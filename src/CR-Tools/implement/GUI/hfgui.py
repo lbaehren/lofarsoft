@@ -172,10 +172,9 @@ class hfQtPlot(QtGui.QWidget):
         self.setMouseTracking(False)
         self.setCursor(QtCore.Qt.ArrowCursor)
     def hfmouse_value(self): 
-        print "Value Display Mode is diasabled due to recent incompatabilities between the latest SWIG and Boost.Pythong versions"
-        return
-        print "Attention: Cursor values are only displayed correctly, if all subplots have the same plot ranges... (deselect Auto for Y)"
+#        print "Attention: Cursor values are only displayed correctly, if all subplots have the same plot ranges... (deselect Auto for Y)"
         self.mousemode="v"
+        self.hfsetYAuto(False)
         self.setMouseTracking(True)
         self.setCursor(QtCore.Qt.CrossCursor)
     def hfmouse_select(self): 
@@ -205,16 +204,18 @@ class hfQtPlot(QtGui.QWidget):
             self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, event.pos()).normalized())
         if self.mousemode=="v":
             (xc,yc,nx,ny,npan)=self.screenP2coord(event.pos())
-            gdbo=self.d["'PlotPanel:PanelPosition="+str(npan)+"'xAxis:GraphDataBuffer"].FirstObject()
+            #Get the proper GraphDataBuffer Object belonging to the current panel (where cursor is in).            
+            gdbo=self.d["'PlotPanel:PanelPosition="+str(npan)+"'GraphDataBuffer"].FirstObject()
             if gdbo.notFound(): return
-            gl=gdbo.getPyList()
+            xdat=gdbo["'xAxis"].val()
+            ydat=gdbo["'yAxis"].val()
             ymin=gdbo["ymin"].val()
             xmin=gdbo["xmin"].val()
             ymax=gdbo["ymax"].val()
             xmax=gdbo["xmax"].val()
-            n=mglDataGetVecPos(gl[0],xc);
-            x=mglDataGetVecElement(gl[0],n);
-            y=mglDataGetVecElement(gl[1],n);
+            n=hFindLowerBound(xdat,xc);
+            x=xdat[n];
+            y=ydat[n];
             (xsmin,ysmin)=self.coord2screenP(xmin,ymin,nx,ny,npan)
             (xsmax,ysmax)=self.coord2screenP(xmax,ymax,nx,ny,npan)
             (xs,ys)=self.coord2screenP(x,y,nx,ny,npan)

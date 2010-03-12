@@ -414,15 +414,15 @@ boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_i
 
 
 // def("hVecBuffer",hVecBuffer);
-
+/*
  def("mglDataSetVecN", mglDataSetVecN);
  def("mglDataSetVecNSwig", mglDataSetVecNSwig);
  def("mglDataSetVecNi", mglDataSetVecNi);
  def("mglDataPtr", mglDataPtr);
-
  def("mglDataGetVecPos", mglDataGetVecPos);
  def("mglDataGetYfromX",mglDataGetYfromX);
  def("mglDataGetVecElement",mglDataGetVecElement);
+*/
  def("pytointptr",getPointerFromPythonObject);
  def("getptr", PyGetPtr);
  def("setDebug", setDebug);

@@ -4100,7 +4100,23 @@ void* extract_swig_wrapped_pointer(PyObject* obj)
         return NULL;
     //This Python Object is a SWIG Wrapper and contains our pointer
     PySwigObject* pyswig=(PySwigObject*)thisAttr;
+    PySwigObject* pyswig2=reinterpret_cast<PySwigObject*>(thisAttr);
     return (pyswig->ptr);
+}
+
+PySwigObject* extract_swig_object(PyObject* obj)
+{
+    char thisStr[] = "this";
+    //first we need to get the this attribute from the Python Object
+    if (!PyObject_HasAttrString(obj, thisStr))
+        return NULL;
+
+    PyObject* thisAttr = PyObject_GetAttrString(obj, thisStr);
+    if (thisAttr == NULL)
+        return NULL;
+    //This Python Object is a SWIG Wrapper and contains our pointer
+    PySwigObject* pyswig=(PySwigObject*)thisAttr;
+    return pyswig;
 }
 
 /*
@@ -4149,6 +4165,7 @@ HInteger mglDataSetVecNOld(const mglData* md, const std::vector<HNumber> &vec){
     return 0;
 }
 */
+/*
 
 HInteger mglDataSetVecN(const mglData* md, const std::vector<HNumber> &vec){
   cout << "mglDataSetVecN(mglData* md, vector<HNumber> &vec) ";
@@ -4167,7 +4184,7 @@ HInteger mglDataSetVecN(const mglData* md, const std::vector<HNumber> &vec){
     return 0;
 }
 
-HInteger mglDataSetVecNSwig(PyObject* pyobj, const std::vector<HNumber> &vec){
+HInteger mglDataSetVecNSwig(PyObject* pyobj, std::vector<HNumber> &vec){
   cout << "mglDataSetVecN(mglData* md, vector<HNumber> &vec) " << endl;
   PySwigObject* pyswigobj=extract_swig_wrapped_pointer(pyobj);
   void * ptr=extract_swig_wrapped_pointer(pyobj);
@@ -4182,7 +4199,8 @@ HInteger mglDataSetVecNSwig(PyObject* pyobj, const std::vector<HNumber> &vec){
   //    cout << " vec.begin()=" << vec.begin();
   cout << " a=" << a;
   cout << " *a=" << *a <<endl;
-  md->Set(vec);
+  md->Set(a,vec.size());
+  //  md->Set(vec);
   cout << "vec[0]=" << vec[0];
   cout << " &(vec[0])=" <<  &(vec[0]);
   //    cout << " vec.begin()=" << vec.begin();
@@ -4216,7 +4234,7 @@ HInteger mglDataPtr(const mglData* md, const std::vector<HNumber> &vec){
   return i;
 }
 
-
+*/
 /*!
 \brief Returns a byte-by-byte copy of the current vector as a python str object, which can be used as a buffer to create, e.g. a numpy array from it using fromstring(s). - NONSENSE - NUMPY arrays can be directly made from a STL vector (copying)
  */
