@@ -19,4 +19,4 @@ class sip(MAC_control):
             datafiles = self.run_task("dppp_pass1", datafiles)
        
 if __name__ == '__main__':
-    sys.exit(eval(os.path.splitext(os.path.basename(sys.argv[0]))[0])().main())
+    sys.exit(sip().main())

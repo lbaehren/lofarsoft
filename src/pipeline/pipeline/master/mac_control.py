@@ -31,10 +31,10 @@ class MAC_control(control):
             self.logger.info("Pipeline instructed to quit; bailing out")
             raise PipelineQuit
         try:
-            super(MAC_control, self).__init__(configblock, datafiles)
+            super(MAC_control, self).run_task(configblock, datafiles)
         except PipelineException, message:
             self.logger.error(message)
-            raise PipelineQuit
+#            raise PipelineQuit
 
     def go(self):
         super(control, self).go()
