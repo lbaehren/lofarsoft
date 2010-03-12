@@ -41,7 +41,10 @@ class control(LOFARrecipe):
                 "%s reports failure (using %s recipe)" % (configblock, recipe)
             )
             raise PipelineRecipeFailed("%s failed", configblock)
-        return outputs['data']
+        try:
+            return outputs['data']
+        except:
+            return None
 
     def pipeline_logic(self):
         # Define pipeline logic here in subclasses
