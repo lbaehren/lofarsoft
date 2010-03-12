@@ -45,7 +45,7 @@ class MAC_control(control):
             (self.name,)
         )
 
-        self.state = { {
+        self.state = {
             'run':      threading.Event(),
             'quit':     threading.Event(),
             'pause':    threading.Event(),
@@ -64,7 +64,7 @@ class MAC_control(control):
 
     def control_loop(self):
         try:
-            my_interface = ControllerPort_Interface(self.inputs['servicemask', self.inputs['targethost'])
+            my_interface = ControllerPort_Interface(self.inputs['servicemask'], self.inputs['targethost'])
         except:
             self.logger.info("Control interface not connected")
             self.state['quit'].set()
@@ -120,7 +120,7 @@ class MAC_control(control):
             elif isinstance(current_event, ControlReleaseEvent):
                 self.logger.debug("Received ReleaseEvent")
                 my_interface.send_event(ControlReleasedEvent(self.inputs['controllername'], controlOK))
-           elif isinstance(current_event, ControlQuitEvent):
+            elif isinstance(current_event, ControlQuitEvent):
                 self.logger.debug("Received QuitEvent")
                 self.logger.debug("Setting quit state: pipeline must exit")
                 self.state['quit'].set() # Signal pipeline to stop at next opportunity
@@ -139,7 +139,7 @@ class MAC_control(control):
             # let's stop it just in case.
             if self.state['finished'].isSet():
                 self.logger.debug("Got finished state: control loop exiting")
-                my_interface.send_event(ControlQuitedEvent(self.inputs['controllername'], self.inputs['treeid'], controlOK, "pipeline finished")
+                my_interface.send_event(ControlQuitedEvent(self.inputs['controllername'], self.inputs['treeid'], controlOK, "pipeline finished"))
                 event_receiver.active = False
                 break
 
