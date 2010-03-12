@@ -66,7 +66,7 @@ class MAC_control(control):
         try:
             my_interface = ControllerPort_Interface(self.inputs['servicemask'], self.inputs['targethost'])
         except:
-            self.logger.info("Control interface not connected")
+            self.logger.info("Control interface not connected; quitting")
             self.state['quit'].set()
             self.state['run'].set()
             return
@@ -147,4 +147,4 @@ class MAC_control(control):
             time.sleep(1)
 
 if __name__ == '__main__':
-    sys.exit(control().main())
+    sys.exit(MAC_control().main())
