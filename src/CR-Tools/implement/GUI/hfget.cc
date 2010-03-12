@@ -4064,12 +4064,24 @@ SWIG objects. Specifically for getting vector data into an mglData object
 
 
 //The basic wrapper SWIG uses ... CHECK if that has changed!
-struct PySwigObject {
+/*struct PySwigObject {
     PyObject_HEAD
     void * ptr;
     const char * desc;
 };
+*/
+extern "C" {
+  struct swig_type_info;
+}
 
+typedef struct {
+  PyObject_HEAD
+  void *ptr;
+  swig_type_info *ty;
+  int own;
+  PyObject *next;
+} SwigPyObject;
+#define PySwigObject SwigPyObject
 
 //This function returns the pointer to an object exposed in SWIG -
 //doesn't seem to work anymore with recent swig/boost python
@@ -4087,7 +4099,8 @@ void* extract_swig_wrapped_pointer(PyObject* obj)
     if (thisAttr == NULL)
         return NULL;
     //This Python Object is a SWIG Wrapper and contains our pointer
-    return (((PySwigObject*)thisAttr)->ptr);
+    PySwigObject* pyswig=(PySwigObject*)thisAttr;
+    return (pyswig->ptr);
 }
 
 /*
@@ -4135,6 +4148,7 @@ HInteger mglDataSetVecNOld(const mglData* md, const std::vector<HNumber> &vec){
     cout << " *a=" << *a <<endl;
     return 0;
 }
+*/
 
 HInteger mglDataSetVecN(const mglData* md, const std::vector<HNumber> &vec){
   cout << "mglDataSetVecN(mglData* md, vector<HNumber> &vec) ";
@@ -4156,11 +4170,11 @@ HInteger mglDataSetVecN(const mglData* md, const std::vector<HNumber> &vec){
 HInteger mglDataSetVecNSwig(PyObject* pyobj, const std::vector<HNumber> &vec){
   cout << "mglDataSetVecN(mglData* md, vector<HNumber> &vec) " << endl;
   PySwigObject* pyswigobj=extract_swig_wrapped_pointer(pyobj);
-  void * ptr=pyswigobj->ptr;
-  PyObject* pyptr=(PyObject*)pyswigobj->ptr;
+  void * ptr=extract_swig_wrapped_pointer(pyobj);
+  //  PyObject* pyptr=(PyObject*)pyswigobj->ptr;
   cout << "ptr=" << reinterpret_cast<HIntPointer>(ptr) <<endl;
-  void * ptr2;//=(boost::python::extract<void*>(boost::python::object(pyptr)));
-  mglData* md=reinterpret_cast<mglData*>(ptr2);
+  //void * ptr2;//=(boost::python::extract<void*>(boost::python::object(pyptr)));
+  mglData* md=reinterpret_cast<mglData*>(ptr);
   //  mglData* md0=boost::python::extract<mglData*>(boost::python::object(pyswigobj));
   HNumber * a = &(vec[0]);
   cout << "vec[0]=" << vec[0];
@@ -4201,7 +4215,7 @@ HInteger mglDataPtr(const mglData* md, const std::vector<HNumber> &vec){
   cout << " md=" << i <<endl;
   return i;
 }
-*/
+
 
 /*!
 \brief Returns a byte-by-byte copy of the current vector as a python str object, which can be used as a buffer to create, e.g. a numpy array from it using fromstring(s). - NONSENSE - NUMPY arrays can be directly made from a STL vector (copying)

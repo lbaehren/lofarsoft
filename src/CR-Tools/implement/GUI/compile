@@ -7,7 +7,7 @@ cd $LOFARSOFT/src/CR-Tools/implement/GUI
 #./hfprep
 cd $LOFARSOFT/build/cr
 
-
+make rebuild_cache
 make hfget
 #cp implement/libhfget.so ../../release/lib/python
 #cp implement/libhfget.so ../../release/lib/
