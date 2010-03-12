@@ -16,9 +16,13 @@ set(CMAKE_CXX_FLAGS "-g -O3")
 add_executable(bf2presto bf2presto.c)
 target_link_libraries(bf2presto m) #link the math library
 
+add_executable(bf2presto8 bf2presto8.c)
+target_link_libraries(bf2presto8 m) #link the math library
+
+
 add_custom_target (bf2presto_install
-  COMMAND cp ${PULSAR_BINARY_DIR}/apps/bf2presto/bf2presto ${CMAKE_INSTALL_PREFIX}/bin/
+  COMMAND cp ${PULSAR_BINARY_DIR}/apps/bf2presto/bf2presto ${PULSAR_BINARY_DIR}/apps/bf2presto/bf2presto8 ${CMAKE_INSTALL_PREFIX}/bin/
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/bf2presto
-  COMMENT "Install ${PULSAR_BINARY_DIR}/apps/bf2presto/bf2presto program into ${CMAKE_INSTALL_PREFIX}/bin/..."
+  COMMENT "Install ${PULSAR_BINARY_DIR}/apps/bf2presto/bf2presto and bf2presto8 program into ${CMAKE_INSTALL_PREFIX}/bin/..."
   )
-add_dependencies (bf2presto_install bf2presto)
+add_dependencies (bf2presto_install bf2presto bf2presto8)
