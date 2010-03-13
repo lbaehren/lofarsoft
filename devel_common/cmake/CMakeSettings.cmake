@@ -75,6 +75,14 @@ if (NOT USG_CMAKE_CONFIG)
       "USG data area"
       FORCE
       )
+    ## Directories inside the release directory
+    if (USG_INSTALL_PREFIX)
+      execute_process (
+	COMMAND mkdir -p lib
+	COMMAND ln -s lib lib64
+	WORKING_DIRECTORY ${USG_INSTALL_PREFIX}
+	)
+    endif (USG_INSTALL_PREFIX)
   else (USG_ROOT)
     message (SEND_ERROR "USG_ROOT is undefined!")
   endif (USG_ROOT)
