@@ -15,7 +15,10 @@ class sip(MAC_control):
     def pipeline_logic(self):
         # Customise this to the requirements of a specific job.
         with log_time(self.logger):
-            datafiles = self.run_task("vdsreader")
+            # Read filenames from a VDS file
+#            datafiles = self.run_task("vdsreader")
+            # Or as command line arguments
+            datafiles = self.inputs['args']
             datafiles = self.run_task("ndppp", datafiles)
        
 if __name__ == '__main__':
