@@ -1,8 +1,4 @@
-from __future__ import with_statement
-from subprocess import check_call, CalledProcessError
-from contextlib import closing
-
-# Local helpers
+import subprocess
 from pipeline.support.lofarrecipe import LOFARrecipe
 
 class dummy_echo(LOFARrecipe):
@@ -19,11 +15,16 @@ class dummy_echo(LOFARrecipe):
         self.logger.info("Starting dummy_echo run")
         super(dummy_echo, self).go()
 
-        print self.inputs['args']
-        check_call([self.inputs['executable'], self.inputs['args']])
+        execute = [self.inputs['executable']]
+        execute.extend(self.inputs['args'])
+
+        my_process = subprocess.Popen(execute, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        sout, serr = my_process.communicate()
+        self.logger.info("stdout: " + sout)
+        self.logger.info("stderr: " + serr)
 
         return 0
 
 
 if __name__ == '__main__':
-    sys.exit(bbs().main())
+    sys.exit(dummy_echo().main())
