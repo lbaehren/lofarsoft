@@ -37,6 +37,11 @@ namespace CR { // Namespace CR -- begin
     : analyseLOPESevent2(),
     pulsePattern( Vector<Double>() ),
     pulseHeight(0.),
+    pulseTime(0.),
+    startTime(-150e-6),
+    noiseIntervalLength(10e-6),
+    noiseIntervalGap(5e-6),
+    NnoiseIntervals(2),
     upsampledNoise( Matrix<Double>() )
   {}
 
@@ -118,7 +123,7 @@ namespace CR { // Namespace CR -- begin
       // Plot chosen pulse pattern
       CompleteBeamPipe_p->plotAllAntennas("pulsePattern", lev_p, AntennaSelection, true,
                                           getUpsamplingExponent(),false, true);
-      // calculate the maxima
+      // calculate the maxima (calibPulses is defined in analyseLOPESevent2)
       calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
                                                         1e99, 3, pulseStart - 10.5e-6, pulseStart - 0.5e-6);
       
@@ -128,8 +133,17 @@ namespace CR { // Namespace CR -- begin
       Slice range= CompleteBeamPipe_p->calculatePlotRange(timeValues);
       pulsePattern =
         CompleteBeamPipe_p->getUpsampledFieldstrength(lev_p, getUpsamplingExponent(), AntennaSelection).column(antenna-1)(range).copy();
-      pulseHeight = calibPulses.begin()->second.envelopeMaximum;
-      
+        
+      // store properties of test pulse  
+      testPulseProperties = calibPulses.begin()->second;
+      pulseHeight = testPulseProperties.envelopeMaximum;
+      // substract start time of pulse window to get relative pulse time in pulse pattern (in ns)
+      testPulseProperties.maximumTime -= pulseStart*1e9;
+      testPulseProperties.envelopeTime -= pulseStart*1e9;
+      testPulseProperties.minimumTime -= pulseStart*1e9;
+      testPulseProperties.halfheightTime -= pulseStart*1e9;
+      pulseTime = testPulseProperties.envelopeTime*1e-9; // in s
+      cout << "Height of test pulse = " << pulseHeight << " \t Time of testpulse = " << pulseTime << " s" << endl;   
     } catch (AipsError x) {
       cerr << "checkNoiseInfluence::loadPulsePattern: " << x.getMesg() << endl;
     }
@@ -185,14 +199,19 @@ namespace CR { // Namespace CR -- begin
       upsampledNoise=CompleteBeamPipe_p->getUpsampledFieldstrength(lev_p, getUpsamplingExponent(), AntennaSelection);
                                          
       // calculate the maxima
-      for (int i = 0; i < 2; i++) {
-        setPlotInterval(-150e-6 + i*15e-6, -149e-6 + i*15e-6);
+      for (int i = 0; i < NnoiseIntervals; ++i) {
+        setPlotInterval(startTime + i*(noiseIntervalLength+noiseIntervalGap), startTime + i*(noiseIntervalLength+noiseIntervalGap) + noiseIntervalLength);
         CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
-        double noiseTime = (plotStart()+plotStop())/2.;   // noise range is normally calculated in respect to the time of the CC beam
+        double noiseTime = plotStart()+pulseTime;   // noise range is normally calculated in respect to the time of the CC beam (where the pulse is expected)
         calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
-                                                          noiseTime, 3, plotStart() - 10.5e-6, plotStart() - 0.5e-6);
-      }                                                    
-   
+                                                          noiseTime, 3, plotStart(), plotStop());
+        vector<double> noiseValues; // stores the noise heights for one noise interval
+        // loop through all antennas and store height of noise                                          
+        for( map<int, PulseProperties>::iterator it = calibPulses.begin(); it != calibPulses.end(); ++it ) {
+          noiseValues.push_back(it->second.noise);
+        } 
+        noiseHeight.push_back(noiseValues);
+      }  
     } catch (AipsError x) {
       cerr << "checkNoiseInfluence::loadNoiseEvent: " << x.getMesg() << endl;
     }  
@@ -222,6 +241,27 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->plotAllAntennas("noise2", lev_p, AntennaSelection, false,
                                           getUpsamplingExponent(),false, false);
 
+      // calculate the maxima in same intervals as noise
+      for (int i = 0; i < NnoiseIntervals; ++i) {
+        setPlotInterval(startTime + i*(noiseIntervalLength+noiseIntervalGap), startTime + i*(noiseIntervalLength+noiseIntervalGap) + noiseIntervalLength);
+        CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+        calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
+                                                          plotStart()+pulseTime, 3, plotStart(), plotStop());
+        vector<double> noiseValues = noiseHeight[i]; // get the noise heights for one noise interval
+        // loop through all antennas and get the signal-to-noise ratio                              
+        cout << "\nNoise/Noise = " << endl;
+        unsigned int j = 0;
+        for( map<int, PulseProperties>::iterator it = calibPulses.begin(); it != calibPulses.end(); ++it ) {        
+          cout << it->second.noise/noiseValues[j] << " " << endl;
+          ++j;
+        } 
+        j=0;
+        cout << "\nSignal/Noise = " << endl;
+        for( map<int, PulseProperties>::iterator it = calibPulses.begin(); it != calibPulses.end(); ++it ) {
+          cout << it->second.envelopeMaximum/noiseValues[j] << " " << endl;
+          ++j;
+        } 
+      }  
     } catch (AipsError x) {
       cerr << "checkNoiseInfluence::addPulseToNoise: " << x.getMesg() << endl;
     }  

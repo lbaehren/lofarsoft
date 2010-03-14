@@ -67,13 +67,33 @@ namespace CR { // Namespace CR -- begin
   //! trace of radio pulse to be added to data
   Vector<Double> pulsePattern;
 
+  //! properties of test pulse
+  PulseProperties testPulseProperties;
+  
   //! height of pulse in pulse pattern (used to scale it down or up)
   double pulseHeight;
   
+  //! time of pulse in pulse pattern (maximum of envelope)
+  double pulseTime;
+  
+  //! time in trace for first noise interval (default -150 µs)
+  double startTime;
+  
+  //! length of noise interval (default 10 µs)
+  double noiseIntervalLength;
+  
+  //! gap between noise intervals (default 5 µs)
+  double noiseIntervalGap;
+
+  //! number of noise intervals (default 20)
+  int NnoiseIntervals;
+
   //! upsampled trace of noise event
   Matrix<Double> upsampledNoise;
 
-
+  //! height of noise in the different antennas and different noise intervals
+  vector< vector<double> > noiseHeight;
+  
   public:
 
     // ------------------------------------------------------------- Construction
