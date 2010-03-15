@@ -50,9 +50,11 @@ option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO
 
 ## Options affecting the build of individual packages
 
-option (CR_WITH_GUI         "Build CR-Tools with graphical interface?"   NO  )
-option (CR_WITH_STARTOOLS   "Enable using routines from LOPES-Star?"     YES )
-option (DAL_PYTHON_BINDINGS "Create python bindings for DAL?"            YES )
+option (CR_WITH_GUI          "Build CR-Tools with graphical interface?"   NO  )
+option (CR_WITH_STARTOOLS    "Enable using routines from LOPES-Star?"     YES )
+option (DAL_PYTHON_BINDINGS  "Create python bindings for DAL?"            YES )
+option (RM_ENABLE_ITPP       "Enable using IT++ library?"                 NO  )
+option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"            YES )
 
 ## ==============================================================================
 ##
@@ -356,11 +358,20 @@ add_dependencies (pybdsm boost num_util wcslib)
 ##                                                                  RM
 
 add_custom_target (rm
-  COMMAND ./build_package.sh rm ${USG_ROOT}/src/RM
+  COMMAND ./build_package.sh rm ${USG_ROOT}/src/RM -DRM_ENABLE_ARMADILLO=${RM_ENABLE_ARMADILLO} -DRM_ENABLE_ITPP=${RM_ENABLE_ITPP}
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package RM ..."
   )
-add_dependencies (rm itpp dal)
+
+add_dependencies (rm dal)
+
+if (RM_ENABLE_ARMADILLO)
+  add_dependencies (rm armadillo)
+endif (RM_ENABLE_ARMADILLO)
+
+if (RM_ENABLE_ITPP)
+  add_dependencies (rm itpp)
+endif (RM_ENABLE_ITPP)
 
 ##____________________________________________________________________
 ##                                                             smosaic
