@@ -42,7 +42,8 @@ endif (NOT USG_ROOT)
 option (RM_COMPILER_WARNINGS    "Enable standard set of compiler warnings?"  YES )
 option (RM_DEBUGGING_MESSAGES   "Print debugging information?"               NO  )
 option (RM_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO  )
-option (RM_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
+option (RM_ENABLE_ITPP          "Enable using IT++ library?"                 NO  )
+option (RM_ENABLE_ARMADILLO     "Enable using Armadillo library?"            YES )
 
 ## =============================================================================
 ##
@@ -75,37 +76,6 @@ if (NOT RM_VERBOSE_CONFIGURE)
   set (CMAKE_VERBOSE_MAKEFILE  NO  )
 endif (NOT RM_VERBOSE_CONFIGURE)
 
-## System libraries ------------------------------
-
-find_library (HAVE_LIBM    m     PATHS ${lib_locations} )
-find_library (HAVE_LIBUTIL util  PATHS ${lib_locations} )
-find_library (HAVE_LIBDL   dl    PATHS ${lib_locations} )
-find_library (HAVE_LIBGD   gd    PATHS ${lib_locations} )
-
-## System header files ---------------------------
-
-find_path (HAVE_LIBGEN_H     libgen.h      PATHS ${include_locations} )
-find_path (HAVE_STDINT_H     stdint.h      PATHS ${include_locations} )
-find_path (HAVE_STDLIB_H     stdlib.h      PATHS ${include_locations} )
-find_path (HAVE_STRING_H     string.h      PATHS ${include_locations} )
-find_path (HAVE_STRINGS_H    strings.h     PATHS ${include_locations} )
-find_path (HAVE_SYS_STAT_H   sys/stat.h    PATHS ${include_locations} )
-find_path (HAVE_SYS_TIME_H   sys/time.h    PATHS ${include_locations} )
-find_path (HAVE_SYS_TYPES_H  sys/types.h   PATHS ${include_locations} )
-find_path (HAVE_SYS_UTIME_H  sys/utime.h   PATHS ${include_locations} )
-
-## Check type sizes ------------------------------
-
-include (CheckTypeSize)
-
-check_type_size ("short"         SIZEOF_SHORT       )
-check_type_size ("int"           SIZEOF_INT         )
-check_type_size ("float"         SIZEOF_FLOAT       )
-check_type_size ("double"        SIZEOF_DOUBLE      )
-check_type_size ("long"          SIZEOF_LONG        )
-check_type_size ("long long"     SIZEOF_LONG_LONG   )
-check_type_size ("uint"          SIZEOF_UINT        )
-
 ## Check functions -------------------------------
 
 include (CheckFunctionExists)
@@ -121,6 +91,7 @@ find_package (ZLIB)
 
 ## Custom CMake modules --------------------------
 
+include (FindArmadillo)
 include (FindBoost)
 include (FindCASACORE)
 include (FindCFITSIO)
@@ -128,10 +99,13 @@ include (FindDAL)
 include (FindFFTW3)
 include (FindGFortran)
 include (FindHDF5)
-include (FindITPP)
 include (FindLAPACK)
 include (FindPython)
 include (FindWCSLIB)
+
+if (RM_ENABLE_ITPP)
+  include (FindITPP)
+endif (RM_ENABLE_ITPP)
 
 ## =============================================================================
 ##
@@ -226,6 +200,13 @@ include_directories (BEFORE
 
 ## External header files
 
+if (HAVE_ARMADILLO)
+  include_directories (${ARMADILLO_INCLUDES})
+  add_definitions (-DHAVE_ARMADILLO)
+else (HAVE_ARMADILLO)
+  message (STATUS "[RM] Armadillo installation incomplete!")
+endif (HAVE_ARMADILLO)
+
 if (HAVE_DAL)
   include_directories (${DAL_INCLUDES})
   ## additional compiler flags
@@ -263,12 +244,12 @@ else (HAVE_HDF5)
   message (STATUS "[RM] HDF5 installation incomplete!")
 endif (HAVE_HDF5)
 
-if (HAVE_ITPP)
+if (RM_ENABLE_ITPP AND HAVE_ITPP)
   include_directories (${ITPP_INCLUDES})
   add_definitions (-DHAVE_ITPP)
-else (HAVE_ITPP)
+else (RM_ENABLE_ITPP AND HAVE_ITPP)
   message (STATUS "[RM] IT++ installation incomplete!")
-endif (HAVE_ITPP)
+endif (RM_ENABLE_ITPP AND HAVE_ITPP)
 
 if (HAVE_WCSLIB)
   include_directories (${WCSLIB_INCLUDES})
@@ -291,6 +272,10 @@ set (rm_link_libraries
   ${WCSLIB_LIBRARIES}
   ${LAPACK_LIBRARIES}
   )
+
+if (ARMADILLO_LIBRARIES)
+  list (APPEND rm_link_libraries ${ARMADILLO_LIBRARIES})
+endif (ARMADILLO_LIBRARIES)
 
 if (ITPP_LIBRARIES)
   list (APPEND rm_link_libraries ${ITPP_LIBRARIES})

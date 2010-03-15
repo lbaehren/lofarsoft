@@ -8,9 +8,9 @@ set (rm_modules
   rmClean
   )
 
-if (HAVE_ITPP)
+if (RM_ENABLE_ITPP AND HAVE_ITPP)
   list (APPEND rm_modules rmWiener)
-endif (HAVE_ITPP)
+endif (RM_ENABLE_ITPP AND HAVE_ITPP)
 
 ##__________________________________________________________
 ## Process the contents of the modules directories
