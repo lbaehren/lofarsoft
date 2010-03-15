@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
+#include "filterbank.h"
 
 /* NOTE: for old data sets (before PBW5) there is no 512 byte alignment,
  so "pad" needs to be ignored (line 82) and also the data does not need to 
@@ -44,7 +44,7 @@ void usage(){
   puts("-f\tNumber of the Base Subband (Default = 200)");
   puts("-F\tWrite Floats");
   puts("-h\tShow this Help Screen");
-  //  puts("-L\tuse fiLterbank format (8 bit, 1 beam, stokes I, no collapse)");
+  puts("-L\tuse fiLterbank format (8 bit, 1 beam, stokes I, no collapse)");
   puts("-n\tNumber of Samples per Stokes Integration (Default = 1)");
   puts("-N\tNumber of Samples in block (Default = 768)");
   puts("-o\tOutput Name(Default = PULSAR_OBS)");
@@ -79,14 +79,82 @@ swap_endian(u.buffer);
 *f = u.f;
 }
 
- void convert_nocollapse( FILE *input, FILE **output, int beamnr)
+
+void write_filterbank_header ( ) {
+  /* broadcast header */
+  send_string("HEADER_START");
+  send_string("source_name");  send_string("Unknown");
+  send_int("machine_id", 1);
+  send_int("telescope_id", 1);
+  send_int("data_type",1);
+  send_double("fch1", 139.0625 + 100*0.1953125);
+  send_double("foff", 0.1953125/CHANNELS);
+  send_int("nchans",  CHANNELS);
+  send_int("nbeams",  1);
+  send_int("ibeam",   1);
+  send_int("nbits",   8);
+  send_double("tstart", 53000.0);
+  send_double("tsamp",  SAMPLEDURATION);
+  send_int("nifs", 1);
+  send_string("HEADER_END");
+}
+
+
+//void write_filterbank_header_old ( FILE *output, int beamnr ) {
+//  /* Set the header parameters */
+//  sprintf( inpfile,     "%s" , "Unknown" );
+//  sprintf( source_name, "%s" , "Unknown" );
+//  machine_id   = 1;
+//  telescope_id = 1; 
+//  
+//  data_type    = 1; //filterbank
+//  nchans       = CHANNELS;
+//  foff         = 0.1953125/CHANNELS; // XXX
+//  fch1         = 139.0625; // xxx
+//  
+//  obits        = 16;
+//  sumifs       = 1;
+//  scan_number  = 0;
+//  barycentric  = 0;
+//  
+//  tstart   = 53000.0; // start time
+//  tsamp    = SAMPLEDURATION ; // sampling time
+//  
+//  //,mjdobs,tsamp,fch1,foff,refdm,l;
+//  az_start = 0.0;
+//  za_start = 0.0;
+//  src_raj  = 0.0;
+//  src_dej  = 0.0;
+//  
+//  //     double gal_l,gal_b,header_tobs,raw_fch1,raw_foff;
+//  nbeams   = BEAMS;
+//  ibeam    = beamnr;
+//  
+//  /* Write the header */
+//  filterbank_header(output);
+//}
+
+void convert_nocollapse( FILE *input, FILE **outputfile, int beamnr, int writefb )
 {
   struct stokesdata {
     unsigned	sequence_number;
     char        pad[508];
     float	samples[BEAMS][CHANNELS][SAMPLES|2][STOKES];
   };
+  /* Filterbank data is in a different order. Allocated below */
+  unsigned char filterbank_buffer[BEAMS][STOKES][SAMPLES*AVERAGE_OVER][CHANNELS];
 
+ /*
+   convert raw data from a pulsar machine into "filterbank data"
+   a stream of samples: [s1,c1] [s1,c2]...[s1,cn] [s2,c1]...[s2,cn]..... etc
+   where the indices s1, s2.... are individual sample readouts and c1, c2....
+   are the individual channels. For each readout, there are "n" channels.
+   Before writing out a stream of samples, filterbank sends a header string
+   which is intercepted by other programs (dedisperse, fold etc) downstream.
+ */
+
+
+    
  struct stokesdata *stokesdata;
  int prev_seqnr = -1;
  unsigned time;
@@ -98,9 +166,15 @@ swap_endian(u.buffer);
  double max = -1e9, min= 1e9;
  int x = 0;
  
- stokesdata = malloc( sizeof *stokesdata * AVERAGE_OVER );
+ stokesdata        = malloc( sizeof *stokesdata * AVERAGE_OVER );
+ // filterbank_buffer = malloc( sizeof(unsigned char) * AVERAGE_OVER * BEAMS * CHANNELS * SAMPLES * STOKES );
+ /* need to zero this out */
 
  fseek( input, 0, SEEK_SET );
+
+ /* send the filterbank file header if needed */
+ output = outputfile[0];
+ if (writefb==1) write_filterbank_header();
 
  while( !feof( input ) ) {
    if (x == NUM_BLOCKGROUPS) break;
@@ -190,12 +264,18 @@ swap_endian(u.buffer);
          /* gaps, fill in zeroes */
 	 for( time = 0; time < SAMPLES; time++ ) {
 	   if (writefloats==1){
-           float sum = 0;
-           fwrite( &sum, sizeof sum, 1, output[c] );
+	     float sum = 0;
+	     fwrite( &sum, sizeof sum, 1, outputfile[c] );
 	   }else{
-	   int8_t shsum = 0; // 8-bit
-	   //short shsum = 0; // 16-bit
-           fwrite( &shsum, sizeof shsum, 1, output[c] );
+	     int8_t shsum = 0; // 8-bit
+	     //short shsum = 0; // 16-bit
+	     if (writefb==0) {
+	       fwrite( &shsum, sizeof shsum, 1, outputfile[c] );
+	     } else {
+	       /* gap zeroes get written to the single filterbank file */
+	       /* this is wrong -- need to go into buffer, keep track of variable buffer lenghth .. */
+	       fwrite( &shsum, sizeof shsum, 1, outputfile[0] ); 
+	     }
 	   }
 	 }
          output_samples += SAMPLES;
@@ -216,7 +296,7 @@ swap_endian(u.buffer);
 
 	 if(writefloats==1){
 	   sum = isnan(sum) || sum <= 0.01f && sum >= -0.01f ? average : sum;
-	   fwrite( &sum, sizeof sum, 1, output[c] );
+	   fwrite( &sum, sizeof sum, 1, outputfile[c] );
 	 }else{
 	   	   
 	   /*convert to 16-bit
@@ -245,14 +325,24 @@ swap_endian(u.buffer);
 
 	   shsum = sum;
 	   //printf("%d\n",shsum );
-	   fwrite( &shsum, sizeof shsum, 1, output[c] );
+	   if (writefb==0) {
+	     fwrite( &shsum, sizeof shsum, 1, outputfile[c] ); /* a single sample written channel file*/
+	   } else {
+	     filterbank_buffer[beamnr][0][i*SAMPLES+time][c] = shsum; /* sample written to reordered filterbank buffer */
+	   }
 	   output_samples++;
 	   if( sum == 0 ) nul_samples++;
 	 }
-       }
-     }
+       } // for( time = 0; time < SAMPLES; time++ ) 
+     } // for( i = 0; i < num; i++ ) {
+   } // for( c = 0; c < CHANNELS; c++ ) {
+
+   /* now write the aligned buffer to filterbank file */
+   if (writefb==1) {
+     fwrite( filterbank_buffer, sizeof(filterbank_buffer)/AVERAGE_OVER, num, outputfile[0] );
+     // printf("Printing %d values", num);
    }
- }
+ } //  while( !feof( input ) ) {
 
  /*add zeros to make subbands an equal length*/
  if (NUM_BLOCKGROUPS > 0) {
@@ -262,7 +352,12 @@ swap_endian(u.buffer);
      for (c = 0; c < CHANNELS; c++){
        int8_t shsum = 0; //8 bit
        //signed short shsum = 0; //16 bit
-       fwrite( &shsum, sizeof shsum, 1, output[c] );
+       if (writefb==0) {
+	 fwrite( &shsum, sizeof shsum, 1, outputfile[c] ); /* samples per channel file */
+       } else {
+	 fwrite( &shsum, sizeof shsum, 1, outputfile[0] ); /* all samples to single file */
+       }
+
        output_samples++;
      }
    }
@@ -273,10 +368,10 @@ swap_endian(u.buffer);
  fprintf(stderr,"%.10f seconds per sample\n",SAMPLEDURATION);
  
  free( stokesdata );
-}
+} // void convert_nocollapse()
 
 
-void convert_collapse( FILE *input, FILE **output, int beamnr )
+void convert_collapse( FILE *input, FILE **outputfile, int beamnr )
 {
   struct stokesdata {
     unsigned	sequence_number;
@@ -387,10 +482,10 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
           for( time = 0; time < SAMPLES; time++ ) {
 	    if(writefloats==1){
 	      float sum = 0;
-	      fwrite( &sum, sizeof sum, 1, output[0] );
+	      fwrite( &sum, sizeof sum, 1, outputfile[0] );
 	    }else{
 	      short shsum = 0;
-	      fwrite( &shsum, sizeof shsum, 1, output[0] );
+	      fwrite( &shsum, sizeof shsum, 1, outputfile[0] );
 	    }
 	  }
           output_samples += SAMPLES;
@@ -422,7 +517,7 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
 	  sum = (sum/CHANNELS);
 
 	  if(writefloats==1){
-	    fwrite( &sum, sizeof sum, 1, output[0] );
+	    fwrite( &sum, sizeof sum, 1, outputfile[0] );
 	  }else{
 	    /* convert to signed short */
 	    if( sum >= 128*256 ) {
@@ -436,7 +531,7 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
 	    }
 	    
 	    shsum = sum;
-	    fwrite( &shsum, sizeof shsum, 1, output[0] );
+	    fwrite( &shsum, sizeof shsum, 1, outputfile[0] );
 	    output_samples++;
 	    if( sum == 0 ) nul_samples++;
 	  }
@@ -580,7 +675,9 @@ int main( int argc, char **argv ) {
 	   break;
 	}
     }
- FILE *input, *output[CHANNELS];
+
+
+ FILE *input, *outputfile[CHANNELS]; /* I renamed **output to **outputfile because *output is reserved in sigproc.h -- jvl*/
  c=0;
 
  /* command line verification */
@@ -625,8 +722,8 @@ int main( int argc, char **argv ) {
        fprintf(stderr,"%s -> %s\n", argv[f], buf);
 
        index++;
-       output[c] = fopen( buf, "wb" ); /* open file */
-       if( !output[c] ) {
+       outputfile[c] = fopen( buf, "wb" ); /* open file */
+       if( !outputfile[c] ) {
          perror( buf );
          exit(1);
        }
@@ -634,18 +731,14 @@ int main( int argc, char **argv ) {
 
      /* do the conversion */
      if (collapse==0) { /* default, write all channels */
-       if (writefb==0) { /* default, write to presto subbands */
-	 convert_nocollapse( input, output, b );
-       } else { /* write to single filterbank file */
-	 /* to be done */ ;
-       }
-     } else { /* collapse to single channel */
-       convert_collapse( input, output, b );
+       convert_nocollapse( input, outputfile, b, writefb );
+     } else { /* collapse to single channel, presto format */
+       convert_collapse( input, outputfile, b );
      }
 
      /* close input and output file(s) */
      for( c = 0; c < n_files; c++ ) {
-       fclose( output[c] );
+       fclose( outputfile[c] );
      }
      fclose( input );
 
