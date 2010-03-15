@@ -3,17 +3,16 @@
 project (<PROJECT>)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.8)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (<PROJECT>_FORCE_BUILD "Force rebuild and local installation?"   NO )
-option (<PROJECT>_CMAKE_BUILD "Use CMake to configure and build <PROJECT>?"  YES )
-option (<PROJECT>_VERBOSE_CONFIGURE "Be verbose during configuration?"  NO  )
-option (<PROJECT>_VERBOSE_BUILD     "Be verbose during build process?"  NO  )
+option (<PROJECT>_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
+option (<PROJECT>_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
+option (<PROJECT>_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -36,35 +35,52 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
+if (NOT <PROJECT>_VERBOSE_CONFIGURE)
+  set (<PROJECT>_FIND_QUIETLY     YES )
+endif (NOT <PROJECT>_VERBOSE_CONFIGURE)
 
+include (Find<PROJECT>)
 
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_<PROJECT> OR <PROJECT>_FORCE_BUILD)
   
-  ## ------------------------------------------------------------------------------
-  ## Locate the installation area
-  
-  find_path (<PROJECT>_prefix release_area.txt
-    PATHS
-    ${<PROJECT>_SOURCE_DIR}
-    PATH_SUFFIXES
-    ../release
-    ../../release
-    ../../../release
-    NO_DEFAULT_PATH
-    )
-  
-  if (NOT <PROJECT>_prefix)
-    message (FATAL_ERROR "Unable to locate the installation area")
-  endif (NOT <PROJECT>_prefix)
-  
-  ## ------------------------------------------------------------------------------
-  ## 
+  set (<PROJECT>_VERSION "")
+  set (<PROJECT>_TAR_ARCHIVE "")
+  set (<PROJECT>_URL "")
 
-
+  ##__________________________________________________________________
+  ## Build the project
+  
+  include (ExternalProject)
+  
+  find_file (have_<project>_tgz ${<PROJECT>_TAR_ARCHIVE}  ${<PROJECT>_SOURCE_DIR})
+  
+  if (have_<project>_tgz)
+    ExternalProject_Add (<project>
+      PREFIX ${<PROJECT>_BINARY_DIR}
+      DOWNLOAD_DIR ${<PROJECT>_BINARY_DIR}
+      SOURCE_DIR ${<PROJECT>_BINARY_DIR}
+      URL ${have_<project>_tgz}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${<PROJECT>_BINARY_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
+  else (have_<project>_tgz)
+    ExternalProject_Add (<project>
+      PREFIX ${<PROJECT>_BINARY_DIR}
+      DOWNLOAD_DIR ${<PROJECT>_BINARY_DIR}
+      SOURCE_DIR ${<PROJECT>_BINARY_DIR}
+      URL ${<PROJECT>_URL}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${<PROJECT>_BINARY_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
+  endif (have_<project>_tgz)
+  
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_<PROJECT> OR <PROJECT>_FORCE_BUILD)
-  message (STATUS "Found system-wide installation of <PROJECT>; skipping rebuild!")
+  add_custom_target (<project>
+    WORKING_DIRECTORY ${<PROJECT>_BINARY_DIR}
+    COMMENT "[<PROJECT>] Found system-wide installation; skipping rebuild!"
+    )
 endif (NOT HAVE_<PROJECT> OR <PROJECT>_FORCE_BUILD)
