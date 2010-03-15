@@ -18,6 +18,7 @@ int STOKES = 1;
 int STOKES_SWITCH = 0;			
 int collapse = 0;
 int writefloats = 0;
+int writefb     = 0;
 int SAMPLESPERSTOKESINTEGRATION = 1;
 int SAMPLES = 768;
 int AVERAGE_OVER = 600;
@@ -43,6 +44,7 @@ void usage(){
   puts("-f\tNumber of the Base Subband (Default = 200)");
   puts("-F\tWrite Floats");
   puts("-h\tShow this Help Screen");
+  //  puts("-L\tuse fiLterbank format (8 bit, 1 beam, stokes I, no collapse)");
   puts("-n\tNumber of Samples per Stokes Integration (Default = 1)");
   puts("-N\tNumber of Samples in block (Default = 768)");
   puts("-o\tOutput Name(Default = PULSAR_OBS)");
@@ -450,7 +452,7 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
 
 int main( int argc, char **argv ) {
  float avr;
- int f,b,c,y;
+ int f,b,c,y,n_files;
  char buf[1024];
 
  // for( y = 0; y < argc; y++ ){
@@ -458,7 +460,7 @@ int main( int argc, char **argv ) {
  //}
  //printf("\n");
  int i=0;
- while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:hCF")) != -1)
+ while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:hCFL")) != -1)
     {
       i++;
       switch (c)
@@ -568,6 +570,10 @@ int main( int argc, char **argv ) {
 	   }
 	   break;
 
+	case 'L':
+	  writefb = 1;
+	  break;
+
 	 case 'h':
 	   usage();
 	   exit(1);
@@ -605,58 +611,44 @@ int main( int argc, char **argv ) {
        exit(1);
      }
 
-
-     if(collapse ==1){
-       c = 0; {
-	 if( BEAMS > 1 ) {
-	   sprintf( buf, "beam_%d/%s.sub%04d", b, OUTNAME, index || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
-	 } else {
-	   sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
-	 }
-	 fprintf(stderr,"%s -> %s\n", argv[f], buf);
-	 
-	 index++;
-	 output[c] = fopen( buf, "wb" );
-	 if( !output[c] ) {
-	   perror( buf );
-	   exit(1);
-	 }
-       }
-     
-       /* convert */
-       convert_collapse( input, output, b );
-       
-       fclose( output[0] );
-       
-       fclose( input );
+     /* how many files to open for output? */
+     if (collapse == 1 || writefb == 1) {
+       n_files = 1;        /* one file only */
+     } else {
+       n_files = CHANNELS; /* one file per channel */
      }
-   
-     if (collapse==0){
-     for( c = 0; c < CHANNELS; c++ ) {
-       if( BEAMS > 1 ) {
-         sprintf( buf, "beam_%d/%s.sub%04d", b, OUTNAME, index || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
-       } else {
-         sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
-       }
+     /* open file(s) */
+     for ( c = 0; c < n_files; c++ ) {
+       sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
+       if ( BEAMS > 1  ) sprintf( buf, "beam_%d/%s", b, buf ); /* prepend beam name */
+       if ( writefb==1 ) sprintf( buf, "%s.fil", buf );        /* append filterbank suffix */
        fprintf(stderr,"%s -> %s\n", argv[f], buf);
 
        index++;
-       output[c] = fopen( buf, "wb" );
+       output[c] = fopen( buf, "wb" ); /* open file */
        if( !output[c] ) {
          perror( buf );
          exit(1);
        }
      }
 
-     /* convert */ 
-     convert_nocollapse( input, output, b);
+     /* do the conversion */
+     if (collapse==0) { /* default, write all channels */
+       if (writefb==0) { /* default, write to presto subbands */
+	 convert_nocollapse( input, output, b );
+       } else { /* write to single filterbank file */
+	 /* to be done */ ;
+       }
+     } else { /* collapse to single channel */
+       convert_collapse( input, output, b );
+     }
 
-     for( c = 0; c < CHANNELS; c++ ) {
+     /* close input and output file(s) */
+     for( c = 0; c < n_files; c++ ) {
        fclose( output[c] );
      }
-
      fclose( input );
-     }
+
    }
  }
 
