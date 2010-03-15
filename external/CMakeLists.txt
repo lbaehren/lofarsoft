@@ -1,26 +1,42 @@
 
-add_subdirectory (bison)
-add_subdirectory (blitz)
-add_subdirectory (boost)
-add_subdirectory (casacore)
-add_subdirectory (flex)
-add_subdirectory (fftw3)
-add_subdirectory (gsl)
-add_subdirectory (hdf5)
-add_subdirectory (itpp)
-add_subdirectory (mathgl)
-add_subdirectory (matplotlib)
-add_subdirectory (numeric)
-add_subdirectory (numpy)
-add_subdirectory (plplot)
-add_subdirectory (pyqt)
-add_subdirectory (python)
-add_subdirectory (qt)
-add_subdirectory (root)
-add_subdirectory (sip)
-add_subdirectory (swig)
-add_subdirectory (szip)
-add_subdirectory (valgrind)
+foreach (external_package
+    armadillo
+    bison
+    blitz
+    boost
+    casacore
+    flex
+    fftw3
+    gsl
+    hdf5
+    itpp
+    mathgl
+    matplotlib
+    numeric
+    numpy
+    plplot
+    pyqt
+    python
+    qt
+    root
+    sip
+    swip
+    szip
+    valgrind
+    )
+  ## search for CMakeLists.txt file
+  find_file (external_package_${external_package}
+    NAMES CMakeLists.txt
+    PATHS ${CMAKE_CURRENT_SOURCE_DIR}/${external_package}
+    )
+  ## add the package to the list
+  if (external_package_${external_package})
+    ## Feedback
+    message (STATUS "Adding external package ${external_package} ...")
+    ## Add sub-directory
+    add_subdirectory (${external_package})
+  endif (external_package_${external_package})
+endforeach (external_package armadillo)
 
 ##____________________________________________________________________
 ## Packages which are only available on Mac OS X
