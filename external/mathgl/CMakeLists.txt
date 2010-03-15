@@ -195,17 +195,19 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configuration summary
   
-  message ("-------------------------------------------------------------")
-  message (STATUS "[MathGL] Summary of configuration status")
-  message (STATUS "Forced rebuild from source  = ${MATHGL_FORCE_BUILD}")
-  message (STATUS "Have GNU Scientific Library = ${HAVE_GSL}")
-  message (STATUS "Have HDF5 Library           = ${HAVE_HDF5}")
-  message (STATUS "Have NumPy                  = ${HAVE_NUMPY}")
-  message (STATUS "Have Qt4                    = ${QT4_FOUND}")
-  message (STATUS "Enable support for Python   = ${MATHGL_ENABLE_PYTHON}")
-  message (STATUS "Enable support for Qt       = ${MATHGL_ENABLE_QT}")
-  message ("-------------------------------------------------------------")
-
+  if (MATHGL_VERBOSE_CONFIGURE)
+    message ("-------------------------------------------------------------")
+    message (STATUS "[MathGL] Summary of configuration status")
+    message (STATUS "Forced rebuild from source  = ${MATHGL_FORCE_BUILD}")
+    message (STATUS "Have GNU Scientific Library = ${HAVE_GSL}")
+    message (STATUS "Have HDF5 Library           = ${HAVE_HDF5}")
+    message (STATUS "Have NumPy                  = ${HAVE_NUMPY}")
+    message (STATUS "Have Qt4                    = ${QT4_FOUND}")
+    message (STATUS "Enable support for Python   = ${MATHGL_ENABLE_PYTHON}")
+    message (STATUS "Enable support for Qt       = ${MATHGL_ENABLE_QT}")
+    message ("-------------------------------------------------------------")
+  endif (MATHGL_VERBOSE_CONFIGURE)
+  
   ## <-- end build condition --------------------------------------------------->
   
 else (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)

@@ -37,8 +37,9 @@ endif (USG_ROOT)
 ## Check if the program/package/library is already available
 
 if (NOT QT_VERBOSE_CONFIGURE)
-  set (QT_FIND_QUIETLY  YES )
-  set (QT4_FIND_QUIETLY YES )
+  set (PYTHON_FIND_QUIETLY  YES )
+  set (QT_FIND_QUIETLY      YES )
+  set (QT4_FIND_QUIETLY     YES )
 endif (NOT QT_VERBOSE_CONFIGURE)
 
 include (FindQt4)

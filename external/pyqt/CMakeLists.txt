@@ -88,18 +88,8 @@ if (NOT HAVE_PYQT OR PYQT_FORCE_BUILD)
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_PYQT OR PYQT_FORCE_BUILD)
-  message (STATUS "[PyQt] Found system-wide installation; skipping rebuild!")
+  add_custom_target (pyqt
+    WORKING_DIRECTORY ${PYQT_BINARY_DIR}
+    COMMENT "[PyQt] Found system-wide installation; skipping rebuild!"
+    )
 endif (NOT HAVE_PYQT OR PYQT_FORCE_BUILD)
-
-## ------------------------------------------------------------------------------
-## Configuration summary
-
-if (PYQT_VERBOSE_CONFIGURE) 
-
-  message ("--------------------------------------------------")
-  message ("   [PyQt] Configuration summary.")
-  message (" ")
-  message (" PyQt version = ${PYQT_VERSION}")
-  message ("--------------------------------------------------")
-
-endif (PYQT_VERBOSE_CONFIGURE)

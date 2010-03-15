@@ -11,7 +11,7 @@ cmake_minimum_required (VERSION 2.8)
 ## find script
 
 option (SIP_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
-option (SIP_VERBOSE_CONFIGURE "Be verbose during configuration?"       YES )
+option (SIP_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO  )
 option (SIP_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
 option (SIP_CMAKE_BUILD       "Use CMake to configure and build?"      NO  )
 
@@ -42,7 +42,6 @@ if (NOT SIP_VERBOSE_CONFIGURE)
 endif (NOT SIP_VERBOSE_CONFIGURE)
 
 include (FindPython)
-#include (FindSIP)
 
 ## <-- begin build condition --------------------------------------------------->
 
