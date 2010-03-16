@@ -2012,7 +2012,16 @@ void writeElGainCal(void)
 int main (int argc, char *argv[])
 {
   // Default CalTable-Path
-  const string CalTablePath=caltable_lopes;
+  std::string CalTablePath=caltable_lopes;
+
+  //________________________________________________________
+  // Process parameters from the command line
+  
+  if (argc == 2) {
+    CalTablePath = argv[1];
+  }
+
+  //________________________________________________________
 
   try {
     cout << "Starting writeLopesCalTable...\n"
