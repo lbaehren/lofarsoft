@@ -222,7 +222,7 @@ add_dependencies (casacore hdf5 cfitsio wcslib bison)
 
 add_dependencies (hdf5 szip)
 
-add_dependencies (mathgl hdf5 swig num_util)
+add_dependencies (mathgl hdf5 swig num_util gsl)
 
 add_dependencies (matplotlib numpy)
 
