@@ -9,6 +9,15 @@
 #undef HFPP_FILETYPE
 #define HFPP_FILETYPE hPYTHON
 
+//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(hArray_setDimensions_overloads,setDimensions<HNumber>,1,2)
+
+/*
+std::hArray<HNumber>& (*fptr_hArray_setDimensions_overloads_1)(HInteger dim0) = &std::hArray<HNumber>::setDimensions1;
+std::hArray<HNumber>& (*fptr_hArray_setDimensions_overloads_2)(HInteger dim0, HInteger dim1)= &std::hArray<HNumber>::setDimensions;
+*/
+//std::hArray<HNumber>& (*fptr_hArray_setDimensions_overloads_1)(HInteger dim0) = &std::hArray::setDimensions;
+//std::hArray<HNumber>& (*fptr_hArray_setDimensions_overloads_2)(HInteger dim0, HInteger dim1) = &std::hArray::setDimensions;
+
 BOOST_PYTHON_MODULE(hftools)
 {
     using namespace boost::python;
@@ -20,12 +29,6 @@ BOOST_PYTHON_MODULE(hftools)
       .def("summary",&hFileSummary)
       ;    
 
-    class_<std::hmatrix<HInteger,allocator<HInteger> > >("IntMatrix")
-      .def(vector_indexing_suite<std::hmatrix<HInteger,allocator<HInteger> > >())
-      //      .def("setDimension",&std::hmatrix<HInteger,allocator<HInteger> >::setDimension)
-      //.def("getDimension",&std::hmatrix<HInteger,allocator<HInteger> >::getDimension)
-
-      ;
     /*
   class_<casa::Vector<HInteger> >("CasaIntVec")
     .def(vector_indexing_suite<casa::Vector<HInteger> >())
@@ -62,6 +65,23 @@ BOOST_PYTHON_MODULE(hftools)
     class_<std::vector<HString> >("StringVec")
         .def(vector_indexing_suite<std::vector<HString> >())
       ;
+    class_<hArray<HNumber> >("FloatAry")
+      .def("setVector",&hArray<HNumber>::setVector,return_internal_reference<>())
+      .def("Vector",&hArray<HNumber>::Vector,return_internal_reference<>())
+      .def("getDimensions",&hArray<HNumber>::getDimensions)
+      .def("setDimensions",&hArray<HNumber>::setDimensions1,return_internal_reference<>())
+      .def("setDimensions",&hArray<HNumber>::setDimensions2,return_internal_reference<>())
+      .def("setDimensions",&hArray<HNumber>::setDimensions3,return_internal_reference<>())
+      .def("setDimensions",&hArray<HNumber>::setDimensions4,return_internal_reference<>())
+      .def("setDimensions",&hArray<HNumber>::setDimensions5,return_internal_reference<>())
+      //      .def("setDimensions",fptr_hArray_setDimensions_overloads_1,return_internal_reference<>())
+      //.def("setDimensions",fptr_hArray_setDimensions_overloads_2,return_internal_reference<>())
+      //      .def("setDimensions",&hArray<HNumber>::setDimensions,return_internal_reference<>(),hArray_setDimensions_overloads())
+      .def("setSlice",&hArray<HNumber>::setSlice,return_internal_reference<>())
+      .def("getNumberOfDimensions",&hArray<HNumber>::getNumberOfDimensions)
+      .def("getBegin",&hArray<HNumber>::getBegin)
+      .def("getEnd",&hArray<HNumber>::getEnd)
+      ;
 
     //boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
     // def("pytointptr",getPointerFromPythonObject);
@@ -69,6 +89,15 @@ BOOST_PYTHON_MODULE(hftools)
 
     def("hgetFiletype",hgetFiletype);
     def("hgetFileExtension",hgetFileExtension);
+
+    enum_<DATATYPE>("TYPE")
+      .value("POINTER",POINTER)
+      .value("INTEGER",INTEGER)
+      .value("NUMBER", NUMBER)
+      .value("COMPLEX",COMPLEX)
+      .value("STRING",STRING)
+      .value("BOOLEAN",BOOLEAN)
+      .value("UNDEF",UNDEF);
 
     enum_<hWEIGHTS>("hWEIGHTS")
       .value("FLAT",WEIGHTS_FLAT)

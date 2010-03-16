@@ -13,6 +13,10 @@
 #define HFPP_FUNC_SLICED 1
 #endif
 
+//#ifndef HFPP_FUNC_hARRAY
+//#define HFPP_FUNC_hARRAY 1
+//#endif
+
 #ifndef HFPP_FUNC_VARIANT
 #define HFPP_FUNC_VARIANT
 #endif
@@ -27,9 +31,20 @@
 #define HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE HFPP_FALSE
 #endif
 
+#if HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS == HFPP_NONE	
+#define HFPP_WRAPPER_CLASSES	       
+#define HFPP_PYTHON_WRAPPER_CLASSES (STL)
+#endif	
+
 #ifndef HFPP_WRAPPER_CLASSES
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 #define HFPP_WRAPPER_CLASSES HFPP_DEFAULT_WRAPPER_CLASSES
+#endif
+
+
+#ifndef HFPP_PYTHON_WRAPPER_CLASSES
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+#define HFPP_PYTHON_WRAPPER_CLASSES HFPP_DEFAULT_PYTHON_WRAPPER_CLASSES
 #endif
 
 #ifndef HFPP_MAKE_PYTHONWRAPPERS
@@ -468,12 +483,23 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //
 #endif
 
+//If function has no vectors don't make multiple PYthon wrappers for
+//different vector classes
+#if HFPP_FUNC_HAS_VECTORS
+#else
+#undef HFPP_PYTHON_WRAPPER_CLASSES
+#define HFPP_PYTHON_WRAPPER_CLASSES (STL)
+#endif
+
 #ifndef HFPP_DONOT_MAKE_WRAPPERS
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 HFPP_MAKE_WRAPPERS
 #if HFPP_FUNC_HAS_VECTORS && HFPP_FUNC_SLICED
 HFPP_MAKE_WRAPPERS_SLICED
+//#if HFPP_FUNC_hARRAY
+//HFPP_MAKE_WRAPPERS_hARRAY
+//#endif
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -495,6 +521,8 @@ HFPP_MAKE_WRAPPERS_SLICED
 #undef HFPP_CODE_PRE
 #undef HFPP_FUNC_HAS_VECTORS
 #undef HFPP_FUNC_SLICED 
+#undef HFPP_PYTHON_WRAPPER_CLASSES
+#undef HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS
 
 //--Undefine user-defined parameters from cc file
 #undef HFPP_FUNCDEF

@@ -110,12 +110,15 @@ def VecToString(self,maxlen=10):
 
 
 def VecToPrintString(self,maxlen=10):
-    return "Vec("+str(len(self))+")=[" +VecToString(self)+"]"
+    if hasattr(self,"type"): s=str(self.type)+","
+    else: s=""
+    return "Vec("+s+str(len(self))+")=[" +VecToString(self)+"]"
 
-def MatrixToPrintString(self,maxlen=10):
-    return "Matrix("+str(len(self))+")=[" +VecToString(self)+"]"
+def ArrayToPrintString(self,maxlen=10):
+    return "Array("+str(len(self.Vector()))+")=[" +VecToString(self.Vector())+"]"
 
-setattr(IntMatrix,"__repr__",MatrixToPrintString)
+setattr(FloatAry,"__repr__",ArrayToPrintString)
+
 
 #========================================================================
 # Adding multi-dimensional array capabilities to vector class
@@ -327,7 +330,7 @@ for v in hAllVectorTypes:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealVectorTypes:
-    for s in ["hMean","hStdDev","hDownsample","hNorm","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs"]:
+    for s in ["hMean","hStdDev","hDownsample","hNegate","hNorm","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs"]:
         setattr(v,s[1:].lower(),eval(s))
 
 
@@ -381,16 +384,39 @@ def Vector(Type=float,size=-1,fill=None):
     will contain only [1,2]. Vector([1,2,3],size=2,fill=4) will give
     [4,4].
     """
+    vtype=Type
     if (Type==float): vec=FloatVec()
     if (Type==int): vec=IntVec()
     if (Type==complex): vec=ComplexVec()
     if (Type==str): vec=StringVec()
     if (Type==bool): vec=BoolVec()
-    if (type(Type) in hAllListTypes): vec=Vector(type(Type[0])); vec.extend(Type)
+    if (type(Type) in hAllListTypes): 
+        vtype=type(Type[0])
+        vec=Vector(vtype); vec.extend(Type)
+    vec.type=vtype
     if (size>=0): vec.resize(size)
     if (not fill==None): vec.fill(fill)
     return vec
 
+#======================================================================
+#  Vector Methods/Attributes
+#======================================================================
+
+class Array():
+    def __init__(self,*args):
+        self.vec=apply(Vector,args)
+        self.ArrayType=vec.type
+    def __repr__(self):
+        return "Array("+str(self.vec.type)+","+str(len(self.vec))+")=[" +VecToString(self)+"]"
+    def __setitem__(self,*args):
+        return list(args)
+    def __getitem__(self,*args):
+        self.slice=args
+    def getSlice(self):
+        return (vec,3,10)
+    setDim=hArray_setDim
+    getDim=hArray_getDim
+    def __len__(self): return len(self.vec)
 #------------------------------------------------------------------------
 # cr DataReader Class
 #------------------------------------------------------------------------

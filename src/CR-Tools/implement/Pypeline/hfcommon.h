@@ -83,6 +83,35 @@ typedef CR::CoordinateType::Types CRCoordinateType;
 #define IntAsPtr(INT) reinterpret_cast<HPointer>(INT)
 #define PtrAsInt(PTR) reinterpret_cast<HInteger>(PTR)
 
+enum DATATYPE {
+  //! Data type is a pointer
+  POINTER,
+  //! Data type is an integer number
+  INTEGER,
+  //! Data type is a (floating point) number
+  NUMBER,
+  //! Data type is a complex (floating point) number
+  COMPLEX,
+  //! Data type is a string (of characters)
+  STRING,
+  //! Data type is undefined
+  BOOLEAN,
+  //! Data type is a boolean
+  UNDEF
+};
+
+enum VECTORCLASS {
+  //! Data vector class is standard c++ (STL)
+  VEC_STL,
+  //! Data vector class is CASA (aips++)
+  VEC_CASA,
+  //! Data vector class is numpy 
+  VEC_NUMPY,
+  //! Data vector class is undefined
+  VEC_UNDEF
+};
+
+
 
 
 #endif

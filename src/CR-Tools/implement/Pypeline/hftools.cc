@@ -28,8 +28,6 @@
 */
 #include <memory>
 
-using namespace std;
-
 
 #undef HFPP_VERBOSE
 #include "hftools.h"
@@ -376,69 +374,226 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
 }
 
 //========================================================================
-//                   Matrix Class !!!!!IGNORE!!!!!
+//                             Array Class 
 //========================================================================
 
-// Testing a simple Matrix class that is built upon std::vectors
-// we do actually not really want to do this ....
-namespace std {
+//! Testing a rudimentary Array class, that allows contiguous slicing
 
-  template <class T, class Alloc>
-  class hmatrix : public vector<T,Alloc> {
+template <class T> void hArray<T>::init(){
+  vec_p=NULL;
+  number_of_dimensions=0;
+  dimensions_p = new std::vector<HInteger>();
+}
 
-  public:
-    template <class Iter> hmatrix(Iter it1, Iter it2);
-    hmatrix(const char* buf);
-    hmatrix();
-    ~hmatrix();
+template <class T> hArray<T>::hArray(std::vector<T> & vec){
+  init();
+  setVector(vec);
+}
 
-    void setNumberOfDimensions(HInteger newdim);
-    HInteger getNumberOfDimensions();
+template <class T> hArray<T>::hArray(){
+  init();
+  std::vector<T>* internal_vector=new std::vector<T>();
+  setVector(*internal_vector);
+  vector_is_internal=true;
+}
 
-    void setDimensionN(HInteger n, HInteger size);
+template <class T> void hArray<T>::delVector(){
+  if ((vec_p != NULL) && vector_is_internal) delete vec_p;
+  vec_p=NULL;
+}
 
-    void setDimensions(HInteger dim0);
-    void setDimensions(HInteger dim0, HInteger dim1);
-    void setDimensions(HInteger dim0, HInteger dim1, HInteger dim3);
+template <class T> hArray<T>::~hArray(){ 
+  delVector();
+  if (dimensions_p != NULL) delete dimensions_p;
+}
+
+/*!
+\brief Set the vector to be stored (as reference, hence no copy is made). Creation and destruction of this vector has to be done outside this class!!
+ */
+template <class T> hArray<T>&  hArray<T>::setVector(std::vector<T> & vec){
+  delVector();
+  vec_p=&vec;
+  vector_size=vec.size();
+  setDimensions1(vector_size);
+  setSlice(0,vector_size);
+  vector_is_internal=false;
+  return *this;
+}
+
+/*!
+\brief Retrieve the stored vector (returned as reference, hence no copy is made).
+ */
+template <class T> std::vector<T> & hArray<T>::Vector(){
+  return *vec_p;
+}
+
+/*!
+\brief Retrieve the stored vector (returned as reference, hence no copy is made).
+ */
+template <class T> std::vector<HInteger> hArray<T>::getDimensions(){
+  return *dimensions_p;
+}
+
+/*!
+\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+ */
+template <class T> hArray<T>&  hArray<T>::setDimensions1(HInteger dim0){
+  number_of_dimensions=1;
+  if (dimensions_p->size()!=(uint)number_of_dimensions) dimensions_p->resize(number_of_dimensions);
+  (*dimensions_p)[0]=dim0;
+  vector_size=hProduct<HInteger>(*dimensions_p);
+  if (vec_p->size() != (uint)vector_size) vec_p->resize(vector_size);
+  return *this;
+}
+
+/*!
+\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+ */
+template <class T> hArray<T>&  hArray<T>::setDimensions2(HInteger dim0, HInteger dim1){
+  number_of_dimensions=2;
+  if (dimensions_p->size()!=(uint)number_of_dimensions) dimensions_p->resize(number_of_dimensions);
+  (*dimensions_p)[0]=dim0;
+  (*dimensions_p)[1]=dim1;
+  vector_size=hProduct<HInteger>(*dimensions_p);
+  if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
+  return *this;
+}
+
+/*!
+\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+ */
+template <class T> hArray<T>&  hArray<T>::setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2){
+  number_of_dimensions=3;
+  if (dimensions_p->size()!=(uint)number_of_dimensions) dimensions_p->resize(number_of_dimensions);
+  (*dimensions_p)[0]=dim0;
+  (*dimensions_p)[1]=dim1;
+  (*dimensions_p)[2]=dim2;
+  vector_size=hProduct<HInteger>(*dimensions_p);
+  if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
+  return *this;
+}
+
+/*!
+\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+ */
+template <class T> hArray<T>&  hArray<T>::setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3){
+  number_of_dimensions=4;
+  if (dimensions_p->size()!=(uint)number_of_dimensions) dimensions_p->resize(number_of_dimensions);
+  (*dimensions_p)[0]=dim0;
+  (*dimensions_p)[1]=dim1;
+  (*dimensions_p)[2]=dim2;
+  (*dimensions_p)[3]=dim3;
+  vector_size=hProduct<HInteger>(*dimensions_p);
+  if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
+  return *this;
+}
+
+/*!
+\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+ */
+template <class T> hArray<T>&  hArray<T>::setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4){
+  number_of_dimensions=5;
+  if (dimensions_p->size()!=(uint)number_of_dimensions) dimensions_p->resize(number_of_dimensions);
+  (*dimensions_p)[0]=dim0;
+  (*dimensions_p)[1]=dim1;
+  (*dimensions_p)[2]=dim2;
+  (*dimensions_p)[3]=dim3;
+  (*dimensions_p)[4]=dim4;
+  vector_size=hProduct<HInteger>(*dimensions_p);
+  if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
+  return *this;
+}
+
+/*!
+\brief Sets begin and end the currently active slice using integer offsets from the begin of the stored vector. Use (0,size(vector)) to get the full vector
+ */
+template <class T> hArray<T>& hArray<T>::setSlice(HInteger beg, HInteger end){
+  slice_begin=max(beg,0);
+  if (end>=0) slice_end=min(end,vector_size);
+  else slice_end=vector_size;
+  slice_it_begin=vec_p->begin()+slice_begin;
+  slice_it_end=vec_p->begin()+slice_end;
+  return *this;
+}
+
+/*!
+\brief Returns the number of dimensions that have been associated with the current array
+ */
+template <class T> HInteger hArray<T>::getNumberOfDimensions(){return number_of_dimensions;}
+
+/*!
+\brief Returns the begin iterator of the current slice in the stored vector plus an integer offset (to get a slice from a slice)
+ */
+template <class T> typename std::vector<T>::iterator hArray<T>::begin(HInteger offset){return slice_it_begin+offset;}
+/*!
+\brief Returns the begin iterator of the current slice in the stored vector plus an integer offset (to get a slice from a slice) but not larger than the end iterator of the current slice.
+ */
+template <class T> typename std::vector<T>::iterator hArray<T>::end(HInteger offset){return min(slice_it_begin+offset,slice_it_end);}
+
+/*!
+\brief Returns the begin iterator of the current slice in the stored vector
+ */
+template <class T> typename std::vector<T>::iterator hArray<T>::begin(){return slice_it_begin;}
+/*!
+\brief Returns the end iterator of the current slice in the stored vector
+ */
+template <class T> typename std::vector<T>::iterator hArray<T>::end(){return slice_it_end;}
+
+/*!
+\brief Returns the offset of the current slice from the begin iterator of the stored vector
+ */
+template <class T> HInteger hArray<T>::getBegin(){return slice_begin;}
+
+/*!
+\brief Returns the offset of the end of the current slice from the begin iterator of the stored vector
+ */
+template <class T> HInteger hArray<T>::getEnd(){return slice_end;}
 
 
-  private:
-    HInteger ndim;
-    vector<HInteger>* dimensions_p;
-  };
 
 
-  template <class T, class Alloc> template <class Iter> hmatrix<T,Alloc>::hmatrix(Iter it1, Iter it2) : vector<T,Alloc>(it1,it2) {};
-  template <class T, class Alloc> hmatrix<T,Alloc>::hmatrix(const char* buf) : vector<T,Alloc>(buf){};
-  template <class T, class Alloc> hmatrix<T,Alloc>::hmatrix(){
-    ndim=0;
-    dimensions_p=NULL;
-    //    setDimension(2);
-  };
-  template <class T, class Alloc> hmatrix<T,Alloc>::~hmatrix(){};
+//------------------------------------------------------------------------
+//$DOCSTRING: Return the offset of the current slice from the begin pointer
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hArray_intBegin
+//-----------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HPyObjectPtr)(pyob)()("Python hArray Object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
 
-  template <class T, class Alloc>
-  void hmatrix<T,Alloc>::setNumberOfDimensions(HInteger newdim){
-    if (newdim==ndim) return;
-    if (dimensions_p != NULL) delete dimensions_p;
-    ndim=newdim;
-    dimensions_p = new vector<HString>(ndim);
-  };
+Example:
+antennaIDs=hFileGetParameter(file,"AntennaIDs")
+x=hCalTable("~/LOFAR/usg/data/lopes/LOPES-CalTable",obsdate,list(antennaIDs))
 
-  template <class T, class Alloc>
-  HInteger hmatrix<T,Alloc>::getNumberOfDimensions(){return ndim;};
+*/
+HInteger HFPP_FUNC_NAME(HPyObjectPtr pyobj) {
+//   if (!PyObject_HasAttrString(pyob, "ArrayType")) {
+//     HPyObjectPtr objrepr=PyObject_Repr(pyobj);
+//     char * objrepr_str= PyString_AsString(objrepr);
+//     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Object is not of hArray type;");
+//     return 0;
+//   }
+  
+//   HPyObjectPtr list=PyList_New(0),tuple;
+//   if (CTRead != NULL && PyList_Check(pyob)) {  //Check if CalTable was opened ... and Python object is a list
+//     size=PyList_Size(pyob);
+//     for (i=0;i<size;++i){  //loop over all antennas
+//       ant=PyInt_AsLong(PyList_GetItem(pyob,i));  //Get the ith element of the list, i.e. the antenna ID
+//       CTRead->GetData((uint)date, ant, keyword, &tmpvec);
+//       tuple=PyTuple_Pack(3,PyFloat_FromDouble(tmpvec[0]),PyFloat_FromDouble(tmpvec[1]),PyFloat_FromDouble(tmpvec[2]));
+//       PyList_Append(list,tuple);
+//     };
+//   };
+//   return list;
+  return 0;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-  template <class T, class Alloc>
-  void hmatrix<T,Alloc>::setDimensionN(HInteger n, HInteger size){
-  }
 
-  template <class T, class Alloc>
-  void setDimensions(HInteger dim0){}
-  template <class T, class Alloc>
-  void setDimensions(HInteger dim0, HInteger dim1){}
-  template <class T, class Alloc>
-  void setDimensions(HInteger dim0, HInteger dim1, HInteger dim3){}
-};
 
 //========================================================================
 //                        Helper Functions
@@ -500,7 +655,7 @@ void hFill(const Iter vec,const Iter vec_end, const IterValueType fill_value)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hNew
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
@@ -521,7 +676,7 @@ std::vector<T> HFPP_FUNC_NAME(std::vector<T> & vec)
 
 //$DOCSTRING: Resize a vector to a new length.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -541,7 +696,7 @@ void hResize(std::vector<T> & vec, HInteger newsize)
 
 //$DOCSTRING: Resize a vector to a new length and fill new elements in vector with a specific value.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -562,7 +717,7 @@ void hResize(std::vector<T> & vec, HInteger newsize, T fill)
 
 //$DOCSTRING: Resize an STL vector to the same length as a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -583,7 +738,7 @@ void hResize(std::vector<T> & vec1,std::vector<S> & vec2)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 //$DOCSTRING: Resize a casa vector to the same length as a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -605,6 +760,8 @@ void hResize(casa::Vector<T> & vec1,casa::Vector<S> & vec2)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hConvert
 //-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES (STL) // since it does memory management, using resize
+#define HFPP_PYTHON_WRAPPER_CLASSES (STL) // since it does memory management, using resize
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_CODE_PRE hResize(vec2,vec1); //code will be inserted in wrapper generation in cc file
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -661,7 +818,7 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const 
 //$COPY_TO HFILE START ---------------------------------------------------
 #define HFPP_FUNC_NAME square
 //------------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED)(val)()("Value to be squared")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -680,7 +837,7 @@ inline T square(T val)
 //$COPY_TO HFILE START ---------------------------------------------------
 #define HFPP_FUNC_NAME hPhase
 //------------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(frequency)()("Frequency in Hz")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_1 (HNumber)(time)()("Time in seconds")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -700,7 +857,7 @@ inline HNumber hPhase(HNumber frequency, HNumber time)
 //$COPY_TO HFILE START ---------------------------------------------------
 #define HFPP_FUNC_NAME funcGaussian
 //------------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(x)()("Position at which the Gaussian is evaluated")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_1 (HNumber)(sigma)()("Width of the Gaussian")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -1152,6 +1309,31 @@ IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Multiplies all elements in the vector with each other and return the result
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hProduct
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+ $PARDOCSTRING
+ 
+ hProduct(vec) -> vec[0]*vec[1]*vec[2]* ... * vec[N]
+
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
+{
+  typedef IterValueType T;
+  T prod=1.0;
+  Iter it=vec;
+  while (it!=vec_end) {prod *= *it; ++it;};
+  return prod;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2))).
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hNorm
@@ -1269,7 +1451,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMedian
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -1459,7 +1641,7 @@ void HFPP_FUNC_NAME (const Iter vec1,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDownsample
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
@@ -1563,7 +1745,7 @@ HInteger hFindLowerBound(const HNumber* vec,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFlatWeights
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -1586,7 +1768,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hLinearWeights
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -1620,7 +1802,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGaussianWeights
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -1655,7 +1837,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hWeights
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -1689,7 +1871,7 @@ vector<HNumber> hWeights(HInteger wlen, hWEIGHTS wtype){
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hRunningAverage
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES (STL)
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(idata)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -1713,7 +1895,8 @@ void HFPP_FUNC_NAME (const DataIter  idata,
      typically would peak) */
   HInteger middle=l/2;
   /* To avoid too many rounding errors with Integers */
-  typename DataIter::value_type fac = l*10;
+  //  typename DataIter::value_type fac = l*10;
+  HNumber temp;
 
   DataIter  dit;
   DataIter  dit2;
@@ -1724,14 +1907,15 @@ void HFPP_FUNC_NAME (const DataIter  idata,
   while (din<idata_end && dout<odata_end) {
     dit=din-middle; //data iterator set to the first element to be taken into account (left from current element)
     wit=weights; // weight iterators set to beginning of weights
+    temp=0.0;
     while (wit<weights_end) {
       if (dit<idata) dit2=idata;
       else if (dit>=idata_end) dit2=idata_end-1;
       else dit2=dit;
-      *dout=*dout+((*dit2)*(*wit)*fac);
+      temp=temp+(*dit2)*(*wit);
       ++dit; ++wit;
     };
-    *dout/=fac;
+    *dout=temp;
     ++dout; ++din; //point to the next element in data input and output vector
   };
   return;
@@ -1743,7 +1927,6 @@ void HFPP_FUNC_NAME (const DataIter  idata,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hRunningAverage
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES (STL)
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(idata)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -1783,6 +1966,7 @@ void HFPP_FUNC_NAME (const DataIter idata,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGeometricDelayFarField
 //-----------------------------------------------------------------------
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(antPosition)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(skyDirection)()("Vector in Cartesian coordinates pointing towards a sky position from the antenna - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
@@ -1810,6 +1994,7 @@ HNumber HFPP_FUNC_NAME (
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGeometricDelayNearField
 //-----------------------------------------------------------------------
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(antPosition)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(skyPosition)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
@@ -2040,7 +2225,6 @@ void HFPP_FUNC_NAME (
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSpectralPower
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES (STL)
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HComplex)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -2057,7 +2241,6 @@ void HFPP_FUNC_NAME (
 template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_end)
 {
-  typedef IterValueType T;
   Iterin it(vec);
   Iter itout(out);
   while ((it!=vec_end) && (itout !=out_end)) {
@@ -2406,7 +2589,7 @@ void HFPP_FUNC_NAME(const IterIn data_in,   const IterIn data_in_end,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileSummary
 //------------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("DataReader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
@@ -2425,7 +2608,7 @@ void HFPP_FUNC_NAME(CRDataReader & dr) {
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileOpen
 //------------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_0 (HString)(Filename)()("Filename of file to opwn including full directory name")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -2469,7 +2652,7 @@ CRDataReader & HFPP_FUNC_NAME(HString Filename) {
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileGetParameter
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (HPyObject)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object openen, e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(keyword)()("Keyword ro be read out from the file metadata")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2567,7 +2750,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileSetParameter
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object openen, e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be set in the file")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2625,7 +2808,7 @@ CRDataReader & HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileRead
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object, opened e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
@@ -2721,7 +2904,7 @@ CRDataReader & HFPP_FUNC_NAME(
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCalTable
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (HPyObjectPtr)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HString)(filename)()("Filename of the caltable")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be read out from the file metadata (currenly only Position is implemented)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2755,6 +2938,8 @@ HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HP
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
+
 //
 //========================================================================
 //$SECTION:      Coordinate Conversion (VectorConversion.cc)
@@ -2766,6 +2951,7 @@ HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HP
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCoordinateConvert
 //-----------------------------------------------------------------------
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (bool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(source)()("Coordinates of the source to be converted - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (CRCoordinateType)(sourceCoordinate)()("Type of the coordinates for the source")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2835,7 +3021,7 @@ bool HFPP_FUNC_NAME  (Iter source,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hReadFileOld
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)

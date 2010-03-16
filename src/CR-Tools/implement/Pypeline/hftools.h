@@ -85,6 +85,49 @@
 #include <Pypeline/hfppnew.h>
 #include <Calibration/CalTableReader.h>
 
+using namespace std;
+
+//========================================================================
+//                             Array Class 
+//========================================================================
+
+template <class T>
+  class hArray {
+  
+  public:
+  
+    void init();
+    hArray(std::vector<T> & vec);
+    hArray();
+    ~hArray();
+    void delVector();
+    hArray<T>&  setVector(std::vector<T> & vec);
+    std::vector<T> & Vector();
+    std::vector<HInteger> getDimensions();
+    hArray<T>& setDimensions1(HInteger dim0);
+    hArray<T>& setDimensions2(HInteger dim0, HInteger dim1);
+    hArray<T>& setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
+    hArray<T>& setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3);
+    hArray<T>& setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
+    hArray<T>& setSlice(HInteger beg, HInteger end);
+    HInteger getNumberOfDimensions();
+    typename std::vector<T>::iterator begin();
+    typename std::vector<T>::iterator end();
+    typename std::vector<T>::iterator begin(HInteger offset);
+    typename std::vector<T>::iterator end(HInteger offset);
+    HInteger getBegin();
+    HInteger getEnd();
+    
+  private:
+    HInteger slice_begin, slice_end;
+    typename std::vector<T>::iterator slice_it_begin, slice_it_end;
+    HInteger number_of_dimensions;
+    HInteger vector_size;
+    vector<HInteger>* dimensions_p;
+    vector<T>* vec_p;
+    bool vector_is_internal;
+  };
+
 //========================================================================
 //                    Casting & Conversion Functions
 //========================================================================

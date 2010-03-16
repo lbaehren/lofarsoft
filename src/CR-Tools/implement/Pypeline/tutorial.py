@@ -692,7 +692,7 @@ plt.subplot(1,2,2)
 #%SKIP
 plt.title("Time Series of Antenna 0")
 #%SKIP
-plt.plot(timeall,fxall.elem(15))
+plt.plot(timeall,fxall.elem(0))
 #%SKIP
 plt.ylabel("Electric Field [ADC counts]")
 #%SKIP
