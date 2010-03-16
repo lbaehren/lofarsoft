@@ -1,3 +1,7 @@
+##
+##  CR-Tools/implement/GUI/CMakeLists.txt
+##
+
 
 ##_______________________________________________________________________________
 ## Include directories
@@ -89,7 +93,23 @@ endif (APPLE)
 ##_______________________________________________________________________________
 ## Installation
 
+## Library
+
 install (
   TARGETS hfget
   LIBRARY DESTINATION lib/python
   )
+
+## Scripts
+
+install (
+  FILES hfglobal.py hfinit.py hfpywrappers.py hffuncs.py hfgui.py
+  DESTINATION lib/python
+  PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE OWNER_READ GROUP_READ WORLD_READ
+)
+
+install (
+  FILES hfstart.py hfnet.py hfcrfuncs.py
+  DESTINATION bin
+  PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE OWNER_READ GROUP_READ WORLD_READ
+)
