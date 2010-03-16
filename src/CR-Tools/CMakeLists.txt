@@ -37,7 +37,7 @@ endif (NOT USG_ROOT)
 
 option (CR_BUILD_TESTS          "Build the test programs?"                   YES )
 option (CR_BUILD_EXTERNAL_TESTS "Build test programs for external packages?" NO  )
-option (CR_COMPILER_WARNINGS    "Enable standard set of compiler warnings?"  YES )
+option (CR_CXX_FLAGS            "Enable standard set of compiler flags?"     YES )
 option (CR_DEBUGGING_MESSAGES   "Print debugging information?"               NO  )
 option (CR_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO  )
 option (CR_WITH_PRIVATE         "Include building private code?"             NO  )
@@ -255,11 +255,11 @@ endif (CR_DEBUGGING_MESSAGES)
 ## -------------------------------------------------------------------
 ## Handle option: Enable standard set of compiler warnings?  ON/OFF
 
-if (CR_COMPILER_WARNINGS)
+if (CR_CXX_FLAGS)
   set (CMAKE_CXX_FLAGS
-    "-Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend"
+    "-W -g -Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend"
     )
-endif (CR_COMPILER_WARNINGS)
+endif (CR_CXX_FLAGS)
     
 ## -------------------------------------------------------------------
 ## Handle option: Support for Glish applications?  ON/OFF
