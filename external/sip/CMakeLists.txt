@@ -30,18 +30,17 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
 else (USG_ROOT)
-  message (FATAL_ERROR "[Sip] Unable to locate additional CMake scripts!")
+  message (FATAL_ERROR "[SIP] Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
 if (NOT SIP_VERBOSE_CONFIGURE)
-  set (PYTHON_FIND_QUIETLY YES )
-  set (SIP_FIND_QUIETLY    YES )
+  set (SIP_FIND_QUIETLY YES )
 endif (NOT SIP_VERBOSE_CONFIGURE)
 
-include (FindPython)
+include (FindSIP)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -55,10 +54,10 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project
 
-  set (SIP_VERSION "4.10")
-  set (SIP_DIRECTORY "sip-${SIP_VERSION}")
+  set (sip_version "4.10")
+  set (SIP_DIRECTORY "sip-${sip_version}")
   set (SIP_TAR_ARCHIVE "${SIP_DIRECTORY}.tar.gz")
-  set (SIP_URL "http://www.riverbankcomputing.co.uk/static/Downloads/sip4/${SIP_TAR_ARCHIVE}")
+  set (sip_url "http://www.riverbankcomputing.co.uk/static/Downloads/sip4/${SIP_TAR_ARCHIVE}")
 
   ##__________________________________________________________________
   ## Check if a tar-archive with the source code is available already;
@@ -81,7 +80,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
       DOWNLOAD_DIR ${SIP_BINARY_DIR}
       SOURCE_DIR ${SIP_BINARY_DIR}
       BINARY_DIR ${SIP_BINARY_DIR}/build
-      URL ${SIP_URL}
+      URL ${sip_url}
       CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${SIP_BINARY_DIR}/configure.py -b ${CMAKE_INSTALL_PREFIX}/bin -d ${CMAKE_INSTALL_PREFIX}/lib/python -e ${CMAKE_INSTALL_PREFIX}/include/sip -v ${CMAKE_INSTALL_PREFIX}/share/sip
       )
   endif (have_sip_tgz)
@@ -91,6 +90,6 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
 else (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   add_custom_target (sip
     WORKING_DIRECTORY ${SIP_BINARY_DIR}
-    COMMENT "[Sip] Found system-wide installation; skipping rebuild!"
+    COMMENT "[SIP] Found system-wide installation; skipping rebuild!"
     )
 endif (NOT HAVE_SIP OR SIP_FORCE_BUILD)
