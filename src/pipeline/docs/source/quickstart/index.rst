@@ -48,9 +48,9 @@ For bash (**with LofIm**):
 
 .. code-block:: bash
 
-    export PYTHONPATH=/opt/LofIm/daily/lofar/lib/python2.5/site-packages:/opt/LofIm/daily/pyrap/trunk/lib:/opt/pipeline/dependencies/lib/python2.5/site-packages:/opt/pipeline/pipeline_snapshot/lib/python2.5/site-packages:$PYTHONPATH:.
-    export LD_LIBRARY_PATH=/opt/LofIm/daily/lofar/lib:/opt/LofIm/daily/pyrap/trunk/lib:/opt/LofIm/daily/casarest/trunk/build/lib:/opt/hdf5/lib:/opt/LofIm/daily/casacore/trunk/lib:/opt/pipeline/dependencies/lib:/data/sys/opt/lofar/external/log4cplus/lib:$LD_LIBRARY_PATH
-    export PATH=/opt/LofIm/daily/lofar/bin:/opt/LofIm/daily/askapsoft/bin:/opt/LofIm/daily/casarest/trunk/build/bin:/opt/LofIm/daily/casacore/trunk/bin:/opt/pipeline/dependencies/bin:$PATH
+    export PYTHONPATH=/opt/LofIm/daily/lofar/lib/python2.5/site-packages:/opt/LofIm/daily/pyrap/lib:/opt/pipeline/dependencies/lib/python2.5/site-packages:/opt/pipeline/pipeline_snapshot/lib/python2.5/site-packages:$PYTHONPATH:.
+    export LD_LIBRARY_PATH=/opt/LofIm/daily/lofar/lib:/opt/LofIm/daily/pyrap/lib:/opt/LofIm/daily/casarest/lib:/opt/hdf5/lib:/opt/LofIm/daily/casacore/lib:/opt/pipeline/dependencies/lib:/data/sys/opt/lofar/external/log4cplus/lib:$LD_LIBRARY_PATH
+    export PATH=/opt/LofIm/daily/lofar/bin:/opt/LofIm/daily/askapsoft/bin:/opt/LofIm/daily/casarest/bin:/opt/LofIm/daily/casacore/bin:/opt/pipeline/dependencies/bin:$PATH
     
 
 For tcsh (**without LofIm**):
@@ -65,9 +65,9 @@ For tcsh (**with LofIm**):
 
 .. code-block:: tcsh
 
-    setenv PYTHONPATH /opt/LofIm/daily/lofar/lib/python2.5/site-packages:/opt/LofIm/daily/pyrap/trunk/lib:/opt/pipeline/dependencies/lib/python2.5/site-packages:/opt/pipeline/pipeline_snapshot/lib/python2.5/site-packages:${PYTHONPATH}:.
-    setenv LD_LIBRARY_PATH /opt/LofIm/daily/lofar/lib:/opt/LofIm/daily/pyrap/trunk/lib:/opt/LofIm/daily/casarest/trunk/build/lib:/opt/hdf5/lib:/opt/LofIm/daily/casacore/trunk/lib:/opt/pipeline/dependencies/lib:/data/sys/opt/lofar/external/log4cplus/lib:${LD_LIBRARY_PATH}
-    setenv PATH /opt/LofIm/daily/lofar/bin:/opt/LofIm/daily/askapsoft/bin:/opt/LofIm/daily/casarest/trunk/build/bin:/opt/LofIm/daily/casacore/trunk/bin:/opt/pipeline/dependencies/bin:${PATH}
+    setenv PYTHONPATH /opt/LofIm/daily/lofar/lib/python2.5/site-packages:/opt/LofIm/daily/pyrap/lib:/opt/pipeline/dependencies/lib/python2.5/site-packages:/opt/pipeline/pipeline_snapshot/lib/python2.5/site-packages:${PYTHONPATH}:.
+    setenv LD_LIBRARY_PATH /opt/LofIm/daily/lofar/lib:/opt/LofIm/daily/pyrap/lib:/opt/LofIm/daily/casarest/lib:/opt/hdf5/lib:/opt/LofIm/daily/casacore/lib:/opt/pipeline/dependencies/lib:/data/sys/opt/lofar/external/log4cplus/lib:${LD_LIBRARY_PATH}
+    setenv PATH /opt/LofIm/daily/lofar/bin:/opt/LofIm/daily/askapsoft/bin:/opt/LofIm/daily/casarest/bin:/opt/LofIm/daily/casacore/bin:/opt/pipeline/dependencies/bin:${PATH}
     
 
 Make a runtime directory
