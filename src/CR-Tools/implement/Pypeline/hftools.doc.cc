@@ -304,7 +304,7 @@ template <class T> void hArray<T>::init(){
   vec_p=__null;
   number_of_dimensions=0;
   dimensions_p = new std::vector<HInteger>();
-  cout << "intit: vec_p=" <<vec_p << endl;
+  doiterate=false;
 }
 template <class T> hArray<T>::hArray(std::vector<T> & vec){
   init();
@@ -315,7 +315,6 @@ template <class T> hArray<T>::hArray(){
   std::vector<T>* internal_vector=new std::vector<T>();
   setVector(*internal_vector);
   vector_is_internal=true;
-  cout << "hArray: vec_p=" <<vec_p << "size= " << vec_p->size() << endl;
 }
 template <class T> void hArray<T>::delVector(){
   if ((vec_p != __null) && vector_is_internal) delete vec_p;
@@ -344,13 +343,19 @@ template <class T> std::vector<T> & hArray<T>::Vector(){
   return *vec_p;
 }
 /*!
+\brief Retrieve the stored vector (returned as reference, hence no copy is made).
+ */
+template <class T> std::vector<HInteger> hArray<T>::getDimensions(){
+  return *dimensions_p;
+}
+/*!
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> hArray<T>& hArray<T>::setDimensions1(HInteger dim0){
   number_of_dimensions=1;
   if (dimensions_p->size()!=(uint)number_of_dimensions) dimensions_p->resize(number_of_dimensions);
   (*dimensions_p)[0]=dim0;
-  vector_size=hProduct(*dimensions_p);
+  vector_size=hProduct<HInteger>(*dimensions_p);
   if (vec_p->size() != (uint)vector_size) vec_p->resize(vector_size);
   return *this;
 }
@@ -362,7 +367,7 @@ template <class T> hArray<T>& hArray<T>::setDimensions2(HInteger dim0, HInteger 
   if (dimensions_p->size()!=(uint)number_of_dimensions) dimensions_p->resize(number_of_dimensions);
   (*dimensions_p)[0]=dim0;
   (*dimensions_p)[1]=dim1;
-  vector_size=hProduct(*dimensions_p);
+  vector_size=hProduct<HInteger>(*dimensions_p);
   if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
   return *this;
 }
@@ -374,7 +379,37 @@ template <class T> hArray<T>& hArray<T>::setDimensions3(HInteger dim0, HInteger 
   if (dimensions_p->size()!=(uint)number_of_dimensions) dimensions_p->resize(number_of_dimensions);
   (*dimensions_p)[0]=dim0;
   (*dimensions_p)[1]=dim1;
-  vector_size=hProduct(*dimensions_p);
+  (*dimensions_p)[2]=dim2;
+  vector_size=hProduct<HInteger>(*dimensions_p);
+  if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
+  return *this;
+}
+/*!
+\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+ */
+template <class T> hArray<T>& hArray<T>::setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3){
+  number_of_dimensions=4;
+  if (dimensions_p->size()!=(uint)number_of_dimensions) dimensions_p->resize(number_of_dimensions);
+  (*dimensions_p)[0]=dim0;
+  (*dimensions_p)[1]=dim1;
+  (*dimensions_p)[2]=dim2;
+  (*dimensions_p)[3]=dim3;
+  vector_size=hProduct<HInteger>(*dimensions_p);
+  if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
+  return *this;
+}
+/*!
+\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+ */
+template <class T> hArray<T>& hArray<T>::setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4){
+  number_of_dimensions=5;
+  if (dimensions_p->size()!=(uint)number_of_dimensions) dimensions_p->resize(number_of_dimensions);
+  (*dimensions_p)[0]=dim0;
+  (*dimensions_p)[1]=dim1;
+  (*dimensions_p)[2]=dim2;
+  (*dimensions_p)[3]=dim3;
+  (*dimensions_p)[4]=dim4;
+  vector_size=hProduct<HInteger>(*dimensions_p);
   if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
   return *this;
 }
@@ -417,6 +452,50 @@ template <class T> HInteger hArray<T>::getBegin(){return slice_begin;}
 \brief Returns the offset of the end of the current slice from the begin iterator of the stored vector
  */
 template <class T> HInteger hArray<T>::getEnd(){return slice_end;}
+/*!
+\brief Returns the size (length) of the current slice
+ */
+template <class T> HInteger hArray<T>::getSize(){return slice_size;}
+/*!
+\brief Returns the length of the underlying vector
+ */
+template <class T> HInteger hArray<T>::length(){return vec_p->size();}
+/*!
+\brief Returns the size (length) of the current slice
+ */
+template <class T> hArray<T>& hArray<T>::setSize(HInteger size){slice_size=size; return *this;}
+/*!
+\brief Returns whether or not to iterate over all slices in the vector
+ */
+template <class T> bool hArray<T>::iterate(){return doiterate;}
+/*!
+\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector)
+ */
+template <class T> hArray<T>& hArray<T>::loop(){doiterate=true; return *this;}
+/*!
+\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector)
+ */
+template <class T> hArray<T>& hArray<T>::noloop(){doiterate=false; return *this;}
+/*!
+\brief Reset the slice iterators to the first slice
+*/
+template <class T> hArray<T>& hArray<T>::reset(){ return *this;
+  setSlice(0,getSize());
+}
+/*!
+\brief Increase the current slice by one, if array is in looping mode. 
+
+If the end of the vector is reached, switch looping mode off and reset array to first slice.
+ */
+template <class T> hArray<T>& hArray<T>::next(){
+  if (slice_end>=length()) { // the end has been reached
+    reset();
+    noloop();
+  } else {
+    setSlice(slice_begin+slice_size,slice_end+slice_size);
+  };
+  return *this;
+}
 //------------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /*!
@@ -564,6 +643,7 @@ void hFill(const Iter vec,const Iter vec_end, const typename Iter::value_type fi
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -609,7 +689,11 @@ hFill ( vec.begin(),vec.end() , fill_value);
 }
 
 template < class T > inline void hFill( hArray<T> & vec , T fill_value) {
+bool iterate=true;
+while(iterate) {
 hFill ( vec.begin(),vec.end() , fill_value);
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hFill( casa::Vector<T> & vec , T fill_value) {
@@ -632,25 +716,16 @@ template < class T > inline void hFill_hSLICED ( std::vector<T> & vec , HInteger
 hFill ( vec.begin() + vecslice1,vec.begin() + vecslice2 , fill_value);
 }
 
-template < class T > inline void hFill_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T fill_value ) {
-hFill ( vec.begin(vecslice1),vec.begin(vecslice2) , fill_value);
-}
-
 template < class T > inline void hFill_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T fill_value ) {
 hFill ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , fill_value);
 }
 
 
 void (*fptr_hFill_hSLICED_STL_HString_11_STDIT)( std::vector<HString> & vec , HInteger vecslice1 , HInteger vecslice2 , HString fill_value ) = &hFill_hSLICED;
-void (*fptr_hFill_hSLICED_hARRAY_HString_11_STDIT)( hArray<HString> & vec , HInteger vecslice1 , HInteger vecslice2 , HString fill_value ) = &hFill_hSLICED;
 void (*fptr_hFill_hSLICED_STL_HBool_11_STDIT)( std::vector<HBool> & vec , HInteger vecslice1 , HInteger vecslice2 , HBool fill_value ) = &hFill_hSLICED;
-void (*fptr_hFill_hSLICED_hARRAY_HBool_11_STDIT)( hArray<HBool> & vec , HInteger vecslice1 , HInteger vecslice2 , HBool fill_value ) = &hFill_hSLICED;
 void (*fptr_hFill_hSLICED_STL_HComplex_11_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HComplex fill_value ) = &hFill_hSLICED;
-void (*fptr_hFill_hSLICED_hARRAY_HComplex_11_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HComplex fill_value ) = &hFill_hSLICED;
 void (*fptr_hFill_hSLICED_STL_HNumber_11_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber fill_value ) = &hFill_hSLICED;
-void (*fptr_hFill_hSLICED_hARRAY_HNumber_11_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber fill_value ) = &hFill_hSLICED;
 void (*fptr_hFill_hSLICED_STL_HInteger_11_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger fill_value ) = &hFill_hSLICED;
-void (*fptr_hFill_hSLICED_hARRAY_HInteger_11_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger fill_value ) = &hFill_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -726,15 +801,10 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 std::vector<HString> (*fptr_hNew_STL_HString_1_STL)( std::vector<HString> & vec) = &hNew;
-hArray<HString> (*fptr_hNew_hARRAY_HString_1_STL)( hArray<HString> & vec) = &hNew;
 std::vector<HBool> (*fptr_hNew_STL_HBool_1_STL)( std::vector<HBool> & vec) = &hNew;
-hArray<HBool> (*fptr_hNew_hARRAY_HBool_1_STL)( hArray<HBool> & vec) = &hNew;
 std::vector<HComplex> (*fptr_hNew_STL_HComplex_1_STL)( std::vector<HComplex> & vec) = &hNew;
-hArray<HComplex> (*fptr_hNew_hARRAY_HComplex_1_STL)( hArray<HComplex> & vec) = &hNew;
 std::vector<HNumber> (*fptr_hNew_STL_HNumber_1_STL)( std::vector<HNumber> & vec) = &hNew;
-hArray<HNumber> (*fptr_hNew_hARRAY_HNumber_1_STL)( hArray<HNumber> & vec) = &hNew;
 std::vector<HInteger> (*fptr_hNew_STL_HInteger_1_STL)( std::vector<HInteger> & vec) = &hNew;
-hArray<HInteger> (*fptr_hNew_hARRAY_HInteger_1_STL)( hArray<HInteger> & vec) = &hNew;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -808,15 +878,10 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 void (*fptr_hResize_STL_HString_1HInteger_STL)( std::vector<HString> & vec , HInteger newsize) = &hResize;
-void (*fptr_hResize_hARRAY_HString_1HInteger_STL)( hArray<HString> & vec , HInteger newsize) = &hResize;
 void (*fptr_hResize_STL_HBool_1HInteger_STL)( std::vector<HBool> & vec , HInteger newsize) = &hResize;
-void (*fptr_hResize_hARRAY_HBool_1HInteger_STL)( hArray<HBool> & vec , HInteger newsize) = &hResize;
 void (*fptr_hResize_STL_HComplex_1HInteger_STL)( std::vector<HComplex> & vec , HInteger newsize) = &hResize;
-void (*fptr_hResize_hARRAY_HComplex_1HInteger_STL)( hArray<HComplex> & vec , HInteger newsize) = &hResize;
 void (*fptr_hResize_STL_HNumber_1HInteger_STL)( std::vector<HNumber> & vec , HInteger newsize) = &hResize;
-void (*fptr_hResize_hARRAY_HNumber_1HInteger_STL)( hArray<HNumber> & vec , HInteger newsize) = &hResize;
 void (*fptr_hResize_STL_HInteger_1HInteger_STL)( std::vector<HInteger> & vec , HInteger newsize) = &hResize;
-void (*fptr_hResize_hARRAY_HInteger_1HInteger_STL)( hArray<HInteger> & vec , HInteger newsize) = &hResize;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -893,15 +958,10 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 void (*fptr_hResize_STL_HString_1HInteger1_STL)( std::vector<HString> & vec , HInteger newsize , HString fill) = &hResize;
-void (*fptr_hResize_hARRAY_HString_1HInteger1_STL)( hArray<HString> & vec , HInteger newsize , HString fill) = &hResize;
 void (*fptr_hResize_STL_HBool_1HInteger1_STL)( std::vector<HBool> & vec , HInteger newsize , HBool fill) = &hResize;
-void (*fptr_hResize_hARRAY_HBool_1HInteger1_STL)( hArray<HBool> & vec , HInteger newsize , HBool fill) = &hResize;
 void (*fptr_hResize_STL_HComplex_1HInteger1_STL)( std::vector<HComplex> & vec , HInteger newsize , HComplex fill) = &hResize;
-void (*fptr_hResize_hARRAY_HComplex_1HInteger1_STL)( hArray<HComplex> & vec , HInteger newsize , HComplex fill) = &hResize;
 void (*fptr_hResize_STL_HNumber_1HInteger1_STL)( std::vector<HNumber> & vec , HInteger newsize , HNumber fill) = &hResize;
-void (*fptr_hResize_hARRAY_HNumber_1HInteger1_STL)( hArray<HNumber> & vec , HInteger newsize , HNumber fill) = &hResize;
 void (*fptr_hResize_STL_HInteger_1HInteger1_STL)( std::vector<HInteger> & vec , HInteger newsize , HInteger fill) = &hResize;
-void (*fptr_hResize_hARRAY_HInteger_1HInteger1_STL)( hArray<HInteger> & vec , HInteger newsize , HInteger fill) = &hResize;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -975,55 +1035,30 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 void (*fptr_hResize_STL_HStringHString_12_STLSTL)( std::vector<HString> & vec1 , std::vector<HString> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HStringHString_12_STLSTL)( hArray<HString> & vec1 , hArray<HString> & vec2) = &hResize;
 void (*fptr_hResize_STL_HStringHBool_12_STLSTL)( std::vector<HString> & vec1 , std::vector<HBool> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HStringHBool_12_STLSTL)( hArray<HString> & vec1 , hArray<HBool> & vec2) = &hResize;
 void (*fptr_hResize_STL_HStringHComplex_12_STLSTL)( std::vector<HString> & vec1 , std::vector<HComplex> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HStringHComplex_12_STLSTL)( hArray<HString> & vec1 , hArray<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_STL_HStringHNumber_12_STLSTL)( std::vector<HString> & vec1 , std::vector<HNumber> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HStringHNumber_12_STLSTL)( hArray<HString> & vec1 , hArray<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_STL_HStringHInteger_12_STLSTL)( std::vector<HString> & vec1 , std::vector<HInteger> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HStringHInteger_12_STLSTL)( hArray<HString> & vec1 , hArray<HInteger> & vec2) = &hResize;
 void (*fptr_hResize_STL_HBoolHString_12_STLSTL)( std::vector<HBool> & vec1 , std::vector<HString> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HBoolHString_12_STLSTL)( hArray<HBool> & vec1 , hArray<HString> & vec2) = &hResize;
 void (*fptr_hResize_STL_HBoolHBool_12_STLSTL)( std::vector<HBool> & vec1 , std::vector<HBool> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HBoolHBool_12_STLSTL)( hArray<HBool> & vec1 , hArray<HBool> & vec2) = &hResize;
 void (*fptr_hResize_STL_HBoolHComplex_12_STLSTL)( std::vector<HBool> & vec1 , std::vector<HComplex> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HBoolHComplex_12_STLSTL)( hArray<HBool> & vec1 , hArray<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_STL_HBoolHNumber_12_STLSTL)( std::vector<HBool> & vec1 , std::vector<HNumber> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HBoolHNumber_12_STLSTL)( hArray<HBool> & vec1 , hArray<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_STL_HBoolHInteger_12_STLSTL)( std::vector<HBool> & vec1 , std::vector<HInteger> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HBoolHInteger_12_STLSTL)( hArray<HBool> & vec1 , hArray<HInteger> & vec2) = &hResize;
 void (*fptr_hResize_STL_HComplexHString_12_STLSTL)( std::vector<HComplex> & vec1 , std::vector<HString> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HComplexHString_12_STLSTL)( hArray<HComplex> & vec1 , hArray<HString> & vec2) = &hResize;
 void (*fptr_hResize_STL_HComplexHBool_12_STLSTL)( std::vector<HComplex> & vec1 , std::vector<HBool> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HComplexHBool_12_STLSTL)( hArray<HComplex> & vec1 , hArray<HBool> & vec2) = &hResize;
 void (*fptr_hResize_STL_HComplexHComplex_12_STLSTL)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HComplexHComplex_12_STLSTL)( hArray<HComplex> & vec1 , hArray<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_STL_HComplexHNumber_12_STLSTL)( std::vector<HComplex> & vec1 , std::vector<HNumber> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HComplexHNumber_12_STLSTL)( hArray<HComplex> & vec1 , hArray<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_STL_HComplexHInteger_12_STLSTL)( std::vector<HComplex> & vec1 , std::vector<HInteger> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HComplexHInteger_12_STLSTL)( hArray<HComplex> & vec1 , hArray<HInteger> & vec2) = &hResize;
 void (*fptr_hResize_STL_HNumberHString_12_STLSTL)( std::vector<HNumber> & vec1 , std::vector<HString> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HNumberHString_12_STLSTL)( hArray<HNumber> & vec1 , hArray<HString> & vec2) = &hResize;
 void (*fptr_hResize_STL_HNumberHBool_12_STLSTL)( std::vector<HNumber> & vec1 , std::vector<HBool> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HNumberHBool_12_STLSTL)( hArray<HNumber> & vec1 , hArray<HBool> & vec2) = &hResize;
 void (*fptr_hResize_STL_HNumberHComplex_12_STLSTL)( std::vector<HNumber> & vec1 , std::vector<HComplex> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HNumberHComplex_12_STLSTL)( hArray<HNumber> & vec1 , hArray<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_STL_HNumberHNumber_12_STLSTL)( std::vector<HNumber> & vec1 , std::vector<HNumber> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HNumberHNumber_12_STLSTL)( hArray<HNumber> & vec1 , hArray<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_STL_HNumberHInteger_12_STLSTL)( std::vector<HNumber> & vec1 , std::vector<HInteger> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HNumberHInteger_12_STLSTL)( hArray<HNumber> & vec1 , hArray<HInteger> & vec2) = &hResize;
 void (*fptr_hResize_STL_HIntegerHString_12_STLSTL)( std::vector<HInteger> & vec1 , std::vector<HString> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HIntegerHString_12_STLSTL)( hArray<HInteger> & vec1 , hArray<HString> & vec2) = &hResize;
 void (*fptr_hResize_STL_HIntegerHBool_12_STLSTL)( std::vector<HInteger> & vec1 , std::vector<HBool> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HIntegerHBool_12_STLSTL)( hArray<HInteger> & vec1 , hArray<HBool> & vec2) = &hResize;
 void (*fptr_hResize_STL_HIntegerHComplex_12_STLSTL)( std::vector<HInteger> & vec1 , std::vector<HComplex> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HIntegerHComplex_12_STLSTL)( hArray<HInteger> & vec1 , hArray<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_STL_HIntegerHNumber_12_STLSTL)( std::vector<HInteger> & vec1 , std::vector<HNumber> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HIntegerHNumber_12_STLSTL)( hArray<HInteger> & vec1 , hArray<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_STL_HIntegerHInteger_12_STLSTL)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HIntegerHInteger_12_STLSTL)( hArray<HInteger> & vec1 , hArray<HInteger> & vec2) = &hResize;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1097,55 +1132,30 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 void (*fptr_hResize_STL_HStringHString_12_CASACASA)( std::vector<HString> & vec1 , std::vector<HString> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HStringHString_12_CASACASA)( hArray<HString> & vec1 , hArray<HString> & vec2) = &hResize;
 void (*fptr_hResize_STL_HStringHBool_12_CASACASA)( std::vector<HString> & vec1 , std::vector<HBool> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HStringHBool_12_CASACASA)( hArray<HString> & vec1 , hArray<HBool> & vec2) = &hResize;
 void (*fptr_hResize_STL_HStringHComplex_12_CASACASA)( std::vector<HString> & vec1 , std::vector<HComplex> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HStringHComplex_12_CASACASA)( hArray<HString> & vec1 , hArray<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_STL_HStringHNumber_12_CASACASA)( std::vector<HString> & vec1 , std::vector<HNumber> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HStringHNumber_12_CASACASA)( hArray<HString> & vec1 , hArray<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_STL_HStringHInteger_12_CASACASA)( std::vector<HString> & vec1 , std::vector<HInteger> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HStringHInteger_12_CASACASA)( hArray<HString> & vec1 , hArray<HInteger> & vec2) = &hResize;
 void (*fptr_hResize_STL_HBoolHString_12_CASACASA)( std::vector<HBool> & vec1 , std::vector<HString> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HBoolHString_12_CASACASA)( hArray<HBool> & vec1 , hArray<HString> & vec2) = &hResize;
 void (*fptr_hResize_STL_HBoolHBool_12_CASACASA)( std::vector<HBool> & vec1 , std::vector<HBool> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HBoolHBool_12_CASACASA)( hArray<HBool> & vec1 , hArray<HBool> & vec2) = &hResize;
 void (*fptr_hResize_STL_HBoolHComplex_12_CASACASA)( std::vector<HBool> & vec1 , std::vector<HComplex> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HBoolHComplex_12_CASACASA)( hArray<HBool> & vec1 , hArray<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_STL_HBoolHNumber_12_CASACASA)( std::vector<HBool> & vec1 , std::vector<HNumber> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HBoolHNumber_12_CASACASA)( hArray<HBool> & vec1 , hArray<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_STL_HBoolHInteger_12_CASACASA)( std::vector<HBool> & vec1 , std::vector<HInteger> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HBoolHInteger_12_CASACASA)( hArray<HBool> & vec1 , hArray<HInteger> & vec2) = &hResize;
 void (*fptr_hResize_STL_HComplexHString_12_CASACASA)( std::vector<HComplex> & vec1 , std::vector<HString> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HComplexHString_12_CASACASA)( hArray<HComplex> & vec1 , hArray<HString> & vec2) = &hResize;
 void (*fptr_hResize_STL_HComplexHBool_12_CASACASA)( std::vector<HComplex> & vec1 , std::vector<HBool> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HComplexHBool_12_CASACASA)( hArray<HComplex> & vec1 , hArray<HBool> & vec2) = &hResize;
 void (*fptr_hResize_STL_HComplexHComplex_12_CASACASA)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HComplexHComplex_12_CASACASA)( hArray<HComplex> & vec1 , hArray<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_STL_HComplexHNumber_12_CASACASA)( std::vector<HComplex> & vec1 , std::vector<HNumber> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HComplexHNumber_12_CASACASA)( hArray<HComplex> & vec1 , hArray<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_STL_HComplexHInteger_12_CASACASA)( std::vector<HComplex> & vec1 , std::vector<HInteger> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HComplexHInteger_12_CASACASA)( hArray<HComplex> & vec1 , hArray<HInteger> & vec2) = &hResize;
 void (*fptr_hResize_STL_HNumberHString_12_CASACASA)( std::vector<HNumber> & vec1 , std::vector<HString> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HNumberHString_12_CASACASA)( hArray<HNumber> & vec1 , hArray<HString> & vec2) = &hResize;
 void (*fptr_hResize_STL_HNumberHBool_12_CASACASA)( std::vector<HNumber> & vec1 , std::vector<HBool> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HNumberHBool_12_CASACASA)( hArray<HNumber> & vec1 , hArray<HBool> & vec2) = &hResize;
 void (*fptr_hResize_STL_HNumberHComplex_12_CASACASA)( std::vector<HNumber> & vec1 , std::vector<HComplex> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HNumberHComplex_12_CASACASA)( hArray<HNumber> & vec1 , hArray<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_STL_HNumberHNumber_12_CASACASA)( std::vector<HNumber> & vec1 , std::vector<HNumber> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HNumberHNumber_12_CASACASA)( hArray<HNumber> & vec1 , hArray<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_STL_HNumberHInteger_12_CASACASA)( std::vector<HNumber> & vec1 , std::vector<HInteger> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HNumberHInteger_12_CASACASA)( hArray<HNumber> & vec1 , hArray<HInteger> & vec2) = &hResize;
 void (*fptr_hResize_STL_HIntegerHString_12_CASACASA)( std::vector<HInteger> & vec1 , std::vector<HString> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HIntegerHString_12_CASACASA)( hArray<HInteger> & vec1 , hArray<HString> & vec2) = &hResize;
 void (*fptr_hResize_STL_HIntegerHBool_12_CASACASA)( std::vector<HInteger> & vec1 , std::vector<HBool> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HIntegerHBool_12_CASACASA)( hArray<HInteger> & vec1 , hArray<HBool> & vec2) = &hResize;
 void (*fptr_hResize_STL_HIntegerHComplex_12_CASACASA)( std::vector<HInteger> & vec1 , std::vector<HComplex> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HIntegerHComplex_12_CASACASA)( hArray<HInteger> & vec1 , hArray<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_STL_HIntegerHNumber_12_CASACASA)( std::vector<HInteger> & vec1 , std::vector<HNumber> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HIntegerHNumber_12_CASACASA)( hArray<HInteger> & vec1 , hArray<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_STL_HIntegerHInteger_12_CASACASA)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hResize;
-void (*fptr_hResize_hARRAY_HIntegerHInteger_12_CASACASA)( hArray<HInteger> & vec1 , hArray<HInteger> & vec2) = &hResize;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1183,7 +1193,6 @@ void hConvert(const Iterin vec1,const Iterin vec1_end, const Iter vec2,const Ite
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
-//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
@@ -1229,40 +1238,19 @@ template < class T , class S > inline void hConvert( std::vector<T> & vec1 , std
 hResize(vec2,vec1); hConvert ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
 
-template < class T , class S > inline void hConvert( hArray<T> & vec1 , hArray<S> & vec2) {
-hResize(vec2,vec1); hConvert ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
-}
-
-template < class T , class S > inline void hConvert( casa::Vector<T> & vec1 , casa::Vector<S> & vec2) {
-hResize(vec2,vec1); hConvert ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend());
-}
-
 
 void (*fptr_hConvert_STL_HComplexHComplex_12_STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2) = &hConvert;
-void (*fptr_hConvert_hARRAY_HComplexHComplex_12_STDITSTDIT)( hArray<HComplex> & vec1 , hArray<HComplex> & vec2) = &hConvert;
 void (*fptr_hConvert_STL_HComplexHNumber_12_STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HNumber> & vec2) = &hConvert;
-void (*fptr_hConvert_hARRAY_HComplexHNumber_12_STDITSTDIT)( hArray<HComplex> & vec1 , hArray<HNumber> & vec2) = &hConvert;
 void (*fptr_hConvert_STL_HComplexHInteger_12_STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HInteger> & vec2) = &hConvert;
-void (*fptr_hConvert_hARRAY_HComplexHInteger_12_STDITSTDIT)( hArray<HComplex> & vec1 , hArray<HInteger> & vec2) = &hConvert;
 void (*fptr_hConvert_STL_HNumberHComplex_12_STDITSTDIT)( std::vector<HNumber> & vec1 , std::vector<HComplex> & vec2) = &hConvert;
-void (*fptr_hConvert_hARRAY_HNumberHComplex_12_STDITSTDIT)( hArray<HNumber> & vec1 , hArray<HComplex> & vec2) = &hConvert;
 void (*fptr_hConvert_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec1 , std::vector<HNumber> & vec2) = &hConvert;
-void (*fptr_hConvert_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec1 , hArray<HNumber> & vec2) = &hConvert;
 void (*fptr_hConvert_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec1 , std::vector<HInteger> & vec2) = &hConvert;
-void (*fptr_hConvert_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec1 , hArray<HInteger> & vec2) = &hConvert;
 void (*fptr_hConvert_STL_HIntegerHComplex_12_STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HComplex> & vec2) = &hConvert;
-void (*fptr_hConvert_hARRAY_HIntegerHComplex_12_STDITSTDIT)( hArray<HInteger> & vec1 , hArray<HComplex> & vec2) = &hConvert;
 void (*fptr_hConvert_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HNumber> & vec2) = &hConvert;
-void (*fptr_hConvert_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec1 , hArray<HNumber> & vec2) = &hConvert;
 void (*fptr_hConvert_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hConvert;
-void (*fptr_hConvert_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec1 , hArray<HInteger> & vec2) = &hConvert;
 
 template < class T , class S > inline void hConvert_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hResize(vec2,vec1); hConvert ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
-}
-
-template < class T , class S > inline void hConvert_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hResize(vec2,vec1); hConvert ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
 }
 
 template < class T , class S > inline void hConvert_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
@@ -1271,23 +1259,14 @@ hResize(vec2,vec1); hConvert ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1sl
 
 
 void (*fptr_hConvert_hSLICED_STL_HComplexHComplex_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
-void (*fptr_hConvert_hSLICED_hARRAY_HComplexHComplex_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
 void (*fptr_hConvert_hSLICED_STL_HComplexHNumber_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
-void (*fptr_hConvert_hSLICED_hARRAY_HComplexHNumber_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
 void (*fptr_hConvert_hSLICED_STL_HComplexHInteger_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
-void (*fptr_hConvert_hSLICED_hARRAY_HComplexHInteger_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
 void (*fptr_hConvert_hSLICED_STL_HNumberHComplex_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
-void (*fptr_hConvert_hSLICED_hARRAY_HNumberHComplex_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
 void (*fptr_hConvert_hSLICED_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
-void (*fptr_hConvert_hSLICED_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
 void (*fptr_hConvert_hSLICED_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
-void (*fptr_hConvert_hSLICED_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
 void (*fptr_hConvert_hSLICED_STL_HIntegerHComplex_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
-void (*fptr_hConvert_hSLICED_hARRAY_HIntegerHComplex_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
 void (*fptr_hConvert_hSLICED_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
-void (*fptr_hConvert_hSLICED_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
 void (*fptr_hConvert_hSLICED_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
-void (*fptr_hConvert_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -1328,6 +1307,7 @@ void hCopy(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -1375,7 +1355,12 @@ hCopy ( vec.begin(),vec.end() , outvec.begin(),outvec.end());
 }
 
 template < class T > inline void hCopy( hArray<T> & vec , hArray<T> & outvec) {
+bool iterate=true;
+while(iterate) {
 hCopy ( vec.begin(),vec.end() , outvec.begin(),outvec.end());
+vec.next();
+outvec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hCopy( casa::Vector<T> & vec , casa::Vector<T> & outvec) {
@@ -1394,21 +1379,14 @@ template < class T > inline void hCopy_hSLICED ( std::vector<T> & vec , HInteger
 hCopy ( vec.begin() + vecslice1,vec.begin() + vecslice2 , outvec.begin() + outvecslice1,outvec.begin() + outvecslice2);
 }
 
-template < class T > inline void hCopy_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & outvec , HInteger outvecslice1 , HInteger outvecslice2) {
-hCopy ( vec.begin(vecslice1),vec.begin(vecslice2) , outvec.begin(outvecslice1),outvec.begin(outvecslice2));
-}
-
 template < class T > inline void hCopy_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & outvec , HInteger outvecslice1 , HInteger outvecslice2) {
 hCopy ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , outvec.cbegin() + outvecslice1,outvec.cbegin() + outvecslice2);
 }
 
 
 void (*fptr_hCopy_hSLICED_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hCopy_hSLICED;
-void (*fptr_hCopy_hSLICED_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hCopy_hSLICED;
 void (*fptr_hCopy_hSLICED_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hCopy_hSLICED;
-void (*fptr_hCopy_hSLICED_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hCopy_hSLICED;
 void (*fptr_hCopy_hSLICED_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hCopy_hSLICED;
-void (*fptr_hCopy_hSLICED_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hCopy_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -1677,6 +1655,7 @@ void hExp1(const Iter vec,const Iter vec_end)
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -1721,7 +1700,11 @@ hExp1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hExp( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hExp1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hExp( casa::Vector<T> & vec) {
@@ -1740,21 +1723,14 @@ template < class T > inline void hExp_hSLICED ( std::vector<T> & vec , HInteger 
 hExp1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hExp_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hExp1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hExp_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hExp1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hExp_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hExp_hSLICED;
-void (*fptr_hExp_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hExp_hSLICED;
 void (*fptr_hExp_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hExp_hSLICED;
-void (*fptr_hExp_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hExp_hSLICED;
 void (*fptr_hExp_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hExp_hSLICED;
-void (*fptr_hExp_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hExp_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -1794,6 +1770,7 @@ void hExp2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -1841,7 +1818,12 @@ hExp2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hExp( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hExp2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hExp( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -1860,21 +1842,14 @@ template < class T > inline void hExp_hSLICED ( std::vector<T> & vec , HInteger 
 hExp2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hExp_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hExp2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hExp_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hExp2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hExp_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hExp_hSLICED;
-void (*fptr_hExp_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hExp_hSLICED;
 void (*fptr_hExp_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hExp_hSLICED;
-void (*fptr_hExp_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hExp_hSLICED;
 void (*fptr_hExp_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hExp_hSLICED;
-void (*fptr_hExp_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hExp_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -1912,6 +1887,7 @@ void hLog1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -1958,7 +1934,11 @@ hLog1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hLog( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hLog1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hLog( casa::Vector<T> & vec) {
@@ -1977,21 +1957,14 @@ template < class T > inline void hLog_hSLICED ( std::vector<T> & vec , HInteger 
 hLog1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hLog_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hLog1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hLog_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hLog1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hLog_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog_hSLICED;
-void (*fptr_hLog_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog_hSLICED;
 void (*fptr_hLog_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog_hSLICED;
-void (*fptr_hLog_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog_hSLICED;
 void (*fptr_hLog_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog_hSLICED;
-void (*fptr_hLog_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -2031,6 +2004,7 @@ void hLog2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -2078,7 +2052,12 @@ hLog2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hLog( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hLog2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hLog( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -2097,21 +2076,14 @@ template < class T > inline void hLog_hSLICED ( std::vector<T> & vec , HInteger 
 hLog2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hLog_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hLog2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hLog_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hLog2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hLog_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog_hSLICED;
-void (*fptr_hLog_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog_hSLICED;
 void (*fptr_hLog_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog_hSLICED;
-void (*fptr_hLog_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog_hSLICED;
 void (*fptr_hLog_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog_hSLICED;
-void (*fptr_hLog_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -2149,6 +2121,7 @@ void hLog101(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -2195,7 +2168,11 @@ hLog101 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hLog10( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hLog101 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hLog10( casa::Vector<T> & vec) {
@@ -2214,21 +2191,14 @@ template < class T > inline void hLog10_hSLICED ( std::vector<T> & vec , HIntege
 hLog101 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hLog10_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hLog101 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hLog10_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hLog101 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hLog10_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog10_hSLICED;
-void (*fptr_hLog10_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog10_hSLICED;
 void (*fptr_hLog10_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog10_hSLICED;
-void (*fptr_hLog10_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog10_hSLICED;
 void (*fptr_hLog10_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog10_hSLICED;
-void (*fptr_hLog10_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog10_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -2268,6 +2238,7 @@ void hLog102(const Iter vec,const Iter vec_end, const Iter out,const Iter out_en
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -2315,7 +2286,12 @@ hLog102 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hLog10( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hLog102 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hLog10( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -2334,21 +2310,14 @@ template < class T > inline void hLog10_hSLICED ( std::vector<T> & vec , HIntege
 hLog102 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hLog10_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hLog102 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hLog10_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hLog102 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hLog10_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog10_hSLICED;
-void (*fptr_hLog10_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog10_hSLICED;
 void (*fptr_hLog10_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog10_hSLICED;
-void (*fptr_hLog10_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog10_hSLICED;
 void (*fptr_hLog10_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog10_hSLICED;
-void (*fptr_hLog10_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog10_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -2386,6 +2355,7 @@ void hSin1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -2432,7 +2402,11 @@ hSin1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hSin( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hSin1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hSin( casa::Vector<T> & vec) {
@@ -2451,21 +2425,14 @@ template < class T > inline void hSin_hSLICED ( std::vector<T> & vec , HInteger 
 hSin1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hSin_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hSin1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hSin_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hSin1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hSin_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSin_hSLICED;
-void (*fptr_hSin_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSin_hSLICED;
 void (*fptr_hSin_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSin_hSLICED;
-void (*fptr_hSin_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSin_hSLICED;
 void (*fptr_hSin_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSin_hSLICED;
-void (*fptr_hSin_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSin_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -2505,6 +2472,7 @@ void hSin2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -2552,7 +2520,12 @@ hSin2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hSin( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hSin2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hSin( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -2571,21 +2544,14 @@ template < class T > inline void hSin_hSLICED ( std::vector<T> & vec , HInteger 
 hSin2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hSin_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hSin2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hSin_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hSin2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hSin_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSin_hSLICED;
-void (*fptr_hSin_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSin_hSLICED;
 void (*fptr_hSin_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSin_hSLICED;
-void (*fptr_hSin_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSin_hSLICED;
 void (*fptr_hSin_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSin_hSLICED;
-void (*fptr_hSin_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSin_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -2623,6 +2589,7 @@ void hSinh1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -2669,7 +2636,11 @@ hSinh1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hSinh( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hSinh1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hSinh( casa::Vector<T> & vec) {
@@ -2688,21 +2659,14 @@ template < class T > inline void hSinh_hSLICED ( std::vector<T> & vec , HInteger
 hSinh1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hSinh_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hSinh1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hSinh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hSinh1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hSinh_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSinh_hSLICED;
-void (*fptr_hSinh_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSinh_hSLICED;
 void (*fptr_hSinh_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSinh_hSLICED;
-void (*fptr_hSinh_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSinh_hSLICED;
 void (*fptr_hSinh_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSinh_hSLICED;
-void (*fptr_hSinh_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSinh_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -2742,6 +2706,7 @@ void hSinh2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -2789,7 +2754,12 @@ hSinh2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hSinh( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hSinh2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hSinh( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -2808,21 +2778,14 @@ template < class T > inline void hSinh_hSLICED ( std::vector<T> & vec , HInteger
 hSinh2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hSinh_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hSinh2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hSinh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hSinh2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hSinh_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSinh_hSLICED;
-void (*fptr_hSinh_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSinh_hSLICED;
 void (*fptr_hSinh_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSinh_hSLICED;
-void (*fptr_hSinh_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSinh_hSLICED;
 void (*fptr_hSinh_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSinh_hSLICED;
-void (*fptr_hSinh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSinh_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -2860,6 +2823,7 @@ void hSqrt1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -2906,7 +2870,11 @@ hSqrt1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hSqrt( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hSqrt1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hSqrt( casa::Vector<T> & vec) {
@@ -2925,21 +2893,14 @@ template < class T > inline void hSqrt_hSLICED ( std::vector<T> & vec , HInteger
 hSqrt1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hSqrt_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hSqrt1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hSqrt_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hSqrt1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hSqrt_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSqrt_hSLICED;
-void (*fptr_hSqrt_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSqrt_hSLICED;
 void (*fptr_hSqrt_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSqrt_hSLICED;
-void (*fptr_hSqrt_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSqrt_hSLICED;
 void (*fptr_hSqrt_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSqrt_hSLICED;
-void (*fptr_hSqrt_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSqrt_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -2979,6 +2940,7 @@ void hSqrt2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -3026,7 +2988,12 @@ hSqrt2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hSqrt( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hSqrt2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hSqrt( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -3045,21 +3012,14 @@ template < class T > inline void hSqrt_hSLICED ( std::vector<T> & vec , HInteger
 hSqrt2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hSqrt_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hSqrt2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hSqrt_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hSqrt2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hSqrt_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSqrt_hSLICED;
-void (*fptr_hSqrt_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSqrt_hSLICED;
 void (*fptr_hSqrt_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSqrt_hSLICED;
-void (*fptr_hSqrt_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSqrt_hSLICED;
 void (*fptr_hSqrt_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSqrt_hSLICED;
-void (*fptr_hSqrt_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSqrt_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -3097,6 +3057,7 @@ void hSquare1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -3143,7 +3104,11 @@ hSquare1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hSquare( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hSquare1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hSquare( casa::Vector<T> & vec) {
@@ -3162,21 +3127,14 @@ template < class T > inline void hSquare_hSLICED ( std::vector<T> & vec , HInteg
 hSquare1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hSquare_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hSquare1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hSquare_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hSquare1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hSquare_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSquare_hSLICED;
-void (*fptr_hSquare_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSquare_hSLICED;
 void (*fptr_hSquare_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSquare_hSLICED;
-void (*fptr_hSquare_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSquare_hSLICED;
 void (*fptr_hSquare_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSquare_hSLICED;
-void (*fptr_hSquare_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSquare_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -3216,6 +3174,7 @@ void hSquare2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_e
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -3263,7 +3222,12 @@ hSquare2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hSquare( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hSquare2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hSquare( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -3282,21 +3246,14 @@ template < class T > inline void hSquare_hSLICED ( std::vector<T> & vec , HInteg
 hSquare2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hSquare_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hSquare2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hSquare_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hSquare2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hSquare_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSquare_hSLICED;
-void (*fptr_hSquare_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSquare_hSLICED;
 void (*fptr_hSquare_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSquare_hSLICED;
-void (*fptr_hSquare_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSquare_hSLICED;
 void (*fptr_hSquare_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSquare_hSLICED;
-void (*fptr_hSquare_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSquare_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -3334,6 +3291,7 @@ void hTan1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -3380,7 +3338,11 @@ hTan1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hTan( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hTan1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hTan( casa::Vector<T> & vec) {
@@ -3399,21 +3361,14 @@ template < class T > inline void hTan_hSLICED ( std::vector<T> & vec , HInteger 
 hTan1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hTan_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hTan1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hTan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hTan1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hTan_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTan_hSLICED;
-void (*fptr_hTan_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTan_hSLICED;
 void (*fptr_hTan_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTan_hSLICED;
-void (*fptr_hTan_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTan_hSLICED;
 void (*fptr_hTan_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTan_hSLICED;
-void (*fptr_hTan_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTan_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -3453,6 +3408,7 @@ void hTan2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -3500,7 +3456,12 @@ hTan2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hTan( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hTan2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hTan( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -3519,21 +3480,14 @@ template < class T > inline void hTan_hSLICED ( std::vector<T> & vec , HInteger 
 hTan2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hTan_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hTan2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hTan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hTan2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hTan_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTan_hSLICED;
-void (*fptr_hTan_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTan_hSLICED;
 void (*fptr_hTan_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTan_hSLICED;
-void (*fptr_hTan_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTan_hSLICED;
 void (*fptr_hTan_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTan_hSLICED;
-void (*fptr_hTan_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTan_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -3571,6 +3525,7 @@ void hTanh1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -3617,7 +3572,11 @@ hTanh1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hTanh( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hTanh1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hTanh( casa::Vector<T> & vec) {
@@ -3636,21 +3595,14 @@ template < class T > inline void hTanh_hSLICED ( std::vector<T> & vec , HInteger
 hTanh1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hTanh_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hTanh1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hTanh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hTanh1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hTanh_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTanh_hSLICED;
-void (*fptr_hTanh_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTanh_hSLICED;
 void (*fptr_hTanh_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTanh_hSLICED;
-void (*fptr_hTanh_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTanh_hSLICED;
 void (*fptr_hTanh_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTanh_hSLICED;
-void (*fptr_hTanh_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTanh_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -3690,6 +3642,7 @@ void hTanh2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -3737,7 +3690,12 @@ hTanh2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hTanh( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hTanh2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hTanh( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -3756,21 +3714,14 @@ template < class T > inline void hTanh_hSLICED ( std::vector<T> & vec , HInteger
 hTanh2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hTanh_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hTanh2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hTanh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hTanh2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hTanh_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTanh_hSLICED;
-void (*fptr_hTanh_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTanh_hSLICED;
 void (*fptr_hTanh_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTanh_hSLICED;
-void (*fptr_hTanh_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTanh_hSLICED;
 void (*fptr_hTanh_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTanh_hSLICED;
-void (*fptr_hTanh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTanh_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -3808,6 +3759,7 @@ void hAbs1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -3854,7 +3806,11 @@ hAbs1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hAbs( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hAbs1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hAbs( casa::Vector<T> & vec) {
@@ -3873,21 +3829,14 @@ template < class T > inline void hAbs_hSLICED ( std::vector<T> & vec , HInteger 
 hAbs1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hAbs_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hAbs1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hAbs1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hAbs_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAbs_hSLICED;
-void (*fptr_hAbs_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAbs_hSLICED;
 void (*fptr_hAbs_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAbs_hSLICED;
-void (*fptr_hAbs_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAbs_hSLICED;
 void (*fptr_hAbs_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAbs_hSLICED;
-void (*fptr_hAbs_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAbs_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -3927,6 +3876,7 @@ void hAbs2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -3974,7 +3924,12 @@ hAbs2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hAbs( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hAbs2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hAbs( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -3993,21 +3948,14 @@ template < class T > inline void hAbs_hSLICED ( std::vector<T> & vec , HInteger 
 hAbs2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hAbs_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hAbs2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hAbs2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hAbs_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAbs_hSLICED;
-void (*fptr_hAbs_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAbs_hSLICED;
 void (*fptr_hAbs_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAbs_hSLICED;
-void (*fptr_hAbs_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAbs_hSLICED;
 void (*fptr_hAbs_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAbs_hSLICED;
-void (*fptr_hAbs_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAbs_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -4045,6 +3993,7 @@ void hCos1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -4091,7 +4040,11 @@ hCos1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hCos( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hCos1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hCos( casa::Vector<T> & vec) {
@@ -4110,21 +4063,14 @@ template < class T > inline void hCos_hSLICED ( std::vector<T> & vec , HInteger 
 hCos1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hCos_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hCos1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hCos_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hCos1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hCos_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCos_hSLICED;
-void (*fptr_hCos_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCos_hSLICED;
 void (*fptr_hCos_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCos_hSLICED;
-void (*fptr_hCos_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCos_hSLICED;
 void (*fptr_hCos_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCos_hSLICED;
-void (*fptr_hCos_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCos_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -4164,6 +4110,7 @@ void hCos2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -4211,7 +4158,12 @@ hCos2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hCos( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hCos2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hCos( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -4230,21 +4182,14 @@ template < class T > inline void hCos_hSLICED ( std::vector<T> & vec , HInteger 
 hCos2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hCos_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hCos2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hCos_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hCos2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hCos_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCos_hSLICED;
-void (*fptr_hCos_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCos_hSLICED;
 void (*fptr_hCos_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCos_hSLICED;
-void (*fptr_hCos_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCos_hSLICED;
 void (*fptr_hCos_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCos_hSLICED;
-void (*fptr_hCos_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCos_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -4282,6 +4227,7 @@ void hCosh1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -4328,7 +4274,11 @@ hCosh1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hCosh( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hCosh1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hCosh( casa::Vector<T> & vec) {
@@ -4347,21 +4297,14 @@ template < class T > inline void hCosh_hSLICED ( std::vector<T> & vec , HInteger
 hCosh1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hCosh_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hCosh1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hCosh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hCosh1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hCosh_hSLICED1_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCosh_hSLICED;
-void (*fptr_hCosh_hSLICED1_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCosh_hSLICED;
 void (*fptr_hCosh_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCosh_hSLICED;
-void (*fptr_hCosh_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCosh_hSLICED;
 void (*fptr_hCosh_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCosh_hSLICED;
-void (*fptr_hCosh_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCosh_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -4401,6 +4344,7 @@ void hCosh2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -4448,7 +4392,12 @@ hCosh2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T > inline void hCosh( hArray<T> & vec , hArray<T> & vecout) {
+bool iterate=true;
+while(iterate) {
 hCosh2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hCosh( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
@@ -4467,21 +4416,14 @@ template < class T > inline void hCosh_hSLICED ( std::vector<T> & vec , HInteger
 hCosh2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T > inline void hCosh_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hCosh2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T > inline void hCosh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hCosh2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hCosh_hSLICED2_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCosh_hSLICED;
-void (*fptr_hCosh_hSLICED2_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCosh_hSLICED;
 void (*fptr_hCosh_hSLICED2_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCosh_hSLICED;
-void (*fptr_hCosh_hSLICED2_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCosh_hSLICED;
 void (*fptr_hCosh_hSLICED2_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCosh_hSLICED;
-void (*fptr_hCosh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCosh_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -4522,6 +4464,7 @@ void hCeil1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -4568,7 +4511,11 @@ hCeil1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hCeil( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hCeil1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hCeil( casa::Vector<T> & vec) {
@@ -4585,19 +4532,13 @@ template < class T > inline void hCeil_hSLICED ( std::vector<T> & vec , HInteger
 hCeil1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hCeil_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hCeil1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hCeil_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hCeil1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hCeil_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCeil_hSLICED;
-void (*fptr_hCeil_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCeil_hSLICED;
 void (*fptr_hCeil_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCeil_hSLICED;
-void (*fptr_hCeil_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCeil_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -4637,6 +4578,7 @@ void hCeil2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -4684,7 +4626,12 @@ hCeil2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T , class S > inline void hCeil( hArray<T> & vec , hArray<S> & vecout) {
+bool iterate=true;
+while(iterate) {
 hCeil2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T , class S > inline void hCeil( casa::Vector<T> & vec , casa::Vector<S> & vecout) {
@@ -4705,23 +4652,15 @@ template < class T , class S > inline void hCeil_hSLICED ( std::vector<T> & vec 
 hCeil2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T , class S > inline void hCeil_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hCeil2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T , class S > inline void hCeil_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hCeil2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hCeil_hSLICED2_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
-void (*fptr_hCeil_hSLICED2_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
 void (*fptr_hCeil_hSLICED2_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
-void (*fptr_hCeil_hSLICED2_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
 void (*fptr_hCeil_hSLICED2_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
-void (*fptr_hCeil_hSLICED2_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
 void (*fptr_hCeil_hSLICED2_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
-void (*fptr_hCeil_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -4759,6 +4698,7 @@ void hFloor1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -4805,7 +4745,11 @@ hFloor1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hFloor( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hFloor1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hFloor( casa::Vector<T> & vec) {
@@ -4822,19 +4766,13 @@ template < class T > inline void hFloor_hSLICED ( std::vector<T> & vec , HIntege
 hFloor1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hFloor_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hFloor1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hFloor_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hFloor1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hFloor_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hFloor_hSLICED;
-void (*fptr_hFloor_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hFloor_hSLICED;
 void (*fptr_hFloor_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hFloor_hSLICED;
-void (*fptr_hFloor_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hFloor_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -4874,6 +4812,7 @@ void hFloor2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 ou
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -4921,7 +4860,12 @@ hFloor2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T , class S > inline void hFloor( hArray<T> & vec , hArray<S> & vecout) {
+bool iterate=true;
+while(iterate) {
 hFloor2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T , class S > inline void hFloor( casa::Vector<T> & vec , casa::Vector<S> & vecout) {
@@ -4942,23 +4886,15 @@ template < class T , class S > inline void hFloor_hSLICED ( std::vector<T> & vec
 hFloor2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T , class S > inline void hFloor_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hFloor2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T , class S > inline void hFloor_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hFloor2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hFloor_hSLICED2_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
-void (*fptr_hFloor_hSLICED2_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
 void (*fptr_hFloor_hSLICED2_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
-void (*fptr_hFloor_hSLICED2_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
 void (*fptr_hFloor_hSLICED2_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
-void (*fptr_hFloor_hSLICED2_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
 void (*fptr_hFloor_hSLICED2_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
-void (*fptr_hFloor_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -4996,6 +4932,7 @@ void hAcos1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -5042,7 +4979,11 @@ hAcos1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hAcos( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hAcos1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hAcos( casa::Vector<T> & vec) {
@@ -5059,19 +5000,13 @@ template < class T > inline void hAcos_hSLICED ( std::vector<T> & vec , HInteger
 hAcos1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hAcos_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hAcos1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hAcos_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hAcos1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hAcos_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAcos_hSLICED;
-void (*fptr_hAcos_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAcos_hSLICED;
 void (*fptr_hAcos_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAcos_hSLICED;
-void (*fptr_hAcos_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAcos_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -5111,6 +5046,7 @@ void hAcos2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -5158,7 +5094,12 @@ hAcos2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T , class S > inline void hAcos( hArray<T> & vec , hArray<S> & vecout) {
+bool iterate=true;
+while(iterate) {
 hAcos2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T , class S > inline void hAcos( casa::Vector<T> & vec , casa::Vector<S> & vecout) {
@@ -5179,23 +5120,15 @@ template < class T , class S > inline void hAcos_hSLICED ( std::vector<T> & vec 
 hAcos2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T , class S > inline void hAcos_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hAcos2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T , class S > inline void hAcos_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hAcos2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hAcos_hSLICED2_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
-void (*fptr_hAcos_hSLICED2_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
 void (*fptr_hAcos_hSLICED2_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
-void (*fptr_hAcos_hSLICED2_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
 void (*fptr_hAcos_hSLICED2_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
-void (*fptr_hAcos_hSLICED2_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
 void (*fptr_hAcos_hSLICED2_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
-void (*fptr_hAcos_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -5233,6 +5166,7 @@ void hAsin1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -5279,7 +5213,11 @@ hAsin1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hAsin( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hAsin1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hAsin( casa::Vector<T> & vec) {
@@ -5296,19 +5234,13 @@ template < class T > inline void hAsin_hSLICED ( std::vector<T> & vec , HInteger
 hAsin1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hAsin_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hAsin1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hAsin_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hAsin1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hAsin_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAsin_hSLICED;
-void (*fptr_hAsin_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAsin_hSLICED;
 void (*fptr_hAsin_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAsin_hSLICED;
-void (*fptr_hAsin_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAsin_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -5348,6 +5280,7 @@ void hAsin2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -5395,7 +5328,12 @@ hAsin2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T , class S > inline void hAsin( hArray<T> & vec , hArray<S> & vecout) {
+bool iterate=true;
+while(iterate) {
 hAsin2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T , class S > inline void hAsin( casa::Vector<T> & vec , casa::Vector<S> & vecout) {
@@ -5416,23 +5354,15 @@ template < class T , class S > inline void hAsin_hSLICED ( std::vector<T> & vec 
 hAsin2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T , class S > inline void hAsin_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hAsin2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T , class S > inline void hAsin_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hAsin2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hAsin_hSLICED2_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
-void (*fptr_hAsin_hSLICED2_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
 void (*fptr_hAsin_hSLICED2_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
-void (*fptr_hAsin_hSLICED2_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
 void (*fptr_hAsin_hSLICED2_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
-void (*fptr_hAsin_hSLICED2_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
 void (*fptr_hAsin_hSLICED2_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
-void (*fptr_hAsin_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -5470,6 +5400,7 @@ void hAtan1(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -5516,7 +5447,11 @@ hAtan1 ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hAtan( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hAtan1 ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hAtan( casa::Vector<T> & vec) {
@@ -5533,19 +5468,13 @@ template < class T > inline void hAtan_hSLICED ( std::vector<T> & vec , HInteger
 hAtan1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hAtan_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hAtan1 ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hAtan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hAtan1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hAtan_hSLICED1_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAtan_hSLICED;
-void (*fptr_hAtan_hSLICED1_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAtan_hSLICED;
 void (*fptr_hAtan_hSLICED1_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAtan_hSLICED;
-void (*fptr_hAtan_hSLICED1_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAtan_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -5585,6 +5514,7 @@ void hAtan2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -5632,7 +5562,12 @@ hAtan2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 template < class T , class S > inline void hAtan( hArray<T> & vec , hArray<S> & vecout) {
+bool iterate=true;
+while(iterate) {
 hAtan2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 template < class T , class S > inline void hAtan( casa::Vector<T> & vec , casa::Vector<S> & vecout) {
@@ -5653,23 +5588,15 @@ template < class T , class S > inline void hAtan_hSLICED ( std::vector<T> & vec 
 hAtan2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-template < class T , class S > inline void hAtan_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hAtan2 ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 template < class T , class S > inline void hAtan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hAtan2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hAtan_hSLICED2_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
-void (*fptr_hAtan_hSLICED2_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
 void (*fptr_hAtan_hSLICED2_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
-void (*fptr_hAtan_hSLICED2_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
 void (*fptr_hAtan_hSLICED2_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
-void (*fptr_hAtan_hSLICED2_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
 void (*fptr_hAtan_hSLICED2_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
-void (*fptr_hAtan_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -5717,6 +5644,7 @@ void hiSub(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin v
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -5762,7 +5690,12 @@ hiSub ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
 
 template < class T , class S > inline void hiSub( hArray<T> & vec1 , hArray<S> & vec2) {
+bool iterate=true;
+while(iterate) {
 hiSub ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
+vec1.next();
+vec2.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S > inline void hiSub( casa::Vector<T> & vec1 , casa::Vector<S> & vec2) {
@@ -5793,33 +5726,20 @@ template < class T , class S > inline void hiSub_hSLICED ( std::vector<T> & vec1
 hiSub ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
 }
 
-template < class T , class S > inline void hiSub_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hiSub ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
-}
-
 template < class T , class S > inline void hiSub_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hiSub ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
 }
 
 
 void (*fptr_hiSub_hSLICED_STL_HComplexHComplex_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED_hARRAY_HComplexHComplex_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED_STL_HComplexHNumber_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED_hARRAY_HComplexHNumber_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED_STL_HComplexHInteger_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED_hARRAY_HComplexHInteger_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED_STL_HNumberHComplex_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED_hARRAY_HNumberHComplex_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED_STL_HIntegerHComplex_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED_hARRAY_HIntegerHComplex_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -5860,6 +5780,7 @@ void hiSub2(const Iter vec1,const Iter vec1_end, S val)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -5907,7 +5828,11 @@ hiSub2 ( vec1.begin(),vec1.end() , val);
 }
 
 template < class T , class S > inline void hiSub( hArray<T> & vec1 , S val) {
+bool iterate=true;
+while(iterate) {
 hiSub2 ( vec1.begin(),vec1.end() , val);
+vec1.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S > inline void hiSub( casa::Vector<T> & vec1 , S val) {
@@ -5938,33 +5863,20 @@ template < class T , class S > inline void hiSub_hSLICED ( std::vector<T> & vec1
 hiSub2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val);
 }
 
-template < class T , class S > inline void hiSub_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
-hiSub2 ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , val);
-}
-
 template < class T , class S > inline void hiSub_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
 hiSub2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val);
 }
 
 
 void (*fptr_hiSub_hSLICED2_STL_HComplexHComplex_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED2_hARRAY_HComplexHComplex_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED2_STL_HComplexHNumber_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED2_hARRAY_HComplexHNumber_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED2_STL_HComplexHInteger_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED2_hARRAY_HComplexHInteger_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED2_STL_HNumberHComplex_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED2_hARRAY_HNumberHComplex_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED2_STL_HNumberHNumber_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED2_hARRAY_HNumberHNumber_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED2_STL_HNumberHInteger_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED2_hARRAY_HNumberHInteger_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED2_STL_HIntegerHComplex_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED2_hARRAY_HIntegerHComplex_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED2_STL_HIntegerHNumber_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED2_hARRAY_HIntegerHNumber_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiSub_hSLICED;
 void (*fptr_hiSub_hSLICED2_STL_HIntegerHInteger_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiSub_hSLICED;
-void (*fptr_hiSub_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiSub_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -6009,6 +5921,7 @@ void hSub(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const It
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -6057,7 +5970,13 @@ hSub ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end
 }
 
 template < class T , class S , class U > inline void hSub( hArray<T> & vec1 , hArray<S> & vec2 , hArray<U> & vec3) {
+bool iterate=true;
+while(iterate) {
 hSub ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hSub( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
@@ -6124,69 +6043,38 @@ template < class T , class S , class U > inline void hSub_hSLICED ( std::vector<
 hSub ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T , class S , class U > inline void hSub_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hSub ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T , class S , class U > inline void hSub_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hSub ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hSub_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -6229,6 +6117,7 @@ void hSubAdd(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -6277,7 +6166,13 @@ hSubAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.
 }
 
 template < class T > inline void hSubAdd( hArray<T> & vec1 , hArray<T> & vec2 , hArray<T> & vec3) {
+bool iterate=true;
+while(iterate) {
 hSubAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T > inline void hSubAdd( casa::Vector<T> & vec1 , casa::Vector<T> & vec2 , casa::Vector<T> & vec3) {
@@ -6296,21 +6191,14 @@ template < class T > inline void hSubAdd_hSLICED ( std::vector<T> & vec1 , HInte
 hSubAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T > inline void hSubAdd_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hSubAdd ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T > inline void hSubAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hSubAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hSubAdd_hSLICED_STL_HComplex_111_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAdd_hSLICED;
-void (*fptr_hSubAdd_hSLICED_hARRAY_HComplex_111_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAdd_hSLICED;
 void (*fptr_hSubAdd_hSLICED_STL_HNumber_111_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAdd_hSLICED;
-void (*fptr_hSubAdd_hSLICED_hARRAY_HNumber_111_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAdd_hSLICED;
 void (*fptr_hSubAdd_hSLICED_STL_HInteger_111_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAdd_hSLICED;
-void (*fptr_hSubAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAdd_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -6355,6 +6243,7 @@ void hSubAddConv(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,c
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -6403,7 +6292,13 @@ hSubAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),v
 }
 
 template < class T , class S , class U > inline void hSubAddConv( hArray<T> & vec1 , hArray<S> & vec2 , hArray<U> & vec3) {
+bool iterate=true;
+while(iterate) {
 hSubAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hSubAddConv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
@@ -6470,69 +6365,38 @@ template < class T , class S , class U > inline void hSubAddConv_hSLICED ( std::
 hSubAddConv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T , class S , class U > inline void hSubAddConv_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hSubAddConv ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T , class S , class U > inline void hSubAddConv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hSubAddConv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hSubAddConv_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 void (*fptr_hSubAddConv_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
-void (*fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -6576,6 +6440,7 @@ void hSub2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec2,con
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -6624,7 +6489,12 @@ hSub2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
 }
 
 template < class T , class S , class U > inline void hSub( hArray<T> & vec1 , S val , hArray<U> & vec2) {
+bool iterate=true;
+while(iterate) {
 hSub2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
+vec1.next();
+vec2.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hSub( casa::Vector<T> & vec1 , S val , casa::Vector<U> & vec2) {
@@ -6691,69 +6561,38 @@ template < class T , class S , class U > inline void hSub_hSLICED ( std::vector<
 hSub2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
 }
 
-template < class T , class S , class U > inline void hSub_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , hArray<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hSub2 ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , val , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
-}
-
 template < class T , class S , class U > inline void hSub_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , casa::Vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hSub2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
 }
 
 
 void (*fptr_hSub_hSLICED2_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 void (*fptr_hSub_hSLICED2_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
-void (*fptr_hSub_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -6796,6 +6635,7 @@ void hiMul(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin v
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -6843,7 +6683,12 @@ hiMul ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
 
 template < class T , class S > inline void hiMul( hArray<T> & vec1 , hArray<S> & vec2) {
+bool iterate=true;
+while(iterate) {
 hiMul ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
+vec1.next();
+vec2.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S > inline void hiMul( casa::Vector<T> & vec1 , casa::Vector<S> & vec2) {
@@ -6874,33 +6719,20 @@ template < class T , class S > inline void hiMul_hSLICED ( std::vector<T> & vec1
 hiMul ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
 }
 
-template < class T , class S > inline void hiMul_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hiMul ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
-}
-
 template < class T , class S > inline void hiMul_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hiMul ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
 }
 
 
 void (*fptr_hiMul_hSLICED_STL_HComplexHComplex_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED_hARRAY_HComplexHComplex_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED_STL_HComplexHNumber_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED_hARRAY_HComplexHNumber_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED_STL_HComplexHInteger_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED_hARRAY_HComplexHInteger_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED_STL_HNumberHComplex_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED_hARRAY_HNumberHComplex_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED_STL_HIntegerHComplex_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED_hARRAY_HIntegerHComplex_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -6941,6 +6773,7 @@ void hiMul2(const Iter vec1,const Iter vec1_end, S val)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -6988,7 +6821,11 @@ hiMul2 ( vec1.begin(),vec1.end() , val);
 }
 
 template < class T , class S > inline void hiMul( hArray<T> & vec1 , S val) {
+bool iterate=true;
+while(iterate) {
 hiMul2 ( vec1.begin(),vec1.end() , val);
+vec1.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S > inline void hiMul( casa::Vector<T> & vec1 , S val) {
@@ -7019,33 +6856,20 @@ template < class T , class S > inline void hiMul_hSLICED ( std::vector<T> & vec1
 hiMul2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val);
 }
 
-template < class T , class S > inline void hiMul_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
-hiMul2 ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , val);
-}
-
 template < class T , class S > inline void hiMul_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
 hiMul2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val);
 }
 
 
 void (*fptr_hiMul_hSLICED2_STL_HComplexHComplex_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED2_hARRAY_HComplexHComplex_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED2_STL_HComplexHNumber_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED2_hARRAY_HComplexHNumber_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED2_STL_HComplexHInteger_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED2_hARRAY_HComplexHInteger_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED2_STL_HNumberHComplex_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED2_hARRAY_HNumberHComplex_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED2_STL_HNumberHNumber_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED2_hARRAY_HNumberHNumber_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED2_STL_HNumberHInteger_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED2_hARRAY_HNumberHInteger_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED2_STL_HIntegerHComplex_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED2_hARRAY_HIntegerHComplex_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED2_STL_HIntegerHNumber_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED2_hARRAY_HIntegerHNumber_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiMul_hSLICED;
 void (*fptr_hiMul_hSLICED2_STL_HIntegerHInteger_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiMul_hSLICED;
-void (*fptr_hiMul_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiMul_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -7090,6 +6914,7 @@ void hMul(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const It
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -7138,7 +6963,13 @@ hMul ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end
 }
 
 template < class T , class S , class U > inline void hMul( hArray<T> & vec1 , hArray<S> & vec2 , hArray<U> & vec3) {
+bool iterate=true;
+while(iterate) {
 hMul ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hMul( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
@@ -7205,69 +7036,38 @@ template < class T , class S , class U > inline void hMul_hSLICED ( std::vector<
 hMul ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T , class S , class U > inline void hMul_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hMul ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T , class S , class U > inline void hMul_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hMul ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hMul_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -7310,6 +7110,7 @@ void hMulAdd(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -7358,7 +7159,13 @@ hMulAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.
 }
 
 template < class T > inline void hMulAdd( hArray<T> & vec1 , hArray<T> & vec2 , hArray<T> & vec3) {
+bool iterate=true;
+while(iterate) {
 hMulAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T > inline void hMulAdd( casa::Vector<T> & vec1 , casa::Vector<T> & vec2 , casa::Vector<T> & vec3) {
@@ -7377,21 +7184,14 @@ template < class T > inline void hMulAdd_hSLICED ( std::vector<T> & vec1 , HInte
 hMulAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T > inline void hMulAdd_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hMulAdd ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T > inline void hMulAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hMulAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hMulAdd_hSLICED_STL_HComplex_111_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAdd_hSLICED;
-void (*fptr_hMulAdd_hSLICED_hARRAY_HComplex_111_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAdd_hSLICED;
 void (*fptr_hMulAdd_hSLICED_STL_HNumber_111_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAdd_hSLICED;
-void (*fptr_hMulAdd_hSLICED_hARRAY_HNumber_111_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAdd_hSLICED;
 void (*fptr_hMulAdd_hSLICED_STL_HInteger_111_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAdd_hSLICED;
-void (*fptr_hMulAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAdd_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -7436,6 +7236,7 @@ void hMulAddConv(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,c
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -7484,7 +7285,13 @@ hMulAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),v
 }
 
 template < class T , class S , class U > inline void hMulAddConv( hArray<T> & vec1 , hArray<S> & vec2 , hArray<U> & vec3) {
+bool iterate=true;
+while(iterate) {
 hMulAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hMulAddConv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
@@ -7551,69 +7358,38 @@ template < class T , class S , class U > inline void hMulAddConv_hSLICED ( std::
 hMulAddConv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T , class S , class U > inline void hMulAddConv_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hMulAddConv ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T , class S , class U > inline void hMulAddConv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hMulAddConv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hMulAddConv_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 void (*fptr_hMulAddConv_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
-void (*fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -7657,6 +7433,7 @@ void hMul2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec2,con
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -7705,7 +7482,12 @@ hMul2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
 }
 
 template < class T , class S , class U > inline void hMul( hArray<T> & vec1 , S val , hArray<U> & vec2) {
+bool iterate=true;
+while(iterate) {
 hMul2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
+vec1.next();
+vec2.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hMul( casa::Vector<T> & vec1 , S val , casa::Vector<U> & vec2) {
@@ -7772,69 +7554,38 @@ template < class T , class S , class U > inline void hMul_hSLICED ( std::vector<
 hMul2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
 }
 
-template < class T , class S , class U > inline void hMul_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , hArray<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hMul2 ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , val , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
-}
-
 template < class T , class S , class U > inline void hMul_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , casa::Vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hMul2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
 }
 
 
 void (*fptr_hMul_hSLICED2_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 void (*fptr_hMul_hSLICED2_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
-void (*fptr_hMul_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -7877,6 +7628,7 @@ void hiAdd(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin v
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -7924,7 +7676,12 @@ hiAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
 
 template < class T , class S > inline void hiAdd( hArray<T> & vec1 , hArray<S> & vec2) {
+bool iterate=true;
+while(iterate) {
 hiAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
+vec1.next();
+vec2.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S > inline void hiAdd( casa::Vector<T> & vec1 , casa::Vector<S> & vec2) {
@@ -7955,33 +7712,20 @@ template < class T , class S > inline void hiAdd_hSLICED ( std::vector<T> & vec1
 hiAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
 }
 
-template < class T , class S > inline void hiAdd_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hiAdd ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
-}
-
 template < class T , class S > inline void hiAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hiAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
 }
 
 
 void (*fptr_hiAdd_hSLICED_STL_HComplexHComplex_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED_hARRAY_HComplexHComplex_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED_STL_HComplexHNumber_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED_hARRAY_HComplexHNumber_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED_STL_HComplexHInteger_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED_hARRAY_HComplexHInteger_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED_STL_HNumberHComplex_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED_hARRAY_HNumberHComplex_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED_STL_HIntegerHComplex_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED_hARRAY_HIntegerHComplex_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -8022,6 +7766,7 @@ void hiAdd2(const Iter vec1,const Iter vec1_end, S val)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -8069,7 +7814,11 @@ hiAdd2 ( vec1.begin(),vec1.end() , val);
 }
 
 template < class T , class S > inline void hiAdd( hArray<T> & vec1 , S val) {
+bool iterate=true;
+while(iterate) {
 hiAdd2 ( vec1.begin(),vec1.end() , val);
+vec1.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S > inline void hiAdd( casa::Vector<T> & vec1 , S val) {
@@ -8100,33 +7849,20 @@ template < class T , class S > inline void hiAdd_hSLICED ( std::vector<T> & vec1
 hiAdd2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val);
 }
 
-template < class T , class S > inline void hiAdd_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
-hiAdd2 ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , val);
-}
-
 template < class T , class S > inline void hiAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
 hiAdd2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val);
 }
 
 
 void (*fptr_hiAdd_hSLICED2_STL_HComplexHComplex_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED2_hARRAY_HComplexHComplex_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED2_STL_HComplexHNumber_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED2_hARRAY_HComplexHNumber_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED2_STL_HComplexHInteger_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED2_hARRAY_HComplexHInteger_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED2_STL_HNumberHComplex_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED2_hARRAY_HNumberHComplex_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED2_STL_HNumberHNumber_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED2_hARRAY_HNumberHNumber_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED2_STL_HNumberHInteger_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED2_hARRAY_HNumberHInteger_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED2_STL_HIntegerHComplex_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED2_hARRAY_HIntegerHComplex_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED2_STL_HIntegerHNumber_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED2_hARRAY_HIntegerHNumber_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiAdd_hSLICED;
 void (*fptr_hiAdd_hSLICED2_STL_HIntegerHInteger_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiAdd_hSLICED;
-void (*fptr_hiAdd_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiAdd_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -8171,6 +7907,7 @@ void hAdd(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const It
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -8219,7 +7956,13 @@ hAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end
 }
 
 template < class T , class S , class U > inline void hAdd( hArray<T> & vec1 , hArray<S> & vec2 , hArray<U> & vec3) {
+bool iterate=true;
+while(iterate) {
 hAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hAdd( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
@@ -8286,69 +8029,38 @@ template < class T , class S , class U > inline void hAdd_hSLICED ( std::vector<
 hAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T , class S , class U > inline void hAdd_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hAdd ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T , class S , class U > inline void hAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hAdd_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -8391,6 +8103,7 @@ void hAddAdd(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -8439,7 +8152,13 @@ hAddAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.
 }
 
 template < class T > inline void hAddAdd( hArray<T> & vec1 , hArray<T> & vec2 , hArray<T> & vec3) {
+bool iterate=true;
+while(iterate) {
 hAddAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T > inline void hAddAdd( casa::Vector<T> & vec1 , casa::Vector<T> & vec2 , casa::Vector<T> & vec3) {
@@ -8458,21 +8177,14 @@ template < class T > inline void hAddAdd_hSLICED ( std::vector<T> & vec1 , HInte
 hAddAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T > inline void hAddAdd_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hAddAdd ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T > inline void hAddAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hAddAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hAddAdd_hSLICED_STL_HComplex_111_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAdd_hSLICED;
-void (*fptr_hAddAdd_hSLICED_hARRAY_HComplex_111_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAdd_hSLICED;
 void (*fptr_hAddAdd_hSLICED_STL_HNumber_111_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAdd_hSLICED;
-void (*fptr_hAddAdd_hSLICED_hARRAY_HNumber_111_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAdd_hSLICED;
 void (*fptr_hAddAdd_hSLICED_STL_HInteger_111_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAdd_hSLICED;
-void (*fptr_hAddAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAdd_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -8517,6 +8229,7 @@ void hAddAddConv(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,c
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -8565,7 +8278,13 @@ hAddAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),v
 }
 
 template < class T , class S , class U > inline void hAddAddConv( hArray<T> & vec1 , hArray<S> & vec2 , hArray<U> & vec3) {
+bool iterate=true;
+while(iterate) {
 hAddAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hAddAddConv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
@@ -8632,69 +8351,38 @@ template < class T , class S , class U > inline void hAddAddConv_hSLICED ( std::
 hAddAddConv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T , class S , class U > inline void hAddAddConv_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hAddAddConv ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T , class S , class U > inline void hAddAddConv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hAddAddConv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hAddAddConv_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 void (*fptr_hAddAddConv_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
-void (*fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -8738,6 +8426,7 @@ void hAdd2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec2,con
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -8786,7 +8475,12 @@ hAdd2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
 }
 
 template < class T , class S , class U > inline void hAdd( hArray<T> & vec1 , S val , hArray<U> & vec2) {
+bool iterate=true;
+while(iterate) {
 hAdd2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
+vec1.next();
+vec2.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hAdd( casa::Vector<T> & vec1 , S val , casa::Vector<U> & vec2) {
@@ -8853,69 +8547,38 @@ template < class T , class S , class U > inline void hAdd_hSLICED ( std::vector<
 hAdd2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
 }
 
-template < class T , class S , class U > inline void hAdd_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , hArray<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hAdd2 ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , val , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
-}
-
 template < class T , class S , class U > inline void hAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , casa::Vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hAdd2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
 }
 
 
 void (*fptr_hAdd_hSLICED2_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 void (*fptr_hAdd_hSLICED2_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
-void (*fptr_hAdd_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -8958,6 +8621,7 @@ void hiDiv(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin v
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -9005,7 +8669,12 @@ hiDiv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
 
 template < class T , class S > inline void hiDiv( hArray<T> & vec1 , hArray<S> & vec2) {
+bool iterate=true;
+while(iterate) {
 hiDiv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
+vec1.next();
+vec2.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S > inline void hiDiv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2) {
@@ -9036,33 +8705,20 @@ template < class T , class S > inline void hiDiv_hSLICED ( std::vector<T> & vec1
 hiDiv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
 }
 
-template < class T , class S > inline void hiDiv_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hiDiv ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
-}
-
 template < class T , class S > inline void hiDiv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hiDiv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
 }
 
 
 void (*fptr_hiDiv_hSLICED_STL_HComplexHComplex_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED_hARRAY_HComplexHComplex_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED_STL_HComplexHNumber_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED_hARRAY_HComplexHNumber_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED_STL_HComplexHInteger_12_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED_hARRAY_HComplexHInteger_12_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED_STL_HNumberHComplex_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED_hARRAY_HNumberHComplex_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED_STL_HNumberHNumber_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED_hARRAY_HNumberHNumber_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED_STL_HNumberHInteger_12_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED_hARRAY_HNumberHInteger_12_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED_STL_HIntegerHComplex_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED_hARRAY_HIntegerHComplex_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED_STL_HIntegerHNumber_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED_hARRAY_HIntegerHNumber_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED_STL_HIntegerHInteger_12_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -9103,6 +8759,7 @@ void hiDiv2(const Iter vec1,const Iter vec1_end, S val)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -9150,7 +8807,11 @@ hiDiv2 ( vec1.begin(),vec1.end() , val);
 }
 
 template < class T , class S > inline void hiDiv( hArray<T> & vec1 , S val) {
+bool iterate=true;
+while(iterate) {
 hiDiv2 ( vec1.begin(),vec1.end() , val);
+vec1.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S > inline void hiDiv( casa::Vector<T> & vec1 , S val) {
@@ -9181,33 +8842,20 @@ template < class T , class S > inline void hiDiv_hSLICED ( std::vector<T> & vec1
 hiDiv2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val);
 }
 
-template < class T , class S > inline void hiDiv_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
-hiDiv2 ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , val);
-}
-
 template < class T , class S > inline void hiDiv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
 hiDiv2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val);
 }
 
 
 void (*fptr_hiDiv_hSLICED2_STL_HComplexHComplex_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED2_hARRAY_HComplexHComplex_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED2_STL_HComplexHNumber_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED2_hARRAY_HComplexHNumber_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED2_STL_HComplexHInteger_12_STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED2_hARRAY_HComplexHInteger_12_STDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED2_STL_HNumberHComplex_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED2_hARRAY_HNumberHComplex_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED2_STL_HNumberHNumber_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED2_hARRAY_HNumberHNumber_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED2_STL_HNumberHInteger_12_STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED2_hARRAY_HNumberHInteger_12_STDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED2_STL_HIntegerHComplex_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED2_hARRAY_HIntegerHComplex_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED2_STL_HIntegerHNumber_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED2_hARRAY_HIntegerHNumber_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiDiv_hSLICED;
 void (*fptr_hiDiv_hSLICED2_STL_HIntegerHInteger_12_STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiDiv_hSLICED;
-void (*fptr_hiDiv_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiDiv_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -9252,6 +8900,7 @@ void hDiv(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const It
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -9300,7 +8949,13 @@ hDiv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end
 }
 
 template < class T , class S , class U > inline void hDiv( hArray<T> & vec1 , hArray<S> & vec2 , hArray<U> & vec3) {
+bool iterate=true;
+while(iterate) {
 hDiv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hDiv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
@@ -9367,69 +9022,38 @@ template < class T , class S , class U > inline void hDiv_hSLICED ( std::vector<
 hDiv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T , class S , class U > inline void hDiv_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hDiv ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T , class S , class U > inline void hDiv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hDiv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hDiv_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -9472,6 +9096,7 @@ void hDivAdd(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -9520,7 +9145,13 @@ hDivAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.
 }
 
 template < class T > inline void hDivAdd( hArray<T> & vec1 , hArray<T> & vec2 , hArray<T> & vec3) {
+bool iterate=true;
+while(iterate) {
 hDivAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T > inline void hDivAdd( casa::Vector<T> & vec1 , casa::Vector<T> & vec2 , casa::Vector<T> & vec3) {
@@ -9539,21 +9170,14 @@ template < class T > inline void hDivAdd_hSLICED ( std::vector<T> & vec1 , HInte
 hDivAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T > inline void hDivAdd_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hDivAdd ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T > inline void hDivAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hDivAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hDivAdd_hSLICED_STL_HComplex_111_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAdd_hSLICED;
-void (*fptr_hDivAdd_hSLICED_hARRAY_HComplex_111_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAdd_hSLICED;
 void (*fptr_hDivAdd_hSLICED_STL_HNumber_111_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAdd_hSLICED;
-void (*fptr_hDivAdd_hSLICED_hARRAY_HNumber_111_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAdd_hSLICED;
 void (*fptr_hDivAdd_hSLICED_STL_HInteger_111_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAdd_hSLICED;
-void (*fptr_hDivAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAdd_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -9598,6 +9222,7 @@ void hDivAddConv(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,c
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -9646,7 +9271,13 @@ hDivAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),v
 }
 
 template < class T , class S , class U > inline void hDivAddConv( hArray<T> & vec1 , hArray<S> & vec2 , hArray<U> & vec3) {
+bool iterate=true;
+while(iterate) {
 hDivAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
+vec1.next();
+vec2.next();
+vec3.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hDivAddConv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
@@ -9713,69 +9344,38 @@ template < class T , class S , class U > inline void hDivAddConv_hSLICED ( std::
 hDivAddConv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
 }
 
-template < class T , class S , class U > inline void hDivAddConv_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
-hDivAddConv ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2) , vec3.begin(vec3slice1),vec3.begin(vec3slice2));
-}
-
 template < class T , class S , class U > inline void hDivAddConv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
 hDivAddConv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
 }
 
 
 void (*fptr_hDivAddConv_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 void (*fptr_hDivAddConv_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
-void (*fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , hArray<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -9819,6 +9419,7 @@ void hDiv2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec2,con
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -9867,7 +9468,12 @@ hDiv2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
 }
 
 template < class T , class S , class U > inline void hDiv( hArray<T> & vec1 , S val , hArray<U> & vec2) {
+bool iterate=true;
+while(iterate) {
 hDiv2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
+vec1.next();
+vec2.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T , class S , class U > inline void hDiv( casa::Vector<T> & vec1 , S val , casa::Vector<U> & vec2) {
@@ -9934,69 +9540,38 @@ template < class T , class S , class U > inline void hDiv_hSLICED ( std::vector<
 hDiv2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
 }
 
-template < class T , class S , class U > inline void hDiv_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , hArray<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hDiv2 ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , val , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
-}
-
 template < class T , class S , class U > inline void hDiv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , casa::Vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hDiv2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
 }
 
 
 void (*fptr_hDiv_hSLICED2_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 void (*fptr_hDiv_hSLICED2_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
-void (*fptr_hDiv_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -10037,6 +9612,7 @@ void hConj(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -10083,7 +9659,11 @@ hConj ( vec.begin(),vec.end());
 }
 
 inline void hConj( hArray<HComplex> & vec) {
+bool iterate=true;
+while(iterate) {
 hConj ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 inline void hConj( casa::Vector<HComplex> & vec) {
@@ -10098,17 +9678,12 @@ void (*fptr_hConj_hARRAY_HInteger_HComplex_STDIT)( hArray<HComplex> & vec) = &hC
 hConj ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-inline void hConj_hSLICED ( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hConj ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 inline void hConj_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hConj ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hConj_hSLICED_STL_HInteger_HComplex_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hConj_hSLICED;
-void (*fptr_hConj_hSLICED_hARRAY_HInteger_HComplex_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hConj_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -10166,6 +9741,7 @@ void hCrossCorrelateComplex(const Iter vec1,const Iter vec1_end, const Iter vec2
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -10211,7 +9787,12 @@ hCrossCorrelateComplex ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
 
 inline void hCrossCorrelateComplex( hArray<HComplex> & vec1 , hArray<HComplex> & vec2) {
+bool iterate=true;
+while(iterate) {
 hCrossCorrelateComplex ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
+vec1.next();
+vec2.next();
+iterate = vec1.iterate(); };
 }
 
 inline void hCrossCorrelateComplex( casa::Vector<HComplex> & vec1 , casa::Vector<HComplex> & vec2) {
@@ -10226,17 +9807,12 @@ void (*fptr_hCrossCorrelateComplex_hARRAY_HInteger_HComplexHComplex_STDITSTDIT)(
 hCrossCorrelateComplex ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
 }
 
-inline void hCrossCorrelateComplex_hSLICED ( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hCrossCorrelateComplex ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
-}
-
 inline void hCrossCorrelateComplex_hSLICED ( casa::Vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hCrossCorrelateComplex ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
 }
 
 
 void (*fptr_hCrossCorrelateComplex_hSLICED_STL_HInteger_HComplexHComplex_STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hCrossCorrelateComplex_hSLICED;
-void (*fptr_hCrossCorrelateComplex_hSLICED_hARRAY_HInteger_HComplexHComplex_STDITSTDIT)( hArray<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hCrossCorrelateComplex_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -10289,6 +9865,7 @@ void hReal(const Iter vec,const Iter vec_end, const Iterout vecout,const Iterout
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -10334,7 +9911,12 @@ hReal ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 inline void hReal( hArray<HComplex> & vec , hArray<HNumber> & vecout) {
+bool iterate=true;
+while(iterate) {
 hReal ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 inline void hReal( casa::Vector<HComplex> & vec , casa::Vector<HNumber> & vecout) {
@@ -10349,17 +9931,12 @@ void (*fptr_hReal_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<HComplex> 
 hReal ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-inline void hReal_hSLICED ( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hReal ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 inline void hReal_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hReal ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hReal_hSLICED_STL_HInteger_HComplexHNumber_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hReal_hSLICED;
-void (*fptr_hReal_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hReal_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -10410,6 +9987,7 @@ void hArg(const Iter vec,const Iter vec_end, const Iterout vecout,const Iterout 
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -10455,7 +10033,12 @@ hArg ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 inline void hArg( hArray<HComplex> & vec , hArray<HNumber> & vecout) {
+bool iterate=true;
+while(iterate) {
 hArg ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 inline void hArg( casa::Vector<HComplex> & vec , casa::Vector<HNumber> & vecout) {
@@ -10470,17 +10053,12 @@ void (*fptr_hArg_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<HComplex> &
 hArg ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-inline void hArg_hSLICED ( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hArg ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 inline void hArg_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hArg ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hArg_hSLICED_STL_HInteger_HComplexHNumber_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hArg_hSLICED;
-void (*fptr_hArg_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hArg_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -10531,6 +10109,7 @@ void hImag(const Iter vec,const Iter vec_end, const Iterout vecout,const Iterout
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -10576,7 +10155,12 @@ hImag ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 inline void hImag( hArray<HComplex> & vec , hArray<HNumber> & vecout) {
+bool iterate=true;
+while(iterate) {
 hImag ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 inline void hImag( casa::Vector<HComplex> & vec , casa::Vector<HNumber> & vecout) {
@@ -10591,17 +10175,12 @@ void (*fptr_hImag_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<HComplex> 
 hImag ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-inline void hImag_hSLICED ( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hImag ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 inline void hImag_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hImag ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hImag_hSLICED_STL_HInteger_HComplexHNumber_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hImag_hSLICED;
-void (*fptr_hImag_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hImag_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -10652,6 +10231,7 @@ void hNorm(const Iter vec,const Iter vec_end, const Iterout vecout,const Iterout
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -10697,7 +10277,12 @@ hNorm ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
 
 inline void hNorm( hArray<HComplex> & vec , hArray<HNumber> & vecout) {
+bool iterate=true;
+while(iterate) {
 hNorm ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); };
 }
 
 inline void hNorm( casa::Vector<HComplex> & vec , casa::Vector<HNumber> & vecout) {
@@ -10712,17 +10297,12 @@ void (*fptr_hNorm_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<HComplex> 
 hNorm ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
 }
 
-inline void hNorm_hSLICED ( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-hNorm ( vec.begin(vecslice1),vec.begin(vecslice2) , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
-}
-
 inline void hNorm_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 hNorm ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
 }
 
 
 void (*fptr_hNorm_hSLICED_STL_HInteger_HComplexHNumber_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hNorm_hSLICED;
-void (*fptr_hNorm_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hNorm_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -10761,6 +10341,7 @@ void hNegate(const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -10807,7 +10388,11 @@ hNegate ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hNegate( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hNegate ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hNegate( casa::Vector<T> & vec) {
@@ -10826,21 +10411,14 @@ template < class T > inline void hNegate_hSLICED ( std::vector<T> & vec , HInteg
 hNegate ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hNegate_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hNegate ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hNegate_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hNegate ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hNegate_hSLICED_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNegate_hSLICED;
-void (*fptr_hNegate_hSLICED_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNegate_hSLICED;
 void (*fptr_hNegate_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNegate_hSLICED;
-void (*fptr_hNegate_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNegate_hSLICED;
 void (*fptr_hNegate_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNegate_hSLICED;
-void (*fptr_hNegate_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNegate_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -10877,6 +10455,7 @@ typename Iter::value_type hSum (const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -10922,8 +10501,15 @@ template < class T > inline T hSum( std::vector<T> & vec) {
 return hSum ( vec.begin(),vec.end());
 }
 
-template < class T > inline T hSum( hArray<T> & vec) {
-return hSum ( vec.begin(),vec.end());
+template < class T > inline vector<T> hSum( hArray<T> & vec) {
+bool iterate=true;
+vector<T> returnvector;
+T returnvalue;
+while(iterate) {
+returnvalue = hSum ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); returnvector.push_back(returnvalue); };
+return returnvector;
 }
 
 template < class T > inline T hSum( casa::Vector<T> & vec) {
@@ -10932,18 +10518,14 @@ return hSum ( vec.cbegin(),vec.cend());
 
 
 HComplex (*fptr_hSum_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec) = &hSum;
-HComplex (*fptr_hSum_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec) = &hSum;
+vector<HComplex > (*fptr_hSum_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec) = &hSum;
 HNumber (*fptr_hSum_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec) = &hSum;
-HNumber (*fptr_hSum_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hSum;
+vector<HNumber > (*fptr_hSum_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hSum;
 HInteger (*fptr_hSum_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec) = &hSum;
-HInteger (*fptr_hSum_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hSum;
+vector<HInteger > (*fptr_hSum_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hSum;
 
 template < class T > inline T hSum_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 return hSum ( vec.begin() + vecslice1,vec.begin() + vecslice2);
-}
-
-template < class T > inline T hSum_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-return hSum ( vec.begin(vecslice1),vec.begin(vecslice2));
 }
 
 template < class T > inline T hSum_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
@@ -10952,11 +10534,8 @@ return hSum ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 
 
 HComplex (*fptr_hSum_hSLICED_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSum_hSLICED;
-HComplex (*fptr_hSum_hSLICED_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSum_hSLICED;
 HNumber (*fptr_hSum_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSum_hSLICED;
-HNumber (*fptr_hSum_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSum_hSLICED;
 HInteger (*fptr_hSum_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSum_hSLICED;
-HInteger (*fptr_hSum_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSum_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -10996,6 +10575,7 @@ typename Iter::value_type hProduct (const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -11041,8 +10621,15 @@ template < class T > inline T hProduct( std::vector<T> & vec) {
 return hProduct ( vec.begin(),vec.end());
 }
 
-template < class T > inline T hProduct( hArray<T> & vec) {
-return hProduct ( vec.begin(),vec.end());
+template < class T > inline vector<T> hProduct( hArray<T> & vec) {
+bool iterate=true;
+vector<T> returnvector;
+T returnvalue;
+while(iterate) {
+returnvalue = hProduct ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); returnvector.push_back(returnvalue); };
+return returnvector;
 }
 
 template < class T > inline T hProduct( casa::Vector<T> & vec) {
@@ -11051,18 +10638,14 @@ return hProduct ( vec.cbegin(),vec.cend());
 
 
 HComplex (*fptr_hProduct_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec) = &hProduct;
-HComplex (*fptr_hProduct_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec) = &hProduct;
+vector<HComplex > (*fptr_hProduct_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec) = &hProduct;
 HNumber (*fptr_hProduct_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec) = &hProduct;
-HNumber (*fptr_hProduct_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hProduct;
+vector<HNumber > (*fptr_hProduct_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hProduct;
 HInteger (*fptr_hProduct_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec) = &hProduct;
-HInteger (*fptr_hProduct_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hProduct;
+vector<HInteger > (*fptr_hProduct_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hProduct;
 
 template < class T > inline T hProduct_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 return hProduct ( vec.begin() + vecslice1,vec.begin() + vecslice2);
-}
-
-template < class T > inline T hProduct_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-return hProduct ( vec.begin(vecslice1),vec.begin(vecslice2));
 }
 
 template < class T > inline T hProduct_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
@@ -11071,11 +10654,8 @@ return hProduct ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 
 
 HComplex (*fptr_hProduct_hSLICED_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hProduct_hSLICED;
-HComplex (*fptr_hProduct_hSLICED_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hProduct_hSLICED;
 HNumber (*fptr_hProduct_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hProduct_hSLICED;
-HNumber (*fptr_hProduct_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hProduct_hSLICED;
 HInteger (*fptr_hProduct_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hProduct_hSLICED;
-HInteger (*fptr_hProduct_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hProduct_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -11111,6 +10691,7 @@ HNumber hNorm (const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -11156,8 +10737,15 @@ template < class T > inline HNumber hNorm( std::vector<T> & vec) {
 return hNorm ( vec.begin(),vec.end());
 }
 
-template < class T > inline HNumber hNorm( hArray<T> & vec) {
-return hNorm ( vec.begin(),vec.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber>) hNorm( hArray<T> & vec) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HNumber> returnvector;
+HNumber returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hNorm ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HNumber hNorm( casa::Vector<T> & vec) {
@@ -11166,16 +10754,12 @@ return hNorm ( vec.cbegin(),vec.cend());
 
 
 HNumber (*fptr_hNorm_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec) = &hNorm;
-HNumber (*fptr_hNorm_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hNorm;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber >) (*fptr_hNorm_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hNorm;
 HNumber (*fptr_hNorm_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec) = &hNorm;
-HNumber (*fptr_hNorm_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hNorm;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber >) (*fptr_hNorm_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hNorm;
 
 template < class T > inline HNumber hNorm_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 return hNorm ( vec.begin() + vecslice1,vec.begin() + vecslice2);
-}
-
-template < class T > inline HNumber hNorm_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-return hNorm ( vec.begin(vecslice1),vec.begin(vecslice2));
 }
 
 template < class T > inline HNumber hNorm_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
@@ -11184,9 +10768,7 @@ return hNorm ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 
 
 HNumber (*fptr_hNorm_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNorm_hSLICED;
-HNumber (*fptr_hNorm_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNorm_hSLICED;
 HNumber (*fptr_hNorm_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNorm_hSLICED;
-HNumber (*fptr_hNorm_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNorm_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -11221,6 +10803,7 @@ void hNormalize (const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -11267,7 +10850,11 @@ hNormalize ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hNormalize( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hNormalize ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hNormalize( casa::Vector<T> & vec) {
@@ -11284,19 +10871,13 @@ template < class T > inline void hNormalize_hSLICED ( std::vector<T> & vec , HIn
 hNormalize ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hNormalize_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hNormalize ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hNormalize_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hNormalize ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hNormalize_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNormalize_hSLICED;
-void (*fptr_hNormalize_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNormalize_hSLICED;
 void (*fptr_hNormalize_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNormalize_hSLICED;
-void (*fptr_hNormalize_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNormalize_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -11331,6 +10912,7 @@ HNumber hMean (const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -11376,8 +10958,15 @@ template < class T > inline HNumber hMean( std::vector<T> & vec) {
 return hMean ( vec.begin(),vec.end());
 }
 
-template < class T > inline HNumber hMean( hArray<T> & vec) {
-return hMean ( vec.begin(),vec.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber>) hMean( hArray<T> & vec) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HNumber> returnvector;
+HNumber returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hMean ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HNumber hMean( casa::Vector<T> & vec) {
@@ -11386,16 +10975,12 @@ return hMean ( vec.cbegin(),vec.cend());
 
 
 HNumber (*fptr_hMean_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec) = &hMean;
-HNumber (*fptr_hMean_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hMean;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber >) (*fptr_hMean_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hMean;
 HNumber (*fptr_hMean_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec) = &hMean;
-HNumber (*fptr_hMean_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hMean;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber >) (*fptr_hMean_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hMean;
 
 template < class T > inline HNumber hMean_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 return hMean ( vec.begin() + vecslice1,vec.begin() + vecslice2);
-}
-
-template < class T > inline HNumber hMean_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-return hMean ( vec.begin(vecslice1),vec.begin(vecslice2));
 }
 
 template < class T > inline HNumber hMean_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
@@ -11404,9 +10989,7 @@ return hMean ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 
 
 HNumber (*fptr_hMean_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hMean_hSLICED;
-HNumber (*fptr_hMean_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hMean_hSLICED;
 HNumber (*fptr_hMean_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hMean_hSLICED;
-HNumber (*fptr_hMean_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hMean_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -11443,6 +11026,7 @@ void hSort(const Iter vec, const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -11489,7 +11073,11 @@ hSort ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hSort( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hSort ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hSort( casa::Vector<T> & vec) {
@@ -11508,21 +11096,14 @@ template < class T > inline void hSort_hSLICED ( std::vector<T> & vec , HInteger
 hSort ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hSort_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hSort ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hSort_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hSort ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hSort_hSLICED_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSort_hSLICED;
-void (*fptr_hSort_hSLICED_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSort_hSLICED;
 void (*fptr_hSort_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSort_hSLICED;
-void (*fptr_hSort_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSort_hSLICED;
 void (*fptr_hSort_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSort_hSLICED;
-void (*fptr_hSort_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSort_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -11561,6 +11142,7 @@ typename Iter::value_type hSortMedian(const Iter vec, const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -11606,8 +11188,15 @@ template < class T > inline T hSortMedian( std::vector<T> & vec) {
 return hSortMedian ( vec.begin(),vec.end());
 }
 
-template < class T > inline T hSortMedian( hArray<T> & vec) {
-return hSortMedian ( vec.begin(),vec.end());
+template < class T > inline vector<T> hSortMedian( hArray<T> & vec) {
+bool iterate=true;
+vector<T> returnvector;
+T returnvalue;
+while(iterate) {
+returnvalue = hSortMedian ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); returnvector.push_back(returnvalue); };
+return returnvector;
 }
 
 template < class T > inline T hSortMedian( casa::Vector<T> & vec) {
@@ -11616,16 +11205,12 @@ return hSortMedian ( vec.cbegin(),vec.cend());
 
 
 HNumber (*fptr_hSortMedian_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec) = &hSortMedian;
-HNumber (*fptr_hSortMedian_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hSortMedian;
+vector<HNumber > (*fptr_hSortMedian_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hSortMedian;
 HInteger (*fptr_hSortMedian_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec) = &hSortMedian;
-HInteger (*fptr_hSortMedian_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hSortMedian;
+vector<HInteger > (*fptr_hSortMedian_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hSortMedian;
 
 template < class T > inline T hSortMedian_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 return hSortMedian ( vec.begin() + vecslice1,vec.begin() + vecslice2);
-}
-
-template < class T > inline T hSortMedian_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-return hSortMedian ( vec.begin(vecslice1),vec.begin(vecslice2));
 }
 
 template < class T > inline T hSortMedian_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
@@ -11634,9 +11219,7 @@ return hSortMedian ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 
 
 HNumber (*fptr_hSortMedian_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSortMedian_hSLICED;
-HNumber (*fptr_hSortMedian_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSortMedian_hSLICED;
 HInteger (*fptr_hSortMedian_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSortMedian_hSLICED;
-HInteger (*fptr_hSortMedian_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSortMedian_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -11712,9 +11295,7 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 HNumber (*fptr_hMedian_STL_HNumber_1_STL)( std::vector<HNumber> & vec) = &hMedian;
-HNumber (*fptr_hMedian_hARRAY_HNumber_1_STL)( hArray<HNumber> & vec) = &hMedian;
 HInteger (*fptr_hMedian_STL_HInteger_1_STL)( std::vector<HInteger> & vec) = &hMedian;
-HInteger (*fptr_hMedian_hARRAY_HInteger_1_STL)( hArray<HInteger> & vec) = &hMedian;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -11756,6 +11337,7 @@ HNumber hStdDev (const Iter vec,const Iter vec_end, const typename Iter::value_t
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -11802,8 +11384,15 @@ template < class T > inline HNumber hStdDev( std::vector<T> & vec , HNumber mean
 return hStdDev ( vec.begin(),vec.end() , mean);
 }
 
-template < class T > inline HNumber hStdDev( hArray<T> & vec , HNumber mean) {
-return hStdDev ( vec.begin(),vec.end() , mean);
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber>) hStdDev( hArray<T> & vec , HNumber mean) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HNumber> returnvector;
+HNumber returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hStdDev ( vec.begin(),vec.end() , mean);
+vec.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HNumber hStdDev( casa::Vector<T> & vec , HNumber mean) {
@@ -11812,16 +11401,12 @@ return hStdDev ( vec.cbegin(),vec.cend() , mean);
 
 
 HNumber (*fptr_hStdDev_STL_HNumber_1HNumber_STDIT)( std::vector<HNumber> & vec , HNumber mean) = &hStdDev;
-HNumber (*fptr_hStdDev_hARRAY_HNumber_1HNumber_STDIT)( hArray<HNumber> & vec , HNumber mean) = &hStdDev;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber >) (*fptr_hStdDev_hARRAY_HNumber_1HNumber_STDIT)( hArray<HNumber> & vec , HNumber mean) = &hStdDev;
 HNumber (*fptr_hStdDev_STL_HInteger_1HNumber_STDIT)( std::vector<HInteger> & vec , HNumber mean) = &hStdDev;
-HNumber (*fptr_hStdDev_hARRAY_HInteger_1HNumber_STDIT)( hArray<HInteger> & vec , HNumber mean) = &hStdDev;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber >) (*fptr_hStdDev_hARRAY_HInteger_1HNumber_STDIT)( hArray<HInteger> & vec , HNumber mean) = &hStdDev;
 
 template < class T > inline HNumber hStdDev_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) {
 return hStdDev ( vec.begin() + vecslice1,vec.begin() + vecslice2 , mean);
-}
-
-template < class T > inline HNumber hStdDev_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) {
-return hStdDev ( vec.begin(vecslice1),vec.begin(vecslice2) , mean);
 }
 
 template < class T > inline HNumber hStdDev_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) {
@@ -11830,9 +11415,7 @@ return hStdDev ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , mean);
 
 
 HNumber (*fptr_hStdDev_hSLICED_STL_HNumber_1HNumber_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) = &hStdDev_hSLICED;
-HNumber (*fptr_hStdDev_hSLICED_hARRAY_HNumber_1HNumber_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) = &hStdDev_hSLICED;
 HNumber (*fptr_hStdDev_hSLICED_STL_HInteger_1HNumber_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) = &hStdDev_hSLICED;
-HNumber (*fptr_hStdDev_hSLICED_hARRAY_HInteger_1HNumber_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) = &hStdDev_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -11865,6 +11448,7 @@ HNumber hStdDev (const Iter vec,const Iter vec_end)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -11910,8 +11494,15 @@ template < class T > inline HNumber hStdDev( std::vector<T> & vec) {
 return hStdDev ( vec.begin(),vec.end());
 }
 
-template < class T > inline HNumber hStdDev( hArray<T> & vec) {
-return hStdDev ( vec.begin(),vec.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber>) hStdDev( hArray<T> & vec) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HNumber> returnvector;
+HNumber returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hStdDev ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HNumber hStdDev( casa::Vector<T> & vec) {
@@ -11920,16 +11511,12 @@ return hStdDev ( vec.cbegin(),vec.cend());
 
 
 HNumber (*fptr_hStdDev_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec) = &hStdDev;
-HNumber (*fptr_hStdDev_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hStdDev;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber >) (*fptr_hStdDev_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec) = &hStdDev;
 HNumber (*fptr_hStdDev_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec) = &hStdDev;
-HNumber (*fptr_hStdDev_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hStdDev;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber >) (*fptr_hStdDev_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec) = &hStdDev;
 
 template < class T > inline HNumber hStdDev_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 return hStdDev ( vec.begin() + vecslice1,vec.begin() + vecslice2);
-}
-
-template < class T > inline HNumber hStdDev_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-return hStdDev ( vec.begin(vecslice1),vec.begin(vecslice2));
 }
 
 template < class T > inline HNumber hStdDev_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
@@ -11938,9 +11525,7 @@ return hStdDev ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 
 
 HNumber (*fptr_hStdDev_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hStdDev_hSLICED;
-HNumber (*fptr_hStdDev_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hStdDev_hSLICED;
 HNumber (*fptr_hStdDev_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hStdDev_hSLICED;
-HNumber (*fptr_hStdDev_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hStdDev_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -11993,6 +11578,7 @@ HInteger hFindLessEqual (const Iter vec , const Iter vec_end, const typename Ite
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -12038,8 +11624,16 @@ template < class T > inline HInteger hFindLessEqual( std::vector<T> & vec , T th
 return hFindLessEqual ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
 
-template < class T > inline HInteger hFindLessEqual( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
-return hFindLessEqual ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger>) hFindLessEqual( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HInteger> returnvector;
+HInteger returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hFindLessEqual ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HInteger hFindLessEqual( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
@@ -12048,16 +11642,12 @@ return hFindLessEqual ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),ve
 
 
 HInteger (*fptr_hFindLessEqual_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindLessEqual;
-HInteger (*fptr_hFindLessEqual_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindLessEqual;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLessEqual_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindLessEqual;
 HInteger (*fptr_hFindLessEqual_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindLessEqual;
-HInteger (*fptr_hFindLessEqual_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindLessEqual;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLessEqual_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindLessEqual;
 
 template < class T > inline HInteger hFindLessEqual_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 return hFindLessEqual ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
-}
-
-template < class T > inline HInteger hFindLessEqual_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-return hFindLessEqual ( vec.begin(vecslice1),vec.begin(vecslice2) , threshold , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
 }
 
 template < class T > inline HInteger hFindLessEqual_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
@@ -12066,9 +11656,7 @@ return hFindLessEqual ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , thre
 
 
 HInteger (*fptr_hFindLessEqual_hSLICED_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqual_hSLICED;
-HInteger (*fptr_hFindLessEqual_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqual_hSLICED;
 HInteger (*fptr_hFindLessEqual_hSLICED_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqual_hSLICED;
-HInteger (*fptr_hFindLessEqual_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqual_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -12118,6 +11706,7 @@ HInteger hFindLessEqualAbs (const Iter vec , const Iter vec_end, const typename 
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -12163,8 +11752,16 @@ template < class T > inline HInteger hFindLessEqualAbs( std::vector<T> & vec , T
 return hFindLessEqualAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
 
-template < class T > inline HInteger hFindLessEqualAbs( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
-return hFindLessEqualAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger>) hFindLessEqualAbs( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HInteger> returnvector;
+HInteger returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hFindLessEqualAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HInteger hFindLessEqualAbs( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
@@ -12173,16 +11770,12 @@ return hFindLessEqualAbs ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin()
 
 
 HInteger (*fptr_hFindLessEqualAbs_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindLessEqualAbs;
-HInteger (*fptr_hFindLessEqualAbs_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindLessEqualAbs;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLessEqualAbs_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindLessEqualAbs;
 HInteger (*fptr_hFindLessEqualAbs_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindLessEqualAbs;
-HInteger (*fptr_hFindLessEqualAbs_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindLessEqualAbs;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLessEqualAbs_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindLessEqualAbs;
 
 template < class T > inline HInteger hFindLessEqualAbs_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 return hFindLessEqualAbs ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
-}
-
-template < class T > inline HInteger hFindLessEqualAbs_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-return hFindLessEqualAbs ( vec.begin(vecslice1),vec.begin(vecslice2) , threshold , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
 }
 
 template < class T > inline HInteger hFindLessEqualAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
@@ -12191,9 +11784,7 @@ return hFindLessEqualAbs ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , t
 
 
 HInteger (*fptr_hFindLessEqualAbs_hSLICED_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqualAbs_hSLICED;
-HInteger (*fptr_hFindLessEqualAbs_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqualAbs_hSLICED;
 HInteger (*fptr_hFindLessEqualAbs_hSLICED_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqualAbs_hSLICED;
-HInteger (*fptr_hFindLessEqualAbs_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqualAbs_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -12244,6 +11835,7 @@ HInteger hFindGreaterThan (const Iter vec , const Iter vec_end, const typename I
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -12289,8 +11881,16 @@ template < class T > inline HInteger hFindGreaterThan( std::vector<T> & vec , T 
 return hFindGreaterThan ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
 
-template < class T > inline HInteger hFindGreaterThan( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
-return hFindGreaterThan ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger>) hFindGreaterThan( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HInteger> returnvector;
+HInteger returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hFindGreaterThan ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HInteger hFindGreaterThan( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
@@ -12299,16 +11899,12 @@ return hFindGreaterThan ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),
 
 
 HInteger (*fptr_hFindGreaterThan_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindGreaterThan;
-HInteger (*fptr_hFindGreaterThan_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindGreaterThan;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindGreaterThan_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindGreaterThan;
 HInteger (*fptr_hFindGreaterThan_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindGreaterThan;
-HInteger (*fptr_hFindGreaterThan_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindGreaterThan;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindGreaterThan_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindGreaterThan;
 
 template < class T > inline HInteger hFindGreaterThan_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 return hFindGreaterThan ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
-}
-
-template < class T > inline HInteger hFindGreaterThan_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-return hFindGreaterThan ( vec.begin(vecslice1),vec.begin(vecslice2) , threshold , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
 }
 
 template < class T > inline HInteger hFindGreaterThan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
@@ -12317,9 +11913,7 @@ return hFindGreaterThan ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , th
 
 
 HInteger (*fptr_hFindGreaterThan_hSLICED_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThan_hSLICED;
-HInteger (*fptr_hFindGreaterThan_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThan_hSLICED;
 HInteger (*fptr_hFindGreaterThan_hSLICED_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThan_hSLICED;
-HInteger (*fptr_hFindGreaterThan_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThan_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -12369,6 +11963,7 @@ HInteger hFindGreaterThanAbs (const Iter vec , const Iter vec_end, const typenam
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -12414,8 +12009,16 @@ template < class T > inline HInteger hFindGreaterThanAbs( std::vector<T> & vec ,
 return hFindGreaterThanAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
 
-template < class T > inline HInteger hFindGreaterThanAbs( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
-return hFindGreaterThanAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger>) hFindGreaterThanAbs( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HInteger> returnvector;
+HInteger returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hFindGreaterThanAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HInteger hFindGreaterThanAbs( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
@@ -12424,16 +12027,12 @@ return hFindGreaterThanAbs ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin
 
 
 HInteger (*fptr_hFindGreaterThanAbs_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindGreaterThanAbs;
-HInteger (*fptr_hFindGreaterThanAbs_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindGreaterThanAbs;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindGreaterThanAbs_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindGreaterThanAbs;
 HInteger (*fptr_hFindGreaterThanAbs_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindGreaterThanAbs;
-HInteger (*fptr_hFindGreaterThanAbs_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindGreaterThanAbs;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindGreaterThanAbs_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindGreaterThanAbs;
 
 template < class T > inline HInteger hFindGreaterThanAbs_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 return hFindGreaterThanAbs ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
-}
-
-template < class T > inline HInteger hFindGreaterThanAbs_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-return hFindGreaterThanAbs ( vec.begin(vecslice1),vec.begin(vecslice2) , threshold , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
 }
 
 template < class T > inline HInteger hFindGreaterThanAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
@@ -12442,9 +12041,7 @@ return hFindGreaterThanAbs ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 ,
 
 
 HInteger (*fptr_hFindGreaterThanAbs_hSLICED_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThanAbs_hSLICED;
-HInteger (*fptr_hFindGreaterThanAbs_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThanAbs_hSLICED;
 HInteger (*fptr_hFindGreaterThanAbs_hSLICED_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThanAbs_hSLICED;
-HInteger (*fptr_hFindGreaterThanAbs_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThanAbs_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -12495,6 +12092,7 @@ HInteger hFindGreaterEqual (const Iter vec , const Iter vec_end, const typename 
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -12540,8 +12138,16 @@ template < class T > inline HInteger hFindGreaterEqual( std::vector<T> & vec , T
 return hFindGreaterEqual ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
 
-template < class T > inline HInteger hFindGreaterEqual( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
-return hFindGreaterEqual ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger>) hFindGreaterEqual( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HInteger> returnvector;
+HInteger returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hFindGreaterEqual ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HInteger hFindGreaterEqual( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
@@ -12550,16 +12156,12 @@ return hFindGreaterEqual ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin()
 
 
 HInteger (*fptr_hFindGreaterEqual_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindGreaterEqual;
-HInteger (*fptr_hFindGreaterEqual_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindGreaterEqual;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindGreaterEqual_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindGreaterEqual;
 HInteger (*fptr_hFindGreaterEqual_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindGreaterEqual;
-HInteger (*fptr_hFindGreaterEqual_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindGreaterEqual;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindGreaterEqual_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindGreaterEqual;
 
 template < class T > inline HInteger hFindGreaterEqual_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 return hFindGreaterEqual ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
-}
-
-template < class T > inline HInteger hFindGreaterEqual_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-return hFindGreaterEqual ( vec.begin(vecslice1),vec.begin(vecslice2) , threshold , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
 }
 
 template < class T > inline HInteger hFindGreaterEqual_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
@@ -12568,9 +12170,7 @@ return hFindGreaterEqual ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , t
 
 
 HInteger (*fptr_hFindGreaterEqual_hSLICED_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqual_hSLICED;
-HInteger (*fptr_hFindGreaterEqual_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqual_hSLICED;
 HInteger (*fptr_hFindGreaterEqual_hSLICED_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqual_hSLICED;
-HInteger (*fptr_hFindGreaterEqual_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqual_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -12620,6 +12220,7 @@ HInteger hFindGreaterEqualAbs (const Iter vec , const Iter vec_end, const typena
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -12665,8 +12266,16 @@ template < class T > inline HInteger hFindGreaterEqualAbs( std::vector<T> & vec 
 return hFindGreaterEqualAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
 
-template < class T > inline HInteger hFindGreaterEqualAbs( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
-return hFindGreaterEqualAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger>) hFindGreaterEqualAbs( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HInteger> returnvector;
+HInteger returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hFindGreaterEqualAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HInteger hFindGreaterEqualAbs( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
@@ -12675,16 +12284,12 @@ return hFindGreaterEqualAbs ( vec.cbegin(),vec.cend() , threshold , vecout.cbegi
 
 
 HInteger (*fptr_hFindGreaterEqualAbs_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindGreaterEqualAbs;
-HInteger (*fptr_hFindGreaterEqualAbs_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindGreaterEqualAbs;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindGreaterEqualAbs_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindGreaterEqualAbs;
 HInteger (*fptr_hFindGreaterEqualAbs_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindGreaterEqualAbs;
-HInteger (*fptr_hFindGreaterEqualAbs_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindGreaterEqualAbs;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindGreaterEqualAbs_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindGreaterEqualAbs;
 
 template < class T > inline HInteger hFindGreaterEqualAbs_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 return hFindGreaterEqualAbs ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
-}
-
-template < class T > inline HInteger hFindGreaterEqualAbs_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-return hFindGreaterEqualAbs ( vec.begin(vecslice1),vec.begin(vecslice2) , threshold , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
 }
 
 template < class T > inline HInteger hFindGreaterEqualAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
@@ -12693,9 +12298,7 @@ return hFindGreaterEqualAbs ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 
 
 
 HInteger (*fptr_hFindGreaterEqualAbs_hSLICED_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqualAbs_hSLICED;
-HInteger (*fptr_hFindGreaterEqualAbs_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqualAbs_hSLICED;
 HInteger (*fptr_hFindGreaterEqualAbs_hSLICED_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqualAbs_hSLICED;
-HInteger (*fptr_hFindGreaterEqualAbs_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqualAbs_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -12746,6 +12349,7 @@ HInteger hFindLessThan (const Iter vec , const Iter vec_end, const typename Iter
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -12791,8 +12395,16 @@ template < class T > inline HInteger hFindLessThan( std::vector<T> & vec , T thr
 return hFindLessThan ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
 
-template < class T > inline HInteger hFindLessThan( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
-return hFindLessThan ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger>) hFindLessThan( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HInteger> returnvector;
+HInteger returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hFindLessThan ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HInteger hFindLessThan( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
@@ -12801,16 +12413,12 @@ return hFindLessThan ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),vec
 
 
 HInteger (*fptr_hFindLessThan_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindLessThan;
-HInteger (*fptr_hFindLessThan_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindLessThan;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLessThan_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindLessThan;
 HInteger (*fptr_hFindLessThan_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindLessThan;
-HInteger (*fptr_hFindLessThan_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindLessThan;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLessThan_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindLessThan;
 
 template < class T > inline HInteger hFindLessThan_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 return hFindLessThan ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
-}
-
-template < class T > inline HInteger hFindLessThan_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-return hFindLessThan ( vec.begin(vecslice1),vec.begin(vecslice2) , threshold , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
 }
 
 template < class T > inline HInteger hFindLessThan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
@@ -12819,9 +12427,7 @@ return hFindLessThan ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , thres
 
 
 HInteger (*fptr_hFindLessThan_hSLICED_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThan_hSLICED;
-HInteger (*fptr_hFindLessThan_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThan_hSLICED;
 HInteger (*fptr_hFindLessThan_hSLICED_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThan_hSLICED;
-HInteger (*fptr_hFindLessThan_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThan_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -12871,6 +12477,7 @@ HInteger hFindLessThanAbs (const Iter vec , const Iter vec_end, const typename I
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -12916,8 +12523,16 @@ template < class T > inline HInteger hFindLessThanAbs( std::vector<T> & vec , T 
 return hFindLessThanAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
 
-template < class T > inline HInteger hFindLessThanAbs( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
-return hFindLessThanAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger>) hFindLessThanAbs( hArray<T> & vec , T threshold , hArray<HInteger> & vecout) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HInteger> returnvector;
+HInteger returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hFindLessThanAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
+vec.next();
+vecout.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HInteger hFindLessThanAbs( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
@@ -12926,16 +12541,12 @@ return hFindLessThanAbs ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),
 
 
 HInteger (*fptr_hFindLessThanAbs_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindLessThanAbs;
-HInteger (*fptr_hFindLessThanAbs_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindLessThanAbs;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLessThanAbs_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HNumber threshold , hArray<HInteger> & vecout) = &hFindLessThanAbs;
 HInteger (*fptr_hFindLessThanAbs_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindLessThanAbs;
-HInteger (*fptr_hFindLessThanAbs_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindLessThanAbs;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLessThanAbs_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger threshold , hArray<HInteger> & vecout) = &hFindLessThanAbs;
 
 template < class T > inline HInteger hFindLessThanAbs_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
 return hFindLessThanAbs ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
-}
-
-template < class T > inline HInteger hFindLessThanAbs_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
-return hFindLessThanAbs ( vec.begin(vecslice1),vec.begin(vecslice2) , threshold , vecout.begin(vecoutslice1),vecout.begin(vecoutslice2));
 }
 
 template < class T > inline HInteger hFindLessThanAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
@@ -12944,9 +12555,7 @@ return hFindLessThanAbs ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , th
 
 
 HInteger (*fptr_hFindLessThanAbs_hSLICED_STL_HNumber_11HInteger_STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThanAbs_hSLICED;
-HInteger (*fptr_hFindLessThanAbs_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThanAbs_hSLICED;
 HInteger (*fptr_hFindLessThanAbs_hSLICED_STL_HInteger_11HInteger_STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThanAbs_hSLICED;
-HInteger (*fptr_hFindLessThanAbs_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , hArray<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThanAbs_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -13008,6 +12617,7 @@ void hDownsample (const Iter vec1,
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -13053,7 +12663,12 @@ hDownsample ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
 
 template < class T > inline void hDownsample( hArray<T> & vec1 , hArray<T> & vec2) {
+bool iterate=true;
+while(iterate) {
 hDownsample ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
+vec1.next();
+vec2.next();
+iterate = vec1.iterate(); };
 }
 
 template < class T > inline void hDownsample( casa::Vector<T> & vec1 , casa::Vector<T> & vec2) {
@@ -13070,19 +12685,13 @@ template < class T > inline void hDownsample_hSLICED ( std::vector<T> & vec1 , H
 hDownsample ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
 }
 
-template < class T > inline void hDownsample_hSLICED ( hArray<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
-hDownsample ( vec1.begin(vec1slice1),vec1.begin(vec1slice2) , vec2.begin(vec2slice1),vec2.begin(vec2slice2));
-}
-
 template < class T > inline void hDownsample_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
 hDownsample ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
 }
 
 
 void (*fptr_hDownsample_hSLICED_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDownsample_hSLICED;
-void (*fptr_hDownsample_hSLICED_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDownsample_hSLICED;
 void (*fptr_hDownsample_hSLICED_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDownsample_hSLICED;
-void (*fptr_hDownsample_hSLICED_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , hArray<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDownsample_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -13171,9 +12780,7 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 std::vector<HNumber> (*fptr_hDownsample_STL_HNumber_1HNumber_STL)( std::vector<HNumber> & vec , HNumber downsample_factor) = &hDownsample;
-hArray<HNumber> (*fptr_hDownsample_hARRAY_HNumber_1HNumber_STL)( hArray<HNumber> & vec , HNumber downsample_factor) = &hDownsample;
 std::vector<HInteger> (*fptr_hDownsample_STL_HInteger_1HNumber_STL)( std::vector<HInteger> & vec , HNumber downsample_factor) = &hDownsample;
-hArray<HInteger> (*fptr_hDownsample_hARRAY_HInteger_1HNumber_STL)( hArray<HInteger> & vec , HNumber downsample_factor) = &hDownsample;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -13246,6 +12853,7 @@ HInteger hFindLowerBound (const Iter vec,
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -13290,8 +12898,15 @@ template < class T > inline HInteger hFindLowerBound( std::vector<T> & vec , T v
 return hFindLowerBound ( vec.begin(),vec.end() , value);
 }
 
-template < class T > inline HInteger hFindLowerBound( hArray<T> & vec , T value) {
-return hFindLowerBound ( vec.begin(),vec.end() , value);
+template < class T > inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger>) hFindLowerBound( hArray<T> & vec , T value) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HInteger> returnvector;
+HInteger returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hFindLowerBound ( vec.begin(),vec.end() , value);
+vec.next();
+iterate = vec.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 template < class T > inline HInteger hFindLowerBound( casa::Vector<T> & vec , T value) {
@@ -13300,18 +12915,14 @@ return hFindLowerBound ( vec.cbegin(),vec.cend() , value);
 
 
 HInteger (*fptr_hFindLowerBound_STL_HComplex_11_STDIT)( std::vector<HComplex> & vec , HComplex value) = &hFindLowerBound;
-HInteger (*fptr_hFindLowerBound_hARRAY_HComplex_11_STDIT)( hArray<HComplex> & vec , HComplex value) = &hFindLowerBound;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLowerBound_hARRAY_HComplex_11_STDIT)( hArray<HComplex> & vec , HComplex value) = &hFindLowerBound;
 HInteger (*fptr_hFindLowerBound_STL_HNumber_11_STDIT)( std::vector<HNumber> & vec , HNumber value) = &hFindLowerBound;
-HInteger (*fptr_hFindLowerBound_hARRAY_HNumber_11_STDIT)( hArray<HNumber> & vec , HNumber value) = &hFindLowerBound;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLowerBound_hARRAY_HNumber_11_STDIT)( hArray<HNumber> & vec , HNumber value) = &hFindLowerBound;
 HInteger (*fptr_hFindLowerBound_STL_HInteger_11_STDIT)( std::vector<HInteger> & vec , HInteger value) = &hFindLowerBound;
-HInteger (*fptr_hFindLowerBound_hARRAY_HInteger_11_STDIT)( hArray<HInteger> & vec , HInteger value) = &hFindLowerBound;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HInteger, vector<HInteger >) (*fptr_hFindLowerBound_hARRAY_HInteger_11_STDIT)( hArray<HInteger> & vec , HInteger value) = &hFindLowerBound;
 
 template < class T > inline HInteger hFindLowerBound_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T value ) {
 return hFindLowerBound ( vec.begin() + vecslice1,vec.begin() + vecslice2 , value);
-}
-
-template < class T > inline HInteger hFindLowerBound_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T value ) {
-return hFindLowerBound ( vec.begin(vecslice1),vec.begin(vecslice2) , value);
 }
 
 template < class T > inline HInteger hFindLowerBound_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T value ) {
@@ -13320,11 +12931,8 @@ return hFindLowerBound ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , val
 
 
 HInteger (*fptr_hFindLowerBound_hSLICED_STL_HComplex_11_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HComplex value ) = &hFindLowerBound_hSLICED;
-HInteger (*fptr_hFindLowerBound_hSLICED_hARRAY_HComplex_11_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HComplex value ) = &hFindLowerBound_hSLICED;
 HInteger (*fptr_hFindLowerBound_hSLICED_STL_HNumber_11_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber value ) = &hFindLowerBound_hSLICED;
-HInteger (*fptr_hFindLowerBound_hSLICED_hARRAY_HNumber_11_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber value ) = &hFindLowerBound_hSLICED;
 HInteger (*fptr_hFindLowerBound_hSLICED_STL_HInteger_11_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger value ) = &hFindLowerBound_hSLICED;
-HInteger (*fptr_hFindLowerBound_hSLICED_hARRAY_HInteger_11_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger value ) = &hFindLowerBound_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -13689,7 +13297,8 @@ void hRunningAverage (const DataIter idata,
      typically would peak) */
   HInteger middle=l/2;
   /* To avoid too many rounding errors with Integers */
-  typename DataIter::value_type fac = l*10;
+  //  typename DataIter::value_type fac = l*10;
+  HNumber temp;
   DataIter dit;
   DataIter dit2;
   DataIter din(idata);
@@ -13698,14 +13307,15 @@ void hRunningAverage (const DataIter idata,
   while (din<idata_end && dout<odata_end) {
     dit=din-middle; //data iterator set to the first element to be taken into account (left from current element)
     wit=weights; // weight iterators set to beginning of weights
+    temp=0.0;
     while (wit<weights_end) {
       if (dit<idata) dit2=idata;
       else if (dit>=idata_end) dit2=idata_end-1;
       else dit2=dit;
-      *dout=*dout+((*dit2)*(*wit)*fac);
+      temp=temp+(*dit2)*(*wit);
       ++dit; ++wit;
     };
-    *dout/=fac;
+    *dout=temp;
     ++dout; ++din; //point to the next element in data input and output vector
   };
   return;
@@ -13719,6 +13329,8 @@ void hRunningAverage (const DataIter idata,
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
@@ -13765,6 +13377,20 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 hRunningAverage ( idata.begin(),idata.end() , odata.begin(),odata.end() , weights.begin(),weights.end());
 }
 
+inline void hRunningAverage( hArray<HNumber> & idata , hArray<HNumber> & odata , hArray<HNumber> & weights) {
+bool iterate=true;
+while(iterate) {
+hRunningAverage ( idata.begin(),idata.end() , odata.begin(),odata.end() , weights.begin(),weights.end());
+idata.next();
+odata.next();
+weights.next();
+iterate = idata.iterate(); };
+}
+
+inline void hRunningAverage( casa::Vector<HNumber> & idata , casa::Vector<HNumber> & odata , casa::Vector<HNumber> & weights) {
+hRunningAverage ( idata.cbegin(),idata.cend() , odata.cbegin(),odata.cend() , weights.cbegin(),weights.cend());
+}
+
 
 void (*fptr_hRunningAverage_STL_HInteger_HNumberHNumberHNumber_STDITSTDITSTDIT)( std::vector<HNumber> & idata , std::vector<HNumber> & odata , std::vector<HNumber> & weights) = &hRunningAverage;
 void (*fptr_hRunningAverage_hARRAY_HInteger_HNumberHNumberHNumber_STDITSTDITSTDIT)( hArray<HNumber> & idata , hArray<HNumber> & odata , hArray<HNumber> & weights) = &hRunningAverage;
@@ -13773,9 +13399,12 @@ void (*fptr_hRunningAverage_hARRAY_HInteger_HNumberHNumberHNumber_STDITSTDITSTDI
 hRunningAverage ( idata.begin() + idataslice1,idata.begin() + idataslice2 , odata.begin() + odataslice1,odata.begin() + odataslice2 , weights.begin() + weightsslice1,weights.begin() + weightsslice2);
 }
 
+inline void hRunningAverage_hSLICED ( casa::Vector<HNumber> & idata , HInteger idataslice1 , HInteger idataslice2 , casa::Vector<HNumber> & odata , HInteger odataslice1 , HInteger odataslice2 , casa::Vector<HNumber> & weights , HInteger weightsslice1 , HInteger weightsslice2) {
+hRunningAverage ( idata.cbegin() + idataslice1,idata.cbegin() + idataslice2 , odata.cbegin() + odataslice1,odata.cbegin() + odataslice2 , weights.cbegin() + weightsslice1,weights.cbegin() + weightsslice2);
+}
+
 
 void (*fptr_hRunningAverage_hSLICED_STL_HInteger_HNumberHNumberHNumber_STDITSTDITSTDIT)( std::vector<HNumber> & idata , HInteger idataslice1 , HInteger idataslice2 , std::vector<HNumber> & odata , HInteger odataslice1 , HInteger odataslice2 , std::vector<HNumber> & weights , HInteger weightsslice1 , HInteger weightsslice2) = &hRunningAverage_hSLICED;
-void (*fptr_hRunningAverage_hSLICED_hARRAY_HInteger_HNumberHNumberHNumber_STDITSTDITSTDIT)( hArray<HNumber> & idata , HInteger idataslice1 , HInteger idataslice2 , hArray<HNumber> & odata , HInteger odataslice1 , HInteger odataslice2 , hArray<HNumber> & weights , HInteger weightsslice1 , HInteger weightsslice2) = &hRunningAverage_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -13826,6 +13455,8 @@ void hRunningAverage (const DataIter idata,
 //#define HFPP_FUNC_hARRAY 1
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -13872,6 +13503,19 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 hRunningAverage ( idata.begin(),idata.end() , odata.begin(),odata.end() , wlen , wtype);
 }
 
+inline void hRunningAverage( hArray<HNumber> & idata , hArray<HNumber> & odata , HInteger wlen , hWEIGHTS wtype) {
+bool iterate=true;
+while(iterate) {
+hRunningAverage ( idata.begin(),idata.end() , odata.begin(),odata.end() , wlen , wtype);
+idata.next();
+odata.next();
+iterate = idata.iterate(); };
+}
+
+inline void hRunningAverage( casa::Vector<HNumber> & idata , casa::Vector<HNumber> & odata , HInteger wlen , hWEIGHTS wtype) {
+hRunningAverage ( idata.cbegin(),idata.cend() , odata.cbegin(),odata.cend() , wlen , wtype);
+}
+
 
 void (*fptr_hRunningAverage_STL_HInteger_HNumberHNumberHIntegerhWEIGHTS_STDITSTDIT)( std::vector<HNumber> & idata , std::vector<HNumber> & odata , HInteger wlen , hWEIGHTS wtype) = &hRunningAverage;
 void (*fptr_hRunningAverage_hARRAY_HInteger_HNumberHNumberHIntegerhWEIGHTS_STDITSTDIT)( hArray<HNumber> & idata , hArray<HNumber> & odata , HInteger wlen , hWEIGHTS wtype) = &hRunningAverage;
@@ -13880,9 +13524,12 @@ void (*fptr_hRunningAverage_hARRAY_HInteger_HNumberHNumberHIntegerhWEIGHTS_STDIT
 hRunningAverage ( idata.begin() + idataslice1,idata.begin() + idataslice2 , odata.begin() + odataslice1,odata.begin() + odataslice2 , wlen , wtype);
 }
 
+inline void hRunningAverage_hSLICED ( casa::Vector<HNumber> & idata , HInteger idataslice1 , HInteger idataslice2 , casa::Vector<HNumber> & odata , HInteger odataslice1 , HInteger odataslice2 , HInteger wlen , hWEIGHTS wtype ) {
+hRunningAverage ( idata.cbegin() + idataslice1,idata.cbegin() + idataslice2 , odata.cbegin() + odataslice1,odata.cbegin() + odataslice2 , wlen , wtype);
+}
+
 
 void (*fptr_hRunningAverage_hSLICED_STL_HInteger_HNumberHNumberHIntegerhWEIGHTS_STDITSTDIT)( std::vector<HNumber> & idata , HInteger idataslice1 , HInteger idataslice2 , std::vector<HNumber> & odata , HInteger odataslice1 , HInteger odataslice2 , HInteger wlen , hWEIGHTS wtype ) = &hRunningAverage_hSLICED;
-void (*fptr_hRunningAverage_hSLICED_hARRAY_HInteger_HNumberHNumberHIntegerhWEIGHTS_STDITSTDIT)( hArray<HNumber> & idata , HInteger idataslice1 , HInteger idataslice2 , hArray<HNumber> & odata , HInteger odataslice1 , HInteger odataslice2 , HInteger wlen , hWEIGHTS wtype ) = &hRunningAverage_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -13931,6 +13578,7 @@ HNumber hGeometricDelayFarField (
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -13976,8 +13624,16 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 return hGeometricDelayFarField ( antPosition.begin() , skyDirection.begin() , length);
 }
 
-inline HNumber hGeometricDelayFarField( hArray<HNumber> & antPosition , hArray<HNumber> & skyDirection , HNumber length) {
-return hGeometricDelayFarField ( antPosition.begin() , skyDirection.begin() , length);
+inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber>) hGeometricDelayFarField( hArray<HNumber> & antPosition , hArray<HNumber> & skyDirection , HNumber length) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HNumber> returnvector;
+HNumber returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hGeometricDelayFarField ( antPosition.begin() , skyDirection.begin() , length);
+antPosition.next();
+skyDirection.next();
+iterate = antPosition.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 inline HNumber hGeometricDelayFarField( casa::Vector<HNumber> & antPosition , casa::Vector<HNumber> & skyDirection , HNumber length) {
@@ -13986,7 +13642,7 @@ return hGeometricDelayFarField ( antPosition.cbegin() , skyDirection.cbegin() , 
 
 
 HNumber (*fptr_hGeometricDelayFarField_STL_HInteger_HNumberHNumberHNumber_STDITFIXEDSTDITFIXED)( std::vector<HNumber> & antPosition , std::vector<HNumber> & skyDirection , HNumber length) = &hGeometricDelayFarField;
-HNumber (*fptr_hGeometricDelayFarField_hARRAY_HInteger_HNumberHNumberHNumber_STDITFIXEDSTDITFIXED)( hArray<HNumber> & antPosition , hArray<HNumber> & skyDirection , HNumber length) = &hGeometricDelayFarField;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber >) (*fptr_hGeometricDelayFarField_hARRAY_HInteger_HNumberHNumberHNumber_STDITFIXEDSTDITFIXED)( hArray<HNumber> & antPosition , hArray<HNumber> & skyDirection , HNumber length) = &hGeometricDelayFarField;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -14029,6 +13685,7 @@ HNumber hGeometricDelayNearField (
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -14076,8 +13733,16 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 return hGeometricDelayNearField ( antPosition.begin() , skyPosition.begin() , distance);
 }
 
-inline HNumber hGeometricDelayNearField( hArray<HNumber> & antPosition , hArray<HNumber> & skyPosition , HNumber distance) {
-return hGeometricDelayNearField ( antPosition.begin() , skyPosition.begin() , distance);
+inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber>) hGeometricDelayNearField( hArray<HNumber> & antPosition , hArray<HNumber> & skyPosition , HNumber distance) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<HNumber> returnvector;
+HNumber returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hGeometricDelayNearField ( antPosition.begin() , skyPosition.begin() , distance);
+antPosition.next();
+skyPosition.next();
+iterate = antPosition.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 inline HNumber hGeometricDelayNearField( casa::Vector<HNumber> & antPosition , casa::Vector<HNumber> & skyPosition , HNumber distance) {
@@ -14086,7 +13751,7 @@ return hGeometricDelayNearField ( antPosition.cbegin() , skyPosition.cbegin() , 
 
 
 HNumber (*fptr_hGeometricDelayNearField_STL_HInteger_HNumberHNumberHNumber_STDITFIXEDSTDITFIXED)( std::vector<HNumber> & antPosition , std::vector<HNumber> & skyPosition , HNumber distance) = &hGeometricDelayNearField;
-HNumber (*fptr_hGeometricDelayNearField_hARRAY_HInteger_HNumberHNumberHNumber_STDITFIXEDSTDITFIXED)( hArray<HNumber> & antPosition , hArray<HNumber> & skyPosition , HNumber distance) = &hGeometricDelayNearField;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(HNumber, vector<HNumber >) (*fptr_hGeometricDelayNearField_hARRAY_HInteger_HNumberHNumberHNumber_STDITFIXEDSTDITFIXED)( hArray<HNumber> & antPosition , hArray<HNumber> & skyPosition , HNumber distance) = &hGeometricDelayNearField;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -14159,6 +13824,7 @@ void hGeometricDelays (
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -14206,7 +13872,13 @@ hGeometricDelays ( antPositions.begin(),antPositions.end() , skyPositions.begin(
 }
 
 inline void hGeometricDelays( hArray<HNumber> & antPositions , hArray<HNumber> & skyPositions , hArray<HNumber> & delays , bool farfield) {
+bool iterate=true;
+while(iterate) {
 hGeometricDelays ( antPositions.begin(),antPositions.end() , skyPositions.begin(),skyPositions.end() , delays.begin(),delays.end() , farfield);
+antPositions.next();
+skyPositions.next();
+delays.next();
+iterate = antPositions.iterate(); };
 }
 
 inline void hGeometricDelays( casa::Vector<HNumber> & antPositions , casa::Vector<HNumber> & skyPositions , casa::Vector<HNumber> & delays , bool farfield) {
@@ -14221,17 +13893,12 @@ void (*fptr_hGeometricDelays_hARRAY_HInteger_HNumberHNumberHNumberbool_STDITSTDI
 hGeometricDelays ( antPositions.begin() + antPositionsslice1,antPositions.begin() + antPositionsslice2 , skyPositions.begin() + skyPositionsslice1,skyPositions.begin() + skyPositionsslice2 , delays.begin() + delaysslice1,delays.begin() + delaysslice2 , farfield);
 }
 
-inline void hGeometricDelays_hSLICED ( hArray<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , hArray<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , hArray<HNumber> & delays , HInteger delaysslice1 , HInteger delaysslice2 , bool farfield ) {
-hGeometricDelays ( antPositions.begin(antPositionsslice1),antPositions.begin(antPositionsslice2) , skyPositions.begin(skyPositionsslice1),skyPositions.begin(skyPositionsslice2) , delays.begin(delaysslice1),delays.begin(delaysslice2) , farfield);
-}
-
 inline void hGeometricDelays_hSLICED ( casa::Vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , casa::Vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , casa::Vector<HNumber> & delays , HInteger delaysslice1 , HInteger delaysslice2 , bool farfield ) {
 hGeometricDelays ( antPositions.cbegin() + antPositionsslice1,antPositions.cbegin() + antPositionsslice2 , skyPositions.cbegin() + skyPositionsslice1,skyPositions.cbegin() + skyPositionsslice2 , delays.cbegin() + delaysslice1,delays.cbegin() + delaysslice2 , farfield);
 }
 
 
 void (*fptr_hGeometricDelays_hSLICED_STL_HInteger_HNumberHNumberHNumberbool_STDITSTDITSTDIT)( std::vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , std::vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , std::vector<HNumber> & delays , HInteger delaysslice1 , HInteger delaysslice2 , bool farfield ) = &hGeometricDelays_hSLICED;
-void (*fptr_hGeometricDelays_hSLICED_hARRAY_HInteger_HNumberHNumberHNumberbool_STDITSTDITSTDIT)( hArray<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , hArray<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , hArray<HNumber> & delays , HInteger delaysslice1 , HInteger delaysslice2 , bool farfield ) = &hGeometricDelays_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -14320,6 +13987,7 @@ void hGeometricPhases (
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -14368,7 +14036,14 @@ hGeometricPhases ( frequencies.begin(),frequencies.end() , antPositions.begin(),
 }
 
 inline void hGeometricPhases( hArray<HNumber> & frequencies , hArray<HNumber> & antPositions , hArray<HNumber> & skyPositions , hArray<HNumber> & phases , bool farfield) {
+bool iterate=true;
+while(iterate) {
 hGeometricPhases ( frequencies.begin(),frequencies.end() , antPositions.begin(),antPositions.end() , skyPositions.begin(),skyPositions.end() , phases.begin(),phases.end() , farfield);
+frequencies.next();
+antPositions.next();
+skyPositions.next();
+phases.next();
+iterate = frequencies.iterate(); };
 }
 
 inline void hGeometricPhases( casa::Vector<HNumber> & frequencies , casa::Vector<HNumber> & antPositions , casa::Vector<HNumber> & skyPositions , casa::Vector<HNumber> & phases , bool farfield) {
@@ -14383,17 +14058,12 @@ void (*fptr_hGeometricPhases_hARRAY_HInteger_HNumberHNumberHNumberHNumberbool_ST
 hGeometricPhases ( frequencies.begin() + frequenciesslice1,frequencies.begin() + frequenciesslice2 , antPositions.begin() + antPositionsslice1,antPositions.begin() + antPositionsslice2 , skyPositions.begin() + skyPositionsslice1,skyPositions.begin() + skyPositionsslice2 , phases.begin() + phasesslice1,phases.begin() + phasesslice2 , farfield);
 }
 
-inline void hGeometricPhases_hSLICED ( hArray<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , hArray<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , hArray<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , hArray<HNumber> & phases , HInteger phasesslice1 , HInteger phasesslice2 , bool farfield ) {
-hGeometricPhases ( frequencies.begin(frequenciesslice1),frequencies.begin(frequenciesslice2) , antPositions.begin(antPositionsslice1),antPositions.begin(antPositionsslice2) , skyPositions.begin(skyPositionsslice1),skyPositions.begin(skyPositionsslice2) , phases.begin(phasesslice1),phases.begin(phasesslice2) , farfield);
-}
-
 inline void hGeometricPhases_hSLICED ( casa::Vector<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , casa::Vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , casa::Vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , casa::Vector<HNumber> & phases , HInteger phasesslice1 , HInteger phasesslice2 , bool farfield ) {
 hGeometricPhases ( frequencies.cbegin() + frequenciesslice1,frequencies.cbegin() + frequenciesslice2 , antPositions.cbegin() + antPositionsslice1,antPositions.cbegin() + antPositionsslice2 , skyPositions.cbegin() + skyPositionsslice1,skyPositions.cbegin() + skyPositionsslice2 , phases.cbegin() + phasesslice1,phases.cbegin() + phasesslice2 , farfield);
 }
 
 
 void (*fptr_hGeometricPhases_hSLICED_STL_HInteger_HNumberHNumberHNumberHNumberbool_STDITSTDITSTDITSTDIT)( std::vector<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , std::vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , std::vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , std::vector<HNumber> & phases , HInteger phasesslice1 , HInteger phasesslice2 , bool farfield ) = &hGeometricPhases_hSLICED;
-void (*fptr_hGeometricPhases_hSLICED_hARRAY_HInteger_HNumberHNumberHNumberHNumberbool_STDITSTDITSTDITSTDIT)( hArray<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , hArray<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , hArray<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , hArray<HNumber> & phases , HInteger phasesslice1 , HInteger phasesslice2 , bool farfield ) = &hGeometricPhases_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -14482,6 +14152,7 @@ void hGeometricWeights (
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -14530,7 +14201,14 @@ hGeometricWeights ( frequencies.begin(),frequencies.end() , antPositions.begin()
 }
 
 inline void hGeometricWeights( hArray<HNumber> & frequencies , hArray<HNumber> & antPositions , hArray<HNumber> & skyPositions , hArray<HComplex> & weights , bool farfield) {
+bool iterate=true;
+while(iterate) {
 hGeometricWeights ( frequencies.begin(),frequencies.end() , antPositions.begin(),antPositions.end() , skyPositions.begin(),skyPositions.end() , weights.begin(),weights.end() , farfield);
+frequencies.next();
+antPositions.next();
+skyPositions.next();
+weights.next();
+iterate = frequencies.iterate(); };
 }
 
 inline void hGeometricWeights( casa::Vector<HNumber> & frequencies , casa::Vector<HNumber> & antPositions , casa::Vector<HNumber> & skyPositions , casa::Vector<HComplex> & weights , bool farfield) {
@@ -14545,17 +14223,12 @@ void (*fptr_hGeometricWeights_hARRAY_HInteger_HNumberHNumberHNumberHComplexbool_
 hGeometricWeights ( frequencies.begin() + frequenciesslice1,frequencies.begin() + frequenciesslice2 , antPositions.begin() + antPositionsslice1,antPositions.begin() + antPositionsslice2 , skyPositions.begin() + skyPositionsslice1,skyPositions.begin() + skyPositionsslice2 , weights.begin() + weightsslice1,weights.begin() + weightsslice2 , farfield);
 }
 
-inline void hGeometricWeights_hSLICED ( hArray<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , hArray<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , hArray<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , hArray<HComplex> & weights , HInteger weightsslice1 , HInteger weightsslice2 , bool farfield ) {
-hGeometricWeights ( frequencies.begin(frequenciesslice1),frequencies.begin(frequenciesslice2) , antPositions.begin(antPositionsslice1),antPositions.begin(antPositionsslice2) , skyPositions.begin(skyPositionsslice1),skyPositions.begin(skyPositionsslice2) , weights.begin(weightsslice1),weights.begin(weightsslice2) , farfield);
-}
-
 inline void hGeometricWeights_hSLICED ( casa::Vector<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , casa::Vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , casa::Vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , casa::Vector<HComplex> & weights , HInteger weightsslice1 , HInteger weightsslice2 , bool farfield ) {
 hGeometricWeights ( frequencies.cbegin() + frequenciesslice1,frequencies.cbegin() + frequenciesslice2 , antPositions.cbegin() + antPositionsslice1,antPositions.cbegin() + antPositionsslice2 , skyPositions.cbegin() + skyPositionsslice1,skyPositions.cbegin() + skyPositionsslice2 , weights.cbegin() + weightsslice1,weights.cbegin() + weightsslice2 , farfield);
 }
 
 
 void (*fptr_hGeometricWeights_hSLICED_STL_HInteger_HNumberHNumberHNumberHComplexbool_STDITSTDITSTDITSTDIT)( std::vector<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , std::vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , std::vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , std::vector<HComplex> & weights , HInteger weightsslice1 , HInteger weightsslice2 , bool farfield ) = &hGeometricWeights_hSLICED;
-void (*fptr_hGeometricWeights_hSLICED_hARRAY_HInteger_HNumberHNumberHNumberHComplexbool_STDITSTDITSTDITSTDIT)( hArray<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , hArray<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , hArray<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , hArray<HComplex> & weights , HInteger weightsslice1 , HInteger weightsslice2 , bool farfield ) = &hGeometricWeights_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -14584,7 +14257,6 @@ void (*fptr_hGeometricWeights_hSLICED_hARRAY_HInteger_HNumberHNumberHNumberHComp
 template <class Iterin, class Iter>
 void hSpectralPower(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_end)
 {
-  typedef typename Iter::value_type T;
   Iterin it(vec);
   Iter itout(out);
   while ((it!=vec_end) && (itout !=out_end)) {
@@ -14601,6 +14273,8 @@ void hSpectralPower(const Iterin vec,const Iterin vec_end, const Iter out,const 
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
@@ -14646,6 +14320,19 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 hSpectralPower ( vec.begin(),vec.end() , outvec.begin(),outvec.end());
 }
 
+inline void hSpectralPower( hArray<HComplex> & vec , hArray<HNumber> & outvec) {
+bool iterate=true;
+while(iterate) {
+hSpectralPower ( vec.begin(),vec.end() , outvec.begin(),outvec.end());
+vec.next();
+outvec.next();
+iterate = vec.iterate(); };
+}
+
+inline void hSpectralPower( casa::Vector<HComplex> & vec , casa::Vector<HNumber> & outvec) {
+hSpectralPower ( vec.cbegin(),vec.cend() , outvec.cbegin(),outvec.cend());
+}
+
 
 void (*fptr_hSpectralPower_STL_HInteger_HComplexHNumber_STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HNumber> & outvec) = &hSpectralPower;
 void (*fptr_hSpectralPower_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<HComplex> & vec , hArray<HNumber> & outvec) = &hSpectralPower;
@@ -14654,9 +14341,12 @@ void (*fptr_hSpectralPower_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<H
 hSpectralPower ( vec.begin() + vecslice1,vec.begin() + vecslice2 , outvec.begin() + outvecslice1,outvec.begin() + outvecslice2);
 }
 
+inline void hSpectralPower_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<HNumber> & outvec , HInteger outvecslice1 , HInteger outvecslice2) {
+hSpectralPower ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , outvec.cbegin() + outvecslice1,outvec.cbegin() + outvecslice2);
+}
+
 
 void (*fptr_hSpectralPower_hSLICED_STL_HInteger_HComplexHNumber_STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hSpectralPower_hSLICED;
-void (*fptr_hSpectralPower_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , hArray<HNumber> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hSpectralPower_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -14694,6 +14384,7 @@ void hADC2Voltage(const Iter vec, const Iter vec_end, const HNumber adc2voltage)
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -14741,7 +14432,11 @@ hADC2Voltage ( vec.begin(),vec.end() , adc2voltage);
 }
 
 template < class T > inline void hADC2Voltage( hArray<T> & vec , HNumber adc2voltage) {
+bool iterate=true;
+while(iterate) {
 hADC2Voltage ( vec.begin(),vec.end() , adc2voltage);
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hADC2Voltage( casa::Vector<T> & vec , HNumber adc2voltage) {
@@ -14760,21 +14455,14 @@ template < class T > inline void hADC2Voltage_hSLICED ( std::vector<T> & vec , H
 hADC2Voltage ( vec.begin() + vecslice1,vec.begin() + vecslice2 , adc2voltage);
 }
 
-template < class T > inline void hADC2Voltage_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) {
-hADC2Voltage ( vec.begin(vecslice1),vec.begin(vecslice2) , adc2voltage);
-}
-
 template < class T > inline void hADC2Voltage_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) {
 hADC2Voltage ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , adc2voltage);
 }
 
 
 void (*fptr_hADC2Voltage_hSLICED_STL_HComplex_1HNumber_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) = &hADC2Voltage_hSLICED;
-void (*fptr_hADC2Voltage_hSLICED_hARRAY_HComplex_1HNumber_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) = &hADC2Voltage_hSLICED;
 void (*fptr_hADC2Voltage_hSLICED_STL_HNumber_1HNumber_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) = &hADC2Voltage_hSLICED;
-void (*fptr_hADC2Voltage_hSLICED_hARRAY_HNumber_1HNumber_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) = &hADC2Voltage_hSLICED;
 void (*fptr_hADC2Voltage_hSLICED_STL_HInteger_1HNumber_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) = &hADC2Voltage_hSLICED;
-void (*fptr_hADC2Voltage_hSLICED_hARRAY_HInteger_1HNumber_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) = &hADC2Voltage_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -14829,6 +14517,7 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -14877,7 +14566,11 @@ hGetHanningFilter ( vec.begin(),vec.end() , Alpha , Beta , BetaRise , BetaFall);
 }
 
 template < class T > inline void hGetHanningFilter( hArray<T> & vec , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall) {
+bool iterate=true;
+while(iterate) {
 hGetHanningFilter ( vec.begin(),vec.end() , Alpha , Beta , BetaRise , BetaFall);
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hGetHanningFilter( casa::Vector<T> & vec , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall) {
@@ -14896,21 +14589,14 @@ template < class T > inline void hGetHanningFilter_hSLICED ( std::vector<T> & ve
 hGetHanningFilter ( vec.begin() + vecslice1,vec.begin() + vecslice2 , Alpha , Beta , BetaRise , BetaFall);
 }
 
-template < class T > inline void hGetHanningFilter_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) {
-hGetHanningFilter ( vec.begin(vecslice1),vec.begin(vecslice2) , Alpha , Beta , BetaRise , BetaFall);
-}
-
 template < class T > inline void hGetHanningFilter_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) {
 hGetHanningFilter ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , Alpha , Beta , BetaRise , BetaFall);
 }
 
 
 void (*fptr_hGetHanningFilter_hSLICED_STL_HComplex_1HNumberuintuintuint_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HComplex_1HNumberuintuintuint_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) = &hGetHanningFilter_hSLICED;
 void (*fptr_hGetHanningFilter_hSLICED_STL_HNumber_1HNumberuintuintuint_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HNumber_1HNumberuintuintuint_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) = &hGetHanningFilter_hSLICED;
 void (*fptr_hGetHanningFilter_hSLICED_STL_HInteger_1HNumberuintuintuint_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumberuintuintuint_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) = &hGetHanningFilter_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -14952,6 +14638,7 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -15000,7 +14687,11 @@ hGetHanningFilter ( vec.begin(),vec.end() , Alpha , Beta);
 }
 
 template < class T > inline void hGetHanningFilter( hArray<T> & vec , HNumber Alpha , uint Beta) {
+bool iterate=true;
+while(iterate) {
 hGetHanningFilter ( vec.begin(),vec.end() , Alpha , Beta);
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hGetHanningFilter( casa::Vector<T> & vec , HNumber Alpha , uint Beta) {
@@ -15019,21 +14710,14 @@ template < class T > inline void hGetHanningFilter_hSLICED ( std::vector<T> & ve
 hGetHanningFilter ( vec.begin() + vecslice1,vec.begin() + vecslice2 , Alpha , Beta);
 }
 
-template < class T > inline void hGetHanningFilter_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) {
-hGetHanningFilter ( vec.begin(vecslice1),vec.begin(vecslice2) , Alpha , Beta);
-}
-
 template < class T > inline void hGetHanningFilter_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) {
 hGetHanningFilter ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , Alpha , Beta);
 }
 
 
 void (*fptr_hGetHanningFilter_hSLICED_STL_HComplex_1HNumberuint_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HComplex_1HNumberuint_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) = &hGetHanningFilter_hSLICED;
 void (*fptr_hGetHanningFilter_hSLICED_STL_HNumber_1HNumberuint_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HNumber_1HNumberuint_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) = &hGetHanningFilter_hSLICED;
 void (*fptr_hGetHanningFilter_hSLICED_STL_HInteger_1HNumberuint_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumberuint_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) = &hGetHanningFilter_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -15070,6 +14754,7 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -15117,7 +14802,11 @@ hGetHanningFilter ( vec.begin(),vec.end() , Alpha);
 }
 
 template < class T > inline void hGetHanningFilter( hArray<T> & vec , HNumber Alpha) {
+bool iterate=true;
+while(iterate) {
 hGetHanningFilter ( vec.begin(),vec.end() , Alpha);
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hGetHanningFilter( casa::Vector<T> & vec , HNumber Alpha) {
@@ -15136,21 +14825,14 @@ template < class T > inline void hGetHanningFilter_hSLICED ( std::vector<T> & ve
 hGetHanningFilter ( vec.begin() + vecslice1,vec.begin() + vecslice2 , Alpha);
 }
 
-template < class T > inline void hGetHanningFilter_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) {
-hGetHanningFilter ( vec.begin(vecslice1),vec.begin(vecslice2) , Alpha);
-}
-
 template < class T > inline void hGetHanningFilter_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) {
 hGetHanningFilter ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , Alpha);
 }
 
 
 void (*fptr_hGetHanningFilter_hSLICED_STL_HComplex_1HNumber_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HComplex_1HNumber_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) = &hGetHanningFilter_hSLICED;
 void (*fptr_hGetHanningFilter_hSLICED_STL_HNumber_1HNumber_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HNumber_1HNumber_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) = &hGetHanningFilter_hSLICED;
 void (*fptr_hGetHanningFilter_hSLICED_STL_HInteger_1HNumber_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumber_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) = &hGetHanningFilter_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -15184,6 +14866,7 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end){
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -15230,7 +14913,11 @@ hGetHanningFilter ( vec.begin(),vec.end());
 }
 
 template < class T > inline void hGetHanningFilter( hArray<T> & vec) {
+bool iterate=true;
+while(iterate) {
 hGetHanningFilter ( vec.begin(),vec.end());
+vec.next();
+iterate = vec.iterate(); };
 }
 
 template < class T > inline void hGetHanningFilter( casa::Vector<T> & vec) {
@@ -15249,21 +14936,14 @@ template < class T > inline void hGetHanningFilter_hSLICED ( std::vector<T> & ve
 hGetHanningFilter ( vec.begin() + vecslice1,vec.begin() + vecslice2);
 }
 
-template < class T > inline void hGetHanningFilter_hSLICED ( hArray<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
-hGetHanningFilter ( vec.begin(vecslice1),vec.begin(vecslice2));
-}
-
 template < class T > inline void hGetHanningFilter_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
 hGetHanningFilter ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
 }
 
 
 void (*fptr_hGetHanningFilter_hSLICED_STL_HComplex_1_STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hGetHanningFilter_hSLICED;
 void (*fptr_hGetHanningFilter_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hGetHanningFilter_hSLICED;
 void (*fptr_hGetHanningFilter_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hGetHanningFilter_hSLICED;
-void (*fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hGetHanningFilter_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -15303,6 +14983,7 @@ void hApplyFilter(const Iter data, const Iter data_end, const IterFilter filter,
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -15350,7 +15031,12 @@ hApplyFilter ( data.begin(),data.end() , filter.begin(),filter.end());
 }
 
 template < class T > inline void hApplyFilter( hArray<T> & data , hArray<T> & filter) {
+bool iterate=true;
+while(iterate) {
 hApplyFilter ( data.begin(),data.end() , filter.begin(),filter.end());
+data.next();
+filter.next();
+iterate = data.iterate(); };
 }
 
 template < class T > inline void hApplyFilter( casa::Vector<T> & data , casa::Vector<T> & filter) {
@@ -15369,21 +15055,14 @@ template < class T > inline void hApplyFilter_hSLICED ( std::vector<T> & data , 
 hApplyFilter ( data.begin() + dataslice1,data.begin() + dataslice2 , filter.begin() + filterslice1,filter.begin() + filterslice2);
 }
 
-template < class T > inline void hApplyFilter_hSLICED ( hArray<T> & data , HInteger dataslice1 , HInteger dataslice2 , hArray<T> & filter , HInteger filterslice1 , HInteger filterslice2) {
-hApplyFilter ( data.begin(dataslice1),data.begin(dataslice2) , filter.begin(filterslice1),filter.begin(filterslice2));
-}
-
 template < class T > inline void hApplyFilter_hSLICED ( casa::Vector<T> & data , HInteger dataslice1 , HInteger dataslice2 , casa::Vector<T> & filter , HInteger filterslice1 , HInteger filterslice2) {
 hApplyFilter ( data.cbegin() + dataslice1,data.cbegin() + dataslice2 , filter.cbegin() + filterslice1,filter.cbegin() + filterslice2);
 }
 
 
 void (*fptr_hApplyFilter_hSLICED_STL_HComplex_11_STDITSTDIT)( std::vector<HComplex> & data , HInteger dataslice1 , HInteger dataslice2 , std::vector<HComplex> & filter , HInteger filterslice1 , HInteger filterslice2) = &hApplyFilter_hSLICED;
-void (*fptr_hApplyFilter_hSLICED_hARRAY_HComplex_11_STDITSTDIT)( hArray<HComplex> & data , HInteger dataslice1 , HInteger dataslice2 , hArray<HComplex> & filter , HInteger filterslice1 , HInteger filterslice2) = &hApplyFilter_hSLICED;
 void (*fptr_hApplyFilter_hSLICED_STL_HNumber_11_STDITSTDIT)( std::vector<HNumber> & data , HInteger dataslice1 , HInteger dataslice2 , std::vector<HNumber> & filter , HInteger filterslice1 , HInteger filterslice2) = &hApplyFilter_hSLICED;
-void (*fptr_hApplyFilter_hSLICED_hARRAY_HNumber_11_STDITSTDIT)( hArray<HNumber> & data , HInteger dataslice1 , HInteger dataslice2 , hArray<HNumber> & filter , HInteger filterslice1 , HInteger filterslice2) = &hApplyFilter_hSLICED;
 void (*fptr_hApplyFilter_hSLICED_STL_HInteger_11_STDITSTDIT)( std::vector<HInteger> & data , HInteger dataslice1 , HInteger dataslice2 , std::vector<HInteger> & filter , HInteger filterslice1 , HInteger filterslice2) = &hApplyFilter_hSLICED;
-void (*fptr_hApplyFilter_hSLICED_hARRAY_HInteger_11_STDITSTDIT)( hArray<HInteger> & data , HInteger dataslice1 , HInteger dataslice2 , hArray<HInteger> & filter , HInteger filterslice1 , HInteger filterslice2) = &hApplyFilter_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -15419,6 +15098,7 @@ void hApplyHanningFilter(const Iter data, const Iter data_end){
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -15465,7 +15145,11 @@ hApplyHanningFilter ( data.begin(),data.end());
 }
 
 template < class T > inline void hApplyHanningFilter( hArray<T> & data) {
+bool iterate=true;
+while(iterate) {
 hApplyHanningFilter ( data.begin(),data.end());
+data.next();
+iterate = data.iterate(); };
 }
 
 template < class T > inline void hApplyHanningFilter( casa::Vector<T> & data) {
@@ -15484,21 +15168,14 @@ template < class T > inline void hApplyHanningFilter_hSLICED ( std::vector<T> & 
 hApplyHanningFilter ( data.begin() + dataslice1,data.begin() + dataslice2);
 }
 
-template < class T > inline void hApplyHanningFilter_hSLICED ( hArray<T> & data , HInteger dataslice1 , HInteger dataslice2) {
-hApplyHanningFilter ( data.begin(dataslice1),data.begin(dataslice2));
-}
-
 template < class T > inline void hApplyHanningFilter_hSLICED ( casa::Vector<T> & data , HInteger dataslice1 , HInteger dataslice2) {
 hApplyHanningFilter ( data.cbegin() + dataslice1,data.cbegin() + dataslice2);
 }
 
 
 void (*fptr_hApplyHanningFilter_hSLICED_STL_HComplex_1_STDIT)( std::vector<HComplex> & data , HInteger dataslice1 , HInteger dataslice2) = &hApplyHanningFilter_hSLICED;
-void (*fptr_hApplyHanningFilter_hSLICED_hARRAY_HComplex_1_STDIT)( hArray<HComplex> & data , HInteger dataslice1 , HInteger dataslice2) = &hApplyHanningFilter_hSLICED;
 void (*fptr_hApplyHanningFilter_hSLICED_STL_HNumber_1_STDIT)( std::vector<HNumber> & data , HInteger dataslice1 , HInteger dataslice2) = &hApplyHanningFilter_hSLICED;
-void (*fptr_hApplyHanningFilter_hSLICED_hARRAY_HNumber_1_STDIT)( hArray<HNumber> & data , HInteger dataslice1 , HInteger dataslice2) = &hApplyHanningFilter_hSLICED;
 void (*fptr_hApplyHanningFilter_hSLICED_STL_HInteger_1_STDIT)( std::vector<HInteger> & data , HInteger dataslice1 , HInteger dataslice2) = &hApplyHanningFilter_hSLICED;
-void (*fptr_hApplyHanningFilter_hSLICED_hARRAY_HInteger_1_STDIT)( hArray<HInteger> & data , HInteger dataslice1 , HInteger dataslice2) = &hApplyHanningFilter_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -15587,6 +15264,7 @@ void hFFT(const IterIn data_in, const IterIn data_in_end,
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -15633,7 +15311,12 @@ hFFT ( data_in.begin(),data_in.end() , data_out.begin(),data_out.end() , nyquist
 }
 
 inline void hFFT( hArray<HNumber> & data_in , hArray<HComplex> & data_out , HInteger nyquistZone) {
+bool iterate=true;
+while(iterate) {
 hFFT ( data_in.begin(),data_in.end() , data_out.begin(),data_out.end() , nyquistZone);
+data_in.next();
+data_out.next();
+iterate = data_in.iterate(); };
 }
 
 inline void hFFT( casa::Vector<HNumber> & data_in , casa::Vector<HComplex> & data_out , HInteger nyquistZone) {
@@ -15648,17 +15331,12 @@ void (*fptr_hFFT_hARRAY_HInteger_HNumberHComplexHInteger_STDITSTDIT)( hArray<HNu
 hFFT ( data_in.begin() + data_inslice1,data_in.begin() + data_inslice2 , data_out.begin() + data_outslice1,data_out.begin() + data_outslice2 , nyquistZone);
 }
 
-inline void hFFT_hSLICED ( hArray<HNumber> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , hArray<HComplex> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) {
-hFFT ( data_in.begin(data_inslice1),data_in.begin(data_inslice2) , data_out.begin(data_outslice1),data_out.begin(data_outslice2) , nyquistZone);
-}
-
 inline void hFFT_hSLICED ( casa::Vector<HNumber> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , casa::Vector<HComplex> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) {
 hFFT ( data_in.cbegin() + data_inslice1,data_in.cbegin() + data_inslice2 , data_out.cbegin() + data_outslice1,data_out.cbegin() + data_outslice2 , nyquistZone);
 }
 
 
 void (*fptr_hFFT_hSLICED_STL_HInteger_HNumberHComplexHInteger_STDITSTDIT)( std::vector<HNumber> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , std::vector<HComplex> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) = &hFFT_hSLICED;
-void (*fptr_hFFT_hSLICED_hARRAY_HInteger_HNumberHComplexHInteger_STDITSTDIT)( hArray<HNumber> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , hArray<HComplex> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) = &hFFT_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -15739,6 +15417,7 @@ void hInvFFT(const IterIn data_in, const IterIn data_in_end,
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -15785,7 +15464,12 @@ hInvFFT ( data_in.begin(),data_in.end() , data_out.begin(),data_out.end() , nyqu
 }
 
 inline void hInvFFT( hArray<HComplex> & data_in , hArray<HNumber> & data_out , HInteger nyquistZone) {
+bool iterate=true;
+while(iterate) {
 hInvFFT ( data_in.begin(),data_in.end() , data_out.begin(),data_out.end() , nyquistZone);
+data_in.next();
+data_out.next();
+iterate = data_in.iterate(); };
 }
 
 inline void hInvFFT( casa::Vector<HComplex> & data_in , casa::Vector<HNumber> & data_out , HInteger nyquistZone) {
@@ -15800,17 +15484,12 @@ void (*fptr_hInvFFT_hARRAY_HInteger_HComplexHNumberHInteger_STDITSTDIT)( hArray<
 hInvFFT ( data_in.begin() + data_inslice1,data_in.begin() + data_inslice2 , data_out.begin() + data_outslice1,data_out.begin() + data_outslice2 , nyquistZone);
 }
 
-inline void hInvFFT_hSLICED ( hArray<HComplex> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , hArray<HNumber> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) {
-hInvFFT ( data_in.begin(data_inslice1),data_in.begin(data_inslice2) , data_out.begin(data_outslice1),data_out.begin(data_outslice2) , nyquistZone);
-}
-
 inline void hInvFFT_hSLICED ( casa::Vector<HComplex> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , casa::Vector<HNumber> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) {
 hInvFFT ( data_in.cbegin() + data_inslice1,data_in.cbegin() + data_inslice2 , data_out.cbegin() + data_outslice1,data_out.cbegin() + data_outslice2 , nyquistZone);
 }
 
 
 void (*fptr_hInvFFT_hSLICED_STL_HInteger_HComplexHNumberHInteger_STDITSTDIT)( std::vector<HComplex> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , std::vector<HNumber> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) = &hInvFFT_hSLICED;
-void (*fptr_hInvFFT_hSLICED_hARRAY_HInteger_HComplexHNumberHInteger_STDITSTDIT)( hArray<HComplex> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , hArray<HNumber> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) = &hInvFFT_hSLICED;
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -15917,11 +15596,11 @@ CRDataReader & hFileOpen(HString Filename) {
     opened=drp!=__null;
     cout << "Opening LOFAR File="<<Filename<<endl; drp->summary();
   } else {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4297 << ": " << "hFileOpen" << ": Unknown Filetype = " << Filetype << ", Filename=" << Filename << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4387 << ": " << "hFileOpen" << ": Unknown Filetype = " << Filetype << ", Filename=" << Filename << endl );
     opened=false;
   }
   if (!opened){
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4301 << ": " << "hFileOpen" << ": Opening file " << Filename << " failed." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4391 << ": " << "hFileOpen" << ": Opening file " << Filename << " failed." << endl );
     CR::LopesEventIn* lep = new CR::LopesEventIn; //Make a dummy data reader ....  
     drp=lep;
   };
@@ -16388,7 +16067,7 @@ CRDataReader & hFileRead(
   DataReader *drp=&dr;
   //Check whether it is non-NULL.
   if (drp==reinterpret_cast<HPointer>(__null)){
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4515 << ": " << "hFileRead" << ": pointer to FileObject is NULL, DataReader not found." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4605 << ": " << "hFileRead" << ": pointer to FileObject is NULL, DataReader not found." << endl );
     return dr;
   };
   //------TIME------------------------------
@@ -16450,7 +16129,7 @@ drp->calfft (casamtrx);
 cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
 };}
   else {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4560 << ": " << "hFileRead" << ": Datatype=" << Datatype << " is unknown." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4650 << ": " << "hFileRead" << ": Datatype=" << Datatype << " is unknown." << endl );
     vec.clear();
   };
   return dr;
@@ -16508,11 +16187,8 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 CRDataReader & (*fptr_hFileRead_STL_HComplex_CRDataReaderHString1_STL)( CRDataReader & dr , HString Datatype , std::vector<HComplex> & vec) = &hFileRead;
-CRDataReader & (*fptr_hFileRead_hARRAY_HComplex_CRDataReaderHString1_STL)( CRDataReader & dr , HString Datatype , hArray<HComplex> & vec) = &hFileRead;
 CRDataReader & (*fptr_hFileRead_STL_HNumber_CRDataReaderHString1_STL)( CRDataReader & dr , HString Datatype , std::vector<HNumber> & vec) = &hFileRead;
-CRDataReader & (*fptr_hFileRead_hARRAY_HNumber_CRDataReaderHString1_STL)( CRDataReader & dr , HString Datatype , hArray<HNumber> & vec) = &hFileRead;
 CRDataReader & (*fptr_hFileRead_STL_HInteger_CRDataReaderHString1_STL)( CRDataReader & dr , HString Datatype , std::vector<HInteger> & vec) = &hFileRead;
-CRDataReader & (*fptr_hFileRead_hARRAY_HInteger_CRDataReaderHString1_STL)( CRDataReader & dr , HString Datatype , hArray<HInteger> & vec) = &hFileRead;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -16694,6 +16370,7 @@ bool hCoordinateConvert (Iter source,
 //#endif
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
 //bindings
@@ -16741,8 +16418,16 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 return hCoordinateConvert ( source.begin() , sourceCoordinate , target.begin() , targetCoordinate , anglesInDegrees);
 }
 
-inline bool hCoordinateConvert( hArray<HNumber> & source , CRCoordinateType sourceCoordinate , hArray<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) {
-return hCoordinateConvert ( source.begin() , sourceCoordinate , target.begin() , targetCoordinate , anglesInDegrees);
+inline BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(bool, vector<bool>) hCoordinateConvert( hArray<HNumber> & source , CRCoordinateType sourceCoordinate , hArray<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) {
+bool iterate=true;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, vector<bool> returnvector;
+bool returnvalue;
+) while(iterate) {
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(, returnvalue =) hCoordinateConvert ( source.begin() , sourceCoordinate , target.begin() , targetCoordinate , anglesInDegrees);
+source.next();
+target.next();
+iterate = source.iterate(); BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(};, returnvector.push_back(returnvalue); };
+return returnvector;)
 }
 
 inline bool hCoordinateConvert( casa::Vector<HNumber> & source , CRCoordinateType sourceCoordinate , casa::Vector<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) {
@@ -16751,7 +16436,7 @@ return hCoordinateConvert ( source.cbegin() , sourceCoordinate , target.cbegin()
 
 
 bool (*fptr_hCoordinateConvert_STL_HInteger_HNumberCRCoordinateTypeHNumberCRCoordinateTypebool_STDITFIXEDSTDITFIXED)( std::vector<HNumber> & source , CRCoordinateType sourceCoordinate , std::vector<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) = &hCoordinateConvert;
-bool (*fptr_hCoordinateConvert_hARRAY_HInteger_HNumberCRCoordinateTypeHNumberCRCoordinateTypebool_STDITFIXEDSTDITFIXED)( hArray<HNumber> & source , CRCoordinateType sourceCoordinate , hArray<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) = &hCoordinateConvert;
+BOOST_PP_IIF_BOOST_PP_BOOL_HFPP_FUNC_IS_VOID(bool, vector<bool >) (*fptr_hCoordinateConvert_hARRAY_HInteger_HNumberCRCoordinateTypeHNumberCRCoordinateTypebool_STDITFIXEDSTDITFIXED)( hArray<HNumber> & source , CRCoordinateType sourceCoordinate , hArray<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) = &hCoordinateConvert;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -16822,12 +16507,12 @@ void hReadFileOld(std::vector<T> & vec,
   DataReader *drp=reinterpret_cast<DataReader*>(iptr);
   //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
   if (drp==reinterpret_cast<HPointer>(__null)){
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4772 << ": " << "dataRead: pointer to FileObject is NULL, DataReader not found." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4862 << ": " << "dataRead: pointer to FileObject is NULL, DataReader not found." << endl );
     return;
   };
 //!!!One Needs to verify somehow that the parameters make sense !!!
   if (Antenna > static_cast<HInteger>(drp->nofAntennas()-1)) {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4778 << ": " << "Requested Antenna number too large!" << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4868 << ": " << "Requested Antenna number too large!" << endl );
     return;
   };
   drp->setBlocksize(Blocksize);
@@ -16891,7 +16576,7 @@ void hReadFileOld(std::vector<T> & vec,
     ncol=ary.ncolumn(); if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,vec,Antenna); else aipscol2stlvec(ary,vec,0);;
   }
   else {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4850 << ": " << "DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4940 << ": " << "DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << endl );
     vec.clear();
     return;
   };
@@ -16955,11 +16640,8 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 void (*fptr_hReadFileOld_STL_HComplex_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL)( std::vector<HComplex> & vec , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift) = &hReadFileOld;
-void (*fptr_hReadFileOld_hARRAY_HComplex_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL)( hArray<HComplex> & vec , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift) = &hReadFileOld;
 void (*fptr_hReadFileOld_STL_HNumber_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL)( std::vector<HNumber> & vec , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift) = &hReadFileOld;
-void (*fptr_hReadFileOld_hARRAY_HNumber_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL)( hArray<HNumber> & vec , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift) = &hReadFileOld;
 void (*fptr_hReadFileOld_STL_HInteger_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL)( std::vector<HInteger> & vec , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift) = &hReadFileOld;
-void (*fptr_hReadFileOld_hARRAY_HInteger_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL)( hArray<HInteger> & vec , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift) = &hReadFileOld;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -17046,8 +16728,12 @@ void init_module_hftools(); extern "C" __attribute__ ((visibility("default"))) v
     class_<hArray<HNumber> >("FloatAry")
       .def("setVector",&hArray<HNumber>::setVector,return_internal_reference<>())
       .def("Vector",&hArray<HNumber>::Vector,return_internal_reference<>())
+      .def("getDimensions",&hArray<HNumber>::getDimensions)
       .def("setDimensions",&hArray<HNumber>::setDimensions1,return_internal_reference<>())
       .def("setDimensions",&hArray<HNumber>::setDimensions2,return_internal_reference<>())
+      .def("setDimensions",&hArray<HNumber>::setDimensions3,return_internal_reference<>())
+      .def("setDimensions",&hArray<HNumber>::setDimensions4,return_internal_reference<>())
+      .def("setDimensions",&hArray<HNumber>::setDimensions5,return_internal_reference<>())
       //      .def("setDimensions",fptr_hArray_setDimensions_overloads_1,return_internal_reference<>())
       //.def("setDimensions",fptr_hArray_setDimensions_overloads_2,return_internal_reference<>())
       //      .def("setDimensions",&hArray<HNumber>::setDimensions,return_internal_reference<>(),hArray_setDimensions_overloads())
@@ -17055,6 +16741,14 @@ void init_module_hftools(); extern "C" __attribute__ ((visibility("default"))) v
       .def("getNumberOfDimensions",&hArray<HNumber>::getNumberOfDimensions)
       .def("getBegin",&hArray<HNumber>::getBegin)
       .def("getEnd",&hArray<HNumber>::getEnd)
+      .def("getSize",&hArray<HNumber>::getSize)
+      .def("iterate",&hArray<HNumber>::iterate)
+      .def("__len__",&hArray<HNumber>::length)
+      .def("setSize",&hArray<HNumber>::setSize,return_internal_reference<>())
+      .def("loop",&hArray<HNumber>::loop,return_internal_reference<>())
+      .def("noloop",&hArray<HNumber>::noloop,return_internal_reference<>())
+      .def("next",&hArray<HNumber>::next,return_internal_reference<>())
+      .def("reset",&hArray<HNumber>::reset,return_internal_reference<>())
       ;
     //boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
     // def("pytointptr",getPointerFromPythonObject);
@@ -17100,7 +16794,7 @@ void init_module_hftools(); extern "C" __attribute__ ((visibility("default"))) v
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -17166,7 +16860,7 @@ def("hArray_intBegin",fptr_hArray_intBegin_STL_HInteger_HPyObjectPtr_ );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -17179,6 +16873,7 @@ def("hArray_intBegin",fptr_hArray_intBegin_STL_HInteger_HPyObjectPtr_ );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -17239,17 +16934,11 @@ def("hFill",fptr_hFill_hARRAY_HInteger_11_STDIT );
 
 
 
-
 def("hFill",fptr_hFill_hSLICED_STL_HString_11_STDIT );
-def("hFill",fptr_hFill_hSLICED_hARRAY_HString_11_STDIT );
 def("hFill",fptr_hFill_hSLICED_STL_HBool_11_STDIT );
-def("hFill",fptr_hFill_hSLICED_hARRAY_HBool_11_STDIT );
 def("hFill",fptr_hFill_hSLICED_STL_HComplex_11_STDIT );
-def("hFill",fptr_hFill_hSLICED_hARRAY_HComplex_11_STDIT );
 def("hFill",fptr_hFill_hSLICED_STL_HNumber_11_STDIT );
-def("hFill",fptr_hFill_hSLICED_hARRAY_HNumber_11_STDIT );
 def("hFill",fptr_hFill_hSLICED_STL_HInteger_11_STDIT );
-def("hFill",fptr_hFill_hSLICED_hARRAY_HInteger_11_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -17264,7 +16953,7 @@ def("hFill",fptr_hFill_hSLICED_hARRAY_HInteger_11_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -17319,15 +17008,10 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 def("hNew",fptr_hNew_STL_HString_1_STL );
-def("hNew",fptr_hNew_hARRAY_HString_1_STL );
 def("hNew",fptr_hNew_STL_HBool_1_STL );
-def("hNew",fptr_hNew_hARRAY_HBool_1_STL );
 def("hNew",fptr_hNew_STL_HComplex_1_STL );
-def("hNew",fptr_hNew_hARRAY_HComplex_1_STL );
 def("hNew",fptr_hNew_STL_HNumber_1_STL );
-def("hNew",fptr_hNew_hARRAY_HNumber_1_STL );
 def("hNew",fptr_hNew_STL_HInteger_1_STL );
-def("hNew",fptr_hNew_hARRAY_HInteger_1_STL );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -17339,7 +17023,7 @@ def("hNew",fptr_hNew_hARRAY_HInteger_1_STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -17394,15 +17078,10 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 def("hResize",fptr_hResize_STL_HString_1HInteger_STL );
-def("hResize",fptr_hResize_hARRAY_HString_1HInteger_STL );
 def("hResize",fptr_hResize_STL_HBool_1HInteger_STL );
-def("hResize",fptr_hResize_hARRAY_HBool_1HInteger_STL );
 def("hResize",fptr_hResize_STL_HComplex_1HInteger_STL );
-def("hResize",fptr_hResize_hARRAY_HComplex_1HInteger_STL );
 def("hResize",fptr_hResize_STL_HNumber_1HInteger_STL );
-def("hResize",fptr_hResize_hARRAY_HNumber_1HInteger_STL );
 def("hResize",fptr_hResize_STL_HInteger_1HInteger_STL );
-def("hResize",fptr_hResize_hARRAY_HInteger_1HInteger_STL );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -17414,7 +17093,7 @@ def("hResize",fptr_hResize_hARRAY_HInteger_1HInteger_STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -17470,15 +17149,10 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 def("hResize",fptr_hResize_STL_HString_1HInteger1_STL );
-def("hResize",fptr_hResize_hARRAY_HString_1HInteger1_STL );
 def("hResize",fptr_hResize_STL_HBool_1HInteger1_STL );
-def("hResize",fptr_hResize_hARRAY_HBool_1HInteger1_STL );
 def("hResize",fptr_hResize_STL_HComplex_1HInteger1_STL );
-def("hResize",fptr_hResize_hARRAY_HComplex_1HInteger1_STL );
 def("hResize",fptr_hResize_STL_HNumber_1HInteger1_STL );
-def("hResize",fptr_hResize_hARRAY_HNumber_1HInteger1_STL );
 def("hResize",fptr_hResize_STL_HInteger_1HInteger1_STL );
-def("hResize",fptr_hResize_hARRAY_HInteger_1HInteger1_STL );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -17490,7 +17164,7 @@ def("hResize",fptr_hResize_hARRAY_HInteger_1HInteger1_STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -17545,55 +17219,30 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 def("hResize",fptr_hResize_STL_HStringHString_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HStringHString_12_STLSTL );
 def("hResize",fptr_hResize_STL_HStringHBool_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HStringHBool_12_STLSTL );
 def("hResize",fptr_hResize_STL_HStringHComplex_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HStringHComplex_12_STLSTL );
 def("hResize",fptr_hResize_STL_HStringHNumber_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HStringHNumber_12_STLSTL );
 def("hResize",fptr_hResize_STL_HStringHInteger_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HStringHInteger_12_STLSTL );
 def("hResize",fptr_hResize_STL_HBoolHString_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HBoolHString_12_STLSTL );
 def("hResize",fptr_hResize_STL_HBoolHBool_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HBoolHBool_12_STLSTL );
 def("hResize",fptr_hResize_STL_HBoolHComplex_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HBoolHComplex_12_STLSTL );
 def("hResize",fptr_hResize_STL_HBoolHNumber_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HBoolHNumber_12_STLSTL );
 def("hResize",fptr_hResize_STL_HBoolHInteger_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HBoolHInteger_12_STLSTL );
 def("hResize",fptr_hResize_STL_HComplexHString_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HComplexHString_12_STLSTL );
 def("hResize",fptr_hResize_STL_HComplexHBool_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HComplexHBool_12_STLSTL );
 def("hResize",fptr_hResize_STL_HComplexHComplex_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HComplexHComplex_12_STLSTL );
 def("hResize",fptr_hResize_STL_HComplexHNumber_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HComplexHNumber_12_STLSTL );
 def("hResize",fptr_hResize_STL_HComplexHInteger_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HComplexHInteger_12_STLSTL );
 def("hResize",fptr_hResize_STL_HNumberHString_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HNumberHString_12_STLSTL );
 def("hResize",fptr_hResize_STL_HNumberHBool_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HNumberHBool_12_STLSTL );
 def("hResize",fptr_hResize_STL_HNumberHComplex_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HNumberHComplex_12_STLSTL );
 def("hResize",fptr_hResize_STL_HNumberHNumber_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HNumberHNumber_12_STLSTL );
 def("hResize",fptr_hResize_STL_HNumberHInteger_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HNumberHInteger_12_STLSTL );
 def("hResize",fptr_hResize_STL_HIntegerHString_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HIntegerHString_12_STLSTL );
 def("hResize",fptr_hResize_STL_HIntegerHBool_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HIntegerHBool_12_STLSTL );
 def("hResize",fptr_hResize_STL_HIntegerHComplex_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HIntegerHComplex_12_STLSTL );
 def("hResize",fptr_hResize_STL_HIntegerHNumber_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HIntegerHNumber_12_STLSTL );
 def("hResize",fptr_hResize_STL_HIntegerHInteger_12_STLSTL );
-def("hResize",fptr_hResize_hARRAY_HIntegerHInteger_12_STLSTL );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -17605,7 +17254,7 @@ def("hResize",fptr_hResize_hARRAY_HIntegerHInteger_12_STLSTL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -17660,55 +17309,30 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 def("hResize",fptr_hResize_STL_HStringHString_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HStringHString_12_CASACASA );
 def("hResize",fptr_hResize_STL_HStringHBool_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HStringHBool_12_CASACASA );
 def("hResize",fptr_hResize_STL_HStringHComplex_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HStringHComplex_12_CASACASA );
 def("hResize",fptr_hResize_STL_HStringHNumber_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HStringHNumber_12_CASACASA );
 def("hResize",fptr_hResize_STL_HStringHInteger_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HStringHInteger_12_CASACASA );
 def("hResize",fptr_hResize_STL_HBoolHString_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HBoolHString_12_CASACASA );
 def("hResize",fptr_hResize_STL_HBoolHBool_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HBoolHBool_12_CASACASA );
 def("hResize",fptr_hResize_STL_HBoolHComplex_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HBoolHComplex_12_CASACASA );
 def("hResize",fptr_hResize_STL_HBoolHNumber_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HBoolHNumber_12_CASACASA );
 def("hResize",fptr_hResize_STL_HBoolHInteger_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HBoolHInteger_12_CASACASA );
 def("hResize",fptr_hResize_STL_HComplexHString_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HComplexHString_12_CASACASA );
 def("hResize",fptr_hResize_STL_HComplexHBool_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HComplexHBool_12_CASACASA );
 def("hResize",fptr_hResize_STL_HComplexHComplex_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HComplexHComplex_12_CASACASA );
 def("hResize",fptr_hResize_STL_HComplexHNumber_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HComplexHNumber_12_CASACASA );
 def("hResize",fptr_hResize_STL_HComplexHInteger_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HComplexHInteger_12_CASACASA );
 def("hResize",fptr_hResize_STL_HNumberHString_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HNumberHString_12_CASACASA );
 def("hResize",fptr_hResize_STL_HNumberHBool_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HNumberHBool_12_CASACASA );
 def("hResize",fptr_hResize_STL_HNumberHComplex_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HNumberHComplex_12_CASACASA );
 def("hResize",fptr_hResize_STL_HNumberHNumber_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HNumberHNumber_12_CASACASA );
 def("hResize",fptr_hResize_STL_HNumberHInteger_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HNumberHInteger_12_CASACASA );
 def("hResize",fptr_hResize_STL_HIntegerHString_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HIntegerHString_12_CASACASA );
 def("hResize",fptr_hResize_STL_HIntegerHBool_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HIntegerHBool_12_CASACASA );
 def("hResize",fptr_hResize_STL_HIntegerHComplex_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HIntegerHComplex_12_CASACASA );
 def("hResize",fptr_hResize_STL_HIntegerHNumber_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HIntegerHNumber_12_CASACASA );
 def("hResize",fptr_hResize_STL_HIntegerHInteger_12_CASACASA );
-def("hResize",fptr_hResize_hARRAY_HIntegerHInteger_12_CASACASA );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -17720,7 +17344,7 @@ def("hResize",fptr_hResize_hARRAY_HIntegerHInteger_12_CASACASA );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -17733,7 +17357,6 @@ def("hResize",fptr_hResize_hARRAY_HIntegerHInteger_12_CASACASA );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
-//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
@@ -17777,49 +17400,28 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 
-
-
 def("hConvert",fptr_hConvert_STL_HComplexHComplex_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hARRAY_HComplexHComplex_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_STL_HComplexHNumber_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hARRAY_HComplexHNumber_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_STL_HComplexHInteger_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hARRAY_HComplexHInteger_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_STL_HNumberHComplex_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hARRAY_HNumberHComplex_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_STL_HNumberHNumber_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_STL_HNumberHInteger_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_STL_HIntegerHComplex_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hARRAY_HIntegerHComplex_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hARRAY_HIntegerHInteger_12_STDITSTDIT );
-
 
 
 
 
 def("hConvert",fptr_hConvert_hSLICED_STL_HComplexHComplex_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hSLICED_hARRAY_HComplexHComplex_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_hSLICED_STL_HComplexHNumber_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hSLICED_hARRAY_HComplexHNumber_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_hSLICED_STL_HComplexHInteger_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hSLICED_hARRAY_HComplexHInteger_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_hSLICED_STL_HNumberHComplex_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hSLICED_hARRAY_HNumberHComplex_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_hSLICED_STL_HNumberHNumber_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hSLICED_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_hSLICED_STL_HNumberHInteger_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hSLICED_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_hSLICED_STL_HIntegerHComplex_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hSLICED_hARRAY_HIntegerHComplex_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_hSLICED_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hSLICED_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hConvert",fptr_hConvert_hSLICED_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hConvert",fptr_hConvert_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -17834,7 +17436,7 @@ def("hConvert",fptr_hConvert_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -17847,6 +17449,7 @@ def("hConvert",fptr_hConvert_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -17903,13 +17506,9 @@ def("hCopy",fptr_hCopy_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hCopy",fptr_hCopy_hSLICED_STL_HComplex_11_STDITSTDIT );
-def("hCopy",fptr_hCopy_hSLICED_hARRAY_HComplex_11_STDITSTDIT );
 def("hCopy",fptr_hCopy_hSLICED_STL_HNumber_11_STDITSTDIT );
-def("hCopy",fptr_hCopy_hSLICED_hARRAY_HNumber_11_STDITSTDIT );
 def("hCopy",fptr_hCopy_hSLICED_STL_HInteger_11_STDITSTDIT );
-def("hCopy",fptr_hCopy_hSLICED_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -17924,7 +17523,7 @@ def("hCopy",fptr_hCopy_hSLICED_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -17992,7 +17591,7 @@ def("square",fptr_square_STL_HInteger_1_ );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -18059,7 +17658,7 @@ def("hPhase",fptr_hPhase_STL_HInteger_HNumberHNumber_ );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:04 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -18127,7 +17726,7 @@ def("funcGaussian",fptr_funcGaussian_STL_HInteger_HNumberHNumberHNumber_ );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -18140,6 +17739,7 @@ def("funcGaussian",fptr_funcGaussian_STL_HInteger_HNumberHNumberHNumber_ );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -18195,13 +17795,9 @@ def("hExp",fptr_hExp1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hExp",fptr_hExp_hSLICED1_STL_HComplex_1_STDIT );
-def("hExp",fptr_hExp_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hExp",fptr_hExp_hSLICED1_STL_HNumber_1_STDIT );
-def("hExp",fptr_hExp_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hExp",fptr_hExp_hSLICED1_STL_HInteger_1_STDIT );
-def("hExp",fptr_hExp_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -18216,7 +17812,7 @@ def("hExp",fptr_hExp_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -18229,6 +17825,7 @@ def("hExp",fptr_hExp_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -18285,13 +17882,9 @@ def("hExp",fptr_hExp2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hExp",fptr_hExp_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hExp",fptr_hExp_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hExp",fptr_hExp_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hExp",fptr_hExp_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hExp",fptr_hExp_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hExp",fptr_hExp_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -18306,7 +17899,7 @@ def("hExp",fptr_hExp_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -18319,6 +17912,7 @@ def("hExp",fptr_hExp_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -18374,13 +17968,9 @@ def("hLog",fptr_hLog1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hLog",fptr_hLog_hSLICED1_STL_HComplex_1_STDIT );
-def("hLog",fptr_hLog_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hLog",fptr_hLog_hSLICED1_STL_HNumber_1_STDIT );
-def("hLog",fptr_hLog_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hLog",fptr_hLog_hSLICED1_STL_HInteger_1_STDIT );
-def("hLog",fptr_hLog_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -18395,7 +17985,7 @@ def("hLog",fptr_hLog_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -18408,6 +17998,7 @@ def("hLog",fptr_hLog_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -18464,13 +18055,9 @@ def("hLog",fptr_hLog2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hLog",fptr_hLog_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hLog",fptr_hLog_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hLog",fptr_hLog_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hLog",fptr_hLog_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hLog",fptr_hLog_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hLog",fptr_hLog_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -18485,7 +18072,7 @@ def("hLog",fptr_hLog_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -18498,6 +18085,7 @@ def("hLog",fptr_hLog_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -18553,13 +18141,9 @@ def("hLog10",fptr_hLog101_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hLog10",fptr_hLog10_hSLICED1_STL_HComplex_1_STDIT );
-def("hLog10",fptr_hLog10_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hLog10",fptr_hLog10_hSLICED1_STL_HNumber_1_STDIT );
-def("hLog10",fptr_hLog10_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hLog10",fptr_hLog10_hSLICED1_STL_HInteger_1_STDIT );
-def("hLog10",fptr_hLog10_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -18574,7 +18158,7 @@ def("hLog10",fptr_hLog10_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -18587,6 +18171,7 @@ def("hLog10",fptr_hLog10_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -18643,13 +18228,9 @@ def("hLog10",fptr_hLog102_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hLog10",fptr_hLog10_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hLog10",fptr_hLog10_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hLog10",fptr_hLog10_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hLog10",fptr_hLog10_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hLog10",fptr_hLog10_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hLog10",fptr_hLog10_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -18664,7 +18245,7 @@ def("hLog10",fptr_hLog10_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -18677,6 +18258,7 @@ def("hLog10",fptr_hLog10_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -18732,13 +18314,9 @@ def("hSin",fptr_hSin1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hSin",fptr_hSin_hSLICED1_STL_HComplex_1_STDIT );
-def("hSin",fptr_hSin_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hSin",fptr_hSin_hSLICED1_STL_HNumber_1_STDIT );
-def("hSin",fptr_hSin_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hSin",fptr_hSin_hSLICED1_STL_HInteger_1_STDIT );
-def("hSin",fptr_hSin_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -18753,7 +18331,7 @@ def("hSin",fptr_hSin_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -18766,6 +18344,7 @@ def("hSin",fptr_hSin_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -18822,13 +18401,9 @@ def("hSin",fptr_hSin2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hSin",fptr_hSin_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hSin",fptr_hSin_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hSin",fptr_hSin_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hSin",fptr_hSin_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hSin",fptr_hSin_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hSin",fptr_hSin_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -18843,7 +18418,7 @@ def("hSin",fptr_hSin_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -18856,6 +18431,7 @@ def("hSin",fptr_hSin_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -18911,13 +18487,9 @@ def("hSinh",fptr_hSinh1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hSinh",fptr_hSinh_hSLICED1_STL_HComplex_1_STDIT );
-def("hSinh",fptr_hSinh_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hSinh",fptr_hSinh_hSLICED1_STL_HNumber_1_STDIT );
-def("hSinh",fptr_hSinh_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hSinh",fptr_hSinh_hSLICED1_STL_HInteger_1_STDIT );
-def("hSinh",fptr_hSinh_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -18932,7 +18504,7 @@ def("hSinh",fptr_hSinh_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -18945,6 +18517,7 @@ def("hSinh",fptr_hSinh_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19001,13 +18574,9 @@ def("hSinh",fptr_hSinh2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hSinh",fptr_hSinh_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hSinh",fptr_hSinh_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hSinh",fptr_hSinh_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hSinh",fptr_hSinh_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hSinh",fptr_hSinh_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hSinh",fptr_hSinh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19022,7 +18591,7 @@ def("hSinh",fptr_hSinh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19035,6 +18604,7 @@ def("hSinh",fptr_hSinh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19090,13 +18660,9 @@ def("hSqrt",fptr_hSqrt1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hSqrt",fptr_hSqrt_hSLICED1_STL_HComplex_1_STDIT );
-def("hSqrt",fptr_hSqrt_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hSqrt",fptr_hSqrt_hSLICED1_STL_HNumber_1_STDIT );
-def("hSqrt",fptr_hSqrt_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hSqrt",fptr_hSqrt_hSLICED1_STL_HInteger_1_STDIT );
-def("hSqrt",fptr_hSqrt_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19111,7 +18677,7 @@ def("hSqrt",fptr_hSqrt_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19124,6 +18690,7 @@ def("hSqrt",fptr_hSqrt_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19180,13 +18747,9 @@ def("hSqrt",fptr_hSqrt2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hSqrt",fptr_hSqrt_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hSqrt",fptr_hSqrt_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hSqrt",fptr_hSqrt_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hSqrt",fptr_hSqrt_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hSqrt",fptr_hSqrt_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hSqrt",fptr_hSqrt_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19201,7 +18764,7 @@ def("hSqrt",fptr_hSqrt_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19214,6 +18777,7 @@ def("hSqrt",fptr_hSqrt_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19269,13 +18833,9 @@ def("hSquare",fptr_hSquare1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hSquare",fptr_hSquare_hSLICED1_STL_HComplex_1_STDIT );
-def("hSquare",fptr_hSquare_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hSquare",fptr_hSquare_hSLICED1_STL_HNumber_1_STDIT );
-def("hSquare",fptr_hSquare_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hSquare",fptr_hSquare_hSLICED1_STL_HInteger_1_STDIT );
-def("hSquare",fptr_hSquare_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19290,7 +18850,7 @@ def("hSquare",fptr_hSquare_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19303,6 +18863,7 @@ def("hSquare",fptr_hSquare_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19359,13 +18920,9 @@ def("hSquare",fptr_hSquare2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hSquare",fptr_hSquare_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hSquare",fptr_hSquare_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hSquare",fptr_hSquare_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hSquare",fptr_hSquare_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hSquare",fptr_hSquare_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hSquare",fptr_hSquare_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19380,7 +18937,7 @@ def("hSquare",fptr_hSquare_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19393,6 +18950,7 @@ def("hSquare",fptr_hSquare_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19448,13 +19006,9 @@ def("hTan",fptr_hTan1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hTan",fptr_hTan_hSLICED1_STL_HComplex_1_STDIT );
-def("hTan",fptr_hTan_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hTan",fptr_hTan_hSLICED1_STL_HNumber_1_STDIT );
-def("hTan",fptr_hTan_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hTan",fptr_hTan_hSLICED1_STL_HInteger_1_STDIT );
-def("hTan",fptr_hTan_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19469,7 +19023,7 @@ def("hTan",fptr_hTan_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19482,6 +19036,7 @@ def("hTan",fptr_hTan_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19538,13 +19093,9 @@ def("hTan",fptr_hTan2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hTan",fptr_hTan_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hTan",fptr_hTan_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hTan",fptr_hTan_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hTan",fptr_hTan_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hTan",fptr_hTan_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hTan",fptr_hTan_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19559,7 +19110,7 @@ def("hTan",fptr_hTan_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19572,6 +19123,7 @@ def("hTan",fptr_hTan_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19627,13 +19179,9 @@ def("hTanh",fptr_hTanh1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hTanh",fptr_hTanh_hSLICED1_STL_HComplex_1_STDIT );
-def("hTanh",fptr_hTanh_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hTanh",fptr_hTanh_hSLICED1_STL_HNumber_1_STDIT );
-def("hTanh",fptr_hTanh_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hTanh",fptr_hTanh_hSLICED1_STL_HInteger_1_STDIT );
-def("hTanh",fptr_hTanh_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19648,7 +19196,7 @@ def("hTanh",fptr_hTanh_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19661,6 +19209,7 @@ def("hTanh",fptr_hTanh_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19717,13 +19266,9 @@ def("hTanh",fptr_hTanh2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hTanh",fptr_hTanh_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hTanh",fptr_hTanh_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hTanh",fptr_hTanh_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hTanh",fptr_hTanh_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hTanh",fptr_hTanh_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hTanh",fptr_hTanh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19738,7 +19283,7 @@ def("hTanh",fptr_hTanh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19751,6 +19296,7 @@ def("hTanh",fptr_hTanh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19806,13 +19352,9 @@ def("hAbs",fptr_hAbs1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hAbs",fptr_hAbs_hSLICED1_STL_HComplex_1_STDIT );
-def("hAbs",fptr_hAbs_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hAbs",fptr_hAbs_hSLICED1_STL_HNumber_1_STDIT );
-def("hAbs",fptr_hAbs_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hAbs",fptr_hAbs_hSLICED1_STL_HInteger_1_STDIT );
-def("hAbs",fptr_hAbs_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19827,7 +19369,7 @@ def("hAbs",fptr_hAbs_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19840,6 +19382,7 @@ def("hAbs",fptr_hAbs_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19896,13 +19439,9 @@ def("hAbs",fptr_hAbs2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hAbs",fptr_hAbs_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hAbs",fptr_hAbs_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hAbs",fptr_hAbs_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hAbs",fptr_hAbs_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hAbs",fptr_hAbs_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hAbs",fptr_hAbs_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -19917,7 +19456,7 @@ def("hAbs",fptr_hAbs_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -19930,6 +19469,7 @@ def("hAbs",fptr_hAbs_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -19985,13 +19525,9 @@ def("hCos",fptr_hCos1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hCos",fptr_hCos_hSLICED1_STL_HComplex_1_STDIT );
-def("hCos",fptr_hCos_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hCos",fptr_hCos_hSLICED1_STL_HNumber_1_STDIT );
-def("hCos",fptr_hCos_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hCos",fptr_hCos_hSLICED1_STL_HInteger_1_STDIT );
-def("hCos",fptr_hCos_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20006,7 +19542,7 @@ def("hCos",fptr_hCos_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20019,6 +19555,7 @@ def("hCos",fptr_hCos_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20075,13 +19612,9 @@ def("hCos",fptr_hCos2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hCos",fptr_hCos_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hCos",fptr_hCos_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hCos",fptr_hCos_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hCos",fptr_hCos_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hCos",fptr_hCos_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hCos",fptr_hCos_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20096,7 +19629,7 @@ def("hCos",fptr_hCos_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20109,6 +19642,7 @@ def("hCos",fptr_hCos_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20164,13 +19698,9 @@ def("hCosh",fptr_hCosh1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hCosh",fptr_hCosh_hSLICED1_STL_HComplex_1_STDIT );
-def("hCosh",fptr_hCosh_hSLICED1_hARRAY_HComplex_1_STDIT );
 def("hCosh",fptr_hCosh_hSLICED1_STL_HNumber_1_STDIT );
-def("hCosh",fptr_hCosh_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hCosh",fptr_hCosh_hSLICED1_STL_HInteger_1_STDIT );
-def("hCosh",fptr_hCosh_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20185,7 +19715,7 @@ def("hCosh",fptr_hCosh_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20198,6 +19728,7 @@ def("hCosh",fptr_hCosh_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20254,13 +19785,9 @@ def("hCosh",fptr_hCosh2_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hCosh",fptr_hCosh_hSLICED2_STL_HComplex_11_STDITSTDIT );
-def("hCosh",fptr_hCosh_hSLICED2_hARRAY_HComplex_11_STDITSTDIT );
 def("hCosh",fptr_hCosh_hSLICED2_STL_HNumber_11_STDITSTDIT );
-def("hCosh",fptr_hCosh_hSLICED2_hARRAY_HNumber_11_STDITSTDIT );
 def("hCosh",fptr_hCosh_hSLICED2_STL_HInteger_11_STDITSTDIT );
-def("hCosh",fptr_hCosh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20275,7 +19802,7 @@ def("hCosh",fptr_hCosh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20288,6 +19815,7 @@ def("hCosh",fptr_hCosh_hSLICED2_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20341,11 +19869,8 @@ def("hCeil",fptr_hCeil1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hCeil",fptr_hCeil_hSLICED1_STL_HNumber_1_STDIT );
-def("hCeil",fptr_hCeil_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hCeil",fptr_hCeil_hSLICED1_STL_HInteger_1_STDIT );
-def("hCeil",fptr_hCeil_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20360,7 +19885,7 @@ def("hCeil",fptr_hCeil_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20373,6 +19898,7 @@ def("hCeil",fptr_hCeil_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20431,15 +19957,10 @@ def("hCeil",fptr_hCeil2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 
 
-
 def("hCeil",fptr_hCeil_hSLICED2_STL_HNumberHNumber_12_STDITSTDIT );
-def("hCeil",fptr_hCeil_hSLICED2_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hCeil",fptr_hCeil_hSLICED2_STL_HNumberHInteger_12_STDITSTDIT );
-def("hCeil",fptr_hCeil_hSLICED2_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hCeil",fptr_hCeil_hSLICED2_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hCeil",fptr_hCeil_hSLICED2_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hCeil",fptr_hCeil_hSLICED2_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hCeil",fptr_hCeil_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20454,7 +19975,7 @@ def("hCeil",fptr_hCeil_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20467,6 +19988,7 @@ def("hCeil",fptr_hCeil_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20520,11 +20042,8 @@ def("hFloor",fptr_hFloor1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hFloor",fptr_hFloor_hSLICED1_STL_HNumber_1_STDIT );
-def("hFloor",fptr_hFloor_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hFloor",fptr_hFloor_hSLICED1_STL_HInteger_1_STDIT );
-def("hFloor",fptr_hFloor_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20539,7 +20058,7 @@ def("hFloor",fptr_hFloor_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20552,6 +20071,7 @@ def("hFloor",fptr_hFloor_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20610,15 +20130,10 @@ def("hFloor",fptr_hFloor2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 
 
-
 def("hFloor",fptr_hFloor_hSLICED2_STL_HNumberHNumber_12_STDITSTDIT );
-def("hFloor",fptr_hFloor_hSLICED2_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hFloor",fptr_hFloor_hSLICED2_STL_HNumberHInteger_12_STDITSTDIT );
-def("hFloor",fptr_hFloor_hSLICED2_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hFloor",fptr_hFloor_hSLICED2_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hFloor",fptr_hFloor_hSLICED2_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hFloor",fptr_hFloor_hSLICED2_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hFloor",fptr_hFloor_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20633,7 +20148,7 @@ def("hFloor",fptr_hFloor_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20646,6 +20161,7 @@ def("hFloor",fptr_hFloor_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20699,11 +20215,8 @@ def("hAcos",fptr_hAcos1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hAcos",fptr_hAcos_hSLICED1_STL_HNumber_1_STDIT );
-def("hAcos",fptr_hAcos_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hAcos",fptr_hAcos_hSLICED1_STL_HInteger_1_STDIT );
-def("hAcos",fptr_hAcos_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20718,7 +20231,7 @@ def("hAcos",fptr_hAcos_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20731,6 +20244,7 @@ def("hAcos",fptr_hAcos_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20789,15 +20303,10 @@ def("hAcos",fptr_hAcos2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 
 
-
 def("hAcos",fptr_hAcos_hSLICED2_STL_HNumberHNumber_12_STDITSTDIT );
-def("hAcos",fptr_hAcos_hSLICED2_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hAcos",fptr_hAcos_hSLICED2_STL_HNumberHInteger_12_STDITSTDIT );
-def("hAcos",fptr_hAcos_hSLICED2_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hAcos",fptr_hAcos_hSLICED2_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hAcos",fptr_hAcos_hSLICED2_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hAcos",fptr_hAcos_hSLICED2_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hAcos",fptr_hAcos_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20812,7 +20321,7 @@ def("hAcos",fptr_hAcos_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20825,6 +20334,7 @@ def("hAcos",fptr_hAcos_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20878,11 +20388,8 @@ def("hAsin",fptr_hAsin1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hAsin",fptr_hAsin_hSLICED1_STL_HNumber_1_STDIT );
-def("hAsin",fptr_hAsin_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hAsin",fptr_hAsin_hSLICED1_STL_HInteger_1_STDIT );
-def("hAsin",fptr_hAsin_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20897,7 +20404,7 @@ def("hAsin",fptr_hAsin_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -20910,6 +20417,7 @@ def("hAsin",fptr_hAsin_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -20968,15 +20476,10 @@ def("hAsin",fptr_hAsin2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 
 
-
 def("hAsin",fptr_hAsin_hSLICED2_STL_HNumberHNumber_12_STDITSTDIT );
-def("hAsin",fptr_hAsin_hSLICED2_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hAsin",fptr_hAsin_hSLICED2_STL_HNumberHInteger_12_STDITSTDIT );
-def("hAsin",fptr_hAsin_hSLICED2_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hAsin",fptr_hAsin_hSLICED2_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hAsin",fptr_hAsin_hSLICED2_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hAsin",fptr_hAsin_hSLICED2_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hAsin",fptr_hAsin_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -20991,7 +20494,7 @@ def("hAsin",fptr_hAsin_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -21004,6 +20507,7 @@ def("hAsin",fptr_hAsin_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -21057,11 +20561,8 @@ def("hAtan",fptr_hAtan1_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hAtan",fptr_hAtan_hSLICED1_STL_HNumber_1_STDIT );
-def("hAtan",fptr_hAtan_hSLICED1_hARRAY_HNumber_1_STDIT );
 def("hAtan",fptr_hAtan_hSLICED1_STL_HInteger_1_STDIT );
-def("hAtan",fptr_hAtan_hSLICED1_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -21076,7 +20577,7 @@ def("hAtan",fptr_hAtan_hSLICED1_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -21089,6 +20590,7 @@ def("hAtan",fptr_hAtan_hSLICED1_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -21147,15 +20649,10 @@ def("hAtan",fptr_hAtan2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 
 
-
 def("hAtan",fptr_hAtan_hSLICED2_STL_HNumberHNumber_12_STDITSTDIT );
-def("hAtan",fptr_hAtan_hSLICED2_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hAtan",fptr_hAtan_hSLICED2_STL_HNumberHInteger_12_STDITSTDIT );
-def("hAtan",fptr_hAtan_hSLICED2_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hAtan",fptr_hAtan_hSLICED2_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hAtan",fptr_hAtan_hSLICED2_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hAtan",fptr_hAtan_hSLICED2_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hAtan",fptr_hAtan_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -21170,7 +20667,7 @@ def("hAtan",fptr_hAtan_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -21183,6 +20680,7 @@ def("hAtan",fptr_hAtan_hSLICED2_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -21251,25 +20749,15 @@ def("hiSub",fptr_hiSub_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 
 
-
 def("hiSub",fptr_hiSub_hSLICED_STL_HComplexHComplex_12_STDITSTDIT );
-def("hiSub",fptr_hiSub_hSLICED_hARRAY_HComplexHComplex_12_STDITSTDIT );
 def("hiSub",fptr_hiSub_hSLICED_STL_HComplexHNumber_12_STDITSTDIT );
-def("hiSub",fptr_hiSub_hSLICED_hARRAY_HComplexHNumber_12_STDITSTDIT );
 def("hiSub",fptr_hiSub_hSLICED_STL_HComplexHInteger_12_STDITSTDIT );
-def("hiSub",fptr_hiSub_hSLICED_hARRAY_HComplexHInteger_12_STDITSTDIT );
 def("hiSub",fptr_hiSub_hSLICED_STL_HNumberHComplex_12_STDITSTDIT );
-def("hiSub",fptr_hiSub_hSLICED_hARRAY_HNumberHComplex_12_STDITSTDIT );
 def("hiSub",fptr_hiSub_hSLICED_STL_HNumberHNumber_12_STDITSTDIT );
-def("hiSub",fptr_hiSub_hSLICED_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hiSub",fptr_hiSub_hSLICED_STL_HNumberHInteger_12_STDITSTDIT );
-def("hiSub",fptr_hiSub_hSLICED_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hiSub",fptr_hiSub_hSLICED_STL_HIntegerHComplex_12_STDITSTDIT );
-def("hiSub",fptr_hiSub_hSLICED_hARRAY_HIntegerHComplex_12_STDITSTDIT );
 def("hiSub",fptr_hiSub_hSLICED_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hiSub",fptr_hiSub_hSLICED_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hiSub",fptr_hiSub_hSLICED_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hiSub",fptr_hiSub_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -21284,7 +20772,7 @@ def("hiSub",fptr_hiSub_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -21297,6 +20785,7 @@ def("hiSub",fptr_hiSub_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -21365,25 +20854,15 @@ def("hiSub",fptr_hiSub2_hARRAY_HIntegerHInteger_12_STDIT );
 
 
 
-
 def("hiSub",fptr_hiSub_hSLICED2_STL_HComplexHComplex_12_STDIT );
-def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HComplexHComplex_12_STDIT );
 def("hiSub",fptr_hiSub_hSLICED2_STL_HComplexHNumber_12_STDIT );
-def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HComplexHNumber_12_STDIT );
 def("hiSub",fptr_hiSub_hSLICED2_STL_HComplexHInteger_12_STDIT );
-def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HComplexHInteger_12_STDIT );
 def("hiSub",fptr_hiSub_hSLICED2_STL_HNumberHComplex_12_STDIT );
-def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HNumberHComplex_12_STDIT );
 def("hiSub",fptr_hiSub_hSLICED2_STL_HNumberHNumber_12_STDIT );
-def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HNumberHNumber_12_STDIT );
 def("hiSub",fptr_hiSub_hSLICED2_STL_HNumberHInteger_12_STDIT );
-def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HNumberHInteger_12_STDIT );
 def("hiSub",fptr_hiSub_hSLICED2_STL_HIntegerHComplex_12_STDIT );
-def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HIntegerHComplex_12_STDIT );
 def("hiSub",fptr_hiSub_hSLICED2_STL_HIntegerHNumber_12_STDIT );
-def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HIntegerHNumber_12_STDIT );
 def("hiSub",fptr_hiSub_hSLICED2_STL_HIntegerHInteger_12_STDIT );
-def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -21398,7 +20877,7 @@ def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -21411,6 +20890,7 @@ def("hiSub",fptr_hiSub_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -21516,61 +20996,33 @@ def("hSub",fptr_hSub_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 
 
-
 def("hSub",fptr_hSub_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -21585,7 +21037,7 @@ def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -21598,6 +21050,7 @@ def("hSub",fptr_hSub_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -21655,13 +21108,9 @@ def("hSubAdd",fptr_hSubAdd_hARRAY_HInteger_111_STDITSTDITSTDIT );
 
 
 
-
 def("hSubAdd",fptr_hSubAdd_hSLICED_STL_HComplex_111_STDITSTDITSTDIT );
-def("hSubAdd",fptr_hSubAdd_hSLICED_hARRAY_HComplex_111_STDITSTDITSTDIT );
 def("hSubAdd",fptr_hSubAdd_hSLICED_STL_HNumber_111_STDITSTDITSTDIT );
-def("hSubAdd",fptr_hSubAdd_hSLICED_hARRAY_HNumber_111_STDITSTDITSTDIT );
 def("hSubAdd",fptr_hSubAdd_hSLICED_STL_HInteger_111_STDITSTDITSTDIT );
-def("hSubAdd",fptr_hSubAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -21676,7 +21125,7 @@ def("hSubAdd",fptr_hSubAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -21689,6 +21138,7 @@ def("hSubAdd",fptr_hSubAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -21794,61 +21244,33 @@ def("hSubAddConv",fptr_hSubAddConv_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDI
 
 
 
-
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -21863,7 +21285,7 @@ def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_S
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -21876,6 +21298,7 @@ def("hSubAddConv",fptr_hSubAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_S
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -21981,61 +21404,33 @@ def("hSub",fptr_hSub2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 
 
-
 def("hSub",fptr_hSub_hSLICED2_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hSub",fptr_hSub_hSLICED2_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -22050,7 +21445,7 @@ def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDI
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -22063,6 +21458,7 @@ def("hSub",fptr_hSub_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDI
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -22131,25 +21527,15 @@ def("hiMul",fptr_hiMul_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 
 
-
 def("hiMul",fptr_hiMul_hSLICED_STL_HComplexHComplex_12_STDITSTDIT );
-def("hiMul",fptr_hiMul_hSLICED_hARRAY_HComplexHComplex_12_STDITSTDIT );
 def("hiMul",fptr_hiMul_hSLICED_STL_HComplexHNumber_12_STDITSTDIT );
-def("hiMul",fptr_hiMul_hSLICED_hARRAY_HComplexHNumber_12_STDITSTDIT );
 def("hiMul",fptr_hiMul_hSLICED_STL_HComplexHInteger_12_STDITSTDIT );
-def("hiMul",fptr_hiMul_hSLICED_hARRAY_HComplexHInteger_12_STDITSTDIT );
 def("hiMul",fptr_hiMul_hSLICED_STL_HNumberHComplex_12_STDITSTDIT );
-def("hiMul",fptr_hiMul_hSLICED_hARRAY_HNumberHComplex_12_STDITSTDIT );
 def("hiMul",fptr_hiMul_hSLICED_STL_HNumberHNumber_12_STDITSTDIT );
-def("hiMul",fptr_hiMul_hSLICED_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hiMul",fptr_hiMul_hSLICED_STL_HNumberHInteger_12_STDITSTDIT );
-def("hiMul",fptr_hiMul_hSLICED_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hiMul",fptr_hiMul_hSLICED_STL_HIntegerHComplex_12_STDITSTDIT );
-def("hiMul",fptr_hiMul_hSLICED_hARRAY_HIntegerHComplex_12_STDITSTDIT );
 def("hiMul",fptr_hiMul_hSLICED_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hiMul",fptr_hiMul_hSLICED_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hiMul",fptr_hiMul_hSLICED_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hiMul",fptr_hiMul_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -22164,7 +21550,7 @@ def("hiMul",fptr_hiMul_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -22177,6 +21563,7 @@ def("hiMul",fptr_hiMul_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -22245,25 +21632,15 @@ def("hiMul",fptr_hiMul2_hARRAY_HIntegerHInteger_12_STDIT );
 
 
 
-
 def("hiMul",fptr_hiMul_hSLICED2_STL_HComplexHComplex_12_STDIT );
-def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HComplexHComplex_12_STDIT );
 def("hiMul",fptr_hiMul_hSLICED2_STL_HComplexHNumber_12_STDIT );
-def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HComplexHNumber_12_STDIT );
 def("hiMul",fptr_hiMul_hSLICED2_STL_HComplexHInteger_12_STDIT );
-def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HComplexHInteger_12_STDIT );
 def("hiMul",fptr_hiMul_hSLICED2_STL_HNumberHComplex_12_STDIT );
-def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HNumberHComplex_12_STDIT );
 def("hiMul",fptr_hiMul_hSLICED2_STL_HNumberHNumber_12_STDIT );
-def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HNumberHNumber_12_STDIT );
 def("hiMul",fptr_hiMul_hSLICED2_STL_HNumberHInteger_12_STDIT );
-def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HNumberHInteger_12_STDIT );
 def("hiMul",fptr_hiMul_hSLICED2_STL_HIntegerHComplex_12_STDIT );
-def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HIntegerHComplex_12_STDIT );
 def("hiMul",fptr_hiMul_hSLICED2_STL_HIntegerHNumber_12_STDIT );
-def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HIntegerHNumber_12_STDIT );
 def("hiMul",fptr_hiMul_hSLICED2_STL_HIntegerHInteger_12_STDIT );
-def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -22278,7 +21655,7 @@ def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -22291,6 +21668,7 @@ def("hiMul",fptr_hiMul_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -22396,61 +21774,33 @@ def("hMul",fptr_hMul_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 
 
-
 def("hMul",fptr_hMul_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -22465,7 +21815,7 @@ def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -22478,6 +21828,7 @@ def("hMul",fptr_hMul_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -22535,13 +21886,9 @@ def("hMulAdd",fptr_hMulAdd_hARRAY_HInteger_111_STDITSTDITSTDIT );
 
 
 
-
 def("hMulAdd",fptr_hMulAdd_hSLICED_STL_HComplex_111_STDITSTDITSTDIT );
-def("hMulAdd",fptr_hMulAdd_hSLICED_hARRAY_HComplex_111_STDITSTDITSTDIT );
 def("hMulAdd",fptr_hMulAdd_hSLICED_STL_HNumber_111_STDITSTDITSTDIT );
-def("hMulAdd",fptr_hMulAdd_hSLICED_hARRAY_HNumber_111_STDITSTDITSTDIT );
 def("hMulAdd",fptr_hMulAdd_hSLICED_STL_HInteger_111_STDITSTDITSTDIT );
-def("hMulAdd",fptr_hMulAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -22556,7 +21903,7 @@ def("hMulAdd",fptr_hMulAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -22569,6 +21916,7 @@ def("hMulAdd",fptr_hMulAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -22674,61 +22022,33 @@ def("hMulAddConv",fptr_hMulAddConv_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDI
 
 
 
-
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -22743,7 +22063,7 @@ def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_S
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -22756,6 +22076,7 @@ def("hMulAddConv",fptr_hMulAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_S
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -22861,61 +22182,33 @@ def("hMul",fptr_hMul2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 
 
-
 def("hMul",fptr_hMul_hSLICED2_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hMul",fptr_hMul_hSLICED2_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -22930,7 +22223,7 @@ def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDI
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -22943,6 +22236,7 @@ def("hMul",fptr_hMul_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDI
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -23011,25 +22305,15 @@ def("hiAdd",fptr_hiAdd_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 
 
-
 def("hiAdd",fptr_hiAdd_hSLICED_STL_HComplexHComplex_12_STDITSTDIT );
-def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HComplexHComplex_12_STDITSTDIT );
 def("hiAdd",fptr_hiAdd_hSLICED_STL_HComplexHNumber_12_STDITSTDIT );
-def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HComplexHNumber_12_STDITSTDIT );
 def("hiAdd",fptr_hiAdd_hSLICED_STL_HComplexHInteger_12_STDITSTDIT );
-def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HComplexHInteger_12_STDITSTDIT );
 def("hiAdd",fptr_hiAdd_hSLICED_STL_HNumberHComplex_12_STDITSTDIT );
-def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HNumberHComplex_12_STDITSTDIT );
 def("hiAdd",fptr_hiAdd_hSLICED_STL_HNumberHNumber_12_STDITSTDIT );
-def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hiAdd",fptr_hiAdd_hSLICED_STL_HNumberHInteger_12_STDITSTDIT );
-def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hiAdd",fptr_hiAdd_hSLICED_STL_HIntegerHComplex_12_STDITSTDIT );
-def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HIntegerHComplex_12_STDITSTDIT );
 def("hiAdd",fptr_hiAdd_hSLICED_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hiAdd",fptr_hiAdd_hSLICED_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -23044,7 +22328,7 @@ def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -23057,6 +22341,7 @@ def("hiAdd",fptr_hiAdd_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -23125,25 +22410,15 @@ def("hiAdd",fptr_hiAdd2_hARRAY_HIntegerHInteger_12_STDIT );
 
 
 
-
 def("hiAdd",fptr_hiAdd_hSLICED2_STL_HComplexHComplex_12_STDIT );
-def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HComplexHComplex_12_STDIT );
 def("hiAdd",fptr_hiAdd_hSLICED2_STL_HComplexHNumber_12_STDIT );
-def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HComplexHNumber_12_STDIT );
 def("hiAdd",fptr_hiAdd_hSLICED2_STL_HComplexHInteger_12_STDIT );
-def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HComplexHInteger_12_STDIT );
 def("hiAdd",fptr_hiAdd_hSLICED2_STL_HNumberHComplex_12_STDIT );
-def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HNumberHComplex_12_STDIT );
 def("hiAdd",fptr_hiAdd_hSLICED2_STL_HNumberHNumber_12_STDIT );
-def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HNumberHNumber_12_STDIT );
 def("hiAdd",fptr_hiAdd_hSLICED2_STL_HNumberHInteger_12_STDIT );
-def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HNumberHInteger_12_STDIT );
 def("hiAdd",fptr_hiAdd_hSLICED2_STL_HIntegerHComplex_12_STDIT );
-def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HIntegerHComplex_12_STDIT );
 def("hiAdd",fptr_hiAdd_hSLICED2_STL_HIntegerHNumber_12_STDIT );
-def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HIntegerHNumber_12_STDIT );
 def("hiAdd",fptr_hiAdd_hSLICED2_STL_HIntegerHInteger_12_STDIT );
-def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -23158,7 +22433,7 @@ def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -23171,6 +22446,7 @@ def("hiAdd",fptr_hiAdd_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -23276,61 +22552,33 @@ def("hAdd",fptr_hAdd_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 
 
-
 def("hAdd",fptr_hAdd_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -23345,7 +22593,7 @@ def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -23358,6 +22606,7 @@ def("hAdd",fptr_hAdd_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -23415,13 +22664,9 @@ def("hAddAdd",fptr_hAddAdd_hARRAY_HInteger_111_STDITSTDITSTDIT );
 
 
 
-
 def("hAddAdd",fptr_hAddAdd_hSLICED_STL_HComplex_111_STDITSTDITSTDIT );
-def("hAddAdd",fptr_hAddAdd_hSLICED_hARRAY_HComplex_111_STDITSTDITSTDIT );
 def("hAddAdd",fptr_hAddAdd_hSLICED_STL_HNumber_111_STDITSTDITSTDIT );
-def("hAddAdd",fptr_hAddAdd_hSLICED_hARRAY_HNumber_111_STDITSTDITSTDIT );
 def("hAddAdd",fptr_hAddAdd_hSLICED_STL_HInteger_111_STDITSTDITSTDIT );
-def("hAddAdd",fptr_hAddAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -23436,7 +22681,7 @@ def("hAddAdd",fptr_hAddAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -23449,6 +22694,7 @@ def("hAddAdd",fptr_hAddAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -23554,61 +22800,33 @@ def("hAddAddConv",fptr_hAddAddConv_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDI
 
 
 
-
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -23623,7 +22841,7 @@ def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_S
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -23636,6 +22854,7 @@ def("hAddAddConv",fptr_hAddAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_S
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -23741,61 +22960,33 @@ def("hAdd",fptr_hAdd2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 
 
-
 def("hAdd",fptr_hAdd_hSLICED2_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_hSLICED2_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -23810,7 +23001,7 @@ def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDI
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -23823,6 +23014,7 @@ def("hAdd",fptr_hAdd_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDI
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -23891,25 +23083,15 @@ def("hiDiv",fptr_hiDiv_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 
 
-
 def("hiDiv",fptr_hiDiv_hSLICED_STL_HComplexHComplex_12_STDITSTDIT );
-def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HComplexHComplex_12_STDITSTDIT );
 def("hiDiv",fptr_hiDiv_hSLICED_STL_HComplexHNumber_12_STDITSTDIT );
-def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HComplexHNumber_12_STDITSTDIT );
 def("hiDiv",fptr_hiDiv_hSLICED_STL_HComplexHInteger_12_STDITSTDIT );
-def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HComplexHInteger_12_STDITSTDIT );
 def("hiDiv",fptr_hiDiv_hSLICED_STL_HNumberHComplex_12_STDITSTDIT );
-def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HNumberHComplex_12_STDITSTDIT );
 def("hiDiv",fptr_hiDiv_hSLICED_STL_HNumberHNumber_12_STDITSTDIT );
-def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HNumberHNumber_12_STDITSTDIT );
 def("hiDiv",fptr_hiDiv_hSLICED_STL_HNumberHInteger_12_STDITSTDIT );
-def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HNumberHInteger_12_STDITSTDIT );
 def("hiDiv",fptr_hiDiv_hSLICED_STL_HIntegerHComplex_12_STDITSTDIT );
-def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HIntegerHComplex_12_STDITSTDIT );
 def("hiDiv",fptr_hiDiv_hSLICED_STL_HIntegerHNumber_12_STDITSTDIT );
-def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HIntegerHNumber_12_STDITSTDIT );
 def("hiDiv",fptr_hiDiv_hSLICED_STL_HIntegerHInteger_12_STDITSTDIT );
-def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -23924,7 +23106,7 @@ def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -23937,6 +23119,7 @@ def("hiDiv",fptr_hiDiv_hSLICED_hARRAY_HIntegerHInteger_12_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -24005,25 +23188,15 @@ def("hiDiv",fptr_hiDiv2_hARRAY_HIntegerHInteger_12_STDIT );
 
 
 
-
 def("hiDiv",fptr_hiDiv_hSLICED2_STL_HComplexHComplex_12_STDIT );
-def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HComplexHComplex_12_STDIT );
 def("hiDiv",fptr_hiDiv_hSLICED2_STL_HComplexHNumber_12_STDIT );
-def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HComplexHNumber_12_STDIT );
 def("hiDiv",fptr_hiDiv_hSLICED2_STL_HComplexHInteger_12_STDIT );
-def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HComplexHInteger_12_STDIT );
 def("hiDiv",fptr_hiDiv_hSLICED2_STL_HNumberHComplex_12_STDIT );
-def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HNumberHComplex_12_STDIT );
 def("hiDiv",fptr_hiDiv_hSLICED2_STL_HNumberHNumber_12_STDIT );
-def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HNumberHNumber_12_STDIT );
 def("hiDiv",fptr_hiDiv_hSLICED2_STL_HNumberHInteger_12_STDIT );
-def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HNumberHInteger_12_STDIT );
 def("hiDiv",fptr_hiDiv_hSLICED2_STL_HIntegerHComplex_12_STDIT );
-def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HIntegerHComplex_12_STDIT );
 def("hiDiv",fptr_hiDiv_hSLICED2_STL_HIntegerHNumber_12_STDIT );
-def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HIntegerHNumber_12_STDIT );
 def("hiDiv",fptr_hiDiv_hSLICED2_STL_HIntegerHInteger_12_STDIT );
-def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -24038,7 +23211,7 @@ def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -24051,6 +23224,7 @@ def("hiDiv",fptr_hiDiv_hSLICED2_hARRAY_HIntegerHInteger_12_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -24156,61 +23330,33 @@ def("hDiv",fptr_hDiv_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 
 
-
 def("hDiv",fptr_hDiv_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -24225,7 +23371,7 @@ def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -24238,6 +23384,7 @@ def("hDiv",fptr_hDiv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -24295,13 +23442,9 @@ def("hDivAdd",fptr_hDivAdd_hARRAY_HInteger_111_STDITSTDITSTDIT );
 
 
 
-
 def("hDivAdd",fptr_hDivAdd_hSLICED_STL_HComplex_111_STDITSTDITSTDIT );
-def("hDivAdd",fptr_hDivAdd_hSLICED_hARRAY_HComplex_111_STDITSTDITSTDIT );
 def("hDivAdd",fptr_hDivAdd_hSLICED_STL_HNumber_111_STDITSTDITSTDIT );
-def("hDivAdd",fptr_hDivAdd_hSLICED_hARRAY_HNumber_111_STDITSTDITSTDIT );
 def("hDivAdd",fptr_hDivAdd_hSLICED_STL_HInteger_111_STDITSTDITSTDIT );
-def("hDivAdd",fptr_hDivAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -24316,7 +23459,7 @@ def("hDivAdd",fptr_hDivAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -24329,6 +23472,7 @@ def("hDivAdd",fptr_hDivAdd_hSLICED_hARRAY_HInteger_111_STDITSTDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -24434,61 +23578,33 @@ def("hDivAddConv",fptr_hDivAddConv_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDI
 
 
 
-
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_hSLICED_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -24503,7 +23619,7 @@ def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_S
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -24516,6 +23632,7 @@ def("hDivAddConv",fptr_hDivAddConv_hSLICED_hARRAY_HIntegerHIntegerHInteger_123_S
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -24621,61 +23738,33 @@ def("hDiv",fptr_hDiv2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 
 
-
 def("hDiv",fptr_hDiv_hSLICED2_STL_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HComplexHComplexHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HComplexHComplexHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HComplexHComplexHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HComplexHNumberHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HComplexHNumberHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HComplexHNumberHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HComplexHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HComplexHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HComplexHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HNumberHComplexHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HNumberHComplexHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HNumberHComplexHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HNumberHNumberHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HNumberHNumberHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HNumberHNumberHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HNumberHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HNumberHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HNumberHIntegerHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHComplexHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHComplexHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHComplexHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHNumberHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHNumberHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHNumberHInteger_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHIntegerHComplex_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHIntegerHNumber_123_STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_hSLICED2_STL_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
-def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -24690,7 +23779,7 @@ def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDI
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -24703,6 +23792,7 @@ def("hDiv",fptr_hDiv_hSLICED2_hARRAY_HIntegerHIntegerHInteger_123_STDITSTDITSTDI
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -24754,9 +23844,7 @@ def("hConj",fptr_hConj_hARRAY_HInteger_HComplex_STDIT );
 
 
 
-
 def("hConj",fptr_hConj_hSLICED_STL_HInteger_HComplex_STDIT );
-def("hConj",fptr_hConj_hSLICED_hARRAY_HInteger_HComplex_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -24771,7 +23859,7 @@ def("hConj",fptr_hConj_hSLICED_hARRAY_HInteger_HComplex_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -24784,6 +23872,7 @@ def("hConj",fptr_hConj_hSLICED_hARRAY_HInteger_HComplex_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -24836,9 +23925,7 @@ def("hCrossCorrelateComplex",fptr_hCrossCorrelateComplex_hARRAY_HInteger_HComple
 
 
 
-
 def("hCrossCorrelateComplex",fptr_hCrossCorrelateComplex_hSLICED_STL_HInteger_HComplexHComplex_STDITSTDIT );
-def("hCrossCorrelateComplex",fptr_hCrossCorrelateComplex_hSLICED_hARRAY_HInteger_HComplexHComplex_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -24853,7 +23940,7 @@ def("hCrossCorrelateComplex",fptr_hCrossCorrelateComplex_hSLICED_hARRAY_HInteger
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -24866,6 +23953,7 @@ def("hCrossCorrelateComplex",fptr_hCrossCorrelateComplex_hSLICED_hARRAY_HInteger
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -24918,9 +24006,7 @@ def("hReal",fptr_hReal_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 
 
 
-
 def("hReal",fptr_hReal_hSLICED_STL_HInteger_HComplexHNumber_STDITSTDIT );
-def("hReal",fptr_hReal_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -24935,7 +24021,7 @@ def("hReal",fptr_hReal_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -24948,6 +24034,7 @@ def("hReal",fptr_hReal_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25000,9 +24087,7 @@ def("hArg",fptr_hArg_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 
 
 
-
 def("hArg",fptr_hArg_hSLICED_STL_HInteger_HComplexHNumber_STDITSTDIT );
-def("hArg",fptr_hArg_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25017,7 +24102,7 @@ def("hArg",fptr_hArg_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25030,6 +24115,7 @@ def("hArg",fptr_hArg_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25082,9 +24168,7 @@ def("hImag",fptr_hImag_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 
 
 
-
 def("hImag",fptr_hImag_hSLICED_STL_HInteger_HComplexHNumber_STDITSTDIT );
-def("hImag",fptr_hImag_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25099,7 +24183,7 @@ def("hImag",fptr_hImag_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25112,6 +24196,7 @@ def("hImag",fptr_hImag_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25164,9 +24249,7 @@ def("hNorm",fptr_hNorm_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 
 
 
-
 def("hNorm",fptr_hNorm_hSLICED_STL_HInteger_HComplexHNumber_STDITSTDIT );
-def("hNorm",fptr_hNorm_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25181,7 +24264,7 @@ def("hNorm",fptr_hNorm_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25194,6 +24277,7 @@ def("hNorm",fptr_hNorm_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25249,13 +24333,9 @@ def("hNegate",fptr_hNegate_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hNegate",fptr_hNegate_hSLICED_STL_HComplex_1_STDIT );
-def("hNegate",fptr_hNegate_hSLICED_hARRAY_HComplex_1_STDIT );
 def("hNegate",fptr_hNegate_hSLICED_STL_HNumber_1_STDIT );
-def("hNegate",fptr_hNegate_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hNegate",fptr_hNegate_hSLICED_STL_HInteger_1_STDIT );
-def("hNegate",fptr_hNegate_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25270,7 +24350,7 @@ def("hNegate",fptr_hNegate_hSLICED_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25283,6 +24363,7 @@ def("hNegate",fptr_hNegate_hSLICED_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25338,13 +24419,9 @@ def("hSum",fptr_hSum_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hSum",fptr_hSum_hSLICED_STL_HComplex_1_STDIT );
-def("hSum",fptr_hSum_hSLICED_hARRAY_HComplex_1_STDIT );
 def("hSum",fptr_hSum_hSLICED_STL_HNumber_1_STDIT );
-def("hSum",fptr_hSum_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hSum",fptr_hSum_hSLICED_STL_HInteger_1_STDIT );
-def("hSum",fptr_hSum_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25359,7 +24436,7 @@ def("hSum",fptr_hSum_hSLICED_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25372,6 +24449,7 @@ def("hSum",fptr_hSum_hSLICED_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25427,13 +24505,9 @@ def("hProduct",fptr_hProduct_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hProduct",fptr_hProduct_hSLICED_STL_HComplex_1_STDIT );
-def("hProduct",fptr_hProduct_hSLICED_hARRAY_HComplex_1_STDIT );
 def("hProduct",fptr_hProduct_hSLICED_STL_HNumber_1_STDIT );
-def("hProduct",fptr_hProduct_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hProduct",fptr_hProduct_hSLICED_STL_HInteger_1_STDIT );
-def("hProduct",fptr_hProduct_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25448,7 +24522,7 @@ def("hProduct",fptr_hProduct_hSLICED_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25461,6 +24535,7 @@ def("hProduct",fptr_hProduct_hSLICED_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25514,11 +24589,8 @@ def("hNorm",fptr_hNorm_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hNorm",fptr_hNorm_hSLICED_STL_HNumber_1_STDIT );
-def("hNorm",fptr_hNorm_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hNorm",fptr_hNorm_hSLICED_STL_HInteger_1_STDIT );
-def("hNorm",fptr_hNorm_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25533,7 +24605,7 @@ def("hNorm",fptr_hNorm_hSLICED_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25546,6 +24618,7 @@ def("hNorm",fptr_hNorm_hSLICED_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25599,11 +24672,8 @@ def("hNormalize",fptr_hNormalize_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hNormalize",fptr_hNormalize_hSLICED_STL_HNumber_1_STDIT );
-def("hNormalize",fptr_hNormalize_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hNormalize",fptr_hNormalize_hSLICED_STL_HInteger_1_STDIT );
-def("hNormalize",fptr_hNormalize_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25618,7 +24688,7 @@ def("hNormalize",fptr_hNormalize_hSLICED_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25631,6 +24701,7 @@ def("hNormalize",fptr_hNormalize_hSLICED_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25684,11 +24755,8 @@ def("hMean",fptr_hMean_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hMean",fptr_hMean_hSLICED_STL_HNumber_1_STDIT );
-def("hMean",fptr_hMean_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hMean",fptr_hMean_hSLICED_STL_HInteger_1_STDIT );
-def("hMean",fptr_hMean_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25703,7 +24771,7 @@ def("hMean",fptr_hMean_hSLICED_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25716,6 +24784,7 @@ def("hMean",fptr_hMean_hSLICED_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25771,13 +24840,9 @@ def("hSort",fptr_hSort_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hSort",fptr_hSort_hSLICED_STL_HComplex_1_STDIT );
-def("hSort",fptr_hSort_hSLICED_hARRAY_HComplex_1_STDIT );
 def("hSort",fptr_hSort_hSLICED_STL_HNumber_1_STDIT );
-def("hSort",fptr_hSort_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hSort",fptr_hSort_hSLICED_STL_HInteger_1_STDIT );
-def("hSort",fptr_hSort_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25792,7 +24857,7 @@ def("hSort",fptr_hSort_hSLICED_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25805,6 +24870,7 @@ def("hSort",fptr_hSort_hSLICED_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -25858,11 +24924,8 @@ def("hSortMedian",fptr_hSortMedian_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hSortMedian",fptr_hSortMedian_hSLICED_STL_HNumber_1_STDIT );
-def("hSortMedian",fptr_hSortMedian_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hSortMedian",fptr_hSortMedian_hSLICED_STL_HInteger_1_STDIT );
-def("hSortMedian",fptr_hSortMedian_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -25877,7 +24940,7 @@ def("hSortMedian",fptr_hSortMedian_hSLICED_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25932,9 +24995,7 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 def("hMedian",fptr_hMedian_STL_HNumber_1_STL );
-def("hMedian",fptr_hMedian_hARRAY_HNumber_1_STL );
 def("hMedian",fptr_hMedian_STL_HInteger_1_STL );
-def("hMedian",fptr_hMedian_hARRAY_HInteger_1_STL );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -25946,7 +25007,7 @@ def("hMedian",fptr_hMedian_hARRAY_HInteger_1_STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -25959,6 +25020,7 @@ def("hMedian",fptr_hMedian_hARRAY_HInteger_1_STL );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26013,11 +25075,8 @@ def("hStdDev",fptr_hStdDev_hARRAY_HInteger_1HNumber_STDIT );
 
 
 
-
 def("hStdDev",fptr_hStdDev_hSLICED_STL_HNumber_1HNumber_STDIT );
-def("hStdDev",fptr_hStdDev_hSLICED_hARRAY_HNumber_1HNumber_STDIT );
 def("hStdDev",fptr_hStdDev_hSLICED_STL_HInteger_1HNumber_STDIT );
-def("hStdDev",fptr_hStdDev_hSLICED_hARRAY_HInteger_1HNumber_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26032,7 +25091,7 @@ def("hStdDev",fptr_hStdDev_hSLICED_hARRAY_HInteger_1HNumber_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26045,6 +25104,7 @@ def("hStdDev",fptr_hStdDev_hSLICED_hARRAY_HInteger_1HNumber_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26098,11 +25158,8 @@ def("hStdDev",fptr_hStdDev_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hStdDev",fptr_hStdDev_hSLICED_STL_HNumber_1_STDIT );
-def("hStdDev",fptr_hStdDev_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hStdDev",fptr_hStdDev_hSLICED_STL_HInteger_1_STDIT );
-def("hStdDev",fptr_hStdDev_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26117,7 +25174,7 @@ def("hStdDev",fptr_hStdDev_hSLICED_hARRAY_HInteger_1_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26130,6 +25187,7 @@ def("hStdDev",fptr_hStdDev_hSLICED_hARRAY_HInteger_1_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26185,11 +25243,8 @@ def("hFindLessEqual",fptr_hFindLessEqual_hARRAY_HInteger_11HInteger_STDITSTDIT )
 
 
 
-
 def("hFindLessEqual",fptr_hFindLessEqual_hSLICED_STL_HNumber_11HInteger_STDITSTDIT );
-def("hFindLessEqual",fptr_hFindLessEqual_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT );
 def("hFindLessEqual",fptr_hFindLessEqual_hSLICED_STL_HInteger_11HInteger_STDITSTDIT );
-def("hFindLessEqual",fptr_hFindLessEqual_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26204,7 +25259,7 @@ def("hFindLessEqual",fptr_hFindLessEqual_hSLICED_hARRAY_HInteger_11HInteger_STDI
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26217,6 +25272,7 @@ def("hFindLessEqual",fptr_hFindLessEqual_hSLICED_hARRAY_HInteger_11HInteger_STDI
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26272,11 +25328,8 @@ def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_hARRAY_HInteger_11HInteger_STDITS
 
 
 
-
 def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_hSLICED_STL_HNumber_11HInteger_STDITSTDIT );
-def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT );
 def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_hSLICED_STL_HInteger_11HInteger_STDITSTDIT );
-def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26291,7 +25344,7 @@ def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_hSLICED_hARRAY_HInteger_11HIntege
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26304,6 +25357,7 @@ def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_hSLICED_hARRAY_HInteger_11HIntege
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26359,11 +25413,8 @@ def("hFindGreaterThan",fptr_hFindGreaterThan_hARRAY_HInteger_11HInteger_STDITSTD
 
 
 
-
 def("hFindGreaterThan",fptr_hFindGreaterThan_hSLICED_STL_HNumber_11HInteger_STDITSTDIT );
-def("hFindGreaterThan",fptr_hFindGreaterThan_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT );
 def("hFindGreaterThan",fptr_hFindGreaterThan_hSLICED_STL_HInteger_11HInteger_STDITSTDIT );
-def("hFindGreaterThan",fptr_hFindGreaterThan_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26378,7 +25429,7 @@ def("hFindGreaterThan",fptr_hFindGreaterThan_hSLICED_hARRAY_HInteger_11HInteger_
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26391,6 +25442,7 @@ def("hFindGreaterThan",fptr_hFindGreaterThan_hSLICED_hARRAY_HInteger_11HInteger_
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26446,11 +25498,8 @@ def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_hARRAY_HInteger_11HInteger_ST
 
 
 
-
 def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_hSLICED_STL_HNumber_11HInteger_STDITSTDIT );
-def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT );
 def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_hSLICED_STL_HInteger_11HInteger_STDITSTDIT );
-def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26465,7 +25514,7 @@ def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_hSLICED_hARRAY_HInteger_11HIn
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26478,6 +25527,7 @@ def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_hSLICED_hARRAY_HInteger_11HIn
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26533,11 +25583,8 @@ def("hFindGreaterEqual",fptr_hFindGreaterEqual_hARRAY_HInteger_11HInteger_STDITS
 
 
 
-
 def("hFindGreaterEqual",fptr_hFindGreaterEqual_hSLICED_STL_HNumber_11HInteger_STDITSTDIT );
-def("hFindGreaterEqual",fptr_hFindGreaterEqual_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT );
 def("hFindGreaterEqual",fptr_hFindGreaterEqual_hSLICED_STL_HInteger_11HInteger_STDITSTDIT );
-def("hFindGreaterEqual",fptr_hFindGreaterEqual_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26552,7 +25599,7 @@ def("hFindGreaterEqual",fptr_hFindGreaterEqual_hSLICED_hARRAY_HInteger_11HIntege
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26565,6 +25612,7 @@ def("hFindGreaterEqual",fptr_hFindGreaterEqual_hSLICED_hARRAY_HInteger_11HIntege
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26620,11 +25668,8 @@ def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_hARRAY_HInteger_11HInteger_
 
 
 
-
 def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_hSLICED_STL_HNumber_11HInteger_STDITSTDIT );
-def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT );
 def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_hSLICED_STL_HInteger_11HInteger_STDITSTDIT );
-def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26639,7 +25684,7 @@ def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_hSLICED_hARRAY_HInteger_11H
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26652,6 +25697,7 @@ def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_hSLICED_hARRAY_HInteger_11H
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26707,11 +25753,8 @@ def("hFindLessThan",fptr_hFindLessThan_hARRAY_HInteger_11HInteger_STDITSTDIT );
 
 
 
-
 def("hFindLessThan",fptr_hFindLessThan_hSLICED_STL_HNumber_11HInteger_STDITSTDIT );
-def("hFindLessThan",fptr_hFindLessThan_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT );
 def("hFindLessThan",fptr_hFindLessThan_hSLICED_STL_HInteger_11HInteger_STDITSTDIT );
-def("hFindLessThan",fptr_hFindLessThan_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26726,7 +25769,7 @@ def("hFindLessThan",fptr_hFindLessThan_hSLICED_hARRAY_HInteger_11HInteger_STDITS
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26739,6 +25782,7 @@ def("hFindLessThan",fptr_hFindLessThan_hSLICED_hARRAY_HInteger_11HInteger_STDITS
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26794,11 +25838,8 @@ def("hFindLessThanAbs",fptr_hFindLessThanAbs_hARRAY_HInteger_11HInteger_STDITSTD
 
 
 
-
 def("hFindLessThanAbs",fptr_hFindLessThanAbs_hSLICED_STL_HNumber_11HInteger_STDITSTDIT );
-def("hFindLessThanAbs",fptr_hFindLessThanAbs_hSLICED_hARRAY_HNumber_11HInteger_STDITSTDIT );
 def("hFindLessThanAbs",fptr_hFindLessThanAbs_hSLICED_STL_HInteger_11HInteger_STDITSTDIT );
-def("hFindLessThanAbs",fptr_hFindLessThanAbs_hSLICED_hARRAY_HInteger_11HInteger_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26813,7 +25854,7 @@ def("hFindLessThanAbs",fptr_hFindLessThanAbs_hSLICED_hARRAY_HInteger_11HInteger_
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26826,6 +25867,7 @@ def("hFindLessThanAbs",fptr_hFindLessThanAbs_hSLICED_hARRAY_HInteger_11HInteger_
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -26880,11 +25922,8 @@ def("hDownsample",fptr_hDownsample_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hDownsample",fptr_hDownsample_hSLICED_STL_HNumber_11_STDITSTDIT );
-def("hDownsample",fptr_hDownsample_hSLICED_hARRAY_HNumber_11_STDITSTDIT );
 def("hDownsample",fptr_hDownsample_hSLICED_STL_HInteger_11_STDITSTDIT );
-def("hDownsample",fptr_hDownsample_hSLICED_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -26899,7 +25938,7 @@ def("hDownsample",fptr_hDownsample_hSLICED_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26955,9 +25994,7 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 def("hDownsample",fptr_hDownsample_STL_HNumber_1HNumber_STL );
-def("hDownsample",fptr_hDownsample_hARRAY_HNumber_1HNumber_STL );
 def("hDownsample",fptr_hDownsample_STL_HInteger_1HNumber_STL );
-def("hDownsample",fptr_hDownsample_hARRAY_HInteger_1HNumber_STL );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -26969,7 +26006,7 @@ def("hDownsample",fptr_hDownsample_hARRAY_HInteger_1HNumber_STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -26982,6 +26019,7 @@ def("hDownsample",fptr_hDownsample_hARRAY_HInteger_1HNumber_STL );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -27038,13 +26076,9 @@ def("hFindLowerBound",fptr_hFindLowerBound_hARRAY_HInteger_11_STDIT );
 
 
 
-
 def("hFindLowerBound",fptr_hFindLowerBound_hSLICED_STL_HComplex_11_STDIT );
-def("hFindLowerBound",fptr_hFindLowerBound_hSLICED_hARRAY_HComplex_11_STDIT );
 def("hFindLowerBound",fptr_hFindLowerBound_hSLICED_STL_HNumber_11_STDIT );
-def("hFindLowerBound",fptr_hFindLowerBound_hSLICED_hARRAY_HNumber_11_STDIT );
 def("hFindLowerBound",fptr_hFindLowerBound_hSLICED_STL_HInteger_11_STDIT );
-def("hFindLowerBound",fptr_hFindLowerBound_hSLICED_hARRAY_HInteger_11_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -27059,7 +26093,7 @@ def("hFindLowerBound",fptr_hFindLowerBound_hSLICED_hARRAY_HInteger_11_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27125,7 +26159,7 @@ def("hFlatWeights",fptr_hFlatWeights_STL_HInteger_HInteger_ );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27191,7 +26225,7 @@ def("hLinearWeights",fptr_hLinearWeights_STL_HInteger_HInteger_ );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27257,7 +26291,7 @@ def("hGaussianWeights",fptr_hGaussianWeights_STL_HInteger_HInteger_ );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27324,7 +26358,7 @@ def("hWeights",fptr_hWeights_STL_HInteger_HIntegerhWEIGHTS_ );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27337,6 +26371,8 @@ def("hWeights",fptr_hWeights_STL_HInteger_HIntegerhWEIGHTS_ );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
@@ -27379,6 +26415,8 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //different vector classes
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
+
+
 
 
 def("hRunningAverage",fptr_hRunningAverage_STL_HInteger_HNumberHNumberHNumber_STDITSTDITSTDIT );
@@ -27386,8 +26424,8 @@ def("hRunningAverage",fptr_hRunningAverage_hARRAY_HInteger_HNumberHNumberHNumber
 
 
 
+
 def("hRunningAverage",fptr_hRunningAverage_hSLICED_STL_HInteger_HNumberHNumberHNumber_STDITSTDITSTDIT );
-def("hRunningAverage",fptr_hRunningAverage_hSLICED_hARRAY_HInteger_HNumberHNumberHNumber_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -27402,7 +26440,7 @@ def("hRunningAverage",fptr_hRunningAverage_hSLICED_hARRAY_HInteger_HNumberHNumbe
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27415,6 +26453,8 @@ def("hRunningAverage",fptr_hRunningAverage_hSLICED_hARRAY_HInteger_HNumberHNumbe
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
@@ -27460,13 +26500,15 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 
+
+
 def("hRunningAverage",fptr_hRunningAverage_STL_HInteger_HNumberHNumberHIntegerhWEIGHTS_STDITSTDIT );
 def("hRunningAverage",fptr_hRunningAverage_hARRAY_HInteger_HNumberHNumberHIntegerhWEIGHTS_STDITSTDIT );
 
 
 
+
 def("hRunningAverage",fptr_hRunningAverage_hSLICED_STL_HInteger_HNumberHNumberHIntegerhWEIGHTS_STDITSTDIT );
-def("hRunningAverage",fptr_hRunningAverage_hSLICED_hARRAY_HInteger_HNumberHNumberHIntegerhWEIGHTS_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -27481,7 +26523,7 @@ def("hRunningAverage",fptr_hRunningAverage_hSLICED_hARRAY_HInteger_HNumberHNumbe
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27494,6 +26536,7 @@ def("hRunningAverage",fptr_hRunningAverage_hSLICED_hARRAY_HInteger_HNumberHNumbe
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -27554,7 +26597,7 @@ def("hGeometricDelayFarField",fptr_hGeometricDelayFarField_hARRAY_HInteger_HNumb
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27567,6 +26610,7 @@ def("hGeometricDelayFarField",fptr_hGeometricDelayFarField_hARRAY_HInteger_HNumb
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -27627,7 +26671,7 @@ def("hGeometricDelayNearField",fptr_hGeometricDelayNearField_hARRAY_HInteger_HNu
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27640,6 +26684,7 @@ def("hGeometricDelayNearField",fptr_hGeometricDelayNearField_hARRAY_HInteger_HNu
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -27694,9 +26739,7 @@ def("hGeometricDelays",fptr_hGeometricDelays_hARRAY_HInteger_HNumberHNumberHNumb
 
 
 
-
 def("hGeometricDelays",fptr_hGeometricDelays_hSLICED_STL_HInteger_HNumberHNumberHNumberbool_STDITSTDITSTDIT );
-def("hGeometricDelays",fptr_hGeometricDelays_hSLICED_hARRAY_HInteger_HNumberHNumberHNumberbool_STDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -27711,7 +26754,7 @@ def("hGeometricDelays",fptr_hGeometricDelays_hSLICED_hARRAY_HInteger_HNumberHNum
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27724,6 +26767,7 @@ def("hGeometricDelays",fptr_hGeometricDelays_hSLICED_hARRAY_HInteger_HNumberHNum
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -27779,9 +26823,7 @@ def("hGeometricPhases",fptr_hGeometricPhases_hARRAY_HInteger_HNumberHNumberHNumb
 
 
 
-
 def("hGeometricPhases",fptr_hGeometricPhases_hSLICED_STL_HInteger_HNumberHNumberHNumberHNumberbool_STDITSTDITSTDITSTDIT );
-def("hGeometricPhases",fptr_hGeometricPhases_hSLICED_hARRAY_HInteger_HNumberHNumberHNumberHNumberbool_STDITSTDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -27796,7 +26838,7 @@ def("hGeometricPhases",fptr_hGeometricPhases_hSLICED_hARRAY_HInteger_HNumberHNum
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27809,6 +26851,7 @@ def("hGeometricPhases",fptr_hGeometricPhases_hSLICED_hARRAY_HInteger_HNumberHNum
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -27864,9 +26907,7 @@ def("hGeometricWeights",fptr_hGeometricWeights_hARRAY_HInteger_HNumberHNumberHNu
 
 
 
-
 def("hGeometricWeights",fptr_hGeometricWeights_hSLICED_STL_HInteger_HNumberHNumberHNumberHComplexbool_STDITSTDITSTDITSTDIT );
-def("hGeometricWeights",fptr_hGeometricWeights_hSLICED_hARRAY_HInteger_HNumberHNumberHNumberHComplexbool_STDITSTDITSTDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -27881,7 +26922,7 @@ def("hGeometricWeights",fptr_hGeometricWeights_hSLICED_hARRAY_HInteger_HNumberHN
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27894,6 +26935,8 @@ def("hGeometricWeights",fptr_hGeometricWeights_hSLICED_hARRAY_HInteger_HNumberHN
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
 //instantiated for template parameters. Important e.g. for pythn
@@ -27937,13 +26980,15 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 
+
+
 def("hSpectralPower",fptr_hSpectralPower_STL_HInteger_HComplexHNumber_STDITSTDIT );
 def("hSpectralPower",fptr_hSpectralPower_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 
 
 
+
 def("hSpectralPower",fptr_hSpectralPower_hSLICED_STL_HInteger_HComplexHNumber_STDITSTDIT );
-def("hSpectralPower",fptr_hSpectralPower_hSLICED_hARRAY_HInteger_HComplexHNumber_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -27958,7 +27003,7 @@ def("hSpectralPower",fptr_hSpectralPower_hSLICED_hARRAY_HInteger_HComplexHNumber
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -27971,6 +27016,7 @@ def("hSpectralPower",fptr_hSpectralPower_hSLICED_hARRAY_HInteger_HComplexHNumber
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -28027,13 +27073,9 @@ def("hADC2Voltage",fptr_hADC2Voltage_hARRAY_HInteger_1HNumber_STDIT );
 
 
 
-
 def("hADC2Voltage",fptr_hADC2Voltage_hSLICED_STL_HComplex_1HNumber_STDIT );
-def("hADC2Voltage",fptr_hADC2Voltage_hSLICED_hARRAY_HComplex_1HNumber_STDIT );
 def("hADC2Voltage",fptr_hADC2Voltage_hSLICED_STL_HNumber_1HNumber_STDIT );
-def("hADC2Voltage",fptr_hADC2Voltage_hSLICED_hARRAY_HNumber_1HNumber_STDIT );
 def("hADC2Voltage",fptr_hADC2Voltage_hSLICED_STL_HInteger_1HNumber_STDIT );
-def("hADC2Voltage",fptr_hADC2Voltage_hSLICED_hARRAY_HInteger_1HNumber_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -28048,7 +27090,7 @@ def("hADC2Voltage",fptr_hADC2Voltage_hSLICED_hARRAY_HInteger_1HNumber_STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -28061,6 +27103,7 @@ def("hADC2Voltage",fptr_hADC2Voltage_hSLICED_hARRAY_HInteger_1HNumber_STDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -28120,13 +27163,9 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hARRAY_HInteger_1HNumberuintuintu
 
 
 
-
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HComplex_1HNumberuintuintuint_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HComplex_1HNumberuintuintuint_STDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HNumber_1HNumberuintuintuint_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HNumber_1HNumberuintuintuint_STDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HInteger_1HNumberuintuintuint_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumberuintuintuint_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -28141,7 +27180,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumberu
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -28154,6 +27193,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumberu
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -28211,13 +27251,9 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hARRAY_HInteger_1HNumberuint_STDI
 
 
 
-
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HComplex_1HNumberuint_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HComplex_1HNumberuint_STDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HNumber_1HNumberuint_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HNumber_1HNumberuint_STDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HInteger_1HNumberuint_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumberuint_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -28232,7 +27268,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumberu
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -28245,6 +27281,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumberu
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -28301,13 +27338,9 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hARRAY_HInteger_1HNumber_STDIT );
 
 
 
-
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HComplex_1HNumber_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HComplex_1HNumber_STDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HNumber_1HNumber_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HNumber_1HNumber_STDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HInteger_1HNumber_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumber_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -28322,7 +27355,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumber_
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -28335,6 +27368,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1HNumber_
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -28390,13 +27424,9 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HComplex_1_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HComplex_1_STDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HNumber_1_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_STL_HInteger_1_STDIT );
-def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -28411,7 +27441,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1_STDIT )
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -28424,6 +27454,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_hSLICED_hARRAY_HInteger_1_STDIT )
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -28480,13 +27511,9 @@ def("hApplyFilter",fptr_hApplyFilter_hARRAY_HInteger_11_STDITSTDIT );
 
 
 
-
 def("hApplyFilter",fptr_hApplyFilter_hSLICED_STL_HComplex_11_STDITSTDIT );
-def("hApplyFilter",fptr_hApplyFilter_hSLICED_hARRAY_HComplex_11_STDITSTDIT );
 def("hApplyFilter",fptr_hApplyFilter_hSLICED_STL_HNumber_11_STDITSTDIT );
-def("hApplyFilter",fptr_hApplyFilter_hSLICED_hARRAY_HNumber_11_STDITSTDIT );
 def("hApplyFilter",fptr_hApplyFilter_hSLICED_STL_HInteger_11_STDITSTDIT );
-def("hApplyFilter",fptr_hApplyFilter_hSLICED_hARRAY_HInteger_11_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -28501,7 +27528,7 @@ def("hApplyFilter",fptr_hApplyFilter_hSLICED_hARRAY_HInteger_11_STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -28514,6 +27541,7 @@ def("hApplyFilter",fptr_hApplyFilter_hSLICED_hARRAY_HInteger_11_STDITSTDIT );
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -28569,13 +27597,9 @@ def("hApplyHanningFilter",fptr_hApplyHanningFilter_hARRAY_HInteger_1_STDIT );
 
 
 
-
 def("hApplyHanningFilter",fptr_hApplyHanningFilter_hSLICED_STL_HComplex_1_STDIT );
-def("hApplyHanningFilter",fptr_hApplyHanningFilter_hSLICED_hARRAY_HComplex_1_STDIT );
 def("hApplyHanningFilter",fptr_hApplyHanningFilter_hSLICED_STL_HNumber_1_STDIT );
-def("hApplyHanningFilter",fptr_hApplyHanningFilter_hSLICED_hARRAY_HNumber_1_STDIT );
 def("hApplyHanningFilter",fptr_hApplyHanningFilter_hSLICED_STL_HInteger_1_STDIT );
-def("hApplyHanningFilter",fptr_hApplyHanningFilter_hSLICED_hARRAY_HInteger_1_STDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -28590,7 +27614,7 @@ def("hApplyHanningFilter",fptr_hApplyHanningFilter_hSLICED_hARRAY_HInteger_1_STD
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -28603,6 +27627,7 @@ def("hApplyHanningFilter",fptr_hApplyHanningFilter_hSLICED_hARRAY_HInteger_1_STD
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -28656,9 +27681,7 @@ def("hFFT",fptr_hFFT_hARRAY_HInteger_HNumberHComplexHInteger_STDITSTDIT );
 
 
 
-
 def("hFFT",fptr_hFFT_hSLICED_STL_HInteger_HNumberHComplexHInteger_STDITSTDIT );
-def("hFFT",fptr_hFFT_hSLICED_hARRAY_HInteger_HNumberHComplexHInteger_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -28673,7 +27696,7 @@ def("hFFT",fptr_hFFT_hSLICED_hARRAY_HInteger_HNumberHComplexHInteger_STDITSTDIT 
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -28686,6 +27709,7 @@ def("hFFT",fptr_hFFT_hSLICED_hARRAY_HInteger_HNumberHComplexHInteger_STDITSTDIT 
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -28739,9 +27763,7 @@ def("hInvFFT",fptr_hInvFFT_hARRAY_HInteger_HComplexHNumberHInteger_STDITSTDIT );
 
 
 
-
 def("hInvFFT",fptr_hInvFFT_hSLICED_STL_HInteger_HComplexHNumberHInteger_STDITSTDIT );
-def("hInvFFT",fptr_hInvFFT_hSLICED_hARRAY_HInteger_HComplexHNumberHInteger_STDITSTDIT );
 
 //#if HFPP_FUNC_hARRAY
 //HFPP_MAKE_WRAPPERS_hARRAY
@@ -28756,7 +27778,7 @@ def("hInvFFT",fptr_hInvFFT_hSLICED_hARRAY_HInteger_HComplexHNumberHInteger_STDIT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -28822,7 +27844,7 @@ def("hFileSummary",fptr_hFileSummary_STL_HInteger_CRDataReader_ );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -28888,7 +27910,7 @@ def("hFileOpen",fptr_hFileOpen_STL_HInteger_HString_ , return_internal_reference
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -28955,7 +27977,7 @@ def("hFileGetParameter",fptr_hFileGetParameter_STL_HInteger_CRDataReaderHString_
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -29023,7 +28045,7 @@ def("hFileSetParameter",fptr_hFileSetParameter_STL_HInteger_CRDataReaderHStringH
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -29080,11 +28102,8 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 def("hFileRead",fptr_hFileRead_STL_HComplex_CRDataReaderHString1_STL , return_internal_reference<>());
-def("hFileRead",fptr_hFileRead_hARRAY_HComplex_CRDataReaderHString1_STL , return_internal_reference<>());
 def("hFileRead",fptr_hFileRead_STL_HNumber_CRDataReaderHString1_STL , return_internal_reference<>());
-def("hFileRead",fptr_hFileRead_hARRAY_HNumber_CRDataReaderHString1_STL , return_internal_reference<>());
 def("hFileRead",fptr_hFileRead_STL_HInteger_CRDataReaderHString1_STL , return_internal_reference<>());
-def("hFileRead",fptr_hFileRead_hARRAY_HInteger_CRDataReaderHString1_STL , return_internal_reference<>());
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -29096,7 +28115,7 @@ def("hFileRead",fptr_hFileRead_hARRAY_HInteger_CRDataReaderHString1_STL , return
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -29165,7 +28184,7 @@ def("hCalTable",fptr_hCalTable_STL_HInteger_HStringHStringHIntegerHPyObjectPtr_ 
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -29178,6 +28197,7 @@ def("hCalTable",fptr_hCalTable_STL_HInteger_HStringHStringHIntegerHPyObjectPtr_ 
 //#ifndef HFPP_FUNC_hARRAY
 //#define HFPP_FUNC_hARRAY 1
 //#endif
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different types of wrappers that will be built (STL, CASA, ...)
 //Defines all the different base types (int, double, ...) that will be
@@ -29240,7 +28260,7 @@ def("hCoordinateConvert",fptr_hCoordinateConvert_hARRAY_HInteger_HNumberCRCoordi
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Tue Mar 16 21:44:05 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 17 22:18:43 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -29303,11 +28323,8 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Generate wrappers
 
 def("hReadFileOld",fptr_hReadFileOld_STL_HComplex_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL );
-def("hReadFileOld",fptr_hReadFileOld_hARRAY_HComplex_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL );
 def("hReadFileOld",fptr_hReadFileOld_STL_HNumber_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL );
-def("hReadFileOld",fptr_hReadFileOld_hARRAY_HNumber_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL );
 def("hReadFileOld",fptr_hReadFileOld_STL_HInteger_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL );
-def("hReadFileOld",fptr_hReadFileOld_hARRAY_HInteger_1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHInteger_STL );
 
 ////////////////////////////////////////////////////////////////////////////////
 //

@@ -117,15 +117,24 @@ template <class T>
     typename std::vector<T>::iterator end(HInteger offset);
     HInteger getBegin();
     HInteger getEnd();
+    HInteger getSize();
+    HInteger length();
+    hArray<T>& setSize(HInteger size);
+    bool iterate();
+    hArray<T>& loop();
+    hArray<T>& noloop();
+    hArray<T>& next();
+    hArray<T>& reset();
     
   private:
-    HInteger slice_begin, slice_end;
+    HInteger slice_begin, slice_end, slice_size;
     typename std::vector<T>::iterator slice_it_begin, slice_it_end;
     HInteger number_of_dimensions;
     HInteger vector_size;
     vector<HInteger>* dimensions_p;
     vector<T>* vec_p;
     bool vector_is_internal;
+    bool doiterate;
   };
 
 //========================================================================

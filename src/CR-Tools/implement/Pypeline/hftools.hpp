@@ -81,6 +81,14 @@ BOOST_PYTHON_MODULE(hftools)
       .def("getNumberOfDimensions",&hArray<HNumber>::getNumberOfDimensions)
       .def("getBegin",&hArray<HNumber>::getBegin)
       .def("getEnd",&hArray<HNumber>::getEnd)
+      .def("getSize",&hArray<HNumber>::getSize)
+      .def("iterate",&hArray<HNumber>::iterate)
+      .def("__len__",&hArray<HNumber>::length)
+      .def("setSize",&hArray<HNumber>::setSize,return_internal_reference<>())
+      .def("loop",&hArray<HNumber>::loop,return_internal_reference<>())
+      .def("noloop",&hArray<HNumber>::noloop,return_internal_reference<>())
+      .def("next",&hArray<HNumber>::next,return_internal_reference<>())
+      .def("reset",&hArray<HNumber>::reset,return_internal_reference<>())
       ;
 
     //boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());

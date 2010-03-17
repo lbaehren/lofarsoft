@@ -383,6 +383,7 @@ template <class T> void hArray<T>::init(){
   vec_p=NULL;
   number_of_dimensions=0;
   dimensions_p = new std::vector<HInteger>();
+  doiterate=false;
 }
 
 template <class T> hArray<T>::hArray(std::vector<T> & vec){
@@ -549,6 +550,58 @@ template <class T> HInteger hArray<T>::getBegin(){return slice_begin;}
  */
 template <class T> HInteger hArray<T>::getEnd(){return slice_end;}
 
+/*!
+\brief Returns the size (length) of the current slice
+ */
+template <class T> HInteger hArray<T>::getSize(){return slice_size;}
+
+/*!
+\brief Returns the length of the underlying vector
+ */
+template <class T> HInteger hArray<T>::length(){return vec_p->size();}
+
+/*!
+\brief Returns the size (length) of the current slice
+ */
+template <class T> hArray<T>& hArray<T>::setSize(HInteger size){slice_size=size; return *this;}
+
+/*!
+\brief Returns whether or not to iterate over all slices in the vector
+ */
+template <class T> bool hArray<T>::iterate(){return doiterate;}
+
+/*!
+\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector)
+ */
+template <class T> hArray<T>&  hArray<T>::loop(){doiterate=true; return *this;}
+
+/*!
+\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector)
+ */
+template <class T> hArray<T>&  hArray<T>::noloop(){doiterate=false; return *this;}
+
+/*!
+\brief Reset the slice iterators to the first slice
+*/
+template <class T> hArray<T>& hArray<T>::reset(){ 
+  setSlice(0,getSize());
+  return *this;
+}
+
+/*!
+\brief Increase the current slice by one, if array is in looping mode. 
+
+If the end of the vector is reached, switch looping mode off and reset array to first slice.
+ */
+template <class T> hArray<T>& hArray<T>::next(){
+  if (slice_end>=length()) { // the end has been reached
+    reset();
+    noloop();
+  } else {  
+    setSlice(slice_begin+slice_size,slice_end+slice_size);
+  };
+  return *this;
+}
 
 
 
