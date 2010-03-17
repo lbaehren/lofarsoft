@@ -253,7 +253,21 @@ and compute nodes.  Something like
     $ fab compute_nodes:~/pipeline_runtime/jobs/L2009_16007_1/pipeline.cfg start_engine:~/pipeline_runtime/jobs/L2009_16007_1/pipeline.cfg
 
 should do the trick. Yes, repeating the name of the configuration file four
-times is annoying -- patches welcome!  
+times is annoying -- patches welcome!  There maybe errors regarding "log4cplus"
+when starting the engines, which can be ignored;  in general, the STDOUT is as 
+follows for the head_node engine start up:
+
+.. code-block:: none
+
+	Debug: registered context Global=0
+	log4cplus:ERROR No appenders could be found for logger (LCS.Common.EXCEPTION).
+	log4cplus:ERROR Please initialize the log4cplus system properly.
+	[lfe001] run: bash /opt/pipeline/pipeline_snapshot/bin/ipcontroller.sh ~/pipeline_runtime start /opt/pipeline/dependencies/lib/python2.5/site-packages:/opt/pipeline/pipeline_snapshot/lib/python2.5/site-packages
+
+	Done.
+	Disconnecting from lfe001... done.
+
+
 
 Wait a moment
 -------------
