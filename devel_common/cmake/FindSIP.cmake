@@ -26,12 +26,18 @@
 #  HAVE_SIP       = Set to true, if all components of SIP have been found.
 #  SIP_INCLUDES   = Include path for the header files of SIP
 #  SIP_LIBRARIES  = Link these to use SIP
-#  SIP_LFLAGS     = Linker flags (optional)
+#  SIP_VERSION    = Version of SIP.
 
 ## -----------------------------------------------------------------------------
-## Search locations
+## CMake common settings
 
 include (CMakeSettings)
+
+if (SIP_FIND_QUIETLY)
+  set (PYTHON_FIND_QUIETLY YES )
+endif (SIP_FIND_QUIETLY)
+
+include (FindPython)
 
 ## -----------------------------------------------------------------------------
 ## As the shared libraries of a Python module typically do not contain the 
@@ -40,6 +46,7 @@ include (CMakeSettings)
 ## original prefixes once the end of this module is reached.
 
 set (TMP_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
+set (CMAKE_FIND_LIBRARY_PREFIXES "")
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
@@ -47,9 +54,9 @@ set (TMP_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
 find_path (SIP_INCLUDES sip.h
   PATHS ${include_locations}
   PATH_SUFFIXES
-  python2.6
-  python2.5
-  python2.4
+  python${PYTHON_VERSION}
+  python${PYTHON_VERSION}/site-packages
+  sip
   NO_DEFAULT_PATH
   )
 
@@ -59,9 +66,10 @@ find_path (SIP_INCLUDES sip.h
 find_library (SIP_LIBRARIES sip
   PATHS ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages
-  python2.5/site-packages
-  python2.4/site-packages
+  python
+  python${PYTHON_VERSION}
+  python${PYTHON_VERSION}/site-packages
+  sip
   NO_DEFAULT_PATH
   )
 
@@ -71,9 +79,10 @@ find_library (SIP_LIBRARIES sip
 find_file (SIP_SIPCONFIG_PY sipconfig.py
   PATHS ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages
-  python2.5/site-packages
-  python2.4/site-packages
+  python
+  python${PYTHON_VERSION}
+  python${PYTHON_VERSION}/site-packages
+  sip
   NO_DEFAULT_PATH
   )
 
@@ -86,7 +95,12 @@ if (SIP_SIPCONFIG_PY)
     )
   ## extract the version string
   if (SIP_VERSION_STRING)
-    string (REGEX MATCH "[0-9].[0-9].[0-9]" SIP_VERSION ${SIP_VERSION_STRING})
+    ## check version string consisting of three digits
+    string (REGEX MATCH "[0-9]+.[0-9]+.[0-9]+" SIP_VERSION ${SIP_VERSION_STRING})
+    ## check version string consisting of two digits
+    if (NOT SIP_VERSION)
+      string (REGEX MATCH "[0-9]+.[0-9]+" SIP_VERSION ${SIP_VERSION_STRING})
+    endif (NOT SIP_VERSION)
   endif (SIP_VERSION_STRING)
 else (SIP_SIPCONFIG_PY)
   message (STATUS "[FindSIP] Unable to determine version - no config file!")
@@ -128,6 +142,7 @@ endif (HAVE_SIP)
 mark_as_advanced (
   SIP_INCLUDES
   SIP_LIBRARIES
+  SIP_VERSION
   )
 
 ## -----------------------------------------------------------------------------
