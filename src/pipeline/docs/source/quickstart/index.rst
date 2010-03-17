@@ -204,7 +204,16 @@ to see the paths to the MS files.  A list that looks like
 
     ['/net/sub3/lse007/data2/L2009_16007/SB1.MS', '/net/sub3/lse007/data2/L2009_16007/SB2.MS', ...]
 
-is fine.  This method allows you the test the pipeline with a fewer set of files than the typical set in its entirety.
+is fine.  This method allows you the test the pipeline with a fewer set of files than the typical set in its entirety.  In order to **run on a list of files instead of running vsdreader**, the list would go into the sip.py file as such (otherwise, use the above setting for datafiles of run_task("vdsreader")):
+
+.. code-block:: python
+
+    class sip(control):
+       def pipeline_logic(self):
+           with log_time(self.logger):
+               datafiles = ['/net/sub3/lse007/data2/L2009_16007/SB1.MS', '/net/sub3/lse007/data2/L2009_16007/SB2.MS']
+               datafiles = self.run_task("dppp_pass1", datafiles)
+
 
 Anyway, assuming you want to go the VDS route, something like
 
