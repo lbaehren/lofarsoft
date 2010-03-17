@@ -1,22 +1,17 @@
-message (STATUS "[CR-Tools] private/terveen")
+
 ## -------------------------------------------------------------------
 ## Build instructions
 
 if (HAVE_CASACORE AND HAVE_DAL AND DAL_LIBRARIES AND HDF5_LIBRARIES)
   
-  foreach (src 
-      TBBpartskymapper
-      TBBskymapper
-      TransientTriggerFromSkymap      
-      imagededisperse
-      MSDynSpec
-      zenittest
-      sandertest
-      tDynSpec
-    )
+  foreach (src ${cr_terveen_sources})
+    
+    ## get the name of the file without the extension
+    get_filename_component (extension ${src} EXT)
+    get_filename_component (src ${src} NAME_WE)
     
     ## compiler instructions
-    add_executable (${src} ${src}.cc)
+    add_executable(${src} ${src}${extension})
     
     ## linker instructions
     target_link_libraries (${src} 
@@ -28,6 +23,13 @@ if (HAVE_CASACORE AND HAVE_DAL AND DAL_LIBRARIES AND HDF5_LIBRARIES)
       ${CFITSIO_LIBRARIES}
       )
     
-    endforeach (src)
+    ## installation instructions
+    install (TARGETS ${src}
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      )
     
+  endforeach (src)
+  
 endif (HAVE_CASACORE AND HAVE_DAL AND DAL_LIBRARIES AND HDF5_LIBRARIES)
+

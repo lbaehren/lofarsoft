@@ -4,7 +4,7 @@
 
 if (HAVE_CASACORE AND HAVE_DAL AND DAL_LIBRARIES AND HDF5_LIBRARIES)
 
-  foreach (src ${cr_falcke_sources})
+  foreach (src ${cr_link_sources})
     
     ## get the name of the file without the extension
     get_filename_component (extension ${src} EXT)
