@@ -69,7 +69,13 @@ namespace CR { // Namespace CR -- begin
   }
   
   void Feed::copy (Feed const &other)
-  {;}
+  {
+    offset_p.resize(other.offset_p.size());
+    offset_p = other.offset_p;
+
+    orientation_p.resize(other.orientation_p.size());
+    orientation_p = other.orientation_p;
+  }
 
   // ============================================================================
   //
@@ -78,9 +84,11 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   void Feed::summary (std::ostream &os)
-  {;}
-  
-  
+  {
+    os << "[Feed] Summary of internal parameters" << std::endl;
+//     os << "-- Offset       = " << offset_p      << std::endl;
+//     os << "-- Orientation  = " << orientation_p << std::endl;
+  }
   
   // ============================================================================
   //

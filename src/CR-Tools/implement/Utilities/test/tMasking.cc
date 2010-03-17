@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$ */
-
 // Custom header files
 #include <Utilities/Masking.h>
 
@@ -193,8 +191,8 @@ int test_subMask ()
 //
 // =============================================================================
 
-int main (int argc, char* argv[]) {
-
+int main ()
+{
   bool ok (true);
   int nofFailedTests (0);
   
