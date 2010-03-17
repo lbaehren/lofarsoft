@@ -175,7 +175,7 @@
 	for further description.</td>
      </tr>
      <tr valign="top">
-	<td bgcolor="dddddd">\b dal</td>
+	<td bgcolor="dddddd">\b lasa</td>
      	<td bgcolor="eeeeee">The <a href="group___l_a_s_a.html">LOFAR Air Shower
 	Array</a> (LASA).</td>
      </tr>
@@ -456,7 +456,14 @@
 /*!
   \defgroup LASA LOFAR Air-Shower Array (LASA)
 
-  <b>Setting up your working copy</b>
+  - \ref lasa_setup
+  - \ref lasa_build
+  - \ref lasa_update
+
+  \section lasa_setup Setting up your working copy
+
+  \b Note: This essentially is the  same procedure as already described in the
+  \ref configure_build_install.
 
   <ol>
     <li>For the initial checkout of your working copy run:
@@ -498,7 +505,7 @@
     appropriate statement to $HOME/.cshrc. 
   </ol>
 
-  <b>Compile the software</b>
+  \section lasa_build Compile the software
 
   <ol>
     <li>Change into the \b build directory and run the \e bootstrap script:
@@ -516,5 +523,8 @@
     make lasa
     \endverbatim
   </ol>
+
+  \section lasa_update Update your working copy
+
 */
 

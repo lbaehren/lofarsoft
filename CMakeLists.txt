@@ -169,7 +169,7 @@ add_custom_target (clean-src
 if (svn_executable)
   add_custom_target (update
     COMMAND svn up
-    COMMAND cd ${USG_ROOT}/build && ./bootstrap
+    COMMAND cd ${USG_ROOT}/build && rm -rf CMake* && ./bootstrap
     WORKING_DIRECTORY ${USG_ROOT}
     COMMENT "Updating working version of the source code from repository ..."
     )

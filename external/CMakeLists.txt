@@ -20,7 +20,7 @@ foreach (external_package
     qt
     root
     sip
-    swip
+    swig
     szip
     valgrind
     )
