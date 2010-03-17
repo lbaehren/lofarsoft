@@ -162,6 +162,11 @@ analyse LOFAR data. In addition, the USG performs the following functions:
   `-- src
       `-- RM          <-- you are here
   \endverbatim
+
+  <h3>External packages</h3>
+
+  - \ref external_packages_armadillo
+  - \ref external_packages_itpp
 */
 
 /*!
