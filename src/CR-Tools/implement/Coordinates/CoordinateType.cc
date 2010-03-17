@@ -278,9 +278,14 @@ namespace CR { // Namespace CR -- begin
   {
     unsigned int nofAxes (2);
     casa::Matrix<casa::Double> xform(nofAxes,nofAxes);
-    
-    xform            = 0.0;
-    xform.diagonal() = 1.0;
+
+    try {
+      xform            = 0.0;
+      xform.diagonal() = 1.0;
+    } catch (casa::AipsError x) {
+      std::cerr << "[CoordinateType::makeDirectionCoordinate] " << x.getMesg()
+		<< std::endl;
+    }
 
     /* Check the dimensions of the vectors with the input parameters */
     
@@ -377,11 +382,12 @@ namespace CR { // Namespace CR -- begin
 					Vector<double> const &increment,
 					Vector<double> const &refPixel)
   {
-    uint nelem = refValue.nelements();
-    Matrix<casa::Double> pc(nelem,nelem);
+    uint rank = refValue.nelements();
+    casa::Matrix<double> pc (rank,rank,0.0);
     
-    pc = 0.0;
-    pc.diagonal(1);
+    for (uint n(0); n<rank; ++n) {
+      pc(n,n) = 1.0;
+    }
     
     LinearCoordinate coord (names,
 			    units,
