@@ -2,7 +2,7 @@
 from math import *
 from hftools import *
 from pydoc import help as pyhelp
-import os,sys
+import os,sys,re
 LOFARSOFT=os.environ["LOFARSOFT"]
 
 pydocpyfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.py"
@@ -27,10 +27,13 @@ def hhelpstring(func):
     contains informations from the CRTOOLS. If so, return only that
     part.
     """
-    if func.__doc__==None: return ""
-    iscr=func.__doc__.find("\nPYCRTOOLS ")
-    if iscr>=0: doc=func.__doc__[iscr+1:]
-    else: doc=func.__doc__
+    doc=func.__doc__
+    if doc==None: return ""
+    match=re.search("^PYCRTOOLS .*",doc,re.MULTILINE)
+    if (match):
+        predoc=doc[match.start():match.end()]
+        doc=re.sub("PYCRTOOLS .*","",doc[match.end():])
+        doc = predoc + doc;
     return doc
 
 #    Included to overwrite the pydoc help function.
@@ -110,15 +113,12 @@ def VecToString(self,maxlen=10):
 
 
 def VecToPrintString(self,maxlen=10):
-    if hasattr(self,"type"): s=str(self.type)+","
-    else: s=""
-    return "Vec("+s+str(len(self))+")=[" +VecToString(self)+"]"
+    s=typename(basetype(self))+","
+    return "Vec("+s+str(len(self))+")=[" +VecToString(self,maxlen)+"]"
 
 def ArrayToPrintString(self,maxlen=10):
-    return "Array("+str(len(self.Vector()))+")=[" +VecToString(self.Vector())+"]"
-
-setattr(FloatAry,"__repr__",ArrayToPrintString)
-
+    s=typename(basetype(self))+", "
+    return "Array("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]) -> [" +VecToString(self.Vector()[self.getBegin():self.getEnd()],maxlen)+"]"
 
 #========================================================================
 # Adding multi-dimensional array capabilities to vector class
@@ -133,7 +133,7 @@ def multiply_list(l):
     """
     return reduce(lambda x,y:x*y,l)
 
-def hArray_setDim(self,dimensions_list):
+def hVector_setDim(self,dimensions_list):
     """setDim([dim1,dim2,...,dimN]) 
     
     Sets the dimensions of a multidimensonal array, using a list of
@@ -154,7 +154,7 @@ def hArray_setDim(self,dimensions_list):
     self.ndim=len(dimensions_list)
     return self
 
-def hArray_getDim(self):
+def hVector_getDim(self):
     """
     self.getDim() -> [dim1,dim2,...,dimN] or len(self)
     
@@ -166,7 +166,7 @@ def hArray_getDim(self):
     if self.ndim>0: return self.dimension
     else: return len(self)
 
-def hArray_elem(self,n):
+def hVector_elem(self,n):
     """
     self.elem(n) -> nth element of the first dimension of the array
 
@@ -181,18 +181,218 @@ def hArray_elem(self,n):
     else:
         return self[n]
 
-        
-        
 
 def extendflat(self,l):
     """
     vector.extendflat([[e1-1,e1-2,...],[e2-1,e2-2,...],..]) -> [e1-1,e1-2,...,e2-1,e2-2,...]
 
-    Appendinh all elements in a list of lists to a one-dimensional
+    Appending all elements in a list of lists to a one-dimensional
     vector with a flat dat structure (just 1D).
     """
     map(lambda x:self.extend(x),l)
 
+
+def hArray_newreference(self):
+    """
+    array.newreference() -> copy of array referencing the same vector
+
+    Will make an exact copy of the array, and reference the same
+    vector. Hence the new array can be assigned a new slice, but will
+    still access the same underlying vector in memory.
+    """
+    ary=Array(basetype(self))
+    ary.vec=self.vec
+    ary.setVector(self.Vector())
+    ary.setDim(self.getDim())
+    ary.setSlice(self.getBegin(),self.getEnd())
+    if self.iterate(): ary.loop()
+    return ary
+
+def hArray_setDim(self,dimensions_list):
+    """setDim([dim1,dim2,...,dimN]) -> Array with new dimensions
+     
+    Sets the dimensions of a multidimensonal array, using a list of
+    integers as input. Will resize the underlying vector, if necessary
+    (i.e., if size has changed). Apart from the size, this does not
+    change the underlying data structure, just keeps track on how the
+    data is internally organized.
+
+    Index ordering follows c(++) convention: the last index runs
+    fastest (i.e. in analogy with normal numbers, where also the last
+    digit implies the smallest increment).
+
+    Use array.getDim() to retrieve the dimension list. 
+    """
+    return apply(self.setDimensions,dimensions_list)
+
+def hArray_getDim(self):
+    """
+    self.getDim() -> [dim1,dim2,...,dimN] or len(self)
+    
+    Retrieves the dimensions of a multidimensonal array as  a list of
+    integers.
+
+    Use array.setDim([dim1,dim2,...,dimN]) to set the dimensions. 
+    """
+    return list(self.getDimensions())
+
+def hArray_return_slice_start(val): 
+    """ Reduces a slice to its start value"""
+    if type(val)==slice: 
+        return val.start
+    else:
+        return val
+
+
+def hArray_getitem(self,dimlist):
+    """
+    self[]
+    
+    Retrieves the dimensions of a multidimensonal array as  a list of
+    integers.
+
+    Use array.setDim([dim1,dim2,...,dimN]) to set the dimensions. 
+    """
+    if type(dimlist)==int: dimlist=[dimlist]
+    sizes=self.getSizes()
+    dimliststarts=Vector(map(hArray_return_slice_start,dimlist))
+    start=dimliststarts.mulsum(sizes)
+    if type(dimlist[-1])==slice:
+        end=start+(dimlist[-1].stop-dimlist[-1].start+1)*sizes[len(dimlist)-1]
+    else:
+        end=start+sizes[len(dimlist)-1]
+    ary=Array(self)
+    ary.setSlice(start,end)
+    return ary;
+
+def hArray_setitem(self,dims):
+    """
+    self[]
+    
+    Retrieves the dimensions of a multidimensonal array as  a list of
+    integers.
+
+    Use array.setDim([dim1,dim2,...,dimN]) to set the dimensions. 
+    """
+    return (dims)
+
+ 
+#======================================================================
+#  Define Lists of Array and Vector Types that we will use 
+#======================================================================
+
+hBaseTypes=[int,float,complex,bool,str]
+hBaseNames=["Int","Float","Complex","Bool","String"]
+hBaseNamesPy=["int","float","complex","bool","str"]
+
+hRealTypes=[int,float]
+hComplexTypes=[complex]
+hNumericalTypes=hRealTypes+hComplexTypes
+hOtherTypes=[bool,str]
+
+#------------------------------------------------------------
+
+hVectorBaseTypeDictionary={}
+hArrayBaseTypeDictionary={}
+hArrayTypeDictionary={}
+hVectorTypeDictionary={}
+hTypeDictionary={}
+hTypeNamesDictionary={}
+hAllVectorTypes=[]
+hAllArrayTypes=[]
+for i in range(len(hBaseTypes)):
+    btype=hBaseTypes[i]
+    vtype=eval(hBaseNames[i]+"Vec")
+    atype=eval(hBaseNames[i]+"Array")
+    hAllVectorTypes.append(vtype)
+    hAllArrayTypes.append(atype)
+    hVectorBaseTypeDictionary[vtype]=btype
+    hArrayBaseTypeDictionary[atype]=btype
+    hVectorTypeDictionary[btype]=vtype
+    hArrayTypeDictionary[btype]=atype
+    hTypeDictionary[btype]=btype
+    hTypeNamesDictionary[btype]=hBaseNamesPy[i]
+
+hAllListTypes=hAllVectorTypes+[list,tuple]
+
+
+basetypedictionary=dict(zip(hVectorBaseTypeDictionary.keys()+hArrayBaseTypeDictionary.keys()+hTypeDictionary.keys(),hVectorBaseTypeDictionary.values()+hArrayBaseTypeDictionary.values()+hTypeDictionary.values()))
+
+def type2vector(basetype):
+    """type2vector(float) -> Vec(0)=[]
+
+    Creates a vector with elements of type 'basetype'. Returns None if
+    a vector of the basetype does not exist.
+    """
+    if basetype in hBaseTypes:
+        return hVectorTypeDictionary[basetype]()
+    else: return None
+
+def type2array(basetype):
+    """type2array(float) -> Vec(0)=[]
+
+    Creates an array with elements of type 'basetype'. Returns None if
+    an array of the basetype does not exist.
+    """
+    if basetype in hBaseTypes:
+        return hArrayTypeDictionary[basetype]()
+    else: return None
+
+def basetype(vec_or_array): 
+    """
+    basetype(IntVec) -> <type 'int'>
+    basetype(FloatArray) -> <type 'float'>
+    basetype(complex) -> <type 'complex'>
+    
+    Returns the basic type contained in the vector or array. Input can be either a vector, an array, or a type thereof.
+    """
+    t=type(vec_or_array)
+    if t==type: t=vec_or_array
+    return basetypedictionary[t]
+
+def typename(btype): 
+    """
+    basetype(float) -> "float"    
+    basetype(str) -> "str"
+    
+    Returns the name of the base type as a short string.
+    """
+    t=type(btype)
+    if t==type: t=btype
+    return hTypeNamesDictionary[t]
+
+
+def isArray(ary): 
+    """
+    isArray(array) -> True or False
+
+    Returns true if the argument is one of the hArray arrays, i.e. those listed in hAllVectorTypes.
+    """
+    return type(ary) in hAllArrayTypes
+
+def isVector(vec): 
+    """
+    isVector(vec) -> True or False
+
+    Returns true if the argument is one of the standard c++ vectors i.e. those liste in hAllVectorTypes.
+    """
+    return type(vec) in hAllVectorTypes
+
+hRealVectorTypes=map(lambda t:hVectorTypeDictionary[t],hRealTypes)
+hComplexVectorTypes=map(lambda t:hVectorTypeDictionary[t],hComplexTypes)
+hNumericalVectorTypes=map(lambda t:hVectorTypeDictionary[t],hNumericalTypes)
+hOtherVectorTypes=map(lambda t:hVectorTypeDictionary[t],hOtherTypes)
+
+hRealArrayTypes=map(lambda t:hArrayTypeDictionary[t],hRealTypes)
+hComplexArrayTypes=map(lambda t:hArrayTypeDictionary[t],hComplexTypes)
+hNumericalArrayTypes=map(lambda t:hArrayTypeDictionary[t],hNumericalTypes)
+hOtherArrayTypes=map(lambda t:hArrayTypeDictionary[t],hOtherTypes)
+
+hRealContainerTypes=hRealVectorTypes+hRealArrayTypes
+hComplexContainerTypes=hComplexVectorTypes+hComplexArrayTypes
+hNumericalContainerTypes=hNumericalVectorTypes+hNumericalArrayTypes
+hOtherContainerTypes=hOtherVectorTypes+hOtherArrayTypes
+hAllContainerTypes=hAllVectorTypes+hAllArrayTypes
 
 #======================================================================
 #  Vector Methods/Attributes
@@ -243,12 +443,6 @@ BoolVec.__name__="BoolVec"
 ComplexVec.__name__="ComplexVec"
 StringVec.__name__="StringVec"
 
-hRealVectorTypes=[IntVec,FloatVec]
-hNumericalVectorTypes=hRealVectorTypes+[ComplexVec]
-hOtherVectorTypes=[BoolVec,StringVec]
-hAllVectorTypes=hOtherVectorTypes+hNumericalVectorTypes
-hAllListTypes=hAllVectorTypes+[list,tuple]
-
 #Operator Overloading - basic arithmetic 
 
 # Operator:  +=
@@ -258,7 +452,7 @@ def Vec_iadd(vec1,vec2):
     vec1+=vec2 will add all elements in vec2 to the corresponding
     elements in vec1 and store the result in vec1.
     """
-    hiAdd(vec1,vec2)
+    hAdd(vec1,vec2)
     return vec1
 
 # Operator:  -=
@@ -266,7 +460,7 @@ def Vec_isub(vec1,vec2):
     "Provides the -= operator for addig two vectors in place. \
     vec1-=vec2 will subtract all elements in vec2 from the corresponding elements in vec1\
     and store the result in vec1."
-    hiSub(vec1,vec2)
+    hSub(vec1,vec2)
     return vec1
 
 # Operator:  /=
@@ -274,7 +468,7 @@ def Vec_idiv(vec1,vec2):
     "Provides the /= operator for addig two vectors in place. \
     vec1/=vec2 will divide all elements in vec1 by the corresponding elements in vec2\
     and store the result in vec1."
-    hiDiv(vec1,vec2)
+    hDiv(vec1,vec2)
     return vec1
 
 # Operator:  *=
@@ -282,7 +476,7 @@ def Vec_imul(vec1,vec2):
     "Provides the *= operator for addig two vectors in place. \
     vec1=vec2 will multiply all elements in vec1 with the corresponding elements in vec2\
     and store the result in vec1."
-    hiMul(vec1,vec2)
+    hMul(vec1,vec2)
     return vec1
 
 # Operator:  +
@@ -316,28 +510,40 @@ def Vec_div(vec1,val):
 
 #Fourier Transforms 
 setattr(FloatVec,"fft",hFFT)
+setattr(FloatArray,"fft",hFFT)
 
+for v in hAllArrayTypes:
+    setattr(v,"__repr__",ArrayToPrintString)
+    setattr(v,"setDim",hArray_setDim)
+    setattr(v,"getDim",hArray_getDim)
+    setattr(v,"newreference",hArray_newreference)
+    setattr(v,"__getitem__",hArray_getitem)
+    setattr(v,"__setitem__",hArray_setitem)
 
 for v in hAllVectorTypes:
     setattr(v,"__repr__",VecToPrintString)
     setattr(v,"extendflat",extendflat)
-    setattr(v,"setDim",hArray_setDim)
-    setattr(v,"getDim",hArray_getDim)
-    setattr(v,"elem",hArray_elem)
+    setattr(v,"setDim",hVector_setDim)
+    setattr(v,"getDim",hVector_getDim)
+    setattr(v,"elem",hVector_elem)
     setattr(v,"dimension",[])
     setattr(v,"ndim",0)
-    for s in ["hResize","hFill","hNew","hCopy","hSort"]:
+    for s in ["hResize","hNew"]:
         setattr(v,s[1:].lower(),eval(s))
 
-for v in hRealVectorTypes:
+for v in hAllContainerTypes:
+    for s in ["hFill","hCopy","hSort"]:
+        setattr(v,s[1:].lower(),eval(s))
+
+for v in hRealContainerTypes:
     for s in ["hMean","hStdDev","hDownsample","hNegate","hNorm","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs"]:
         setattr(v,s[1:].lower(),eval(s))
 
+for v in hComplexContainerTypes:
+    for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex","hInvFFT"]:
+        setattr(v,s[1:].lower(),eval(s))
 
-for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex"]:
-    setattr(ComplexVec,s[1:].lower(),eval(s))
-
-for v in hNumericalVectorTypes:
+for v in hNumericalContainerTypes:
     setattr(v,"__add__",Vec_add)
     setattr(v,"__sub__",Vec_sub)
     setattr(v,"__div__",Vec_div)
@@ -346,9 +552,8 @@ for v in hNumericalVectorTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hMulAddConv","hDivAddConv","hSubAddConv","hAddAddConv","hiMul","hiDiv","hiSub","hiAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSortMedian","hMedian","hFindLowerBound"]:
+    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hMulAddConv","hDivAddConv","hSubAddConv","hAddAddConv","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
         setattr(v,s[1:].lower(),eval(s))
-
 
 #========================================================================
 # Convenience Vector Constructor
@@ -385,38 +590,41 @@ def Vector(Type=float,size=-1,fill=None):
     [4,4].
     """
     vtype=Type
-    if (Type==float): vec=FloatVec()
-    if (Type==int): vec=IntVec()
-    if (Type==complex): vec=ComplexVec()
-    if (Type==str): vec=StringVec()
-    if (Type==bool): vec=BoolVec()
-    if (type(Type) in hAllListTypes): 
+    if (type(vtype) in hAllArrayTypes):  # ArrayClass
+        vtype=basetype(Type)
+        vec=Vector(Type.getVector())
+    elif (type(vtype) in hAllListTypes):  #List or Vector 
         vtype=type(Type[0])
-        vec=Vector(vtype); vec.extend(Type)
+        vec=type2vector(vtype)
+        vec.extend(Type)
+    else:
+        vec=type2vector(vtype)
     vec.type=vtype
     if (size>=0): vec.resize(size)
     if (not fill==None): vec.fill(fill)
     return vec
 
 #======================================================================
-#  Vector Methods/Attributes
+#  Array Class and Vector Methods/Attributes
 #======================================================================
 
-class Array():
-    def __init__(self,*args):
-        self.vec=apply(Vector,args)
-        self.ArrayType=vec.type
-    def __repr__(self):
-        return "Array("+str(self.vec.type)+","+str(len(self.vec))+")=[" +VecToString(self)+"]"
-    def __setitem__(self,*args):
-        return list(args)
-    def __getitem__(self,*args):
-        self.slice=args
-    def getSlice(self):
-        return (vec,3,10)
-    setDim=hArray_setDim
-    getDim=hArray_getDim
-    def __len__(self): return len(self.vec)
+def Array(Type=float,dimensions=None,size=-1,fill=None):
+    if isVector(Type):  #Make a new array with refernece to the input vector
+        ary=type2array(basetype(Type))
+        ary.vec=Type
+        ary.setVector(ary.vec)
+    elif isArray(Type):  # Just make a copy with reference to same vector
+        ary=Type.newreference()
+    else: # Create a new vector
+        vec=Vector(Type=Type,size=size)
+        ary=type2array(basetype(vec))
+        ary.vec=vec
+        ary.setVector(ary.vec)
+    if (type(dimensions) in [list,tuple,IntVec]): ary.setDim(dimensions)
+    if not (fill == None): ary.fill(fill)
+    return ary
+
+
 #------------------------------------------------------------------------
 # cr DataReader Class
 #------------------------------------------------------------------------
@@ -499,4 +707,7 @@ def CRQualityCheck(file,limits,maxblocksize=65536,nsigma=5):
                 print noncompliancelist,"!!"
             else: print ""
     return qualityflaglist
+
+
+
 

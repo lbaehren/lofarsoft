@@ -55,7 +55,7 @@ BEGIN{npar=0}
 
     if (doxydoc != "") s=s "\n\n" doxydoc
     doxydoc=""
-    print funcname ".__doc__=\"\"\"" s "\"\"\"\n" 
+    print funcname ".__doc__=" funcname ".__doc__ +" "\"\"\"" s "\"\"\"\n" 
     next
 }
 

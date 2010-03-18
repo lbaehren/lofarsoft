@@ -13,6 +13,8 @@
 #include <complex>
 #include <cmath>
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <limits.h>
 #include <typeinfo>
 
@@ -104,6 +106,8 @@ template <class T>
     hArray<T>&  setVector(std::vector<T> & vec);
     std::vector<T> & Vector();
     std::vector<HInteger> getDimensions();
+    std::vector<HInteger> getSizes();
+    void calcSizes();
     hArray<T>& setDimensions1(HInteger dim0);
     hArray<T>& setDimensions2(HInteger dim0, HInteger dim1);
     hArray<T>& setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
@@ -131,7 +135,8 @@ template <class T>
     typename std::vector<T>::iterator slice_it_begin, slice_it_end;
     HInteger number_of_dimensions;
     HInteger vector_size;
-    vector<HInteger>* dimensions_p;
+    vector<HInteger> dimensions;
+    vector<HInteger> sizes;
     vector<T>* vec_p;
     bool vector_is_internal;
     bool doiterate;

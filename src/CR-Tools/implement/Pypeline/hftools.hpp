@@ -65,31 +65,12 @@ BOOST_PYTHON_MODULE(hftools)
     class_<std::vector<HString> >("StringVec")
         .def(vector_indexing_suite<std::vector<HString> >())
       ;
-    class_<hArray<HNumber> >("FloatAry")
-      .def("setVector",&hArray<HNumber>::setVector,return_internal_reference<>())
-      .def("Vector",&hArray<HNumber>::Vector,return_internal_reference<>())
-      .def("getDimensions",&hArray<HNumber>::getDimensions)
-      .def("setDimensions",&hArray<HNumber>::setDimensions1,return_internal_reference<>())
-      .def("setDimensions",&hArray<HNumber>::setDimensions2,return_internal_reference<>())
-      .def("setDimensions",&hArray<HNumber>::setDimensions3,return_internal_reference<>())
-      .def("setDimensions",&hArray<HNumber>::setDimensions4,return_internal_reference<>())
-      .def("setDimensions",&hArray<HNumber>::setDimensions5,return_internal_reference<>())
-      //      .def("setDimensions",fptr_hArray_setDimensions_overloads_1,return_internal_reference<>())
-      //.def("setDimensions",fptr_hArray_setDimensions_overloads_2,return_internal_reference<>())
-      //      .def("setDimensions",&hArray<HNumber>::setDimensions,return_internal_reference<>(),hArray_setDimensions_overloads())
-      .def("setSlice",&hArray<HNumber>::setSlice,return_internal_reference<>())
-      .def("getNumberOfDimensions",&hArray<HNumber>::getNumberOfDimensions)
-      .def("getBegin",&hArray<HNumber>::getBegin)
-      .def("getEnd",&hArray<HNumber>::getEnd)
-      .def("getSize",&hArray<HNumber>::getSize)
-      .def("iterate",&hArray<HNumber>::iterate)
-      .def("__len__",&hArray<HNumber>::length)
-      .def("setSize",&hArray<HNumber>::setSize,return_internal_reference<>())
-      .def("loop",&hArray<HNumber>::loop,return_internal_reference<>())
-      .def("noloop",&hArray<HNumber>::noloop,return_internal_reference<>())
-      .def("next",&hArray<HNumber>::next,return_internal_reference<>())
-      .def("reset",&hArray<HNumber>::reset,return_internal_reference<>())
-      ;
+
+    HFPP_hARRAY_BOOST_PYTHON_WRAPPER(HNumber,FloatArray);
+    HFPP_hARRAY_BOOST_PYTHON_WRAPPER(HInteger,IntArray);
+    HFPP_hARRAY_BOOST_PYTHON_WRAPPER(HComplex,ComplexArray);
+    HFPP_hARRAY_BOOST_PYTHON_WRAPPER(HString,StringArray);
+    HFPP_hARRAY_BOOST_PYTHON_WRAPPER(HBool,BoolArray);
 
     //boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
     // def("pytointptr",getPointerFromPythonObject);
