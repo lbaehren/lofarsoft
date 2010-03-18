@@ -459,6 +459,7 @@
   - \ref lasa_setup
   - \ref lasa_build
   - \ref lasa_update
+  - \ref lasa_commit
 
   \section lasa_setup Setting up your working copy
 
@@ -522,9 +523,53 @@
     \verbatim
     make lasa
     \endverbatim
+
+    <li>Once the initial build of the package is done -- which also includes
+    checking the presence (and if required  build) of external packages, the
+    fastest route to build the LASA software while developing and writing new
+    code, is by running \e make within the \b build/lasa directory:
+    \verbatim
+    cd build/lasa
+    make
+    \endverbatim
   </ol>
 
   \section lasa_update Update your working copy
 
+  <ol>
+    <li>The savest way to update your existing working copy is to run
+    \verbatim
+    cd build
+    make update
+    \endverbatim
+    from the \e build directory; this will ensure, that not only you will be
+    picking up changes in the source code, but also adjustments to the build
+    environment.
+  </ol>
+
+  \section lasa_commit Committing changes
+
+  Once  you have made changes to the source code, checking them back into the
+  repository works as follows:
+
+  <ol>
+    <li>Change into the directory holding the source code:
+    \verbatim
+    cd src/LASA
+    \endverbatim
+
+    <li>Commit the changes by typing
+    \verbatim
+    svn commit
+    \endverbatim
+    or
+    \verbatim
+    svn commit -m "Your short comment about the changes made."
+    \endverbatim
+    While the first variant will open an editor window for you to type in a
+    short commit report, the second variant allows you to directly provide such
+    a short statement -- describing what changes were done to the code -- from
+    the command line.
+  </ol>
 */
 
