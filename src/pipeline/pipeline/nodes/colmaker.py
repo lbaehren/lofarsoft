@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import pyrap.tables
 
 from pipeline.support.lofarnode import LOFARnode
@@ -7,7 +8,7 @@ class makecolumns_node(LOFARnode):
     """
     Add imaging columns to a given MS using pyrap.
     """
-    def run(self, file)
+    def run(self, file):
         with log_time(self.logger):
             self.logger.info("Processing: %s" % (file))
             try:
