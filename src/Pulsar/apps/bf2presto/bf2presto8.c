@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "filterbank.h"
+#include "makeinf.h"
 
 /* NOTE: for old data sets (before PBW5) there is no 512 byte alignment,
  so "pad" needs to be ignored (line 82) and also the data does not need to 
@@ -19,6 +20,7 @@ int STOKES_SWITCH = 0;
 int collapse = 0;
 int writefloats = 0;
 int writefb     = 0;
+char parsetfile[1000]; // for reading header info for filterbank file
 int SAMPLESPERSTOKESINTEGRATION = 1;
 int SAMPLES = 768;
 int AVERAGE_OVER = 600;
@@ -33,9 +35,10 @@ float N_sigma = 7;
 #define CLOCK				200*1000*1000
 #define FFTLENGTH			1024
 #define SAMPLEDURATION			(SAMPLESPERSTOKESINTEGRATION*1.0/(1.0*CLOCK/FFTLENGTH/CHANNELS))
+#define MAXNOINPUTFILES                 256
 
 void usage(){
-  puts("Syntax: bf2presto[options] SB*.MS");
+  puts("Syntax: bf2presto [options] SB*.MS");
   puts("-A\tNumber of blocks to average over when rescaling (Default = 600)");
   puts("-b\tNumber of Beams (Default = 1)");
   puts("-B\tNumber of BlockGroups to convert (Default = All)");
@@ -44,7 +47,7 @@ void usage(){
   puts("-f\tNumber of the Base Subband (Default = 200)");
   puts("-F\tWrite Floats");
   puts("-h\tShow this Help Screen");
-  puts("-L\tuse fiLterbank format (8 bit, 1 beam, stokes I, no collapse)");
+  puts("-L <parset>\tuse fiLterbank format (8 bit, 1 beam, stokes I, no collapse), with header info from <parset>");
   puts("-n\tNumber of Samples per Stokes Integration (Default = 1)");
   puts("-N\tNumber of Samples in block (Default = 768)");
   puts("-o\tOutput Name(Default = PULSAR_OBS)");
@@ -80,69 +83,40 @@ swap_endian(u.buffer);
 }
 
 
-void write_filterbank_header ( ) {
+void write_filterbank_header ( int n_infiles, char *parsetfile ) {
+  /* read values from parset */
+  FILE *fp;
+  char cmd[1000], tempinffile[1000], script[1000];
+  infodata idata;
+
+  /* use parset to inf file convertor */
+  sprintf(tempinffile, "/tmp/bf2presto"); // no suffix here
+  sprintf(script,      "$LOFARSOFT/src/Pulsar/apps/bf2presto/par2inf.py");
+
+  printf("Reading parset file %s using %s \n", parsetfile, script);
+  sprintf(cmd, "%s -o %s.inf %s; ", script, tempinffile, parsetfile);  
+  system(cmd);
+  system("echo $LOFARSOFT > ~leeuwen/tst.txt");
+  readinf(&idata, tempinffile);
+  strcat(tempinffile, ".fil");
+  if(remove(tempinffile)) printf("Could not remove %s", tempinffile);  
+
   /* broadcast header */
   send_string("HEADER_START");
-  send_string("source_name");  send_string("Unknown");
-  send_int("machine_id", 1);
-  send_int("telescope_id", 1);
+  send_string("source_name");  send_string(idata.object);
+  send_int("machine_id", 0);
+  send_int("telescope_id", 0);
   send_int("data_type",1);
-  send_double("fch1", 139.0625 + 100*0.1953125);
-  send_double("foff", 0.1953125/CHANNELS);
-  send_int("nchans",  CHANNELS);
+  send_double("fch1", idata.freq  + 0.1953125*n_infiles); //139.56484375 + 0.1953125*n_infiles);
+  send_double("foff", -0.1953125/CHANNELS);
+  send_int("nchans",  CHANNELS*n_infiles);
   send_int("nbeams",  1);
   send_int("ibeam",   1);
   send_int("nbits",   8);
-  send_double("tstart", 53000.0);
+  send_double("tstart", idata.mjd_i+idata.mjd_f);
   send_double("tsamp",  SAMPLEDURATION);
   send_int("nifs", 1);
   send_string("HEADER_END");
-}
-
-
-//void write_filterbank_header_old ( FILE *output, int beamnr ) {
-//  /* Set the header parameters */
-//  sprintf( inpfile,     "%s" , "Unknown" );
-//  sprintf( source_name, "%s" , "Unknown" );
-//  machine_id   = 1;
-//  telescope_id = 1; 
-//  
-//  data_type    = 1; //filterbank
-//  nchans       = CHANNELS;
-//  foff         = 0.1953125/CHANNELS; // XXX
-//  fch1         = 139.0625; // xxx
-//  
-//  obits        = 16;
-//  sumifs       = 1;
-//  scan_number  = 0;
-//  barycentric  = 0;
-//  
-//  tstart   = 53000.0; // start time
-//  tsamp    = SAMPLEDURATION ; // sampling time
-//  
-//  //,mjdobs,tsamp,fch1,foff,refdm,l;
-//  az_start = 0.0;
-//  za_start = 0.0;
-//  src_raj  = 0.0;
-//  src_dej  = 0.0;
-//  
-//  //     double gal_l,gal_b,header_tobs,raw_fch1,raw_foff;
-//  nbeams   = BEAMS;
-//  ibeam    = beamnr;
-//  
-//  /* Write the header */
-//  filterbank_header(output);
-//}
-
-void convert_nocollapse( FILE *input, FILE **outputfile, int beamnr, int writefb )
-{
-  struct stokesdata {
-    unsigned	sequence_number;
-    char        pad[508];
-    float	samples[BEAMS][CHANNELS][SAMPLES|2][STOKES];
-  };
-  /* Filterbank data is in a different order. Allocated below */
-  unsigned char filterbank_buffer[BEAMS][STOKES][SAMPLES*AVERAGE_OVER][CHANNELS];
 
  /*
    convert raw data from a pulsar machine into "filterbank data"
@@ -154,9 +128,23 @@ void convert_nocollapse( FILE *input, FILE **outputfile, int beamnr, int writefb
  */
 
 
+}
+
+
+void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int writefb, int n_infiles )
+{
+  struct stokesdata_struct {
+    unsigned	sequence_number;
+    char        pad[508];
+    float	samples[BEAMS][CHANNELS][SAMPLES|2][STOKES];
+  };
+  /* Filterbank data is in a different order. Allocated below */
+  unsigned char *filterbank_buffer; // [BEAMS][STOKES][SAMPLES*AVERAGE_OVER][CHANNELS*n_infiles];
+  //  unsigned char filterbank_buffer[BEAMS][STOKES][SAMPLES*AVERAGE_OVER][CHANNELS*MAXNOINFILES];
     
- struct stokesdata *stokesdata;
+ struct stokesdata_struct *stokesdata;
  int prev_seqnr = -1;
+ static int current_file=0;
  unsigned time;
  unsigned output_samples = 0;
  unsigned nul_samples = 0;
@@ -165,26 +153,48 @@ void convert_nocollapse( FILE *input, FILE **outputfile, int beamnr, int writefb
  double offset=0;
  double max = -1e9, min= 1e9;
  int x = 0;
+ int filterbank_buffer_size;
+
+ stokesdata = (struct stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(struct stokesdata_struct) );
+ filterbank_buffer_size =  BEAMS * STOKES * (SAMPLES*AVERAGE_OVER) * (CHANNELS*n_infiles);
+ filterbank_buffer = (unsigned char *) malloc( filterbank_buffer_size * sizeof(unsigned char) );
  
- stokesdata        = malloc( sizeof *stokesdata * AVERAGE_OVER );
- // filterbank_buffer = malloc( sizeof(unsigned char) * AVERAGE_OVER * BEAMS * CHANNELS * SAMPLES * STOKES );
- /* need to zero this out */
-
- fseek( input, 0, SEEK_SET );
-
  /* send the filterbank file header if needed */
  output = outputfile[0];
- if (writefb==1) write_filterbank_header();
+ if (writefb==1) write_filterbank_header(n_infiles, parsetfile);
 
- while( !feof( input ) ) {
+ input = inputfiles[current_file];
+ current_file++;
+ fseek( input, 0, SEEK_SET );
+
+ // while( !feof( input ) ) {
+ while( !feof( inputfiles[0] ) ) {
    if (x == NUM_BLOCKGROUPS) break;
    x++;
    unsigned num = 0;
-   unsigned i,c;
+   unsigned i,c,f,n_simult_files;
    int orig_prev_seqnr;
+   int written_samples=0;
+
+   /* zero out array to be safe */
+   memset(filterbank_buffer, 0, filterbank_buffer_size * sizeof(filterbank_buffer[0]));
 
    /* read data */
-   num = fread( &stokesdata[0], sizeof stokesdata[0], AVERAGE_OVER, input );
+   if (writefb==1) { 
+     n_simult_files=n_infiles;  /* need data from all input files */
+   } else { 
+     n_simult_files=1;  /* for presto output only run over current MS file */
+   }
+   
+   for (f = 0; f < n_simult_files ; f++) {
+     /* read data */
+     if (writefb==1) { 
+       num = fread( &stokesdata[0], sizeof stokesdata[0], AVERAGE_OVER, inputfiles[f] );
+     } else { 
+       num = fread( &stokesdata[0], sizeof stokesdata[0], AVERAGE_OVER, input );
+     }
+
+
    for( i = 0; i < num; i++ ) {
      for( c = 0; c < CHANNELS; c++ ) {
        unsigned b,t,s;
@@ -209,10 +219,14 @@ void convert_nocollapse( FILE *input, FILE **outputfile, int beamnr, int writefb
      swap_endian( (char*)&stokesdata[i].sequence_number );
 
      /* detect gaps */
-     if( prev_seqnr + 1 != stokesdata[i].sequence_number ) {
-       fprintf(stderr,"num %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[i].sequence_number );
-     }
-     prev_seqnr = stokesdata[i].sequence_number;
+//     if( prev_seqnr + 1 != stokesdata[i].sequence_number ) {
+//       fprintf(stderr,"num %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[i].sequence_number );
+//       if (writefb==1) {
+//	 fprintf(stderr," ** filterbank code cannot handle gaps yet. aborting.");
+//	 exit(1);
+//       }
+//     }
+//     prev_seqnr = stokesdata[i].sequence_number;
    }
    
    for( c = 0; c < CHANNELS; c++ ) {
@@ -272,9 +286,10 @@ void convert_nocollapse( FILE *input, FILE **outputfile, int beamnr, int writefb
 	     if (writefb==0) {
 	       fwrite( &shsum, sizeof shsum, 1, outputfile[c] );
 	     } else {
+	       printf("A gap here -- not doing anything about it ..\n");
 	       /* gap zeroes get written to the single filterbank file */
 	       /* this is wrong -- need to go into buffer, keep track of variable buffer lenghth .. */
-	       fwrite( &shsum, sizeof shsum, 1, outputfile[0] ); 
+	       //	       fwrite( &shsum, sizeof shsum, 1, outputfile[0] ); 
 	     }
 	   }
 	 }
@@ -287,6 +302,7 @@ void convert_nocollapse( FILE *input, FILE **outputfile, int beamnr, int writefb
        /* process data */
        float prev = 0;
        float x = 0;
+       int fb_pos;
        for( time = 0; time < SAMPLES; time++ ) {
          float sum;
          float avr;
@@ -328,7 +344,14 @@ void convert_nocollapse( FILE *input, FILE **outputfile, int beamnr, int writefb
 	   if (writefb==0) {
 	     fwrite( &shsum, sizeof shsum, 1, outputfile[c] ); /* a single sample written channel file*/
 	   } else {
-	     filterbank_buffer[beamnr][0][i*SAMPLES+time][c] = shsum; /* sample written to reordered filterbank buffer */
+	     fb_pos = // beamnr = 0 in this example, stokes = 0 too XXXX
+	       //	       (i*SAMPLES+time) * (CHANNELS*n_infiles) + f*CHANNELS+c;
+	       (i*SAMPLES+time+1) * (CHANNELS*n_infiles) - (f*CHANNELS+c+1);
+	     if (fb_pos > filterbank_buffer_size) { printf("Oops, fb_pos overflowing\n"); }
+	     //	     if (c!=0 && c!=CHANNELS-1) {
+	       filterbank_buffer[fb_pos] = (unsigned char) shsum; /* sample written to reordered filterbank buffer */
+	       written_samples++;
+	       //	     }
 	   }
 	   output_samples++;
 	   if( sum == 0 ) nul_samples++;
@@ -336,12 +359,15 @@ void convert_nocollapse( FILE *input, FILE **outputfile, int beamnr, int writefb
        } // for( time = 0; time < SAMPLES; time++ ) 
      } // for( i = 0; i < num; i++ ) {
    } // for( c = 0; c < CHANNELS; c++ ) {
+   } // for (f = 0; f < n_simult_files ; f++) { 
 
    /* now write the aligned buffer to filterbank file */
    if (writefb==1) {
-     fwrite( filterbank_buffer, sizeof(filterbank_buffer)/AVERAGE_OVER, num, outputfile[0] );
-     // printf("Printing %d values", num);
+     fwrite( filterbank_buffer, filterbank_buffer_size/AVERAGE_OVER*sizeof(unsigned char), num, outputfile[0] );
+     printf("Printing %d values\n", num);
+     printf("Wrote %d samples in buffer of size %d\n", written_samples, filterbank_buffer_size );
    }
+
  } //  while( !feof( input ) ) {
 
  /*add zeros to make subbands an equal length*/
@@ -368,6 +394,7 @@ void convert_nocollapse( FILE *input, FILE **outputfile, int beamnr, int writefb
  fprintf(stderr,"%.10f seconds per sample\n",SAMPLEDURATION);
  
  free( stokesdata );
+ free( filterbank_buffer );
 } // void convert_nocollapse()
 
 
@@ -547,7 +574,7 @@ void convert_collapse( FILE *input, FILE **outputfile, int beamnr )
 
 int main( int argc, char **argv ) {
  float avr;
- int f,b,c,y,n_files;
+ int f,b,c,y,n_outfiles,n_infiles;
  char buf[1024];
 
  // for( y = 0; y < argc; y++ ){
@@ -555,7 +582,7 @@ int main( int argc, char **argv ) {
  //}
  //printf("\n");
  int i=0;
- while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:hCFL")) != -1)
+ while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:hCF")) != -1)
     {
       i++;
       switch (c)
@@ -621,6 +648,13 @@ int main( int argc, char **argv ) {
 	  }
 	  break;
 
+	case 'L':
+	  writefb = 1;
+	  if (sscanf(optarg, "%1000s", &parsetfile) != 1) {
+	    printf("ERROR: Could not set parsetfile = %s\n", optarg);
+	    exit(-1);
+	  }
+
 	case 'o':
 	  if (sscanf(optarg, "%99s", &OUTNAME) != 1) {
 	    printf("ERROR: Output Name = %s\n", optarg);
@@ -665,21 +699,17 @@ int main( int argc, char **argv ) {
 	   }
 	   break;
 
-	case 'L':
-	  writefb = 1;
-	  break;
-
 	 case 'h':
 	   usage();
 	   exit(1);
 	   break;
 	}
     }
-
-
- FILE *input, *outputfile[CHANNELS]; /* I renamed **output to **outputfile because *output is reserved in sigproc.h -- jvl*/
+ 
+ 
+ FILE *input[MAXNOINPUTFILES], *outputfile[CHANNELS]; /* I renamed **output to **outputfile because *output is reserved in sigproc.h -- jvl*/
  c=0;
-
+ 
  /* command line verification */
  if( argc -optind < 1 ) {
    usage();
@@ -690,7 +720,8 @@ int main( int argc, char **argv ) {
  printf("Output Name: %s\n", OUTNAME);
  printf("Lowest Subband: %d\n",BASESUBBAND);
  printf("Stokes Parameter: %d\n",STOKES_SWITCH);
- 
+
+ /* make beam dirs */ 
  if( BEAMS > 1 ) {
    for( b = 0; b < BEAMS; b++ ) {
      sprintf( buf, "beam_%d", b );
@@ -698,53 +729,81 @@ int main( int argc, char **argv ) {
    }
  }
 
+ /* open files */
  for( b = 0; b < BEAMS; b++ ) {
+
+   /* how many files to open for output? */
+   if (collapse == 1 || writefb == 1) {
+     n_outfiles = 1;        /* one file only */
+   } else {
+     n_outfiles = CHANNELS; /* one file per channel */
+   }
+
+   /* loop over input files */
    int index = 0;
-   for( f = optind; f < argc; f++ ) {
-     fprintf(stderr,"Starting Work on %s\n", argv[f]);
-     input = fopen( argv[f], "rb" );
-     if( !input ) {
+   n_infiles = argc-optind;
+   if (n_infiles > MAXNOINPUTFILES) { 
+     printf("n_infiles (%d) > MAXNOINPUTFILES (%d), recompile needed, aborting.", 
+	    n_infiles, MAXNOINPUTFILES);
+     exit(1);
+   }
+   for( f = 0; f < n_infiles; f++ ) {
+     fprintf(stderr,"Starting Work on %s\n", argv[optind+f]);
+     input[f] = fopen( argv[optind+f], "rb" );
+     if( !input[f] ) {
        perror( argv[f] );
        exit(1);
      }
+   }
 
-     /* how many files to open for output? */
-     if (collapse == 1 || writefb == 1) {
-       n_files = 1;        /* one file only */
-     } else {
-       n_files = CHANNELS; /* one file per channel */
-     }
-     /* open file(s) */
-     for ( c = 0; c < n_files; c++ ) {
-       sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
-       if ( BEAMS > 1  ) sprintf( buf, "beam_%d/%s", b, buf ); /* prepend beam name */
-       if ( writefb==1 ) sprintf( buf, "%s.fil", buf );        /* append filterbank suffix */
-       fprintf(stderr,"%s -> %s\n", argv[f], buf);
-
-       index++;
-       outputfile[c] = fopen( buf, "wb" ); /* open file */
-       if( !outputfile[c] ) {
-         perror( buf );
-         exit(1);
+   /* open output file(s), do conversion */
+   if ( writefb==0 ) {
+     for( f = 0; f < n_infiles; f++ ) { /* loop over input files */
+       for ( c = 0; c < n_outfiles; c++ ) { /* make channel output files */
+	 /* create names */
+	 sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
+	 if ( BEAMS > 1  ) sprintf( buf, "beam_%d/%s", b, buf ); /* prepend beam name */
+	 fprintf(stderr,"%s -> %s\n", argv[optind+f], buf);
+	 /* open file */
+	 index++;
+	 outputfile[c] = fopen( buf, "wb" );
+	 if( !outputfile[c] ) {
+	   perror( buf );
+	   exit(1);
+	 }
+	 /* convert */
+	 if (collapse==0) { /* default, write all channels */
+	   convert_nocollapse( input, outputfile, b, writefb, n_infiles ); // takes file **input; writefb==0
+	 } else {
+	   convert_collapse( input[f], outputfile, b );	// takes file *input for input
+	 }   
        }
      }
-
-     /* do the conversion */
-     if (collapse==0) { /* default, write all channels */
-       convert_nocollapse( input, outputfile, b, writefb );
-     } else { /* collapse to single channel, presto format */
-       convert_collapse( input, outputfile, b );
+   } else { /* create single filterbank file, convert */
+     /* filename */
+     sprintf( buf, "%s.fil", OUTNAME );  /* append filterbank suffix */
+     fprintf( stderr,"Writing to file %s\n", buf);
+     /* open file */
+     outputfile[0] = fopen( buf, "wb" );
+     if( !outputfile[0] ) {
+       perror( buf );
+       exit(1);
      }
-
-     /* close input and output file(s) */
-     for( c = 0; c < n_files; c++ ) {
-       fclose( outputfile[c] );
-     }
-     fclose( input );
+     /* do the conversion */     
+     convert_nocollapse( input, outputfile, b, writefb, n_infiles ); // where writefb==1
+   }
+   
+   
+   /* close input and output file(s) */
+   for( c = 0; c < n_outfiles; c++ ) {
+     fclose( outputfile[c] );
+   }
+   for( f = 0; f < n_infiles; f++ ) {
+     fclose( input[f] );
 
    }
  }
-
-
+ 
+ 
  return 0;
 }

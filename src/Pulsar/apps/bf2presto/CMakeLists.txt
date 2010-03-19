@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(bf2presto)
 
-include_directories (${PULSAR_SOURCE_DIR}/apps/sigproc-4.3/)
+include_directories (${PULSAR_SOURCE_DIR}/apps/sigproc-4.3/ ${PULSAR_SOURCE_DIR}/apps/presto/include/ )
 
 set(CMAKE_CXX_FLAGS "-g -O3")
 
@@ -19,7 +19,7 @@ add_executable(bf2presto bf2presto.c)
 target_link_libraries(bf2presto m) #link the math library
 
 add_executable(bf2presto8 bf2presto8.c)
-target_link_libraries(bf2presto8 m sigproc) #link the math library
+target_link_libraries(bf2presto8 m sigproc presto) #link libs
 
 
 add_custom_target (bf2presto_install
