@@ -28,3 +28,10 @@ add_custom_target (bf2presto_install
   COMMENT "Install ${PULSAR_BINARY_DIR}/apps/bf2presto/bf2presto and bf2presto8 program into ${CMAKE_INSTALL_PREFIX}/bin/..."
   )
 add_dependencies (bf2presto_install bf2presto bf2presto8)
+
+install (
+  TARGETS bf2presto bf2presto8
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
