@@ -96,10 +96,9 @@ void write_filterbank_header ( int n_infiles, char *parsetfile ) {
   printf("Reading parset file %s using %s \n", parsetfile, script);
   sprintf(cmd, "%s -o %s.inf %s; ", script, tempinffile, parsetfile);  
   system(cmd);
-  system("echo $LOFARSOFT > ~leeuwen/tst.txt");
   readinf(&idata, tempinffile);
-  strcat(tempinffile, ".fil");
-  if(remove(tempinffile)) printf("Could not remove %s", tempinffile);  
+  strcat(tempinffile, ".inf");
+  if( remove(tempinffile)!=0 ) printf("Could not remove %s", tempinffile);  
 
   /* broadcast header */
   send_string("HEADER_START");
@@ -156,9 +155,11 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
  int filterbank_buffer_size;
 
  stokesdata = (struct stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(struct stokesdata_struct) );
- filterbank_buffer_size =  BEAMS * STOKES * (SAMPLES*AVERAGE_OVER) * (CHANNELS*n_infiles);
- filterbank_buffer = (unsigned char *) malloc( filterbank_buffer_size * sizeof(unsigned char) );
- 
+ if (writefb==1) {
+   filterbank_buffer_size =  BEAMS * STOKES * (SAMPLES*AVERAGE_OVER) * (CHANNELS*n_infiles);
+   filterbank_buffer = (unsigned char *) malloc( filterbank_buffer_size * sizeof(unsigned char) );
+ }
+
  /* send the filterbank file header if needed */
  output = outputfile[0];
  if (writefb==1) write_filterbank_header(n_infiles, parsetfile);
@@ -176,12 +177,11 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
    int orig_prev_seqnr;
    int written_samples=0;
 
-   /* zero out array to be safe */
-   memset(filterbank_buffer, 0, filterbank_buffer_size * sizeof(filterbank_buffer[0]));
-
    /* read data */
    if (writefb==1) { 
      n_simult_files=n_infiles;  /* need data from all input files */
+     /* zero out array to be safe */
+     memset(filterbank_buffer, 0, filterbank_buffer_size * sizeof(filterbank_buffer[0]));
    } else { 
      n_simult_files=1;  /* for presto output only run over current MS file */
    }
@@ -219,14 +219,12 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
      swap_endian( (char*)&stokesdata[i].sequence_number );
 
      /* detect gaps */
-//     if( prev_seqnr + 1 != stokesdata[i].sequence_number ) {
-//       fprintf(stderr,"num %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[i].sequence_number );
-//       if (writefb==1) {
-//	 fprintf(stderr," ** filterbank code cannot handle gaps yet. aborting.");
-//	 exit(1);
-//       }
-//     }
-//     prev_seqnr = stokesdata[i].sequence_number;
+     if (writefb==0) {
+       if( prev_seqnr + 1 != stokesdata[i].sequence_number ) {
+	 fprintf(stderr,"num %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[i].sequence_number );
+       }
+     }
+     prev_seqnr = stokesdata[i].sequence_number;
    }
    
    for( c = 0; c < CHANNELS; c++ ) {

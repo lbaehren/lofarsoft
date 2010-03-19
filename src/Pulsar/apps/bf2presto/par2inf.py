@@ -190,7 +190,7 @@ parser.add_option("-r", "--repeat",action="store",type="int",dest="repeat",
 filename = args[len(args)-1]
 defaultfile="%s/src/Pulsar/apps/bf2presto/default.inf"%os.environ['LOFARSOFT']
 id = infodata(defaultfile)
-print "Using default .inf file: %s."%defaultfile
+print "  Taking template from .inf file: %s."%defaultfile
 par = pardata(filename)
 
 
