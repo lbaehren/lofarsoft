@@ -618,171 +618,268 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
 //! Testing a rudimentary Array class, that allows contiguous slicing
 
 template <class T> void hArray<T>::init(){
-  vec_p=NULL;
-  number_of_dimensions=0;
+  cout << "Creating hArray ptr=" << reinterpret_cast<void*>(this) << endl;
+  storage_p = NULL;
+  slice_begin=0;
+  slice_end=0;
+  slice_size=0;
+  array_is_shared=false;
   doiterate=false;
 }
 
-template <class T> hArray<T>::hArray(std::vector<T> & vec){
-  init();
-  setVector(vec);
+template <class T> void hArray<T>::new_storage(){
+  storage_p=new storage_container;
+  storage_p->parent=this;
+  storage_p->ndims_p=NULL;
+  storage_p->size_p=NULL;
+  storage_p->dimensions_p=NULL;
+  storage_p->slice_sizes_p=NULL;
+  storage_p->vec_p=NULL;
+  storage_p->vector_is_shared=false;
+}
+
+template <class T> void hArray<T>::initialize_storage(){
+  if (storage_p==NULL) new_storage();
+  if (storage_p->ndims_p==NULL) storage_p->ndims_p=new HInteger;
+  if (storage_p->size_p==NULL) storage_p->size_p=new HInteger;
+  if (storage_p->dimensions_p==NULL) storage_p->dimensions_p=new std::vector<HInteger>;
+  if (storage_p->slice_sizes_p==NULL) storage_p->slice_sizes_p=new std::vector<HInteger>;
+  if (storage_p->vec_p==NULL) storage_p->vec_p=new std::vector<T>;
+}
+
+template <class T> void hArray<T>::delete_storage(){
+  if (!array_is_shared) {
+    if (storage_p->ndims_p!=NULL) {delete storage_p->ndims_p; storage_p->ndims_p=NULL;}
+    if (storage_p->size_p!=NULL) {delete storage_p->dimensions_p; storage_p->dimensions_p=NULL;}
+    if (storage_p->dimensions_p!=NULL) {delete storage_p->dimensions_p; storage_p->dimensions_p=NULL;}
+    if (storage_p->slice_sizes_p!=NULL) {delete storage_p->slice_sizes_p; storage_p->slice_sizes_p=NULL;}
+    delVector();
+    delete storage_p;
+  }
+  storage_p=NULL;
 }
 
 template <class T> hArray<T>::hArray(){
+  copycount=0;
   init();
-  std::vector<T>* internal_vector=new std::vector<T>();
-  setVector(*internal_vector);
-  vector_is_internal=true;
+  initialize_storage();
 }
 
+template <class T> hArray<T>::hArray(const std::vector<T> & vec){
+  copycount=0;
+  init();
+  storage_p=new storage_container;
+  setVector(vec);
+  storage_p->vector_is_shared=true;
+  initialize_storage();
+}
+
+
+/*!
+\brief Creates a new array as a shared copy, i.e. it shares the data vector and dimensions of its parent.
+
+*/
+
+template <class T> hArray<T>::hArray(storage_container * sptr){
+  if (sptr==NULL) return;
+  copycount=sptr->parent->copycount+1;
+  init();
+  storage_p=sptr;
+  array_is_shared=true;
+  initialize_storage();
+  setSlice(0,storage_p->vec_p->size());
+}
+
+/*! \brief Returns a new hArray object, which shares the same vector and storage description (i.e. dimensions).
+
+The storage will be deleted when the original object is deleted (not
+when the shared copy is deleted) - even if the shared copied object is
+still around.
+
+ */
+template <class T> hArray<T> & hArray<T>::shared_copy(){hArray<T> * ary_p=new hArray<T>(storage_p); return *ary_p;}
+
 template <class T> void hArray<T>::delVector(){
-  if ((vec_p != NULL) && vector_is_internal) delete vec_p;
-  vec_p=NULL;
+  if (storage_p==NULL) return; //Check if vector was deleted elsewhere
+  if ((storage_p->vec_p != NULL) && !storage_p->vector_is_shared) delete storage_p->vec_p;
+  storage_p->vec_p=NULL;
 }
 
 template <class T> hArray<T>::~hArray(){ 
-  delVector();
+  cout << "Deleting hArray ptr=" << reinterpret_cast<void*>(this) << endl;
+  delete_storage();
 }
 
+/*
+template <class T> hArray::storage_container * hArray<T>::getStorage(){
+  return storage_p;
+}
+*/
+
 /*!
-\brief Set the vector to be stored (as reference, hence no copy is made). Creation and destruction of this vector has to be done outside this class!!
- */
-template <class T> hArray<T>&  hArray<T>::setVector(std::vector<T> & vec){
+
+\brief Set the vector to be stored (as reference, hence no copy is
+made). Creation and destruction of this vector has to be done outside
+this class!!
+ 
+*/
+template <class T> hArray<T> &   hArray<T>::setVector(std::vector<T> & vec){
   delVector();
-  vec_p=&vec;
-  vector_size=vec.size();
-  setDimensions1(vector_size);
-  setSlice(0,vector_size);
-  vector_is_internal=false;
+  initialize_storage();
+  storage_p->vec_p=&vec;
+  (*storage_p->size_p)=vec.size();
+  setDimensions1((*storage_p->size_p));
+  setSlice(0,(*storage_p->size_p));
+  storage_p->vector_is_shared=true;
   return *this;
 }
 
 /*!
 \brief Retrieve the stored vector (returned as reference, hence no copy is made).
  */
-template <class T> std::vector<T> & hArray<T>::Vector(){
-  return *vec_p;
+template <class T> std::vector<T> & hArray<T>::getVector(){
+  if (storage_p==NULL) { static vector<T> v; return v;} //Check if vector was deleted elsewhere
+  return *(storage_p->vec_p);
 }
 
 /*!
 \brief Retrieve the stored vector (returned as reference, hence no copy is made).
  */
-template <class T> std::vector<HInteger> hArray<T>::getDimensions(){
-  return dimensions;
+template <class T> std::vector<HInteger> & hArray<T>::getDimensions(){
+  if (storage_p==NULL) {static vector<HInteger> v; return v;} //Check if vector was deleted elsewhere
+  return *(storage_p->dimensions_p);
 }
 
 /*!
 \brief Calculate the size of one slice in each dimension, will be called whenever dimensions change.
  */
 template <class T> void hArray<T>::calcSizes(){
-  sizes.resize(dimensions.size());
-  sizes[dimensions.size()-1]=1;
-  for (int i=dimensions.size()-1; i>0; --i) sizes[i-1]=sizes[i]*dimensions[i];
+  if (storage_p==NULL) return; //Check if vector was deleted elsewhere
+  (*storage_p->slice_sizes_p).resize((*storage_p->dimensions_p).size());
+  (*storage_p->slice_sizes_p)[(*storage_p->dimensions_p).size()-1]=1;
+  for (int i=(*storage_p->dimensions_p).size()-1; i>0; --i) (*storage_p->slice_sizes_p)[i-1]=(*storage_p->slice_sizes_p)[i]*(*storage_p->dimensions_p)[i];
 }
 
 /*!
 \brief Calculate the size of one slice in each dimension, will be called whenever dimensions change.
  */
-template <class T> std::vector<HInteger> hArray<T>::getSizes(){
-  return sizes;
+template <class T> std::vector<HInteger> & hArray<T>::getSizes(){
+  if (storage_p==NULL) {static vector<HInteger> v; return v;} //Check if vector was deleted elsewhere
+  return *(storage_p->slice_sizes_p);
 }
 
 /*!
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
-template <class T> hArray<T>&  hArray<T>::setDimensions1(HInteger dim0){
-  number_of_dimensions=1;
-  if (dimensions.size()!=(uint)number_of_dimensions) dimensions.resize(number_of_dimensions);
-  dimensions[0]=dim0;
-  vector_size=hProduct<HInteger>(dimensions);
-  if (vec_p->size() != (uint)vector_size) vec_p->resize(vector_size);
-  setSlice(0,vector_size);
+template <class T> void  hArray<T>::setDimensions1(HInteger dim0){
+  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+  (*storage_p->ndims_p)=1;
+  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+  (*storage_p->dimensions_p)[0]=dim0;
+  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+  if (storage_p->vec_p->size() != (uint)(*storage_p->size_p)) storage_p->vec_p->resize((*storage_p->size_p));
+  setSlice(0,(*storage_p->size_p));
   calcSizes();
-  return *this;
+  return ;
 }
 
 /*!
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
-template <class T> hArray<T>&  hArray<T>::setDimensions2(HInteger dim0, HInteger dim1){
-  number_of_dimensions=2;
-  if (dimensions.size()!=(uint)number_of_dimensions) dimensions.resize(number_of_dimensions);
-  dimensions[0]=dim0;
-  dimensions[1]=dim1;
-  vector_size=hProduct<HInteger>(dimensions);
-  if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
-  setSlice(0,vector_size);
+template <class T> void  hArray<T>::setDimensions2(HInteger dim0, HInteger dim1){
+  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+  (*storage_p->ndims_p)=2;
+  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+  (*storage_p->dimensions_p)[0]=dim0;
+  (*storage_p->dimensions_p)[1]=dim1;
+  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+  setSlice(0,(*storage_p->size_p));
   calcSizes();
-  return *this;
+  return ;
 }
 
 /*!
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
-template <class T> hArray<T>&  hArray<T>::setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2){
-  number_of_dimensions=3;
-  if (dimensions.size()!=(uint)number_of_dimensions) dimensions.resize(number_of_dimensions);
-  dimensions[0]=dim0;
-  dimensions[1]=dim1;
-  dimensions[2]=dim2;
-  vector_size=hProduct<HInteger>(dimensions);
-  if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
-  setSlice(0,vector_size);
+template <class T> void  hArray<T>::setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2){
+  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+  (*storage_p->ndims_p)=3;
+  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+  (*storage_p->dimensions_p)[0]=dim0;
+  (*storage_p->dimensions_p)[1]=dim1;
+  (*storage_p->dimensions_p)[2]=dim2;
+  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+  setSlice(0,(*storage_p->size_p));
   calcSizes();
-  return *this;
+  return ;
 }
 
 /*!
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
-template <class T> hArray<T>&  hArray<T>::setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3){
-  number_of_dimensions=4;
-  if (dimensions.size()!=(uint)number_of_dimensions) dimensions.resize(number_of_dimensions);
-  dimensions[0]=dim0;
-  dimensions[1]=dim1;
-  dimensions[2]=dim2;
-  dimensions[3]=dim3;
-  vector_size=hProduct<HInteger>(dimensions);
-  if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
-  setSlice(0,vector_size);
+template <class T> void  hArray<T>::setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3){
+  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+  (*storage_p->ndims_p)=4;
+  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+  (*storage_p->dimensions_p)[0]=dim0;
+  (*storage_p->dimensions_p)[1]=dim1;
+  (*storage_p->dimensions_p)[2]=dim2;
+  (*storage_p->dimensions_p)[3]=dim3;
+  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+  setSlice(0,(*storage_p->size_p));
   calcSizes();
-  return *this;
+  return ;
 }
 
 /*!
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
-template <class T> hArray<T>&  hArray<T>::setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4){
-  number_of_dimensions=5;
-  if (dimensions.size()!=(uint)number_of_dimensions) dimensions.resize(number_of_dimensions);
-  dimensions[0]=dim0;
-  dimensions[1]=dim1;
-  dimensions[2]=dim2;
-  dimensions[3]=dim3;
-  dimensions[4]=dim4;
-  vector_size=hProduct<HInteger>(dimensions);
-  if ((uint)vector_size != vec_p->size()) vec_p->resize(vector_size);
-  setSlice(0,vector_size);
+template <class T> void  hArray<T>::setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4){
+  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+  (*storage_p->ndims_p)=5;
+  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+  (*storage_p->dimensions_p)[0]=dim0;
+  (*storage_p->dimensions_p)[1]=dim1;
+  (*storage_p->dimensions_p)[2]=dim2;
+  (*storage_p->dimensions_p)[3]=dim3;
+  (*storage_p->dimensions_p)[4]=dim4;
+  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+  setSlice(0,(*storage_p->size_p));
   calcSizes();
-  return *this;
+  return ;
 }
 
 /*!
 \brief Sets begin and end the currently active slice using integer offsets from the begin of the stored vector. Use (0,size(vector)) to get the full vector
  */
-template <class T> hArray<T>& hArray<T>::setSlice(HInteger beg, HInteger end){
+template <class T> hArray<T> &  hArray<T>::setSlice(HInteger beg, HInteger end){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   slice_begin=max(beg,0);
-  if (end>=0) slice_end=min(end,vector_size);
-  else slice_end=vector_size;
-  slice_it_begin=vec_p->begin()+slice_begin;
-  slice_it_end=vec_p->begin()+slice_end;
+  if (end>=0) slice_end=min(end,(*storage_p->size_p));
+  else slice_end=(*storage_p->size_p); 
+  slice_it_begin=storage_p->vec_p->begin()+slice_begin;
+  slice_it_end=storage_p->vec_p->begin()+slice_end;
+  slice_size=slice_end-slice_begin;
   return *this;
 }
 
 /*!
 \brief Returns the number of dimensions that have been associated with the current array
  */
-template <class T> HInteger hArray<T>::getNumberOfDimensions(){return number_of_dimensions;}
+template <class T> HInteger hArray<T>::getNumberOfDimensions(){
+  if (storage_p==NULL) return 0; //Check if vector was deleted elsewhere
+  return (*storage_p->ndims_p);
+}
 
 /*!
 \brief Returns the begin iterator of the current slice in the stored vector plus an integer offset (to get a slice from a slice)
@@ -820,12 +917,12 @@ template <class T> HInteger hArray<T>::getSize(){return slice_size;}
 /*!
 \brief Returns the length of the underlying vector
  */
-template <class T> HInteger hArray<T>::length(){return vec_p->size();}
+template <class T> HInteger hArray<T>::length(){
+  if (storage_p==NULL) return 0; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return 0; //Check if vector was deleted elsewhere
+  return storage_p->vec_p->size();
+}
 
-/*!
-\brief Returns the size (length) of the current slice
- */
-template <class T> hArray<T>& hArray<T>::setSize(HInteger size){slice_size=size; return *this;}
 
 /*!
 \brief Returns whether or not to iterate over all slices in the vector
@@ -835,17 +932,17 @@ template <class T> bool hArray<T>::iterate(){return doiterate;}
 /*!
 \brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector)
  */
-template <class T> hArray<T>&  hArray<T>::loop(){doiterate=true; return *this;}
+template <class T> hArray<T> &   hArray<T>::loop(){doiterate=true; return *this;}
 
 /*!
 \brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector)
  */
-template <class T> hArray<T>&  hArray<T>::noloop(){doiterate=false; return *this;}
+template <class T> hArray<T> &   hArray<T>::noloop(){doiterate=false; return *this;}
 
 /*!
 \brief Reset the slice iterators to the first slice
 */
-template <class T> hArray<T>& hArray<T>::reset(){ 
+template <class T> hArray<T> &  hArray<T>::reset(){ 
   setSlice(0,getSize());
   return *this;
 }
@@ -855,7 +952,7 @@ template <class T> hArray<T>& hArray<T>::reset(){
 
 If the end of the vector is reached, switch looping mode off and reset array to first slice.
  */
-template <class T> hArray<T>& hArray<T>::next(){
+template <class T> hArray<T> &  hArray<T>::next(){
   if (slice_end>=length()) { // the end has been reached
     reset();
     noloop();
@@ -865,29 +962,44 @@ template <class T> hArray<T>& hArray<T>::next(){
   return *this;
 }
 
+    //      .def("setVector",&hArray<TYPE>::setVector,return_value_policy<manage_new_object>()) \
+    //      .def("getVector",&hArray<TYPE>::getVector,return_value_policy<manage_new_object>()) \
+    //  .def("shared_copy",&hArray<TYPE>::shared_copy,return_value_policy<manage_new_object>()) \
+
+/*
+    .def("getVector",&hArray<TYPE>::getVector,return_value_policy<manage_new_object>()) \
+    .def("shared_copy",&hArray<TYPE>::shared_copy,return_value_policy<manage_new_object>()) \
+    .def("getDimensions",&hArray<TYPE>::getDimensions,return_value_policy<manage_new_object>()) \
+    .def("getSizes",&hArray<TYPE>::getSizes,return_value_policy<manage_new_object>()) \
+*/
+
+/*
+return_internal_reference<1,
+        with_custodian_and_ward<1, 2> >
+*/
 
 #define HFPP_hARRAY_BOOST_PYTHON_WRAPPER(TYPE,NAME)	\
     class_<hArray<TYPE> >(#NAME) \
-      .def("setVector",&hArray<TYPE>::setVector,return_internal_reference<>()) \
-      .def("Vector",&hArray<TYPE>::Vector,return_internal_reference<>()) \
-      .def("getDimensions",&hArray<TYPE>::getDimensions) \
-      .def("getSizes",&hArray<TYPE>::getSizes) \
-      .def("setDimensions",&hArray<TYPE>::setDimensions1,return_internal_reference<>()) \
-      .def("setDimensions",&hArray<TYPE>::setDimensions2,return_internal_reference<>()) \
-      .def("setDimensions",&hArray<TYPE>::setDimensions3,return_internal_reference<>()) \
-      .def("setDimensions",&hArray<TYPE>::setDimensions4,return_internal_reference<>()) \
-      .def("setSlice",&hArray<TYPE>::setSlice,return_internal_reference<>()) \
-      .def("getNumberOfDimensions",&hArray<TYPE>::getNumberOfDimensions) \
-      .def("getBegin",&hArray<TYPE>::getBegin) \
-      .def("getEnd",&hArray<TYPE>::getEnd) \
-      .def("getSize",&hArray<TYPE>::getSize) \
-      .def("iterate",&hArray<TYPE>::iterate) \
-      .def("__len__",&hArray<TYPE>::length) \
-      .def("setSize",&hArray<TYPE>::setSize,return_internal_reference<>()) \
-      .def("loop",&hArray<TYPE>::loop,return_internal_reference<>()) \
-      .def("noloop",&hArray<TYPE>::noloop,return_internal_reference<>()) \
-      .def("next",&hArray<TYPE>::next,return_internal_reference<>()) \
-      .def("reset",&hArray<TYPE>::reset,return_internal_reference<>())
+    .def("getVector",&hArray<TYPE>::getVector,return_internal_reference<>()) \
+    .def("shared_copy",&hArray<TYPE>::shared_copy,return_internal_reference<>()) \
+    .def("getDimensions",&hArray<TYPE>::getDimensions,return_internal_reference<>()) \
+    .def("getSizes",&hArray<TYPE>::getSizes,return_internal_reference<>()) \
+    .def("setVector",&hArray<TYPE>::setVector,return_internal_reference<>())\
+    .def("setDimensions",&hArray<TYPE>::setDimensions1)			\
+    .def("setDimensions",&hArray<TYPE>::setDimensions2)			\
+    .def("setDimensions",&hArray<TYPE>::setDimensions3)			\
+    .def("setDimensions",&hArray<TYPE>::setDimensions4)			\
+    .def("setSlice",&hArray<TYPE>::setSlice,return_internal_reference<>())				\
+    .def("getNumberOfDimensions",&hArray<TYPE>::getNumberOfDimensions)	\
+    .def("getBegin",&hArray<TYPE>::getBegin)				\
+    .def("getEnd",&hArray<TYPE>::getEnd)				\
+    .def("getSize",&hArray<TYPE>::getSize)				\
+    .def("iterate",&hArray<TYPE>::iterate)				\
+    .def("__len__",&hArray<TYPE>::length)				\
+    .def("loop",&hArray<TYPE>::loop,return_internal_reference<>())					\
+    .def("noloop",&hArray<TYPE>::noloop,return_internal_reference<>())				\
+    .def("next",&hArray<TYPE>::next,return_internal_reference<>())					\
+    .def("reset",&hArray<TYPE>::reset,return_internal_reference<>())
       
 
 

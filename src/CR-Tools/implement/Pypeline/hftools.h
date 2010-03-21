@@ -66,6 +66,8 @@
 #include <boost/python/str.hpp>
 //>>>>>>>>#include <boost/python/return_internal_reference.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <boost/python/manage_new_object.hpp>
+#include <boost/python/return_value_policy.hpp>
 //>>>>>>>>#include <boost/python/operators.hpp>
 #include <boost/python/operators.hpp>
 //>>>>>>>>#include <boost/python/object_operators.hpp>
@@ -97,23 +99,39 @@ template <class T>
   class hArray {
   
   public:
-  
+
+  struct storage_container {
+    HInteger *ndims_p;
+    HInteger *size_p;
+    vector<HInteger> * dimensions_p;
+    vector<HInteger> * slice_sizes_p;
+    vector<T>* vec_p;
+    hArray* parent;
+    bool vector_is_shared;
+  }; 
+
     void init();
-    hArray(std::vector<T> & vec);
+    void initialize_storage();
     hArray();
+    hArray(const std::vector<T> & vec);
+    hArray(storage_container * sptr);
     ~hArray();
     void delVector();
-    hArray<T>&  setVector(std::vector<T> & vec);
-    std::vector<T> & Vector();
-    std::vector<HInteger> getDimensions();
-    std::vector<HInteger> getSizes();
+    void delete_storage();
+    void new_storage();
+    hArray<T> &  shared_copy();
+    hArray<T> &   setVector(std::vector<T> & vec);
+    std::vector<T> & getVector();
+    std::vector<HInteger> & getDimensions();
+    std::vector<HInteger> & getSizes();
     void calcSizes();
-    hArray<T>& setDimensions1(HInteger dim0);
-    hArray<T>& setDimensions2(HInteger dim0, HInteger dim1);
-    hArray<T>& setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
-    hArray<T>& setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3);
-    hArray<T>& setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
-    hArray<T>& setSlice(HInteger beg, HInteger end);
+    void setDimensions1(HInteger dim0);
+    void setDimensions2(HInteger dim0, HInteger dim1);
+    void setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
+    void setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3);
+    void setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
+    hArray<T> &  setSlice(HInteger beg, HInteger end);
+    //    storage_container * getStorage();
     HInteger getNumberOfDimensions();
     typename std::vector<T>::iterator begin();
     typename std::vector<T>::iterator end();
@@ -123,22 +141,23 @@ template <class T>
     HInteger getEnd();
     HInteger getSize();
     HInteger length();
-    hArray<T>& setSize(HInteger size);
     bool iterate();
-    hArray<T>& loop();
-    hArray<T>& noloop();
-    hArray<T>& next();
-    hArray<T>& reset();
+    hArray<T> &  loop();
+    hArray<T> &  noloop();
+    hArray<T> &  next();
+    hArray<T> &  reset();
     
+    //These are the basic parameters describing the data
+    //structure. They can be shared
+
+    storage_container * storage_p;
+    bool array_is_shared;
+
+    HInteger copycount;
+
   private:
     HInteger slice_begin, slice_end, slice_size;
     typename std::vector<T>::iterator slice_it_begin, slice_it_end;
-    HInteger number_of_dimensions;
-    HInteger vector_size;
-    vector<HInteger> dimensions;
-    vector<HInteger> sizes;
-    vector<T>* vec_p;
-    bool vector_is_internal;
     bool doiterate;
   };
 

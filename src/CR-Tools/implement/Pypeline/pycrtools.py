@@ -118,7 +118,7 @@ def VecToPrintString(self,maxlen=10):
 
 def ArrayToPrintString(self,maxlen=10):
     s=typename(basetype(self))+", "
-    return "Array("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]) -> [" +VecToString(self.Vector()[self.getBegin():self.getEnd()],maxlen)+"]"
+    return "Array("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]) -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
 
 #========================================================================
 # Adding multi-dimensional array capabilities to vector class
@@ -200,13 +200,7 @@ def hArray_newreference(self):
     vector. Hence the new array can be assigned a new slice, but will
     still access the same underlying vector in memory.
     """
-    ary=Array(basetype(self))
-    ary.vec=self.vec
-    ary.setVector(self.Vector())
-    ary.setDim(self.getDim())
-    ary.setSlice(self.getBegin(),self.getEnd())
-    if self.iterate(): ary.loop()
-    return ary
+    return self.shared_copy()
 
 def hArray_setDim(self,dimensions_list):
     """setDim([dim1,dim2,...,dimN]) -> Array with new dimensions
@@ -223,7 +217,8 @@ def hArray_setDim(self,dimensions_list):
 
     Use array.getDim() to retrieve the dimension list. 
     """
-    return apply(self.setDimensions,dimensions_list)
+    apply(self.setDimensions,dimensions_list)
+    return self;
 
 def hArray_getDim(self):
     """
@@ -238,7 +233,9 @@ def hArray_getDim(self):
 
 def hArray_return_slice_start(val): 
     """ Reduces a slice to its start value"""
-    if type(val)==slice: 
+    if val==Ellipsis: 
+        return 0
+    elif type(val)==slice:
         return val.start
     else:
         return val
@@ -253,15 +250,19 @@ def hArray_getitem(self,dimlist):
 
     Use array.setDim([dim1,dim2,...,dimN]) to set the dimensions. 
     """
-    if type(dimlist)==int: dimlist=[dimlist]
+    
+    if not type(dimlist) in [list,tuple]: 
+        print "NOT:",dimlist
+        dimlist=[dimlist]
     sizes=self.getSizes()
+    ary=Array(self)
+    if dimlist[-1]==Ellipsis: ary.loop()
     dimliststarts=Vector(map(hArray_return_slice_start,dimlist))
     start=dimliststarts.mulsum(sizes)
     if type(dimlist[-1])==slice:
         end=start+(dimlist[-1].stop-dimlist[-1].start+1)*sizes[len(dimlist)-1]
     else:
         end=start+sizes[len(dimlist)-1]
-    ary=Array(self)
     ary.setSlice(start,end)
     return ary;
 
