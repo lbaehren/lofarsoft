@@ -65,11 +65,11 @@ using CR::checkNoiseInfluence;
 const string pulseEvent="2009.08.10.12:18:07.598.event";
 const string noiseEvent="2009.06.15.19:42:11.987.event";
 const int pulseAnt = 1;
-const double pulseStart = 0.9e-6;
-const double pulseStop  = 1.5e-6;
+const double pulseStart = -4e-6;
 // const double pulseStart = -1e-5;
 // const double pulseStop  = 1e-5;
-const int upsamplingExponent = 3;
+const int upsamplingExponent = 6;
+const int NnoiseIntervals = 20; // number of noise intervals (do not use more than 20)
 
 int main (int argc, char *argv[])
 {
@@ -83,16 +83,22 @@ int main (int argc, char *argv[])
     noisetest.initPipeline(obsrec);
     
     // load pulse pattern from calibration event
-    noisetest.setPlotInterval(pulseStart, pulseStop);
     noisetest.setUpsamplingExponent(upsamplingExponent);
     noisetest.setCCWindowWidth(1e-7);
-    noisetest.loadPulsePattern(pulseEvent, pulseAnt, pulseStart, pulseStop);
+    noisetest.setNnoiseIntervals(NnoiseIntervals);
+    noisetest.loadPulsePattern(pulseEvent, pulseAnt, pulseStart);
     
     // load noise event
     noisetest.loadNoiseEvent(noiseEvent);
     
     // add pulse to noise
     noisetest.addPulseToNoise(0);
+    noisetest.addPulseToNoise(1);
+//     noisetest.addPulseToNoise(2);
+//     noisetest.addPulseToNoise(3);
+//     noisetest.addPulseToNoise(5);
+    noisetest.addPulseToNoise(10);
+    noisetest.addPulseToNoise(20);
 
     cout << "\nEnd of program.\n" << endl;
   } catch (AipsError x) {

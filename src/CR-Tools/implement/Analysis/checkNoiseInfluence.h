@@ -91,6 +91,9 @@ namespace CR { // Namespace CR -- begin
   //! upsampled trace of noise event
   Matrix<Double> upsampledNoise;
 
+  //! time axis of upsampled noise traces
+  Vector<Double> noiseTimeAxis;
+  
   //! height of noise in the different antennas and different noise intervals
   vector< vector<double> > noiseHeight;
   
@@ -154,17 +157,34 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
 
     /*!
+      \brief Get number of noise intervals (do not use more than 20)
+
+      \return noiseIntervals -- number of noise intervals
+    */
+    inline int getNnoiseIntervals () {
+      return NnoiseIntervals;
+    }
+
+    /*!
+      \brief Set number of noise intervals (do not use more than 20)
+
+      \param noiseIntervals -- number of noise intervals
+    */
+    inline void setNnoiseIntervals (int const &intervals) {
+      NnoiseIntervals = intervals;
+    }
+
+
+    /*!
       \brief Loads the pattern of a (calibration) test pulse
 
       \param evname          - path to the eventfile to be processed
       \param antenna         - Antenna number to take the test pulse from
-      \param pulseStart      - start time of pulse (in s)
-      \param pulseStop       - stop time of pulse (in s)
+      \param pulseStart      - start time of pulse interval (in s)
     */
     void loadPulsePattern(const string& evname,
                           const int& antenna, 
-                          const double& pulseStart,
-                          const double& pulseStop);
+                          const double& pulseStart);
                           
     /*!
       \brief Loads noise event

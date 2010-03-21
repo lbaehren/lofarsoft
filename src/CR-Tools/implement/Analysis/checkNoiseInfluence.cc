@@ -25,6 +25,9 @@
 
 #ifdef HAVE_STARTOOLS
 
+// include files for root histograms
+#include<TH1D.h>
+
 namespace CR { // Namespace CR -- begin
 
   // ============================================================================
@@ -41,8 +44,10 @@ namespace CR { // Namespace CR -- begin
     startTime(-150e-6),
     noiseIntervalLength(10e-6),
     noiseIntervalGap(5e-6),
-    NnoiseIntervals(2),
-    upsampledNoise( Matrix<Double>() )
+    NnoiseIntervals(20),
+    upsampledNoise( Matrix<Double>() ),
+    noiseTimeAxis( Vector<Double>() ),
+    noiseHeight(vector< vector<double> >())
   {}
 
   // ============================================================================
@@ -71,10 +76,10 @@ namespace CR { // Namespace CR -- begin
 
   void checkNoiseInfluence::loadPulsePattern(const string& evname,
                                              const int& antenna, 
-                                             const double& pulseStart,
-                                             const double& pulseStop)
+                                             const double& pulseStart)
   {
     try {   
+      double pulseStop = pulseStart + noiseIntervalLength;
       cout << "\nLoading pulse pattern from file '" << evname
            << "', antenna " << antenna
            << "\n,at time range from " << pulseStart << " s to " << pulseStop << " s."
@@ -117,6 +122,7 @@ namespace CR { // Namespace CR -- begin
 
       // initialize Complete Pipeline
       CompleteBeamPipe_p = static_cast<CompletePipeline*>(pipeline_p);
+      setPlotInterval(pulseStart,pulseStop);
       CompleteBeamPipe_p->setPlotInterval(pulseStart,pulseStop);
       CompleteBeamPipe_p->setCalibrationMode(true);
 
@@ -130,7 +136,7 @@ namespace CR { // Namespace CR -- begin
       // load the pulse pattern: calculate time range of pulse and get up-sampled trace in this range
       Vector<Double> timeValues =
         CompleteBeamPipe_p->getUpsampledTimeAxis(lev_p, getUpsamplingExponent());
-      Slice range= CompleteBeamPipe_p->calculatePlotRange(timeValues);
+      Slice range = CompleteBeamPipe_p->calculatePlotRange(timeValues);
       pulsePattern =
         CompleteBeamPipe_p->getUpsampledFieldstrength(lev_p, getUpsamplingExponent(), AntennaSelection).column(antenna-1)(range).copy();
         
@@ -197,6 +203,7 @@ namespace CR { // Namespace CR -- begin
 
       // store upsampled noise
       upsampledNoise=CompleteBeamPipe_p->getUpsampledFieldstrength(lev_p, getUpsamplingExponent(), AntennaSelection);
+      noiseTimeAxis =CompleteBeamPipe_p->getUpsampledTimeAxis(lev_p, getUpsamplingExponent());
                                          
       // calculate the maxima
       for (int i = 0; i < NnoiseIntervals; ++i) {
@@ -231,37 +238,214 @@ namespace CR { // Namespace CR -- begin
         return;
       }
 
-      CompleteBeamPipe_p->setUpsampledFieldStrength(upsampledNoise);
+      // add pulse to noise, for each noise interval
+      Matrix<Double> noiseAndPulse = upsampledNoise.copy();
+      for (int interval = 0; interval < NnoiseIntervals; ++interval) {
+        double startsample = ntrue(noiseTimeAxis < startTime + interval*(noiseIntervalLength+noiseIntervalGap));  
+        //cout << "Interval samples" << interval << ": " << startsample << " to " << startsample+pulsePattern.nelements() << endl;
+        // loop through all antennas and add pulse
+        for (unsigned int i=0; i < upsampledNoise.ncolumn(); ++i)
+          for (unsigned int j=0; j < pulsePattern.nelements(); ++j)            
+            noiseAndPulse(j+startsample,i) += pulseSNR*noiseHeight[interval][i]/pulseHeight*pulsePattern(j); 
+      }         
+      CompleteBeamPipe_p->setUpsampledFieldStrength(noiseAndPulse);
 
-      // create a plot to see, if things work
-      CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
       CompleteBeamPipe_p->setCalibrationMode(true);
 
-      // Plot noise
-      CompleteBeamPipe_p->plotAllAntennas("noise2", lev_p, AntennaSelection, false,
-                                          getUpsamplingExponent(),false, false);
+      // create arrays and variables to store the information on snr and time shift
+      double SNR;
+      double lgSNR;
+      double envelopeTimeDiff;
+      double halfheightTimeDiff;
+      double maximumTimeDiff;
+      double minimumTimeDiff;
+      
+      // prepare root histograms
+      double SNRminimum = 0;
+      if (pulseSNR > 5)
+        SNRminimum = round(pulseSNR-5);
+      TH1D *SNRHist = new TH1D("SNRHist","SNR",100,SNRminimum,SNRminimum+10);
+      TH1D *lgSNRHist = new TH1D("lgSNRHist","lg SNR",120,-3,3);
+      TH1D *envelopeTimeDiffHist = new TH1D("envelopeTimeDiffHist","Time deviation of envelope maximum",100,-round(100/(pulseSNR+1)),+round(100/(pulseSNR+1)));      
+      TH1D *halfheightTimeDiffHist = new TH1D("halfheightTimeDiffHist","Time deviation of crossing of half height",
+                                              100,-round(1000/(pulseSNR+1)),+round(1000/(pulseSNR+1)));      
+      TH1D *maximumTimeDiffHist = new TH1D("maximumTimeDiffHist","Time deviation of maximum",120,-30,+30);      
+      TH1D *minimumTimeDiffHist = new TH1D("minimumTimeDiffHist","Time deviation of minimum",120,-30,+30);      
 
+      unsigned int ant = 0;
+      unsigned int i=0;  // counter to fill arrays
+      int interval = 0; // noise interval
+
+      // prepare rootfile for results
+      TFile *rootfile=NULL;
+      stringstream filename;
+      filename << "resultsSNR-" << pulseSNR << ".root";
+      rootfile = new TFile(filename.str().c_str(),"RECREATE","Results for SNR test pulse study");
+
+      // check if file is open
+      if (rootfile->IsZombie()) {
+        cerr << "\nError: Could not create root file! \n" << endl;
+        return;               // exit
+      }
+    
+      // create tree and tree structure
+      TTree *roottree = NULL;
+      roottree = new TTree(filename.str().c_str(),filename.str().c_str());
+      roottree->Branch("ant",&ant,"ant/i");
+      roottree->Branch("noiseInterval",&interval,"noiseInterval/i");
+      roottree->Branch("SNR",&SNR,"SNR/D");
+      roottree->Branch("lgSNR",&lgSNR,"lgSNR/D");
+      roottree->Branch("envelopeTimeDiff",&envelopeTimeDiff,"envelopeTimeDiff/D");
+      roottree->Branch("halfheightTimeDiff",&halfheightTimeDiff,"halfheightTimeDiff/D");
+      roottree->Branch("maximumTimeDiff",&maximumTimeDiff,"maximumTimeDiff/D");
+      roottree->Branch("minimumTimeDiff",&minimumTimeDiff,"minimumTimeDiff/D");
+      
       // calculate the maxima in same intervals as noise
-      for (int i = 0; i < NnoiseIntervals; ++i) {
-        setPlotInterval(startTime + i*(noiseIntervalLength+noiseIntervalGap), startTime + i*(noiseIntervalLength+noiseIntervalGap) + noiseIntervalLength);
+      for (interval = 0; interval < NnoiseIntervals; ++interval) {
+        setPlotInterval(startTime + interval*(noiseIntervalLength+noiseIntervalGap),
+                        startTime + interval*(noiseIntervalLength+noiseIntervalGap) + noiseIntervalLength);
         CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+        
+        // Plot noise
+        filename.str("");
+        filename << "noiseAndPulse-" << interval;
+        CompleteBeamPipe_p->plotAllAntennas(filename.str(), lev_p, AntennaSelection, false,
+                                            getUpsamplingExponent(),false, false);
         calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
                                                           plotStart()+pulseTime, 3, plotStart(), plotStop());
-        vector<double> noiseValues = noiseHeight[i]; // get the noise heights for one noise interval
+        vector<double> noiseValues = noiseHeight[interval]; // get the noise heights for one noise interval
+        
         // loop through all antennas and get the signal-to-noise ratio                              
-        cout << "\nNoise/Noise = " << endl;
-        unsigned int j = 0;
+        ant = 0;
         for( map<int, PulseProperties>::iterator it = calibPulses.begin(); it != calibPulses.end(); ++it ) {        
-          cout << it->second.noise/noiseValues[j] << " " << endl;
-          ++j;
+          SNR = it->second.envelopeMaximum/noiseValues[ant];
+          lgSNR = log10(it->second.envelopeMaximum/noiseValues[ant]);
+          // calculate deviation of pulse time
+          envelopeTimeDiff = it->second.envelopeTime - (plotStart()*1e9+testPulseProperties.envelopeTime);
+          halfheightTimeDiff = it->second.halfheightTime - (plotStart()*1e9+testPulseProperties.halfheightTime);
+          maximumTimeDiff = it->second.maximumTime - (plotStart()*1e9+testPulseProperties.minimumTime);
+          minimumTimeDiff = it->second.minimumTime - (plotStart()*1e9+testPulseProperties.minimumTime);
+          roottree->Fill(); // store data in root tree
+          rootfile->Write("",TObject::kOverwrite);
+
+          // fill arrays for histograms
+          SNRHist->Fill(SNR);
+          lgSNRHist->Fill(lgSNR);
+          envelopeTimeDiffHist->Fill(envelopeTimeDiff);
+          halfheightTimeDiffHist->Fill(halfheightTimeDiff);
+          maximumTimeDiffHist->Fill(maximumTimeDiff);
+          minimumTimeDiffHist->Fill(minimumTimeDiff);
+          
+          ++i;
+          ++ant;
         } 
-        j=0;
-        cout << "\nSignal/Noise = " << endl;
-        for( map<int, PulseProperties>::iterator it = calibPulses.begin(); it != calibPulses.end(); ++it ) {
-          cout << it->second.envelopeMaximum/noiseValues[j] << " " << endl;
-          ++j;
-        } 
-      }  
+      }
+
+      // fit prepared histograms
+      SNRHist->Fit("gaus");
+      lgSNRHist->Fit("gaus");
+      envelopeTimeDiffHist->Fit("gaus");
+      halfheightTimeDiffHist->Fit("gaus");
+      maximumTimeDiffHist->Fit("gaus");
+      minimumTimeDiffHist->Fit("gaus");
+
+      //SNRHist -> SetStats(0);
+      //SNRHist -> SetTitle("");
+      SNRHist -> GetXaxis()->SetTitle("signal-to-noise ratio"); 
+      SNRHist -> GetYaxis()->SetTitle("entries per bin");
+      SNRHist -> GetXaxis()->SetTitleSize(0.05);
+      SNRHist -> GetYaxis()->SetTitleSize(0.05);
+
+      //lgSNRHist -> SetStats(0);
+      //lgSNRHist -> SetTitle("");
+      lgSNRHist -> GetXaxis()->SetTitle("lg(signal-to-noise ratio)"); 
+      lgSNRHist -> GetYaxis()->SetTitle("entries per bin");
+      lgSNRHist -> GetXaxis()->SetTitleSize(0.05);
+      lgSNRHist -> GetYaxis()->SetTitleSize(0.05);
+
+      //envelopeTimeDiffHist -> SetStats(0);
+      //envelopeTimeDiffHist -> SetTitle("");
+      envelopeTimeDiffHist -> GetXaxis()->SetTitle("deviation of envelope maximum time [ns]"); 
+      envelopeTimeDiffHist -> GetYaxis()->SetTitle("entries per bin");
+      envelopeTimeDiffHist -> GetXaxis()->SetTitleSize(0.05);
+      envelopeTimeDiffHist -> GetYaxis()->SetTitleSize(0.05);
+
+      //halfheightTimeDiffHist -> SetStats(0);
+      //halfheightTimeDiffHist -> SetTitle("");
+      halfheightTimeDiffHist -> GetXaxis()->SetTitle("deviation of halfheight time [ns]"); 
+      halfheightTimeDiffHist -> GetYaxis()->SetTitle("entries per bin");
+      halfheightTimeDiffHist -> GetXaxis()->SetTitleSize(0.05);
+      halfheightTimeDiffHist -> GetYaxis()->SetTitleSize(0.05);
+
+      //maximumTimeDiffHist -> SetStats(0);
+      //maximumTimeDiffHist -> SetTitle("");
+      maximumTimeDiffHist -> GetXaxis()->SetTitle("deviation of maximum time [ns]"); 
+      maximumTimeDiffHist -> GetYaxis()->SetTitle("entries per bin");
+      maximumTimeDiffHist -> GetXaxis()->SetTitleSize(0.05);
+      maximumTimeDiffHist -> GetYaxis()->SetTitleSize(0.05);
+
+      //minimumTimeDiffHist -> SetStats(0);
+      //minimumTimeDiffHist -> SetTitle("");
+      minimumTimeDiffHist -> GetXaxis()->SetTitle("deviation of minimum time [ns]"); 
+      minimumTimeDiffHist -> GetYaxis()->SetTitle("entries per bin");
+      minimumTimeDiffHist -> GetXaxis()->SetTitleSize(0.05);
+      minimumTimeDiffHist -> GetYaxis()->SetTitleSize(0.05);
+
+      // prepare canvas for root histograms
+      TCanvas *c1 = new TCanvas("c1","");
+      c1->Range(-18.4356,-0.31111,195.528,2.19048);
+      c1->SetFillColor(0);
+      c1->SetBorderMode(0);
+      c1->SetBorderSize(2);
+      c1->SetLeftMargin(0.127);
+      c1->SetRightMargin(0.076);
+      c1->SetBottomMargin(0.125);
+      c1->SetFrameLineWidth(2);
+      c1->SetFrameBorderMode(0);
+
+      // draw histograms and save them in files 
+      c1->Clear();
+      SNRHist -> Draw();
+      filename.str("");
+      filename << "SNR_hist-" << pulseSNR << ".eps";
+      c1->Print(filename.str().c_str());
+
+      // draw histograms and save them in files 
+      c1->Clear();
+      lgSNRHist -> Draw();
+      filename.str("");
+      filename << "lgSNR_hist-" << pulseSNR << ".eps";
+      c1->Print(filename.str().c_str());
+
+      c1->Clear();
+      envelopeTimeDiffHist -> Draw();
+      filename.str("");
+      filename << "EnvTime_hist-" << pulseSNR << ".eps";
+      c1->Print(filename.str().c_str());
+      
+      c1->Clear();
+      halfheightTimeDiffHist -> Draw();
+      filename.str("");
+      filename << "HalfHeightTime_hist-" << pulseSNR << ".eps";
+      c1->Print(filename.str().c_str());
+
+      c1->Clear();
+      maximumTimeDiffHist -> Draw();
+      filename.str("");
+      filename << "MaxTime_hist-" << pulseSNR << ".eps";
+      c1->Print(filename.str().c_str());
+
+      c1->Clear();
+      minimumTimeDiffHist -> Draw();
+      filename.str("");
+      filename << "MinTime_hist-" << pulseSNR << ".eps";
+      c1->Print(filename.str().c_str());
+
+      cout << "\nResults for true SNR of " << pulseSNR << " are stored in root file" << endl;
+      //cout << "Mean of fit to SNR = ";
+
+      // close root file
+      rootfile->Close();
     } catch (AipsError x) {
       cerr << "checkNoiseInfluence::addPulseToNoise: " << x.getMesg() << endl;
     }  
