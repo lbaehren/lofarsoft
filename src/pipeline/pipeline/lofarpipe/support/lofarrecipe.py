@@ -38,6 +38,26 @@ class LOFARrecipe(WSRTrecipe):
             help="[Expert use] Pipeline start time"
         )
 
+    def run_task(self, configblock, datafiles=[]):
+        self.logger.info("Running task: %s" % (configblock,))
+        recipe = self.config.get(configblock, "recipe")
+        inputs = LOFARinput(self.inputs)
+        inputs['args'] = datafiles
+        inputs.update(self.config.items(configblock))
+        # These inputs are never required:
+        for inp in ('recipe', 'recipe_directories', 'lofarroot', 'default_working_directory'):
+            del(inputs[inp])
+        outputs = LOFARoutput()
+        if self.cook_recipe(recipe, inputs, outputs):
+            self.logger.warn(
+                "%s reports failure (using %s recipe)" % (configblock, recipe)
+            )
+            raise PipelineRecipeFailed("%s failed", configblock)
+        try:
+            return outputs['data']
+        except:
+            return None
+
     def go(self):
         # Every recipe needs a job identifier
         if not self.inputs["job_name"]:
