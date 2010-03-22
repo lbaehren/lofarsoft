@@ -2,7 +2,9 @@ import os, sys
 import utilities
 from lofarpipe.support.lofarexceptions import PipelineException
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
+from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
 from IPython.kernel import client as IPclient
+from ConfigParser import NoOptionError, NoSectionError
 from ConfigParser import SafeConfigParser as ConfigParser
 
 class LOFARrecipe(WSRTrecipe):
@@ -27,6 +29,11 @@ class LOFARrecipe(WSRTrecipe):
             help="Configuration file"
         )
         self.optionparser.add_option(
+            '--task-file',
+            dest="task_files",
+            help="Task definition file"
+        )
+        self.optionparser.add_option(
             '-n', '--dry-run',
             dest="dry_run",
             help="Dry run",
@@ -40,13 +47,15 @@ class LOFARrecipe(WSRTrecipe):
 
     def run_task(self, configblock, datafiles=[]):
         self.logger.info("Running task: %s" % (configblock,))
-        recipe = self.config.get(configblock, "recipe")
+        try:
+            recipe = self.task_definitions.get(configblock, "recipe")
+        except NoSectionError:
+            raise PipelineException("%s not found -- check your task definitions" % configblock)
         inputs = LOFARinput(self.inputs)
         inputs['args'] = datafiles
-        inputs.update(self.config.items(configblock))
-        # These inputs are never required:
-        for inp in ('recipe', 'recipe_directories', 'lofarroot', 'default_working_directory'):
-            del(inputs[inp])
+        inputs.update(self.task_definitions.items(configblock))
+        # This input is not required:
+        del inputs['recipe']
         outputs = LOFARoutput()
         if self.cook_recipe(recipe, inputs, outputs):
             self.logger.warn(
@@ -86,9 +95,21 @@ class LOFARrecipe(WSRTrecipe):
         self.config = ConfigParser({
             "job_name": self.inputs["job_name"],
             "runtime_directory": self.inputs["runtime_directory"],
-            "start_time": self.inputs["start_time"]
+            "start_time": self.inputs["start_time"],
+            "cwd": os.getcwd()
         })
         self.config.read(self.inputs["config"])
+
+        if not self.inputs["task_files"]:
+            try:
+                self.inputs["task_files"] = utilities.string_to_list(
+                    self.config.get('DEFAULT', "task_files")
+                )
+            except NoOptionError:
+                self.inputs["task_files"] = []
+
+        self.task_definitions = ConfigParser()
+        self.task_definitions.read(self.inputs["task_files"])
 
         self.recipe_path = utilities.string_to_list(
             self.config.get('DEFAULT', "recipe_directories")

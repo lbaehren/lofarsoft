@@ -1,4 +1,4 @@
-import subprocess
+import subprocess, sys
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 
 class dummy_echo(LOFARrecipe):
