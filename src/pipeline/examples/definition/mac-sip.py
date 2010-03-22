@@ -8,8 +8,8 @@ hand.
 """
 from __future__ import with_statement
 import sys, os
-from pipeline.master.mac_control import MAC_control
-from pipeline.support.utilities import log_time
+from lofarpipe.support.control import MAC_control
+from lofarpipe.support.utilities import log_time
 
 class sip(MAC_control):
     def pipeline_logic(self):
