@@ -1,5 +1,5 @@
 import subprocess
-from pipeline.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofarrecipe import LOFARrecipe
 
 class dummy_echo(LOFARrecipe):
     def __init__(self):

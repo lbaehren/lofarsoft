@@ -1,4 +1,4 @@
-from cuisine.ingredient import WSRTingredient
+from lofarpipe.cuisine.ingredient import WSRTingredient
 
 class LOFARinput(WSRTingredient):
     """

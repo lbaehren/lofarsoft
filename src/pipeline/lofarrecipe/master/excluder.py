@@ -1,11 +1,11 @@
 import sys
-from pipeline.support.pyraprunner import pyraprunner
-from pipeline.support.utilities import string_to_list
+from lofarpipe.support.pyraprunner import pyraprunner
+from lofarpipe.support.utilities import string_to_list
 
 class excluder(pyraprunner):
     @staticmethod
     def remote_function(input, output, *stations):
-        from pipeline.nodes.excluder import excluder_node
+        from lofarrecipe.nodes.excluder import excluder_node
         return excluder_node(loghost=loghost, logport=logport).run(input, output, *stations)
 
     def __init__(self):

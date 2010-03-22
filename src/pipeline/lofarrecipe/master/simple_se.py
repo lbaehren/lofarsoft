@@ -2,8 +2,8 @@ from __future__ import with_statement
 from contextlib import closing
 
 # Local helpers
-from pipeline.support.lofarrecipe import LOFARrecipe
-import pipeline.support.utilities as utilities
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+import lofarpipe.support.utilities as utilities
 import os, os.path, glob, subprocess, sys, numpy, shutil, errno, re
 
 # SE tools

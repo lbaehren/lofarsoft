@@ -1,7 +1,7 @@
 import os, sys
 import utilities
-from lofarexceptions import PipelineException
-from cuisine.WSRTrecipe import WSRTrecipe
+from lofarpipe.support.lofarexceptions import PipelineException
+from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
 from IPython.kernel import client as IPclient
 from ConfigParser import SafeConfigParser as ConfigParser
 

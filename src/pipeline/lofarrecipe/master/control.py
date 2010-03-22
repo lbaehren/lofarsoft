@@ -1,8 +1,8 @@
 import sys, datetime, logging, os
-from pipeline.support.lofarrecipe import LOFARrecipe
-from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
-from pipeline.support.lofarexceptions import PipelineException, PipelineQuit
-import pipeline.support.utilities as utilities
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
+from lofarpipe.support.lofarexceptions import PipelineException, PipelineQuit
+import lofarpipe.support.utilities as utilities
 
 # The below are necessary for the MAC interface
 from ep.control import *

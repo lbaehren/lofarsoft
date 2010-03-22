@@ -1,13 +1,13 @@
 from __future__ import with_statement
 import sys, os, tempfile
 
-from pipeline.support.ipython import LOFARTask
-from pipeline.support.lofarrecipe import LOFARrecipe
-import pipeline.support.utilities as utilities
-from pipeline.support.clusterlogger import clusterlogger
+from lofarpipe.support.ipython import LOFARTask
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+import lofarpipe.support.utilities as utilities
+from lofarpipe.support.clusterlogger import clusterlogger
 
 def make_columns(file):
-    from pipeline.nodes.colmaker import makecolumns_node
+    from lofarrecipe.nodes.colmaker import makecolumns_node
     return makecolumns_node(loghost=loghost, logport=logport).run(file)
 
 class colmaker(LOFARrecipe):

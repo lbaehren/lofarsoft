@@ -1,8 +1,8 @@
 # Local helpers
-from pipeline.support.lofarrecipe import LOFARrecipe
-from pipeline.support.ipython import LOFARTask
-from pipeline.support.clusterdesc import ClusterDesc
-import pipeline.support.utilities as utilities
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.ipython import LOFARTask
+from lofarpipe.support.clusterdesc import ClusterDesc
+import lofarpipe.support.utilities as utilities
 import pyrap.images
 from skim.main import run as create_hdf5
 import os, os.path, glob, subprocess, sys, numpy

@@ -1,11 +1,11 @@
 import sys, os
-from pipeline.support.pyraprunner import pyraprunner
-from pipeline.support.sourcelist import SourceList
+from lofarpipe.support.pyraprunner import pyraprunner
+from lofarpipe.support.sourcelist import SourceList
 
 class flagger(pyraprunner):
     @staticmethod
     def remote_function(input, output, max_value):
-        from pipeline.nodes.flagger import flagger_node
+        from lofarrecipe.nodes.flagger import flagger_node
         return flagger_node(loghost=loghost, logport=logport).run(input, output, max_value)
 
     def __init__(self):

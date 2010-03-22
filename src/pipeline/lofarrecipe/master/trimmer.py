@@ -1,10 +1,10 @@
 import sys
-from pipeline.support.pyraprunner import pyraprunner
+from lofarpipe.support.pyraprunner import pyraprunner
 
 class trimmer(pyraprunner):
     @staticmethod
     def remote_function(input, output, start_seconds, end_seconds):
-        from pipeline.nodes.trimmer import trimmer_node
+        from lofarrecipe.nodes.trimmer import trimmer_node
         return trimmer_node(loghost=loghost, logport=logport).run(
             input, output, start_seconds, end_seconds
         )

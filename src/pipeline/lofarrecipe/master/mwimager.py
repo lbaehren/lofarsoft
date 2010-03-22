@@ -1,16 +1,13 @@
 from __future__ import with_statement
 import sys, os, tempfile, glob, shutil, errno, subprocess, itertools
 from contextlib import closing
-from pipeline.support.clusterdesc import ClusterDesc
-
-# Cusine core
-from cuisine.parset import Parset
+from lofarpipe.support.clusterdesc import ClusterDesc
 
 # Local helpers
-from pipeline.support.lofarrecipe import LOFARrecipe
-from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
-from pipeline.support.group_data import group_files
-import pipeline.support.utilities as utilities
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
+from lofarpipe.support.group_data import group_files
+import lofarpipe.support.utilities as utilities
 
 class mwimager(LOFARrecipe):
     def __init__(self):

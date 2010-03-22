@@ -2,17 +2,17 @@ from __future__ import with_statement
 import sys, os
 
 # Local helpers
-from pipeline.support.lofarrecipe import LOFARrecipe
-from pipeline.support.lofaringredient import LOFARoutput, LOFARinput
-from pipeline.support.ipython import LOFARTask
-from pipeline.support.group_data import group_files
-import pipeline.support.utilities as utilities
-from pipeline.support.clusterlogger import clusterlogger
-from pipeline.support.clusterdesc import ClusterDesc
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofaringredient import LOFARoutput, LOFARinput
+from lofarpipe.support.ipython import LOFARTask
+from lofarpipe.support.group_data import group_files
+import lofarpipe.support.utilities as utilities
+from lofarpipe.support.clusterlogger import clusterlogger
+from lofarpipe.support.clusterdesc import ClusterDesc
 
 def run_casapy(infile, parset, start_time, end_time, increment):
     # Run on engine to process data with Casapy
-    from pipeline.nodes.casapy import casapy_node
+    from lofarrecipe.nodes.casapy import casapy_node
     return casapy_node(loghost=loghost, logport=logport).run(
         infile,
         parset,

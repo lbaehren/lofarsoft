@@ -1,6 +1,6 @@
 from __future__ import with_statement
 from contextlib import closing, contextmanager
-from cuisine.parset import Parset
+from lofarpipe.cuisine.parset import Parset
 from tempfile import mkstemp
 import os, errno, shutil, subprocess, time, resource
 from itertools import islice, repeat, chain, izip

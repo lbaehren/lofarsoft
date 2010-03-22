@@ -4,10 +4,10 @@ from subprocess import check_call, CalledProcessError
 from contextlib import closing
 
 # Local helpers
-from pipeline.support.lofarrecipe import LOFARrecipe
-from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
-import pipeline.support.utilities as utilities
-from pipeline.support.clusterdesc import ClusterDesc
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
+import lofarpipe.support.utilities as utilities
+from lofarpipe.support.clusterdesc import ClusterDesc
 
 class bbs(LOFARrecipe):
     def __init__(self):

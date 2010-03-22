@@ -1,13 +1,13 @@
 from __future__ import with_statement
 import sys, os
 
-from pipeline.support.ipython import LOFARTask
-from pipeline.support.lofarrecipe import LOFARrecipe
-import pipeline.support.utilities as utilities
-from pipeline.support.clusterlogger import clusterlogger
+from lofarpipe.support.ipython import LOFARTask
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+import lofarpipe.support.utilities as utilities
+from lofarpipe.support.clusterlogger import clusterlogger
 
 def run_qcheck(infile, pluginlist, outputdir):
-    from pipeline.nodes.qcheck import qcheck_node
+    from lofarrecipe.nodes.qcheck import qcheck_node
     return qcheck_node(loghost=loghost, logport=logport).run(
         infile,
         pluginlist,

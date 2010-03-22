@@ -1,16 +1,16 @@
 import sys, os
 
 # Local helpers
-from pipeline.support.lofarrecipe import LOFARrecipe
-from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
-from pipeline.support.ipython import LOFARTask
-import pipeline.support.utilities as utilities
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
+from lofarpipe.support.ipython import LOFARTask
+import lofarpipe.support.utilities as utilities
 
 from tkp_lib.dataset import DataSet
 
 def sextract(image, dataset):
     # Run on engine to source extract
-    from pipeline.nodes.sextractor import sextract
+    from lofarrecipe.nodes.sextractor import sextract
     return sextract(image, dataset)
 
 class sextractor(LOFARrecipe):

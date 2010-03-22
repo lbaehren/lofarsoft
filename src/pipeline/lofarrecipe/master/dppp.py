@@ -2,14 +2,14 @@ from __future__ import with_statement
 import sys, os
 
 # Local helpers
-from pipeline.support.lofarrecipe import LOFARrecipe
-from pipeline.support.ipython import LOFARTask
-import pipeline.support.utilities as utilities
-from pipeline.support.clusterlogger import clusterlogger
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.ipython import LOFARTask
+import lofarpipe.support.utilities as utilities
+from lofarpipe.support.clusterlogger import clusterlogger
 
 def run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript):
     # Run on engine to process data with DPPP
-    from pipeline.nodes.dppp import dppp_node
+    from lofarrecipe.nodes.dppp import dppp_node
     return dppp_node(loghost=loghost, logport=logport).run(
         ms_name,
         ms_outname,
