@@ -245,7 +245,7 @@ namespace CR { // Namespace CR -- begin
   */
   inline void deg2rad (double &rad,
 		       double const &deg) {
-    rad = deg2rad (rad);
+    rad = deg2rad (deg);
   }
   
   /*!
