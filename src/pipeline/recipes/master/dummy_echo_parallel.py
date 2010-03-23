@@ -1,12 +1,12 @@
 from __future__ import with_statement
-import subprocess, sys, time
+import subprocess, sys, os
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
 
 def run_dummy_echo(filename, executable):
-    import imp, os
-    dummy_echo_node = imp.load_module('dummy_echo_parallel', *imp.find_module('dummy_echo_parallel', [os.path.dirname(recipe.replace('master', 'nodes'))])).dummy_echo_node
+    import imp
+    dummy_echo_node = imp.load_module(recipename, *imp.find_module(recipename, [nodepath])).dummy_echo_node
     return dummy_echo_node(loghost=loghost, logport=logport).run(filename, executable)
 
 class dummy_echo_parallel(LOFARrecipe):
@@ -40,7 +40,8 @@ class dummy_echo_parallel(LOFARrecipe):
                 task = LOFARTask(
                     "result = run_dummy_echo(filename, executable)",
                     push = dict(
-                        recipe=self.__file__,
+                        recipename=self.name,
+                        nodepath=os.path.dirname(self.__file__.replace('master', 'nodes')),
                         filename=filename,
                         executable=self.inputs['executable'],
                         loghost=loghost,
@@ -50,14 +51,11 @@ class dummy_echo_parallel(LOFARrecipe):
                 )
                 self.logger.info("Scheduling processing of %s" % (filename))
                 tasks.append(tc.run(task))
-                time.sleep(0.1) # Tiny delay to avoid everything starting logging at once.
-
-        self.logger.info("Waiting for all dummy_echo tasks to complete")
-        tc.barrier(tasks)
+            self.logger.info("Waiting for all dummy_echo tasks to complete")
+            tc.barrier(tasks)
 
         for task in tasks:
             result = tc.get_task_result(task)
-            print result
             if result.failure:
                 self.logger.warn(result)
                 self.logger.warn(result.failure.getTraceback())

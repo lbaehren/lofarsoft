@@ -3,8 +3,6 @@ from lofarpipe.support.lofarnode import LOFARnode
 
 class dummy_echo_node(LOFARnode):
     def run(self, filename, executable):
-        import time, random
-        time.sleep(random.randint(1,5))
         self.logger.info("Processing %s" % (filename))
         execute = [executable, filename]
 
