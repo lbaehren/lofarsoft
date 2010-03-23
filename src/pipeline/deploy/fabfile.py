@@ -1,5 +1,5 @@
 from fabric.api import env, hosts, run, put, get, require
-from pipeline.support.clusterdesc import ClusterDesc
+from lofarpipe.support.clusterdesc import ClusterDesc
 import os.path
 
 from ConfigParser import SafeConfigParser as ConfigParser
