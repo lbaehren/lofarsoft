@@ -5,7 +5,6 @@ setup(
     version="0.1.dev",
     packages=[
         'lofarpipe', 'lofarpipe.cuisine', 'lofarpipe.support',
-        'lofarrecipe', 'lofarrecipe.master', 'lofarrecipe.nodes',
         'qcheck'
     ],
     description="LOFAR Pipeline System",
