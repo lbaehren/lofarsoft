@@ -119,8 +119,8 @@ template <class T>
     void delVector();
     void delete_storage();
     void new_storage();
-    hArray<T> &  shared_copy();
-    hArray<T> &   setVector(std::vector<T> & vec);
+    hArray<T> & shared_copy();
+    hArray<T> & setVector(std::vector<T> & vec);
     std::vector<T> & getVector();
     std::vector<HInteger> & getDimensions();
     std::vector<HInteger> & getSizes();
@@ -130,22 +130,22 @@ template <class T>
     void setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
     void setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3);
     void setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
-    hArray<T> &  setSlice(HInteger beg, HInteger end);
-    //    storage_container * getStorage();
+    hArray<T> & setSlice(HInteger beg, HInteger end);
+    hArray<T> & setSliceVector(vector<HInteger> & index_vector, HInteger offset_start=0, HInteger offset_end=-1);
     HInteger getNumberOfDimensions();
     typename std::vector<T>::iterator begin();
     typename std::vector<T>::iterator end();
-    typename std::vector<T>::iterator begin(HInteger offset);
-    typename std::vector<T>::iterator end(HInteger offset);
     HInteger getBegin();
     HInteger getEnd();
     HInteger getSize();
     HInteger length();
     bool iterate();
-    hArray<T> &  loop();
-    hArray<T> &  noloop();
+    hArray<T> & loop(vector<HInteger> & start_element_index, HInteger start=0, HInteger end=-1, HInteger increment=1);
+    hArray<T> & loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec);
+    HInteger setLoopSlice(vector<HInteger> & start_element_index);
     hArray<T> &  next();
-    hArray<T> &  reset();
+    hArray<T> &  loopOn();
+    hArray<T> &  loopOff();
     
     //These are the basic parameters describing the data
     //structure. They can be shared
@@ -157,7 +157,10 @@ template <class T>
 
   private:
     HInteger slice_begin, slice_end, slice_size;
-    typename std::vector<T>::iterator slice_it_begin, slice_it_end;
+    HInteger loop_slice_begin, loop_slice_end, loop_slice_size;
+    HInteger loop_start, loop_end, loop_increment, loop_i, loop_nslice, loop_maxn;
+    vector<HInteger> index_vector;
+    bool loop_over_indexvector;
     bool doiterate;
   };
 

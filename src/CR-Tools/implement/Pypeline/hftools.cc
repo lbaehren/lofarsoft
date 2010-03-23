@@ -625,6 +625,10 @@ template <class T> void hArray<T>::init(){
   slice_size=0;
   array_is_shared=false;
   doiterate=false;
+  loop_slice_begin=0; loop_slice_end=0; loop_slice_size=0;
+  loop_i=0; loop_start=0; loop_end=0; loop_increment=1; loop_maxn=0;
+  loop_nslice=0;
+  loop_over_indexvector=false;
 }
 
 template <class T> void hArray<T>::new_storage(){
@@ -867,9 +871,29 @@ template <class T> hArray<T> &  hArray<T>::setSlice(HInteger beg, HInteger end){
   slice_begin=max(beg,0);
   if (end>=0) slice_end=min(end,(*storage_p->size_p));
   else slice_end=(*storage_p->size_p); 
-  slice_it_begin=storage_p->vec_p->begin()+slice_begin;
-  slice_it_end=storage_p->vec_p->begin()+slice_end;
   slice_size=slice_end-slice_begin;
+  return *this;
+}
+
+/*!  \brief Sets begin and end of the currently active slice using an integer array of array indices.
+
+If the length of the index vector is shorter than the actual number of
+dimensions, this will provide a slice over the remanining dimensions
+(belonging to the element indicated by the index vector)
+
+ */
+template <class T> hArray<T> &  hArray<T>::setSliceVector(vector<HInteger> & index_vector, HInteger offset_start, HInteger offset_end){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
+  HInteger level=index_vector.size();
+  if ((level > *storage_p->ndims_p) || (level < 0)) {ERROR("setSliceVector: Dimension wrong"); return *this;};
+  offset_start=offset_start * (storage_p->slice_sizes_p->at(level));
+  if (offset_end==-1) offset_end=storage_p->dimensions_p->at(level);
+  offset_end=offset_end * (storage_p->slice_sizes_p->at(level));
+  slice_begin=max(0,min(hMulSum(index_vector,*storage_p->slice_sizes_p)+offset_start,storage_p->vec_p->size())); 
+  slice_end=max(0,min(hMulSum(index_vector,*storage_p->slice_sizes_p)+offset_end,storage_p->vec_p->size())); 
+  //  slice_end=min(max(slice_begin+storage_p->slice_sizes_p->at(level-1),slice_begin),storage_p->vec_p->size());
+  slice_size=slice_end-slice_begin; 
   return *this;
 }
 
@@ -882,37 +906,41 @@ template <class T> HInteger hArray<T>::getNumberOfDimensions(){
 }
 
 /*!
-\brief Returns the begin iterator of the current slice in the stored vector plus an integer offset (to get a slice from a slice)
- */
-template <class T> typename std::vector<T>::iterator hArray<T>::begin(HInteger offset){return slice_it_begin+offset;}
-/*!
-\brief Returns the begin iterator of the current slice in the stored vector plus an integer offset (to get a slice from a slice) but not larger than the end iterator of the current slice.
- */
-template <class T> typename std::vector<T>::iterator hArray<T>::end(HInteger offset){return min(slice_it_begin+offset,slice_it_end);}
-
-/*!
 \brief Returns the begin iterator of the current slice in the stored vector
  */
-template <class T> typename std::vector<T>::iterator hArray<T>::begin(){return slice_it_begin;}
+template <class T> typename std::vector<T>::iterator hArray<T>::begin(){
+  return storage_p->vec_p->begin()+getBegin();
+}
 /*!
 \brief Returns the end iterator of the current slice in the stored vector
  */
-template <class T> typename std::vector<T>::iterator hArray<T>::end(){return slice_it_end;}
+template <class T> typename std::vector<T>::iterator hArray<T>::end(){
+  return storage_p->vec_p->begin()+getEnd();
+}
 
 /*!
 \brief Returns the offset of the current slice from the begin iterator of the stored vector
  */
-template <class T> HInteger hArray<T>::getBegin(){return slice_begin;}
+template <class T> HInteger hArray<T>::getBegin(){
+  if (doiterate) return min(loop_slice_begin+loop_nslice*loop_slice_size,loop_slice_end);
+  else return slice_begin;
+}
 
 /*!
 \brief Returns the offset of the end of the current slice from the begin iterator of the stored vector
  */
-template <class T> HInteger hArray<T>::getEnd(){return slice_end;}
+template <class T> HInteger hArray<T>::getEnd(){
+  if (doiterate) return min(loop_slice_begin+(loop_nslice+1)*loop_slice_size,loop_slice_end);
+  else return slice_end;
+}
 
 /*!
 \brief Returns the size (length) of the current slice
  */
-template <class T> HInteger hArray<T>::getSize(){return slice_size;}
+template <class T> HInteger hArray<T>::getSize(){
+  if (doiterate) return loop_slice_size;
+  else return slice_size;
+}
 
 /*!
 \brief Returns the length of the underlying vector
@@ -929,23 +957,83 @@ template <class T> HInteger hArray<T>::length(){
  */
 template <class T> bool hArray<T>::iterate(){return doiterate;}
 
-/*!
-\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector)
- */
-template <class T> hArray<T> &   hArray<T>::loop(){doiterate=true; return *this;}
 
 /*!
-\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector)
+\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector). 
+
  */
-template <class T> hArray<T> &   hArray<T>::noloop(){doiterate=false; return *this;}
+template <class T> hArray<T> & hArray<T>::loopOn(){doiterate=true; return *this;}
 
 /*!
-\brief Reset the slice iterators to the first slice
-*/
-template <class T> hArray<T> &  hArray<T>::reset(){ 
-  setSlice(0,getSize());
+\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector). 
+
+\param "start_element_index" indicates the array element to start with. Looping
+will be done over the next higher dimension.
+
+\param start (starting at 0), end, increment indicate over how
+many slices the iteration should proceed.
+
+ */
+template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_element_index, HInteger start, HInteger end, HInteger increment){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
+  HInteger level=setLoopSlice(start_element_index);
+  if ( level <= -1 )  {ERROR("loop: dimensions are wrong!"); return *this;};
+  if (end<0) end=storage_p->dimensions_p->at(level);
+  start=min(max(0,start),loop_maxn);
+  end=min(max(start,end),loop_maxn);
+  increment = max(increment,1);
+  doiterate=true; 
+  loop_over_indexvector=false;
+  loop_i=start; loop_start=start; loop_end=end; loop_increment=increment;
+  loop_nslice = loop_i;
   return *this;
 }
+
+/*!
+\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector). 
+
+The parameters start (statring at 0), end, increment indicate over how
+many slices the iteration should proceed.
+
+ */
+template <class T> hArray<T> & hArray<T>::loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
+  HInteger level=setLoopSlice(start_element_index);
+  if ( level <= -1 ) {ERROR("loopVector: dimensions are wrong!"); return *this;};
+  doiterate=true; 
+  loop_over_indexvector=true;
+  loop_i=0; loop_start=0; loop_end=vec.size(); loop_increment=1;
+  index_vector=vec;
+  loop_nslice=index_vector[loop_i];
+  return *this;
+}
+
+/*!
+\brief Sets the slice parameters used by the looping algorithm to calculate the currently worked on slice.
+
+\param start_element_index: a vector of n indices which remain
+constant during the looping. Looping will be done over the n+1st
+index.
+
+ */
+template <class T> HInteger hArray<T>::setLoopSlice(vector<HInteger> & start_element_index){
+  if (storage_p==NULL) return -1; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return -1; //Check if vector was deleted elsewhere
+  HInteger level=start_element_index.size();
+  if (level >= *storage_p->ndims_p)  {ERROR("setLoopSlice: dimensions are wrong!"); return -1;};
+  loop_maxn = storage_p->dimensions_p->at(level);
+  loop_slice_begin=hMulSum(start_element_index,*storage_p->slice_sizes_p); // multiplies the start element indices with the (cummulaitve) sizes of slices per dimension - giving the total offset
+  loop_slice_size=storage_p->slice_sizes_p->at(level);
+  loop_slice_end=loop_slice_begin+loop_slice_size*loop_maxn;
+  return level;
+}
+
+/*!
+\brief Switches the looping mode off (i.e. the next function will not loop over all slices in the vector)
+ */
+template <class T> hArray<T> & hArray<T>::loopOff(){doiterate=false; return *this;}
 
 /*!
 \brief Increase the current slice by one, if array is in looping mode. 
@@ -953,11 +1041,14 @@ template <class T> hArray<T> &  hArray<T>::reset(){
 If the end of the vector is reached, switch looping mode off and reset array to first slice.
  */
 template <class T> hArray<T> &  hArray<T>::next(){
-  if (slice_end>=length()) { // the end has been reached
-    reset();
-    noloop();
+  if (!doiterate) return *this;
+  loop_i+=loop_increment;
+  if (loop_i>=loop_end) { // the end is near, stop looping ...
+    loopOff();
   } else {  
-    setSlice(slice_begin+slice_size,slice_end+slice_size);
+    if (loop_over_indexvector) loop_nslice=index_vector[loop_i];
+    else loop_nslice = loop_i;
+    loop_nslice = min(loop_nslice,loop_maxn);
   };
   return *this;
 }
@@ -990,6 +1081,7 @@ return_internal_reference<1,
     .def("setDimensions",&hArray<TYPE>::setDimensions3)			\
     .def("setDimensions",&hArray<TYPE>::setDimensions4)			\
     .def("setSlice",&hArray<TYPE>::setSlice,return_internal_reference<>())				\
+    .def("setSliceVector",&hArray<TYPE>::setSliceVector,return_internal_reference<>())				\
     .def("getNumberOfDimensions",&hArray<TYPE>::getNumberOfDimensions)	\
     .def("getBegin",&hArray<TYPE>::getBegin)				\
     .def("getEnd",&hArray<TYPE>::getEnd)				\
@@ -997,9 +1089,10 @@ return_internal_reference<1,
     .def("iterate",&hArray<TYPE>::iterate)				\
     .def("__len__",&hArray<TYPE>::length)				\
     .def("loop",&hArray<TYPE>::loop,return_internal_reference<>())					\
-    .def("noloop",&hArray<TYPE>::noloop,return_internal_reference<>())				\
+    .def("loop",&hArray<TYPE>::loopVector,return_internal_reference<>())					\
+    .def("noOn",&hArray<TYPE>::loopOn,return_internal_reference<>())				\
+    .def("noOff",&hArray<TYPE>::loopOff,return_internal_reference<>())				\
     .def("next",&hArray<TYPE>::next,return_internal_reference<>())					\
-    .def("reset",&hArray<TYPE>::reset,return_internal_reference<>())
       
 
 
@@ -1085,10 +1178,13 @@ HString hgetFileExtension(HString filename){
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to fill")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(fill_value)()("Fill value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
+  hFill(vec,0) -> [0,0,0,...]
+  vec.fill(0) -> [0,0,0,...]
+
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -1099,6 +1195,42 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType fill_
   while (it!=vec_end) {
     *it=fill_value;
     ++it;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Fills a vector with the content of another vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFill
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to fill")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(fill_vec)()("Vector of values to fill it with")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hFill(vec,[0,1,2]) -> [0,1,2,0,1,2,...]
+  vec.fill([0,1,2]) -> [0,1,2,0,1,2,...]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+If fill_vec is shorther than vec, the procedure will wrap around and
+start from the beginning of fill_vec again. Hence, in this case
+fill_vec will appear repeated multiple times in vec.
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter fill_vec, const Iter fill_vec_end)
+{
+  Iter it1=vec;
+  Iter it2=fill_vec;
+  if (it2==vec_end) return;
+  while (it1!=vec_end) {
+    *it1=*it2;
+    ++it1;++it2;
+    if (it2==fill_vec_end) it2=fill_vec;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"

@@ -118,7 +118,9 @@ def VecToPrintString(self,maxlen=10):
 
 def ArrayToPrintString(self,maxlen=10):
     s=typename(basetype(self))+", "
-    return "Array("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]) -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+    loops=""
+    if self.iterate(): loops="*"
+    return "Array("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
 
 #========================================================================
 # Adding multi-dimensional array capabilities to vector class
@@ -237,46 +239,75 @@ def hArray_return_slice_start(val):
         return 0
     elif type(val)==slice:
         return val.start
+    elif type(val)==list:
+        return val[0]
     else:
         return val
 
+def hArray_return_slice_end(val): 
+    """ Reduces a slice to its end value"""
+    if val==Ellipsis: 
+        return -1
+    elif type(val)==slice:
+        return hNone2Value(val.stop,-1)
+    elif type(val)==list:
+        return val[-1]
+    else:
+        return val+1
+
+def hNone2Value(none,defval): 
+    """
+    Returns a default value if the the first input is the None object,
+    otherwise return the value of the first argument.
+    """
+    if none==None: return defval
+    else: return none
+
+def hArray_vec(self):
+    """
+    Retrieve the currently selected slice from the stored vector.
+    """
+    return self.getVector()[self.getBegin():self.getEnd()]
+
+def hArray_val(self):
+    """
+    Retrieve the first element of the currently selected slice from the stored vector.
+    """
+    return self.vec()[0]
 
 def hArray_getitem(self,dimlist):
     """
-    self[]
+    self[n1,n2,n3]-> return Element with these indices
     
-    Retrieves the dimensions of a multidimensonal array as  a list of
+    Retrieves a copy of the array with the internal slices set to reflect ...
     integers.
 
     Use array.setDim([dim1,dim2,...,dimN]) to set the dimensions. 
     """
-    
-    if not type(dimlist) in [list,tuple]: 
-        print "NOT:",dimlist
-        dimlist=[dimlist]
-    sizes=self.getSizes()
+    if not type(dimlist)==tuple: dimlist=(dimlist,)
     ary=Array(self)
-    if dimlist[-1]==Ellipsis: ary.loop()
+    lastelement=dimlist[-1]
     dimliststarts=Vector(map(hArray_return_slice_start,dimlist))
-    start=dimliststarts.mulsum(sizes)
-    if type(dimlist[-1])==slice:
-        end=start+(dimlist[-1].stop-dimlist[-1].start+1)*sizes[len(dimlist)-1]
-    else:
-        end=start+sizes[len(dimlist)-1]
-    ary.setSlice(start,end)
+    if (lastelement==Ellipsis):   # looping is requested
+        if len(dimlist)>=2:      # but ...
+            if not type(dimlist[-2])==int:  # .. there is a slice or list preceding the ellipsis, over which to loop
+                lastelement=dimlist[-2]
+        if type(lastelement)==slice: ary.loop(dimliststarts[0:-2],lastelement.start,hNone2Value(lastelement.stop,-1),hNone2Value(lastelement.step,1))
+        elif lastelement==Ellipsis: ary.loop(dimliststarts[0:-1],0,-1,1)
+        elif type(lastelement)==list: ary.loop(dimliststarts[0:-2],Vector(lastelement))
+    elif type(lastelement) in [slice,list]: #Non-looping slice
+        ary.setSliceVector(dimliststarts[0:-1],hArray_return_slice_start(lastelement),hArray_return_slice_end(lastelement))
+    else: # normal integer index
+        ary.setSliceVector(dimliststarts[0:-1],lastelement,lastelement+1)
     return ary;
 
-def hArray_setitem(self,dims):
+def hArray_setitem(self,dims,fill):
     """
-    self[]
+    vec[n1,n2,..] = [0,1,2] -> set slice of array to input vector/value
     
-    Retrieves the dimensions of a multidimensonal array as  a list of
-    integers.
-
-    Use array.setDim([dim1,dim2,...,dimN]) to set the dimensions. 
     """
-    return (dims)
-
+    if (type(fill)) in [list,tuple]: fill=Array(fill)
+    return hFill(hArray_getitem(self,dims),fill)
  
 #======================================================================
 #  Define Lists of Array and Vector Types that we will use 
@@ -517,6 +548,8 @@ for v in hAllArrayTypes:
     setattr(v,"__repr__",ArrayToPrintString)
     setattr(v,"setDim",hArray_setDim)
     setattr(v,"getDim",hArray_getDim)
+    setattr(v,"vec",hArray_vec)
+    setattr(v,"val",hArray_val)
     setattr(v,"newreference",hArray_newreference)
     setattr(v,"__getitem__",hArray_getitem)
     setattr(v,"__setitem__",hArray_setitem)
@@ -612,15 +645,15 @@ def Vector(Type=float,size=-1,fill=None):
 def Array(Type=float,dimensions=None,size=-1,fill=None):
     if isVector(Type):  #Make a new array with refernece to the input vector
         ary=type2array(basetype(Type))
-        ary.vec=Type
-        ary.setVector(ary.vec)
+        ary.stored_vector=Type
+        ary.setVector(ary.stored_vector)
     elif isArray(Type):  # Just make a copy with reference to same vector
         ary=Type.newreference()
     else: # Create a new vector
         vec=Vector(Type=Type,size=size)
         ary=type2array(basetype(vec))
-        ary.vec=vec
-        ary.setVector(ary.vec)
+        ary.stored_vector=vec
+        ary.setVector(ary.stored_vector)
     if (type(dimensions) in [list,tuple,IntVec]): ary.setDim(dimensions)
     if not (fill == None): ary.fill(fill)
     return ary
