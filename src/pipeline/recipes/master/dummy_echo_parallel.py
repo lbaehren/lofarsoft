@@ -1,12 +1,12 @@
 from __future__ import with_statement
-import subprocess, sys
+import subprocess, sys, time
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
 
 def run_dummy_echo(filename, executable):
+    import imp, os
     dummy_echo_node = imp.load_module('dummy_echo_parallel', *imp.find_module('dummy_echo_parallel', [os.path.dirname(recipe.replace('master', 'nodes'))])).dummy_echo_node
-#    from lofarrecipe.nodes.dummy_echo import dummy_echo_node
     return dummy_echo_node(loghost=loghost, logport=logport).run(filename, executable)
 
 class dummy_echo_parallel(LOFARrecipe):
@@ -38,18 +38,29 @@ class dummy_echo_parallel(LOFARrecipe):
             tasks = [] # this will be a list of scheduled jobs
             for filename in self.inputs['args']:
                 task = LOFARTask(
-                    "run_dummy_echo(filename)",
+                    "result = run_dummy_echo(filename, executable)",
                     push = dict(
                         recipe=self.__file__,
                         filename=filename,
-                        executable=self.inputs['executable']
-                    )
+                        executable=self.inputs['executable'],
+                        loghost=loghost,
+                        logport=logport
+                    ),
+                    pull="result"
                 )
                 self.logger.info("Scheduling processing of %s" % (filename))
                 tasks.append(tc.run(task))
+                time.sleep(0.1) # Tiny delay to avoid everything starting logging at once.
 
         self.logger.info("Waiting for all dummy_echo tasks to complete")
         tc.barrier(tasks)
+
+        for task in tasks:
+            result = tc.get_task_result(task)
+            print result
+            if result.failure:
+                self.logger.warn(result)
+                self.logger.warn(result.failure.getTraceback())
 
         return 0
 
