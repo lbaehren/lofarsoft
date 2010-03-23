@@ -64,6 +64,7 @@ using CR::checkNoiseInfluence;
 
 const string pulseEvent="2009.08.10.12:18:07.598.event";
 const string noiseEvent="2009.06.15.19:42:11.987.event";
+// const string noiseEvent="2005.11.19.01:44:28.132.event";
 const int pulseAnt = 1;
 const double pulseStart = -4e-6;
 // const double pulseStart = -1e-5;
@@ -93,12 +94,12 @@ int main (int argc, char *argv[])
     
     // add pulse to noise
     noisetest.addPulseToNoise(0);
-    noisetest.addPulseToNoise(1);
+//     noisetest.addPulseToNoise(1);
 //     noisetest.addPulseToNoise(2);
 //     noisetest.addPulseToNoise(3);
 //     noisetest.addPulseToNoise(5);
-    noisetest.addPulseToNoise(10);
-    noisetest.addPulseToNoise(20);
+//     noisetest.addPulseToNoise(10);
+//     noisetest.addPulseToNoise(20);
 
     cout << "\nEnd of program.\n" << endl;
   } catch (AipsError x) {

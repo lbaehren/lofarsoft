@@ -84,35 +84,8 @@ namespace CR { // Namespace CR -- begin
   
   void CompletePipeline::destroy ()
   {;}
+
   
-  // ============================================================================
-  //
-  //  Operators
-  //
-  // ============================================================================
-  
-  CompletePipeline& CompletePipeline::operator= (CompletePipeline const &other)
-  {
-    if (this != &other) {
-      destroy ();
-      copy (other);
-    }
-    return *this;
-  }
-  
-  void CompletePipeline::copy (CompletePipeline const &other)
-  {;}
-
-  // ============================================================================
-  //
-  //  Parameters
-  //
-  // ============================================================================
-
-  void CompletePipeline::summary (std::ostream &os)
-  {;}
-
-
   // ============================================================================
   //
   //  Methods
@@ -536,42 +509,64 @@ namespace CR { // Namespace CR -- begin
     double noise = 0.;
     try {
       vector<double> localExtrema; //  vector to store local extrema of trace
-
+      vector<unsigned int> localExtremaWeight; // weight of local extrema (for method 4)
+      
       // first: calculate trace for noise calculation
       Vector<Double> noiseTrace(trace.nelements());   
       if ((method == 0) || (method == 2))       // choose abolute of trace
         for(unsigned int j = 0; j < trace.nelements(); ++j)
           noiseTrace(j) = abs(trace(j));
-      if (method == 3) {  // envelope
+      if ((method == 3) || (method == 4))  // envelope
         noiseTrace = envelope(trace);
-        method = 2;  // proceed for search of local maxima like in method 2
-      }  
         
-      // calculate noise with different methods  
-      switch(method) {
-        case 0: // Steffen's method (mean of the absolute)
-          noise = mean(noiseTrace);
-          break;
-        case 1: // RMS (Radio-Auger)
-          noise = rms(trace);
-          break;
-        case 2: // mean of local maxima (absolute of trace or envelope)
-          // search for local extrema and store them
-          for(unsigned int j = 1; j < noiseTrace.nelements()-1; ++j) {
-            if ( (noiseTrace(j-1) < noiseTrace(j)) && (noiseTrace(j) > noiseTrace(j+1)) )
-              localExtrema.push_back(noiseTrace(j));
-          }
-          if (localExtrema.size() == 0) {
-            noise = max(noiseTrace);
-            cerr << "CompletePipeline:calculateNoise: " << "WARNING: noise interval too small!" << endl;
-          } else {
-            //  cout << "Calculating noise as mean of " << localExtrema.size() << " local extrema." << endl;
-            noise = mean(static_cast< Vector<double> >(localExtrema));
+      // search for local maxima for methods 2,3, and 4  
+      if ((method == 2) || (method == 3) || (method == 4)) { 
+        unsigned int max1 = 0, max2 = 0; // position of second last and last maximum (for weight calculation) 
+        for(unsigned int j = 1; j < noiseTrace.nelements()-1; ++j) {
+          if ( (noiseTrace(j-1) < noiseTrace(j)) && (noiseTrace(j) > noiseTrace(j+1)) ) {
+            localExtrema.push_back(noiseTrace(j));
+            if (max2 == 0) {
+              max2 = j;         // for the first maximum, just store the position
+            } else {
+              // weight = distance between neighbouring maxima
+              localExtremaWeight.push_back(j-max1);
+              max1 = max2;
+              max2 = j;
+            }            
           }  
-          break;
-        default:
-          cerr << "CompletePipeline:calculateNoise: " << "Unkown method for noise calculation!" << endl;
-      }        
+        }
+        // store weight for last maximum
+        localExtremaWeight.push_back(noiseTrace.nelements()-max1);
+      }  
+      
+      // calculate noise with different methods  
+      if (method==0)
+        return mean(noiseTrace);
+      if (method==1)
+        return rms(trace);
+      if ((method==2) || (method == 3)) { // mean of local maxima (absolute of trace or envelope)
+        if (localExtrema.size() == 0) {
+          return max(noiseTrace);
+          cerr << "CompletePipeline:calculateNoise: " << "WARNING: noise interval too small!" << endl;
+        } else {
+          //  cout << "Calculating noise as mean of " << localExtrema.size() << " local extrema." << endl;
+          return mean(static_cast< Vector<double> >(localExtrema));
+        }  
+      }  
+      if (method==4) {    // weighted  average of local maxima
+        unsigned int sumOfWeights = 0;
+        double weightedSum = 0;
+        for (unsigned int i = 0; i < localExtremaWeight.size(); ++i) {
+          sumOfWeights += localExtremaWeight[i];
+          weightedSum += double(localExtremaWeight[i])*localExtrema[i];
+        }  
+        noise = weightedSum / double(sumOfWeights);
+        // cout << "Mean =  " << mean(static_cast< Vector<double> >(localExtrema)) << ",\t weighted mean = " << noise << endl;  
+        return noise;
+      }
+      
+      // if it comes here, something went wrong  
+      cerr << "CompletePipeline:calculateNoise: " << "Unkown method for noise calculation!" << endl;       
     } catch (AipsError x) {
       cerr << "CompletePipeline:calculateNoise: " << x.getMesg() << endl;
     }

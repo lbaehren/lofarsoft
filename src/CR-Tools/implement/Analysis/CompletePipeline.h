@@ -129,15 +129,6 @@ namespace CR { // Namespace CR -- begin
     */
     ~CompletePipeline ();
     
-    // ---------------------------------------------------------------- Operators
-    
-    /*!
-      \brief Overloading of the copy operator
-      
-      \param other -- Another CompletePipeline object from which to make a copy.
-    */
-    CompletePipeline& operator= (CompletePipeline const &other); 
-    
     // --------------------------------------------------------------- Parameters
     
     /*!
@@ -148,19 +139,6 @@ namespace CR { // Namespace CR -- begin
     std::string className () const {
       return "CompletePipeline";
     }
-
-    /*!
-      \brief Provide a summary of the internal status
-    */
-    inline void summary () {
-      summary (std::cout);
-    }
-
-    /*!
-      \brief Provide a summary of the internal status
-    */
-    void summary (std::ostream &os);    
-
 
     // ------------------------------------------------------------------ Methods
 
@@ -429,6 +407,10 @@ namespace CR { // Namespace CR -- begin
       \param trace            -- trace or part of trace to calculate the noise from
       \param method           -- method of noise calculation:
                                  0: Steffen's method: noise = mean of absolute values of trace
+                                 1: RMS of field strength
+                                 2: mean of absolute of maxima and minima of field strength
+                                 3: mean of local maxima of envelope
+                                 4: weighted average of local maxima of envelope
 
       \return noise           -- noise (different methods will be implemented)
     */

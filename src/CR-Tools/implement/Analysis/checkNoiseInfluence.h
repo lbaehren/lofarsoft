@@ -79,6 +79,9 @@ namespace CR { // Namespace CR -- begin
   //! time in trace for first noise interval (default -150 µs)
   double startTime;
   
+  //! method for noise calculation in CompletePipeline
+  int noiseMethod;
+
   //! length of noise interval (default 10 µs)
   double noiseIntervalLength;
   
@@ -121,15 +124,6 @@ namespace CR { // Namespace CR -- begin
     */
     ~checkNoiseInfluence ();
 
-    // ---------------------------------------------------------------- Operators
-
-    /*!
-      \brief Overloading of the copy operator
-
-      \param other -- Another checkNoiseInfluence object from which to make a copy.
-    */
-    checkNoiseInfluence& operator= (checkNoiseInfluence const &other); 
-
     // --------------------------------------------------------------- Parameters
 
     /*!
@@ -140,19 +134,6 @@ namespace CR { // Namespace CR -- begin
     std::string className () const {
       return "checkNoiseInfluence";
     }
-
-    /*!
-      \brief Provide a summary of the internal status
-    */
-    inline void summary () {
-      summary (std::cout);
-    }
-
-    /*!
-      \brief Provide a summary of the internal status
-    */
-    void summary (std::ostream &os);    
-
 
     // ------------------------------------------------------------------ Methods
 

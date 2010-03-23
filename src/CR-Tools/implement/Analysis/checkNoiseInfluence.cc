@@ -42,6 +42,7 @@ namespace CR { // Namespace CR -- begin
     pulseHeight(0.),
     pulseTime(0.),
     startTime(-150e-6),
+    noiseMethod(4),
     noiseIntervalLength(10e-6),
     noiseIntervalGap(5e-6),
     NnoiseIntervals(20),
@@ -57,15 +58,6 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
 
   checkNoiseInfluence::~checkNoiseInfluence ()
-  {}
-
-  // ============================================================================
-  //
-  //  Parameters
-  //
-  // ============================================================================
-
-  void checkNoiseInfluence::summary (std::ostream &os)
   {}
 
   // ============================================================================
@@ -131,7 +123,7 @@ namespace CR { // Namespace CR -- begin
                                           getUpsamplingExponent(),false, true);
       // calculate the maxima (calibPulses is defined in analyseLOPESevent2)
       calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
-                                                        1e99, 3, pulseStart - 10.5e-6, pulseStart - 0.5e-6);
+                                                        1e99, noiseMethod, pulseStart - 10.5e-6, pulseStart - 0.5e-6);
       
       // load the pulse pattern: calculate time range of pulse and get up-sampled trace in this range
       Vector<Double> timeValues =
@@ -211,7 +203,7 @@ namespace CR { // Namespace CR -- begin
         CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
         double noiseTime = plotStart()+pulseTime;   // noise range is normally calculated in respect to the time of the CC beam (where the pulse is expected)
         calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
-                                                          noiseTime, 3, plotStart(), plotStop());
+                                                          noiseTime, noiseMethod, plotStart(), plotStop());
         vector<double> noiseValues; // stores the noise heights for one noise interval
         // loop through all antennas and store height of noise                                          
         for( map<int, PulseProperties>::iterator it = calibPulses.begin(); it != calibPulses.end(); ++it ) {
@@ -312,7 +304,7 @@ namespace CR { // Namespace CR -- begin
         CompleteBeamPipe_p->plotAllAntennas(filename.str(), lev_p, AntennaSelection, false,
                                             getUpsamplingExponent(),false, false);
         calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
-                                                          plotStart()+pulseTime, 3, plotStart(), plotStop());
+                                                          plotStart()+pulseTime, noiseMethod, plotStart(), plotStop());
         vector<double> noiseValues = noiseHeight[interval]; // get the noise heights for one noise interval
         
         // loop through all antennas and get the signal-to-noise ratio                              

@@ -1444,7 +1444,7 @@ int main (int argc, char *argv[])
 
     // create tree and tree structure (depends on chosen polarization)
     TTree *roottree = NULL;
-    if (config["rootFileMode"]->sValue() == "RECREATE");
+    if (config["rootFileMode"]->sValue() == "RECREATE")
       roottree = new TTree("T","LOPES");
     if (config["rootFileMode"]->sValue() == "UPDATE")
       roottree = (TTree*)rootfile->Get("T;1");
