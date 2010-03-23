@@ -26,26 +26,24 @@
 
 set SYSTEM_NAME = `uname -s`
 
-# If not running interactively, don't do anything
-if ( ! $?prompt ) then
-   exit 0
-endif
-
 ##______________________________________________________________________________
 ## Check for the existence of the LOFARSOFT  environment variable
-
+    
 if(${?LOFARSOFT} == 0) then
-   echo "ERROR:  Please set the LOFARSOFT environment variable"
-   exit
+    echo "ERROR:  Please set the LOFARSOFT environment variable"
+    exit
 else
-   echo "Initializing LOFAR software environment"
+    if ( $?prompt ) then
+	echo "Initializing LOFAR software environment"
+    endif
 endif
-
 
 ##______________________________________________________________________________
 ##  Add the LOFAR executables to the path
 
-echo "-- Add the LOFAR executables to the path"
+if ( $?prompt ) then
+    echo "-- Add the LOFAR executables to the path"
+endif
 
 set path = ( $LOFARSOFT/release/share/pulsar/bin $LOFARSOFT/release/bin $path )
 
@@ -73,7 +71,9 @@ endif
 #
 #############################################################################
 
-echo "-- Add the Python libraries to the existing search path"
+if ( $?prompt ) then
+    echo "-- Add the Python libraries to the existing search path"
+endif
 
 if ($?PYTHONPATH) then
    if ( $PYTHONPATH != $LOFARSOFT/release/lib ) then   
@@ -134,6 +134,7 @@ if (${?PRESTO}) then
    echo "           $PRESTO to ${LOFARSOFT}/release/share/pulsar"
   endif
 endif
+
 setenv PRESTO ${LOFARSOFT}/release/share/pulsar
 
 #############################################################################
