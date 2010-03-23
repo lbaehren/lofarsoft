@@ -1,6 +1,6 @@
 import os, sys, inspect
 import utilities
-from lofarpipe.support.lofarexceptions import PipelineException
+from lofarpipe.support.lofarexceptions import PipelineException, ClusterError
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
 from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
 from IPython.kernel import client as IPclient
@@ -116,9 +116,11 @@ class LOFARrecipe(WSRTrecipe):
         self.task_definitions = ConfigParser()
         self.task_definitions.read(self.inputs["task_files"])
 
-        self.recipe_path = utilities.string_to_list(
-            self.config.get('DEFAULT', "recipe_directories")
-        )
+        self.recipe_path = [
+            os.path.join(root, 'master') for root in utilities.string_to_list(
+                self.config.get('DEFAULT', "recipe_directories")
+            )
+        ]
 
         if not self.inputs['runtime_directory']:
             self.inputs["runtime_directory"] = self.config.get(
@@ -132,8 +134,10 @@ class LOFARrecipe(WSRTrecipe):
         try:
             tc  = IPclient.TaskClient(self.config.get('cluster', 'task_furl'))
             mec = IPclient.MultiEngineClient(self.config.get('cluster', 'multiengine_furl'))
+        except NoSectionError:
+            self.logger.error("Cluster not definied in configuration")
+            raise ClusterError
         except:
             self.logger.error("Unable to initialise cluster")
-            raise utilities.ClusterError
-        self.logger.info("Cluster initialised")
+            raise ClusterError
         return tc, mec
