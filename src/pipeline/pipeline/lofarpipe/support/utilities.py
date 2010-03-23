@@ -5,9 +5,6 @@ from tempfile import mkstemp
 import os, errno, shutil, subprocess, time, resource
 from itertools import islice, repeat, chain, izip
 
-class ClusterError(Exception):
-    pass
-
 def get_parset(parset):
     p = Parset()
     p.readFromFile(parset)

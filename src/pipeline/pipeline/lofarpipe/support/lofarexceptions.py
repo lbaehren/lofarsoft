@@ -16,3 +16,6 @@ class PipelineQuit(PipelineException):
     subsequent steps and exit cleanly.
     """
     pass
+
+class ClusterError(PipelineException):
+    pass
