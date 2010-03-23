@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, inspect
 import utilities
 from lofarpipe.support.lofarexceptions import PipelineException
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
@@ -44,6 +44,11 @@ class LOFARrecipe(WSRTrecipe):
             dest="start_time",
             help="[Expert use] Pipeline start time"
         )
+
+    @property
+    def __file__(self):
+        import inspect
+        return os.path.abspath(inspect.getsourcefile(self.__class__))
 
     def run_task(self, configblock, datafiles=[]):
         self.logger.info("Running task: %s" % (configblock,))
