@@ -15,11 +15,11 @@ class sip(control):
         # Customise this to the requirements of a specific job.
         with log_time(self.logger):
             datafiles = ['/net/sub3/lse007/data2/L2009_16007/SB0.MS']
-            datafiles = self.run_task("vdsreader")
-            datafiles = self.run_task("ndppp", datafiles)
-            datafiles = self.run_task("bbs", datafiles)
-            self.outputs['images'] = self.run_task("mwimager", datafiles)
-            self.outputs['average'] = self.run_task("collector")
+            datafiles = self.run_task("vdsreader")['data']
+            datafiles = self.run_task("ndppp", datafiles)['data']
+            datafiles = self.run_task("bbs", datafiles)['data']
+            self.outputs['images'] = self.run_task("mwimager", datafiles)['data']
+            self.outputs['average'] = self.run_task("collector")['data']
 
 
 

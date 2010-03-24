@@ -68,10 +68,7 @@ class LOFARrecipe(WSRTrecipe):
                 "%s reports failure (using %s recipe)" % (configblock, recipe)
             )
             raise PipelineRecipeFailed("%s failed", configblock)
-        try:
-            return outputs['data']
-        except:
-            return None
+        return outputs
 
     def go(self):
         # Every recipe needs a job identifier
