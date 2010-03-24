@@ -53,7 +53,12 @@ find_path (PYQT_INCLUDES PyQt4.api
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-set (PYQT_LIBRARIES "")
+## Remove the standard library prefix
+
+set (TMP_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
+set (CMAKE_FIND_LIBRARY_PREFIXES "")
+
+## Search for the libraries
 
 find_library (PYQT_QT_LIBRARY Qt
   PATHS ${lib_locations}
@@ -87,6 +92,13 @@ endif (PYQT_QTDESIGNER_LIBRARY)
 if (PYQT_LIBRARIES)
   list (REVERSE PYQT_LIBRARIES)
 endif (PYQT_LIBRARIES)
+
+## Reinstate the library prefix 
+
+set (CMAKE_FIND_LIBRARY_PREFIXES ${TMP_FIND_LIBRARY_PREFIXES} CACHE STRING
+  "Library prefixes"
+  FORCE
+  )
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
