@@ -189,7 +189,6 @@ set (packages_external
   blas
   cfitsio
   num_util
-  pyrap
   wcslib
   wcstools
   )
