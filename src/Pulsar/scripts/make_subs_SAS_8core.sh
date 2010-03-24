@@ -32,8 +32,6 @@ echo "Starting Time"
 date
 
 num_dir="0 1 2 3 4 5 6 7"
-subband_tot=(248 * 16)
-echo Total number of Subbands is $subband_tot
 
 #Set up the list of files called "DONE" for output checking
 done_list=""
