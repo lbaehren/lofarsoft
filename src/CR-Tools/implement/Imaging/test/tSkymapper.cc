@@ -418,16 +418,12 @@ int test_methods (uint const &blocksize=1024)
 
   \param infile       -- LOPES data set to use as data input
   \param blocksize    -- Number of samples per block of data.
-  \param have_dataset -- Do we have a dataset available to work with? If this is
-         not the case the best we can do is to either use simulated data of blank
-	 input arrays.
 
   \return nofFailedTests --  The number of failed tests encountered within this
           fucntion.
 */
 int test_processing (string const &infile,
-		     uint const &blocksize,
-		     bool have_dataset)
+		     uint const &blocksize)
 {
   cout << "\n[tSkymapper::test_processing]\n" << endl;
   
@@ -585,10 +581,15 @@ int main (int argc,
   nofFailedTests += test_Skymapper ();
   // Test the various methods for accessing internal data
 //   nofFailedTests += test_methods();
-  // Test processing of data
-  nofFailedTests += test_processing (infile,
-				     blocksize,
-				     have_dataset);
+
+  if (have_dataset) {
+    // Test processing of data
+    nofFailedTests += test_processing (infile,
+				       blocksize);
+  } else {
+    std::cerr << "-- No input dataset provided; skipping processing test!"
+	      << std::endl;
+  }
   
   return nofFailedTests;
 }

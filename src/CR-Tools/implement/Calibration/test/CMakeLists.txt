@@ -6,10 +6,6 @@
 ## Set up the list with test program sources
 
 set (tests
-#  ascii_export_baseline
-#  ascii_export_spectra
-  tAverageGain
-  tBaselineGain
   tCalTableInterpolater
   tCalTables
   tPhaseCalibration

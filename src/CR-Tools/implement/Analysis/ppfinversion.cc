@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #include <Analysis/ppfinversion.h>
 #include <Analysis/SubbandID.h>
 
@@ -30,23 +28,28 @@ namespace CR { // Namespace CR -- begin
   //  Construction
   //
   // ============================================================================
-  //Default Constructor
-  
+
+  //_____________________________________________________________________________
+  //                                                                 ppfinversion
+
   ppfinversion::ppfinversion ()
   {;}
   
- // Argumented Constructor
-  
-  ppfinversion::ppfinversion( const Matrix<DComplex>& FTData,
+  //_____________________________________________________________________________
+  //                                                                 ppfinversion
+
+  ppfinversion::ppfinversion (const Matrix<DComplex>& FTData,
                               const Vector<Double>& FIRCoefficients,
-			      const Vector<uint> subBand_IDs ) 
+			      const Vector<uint> subBandIDs) 
   {
-  //Matrix<DComplex> timeseriesdata ;
+    FTData_p          = FTData;
+    FIRCoefficients_p = FIRCoefficients;
+    subBandIDs_p      = subBandIDs;
   }
-  
-  //--------end of Argumented Constructor : ppfinversion------------------------
-  //-----------------------------------------------------------------------------
-  
+
+  //_____________________________________________________________________________
+  //                                                                 ppfinversion
+
   ppfinversion::ppfinversion (ppfinversion const &other)
   {
     copy (other);
@@ -54,32 +57,9 @@ namespace CR { // Namespace CR -- begin
   
   // ============================================================================
   //
-  //  Destruction
-  //
-  // ============================================================================
-  
-  ppfinversion::~ppfinversion ()
-  {
-    destroy();
-  }
-  
-  void ppfinversion::destroy ()
-  {;}
-  
-  // ============================================================================
-  //
   //  Operators
   //
   // ============================================================================
-  
-  ppfinversion& ppfinversion::operator= (ppfinversion const &other)
-  {
-    if (this != &other) {
-      destroy ();
-      copy (other);
-    }
-    return *this;
-  }
   
   void ppfinversion::copy (ppfinversion const &other)
   {;}
@@ -166,92 +146,82 @@ namespace CR { // Namespace CR -- begin
     }
     
     
-   Matrix<DComplex> ppfinversion::setGeneratedSubbands( const Matrix<DComplex>& filteredMatrix,
-                                                        const Vector<uint> subBand_IDs ) 
-						    
-    {
-       try {
-                      
-	    uint nColumns = filteredMatrix.ncolumn() ;
-	   // uint nRows = filteredMatrix.nrow() ;	    	    
-	    
-       	    Matrix <DComplex> generatedSubbands(1024, nColumns,0.0 ) ;
-		    
-	    uint nofelement = subBand_IDs.nelements() ;
-           
-	    for(uint i=0; i< nofelement; i++ ){
-	        		 
-	         uint subbandID = subBand_IDs(i) ;
-		 
-	//	 Vector<DComplex> filtered_vector = filteredMatrix.row(512-subbandID) ;
-                  Vector<DComplex> filtered_vector = (filteredMatrix.row(i)) ;
-
-//		 generatedSubbands.row(512-subbandID) = filtered_vector ;
-		 generatedSubbands.row(subbandID) = filtered_vector ;
+   Matrix<DComplex> 
+   ppfinversion::setGeneratedSubbands( const Matrix<DComplex>& filteredMatrix,
+				       const Vector<uint> subBand_IDs ) 
+     
+   {
+     try {
+       
+       uint nColumns = filteredMatrix.ncolumn() ;
+       // uint nRows = filteredMatrix.nrow() ;	    	    
+       
+       Matrix <DComplex> generatedSubbands(1024, nColumns,0.0 ) ;
+       
+       uint nofelement = subBand_IDs.nelements() ;
+       
+       for(uint i=0; i< nofelement; i++ ){
 	 
-		// if( subbandID< 512 ){	 
-//		 generatedSubbands.row(512+subbandID) = conj(filteredMatrix.row(512-subbandID)) ;
-	   	 generatedSubbands.row(1024-subbandID) = (conj(filteredMatrix.row(i))) ;
-		 
-		// }
+	 uint subbandID = subBand_IDs(i) ;
 	 
-	}
-		 	    
-	    return generatedSubbands ;
-	}
-	   
-        catch( AipsError x ){
-	cerr << " ppfinversion::setGeneratedSubbands " << x.getMesg () << endl ;
-	return Matrix<DComplex> () ;
-	}
-    }
-    	
+	 //	 Vector<DComplex> filtered_vector = filteredMatrix.row(512-subbandID) ;
+	 Vector<DComplex> filtered_vector = (filteredMatrix.row(i)) ;
+	 
+	 //		 generatedSubbands.row(512-subbandID) = filtered_vector ;
+	 generatedSubbands.row(subbandID) = filtered_vector ;
+	 
+	 // if( subbandID< 512 ){	 
+	 //		 generatedSubbands.row(512+subbandID) = conj(filteredMatrix.row(512-subbandID)) ;
+	 generatedSubbands.row(1024-subbandID) = (conj(filteredMatrix.row(i))) ;
+	 
+	 // }
+	 
+       }
+       
+       return generatedSubbands ;
+     }
+     
+     catch( AipsError x ){
+       cerr << " ppfinversion::setGeneratedSubbands " << x.getMesg () << endl ;
+       return Matrix<DComplex> () ;
+     }
+   }
+  
+  
+  
+  Matrix<Double> ppfinversion::DFTinversion ( const Matrix<DComplex>& generatedSubbands,
+					      const Matrix<DComplex>& DFTMatrix,
+					      const Vector<uint> subBand_IDs )
     
-    				    
-    Matrix<Double> ppfinversion::DFTinversion ( const Matrix<DComplex>& generatedSubbands,
-                                                const Matrix<DComplex>& DFTMatrix,
-						const Vector<uint> subBand_IDs )
-
-    {
-      try {
-           uint nofelement = subBand_IDs.nelements() ;
-	   
-	   double base_p = 512/nofelement ;
-// 	   double power_ratio = pow(base_p,0.5) ;
-	   
-           uint nOfColumns = generatedSubbands.ncolumn();
-	   
-  //        uint nOfRows = generatedSubbands.ncolumn();
-          uint nOfRows = DFTMatrix.nrow() ;
-
-           Matrix<Double> DFTinvertedMatrix ( nOfRows, nOfColumns, 0.0 );
-         
-	  // cout << " generated matrix : " << generatedSubbands.row(3) << endl ;
-           
-	   for( uint c= 0; c < nOfColumns; c++ ){
- 		
-	//   cout << c<<" columns is inverting DFT " <<endl ;
-	   
-                for( uint r= 0 ; r < nOfRows ; r++ ){
-		   
-		    //cout << r <<" row is inverting DFT " <<endl ;
-		    	
-                     Double DFTinverted = (base_p)*real( sum ( DFTMatrix.row(r)*generatedSubbands.column(c)) ) ;
-			
-        		  DFTinvertedMatrix( r,c ) = DFTinverted ;
-	          }
-              }
-	      
-	      
-          return DFTinvertedMatrix ;
-          }
-          catch( AipsError x ){
-          cerr << "ppfinversion :: DFTinversion " <<  x.getMesg () << endl ;
-          return Matrix<Double> () ;
-          }
+  {
+    try {
+      uint nofelement = subBand_IDs.nelements() ;
+      double base_p   = 512/nofelement ;
+      uint nOfColumns = generatedSubbands.ncolumn();
+      uint nOfRows    = DFTMatrix.nrow() ;
+      
+      Matrix<Double> DFTinvertedMatrix ( nOfRows, nOfColumns, 0.0 );
+      
+      for( uint c= 0; c < nOfColumns; c++ ){
+	
+	for( uint r= 0 ; r < nOfRows ; r++ ) {
+	  
+	  Double DFTinverted = (base_p)*real( sum ( DFTMatrix.row(r)*generatedSubbands.column(c)) ) ;
+	  
+	  DFTinvertedMatrix( r,c ) = DFTinverted ;
+	}
+      }
+      
+      
+      return DFTinvertedMatrix ;
     }
-
-    
+    catch( AipsError x ){
+      cerr << "ppfinversion :: DFTinversion " <<  x.getMesg () << endl ;
+      return Matrix<Double> () ;
+    }
+  }
+  
+  
     Vector<Double> ppfinversion::FIR_inversion( const Vector<Double>& FIRCoeff_inv,
                                	                const Matrix<DComplex>& FTData,
 						const Vector<uint> subBand_IDs ) 

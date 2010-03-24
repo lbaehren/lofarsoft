@@ -13,11 +13,9 @@
 
 set (tests
   tData
-  tITSMetadata
   tLopesEvent
   tLopesEventIn
   tNDABeam
-  tObservationData
   tTIM40Header
   )
 

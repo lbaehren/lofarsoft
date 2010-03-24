@@ -467,15 +467,14 @@ namespace CR { // Namespace CR -- begin
   
   void test_showGeomPhase (CR::GeomPhase &phase,
 			   int nofSkyPositions,
-			   int nofDelays,
-			   int nofPhases)
+			   int nofDelays)
   {
     /* Display the parameters of the underlying GeomDelay object */
     test_showGeomDelay (phase,
 			nofSkyPositions,
 			nofDelays);
     
-    /* Display frequency values */
+    // Display frequency values __________________
     {
       Vector<double> freq = phase.frequencies();
       //
@@ -486,8 +485,8 @@ namespace CR { // Namespace CR -- begin
 	   << freq(2) << " "
 	   << freq(3) << " .. ]" << endl;
     }
-    
-    // display geometrical phases
+
+    // Display geometrical phases ________________
     {
       Cube<double> phases = phase.phases();
       IPosition shape     = phases.shape();   // [freq,ant,sky]
@@ -513,14 +512,12 @@ namespace CR { // Namespace CR -- begin
   
   void test_showGeomWeight (CR::GeomWeight &weight,
 			    int nofSkyPositions,
-			    int nofDelays,
-			    int nofPhases)
+			    int nofDelays)
   {
     /* Display the parameters of the underlying GeomPhase object */
     test_showGeomPhase (weight,
 			nofSkyPositions,
-			nofDelays,
-			nofPhases);
+			nofDelays);
     
     // display geometrical weights
     {

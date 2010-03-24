@@ -612,6 +612,72 @@ endif (HAVE_BLITZ)
 
 ## =============================================================================
 ##
+##  Link libraries
+##
+## =============================================================================
+
+if (DAL_LIBRARIES)
+  list (APPEND cr_link_libraries ${DAL_LIBRARIES})
+endif (DAL_LIBRARIES)
+
+if (CASA_LIBRARIES)
+  list (APPEND cr_link_libraries ${CASA_LIBRARIES})
+endif (CASA_LIBRARIES)
+
+if (HDF5_LIBRARIES)
+  list (APPEND cr_link_libraries ${HDF5_LIBRARIES})
+endif (HDF5_LIBRARIES)
+
+if (GFORTRAN_LIBRARIES)
+  list (APPEND cr_link_libraries ${GFORTRAN_LIBRARIES})
+endif (GFORTRAN_LIBRARIES)
+
+if (LAPACK_LIBRARIES)
+  list (APPEND cr_link_libraries ${LAPACK_LIBRARIES})
+endif (LAPACK_LIBRARIES)
+
+if (CFITSIO_LIBRARIES)
+  list (APPEND cr_link_libraries ${CFITSIO_LIBRARIES})
+endif (CFITSIO_LIBRARIES)
+
+if (WCSLIB_LIBRARIES)
+  list (APPEND cr_link_libraries ${WCSLIB_LIBRARIES})
+endif (WCSLIB_LIBRARIES)
+
+if (X11_LIBRARIES)
+  list (APPEND cr_link_libraries ${X11_LIBRARIES})
+endif (X11_LIBRARIES)
+
+if (PGPLOT_LIBRARIES)
+  list (APPEND cr_link_libraries ${PGPLOT_LIBRARIES})
+endif (PGPLOT_LIBRARIES)
+
+if (PLPLOT_LIBRARIES)
+  list (APPEND cr_link_libraries ${PLPLOT_LIBRARIES})
+endif (PLPLOT_LIBRARIES)
+
+if (PNG_LIBRARIES)
+  list (APPEND cr_link_libraries ${PNG_LIBRARIES})
+endif (PNG_LIBRARIES)
+
+if (FFTW3_LIBRARIES)
+  list (APPEND cr_link_libraries ${FFTW3_LIBRARIES})
+endif (FFTW3_LIBRARIES)
+
+if (HAVE_LIBUTIL)
+  list (APPEND cr_link_libraries ${HAVE_LIBUTIL})
+endif (HAVE_LIBUTIL)
+
+if (HAVE_LIBM)
+  list (APPEND cr_link_libraries ${HAVE_LIBM})
+endif (HAVE_LIBM)
+
+if (HAVE_LIBZ)
+  list (APPEND cr_link_libraries ${HAVE_LIBZ})
+endif (HAVE_LIBZ)
+
+## =============================================================================
+##
 ##  Configuration for the subdirectories
 ##
 ## =============================================================================

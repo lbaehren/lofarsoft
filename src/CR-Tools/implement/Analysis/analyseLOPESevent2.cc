@@ -78,8 +78,11 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
 
   void analyseLOPESevent2::summary (std::ostream &os)
-  {;}
-
+  {
+    os << "[analyseLOPESevent2] Summary of internal parameters" << std::endl;
+    os << "-- Lateral SNR cut  = " << lateralSNRcut  << std::endl;
+    os << "-- Lateral time cut = " << lateralTimeCut << std::endl;
+  }
 
   // ============================================================================
   //

@@ -48,9 +48,9 @@
 
 // CR-Tools header files
 #include <Coordinates/SkymapCoordinate.h>
-#include <Data/ObservationData.h>
 #include <Imaging/Beamformer.h>
 #include <IO/DataReader.h>
+#include <IO/ObservationData.h>
 
 using casa::Matrix;
 using casa::String;

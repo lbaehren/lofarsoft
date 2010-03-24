@@ -72,7 +72,10 @@ const double pulseStart = -4e-6;
 const int upsamplingExponent = 6;
 const int NnoiseIntervals = 20; // number of noise intervals (do not use more than 20)
 
-int main (int argc, char *argv[])
+//_______________________________________________________________________________
+//                                                                           main
+
+int main ()
 {
   try {
     cout << "\nStarting tcheckNoiseInfluence.\n" << endl;

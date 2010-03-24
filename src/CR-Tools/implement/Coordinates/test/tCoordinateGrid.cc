@@ -87,65 +87,8 @@ void setParameters (Vector<Int>& shape,
   units(2) = "m";
 }
 
-// =============================================================================
-
-/*!
-  \brief Check the coordinates of the generated grid
-  
-  \param shape     - Shape of the coordinate grid, i.e. number of grid nodes
-                      along each coordinate axis.
-  \param center    - Coordinates of the center of the grid.
-  \param increment - Coordinate increment between two subsequent grid nodes
-                     along a coordinate axis.
-  \param units     - Physical units associated with each coordinate axis.
-*/
-int test_gridding (Vector<Int>& shape,
-		   Vector<Double>& center,
-		   Vector<Double>& increment,
-		   Vector<String>& units)
-{
-  cout << "\n[tCoordinateGrid::test_gridding]\n" << endl;
-
-  int nofFailedTests (0);
-  Vector<Int> pos (shape.nelements(),0);
-  Int naxes (shape.nelements());
-  Int nelem (1);
-  
-  shape = 3;
-
-  try {
-    for (int i=0; i<naxes; i++) {
-      nelem *= shape(i);
-    }
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
-  }
-
-  try {
-    pos(0) = -1;    
-    for (int m=0; m<nelem; m++) {
-      // increment the last element in the position vector
-      pos(0) += 1;
-      // go through the axes and check if we are within the axis shape
-      for (int n=0; n<naxes-1; n++) {
-	// check if we're within the range of this axis
-	if (pos(n) == shape(n)) {
-	  pos(n) = 0;
-	  pos(n+1) += 1;
-	}
-      }
-      cout << "\t" << m << "\t" << pos << endl;
-    }
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
-  }
-
-  return nofFailedTests;
-}
-
-// =============================================================================
+//_______________________________________________________________________________
+//                                                                 show_variables
 
 /*!
   \brief Show the parameters of the coordinate grid
@@ -161,7 +104,8 @@ void show_variables (CoordinateGrid& cg)
   cout << " - Use limits? : " << cg.useLimits() << endl;
 }
 
-// =============================================================================
+//_______________________________________________________________________________
+//                                                            test_CoordinateGrid
 
 /*!
   \brief Test constructors
@@ -423,14 +367,6 @@ int main ()
   Vector<Double> increment;
   Vector<Int> shape;
   Vector<String> units;
-
-
-  // Test generation of grid coordinates
-  {
-    setParameters (shape, center, increment, units);
-    //
-    nofFailedTests += test_gridding (shape, center, increment, units);
-  }
 
   // Testing constructors
   {

@@ -330,12 +330,10 @@ namespace CR { // Namespace CR -- begin
     \param phase -- GeomPhase object of which to display internal parameters
     \param nofSkyPositions -- nof. sky positions to be displayed
     \param nofDelays -- nof. geometrical delays for which to display the values
-    \param nofPhases -- nof. geometrical phases for which to display the values
   */
   void test_showGeomPhase (CR::GeomPhase &phase,
 			   int nofSkyPositions=4,
-			   int nofDelays=4,
-			   int nofPhases=4);
+			   int nofDelays=4);
   
   /*!
     \brief Show internal parameters of a GeomWeight object
@@ -343,12 +341,10 @@ namespace CR { // Namespace CR -- begin
     \param weight -- GeomWeight object of which to display internal parameters
     \param nofSkyPositions -- nof. sky positions to be displayed
     \param nofDelays  -- nof. geometrical delays for which to display the values
-    \param nofPhases  -- nof. geometrical phases for which to display the values
   */
   void test_showGeomWeight (CR::GeomWeight &weight,
 			    int nofSkyPositions=4,
-			    int nofDelays=4,
-			    int nofPhases=4);
+			    int nofDelays=4);
   
 } // Namespace CR -- end
 

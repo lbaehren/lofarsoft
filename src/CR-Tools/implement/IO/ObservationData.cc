@@ -18,9 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$ */
-
-#include <Data/ObservationData.h>
+#include <IO/ObservationData.h>
 #include <Coordinates/MConversions.h>
 
 using std::cerr;

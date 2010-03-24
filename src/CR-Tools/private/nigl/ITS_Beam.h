@@ -27,7 +27,7 @@
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>
-#include <Data/ITSMetadata.h>
+#include <IO/ITSMetadata.h>
 #include <IO/DataReader.h>
 #include <Utilities/StringTools.h>
 

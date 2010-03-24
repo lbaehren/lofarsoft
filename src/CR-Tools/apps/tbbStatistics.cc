@@ -107,7 +107,8 @@ bool export2fits (casa::Matrix<double> const &spectrum,
   fitsfile *fptr;
   
   /* Provide some basic feedback before starting export of data */
-  cout << "[tbbStatistics::export2fits]"               << endl;
+  cout << "[tbbStatistics::export2fits]"                << endl;
+  cout << "-- Blocksize         = " << blocksize        << endl;
   cout << "-- Output file       = " << outfile          << endl;
   cout << "-- Dynamic spectrum  = " << spectrum.shape() << endl;
   cout << "-- nof. image pixels = " << nelements        << endl;

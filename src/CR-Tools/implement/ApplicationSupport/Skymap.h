@@ -56,7 +56,7 @@ using namespace std;
 // custom
 #include <ApplicationSupport/Beamformer.h>
 #include <ApplicationSupport/DataFrequency.h>
-#include <Data/ObservationData.h>
+#include <IO/ObservationData.h>
 #include <Imaging/SkymapGrid.h>
 #include <Imaging/SkymapQuantity.h>
 #include <Math/Transforms.h>

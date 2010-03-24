@@ -122,15 +122,9 @@ namespace CR { // Namespace CR -- begin
     
   public:
     
-    // =========================================================================
-    //
-    //  Construction
-    //
-    // =========================================================================
-    
-    /*!
-      \brief Default constructor without argument
-    */
+    // === Construction =========================================================
+
+    //! Default constructor without argument
     ppfimplement ();
     
     /*!
@@ -159,22 +153,12 @@ namespace CR { // Namespace CR -- begin
     */
     ppfimplement (ppfimplement const &other);
     
-    // =========================================================================
-    //
-    //  Destruction
-    //
-    // =========================================================================
+    // === Destruction ==========================================================
     
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     virtual  ~ppfimplement ();
     
-    // =========================================================================
-    //
-    //  Operators
-    //
-    // =========================================================================
+    // === Operators ============================================================
     
     /*!
       \brief Overloading of the copy operator
@@ -182,8 +166,8 @@ namespace CR { // Namespace CR -- begin
       \param other -- Another ppfimplement object from which to make a copy.
     */
     ppfimplement& operator= (ppfimplement const &other); 
-    
-    // --------------------------------------------------------------- Parameters
+
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class

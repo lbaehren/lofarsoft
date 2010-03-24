@@ -61,7 +61,7 @@
 #include <Imaging/Beamforming.h>
 #include <IO/DataReader.h>
 #include <Math.h>
-#include <Data/ObservationData.h>
+#include <IO/ObservationData.h>
 #include <Utilities/StringTools.h>
 #include <Utilities/ProgressBar.h>
 

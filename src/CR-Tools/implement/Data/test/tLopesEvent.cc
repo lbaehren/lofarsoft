@@ -389,57 +389,8 @@ int test_DataReader (string const &name,
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
-
-int test_dataLoops (string const &name,
-		    uint const &blocksize)
-{
-  cout << "\n[test_dataLoops]\n" << endl;
-
-  int nofFailedTests (0);
-  int blocknum (500), filenum (35);       // change this for testing
-  Vector<String> filenames(filenum);
-  ofstream outfile;
-  IPosition shape;
-
-  DataReader *dr;
-  LopesEvent *le;
-
-//  le = new LopesEvent (name,blocksize);
-//  dr = le;
-
-  filenames(0) = "/home/anigl/data/lopesgui/lopesnigl/eventfiles/2006.12.02.00:01:00.678.event";
-  filenames(1) = "/home/anigl/data/lopesgui/lopesnigl/eventfiles/2006.12.02.00:05:47.720.event";
-  filenames(2) = "/home/anigl/data/lopesgui/lopesnigl/eventfiles/2006.12.02.00:07:58.043.event";
-  for (int filen(3); filen<filenum; filen++) {filenames(filen) = filenames(0);}
-  filenames(30) = "/home/anigl/data/lopesgui/lopesnigl/eventfiles/2006.12.02.00:07:58.043.event";
-  
-  for (int filen(0); filen<filenum; filen++) {
-    //DataReader *dr
-    //LopesEvent *
-    le = new LopesEvent (filenames(filen),256);
-    dr = le;
-    show_LopesEvent (*le);
-    for (int blockn(0); blockn<blocknum; blockn++) {
-      // read the data
-      Matrix<Double> fx (dr->fx());
-      // provide some test output
-      cout << blockn << "\t"
-        << filen << "\t"
-        << dr->block() << "\t"
-        << dr->stride() << "\t"
-        //<< dr->blocksize() << "\t"
-        //<< dr->selectedAntennas() 
-        << endl;
-      dr->nextBlock();
-    }
-    //delete[] dr, le;
-  }
-  
-  return nofFailedTests;
-}
-
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                           main
 
 int main (int argc,
 	  char *argv[])
@@ -455,29 +406,16 @@ int main (int argc,
     filename = argv[1];
   }
 
-
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_LopesEvent (filename, blocksize);
-  }
-
+  nofFailedTests += test_LopesEvent (filename, blocksize);
+  
   // Test reading of header
-  {
-    nofFailedTests += test_Header (filename.c_str());
-  }
-
+  nofFailedTests += test_Header (filename.c_str());
+  
   // Test reading of data
-  {
-    nofFailedTests += test_Data (filename.c_str());
-  }
-
-  {
-    nofFailedTests += test_DataReader (filename, blocksize);
-  }
-
-//   {
-//     nofFailedTests += test_dataLoops (filename, blocksize);
-//   }
-
+  nofFailedTests += test_Data (filename.c_str());
+  
+  nofFailedTests += test_DataReader (filename, blocksize);
+  
   return nofFailedTests;
 }

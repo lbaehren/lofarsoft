@@ -84,22 +84,24 @@ namespace CR { // Namespace CR -- begin
   */  
   class SimplePlot {
     
+    //! Default character height
     Int ppCharacterHeight;
+    //! Default line width
     Int ppLineWidth;
     
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
     //! Default constructor
     SimplePlot ();
         
-    // -------------------------------------------------------------- Destruction
+    // === Destruction ==========================================================
 
     //! Destructor
     ~SimplePlot ();
         
-    // --------------------------------------------------------------- Parameters
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class
@@ -118,7 +120,7 @@ namespace CR { // Namespace CR -- begin
     //! Provide a summary of the internal status
     void summary (std::ostream &os);    
 
-    // ------------------------------------------------------------------ Methods
+    // === Methods ==============================================================
     
 
     /*!

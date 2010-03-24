@@ -18,12 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $$ */
-
 /*!
   \file tBaselineGain.cc
 
-  \ingroup Calibration
+  \ingroup CR
   
   \brief A collection of tests for the BaselineGain class
 

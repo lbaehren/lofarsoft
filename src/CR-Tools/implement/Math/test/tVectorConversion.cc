@@ -22,10 +22,6 @@
 
 #include <Math/VectorConversion.h>
 
-#ifdef HAVE_BLITZ
-#include <blitz/array.h>
-#endif
-
 #ifdef HAVE_CASA
 #include <casa/aips.h>
 #include <casa/Arrays.h>
@@ -74,17 +70,6 @@ void show_conversion (std::vector<double> const &a,
   cout << "[" << b[0] << "," << b[1] << "," << b[2] << "]";
   cout << endl;
 }
-
-#ifdef HAVE_BLITZ
-void show_conversion (blitz::Array<double,1> const &a,
-		      blitz::Array<double,1> const &b)
-{
-  cout << "[" << a(0) << "," << a(1) << "," << a(2) << "]";
-  cout << "  ->  ";
-  cout << "[" << b(0) << "," << b(1) << "," << b(2) << "]";
-  cout << endl;
-}
-#endif
 
 // -----------------------------------------------------------------------------
 
@@ -405,29 +390,25 @@ int test_Cartesian2Other ()
     cartesian[0] = 1.0;
     cartesian[1] = 0.0;
     status = CR::Cartesian2NorthEastHeight (other,
-				      cartesian,
-				      true);
+					    cartesian);
     show_conversion (cartesian,other);
-
+    
     cartesian[0] = 0.0;
     cartesian[1] = 1.0; 
     status = CR::Cartesian2NorthEastHeight (other,
-				      cartesian,
-				      true);
+					    cartesian);
     show_conversion (cartesian,other);
-
+    
     cartesian[0] = -1.0;
     cartesian[1] = 0.0; 
     status = CR::Cartesian2NorthEastHeight (other,
-				      cartesian,
-				      true);
+					    cartesian);
     show_conversion (cartesian,other);
     //
     cartesian[0] = 0.0;
     cartesian[1] = -1.0; 
     status = CR::Cartesian2NorthEastHeight (other,
-				      cartesian,
-				      true);
+					    cartesian);
     show_conversion (cartesian,other);
   } catch (std::string message) {
     std::cerr << message << endl;

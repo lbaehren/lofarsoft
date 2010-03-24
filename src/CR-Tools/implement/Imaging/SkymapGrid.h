@@ -45,7 +45,7 @@
 #include <measures/Measures/MeasRef.h>
 #include <measures/Measures/MeasTable.h>
 
-#include <Data/ObservationData.h>
+#include <IO/ObservationData.h>
 
 using casa::AipsError;
 using casa::Coordinate;

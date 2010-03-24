@@ -28,7 +28,7 @@
 #include <Coordinates/SpatialCoordinate.h>
 #include <Coordinates/TimeFreqCoordinate.h>
 #include <Coordinates/SkymapCoordinate.h>
-#include <Data/ObservationData.h>
+#include <IO/ObservationData.h>
 #include <Imaging/Beamformer.h>
 #include <Math/VectorConversion.h>
 

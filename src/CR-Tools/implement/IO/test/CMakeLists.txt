@@ -2,41 +2,33 @@
 ## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
-## -----------------------------------------------------------------------------
-## Set up the list with test program sources
+##_______________________________________________________________________________
+##                                                           List of source files
 
-set (tests
-  tApplyInstrumentEffects
-  tDataBlockSettings
-  tDataIterator
-  tDataReader
-  tFFTServer
-  tgenTVSpec
-  tImportAntenna
-  tImportSimulation
-  tFalckeGorhamGalacticNoise
-  tLogfileName
-  tsimulation2event
-  tSimulation2fftMatrix
-  ttoLOPESgrid
-  tTSmatrix2Event
-  tRawSubbandIn
-  ttbbctlIn
-  )
+file (GLOB tests_IO *.cc)
 
-if (HAVE_HDF5)
-  list (APPEND tests tH5ImportConfig)
-endif (HAVE_HDF5)
+if (NOT HAVE_CASACORE OR NOT DAL_LIBRARIES OR NOT HDF5_LIBRARIES)
+  list (REMOVE_ITEM tests_IO ${CURRENT_SOURCE_DIR}/LOFAR_TBB.cc)
+endif (NOT HAVE_CASACORE OR NOT DAL_LIBRARIES OR NOT HDF5_LIBRARIES)
 
-## -----------------------------------------------------------------------------
-## Build the test programs
+##_______________________________________________________________________________
+##                                                     Build/Install instructions
 
-foreach (src ${tests})
-  ## build executable
-  add_executable (${src} ${src}.cc)
-  target_link_libraries (${src} cr)
-  ## testing
-  add_test (${src} ${src})
+foreach (src ${tests_IO})
+  ## get the name of the file without the extension
+  get_filename_component (src ${src} NAME_WE)
+  ## compiler instructions
+  add_executable(${src} ${src}.cc)
+  ## linker instructions
+  target_link_libraries (${src}
+    cr
+    ${cr_link_libraries}
+    )
+  ## installation instructions
+  install (TARGETS ${src}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    )
 endforeach (src)
 
 ##_______________________________________________________________________________
@@ -57,48 +49,45 @@ if (dataset_tbb)
   
 endif (dataset_tbb)
 
-##____________________________________________________________________
-## Test working with LOPES example dataset
+##_______________________________________________________________________________
+##                                                           Testing instructions
 
-foreach (src tUpSampledDR)
-  ## compiler instructions
-  add_executable (${src} ${src}.cc)
-  ## linker instructions
-  target_link_libraries (${src} cr)
-  ## testing
-  if (dataset_lopes_example)
-    add_test (${src} ${src} ${dataset_lopes_example})
-  else (dataset_lopes_example)
-    add_test (${src} ${src})
-  endif (dataset_lopes_example)
-endforeach (src)
-
-##____________________________________________________________________
-##                                                          tLOFAR_TBB
-
-if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES)
-  
-  ## compiler instructions
-  add_executable (tLOFAR_TBB tLOFAR_TBB.cc)
-  ## linker instructions
-  target_link_libraries (tLOFAR_TBB
-    cr
-    ${HAVE_LIBZ}
-    ${DAL_LIBRARIES}
-    ${CASA_LIBRARIES}
-    ${HDF5_LIBRARIES}
+foreach (test
+    tApplyInstrumentEffects
+    tDataBlockSettings
+    tDataIterator
+    tDataReader
+    tFFTServer
+    tFalckeGorhamGalacticNoise
+    tITSMetadata
+    tImportAntenna
+    tImportSimulation
+    tLogfileName
+    tObservationData
+    tRawSubbandIn
+    tSimulation2fftMatrix
+    tTSmatrix2Event
+    tgenTVSpec
+    tsimulation2event
+    ttbbctlIn
+    ttoLOPESgrid
     )
-  ## testing
-  if (dataset_tbb)
-    add_test (tLOFAR_TBB ${BASH_EXCUTABLE} tLOFAR_TBB.sh)
-  else (dataset_tbb)
-    add_test (tLOFAR_TBB tLOFAR_TBB)
-  endif (dataset_tbb)
-  ## installation
-  list (APPEND tests tLOFAR_TBB)
-  
-endif (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES)
+  add_test (${test} ${test})
+endforeach (test)
 
+## Tests which need additional input
+    
+if (dataset_lopes_example)
+  add_test (tUpSampledDR tUpSampledDR ${dataset_lopes_example})
+else (dataset_lopes_example)
+  add_test (tUpSampledDR tUpSampledDR)
+endif (dataset_lopes_example)
+
+if (dataset_tbb)
+  add_test (tLOFAR_TBB ${BASH_EXCUTABLE} tLOFAR_TBB.sh)
+else (dataset_tbb)
+  add_test (tLOFAR_TBB tLOFAR_TBB)
+endif (dataset_tbb)
 
 ## -----------------------------------------------------------------------------
 ## Installation

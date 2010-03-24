@@ -69,7 +69,9 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   void CRflaggingPlugin::summary (std::ostream &os)
-  {;}
+  {
+    os << "[CRflaggingPlugin] Summary of object properties" << std::endl;
+  }
   
   // ============================================================================
   //

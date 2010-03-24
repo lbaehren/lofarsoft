@@ -106,35 +106,32 @@ namespace CR { // Namespace CR -- begin
   */  
   class ppfinversion {
     
-  public:
-   
-   // ------------------------------------------------------------- Construction
+    casa::Matrix<DComplex> FTData_p;
+    casa::Vector<Double> FIRCoefficients_p;
+    casa::Vector<uint> subBandIDs_p;
     
-    /*!
-      \brief Default constructor without arguement
-    */
+  public:
+    
+   // === Construction ==========================================================
+
+    //! Default constructor
     ppfinversion ();
     
     /*!
-     \brief arguemented constructor
-     
-     sets the fourier transformed signal back to the time domain by inverting the processing of polyphase filter banks.
-     
-     \param    FTData             --  a matrix of fourier transformed data, in which number of rows define according to
-                                      the number of subbands available, and number of columns is the number of samples
-			              per subband.
-				      
-     \param  samplingFreq         -- sampling frequency with which data is sampled.
-			    
-     \param   subband_frequencies -- a vector of initial frequencies of all subbands on which station level processing is done.
-			    
-     \param  FIRCoefficients      --  A vector of FIR coefficients of size 1024 X 16 = 16384
-			    
+      \brief Argumented constructor
+      
+      Set the fourier transformed signal back to the time domain by inverting the
+      processing of polyphase filter banks.
+      
+      \param FTData -- a matrix of fourier transformed data, in which number of
+             rows define according to the number of subbands available, and number
+	     of columns is the number of samples per subband.			      
+      \param FIRCoefficients -- A vector of FIR coefficients of size 1024 X 16 = 16384
+      \param subBandIDs -- Identifier of the sub-bands.
     */
-    
     ppfinversion( const Matrix<DComplex>& FTData,
                   const Vector<Double>& FIRCoefficients,
-		  const Vector<uint> subBand_IDs ) ;
+		  const Vector<uint> subBandIDs ) ;
     
     /*!
     
@@ -145,23 +142,7 @@ namespace CR { // Namespace CR -- begin
     */
     ppfinversion (ppfinversion const &other);
     
-    // -------------------------------------------------------------- Destruction
-
-    /*!
-      \brief Destructor
-    */
-    ~ppfinversion ();
-    
-    // ---------------------------------------------------------------- Operators
-    
-    /*!
-      \brief Overloading of the copy operator
-      
-      \param other -- Another ppfinversion object from which to make a copy.
-    */
-    ppfinversion& operator= (ppfinversion const &other); 
-    
-    // --------------------------------------------------------------- Parameters
+    // === Parameters ===========================================================
     
     /*!
       \brief Get the name of the class
@@ -177,9 +158,8 @@ namespace CR { // Namespace CR -- begin
     */
     void summary ();    
 
-    // ---------------------------------------Computational Methods
+    // === Computational Methods ================================================
 
-   
     /*!
     \brief set the FIR coefficient vector into the marix of dimension 1024 X 16
     
@@ -270,12 +250,7 @@ namespace CR { // Namespace CR -- begin
       \brief Unconditional copying
     */
     void copy (ppfinversion const &other);
-    
-    /*!
-      \brief Unconditional deletion 
-    */
-    void destroy(void);
-    
+        
   };
   
 } // Namespace CR -- end

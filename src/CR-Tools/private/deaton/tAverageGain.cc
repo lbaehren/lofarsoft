@@ -18,14 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$ */
-
 #include <Calibration/AverageGain.h>
 
 /*!
   \file tAverageGain.cc
   
-  \ingroup Calibration
+  \ingroup CR
   
   \brief A collection of tests for AverageGain
   
@@ -146,7 +144,7 @@ Bool test_AverageGain()
   
   \return ok -- Status of the test routine.
 */
-Bool stresstest_addBlock( AverageGain& average )
+Bool stresstest_addBlock (AverageGain &average)
 {
   Bool ok ( True );
   cout << "[#] addBlock stresstest (should return error)" << endl;

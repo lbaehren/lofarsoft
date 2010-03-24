@@ -24,7 +24,7 @@
 /* $Id$*/
 
 #include <fstream>
-#include <Data/ITSMetadata.h>
+#include <IO/ITSMetadata.h>
 
 // ==============================================================================
 //

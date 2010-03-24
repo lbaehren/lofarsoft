@@ -752,8 +752,7 @@ int test_processing ()
 //_______________________________________________________________________________
 //                                                                           main
 
-int main (int argc,
-          char *argv[])
+int main ()
 {
   int nofFailedTests (0);
   uint blocksize (1024);

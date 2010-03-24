@@ -23,12 +23,13 @@
 
 /* $Id$*/
 
-#include <Data/ITSMetadata.h>
+#include <IO/ITSMetadata.h>
 
 /*!
   \file tITSMetadata.cc
 
-  \ingroup CR_Data
+  \ingroup CR
+  \ingroup IO
   
   \brief A collection of test routines for ITSMetadata
  

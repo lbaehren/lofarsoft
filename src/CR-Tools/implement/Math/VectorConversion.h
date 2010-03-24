@@ -37,10 +37,6 @@
 #include <casa/Exceptions/Error.h>
 #include <measures/Measures.h>
 using casa::uInt;
-#else
-#ifdef HAVE_BLITZ
-#include <blitz/array.h>
-#endif
 #endif
 
 #include <Math/Constants.h>
@@ -412,25 +408,6 @@ namespace CR { // Namespace CR -- begin
 		      casa::Vector<double> &source,
 		      CR::CoordinateType::Types const &sourceCoordinate,
 		      bool const &anglesInDegrees=false);
-#else
-#ifdef HAVE_BLITZ
-  /*!
-    \brief Convert vector from one coordinate system to another
-
-    \retval source -- Vector in the source coordinate system
-    \param targetCoordinate -- CR::CoordinateType of the target coordinate system
-    \param xSource -- Vector in the target coordinate system
-    \param sourceCoordinate -- CR::CoordinateType of the source coordinate system
-    \param anglesInDegrees  -- Are the angles given in units of degrees? If
-                               <i>true</i> angles will be converted to radians
-			       before the conversion.
-  */
-  bool convertVector (blitz::Array<double,1> &target,
-		      CR::CoordinateType::Types const &targetCoordinate,
-		      blitz::Array<double,1> &source,
-		      CR::CoordinateType::Types const &sourceCoordinate,
-		      bool const &anglesInDegrees=false);
-#endif
 #endif
 
   // ============================================================================
@@ -479,9 +456,6 @@ namespace CR { // Namespace CR -- begin
 
   casa::Vector<double> AzEl2Cartesian (const casa::Vector<double>& azel,
 				       bool const &anglesInDegrees=false);  
-#else
-  blitz::Array<double,1> azel2Cartesian (const blitz::Array<double,1>& azel,
-					 bool const &anglesInDegrees=false);
 #endif
   
   /*!
@@ -522,12 +496,6 @@ namespace CR { // Namespace CR -- begin
   bool AzElHeight2Cartesian (casa::Vector<double> &Cartesian,
 			     casa::Vector<double> const &AzElHeight,
 			     bool const &anglesInDegrees=false);
-#else
-#ifdef HAVE_BLITZ
-  bool AzElHeight2Cartesian (blitz::Array<double,1> &Cartesian,
-			     blitz::Array<double,1> const &AzElHeight,
-			     bool const &anglesInDegrees=false);
-#endif
 #endif
 
   /*!
@@ -559,12 +527,6 @@ namespace CR { // Namespace CR -- begin
   bool AzElRadius2Cartesian (casa::Vector<double> &Cartesian,
 			     casa::Vector<double> const &AzElRadius,
 			     bool const &anglesInDegrees=false);
-#else
-#ifdef HAVE_BLITZ
-  bool AzElRadius2Cartesian (blitz::Array<double,1> &Cartesian,
-			     blitz::Array<double,1> const &AzElRadius,
-			     bool const &anglesInDegrees=false);
-#endif
 #endif
 
   /*!
@@ -596,12 +558,6 @@ namespace CR { // Namespace CR -- begin
   bool AzElRadius2Spherical (casa::Vector<double> &Spherical,
 			     casa::Vector<double> const &AzElRadius,
 			     bool const &anglesInDegrees=false);
-#else
-#ifdef HAVE_BLITZ
-  bool AzElRadius2Spherical (blitz::Array<double,1> &Spherical,
-			     blitz::Array<double,1> const &AzElRadius,
-			     bool const &anglesInDegrees=false);
-#endif
 #endif
 
   // ============================================================================
@@ -646,12 +602,6 @@ namespace CR { // Namespace CR -- begin
   bool Cartesian2AzElHeight (casa::Vector<double> &AzElHeight,
 			     casa::Vector<double> const &cartesian,
 			     bool const &anglesInDegrees=false);
-#else  
-#ifdef HAVE_BLITZ
-  bool Cartesian2AzElHeight (blitz::Array<double,1> &AzElHeight,
-			     blitz::Array<double,1> const &cartesian,
-			     bool const &anglesInDegrees=false);
-#endif
 #endif
   
   // ----------------------------------------------------------------------------
@@ -700,12 +650,6 @@ namespace CR { // Namespace CR -- begin
   bool Cartesian2Cylindrical (casa::Vector<double> &cylindrical,
 			      casa::Vector<double> const &cartesian,
 			      bool const &anglesInDegrees=false);
-#else  
-#ifdef HAVE_BLITZ
-  bool Cartesian2Cylindrical (blitz::Array<double,1> &cylindrical,
-			      blitz::Array<double,1> const &cartesian,
-			      bool const &anglesInDegrees=false);
-#endif
 #endif
   
   // ----------------------------------------------------------------------------
@@ -764,23 +708,6 @@ namespace CR { // Namespace CR -- begin
   bool Cartesian2Spherical (casa::Vector<double> &spherical,
 			    casa::Vector<double> const &cartesian,
 			    bool const &anglesInDegrees=false);
-#else
-#ifdef HAVE_BLITZ
-  /*!
-    \brief Conversion from cartesian to spherical coordinates
-
-    \retval spherical -- Vector in spherical coordinates, \f$ (r,\phi,\theta) \f$
-    \param cartesian  -- Vector in cartesian coordinates, \f$ (x,y,z) \f$
-    \param anglesInDegrees -- Are the angles given in units of degrees? If
-                    <i>yes</i> angles will be converted to radians before the 
-		    conversion.
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool Cartesian2Spherical (blitz::Array<double,1> &spherical,
-			    blitz::Array<double,1> const &cartesian,
-			    bool const &anglesInDegrees=false);
-#endif
 #endif
 
   // ----------------------------------------------------------------------------
@@ -819,12 +746,6 @@ namespace CR { // Namespace CR -- begin
   bool Cartesian2AzElRadius (casa::Vector<double> &AzElRadius,
 			     casa::Vector<double> const &cartesian,
 			     bool const &anglesInDegrees=false);
-#else  
-#ifdef HAVE_BLITZ
-  bool Cartesian2AzElRadius (blitz::Array<double,1> &AzElRadius,
-			     blitz::Array<double,1> const &cartesian,
-			     bool const &anglesInDegrees=false);
-#endif
 #endif
 
   // ----------------------------------------------------------------------------
@@ -850,8 +771,8 @@ namespace CR { // Namespace CR -- begin
 					 double &height,
 					 double const &x,
 					 double const &y,
-					 double const &z,
-					 bool const &anglesInDegrees=false) {
+					 double const &z)
+  {
     north  = y;
     east   = x;
     height = z;
@@ -860,8 +781,7 @@ namespace CR { // Namespace CR -- begin
   }
   
   inline bool Cartesian2NorthEastHeight (std::vector<double> &northEastHeight,
-					 std::vector<double> const &cartesian,
-					 bool const &anglesInDegrees=false) {
+					 std::vector<double> const &cartesian) {
     northEastHeight[0] = cartesian[1];
     northEastHeight[1] = cartesian[0];
     northEastHeight[2] = cartesian[2];
@@ -871,26 +791,14 @@ namespace CR { // Namespace CR -- begin
   
 #ifdef HAVE_CASA
   inline bool Cartesian2NorthEastHeight (casa::Vector<double> &northEastHeight,
-					 casa::Vector<double> const &cartesian,
-					 bool const &anglesInDegrees=false) {
+					 casa::Vector<double> const &cartesian)
+  {
     northEastHeight(0) = cartesian(1);
     northEastHeight(1) = cartesian(0);
     northEastHeight(2) = cartesian(2);
     
     return true;  
   }
-#else  
-#ifdef HAVE_BLITZ
-  inline bool Cartesian2NorthEastHeight (blitz::Array<double,1> &northEastHeight,
-					 blitz::Array<double,1> const &cartesian,
-					 bool const &anglesInDegrees=false) {
-    northEastHeight(0) = cartesian(1);
-    northEastHeight(1) = cartesian(0);
-    northEastHeight(2) = cartesian(2);
-    
-    return true;  
-  }
-#endif
 #endif
   
   // ============================================================================
@@ -933,12 +841,6 @@ namespace CR { // Namespace CR -- begin
   bool Cylindrical2Cartesian (casa::Vector<double> &cartesian,
 			      casa::Vector<double> const &cylindrical,
 			      bool const &anglesInDegrees=false);
-#else  
-#ifdef HAVE_BLITZ
-  bool Cylindrical2Cartesian (blitz::Array<double,1> &cartesian,
-			      blitz::Array<double,1> const &cylindrical,
-			      bool const &anglesInDegrees=false);
-#endif
 #endif
 
   // ----------------------------------------------------------------------------
@@ -976,15 +878,6 @@ namespace CR { // Namespace CR -- begin
   bool Cylindrical2Spherical (casa::Vector<double> &spherical,
 			      casa::Vector<double> const &cylindrical,
 			      bool const &anglesInDegrees=false);
-#else  
-#ifdef HAVE_BLITZ
-  /*!
-    \brief Conversion from cylindrical to spherical coordinates
-  */
-  bool Cylindrical2Spherical (blitz::Array<double,1> &spherical,
-			      blitz::Array<double,1> const &cylindrical,
-			      bool const &anglesInDegrees=false);
-#endif
 #endif
   
   // ----------------------------------------------------------------------------
@@ -1024,15 +917,6 @@ namespace CR { // Namespace CR -- begin
   bool Cylindrical2AzElHeight (casa::Vector<double> &azElHeight,
 			       casa::Vector<double> const &cylindrical,
 			       bool const &anglesInDegrees=false);
-#else  
-#ifdef HAVE_BLITZ
-  /*!
-    \brief Conversion from cylindrical to Azimuth-Elevation-Height coordinates
-  */
-  bool Cylindrical2AzElHeight (blitz::Array<double,1> &azElHeight,
-			       blitz::Array<double,1> const &cylindrical,
-			       bool const &anglesInDegrees=false);
-#endif
 #endif
   
   // ----------------------------------------------------------------------------
@@ -1072,15 +956,6 @@ namespace CR { // Namespace CR -- begin
   bool Cylindrical2AzElRadius (casa::Vector<double> &azElRadius,
 			       casa::Vector<double> const &cylindrical,
 			       bool const &anglesInDegrees=false);
-#else  
-#ifdef HAVE_BLITZ
-  /*!
-    \brief Conversion from cylindrical to Azimuth-Elevation-Radius coordinates
-  */
-  bool Cylindrical2AzElRadius (blitz::Array<double,1> &azElRadius,
-			       blitz::Array<double,1> const &cylindrical,
-			       bool const &anglesInDegrees=false);
-#endif
 #endif
   
   // ============================================================================
@@ -1172,13 +1047,6 @@ namespace CR { // Namespace CR -- begin
   bool Spherical2Cartesian (casa::Vector<double> &cartesian,
 			    casa::Vector<double> const &spherical,
 			    bool const &anglesInDegrees=false);
-#else
-#ifdef HAVE_BLITZ
-  bool Spherical2Cartesian (blitz::Array<double,1> &cartesian,
-			    blitz::Array<double,1> const &spherical,
-			    bool const &anglesInDegrees=false);
-
-#endif
 #endif
 
   /*!
@@ -1350,22 +1218,7 @@ namespace CR { // Namespace CR -- begin
   casa::Vector<double> polar2Cartesian (casa::Vector<double> const &polar);
 
 #endif
-  
-  // ============================================================================
-  //
-  //  Conversion using Blitz++ array classes
-  //
-  // ============================================================================
 
-#ifndef HAVE_CASA  
-#ifdef HAVE_BLITZ
-  
-  template <class T>
-    blitz::Array<T,1> polar2Cartesian (blitz::Array<T,1> const &polar);
-
-#endif
-#endif
-  
 } // Namespace CR -- end
 
 #endif /* VECTORCONVERSION_H */

@@ -39,7 +39,7 @@
 #include <measures/Measures/MeasFrame.h>
 
 /* CR-Tools headers */
-#include <Data/ObservationData.h>
+#include <IO/ObservationData.h>
 #include <Coordinates/MConversions.h>
 
 using std::cout;

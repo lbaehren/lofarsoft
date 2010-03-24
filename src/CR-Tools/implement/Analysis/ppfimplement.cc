@@ -39,7 +39,6 @@ namespace CR { // Namespace CR -- begin
   {
     filterRows_p    = 1024;
     filterColumns_p = 16;
-    Vector<Double> signal ;
   }
   
   ppfimplement::ppfimplement (ppfimplement const &other)

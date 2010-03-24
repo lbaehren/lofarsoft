@@ -48,7 +48,7 @@ using namespace std;
 #include <tables/Tables/IncrementalStMan.h>
 
 #include <ApplicationSupport/Glish.h>
-#include <Data/ITSCorrelation.h>
+#include <IO/ITSCorrelation.h>
 #include <ApplicationSupport/DataFrequency.h>
 #include <Math.h>
 #include <ApplicationSupport/ObservationMeta.h>

@@ -24,15 +24,16 @@
 #ifndef ITSCORRELATION_H
 #define ITSCORRELATION_H
 
-#include <Data/ITSMetadata.h>
 #include <IO/DataReader.h>
+#include <IO/ITSMetadata.h>
 
 using CR::DataReader;
 
 /*!
   \class ITSCorrelation
 
-  \ingroup CR_Data
+  \ingroup CR
+  \ingroup IO
 
   \brief Brief description for class ITSCorrelation
 
@@ -65,7 +66,7 @@ class ITSCorrelation : public DataReader {
 
  public:
 
-  // --------------------------------------------------------------- Construction
+  // === Construction ===========================================================
 
   //! Default constructor
   ITSCorrelation ();
@@ -77,15 +78,7 @@ class ITSCorrelation : public DataReader {
   */
   ITSCorrelation (String const &metafile);
 
-  /*!
-    \brief Copy constructor
-
-    \param other -- Another ITSCorrelation object from which to create this new
-                    one.
-  */
-  ITSCorrelation (ITSCorrelation const &other);
-
-  // ---------------------------------------------------------------- Destruction
+  // === Destruction ============================================================
 
   //! Destructor
   ~ITSCorrelation ();

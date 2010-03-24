@@ -72,6 +72,9 @@ int test_Beamformer (uint blocksize=1024,
   cout << "\n[tBeamformer::test_Beamformer]\n" << endl;
 
   int nofFailedTests (0);
+
+  std::cout << "-- Blocksize  = " << blocksize << std::endl;
+  std::cout << "-- FFT length = " << fftLength << std::endl;
   
   cout << "[1] Testing default constructor ..." << endl;
   try {
@@ -604,7 +607,7 @@ int test_coordinates (uint blocksize=512)
 			   false);
     phase.setFrequencies (tf.frequencyValues());
     //
-    CR::test_showGeomPhase(phase,4,4,10);
+    CR::test_showGeomPhase(phase,4,4);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

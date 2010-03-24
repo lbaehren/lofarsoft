@@ -67,9 +67,10 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   void SimplePlot::summary (std::ostream &os)
-  {;}
-  
-  
+  {
+    os << "-- Character height = " << ppCharacterHeight << std::endl;
+    os << "-- Line width       = " << ppLineWidth       << std::endl;
+}
   
   // ============================================================================
   //

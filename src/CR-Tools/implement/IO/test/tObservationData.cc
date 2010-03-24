@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$ */
-
 #include <casa/aips.h>
 #include <casa/string.h>
 #include <casa/Arrays.h>
@@ -28,7 +26,7 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/ArrayMath.h>
 
-#include <Data/ObservationData.h>
+#include <IO/ObservationData.h>
 
 using std::cerr;
 using std::cout;

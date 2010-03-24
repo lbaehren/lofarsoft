@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/ITSCorrelation.h>
+#include <IO/ITSCorrelation.h>
 
 // ==============================================================================
 //
@@ -33,22 +33,16 @@
 //                                                                 ITSCorrelation
 
 ITSCorrelation::ITSCorrelation ()
+  : DataReader ()
 {;}
 
 //_______________________________________________________________________________
 //                                                                 ITSCorrelation
 
 ITSCorrelation::ITSCorrelation (String const &metafile)
+  : DataReader ()
 {
   setMetafile (metafile);
-}
-
-//_______________________________________________________________________________
-//                                                                 ITSCorrelation
-
-ITSCorrelation::ITSCorrelation (ITSCorrelation const &other)
-{
-  copy (other);
 }
 
 // ==============================================================================
