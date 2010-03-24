@@ -1,23 +1,11 @@
 from __future__ import with_statement
 import sys, os
 
-# Local helpers
+import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.ipython import LOFARTask
-import lofarpipe.support.utilities as utilities
 from lofarpipe.support.clusterlogger import clusterlogger
-
-def run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript):
-    # Run on engine to process data with DPPP
-    from lofarrecipe.nodes.dppp import dppp_node
-    return dppp_node(loghost=loghost, logport=logport).run(
-        ms_name,
-        ms_outname,
-        parset,
-        log_location,
-        executable,
-        initscript
-    )
+from lofarpipe.support.lofarnode import run_node
 
 class dppp(LOFARrecipe):
     def __init__(self):
@@ -61,7 +49,7 @@ class dppp(LOFARrecipe):
         tc, mec = self._get_cluster()
         mec.push_function(
             dict(
-                run_dppp=run_dppp,
+                run_dppp=run_node,
                 build_available_list=utilities.build_available_list,
                 clear_available_list=utilities.clear_available_list
             )
@@ -104,6 +92,8 @@ class dppp(LOFARrecipe):
                     task = LOFARTask(
                         "result = run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript)",
                         push=dict(
+                            recipename=self.name,
+                            nodepath=os.path.dirname(self.__file__.replace('master', 'nodes')),
                             ms_name=ms_name,
                             ms_outname=outnames[-1],
                             parset=self.inputs['parset'],

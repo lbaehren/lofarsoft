@@ -21,7 +21,7 @@ log4cplus.appender.FILE.layout=log4cplus::PatternLayout
 log_format = "log4cplus.appender.FILE.layout.ConversionPattern=%x %D{%d-%m-%y %H:%M:%S} %-5p %c{3} - %m [%.25l]%n"
 
 
-class dppp_node(LOFARnode):
+class dppp(LOFARnode):
     def run(self, infile, outfile, parset, log_location, executable, initscript):
         # Time execution of this job
         with log_time(self.logger):
