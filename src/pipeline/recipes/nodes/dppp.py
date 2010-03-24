@@ -4,10 +4,9 @@ from contextlib import closing
 from subprocess import check_call, CalledProcessError
 import os.path, tempfile, shutil
 
-from pipeline.support.lofarnode import LOFARnode
-from pipeline.support.utilities import patch_parset, create_directory, log_time
-from pipeline.support.lofarexceptions import ExecutableMissing
-import pipeline.support.utilities as utilities
+from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.utilities import patch_parset, create_directory, log_time, read_initscript
+from lofarpipe.support.lofarexceptions import ExecutableMissing
 
 log_prop = """
 log4cplus.rootLogger=DEBUG, FILE
@@ -30,7 +29,7 @@ class dppp(LOFARnode):
             # Create output directories and ensure the environment
             # is initialised for DPPP run
             create_directory(log_location)
-            env = utilities.read_initscript(initscript)
+            env = read_initscript(initscript)
 
             # If the input and output filenames are the same, DPPP should not
             # write a new MS, but rather update the existing one in-place.
