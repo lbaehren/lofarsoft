@@ -53,8 +53,6 @@ endif (HAVE_FITSIO_H)
 ## -----------------------------------------------------------------------------
 ## Check for the parts of the library
 
-## [1] core library
-
 FIND_LIBRARY (CFITSIO_CFITSIO_LIBRARY
   NAMES cfitsio
   PATHS ${lib_locations}
@@ -65,28 +63,6 @@ FIND_LIBRARY (CFITSIO_CFITSIO_LIBRARY
 if (CFITSIO_CFITSIO_LIBRARY)
   set (CFITSIO_LIBRARIES ${CFITSIO_CFITSIO_LIBRARY})
 endif (CFITSIO_CFITSIO_LIBRARY)
-
-## [2] math library
-
-#FIND_LIBRARY (CFITSIO_libm
-#  NAMES m
-#  PATHS ${lib_locations}
-#  NO_DEFAULT_PATH
-#)
-
-## [3] file access
-
-#FIND_LIBRARY (CFITSIO_libnsl
-#  NAMES nsl
-#  PATHS ${lib_locations}
-#  NO_DEFAULT_PATH
-#  )
-
-if (CFITSIO_libnsl)
-  list (APPEND CFITSIO_LIBRARIES ${CFITSIO_libnsl})
-else (CFITSIO_libnsl)
-  message (STATUS "Unable to find libnsl.")
-endif (CFITSIO_libnsl)
 
 ## -----------------------------------------------------------------------------
 ## Determine library version
@@ -163,7 +139,6 @@ ENDIF (HAVE_CFITSIO)
 
 MARK_AS_ADVANCED (
   CFITSIO_CFITSIO_LIBRARY
-  CFITSIO_libm
   CFITSIO_INCLUDES
   CFITSIO_LIBRARIES
   CFITSIO_VERSION
