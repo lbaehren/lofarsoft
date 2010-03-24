@@ -113,7 +113,7 @@ class LOFARrecipe(WSRTrecipe):
             except NoOptionError:
                 self.inputs["task_files"] = []
 
-        self.task_definitions = ConfigParser()
+        self.task_definitions = ConfigParser(self.config.defaults())
         self.task_definitions.read(self.inputs["task_files"])
 
         self.recipe_path = [
