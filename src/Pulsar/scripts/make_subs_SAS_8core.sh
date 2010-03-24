@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/ksh -x
 #Convert raw LOFAR data
 #Assumes 16 channels per subband and divides into 8 chunks of 32 subbands
 
@@ -122,7 +122,7 @@ done
 #Create .sub.inf files with par2inf.py
 cp $PARSET ./${OBSID}.parset
 cp ~hessels/default.inf .
-python ~hessels/par2inf.py -S ${PULSAR} -o test -n 31 -r 8 ./${OBSID}.parset
+python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n 31 -r 8 ./${OBSID}.parset
 jj=0
 for ii in `ls test*.inf`
 do
@@ -158,9 +158,14 @@ do
    sleep 15
 done
 
+#Clean up the DONE file
+for ii in $num_dir
+do
+   rm -rf ${STOKES}/"RSP"$ii"/DONE" 
+done
+
 #Make a cumulative plot of the profiles
-###python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8.py
-python ~alexov/plot_profs.py
+python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8.py
 convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf
 rm profiles.ps
 
@@ -185,7 +190,28 @@ date
 for ii in $num_dir
 do
    cd ${location}/${STOKES}/RSP${ii}
-   python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0??? 
+   python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  && touch DONE &
+done
+
+cd ${location}
+
+#Check when all 8 DONE files are available, then all processes have exited
+ii=1
+yy=0
+while [ $ii -ne $yy ]
+do
+   if [ -e $done_list ]
+   then
+      echo "All subdyn tasks have completed!" 
+      yy=1
+   fi
+   sleep 15
+done
+
+#Clean up the DONE file
+for ii in $num_dir
+do
+   rm -rf ${STOKES}/"RSP"$ii"/DONE" 
 done
 
 date_end=`date`
