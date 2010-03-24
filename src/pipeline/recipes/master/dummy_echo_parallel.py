@@ -1,5 +1,6 @@
 from __future__ import with_statement
-import subprocess, sys, os
+import sys, os
+
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
