@@ -116,15 +116,17 @@ chmod 774 * ${STOKES}/RSP*/*
 chgrp pulsar * ${STOKES}/RSP*/*
 mv *.tar.gz *.pdf ${STOKES}
 
+location=`pwd`
 #RFI-Report
 echo "Producing rfi report"
 date
 for ii in 0 1 2 3
 do
-cd RSP{$ii}
-subdyn --saveonly -n `echo $SAMPLES*10 | bc` *.sub0??? 
+cd ${location}/${STOKES}/RSP${ii}
+python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo $SAMPLES*10 | bc` *.sub0??? 
 cd ../
 done
+cd ${location}
 
 echo "End Time"
 date
