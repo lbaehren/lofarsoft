@@ -163,21 +163,29 @@ do
 done
 
 #Make a cumulative plot of the profiles
+echo "Running plot summary script plot_profs8.py"
+date
 python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8.py
 convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf
 rm profiles.ps
 
 #Make a .pdf version of the plots
+echo "Running convert on ps to pdf of the plots"
+date
 for ii in $num_dir
 do
    convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
 done
 
 #Make a tarball of all the plots
+echo "Creating tar file of plots"
+date
 tar cvf ${PULSAR}_${OBSID}_plots.tar *profiles.pdf ${STOKES}/RSP*/*pfd.ps ${STOKES}/RSP*/*pfd.pdf ${STOKES}/RSP*/*pfd.bestprof ${STOKES}/RSP*/*.sub.inf
 gzip ${PULSAR}_${OBSID}_plots.tar
 
 #Change permissions and move files
+echo "Changing permissions of files"
+date
 chmod 774 * ${STOKES}/RSP*/*
 chgrp pulsar * ${STOKES}/RSP*/*
 mv *.tar.gz *.pdf ${STOKES}
