@@ -227,7 +227,7 @@ add_dependencies (matplotlib numpy)
 
 add_dependencies (num_util boost numpy)
 
-add_dependencies (pyrap casacore num_util)
+#add_dependencies (pyrap casacore num_util)
 
 add_dependencies (pyqt sip)
 
