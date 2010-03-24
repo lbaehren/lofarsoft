@@ -1,4 +1,4 @@
-#!/bin/ksh -x
+#!/bin/ksh 
 #Convert raw LOFAR data
 #Assumes 16 channels per subband and divides into 8 chunks of 32 subbands
 
