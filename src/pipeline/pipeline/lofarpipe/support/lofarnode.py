@@ -2,6 +2,11 @@ import platform
 import logging, logging.handlers
 import os
 
+def run_node(*args):
+    import imp
+    control_script = getattr(imp.load_module(recipename, *imp.find_module(recipename, [nodepath])), recipename)
+    return control_script(loghost=loghost, logport=logport).run(*args)
+
 class LOFARnode(object):
     """
     Base class for node jobs called through IPython.

@@ -3,11 +3,7 @@ import subprocess, sys, os
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
-
-def run_dummy_echo(filename, executable):
-    import imp
-    dummy_echo_node = imp.load_module(recipename, *imp.find_module(recipename, [nodepath])).dummy_echo_node
-    return dummy_echo_node(loghost=loghost, logport=logport).run(filename, executable)
+from lofarpipe.support.lofarnode import run_node
 
 class dummy_echo_parallel(LOFARrecipe):
     def __init__(self):
@@ -28,7 +24,7 @@ class dummy_echo_parallel(LOFARrecipe):
         tc, mec = self._get_cluster()
         mec.push_function(
             dict(
-                run_dummy_echo=run_dummy_echo,
+                run_dummy_echo=run_node,
             )
         )
         self.logger.info("Cluster initialised")

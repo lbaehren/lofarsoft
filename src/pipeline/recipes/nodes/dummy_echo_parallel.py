@@ -1,7 +1,7 @@
 import subprocess
 from lofarpipe.support.lofarnode import LOFARnode
 
-class dummy_echo_node(LOFARnode):
+class dummy_echo_parallel(LOFARnode):
     def run(self, filename, executable):
         self.logger.info("Processing %s" % (filename))
         execute = [executable, filename]
