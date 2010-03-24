@@ -59,8 +59,9 @@ class LOFARrecipe(WSRTrecipe):
         inputs = LOFARinput(self.inputs)
         inputs['args'] = datafiles
         inputs.update(self.task_definitions.items(configblock))
-        # This input is not required:
-        del inputs['recipe']
+        # These inputs are never required:
+        for inp in ('recipe', 'recipe_directories', 'lofarroot', 'default_working_directory', 'cwd'):
+            del(inputs[inp])
         outputs = LOFARoutput()
         if self.cook_recipe(recipe, inputs, outputs):
             self.logger.warn(
