@@ -1,5 +1,6 @@
 # Local helpers
 from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.utilities import get_parset
 import lofarpipe.support.utilities as utilities
 
 class vdsreader(LOFARrecipe):
@@ -19,7 +20,7 @@ class vdsreader(LOFARrecipe):
         super(vdsreader, self).go()
 
         try:
-            gvds = utilities.get_parset(self.inputs['gvds'])
+            gvds = get_parset(self.inputs['gvds'])
         except:
             self.logger.error("Unable to read G(V)DS file")
             raise

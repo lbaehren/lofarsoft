@@ -137,4 +137,4 @@ class collector(LOFARrecipe):
         return 0
 
 if __name__ == '__main__':
-    sys.exit(eval(os.path.splitext(os.path.basename(sys.argv[0]))[0])().main())
+    sys.exit(collector().main())

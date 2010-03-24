@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import sys, os, tempfile, glob, shutil, errno, subprocess, itertools
+import sys, os, tempfile, glob, subprocess, itertools
 from contextlib import closing
 from lofarpipe.support.clusterdesc import ClusterDesc
 

@@ -69,11 +69,6 @@ class bbs(LOFARrecipe):
             help="Database name"
         )
         self.optionparser.add_option(
-            '--instrument-db',
-            dest="instrument_db",
-            help="Instrumnet database location"
-        )
-        self.optionparser.add_option(
             '--log',
             dest="log",
             help="Log file"
@@ -159,7 +154,6 @@ class bbs(LOFARrecipe):
             "--db-user", self.inputs['db_user'],
             "--cluster-desc", self.config.get('cluster', 'clusterdesc'),
             "--key", self.inputs['key'],
-#            "--instrument-db", self.inputs['instrument_db'],
             self.inputs['gvds'],
             self.inputs['parset'],
             self.inputs['skymodel'],
