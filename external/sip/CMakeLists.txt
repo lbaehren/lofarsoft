@@ -54,7 +54,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project
 
-  set (sip_version "4.10")
+  set (sip_version "4.10.1")
   set (SIP_DIRECTORY "sip-${sip_version}")
   set (SIP_TAR_ARCHIVE "${SIP_DIRECTORY}.tar.gz")
   set (sip_url "http://www.riverbankcomputing.co.uk/static/Downloads/sip4/${SIP_TAR_ARCHIVE}")
