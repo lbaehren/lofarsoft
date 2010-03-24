@@ -53,6 +53,8 @@ find_path (PYQT_INCLUDES PyQt4.api
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
+set (PYQT_LIBRARIES "")
+
 find_library (PYQT_QT_LIBRARY Qt
   PATHS ${lib_locations}
   PATH_SUFFIXES python${PYTHON_VERSION}/site-packages/PyQt4
@@ -82,7 +84,9 @@ endif (PYQT_QTDESIGNER_LIBRARY)
 
 ## adjust the ordering
 
-list (REVERSE PYQT_LIBRARIES)
+if (PYQT_LIBRARIES)
+  list (REVERSE PYQT_LIBRARIES)
+endif (PYQT_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
