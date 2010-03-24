@@ -2,20 +2,11 @@ from __future__ import with_statement
 import sys, os, tempfile, errno
 import subprocess
 
-# Local helpers
+import lofarpipe.support.utilities as utilities
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.lofarrecipe import LOFARrecipe
-import lofarpipe.support.utilities as utilities
 from lofarpipe.support.clusterlogger import clusterlogger
-
-def make_vds(infile, clusterdesc, outfile, executable):
-    from lofarrecipe.nodes.vdsmaker import makevds_node
-    return makevds_node(loghost=loghost, logport=logport).run(
-        infile,
-        clusterdesc,
-        outfile,
-        executable
-    )
+from lofarpipe.support.lofarnode import run_node
 
 class vdsmaker(LOFARrecipe):
     def __init__(self):
@@ -51,7 +42,7 @@ class vdsmaker(LOFARrecipe):
         tc, mec = self._get_cluster()
         mec.push_function(
             dict(
-                make_vds=make_vds,
+                make_vds=run_node,
                 build_available_list=utilities.build_available_list,
                 clear_available_list=utilities.clear_available_list
             )
@@ -78,6 +69,8 @@ class vdsmaker(LOFARrecipe):
                 task = LOFARTask(
                     "result = make_vds(ms_name, clusterdesc, vds_name, executable)",
                     push=dict(
+                        recipename=self.name,
+                        nodepath=os.path.dirname(self.__file__.replace('master', 'nodes')),
                         ms_name=ms_name,
                         vds_name=vdsnames[-1],
                         clusterdesc=clusterdesc,
@@ -94,8 +87,16 @@ class vdsmaker(LOFARrecipe):
             self.logger.info("Waiting for all makevds tasks to complete")
             tc.barrier(tasks)
 
+        failure = False
         for task in tasks:
-            tc.get_task_result(task)
+            res = tc.get_task_result(task)
+            if res.failure:
+                self.logger.warn("Task %s failed" % (task))
+                self.logger.warn(res)
+                self.logger.warn(res.failure.getTraceback())
+                failure = True
+        if failure:
+            return 1
 
         # Combine VDS files to produce GDS
         self.logger.info("Combining VDS files")

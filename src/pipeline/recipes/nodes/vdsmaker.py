@@ -1,13 +1,12 @@
-# Python standard library
 from __future__ import with_statement
 import os
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
 
-from pipeline.support.lofarexceptions import ExecutableMissing
-from pipeline.support.utilities import create_directory, log_time
-from pipeline.support.lofarnode import LOFARnode
+from lofarpipe.support.lofarexceptions import ExecutableMissing
+from lofarpipe.support.utilities import create_directory, log_time
+from lofarpipe.support.lofarnode import LOFARnode
 
-class makevds_node(LOFARnode):
+class vdsmaker(LOFARnode):
     """
     Make a VDS file for the input MS in a specificed location.
     """
