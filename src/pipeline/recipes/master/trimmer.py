@@ -2,13 +2,6 @@ import sys
 from lofarpipe.support.pyraprunner import pyraprunner
 
 class trimmer(pyraprunner):
-    @staticmethod
-    def remote_function(input, output, start_seconds, end_seconds):
-        from lofarrecipe.nodes.trimmer import trimmer_node
-        return trimmer_node(loghost=loghost, logport=logport).run(
-            input, output, start_seconds, end_seconds
-        )
-
     def __init__(self):
         super(trimmer, self).__init__()
         self.optionparser.add_option(

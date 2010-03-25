@@ -1,10 +1,10 @@
 from __future__ import with_statement
 from pyrap.tables import table
 
-from pipeline.support.lofarnode import LOFARnode
-from pipeline.support.utilities import log_time
+from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.utilities import log_time
 
-class excluder_node(LOFARnode):
+class excluder(LOFARnode):
     """
     Remove data from the given station from the input MS.
     """

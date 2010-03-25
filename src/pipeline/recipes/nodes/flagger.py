@@ -2,10 +2,10 @@ from __future__ import with_statement
 from pyrap.tables import table
 import numpy
 
-from pipeline.support.lofarnode import LOFARnode
-from pipeline.support.utilities import log_time
+from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.utilities import log_time
 
-class flagger_node(LOFARnode):
+class flagger(LOFARnode):
     """
     Flag out CORRECTED_DATA greater than some maximum value.
     """

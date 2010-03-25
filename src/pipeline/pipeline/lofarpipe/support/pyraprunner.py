@@ -1,25 +1,16 @@
-### NOTE: Not yet converted to new-style framework.
 from __future__ import with_statement
 import sys
 
-from pipeline.support.ipython import LOFARTask
-
-# Local helpers
-from pipeline.support.lofarrecipe import LOFARrecipe
-import pipeline.support.utilities as utilities
-from pipeline.support.clusterlogger import clusterlogger
+import lofarpipe.support.utilities as utilities
+from lofarpipe.support.ipython import LOFARTask
+from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.clusterlogger import clusterlogger
+from lofarpipe.support.lofarnode import run_node
 
 class pyraprunner(LOFARrecipe):
     """
     Provides all the basic infrastructure for applying a pyrap-based filter to
     code on the cluster, distributed using an IPython task client.
-
-    Should be subclassed and customised to requirements: additional arguments
-    may be added to __init__() by extending self.optionparser. A function in
-    the local namespace called remote_function() will be pushed to the
-    cluster, and by default called as remote_function(inputname, outputname);
-    any additional arguments returned by self._generate_arguments() will be
-    added to this list.
     """
     def __init__(self):
         super(pyraprunner, self).__init__()
@@ -41,7 +32,7 @@ class pyraprunner(LOFARrecipe):
         function_name = self.__class__.__name__ + "_remote"
         mec.push_function(
             {
-                function_name: self.remote_function,
+                function_name: run_node,
                 "build_available_list": utilities.build_available_list,
                 "clear_available_list": utilities.clear_available_list
             }
@@ -69,6 +60,8 @@ class pyraprunner(LOFARrecipe):
                 task = LOFARTask(
                     execute_string,
                     push=dict(
+                        recipename=self.name,
+                        nodepath=os.path.dirname(self.__file__.replace('master', 'nodes')),
                         ms_name=ms_name,
                         loghost=loghost,
                         logport=logport
@@ -84,15 +77,22 @@ class pyraprunner(LOFARrecipe):
                 (self.__class__.__name__)
             )
             tc.barrier(tasks)
-            for task in tasks:
-                res = tc.get_task_result(task)
-                if res.failure:
-                    self.logger.error(res.failure)
-                    return 1
 
-        self.outputs['data'] = outnames
+
+        failure = False
+        for task in tasks:
+            res = tc.get_task_result(task)
+            if res.failure:
+                self.logger.warn("Task %s failed" % (task))
+                self.logger.warn(res)
+                self.logger.warn(res.failure.getTraceback())
+                failure = True
+        if failure:
+            return 1
 
         mec.execute("clear_available_list(\"%s\")" % (available_list,))
+        self.outputs['data'] = outnames
+        return 0
 
 if __name__ == '__main__':
     sys.exit(pyraprunner().main())
