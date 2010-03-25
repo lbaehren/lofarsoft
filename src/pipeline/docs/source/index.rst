@@ -1,31 +1,42 @@
-.. LOFAR Standard Imaging Pipeline documentation master file, created by sphinx-quickstart on Wed Jun 10 17:09:31 2009.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-LOFAR Standard Imaging Pipeline documentation
-=============================================
+#############################
+LOFAR Pipelines Documentation
+#############################
 
 This document provides a brief overview of the so-called "pipeline framework"
 developed for supporting LOFAR pipelines, and describes how it has been used
 to assemble a prototype "standard imaging pipeline".
 
+
+The LOFAR Pipeline Framework
+============================
+
 The framework aims to make it possible to manage a variety of different
 processing steps in a flexible yet consistent way, while running them in
-parallel across the LOFAR offline cluster.
-
-The standard imaging pipeline will accept raw data from the LOFAR correlator,
-pre-process it, calibrate it, image it, and update the sky model with the
-sources detected in the data.
+parallel across the LOFAR offline cluster. The following chapters describe the
+various components of the framework and how they fit together.
 
 .. toctree::
    :maxdepth: 2
 
-   quickstart/index.rst
-   framework/index.rst
-   recipe/index.rst
-   parallel/index.rst
-   pipeline/index.rst
-   sip/index.rst
+   framework/dependencies/index.rst
+   framework/recipe/index.rst
+   framework/parallel/index.rst
+   framework/pipeline/index.rst
+
+The Standard Imaging Pipeline
+=============================
+
+The Standard Imaging Pipeline (or SIP) will accept raw data from the LOFAR
+correlator, pre-process it, calibrate it, image it, and update the sky model
+with the sources detected in the data. This section describes the components
+of the SIP and how they fit together.
+
+.. toctree::
+   :maxdepth: 2
+
+   sip/quickstart/index.rst
+   sip/recipes/index.rst
+
 
 Indices and tables
 ==================
