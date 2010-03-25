@@ -1,5 +1,5 @@
 import subprocess
-import pipeline.support.utilities as utilities
+import lofarpipe.support.utilities as utilities
 
 def group_files(logger, clusterdesc, node_directory, group_size, filenames):
         # Given a limited number of processes per node, the first task is to

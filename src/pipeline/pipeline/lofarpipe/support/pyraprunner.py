@@ -1,3 +1,4 @@
+### NOTE: Not yet converted to new-style framework.
 from __future__ import with_statement
 import sys
 
