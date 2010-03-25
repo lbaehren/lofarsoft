@@ -1,6 +1,6 @@
 def p_(var): 
     if (type(var)==list): map(lambda x:p_(x),var)
-    else: print var,"=",eval(var)
+    else: print " ",var,"=>",eval(var)
 
 """
 ========================================================================
@@ -8,8 +8,18 @@ def p_(var):
 ========================================================================
 
 Version History:
- -    started March 1, 2010 by H. Falcke
+ -    2010-03-01 - started (H. Falcke)
+ -    2010-03-24 - added hArray description (HF)
 
+The library makes use of algotithms and code developed by Andreas
+Horneffer, Lars B"ahren, Martin vd Akker, Heino Falcke, ...
+
+To create a PDF version of the tutorial.py script use 
+
+./prettypy tutorial.py
+
+in the $LOFARSOFT/src/CR-Tools/implement/Pypeline directory.
+  
 %%MERGE: toc
 
 (+) StartUp
@@ -143,7 +153,9 @@ will create a floating point vector of size 0.
 The vector can be filled with a python list or tuple, by using the extend attribute:
 
 """
-v.extend([1,2,3,4]);v
+v.extend([1,2,3,4])
+
+p_("v")
 """
 
 Note, that python has automatically converted the integers into
@@ -152,8 +164,18 @@ floats, since the STL vector does not allow any automatic typing.
 The STL vector can be converted back to a python list by using the
 python list creator:
 
->>> list(v)
-  [1.0, 2.0, 3.0, 4.0]
+"""
+p_("list(v)")
+"""
+
+or use the list or val methods of the vector (where the latter has the
+extra twist that it will return a scalar value, if the vector has a
+length of one).
+
+"""
+p_("v.val()")
+p_("v.list()")
+"""
 
 However, the basic Boost Python STL vector constructor takes no
 arguments and is a bit cumbersome to use in the long run.  Here we
@@ -310,7 +332,7 @@ Similarly you can do
 - v1*=v2
 - v1/=v2
 
-Here is a list of other functions you can use
+Here are examples of some basic statistics functions one can use
 
 Mean: 
 
@@ -334,6 +356,406 @@ Standard Deviation:
 
 """
 p_("v1.stddev()")
+"""
+
+(++) Working with the hArray class
+----------------------------------
+
+(+++) Creating Arrays and basic operations
+..........................................
+
+While the basic underlying data structures are plain STL vectors, in
+many cases, however, one has to deal with multi-dimensional data. For
+this case we introduce a new wrapper class, named hArrays, that
+mimicks a multi-dimensional array, but still operates on an underlying
+vector with essentially a flat, horizontal data structure. Given that
+a major concern is to minimize duplication of large data structures,
+the array class will share memory with its associated vector and also
+with arrays that are derived from it. Explicit copying will have to be
+done in order to avoid this. Access to various dimensions (rows,
+columns, etc...) is done via slices that need to be contiguous in
+memory! Since the array is vector-based, all methods defined for
+vectors are also inherited by hArrays and can be applied to slices or
+even automatically loop over multiple slices (e.g., rows or columns).
+
+An array is defined using the hArray function. This is a constructor
+function and not a class of its own. It will return array classes of
+different types, such as IntArray, FloatArray, ComplexArray,
+StringArray, BoolArray, referring to the different data types they
+contain. As for vectors, each array can only contain one type of data.
+
+hArray(Type=float,dimensions=[n1,n2,n3...],fill=None) -> FloatArray
+
+where Type can be a Python type, a Python list/tuple (where the first
+element determines the type), an STL vector, or another hArray.
+
+Dimensions are given as a list of the form [dim1,dim2,dim3, ...]. The
+size of the underlying vector will automatically be resized to
+dim1*dim2*dim3* ... to be able to contain all elements. Alternatively,
+one can provide another array, who's dimensions will be copied.
+
+The array can be filled with an initialization values that can be
+either a single value, a list, a tuple, or an STL vector of the same
+type.
+
+"""
+v=Vector(range(10))
+
+a=hArray(v,[3,3])
+
+p_("a")
+"""
+
+One may wonder what the representation of the Array actually
+means. 
+
+a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,0,0,0]
+
+After "hArray(" first the data type is given, then the array
+dimensions and total vector size, and finally the currently active
+slice (given as start and end index of the vector). An optional
+asterisk indicates that the next operation will actually loop the
+previously specified slices (see below). At the end the currently
+selected slice is displayed (while the array may actually hold more
+data).
+
+The underlying vector of an array can be retrieved with the .vec()
+method. I.e.,
+
+"""
+a.vec()
+"""
+
+The arrays have most of the vector methods defined, so you can also
+add, multiply, etc. with scalars or other arrays.
+
+"""
+p_("a*2")
+
+p_("a*a")
+"""
+
+Underlying these operations are the basic hftools functions, e.g. the
+multiplication is essentially a python method that first creates a new
+array and then calls hMul.
+
+"""
+tmp_array=a.new()
+a.mul(2,tmp_array)
+
+p_("a")
+"""
+
+BTW, this could also be done calling the function hMul(a,2,tmp_array),
+rather than the corresponding method. 
+
+An important constraint is that all these functions or methods only
+work with either vector or array clases, a mix in the paramters
+between vectors and arrays is currently not supported.
+
+(+++) Changing Dimensions
+..........................
+
+The dimensions can be obtained and set, using the getDim and setDim
+methods. If the length of the underlying vector changes due to a
+change in the dimensions, the vector will be resized and padded with
+zeros, if necessary.
+
+"""
+a.getDim()
+
+a.setDim([3,3,2])
+
+a.setDim([3,3])
+"""
+
+(+++) Memory sharing
+......................
+
+Note, that the array and vector point share the same memory. Changing
+an element in the vector
+
+"""
+v[0]=-1
+
+p_("v")
+p_("a")
+"""
+
+will also change the corresponding element in the array. The same is,
+btw, true if one creates an array from an array. Both will share the
+same underlying data vector. They will, btw, also share the same size
+and dimensions.
+
+"""
+b=hArray(a)
+
+b[0,0]=-2
+
+p_("b")
+p_("a")
+p_("v")
+
+v[0]=0
+
+p_("a")
+"""
+
+To actually make a pyhsically distinct copy, you need to explicitly
+copy the data over.
+
+"""
+c=hArray(int,a)
+
+a.copy(c)
+"""
+
+or more simply
+
+"""
+c=hArray(int,a,a)
+"""
+
+(the 2nd parameter is for the dimensions, the third one is the fill
+parameter that initates the copying).
+
+(+++) Basic Slicing
+...................
+
+The main purpose of these arrays is, of course, to be able to access
+multiple dimensions. This is done using the usual __getitem__ method
+of python.
+
+Let us take our two-dimensional array from before:
+
+"""
+p_("a")
+"""
+
+The vector followed by a single number in square brackets 
+will "in principle" obtain the first column of the array.
+
+"""
+p_("a[0]")
+"""
+
+It says "in principle", because the only thing which that command does is
+to return a new hArray python object, which will point to the same
+data vector, but contain a different data slice which is then returned
+whenever a method tries to operate on the vector.
+
+"""
+a[0].vec()
+"""
+
+This retrieves a copy of the data, since assigning a sub-slice of a
+vector to another vector actually requires copying the data - as
+vectors do not know about slicing (yet). Use one-dimensional arrays if
+you want to have are reference to a slice only.
+
+In contrast, a.vec(), without slicing, will give you a reference to
+the underlying vector.
+
+Similarly, 
+
+"""
+a[0,1].vec()
+"""
+
+will access a slice consisting of a single element (returned as a
+vector). To obtain it as a scalar value, use
+
+"""
+a[0,1].val()
+"""
+
+One may wonder, why one has to use the extra methods vec and val to
+access the data. The reason is that slicing on its own will return an
+array (and not a vector), which we need for other purposes still.
+
+Slicing can also be done over multiple elements of one dimension,
+using the known python slicing syntax:
+
+"""
+a[0,0:2].val()
+"""
+
+however, currently this is restricted to the last dimension only, in
+order to point to a contiguous memory slice. Hence:
+
+"""
+a[0:2]
+"""
+
+is possible, but not
+
+"""
+a[0:2,0:2]
+"""
+
+where the first slice is simply ignored.
+
+(+++) Applying Methods to Slices
+................................
+
+First, of all, we can now apply the known vector functions also to
+array slices directly. E.g.,
+
+"""
+a[0].sum()
+"""
+
+will return the sum over the first row of the array, i.e. the first
+three elements of the underlying vector. While 
+
+"""
+a[0].negate()
+p_("a")
+a[0].negate()
+p_("a")
+"""
+
+returns nothing, but will actually change ths sign of the first three
+elements in the underlying vector.
+
+In principle one could now loop over all slices using a for loop:
+
+"""
+for i in range(a.getDim()[0]): print "Row",i,":",a[i].val(), " => a =", a
+"""
+
+However, looping over slices in simple way is aready built into the
+arrays, by appending the Ellipsis symbol "..." to the dimensions. This
+will actually put the array in "looping mode".
+
+"""
+l=a[0:3,...]
+p_("l")
+"""
+
+which is indicated in the screen representation of the array by an
+extra asterisk and actually means that one can loop over all the
+elements of the respective dimension.
+
+"""
+iterate=True
+while iterate:
+    print "Row",l.loop_nslice(),":",l.val(), " => l =", l
+    iterate=l.next().doLoopAgain()
+
+p_("l")
+"""
+
+This will do exactly the same as the for-loop above.
+
+Here doLoopAgain() will return True as long as the array is in looping
+mode and has not yet reached the last slice. loop_nslice() returns the
+current slice the array is set to (see also loop_i, loop_start,
+loop_end). next() will advance to the next slice until the end is
+reached (and doLoopAgain is set to false). The loop will be reset at
+the next call of next(). Hence, as written above the loop could be
+called multiple times where the loop will be automatically reset each
+time.
+
+We could also explicitly reset the loop in using to its starting
+values, but that should not be necessary most of the time.
+
+"""
+l.resetLoop()
+"""
+
+Now, since this is still a bit too much work, you can actually apply
+(most of) the available vector methods to multiple slices at once, by
+just applying it to an array in looping mode.
+
+As an example, let's calculate the mean value of each slice at the to
+level of our example array, which is simply:
+
+"""
+l.mean()
+"""
+
+In contrast to the same method applied to vectors, where a single
+value is returned, the return value is now a vector of values, each of
+which corresponds to the mean of one top-level slice. Hence, the
+vector has looped automatically over all the slices specified in the
+definition of the array.
+
+The looping over slices can be more complex taking start, stop, and
+increment values into account:
+
+"""
+a[1:,...].mean()
+"""
+
+will loop over all top-level slices starting at the 2nd slice 
+(slice #1) until the last.
+
+"""
+a[:2,...].mean()
+"""
+
+will loop over the first two top-level slices.
+
+"""
+a[0:3:2,...].mean()
+"""
+
+will loop over the two top-level slices using an increment of 2,
+i.e. here take the first and third only (so, here non contiguous
+slices can be put to work).
+
+To loop over all slices in one dimensions, a short-cut can be used by
+leaving away the slice specification. Hence,
+
+"""
+a[...].mean()
+"""
+
+will do the same as a[0:,..].mean().
+
+Finally, it is even possible to specify an array of indices for the slicing. 
+
+"""
+a[[0,2],...].mean()
+"""
+
+will loop over slices 0 and 2.
+
+
+Looping can also be done for methods that require multiple arrays as
+inputs (remember a mix of vectors and arrays is forbidden). In this
+case the next() method will be applied to every array in the paramter
+list and looping proceeds until the first array has reached the
+end. Hence, care has to be taken that the same slice looping is
+applied to all arrays in the parameter list.
+
+As an example we create a new array of the dimensions of a
+
+"""
+x=hArray(int,a)
+"""
+
+and fill it with slices from "a" multiplied by the scalar value 2
+
+"""
+a[[0,2],...].mul(2,x[[0,2],...])
+
+p_("x")
+"""
+
+and indeed now thw first and last slice were operated on and filled
+with the results of the operation.
+
+Forgetting slicing in a parameter can lead to unexpected results,
+e.g., in the following example "a" is looped over but x is not. Hence,
+the result will always be written (and overwritten) into the first
+three elements of x, containing at the end only the results of the
+mutliplication of the last slice in a.
+"""
+x=hArray(int,a); a[...].mul(2,x)
+
+p_("x")
 """
 
 (+) File I/O

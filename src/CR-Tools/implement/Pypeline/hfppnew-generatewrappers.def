@@ -8,6 +8,24 @@
 //------------------------------------------------------------------------------
 #define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS 0
 #define HFPP_FUNC_HAS_VECTORS 0
+#define HFPP_FUNC_HAS_SCALARS 0
+
+
+#ifndef HFPP_CLASS_STL
+#define HFPP_CLASS_STL (STL)
+#endif
+
+#ifndef HFPP_CLASS_CASA
+#define HFPP_CLASS_CASA (CASA)
+#endif
+
+#ifndef HFPP_CLASS_hARRAY
+#define HFPP_CLASS_hARRAY (hARRAY)
+#endif
+
+#ifndef HFPP_CLASS_hARRAYALL
+#define HFPP_CLASS_hARRAYALL (hARRAYALL)
+#endif
 
 #ifndef HFPP_FUNC_SLICED
 #define HFPP_FUNC_SLICED 1
@@ -81,7 +99,6 @@
 #endif
 
 
-
 //Now set some definitions based on conditionals
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
@@ -116,6 +133,9 @@ s="""
 #if HFPP_GET_PAR_DIM($$$)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
@@ -144,6 +164,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(0)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(0) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_0 HFPP_TRUE
@@ -166,6 +189,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(1)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(1) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_1 HFPP_TRUE
@@ -188,6 +214,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(2)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(2) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_2 HFPP_TRUE
@@ -210,6 +239,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(3)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(3) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_3 HFPP_TRUE
@@ -232,6 +264,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(4)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(4) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_4 HFPP_TRUE
@@ -254,6 +289,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(5)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(5) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_5 HFPP_TRUE
@@ -276,6 +314,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(6)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(6) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_6 HFPP_TRUE
@@ -298,6 +339,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(7)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(7) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_7 HFPP_TRUE
@@ -320,6 +364,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(8)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(8) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_8 HFPP_TRUE
@@ -342,6 +389,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(9)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(9) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_9 HFPP_TRUE
@@ -364,6 +414,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(10)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(10) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_10 HFPP_TRUE
@@ -386,6 +439,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(11)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(11) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_11 HFPP_TRUE
@@ -408,6 +464,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(12)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(12) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_12 HFPP_TRUE
@@ -430,6 +489,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(13)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(13) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_13 HFPP_TRUE
@@ -452,6 +514,9 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #if HFPP_GET_PAR_DIM(14)>0
 #undef HFPP_FUNC_HAS_VECTORS
 #define HFPP_FUNC_HAS_VECTORS 1
+#else
+#undef HFPP_FUNC_HAS_SCALARS
+#define HFPP_FUNC_HAS_SCALARS 1
 #endif // HAS_VECTORS
 #if HFPP_GET_PAR_BASETYPE_VAL(14) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_14 HFPP_TRUE
@@ -466,6 +531,8 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #endif
 #endif
 
+//------------------------------------------------------------------------
+
 #define HFPP_FUNC_NUMBER_OF_WRAPPER_TYPES BOOST_PP_SEQ_SIZE(HFPP_WRAPPER_TYPES)
 
 #if HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS > 0
@@ -473,7 +540,6 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 #else
 #define HFPP_GET_FUNC_TEMPLATE_DEFINITION
 #endif
-
 
 
 #ifdef HFPP_VERBOSE
@@ -502,12 +568,22 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //
 #endif
 
-//If function has no vectors don't make multiple PYthon wrappers for
+//If function has no vectors don't make multiple Python wrappers for
 //different vector classes
 #if HFPP_FUNC_HAS_VECTORS
 #else
 #undef HFPP_PYTHON_WRAPPER_CLASSES
 #define HFPP_PYTHON_WRAPPER_CLASSES (STL)
+#endif
+
+
+//Don't do the wrapper class for hArrays, where the scalars become
+//vectors, if there are no scalars ...
+
+#if HFPP_FUNC_HAS_SCALARS
+#else
+#undef HFPP_CLASS_hARRAYALL
+#define HFPP_CLASS_hARRAYALL
 #endif
 
 #ifndef HFPP_DONOT_MAKE_WRAPPERS
@@ -516,9 +592,6 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 HFPP_MAKE_WRAPPERS
 #if HFPP_FUNC_HAS_VECTORS && HFPP_FUNC_SLICED
 HFPP_MAKE_WRAPPERS_SLICED
-//#if HFPP_FUNC_hARRAY
-//HFPP_MAKE_WRAPPERS_hARRAY
-//#endif
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -541,11 +614,17 @@ HFPP_MAKE_WRAPPERS_SLICED
 #undef HFPP_CODE_PRE
 #undef HFPP_CODE_POST
 #undef HFPP_FUNC_HAS_VECTORS
+#undef HFPP_FUNC_HAS_SCALARS
 #undef HFPP_FUNC_SLICED 
 #undef HFPP_PYTHON_WRAPPER_CLASSES
 #undef HFPP_PYTHON_WRAPPER_CLASSES_SLICED
 #undef HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS
 #undef HFPP_FUNC_IS_VOID
+
+#undef HFPP_CLASS_STL
+#undef HFPP_CLASS_CASA
+#undef HFPP_CLASS_hARRAY
+#undef HFPP_CLASS_hARRAYALL
 
 //--Undefine user-defined parameters from cc file
 #undef HFPP_FUNCDEF

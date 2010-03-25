@@ -116,11 +116,11 @@ def VecToPrintString(self,maxlen=10):
     s=typename(basetype(self))+","
     return "Vec("+s+str(len(self))+")=[" +VecToString(self,maxlen)+"]"
 
-def ArrayToPrintString(self,maxlen=10):
+def hArrayToPrintString(self,maxlen=10):
     s=typename(basetype(self))+", "
     loops=""
-    if self.iterate(): loops="*"
-    return "Array("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+    if self.loopingMode(): loops="*"
+    return "hArray("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
 
 #========================================================================
 # Adding multi-dimensional array capabilities to vector class
@@ -135,6 +135,26 @@ def multiply_list(l):
     """
     return reduce(lambda x,y:x*y,l)
 
+def hVector_list(self):
+    """
+    vec.list() -> [x1,x2,x3, ...]
+
+    Retrieve the STL vector as a python list.
+    """
+    return list(self)
+
+def hVector_val(self):
+    """
+    vec.val() -> a             : if length == 1 
+    vec.val() -> [a,b,c,...]   : if length > 1 
+
+    Retrieve the contents of the vector as python values: either as a
+    single value, if the vector just contains a single value, or
+    otherwise return a python list.
+    """
+    if len(self)==1: return self[0]
+    else: return list(self)
+    
 def hVector_setDim(self,dimensions_list):
     """setDim([dim1,dim2,...,dimN]) 
     
@@ -205,7 +225,7 @@ def hArray_newreference(self):
     return self.shared_copy()
 
 def hArray_setDim(self,dimensions_list):
-    """setDim([dim1,dim2,...,dimN]) -> Array with new dimensions
+    """setDim([dim1,dim2,...,dimN]) -> hArray with new dimensions
      
     Sets the dimensions of a multidimensonal array, using a list of
     integers as input. Will resize the underlying vector, if necessary
@@ -235,10 +255,11 @@ def hArray_getDim(self):
 
 def hArray_return_slice_start(val): 
     """ Reduces a slice to its start value"""
-    if val==Ellipsis: 
+    if (val==Ellipsis):
         return 0
     elif type(val)==slice:
-        return val.start
+         if (val.start == None): return 0
+         return val.start
     elif type(val)==list:
         return val[0]
     else:
@@ -265,15 +286,53 @@ def hNone2Value(none,defval):
 
 def hArray_vec(self):
     """
-    Retrieve the currently selected slice from the stored vector.
+    array.vec() -> Vector([x1,x2,x3, ...])
+
+    Retrieve the currently selected slice from the stored vector. If
+    the entire vector is to be returned a reference to the internal
+    data vector is returned. Otherwise, if a slice is active, a copy
+    of that slice is returned. Use getVector() to ensure you always
+    get only a reference.
     """
-    return self.getVector()[self.getBegin():self.getEnd()]
+    beg=self.getBegin(); end=self.getEnd()
+    if ((beg==0 )& (end==len(self))): return self.getVector()
+    else: return self.getVector()[beg:end]
+
+def hArray_list(self):
+    """
+    array.list() -> [x1,x2,x3, ...]
+
+    Retrieve the currently selected slice from the stored vector as a
+    python list.
+    """
+    return list(self.getVector()[self.getBegin():self.getEnd()])
+
+def hArray_new(self):
+    """
+    ary.new() -> new_array
+
+    Create a new array of the same type and dimensions
+    """
+    return hArray(basetype(self),self)
 
 def hArray_val(self):
     """
+    ary.val() -> a             : if length == 1 
+    ary.val() -> [a,b,c,...]   : if length > 1 
+
+    Retrieve the contents of the vector as python values: either as a
+    single value, if the vector just contains a single value, or
+    otherwise return a python list.
+    """
+    return self.vec().val()
+
+def hArray_copy_resize(self,ary):
+    """
     Retrieve the first element of the currently selected slice from the stored vector.
     """
-    return self.vec()[0]
+    ary.resize(len(self))
+    ary.copy(self)
+    return ary
 
 def hArray_getitem(self,dimlist):
     """
@@ -285,14 +344,14 @@ def hArray_getitem(self,dimlist):
     Use array.setDim([dim1,dim2,...,dimN]) to set the dimensions. 
     """
     if not type(dimlist)==tuple: dimlist=(dimlist,)
-    ary=Array(self)
+    ary=hArray(self)
     lastelement=dimlist[-1]
     dimliststarts=Vector(map(hArray_return_slice_start,dimlist))
     if (lastelement==Ellipsis):   # looping is requested
         if len(dimlist)>=2:      # but ...
             if not type(dimlist[-2])==int:  # .. there is a slice or list preceding the ellipsis, over which to loop
                 lastelement=dimlist[-2]
-        if type(lastelement)==slice: ary.loop(dimliststarts[0:-2],lastelement.start,hNone2Value(lastelement.stop,-1),hNone2Value(lastelement.step,1))
+        if type(lastelement)==slice: ary.loop(dimliststarts[0:-2],hNone2Value(lastelement.start,0),hNone2Value(lastelement.stop,-1),hNone2Value(lastelement.step,1))
         elif lastelement==Ellipsis: ary.loop(dimliststarts[0:-1],0,-1,1)
         elif type(lastelement)==list: ary.loop(dimliststarts[0:-2],Vector(lastelement))
     elif type(lastelement) in [slice,list]: #Non-looping slice
@@ -306,11 +365,11 @@ def hArray_setitem(self,dims,fill):
     vec[n1,n2,..] = [0,1,2] -> set slice of array to input vector/value
     
     """
-    if (type(fill)) in [list,tuple]: fill=Array(fill)
+    if (type(fill)) in [list,tuple]: fill=hArray(fill)
     return hFill(hArray_getitem(self,dims),fill)
  
 #======================================================================
-#  Define Lists of Array and Vector Types that we will use 
+#  Define Lists of hArray and Vector Types that we will use 
 #======================================================================
 
 hBaseTypes=[int,float,complex,bool,str]
@@ -394,9 +453,9 @@ def typename(btype):
     return hTypeNamesDictionary[t]
 
 
-def isArray(ary): 
+def ishArray(ary): 
     """
-    isArray(array) -> True or False
+    ishArray(array) -> True or False
 
     Returns true if the argument is one of the hArray arrays, i.e. those listed in hAllVectorTypes.
     """
@@ -462,6 +521,53 @@ vec+1, vec1+vec2, vec+=vec2).
 
 See the tutorial (tutorial.py) for more details.
 """
+
+Arraydoc= """
+
+hArray(Type=int,dimensions=[n1,n2,n3...],fill=None) -> IntArray
+
+hArray(Type=float,dimensions=[n1,n2,n3...],fill=None) -> FloatArray
+
+....
+
+While the basic underlying data structures are plain STL vectors, in
+many cases, however, one has to deal with multi-dimensional data. For
+this case we introduce a new wrapper class, named hArrays, that
+mimicks a multi-dimensional array, but still operates on an underlying
+vector with essentially a flat, horizontal data structure. Given that
+a major concern is to minimize duplication of large data structures,
+the array class will share memory with its associated vector and also
+with arrays that are derived from it. Explicit copying will have to be
+done in order to avoid this. Access to various dimensions (rows,
+columns, etc...) is done via slices that need to be contiguous in
+memory! Since the array is vector-based, all methods defined for
+vectors are also inherited by hArrays and can be applied to slices or
+even automatically loop over multiple slices (e.g., rows or columns).
+
+An array is defined using the hArray function. This is a constructor
+function and not a class of its own. It will return array classes of
+different types, such as IntArray, FloatArray, ComplexArray,
+StringArray, BoolArray, referring to the different data types they
+contain. As for vectors, each array can only contain one type of data.
+
+where Type can be a Python type, a Python list/tuple (where the first
+element determines the type), an STL vector, or another hArray.
+
+Dimensions are given as a list of the form [dim1,dim2,dim3, ...]. The
+size of the underlying vector will automatically be resized to
+dim1*dim2*dim3* ... to be able to contain all elements. Alternatively,
+one can provide another array, who's dimensions will be copied.
+
+The array can be filled with an initialization values that can be
+either a single value, a list, a tuple, or an STL vector of the same
+type.
+"""
+
+IntArray.__doc__="c++ hftools array of type 'int'\n"+Arraydoc 
+FloatArray.__doc__="c++ hftools array of type 'float'\n"+Arraydoc 
+StringArray.__doc__="c++ hftools array of type 'str'\n"+Arraydoc 
+BoolArray.__doc__="c++ hftools array of type 'bool'\n"+Arraydoc 
+ComplexArray.__doc__="c++ hftools array of type 'complex'\n"+Arraydoc 
 
 IntVec.__doc__="c++ standard template library (STL) vector of type 'int'\n"+Vectordoc 
 FloatVec.__doc__="c++ standard template library (STL) vector of type 'float'\n"+Vectordoc 
@@ -545,11 +651,14 @@ setattr(FloatVec,"fft",hFFT)
 setattr(FloatArray,"fft",hFFT)
 
 for v in hAllArrayTypes:
-    setattr(v,"__repr__",ArrayToPrintString)
+    setattr(v,"__repr__",hArrayToPrintString)
     setattr(v,"setDim",hArray_setDim)
     setattr(v,"getDim",hArray_getDim)
     setattr(v,"vec",hArray_vec)
     setattr(v,"val",hArray_val)
+    setattr(v,"new",hArray_new)
+    setattr(v,"list",hArray_list)
+    setattr(v,"copy_resize",hArray_copy_resize)
     setattr(v,"newreference",hArray_newreference)
     setattr(v,"__getitem__",hArray_getitem)
     setattr(v,"__setitem__",hArray_setitem)
@@ -560,6 +669,8 @@ for v in hAllVectorTypes:
     setattr(v,"setDim",hVector_setDim)
     setattr(v,"getDim",hVector_getDim)
     setattr(v,"elem",hVector_elem)
+    setattr(v,"val",hVector_val)
+    setattr(v,"list",hVector_list)
     setattr(v,"dimension",[])
     setattr(v,"ndim",0)
     for s in ["hResize","hNew"]:
@@ -624,7 +735,7 @@ def Vector(Type=float,size=-1,fill=None):
     [4,4].
     """
     vtype=Type
-    if (type(vtype) in hAllArrayTypes):  # ArrayClass
+    if (type(vtype) in hAllArrayTypes):  # hArrayClass
         vtype=basetype(Type)
         vec=Vector(Type.getVector())
     elif (type(vtype) in hAllListTypes):  #List or Vector 
@@ -635,29 +746,73 @@ def Vector(Type=float,size=-1,fill=None):
         vec=type2vector(vtype)
     vec.type=vtype
     if (size>=0): vec.resize(size)
-    if (not fill==None): vec.fill(fill)
+    if type(fill) in [tuple,list]: fill=Vector(fill)
+    if type(fill) in hAllArrayTypes: fill=fill.vec()
+    if (not fill==None): 
+        vec.fill(fill)
     return vec
 
 #======================================================================
-#  Array Class and Vector Methods/Attributes
+#  hArray Class and Vector Methods/Attributes
 #======================================================================
 
-def Array(Type=float,dimensions=None,size=-1,fill=None):
+def hArray(Type=float,dimensions=None,fill=None):
+    """
+    Python convenience constructor function for hArrays. If speed is
+    of the essence, use the original vector constructors: BoolArray(),
+    IntArray(), FloatArray(), ComplexArray(), StringArray()
+    
+    Usage:
+
+    hArray(Type=float,dimensions=[n1,n2,n3...],fill=None) -> FloatArray
+
+    Array(Type) -  will create an empty array of type "Type", where Type is
+    a basic Python type, i.e.  bool, int, float, complex, str.
+
+    Array([1,2,3,...]) or Array((1,2,3,...)) - if a list or a tuple is
+    provided as first argument then an array is created of the type of
+    the first element in the list or tuple (here an integer) and
+    filled with the contents of the list or tuple.
+
+    Array(vec) - will create an array of the type of a vector and use
+    the vector as its underlying memory storage. To copy the value,
+    use the fill parameter described below.
+
+    Array(Type,dimension) - will create an array of type "Type",
+    specifiying its dimensions. Input for dimensions can be a list or
+    a another array (who's dimensions are coopied).
+    
+    Array(Type,dimension,fill) - same as above but fill the array with
+    particular values. Input can be a single value, a list, a vector,
+    or another array.
+
+    Array() defaults to a float array.
+
+    Note, that dimension and fill take precedence over the list and tuple
+    input. Hence if you create a array with Array([1,2,3],dimension=[2]) it
+    will contain only [1,2]. Array([1,2,3],dimension=[2],fill=4) will give
+    [4,4].
+    """
     if isVector(Type):  #Make a new array with refernece to the input vector
         ary=type2array(basetype(Type))
         ary.stored_vector=Type
         ary.setVector(ary.stored_vector)
-    elif isArray(Type):  # Just make a copy with reference to same vector
+    elif ishArray(Type):  # Just make a copy with reference to same vector
         ary=Type.newreference()
     else: # Create a new vector
-        vec=Vector(Type=Type,size=size)
+        vec=Vector(Type=Type)
         ary=type2array(basetype(vec))
         ary.stored_vector=vec
         ary.setVector(ary.stored_vector)
     if (type(dimensions) in [list,tuple,IntVec]): ary.setDim(dimensions)
-    if not (fill == None): ary.fill(fill)
+    if (type(dimensions) in hAllArrayTypes): ary.setDim(dimensions.getDim())
+    if not (fill == None): 
+        if type(fill) in hAllVectorTypes: ary.vec().fill(fill)
+        if type(fill) in [tuple,list]: ary.vec().fill(Vector(fill))
+        else: ary.fill(fill)
     return ary
 
+hArray.__doc__=Arraydoc
 
 #------------------------------------------------------------------------
 # cr DataReader Class
@@ -742,6 +897,55 @@ def CRQualityCheck(file,limits,maxblocksize=65536,nsigma=5):
             else: print ""
     return qualityflaglist
 
+"""
+def CRQualityCheckNew(file,limits,maxblocksize=65536,nsigma=5):
+
+    CRQualityCheck(file,[("mean",(-15,15)),("rms",(5,15)),("nonGaussianity",(-1,3))]) 
+
+    Will step through all antennas of a file assess the data quality. For each 
+
+
+#Initialize some parameters
+    nAntennas=file.get("nofAntennas")
+    filesize=file.get("Filesize")
+    blocksize=min(filesize/4,maxblocksize)
+    file.set("Blocksize",blocksize)
+    nBlocks=filesize/blocksize; 
+    blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
+#Create the some scratch vectors
+    qualityflaglist=[]
+    rawdata=hArray(float,[nAntennas,blocksize])
+    where=hArray(int,rawdata)
+#Calculate probabilities to find certain peaks
+    probability=funcGaussian(nsigma,1,0) # what is the probability of a 5 sigma peak
+    npeaksexpected=probability*blocksize # what is the probability to see such a peak with the blocksize
+    npeakserror=sqrt(npeaksexpected) # what is the statisitcal error on that expectation
+#Start checking
+    print "Quality checking of file ",file.filename
+    print "Considering",nAntennas," antennas and the Blocks:",blocklist
+    print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected
+    for Block in blocklist:
+        file.set("Block",Block).read("Voltage",rawdata.vec())
+        print "Block={0:3d}:".format(Block),
+        rawdata_loop=rawdata[...];
+        datamean = rawdata_loop.mean
+        iterate=True; 
+#        datarms=Vector(float,nAntennas); 
+#        while iterate: 
+#            datarms[rawdata_loop.loop_nslice()]=rawdata_loop.vec().stddev[datamean]
+#            iterate=rawdata_loop.next().doLoopAgain()
+#        
+#        datarms = rawdata[...].stddev(hArray(datamean)[...])
+#        datanpeaks=rawdata[...].findgreaterthanabs(int(round(nsigma*datarms)),where)
+        dataNonGaussianity=(datanpeaks-npeaksexpected)/npeakserror
+        print "mean={0:4.2f},".format(datamean),"rms={0:5.1f},".format(datarms),"npeaks={0:5d},".format(datanpeaks),"nonGaussianity={0:5.2f}".format(dataNonGaussianity),
+        noncompliancelist=CheckParameterConformance([datamean,datarms,dataNonGaussianity],limits)
+        if noncompliancelist:
+            qualityflaglist.append((Antenna,Block,noncompliancelist))
+            print noncompliancelist,"!!"
+        else: print ""
+return qualityflaglist
+    """
 
 
 

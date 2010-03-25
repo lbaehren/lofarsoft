@@ -120,6 +120,7 @@ template <class T>
     void delete_storage();
     void new_storage();
     hArray<T> & shared_copy();
+    hArray<T> & resize(HInteger newsize);
     hArray<T> & setVector(std::vector<T> & vec);
     std::vector<T> & getVector();
     std::vector<HInteger> & getDimensions();
@@ -130,22 +131,30 @@ template <class T>
     void setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
     void setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3);
     void setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
-    hArray<T> & setSlice(HInteger beg, HInteger end);
+    hArray<T> & setSlice(HInteger beg, HInteger end=-1);
     hArray<T> & setSliceVector(vector<HInteger> & index_vector, HInteger offset_start=0, HInteger offset_end=-1);
     HInteger getNumberOfDimensions();
     typename std::vector<T>::iterator begin();
     typename std::vector<T>::iterator end();
+    HInteger getLoop_i();
+    HInteger getLoop_nslice();
+    HInteger getLoop_start();
+    HInteger getLoop_end();
+    HInteger getLoop_increment();
     HInteger getBegin();
     HInteger getEnd();
     HInteger getSize();
     HInteger length();
-    bool iterate();
+    bool loopingMode();
+    bool doLoopAgain();
     hArray<T> & loop(vector<HInteger> & start_element_index, HInteger start=0, HInteger end=-1, HInteger increment=1);
     hArray<T> & loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec);
     HInteger setLoopSlice(vector<HInteger> & start_element_index);
     hArray<T> &  next();
     hArray<T> &  loopOn();
     hArray<T> &  loopOff();
+    hArray<T> &  resetLoop();
+    hArray<T> &  all();
     
     //These are the basic parameters describing the data
     //structure. They can be shared
@@ -161,6 +170,7 @@ template <class T>
     HInteger loop_start, loop_end, loop_increment, loop_i, loop_nslice, loop_maxn;
     vector<HInteger> index_vector;
     bool loop_over_indexvector;
+    bool loop_next;
     bool doiterate;
   };
 

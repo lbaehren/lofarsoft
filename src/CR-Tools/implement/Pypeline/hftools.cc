@@ -618,7 +618,7 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
 //! Testing a rudimentary Array class, that allows contiguous slicing
 
 template <class T> void hArray<T>::init(){
-  cout << "Creating hArray ptr=" << reinterpret_cast<void*>(this) << endl;
+  //  cout << "Creating hArray ptr=" << reinterpret_cast<void*>(this) << endl;
   storage_p = NULL;
   slice_begin=0;
   slice_end=0;
@@ -627,6 +627,7 @@ template <class T> void hArray<T>::init(){
   doiterate=false;
   loop_slice_begin=0; loop_slice_end=0; loop_slice_size=0;
   loop_i=0; loop_start=0; loop_end=0; loop_increment=1; loop_maxn=0;
+  loop_next=false;
   loop_nslice=0;
   loop_over_indexvector=false;
 }
@@ -710,7 +711,7 @@ template <class T> void hArray<T>::delVector(){
 }
 
 template <class T> hArray<T>::~hArray(){ 
-  cout << "Deleting hArray ptr=" << reinterpret_cast<void*>(this) << endl;
+  //  cout << "Deleting hArray ptr=" << reinterpret_cast<void*>(this) << endl;
   delete_storage();
 }
 
@@ -868,8 +869,9 @@ template <class T> void  hArray<T>::setDimensions5(HInteger dim0, HInteger dim1,
 template <class T> hArray<T> &  hArray<T>::setSlice(HInteger beg, HInteger end){
   if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
-  slice_begin=max(beg,0);
-  if (end>=0) slice_end=min(end,(*storage_p->size_p));
+  slice_begin=std::max(beg,0);
+  if (end==-1) end=storage_p->vec_p->size();
+  if (end>=0) slice_end=std::min(end,(*storage_p->size_p));
   else slice_end=(*storage_p->size_p); 
   slice_size=slice_end-slice_begin;
   return *this;
@@ -890,9 +892,9 @@ template <class T> hArray<T> &  hArray<T>::setSliceVector(vector<HInteger> & ind
   offset_start=offset_start * (storage_p->slice_sizes_p->at(level));
   if (offset_end==-1) offset_end=storage_p->dimensions_p->at(level);
   offset_end=offset_end * (storage_p->slice_sizes_p->at(level));
-  slice_begin=max(0,min(hMulSum(index_vector,*storage_p->slice_sizes_p)+offset_start,storage_p->vec_p->size())); 
-  slice_end=max(0,min(hMulSum(index_vector,*storage_p->slice_sizes_p)+offset_end,storage_p->vec_p->size())); 
-  //  slice_end=min(max(slice_begin+storage_p->slice_sizes_p->at(level-1),slice_begin),storage_p->vec_p->size());
+  slice_begin=std::max(0,std::min(hMulSum(index_vector,*storage_p->slice_sizes_p)+offset_start,(HInteger)storage_p->vec_p->size())); 
+  slice_end=std::max(0,std::min(hMulSum(index_vector,*storage_p->slice_sizes_p)+offset_end,(HInteger)storage_p->vec_p->size())); 
+  //  slice_end=min(std::max(slice_begin+storage_p->slice_sizes_p->at(level-1),slice_begin),storage_p->vec_p->size());
   slice_size=slice_end-slice_begin; 
   return *this;
 }
@@ -922,7 +924,7 @@ template <class T> typename std::vector<T>::iterator hArray<T>::end(){
 \brief Returns the offset of the current slice from the begin iterator of the stored vector
  */
 template <class T> HInteger hArray<T>::getBegin(){
-  if (doiterate) return min(loop_slice_begin+loop_nslice*loop_slice_size,loop_slice_end);
+  if (doiterate) return std::min(loop_slice_begin+loop_nslice*loop_slice_size,loop_slice_end);
   else return slice_begin;
 }
 
@@ -930,7 +932,7 @@ template <class T> HInteger hArray<T>::getBegin(){
 \brief Returns the offset of the end of the current slice from the begin iterator of the stored vector
  */
 template <class T> HInteger hArray<T>::getEnd(){
-  if (doiterate) return min(loop_slice_begin+(loop_nslice+1)*loop_slice_size,loop_slice_end);
+  if (doiterate) return std::min(loop_slice_begin+(loop_nslice+1)*loop_slice_size,loop_slice_end);
   else return slice_end;
 }
 
@@ -952,17 +954,74 @@ template <class T> HInteger hArray<T>::length(){
 }
 
 
+/*!  \brief Resizes the vector to the length given as input. If the
+new size differs, then the vector will be resized and slices and
+dimensions be reset to a flat (one dimensional) vector array.
+ */
+template <class T> hArray<T> & hArray<T>::resize(HInteger newsize){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (newsize==(HInteger)storage_p->vec_p->size()) return *this;
+  storage_p->vec_p->resize(newsize);
+  *storage_p->size_p=newsize;
+  storage_p->dimensions_p->resize(1);
+  storage_p->dimensions_p->at(0)=newsize;
+  setSlice(0,newsize);
+  calcSizes();
+  return *this;
+}
+
 /*!
 \brief Returns whether or not to iterate over all slices in the vector
  */
-template <class T> bool hArray<T>::iterate(){return doiterate;}
+template <class T> bool hArray<T>::doLoopAgain(){return doiterate && loop_next;}
 
+/*!
+\brief Returns whether or not the  iterate over all slices in the vector
+ */
+template <class T> bool hArray<T>::loopingMode(){return doiterate;}
+
+/*!  \brief Returns the current loop index (which may be different
+from loop_nslice if one loops over an array of indices)
+ */
+template <class T> HInteger hArray<T>::getLoop_i(){return loop_i;}
+
+/*!
+\brief Returns the current loop start
+ */
+template <class T> HInteger hArray<T>::getLoop_start(){return loop_start;}
+
+/*!
+\brief Returns the current loop end
+ */
+template <class T> HInteger hArray<T>::getLoop_end(){return loop_end;}
+
+/*!
+\brief Returns the current loop index increment
+ */
+template <class T> HInteger hArray<T>::getLoop_increment(){return loop_increment;}
+
+/*!  \brief Returns the number of the currently used slice in the loop
+(which may be different from loop_i, if one loops over an array of
+indices)
+ */
+template <class T> HInteger hArray<T>::getLoop_nslice(){return loop_nslice;}
 
 /*!
 \brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector). 
 
  */
-template <class T> hArray<T> & hArray<T>::loopOn(){doiterate=true; return *this;}
+template <class T> hArray<T> & hArray<T>::loopOn(){
+  loop_next=true;
+  doiterate=true; 
+  return *this;
+}
+
+/*!
+\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector). 
+
+ */
+template <class T> hArray<T> & hArray<T>::all(){setSlice(0,-1); return *this;}
 
 /*!
 \brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector). 
@@ -980,10 +1039,10 @@ template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_elemen
   HInteger level=setLoopSlice(start_element_index);
   if ( level <= -1 )  {ERROR("loop: dimensions are wrong!"); return *this;};
   if (end<0) end=storage_p->dimensions_p->at(level);
-  start=min(max(0,start),loop_maxn);
-  end=min(max(start,end),loop_maxn);
-  increment = max(increment,1);
-  doiterate=true; 
+  start=std::min(std::max(0,start),loop_maxn);
+  end=std::min(std::max(start,end),loop_maxn);
+  increment = std::max(increment,1);
+  loopOn();
   loop_over_indexvector=false;
   loop_i=start; loop_start=start; loop_end=end; loop_increment=increment;
   loop_nslice = loop_i;
@@ -1002,13 +1061,27 @@ template <class T> hArray<T> & hArray<T>::loopVector(vector<HInteger> & start_el
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   HInteger level=setLoopSlice(start_element_index);
   if ( level <= -1 ) {ERROR("loopVector: dimensions are wrong!"); return *this;};
-  doiterate=true; 
+  loopOn();
   loop_over_indexvector=true;
   loop_i=0; loop_start=0; loop_end=vec.size(); loop_increment=1;
   index_vector=vec;
   loop_nslice=index_vector[loop_i];
   return *this;
 }
+
+/*!
+\brief Sets the array to looping mode and resets the loop parameters to its start values
+
+ */
+template <class T> hArray<T> & hArray<T>::resetLoop(){
+  loop_i=loop_start;
+  if (loop_over_indexvector) loop_nslice=index_vector[loop_i];
+  else loop_nslice = loop_i;
+  loopOn(); 
+  return *this;
+}
+
+
 
 /*!
 \brief Sets the slice parameters used by the looping algorithm to calculate the currently worked on slice.
@@ -1042,13 +1115,15 @@ If the end of the vector is reached, switch looping mode off and reset array to 
  */
 template <class T> hArray<T> &  hArray<T>::next(){
   if (!doiterate) return *this;
+  if (loop_next==false) loop_next=true;  // start all over again
   loop_i+=loop_increment;
   if (loop_i>=loop_end) { // the end is near, stop looping ...
-    loopOff();
+    resetLoop();
+    loop_next=false;
   } else {  
     if (loop_over_indexvector) loop_nslice=index_vector[loop_i];
     else loop_nslice = loop_i;
-    loop_nslice = min(loop_nslice,loop_maxn);
+    loop_nslice = std::min(loop_nslice,loop_maxn);
   };
   return *this;
 }
@@ -1086,58 +1161,21 @@ return_internal_reference<1,
     .def("getBegin",&hArray<TYPE>::getBegin)				\
     .def("getEnd",&hArray<TYPE>::getEnd)				\
     .def("getSize",&hArray<TYPE>::getSize)				\
-    .def("iterate",&hArray<TYPE>::iterate)				\
+    .def("loopingMode",&hArray<TYPE>::loopingMode)			\
+    .def("doLoopAgain",&hArray<TYPE>::doLoopAgain)			\
+    .def("loop_i",&hArray<TYPE>::getLoop_i)				\
+    .def("loop_nslice",&hArray<TYPE>::getLoop_nslice)			\
+    .def("loop_start",&hArray<TYPE>::getLoop_start)			\
+    .def("loop_end",&hArray<TYPE>::getLoop_end)				\
+    .def("loop_increment",&hArray<TYPE>::getLoop_increment)		\
     .def("__len__",&hArray<TYPE>::length)				\
+    .def("resize",&hArray<TYPE>::resize,return_internal_reference<>())					\
     .def("loop",&hArray<TYPE>::loop,return_internal_reference<>())					\
     .def("loop",&hArray<TYPE>::loopVector,return_internal_reference<>())					\
+    .def("resetLoop",&hArray<TYPE>::resetLoop,return_internal_reference<>())				\
     .def("noOn",&hArray<TYPE>::loopOn,return_internal_reference<>())				\
     .def("noOff",&hArray<TYPE>::loopOff,return_internal_reference<>())				\
-    .def("next",&hArray<TYPE>::next,return_internal_reference<>())					\
-      
-
-
-
-//------------------------------------------------------------------------
-//$DOCSTRING: Return the offset of the current slice from the begin pointer
-//$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hArray_intBegin
-//-----------------------------------------------------------------------
-#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HPyObjectPtr)(pyob)()("Python hArray Object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-//$COPY_TO END --------------------------------------------------
-/*!
- \brief $DOCSTRING
- $PARDOCSTRING
-
-Example:
-antennaIDs=hFileGetParameter(file,"AntennaIDs")
-x=hCalTable("~/LOFAR/usg/data/lopes/LOPES-CalTable",obsdate,list(antennaIDs))
-
-*/
-HInteger HFPP_FUNC_NAME(HPyObjectPtr pyobj) {
-//   if (!PyObject_HasAttrString(pyob, "ArrayType")) {
-//     HPyObjectPtr objrepr=PyObject_Repr(pyobj);
-//     char * objrepr_str= PyString_AsString(objrepr);
-//     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Object is not of hArray type;");
-//     return 0;
-//   }
-  
-//   HPyObjectPtr list=PyList_New(0),tuple;
-//   if (CTRead != NULL && PyList_Check(pyob)) {  //Check if CalTable was opened ... and Python object is a list
-//     size=PyList_Size(pyob);
-//     for (i=0;i<size;++i){  //loop over all antennas
-//       ant=PyInt_AsLong(PyList_GetItem(pyob,i));  //Get the ith element of the list, i.e. the antenna ID
-//       CTRead->GetData((uint)date, ant, keyword, &tmpvec);
-//       tuple=PyTuple_Pack(3,PyFloat_FromDouble(tmpvec[0]),PyFloat_FromDouble(tmpvec[1]),PyFloat_FromDouble(tmpvec[2]));
-//       PyList_Append(list,tuple);
-//     };
-//   };
-//   return list;
-  return 0;
-}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
+    .def("next",&hArray<TYPE>::next,return_internal_reference<>())					
 
 
 //========================================================================
@@ -1368,7 +1406,7 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-//$DOCSTRING: Copies a vector to another one.
+//$DOCSTRING: Copies a vector to another one without resizing them.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCopy
 //-----------------------------------------------------------------------
@@ -1377,8 +1415,12 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(outvec)()("Vector containing a copy of the input values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
+  vec1.copy(vec2) -> copy elements of vec1 to vec2
+
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Use vec.resize first if you want to ensure that both vectors have the same size.
 */
 template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_end)
@@ -1610,7 +1652,7 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
 #define HFPP_FUNC_VARIANT 2
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(val)()("Value containing the second operand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(operand)()("Value containing the second operand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -1718,7 +1760,7 @@ void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec
 #define HFPP_FUNC_VARIANT 2
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(val)()("Value containing the second operand")(HFPP_PAR_IS_SCALAR)(STDIT)(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(operand)()("Value containing the second operand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec2)()("Vector containing the output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
