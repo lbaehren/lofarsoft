@@ -206,14 +206,16 @@ input. Hence if you create a vector with Vector([1,2,3],size=2) it
 will contain only [1,2]. Vector([1,2,3],size=2,fill=4) will give
 [4,4].
 
-As the latest addition some simple support for multiple dimensions has
-been implemented, using the methods:
+Some simple support for multiple dimensions had been implemented,
+using the methods:
 
 vector.setDim([n1,n2,..])
 vector.getDim()
 vector.elem(n)
 
-This will be described later ....
+However, this is already depreciated, since there is an array class to
+do this better.
+
 
 (+++) Referencing, memory allocation, indexing, slicing
 ........................................................
@@ -296,32 +298,40 @@ v3
 The vectors have a number of mathematical functions attached to
 them. A full list can be seen by typing
 
->>> dir(Vector(float))
-['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__isub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd', 'addaddconv', 'append', 'asin', 'atan', 'ceil', 'convert', 'copy', 'cos', 'cosh', 'div', 'divadd', 'divaddconv', 'downsample', 'exp', 'extend', 'extendflat', 'fft', 'fill', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'findgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findlessthanabs', 'findlowerbound', 'floor', 'iadd', 'idiv', 'imul', 'isub', 'log', 'log10', 'mean', 'median', 'mul', 'muladd', 'muladdconv', 'new', 'norm', 'normalize', 'resize', 'sin', 'sinh', 'sort', 'sortmedian', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'subaddconv', 'sum', 'tan', 'tanh']
+"""
+dir(v1)
+"""
 
 Some of the basic arithmetic is available in an intuitve way.
 
 You can add a scalar to a vector by
 
->>> v1+3
-  Vec(6)=[3.0,4.0,5.0,6.0,7.0,8.0]
+"""
+v1+3
+"""
 
 This will actually create a new vector (and destroy it right away,
 since no reference was kept). The original vector is unchanged.
 
-You can also add two vectors:
+A technical limitiation is that - even though addition and
+multiplication is cummutative, the scalar (i.e., non-vector) values
+has to come as the second argument.
 
->>>v1+v2
-  Vec(6)=[2.0,3.0,4.0,5.0,6.0,7.0]
+You can also add two vectors (which is commutative):
+
+"""
+v1+v2
+"""
 
 In order to change the vector, you can use the "in place" operators
 +=, -=, /=, *= :
 
 Adding a vector in place:
 
->>>v1+=v2;
->>>v1
-  Vec(6)=[2.0,3.0,4.0,5.0,6.0,7.0]
+"""
+v1+=v2
+p_("v1")
+"""
 
 now v1 was actually modified such that v2 was added to the content of
 v1 and the results is stored in v1.
@@ -441,12 +451,12 @@ array and then calls hMul.
 
 """
 tmp_array=a.new()
-a.mul(2,tmp_array)
+tmp_array.mul(a,2)
 
 p_("a")
 """
 
-BTW, this could also be done calling the function hMul(a,2,tmp_array),
+BTW, this could also be done calling the function hMul(tmp_array,a,2),
 rather than the corresponding method. 
 
 An important constraint is that all these functions or methods only
@@ -739,12 +749,12 @@ x=hArray(int,a)
 and fill it with slices from "a" multiplied by the scalar value 2
 
 """
-a[[0,2],...].mul(2,x[[0,2],...])
+x[[0,2],...].mul(a[[0,2],...],2)
 
 p_("x")
 """
 
-and indeed now thw first and last slice were operated on and filled
+and indeed now the first and last slice were operated on and filled
 with the results of the operation.
 
 Forgetting slicing in a parameter can lead to unexpected results,
@@ -753,7 +763,7 @@ the result will always be written (and overwritten) into the first
 three elements of x, containing at the end only the results of the
 mutliplication of the last slice in a.
 """
-x=hArray(int,a); a[...].mul(2,x)
+x.fill(0); x[...].mul(a,2)
 
 p_("x")
 """
@@ -918,9 +928,6 @@ fxdata.setDim([nofSelectedAntennas,blocksize])
 
 This is now a large vector filled with zeros.
 
->>> fxdata
-Vec(2048)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...]
-
 Now we can read in the raw time series data, using "file.read" and a
 keyword. Currently implemented are the data fields "Fx", "Voltage",
 "FFT", "CalFFT","Time", "Frequency".
@@ -931,9 +938,10 @@ keyword "Fx" (means f(x) ).
 
 """
 file.read("Fx",fxdata)
+p_("fxdata")
 """
 
-and voila the vector is filled with time series data from the data file.. 
+and voila the vector is filled with time series data from the data file. 
 
 Access the various antennas through slicing
 
@@ -1126,10 +1134,143 @@ So, for a linear plot use .plot, for a loglog plot use .loglog and for
 a log-linear plot use .semilogx or .semilogy ...
 
 (+) CR Pipeline Modules
+---------------------------
 
-qualitycriteria=[("mean",(-15,15)),("rms",(5,15)),("nonGaussianity",(-3,3))]
-qualityresults=CRQualityCheck(file,qualitycriteria) 
+(++) Quality Checking of Time Series Data
+----------------------------------------------
 
+For an automatic pipeline it is essential to check whether the data is
+of good quality, or whether one needs to flag particular
+antennas. Here we demonstrate a simple, but effective way to do this.
+
+The basic parameters to look at are the mean value of the time series
+(indicating potential DC offsets), the root-mean-square (RMS)
+deviation (related to the power received), and the number of peaks in
+the data (indicating potential RFI problems).
+
+For cosmic ray data, we expect spikes and peaks to be in the middle of
+a trace, so we will just look at the first or/and last quarter of a
+data set and set the block size accordingly.
+
+"""
+blocksize=min(filesize/4,maxblocksize)
+"""
+
+We will then read this block of data into an apropriately sized data array.
+
+"""
+dataarray=hArray(float,[nofSelectedAntennas,blocksize])
+file.set("Blocksize",blocksize).set("Block",3).read("Voltage",dataarray.vec())
+"""
+
+The array now contains all the measured voltages of the selected
+antennas in the file.
+
+First we calculate the mean over all samples for each antennas (and
+make use of the looping through the Ellipsis object).
+
+"""
+datamean = dataarray[...].mean()
+p_("datamean")
+"""
+
+Similarly we get the rms (where we spare the algorithm from recalculating the
+mean, by providing it as input - actually a list of means).
+
+"""
+datarms = dataarray[...].stddev(datamean)
+p_("datarms")
+"""
+
+and finally we get the total number of peaks 5 sigma above the noise.
+
+"""
+datanpeaks = dataarray[...].countgreaterthanabs(datarms*5)
+p_("datanpeaks")
+"""
+
+To see whether we have more peaks than expected, we first calculate
+the expected number of peaks for a Gaussian distribution and our
+blocksize, as well as the error on that number.
+
+"""
+npeaksexpected=funcGaussian(5,1,0)*blocksize 
+p_("npeaksexpected")
+npeakserror=sqrt(npeaksexpected) 
+p_("npeakserror")
+"""
+
+So, that we can get a normalized quantity 
+
+G = (Npeaks_detected - Npeaks_expected)/Npeaks_error
+
+which should be of order unity if we have roughly a Gaussian
+distribution. If it is much larger or less than unity we have more or
+less peaks than expected and the data is clearly not Gaussian noise.
+
+We do the calculation of G using our STL vectors (even though speed it no
+of the essence here)
+
+"""
+dataNonGaussianity = Vector(float,nAntennas)
+dataNonGaussianity.sub(datanpeaks,npeaksexpected)
+dataNonGaussianity /= npeakserror
+"""
+
+The next stept is to make a nice table of the results and check
+whether these parameters are within the limits we have imposed (based
+on empirical studies of the data). 
+
+To ease the operation we combine all the data into one python array
+(using the zip function - zip, as in zipper).
+
+"""
+dataproperties=zip(selectedAntennas,datamean,datarms,datanpeaks,dataNonGaussianity)
+"""
+
+which is a rather nasty collection of numbers. So, we print a nice
+table (restricting it to the first 5 antennas).
+
+"""
+for prop in dataproperties[0:5]: print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, nonGaussianity={4: 7.2f}".format(*prop)
+"""
+
+Clearly this is a spiky dataset, with only one antenna not being
+affected by too many peaks (which is in fact not the case for the
+first block of that dataset).
+
+To check automatically whether all parameters are in the allowed
+range, we can use a little python helper function, using a python
+"dict" as database for allowed parameters.
+
+"""
+qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
+CheckParameterConformance(dataproperties[0],{"mean":1,"rms":2,"nonGaussianity":4},qualitycriteria)
+"""
+
+The first paramter is just the list of numbers of the mean, rms,
+etc. of one antenna we created above. The second parameter is a dict,
+describing which parameter to find at which position in the input
+list, and the third parameter is yet another dict specifying for each
+parameter the range of allowed upper and lower values. The result is a
+list of parameter names, where the antennas failed the test. The list
+is empty if the antenna passed it.
+
+Finally, we do not want to do this manually all the time. So, a little
+python function is available, that does the quality checking for you
+and returns a list with failed antennas and their properties.
+
+"""
+badantennalist=CRQualityCheck(qualitycriteria,file,dataarray,verbose=False) 
+
+p_("badantennalist[0]")
+"""
+
+(first the antenna number, then the block, then a list with the mean,
+rms, npeaks, and nonGaussianity, and finally the failed fields)
+
+Note, that this function can be called with "file=None". In this case
+the data provided in the datararray will be used.
 
 (+) Coordinates
 ---------------

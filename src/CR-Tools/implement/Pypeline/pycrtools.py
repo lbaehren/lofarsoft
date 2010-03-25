@@ -621,28 +621,28 @@ def Vec_imul(vec1,vec2):
 def Vec_add(vec1,val):
     "Provides the + operator for adding two vectors or a vector and a scalar. The result will be a new vector."
     vecout=vec1.new()
-    hAdd(vec1,val,vecout)
+    hAdd(vecout,vec1,val)
     return vecout
 
 # Operator:  -
 def Vec_sub(vec1,val):
     "Provides the - operator for subtracting two vectors or a vector and a scalar. The result will be a new vector."
     vecout=vec1.new()
-    hSub(vec1,val,vecout)
+    hSub(vecout,vec1,val)
     return vecout
 
 # Operator:  *
 def Vec_mul(vec1,val):
     "Provides the * operator for multiplying two vectors or a vector and a scalar. The result will be a new vector."
     vecout=vec1.new()
-    hMul(vec1,val,vecout)
+    hMul(vecout,vec1,val)
     return vecout
 
 # Operator:  /
 def Vec_div(vec1,val):
     "Provides the / operator for dividing two vectors or a vector by a scalar. The result will be a new vector."
     vecout=vec1.new()
-    hDiv(vec1,val,vecout)
+    hDiv(vecout,vec1,val)
     return vecout
 
 
@@ -681,7 +681,7 @@ for v in hAllContainerTypes:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hStdDev","hDownsample","hNegate","hNorm","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs"]:
+    for s in ["hMean","hStdDev","hDownsample","hNegate","hNorm","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hComplexContainerTypes:
@@ -697,7 +697,7 @@ for v in hNumericalContainerTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hMulAddConv","hDivAddConv","hSubAddConv","hAddAddConv","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
+    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
         setattr(v,s[1:].lower(),eval(s))
 
 #========================================================================
@@ -837,115 +837,112 @@ DataReader.__doc__=crfile.__doc__
 # Pypeline Extension, Functions and Algorithms
 #------------------------------------------------------------------------
 
-def CheckParameterConformance(data,limits):
+def CheckParameterConformance(data,keys,limits):
     """
-    CheckParameterConformance([12,-10],[("mean",(-15,15)),("rms",(10,40))])  ->  ["rms"]
-    
-    Checks whether a list of numbers is within a range of limits
-    specified beforehand. The limits are provided as a list of tuples,
-    of the form ("FIELDNAME",(LOWERLIMT,UPPERLIMIT)). A list of
-    fieldnames is returned where the data does not fall within the
-    specified range.
+    Usage:
+
+    qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
+
+    CheckParameterConformance([Antenna,mean,rms,npeaks,nonGaussianity],{"mean":1,"rms":2,"nonGaussianity":4},qualitycriteria)  ->  ["rms",...]
+
+    Parameters:
+
+    data -  is a list of quality values (i.e. numbers) to check
+
+    keys - a dictionary of fieldnames to be checked and indices
+           telling, where in data the field can be found
+
+    limits - a dictionary of fieldnames and limits (lowerlimit,
+             upperlimit)
+
+    Checks whether a list of numbers is within a range of limits. The
+    limits are provided as a dictionary of fieldnames and tuples, of
+    the form FIELDNAME:(LOWERLIMT,UPPERLIMIT). A list of fieldnames is
+    returned where the data does not fall within the specified range.
 
     """
     result=[]
-    for i in range(len(data)):
-        if (data[i]<limits[i][1][0]) | (data[i]>limits[i][1][1]): result.append(limits[i][0])
+    for k in keys:
+        if (data[keys[k]]<limits[k][0]) | (data[keys[k]]>limits[k][1]): result.append(k)
     return result
 
 
-def CRQualityCheck(file,limits,maxblocksize=65536,nsigma=5):
+def CRQualityCheck(limits,file=None,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True):
     """
-    CRQualityCheck(file,[("mean",(-15,15)),("rms",(5,15)),("nonGaussianity",(-1,3))]) 
+    Usage:
 
-    Will step through all antennas of a file assess the data quality. For each 
+    CRQualityCheck(qualitycriteria,file,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True) -> list of antennas failing the limits
 
+    qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
+
+    Will step through all antennas of a file assess the data quality
+    and return a list with antennas which have failed the quality
+    check and their statistical properties.
+
+    Parameters:
+
+
+    qualitycriteria - a Python dict with keywords of parameters and limits thereof (lower, upper)
+
+    file - Data Reader file object, if none, use values in dataarray and don't read in again
+
+    array - an optional data storage array to read in the data
+
+    maxblocksize - The algorithms takes by default the first and last
+    quarter of a file but not more samples than given in this
+    paramter.
+
+    nsigma - determines for the peak counting algorithm the threshold
+    for peak detection in standard deviations
+
+    verbose - sets whether or not to print additional information
     """
 #Initialize some parameters
-    nAntennas=file.get("nofAntennas")
-    filesize=file.get("Filesize")
-    blocksize=min(filesize/4,maxblocksize)
-    file.set("Blocksize",blocksize)
-    nBlocks=filesize/blocksize; 
-    blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
+    if not file==None:
+        nAntennas=file.get("nofSelectedAntennas")
+        selected_antennas=file.get("selectedAntennas")
+        filesize=file.get("Filesize")
+        blocksize=min(filesize/4,maxblocksize)
+        file.set("Blocksize",blocksize)
+        nBlocks=filesize/blocksize; 
+        blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
+        if dataarray==None: dataarray=hArray(float,[nAntennas,blocksize])
+    else:
+        nAntennas=dataarray.getDim()[0]
+        blocksize=dataarray.getDim()[1]
+        selected_antennas=range(nAntennas)
+        blocklist=[0]
 #Create the some scratch vectors
     qualityflaglist=[]
-    where=Vector(int,blocksize)
-    rawdata=Vector(float)
-    rawdata.setDim([nAntennas,blocksize])
 #Calculate probabilities to find certain peaks
     probability=funcGaussian(nsigma,1,0) # what is the probability of a 5 sigma peak
     npeaksexpected=probability*blocksize # what is the probability to see such a peak with the blocksize
     npeakserror=sqrt(npeaksexpected) # what is the statisitcal error on that expectation
 #Start checking
-    print "Quality checking of file ",file.filename
-    print "Considering",nAntennas," antennas and the Blocks:",blocklist
-    print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected
+    if verbose:
+        if not file==None: print "Quality checking of file ",file.filename
+        print "Considering",nAntennas," antennas and the Blocks:",blocklist
+        print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected
     for Block in blocklist:
-        file.set("Block",Block).read("Voltage",rawdata)
-        for Antenna in range(nAntennas):
-            print "Antenna={0:2d},".format(Antenna),"Block={0:3d}:".format(Block),
-            datamean = rawdata.mean(Antenna*blocksize,(Antenna+1)*blocksize)
-            datarms = rawdata.elem(Antenna).stddev(datamean)
-            datanpeaks=rawdata.elem(Antenna).findgreaterthanabs(int(round(nsigma*datarms)),where)
-            dataNonGaussianity=(datanpeaks-npeaksexpected)/npeakserror
-            print "mean={0:4.2f},".format(datamean),"rms={0:5.1f},".format(datarms),"npeaks={0:5d},".format(datanpeaks),"nonGaussianity={0:5.2f}".format(dataNonGaussianity),
-            noncompliancelist=CheckParameterConformance([datamean,datarms,dataNonGaussianity],limits)
-            if noncompliancelist:
-                qualityflaglist.append((Antenna,Block,noncompliancelist))
-                print noncompliancelist,"!!"
-            else: print ""
+        if verbose:
+            print "\nBlock = ", Block
+            print "-----------------------------------------------------------------------------------------"
+        if not file==None: file.set("Block",Block).read("Voltage",dataarray.vec())
+        datamean = dataarray[...].mean()
+        datarms = dataarray[...].stddev(datamean)
+        datanpeaks = dataarray[...].countgreaterthanabs(datarms*nsigma)
+        dataNonGaussianity = Vector(float,nAntennas)
+        dataNonGaussianity.sub(datanpeaks,npeaksexpected)
+        dataNonGaussianity /= npeakserror
+        dataproperties=zip(selected_antennas,datamean,datarms,datanpeaks,dataNonGaussianity)
+        noncompliancelist=[]
+        for prop in iter(dataproperties): 
+            noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"nonGaussianity":4},limits)
+            if noncompliancelist: qualityflaglist.append([prop[0],Block,prop[1:],noncompliancelist])
+            if verbose:
+                print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, nonGaussianity={4: 7.2f}".format(*prop)," ",noncompliancelist
     return qualityflaglist
 
-"""
-def CRQualityCheckNew(file,limits,maxblocksize=65536,nsigma=5):
 
-    CRQualityCheck(file,[("mean",(-15,15)),("rms",(5,15)),("nonGaussianity",(-1,3))]) 
-
-    Will step through all antennas of a file assess the data quality. For each 
-
-
-#Initialize some parameters
-    nAntennas=file.get("nofAntennas")
-    filesize=file.get("Filesize")
-    blocksize=min(filesize/4,maxblocksize)
-    file.set("Blocksize",blocksize)
-    nBlocks=filesize/blocksize; 
-    blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
-#Create the some scratch vectors
-    qualityflaglist=[]
-    rawdata=hArray(float,[nAntennas,blocksize])
-    where=hArray(int,rawdata)
-#Calculate probabilities to find certain peaks
-    probability=funcGaussian(nsigma,1,0) # what is the probability of a 5 sigma peak
-    npeaksexpected=probability*blocksize # what is the probability to see such a peak with the blocksize
-    npeakserror=sqrt(npeaksexpected) # what is the statisitcal error on that expectation
-#Start checking
-    print "Quality checking of file ",file.filename
-    print "Considering",nAntennas," antennas and the Blocks:",blocklist
-    print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected
-    for Block in blocklist:
-        file.set("Block",Block).read("Voltage",rawdata.vec())
-        print "Block={0:3d}:".format(Block),
-        rawdata_loop=rawdata[...];
-        datamean = rawdata_loop.mean
-        iterate=True; 
-#        datarms=Vector(float,nAntennas); 
-#        while iterate: 
-#            datarms[rawdata_loop.loop_nslice()]=rawdata_loop.vec().stddev[datamean]
-#            iterate=rawdata_loop.next().doLoopAgain()
-#        
-#        datarms = rawdata[...].stddev(hArray(datamean)[...])
-#        datanpeaks=rawdata[...].findgreaterthanabs(int(round(nsigma*datarms)),where)
-        dataNonGaussianity=(datanpeaks-npeaksexpected)/npeakserror
-        print "mean={0:4.2f},".format(datamean),"rms={0:5.1f},".format(datarms),"npeaks={0:5d},".format(datanpeaks),"nonGaussianity={0:5.2f}".format(dataNonGaussianity),
-        noncompliancelist=CheckParameterConformance([datamean,datarms,dataNonGaussianity],limits)
-        if noncompliancelist:
-            qualityflaglist.append((Antenna,Block,noncompliancelist))
-            print noncompliancelist,"!!"
-        else: print ""
-return qualityflaglist
-    """
-
-
-
+#qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
+#CRQualityCheck(file,qualitycriteria,maxblocksize=65536,nsigma=5,verbose=True)

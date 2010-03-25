@@ -35,7 +35,9 @@ BEGIN{true=1; false=0; iter=false}
     for (i in idxs) {
 	out = inp
 	idxsicap=toupper(substr(idxs[i],1,1)) substr(idxs[i],2) 
+	idxsilow=tolower(substr(idxs[i],1,1)) substr(idxs[i],2) 
 	gsub("{?\\$" ivar "!CAPS}?",idxsicap,out)
+	gsub("{?\\$" ivar "!LOW}?",idxsilow,out)
 	gsub("{?\\$" ivar "}?",idxs[i],out)
 	print out
     }
