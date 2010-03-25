@@ -178,8 +178,10 @@ namespace CR { // Namespace CR -- begin
       \brief Adds pulse to the noise
       
       \param pulseSNR          - signal-to-noise ratio to which the test pulse is scaled
+      \param resultsFileName   - name of file for ASCII results
     */
-    void addPulseToNoise(const double& pulseSNR);                          
+    void addPulseToNoise(const double& pulseSNR,
+                         const string& resultsFileName = "");                          
 
                           
   }; // class definition
