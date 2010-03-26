@@ -18,10 +18,11 @@ various components of the framework and how they fit together.
 .. toctree::
    :maxdepth: 2
 
-   framework/dependencies/index.rst
+   framework/overview/index.rst
    framework/recipe/index.rst
    framework/parallel/index.rst
-   framework/pipeline/index.rst
+   framework/infrastructure/index.rst
+   framework/dependencies/index.rst
 
 The Standard Imaging Pipeline
 =============================

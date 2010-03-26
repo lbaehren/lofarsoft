@@ -1,13 +1,16 @@
-=========
-Framework
-=========
+************
+Dependencies
+************
 
 The LOFAR pipeline system is built using the `Python
-<http://www.python.org/>`_ programming language. It relies on various
-libraries and tools.
+<http://www.python.org/>`_ programming language. It builds upon the following
+libraries and tools. The short descriptions given here should serve as
+background material for those who simply wish to use the framework: directly
+interacting with these components should rarely be necessary. Developers, of
+course, will wish to learn in detail about all of these libraries.
 
 Cuisine
--------
+=======
 The pipeline is constructed using a system based on the `WSRT Cuisine
 <http://www.astron.nl/~renting/pipeline_frame.html>`_ framework developed by
 Adriaan Renting; the reader is encouraged to refer to its documentation. Some
@@ -33,8 +36,10 @@ modificatins have been made. These include:
 * Assorted bug-fixes and tweaks.
 
 
+.. _ipython-blurb:
+
 IPython
--------
+=======
 `IPython <http://ipython.scipy.org>`_, billed as "an enhanced interactive
 Python", also provides a comprehensive and easy-to-use suite of tools for
 parallel processing across a cluster of compute nodes using Python. This
@@ -59,7 +64,7 @@ recipe for an example of its use.
 .. _distproc-blurb:
 
 distproc
---------
+========
 An alternative method of starting a distributed process across the cluster is
 to use the ``distproc`` system by Ger van Diepen. This system is used
 internally by various pipeline components, such as the MWImager; the intested
@@ -92,7 +97,7 @@ systems to schedule jobs on the appropriate compute nodes.
 .. _fabric-blurb:
 
 Fabric
-------
+======
 `Fabric <http://docs.fabfile.org/>`_ is "a Python library and command-line
 tool designed to streamline deploying applications or performing system
 administration tasks via the SSH protocol", to quote the website. In the
