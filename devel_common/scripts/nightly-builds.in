@@ -8,14 +8,15 @@ export LOFARSOFT=${USG_ROOT}
 echo "-- Cleaning up code base ..."
 
 cd ${USG_ROOT}
-rm -rf release
-rm -rf build
+rm -rf release/*
+rm -rf build/*
 
 echo "-- Updating working copy ..."
 
+cd ${USG_ROOT}
 svn up
 
-echo "-- Running bootstrap ..."
+echo "-- Building projects ..."
 
 cd ${USG_ROOT}/build
 ./bootstrap
