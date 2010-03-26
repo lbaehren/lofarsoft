@@ -77,8 +77,8 @@ fi
 #Check whether Output Processing Location already exists
 if [ -d $location ] && [ $delete -ne 1 ]
 then
-   echo "ERROR: Output Processing Location $location already exists;  \n"\
-        "       please specify different output location or delete location and try again."
+   echo "ERROR: Output Processing Location $location already exists;  "
+   echo "       please specify different output location or try again with delete option (-del)."
    exit 1
 elif [ -d $location ] && [ $delete -eq 1 ]
 then
@@ -89,6 +89,9 @@ else
    mkdir -p $location 
    cd $location
 fi
+
+#In the event that location is a specified relative path, put the absolute path as location
+location=`pwd`
 
 #Set these parameters by hand
 ###OBSID=L2010_06296
@@ -139,101 +142,94 @@ do
    fi   
 done
 
-#As a testing measure, you can set run_this to 1 
-# in order to skip the bf2presto if it's already done;
-# the script picks up after the bf2presto step.
-# By default (0), everything is run.
-run_this=0
-if [ $run_this -eq 0 ] 
+#Create directories with appropriate permissions
+for ii in $num_dir
+do
+  mkdir -p ${STOKES}/RSP$ii
+  chmod 774 ${STOKES}/RSP$ii
+  chgrp pulsar ${STOKES}/RSP$ii
+done
+if [ $all -eq 1 ]
+then 
+  mkdir ${STOKES}/"RSPA"
+  chmod 774 ${STOKES}/"RSPA"
+  chgrp pulsar ${STOKES}/"RSPA"
+  fi
+  
+master_list=${STOKES}/SB_master.list
+#Create subband lists
+all_list=`ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.incoherentstokes | sort -t B -g -k 2`
+ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.incoherentstokes | sort -t B -g -k 2 > $master_list
+all_num=`wc -l $master_list | awk '{print $1}'`
+
+if [ $all_num -lt 8 ]
 then
-	#Create directories with appropriate permissions
-	for ii in $num_dir
-	do
-	   mkdir -p ${STOKES}/RSP$ii
-	   chmod 774 ${STOKES}/RSP$ii
-	   chgrp pulsar ${STOKES}/RSP$ii
-	done
-	if [ $all -eq 1 ]
-	then 
-	   mkdir ${STOKES}/"RSPA"
-	   chmod 774 ${STOKES}/"RSPA"
-	   chgrp pulsar ${STOKES}/"RSPA"
-    fi
-    
-	master_list=${STOKES}/SB_master.list
-	#Create subband lists
-	all_list=`ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.incoherentstokes | sort -t B -g -k 2`
-	ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.incoherentstokes | sort -t B -g -k 2 > $master_list
-	all_num=`wc -l $master_list | awk '{print $1}'`
-	
-	if [ $all_num -lt 8 ]
-	then
-	   echo "Error: Less than 8 subbands found, unlikely to be a valid observation"
-	   exit 1
-	fi
-	
-	div_files=`echo $all_num | awk '{print $1 / 8}'`
-	count=0
-	
-	#Create 8-sections of the file list
-	split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
-	
-	#Move the lists to the directories
-	for ii in $num_dir
-	do
-	   mv ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"$ii"/RSP"$ii".list"
-	done
-	
-	echo "Starting bf2presto conversion"
-	date
-	
-	#Convert the subbands with bf2presto
-	for ii in $num_dir
-	do
-	   echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
-	   bf2presto ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 && touch ${STOKES}/"RSP"$ii"/DONE"  >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out"  2>&1 &
-	done
-	
-	echo "Running bf2presto in the background..." 
-		
-	#Create .sub.inf files with par2inf.py
-	cp $PARSET ./${OBSID}.parset
-	cp ~hessels/default.inf .
-	python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n 31 -r 8 ./${OBSID}.parset
-	jj=0
-	for ii in `ls test*.inf`
-	do
-	  mv ${ii} ${STOKES}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
-	  jj=`expr $jj + 1`
-	done
-	
-	#Create the .sub.inf file for the entire set (in background, as there is plenty of time to finish before file is needed
-	if [ $all -eq 1 ]
-	then 
-       python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n 248 -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf &
-	fi
-	
-	#Check when all 8 DONE files are available, then all processes have exited
-	ii=1
-	yy=0
-	while [ $ii -ne $yy ]
-	do
-	   if [ -e $done_list ]
-	   then
-	      echo "All bf2presto tasks have completed!" 
-	      yy=1
-	      sleep 5
-	   fi
-	   sleep 10
-	done
-	
-	#Make a master subband location with all subbands (run in the background, while other tasks are being done)
-	if [ $all -eq 1 ]
-	then 
-       cd ${STOKES}/"RSPA"
-       #master_counter=0
-       echo "#!/bin/sh" > run.sh
-    # the method below is too slow, so keeping it for reference, using awk/sed instead
+  echo "Error: Less than 8 subbands found, unlikely to be a valid observation"
+  exit 1
+fi
+
+div_files=`echo $all_num | awk '{print $1 / 8}'`
+count=0
+
+#Create 8-sections of the file list
+split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+
+#Move the lists to the directories
+for ii in $num_dir
+do
+  mv ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"$ii"/RSP"$ii".list"
+done
+
+echo "Starting bf2presto conversion"
+date
+
+#Convert the subbands with bf2presto
+for ii in $num_dir
+do
+  echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
+  bf2presto ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 && touch ${STOKES}/"RSP"$ii"/DONE"  >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out"  2>&1 &
+done
+
+echo "Running bf2presto in the background..." 
+
+#Create .sub.inf files with par2inf.py
+cp $PARSET ./${OBSID}.parset
+cp ~hessels/default.inf .
+python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n 31 -r 8 ./${OBSID}.parset
+jj=0
+for ii in `ls test*.inf`
+do
+ mv ${ii} ${STOKES}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
+ jj=`expr $jj + 1`
+done
+
+#Create the .sub.inf file for the entire set (in background, as there is plenty of time to finish before file is needed
+if [ $all -eq 1 ]
+then 
+     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n 248 -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf &
+fi
+
+#Check when all 8 DONE files are available, then all processes have exited
+ii=1
+yy=0
+while [ $ii -ne $yy ]
+do
+  if [ -e $done_list ]
+  then
+     echo "All bf2presto tasks have completed!" 
+     yy=1
+     sleep 5
+  fi
+  sleep 10
+done
+
+#Make a master subband location with all subbands (run in the background, while other tasks are being done)
+if [ $all -eq 1 ]
+then 
+     cd ${STOKES}/"RSPA"
+     #master_counter=0
+     echo "#!/bin/sh" > run.sh
+  # the method below is too slow, so keeping it for reference, using awk/sed instead
 #    for ii in $num_dir
 #    do
 #       sub_rsp_counter=0
@@ -247,21 +243,20 @@ then
 #          (( sub_rsp_counter += 1 ))
 #       done
 #    done
-        ls ../RSP0/*sub0??? ../RSP1/*sub0??? ../RSP2/*sub0??? ../RSP3/*sub0??? ../RSP4/*sub0??? ../RSP5/*sub0??? ../RSP6/*sub0??? ../RSP7/*sub0??? | sed 's/\// /g' | awk '{print $3}' | sed 's/RSP/ RSP /' | sed 's/ RSP/RSP/g' | sed 's/\.sub/ /' | awk '{printf("ln -s ../RSP%d/%s%d.sub%04d %sA.sub%04d\n"),$2,$1,$2,$3,$1,$2*496+$3}' >> run.sh
-       echo "Performing subband linking for all RPSs in one location"
-       chmod 777 run.sh
-       check_number=`wc -l run.sh | awk '{print $1}'`
-       if [ $check_number -ne 3969 ]
-       then
-          all=0
-          echo "Warning - problem running on ALL subbands;  master list is too short (is $check_number but should be 3969 rows)"
-          echo "Warning - problem running on ALL subbands;  master list is too short (is $check_number but should be 3969 rows)" >> ${location}/$log
-        else
-          ./run.sh &
-        fi
-        cd $location
-    fi
-fi # end of run_this for testing purposes to skip the bf2presto section
+      ls ../RSP0/*sub0??? ../RSP1/*sub0??? ../RSP2/*sub0??? ../RSP3/*sub0??? ../RSP4/*sub0??? ../RSP5/*sub0??? ../RSP6/*sub0??? ../RSP7/*sub0??? | sed 's/\// /g' | awk '{print $3}' | sed 's/RSP/ RSP /' | sed 's/ RSP/RSP/g' | sed 's/\.sub/ /' | awk '{printf("ln -s ../RSP%d/%s%d.sub%04d %sA.sub%04d\n"),$2,$1,$2,$3,$1,$2*496+$3}' >> run.sh
+     echo "Performing subband linking for all RPSs in one location"
+     chmod 777 run.sh
+     check_number=`wc -l run.sh | awk '{print $1}'`
+     if [ $check_number -ne 3969 ]
+     then
+        all=0
+        echo "Warning - problem running on ALL subbands;  master list is too short (is $check_number but should be 3969 rows)"
+        echo "Warning - problem running on ALL subbands;  master list is too short (is $check_number but should be 3969 rows)" >> ${location}/$log
+      else
+        ./run.sh &
+      fi
+      cd $location
+fi
 
 #Clean up the DONE file
 for ii in $num_dir
