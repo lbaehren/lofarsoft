@@ -37,6 +37,7 @@ set (enable-python ${MATHGL_ENABLE_PYTHON} CACHE BOOL "Enable Python extension")
 ##____________________________________________________________________
 ##                                                              OpenGL
 
+set (OPENGL_FOUND          ${OPENGL_FOUND}     CACHE BOOL     "Have OpenGL?")
 set (OPENGL_LIBRARIES      ${OPENGL_LIBRARIES} CACHE FILEPATH "Path to libOpenGL")
 
 ##____________________________________________________________________
@@ -60,6 +61,10 @@ set (QT_LIBRARIES          ${QT_LIBRARIES}          CACHE FILEPATH "Qt libraries
 if (GSL_INCLUDES)
   include_directories (${GSL_INCLUDES})
 endif (GSL_INCLUDES)
+
+if (OPENGL_INCLUDE_DIR)
+  include_directories (${OPENGL_INCLUDE_DIR})
+endif (OPENGL_INCLUDE_DIR)
 
 if (QT_INCLUDE_DIR)
   include_directories (${QT_INCLUDE_DIR})
