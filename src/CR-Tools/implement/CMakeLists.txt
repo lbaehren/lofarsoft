@@ -64,6 +64,7 @@ else (CR_WITH_STARTOOLS)
       analyseLOPESevent2.cc
       checkNoiseInfluence.cc
       PulseProperties.cc
+      lateralDistribution.cc
       )
     list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/${cr_startools})
   endforeach (cr_startools)
