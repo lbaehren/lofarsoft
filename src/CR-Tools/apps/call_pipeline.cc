@@ -30,6 +30,7 @@
 
 #include <crtools.h>
 #include <Analysis/analyseLOPESevent2.h>
+#include <Analysis/lateralDistribution.h>
 #include <Analysis/PulseProperties.h>
 #include <Analysis/AntennasDisplay.h>
 
@@ -1828,8 +1829,6 @@ int main (int argc, char *argv[])
           eventPipeline.setFreqInterval(config["freqStart"]->dValue(),config["freqStop"]->dValue());
           eventPipeline.setCCWindowWidth(config["ccWindowWidth"]->dValue());
           eventPipeline.setUpsamplingExponent(config["upsamplingExponent"]->uiValue());
-          eventPipeline.setLateralSNRcut(config["lateralSNRcut"]->dValue());
-          eventPipeline.setLateralTimeCut(config["lateralTimeCut"]->dValue());
           eventPipeline.setCoreError(coreError);
           eventPipeline.setAzimuthError(azimuthError);
           eventPipeline.setZenithError(zenithError);
@@ -1896,9 +1895,16 @@ int main (int argc, char *argv[])
             if (config["lateralOutputFile"]->bValue())
               eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
 
+            // get the pulse properties
+            rawPulsesMap = eventPipeline.getRawPulseProperties();
+            calibPulsesMap = eventPipeline.getCalibPulseProperties();
+
             // generate the lateral distribution and get resutls
+            CR::lateralDistribution lateralFitter;
+            lateralFitter.setLateralSNRcut(config["lateralSNRcut"]->dValue());
+            lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
-              eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y, config["lateralPowerLaw"]->bValue());
+              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", calibPulsesMap, results, config["lateralPowerLaw"]->bValue());
               R_0 = results.asDouble("R_0");
               sigR_0 = results.asDouble("sigR_0");
               eps = results.asDouble("eps");
@@ -1921,11 +1927,7 @@ int main (int argc, char *argv[])
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue())
-              eventPipeline.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",results, core_x, core_y);
-
-            // get the pulse properties
-            rawPulsesMap = eventPipeline.getRawPulseProperties();
-            calibPulsesMap = eventPipeline.getCalibPulseProperties();
+              lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-", calibPulsesMap, results);
 
             // getting necessary data to plot [added: mfranc]
             if(config["eventDisplayPlot"]->bValue()) {
@@ -1956,8 +1958,6 @@ int main (int argc, char *argv[])
           eventPipeline.setFreqInterval(config["freqStart"]->dValue(),config["freqStop"]->dValue());
           eventPipeline.setCCWindowWidth(config["ccWindowWidth"]->dValue());
           eventPipeline.setUpsamplingExponent(config["upsamplingExponent"]->uiValue());
-          eventPipeline.setLateralSNRcut(config["lateralSNRcut"]->dValue());
-          eventPipeline.setLateralTimeCut(config["lateralTimeCut"]->dValue());
           eventPipeline.setCoreError(coreError);
           eventPipeline.setAzimuthError(azimuthError);
           eventPipeline.setZenithError(zenithError);
@@ -2024,9 +2024,18 @@ int main (int argc, char *argv[])
             if (config["lateralOutputFile"]->bValue())
               eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
 
-            // generate the lateral distribution
+            // get the pulse properties and insert them into allready existing EW map
+            // (which will be empty, if polarization = EW, but still existing
+            map <int,PulseProperties> newPulses(eventPipeline.getRawPulseProperties());
+            rawPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
+            newPulses = eventPipeline.getCalibPulseProperties();
+
+            // fit lateral distribution
+            CR::lateralDistribution lateralFitter;
+            lateralFitter.setLateralSNRcut(config["lateralSNRcut"]->dValue());
+            lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
-              eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y, config["lateralPowerLaw"]->bValue());
+              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", newPulses, results, config["lateralPowerLaw"]->bValue());
               R_0_NS = results.asDouble("R_0");
               sigR_0_NS = results.asDouble("sigR_0");
               eps_NS = results.asDouble("eps");
@@ -2049,13 +2058,9 @@ int main (int argc, char *argv[])
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue())
-              eventPipeline.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",results, core_x, core_y);
+              lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-", newPulses, results);
 
-            // get the pulse properties and insert them into allready existing EW map
-            // (which will be empty, if polarization = EW, but still existing
-            map <int,PulseProperties> newPulses(eventPipeline.getRawPulseProperties());
-            rawPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
-            newPulses = eventPipeline.getCalibPulseProperties();
+            // insert calibrated pulse properties here, for eventual changes during the lateral distribution
             calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
 
             // getting necessary data to plot [added: mfranc]
@@ -2087,8 +2092,6 @@ int main (int argc, char *argv[])
           eventPipeline.setFreqInterval(config["freqStart"]->dValue(),config["freqStop"]->dValue());
           eventPipeline.setCCWindowWidth(config["ccWindowWidth"]->dValue());
           eventPipeline.setUpsamplingExponent(config["upsamplingExponent"]->uiValue());
-          eventPipeline.setLateralSNRcut(config["lateralSNRcut"]->dValue());
-          eventPipeline.setLateralTimeCut(config["lateralTimeCut"]->dValue());
           eventPipeline.setCoreError(coreError);
           eventPipeline.setAzimuthError(azimuthError);
           eventPipeline.setZenithError(zenithError);
@@ -2155,9 +2158,18 @@ int main (int argc, char *argv[])
             if (config["lateralOutputFile"]->bValue())
               eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
 
+            // get the pulse properties and insert them into allready existing EW map
+            // (which will be empty, if polarization = EW, but still existing
+            map <int,PulseProperties> newPulses(eventPipeline.getRawPulseProperties());
+            rawPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
+            newPulses = eventPipeline.getCalibPulseProperties();
+
             // generate the lateral distribution
+            CR::lateralDistribution lateralFitter;
+            lateralFitter.setLateralSNRcut(config["lateralSNRcut"]->dValue());
+            lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
-              eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y, config["lateralPowerLaw"]->bValue());
+              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", newPulses, results, config["lateralPowerLaw"]->bValue());
               R_0_VE = results.asDouble("R_0");
               sigR_0_VE = results.asDouble("sigR_0");
               eps_VE = results.asDouble("eps");
@@ -2180,13 +2192,9 @@ int main (int argc, char *argv[])
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue())
-              eventPipeline.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",results, core_x, core_y);
+              lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-", newPulses, results);
 
-            // get the pulse properties and insert them into allready existing EW map
-            // (which will be empty, if polarization = EW, but still existing
-            map <int,PulseProperties> newPulses(eventPipeline.getRawPulseProperties());
-            rawPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
-            newPulses = eventPipeline.getCalibPulseProperties();
+            // insert calibrated pulse properties here, for eventual changes during the lateral distribution
             calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
 
             // getting necessary data to plot [added: mfranc]

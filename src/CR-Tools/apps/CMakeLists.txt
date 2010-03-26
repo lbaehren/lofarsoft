@@ -142,6 +142,39 @@ if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
 ## -------------------------------------------------------------------
+## compareLOPES2sim
+
+if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
+
+  ## compiler instructions
+  add_executable (compareLOPES2sim
+    compareLOPES2sim.cc
+    ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C
+    )
+  ## extra properties to take care of
+  if (APPLE)
+    set_target_properties (compareLOPES2sim
+      PROPERTIES
+      COMPILE_FLAGS "-fsigned-char -fno-common"
+      LINK_FLAGS "-bind_at_load"
+      )
+  endif (APPLE)
+  ## linker instructions
+  target_link_libraries (compareLOPES2sim
+    cr
+    ${POSTGRESQL_LIBRARIES}
+    ${ROOT_LIBRARIES}
+    ${HAVE_LIBUTIL}
+    ${HAVE_LIBM}
+    )
+  ## installation instructions
+  list (APPEND cr_apps compareLOPES2sim)
+
+endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
+
+
+
+## -------------------------------------------------------------------
 ## readLopesCalTable
 
 if (HAVE_CASA OR HAVE_CASACORE)

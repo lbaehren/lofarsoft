@@ -96,11 +96,6 @@ namespace CR { // Namespace CR -- begin
     //! map of calculated pulse parameters of calibrated fieldstrength traces
     map <int, PulseProperties> calibPulses;
 
-    //! SNR cut for lateral distribution
-    double lateralSNRcut;
-    //! Time window cut for lateral distribution (pulse time must be close to cc-beam center)
-    double lateralTimeCut;
-    
     //! Core uncertainty in m
     double coreError;
     //! Zenith uncertainty in radians
@@ -299,42 +294,6 @@ namespace CR { // Namespace CR -- begin
     */
     inline map<int,PulseProperties> getCalibPulseProperties () {
       return calibPulses;
-    }
-
-    /*!
-      \brief Get the SNR cut for the lateral distribution
-
-      \return SNRcut -- SNR cut
-    */
-    inline double getLateralSNRcut () {
-       return lateralSNRcut;
-    }
-
-    /*!
-      \brief Set the SNR cut for the lateral distribution
-
-      \param  SNRcut -- SNR cut
-    */
-    inline void setLateralSNRcut (double const &SNRcut) {
-      lateralSNRcut = SNRcut;
-    }
-
-    /*!
-      \brief Get the timing cut for the lateral distribution
-
-      \return timeCut -- timing cut
-    */
-    inline double getLateralTimeCut () {
-       return lateralTimeCut;
-    }
-
-    /*!
-      \brief Set the timing cut for the lateral distribution
-
-      \param  timeCut -- timing cut
-    */
-    inline void setLateralTimeCut (double const &timeCut) {
-      lateralTimeCut = timeCut;
     }
 
     /*!
@@ -578,34 +537,6 @@ namespace CR { // Namespace CR -- begin
                               const Record& erg,
                               const double& Xc,
                               const double& Yc);
-
-    /*!
-      \brief Fits the lateral distribution
-
-      \param filePrefix  - the filename will be prefix+GT+".dat".
-      \param erg         - results of the pipeline (results from the fit will be added)
-      \param XC          - x-position of the shower center [in m]
-      \param YC          - y-position of the shower center [in m]
-      \param fitPowerLaw - fits not only an exponential, but also a power law
-   */
-    void fitLateralDistribution (const string& filePrefix,
-                                 Record& erg,
-                                 const double& Xc=0,
-                                 const double& Yc=0,
-                                 bool fitPowerLaw=false );
-
-    /*!
-      \brief Plots lateral distribution of arrival times
-
-      \param filePrefix - the filename will be prefix+GT+".dat".
-      \param erg        - results of the pipeline (results from the fit will be added)
-      \param XC         - x-position of the shower center [in m]
-      \param YC         - y-position of the shower center [in m]
-   */
-    void lateralTimeDistribution (const string& filePrefix,
-                                  Record& erg,
-                                  const double& Xc = 0,
-                                  const double& Yc = 0);
 
     /*!
       /brief Generates a simple skymap 
