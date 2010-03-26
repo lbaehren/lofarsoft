@@ -734,7 +734,7 @@ will loop over slices 0 and 2.
 
 
 Looping can also be done for methods that require multiple arrays as
-inputs (remember a mix of vectors and arrays is forbidden). In this
+inputs (remember a mix of vectors and arrays is not implemented). In this
 case the next() method will be applied to every array in the paramter
 list and looping proceeds until the first array has reached the
 end. Hence, care has to be taken that the same slice looping is
@@ -768,6 +768,81 @@ x.fill(0); x[...].mul(a,2)
 p_("x")
 """
 
+(+++) Units and Scale Factors
+................................
+
+Numerical arrays allow one to set a (single) unit for the data. With
+setUnit(prefix, unit_name) one can specify the name of the unit and
+the scale factor, which is specified as a string being one of
+"f","p","n","micro","m","c","d","","h","k","M","G","T","P","E","Z".
+
+"""
+a.setUnit("M","Hz")
+"""
+
+will set the unitname to MHz without modifiying the values in the
+array (assuming that the values were deliverd initially in this
+unit). However, the scaling can be changed by calling setUnit again
+(with or without a unit name), e.g.:
+
+"""
+a.setUnit("k","")
+"""
+
+Which has converted the values to kHz.  The name of the unit can be
+retrieved with
+
+"""
+a.getUnit()
+"""
+
+and cleared with clearUnit().
+
+(+++) Keywords and Values
+................................
+
+For documenting the vector further and to store certain values, one
+can store keywords and values in the array. This is done with
+
+"""
+a.setKey("name","TestArray")
+"""
+
+The keywords can be arbitrary strings ann the values also arbirtrary
+strings. Thus numbers need to be converted to strings and back. The
+keyword "name" is special in the sense that it is a default key, that
+is recognized by a number of other modules (including the __repr__
+method governing array output) to briefly describe the data.
+
+The keyword values can be retrieved using getKey:
+
+"""
+a.getKey("name")
+"""
+
+(+++) History Logbook
+................................
+
+The array keeps a history of most operations performed with it. This
+can be viewed by using the getHistory (retrieves a vector of strings)
+or simply the .history() method, which prints the activity log.
+
+"""
+a.history()
+"""
+
+You can add a line to the history log yourself with 
+
+"""
+a.addHistory("TEST","This is a test.")
+"""
+
+and clear the entire log with .clearHistory().
+
+History tracking can be switched off with 
+
+>>> a.setHistory(False)
+
 (+) File I/O
 ------------
 
@@ -781,7 +856,7 @@ LOFARSOFT=os.environ["LOFARSOFT"]
 #filename=LOFARSOFT+"/data/lopes/example.event"
 #filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 filename=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
-filename
+p_("filename")
 """
 
 We can create a new file object, using the "crfile" class, which is an
@@ -791,7 +866,7 @@ The following will open a data file and return a DataReader object:
 
 """
 file=crfile(filename)
-file.set("Blocksize",1024*2)
+file.set("blocksize",1024*2)
 #%SKIP
 """
 
@@ -815,7 +890,7 @@ single method "get". This method actually calls the function
 Which observatory did we actually use?
 
 """
-obsname=file.get("Observatory");
+obsname=file.get("observatory");
 p_("obsname")
 """
 
@@ -825,6 +900,7 @@ we can access is obtained by
 """
 keywords=file.get("help")
 """
+
 
 Note, that the results are returned as PythonObjects. Hence, this
 makes use of the power of python with automatic typing. For, example
@@ -856,7 +932,6 @@ sampleFrequency =file.get("sampleFrequency");
 maxblocksize=min(filesize,1024*1024); 
 nBlocks=filesize/blocksize; 
 
-#map(lambda var:p_(var),["obsdate","filesize","blocksize","nAntennas","antennas","antennaIDs","selectedAntennas","nofSelectedAntennas","fftlength","sampleFrequency","maxblocksize","nBlocks"])
 p_(["obsdate","filesize","blocksize","nAntennas","antennas","antennaIDs","selectedAntennas","nofSelectedAntennas","fftlength","sampleFrequency","maxblocksize","nBlocks"])
 
 """
@@ -867,7 +942,7 @@ function. E.g. changing the blocksize we already did before. This is
 simply
 
 """
-file.set("Blocksize",blocksize);
+file.set("blocksize",blocksize);
 #%SKIP
 """"
 
@@ -878,24 +953,30 @@ file.set("help",0);
 #%SKIP
 """
 
-The set method actually returns the crfile object. Hence you can
-append multiple set commands after each other.
+Here the listed keywords actually start with capital letters, however,
+to spare you some annoyance, you can use a spelling which starts with
+either an upper or a lower case letter.
+
+Another useful feature: The set method actually returns the crfile
+object itself. Hence, you can append multiple set commands after each
+other.
 
 """
-file.set("Block",2).set("SelectedAntennas",[0,2]);
+file.set("block",2).set("selectedAntennas",[0,2]);
 #%SKIP
 """
 
 Note, that we have now reduced the number of antennas to two: namely
 antenna 0 and 2 and the number of selected antennas is
 
->>>file.get("nofSelectedAntennas")
- 2
+"""
+file.get("nofSelectedAntennas")
+"""
 
 However, now we want to work on all antennas again:
 
 """
-file.set("Block",0).set("SelectedAntennas",range(nAntennas))
+file.set("block",0).set("selectedAntennas",range(nAntennas))
 #%SKIP
 """
 
@@ -913,17 +994,11 @@ python before calling any of the functions. This improves speed and
 efficiency, but requires one to programme carefully and to understand
 the data structrue.
 
-First we create a FloatVec, which is BoostPython wrapped standard
-(STL) vector of doubles.
+First we create a FloatArray of the correct dimensions, naming it
+Voltage and setting the Unit to counts.
 
 """
-fxdata=Vector()
-"""
-
-and resize it to the size we need
-
-"""
-fxdata.setDim([nofSelectedAntennas,blocksize])
+fxdata=hArray(float,[nofSelectedAntennas,blocksize],name="E-Field").setUnit("","Counts")
 """
 
 This is now a large vector filled with zeros.
@@ -938,46 +1013,35 @@ keyword "Fx" (means f(x) ).
 
 """
 file.read("Fx",fxdata)
+#%SKIP
 p_("fxdata")
 """
 
-and voila the vector is filled with time series data from the data file. 
+and voila the vector is filled with time series data from the data
+file. Note that we had to use the .vec method for the array, since
+file.read does not yet accept arrays (since it can't handle c++
+iterators).
 
-Access the various antennas through slicing
-
-"""
-ant0data=fxdata[0:blocksize]
-"""
-or use the .elem method, which returns the nth element of the highest dimension
-
-"""
-ant0data=fxdata.elem(0)
-ant1data=fxdata.elem(1)
-ant0data
-"""
-
-This makes a copy of the data vector if used in this way, while
+No, you can access the individual antennas as single vectors through
+slicing
 
 """
-fxdata[0:3]=[0,1,2]
-fxdata
+ant0data=fxdata[0].vec()
 """
 
-actually modifies the original data vector.
-
-To get the x -Axis we create a second vector
+To get the x-Axis we create a second vector
 
 """
-timedata=Vector(float,blocksize)
-file.read("Time",timedata)
+timedata=hArray(float,[blocksize],name="Time").setUnit("","s")
+file.read("Time",timedata.vec())
+#%SKIP
 """
 
 This is the time relative to the trigger in seconds. So, let's have
-that in microseconds, by multiplying with one million.
+that in microseconds, by using setUnit
 
 """
-timedata *= 10**6
-timedata
+timedata.setUnit("\\mu","")
 """
 
 We do the same now for the frequency axis, which we convert to MHz. As
@@ -985,10 +1049,9 @@ length we have to take the length of the Fourier transformed time
 block (which is blocksize/2+1).
 
 """
-freqdata=Vector(float,fftlength)
-file.read("Frequency",freqdata)
-freqdata/=10**6
-freqdata
+freqdata=hArray(float,dimensions=[fftlength],name="Frequency").setUnit("","Hz")
+f=file.read("Frequency",freqdata)
+freqdata.setUnit("M","Hz")
 """
 
 (+) Fourier Transforms (FFT)
@@ -1006,36 +1069,40 @@ then 0-100 MHz, and the second is 100-200 MHz.
 
 So, let's do the transform:
 """
-fftdata=Vector(complex,fftlength)
-fxdata.elem(0).fft(fftdata,1)
-fftdata
+fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
+fxdata[...].fft(fftdata[...],1)
+
+p_("fxdata")
 """
 
-Here we have used the fft method of the float vector, which is just a
+Here we have used the fft method of the float array, which is just a
 call to the stand-alone function hFFT defined in hftools.cc.
 
-to get the power, we have to square the complex data and convert it to
-floats. This can be done using the complex function "norm" 
+We can convert the data back into the time domain by using the inverse
+Fourier transform.
+"""
+fxinvdata=hArray(float,dimensions=fxdata,name="E-Field'").setUnit("","Counts")
+fftdata[...].invfft(fxinvdata[...],1)
+"""
+
+To get the spectral power from the FFTed vector, we have to square the
+complex data and convert it to floats. This can be done using the
+complex function "norm" (unusual name, but used in c++).
 
 """
-spectrum=Vector(float,fftlength)
-fftdata.norm(spectrum)
+spectrum=hArray(float,dimensions=fftdata,name="E-field Spectrum")
+fftdata[...].norm(spectrum)
 """
 
 We can now try to calulcate the average spectum of the data set for
 one antenna, by looping over all blocks.
 
 """
-avspectrum=Vector(float)
-avspectrum.setDim([nofSelectedAntennas,fftlength])
-fftall=Vector(complex)
-fftall.setDim([nofSelectedAntennas,fftlength])
+avspectrum=hArray(float,dimensions=fftdata,name="avg. Spectrum")
 for block in range(nBlocks):
-    file.set("Block",block).read("FFT",fftall)
-    fftall.spectralpower(avspectrum)
-#%SKIP
+    f=file.set("block",block).read("FFT",fftdata)
+    fftdata[...].spectralpower(avspectrum[...])
 """
-
 
 (+) Basic Plotting
 ------------------
@@ -1088,26 +1155,28 @@ other windows, so search your screen carefully if no window pops up.)
 
 Now, we can issue some of the plotting commands.
 
+
 """
 plt.show()
+#%SKIP
 plt.subplot(1,2,1)
 #%SKIP
 plt.title("Average Spectrum for Two Antennas")
 #%SKIP
-plt.semilogy(freqdata,avspectrum.elem(0))
+plt.semilogy(freqdata.vec(),avspectrum[0].vec())
 #%SKIP
-plt.semilogy(freqdata,avspectrum.elem(1))
+plt.semilogy(freqdata.vec(),avspectrum[1].vec())
 #%SKIP
-plt.ylabel("Power of Electric Field [ADC counts]$^2$")
+plt.ylabel(avspectrum.getKey("name")+" ["+avspectrum.getUnit()+"]")
 #%SKIP
-plt.xlabel("Frequency [MHz]")
+plt.xlabel(freqdata.getKey("name")+" ["+freqdata.getUnit()+"]")
 #%SKIP
 """
 
 To plot the time series of the entire data set, we first read in all sample from all antennas
 
 """
-file.set("Block",0).set("Blocksize",maxblocksize)
+file.set("block",0).set("blocksize",maxblocksize)
 #%SKIP
 fxall=Vector(); fxall.setDim([nofSelectedAntennas,maxblocksize])
 timeall=Vector(float,maxblocksize) 
@@ -1160,7 +1229,7 @@ We will then read this block of data into an apropriately sized data array.
 
 """
 dataarray=hArray(float,[nofSelectedAntennas,blocksize])
-file.set("Blocksize",blocksize).set("Block",3).read("Voltage",dataarray.vec())
+file.set("blocksize",blocksize).set("block",3).read("Voltage",dataarray.vec())
 """
 
 The array now contains all the measured voltages of the selected

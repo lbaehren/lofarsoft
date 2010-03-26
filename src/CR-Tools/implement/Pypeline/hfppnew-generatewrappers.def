@@ -10,6 +10,14 @@
 #define HFPP_FUNC_HAS_VECTORS 0
 #define HFPP_FUNC_HAS_SCALARS 0
 
+#ifndef HFPP_FUNC_KEEP_RETURN_TYPE_FIXED 
+#define HFPP_FUNC_KEEP_RETURN_TYPE_FIXED HFPP_FALSE
+#endif
+        
+#ifndef HFPP_FUNC_MASTER_ARRAY_PARAMETER 
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 0
+#endif
+
 
 #ifndef HFPP_CLASS_STL
 #define HFPP_CLASS_STL (STL)
@@ -45,12 +53,6 @@
 
 #ifndef HFPP_CODE_POST
 #define HFPP_CODE_POST
-#endif
-
-#ifndef HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE
-#define HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE HFPP_TRUE
-#else
-#define HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE HFPP_FALSE
 #endif
 
 #if HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS == HFPP_NONE	
@@ -548,7 +550,7 @@ for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
 //Decide whether the return value of the function will be adapted to
 //the currently wrapped container class or not (only relevant if
 //container, e.g. a vector is returned)
-/* HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE= */ HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE
+/* HFPP_FUNC_KEEP_RETURN_TYPE_FIXED= */ HFPP_FUNC_KEEP_RETURN_TYPE_FIXED
 //
 //Define the base types of for the container classes will be made available (int, float, ...)
 //For each container class all these types will be instantiated
@@ -601,7 +603,7 @@ HFPP_MAKE_WRAPPERS_SLICED
 //========================================================================
 #undef HFPP_FUNC_VARIANT
 #undef HFPP_FUNC_NAME
-#undef HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE
+#undef HFPP_FUNC_KEEP_RETURN_TYPE_FIXED
 #undef HFPP_WRAPPER_CLASSES
 #undef HFPP_WRAPPER_CLASSES_SLICED
 #undef HFPP_WRAPPER_TYPES
@@ -620,7 +622,8 @@ HFPP_MAKE_WRAPPERS_SLICED
 #undef HFPP_PYTHON_WRAPPER_CLASSES_SLICED
 #undef HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS
 #undef HFPP_FUNC_IS_VOID
-
+#undef HFPP_FUNC_MASTER_ARRAY_PARAMETER
+       
 #undef HFPP_CLASS_STL
 #undef HFPP_CLASS_CASA
 #undef HFPP_CLASS_hARRAY

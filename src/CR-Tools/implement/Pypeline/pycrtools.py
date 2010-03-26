@@ -120,7 +120,9 @@ def hArrayToPrintString(self,maxlen=10):
     s=typename(basetype(self))+", "
     loops=""
     if self.loopingMode(): loops="*"
-    return "hArray("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+    name=self.getKey("name"); 
+    if name=="": name="hArray";
+    return name+"("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
 
 #========================================================================
 # Adding multi-dimensional array capabilities to vector class
@@ -756,7 +758,7 @@ def Vector(Type=float,size=-1,fill=None):
 #  hArray Class and Vector Methods/Attributes
 #======================================================================
 
-def hArray(Type=float,dimensions=None,fill=None):
+def hArray(Type=float,dimensions=None,fill=None,name=None):
     """
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
@@ -810,6 +812,7 @@ def hArray(Type=float,dimensions=None,fill=None):
         if type(fill) in hAllVectorTypes: ary.vec().fill(fill)
         if type(fill) in [tuple,list]: ary.vec().fill(Vector(fill))
         else: ary.fill(fill)
+    if type(name)==str: ary.setKey("name",name);
     return ary
 
 hArray.__doc__=Arraydoc
@@ -901,9 +904,9 @@ def CRQualityCheck(limits,file=None,dataarray=None,maxblocksize=65536,nsigma=5,v
     if not file==None:
         nAntennas=file.get("nofSelectedAntennas")
         selected_antennas=file.get("selectedAntennas")
-        filesize=file.get("Filesize")
+        filesize=file.get("filesize")
         blocksize=min(filesize/4,maxblocksize)
-        file.set("Blocksize",blocksize)
+        file.set("blocksize",blocksize)
         nBlocks=filesize/blocksize; 
         blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
         if dataarray==None: dataarray=hArray(float,[nAntennas,blocksize])
@@ -927,7 +930,7 @@ def CRQualityCheck(limits,file=None,dataarray=None,maxblocksize=65536,nsigma=5,v
         if verbose:
             print "\nBlock = ", Block
             print "-----------------------------------------------------------------------------------------"
-        if not file==None: file.set("Block",Block).read("Voltage",dataarray.vec())
+        if not file==None: file.set("block",Block).read("Voltage",dataarray.vec())
         datamean = dataarray[...].mean()
         datarms = dataarray[...].stddev(datamean)
         datanpeaks = dataarray[...].countgreaterthanabs(datarms*nsigma)

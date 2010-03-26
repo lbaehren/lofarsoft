@@ -31,6 +31,9 @@ Table of Contents
 3.3.3.  Memory sharing
 3.3.4.  Basic Slicing
 3.3.5.  Applying Methods to Slices
+3.3.6.  Units and Scale Factors
+3.3.7.  Keywords and Values
+3.3.8.  History Logbook
 4.  File I/O
 4.1.  Opening and Closing a CR Data File
 4.2.  Setting and retrieving metadata (parameters)
@@ -697,7 +700,7 @@ will loop over slices 0 and 2.
 
 
 Looping can also be done for methods that require multiple arrays as
-inputs (remember a mix of vectors and arrays is forbidden). In this
+inputs (remember a mix of vectors and arrays is not implemented). In this
 case the next() method will be applied to every array in the paramter
 list and looping proceeds until the first array has reached the
 end. Hence, care has to be taken that the same slice looping is
@@ -725,6 +728,96 @@ mutliplication of the last slice in a.
 
     x => hArray(int, [3, 3]=9, [0:9]) -> [0,2,4,0,2,4,0,2,4]
 
+3.3.6.  Units and Scale Factors
+................................
+
+Numerical arrays allow one to set a (single) unit for the data. With
+setUnit(prefix, unit_name) one can specify the name of the unit and
+the scale factor, which is specified as a string being one of
+"f","p","n","micro","m","c","d","","h","k","M","G","T","P","E","Z".
+
+>>> a.setUnit("M","Hz")
+  hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
+
+will set the unitname to MHz without modifiying the values in the
+array (assuming that the values were deliverd initially in this
+unit). However, the scaling can be changed by calling setUnit again
+(with or without a unit name), e.g.:
+
+>>> a.setUnit("k","")
+  hArray(int, [3, 3]=9, [0:9]) -> [0,1000,2000,3000,4000,5000,6000,7000,8000]
+
+Which has converted the values to kHz.  The name of the unit can be
+retrieved with
+
+>>> a.getUnit()
+  'kHz'
+
+and cleared with clearUnit().
+
+3.3.7.  Keywords and Values
+................................
+
+For documenting the vector further and to store certain values, one
+can store keywords and values in the array. This is done with
+
+>>> a.setKey("name","TestArray")
+  TestArray(int, [3, 3]=9, [0:9]) -> [0,1000,2000,3000,4000,5000,6000,7000,8000]
+
+The keywords can be arbitrary strings ann the values also arbirtrary
+strings. Thus numbers need to be converted to strings and back. The
+keyword "name" is special in the sense that it is a default key, that
+is recognized by a number of other modules (including the __repr__
+method governing array output) to briefly describe the data.
+
+The keyword values can be retrieved using getKey:
+
+>>> a.getKey("name")
+  'TestArray'
+
+3.3.8.  History Logbook
+................................
+
+The array keeps a history of most operations performed with it. This
+can be viewed by using the getHistory (retrieves a vector of strings)
+or simply the .history() method, which prints the activity log.
+
+>>> a.history()
+    2010-03-27 00:29:53 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
+    2010-03-27 00:29:53 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.
+    2010-03-27 00:29:53 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
+    2010-03-27 00:29:53 [setDimension]: Dimensions set to [10]
+    2010-03-27 00:29:53 [setDimension]: Dimensions set to [3,3]
+    2010-03-27 00:29:53 [setDimension]: Dimensions set to [3,3,2]
+    2010-03-27 00:29:53 [setDimension]: Dimensions set to [3,3]
+    2010-03-27 00:29:53 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...]
+    2010-03-27 00:29:53 [hFill]:   Par 1: fill_value = -2
+    2010-03-27 00:29:53 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 00:29:53 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...]
+    2010-03-27 00:29:53 [hSum]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 00:29:53 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 00:29:53 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...]
+    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 00:29:53 [setUnit]: Unit set to MHz.
+    2010-03-27 00:29:53 [setUnit]: Unit set to kHz.
+    2010-03-27 00:29:53 [setKey]: name = TestArray
+
+You can add a line to the history log yourself with 
+
+>>> a.addHistory("TEST","This is a test.")
+  TestArray(int, [3, 3]=9, [0:9]) -> [0,1000,2000,3000,4000,5000,6000,7000,8000]
+
+and clear the entire log with .clearHistory().
+
+History tracking can be switched off with 
+
+>>> a.setHistory(False)
+
 4.  File I/O
 ------------
 
@@ -735,8 +828,7 @@ Let's see how we can open a file. First define a filename, e.g.:
 
 >>> LOFARSOFT=os.environ["LOFARSOFT"]
 >>> filename=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
->>> filename
-  '/Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5'
+    filename => /Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5
 
 We can create a new file object, using the "crfile" class, which is an
 interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py. 
@@ -761,7 +853,7 @@ The following will open a data file and return a DataReader object:
    -- shape(voltage) ....... = [1024, 16]
    -- shape(fft) ........... = [513, 16]
    -- shape(calfft) ........ = [513, 16]
->>> file.set("Blocksize",1024*2)
+>>> file.set("blocksize",1024*2)
 
 The associated filename can be retrieved with
 
@@ -781,7 +873,7 @@ single method "get". This method actually calls the function
 
 Which observatory did we actually use?
 
->>> obsname=file.get("Observatory");
+>>> obsname=file.get("observatory");
     obsname => LOFAR
 
 There are more keywords, of course. A list of implemented parameters
@@ -789,6 +881,7 @@ we can access is obtained by
 
 >>> keywords=file.get("help")
   hFileGetParameter - available keywords: nofAntennas, nofSelectedChannels, nofSelectedAntennas, nofBaselines, block, blocksize, stride, fftLength, nyquistZone, sampleInterval, referenceTime, sampleFrequency, antennas, selectedAntennas, selectedChannels, positions, increment, frequencyValues, frequencyRange, Date, Observatory, Filesize, dDate, presync, TL, LTL, EventClass, SampleFreq, StartSample, AntennaIDs, help
+
 
 Note, that the results are returned as PythonObjects. Hence, this
 makes use of the power of python with automatic typing. For, example
@@ -837,26 +930,31 @@ We can also change parameters in a very similar fashion, using the
 function. E.g. changing the blocksize we already did before. This is
 simply
 
->>> file.set("Blocksize",blocksize);
+>>> file.set("blocksize",blocksize);
 
 again the list of implemented keywords is visible with using
 
 >>> file.set("help",0);
 
-The set method actually returns the crfile object. Hence you can
-append multiple set commands after each other.
+Here the listed keywords actually start with capital letters, however,
+to spare you some annoyance, you can use a spelling which starts with
+either an upper or a lower case letter.
 
->>> file.set("Block",2).set("SelectedAntennas",[0,2]);
+Another useful feature: The set method actually returns the crfile
+object itself. Hence, you can append multiple set commands after each
+other.
+
+>>> file.set("block",2).set("selectedAntennas",[0,2]);
 
 Note, that we have now reduced the number of antennas to two: namely
 antenna 0 and 2 and the number of selected antennas is
 
->>>file.get("nofSelectedAntennas")
- 2
+>>> file.get("nofSelectedAntennas")
+  2
 
 However, now we want to work on all antennas again:
 
->>> file.set("Block",0).set("SelectedAntennas",range(nAntennas))
+>>> file.set("block",0).set("selectedAntennas",range(nAntennas))
 
 
 4.3.  Reading in Data
@@ -872,15 +970,10 @@ python before calling any of the functions. This improves speed and
 efficiency, but requires one to programme carefully and to understand
 the data structrue.
 
-First we create a FloatVec, which is BoostPython wrapped standard
-(STL) vector of doubles.
+First we create a FloatArray of the correct dimensions, naming it
+Voltage and setting the Unit to counts.
 
->>> fxdata=Vector()
-
-and resize it to the size we need
-
->>> fxdata.setDim([nofSelectedAntennas,blocksize])
-  Vec(float,32768)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...]
+>>> fxdata=hArray(float,[nofSelectedAntennas,blocksize],name="E-Field").setUnit("","Counts")
 
 This is now a large vector filled with zeros.
 
@@ -893,52 +986,37 @@ in the antenna as digitized by the ADC. This is provided by the
 keyword "Fx" (means f(x) ).
 
 >>> file.read("Fx",fxdata)
-  <hftools.DataReader object at 0x77298>
-    fxdata => Vec(float,32768)=[16.0,17.0,10.0,18.0,17.0,6.0,16.0,17.0,-1.0,0.0,...]
+    fxdata => E-Field(float, [16, 2048]=32768, [0:32768]) -> [16.0,17.0,10.0,18.0,17.0,6.0,16.0,17.0,-1.0,0.0,...]
 
-and voila the vector is filled with time series data from the data file. 
+and voila the vector is filled with time series data from the data
+file. Note that we had to use the .vec method for the array, since
+file.read does not yet accept arrays (since it can't handle c++
+iterators).
 
-Access the various antennas through slicing
+No, you can access the individual antennas as single vectors through
+slicing
 
->>> ant0data=fxdata[0:blocksize]
-or use the .elem method, which returns the nth element of the highest dimension
+>>> ant0data=fxdata[0].vec()
 
->>> ant0data=fxdata.elem(0)
->>> ant1data=fxdata.elem(1)
->>> ant0data
-  Vec(float,2048)=[16.0,17.0,10.0,18.0,17.0,6.0,16.0,17.0,-1.0,0.0,...]
+To get the x-Axis we create a second vector
 
-This makes a copy of the data vector if used in this way, while
-
->>> fxdata[0:3]=[0,1,2]
->>> fxdata
-  Vec(float,32768)=[0.0,1.0,2.0,18.0,17.0,6.0,16.0,17.0,-1.0,0.0,...]
-
-actually modifies the original data vector.
-
-To get the x -Axis we create a second vector
-
->>> timedata=Vector(float,blocksize)
->>> file.read("Time",timedata)
-  <hftools.DataReader object at 0x77308>
+>>> timedata=hArray(float,[blocksize],name="Time").setUnit("","s")
+>>> file.read("Time",timedata.vec())
 
 This is the time relative to the trigger in seconds. So, let's have
-that in microseconds, by multiplying with one million.
+that in microseconds, by using setUnit
 
->>> timedata *= 10**6
->>> timedata
-  Vec(float,2048)=[0.0,0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,...]
+>>> timedata.setUnit("\\mu","")
+  Time(float, [2048]=2048, [0:2048]) -> [0.0,0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,...]
 
 We do the same now for the frequency axis, which we convert to MHz. As
 length we have to take the length of the Fourier transformed time
 block (which is blocksize/2+1).
 
->>> freqdata=Vector(float,fftlength)
->>> file.read("Frequency",freqdata)
-  <hftools.DataReader object at 0x77308>
->>> freqdata/=10**6
->>> freqdata
-  Vec(float,1025)=[0.0,0.09765625,0.1953125,0.29296875,0.390625,0.48828125,0.5859375,0.68359375,0.78125,0.87890625,...]
+>>> freqdata=hArray(float,dimensions=[fftlength],name="Frequency").setUnit("","Hz")
+>>> f=file.read("Frequency",freqdata)
+>>> freqdata.setUnit("M","Hz")
+  Frequency(float, [1025]=1025, [0:1025]) -> [0.0,0.09765625,0.1953125,0.29296875,0.390625,0.48828125,0.5859375,0.68359375,0.78125,0.87890625,...]
 
 5.  Fourier Transforms (FFT)
 ----------------------------
@@ -954,33 +1032,33 @@ rate to digitize a bandwidth of 100 MHz. The first Nyquist zone is
 then 0-100 MHz, and the second is 100-200 MHz.
 
 So, let's do the transform:
->>> fftdata=Vector(complex,fftlength)
->>> fxdata.elem(0).fft(fftdata,1)
->>> fftdata
-  Vec(complex,1025)=[(14736+0j),(-38.0622213601+23.4859171199j),(9.68095724748+20.0546226652j),(-29.6260665947+15.6167985077j),(-37.7150725681-45.6666687196j),(-10.7191165725-6.87166502804j),(-51.8022613662+5.13208605582j),(-12.0958025896+51.3491571044j),(32.7738487563-53.4058296902j),(9.04631849557+9.31539046418j),...]
+>>> fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
+>>> fxdata[...].fft(fftdata[...],1)
 
-Here we have used the fft method of the float vector, which is just a
+    fxdata => E-Field(float, [16, 2048]=32768, [0:32768]) -> [16.0,17.0,10.0,18.0,17.0,6.0,16.0,17.0,-1.0,0.0,...]
+
+Here we have used the fft method of the float array, which is just a
 call to the stand-alone function hFFT defined in hftools.cc.
 
-to get the power, we have to square the complex data and convert it to
-floats. This can be done using the complex function "norm" 
+We can convert the data back into the time domain by using the inverse
+Fourier transform.
+>>> fxinvdata=hArray(float,dimensions=fxdata,name="E-Field'").setUnit("","Counts")
+>>> fftdata[...].invfft(fxinvdata[...],1)
 
->>> spectrum=Vector(float,fftlength)
->>> fftdata.norm(spectrum)
+To get the spectral power from the FFTed vector, we have to square the
+complex data and convert it to floats. This can be done using the
+complex function "norm" (unusual name, but used in c++).
+
+>>> spectrum=hArray(float,dimensions=fftdata,name="E-field Spectrum")
+>>> fftdata[...].norm(spectrum)
 
 We can now try to calulcate the average spectum of the data set for
 one antenna, by looping over all blocks.
 
->>> avspectrum=Vector(float)
->>> avspectrum.setDim([nofSelectedAntennas,fftlength])
-  Vec(float,16400)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...]
->>> fftall=Vector(complex)
->>> fftall.setDim([nofSelectedAntennas,fftlength])
-  Vec(complex,16400)=[0j,0j,0j,0j,0j,0j,0j,0j,0j,0j,...]
+>>> avspectrum=hArray(float,dimensions=fftdata,name="avg. Spectrum")
 >>> for block in range(nBlocks):
-...     file.set("Block",block).read("FFT",fftall)
-...     fftall.spectralpower(avspectrum)
-
+...     f=file.set("block",block).read("FFT",fftdata)
+...     fftdata[...].spectralpower(avspectrum[...])
 
 6.  Basic Plotting
 ------------------
@@ -1031,24 +1109,25 @@ other windows, so search your screen carefully if no window pops up.)
 
 Now, we can issue some of the plotting commands.
 
+
 >>> plt.show()
 >>> plt.subplot(1,2,1)
 >>> plt.title("Average Spectrum for Two Antennas")
->>> plt.semilogy(freqdata,avspectrum.elem(0))
->>> plt.semilogy(freqdata,avspectrum.elem(1))
->>> plt.ylabel("Power of Electric Field [ADC counts]$^2$")
->>> plt.xlabel("Frequency [MHz]")
+>>> plt.semilogy(freqdata.vec(),avspectrum[0].vec())
+>>> plt.semilogy(freqdata.vec(),avspectrum[1].vec())
+>>> plt.ylabel(avspectrum.getKey("name")+" ["+avspectrum.getUnit()+"]")
+>>> plt.xlabel(freqdata.getKey("name")+" ["+freqdata.getUnit()+"]")
 
 To plot the time series of the entire data set, we first read in all sample from all antennas
 
->>> file.set("Block",0).set("Blocksize",maxblocksize)
+>>> file.set("block",0).set("blocksize",maxblocksize)
 >>> fxall=Vector(); fxall.setDim([nofSelectedAntennas,maxblocksize])
   Vec(float,2113536)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...]
 >>> timeall=Vector(float,maxblocksize) 
 >>> file.read("Time",timeall); timeall *= 10**6.
-  <hftools.DataReader object at 0x3db490>
+  <hftools.DataReader object at 0x5c85500>
 >>> file.read("Fx",fxall)
-  <hftools.DataReader object at 0x3dbed8>
+  <hftools.DataReader object at 0x3dedc0>
 
 and then we plot it 
 
@@ -1085,8 +1164,8 @@ data set and set the block size accordingly.
 We will then read this block of data into an apropriately sized data array.
 
 >>> dataarray=hArray(float,[nofSelectedAntennas,blocksize])
->>> file.set("Blocksize",blocksize).set("Block",3).read("Voltage",dataarray.vec())
-  <hftools.DataReader object at 0x560a6c0>
+>>> file.set("blocksize",blocksize).set("block",3).read("Voltage",dataarray.vec())
+  <hftools.DataReader object at 0x5c854c8>
 
 The array now contains all the measured voltages of the selected
 antennas in the file.

@@ -12,11 +12,13 @@
 #include <sstream>
 #include <complex>
 #include <cmath>
+#include <cctype>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
 #include <typeinfo>
+#include <ctime>
 
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
@@ -100,6 +102,13 @@ template <class T>
   
   public:
 
+  struct unit_container {
+    HNumber scale_factor;
+    HString prefix;
+    HString name;
+    map<HString,HNumber> prefix_to_factor;
+  };
+
   struct storage_container {
     HInteger *ndims_p;
     HInteger *size_p;
@@ -108,6 +117,10 @@ template <class T>
     vector<T>* vec_p;
     hArray* parent;
     bool vector_is_shared;
+    unit_container unit;
+    bool trackHistory;
+    vector<HString> history;
+    map<HString,HString> keywords;
   }; 
 
     void init();
@@ -155,7 +168,18 @@ template <class T>
     hArray<T> &  loopOff();
     hArray<T> &  resetLoop();
     hArray<T> &  all();
-    
+    hArray<T> &  setUnit(HString prefix, HString name);
+    hArray<T> &  clearUnit();
+    HString  getUnit();
+    hArray<T> &  setHistory(bool on_or_off);
+    bool isTrackingHistory();
+    hArray<T> &  clearHistory();
+    hArray<T> &  addHistory(HString name, HString text);
+    vector<HString> & getHistory();
+    void printHistory();
+    HString getKey(HString key);
+    hArray<T> & setKey(HString key, HString contents);
+
     //These are the basic parameters describing the data
     //structure. They can be shared
 
@@ -190,6 +214,24 @@ template<class T> inline T hfcast(HComplex v);
 template<>  inline HInteger hfcast<HInteger>(HNumber v);
 template<>  inline HInteger hfcast<HInteger>(HComplex v);
 template<>  inline HNumber hfcast<HNumber>(HComplex v);
+
+template<class T> inline T hfcast(/*const*/ HPointer v);
+template<> inline HString hfcast<HString>(HPointer v);
+template<> inline HString hfcast<HString>(HInteger v);
+template<> inline HString hfcast<HString>(HNumber v);
+template<> inline HString hfcast<HString>(HComplex v);
+
+template<class T> inline T hfcast(/*const*/ HString v);
+template<> inline HPointer hfcast(/*const*/ HString v);
+template<> inline HInteger hfcast(/*const*/ HString v);
+template<> inline HNumber hfcast(/*const*/ HString v);
+template<> inline HComplex hfcast(/*const*/ HString v);
+
+template <class T>
+HString pretty_vec(vector<T> & v,const HInteger maxlen=8);
+
+template <class T>
+HString pretty_vec(hArray<T> & v,const HInteger maxlen=8);
 
 
 inline HInteger ptr2int(HPointer v);

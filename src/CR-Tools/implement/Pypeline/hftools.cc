@@ -488,12 +488,25 @@ template<class T> inline T hfcast(int v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HInteger v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HNumber v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HComplex v){return static_cast<T>(v);}
+template<class T> inline T hfcast(/*const*/ HPointer v){return hfcast<T>(reinterpret_cast<HInteger>(v));}
+template<class T> inline T hfcast(/*const*/ HString v){T t; std::istringstream is(v); is >> t; return t;}
+
+template<class T> inline T hfcast(CR::DataReader v){return hfcast<T>(0);}
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
 template<>  inline HInteger hfcast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v));}
 template<>  inline HInteger hfcast<HInteger>(HComplex v){return static_cast<HInteger>(floor(real(v)));}
 template<>  inline HNumber hfcast<HNumber>(HComplex v){return real(v);}
 
+//Convert Numbers to Strings
+template<> inline HString hfcast<HString>(HPointer v){std::ostringstream os; os << v; return os.str();}
+template<> inline HString hfcast<HString>(HInteger v){std::ostringstream os; os << v; return os.str();}
+template<> inline HString hfcast<HString>(HNumber v){std::ostringstream os; os << v; return os.str();}
+template<> inline HString hfcast<HString>(HComplex v){std::ostringstream os; os << v; return os.str();}
+template<> inline HPointer hfcast(/*const*/ HString v){HPointer t=NULL; std::istringstream is(v); is >> t; return t;}
+template<> inline HInteger hfcast(/*const*/ HString v){HInteger t=0; std::istringstream is(v); is >> t; return t;}
+template<> inline HNumber hfcast(/*const*/ HString v){HNumber t=0.0; std::istringstream is(v); is >> t; return t;}
+template<> inline HComplex hfcast(/*const*/ HString v){HComplex t=0.0; std::istringstream is(v); is >> t; return t;}
 
 inline HInteger ptr2int(HPointer v){return reinterpret_cast<HInteger>(v);}
 inline HPointer int2ptr(HInteger v){return reinterpret_cast<HPointer>(v);}
@@ -507,6 +520,39 @@ inline HComplex operator-(HInteger i, HComplex c) {return hfcast<HComplex>(i)-c;
 inline HComplex operator-(HComplex c, HInteger i) {return c-hfcast<HComplex>(i);}
 inline HComplex operator/(HInteger i, HComplex c) {return hfcast<HComplex>(i)/c;}
 inline HComplex operator/(HComplex c, HInteger i) {return c/hfcast<HComplex>(i);}
+
+
+template <class T>
+HString pretty_vec(vector<T> & v,const HInteger maxlen){
+  if (v.size()==0) return "[]";
+  int i=1;
+  typename vector<T>::iterator it=v.begin();
+  HString s=("[");
+  s+=hfcast<HString>(*it); ++it; ++i;
+  while (it!=v.end() && i< maxlen) {
+    s+=","+hfcast<HString>(*it); ++it;  ++i;
+  };
+  if ((HInteger)v.size()>maxlen) s+=",...]";
+  else s+="]";
+  return s;
+}
+
+template <class T>
+HString pretty_vec(hArray<T> & a,const HInteger maxlen){
+  vector<T>* v = &a.getVector(); 
+  if (v->size()==0) return "[]";
+  int i=1;
+  typename vector<T>::iterator it=v->begin();
+  HString s=("[");
+  s+=hfcast<HString>(*it); ++it;  ++i;
+  while (it!=v->end() && i< maxlen) {
+    s+=","+hfcast<HString>(*it); ++it; ++i;
+  };
+  if ((HInteger)v->size() > maxlen) s+=",...]";
+  else s+="]";
+  return s;
+}
+ 
 
 template <class T>
 CasaVector<T> stl2casa(std::vector<T>& stlvec)
@@ -630,7 +676,7 @@ template <class T> void hArray<T>::init(){
   loop_i=0; loop_start=0; loop_end=0; loop_increment=1; loop_maxn=0;
   loop_next=false;
   loop_nslice=0;
-  loop_over_indexvector=false;
+  loop_over_indexvector=false;  
 }
 
 template <class T> void hArray<T>::new_storage(){
@@ -642,6 +688,30 @@ template <class T> void hArray<T>::new_storage(){
   storage_p->slice_sizes_p=NULL;
   storage_p->vec_p=NULL;
   storage_p->vector_is_shared=false;
+  storage_p->unit.prefix_to_factor["f"]=1e-15;
+  storage_p->unit.prefix_to_factor["p"]=1e-12;
+  storage_p->unit.prefix_to_factor["n"]=1e-9;
+  storage_p->unit.prefix_to_factor["micro"]=1e-6;
+  storage_p->unit.prefix_to_factor["mu"]=1e-6;
+  storage_p->unit.prefix_to_factor["\\mu"]=1e-6;
+  storage_p->unit.prefix_to_factor["µ"]=1e-6;
+  storage_p->unit.prefix_to_factor["m"]=1e-3;
+  storage_p->unit.prefix_to_factor["c"]=1e-2;
+  storage_p->unit.prefix_to_factor["d"]=1e-1;
+  storage_p->unit.prefix_to_factor[""]=1.0;
+  storage_p->unit.prefix_to_factor["D"]=1e1;
+  storage_p->unit.prefix_to_factor["h"]=1e2;
+  storage_p->unit.prefix_to_factor["k"]=1e3;
+  storage_p->unit.prefix_to_factor["M"]=1e6;
+  storage_p->unit.prefix_to_factor["G"]=1e9;
+  storage_p->unit.prefix_to_factor["T"]=1e12;
+  storage_p->unit.prefix_to_factor["P"]=1e15;
+  storage_p->unit.prefix_to_factor["E"]=1e18;
+  storage_p->unit.prefix_to_factor["Z"]=1e21;
+  storage_p->unit.name="";
+  storage_p->unit.prefix="";
+  storage_p->unit.scale_factor=1.0;
+  storage_p->trackHistory=True;
 }
 
 template <class T> void hArray<T>::initialize_storage(){
@@ -650,7 +720,10 @@ template <class T> void hArray<T>::initialize_storage(){
   if (storage_p->size_p==NULL) storage_p->size_p=new HInteger;
   if (storage_p->dimensions_p==NULL) storage_p->dimensions_p=new std::vector<HInteger>;
   if (storage_p->slice_sizes_p==NULL) storage_p->slice_sizes_p=new std::vector<HInteger>;
-  if (storage_p->vec_p==NULL) storage_p->vec_p=new std::vector<T>;
+  if (storage_p->vec_p==NULL) {
+    storage_p->vec_p=new std::vector<T>;
+    addHistory((HString)"initialize_storage",(HString)"Vector of type "+typeid(*storage_p->vec_p).name()+" created.");
+  };
 }
 
 template <class T> void hArray<T>::delete_storage(){
@@ -707,8 +780,12 @@ template <class T> hArray<T> & hArray<T>::shared_copy(){hArray<T> * ary_p=new hA
 
 template <class T> void hArray<T>::delVector(){
   if (storage_p==NULL) return; //Check if vector was deleted elsewhere
-  if ((storage_p->vec_p != NULL) && !storage_p->vector_is_shared) delete storage_p->vec_p;
+  if ((storage_p->vec_p != NULL) && !storage_p->vector_is_shared) {
+    addHistory((HString)"delVector",(HString)"Vector of type"+typeid(*storage_p->vec_p).name()+" and size="+hfcast<HString>((HInteger)storage_p->vec_p->size())+" deleted.");
+    delete storage_p->vec_p;
+  }
   storage_p->vec_p=NULL;
+  addHistory((HString)"delVector",(HString)"Reference to Vector of type"+typeid(*storage_p->vec_p).name()+" deleted.");
 }
 
 template <class T> hArray<T>::~hArray(){
@@ -780,6 +857,7 @@ template <class T> std::vector<HInteger> & hArray<T>::getSizes(){
 template <class T> void  hArray<T>::setDimensions1(HInteger dim0){
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hfcast<HString>(dim0)+"]");
   (*storage_p->ndims_p)=1;
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
@@ -796,6 +874,7 @@ template <class T> void  hArray<T>::setDimensions1(HInteger dim0){
 template <class T> void  hArray<T>::setDimensions2(HInteger dim0, HInteger dim1){
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hfcast<HString>(dim0)+","+hfcast<HString>(dim1)+"]");
   (*storage_p->ndims_p)=2;
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
@@ -814,6 +893,7 @@ template <class T> void  hArray<T>::setDimensions3(HInteger dim0, HInteger dim1,
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=3;
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hfcast<HString>(dim0)+","+hfcast<HString>(dim1)+","+hfcast<HString>(dim2)+"]");
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
   (*storage_p->dimensions_p)[1]=dim1;
@@ -832,6 +912,7 @@ template <class T> void  hArray<T>::setDimensions4(HInteger dim0, HInteger dim1,
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=4;
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hfcast<HString>(dim0)+","+hfcast<HString>(dim1)+","+hfcast<HString>(dim2)+","+hfcast<HString>(dim3)+"]");
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
   (*storage_p->dimensions_p)[1]=dim1;
@@ -851,6 +932,7 @@ template <class T> void  hArray<T>::setDimensions5(HInteger dim0, HInteger dim1,
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=5;
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hfcast<HString>(dim0)+","+hfcast<HString>(dim1)+","+hfcast<HString>(dim2)+","+hfcast<HString>(dim3)+","+hfcast<HString>(dim4)+"]");
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
   (*storage_p->dimensions_p)[1]=dim1;
@@ -1129,6 +1211,165 @@ template <class T> hArray<T> &  hArray<T>::next(){
   return *this;
 }
 
+/*!
+\brief Get the unit name of the data array
+ */
+template <class T> HString hArray<T>::getUnit(){
+  if (storage_p==NULL) return ""; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return ""; //Check if vector was deleted elsewhere
+  return storage_p->unit.prefix + storage_p->unit.name; 
+};
+
+/*!
+\brief Take out the unit information 
+ */
+template <class T> hArray<T> &  hArray<T>::clearUnit(){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
+  setUnit("","");
+  storage_p->unit.name="";
+  addHistory((HString)"clearUnit",(HString)"");
+  return *this;
+}
+
+/*!  
+
+\brief Set the value of a particular key word. 
+
+Inputs are always given as strings (also numerical values). As a
+convention, the contents should be formatted as python input style.
+
+ */
+template <class T> hArray<T> &  hArray<T>::setKey(HString key, HString contents){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  storage_p->keywords[key]=contents;
+  addHistory("setKey",key + " = " + contents);
+  return *this;
+}
+
+/*!  
+
+\brief Set the value of a particular key word. 
+
+Inputs are always given as strings (also numerical values). As a
+convention, the contents should be formatted as python input style.
+
+ */
+template <class T> HString hArray<T>::getKey(HString key){
+  if (storage_p==NULL) return ""; //Check if vector was deleted elsewhere
+  map<HString,HString>::iterator it=storage_p->keywords.find(key);
+  if (it!=storage_p->keywords.end()) return it->second;
+  return "";
+}
+
+
+/*!
+\brief Set the unit of the data array and multiply all data with the
+apropriate scale factor. Prefix is the 
+ */
+template <class T> hArray<T> &  hArray<T>::setUnit(HString prefix, HString name){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
+  map<HString,HNumber>::iterator factor_p=storage_p->unit.prefix_to_factor.find(prefix);
+  if (factor_p==storage_p->unit.prefix_to_factor.end()) {
+    ERROR("setUnit: unit prefix " << prefix << " unknown.");
+    return *this;
+  };
+  HNumber factor = factor_p->second;
+  if ((name=="") || (storage_p->unit.name==name)) {
+    if (typeid(T)==typeid(HInteger)) {
+      hMul(*reinterpret_cast<vector<HInteger>*>(storage_p->vec_p),storage_p->unit.scale_factor/factor);
+    } else if (typeid(T)==typeid(HNumber)) {
+      hMul(*reinterpret_cast<vector<HNumber>*>(storage_p->vec_p),storage_p->unit.scale_factor/factor);
+    } else if (typeid(T)==typeid(HComplex)) {
+      hMul(*reinterpret_cast<vector<HComplex>*>(storage_p->vec_p),storage_p->unit.scale_factor/factor);
+    } else {
+      ERROR("setUnit: unit setting not available for type  " << typeid(T).name() << ".");
+    }
+  } else storage_p->unit.name=name;
+  storage_p->unit.scale_factor=factor;
+  storage_p->unit.prefix=prefix;
+  addHistory((HString)"setUnit",(HString)"Unit set to " + getUnit()+".");
+  return *this;
+}
+
+/*!
+\brief Add a line of history information to the history vector
+ */
+template <class T> hArray<T> & hArray<T>::addHistory(HString name, HString text){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (!storage_p->trackHistory) return *this;
+  time_t rawtime;
+  struct tm * timeinfo;
+  char buffer [20];
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+
+  strftime (buffer,80,"%Y-%m-%d %H:%M:%S",timeinfo);
+  HString out(buffer);
+  out += " [" + name + "]: " + text;  
+  storage_p->history.push_back(out);
+  return *this;
+}
+
+/*!
+\brief Return the history information
+ */
+template <class T> vector<HString> & hArray<T>::getHistory(){
+  if (storage_p==NULL) {static vector<HString> h; return h;}; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) {static vector<HString> h; return h;}; //Check if vector was deleted elsewhere
+  if (!storage_p->trackHistory) {static vector<HString> h; return h;};
+  return storage_p->history;
+}
+
+/*!
+\brief Print the history information
+ */
+template <class T> void hArray<T>::printHistory(){
+  if (storage_p==NULL)  return; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL)  return; //Check if vector was deleted elsewhere
+  if (!storage_p->trackHistory) return;
+  vector<HString>::iterator it=storage_p->history.begin();
+  while (it!=storage_p->history.end()) {
+    cout << "  " << *it << endl;
+    ++it;
+  };
+  return;
+}
+
+/*!
+\brief Clear the history information
+ */
+template <class T> hArray<T> &  hArray<T>::clearHistory(){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
+  storage_p->history.clear();
+  return *this;
+}
+
+/*!
+\brief Set history tracking on or off
+ */
+template <class T> hArray<T> &  hArray<T>::setHistory(bool on_or_off){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (!on_or_off) addHistory((HString)"setHistory",(HString)"History tracking switched off.");
+  storage_p->trackHistory=on_or_off;
+  if (on_or_off) addHistory((HString)"setHistory",(HString)"History tracking switched on.");
+
+  return *this;
+}
+
+/*!
+\brief Check if history tracking is on or off
+ */
+template <class T> bool hArray<T>::isTrackingHistory(){
+  if (storage_p==NULL) return false; //Check if vector was deleted elsewhere
+  return(storage_p->trackHistory);
+}
+
     //      .def("setVector",&hArray<TYPE>::setVector,return_value_policy<manage_new_object>()) \
     //      .def("getVector",&hArray<TYPE>::getVector,return_value_policy<manage_new_object>()) \
     //  .def("shared_copy",&hArray<TYPE>::shared_copy,return_value_policy<manage_new_object>()) \
@@ -1176,8 +1417,18 @@ return_internal_reference<1,
     .def("resetLoop",&hArray<TYPE>::resetLoop,return_internal_reference<>())				\
     .def("noOn",&hArray<TYPE>::loopOn,return_internal_reference<>())				\
     .def("noOff",&hArray<TYPE>::loopOff,return_internal_reference<>())				\
-    .def("next",&hArray<TYPE>::next,return_internal_reference<>())
-
+    .def("next",&hArray<TYPE>::next,return_internal_reference<>())       \
+    .def("setUnit",&hArray<TYPE>::setUnit,return_internal_reference<>())	\
+    .def("getUnit",&hArray<TYPE>::getUnit)	\
+    .def("clearUnit",&hArray<TYPE>::clearUnit,return_internal_reference<>())	\
+    .def("addHistory",&hArray<TYPE>::addHistory,return_internal_reference<>())	\
+    .def("clearHistory",&hArray<TYPE>::clearHistory,return_internal_reference<>())	\
+    .def("setHistory",&hArray<TYPE>::setHistory,return_internal_reference<>())	\
+    .def("getHistory",&hArray<TYPE>::getHistory,return_internal_reference<>())	\
+    .def("isTrackingHistory",&hArray<TYPE>::isTrackingHistory)	\
+    .def("history",&hArray<TYPE>::printHistory)	\
+    .def("setKey",&hArray<TYPE>::setKey,return_internal_reference<>())	\
+    .def("getKey",&hArray<TYPE>::getKey)	\>
 
 //========================================================================
 //                        Helper Functions
@@ -1639,7 +1890,7 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
   Iter it1=vec1;
   Iterin it2=vec2;
   while (it1!=vec1_end) {
-    *it1 HFPP_OPERATOR_INPLACE_$MFUNC hfcast<T>(*it2);
+    *it1 =  hfcast<T>(*it1 HFPP_OPERATOR_$MFUNC (*it2));
     ++it1; ++it2;
     if (it2==vec2_end) it2=vec2;
   };
@@ -1664,9 +1915,8 @@ void h{$MFUNC}2(const Iter vec1,const Iter vec1_end, S val)
 {
   typedef IterValueType T;
   Iter it=vec1;
-  T val_t = hfcast<T>(val);
   while (it!=vec1_end) {
-    *it HFPP_OPERATOR_INPLACE_$MFUNC val_t;
+    *it = hfcast<T>(*it HFPP_OPERATOR_$MFUNC val);
     ++it;
   };
 }
@@ -1757,9 +2007,8 @@ void h{$MFUNC}2(const Iter vec,const Iter vec_end,  const Iterin1 vec1,const Ite
   typedef IterValueType T;
   Iterin1 it1=vec1;
   Iter itout=vec;
-  T val_t=hfcast<T>(scalar1);
   while (itout !=vec_end) {
-    *itout = hfcast<T>(*it1) HFPP_OPERATOR_$MFUNC  val_t;
+    *itout = hfcast<T>(*it1 HFPP_OPERATOR_$MFUNC  scalar1);
     ++it1; ++itout;
     if (it1==vec1_end) it1=vec1;
   };
@@ -3012,9 +3261,9 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const HNumber adc2voltag
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Return vector containing Hanning filter")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(Alpha)()("Height parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (uint)(Beta)()("Width parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_3 (uint)(BetaRise)()("Rising slope parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_4 (uint)(BetaFall)()("Falling slope parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(Beta)()("Width parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(BetaRise)()("Rising slope parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(BetaFall)()("Falling slope parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -3022,18 +3271,18 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const HNumber adc2voltag
 */
 template <class Iter>
 void hGetHanningFilter(const Iter vec, const Iter vec_end,
-		       const double Alpha,
-		       const uint Beta,
-		       const uint BetaRise,
-		       const uint BetaFall) {
+		       const HNumber Alpha,
+		       const HInteger Beta,
+		       const HInteger BetaRise,
+		       const HInteger BetaFall) {
 
-  uint blocksize = vec_end - vec;
-  CR::HanningFilter<HNumber> hanning_filter(blocksize, Alpha, Beta, BetaRise, BetaFall);
+  HInteger blocksize = vec_end - vec;
+  CR::HanningFilter<HNumber> hanning_filter(blocksize, (double)Alpha, (HInteger)Beta, (HInteger)BetaRise, (HInteger)BetaFall);
   Iter it_v = vec;
   CasaVector<HNumber> filter = hanning_filter.weights();
   CasaVector<HNumber>::iterator it_f = filter.begin();
 
-  while ((it_v != vec_end) && (it_f != filter.end())) {
+  while ((it_v != vec_end) && (it_f != filter.end())) { 
     *it_v = (IterValueType) *it_f;
     it_v++; it_f++;
   }
@@ -3050,7 +3299,7 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Return vector containing Hanning filter")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(Alpha)()("Height parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (uint)(Beta)()("Width parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(Beta)()("Width parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -3058,11 +3307,11 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 */
 template <class Iter>
 void hGetHanningFilter(const Iter vec, const Iter vec_end,
-		       const double Alpha,
-		       const uint Beta) {
-  uint blocksize = vec_end - vec;
-  uint BetaRise = (blocksize - Beta)/2;
-  uint BetaFall = (blocksize - Beta)/2;
+		       const HNumber Alpha,
+		       const HInteger Beta) {
+  HInteger blocksize = vec_end - vec;
+  HInteger BetaRise = (blocksize - Beta)/2;
+  HInteger BetaFall = (blocksize - Beta)/2;
 
   hGetHanningFilter(vec, vec_end, Alpha, Beta, BetaRise, BetaFall);
 }
@@ -3085,8 +3334,8 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 */
 template <class Iter>
 void hGetHanningFilter(const Iter vec, const Iter vec_end,
-		       const double Alpha) {
-  uint Beta = 0;
+		       const HNumber Alpha) {
+  HInteger Beta = 0;
   hGetHanningFilter(vec, vec_end, Alpha, Beta);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -3107,7 +3356,7 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end){
-  double Alpha = 0.5;
+  HNumber Alpha = 0.5;
   hGetHanningFilter(vec, vec_end, Alpha);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -3155,7 +3404,7 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end, const IterFilter filte
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter data, const Iter data_end){
-  uint blocksize = data_end - data;
+  HInteger blocksize = data_end - data;
   vector<HNumber> filter(blocksize);
 
   hGetHanningFilter(filter.begin(), filter.end());
@@ -3170,6 +3419,7 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end){
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFFT
 //-----------------------------------------------------------------------
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // 2nd parameter is output, use for looping and history informations
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(data_in)()("Vector containing the data on which the FFT will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HComplex)(data_out)()("Return vector in which the FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -3247,6 +3497,7 @@ void HFPP_FUNC_NAME(const IterIn  data_in,  const IterIn  data_in_end,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hInvFFT
 //-----------------------------------------------------------------------
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // 2nd parameter is output, use for looping and history informations
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HComplex)(data_in)()("Vector containing the input data on which the inverse FFT will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(data_out)()("Return vector in which the inverse FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -3392,8 +3643,11 @@ CRDataReader & HFPP_FUNC_NAME(HString Filename) {
 */
 HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 {
+  HString key2(key);
+  key2[0]=(unsigned char)toupper((int)key2[0]);
+  key[0]=(unsigned char)tolower((int)key[0]);
   DataReader *drp=&dr;
-#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if (key== #KEY) {_H_NL_ TYPE result(drp->KEY ()); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key== #KEY) || (key2== #KEY)) {_H_NL_ TYPE result(drp->KEY ()); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
   HFPP_REPEAT(uint,uint,nofAntennas)
     HFPP_REPEAT(uint,uint,nofSelectedChannels)
     HFPP_REPEAT(uint,uint,nofSelectedAntennas)
@@ -3407,7 +3661,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
     HFPP_REPEAT(double,double,sampleFrequency)
     HFPP_REPEAT(uint,uint,nofBaselines)
 #undef HFPP_REPEAT
-#define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {_H_NL_ CasaVector<TYPE> casavec(drp->KEY ()); _H_NL_ std::vector<TYPE2> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
+#define HFPP_REPEAT(TYPE,TYPE2,KEY) if ((key== #KEY) || (key2== #KEY)) {_H_NL_ CasaVector<TYPE> casavec(drp->KEY ()); _H_NL_ std::vector<TYPE2> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
     HFPP_REPEAT(uint,HInteger,antennas)
     HFPP_REPEAT(uint,HInteger,selectedAntennas)
     HFPP_REPEAT(uint,HInteger,selectedChannels)
@@ -3416,7 +3670,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
     HFPP_REPEAT(double,HNumber,frequencyValues)
     HFPP_REPEAT(double,HNumber,frequencyRange)
 #undef HFPP_REPEAT
-#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if (key== #KEY) {_H_NL_ TYPE result;  _H_NL_ drp->headerRecord().get(key,result); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key== #KEY) || (key2== #KEY)) {_H_NL_ TYPE result;  _H_NL_ drp->headerRecord().get(#KEY,result); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
       HFPP_REPEAT(uint,uint,Date)
 	HFPP_REPEAT(casa::String,HString,Observatory)
 	HFPP_REPEAT(int,int,Filesize)
@@ -3428,7 +3682,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 	HFPP_REPEAT(casa::uChar,uint,SampleFreq)
 	HFPP_REPEAT(uint,uint,StartSample)
 #undef HFPP_REPEAT
-	if (key== "AntennaIDs") {_H_NL_ CasaVector<int> casavec; _H_NL_ drp->headerRecord().get(key,casavec); _H_NL_ std::vector<HInteger> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
+	if ((key== "AntennaIDs") || (key2== "AntennaIDs")) {_H_NL_ CasaVector<int> casavec; _H_NL_ drp->headerRecord().get("AntennaIDs",casavec); _H_NL_ std::vector<HInteger> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
     { HString result; result = result
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
   HFPP_REPEAT(uint,uint,nofAntennas)
@@ -3492,7 +3746,10 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 CRDataReader & HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 {
   DataReader *drp=&dr;
-#define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {TYPE input(TYPE2 (pyob)); drp->set##KEY (input);} else
+  HString key2(key);
+  key2[0]=(unsigned char)toupper((int)key2[0]);
+  key[0]=(unsigned char)tolower((int)key[0]);
+#define HFPP_REPEAT(TYPE,TYPE2,KEY) if ((key== #KEY) || (key2==#KEY)) {TYPE input(TYPE2 (pyob)); drp->set##KEY (input);} else
   HFPP_REPEAT(uint,PyInt_AsLong,Block)
     HFPP_REPEAT(uint,PyInt_AsLong,Blocksize)
     HFPP_REPEAT(uint,PyInt_AsLong,StartBlock)
@@ -3502,7 +3759,7 @@ CRDataReader & HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(double,PyFloat_AsDouble,ReferenceTime)
     HFPP_REPEAT(double,PyFloat_AsDouble,SampleFrequency)
     HFPP_REPEAT(int,PyInt_AsLong,Shift)
-    if (key=="SelectedAntennas") {
+    if ((key=="SelectedAntennas") || (key2=="SelectedAntennas")) {
       vector<uint> stlvec(PyList2STLuIntVec(pyob));
       uint * storage = &(stlvec[0]);
       casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
@@ -3537,8 +3794,11 @@ CRDataReader & HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileRead
 //-----------------------------------------------------------------------
-#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_WRAPPER_CLASSES HFPP_CLASS_hARRAY  // Additional C++ wrapper to generate - STL is not needed, since this is already STL
+#define HFPP_PYTHON_WRAPPER_CLASSES HFPP_CLASS_hARRAY HFPP_CLASS_STL //expose STL and hARRAY classes to python
 #define HFPP_FUNC_SLICED HFPP_FALSE
+#define HFPP_FUNC_KEEP_RETURN_TYPE_FIXED HFPP_TRUE //return a single DataReader object and not a vector thereof for array operations
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 2 // Use the third parameter as the master array for looping and history informations
 #define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object, opened e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(Datatype)()("Name of the data column to be retrieved (e.g., FFT, Fx,Time, Frequency...)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
