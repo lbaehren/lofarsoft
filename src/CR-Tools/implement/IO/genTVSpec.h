@@ -40,6 +40,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class genTVSpec
     
+    \ingroup CR
     \ingroup IO
     
     \brief Generate a mock spectrum of the "LOPES TV-transmitter"

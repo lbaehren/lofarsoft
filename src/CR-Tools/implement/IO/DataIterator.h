@@ -31,6 +31,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class DataIterator
     
+    \ingroup CR
     \ingroup IO
 
     \brief A file stream position interator for file I/O

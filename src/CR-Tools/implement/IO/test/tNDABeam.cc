@@ -21,17 +21,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <Data/NDABeam.h>
+#include <IO/NDABeam.h>
 
 /*!
   \file tNDABeam.cc
 
-  \ingroup CR_Data
+  \ingroup CR
+  \ingroup IO
 
   \brief A collection of test routines for NDABeam
  

@@ -31,7 +31,8 @@ using namespace std;
 /*!
   \class DataBlockSettings
 
-  \ingroup IO
+    \ingroup CR
+    \ingroup IO
 
   \brief Check parameters used for progression through the data volume
 

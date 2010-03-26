@@ -40,8 +40,8 @@
 #include <ApplicationSupport/GlishRecord.h>
 #include <IO/LopesEvent.h>
 #include <Data/ITS_Beam.h>
-#include <Data/ITS_Capture.h>
-#include <Data/NDABeam.h>
+#include <IO/ITS_Capture.h>
+#include <IO/NDABeam.h>
 #include <IO/DataReader.h>
 
 #include <casa/namespace.h>

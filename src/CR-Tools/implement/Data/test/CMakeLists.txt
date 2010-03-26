@@ -15,7 +15,6 @@ set (tests
   tData
   tLopesEvent
   tLopesEventIn
-  tNDABeam
   tTIM40Header
   )
 

@@ -397,7 +397,30 @@ Vector<uint> ITSMetadata::antennas (bool const &validDataOnly) const
 //
 // ==============================================================================
 
-// ----------------------------------------------------------------- readMetafile
+//_______________________________________________________________________________
+//                                                                        summary
+
+void ITSMetadata::summary (std::ostream &os)
+{
+  os << "[ITSMetadata] Summary of internal parameters"        << std::endl;
+  os << " - Metafile                = " << metafile()         << std::endl;
+  os << " - Data directory          = " << directory()        << std::endl;
+  os << " - Antenna numbers (all)   = " << antennas(false)    << std::endl;
+  os << " - Antenna with valid data = " << hasValidData()     << std::endl;
+  os << " - Antenna numbers (valid) = " << antennas(true)     << std::endl;
+  os << " - Datafiles (names only)  = " << datafiles(false)   << std::endl;
+  os << " - Experiment description  = " << description()      << std::endl;
+  os << " - Data base name          = " << basename()         << std::endl;
+  os << " - Observation owner       = " << observationOwner() << std::endl;
+  os << " - Observation ID          = " << observationId()    << std::endl;
+  os << " - Observation interval    = " << interval()         << std::endl;
+  os << " - Observation iterations  = " << iterations()       << std::endl;
+  os << " - Plugin 1                = " << plugin1()          << std::endl;
+  os << " - Plugin 2                = " << plugin2()          << std::endl;
+}
+
+//_______________________________________________________________________________
+//                                                                   readMetafile
 
 void ITSMetadata::readMetafile ()
 {

@@ -4,7 +4,6 @@
  ***************************************************************************
  *   Copyright (C) 2006                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
- *   Andreas Nigl (anigl@astron.nl)                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -22,10 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
-#ifndef NDABEAM_H
-#define NDABEAM_H
+#ifndef ITS_CAPTURE_H
+#define ITS_CAPTURE_H
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>
@@ -37,17 +34,18 @@
 using CR::DataReader;
 
 /*!
-  \class NDABeam
+  \class ITS_Capture
 
-  \ingroup CR_Data
+    \ingroup CR
+    \ingroup IO
 
-  \brief Beamformed NDA waveform data 
+  \brief Brief description for class ITS_Capture
 
-  \author Lars B&auml;hren and Andreas Nigl
+  \author Lars B&auml;hren
 
   \date 2006/05/16
 
-  \test tNDABeam.cc
+  \test tITS_Capture.cc
 
   <h3>Prerequisite</h3>
 
@@ -56,45 +54,19 @@ using CR::DataReader;
     <li>[CR] ITSMetadata
   </ul>
 
-  The data are saved as shorts little endian in a binary file.
-
   <h3>Synopsis</h3>
-
-  \verbatim
-  [OBSERVATION]
-  description=NANCAY Jupiter data
-  experiment_type=capturing
-  basename=jupiter_20051130_03
-  starttime=Fri Jan  1 12:00:00 2010
-  interval=0
-  capturemode=SYNCSTOP
-  capturesize=S16_512M
-  antennas=0 1 
-  signextension=true
-  skipcapture=false
-  iterations=1
-  current_status=scheduled
-  current_iteration=0
-  observation_id=1133333588
-  observation_owner=NDA
-  submittime=2005-11-30T06:53:15.00Z
-  # machineformat=ieee-le
-  # precision=int16
-  #EOF
-  triggertime[1]=2005-11-30T07:15:02.00Z
-  file=/data/NDA/jupX3/test3.rd14.10t21
-  file=/data/NDA/jupX3/test3.rd14.0t21.org
-  \endverbatim
 
   <h3>Example(s)</h3>
 
-  See the examples section of ITSBeam -- this class works just the same.
 */
 
-class NDABeam : public DataReader {
+class ITS_Capture : public DataReader {
 
   //! Information contained in experiment.meta are stored in their own object
   ITSMetadata metadata_p;
+
+  //! Type as which the data are stored in the data file
+  short datatype_p;
 
  public:
 
@@ -103,14 +75,14 @@ class NDABeam : public DataReader {
   /*!
     \brief Default constructor
    */
-  NDABeam ();
+  ITS_Capture ();
 
   /*!
     \brief Argumented constructor
 
     \param metafile -- Name of the file from which to read in the data
   */
-  NDABeam (String const &metafile);
+  ITS_Capture (String const &metafile);
 
   /*!
     \brief Argumented constructor
@@ -118,8 +90,8 @@ class NDABeam : public DataReader {
     \param metafile -- Name of the file from which to read in the data
     \param blocksize   -- Size of a block of data, [samples]
   */
-  NDABeam (String const &metafile,
-	   uint const &blocksize);
+  ITS_Capture (String const &metafile,
+	       uint const &blocksize);
   
   /*!
     \brief Argumented constructor
@@ -131,33 +103,33 @@ class NDABeam : public DataReader {
     \param fft2calfft  -- Multiplication factors for conversion from raw to
                           calibrated FFT
   */
-  NDABeam (String const &metafile,
-	   uint const &blocksize,
-	   Vector<Double> const &adc2voltage,
-	   Matrix<DComplex> const &fft2calfft);
+  ITS_Capture (String const &metafile,
+	       uint const &blocksize,
+	       Vector<Double> const &adc2voltage,
+	       Matrix<DComplex> const &fft2calfft);
   /*!
     \brief Copy constructor
 
-    \param other -- Another NDABeam object from which to create this new
+    \param other -- Another ITS_Capture object from which to create this new
                     one.
   */
-  NDABeam (NDABeam const &other);
+  ITS_Capture (ITS_Capture const &other);
 
   // ---------------------------------------------------------------- Destruction
 
   /*!
     \brief Destructor
   */
-  ~NDABeam ();
+  ~ITS_Capture ();
 
   // ------------------------------------------------------------------ Operators
 
   /*!
     \brief Overloading of the copy operator
 
-    \param other -- Another NDABeam object from which to make a copy.
+    \param other -- Another ITS_Capture object from which to make a copy.
   */
-  NDABeam& operator= (NDABeam const &other); 
+  ITS_Capture& operator= (ITS_Capture const &other); 
 
   // ----------------------------------------------------------------- Parameters
 
@@ -166,7 +138,7 @@ class NDABeam : public DataReader {
     
     \return metafile -- Name of the metafile
   */
-  String metafile () const {
+  inline String metafile () const {
     return metadata_p.metafile();
   }
   
@@ -186,7 +158,7 @@ class NDABeam : public DataReader {
     \return directory -- Path to the directory in which the metafile and the
                          datafiles are
   */
-  String directory () const {
+  inline String directory () const {
     return metadata_p.directory();
   }
 
@@ -198,7 +170,7 @@ class NDABeam : public DataReader {
     \return datafiles -- The names of the files, in which the actual data are
                          stored
    */
-  Vector<String> datafiles (bool const &fullPath=true) const {
+  inline Vector<String> datafiles (bool const &fullPath=true) const {
     return metadata_p.datafiles(fullPath);
   }  
 
@@ -210,22 +182,30 @@ class NDABeam : public DataReader {
 
     \return antennas -- Numbers of the antennas included in the experiment
   */
-  Vector<uint> antennas (bool const &validDataOnly=true) const {
+  inline Vector<uint> antennas (bool const &validDataOnly=true) const {
     return metadata_p.antennas (validDataOnly);
   }
 
   // -------------------------------------------------------------------- Methods
 
-  //! Get the raw time series after ADC conversion
+  /*!
+    \brief Get the raw time series after ADC conversion
+    
+    \return fx -- Raw ADC time series, [Counts]
+  */
   Matrix<Double> fx ();
-  //! Get the raw time series after ADC conversion
   void fx (Matrix<Double> &data);
-  
+
  private:
-  
-  //! Unconditional copying
-  void copy (NDABeam const &other);
-  //! Unconditional deletion 
+
+  /*!
+    \brief Unconditional copying
+  */
+  void copy (ITS_Capture const &other);
+
+  /*!
+    \brief Unconditional deletion 
+  */
   void destroy(void);
 
  protected:
@@ -237,7 +217,7 @@ class NDABeam : public DataReader {
                       went fine.
   */
   bool setStreams ();
-
+  
   /*!
     \brief Set the record collecting header information.
     
@@ -248,4 +228,4 @@ class NDABeam : public DataReader {
   
 };
 
-#endif /* NDABEAM_H */
+#endif /* ITSCAPTURE_H */

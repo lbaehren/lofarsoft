@@ -79,9 +79,10 @@ namespace CR {  // Namespace CR -- begin
 	     betaRise,
 	     betaFall);
   } 
-
+  
   template <class T> 
   HanningFilter<T>::HanningFilter (HanningFilter<T> const &other)
+    : BasicFilter<T> (other)
   {
     copy (other);
   }

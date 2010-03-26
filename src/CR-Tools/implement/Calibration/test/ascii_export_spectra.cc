@@ -38,7 +38,7 @@
 #include <casa/Arrays/Matrix.h>
 
 // LOPES-tools header files
-#include <Data/ITS_Capture.h>
+#include <IO/ITS_Capture.h>
 #include <IO/DataReader.h>
 #include <Utilities/ProgressBar.h>
 

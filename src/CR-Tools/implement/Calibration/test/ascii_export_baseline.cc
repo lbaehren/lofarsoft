@@ -31,7 +31,7 @@
 #include <Calibration/BaselineGain.h>
 #include <Calibration/AverageGain.h>
 #include <IO/DataReader.h>
-#include <Data/ITS_Capture.h>
+#include <IO/ITS_Capture.h>
 #include <Utilities/ProgressBar.h>
 
 using casa::Matrix;

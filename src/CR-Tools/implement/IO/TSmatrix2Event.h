@@ -40,6 +40,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class TSmatrix2Event
     
+    \ingroup CR
     \ingroup IO
     
     \brief Convert a time-series matrix into a LOPES event file

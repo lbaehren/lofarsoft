@@ -40,7 +40,7 @@
 
 #include <Calibration/PluginBase.h>
 #include <Calibration/RFIMitigation.h>
-#include <Data/ITS_Capture.h>
+#include <IO/ITS_Capture.h>
 #include <IO/LopesEvent.h>
 #include <IO/DataReader.h>
 

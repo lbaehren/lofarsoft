@@ -49,6 +49,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class ImportSimulation
     
+    \ingroup CR
     \ingroup IO
     
     \brief Brief description for class ImportSimulation

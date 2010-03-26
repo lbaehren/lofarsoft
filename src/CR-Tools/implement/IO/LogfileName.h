@@ -38,7 +38,8 @@
 /*!
   \class LogfileName
   
-  \ingroup IO
+    \ingroup CR
+    \ingroup IO
 
   \brief Help for putting together the name of a logfile.
 

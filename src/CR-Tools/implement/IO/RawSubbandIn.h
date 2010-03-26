@@ -52,6 +52,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class RawSubbandIn
     
+    \ingroup CR
     \ingroup IO
     
     \brief Read in the raw dump of subband data

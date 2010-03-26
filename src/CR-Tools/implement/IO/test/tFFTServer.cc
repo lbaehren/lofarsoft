@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #include <stdlib.h>
 
 // AIPS++/CASA
@@ -36,7 +34,7 @@
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
 
-#include <Data/ITS_Capture.h>
+#include <IO/ITS_Capture.h>
 #include <IO/DataReader.h>
 
 #include <casa/namespace.h>
@@ -50,38 +48,6 @@
   
   \date 2005/12/06
 */
-
-// -------------------------------------------------------------- infile_location
-
-std::string get_filenameData ()
-{
-  bool ok (true);
-  std::string filename ("");
-  std::vector<std::string> filenames;
-
-  filenames.push_back("/data/ITS/2005.08/lightning_20050831_1/experiment.meta");
-  filenames.push_back("/data/ITS/2005.11/jupiter_20051130_01/experiment.meta");
-  filenames.push_back("/data/ITS/2005.11/jupiter_20051130_02/experiment.meta");
-
-  for (uint n(0); filenames.size(); n++) {
-    //
-    std::cout << " --> checking file " << filenames[n] << " ..." << std::endl;
-    // try to open the file
-    FILE *fd = fopen(filenames[n].c_str(),"r");
-    if (fd == NULL) {
-      ok = false;
-      std::cerr << " ---> Failed to open file!" << std::endl;
-    } else {
-      filename = filenames[n];
-      // report success
-      std::cout << " ---> Success opening file." << std::endl;
-      // return the result
-      return filename;
-    }
-  }
-  
-  return filename;
-}
 
 // ------------------------------------------------------------------ test_invers
 
@@ -146,17 +112,34 @@ int test_invers (String const &filename,
 
 // ----------------------------------------------------------------- main routine
 
-int main ()
+int main (int argc,
+          char *argv[])
 {
   int nofFailedTests (0);
+  bool haveDataset (true);
+  int blocksize (8192);
+  std::string filename;
+
+  //________________________________________________________
+  // Process parameters from the command line
   
-  Int blocksize (8192);
-  String filename = get_filenameData ();
-  
-  if (filename != "") {
-    nofFailedTests += test_invers(filename,blocksize);
+  if (argc < 2) {
+    haveDataset = false;
   } else {
-    nofFailedTests++;
+    filename    = argv[1];
+    haveDataset = true;
+  }
+
+  //________________________________________________________
+  // Run the tests
+  
+  
+  if (haveDataset) {
+
+    nofFailedTests += test_invers(filename,blocksize);
+
+  } else {
+    nofFailedTests=1;
   }
 
   return nofFailedTests;

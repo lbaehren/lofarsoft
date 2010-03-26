@@ -63,6 +63,7 @@ foreach (test
     tImportAntenna
     tImportSimulation
     tLogfileName
+    tNDABeam
     tObservationData
     tRawSubbandIn
     tSimulation2fftMatrix

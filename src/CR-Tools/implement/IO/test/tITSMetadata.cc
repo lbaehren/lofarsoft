@@ -50,36 +50,6 @@
   (<tt>/data/ITS/exampledata.its/experiment.meta</tt>).
 */
 
-/*!
-  \brief Show the internal parameters as accessable through public functions
-
-  \param meta -- An ITSMetadata to investigate.
-
-  A simple report of the experiment specific information as extracted from the
-  experiment metafile.
- */
-void show_parameters (ITSMetadata &meta)
-{
-  try {
-    cout << " - Metafile                = " << meta.metafile()         << endl;
-    cout << " - Data directory          = " << meta.directory()        << endl;
-    cout << " - Antenna numbers (all)   = " << meta.antennas(false)    << endl;
-    cout << " - Antenna with valid data = " << meta.hasValidData()     << endl;
-    cout << " - Antenna numbers (valid) = " << meta.antennas(true)     << endl;
-    cout << " - Datafiles (names only)  = " << meta.datafiles(false)   << endl;
-    cout << " - Experiment description  = " << meta.description()      << endl;
-    cout << " - Data base name          = " << meta.basename()         << endl;
-    cout << " - Observation owner       = " << meta.observationOwner() << endl;
-    cout << " - Observation ID          = " << meta.observationId()    << endl;
-    cout << " - Observation interval    = " << meta.interval()         << endl;
-    cout << " - Observation iterations  = " << meta.iterations()       << endl;
-    cout << " - Plugin 1                = " << meta.plugin1()          << endl;
-    cout << " - Plugin 2                = " << meta.plugin2()          << endl;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-  }
-}
-
 // -----------------------------------------------------------------------------
 
 /*!
@@ -98,7 +68,7 @@ Int test_ITSMetadata (const String& metafile)
   try {
     ITSMetadata meta;
     //
-    show_parameters  (meta);
+    meta.summary();
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -109,7 +79,7 @@ Int test_ITSMetadata (const String& metafile)
 //   try {
 //     ITSMetadata meta (metafile);
 //     //
-//     show_parameters  (meta);
+//     meta.summary();
 //   } catch (AipsError x) {
 //     cerr << x.getMesg() << endl;
 //     nofFailedTests++;
@@ -120,6 +90,8 @@ Int test_ITSMetadata (const String& metafile)
   try {
     String newMetafile (metafile+"log");
     ITSMetadata meta (newMetafile);
+    //
+    meta.summary();
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -132,9 +104,9 @@ Int test_ITSMetadata (const String& metafile)
     ITSMetadata meta2 (meta1);
     //
     cout << "+++ original object +++" << endl;
-    show_parameters  (meta1);
+    meta1.summary();
     cout << "+++ object obtained via copy ooperation +++" << endl;
-    show_parameters  (meta2);
+    meta2.summary();
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -158,7 +130,7 @@ Int test_metafile (const String& metafile)
     //
     meta.setMetafile (metafile);
     //
-    show_parameters  (meta);
+    meta.summary();
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -167,27 +139,34 @@ Int test_metafile (const String& metafile)
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                           main
 
 int main (int argc,
-	  char *argv[])
+          char *argv[])
 {
-  Int nofFailedTests (0);
-  string metafile ("/data/ITS/exampledata.its/experiment.meta");
+  int nofFailedTests (0);
+  bool haveDataset (true);
+  std::string filename;
 
+  //________________________________________________________
+  // Process parameters from the command line
+  
   if (argc < 2) {
-    cerr << "[tLopesEvent] No filename on input - using default." << endl;
+    haveDataset = false;
   } else {
-    metafile = argv[1];
+    filename    = argv[1];
+    haveDataset = true;
   }
 
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_ITSMetadata (metafile);
-  }
+  //________________________________________________________
+  // Run the tests
 
-  {
-    nofFailedTests += test_metafile (metafile);
+  if (haveDataset) {
+    nofFailedTests += test_ITSMetadata (filename);
+    nofFailedTests += test_metafile (filename);
+  } else {
+    nofFailedTests = 1;
   }
 
   return nofFailedTests;

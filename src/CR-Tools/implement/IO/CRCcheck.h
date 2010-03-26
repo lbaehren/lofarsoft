@@ -36,6 +36,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class CRCcheck
     
+    \ingroup CR
     \ingroup IO
     
     \brief Class to check CRCs of raw TBB data. 

@@ -42,6 +42,7 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \class Simulation2fftMatrix
     
+    \ingroup CR
     \ingroup IO
     
     \brief Convert simulation data to a DataReader style matrix.

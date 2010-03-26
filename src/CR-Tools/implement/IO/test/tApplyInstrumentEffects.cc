@@ -2,8 +2,8 @@
  | $Id                                                                     |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -53,7 +53,6 @@ int test_ApplyInstrumentEffects ()
   int nofFailedTests (0);
   
   try {
-    
     
     std::cout << "\n[test_ApplyInstrumentEffects]\n" << std::endl;
     
@@ -151,16 +150,37 @@ int test_ApplyInstrumentEffects ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                           main
 
-int main ()
+int main (int argc,
+          char *argv[])
 {
   int nofFailedTests (0);
+  bool haveDataset (true);
+  std::string filename;
 
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_ApplyInstrumentEffects ();
+  //________________________________________________________
+  // Process parameters from the command line
+  
+  if (argc < 2) {
+    haveDataset = false;
+  } else {
+    filename    = argv[1];
+    haveDataset = true;
   }
 
+  //________________________________________________________
+  // Run the tests
+  
+  if (haveDataset) {
+    
+    // Test for the constructor(s)
+    nofFailedTests += test_ApplyInstrumentEffects ();
+    
+  } else {
+    nofFailedTests = 1;
+  }
+  
   return nofFailedTests;
 }

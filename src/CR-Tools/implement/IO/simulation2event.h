@@ -39,6 +39,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class simulation2event
     
+    \ingroup CR
     \ingroup IO
     
     \brief Generate a LOPES event file from reas simulation data

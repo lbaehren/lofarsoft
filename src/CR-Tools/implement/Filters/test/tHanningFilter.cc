@@ -27,7 +27,7 @@
 #include <Filters/BasicFilter.h>
 #include <Filters/HanningFilter.h>
 #include <IO/DataReader.h>
-#include <Data/ITS_Capture.h>
+#include <IO/ITS_Capture.h>
 
 using casa::Float;
 using casa::Double;

@@ -56,6 +56,7 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \class DataReader
     
+    \ingroup CR
     \ingroup IO
     
     \brief Brief description for class DataReader

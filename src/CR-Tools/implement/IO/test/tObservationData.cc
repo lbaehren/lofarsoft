@@ -32,11 +32,8 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
-using casa::IPosition;
 using casa::Matrix;
-using casa::MDirection;
 using casa::MEpoch;
-using casa::MVDirection;
 using casa::ObsInfo;
 using casa::Quantity;
 using casa::String;
@@ -47,7 +44,8 @@ using CR::ObservationData;
 /*!
   \file tObservationData.cc
 
-  \ingroup CR_Data
+  \ingroup CR
+  \ingroup IO
 
   \brief A collection of tests for ObservationData.
 
@@ -55,6 +53,9 @@ using CR::ObservationData;
 
   \date 2005/04/18
 */
+
+//_______________________________________________________________________________
+//                                                               antennaPositions
 
 /*!
   \brief Create array with some dummy antenna positions
@@ -70,7 +71,7 @@ using CR::ObservationData;
 Matrix<double> antennaPositions (uint const &nofAntennas,
 				 bool const &coordAxisFirst)
 {
-  IPosition shape (2,3,nofAntennas);
+  casa::IPosition shape (2,3,nofAntennas);
   Matrix<double> pos (shape);
 
   // Assign values
@@ -95,6 +96,9 @@ Matrix<double> antennaPositions (uint const &nofAntennas,
   
 }
 
+//_______________________________________________________________________________
+//                                                                     getObsInfo
+
 /*!
   \brief Generate AIPS++ ObsInfo object capsulating obersvation information
  */
@@ -112,7 +116,8 @@ casa::ObsInfo getObsInfo ()
   return obsInfo;
 }
 
-// =============================================================================
+//_______________________________________________________________________________
+//                                                           test_ObservationData
 
 /*!
   \brief Test constructors for an ObservationData object.
@@ -129,7 +134,7 @@ int test_ObservationData ()
   ObsInfo obsInfo = getObsInfo();
   uint nofAntennas (10);
   
-  cout << "\n [1] Default (empty) constructor\n" << endl;
+  cout << "[1] Testing ObservationData() ..." << std::endl;
   try {
     ObservationData obsData;
     //
@@ -139,10 +144,10 @@ int test_ObservationData ()
     nofFailedTests++;
   }
 
-  cout << "\n [2] Test constructor with observatory name\n" << endl;
+  cout << "[2] Testing ObservationData(string) ..." << std::endl;
   try {
-    //
-    ObservationData obsData (obsInfo.telescope());
+    std::string telescope = obsInfo.telescope();
+    ObservationData obsData (telescope);
     //
     obsData.summary();
   } catch (AipsError x) {
@@ -150,7 +155,7 @@ int test_ObservationData ()
     nofFailedTests++;
   }
 
-  cout << "\n [3] Test constructor with epoch and observatory name\n" << endl;
+  cout << "[3] Testing ObservationData(Quantity,string) ..." << std::endl;
   try {
     //
     ObservationData obsData (obsInfo.obsDate(),
@@ -210,7 +215,8 @@ int test_ObservationData ()
   return nofFailedTests;
 }
 
-// =============================================================================
+//_______________________________________________________________________________
+//                                                                  test_antennas
 
 /*!
   \brief Test working with the antenna position information
@@ -276,7 +282,8 @@ int test_antennas ()
   return nofFailedTests;
 }
 
-// =============================================================================
+//_______________________________________________________________________________
+//                                                          test_conversionEngine
 
 /*!
   \brief Test creation and operation of the coordinate conversion engine.
@@ -320,13 +327,13 @@ int test_conversionEngine ()
     cout << " Sun (J2000) : " << sunJ2000 << endl;
     //
     for (uint n=0; n<refcode.nelements(); n++) {
-      MDirection::Convert conv = obsData.conversionEngine (refcode(n),false);
+      casa::MDirection::Convert conv = obsData.conversionEngine (refcode(n),false);
       //
-      MVDirection MVDirectionFROM;
+      casa::MVDirection MVDirectionFROM;
       Vector<Quantity> QDirectionTO(2);
       //
-      MVDirectionFROM = MVDirection (Quantity(sunAZEL(0),"deg"),
-				     Quantity(sunAZEL(1),"deg"));
+      MVDirectionFROM = casa::MVDirection (casa::Quantity(sunAZEL(0),"deg"),
+					   casa::Quantity(sunAZEL(1),"deg"));
       //
       QDirectionTO = conv(MVDirectionFROM).getValue().getRecordValue();
       //
@@ -346,7 +353,7 @@ int test_conversionEngine ()
     ObservationData obsData (epoch,telescope);
     Vector<double> sun (2);
     Vector<String> refcode(3);
-    MVDirection MVDirectionFROM;
+    casa::MVDirection MVDirectionFROM;
     Vector<Quantity> QDirectionTO(2);
     //
     refcode(0) = "J2000";
@@ -355,10 +362,10 @@ int test_conversionEngine ()
     //
     for (uint n=1; n<refcode.nelements(); n++) {
       //
-      MDirection::Convert conv = obsData.conversionEngine (refcode(n),refcode(0));
+      casa::MDirection::Convert conv = obsData.conversionEngine (refcode(n),refcode(0));
       //
-      MVDirectionFROM = MVDirection (Quantity(sunJ2000(0),"deg"),
-				     Quantity(sunJ2000(1),"deg"));
+      MVDirectionFROM = casa::MVDirection (casa::Quantity(sunJ2000(0),"deg"),
+					   casa::Quantity(sunJ2000(1),"deg"));
       //
       QDirectionTO = conv(MVDirectionFROM).getValue().getRecordValue();
       //
@@ -378,27 +385,32 @@ int test_conversionEngine ()
   return nofFailedTests;
 }
 
-// =============================================================================
-//
-//  Main routine
-//
-// =============================================================================
+//_______________________________________________________________________________
+//                                                                           main
 
-int main () {
-
+int main (int argc,
+          char *argv[])
+{
   int nofFailedTests (0);
+  bool haveDataset (true);
+  std::string filename;
 
-  {
-    nofFailedTests += test_ObservationData ();
+  //________________________________________________________
+  // Process parameters from the command line
+  
+  if (argc < 2) {
+    haveDataset = false;
+  } else {
+    filename    = argv[1];
+    haveDataset = true;
   }
 
-  {
-    nofFailedTests += test_antennas ();
-  }
-
-  {
-    nofFailedTests += test_conversionEngine ();
-  }
-
+  //________________________________________________________
+  // Run the tests
+  
+  nofFailedTests += test_ObservationData ();
+  nofFailedTests += test_antennas ();
+  nofFailedTests += test_conversionEngine ();
+  
   return nofFailedTests;
 }

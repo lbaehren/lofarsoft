@@ -251,16 +251,16 @@ class ITSMetadata {
 
  public:
 
-  // --------------------------------------------------------------- Construction
-
+  // === Construction ===========================================================
+  
   /*!
     \brief Default constructor
-
+    
     This will just construct an object, but will not do anything further (as this
     requires an experiment meta file to open).
-   */
+  */
   ITSMetadata ();
-
+  
   /*!
     \brief Argumented constructor
     
@@ -276,14 +276,12 @@ class ITSMetadata {
   */
   ITSMetadata (ITSMetadata const &other);
 
-  // ---------------------------------------------------------------- Destruction
+  // === Destruction ============================================================
 
-  /*!
-    \brief Destructor
-  */
+  //! Destructor
   ~ITSMetadata ();
 
-  // ------------------------------------------------------------------ Operators
+  // === Operators ==============================================================
 
   /*!
     \brief Overloading of the copy operator
@@ -292,7 +290,7 @@ class ITSMetadata {
   */
   ITSMetadata &operator= (ITSMetadata const &other); 
 
-  // ----------------------------------------------------------------- Parameters
+  // === Parameter access =======================================================
 
   /*!
     \brief Get the path to the metafile
@@ -433,9 +431,15 @@ class ITSMetadata {
     return observationOwner_p;
   }
 
-  // -------------------------------------------------------------------- Methods
+  // === Methods ================================================================
 
+  //! Provide a summary of the internal parameters to standard output
+  inline void summary () {
+    summary (std::cout);
+  }
 
+  //! Provide a summary of the internal parameters
+  void summary (std::ostream &os);
 
  private:
 

@@ -40,6 +40,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class toLOPESgrid
     
+    \ingroup CR
     \ingroup IO
     
     \brief Interpolate (simulation-)data to the sampling grid as used e.g. by LOPES

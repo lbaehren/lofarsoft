@@ -37,6 +37,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class ApplyInstrumentEffects
     
+    \ingroup CR
     \ingroup IO
     
     \brief Apply the effects of the LOPES electronics to (simulated) data
