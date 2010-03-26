@@ -101,6 +101,9 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   
   if (NOT QT4_FOUND)
     include (FindQtFink)
+    ## set variables for initial cache
+    set (QT4_FOUND ${HAVE_QT})
+    set (QT_INCLUDE_DIR ${QT_INCLUDES})
   endif (NOT QT4_FOUND)
   
   ## Python bindings _____________________________
