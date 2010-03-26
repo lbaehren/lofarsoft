@@ -226,6 +226,47 @@ if (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND HAVE_ROOT)
 
 endif (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND HAVE_ROOT)
 
+
+if (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND HAVE_ROOT)
+  ## compiler instructions
+  add_executable (tlateralDistribution tlateralDistribution.cc)
+  ## linker instructions
+  if (HAVE_LIBM AND HAVE_LIBUTIL)
+    target_link_libraries (tlateralDistribution
+      cr
+      ${POSTGRESQL_LIBRARIES}
+      ${STARTOOLS_LIBRARIES}
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${HAVE_LIBUTIL}
+      ${HAVE_LIBM}
+      )
+  else (HAVE_LIBM AND HAVE_LIBUTIL)
+    target_link_libraries (tlateralDistribution
+      cr
+      ${POSTGRESQL_LIBRARIES}
+      ${STARTOOLS_LIBRARIES}
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      )
+  endif (HAVE_LIBM AND HAVE_LIBUTIL)
+  ## extra properties to take care of
+  if (APPLE)
+    set_target_properties (tlateralDistribution
+      PROPERTIES
+      LINK_FLAGS "-bind_at_load"
+      )
+  endif (APPLE)
+  ## testing
+  if (CR_ENABLE_TESTING) 
+    add_test (tlateralDistribution tlateralDistribution)
+  endif (CR_ENABLE_TESTING) 
+  ## installation
+  list (APPEND tests tlateralDistribution)
+
+endif (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND HAVE_ROOT)
+
+
 ##____________________________________________________________________
 ##                                                    tAntennasDisplay
 ##                                                    tPulseProperties
