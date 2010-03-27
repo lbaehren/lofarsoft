@@ -175,12 +175,14 @@ namespace CR { // Namespace CR -- begin
     void loadNoiseEvent(const string& evname);                          
 
     /*!
-      \brief Adds pulse to the noise
+      \brief Adds pulse to the noise 
       
-      \param pulseSNR          - signal-to-noise ratio to which the test pulse is scaled
+      \param lowerSNR          - upper bound of SNR values used for generating the random SNR of the pulse
+      \param upperSNR          - lower bound of SNR values used for generating the random SNR of the pulse
       \param resultsFileName   - name of file for ASCII results
     */
-    void addPulseToNoise(const double& pulseSNR,
+    void addPulseToNoise(const double& lowerSNR,
+                         const double& upperSNR,
                          const string& resultsFileName = "");                          
 
                           

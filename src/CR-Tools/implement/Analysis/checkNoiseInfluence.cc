@@ -216,7 +216,9 @@ namespace CR { // Namespace CR -- begin
     }  
   }
   
-  void checkNoiseInfluence::addPulseToNoise(const double& pulseSNR, const string& resultsFileName)                          
+  void checkNoiseInfluence::addPulseToNoise(const double& lowerSNR,
+                                            const double& upperSNR,
+                                            const string& resultsFileName)                          
   {
     try {   
       // Generate the antenna selection (all antennas)
@@ -229,6 +231,11 @@ namespace CR { // Namespace CR -- begin
         cerr << "checkNoiseInfluence::addPulseToNoise: " << "Error: Load noise, first!" << endl;
         return;
       }
+      
+      // array to store true pulse height (in units of noise)
+      double truePulseHeight[NnoiseIntervals][upsampledNoise.ncolumn()];
+      // use root random  number generator with random seed (0) to generate pulse height
+      TRandom3 randomGenerator(0);
 
       // add pulse to noise, for each noise interval
       Matrix<Double> noiseAndPulse = upsampledNoise.copy();
@@ -236,9 +243,12 @@ namespace CR { // Namespace CR -- begin
         double startsample = ntrue(noiseTimeAxis < startTime + interval*(noiseIntervalLength+noiseIntervalGap));  
         //cout << "Interval samples" << interval << ": " << startsample << " to " << startsample+pulsePattern.nelements() << endl;
         // loop through all antennas and add pulse
-        for (unsigned int i=0; i < upsampledNoise.ncolumn(); ++i)
-          for (unsigned int j=0; j < pulsePattern.nelements(); ++j)            
-            noiseAndPulse(j+startsample,i) += pulseSNR*noiseHeight[interval][i]/pulseHeight*pulsePattern(j); 
+        for (unsigned int i=0; i < upsampledNoise.ncolumn(); ++i) {
+          truePulseHeight[interval][i] = randomGenerator.Uniform(lowerSNR,upperSNR);
+          for (unsigned int j=0; j < pulsePattern.nelements(); ++j) {
+            noiseAndPulse(j+startsample,i) += truePulseHeight[interval][i]*noiseHeight[interval][i]/pulseHeight*pulsePattern(j); 
+          } 
+        }  
       }         
       CompleteBeamPipe_p->setUpsampledFieldStrength(noiseAndPulse);
 
@@ -246,7 +256,7 @@ namespace CR { // Namespace CR -- begin
 
       // create arrays and variables to store the information on snr and time shift
       double SNR;
-      //double lgSNR;
+      double trueHeight;
       double envelopeTimeDiff;
       double halfheightTimeDiff;
       double maximumTimeDiff;
@@ -254,28 +264,27 @@ namespace CR { // Namespace CR -- begin
       
       // prepare root histograms
       double SNRminimum = 0;
-      if (pulseSNR > 3)
-        SNRminimum = round(pulseSNR-3);
-      TH1D *SNRHist = new TH1D("SNRHist","SNR",60,SNRminimum,round(pulseSNR+3));
-      //TH1D *lgSNRHist = new TH1D("lgSNRHist","lg SNR",120,-3,3);
+      if (lowerSNR > 3)
+        SNRminimum = round(lowerSNR-3);
+      TH1D *SNRHist = new TH1D("SNRHist","SNR",60,SNRminimum,round(upperSNR+3));
+      TH1D *trueHeightHist = new TH1D("trueSNRHist","true pulse height",100,lowerSNR,upperSNR);
       TH1D *envelopeTimeDiffHist = new TH1D("envelopeTimeDiffHist","Time deviation of envelope maximum",
-                                            100,-round(100/(1.5*pulseSNR+1.)),+round(100/(1.5*pulseSNR+1.)));      
+                                            100,-round(100/(1.5*lowerSNR+1.)),+round(100/(1.5*lowerSNR+1.)));      
       TH1D *halfheightTimeDiffHist = new TH1D("halfheightTimeDiffHist","Time deviation of crossing of half height",
-                                              100,-round(1000/(3*pulseSNR+1.)),+round(1000/(3*pulseSNR+1.)));      
+                                              100,-round(1000/(3*lowerSNR+1.)),+round(1000/(3*lowerSNR+1.)));      
       TH1D *maximumTimeDiffHist = new TH1D("maximumTimeDiffHist","Time deviation of maximum",
-                                           100,-round(30/(pulseSNR+1.)),+round(30/(pulseSNR+1.)));      
+                                           100,-round(30/(lowerSNR+1.)),+round(30/(lowerSNR+1.)));      
       TH1D *minimumTimeDiffHist = new TH1D("minimumTimeDiffHist","Time deviation of minimum",
-                                            100,-round(30/(pulseSNR+1.)),+round(30/(pulseSNR+1.)));      
+                                            100,-round(30/(lowerSNR+1.)),+round(30/(lowerSNR+1.)));      
 
       unsigned int ant = 0;
-      unsigned int i=0;  // counter to fill arrays
       int interval = 0; // noise interval
 
       // prepare rootfile for results
       TFile *rootfile=NULL;
       stringstream filename;
-      filename << "resultsSNR-" << pulseSNR << ".root";
-      rootfile = new TFile(filename.str().c_str(),"RECREATE","Results for SNR test pulse study");
+      filename << "resultsSNR-" << lowerSNR << "-" << upperSNR << ".root";
+      rootfile = new TFile(filename.str().c_str(),"UPDATE","Results for SNR test pulse study");
 
       // check if file is open
       if (rootfile->IsZombie()) {
@@ -289,7 +298,7 @@ namespace CR { // Namespace CR -- begin
       roottree->Branch("ant",&ant,"ant/i");
       roottree->Branch("noiseInterval",&interval,"noiseInterval/i");
       roottree->Branch("SNR",&SNR,"SNR/D");
-      //roottree->Branch("lgSNR",&lgSNR,"lgSNR/D");
+      roottree->Branch("trueHeight",&trueHeight,"trueHeight/D");
       roottree->Branch("envelopeTimeDiff",&envelopeTimeDiff,"envelopeTimeDiff/D");
       roottree->Branch("halfheightTimeDiff",&halfheightTimeDiff,"halfheightTimeDiff/D");
       roottree->Branch("maximumTimeDiff",&maximumTimeDiff,"maximumTimeDiff/D");
@@ -314,7 +323,7 @@ namespace CR { // Namespace CR -- begin
         ant = 0;
         for( map<int, PulseProperties>::iterator it = calibPulses.begin(); it != calibPulses.end(); ++it ) {        
           SNR = it->second.envelopeMaximum/noiseValues[ant];
-          //lgSNR = log10(it->second.envelopeMaximum/noiseValues[ant]);
+          trueHeight = truePulseHeight[interval][ant];
           // calculate deviation of pulse time
           envelopeTimeDiff = it->second.envelopeTime - (plotStart()*1e9+testPulseProperties.envelopeTime);
           halfheightTimeDiff = it->second.halfheightTime - (plotStart()*1e9+testPulseProperties.halfheightTime);
@@ -325,20 +334,19 @@ namespace CR { // Namespace CR -- begin
 
           // fill arrays for histograms
           SNRHist->Fill(SNR);
-          //lgSNRHist->Fill(lgSNR);
+          trueHeightHist->Fill(trueHeight);
           envelopeTimeDiffHist->Fill(envelopeTimeDiff);
           halfheightTimeDiffHist->Fill(halfheightTimeDiff);
           maximumTimeDiffHist->Fill(maximumTimeDiff);
           minimumTimeDiffHist->Fill(minimumTimeDiff);
           
-          ++i;
           ++ant;
         } 
       }
 
       // fit prepared histograms
       // SNRHist->Fit("gaus");
-      // lgSNRHist->Fit("gaus");
+      // trueHeightHist->Fit("gaus");
       // envelopeTimeDiffHist->Fit("gaus");
       // halfheightTimeDiffHist->Fit("gaus");
       // maximumTimeDiffHist->Fit("gaus");
@@ -351,12 +359,12 @@ namespace CR { // Namespace CR -- begin
       SNRHist -> GetXaxis()->SetTitleSize(0.05);
       SNRHist -> GetYaxis()->SetTitleSize(0.05);
 
-      //lgSNRHist -> SetStats(0);
-      //lgSNRHist -> SetTitle("");
-      //lgSNRHist -> GetXaxis()->SetTitle("lg(signal-to-noise ratio)"); 
-      //lgSNRHist -> GetYaxis()->SetTitle("entries per bin");
-      //lgSNRHist -> GetXaxis()->SetTitleSize(0.05);
-      //lgSNRHist -> GetYaxis()->SetTitleSize(0.05);
+      //trueHeightHist -> SetStats(0);
+      //trueHeightHist -> SetTitle("");
+      trueHeightHist -> GetXaxis()->SetTitle("true pulse height in units of noise"); 
+      trueHeightHist -> GetYaxis()->SetTitle("entries per bin");
+      trueHeightHist -> GetXaxis()->SetTitleSize(0.05);
+      trueHeightHist -> GetYaxis()->SetTitleSize(0.05);
 
       //envelopeTimeDiffHist -> SetStats(0);
       //envelopeTimeDiffHist -> SetTitle("");
@@ -402,41 +410,41 @@ namespace CR { // Namespace CR -- begin
       c1->Clear();
       SNRHist -> Draw();
       filename.str("");
-      filename << "SNR_hist-" << pulseSNR << ".eps";
+      filename << "SNR_hist-" << lowerSNR << "-" << upperSNR << ".eps";
       c1->Print(filename.str().c_str());
 
       // draw histograms and save them in files 
-      //c1->Clear();
-      //lgSNRHist -> Draw();
-      //filename.str("");
-      //filename << "lgSNR_hist-" << pulseSNR << ".eps";
-      //c1->Print(filename.str().c_str());
+      c1->Clear();
+      trueHeightHist -> Draw();
+      filename.str("");
+      filename << "trueHeight_hist-" << lowerSNR << "-" << upperSNR << ".eps";
+      c1->Print(filename.str().c_str());
 
       c1->Clear();
       envelopeTimeDiffHist -> Draw();
       filename.str("");
-      filename << "EnvTime_hist-" << pulseSNR << ".eps";
+      filename << "EnvTime_hist-" << lowerSNR << "-" << upperSNR << ".eps";
       c1->Print(filename.str().c_str());
       
       c1->Clear();
       halfheightTimeDiffHist -> Draw();
       filename.str("");
-      filename << "HalfHeightTime_hist-" << pulseSNR << ".eps";
+      filename << "HalfHeightTime_hist-" << lowerSNR << "-" << upperSNR << ".eps";
       c1->Print(filename.str().c_str());
 
       c1->Clear();
       maximumTimeDiffHist -> Draw();
       filename.str("");
-      filename << "MaxTime_hist-" << pulseSNR << ".eps";
+      filename << "MaxTime_hist-" << lowerSNR << "-" << upperSNR << ".eps";
       c1->Print(filename.str().c_str());
 
       c1->Clear();
       minimumTimeDiffHist -> Draw();
       filename.str("");
-      filename << "MinTime_hist-" << pulseSNR << ".eps";
+      filename << "MinTime_hist-" << lowerSNR << "-" << upperSNR << ".eps";
       c1->Print(filename.str().c_str());
 
-      cout << "\nResults for true SNR of " << pulseSNR << " are stored in root file:" << endl;
+      cout << "\nResults for true SNR of " << lowerSNR << " - " << upperSNR << " are stored in root file:" << endl;
       cout << "Mean of SNR = " << SNRHist->GetMean() << " \t RMS (std. dev.) of SNR = " << SNRHist->GetRMS() << endl;
       cout << "Mean of env. time = " << envelopeTimeDiffHist->GetMean() << " \t RMS (std. dev.) = " << envelopeTimeDiffHist->GetRMS() << endl;
       
@@ -454,7 +462,8 @@ namespace CR { // Namespace CR -- begin
         }
         // file format:
         // true SNR, mean of SNR, std. dev. of SNR, mean of env. time, std. dev. of env. time
-        resultsFile << pulseSNR << " "
+        resultsFile << lowerSNR << " "
+                    << upperSNR << " "
                     << SNRHist->GetMean() << " "
                     << SNRHist->GetRMS() << " "
                     << envelopeTimeDiffHist->GetMean() << " "

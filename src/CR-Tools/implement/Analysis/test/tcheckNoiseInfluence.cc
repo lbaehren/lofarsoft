@@ -62,11 +62,7 @@ using CR::checkNoiseInfluence;
   noise events
 */
 
-//const string pulseEvent="2009.08.10.12:18:07.598.event";
-//const string pulseEvent="2008.08.05.09:06:05.356.event";
 string pulseEvent="";
-//const string noiseEvent="2009.06.15.19:42:11.987.event";
-//const string noiseEvent="2005.11.19.01:44:28.132.event";
 string noiseEvent="";
 const int pulseAnt = 1;
 const double pulseStart = -4e-6;
@@ -153,40 +149,7 @@ int main (int argc, char *argv[])
     noisetest.loadNoiseEvent(noiseEvent);
     
     // add pulse to noise
-    noisetest.addPulseToNoise(0, resultFileName);
-/*    noisetest.addPulseToNoise(0.1, resultFileName);
-    noisetest.addPulseToNoise(0.2, resultFileName);
-    noisetest.addPulseToNoise(0.3, resultFileName);
-    noisetest.addPulseToNoise(0.4, resultFileName);
-    noisetest.addPulseToNoise(0.5, resultFileName);
-    noisetest.addPulseToNoise(0.6, resultFileName);
-    noisetest.addPulseToNoise(0.7, resultFileName);
-    noisetest.addPulseToNoise(0.8, resultFileName);
-    noisetest.addPulseToNoise(0.9, resultFileName);*/
-    noisetest.addPulseToNoise(1, resultFileName);
-/*    noisetest.addPulseToNoise(1.2, resultFileName);
-    noisetest.addPulseToNoise(1.4, resultFileName);
-    noisetest.addPulseToNoise(1.6, resultFileName);
-    noisetest.addPulseToNoise(1.8, resultFileName);
-    noisetest.addPulseToNoise(2, resultFileName);
-    noisetest.addPulseToNoise(2.25, resultFileName);
-    noisetest.addPulseToNoise(2.5, resultFileName);
-    noisetest.addPulseToNoise(2.75, resultFileName);
-    noisetest.addPulseToNoise(3, resultFileName);
-    noisetest.addPulseToNoise(3.5, resultFileName);
-    noisetest.addPulseToNoise(4, resultFileName);*/
-    noisetest.addPulseToNoise(5, resultFileName);
-/*    noisetest.addPulseToNoise(6, resultFileName);
-    noisetest.addPulseToNoise(7, resultFileName);
-    noisetest.addPulseToNoise(8, resultFileName);
-    noisetest.addPulseToNoise(9, resultFileName);
-    noisetest.addPulseToNoise(10, resultFileName);
-    noisetest.addPulseToNoise(12, resultFileName);
-    noisetest.addPulseToNoise(14, resultFileName);
-    noisetest.addPulseToNoise(16, resultFileName);
-    noisetest.addPulseToNoise(18, resultFileName);
-    noisetest.addPulseToNoise(20, resultFileName);*/
-    noisetest.addPulseToNoise(25, resultFileName);
+    noisetest.addPulseToNoise(0, 6);
 
     cout << "\nEnd of program.\n" << endl;
   } catch (AipsError x) {
