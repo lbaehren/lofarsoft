@@ -42,6 +42,7 @@ Table of Contents
 6.  Basic Plotting
 6.1.  Mathgl
 6.2.  Matplotlib
+6.3.  Plotting Using the hArray Plotting Method
 7.  CR Pipeline Modules
 7.1.  Quality Checking of Time Series Data
 8.  Coordinates
@@ -312,7 +313,7 @@ The vectors have a number of mathematical functions attached to
 them. A full list can be seen by typing
 
 >>> dir(v1)
-  ['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__isub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd', 'append', 'asin', 'atan', 'ceil', 'convert', 'copy', 'cos', 'cosh', 'countgreaterequal', 'countgreaterequalabs', 'countgreaterthan', 'countgreaterthanabs', 'countlessequal', 'countlessequalabs', 'countlessthan', 'countlessthanabs', 'dimension', 'div', 'divadd', 'downsample', 'elem', 'exp', 'extend', 'extendflat', 'fft', 'fill', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'findgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findlessthanabs', 'findlowerbound', 'floor', 'getDim', 'list', 'log', 'log10', 'mean', 'median', 'mul', 'muladd', 'mulsum', 'ndim', 'negate', 'new', 'norm', 'normalize', 'random', 'resize', 'setDim', 'sin', 'sinh', 'sort', 'sortmedian', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'sum', 'tan', 'tanh', 'type', 'val']
+  ['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__isub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd', 'append', 'asin', 'atan', 'ceil', 'convert', 'copy', 'cos', 'cosh', 'countgreaterequal', 'countgreaterequalabs', 'countgreaterthan', 'countgreaterthanabs', 'countlessequal', 'countlessequalabs', 'countlessthan', 'countlessthanabs', 'dimension', 'div', 'divadd', 'downsample', 'elem', 'exp', 'extend', 'extendflat', 'fft', 'fill', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'findgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findlessthanabs', 'findlowerbound', 'floor', 'getDim', 'list', 'log', 'log10', 'mean', 'median', 'mul', 'muladd', 'mulsum', 'ndim', 'negate', 'new', 'norm', 'normalize', 'random', 'resize', 'setDim', 'sin', 'sinh', 'sort', 'sortmedian', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'sum', 'tan', 'tanh', 'type', 'val', 'vec']
 
 Some of the basic arithmetic is available in an intuitve way.
 
@@ -783,29 +784,29 @@ can be viewed by using the getHistory (retrieves a vector of strings)
 or simply the .history() method, which prints the activity log.
 
 >>> a.history()
-    2010-03-27 00:29:53 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
-    2010-03-27 00:29:53 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.
-    2010-03-27 00:29:53 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
-    2010-03-27 00:29:53 [setDimension]: Dimensions set to [10]
-    2010-03-27 00:29:53 [setDimension]: Dimensions set to [3,3]
-    2010-03-27 00:29:53 [setDimension]: Dimensions set to [3,3,2]
-    2010-03-27 00:29:53 [setDimension]: Dimensions set to [3,3]
-    2010-03-27 00:29:53 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...]
-    2010-03-27 00:29:53 [hFill]:   Par 1: fill_value = -2
-    2010-03-27 00:29:53 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-27 00:29:53 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...]
-    2010-03-27 00:29:53 [hSum]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-27 00:29:53 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-27 00:29:53 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...]
-    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-27 00:29:53 [setUnit]: Unit set to MHz.
-    2010-03-27 00:29:53 [setUnit]: Unit set to kHz.
-    2010-03-27 00:29:53 [setKey]: name = TestArray
+    2010-03-27 20:40:57 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
+    2010-03-27 20:40:57 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.
+    2010-03-27 20:40:57 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
+    2010-03-27 20:40:57 [setDimension]: Dimensions set to [10]
+    2010-03-27 20:40:57 [setDimension]: Dimensions set to [3,3]
+    2010-03-27 20:40:57 [setDimension]: Dimensions set to [3,3,2]
+    2010-03-27 20:40:57 [setDimension]: Dimensions set to [3,3]
+    2010-03-27 20:40:57 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...]
+    2010-03-27 20:40:57 [hFill]:   Par 1: fill_value = -2
+    2010-03-27 20:40:57 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 20:40:57 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...]
+    2010-03-27 20:40:57 [hSum]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 20:40:57 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 20:40:57 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...]
+    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-03-27 20:40:57 [setUnit]: Unit set to MHz.
+    2010-03-27 20:40:57 [setUnit]: Unit set to kHz.
+    2010-03-27 20:40:57 [setKey]: name = TestArray
 
 You can add a line to the history log yourself with 
 
@@ -1099,18 +1100,28 @@ gr.WriteEPS("test-y.eps","Test Plot")
 
 6.2.  Matplotlib
 
-Now we import matplotlib
+Now, in principle, we need to import matplotlib
 
 >>> import matplotlib.pyplot as plt
+ 
+however, that should have been done already for you.
 
-And a plot window should pop up somehwere (in the background?) !!"
+Depending on the system you may have to use
+
+>>> plt.show()
+
+and an empty plot window should pop up somehwere (in the background?)
+!! On the Mac it seems to pop up automatically. 
+
 (NB: At least on a Mac the window likes to stubbornly hide behind
 other windows, so search your screen carefully if no window pops up.)
 
-Now, we can issue some of the plotting commands.
+Depending on the system, the program could hang here and wait for
+input. In this case you need to kill the window and re-issue the
+command!!!
 
+Now, we can use some of the plotting commands.
 
->>> plt.show()
 >>> plt.subplot(1,2,1)
 >>> plt.title("Average Spectrum for Two Antennas")
 >>> plt.semilogy(freqdata.vec(),avspectrum[0].vec())
@@ -1125,9 +1136,9 @@ To plot the time series of the entire data set, we first read in all sample from
   Vec(float,2113536)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...]
 >>> timeall=Vector(float,maxblocksize) 
 >>> file.read("Time",timeall); timeall *= 10**6.
-  <hftools.DataReader object at 0x5c85500>
+  <hftools.DataReader object at 0x3dab58>
 >>> file.read("Fx",fxall)
-  <hftools.DataReader object at 0x3dedc0>
+  <hftools.DataReader object at 0x77228>
 
 and then we plot it 
 
@@ -1136,9 +1147,58 @@ and then we plot it
 >>> plt.plot(timeall,fxall.elem(0))
 >>> plt.ylabel("Electric Field [ADC counts]")
 >>> plt.xlabel("Time [$\mu$s]")
-
 So, for a linear plot use .plot, for a loglog plot use .loglog and for
 a log-linear plot use .semilogx or .semilogy ...
+
+6.3.  Plotting Using the hArray Plotting Method
+-------------------------------------------------
+
+There is also a simpler way to make the kind of plots described above,
+unsing the built-in plot method of array.
+
+>>> avspectrum.par.xvalues=freqdata
+>>> avspectrum.par.title="Average Spectrum"
+>>> avspectrum[0].plot(logplot="y")
+  avg. Spectrum(float, [16, 1025]=16400, [0:1025]) -> [13868864905.0,186600.668168,163848.440523,135588.910231,171181.713829,125052.341697,149167.47994,191654.209722,168893.679542,138273.603106,...]
+
+This creates a semilog-plot with appropriate lables and units (if they
+were provided beforehand.)
+
+You can either provide the parameters directly (precedence), or set
+the plotting parameters as attributes to the .par class of the array,
+e.g., "array.par.xvalues=x_vector; array.plot()"
+
+If the array is in looping mode, multiple curves are plotted in one windows. Hence,
+
+>>> avspectrum.par.logplot="y"
+>>> avspectrum[...].plot()
+  avg. Spectrum(float, [16, 1025]=16400, [0:1025]*) -> [13868864905.0,186600.668168,163848.440523,135588.910231,171181.713829,125052.341697,149167.47994,191654.209722,168893.679542,138273.603106,...]
+
+will simply plot all spectra of all antennas (=highest array index) in
+the array.
+
+The availabe parameters are:
+
+    Parameters:
+
+    xvalues: an array with corresponding x values, if "None" numbers
+    from 0 to length of the array are used
+
+    xlabel: the x-axis label, if not specified, use the "name" keyword
+    of the xvalues array - units will be added automatically
+
+    ylabel: the y-axis label, if not specified, use the "name" keyword
+    of the array - units will be added automatically
+
+    title: a title for the plot
+
+    clf: if True (default) clear the screen beforehand (use False to
+    compose plots with multiple lines from different arrays.
+
+    logplot: can be used to make loglog or semilog plots: 
+            "x" ->semilog in x 
+            "y" ->semilog in y
+            "xy"->loglog plot
 
 7.  CR Pipeline Modules
 ---------------------------
@@ -1165,7 +1225,7 @@ We will then read this block of data into an apropriately sized data array.
 
 >>> dataarray=hArray(float,[nofSelectedAntennas,blocksize])
 >>> file.set("blocksize",blocksize).set("block",3).read("Voltage",dataarray.vec())
-  <hftools.DataReader object at 0x5c854c8>
+  <hftools.DataReader object at 0x3daab0>
 
 The array now contains all the measured voltages of the selected
 antennas in the file.

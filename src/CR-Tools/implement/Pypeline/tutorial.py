@@ -1143,22 +1143,29 @@ gr.WriteEPS("test-y.eps","Test Plot")
 
 (++) Matplotlib
 
-Now we import matplotlib
+Now, in principle, we need to import matplotlib
 
-"""
-import matplotlib.pyplot as plt
-"""
+>>> import matplotlib.pyplot as plt
+ 
+however, that should have been done already for you.
 
-And a plot window should pop up somehwere (in the background?) !!"
+Depending on the system you may have to use
+
+>>> plt.show()
+
+and an empty plot window should pop up somehwere (in the background?)
+!! On the Mac it seems to pop up automatically. 
+
 (NB: At least on a Mac the window likes to stubbornly hide behind
 other windows, so search your screen carefully if no window pops up.)
 
-Now, we can issue some of the plotting commands.
+Depending on the system, the program could hang here and wait for
+input. In this case you need to kill the window and re-issue the
+command!!!
 
+Now, we can use some of the plotting commands.
 
 """
-plt.show()
-#%SKIP
 plt.subplot(1,2,1)
 #%SKIP
 plt.title("Average Spectrum for Two Antennas")
@@ -1198,9 +1205,60 @@ plt.ylabel("Electric Field [ADC counts]")
 plt.xlabel("Time [$\mu$s]")
 #%SKIP
 """
-
 So, for a linear plot use .plot, for a loglog plot use .loglog and for
 a log-linear plot use .semilogx or .semilogy ...
+
+(++) Plotting Using the hArray Plotting Method
+-------------------------------------------------
+
+There is also a simpler way to make the kind of plots described above,
+unsing the built-in plot method of array.
+
+"""
+avspectrum.par.xvalues=freqdata
+avspectrum.par.title="Average Spectrum"
+avspectrum[0].plot(logplot="y")
+"""
+
+This creates a semilog-plot with appropriate lables and units (if they
+were provided beforehand.)
+
+You can either provide the parameters directly (precedence), or set
+the plotting parameters as attributes to the .par class of the array,
+e.g., "array.par.xvalues=x_vector; array.plot()"
+
+If the array is in looping mode, multiple curves are plotted in one windows. Hence,
+
+"""
+avspectrum.par.logplot="y"
+avspectrum[...].plot()
+"""
+
+will simply plot all spectra of all antennas (=highest array index) in
+the array.
+
+The availabe parameters are:
+
+    Parameters:
+
+    xvalues: an array with corresponding x values, if "None" numbers
+    from 0 to length of the array are used
+
+    xlabel: the x-axis label, if not specified, use the "name" keyword
+    of the xvalues array - units will be added automatically
+
+    ylabel: the y-axis label, if not specified, use the "name" keyword
+    of the array - units will be added automatically
+
+    title: a title for the plot
+
+    clf: if True (default) clear the screen beforehand (use False to
+    compose plots with multiple lines from different arrays.
+
+    logplot: can be used to make loglog or semilog plots: 
+            "x" ->semilog in x 
+            "y" ->semilog in y
+            "xy"->loglog plot
 
 (+) CR Pipeline Modules
 ---------------------------

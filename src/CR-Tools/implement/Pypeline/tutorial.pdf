@@ -2,7 +2,7 @@
 1 0 obj
 <<
 /Creator (PyText2Pdf 1.3 By Anand B Pillai )
-/CreationDate (D:20100327002956)
+/CreationDate (D:20100327204101)
 /Producer (PyText2Pdf 1.3(\251 Anand B Pillai))
 /Title (tutorial.py.txt)
 >>
@@ -85,6 +85,7 @@ BT
 (6.  Basic Plotting)'
 (6.1.  Mathgl)'
 (6.2.  Matplotlib)'
+(6.3.  Plotting Using the hArray Plotting Method)'
 (7.  CR Pipeline Modules)'
 (7.1.  Quality Checking of Time Series Data)'
 (8.  Coordinates)'
@@ -100,12 +101,11 @@ BT
 (available.)'
 ()'
 (In addition there are some helpful definitons in python as well, which)'
-(are stored in "pycrtools.py". This file actually imports hftools for)'
 ET
 endstream
 endobj
 8 0 obj
-1932
+1911
 endobj
 9 0 obj
 <<
@@ -124,6 +124,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(are stored in "pycrtools.py". This file actually imports hftools for)'
 (you. Hence, all you actually need to do is \(make sure the file is in)'
 (your search path\))'
 ()'
@@ -183,12 +184,11 @@ BT
 ()'
 (\(NB: Unfortunately different systems provide different python data)'
 (structures. Hence a function exposed to python with SWIG or SIP is not)'
-(diretcly able to accept a BOOST PYTHON wrapped vector as input or vice)'
 ET
 endstream
 endobj
 11 0 obj
-1847
+1845
 endobj
 12 0 obj
 <<
@@ -207,6 +207,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(diretcly able to accept a BOOST PYTHON wrapped vector as input or vice)'
 (versa. If you want to do this you have to provide extra conversion)'
 (routines.\))'
 ()'
@@ -266,12 +267,11 @@ BT
 (The vector can be filled with a python list or tuple, by using the extend attribute:)'
 ()'
 (>>> v.extend\([1,2,3,4]\))'
-()'
 ET
 endstream
 endobj
 14 0 obj
-2528
+2598
 endobj
 15 0 obj
 <<
@@ -290,6 +290,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+()'
 (    v => Vec\(float,4\)=[1.0,2.0,3.0,4.0])'
 ()'
 (Note, that python has automatically converted the integers into)'
@@ -349,7 +350,6 @@ BT
 ()'
 (3.2.1.  Referencing, memory allocation, indexing, slicing)'
 (........................................................)'
-()'
 ET
 endstream
 endobj
@@ -373,6 +373,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+()'
 (Following basic python rules, the STL vector will persist in memory as)'
 (long as there is a python reference to it. If you destroy v also the)'
 (c++ memory will disappear. Hence, if you keep a pointer to the vector)'
@@ -432,12 +433,11 @@ BT
 ()'
 (>>> v3=v2.new\(\))'
 (>>> v3)'
-(  Vec\(float,6\)=[0.0,0.0,0.0,0.0,0.0,0.0])'
 ET
 endstream
 endobj
 20 0 obj
-2040
+1998
 endobj
 21 0 obj
 <<
@@ -456,6 +456,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(  Vec\(float,6\)=[0.0,0.0,0.0,0.0,0.0,0.0])'
 ()'
 (Fill a vector with values)'
 ()'
@@ -484,7 +485,7 @@ BT
 (loor', 'getDim', 'list', 'log', 'log10', 'mean', 'median', 'mul', 'muladd', 'mulsum', 'ndi)'
 (m', 'negate', 'new', 'norm', 'normalize', 'random', 'resize', 'setDim', 'sin', 'sinh', 'so)'
 (rt', 'sortmedian', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'sum', 'tan', 'tanh', 'typ)'
-(e', 'val'])'
+(e', 'val', 'vec'])'
 ()'
 (Some of the basic arithmetic is available in an intuitve way.)'
 ()'
@@ -515,12 +516,11 @@ BT
 ()'
 (now v1 was actually modified such that v2 was added to the content of)'
 (v1 and the results is stored in v1.)'
-()'
 ET
 endstream
 endobj
 23 0 obj
-2657
+2706
 endobj
 24 0 obj
 <<
@@ -539,6 +539,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+()'
 (Similarly you can do)'
 ()'
 (- v1-=v2)'
@@ -598,7 +599,6 @@ BT
 (size of the underlying vector will automatically be resized to)'
 (dim1*dim2*dim3* ... to be able to contain all elements. Alternatively,)'
 (one can provide another array, who's dimensions will be copied.)'
-()'
 ET
 endstream
 endobj
@@ -622,6 +622,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+()'
 (The array can be filled with an initialization values that can be)'
 (either a single value, a list, a tuple, or an STL vector of the same)'
 (type.)'
@@ -681,7 +682,6 @@ BT
 (methods. If the length of the underlying vector changes due to a)'
 (change in the dimensions, the vector will be resized and padded with)'
 (zeros, if necessary.)'
-()'
 ET
 endstream
 endobj
@@ -705,6 +705,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+()'
 (>>> a.getDim\(\))'
 (  [3, 3])'
 ()'
@@ -764,7 +765,6 @@ BT
 (of python.)'
 ()'
 (Let us take our two-dimensional array from before:)'
-()'
 ET
 endstream
 endobj
@@ -788,6 +788,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+()'
 (    a => hArray\(int, [3, 3]=9, [0:9]\) -> [0,1,2,3,4,5,6,7,8])'
 ()'
 (The vector followed by a single number in square brackets )'
@@ -847,7 +848,6 @@ BT
 ()'
 (3.3.5.  Applying Methods to Slices)'
 (................................)'
-()'
 ET
 endstream
 endobj
@@ -871,6 +871,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+()'
 (First, of all, we can now apply the known vector functions also to)'
 (array slices directly. E.g.,)'
 ()'
@@ -930,12 +931,11 @@ BT
 (We could also explicitly reset the loop in using to its starting)'
 (values, but that should not be necessary most of the time.)'
 ()'
-(>>> l.resetLoop\(\))'
 ET
 endstream
 endobj
 38 0 obj
-2679
+2660
 endobj
 39 0 obj
 <<
@@ -954,6 +954,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(>>> l.resetLoop\(\))'
 (  hArray\(int, [3, 3]=9, [0:3]*\) -> [0,1,2])'
 ()'
 (Now, since this is still a bit too much work, you can actually apply)'
@@ -1013,12 +1014,11 @@ BT
 (inputs \(remember a mix of vectors and arrays is not implemented\). In this)'
 (case the next\(\) method will be applied to every array in the paramter)'
 (list and looping proceeds until the first array has reached the)'
-(end. Hence, care has to be taken that the same slice looping is)'
 ET
 endstream
 endobj
 41 0 obj
-2190
+2146
 endobj
 42 0 obj
 <<
@@ -1037,6 +1037,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(end. Hence, care has to be taken that the same slice looping is)'
 (applied to all arrays in the parameter list.)'
 ()'
 (As an example we create a new array of the dimensions of a)'
@@ -1096,12 +1097,11 @@ BT
 ()'
 (>>> a.setKey\("name","TestArray"\))'
 (  TestArray\(int, [3, 3]=9, [0:9]\) -> [0,1000,2000,3000,4000,5000,6000,7000,8000])'
-()'
 ET
 endstream
 endobj
 44 0 obj
-2260
+2323
 endobj
 45 0 obj
 <<
@@ -1120,6 +1120,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+()'
 (The keywords can be arbitrary strings ann the values also arbirtrary)'
 (strings. Thus numbers need to be converted to strings and back. The)'
 (keyword "name" is special in the sense that it is a default key, that)'
@@ -1139,29 +1140,29 @@ BT
 (or simply the .history\(\) method, which prints the activity log.)'
 ()'
 (>>> a.history\(\))'
-(    2010-03-27 00:29:53 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.)'
-(    2010-03-27 00:29:53 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.)'
-(    2010-03-27 00:29:53 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.)'
-(    2010-03-27 00:29:53 [setDimension]: Dimensions set to [10])'
-(    2010-03-27 00:29:53 [setDimension]: Dimensions set to [3,3])'
-(    2010-03-27 00:29:53 [setDimension]: Dimensions set to [3,3,2])'
-(    2010-03-27 00:29:53 [setDimension]: Dimensions set to [3,3])'
-(    2010-03-27 00:29:53 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...])'
-(    2010-03-27 00:29:53 [hFill]:   Par 1: fill_value = -2)'
-(    2010-03-27 00:29:53 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 00:29:53 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...])'
-(    2010-03-27 00:29:53 [hSum]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 00:29:53 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 00:29:53 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...])'
-(    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 00:29:53 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 00:29:53 [setUnit]: Unit set to MHz.)'
-(    2010-03-27 00:29:53 [setUnit]: Unit set to kHz.)'
-(    2010-03-27 00:29:53 [setKey]: name = TestArray)'
+(    2010-03-27 20:40:57 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.)'
+(    2010-03-27 20:40:57 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.)'
+(    2010-03-27 20:40:57 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.)'
+(    2010-03-27 20:40:57 [setDimension]: Dimensions set to [10])'
+(    2010-03-27 20:40:57 [setDimension]: Dimensions set to [3,3])'
+(    2010-03-27 20:40:57 [setDimension]: Dimensions set to [3,3,2])'
+(    2010-03-27 20:40:57 [setDimension]: Dimensions set to [3,3])'
+(    2010-03-27 20:40:57 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...])'
+(    2010-03-27 20:40:57 [hFill]:   Par 1: fill_value = -2)'
+(    2010-03-27 20:40:57 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-27 20:40:57 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...])'
+(    2010-03-27 20:40:57 [hSum]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-27 20:40:57 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-27 20:40:57 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...])'
+(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-27 20:40:57 [setUnit]: Unit set to MHz.)'
+(    2010-03-27 20:40:57 [setUnit]: Unit set to kHz.)'
+(    2010-03-27 20:40:57 [setKey]: name = TestArray)'
 ()'
 (You can add a line to the history log yourself with )'
 ()'
@@ -1179,7 +1180,6 @@ BT
 ()'
 (4.1.  Opening and Closing a CR Data File)'
 (---------------------------------------)'
-()'
 ET
 endstream
 endobj
@@ -1203,6 +1203,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+()'
 (Let's see how we can open a file. First define a filename, e.g.:)'
 ()'
 (>>> LOFARSOFT=os.environ["LOFARSOFT"])'
@@ -1262,12 +1263,11 @@ BT
 (There are more keywords, of course. A list of implemented parameters)'
 (we can access is obtained by)'
 ()'
-(>>> keywords=file.get\("help"\))'
 ET
 endstream
 endobj
 50 0 obj
-2333
+2302
 endobj
 51 0 obj
 <<
@@ -1286,6 +1286,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(>>> keywords=file.get\("help"\))'
 (  hFileGetParameter - available keywords: nofAntennas, nofSelectedChannels, nofSelectedAnt)'
 (ennas, nofBaselines, block, blocksize, stride, fftLength, nyquistZone, sampleInterval, ref)'
 (erenceTime, sampleFrequency, antennas, selectedAntennas, selectedChannels, positions, incr)'
@@ -1345,12 +1346,11 @@ BT
 ()'
 (again the list of implemented keywords is visible with using)'
 ()'
-(>>> file.set\("help",0\);)'
 ET
 endstream
 endobj
 53 0 obj
-2517
+2523
 endobj
 54 0 obj
 <<
@@ -1369,6 +1369,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(>>> file.set\("help",0\);)'
 ()'
 (Here the listed keywords actually start with capital letters, however,)'
 (to spare you some annoyance, you can use a spelling which starts with)'
@@ -1428,12 +1429,11 @@ BT
 (file. Note that we had to use the .vec method for the array, since)'
 (file.read does not yet accept arrays \(since it can't handle c++)'
 (iterators\).)'
-()'
 ET
 endstream
 endobj
 56 0 obj
-2394
+2419
 endobj
 57 0 obj
 <<
@@ -1452,6 +1452,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+()'
 (No, you can access the individual antennas as single vectors through)'
 (slicing)'
 ()'
@@ -1511,12 +1512,11 @@ BT
 (complex data and convert it to floats. This can be done using the)'
 (complex function "norm" \(unusual name, but used in c++\).)'
 ()'
-(>>> spectrum=hArray\(float,dimensions=fftdata,name="E-field Spectrum"\))'
 ET
 endstream
 endobj
 59 0 obj
-2644
+2573
 endobj
 60 0 obj
 <<
@@ -1535,6 +1535,7 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(>>> spectrum=hArray\(float,dimensions=fftdata,name="E-field Spectrum"\))'
 (>>> fftdata[...].norm\(spectrum\))'
 ()'
 (We can now try to calulcate the average spectum of the data set for)'
@@ -1584,22 +1585,21 @@ BT
 ()'
 (6.2.  Matplotlib)'
 ()'
-(Now we import matplotlib)'
+(Now, in principle, we need to import matplotlib)'
 ()'
 (>>> import matplotlib.pyplot as plt)'
+( )'
+(however, that should have been done already for you.)'
 ()'
-(And a plot window should pop up somehwere \(in the background?\) !!")'
-(\(NB: At least on a Mac the window likes to stubbornly hide behind)'
-(other windows, so search your screen carefully if no window pops up.\))'
+(Depending on the system you may have to use)'
 ()'
-(Now, we can issue some of the plotting commands.)'
-()'
+(>>> plt.show\(\))'
 ()'
 ET
 endstream
 endobj
 62 0 obj
-1898
+1852
 endobj
 63 0 obj
 <<
@@ -1618,7 +1618,18 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(>>> plt.show\(\))'
+(and an empty plot window should pop up somehwere \(in the background?\))'
+(!! On the Mac it seems to pop up automatically. )'
+()'
+(\(NB: At least on a Mac the window likes to stubbornly hide behind)'
+(other windows, so search your screen carefully if no window pops up.\))'
+()'
+(Depending on the system, the program could hang here and wait for)'
+(input. In this case you need to kill the window and re-issue the)'
+(command!!!)'
+()'
+(Now, we can use some of the plotting commands.)'
+()'
 (>>> plt.subplot\(1,2,1\))'
 (>>> plt.title\("Average Spectrum for Two Antennas"\))'
 (>>> plt.semilogy\(freqdata.vec\(\),avspectrum[0].vec\(\)\))'
@@ -1634,9 +1645,9 @@ BT
 (  Vec\(float,2113536\)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...])'
 (>>> timeall=Vector\(float,maxblocksize\) )'
 (>>> file.read\("Time",timeall\); timeall *= 10**6.)'
-(  <hftools.DataReader object at 0x5c85500>)'
+(  <hftools.DataReader object at 0x3dab58>)'
 (>>> file.read\("Fx",fxall\))'
-(  <hftools.DataReader object at 0x3dedc0>)'
+(  <hftools.DataReader object at 0x77228>)'
 ()'
 (and then we plot it )'
 ()'
@@ -1645,9 +1656,85 @@ BT
 (>>> plt.plot\(timeall,fxall.elem\(0\)\))'
 (>>> plt.ylabel\("Electric Field [ADC counts]"\))'
 (>>> plt.xlabel\("Time [$\\mu$s]"\))'
-()'
 (So, for a linear plot use .plot, for a loglog plot use .loglog and for)'
 (a log-linear plot use .semilogx or .semilogy ...)'
+()'
+(6.3.  Plotting Using the hArray Plotting Method)'
+(-------------------------------------------------)'
+()'
+(There is also a simpler way to make the kind of plots described above,)'
+(unsing the built-in plot method of array.)'
+()'
+(>>> avspectrum.par.xvalues=freqdata)'
+(>>> avspectrum.par.title="Average Spectrum")'
+(>>> avspectrum[0].plot\(logplot="y"\))'
+(  avg. Spectrum\(float, [16, 1025]=16400, [0:1025]\) -> [13868864905.0,186600.668168,163848.)'
+(440523,135588.910231,171181.713829,125052.341697,149167.47994,191654.209722,168893.679542,)'
+(138273.603106,...])'
+()'
+(This creates a semilog-plot with appropriate lables and units \(if they)'
+(were provided beforehand.\))'
+()'
+(You can either provide the parameters directly \(precedence\), or set)'
+(the plotting parameters as attributes to the .par class of the array,)'
+(e.g., "array.par.xvalues=x_vector; array.plot\(\)")'
+ET
+endstream
+endobj
+65 0 obj
+2683
+endobj
+66 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 67 0 R
+>>
+endobj
+67 0 obj
+<<
+/Length 68 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
+()'
+(If the array is in looping mode, multiple curves are plotted in one windows. Hence,)'
+()'
+(>>> avspectrum.par.logplot="y")'
+(>>> avspectrum[...].plot\(\))'
+(  avg. Spectrum\(float, [16, 1025]=16400, [0:1025]*\) -> [13868864905.0,186600.668168,163848)'
+(.440523,135588.910231,171181.713829,125052.341697,149167.47994,191654.209722,168893.679542)'
+(,138273.603106,...])'
+()'
+(will simply plot all spectra of all antennas \(=highest array index\) in)'
+(the array.)'
+()'
+(The availabe parameters are:)'
+()'
+(    Parameters:)'
+()'
+(    xvalues: an array with corresponding x values, if "None" numbers)'
+(    from 0 to length of the array are used)'
+()'
+(    xlabel: the x-axis label, if not specified, use the "name" keyword)'
+(    of the xvalues array - units will be added automatically)'
+()'
+(    ylabel: the y-axis label, if not specified, use the "name" keyword)'
+(    of the array - units will be added automatically)'
+()'
+(    title: a title for the plot)'
+()'
+(    clf: if True \(default\) clear the screen beforehand \(use False to)'
+(    compose plots with multiple lines from different arrays.)'
+()'
+(    logplot: can be used to make loglog or semilog plots: )'
+(            "x" ->semilog in x )'
+(            "y" ->semilog in y)'
+(            "xy"->loglog plot)'
 ()'
 (7.  CR Pipeline Modules)'
 (---------------------------)'
@@ -1674,33 +1761,33 @@ BT
 ()'
 (>>> dataarray=hArray\(float,[nofSelectedAntennas,blocksize]\))'
 (>>> file.set\("blocksize",blocksize\).set\("block",3\).read\("Voltage",dataarray.vec\(\)\))'
-(  <hftools.DataReader object at 0x5c854c8>)'
-()'
-(The array now contains all the measured voltages of the selected)'
-(antennas in the file.)'
 ET
 endstream
 endobj
-65 0 obj
-2616
+68 0 obj
+2454
 endobj
-66 0 obj
+69 0 obj
 <<
 /Type /Page
 /Parent 3 0 R
 /Resources 5 0 R
-/Contents 67 0 R
+/Contents 70 0 R
 >>
 endobj
-67 0 obj
+70 0 obj
 <<
-/Length 68 0 R
+/Length 71 0 R
 >>
 stream
 BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(  <hftools.DataReader object at 0x3daab0>)'
+()'
+(The array now contains all the measured voltages of the selected)'
+(antennas in the file.)'
 ()'
 (First we calculate the mean over all samples for each antennas \(and)'
 (make use of the looping through the Ellipsis object\).)'
@@ -1757,33 +1844,33 @@ BT
 (which is a rather nasty collection of numbers. So, we print a nice)'
 (table \(restricting it to the first 5 antennas\).)'
 ()'
-(>>> for prop in dataproperties[0:5]: print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, )'
-(npeaks={3:5d}, nonGaussianity={4: 7.2f}".format\(*prop\))'
-(  Antenna   0: mean=  7.17, rms=  10.4, npeaks=   45, nonGaussianity= 202.87)'
-(  Antenna   1: mean= -7.79, rms=  10.4, npeaks=    3, nonGaussianity=  13.32)'
 ET
 endstream
 endobj
-68 0 obj
-2826
+71 0 obj
+2654
 endobj
-69 0 obj
+72 0 obj
 <<
 /Type /Page
 /Parent 3 0 R
 /Resources 5 0 R
-/Contents 70 0 R
+/Contents 73 0 R
 >>
 endobj
-70 0 obj
+73 0 obj
 <<
-/Length 71 0 R
+/Length 74 0 R
 >>
 stream
 BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(>>> for prop in dataproperties[0:5]: print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, )'
+(npeaks={3:5d}, nonGaussianity={4: 7.2f}".format\(*prop\))'
+(  Antenna   0: mean=  7.17, rms=  10.4, npeaks=   45, nonGaussianity= 202.87)'
+(  Antenna   1: mean= -7.79, rms=  10.4, npeaks=    3, nonGaussianity=  13.32)'
 (  Antenna   2: mean= -1.98, rms=  10.2, npeaks=   32, nonGaussianity= 144.20)'
 (  Antenna   3: mean= -0.28, rms=  11.9, npeaks=    0, nonGaussianity=  -0.22)'
 (  Antenna   4: mean=  5.23, rms=  10.0, npeaks=   53, nonGaussianity= 238.97)'
@@ -1840,33 +1927,33 @@ BT
 (>>> azel.extend\(\(178,28,1\)\))'
 (>>> cartesian=azel.new\(\))'
 (>>> azel)'
-(  Vec\(float,3\)=[178.0,28.0,1.0])'
-(>>> cartesian)'
-(  Vec\(float,3\)=[0.0,0.0,0.0])'
-()'
 ET
 endstream
 endobj
-71 0 obj
-2800
+74 0 obj
+3022
 endobj
-72 0 obj
+75 0 obj
 <<
 /Type /Page
 /Parent 3 0 R
 /Resources 5 0 R
-/Contents 73 0 R
+/Contents 76 0 R
 >>
 endobj
-73 0 obj
+76 0 obj
 <<
-/Length 74 0 R
+/Length 77 0 R
 >>
 stream
 BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(  Vec\(float,3\)=[178.0,28.0,1.0])'
+(>>> cartesian)'
+(  Vec\(float,3\)=[0.0,0.0,0.0])'
+()'
 (We then do the conversion, using )'
 ()'
 (>>> hCoordinateConvert\(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian)'
@@ -1923,32 +2010,28 @@ BT
 ()'
 ()'
 ()'
-()'
-()'
-()'
-()'
 ET
 endstream
 endobj
-74 0 obj
-609
+77 0 obj
+685
 endobj
 3 0 obj
 <<
 /Type /Pages
-/Count 23
+/Count 24
 /MediaBox [ 0 0 612 792 ]
-/Kids [ 6 0 R 9 0 R 12 0 R 15 0 R 18 0 R 21 0 R 24 0 R 27 0 R 30 0 R 33 0 R 36 0 R 39 0 R 42 0 R 45 0 R 48 0 R 51 0 R 54 0 R 57 0 R 60 0 R 63 0 R 66 0 R 69 0 R 72 0 R ]
+/Kids [ 6 0 R 9 0 R 12 0 R 15 0 R 18 0 R 21 0 R 24 0 R 27 0 R 30 0 R 33 0 R 36 0 R 39 0 R 42 0 R 45 0 R 48 0 R 51 0 R 54 0 R 57 0 R 60 0 R 63 0 R 66 0 R 69 0 R 72 0 R 75 0 R ]
 >>
 endobj
 xref
-0 75
-0000000000 65535 f 0000000009 00000 n 0000000181 00000 n 0000056326 00000 n 0000000230 00000 n 0000000338 00000 n 0000000409 00000 n 0000000489 00000 n 0000002473 00000 n 0000002493 00000 n 0000002574 00000 n 0000004475 00000 n 0000004496 00000 n 0000004578 00000 n 0000007160 00000 n 0000007181 00000 n 0000007263 00000 n 0000009526 00000 n 0000009547 00000 n 0000009629 00000 n 0000011723 00000 n 0000011744 00000 n 0000011826 00000 n 0000014537 00000 n 0000014558 00000 n 0000014640 00000 n 0000017084 00000 n 0000017105 00000 n 0000017187 00000 n 0000019515 00000 n 0000019536 00000 n 0000019618 00000 n 0000021385 00000 n 0000021406 00000 n 0000021488 00000 n 0000023560 00000 n 0000023581 00000 n 0000023663 00000 n 0000026396 00000 n 0000026417 00000 n 0000026499 00000 n 0000028743 00000 n 0000028764 00000 n 0000028846 00000 n 0000031160 00000 n 0000031181 00000 n 0000031263 00000 n 0000034256 00000 n 0000034277 00000 n 0000034359 00000 n 0000036746 00000 n 0000036767 00000 n 0000036849 00000 n 0000039420 00000 n 0000039441 00000 n 0000039523 00000 n 0000041971 00000 n 0000041992 00000 n 0000042074 00000 n 0000044772 00000 n 0000044793 00000 n 0000044875 00000 n 0000046827 00000 n 0000046848 00000 n 0000046930 00000 n 0000049600 00000 n 0000049621 00000 n 0000049703 00000 n 0000052583 00000 n 0000052604 00000 n 0000052686 00000 n 0000055540 00000 n 0000055561 00000 n 0000055643 00000 n 0000056306 00000 n trailer
+0 78
+0000000000 65535 f 0000000009 00000 n 0000000181 00000 n 0000059067 00000 n 0000000230 00000 n 0000000338 00000 n 0000000409 00000 n 0000000489 00000 n 0000002452 00000 n 0000002472 00000 n 0000002553 00000 n 0000004452 00000 n 0000004473 00000 n 0000004555 00000 n 0000007207 00000 n 0000007228 00000 n 0000007310 00000 n 0000009573 00000 n 0000009594 00000 n 0000009676 00000 n 0000011728 00000 n 0000011749 00000 n 0000011831 00000 n 0000014591 00000 n 0000014612 00000 n 0000014694 00000 n 0000017138 00000 n 0000017159 00000 n 0000017241 00000 n 0000019569 00000 n 0000019590 00000 n 0000019672 00000 n 0000021439 00000 n 0000021460 00000 n 0000021542 00000 n 0000023614 00000 n 0000023635 00000 n 0000023717 00000 n 0000026431 00000 n 0000026452 00000 n 0000026534 00000 n 0000028734 00000 n 0000028755 00000 n 0000028837 00000 n 0000031214 00000 n 0000031235 00000 n 0000031317 00000 n 0000034310 00000 n 0000034331 00000 n 0000034413 00000 n 0000036769 00000 n 0000036790 00000 n 0000036872 00000 n 0000039449 00000 n 0000039470 00000 n 0000039552 00000 n 0000042025 00000 n 0000042046 00000 n 0000042128 00000 n 0000044755 00000 n 0000044776 00000 n 0000044858 00000 n 0000046764 00000 n 0000046785 00000 n 0000046867 00000 n 0000049604 00000 n 0000049625 00000 n 0000049707 00000 n 0000052215 00000 n 0000052236 00000 n 0000052318 00000 n 0000055026 00000 n 0000055047 00000 n 0000055129 00000 n 0000058205 00000 n 0000058226 00000 n 0000058308 00000 n 0000059047 00000 n trailer
 <<
-/Size 75
+/Size 78
 /Root 2 0 R
 /Info 1 0 R
 >>
 startxref
-56565
+59313
 %%EOF

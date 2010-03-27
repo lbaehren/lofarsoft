@@ -3,6 +3,8 @@ from math import *
 from hftools import *
 from pydoc import help as pyhelp
 import os,sys,re
+import matplotlib.pyplot as plt
+
 LOFARSOFT=os.environ["LOFARSOFT"]
 
 pydocpyfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.py"
@@ -205,6 +207,13 @@ def hVector_elem(self,n):
     else:
         return self[n]
 
+def hVector_vec(self):
+    """
+     vector.vec() -> vector Convenience method that allows one to
+    treat hArrays and hVectors in the same way, i.e. using the vec()
+    method returns the intrinsic vector for both.
+    """
+    return self;
 
 def extendflat(self,l):
     """
@@ -347,6 +356,7 @@ def hArray_getitem(self,dimlist):
     """
     if not type(dimlist)==tuple: dimlist=(dimlist,)
     ary=hArray(self)
+    ary.par=self.par
     lastelement=dimlist[-1]
     dimliststarts=Vector(map(hArray_return_slice_start,dimlist))
     if (lastelement==Ellipsis):   # looping is requested
@@ -369,6 +379,97 @@ def hArray_setitem(self,dims,fill):
     """
     if (type(fill)) in [list,tuple]: fill=hArray(fill)
     return hFill(hArray_getitem(self,dims),fill)
+
+class hArray_par:
+    """
+    Parameter attribute. Used to hold and inherit arbitrary additional
+    paramaters used by python methods (e.g. xvalues for the plotting
+    command).
+    """
+    pass
+
+#======================================================================
+#  Define Plotting fucntions for vectors and arrays
+#======================================================================
+
+#    plt.subplot(1,2,1)
+#%SKIP
+#plt.title("Average Spectrum for Two Antennas")
+
+
+def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None):
+    """
+    array[0].plot(self,xvalues=vec,xlabel="x",ylabel="y",title="Title",clf=True,logplot="xy") -> plot the array (loglog)
+
+    Method of arrays. Plots the current slice. If the array is in
+    looping mode, multiple curves are plotted in one windows.
+
+    You can set the plotting parameters also as attributes to the .par
+    class of the array, e.g., "array.par.xvalues=x_vector; array.plot()"
+
+    Parameters:
+
+    xvalues: an array with corresponding x values, if "None" numbers
+    from 0 to length of the array are used
+
+    xlabel: the x-axis label, if not specified, use the "name" keyword
+    of the xvalues array - units will be added automatically
+
+    ylabel: the y-axis label, if not specified, use the "name" keyword
+    of the array - units will be added automatically
+
+    title: a title for the plot
+
+    clf: if True (default) clear the screen beforehand (use False to
+    compose plots with multiple lines from different arrays.
+
+    logplot: can be used to make loglog or semilog plots: 
+            "x" ->semilog in x 
+            "y" ->semilog in y
+            "xy"->loglog plot
+    """
+    if xvalues==None:
+        if hasattr(self.par,"xvalues"): xvalues=self.par.xvalues
+        else: xvalues=hArray(range(len(self.vec())))
+    xunit=xvalues.getUnit() 
+    if not xunit=="": xunit=" ["+xunit+"]"
+    yunit=self.getUnit()
+    if not yunit=="": yunit=" ["+yunit+"]"
+    if xlabel==None: xlabel=xvalues.getKey("name")
+    if ylabel==None: ylabel=self.getKey("name")
+    var="clf"; dflt=True; val=eval(var); 
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec("var=dflt")
+    var="xlabel"; dflt=""; val=eval(var); 
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec("var=dflt")
+    var="ylabel"; dflt=""; val=eval(var); 
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec("var=dflt")
+    var="title"; dflt=""; val=eval(var); 
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec("var=dflt")
+    var="logplot"; dflt=""; val=eval(var); 
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec("var=dflt")
+    if clf: self.plt.clf()
+    if logplot=="x": _plot=self.plt.semilogx
+    elif logplot=="y": _plot=self.plt.semilogy
+    elif (logplot=="xy") | (logplot=="yx"): _plot=self.plt.loglog
+    else: _plot=self.plt.plot
+    iterate=True;
+    while (iterate):
+        _plot(xvalues.vec(),self.vec())
+        xvalues.next; iterate=self.next().doLoopAgain()
+    self.plt.ylabel(ylabel+yunit)
+    self.plt.xlabel(xlabel+xunit)
+    if not title=="": self.plt.title(title)
+    return self
  
 #======================================================================
 #  Define Lists of hArray and Vector Types that we will use 
@@ -660,6 +761,9 @@ for v in hAllArrayTypes:
     setattr(v,"val",hArray_val)
     setattr(v,"new",hArray_new)
     setattr(v,"list",hArray_list)
+    setattr(v,"par",hArray_par())
+    setattr(v,"plt",plt)
+    setattr(v,"plot",hPlot_plot)
     setattr(v,"copy_resize",hArray_copy_resize)
     setattr(v,"newreference",hArray_newreference)
     setattr(v,"__getitem__",hArray_getitem)
@@ -672,6 +776,7 @@ for v in hAllVectorTypes:
     setattr(v,"getDim",hVector_getDim)
     setattr(v,"elem",hVector_elem)
     setattr(v,"val",hVector_val)
+    setattr(v,"vec",hVector_vec)
     setattr(v,"list",hVector_list)
     setattr(v,"dimension",[])
     setattr(v,"ndim",0)
@@ -949,3 +1054,4 @@ def CRQualityCheck(limits,file=None,dataarray=None,maxblocksize=65536,nsigma=5,v
 
 #qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
 #CRQualityCheck(file,qualitycriteria,maxblocksize=65536,nsigma=5,verbose=True)
+
