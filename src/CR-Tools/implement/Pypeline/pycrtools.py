@@ -224,6 +224,14 @@ def extendflat(self,l):
     """
     map(lambda x:self.extend(x),l)
 
+def hArray_none(self):
+    """
+    array.none() -> None
+
+    Simply retuens the None object. Can be used to suppress unwanted
+    output, when an operation returns an array.
+    """
+    return None
 
 def hArray_newreference(self):
     """
@@ -380,6 +388,18 @@ def hArray_setitem(self,dims,fill):
     if (type(fill)) in [list,tuple]: fill=hArray(fill)
     return hFill(hArray_getitem(self,dims),fill)
 
+def hArray_read(self,datafile,key):
+    """
+    array[file,"Time"] -> read key Data Array "Time" from file into array.
+
+    Will also set the attributes par.file and par.filename of the array and
+    make a history entry.
+    """
+    self.par.filename=datafile.filename
+    self.addHistory("read","Reading data from file "+self.par.filename)
+    self.par.file=datafile.read(key,self)
+    return self
+    
 class hArray_par:
     """
     Parameter attribute. Used to hold and inherit arbitrary additional
@@ -452,6 +472,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     var="title"; dflt=""; val=eval(var); 
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
+        elif hasattr(self.par,"filename"): exec(var+"=self.par.filename")
         else: exec("var=dflt")
     var="logplot"; dflt=""; val=eval(var); 
     if val==None:
@@ -760,6 +781,8 @@ for v in hAllArrayTypes:
     setattr(v,"vec",hArray_vec)
     setattr(v,"val",hArray_val)
     setattr(v,"new",hArray_new)
+    setattr(v,"none",hArray_none)
+    setattr(v,"read",hArray_read)
     setattr(v,"list",hArray_list)
     setattr(v,"par",hArray_par())
     setattr(v,"plt",plt)
@@ -926,6 +949,54 @@ hArray.__doc__=Arraydoc
 # cr DataReader Class
 #------------------------------------------------------------------------
 
+def DataReader_getHeaderVariables(self):
+    """
+    Method to read out the header information from the DataReader and
+    put it into attributes of the DataReader object.
+    """
+    self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample']))
+    for v in self.keywords:
+        setattr(self,v,self.get(v))
+
+def DataReader_getitem(self,*keys):
+    """
+    datafile["key"] -> value
+    datafile["key1","key2",...] -> [value1, value2,...] 
+
+    Method to obtain header information from the DataReader.
+    """
+    if type(keys[0])==tuple: return map(lambda k:hFileGetParameter(self,k),keys[0])
+    else: return hFileGetParameter(self,keys[0])
+
+def DataReader_set(self,key,val):
+    """
+    datafile.set("key",value) -> set the appropriate header parameter
+
+    Method to set header information in the DataReader and
+    put it into attributes of the DataReader object.
+    """
+    ok=hFileSetParameter(self,key,val)
+    if ok: setattr(self,key[0].lower()+key[1:],val)
+    return self
+
+def DataReader_setitem(self,*keyval):
+    """
+    datafile["key"]=value -> set the appropriate header parameter
+    datafile[["key1","key2",...]]=[value1, value2,...] -> set multiple  header parameters
+
+    Method to set header information in the DataReader and
+    put it into attributes of the DataReader object.
+    """
+    if len(keyval)!=2: 
+        print "Wrong NUmber of Argument for DataReader['key']=value!"
+        return
+    key=keyval[0]
+    val=keyval[1]
+    if (type(key)==tuple):
+        for k,v in zip(key,val): 
+            self.set(k,v)
+    else: self.set(key,val)
+
 def crfile(filename):
     """
     file=crfile("FILENAME.h5") -> DataReader Object
@@ -934,12 +1005,19 @@ def crfile(filename):
     datareader class. It deals with LOFAR and LOEPS data alike. You
     can read data vectors, read or set parameters and get summary of the contents.
     """
-    file=hFileOpen(filename)
-    file.filename=filename
-    return file
+    cfile=hFileOpen(filename)
+    cfile.filename=filename
+    cfile.getHeaderVariables()
+    return cfile
 
 DataReader.read=hFileRead
+DataReader.set=DataReader_set
+DataReader.__setitem__=DataReader_setitem
+DataReader.__getitem__=DataReader_getitem
+DataReader.getHeaderVariables=DataReader_getHeaderVariables
 DataReader.__doc__=crfile.__doc__
+
+
 
 #------------------------------------------------------------------------
 # Pypeline Extension, Functions and Algorithms
@@ -975,11 +1053,11 @@ def CheckParameterConformance(data,keys,limits):
     return result
 
 
-def CRQualityCheck(limits,file=None,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True):
+def CRQualityCheck(limits,datafile=None,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True):
     """
     Usage:
 
-    CRQualityCheck(qualitycriteria,file,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True) -> list of antennas failing the limits
+    CRQualityCheck(qualitycriteria,datafile,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True) -> list of antennas failing the limits
 
     qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
 
@@ -992,7 +1070,7 @@ def CRQualityCheck(limits,file=None,dataarray=None,maxblocksize=65536,nsigma=5,v
 
     qualitycriteria - a Python dict with keywords of parameters and limits thereof (lower, upper)
 
-    file - Data Reader file object, if none, use values in dataarray and don't read in again
+    datafile - Data Reader file object, if none, use values in dataarray and don't read in again
 
     array - an optional data storage array to read in the data
 
@@ -1006,12 +1084,12 @@ def CRQualityCheck(limits,file=None,dataarray=None,maxblocksize=65536,nsigma=5,v
     verbose - sets whether or not to print additional information
     """
 #Initialize some parameters
-    if not file==None:
-        nAntennas=file.get("nofSelectedAntennas")
-        selected_antennas=file.get("selectedAntennas")
-        filesize=file.get("filesize")
+    if not datafile==None:
+        nAntennas=datafile.get("nofSelectedAntennas")
+        selected_antennas=datafile.get("selectedAntennas")
+        filesize=datafile.get("filesize")
         blocksize=min(filesize/4,maxblocksize)
-        file.set("blocksize",blocksize)
+        datafile.set("blocksize",blocksize)
         nBlocks=filesize/blocksize; 
         blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
         if dataarray==None: dataarray=hArray(float,[nAntennas,blocksize])
@@ -1028,14 +1106,14 @@ def CRQualityCheck(limits,file=None,dataarray=None,maxblocksize=65536,nsigma=5,v
     npeakserror=sqrt(npeaksexpected) # what is the statisitcal error on that expectation
 #Start checking
     if verbose:
-        if not file==None: print "Quality checking of file ",file.filename
+        if not datafile==None: print "Quality checking of file ",datafile.filename
         print "Considering",nAntennas," antennas and the Blocks:",blocklist
         print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected
     for Block in blocklist:
         if verbose:
             print "\nBlock = ", Block
             print "-----------------------------------------------------------------------------------------"
-        if not file==None: file.set("block",Block).read("Voltage",dataarray.vec())
+        if not datafile==None: datafile.set("block",Block).read("Voltage",dataarray.vec())
         datamean = dataarray[...].mean()
         datarms = dataarray[...].stddev(datamean)
         datanpeaks = dataarray[...].countgreaterthanabs(datarms*nsigma)
@@ -1053,5 +1131,5 @@ def CRQualityCheck(limits,file=None,dataarray=None,maxblocksize=65536,nsigma=5,v
 
 
 #qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
-#CRQualityCheck(file,qualitycriteria,maxblocksize=65536,nsigma=5,verbose=True)
+#CRQualityCheck(datafile,qualitycriteria,maxblocksize=65536,nsigma=5,verbose=True)
 

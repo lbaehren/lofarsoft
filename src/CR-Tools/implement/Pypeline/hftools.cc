@@ -491,7 +491,7 @@ template<class T> inline T hfcast(HComplex v){return static_cast<T>(v);}
 template<class T> inline T hfcast(/*const*/ HPointer v){return hfcast<T>(reinterpret_cast<HInteger>(v));}
 template<class T> inline T hfcast(/*const*/ HString v){T t; std::istringstream is(v); is >> t; return t;}
 
-template<class T> inline T hfcast(CR::DataReader v){return hfcast<T>(0);}
+template<class T> inline T hfcast(CR::DataReader v){return hfcast<T>((void*)&v);}
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
 template<>  inline HInteger hfcast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v));}
@@ -1428,7 +1428,7 @@ return_internal_reference<1,
     .def("isTrackingHistory",&hArray<TYPE>::isTrackingHistory)	\
     .def("history",&hArray<TYPE>::printHistory)	\
     .def("setKey",&hArray<TYPE>::setKey,return_internal_reference<>())	\
-    .def("getKey",&hArray<TYPE>::getKey)	\>
+    .def("getKey",&hArray<TYPE>::getKey)	\
 
 //========================================================================
 //                        Helper Functions
@@ -3674,7 +3674,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
       HFPP_REPEAT(uint,uint,Date)
 	HFPP_REPEAT(casa::String,HString,Observatory)
 	HFPP_REPEAT(int,int,Filesize)
-	HFPP_REPEAT(double,double,dDate)
+	//	HFPP_REPEAT(double,double,dDate)
 	HFPP_REPEAT(int,int,presync)
 	HFPP_REPEAT(int,int,TL)
 	HFPP_REPEAT(int,int,LTL)
@@ -3709,7 +3709,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
       HFPP_REPEAT(uint,uint,Date)
 	HFPP_REPEAT(casa::String,HString,Observatory)
 	HFPP_REPEAT(int,int,Filesize)
-	HFPP_REPEAT(double,double,dDate)
+			//HFPP_REPEAT(double,double,dDate)
 	HFPP_REPEAT(int,int,presync)
 	HFPP_REPEAT(int,int,TL)
 	HFPP_REPEAT(int,int,LTL)
@@ -3719,9 +3719,9 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 //------------------------------------------------------------------------
 	HFPP_REPEAT(int,int,AntennaIDs)
 #undef HFPP_REPEAT
-		     + "help";
-      if (key!="help") cout << "Unknown keyword " << key <<"!"<<endl;
-      cout  << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << " - available keywords: "<< result <<endl;
+		     + "keywords, help";
+      if ((key!="help") && (key!="keywords")) cout << "Unknown keyword " << key <<"!"<<endl;
+      if (key!="keywords") cout  << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << " - available keywords: "<< result <<endl;
       HPyObject pyob(result);
       return pyob;
     };
@@ -3734,7 +3734,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 #define HFPP_FUNC_NAME hFileSetParameter
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+#define HFPP_FUNCDEF  (bool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object openen, e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be set in the file")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HPyObjectPtr)(pyob)()("Input paramter")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -3743,7 +3743,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
  \brief $DOCSTRING
  $PARDOCSTRING
 */
-CRDataReader & HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
+bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 {
   DataReader *drp=&dr;
   HString key2(key);
@@ -3781,10 +3781,13 @@ CRDataReader & HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(uint,XX,SelectedAntennas)
 #undef HFPP_REPEAT
 		     + "help";
-      if (key!="help") cout << "Unknown keyword " << key <<"!"<<endl;
+      if (key!="help") {
+	cout << "Unknown keyword " << key <<"!"<<endl;
+	return false;
+      };
       cout  << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << " - available keywords: "<< txt <<endl;
     };
-  return dr;
+  return true;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

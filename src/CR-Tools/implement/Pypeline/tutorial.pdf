@@ -2,7 +2,7 @@
 1 0 obj
 <<
 /Creator (PyText2Pdf 1.3 By Anand B Pillai )
-/CreationDate (D:20100327204101)
+/CreationDate (D:20100328165632)
 /Producer (PyText2Pdf 1.3(\251 Anand B Pillai))
 /Title (tutorial.py.txt)
 >>
@@ -1140,29 +1140,29 @@ BT
 (or simply the .history\(\) method, which prints the activity log.)'
 ()'
 (>>> a.history\(\))'
-(    2010-03-27 20:40:57 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.)'
-(    2010-03-27 20:40:57 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.)'
-(    2010-03-27 20:40:57 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.)'
-(    2010-03-27 20:40:57 [setDimension]: Dimensions set to [10])'
-(    2010-03-27 20:40:57 [setDimension]: Dimensions set to [3,3])'
-(    2010-03-27 20:40:57 [setDimension]: Dimensions set to [3,3,2])'
-(    2010-03-27 20:40:57 [setDimension]: Dimensions set to [3,3])'
-(    2010-03-27 20:40:57 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...])'
-(    2010-03-27 20:40:57 [hFill]:   Par 1: fill_value = -2)'
-(    2010-03-27 20:40:57 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 20:40:57 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...])'
-(    2010-03-27 20:40:57 [hSum]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 20:40:57 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 20:40:57 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...])'
-(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 20:40:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
-(    2010-03-27 20:40:57 [setUnit]: Unit set to MHz.)'
-(    2010-03-27 20:40:57 [setUnit]: Unit set to kHz.)'
-(    2010-03-27 20:40:57 [setKey]: name = TestArray)'
+(    2010-03-28 16:56:29 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.)'
+(    2010-03-28 16:56:29 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.)'
+(    2010-03-28 16:56:29 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.)'
+(    2010-03-28 16:56:29 [setDimension]: Dimensions set to [10])'
+(    2010-03-28 16:56:29 [setDimension]: Dimensions set to [3,3])'
+(    2010-03-28 16:56:29 [setDimension]: Dimensions set to [3,3,2])'
+(    2010-03-28 16:56:29 [setDimension]: Dimensions set to [3,3])'
+(    2010-03-28 16:56:29 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...])'
+(    2010-03-28 16:56:29 [hFill]:   Par 1: fill_value = -2)'
+(    2010-03-28 16:56:29 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-28 16:56:29 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...])'
+(    2010-03-28 16:56:29 [hSum]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-28 16:56:29 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-28 16:56:29 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...])'
+(    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...])'
+(    2010-03-28 16:56:29 [setUnit]: Unit set to MHz.)'
+(    2010-03-28 16:56:29 [setUnit]: Unit set to kHz.)'
+(    2010-03-28 16:56:29 [setKey]: name = TestArray)'
 ()'
 (You can add a line to the history log yourself with )'
 ()'
@@ -1207,40 +1207,23 @@ BT
 (Let's see how we can open a file. First define a filename, e.g.:)'
 ()'
 (>>> LOFARSOFT=os.environ["LOFARSOFT"])'
-(>>> filename=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5")'
-()'
-(    filename => /Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse-2010)'
-(-02-11-TBB1.h5)'
+(>>> filename_sun=LOFARSOFT+"/data/lopes/example.event")'
+(>>> filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TB)'
+(B1.h5")'
+(    filename_sun => /Users/falcke/LOFAR/usg/data/lopes/example.event)'
+(    filename_lofar => /Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-puls)'
+(e-2010-02-11-TBB1.h5)'
 ()'
 (We can create a new file object, using the "crfile" class, which is an)'
 (interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py. )'
 ()'
 (The following will open a data file and return a DataReader object:)'
 ()'
-(>>> file=crfile\(filename\))'
-(  -- nof dipole datasets = 16)'
-(  -- Setting up DataIterator objects ...)'
-(  -- Setting up header record ...)'
-(  Opening LOFAR File=/Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse)'
-(-2010-02-11-TBB1.h5)'
-(  [DataReader::summary])'
-(   -- blocksize ............ = 1024)'
-(   -- FFT length ........... = 513)'
-(   -- file streams connected?  0)'
-(   -- shape\(adc2voltage\) ... = [1024, 16])'
-(   -- shape\(fft2calfft\) .... = [513, 16])'
-(   -- nof. antennas ........ = 16)'
-(   -- nof. selected antennas = 16)'
-(   -- nof. selected channels = 513)'
-(   -- shape\(fx\) ............ = [1024, 16])'
-(   -- shape\(voltage\) ....... = [1024, 16])'
-(   -- shape\(fft\) ........... = [513, 16])'
-(   -- shape\(calfft\) ........ = [513, 16])'
-(>>> file.set\("blocksize",1024*2\))'
+(>>> datafile=crfile\(filename_lofar\).set\("blocksize",1024*2\))'
 ()'
 (The associated filename can be retrieved with)'
 ()'
-(>>> file.filename)'
+(>>> datafile.filename)'
 (  '/Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h)'
 (5')'
 ()'
@@ -1251,23 +1234,40 @@ BT
 (4.2.  Setting and retrieving metadata \(parameters\))'
 (-------------------------------------------------)'
 ()'
-(Now we need to access the meta data in the file. This is done using a)'
-(single method "get". This method actually calls the function)'
-("hFileGetParameter" defined in the c++ code.)'
+(Now we need to access the meta data in the file. This is can be done)'
+(in multiple ways. One way is by using the get method. This method)'
+(actually calls the function "hFileGetParameter" defined in the c++)'
+(code.)'
 ()'
 (Which observatory did we actually use?)'
 ()'
-(>>> obsname=file.get\("observatory"\);)'
+(>>> obsname=datafile.get\("observatory"\);)'
 (    obsname => LOFAR)'
 ()'
 (There are more keywords, of course. A list of implemented parameters)'
 (we can access is obtained by)'
 ()'
+(>>> keywords=datafile.get\("help"\))'
+(  hFileGetParameter - available keywords: nofAntennas, nofSelectedChannels, nofSelectedAnt)'
+(ennas, nofBaselines, block, blocksize, stride, fftLength, nyquistZone, sampleInterval, ref)'
+(erenceTime, sampleFrequency, antennas, selectedAntennas, selectedChannels, positions, incr)'
+(ement, frequencyValues, frequencyRange, Date, Observatory, Filesize, presync, TL, LTL, Eve)'
+(ntClass, SampleFreq, StartSample, AntennaIDs, keywords, help)'
+()'
+(Note, that the results are returned as PythonObjects. Hence, this)'
+(makes use of the power of python with automatic typing. For, example)'
+()'
+(>>> datafile.get\("frequencyRange"\))'
+(  Vec\(float,2\)=[0.0,100000000.0])'
+()'
+(actually returns a vector. )'
+()'
+(Here no difference is made where the data comes frome. The keyword)'
 ET
 endstream
 endobj
 50 0 obj
-2302
+2538
 endobj
 51 0 obj
 <<
@@ -1286,39 +1286,29 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(>>> keywords=file.get\("help"\))'
-(  hFileGetParameter - available keywords: nofAntennas, nofSelectedChannels, nofSelectedAnt)'
-(ennas, nofBaselines, block, blocksize, stride, fftLength, nyquistZone, sampleInterval, ref)'
-(erenceTime, sampleFrequency, antennas, selectedAntennas, selectedChannels, positions, incr)'
-(ement, frequencyValues, frequencyRange, Date, Observatory, Filesize, dDate, presync, TL, L)'
-(TL, EventClass, SampleFreq, StartSample, AntennaIDs, help)'
-()'
-()'
-(Note, that the results are returned as PythonObjects. Hence, this)'
-(makes use of the power of python with automatic typing. For, example)'
-()'
-(>>> file.get\("frequencyRange"\))'
-(  Vec\(float,2\)=[0.0,100000000.0])'
-()'
-(actually returns a vector. )'
-()'
-(Here no difference is made where the data comes frome. The keyword)'
 (Obervatory accesses the header record in the data file while the)'
 (frequencRange accesses a method of the DataReader.)'
+()'
+()'
+(A second way do retreive data is to use square brackets. Hence)'
+(datafile[key] is equivalent to datafile.get\(key\).)'
+()'
+(>>> datafile["blocksize"])'
+(  2048)'
 ()'
 (Now we will define a number of useful variables that contain essential)'
 (parameters that we later will use.)'
 ()'
-(>>> obsdate   =file.get\("Date"\); )'
-(>>> filesize  =file.get\("Filesize"\);)'
-(>>> blocksize =file.get\("blocksize"\); )'
-(>>> nAntennas =file.get\("nofAntennas"\); )'
-(>>> antennas  =file.get\("antennas"\); )'
-(>>> antennaIDs=file.get\("AntennaIDs"\); )'
-(>>> selectedAntennas=file.get\("selectedAntennas"\);)'
-(>>> nofSelectedAntennas=file.get\("nofSelectedAntennas"\); )'
-(>>> fftlength =file.get\("fftLength"\);)'
-(>>> sampleFrequency =file.get\("sampleFrequency"\);)'
+(>>> obsdate   =datafile["Date"] )'
+(>>> filesize  =datafile["Filesize"])'
+(>>> blocksize =datafile["blocksize"] )'
+(>>> nAntennas =datafile["nofAntennas"] )'
+(>>> antennas  =datafile["antennas"] )'
+(>>> antennaIDs=datafile["AntennaIDs"] )'
+(>>> selectedAntennas=datafile["selectedAntennas"])'
+(>>> nofSelectedAntennas=datafile["nofSelectedAntennas"] )'
+(>>> fftlength =datafile["fftLength"])'
+(>>> sampleFrequency =datafile["sampleFrequency"])'
 (>>> maxblocksize=min\(filesize,1024*1024\); )'
 (>>> nBlocks=filesize/blocksize; )'
 ()'
@@ -1336,21 +1326,31 @@ BT
 (    maxblocksize => 132096)'
 (    nBlocks => 64)'
 ()'
+(Luckily, you do not have to do this all the time, since all the)'
+(parameters will be read out at the beginning and will be stored as)'
+(attributes to the file object.)'
 ()'
-(We can also change parameters in a very similar fashion, using the)'
-("set" method, which is an implementation of the "hFileSetParameter")'
-(function. E.g. changing the blocksize we already did before. This is)'
-(simply)'
-()'
-(>>> file.set\("blocksize",blocksize\);)'
-()'
-(again the list of implemented keywords is visible with using)'
-()'
+(>>> for kw in datafile.keywords: p_\("datafile."+kw\))'
+(    datafile.observatory => LOFAR)'
+(    datafile.blocksize => 2048)'
+(    datafile.antennaIDs => Vec\(int,16\)=[128002016,128002017,128002018,128002019,128002020,)'
+(128002021,128002022,128002023,128003024,128003025,...])'
+(    datafile.nyquistZone => 1)'
+(    datafile.antennas => Vec\(int,16\)=[0,1,2,3,4,5,6,7,8,9,...])'
+(    datafile.nofBaselines => 120)'
+(    datafile.filesize => 132096)'
+(    datafile.increment => Vec\(float,2\)=[5e-09,195312.5])'
+(    datafile.selectedAntennas => Vec\(int,16\)=[0,1,2,3,4,5,6,7,8,9,...])'
+(    datafile.selectedChannels => Vec\(int,513\)=[0,1,2,3,4,5,6,7,8,9,...])'
+(    datafile.nofAntennas => 16)'
+(    datafile.sampleFrequency => 200000000.0)'
+(    datafile.nofSelectedAntennas => 16)'
+(    datafile.referenceTime => 0.0)'
 ET
 endstream
 endobj
 53 0 obj
-2523
+2515
 endobj
 54 0 obj
 <<
@@ -1369,7 +1369,28 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(>>> file.set\("help",0\);)'
+(    datafile.frequencyValues => Vec\(float,513\)=[0.0,195312.5,390625.0,585937.5,781250.0,97)'
+(6562.5,1171875.0,1367187.5,1562500.0,1757812.5,...])'
+(    datafile.nofSelectedChannels => 513)'
+(    datafile.stride => 0)'
+(    datafile.sampleInterval => 5e-09)'
+(    datafile.frequencyRange => Vec\(float,2\)=[0.0,100000000.0])'
+(    datafile.fftLength => 513)'
+(    datafile.date => 1265926154)'
+(    datafile.block => 0)'
+()'
+(They will be updated whenever you do a file.set\(key,value\), however,)'
+(assigning a new value to the attribute will NOT automatically change)'
+(the parameter in the file. For this, you have to use the the "set")'
+(method, which is an implementation of the "hFileSetParameter")'
+(function. E.g. changing the blocksize we already did before. This is)'
+(simply)'
+()'
+(>>> datafile.set\("blocksize",2048\);)'
+()'
+(again the list of implemented keywords is visible with using)'
+()'
+(>>> datafile.set\("help",0\);)'
 ()'
 (Here the listed keywords actually start with capital letters, however,)'
 (to spare you some annoyance, you can use a spelling which starts with)'
@@ -1379,17 +1400,28 @@ BT
 (object itself. Hence, you can append multiple set commands after each)'
 (other.)'
 ()'
-(>>> file.set\("block",2\).set\("selectedAntennas",[0,2]\);)'
+(>>> datafile.set\("block",2\).set\("selectedAntennas",[0,2,3]\);)'
+()'
+(Alternatively you can also use square brackets:)'
+()'
+(>>> datafile["selectedAntennas"]=[0,2])'
+()'
+(but then it is not possible to append multiple set commands in one)'
+(line, so you need to provide lists of keywords and list of values, like)'
+()'
+(>>> datafile["blocksize","selectedAntennas"]=[2048,[0,2]])'
+(>>> datafile["blocksize","selectedAntennas"])'
+(  [2048, Vec\(int,2\)=[0,2]])'
 ()'
 (Note, that we have now reduced the number of antennas to two: namely)'
 (antenna 0 and 2 and the number of selected antennas is)'
 ()'
-(>>> file.get\("nofSelectedAntennas"\))'
+(>>> datafile["nofSelectedAntennas"])'
 (  2)'
 ()'
 (However, now we want to work on all antennas again:)'
 ()'
-(>>> file.set\("block",0\).set\("selectedAntennas",range\(nAntennas\)\))'
+(>>> datafile.set\("block",0\).set\("selectedAntennas",range\(nAntennas\)\))'
 ()'
 ()'
 (4.3.  Reading in Data)'
@@ -1397,43 +1429,11 @@ BT
 ()'
 (The next step is to actually read in data. This is done with the read)'
 (method \(accessing "hFileRead"\). The data is read flatly into a 1D)'
-(vector. This is also true if mutliple antennas are read out at)'
-(once. Here simply the data from the antennas follow each other.)'
-()'
-(Also, by default memory allocation of the vectors has to be done in)'
-(python before calling any of the functions. This improves speed and)'
-(efficiency, but requires one to programme carefully and to understand)'
-(the data structrue.)'
-()'
-(First we create a FloatArray of the correct dimensions, naming it)'
-(Voltage and setting the Unit to counts.)'
-()'
-(>>> fxdata=hArray\(float,[nofSelectedAntennas,blocksize],name="E-Field"\).setUnit\("","Counts)'
-("\))'
-()'
-(This is now a large vector filled with zeros.)'
-()'
-(Now we can read in the raw time series data, using "file.read" and a)'
-(keyword. Currently implemented are the data fields "Fx", "Voltage",)'
-("FFT", "CalFFT","Time", "Frequency".)'
-()'
-(So, let us read in the raw time series data, i.e. the electric field)'
-(in the antenna as digitized by the ADC. This is provided by the)'
-(keyword "Fx" \(means f\(x\) \).)'
-()'
-(>>> file.read\("Fx",fxdata\))'
-(    fxdata => E-Field\(float, [16, 2048]=32768, [0:32768]\) -> [16.0,17.0,10.0,18.0,17.0,6.0)'
-(,16.0,17.0,-1.0,0.0,...])'
-()'
-(and voila the vector is filled with time series data from the data)'
-(file. Note that we had to use the .vec method for the array, since)'
-(file.read does not yet accept arrays \(since it can't handle c++)'
-(iterators\).)'
 ET
 endstream
 endobj
 56 0 obj
-2419
+2329
 endobj
 57 0 obj
 <<
@@ -1452,6 +1452,43 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
+(vector. This is also true if mutliple antennas are read out at)'
+(once. Here simply the data from the antennas follow each other.)'
+()'
+(Also, by default memory allocation of the vectors has to be done in)'
+(python before calling any of the functions. This improves speed and)'
+(efficiency, but requires one to programme carefully and to understand)'
+(the data structrue.)'
+()'
+(First we create a FloatArray of the correct dimensions, naming it)'
+(Voltage and setting the Unit to counts.)'
+()'
+(>>> fxdata=hArray\(float,[nofSelectedAntennas,blocksize],name="E-Field"\).setUnit\("","Counts)'
+("\))'
+()'
+(This is now a large vector filled with zeros.)'
+()'
+(Now we can read in the raw time series data, either using)'
+("datafile.read" and a keyword, or actually better, use the read method)'
+(of arrays, as they then store filename and history information in the)'
+(array.)'
+()'
+()'
+(Currently implemented keywords for reading data fields are: "Fx",)'
+("Voltage", "FFT", "CalFFT","Time", "Frequency".)'
+()'
+(So, let us read in the raw time series data, i.e. the electric field)'
+(in the antenna as digitized by the ADC. This is provided by the)'
+(keyword "Fx" \(means f\(x\) \).)'
+()'
+(>>> fxdata.read\(datafile,"Fx"\))'
+(    fxdata => E-Field\(float, [16, 2048]=32768, [0:32768]\) -> [16.0,17.0,10.0,18.0,17.0,6.0)'
+(,16.0,17.0,-1.0,0.0,...])'
+()'
+(and voila the vector is filled with time series data from the data)'
+(file. Note that we had to use the .vec method for the array, since)'
+(datafile.read does not yet accept arrays \(since it can't handle c++)'
+(iterators\).)'
 ()'
 (No, you can access the individual antennas as single vectors through)'
 (slicing)'
@@ -1460,13 +1497,13 @@ BT
 ()'
 (To get the x-Axis we create a second vector)'
 ()'
-(>>> timedata=hArray\(float,[blocksize],name="Time"\).setUnit\("","s"\))'
-(>>> file.read\("Time",timedata.vec\(\)\))'
+(>>> times=hArray\(float,[blocksize],name="Time"\).setUnit\("","s"\))'
+(>>> times.read\(datafile,"Time"\))'
 ()'
 (This is the time relative to the trigger in seconds. So, let's have)'
 (that in microseconds, by using setUnit)'
 ()'
-(>>> timedata.setUnit\("\\\\mu",""\))'
+(>>> times.setUnit\("\\\\mu",""\))'
 (  Time\(float, [2048]=2048, [0:2048]\) -> [0.0,0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0)'
 (.045,...])'
 ()'
@@ -1474,9 +1511,35 @@ BT
 (length we have to take the length of the Fourier transformed time)'
 (block \(which is blocksize/2+1\).)'
 ()'
-(>>> freqdata=hArray\(float,dimensions=[fftlength],name="Frequency"\).setUnit\("","Hz"\))'
-(>>> f=file.read\("Frequency",freqdata\))'
-(>>> freqdata.setUnit\("M","Hz"\))'
+(>>> frequencies=hArray\(float,dimensions=[fftlength],name="Frequency"\).setUnit\("","Hz"\))'
+ET
+endstream
+endobj
+59 0 obj
+2451
+endobj
+60 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 61 0 R
+>>
+endobj
+61 0 obj
+<<
+/Length 62 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(>>> frequencies.read\(datafile,"Frequency"\))'
+(  Frequency\(float, [1025]=1025, [0:1025]\) -> [0.0,97656.25,195312.5,292968.75,390625.0,488)'
+(281.25,585937.5,683593.75,781250.0,878906.25,...])'
+()'
+(>>> frequencies.setUnit\("M","Hz"\))'
 (  Frequency\(float, [1025]=1025, [0:1025]\) -> [0.0,0.09765625,0.1953125,0.29296875,0.390625)'
 (,0.48828125,0.5859375,0.68359375,0.78125,0.87890625,...])'
 ()'
@@ -1497,8 +1560,11 @@ BT
 (>>> fftdata=hArray\(complex,[nofSelectedAntennas,fftlength],name="FFT\(E\)"\))'
 (>>> fxdata[...].fft\(fftdata[...],1\))'
 ()'
-(    fxdata => E-Field\(float, [16, 2048]=32768, [0:32768]\) -> [16.0,17.0,10.0,18.0,17.0,6.0)'
-(,16.0,17.0,-1.0,0.0,...])'
+(    fftdata => FFT\(E\)\(complex, [16, 1025]=16400, [0:16400]\) -> [\(14776+0j\),\(-78.0619954633)'
+(+23.5840915053j\),\(49.6800536667+19.8582762045j\),\(-69.6240335619+15.9113124235j\),\(2.2813132)'
+(1087-46.0593431603j\),\(-50.7134694718-6.38083930207j\),\(-11.8103929808+4.5431205938j\),\(-52.0)'
+(847348972+52.0362484443j\),\(72.7593935051-54.1910307411j\),\(-30.9353873089+10.1986827514j\),.)'
+(..])'
 ()'
 (Here we have used the fft method of the float array, which is just a)'
 (call to the stand-alone function hFFT defined in hftools.cc.)'
@@ -1512,29 +1578,6 @@ BT
 (complex data and convert it to floats. This can be done using the)'
 (complex function "norm" \(unusual name, but used in c++\).)'
 ()'
-ET
-endstream
-endobj
-59 0 obj
-2573
-endobj
-60 0 obj
-<<
-/Type /Page
-/Parent 3 0 R
-/Resources 5 0 R
-/Contents 61 0 R
->>
-endobj
-61 0 obj
-<<
-/Length 62 0 R
->>
-stream
-BT
-/F1 9 Tf
-1 0 0 1 50 752 Tm
-12 TL
 (>>> spectrum=hArray\(float,dimensions=fftdata,name="E-field Spectrum"\))'
 (>>> fftdata[...].norm\(spectrum\))'
 ()'
@@ -1543,11 +1586,38 @@ BT
 ()'
 (>>> avspectrum=hArray\(float,dimensions=fftdata,name="avg. Spectrum"\))'
 (>>> for block in range\(nBlocks\):)'
-(...     f=file.set\("block",block\).read\("FFT",fftdata\))'
+(...     fftdata.read\(datafile.set\("Block",block\),"FFT"\).none\(\))'
 (...     fftdata[...].spectralpower\(avspectrum[...]\))'
+()'
+(\(The .none\(\) method is appended to suppress uwanted output in)'
+(generating the tutorial, when an operation returns an array or)'
+(vector.\))'
 ()'
 (6.  Basic Plotting)'
 (------------------)'
+ET
+endstream
+endobj
+62 0 obj
+2846
+endobj
+63 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 64 0 R
+>>
+endobj
+64 0 obj
+<<
+/Length 65 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
 ()'
 (In order to plot the data, we can use external packages. Two packages)'
 (are being provided here: matplotlib and mathgl. The former is)'
@@ -1558,6 +1628,7 @@ BT
 (our GUI programming.)'
 ()'
 (6.1.  Mathgl)'
+(-------------)'
 ()'
 (Here is a simple example on how to use mathgl code \(here without a)'
 (widget\))'
@@ -1584,6 +1655,7 @@ BT
 (gr.WriteEPS\("test-y.eps","Test Plot"\))'
 ()'
 (6.2.  Matplotlib)'
+(------------------)'
 ()'
 (Now, in principle, we need to import matplotlib)'
 ()'
@@ -1595,29 +1667,6 @@ BT
 ()'
 (>>> plt.show\(\))'
 ()'
-ET
-endstream
-endobj
-62 0 obj
-1852
-endobj
-63 0 obj
-<<
-/Type /Page
-/Parent 3 0 R
-/Resources 5 0 R
-/Contents 64 0 R
->>
-endobj
-64 0 obj
-<<
-/Length 65 0 R
->>
-stream
-BT
-/F1 9 Tf
-1 0 0 1 50 752 Tm
-12 TL
 (and an empty plot window should pop up somehwere \(in the background?\))'
 (!! On the Mac it seems to pop up automatically. )'
 ()'
@@ -1629,60 +1678,11 @@ BT
 (command!!!)'
 ()'
 (Now, we can use some of the plotting commands.)'
-()'
-(>>> plt.subplot\(1,2,1\))'
-(>>> plt.title\("Average Spectrum for Two Antennas"\))'
-(>>> plt.semilogy\(freqdata.vec\(\),avspectrum[0].vec\(\)\))'
-(>>> plt.semilogy\(freqdata.vec\(\),avspectrum[1].vec\(\)\))'
-(>>> plt.ylabel\(avspectrum.getKey\("name"\)+" ["+avspectrum.getUnit\(\)+"]"\))'
-(>>> plt.xlabel\(freqdata.getKey\("name"\)+" ["+freqdata.getUnit\(\)+"]"\))'
-()'
-(To plot the time series of the entire data set, we first read in all sample from all anten)'
-(nas)'
-()'
-(>>> file.set\("block",0\).set\("blocksize",maxblocksize\))'
-(>>> fxall=Vector\(\); fxall.setDim\([nofSelectedAntennas,maxblocksize]\))'
-(  Vec\(float,2113536\)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...])'
-(>>> timeall=Vector\(float,maxblocksize\) )'
-(>>> file.read\("Time",timeall\); timeall *= 10**6.)'
-(  <hftools.DataReader object at 0x3dab58>)'
-(>>> file.read\("Fx",fxall\))'
-(  <hftools.DataReader object at 0x77228>)'
-()'
-(and then we plot it )'
-()'
-(>>> plt.subplot\(1,2,2\))'
-(>>> plt.title\("Time Series of Antenna 0"\))'
-(>>> plt.plot\(timeall,fxall.elem\(0\)\))'
-(>>> plt.ylabel\("Electric Field [ADC counts]"\))'
-(>>> plt.xlabel\("Time [$\\mu$s]"\))'
-(So, for a linear plot use .plot, for a loglog plot use .loglog and for)'
-(a log-linear plot use .semilogx or .semilogy ...)'
-()'
-(6.3.  Plotting Using the hArray Plotting Method)'
-(-------------------------------------------------)'
-()'
-(There is also a simpler way to make the kind of plots described above,)'
-(unsing the built-in plot method of array.)'
-()'
-(>>> avspectrum.par.xvalues=freqdata)'
-(>>> avspectrum.par.title="Average Spectrum")'
-(>>> avspectrum[0].plot\(logplot="y"\))'
-(  avg. Spectrum\(float, [16, 1025]=16400, [0:1025]\) -> [13868864905.0,186600.668168,163848.)'
-(440523,135588.910231,171181.713829,125052.341697,149167.47994,191654.209722,168893.679542,)'
-(138273.603106,...])'
-()'
-(This creates a semilog-plot with appropriate lables and units \(if they)'
-(were provided beforehand.\))'
-()'
-(You can either provide the parameters directly \(precedence\), or set)'
-(the plotting parameters as attributes to the .par class of the array,)'
-(e.g., "array.par.xvalues=x_vector; array.plot\(\)")'
 ET
 endstream
 endobj
 65 0 obj
-2683
+1862
 endobj
 66 0 obj
 <<
@@ -1702,6 +1702,56 @@ BT
 1 0 0 1 50 752 Tm
 12 TL
 ()'
+(>>> plt.subplot\(1,2,1\))'
+(>>> plt.title\("Average Spectrum for Two Antennas"\))'
+(>>> plt.semilogy\(frequencies.vec\(\),avspectrum[0].vec\(\)\))'
+(>>> plt.semilogy\(frequencies.vec\(\),avspectrum[1].vec\(\)\))'
+(>>> plt.ylabel\(avspectrum.getKey\("name"\)+" ["+avspectrum.getUnit\(\)+"]"\))'
+(>>> plt.xlabel\(frequencies.getKey\("name"\)+" ["+frequencies.getUnit\(\)+"]"\))'
+()'
+(To plot the time series of the entire data set, we first read in all)'
+(sample from all antennas)'
+()'
+(>>> datafile["block","blocksize"]=\(0,maxblocksize\))'
+(>>> fxall=Vector\(\); fxall.setDim\([datafile.nofSelectedAntennas,maxblocksize]\))'
+(  Vec\(float,2113536\)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...])'
+(>>> timeall=Vector\(float,maxblocksize\) )'
+(>>> datafile.read\("Time",timeall\); timeall *= 10**6.)'
+(  <hftools.DataReader object at 0x539b20>)'
+(>>> datafile.read\("Fx",fxall\))'
+(  <hftools.DataReader object at 0x77308>)'
+()'
+(and then we plot it )'
+()'
+(>>> plt.subplot\(1,2,2\))'
+(>>> plt.title\("Time Series of Antenna 0"\))'
+(>>> plt.plot\(timeall,fxall.elem\(0\)\))'
+(>>> plt.ylabel\("Electric Field [ADC counts]"\))'
+(>>> plt.xlabel\("Time [$\\mu$s]"\))'
+(So, for a linear plot use .plot, for a loglog plot use .loglog and for)'
+(a log-linear plot use .semilogx or .semilogy ...)'
+()'
+(Note, that we have used vectors here instead of hArrays - this is)'
+(actually depreceated in normal interactive use \(but may be faster in)'
+(automatic pipelines\))'
+()'
+(6.3.  Plotting Using the hArray Plotting Method)'
+(-------------------------------------------------)'
+()'
+(There is also a simpler way to make the kind of plots described above,)'
+(unsing the built-in plot method of array.)'
+()'
+(>>> avspectrum.par.xvalues=frequencies)'
+(>>> avspectrum.par.title="Average Spectrum")'
+(>>> avspectrum[0].plot\(logplot="y"\).none\(\))'
+()'
+(This creates a semilog-plot with appropriate lables and units \(if they)'
+(were provided beforehand.\))'
+()'
+(You can either provide the parameters directly \(precedence\), or set)'
+(the plotting parameters as attributes to the .par class of the array,)'
+(e.g., "array.par.xvalues=x_vector; array.plot\(\)")'
+()'
 (If the array is in looping mode, multiple curves are plotted in one windows. Hence,)'
 ()'
 (>>> avspectrum.par.logplot="y")'
@@ -1711,6 +1761,29 @@ BT
 (,138273.603106,...])'
 ()'
 (will simply plot all spectra of all antennas \(=highest array index\) in)'
+ET
+endstream
+endobj
+68 0 obj
+2647
+endobj
+69 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 70 0 R
+>>
+endobj
+70 0 obj
+<<
+/Length 71 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
 (the array.)'
 ()'
 (The availabe parameters are:)'
@@ -1760,31 +1833,9 @@ BT
 (We will then read this block of data into an apropriately sized data array.)'
 ()'
 (>>> dataarray=hArray\(float,[nofSelectedAntennas,blocksize]\))'
-(>>> file.set\("blocksize",blocksize\).set\("block",3\).read\("Voltage",dataarray.vec\(\)\))'
-ET
-endstream
-endobj
-68 0 obj
-2454
-endobj
-69 0 obj
-<<
-/Type /Page
-/Parent 3 0 R
-/Resources 5 0 R
-/Contents 70 0 R
->>
-endobj
-70 0 obj
-<<
-/Length 71 0 R
->>
-stream
-BT
-/F1 9 Tf
-1 0 0 1 50 752 Tm
-12 TL
-(  <hftools.DataReader object at 0x3daab0>)'
+(>>> dataarray.read\(datafile.set\("blocksize",blocksize\).set\("block",3\),"Voltage"\))'
+(  hArray\(float, [16, 33024]=528384, [0:528384]\) -> [6.0,15.0,1.0,8.0,19.0,11.0,11.0,23.0,1)'
+(6.0,8.0,...])'
 ()'
 (The array now contains all the measured voltages of the selected)'
 (antennas in the file.)'
@@ -1793,6 +1844,29 @@ BT
 (make use of the looping through the Ellipsis object\).)'
 ()'
 (>>> datamean = dataarray[...].mean\(\))'
+ET
+endstream
+endobj
+71 0 obj
+2385
+endobj
+72 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 73 0 R
+>>
+endobj
+73 0 obj
+<<
+/Length 74 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
 (    datamean => Vec\(float,16\)=[7.17281371124,-7.79051598837,-1.9765625,-0.283490794574,5.2)'
 (2622940891,-1.5335816376,0.44046753876,-6.22256540698,1.53373304264,4.74460998062,...])'
 ()'
@@ -1844,29 +1918,6 @@ BT
 (which is a rather nasty collection of numbers. So, we print a nice)'
 (table \(restricting it to the first 5 antennas\).)'
 ()'
-ET
-endstream
-endobj
-71 0 obj
-2654
-endobj
-72 0 obj
-<<
-/Type /Page
-/Parent 3 0 R
-/Resources 5 0 R
-/Contents 73 0 R
->>
-endobj
-73 0 obj
-<<
-/Length 74 0 R
->>
-stream
-BT
-/F1 9 Tf
-1 0 0 1 50 752 Tm
-12 TL
 (>>> for prop in dataproperties[0:5]: print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, )'
 (npeaks={3:5d}, nonGaussianity={4: 7.2f}".format\(*prop\))'
 (  Antenna   0: mean=  7.17, rms=  10.4, npeaks=   45, nonGaussianity= 202.87)'
@@ -1876,6 +1927,29 @@ BT
 (  Antenna   4: mean=  5.23, rms=  10.0, npeaks=   53, nonGaussianity= 238.97)'
 ()'
 (Clearly this is a spiky dataset, with only one antenna not being)'
+ET
+endstream
+endobj
+74 0 obj
+2958
+endobj
+75 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 76 0 R
+>>
+endobj
+76 0 obj
+<<
+/Length 77 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
 (affected by too many peaks \(which is in fact not the case for the)'
 (first block of that dataset\).)'
 ()'
@@ -1900,7 +1974,7 @@ BT
 (python function is available, that does the quality checking for you)'
 (and returns a list with failed antennas and their properties.)'
 ()'
-(>>> badantennalist=CRQualityCheck\(qualitycriteria,file,dataarray,verbose=False\) )'
+(>>> badantennalist=CRQualityCheck\(qualitycriteria,datafile,dataarray,verbose=False\) )'
 ()'
 (    badantennalist[0] => [15, 0, \(0.46990067829457366, 214.1564187430852, 463, 2089.322957)'
 (4834572\), ['rms', 'nonGaussianity']])'
@@ -1927,29 +2001,6 @@ BT
 (>>> azel.extend\(\(178,28,1\)\))'
 (>>> cartesian=azel.new\(\))'
 (>>> azel)'
-ET
-endstream
-endobj
-74 0 obj
-3022
-endobj
-75 0 obj
-<<
-/Type /Page
-/Parent 3 0 R
-/Resources 5 0 R
-/Contents 76 0 R
->>
-endobj
-76 0 obj
-<<
-/Length 77 0 R
->>
-stream
-BT
-/F1 9 Tf
-1 0 0 1 50 752 Tm
-12 TL
 (  Vec\(float,3\)=[178.0,28.0,1.0])'
 (>>> cartesian)'
 (  Vec\(float,3\)=[0.0,0.0,0.0])'
@@ -1959,6 +2010,29 @@ BT
 (>>> hCoordinateConvert\(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian)'
 (,True\))'
 (  True)'
+ET
+endstream
+endobj
+77 0 obj
+2649
+endobj
+78 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 79 0 R
+>>
+endobj
+79 0 obj
+<<
+/Length 80 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
 ()'
 (yielding the following output vector:)'
 ()'
@@ -1968,27 +2042,617 @@ BT
 (9.  Appendix: Listing of all Functions:)'
 (=======================================)'
 ()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
+(>>> help\(all\))'
+(  Class:  <type 'function'>)'
+(  )'
+(  SECTION: Administrative Vector Function)'
+(  --------------------------------------------------)'
+(  hFill\(vec, fill_value\) - Fills a vector with a constant value.)'
+(   )'
+(  hFill\(vec, fill_vec\)   - Fills a vector with the content of another vector.)'
+(   )'
+(  hNew\(vec\)              - Make and return a new vector of the same size and )'
+(                           type as the input vector.)'
+(   )'
+(  hConvert\(vec1, vec2\)   - Copies and converts a vector to a vector of another )'
+(                           type.)'
+(   )'
+(  hCopy\(vec, outvec\)     - Copies a vector to another one without resizing them.)'
+(   )'
+(  )'
+(  SECTION: Math Function)'
+(  --------------------------------------------------)'
+(  square\(val\)            - Returns the squared value of the parameter.)'
+(   )'
+(  hPhase\(frequency, time\) - Returns the interferometer phase in radians for a )'
+(                           given frequency and time.)'
+(   )'
+(  funcGaussian\(x, sigma, mu\) - Implementation of the Gauss function.)'
+(   )'
+(  hExp\(vec\)              - Take the exp of all the elements in the vector.)'
+(   )'
+(  hExp\(vec, vecout\)      - Take the exp of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hLog\(vec\)              - Take the log of all the elements in the vector.)'
+(   )'
+(  hLog\(vec, vecout\)      - Take the log of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hLog10\(vec\)            - Take the log10 of all the elements in the vector.)'
+(   )'
+(  hLog10\(vec, vecout\)    - Take the log10 of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hSin\(vec\)              - Take the sin of all the elements in the vector.)'
+(   )'
+(  hSin\(vec, vecout\)      - Take the sin of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hSinh\(vec\)             - Take the sinh of all the elements in the vector.)'
+(   )'
+(  hSinh\(vec, vecout\)     - Take the sinh of all the elements in the vector and )'
+(                           return results in a second vector.)'
+ET
+endstream
+endobj
+80 0 obj
+2574
+endobj
+81 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 82 0 R
+>>
+endobj
+82 0 obj
+<<
+/Length 83 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(   )'
+(  hSqrt\(vec\)             - Take the sqrt of all the elements in the vector.)'
+(   )'
+(  hSqrt\(vec, vecout\)     - Take the sqrt of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hSquare\(vec\)           - Take the square of all the elements in the vector.)'
+(   )'
+(  hSquare\(vec, vecout\)   - Take the square of all the elements in the vector )'
+(                           and return results in a second vector.)'
+(   )'
+(  hTan\(vec\)              - Take the tan of all the elements in the vector.)'
+(   )'
+(  hTan\(vec, vecout\)      - Take the tan of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hTanh\(vec\)             - Take the tanh of all the elements in the vector.)'
+(   )'
+(  hTanh\(vec, vecout\)     - Take the tanh of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hAbs\(vec\)              - Take the abs of all the elements in the vector.)'
+(   )'
+(  hAbs\(vec, vecout\)      - Take the abs of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hCos\(vec\)              - Take the cos of all the elements in the vector.)'
+(   )'
+(  hCos\(vec, vecout\)      - Take the cos of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hCosh\(vec\)             - Take the cosh of all the elements in the vector.)'
+(   )'
+(  hCosh\(vec, vecout\)     - Take the cosh of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hCeil\(vec\)             - Take the ceil of all the elements in the vector.)'
+(   )'
+(  hCeil\(vec, vecout\)     - Take the ceil of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hFloor\(vec\)            - Take the floor of all the elements in the vector.)'
+(   )'
+(  hFloor\(vec, vecout\)    - Take the floor of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hRound\(vec\)            - Take the round of all the elements in the vector.)'
+(   )'
+(  hRound\(vec, vecout\)    - Take the round of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hAcos\(vec\)             - Take the acos of all the elements in the vector.)'
+(   )'
+(  hAcos\(vec, vecout\)     - Take the acos of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hAsin\(vec\)             - Take the asin of all the elements in the vector.)'
+(   )'
+(  hAsin\(vec, vecout\)     - Take the asin of all the elements in the vector and )'
+(                           return results in a second vector.)'
+ET
+endstream
+endobj
+83 0 obj
+2981
+endobj
+84 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 85 0 R
+>>
+endobj
+85 0 obj
+<<
+/Length 86 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(   )'
+(  hAtan\(vec\)             - Take the atan of all the elements in the vector.)'
+(   )'
+(  hAtan\(vec, vecout\)     - Take the atan of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hSub\(vec1, vec2\)       - Performs a Sub between the two vectors, which is )'
+(                           returned in the first vector. If the second vector )'
+(                           is shorter it will be applied multiple times.)'
+(   )'
+(  hSub\(vec1, operand\)    - Performs a Sub between the vector and a scalar )'
+(                           \(applied to each element\), which is returned in the )'
+(                           first vector.)'
+(   )'
+(  hSub\(vec, vec1, vec2\)  - Performs a sub between the last two vectors, which )'
+(                           is returned in the first vector.)'
+(   )'
+(  hSubAdd\(vec, vec1, vec2\) - Performs a sub between the last two vectors, and )'
+(                           add the result to the first vector which can be of )'
+(                           different type.)'
+(   )'
+(  hSub\(vec, vec1, scalar1\) - Performs a sub between the vector and a scalar, )'
+(                           where the result is returned in the first vector )'
+(                           \(with automatic casting\).)'
+(   )'
+(  hMul\(vec1, vec2\)       - Performs a Mul between the two vectors, which is )'
+(                           returned in the first vector. If the second vector )'
+(                           is shorter it will be applied multiple times.)'
+(   )'
+(  hMul\(vec1, operand\)    - Performs a Mul between the vector and a scalar )'
+(                           \(applied to each element\), which is returned in the )'
+(                           first vector.)'
+(   )'
+(  hMul\(vec, vec1, vec2\)  - Performs a mul between the last two vectors, which )'
+(                           is returned in the first vector.)'
+(   )'
+(  hMulAdd\(vec, vec1, vec2\) - Performs a mul between the last two vectors, and )'
+(                           add the result to the first vector which can be of )'
+(                           different type.)'
+(   )'
+(  hMul\(vec, vec1, scalar1\) - Performs a mul between the vector and a scalar, )'
+(                           where the result is returned in the first vector )'
+(                           \(with automatic casting\).)'
+(   )'
+(  hAdd\(vec1, vec2\)       - Performs a Add between the two vectors, which is )'
+(                           returned in the first vector. If the second vector )'
+(                           is shorter it will be applied multiple times.)'
+(   )'
+(  hAdd\(vec1, operand\)    - Performs a Add between the vector and a scalar )'
+(                           \(applied to each element\), which is returned in the )'
+(                           first vector.)'
+(   )'
+(  hAdd\(vec, vec1, vec2\)  - Performs a add between the last two vectors, which )'
+(                           is returned in the first vector.)'
+(   )'
+(  hAddAdd\(vec, vec1, vec2\) - Performs a add between the last two vectors, and )'
+(                           add the result to the first vector which can be of )'
+(                           different type.)'
+(   )'
+(  hAdd\(vec, vec1, scalar1\) - Performs a add between the vector and a scalar, )'
+ET
+endstream
+endobj
+86 0 obj
+3338
+endobj
+87 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 88 0 R
+>>
+endobj
+88 0 obj
+<<
+/Length 89 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(                           where the result is returned in the first vector )'
+(                           \(with automatic casting\).)'
+(   )'
+(  hDiv\(vec1, vec2\)       - Performs a Div between the two vectors, which is )'
+(                           returned in the first vector. If the second vector )'
+(                           is shorter it will be applied multiple times.)'
+(   )'
+(  hDiv\(vec1, operand\)    - Performs a Div between the vector and a scalar )'
+(                           \(applied to each element\), which is returned in the )'
+(                           first vector.)'
+(   )'
+(  hDiv\(vec, vec1, vec2\)  - Performs a div between the last two vectors, which )'
+(                           is returned in the first vector.)'
+(   )'
+(  hDivAdd\(vec, vec1, vec2\) - Performs a div between the last two vectors, and )'
+(                           add the result to the first vector which can be of )'
+(                           different type.)'
+(   )'
+(  hDiv\(vec, vec1, scalar1\) - Performs a div between the vector and a scalar, )'
+(                           where the result is returned in the first vector )'
+(                           \(with automatic casting\).)'
+(   )'
+(  hConj\(vec\)             - Calculate the complex conjugate of all elements in )'
+(                           the complex vector.)'
+(   )'
+(  hCrossCorrelateComplex\(vec1, vec2\) - Multiplies the elements of the first )'
+(                           vector with the complex conjugate of the elements in )'
+(                           the second and returns the results in the first.)'
+(   )'
+(  hReal\(vec, vecout\)     - Take the real of all the elements in the complex )'
+(                           vector and return results in a float vector.)'
+(   )'
+(  hArg\(vec, vecout\)      - Take the arg of all the elements in the complex )'
+(                           vector and return results in a float vector.)'
+(   )'
+(  hImag\(vec, vecout\)     - Take the imag of all the elements in the complex )'
+(                           vector and return results in a float vector.)'
+(   )'
+(  hNorm\(vec, vecout\)     - Take the norm of all the elements in the complex )'
+(                           vector and return results in a float vector.)'
+(   )'
+(  hNegate\(vec\)           - Multiplies each element in the vector with -1 in )'
+(                           place, i.e. the input vector is also the output )'
+(                           vector.)'
+(   )'
+(  hSum\(vec\)              - Performs a sum over the values in a vector and )'
+(                           returns the value.)'
+(   )'
+(  hMulSum\(vec1, vec2\)    - Piecewise multiplication of the elements in a vector )'
+(                           and summing of the results)'
+(   )'
+(  hProduct\(vec\)          - Multiplies all elements in the vector with each )'
+(                           other and return the result)'
+(   )'
+(  hNorm\(vec\)             - Returns the lengths or norm of a vector \(i.e. )'
+(                           Sqrt\(Sum_i\(xi*+2\)\)\).)'
+(   )'
+(  hNormalize\(vec\)        - Normalizes a vector to length unity.)'
+(   )'
+(  )'
+ET
+endstream
+endobj
+89 0 obj
+3159
+endobj
+90 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 91 0 R
+>>
+endobj
+91 0 obj
+<<
+/Length 92 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(  SECTION: Statistics Functions)'
+(  --------------------------------------------------)'
+(  hRandom\(vec, minimum, maximum\) - Fills a vector with random values between )'
+(                           minimum and maximum limits)'
+(   )'
+(  hMean\(vec\)             - Returns the mean value of all elements in a vector.)'
+(   )'
+(  hSort\(vec\)             - Sorts a vector in place.)'
+(   )'
+(  hSortMedian\(vec\)       - Sorts a vector in place and returns the median value )'
+(                           of the elements.)'
+(   )'
+(  hMedian\(vec\)           - Returns the median value of the elements.)'
+(   )'
+(  hStdDev\(vec, mean\)     - Calculates the standard deviation around a mean )'
+(                           value.)'
+(   )'
+(  hStdDev\(vec\)           - Calculates the standard deviation of a vector of )'
+(                           values.)'
+(   )'
+(  )'
+(  SECTION: Comparison and Selection)'
+(  --------------------------------------------------)'
+(  hFindLessEqual\(vec, threshold, vecout\) - Find the samples that are LessEqual )'
+(                           a certain threshold value and returns the number of )'
+(                           samples found and the positions of the samples in a )'
+(                           second vector.)'
+(   )'
+(  hFindLessEqualAbs\(vec, threshold, vecout\) - Find the samples whose absolute )'
+(                           values are LessEqual a certain threshold value and )'
+(                           returns the number of samples found and the )'
+(                           positions of the samples in a second vector.)'
+(   )'
+(  hCountLessEqual\(vec, threshold\) - Count the samples that are LessEqual a )'
+(                           certain threshold value and returns the number of )'
+(                           samples found.)'
+(   )'
+(  hCountLessEqualAbs\(vec, threshold\) - Find the samples whose absolute values )'
+(                           are LessEqual a certain threshold value and returns )'
+(                           the number of samples found.)'
+(   )'
+(  hFindGreaterThan\(vec, threshold, vecout\) - Find the samples that are )'
+(                           GreaterThan a certain threshold value and returns )'
+(                           the number of samples found and the positions of the )'
+(                           samples in a second vector.)'
+(   )'
+(  hFindGreaterThanAbs\(vec, threshold, vecout\) - Find the samples whose absolute )'
+(                           values are GreaterThan a certain threshold value and )'
+(                           returns the number of samples found and the )'
+(                           positions of the samples in a second vector.)'
+(   )'
+(  hCountGreaterThan\(vec, threshold\) - Count the samples that are GreaterThan a )'
+(                           certain threshold value and returns the number of )'
+(                           samples found.)'
+(   )'
+(  hCountGreaterThanAbs\(vec, threshold\) - Find the samples whose absolute values )'
+(                           are GreaterThan a certain threshold value and )'
+(                           returns the number of samples found.)'
+(   )'
+(  hFindGreaterEqual\(vec, threshold, vecout\) - Find the samples that are )'
+ET
+endstream
+endobj
+92 0 obj
+3246
+endobj
+93 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 94 0 R
+>>
+endobj
+94 0 obj
+<<
+/Length 95 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(                           GreaterEqual a certain threshold value and returns )'
+(                           the number of samples found and the positions of the )'
+(                           samples in a second vector.)'
+(   )'
+(  hFindGreaterEqualAbs\(vec, threshold, vecout\) - Find the samples whose )'
+(                           absolute values are GreaterEqual a certain threshold )'
+(                           value and returns the number of samples found and )'
+(                           the positions of the samples in a second vector.)'
+(   )'
+(  hCountGreaterEqual\(vec, threshold\) - Count the samples that are GreaterEqual )'
+(                           a certain threshold value and returns the number of )'
+(                           samples found.)'
+(   )'
+(  hCountGreaterEqualAbs\(vec, threshold\) - Find the samples whose absolute )'
+(                           values are GreaterEqual a certain threshold value )'
+(                           and returns the number of samples found.)'
+(   )'
+(  hFindLessThan\(vec, threshold, vecout\) - Find the samples that are LessThan a )'
+(                           certain threshold value and returns the number of )'
+(                           samples found and the positions of the samples in a )'
+(                           second vector.)'
+(   )'
+(  hFindLessThanAbs\(vec, threshold, vecout\) - Find the samples whose absolute )'
+(                           values are LessThan a certain threshold value and )'
+(                           returns the number of samples found and the )'
+(                           positions of the samples in a second vector.)'
+(   )'
+(  hCountLessThan\(vec, threshold\) - Count the samples that are LessThan a )'
+(                           certain threshold value and returns the number of )'
+(                           samples found.)'
+(   )'
+(  hCountLessThanAbs\(vec, threshold\) - Find the samples whose absolute values )'
+(                           are LessThan a certain threshold value and returns )'
+(                           the number of samples found.)'
+(   )'
+(  hDownsample\(vec1, vec2\) - Downsample the input vector to a smaller output )'
+(                           vector.)'
+(   )'
+(  hDownsample\(vec, downsample_factor\) - Downsample the input vector by a cetain )'
+(                           factor and return a new vector.)'
+(   )'
+(  hFindLowerBound\(vec, value\) - Finds the location \(i.e., returns integer\) in a )'
+(                           monotonically increasing vector, where the input )'
+(                           search value is just above or equal to the value in )'
+(                           the vector.)'
+(   )'
+(  hFlatWeights\(wlen\)     - Returns vector of weights of length len with )'
+(                           constant weights normalized to give a sum of unity. )'
+(                           Can be used by hRunningAverageT.)'
+(   )'
+(  hLinearWeights\(wlen\)   - Returns vector of weights of length wlen with )'
+(                           linearly rising and decreasing weights centered at )'
+(                           len/2.)'
+(   )'
+(  hGaussianWeights\(wlen\) - Returns vector of weights of length wlen with )'
+(                           Gaussian distribution centered at len/2 and )'
+(                           sigma=len/4 \(i.e. the Gaussian extends over 2 sigma )'
+(                           in both directions\).)'
+(   )'
+(  hWeights\(wlen, wtype\)  - Create a normalized weight vector.)'
+ET
+endstream
+endobj
+95 0 obj
+3505
+endobj
+96 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 97 0 R
+>>
+endobj
+97 0 obj
+<<
+/Length 98 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(   )'
+(  hRunningAverage\(idata, odata, weights\) - Calculate the running average of an )'
+(                           input vector using a weight vector.)'
+(   )'
+(  hRunningAverage\(idata, odata, wlen, wtype\) - Overloaded function to )'
+(                           automatically calculate weights.)'
+(   )'
+(  )'
+(  SECTION: RF \(Radio Frequency\) Function)'
+(  --------------------------------------------------)'
+(  hGeometricDelayFarField\(antPosition, skyDirection, length\) - Calculates the )'
+(                           time delay in seconds for a signal received at an )'
+(                           antenna position relative to a phase center from a )'
+(                           source located in a certain direction in farfield )'
+(                           \(based on L. Bahren\).)'
+(   )'
+(  hGeometricDelayNearField\(antPosition, skyPosition, distance\) - Calculates the )'
+(                           time delay in seconds for a signal received at an )'
+(                           antenna position relative to a phase center from a )'
+(                           source located at a certain 3D space coordinate in )'
+(                           nearfield \(based on L. Bahren\).)'
+(   )'
+(  hGeometricDelays\(antPositions, skyPositions, delays, farfield\) - Calculates )'
+(                           the time delay in seconds for signals received at )'
+(                           various antenna positions relative to a phase center )'
+(                           from sources located at certain 3D space coordinates )'
+(                           in near or far field.)'
+(   )'
+(  hGeometricPhases\(frequencies, antPositions, skyPositions, phases, farfield\) - )'
+(                           Calculates the phase gradients for signals received )'
+(                           at various antenna positions relative to a phase )'
+(                           center from sources located at certain 3D space )'
+(                           coordinates in near or far field and for different )'
+(                           frequencies.)'
+(   )'
+(  hGeometricWeights\(frequencies, antPositions, skyPositions, weights, farfield\) )'
+(                           - Calculates the phase gradients as complex weights )'
+(                           for signals received at various antenna positions )'
+(                           relative to a phase center from sources located at )'
+(                           certain 3D space coordinates in near or far field )'
+(                           and for different frequencies.)'
+(   )'
+(  hSpectralPower\(vec, outvec\) - Calculates the power of a complex spectrum and )'
+(                           add it to an output vector.)'
+(   )'
+(  hADC2Voltage\(vec, adc2voltage\) - Convert the ADC value to a voltage.)'
+(   )'
+(  hGetHanningFilter\(vec, Alpha, Beta, BetaRise, BetaFall\) - Create a Hanning )'
+(                           filter.)'
+(   )'
+(  hGetHanningFilter\(vec, Alpha, Beta\) - Create a Hanning filter.)'
+(   )'
+(  hGetHanningFilter\(vec, Alpha\) - Create a Hanning filter.)'
+(   )'
+(  hGetHanningFilter\(vec\) - Create a Hanning filter.)'
+(   )'
+(  hApplyFilter\(data, filter\) - Apply a predefined filter on a vector.)'
+(   )'
+(  hApplyHanningFilter\(data\) - Apply a Hanning filter on a vector.)'
+(   )'
+ET
+endstream
+endobj
+98 0 obj
+3315
+endobj
+99 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 100 0 R
+>>
+endobj
+100 0 obj
+<<
+/Length 101 0 R
+>>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(  hFFT\(data_in, data_out, nyquistZone\) - Apply an FFT on a vector.)'
+(   )'
+(  hInvFFT\(data_in, data_out, nyquistZone\) - Apply an Inverse FFT on a vector.)'
+(   )'
+(  )'
+(  SECTION: I/O Function \(DataReader\))'
+(  --------------------------------------------------)'
+(  hFileSummary\(dr\)       - Print a brief summary of the file contents and )'
+(                           current settings.)'
+(   )'
+(  hFileOpen\(Filename\)    - Function to open a file based on a filename and )'
+(                           returning a datareader object.)'
+(   )'
+(  hFileGetParameter\(dr, keyword\) - Return information from a data file as a )'
+(                           Python object.)'
+(   )'
+(  hFileSetParameter\(dr, keyword, pyob\) - Set parameters in a data file with a )'
+(                           Python object as input.)'
+(   )'
+(  hFileRead\(dr, Datatype, vec\) - Read data from a Datareader object \(pointer in )'
+(                           iptr\) into a vector, where the size should be )'
+(                           pre-allocated.)'
+(   )'
+(  hCalTable\(filename, keyword, date, pyob\) - Return a list of antenna positions )'
+(                           from the CalTables - this is a test.)'
+(   )'
+(  )'
+(  SECTION: Coordinate Conversion \(VectorConversion.cc\))'
+(  --------------------------------------------------)'
+(  hCoordinateConvert\(source, sourceCoordinate, target, targetCoordinate, )'
+(                           anglesInDegrees\) - Converts a 3D spatial vector into )'
+(                           a different Coordinate type \(e.g. Spherical to )'
+(                           Cartesian\).)'
+(   )'
+(  hReadFileOld\(vec, iptr, Datatype, Antenna, Blocksize, Block, Stride, Shift\) - )'
+(                           Read data from a Datareader object \(pointer in iptr\) )'
+(                           into a vector.)'
+(   )'
+(  )'
 ()'
 ()'
 ()'
@@ -2013,25 +2677,25 @@ BT
 ET
 endstream
 endobj
-77 0 obj
-685
+101 0 obj
+1980
 endobj
 3 0 obj
 <<
 /Type /Pages
-/Count 24
+/Count 32
 /MediaBox [ 0 0 612 792 ]
-/Kids [ 6 0 R 9 0 R 12 0 R 15 0 R 18 0 R 21 0 R 24 0 R 27 0 R 30 0 R 33 0 R 36 0 R 39 0 R 42 0 R 45 0 R 48 0 R 51 0 R 54 0 R 57 0 R 60 0 R 63 0 R 66 0 R 69 0 R 72 0 R 75 0 R ]
+/Kids [ 6 0 R 9 0 R 12 0 R 15 0 R 18 0 R 21 0 R 24 0 R 27 0 R 30 0 R 33 0 R 36 0 R 39 0 R 42 0 R 45 0 R 48 0 R 51 0 R 54 0 R 57 0 R 60 0 R 63 0 R 66 0 R 69 0 R 72 0 R 75 0 R 78 0 R 81 0 R 84 0 R 87 0 R 90 0 R 93 0 R 96 0 R 99 0 R ]
 >>
 endobj
 xref
-0 78
-0000000000 65535 f 0000000009 00000 n 0000000181 00000 n 0000059067 00000 n 0000000230 00000 n 0000000338 00000 n 0000000409 00000 n 0000000489 00000 n 0000002452 00000 n 0000002472 00000 n 0000002553 00000 n 0000004452 00000 n 0000004473 00000 n 0000004555 00000 n 0000007207 00000 n 0000007228 00000 n 0000007310 00000 n 0000009573 00000 n 0000009594 00000 n 0000009676 00000 n 0000011728 00000 n 0000011749 00000 n 0000011831 00000 n 0000014591 00000 n 0000014612 00000 n 0000014694 00000 n 0000017138 00000 n 0000017159 00000 n 0000017241 00000 n 0000019569 00000 n 0000019590 00000 n 0000019672 00000 n 0000021439 00000 n 0000021460 00000 n 0000021542 00000 n 0000023614 00000 n 0000023635 00000 n 0000023717 00000 n 0000026431 00000 n 0000026452 00000 n 0000026534 00000 n 0000028734 00000 n 0000028755 00000 n 0000028837 00000 n 0000031214 00000 n 0000031235 00000 n 0000031317 00000 n 0000034310 00000 n 0000034331 00000 n 0000034413 00000 n 0000036769 00000 n 0000036790 00000 n 0000036872 00000 n 0000039449 00000 n 0000039470 00000 n 0000039552 00000 n 0000042025 00000 n 0000042046 00000 n 0000042128 00000 n 0000044755 00000 n 0000044776 00000 n 0000044858 00000 n 0000046764 00000 n 0000046785 00000 n 0000046867 00000 n 0000049604 00000 n 0000049625 00000 n 0000049707 00000 n 0000052215 00000 n 0000052236 00000 n 0000052318 00000 n 0000055026 00000 n 0000055047 00000 n 0000055129 00000 n 0000058205 00000 n 0000058226 00000 n 0000058308 00000 n 0000059047 00000 n trailer
+0 102
+0000000000 65535 f 0000000009 00000 n 0000000181 00000 n 0000086439 00000 n 0000000230 00000 n 0000000338 00000 n 0000000409 00000 n 0000000489 00000 n 0000002452 00000 n 0000002472 00000 n 0000002553 00000 n 0000004452 00000 n 0000004473 00000 n 0000004555 00000 n 0000007207 00000 n 0000007228 00000 n 0000007310 00000 n 0000009573 00000 n 0000009594 00000 n 0000009676 00000 n 0000011728 00000 n 0000011749 00000 n 0000011831 00000 n 0000014591 00000 n 0000014612 00000 n 0000014694 00000 n 0000017138 00000 n 0000017159 00000 n 0000017241 00000 n 0000019569 00000 n 0000019590 00000 n 0000019672 00000 n 0000021439 00000 n 0000021460 00000 n 0000021542 00000 n 0000023614 00000 n 0000023635 00000 n 0000023717 00000 n 0000026431 00000 n 0000026452 00000 n 0000026534 00000 n 0000028734 00000 n 0000028755 00000 n 0000028837 00000 n 0000031214 00000 n 0000031235 00000 n 0000031317 00000 n 0000034310 00000 n 0000034331 00000 n 0000034413 00000 n 0000037005 00000 n 0000037026 00000 n 0000037108 00000 n 0000039677 00000 n 0000039698 00000 n 0000039780 00000 n 0000042163 00000 n 0000042184 00000 n 0000042266 00000 n 0000044771 00000 n 0000044792 00000 n 0000044874 00000 n 0000047774 00000 n 0000047795 00000 n 0000047877 00000 n 0000049793 00000 n 0000049814 00000 n 0000049896 00000 n 0000052597 00000 n 0000052618 00000 n 0000052700 00000 n 0000055139 00000 n 0000055160 00000 n 0000055242 00000 n 0000058254 00000 n 0000058275 00000 n 0000058357 00000 n 0000061060 00000 n 0000061081 00000 n 0000061163 00000 n 0000063791 00000 n 0000063812 00000 n 0000063894 00000 n 0000066929 00000 n 0000066950 00000 n 0000067032 00000 n 0000070424 00000 n 0000070445 00000 n 0000070527 00000 n 0000073740 00000 n 0000073761 00000 n 0000073843 00000 n 0000077143 00000 n 0000077164 00000 n 0000077246 00000 n 0000080805 00000 n 0000080826 00000 n 0000080908 00000 n 0000084277 00000 n 0000084298 00000 n 0000084381 00000 n 0000086417 00000 n trailer
 <<
-/Size 78
+/Size 102
 /Root 2 0 R
 /Info 1 0 R
 >>
 startxref
-59313
+86741
 %%EOF

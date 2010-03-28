@@ -853,10 +853,11 @@ Let's see how we can open a file. First define a filename, e.g.:
 
 """
 LOFARSOFT=os.environ["LOFARSOFT"]
-#filename=LOFARSOFT+"/data/lopes/example.event"
+filename_sun=LOFARSOFT+"/data/lopes/example.event"
 #filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
-filename=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
-p_("filename")
+filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
+p_("filename_sun")
+p_("filename_lofar")
 """
 
 We can create a new file object, using the "crfile" class, which is an
@@ -865,15 +866,14 @@ interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py.
 The following will open a data file and return a DataReader object:
 
 """
-file=crfile(filename)
-file.set("blocksize",1024*2)
+datafile=crfile(filename_lofar).set("blocksize",1024*2)
 #%SKIP
 """
 
 The associated filename can be retrieved with
 
 """
-file.filename
+datafile.filename
 """
 
 The file will be automatically closed (and the DataReader object be
@@ -883,14 +883,15 @@ destroyed), whenever the crfile object is deleted, e.g. with "file=0".
 (++) Setting and retrieving metadata (parameters)
 -------------------------------------------------
 
-Now we need to access the meta data in the file. This is done using a
-single method "get". This method actually calls the function
-"hFileGetParameter" defined in the c++ code.
+Now we need to access the meta data in the file. This is can be done
+in multiple ways. One way is by using the get method. This method
+actually calls the function "hFileGetParameter" defined in the c++
+code.
 
 Which observatory did we actually use?
 
 """
-obsname=file.get("observatory");
+obsname=datafile.get("observatory");
 p_("obsname")
 """
 
@@ -898,15 +899,14 @@ There are more keywords, of course. A list of implemented parameters
 we can access is obtained by
 
 """
-keywords=file.get("help")
+keywords=datafile.get("help")
 """
-
 
 Note, that the results are returned as PythonObjects. Hence, this
 makes use of the power of python with automatic typing. For, example
 
 """
-file.get("frequencyRange")
+datafile.get("frequencyRange")
 """
 
 actually returns a vector. 
@@ -915,41 +915,58 @@ Here no difference is made where the data comes frome. The keyword
 Obervatory accesses the header record in the data file while the
 frequencRange accesses a method of the DataReader.
 
+
+A second way do retreive data is to use square brackets. Hence
+datafile[key] is equivalent to datafile.get(key).
+
+"""
+datafile["blocksize"]
+"""
+
 Now we will define a number of useful variables that contain essential
 parameters that we later will use.
 
 """
-obsdate   =file.get("Date"); 
-filesize  =file.get("Filesize");
-blocksize =file.get("blocksize"); 
-nAntennas =file.get("nofAntennas"); 
-antennas  =file.get("antennas"); 
-antennaIDs=file.get("AntennaIDs"); 
-selectedAntennas=file.get("selectedAntennas");
-nofSelectedAntennas=file.get("nofSelectedAntennas"); 
-fftlength =file.get("fftLength");
-sampleFrequency =file.get("sampleFrequency");
+obsdate   =datafile["Date"] 
+filesize  =datafile["Filesize"]
+blocksize =datafile["blocksize"] 
+nAntennas =datafile["nofAntennas"] 
+antennas  =datafile["antennas"] 
+antennaIDs=datafile["AntennaIDs"] 
+selectedAntennas=datafile["selectedAntennas"]
+nofSelectedAntennas=datafile["nofSelectedAntennas"] 
+fftlength =datafile["fftLength"]
+sampleFrequency =datafile["sampleFrequency"]
 maxblocksize=min(filesize,1024*1024); 
 nBlocks=filesize/blocksize; 
 
 p_(["obsdate","filesize","blocksize","nAntennas","antennas","antennaIDs","selectedAntennas","nofSelectedAntennas","fftlength","sampleFrequency","maxblocksize","nBlocks"])
-
 """
 
-We can also change parameters in a very similar fashion, using the
-"set" method, which is an implementation of the "hFileSetParameter"
+Luckily, you do not have to do this all the time, since all the
+parameters will be read out at the beginning and will be stored as
+attributes to the file object.
+
+"""
+for kw in datafile.keywords: p_("datafile."+kw)
+"""
+
+They will be updated whenever you do a file.set(key,value), however,
+assigning a new value to the attribute will NOT automatically change
+the parameter in the file. For this, you have to use the the "set"
+method, which is an implementation of the "hFileSetParameter"
 function. E.g. changing the blocksize we already did before. This is
 simply
 
 """
-file.set("blocksize",blocksize);
+datafile.set("blocksize",2048);
 #%SKIP
 """"
 
 again the list of implemented keywords is visible with using
 
 """
-file.set("help",0);
+datafile.set("help",0);
 #%SKIP
 """
 
@@ -962,21 +979,35 @@ object itself. Hence, you can append multiple set commands after each
 other.
 
 """
-file.set("block",2).set("selectedAntennas",[0,2]);
+datafile.set("block",2).set("selectedAntennas",[0,2,3]);
 #%SKIP
+"""
+
+Alternatively you can also use square brackets:
+
+"""
+datafile["selectedAntennas"]=[0,2]
+"""
+
+but then it is not possible to append multiple set commands in one
+line, so you need to provide lists of keywords and list of values, like
+
+"""
+datafile["blocksize","selectedAntennas"]=[2048,[0,2]]
+datafile["blocksize","selectedAntennas"]
 """
 
 Note, that we have now reduced the number of antennas to two: namely
 antenna 0 and 2 and the number of selected antennas is
 
 """
-file.get("nofSelectedAntennas")
+datafile["nofSelectedAntennas"]
 """
 
 However, now we want to work on all antennas again:
 
 """
-file.set("block",0).set("selectedAntennas",range(nAntennas))
+datafile.set("block",0).set("selectedAntennas",range(nAntennas))
 #%SKIP
 """
 
@@ -1003,23 +1034,28 @@ fxdata=hArray(float,[nofSelectedAntennas,blocksize],name="E-Field").setUnit("","
 
 This is now a large vector filled with zeros.
 
-Now we can read in the raw time series data, using "file.read" and a
-keyword. Currently implemented are the data fields "Fx", "Voltage",
-"FFT", "CalFFT","Time", "Frequency".
+Now we can read in the raw time series data, either using
+"datafile.read" and a keyword, or actually better, use the read method
+of arrays, as they then store filename and history information in the
+array.
+
+
+Currently implemented keywords for reading data fields are: "Fx",
+"Voltage", "FFT", "CalFFT","Time", "Frequency".
 
 So, let us read in the raw time series data, i.e. the electric field
 in the antenna as digitized by the ADC. This is provided by the
 keyword "Fx" (means f(x) ).
 
 """
-file.read("Fx",fxdata)
+fxdata.read(datafile,"Fx")
 #%SKIP
 p_("fxdata")
 """
 
 and voila the vector is filled with time series data from the data
 file. Note that we had to use the .vec method for the array, since
-file.read does not yet accept arrays (since it can't handle c++
+datafile.read does not yet accept arrays (since it can't handle c++
 iterators).
 
 No, you can access the individual antennas as single vectors through
@@ -1032,8 +1068,8 @@ ant0data=fxdata[0].vec()
 To get the x-Axis we create a second vector
 
 """
-timedata=hArray(float,[blocksize],name="Time").setUnit("","s")
-file.read("Time",timedata.vec())
+times=hArray(float,[blocksize],name="Time").setUnit("","s")
+times.read(datafile,"Time")
 #%SKIP
 """
 
@@ -1041,7 +1077,7 @@ This is the time relative to the trigger in seconds. So, let's have
 that in microseconds, by using setUnit
 
 """
-timedata.setUnit("\\mu","")
+times.setUnit("\\mu","")
 """
 
 We do the same now for the frequency axis, which we convert to MHz. As
@@ -1049,9 +1085,10 @@ length we have to take the length of the Fourier transformed time
 block (which is blocksize/2+1).
 
 """
-freqdata=hArray(float,dimensions=[fftlength],name="Frequency").setUnit("","Hz")
-f=file.read("Frequency",freqdata)
-freqdata.setUnit("M","Hz")
+frequencies=hArray(float,dimensions=[fftlength],name="Frequency").setUnit("","Hz")
+frequencies.read(datafile,"Frequency")
+
+frequencies.setUnit("M","Hz")
 """
 
 (+) Fourier Transforms (FFT)
@@ -1072,7 +1109,7 @@ So, let's do the transform:
 fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
 fxdata[...].fft(fftdata[...],1)
 
-p_("fxdata")
+p_("fftdata")
 """
 
 Here we have used the fft method of the float array, which is just a
@@ -1100,9 +1137,13 @@ one antenna, by looping over all blocks.
 """
 avspectrum=hArray(float,dimensions=fftdata,name="avg. Spectrum")
 for block in range(nBlocks):
-    f=file.set("block",block).read("FFT",fftdata)
+    fftdata.read(datafile.set("Block",block),"FFT").none()
     fftdata[...].spectralpower(avspectrum[...])
 """
+
+(The .none() method is appended to suppress uwanted output in
+generating the tutorial, when an operation returns an array or
+vector.)
 
 (+) Basic Plotting
 ------------------
@@ -1116,6 +1157,7 @@ faster and convenient for real time applications and hence is used in
 our GUI programming.
 
 (++) Mathgl
+-------------
 
 Here is a simple example on how to use mathgl code (here without a
 widget)
@@ -1142,6 +1184,7 @@ gr.Plot(x,y);
 gr.WriteEPS("test-y.eps","Test Plot")
 
 (++) Matplotlib
+------------------
 
 Now, in principle, we need to import matplotlib
 
@@ -1170,25 +1213,26 @@ plt.subplot(1,2,1)
 #%SKIP
 plt.title("Average Spectrum for Two Antennas")
 #%SKIP
-plt.semilogy(freqdata.vec(),avspectrum[0].vec())
+plt.semilogy(frequencies.vec(),avspectrum[0].vec())
 #%SKIP
-plt.semilogy(freqdata.vec(),avspectrum[1].vec())
+plt.semilogy(frequencies.vec(),avspectrum[1].vec())
 #%SKIP
 plt.ylabel(avspectrum.getKey("name")+" ["+avspectrum.getUnit()+"]")
 #%SKIP
-plt.xlabel(freqdata.getKey("name")+" ["+freqdata.getUnit()+"]")
+plt.xlabel(frequencies.getKey("name")+" ["+frequencies.getUnit()+"]")
 #%SKIP
 """
 
-To plot the time series of the entire data set, we first read in all sample from all antennas
+To plot the time series of the entire data set, we first read in all
+sample from all antennas
 
 """
-file.set("block",0).set("blocksize",maxblocksize)
+datafile["block","blocksize"]=(0,maxblocksize)
 #%SKIP
-fxall=Vector(); fxall.setDim([nofSelectedAntennas,maxblocksize])
+fxall=Vector(); fxall.setDim([datafile.nofSelectedAntennas,maxblocksize])
 timeall=Vector(float,maxblocksize) 
-file.read("Time",timeall); timeall *= 10**6.
-file.read("Fx",fxall)
+datafile.read("Time",timeall); timeall *= 10**6.
+datafile.read("Fx",fxall)
 """
 
 and then we plot it 
@@ -1208,6 +1252,10 @@ plt.xlabel("Time [$\mu$s]")
 So, for a linear plot use .plot, for a loglog plot use .loglog and for
 a log-linear plot use .semilogx or .semilogy ...
 
+Note, that we have used vectors here instead of hArrays - this is
+actually depreceated in normal interactive use (but may be faster in
+automatic pipelines)
+
 (++) Plotting Using the hArray Plotting Method
 -------------------------------------------------
 
@@ -1215,9 +1263,9 @@ There is also a simpler way to make the kind of plots described above,
 unsing the built-in plot method of array.
 
 """
-avspectrum.par.xvalues=freqdata
+avspectrum.par.xvalues=frequencies
 avspectrum.par.title="Average Spectrum"
-avspectrum[0].plot(logplot="y")
+avspectrum[0].plot(logplot="y").none()
 """
 
 This creates a semilog-plot with appropriate lables and units (if they
@@ -1287,7 +1335,7 @@ We will then read this block of data into an apropriately sized data array.
 
 """
 dataarray=hArray(float,[nofSelectedAntennas,blocksize])
-file.set("blocksize",blocksize).set("block",3).read("Voltage",dataarray.vec())
+dataarray.read(datafile.set("blocksize",blocksize).set("block",3),"Voltage")
 """
 
 The array now contains all the measured voltages of the selected
@@ -1388,7 +1436,7 @@ python function is available, that does the quality checking for you
 and returns a list with failed antennas and their properties.
 
 """
-badantennalist=CRQualityCheck(qualitycriteria,file,dataarray,verbose=False) 
+badantennalist=CRQualityCheck(qualitycriteria,datafile,dataarray,verbose=False) 
 
 p_("badantennalist[0]")
 """
@@ -1435,7 +1483,7 @@ cartesian
 =======================================
 
 """
-#help(all)
+help(all)
 """
 
 """
