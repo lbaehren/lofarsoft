@@ -1,4 +1,4 @@
-import os, sys, inspect
+import os, sys, inspect, logging
 import utilities
 from lofarpipe.support.lofarexceptions import PipelineException, ClusterError
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe

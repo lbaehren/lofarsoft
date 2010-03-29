@@ -20,7 +20,6 @@ class control(LOFARrecipe):
 
     def go(self):
         super(control, self).go()
-        self._setup()
 
         self.logger.info(
             "Standard Imaging Pipeline (%s) starting." %
