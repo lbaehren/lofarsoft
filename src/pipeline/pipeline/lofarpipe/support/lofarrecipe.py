@@ -48,7 +48,14 @@ class LOFARrecipe(WSRTrecipe):
     @property
     def __file__(self):
         import inspect
-        return os.path.abspath(inspect.getsourcefile(self.__class__))
+        full_location = os.path.abspath(inspect.getsourcefile(self.__class__))
+        # DANGER WILL ROBINSON!
+        # On the lofar cluster frontend (lfe001), home directories are in
+        # /data/users, but on the nodes they are in /home. This workaround
+        # means things work like one might expect for now, but this is not a
+        # good long-term solution.
+        return full_location.replace('/data/users', '/home')
+
 
     def run_task(self, configblock, datafiles=[]):
         self.logger.info("Running task: %s" % (configblock,))
