@@ -207,9 +207,10 @@ echo "Running bf2presto in the background..."
 
 #Create .sub.inf files with par2inf.py
 cp $PARSET ./${OBSID}.parset
-cp ~hessels/default.inf .
+cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
 python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n 31 -r 8 ./${OBSID}.parset
 status=$?
+
 
 if [ $status -ne 0 ]
 then
