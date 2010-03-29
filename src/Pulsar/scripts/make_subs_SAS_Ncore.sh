@@ -16,7 +16,7 @@ USAGE="\nusage : make_subs_SAS_Ncore.sh -id OBS_ID -p Pulsar_name -o Output_Proc
 "      [-rfi] ==> optional parameter perform Vlas's RFI checker and only use clean results (takes 7 extra min)\n"\
 "      [-C | -c] ==> optional parameter to switch on COLLAPSE\n"\
 "      [-del] ==> optional parameter to delete the previous Output_Processing_Location if it exists (override previous results!)\n"
-"      [-core N] ==> optional parameter to change the number of cores/slipts used for processing (default = 8)\n"
+"      [-core N] ==> optional parameter to change the number of cores\/slipts used for processing (default = 8)\n"
 
 if [ $# -lt 6 ]                    # this script needs at least 6 args, including -switches
 then
@@ -230,8 +230,8 @@ status=$?
 
 if [ $status -ne 0 ]
 then
-   echo "ERROR: 'split' command unable to split $all_num files into $div_files chunks (not integer number);  "
-   echo "       you may need to run the non-multi-core pipeline version make_subs_SAS.sh by hand"
+   echo "ERROR: 'split' command unable to split ($all_num files/$core cores) into $div_files chunks each (not integer number);"
+   echo "       you may need to run with a different number of cores which divide $all_num files evenly"
    exit 1
 fi
 
