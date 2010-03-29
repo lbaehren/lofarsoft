@@ -1,0 +1,24 @@
+
+ Data file name without suffix          =  B0950+08
+ Telescope used                         =  GBT
+ Instrument used                        =  STELLA
+ Object being observed                  =  B0950+08
+ J2000 Right Ascension (hh:mm:ss.ssss)  =  09:50:00.0000
+ J2000 Declination     (dd:mm:ss.ssss)  =  08:00:00.0000
+ Data observed by                       =  Mr. LOFAR
+ Epoch of observation (MJD)             =  54000.000000000000000
+ Barycentered?           (1=yes, 0=no)  =  1
+ Number of bins in the time series      =  999    
+ Width of each time series bin (sec)    =  0.00131072
+ Any breaks in the data? (1=yes, 0=no)  =  0
+ Type of observation (EM band)          =  Radio
+ Beam diameter (arcsec)                 =  999
+ Dispersion measure (cm-3 pc)           =  0.0
+ Central freq of low channel (Mhz)      =  139.0625
+ Total bandwidth (Mhz)                  =  48.4375
+ Number of channels                     =  248
+ Channel bandwidth (Mhz)                =  0.1953125
+ Data analyzed by                       =  Jason
+ Any additional notes:
+    LOFAR Test data on B0329+54 after Blue Gene upgrade
+
