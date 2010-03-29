@@ -23,7 +23,10 @@ class dummy_echo(LOFARrecipe):
         self.logger.info("stdout: " + sout)
         self.logger.info("stderr: " + serr)
 
-        return 0
+        if my_process.returncode == 0:
+            return 0
+        else:
+            return 1
 
 
 if __name__ == '__main__':
