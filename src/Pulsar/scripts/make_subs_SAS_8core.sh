@@ -3,7 +3,7 @@
 #Assumes 16 channels per subband and divides into 8 chunks of 31 subbands
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.1
+VERSION=1.2
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_8core.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-all] [-rfi] [-C] [-del]\n\n"\
@@ -109,7 +109,7 @@ alias bf2presto=/home/hassall/bin/bf2presto-working
 date_start=`date`
 
 #Set up generic pipeline version log file
-log=make_subs_SAS_8core.log
+log=${location}/make_subs_SAS_8core.log
 echo "$0 $*" > $log
 echo "Pipeline V$VERSION" >> $log
 echo "Start date: $date_start" >> $log
@@ -162,6 +162,9 @@ all_list=`ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.incoherentstokes | sort -t
 ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.incoherentstokes | sort -t B -g -k 2 > $master_list
 all_num=`wc -l $master_list | awk '{print $1}'`
 
+echo "Found a total of $all_num SB MS incoherentstokes input datafiles to process" 
+echo "Found a total of $all_num SB MS incoherentstokes input datafiles to process" >> $log
+
 if [ $all_num -lt 8 ]
 then
   echo "Error: Less than 8 subbands found, unlikely to be a valid observation"
@@ -173,6 +176,14 @@ count=0
 
 #Create 8-sections of the file list
 split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+status=$?
+
+if [ $status -ne 0 ]
+then
+   echo "ERROR: 'split' command unable to split $all_num files into $div_files chunks (not integer number);  "
+   echo "       you may need to run the non-multi-core pipeline version make_subs_SAS.sh by hand"
+   exit 1
+fi
 
 #Move the lists to the directories
 for ii in $num_dir
@@ -187,7 +198,9 @@ date
 for ii in $num_dir
 do
   echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
-  bf2presto ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 && touch ${STOKES}/"RSP"$ii"/DONE"  >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out"  2>&1 &
+###  bf2presto ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 && touch ${STOKES}/"RSP"$ii"/DONE"  >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out"  2>&1 &
+  bf2presto ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
+   set bf2presto_pid_$ii=$!
 done
 
 echo "Running bf2presto in the background..." 
@@ -196,6 +209,14 @@ echo "Running bf2presto in the background..."
 cp $PARSET ./${OBSID}.parset
 cp ~hessels/default.inf .
 python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n 31 -r 8 ./${OBSID}.parset
+status=$?
+
+if [ $status -ne 0 ]
+then
+   echo "ERROR: Unable to successfully run par2inf task"
+   exit 1
+fi
+
 jj=0
 for ii in `ls test*.inf`
 do
@@ -210,17 +231,22 @@ then
 fi
 
 #Check when all 8 DONE files are available, then all processes have exited
-ii=1
-yy=0
-while [ $ii -ne $yy ]
+#ii=1
+#yy=0
+#while [ $ii -ne $yy ]
+#do
+#  if [ -e $done_list ]
+#  then
+#     echo "All bf2presto tasks have completed!" 
+#     yy=1
+#     sleep 5
+#  fi
+#  sleep 10
+#done
+for ii in $num_dir
 do
-  if [ -e $done_list ]
-  then
-     echo "All bf2presto tasks have completed!" 
-     yy=1
-     sleep 5
-  fi
-  sleep 10
+   echo "Waiting for loop $ii bf2presto to finish"
+   wait $bf2presto_pid_$ii
 done
 
 #Make a master subband location with all subbands (run in the background, while other tasks are being done)
@@ -244,6 +270,19 @@ then
 #       done
 #    done
       ls ../RSP0/*sub0??? ../RSP1/*sub0??? ../RSP2/*sub0??? ../RSP3/*sub0??? ../RSP4/*sub0??? ../RSP5/*sub0??? ../RSP6/*sub0??? ../RSP7/*sub0??? | sed 's/\// /g' | awk '{print $3}' | sed 's/RSP/ RSP /' | sed 's/ RSP/RSP/g' | sed 's/\.sub/ /' | awk '{printf("ln -s ../RSP%d/%s%d.sub%04d %sA.sub%04d\n"),$2,$1,$2,$3,$1,$2*496+$3}' >> run.sh
+      
+      status=$?
+
+      if [ $status -ne 0 ]
+      then
+         echo "WARNING: Unable to successfully run creation of link file list for ALL subbands"
+         echo "         Skipping the ALL processing"
+         echo "WARNING: Unable to successfully run creation of link file list for ALL subbands"  >> $log
+         echo "         Skipping the ALL processing" >> $log
+         all=0
+         break
+     fi
+
      echo "Performing subband linking for all RPSs in one location"
      chmod 777 run.sh
      check_number=`wc -l run.sh | awk '{print $1}'`
@@ -251,18 +290,12 @@ then
      then
         all=0
         echo "Warning - problem running on ALL subbands;  master list is too short (is $check_number but should be 3969 rows)"
-        echo "Warning - problem running on ALL subbands;  master list is too short (is $check_number but should be 3969 rows)" >> ${location}/$log
+        echo "Warning - problem running on ALL subbands;  master list is too short (is $check_number but should be 3969 rows)" >> $log
       else
         ./run.sh &
       fi
       cd $location
 fi
-
-#Clean up the DONE file
-for ii in $num_dir
-do
-   rm -rf ${STOKES}/"RSP"$ii"/DONE" 
-done
 
 echo "Starting folding"
 date
@@ -271,7 +304,6 @@ date
 for ii in $num_dir
 do
    cd ${location}/${STOKES}/RSP${ii}
-###   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii} ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch ${STOKES}/"RSP"$ii"/DONE" >> ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
    prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
    sleep 5
 done
@@ -331,29 +363,17 @@ then
    do
       cd ${location}/${STOKES}/RSP${ii}
       python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  && touch DONE &
+      set subdyn_pid_$ii=$!
    done
 
    cd ${location}
 
    #Check when all 8 DONE files are available, then all processes have exited
-   ii=1
-   yy=0
-   while [ $ii -ne $yy ]
-   do
-      if [ -e $done_list ]
-      then
-         echo "All subdyn tasks have completed!" 
-         yy=1
-      fi
-      sleep 15
-   done
-
-   #Clean up the DONE file
    for ii in $num_dir
    do
-      rm -rf ${STOKES}/"RSP"$ii"/DONE" 
+      echo "Waiting for loop $ii subdyn to finish"
+      wait $subdyn_pid_$ii
    done
-
 fi
 
 #Wait for the all prepfold to finish
