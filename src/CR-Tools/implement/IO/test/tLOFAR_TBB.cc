@@ -400,17 +400,7 @@ int test_headerRecord (std::string const &filename)
   int nofFailedTests (0);
   uint blocksize (1024);
 
-  cout << "[1] Retrieve the header record from the LOFAR_TBB object ..." << endl;
-  try {
-    LOFAR_TBB data (filename,
-		    blocksize);
-    casa::Record rec = data.attributes2headerRecord();
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[2] Set header record from external values ..." << endl;
+  cout << "[1] Set header record from external values ..." << endl;
   try {
     bool status (true);
     // new LOFAR_TBB object to test

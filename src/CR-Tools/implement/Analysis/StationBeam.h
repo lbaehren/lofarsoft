@@ -98,33 +98,11 @@ namespace CR { // Namespace CR -- begin
 
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
     //! Default constructor
     StationBeam ();
     
-    /*!
-      \brief Argumented constructor
-      
-      \param source_declination -- 
-      \param source_hr_angle    -- 
-      \param sky_temp           -- 
-      \param moon_temp          -- 
-      \param station_id         -- 
-    */
-    StationBeam( const Double& source_declination,
-                 const Double& source_hr_angle,
-		 const Double& sky_temp,
-		 const Double& moon_temp,
-		 const Vector<uint>& station_id,
-                 const Double& freq_init,
-		 const Double& bandwidth,
-		 const Double& station_radii,
-		 Vector<Double>& position_x,
-		 Vector<Double>& position_y,
-		 const Vector<Double>& legendre_root,
-		 const Vector<Double>& legendre_weight ) ;
-
     /*!
       \brief Copy constructor
       
@@ -133,12 +111,12 @@ namespace CR { // Namespace CR -- begin
     */
     StationBeam (StationBeam const &other);
     
-    // -------------------------------------------------------------- Destruction
+    // === Destruction ==========================================================
 
     //! Destructor
     virtual ~StationBeam ();
     
-    // ---------------------------------------------------------------- Operators
+    // === Operators ============================================================
     
     /*!
       \brief Overloading of the copy operator
@@ -147,7 +125,7 @@ namespace CR { // Namespace CR -- begin
     */
     StationBeam& operator= (StationBeam const &other); 
     
-    // --------------------------------------------------------------- Parameters
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class
@@ -158,19 +136,7 @@ namespace CR { // Namespace CR -- begin
       return "StationBeam";
     }
 
-    //! Provide a summary of the internal status
-    inline void summary () {
-      summary (std::cout);
-    }
-
-    /*!
-      \brief Provide a summary of the internal parameters
-      
-      \param os -- Output stream, to which the summary is written
-    */
-    void summary (std::ostream &os);    
-    
-    // ------------------------------------------------------------------ Methods
+    // === Methods ==============================================================
     
     /*!
       \brief Compute the station beam

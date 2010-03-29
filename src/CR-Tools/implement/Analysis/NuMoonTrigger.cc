@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2009                                                  *
- *   Kalpana Singh (<mail>)                                                     *
+ *   Copyright (C) 2009                                                    *
+ *   Kalpana Singh (<mail>)                                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -30,71 +30,10 @@ namespace CR { // Namespace  -- begin
   //  Construction
   //
   // ============================================================================
-  
+
   NuMoonTrigger::NuMoonTrigger()
   {;}
   
-  NuMoonTrigger::NuMoonTrigger( std::string const &filename,
-    		   		uint const& n_samples,
-				double const& simTEC,
-		   		double const& sampling_rate,
-		   		uint const& nyquist_zone,
-				uint const& time_int_bins,
-		   		double const& TEC,
-				const double& source_latitude,
-				const double& source_longitude,
-		   		const double& pointing_latitude,
-		   		const double& pointing_longitude,
-		   		const Vector<double>& position_x,
-		   		const Vector<double>& position_y,
-		   		const Vector<double>& position_z,
-				const Vector<double>& gain_scale_factor,
-		   		const Vector<double>& ppf_coeff,
-		   		const Vector<double>& ppf_invcoeff,
-		   		const Vector<double> freq_range,
-				double const& peak_height ) 
-  			
- {
-  //n_frames = 0 ;
-  }
-  
-  NuMoonTrigger::NuMoonTrigger ( NuMoonTrigger const &other)
-  {
-  //  copy (other);
-  }
-  
-  // ============================================================================
-  //
-  //  Destruction
-  //
-  // ============================================================================
-  
-  NuMoonTrigger::~NuMoonTrigger ()
-  {
-    destroy();
-  }
-  
-  void NuMoonTrigger::destroy ()
-  {;}
-  
-  // ============================================================================
-  //
-  //  Operators
-  //
-  // ============================================================================
-  
-  NuMoonTrigger& NuMoonTrigger::operator= (NuMoonTrigger const &other)
-  {
-    if (this != &other) {
-      destroy ();
-    //  copy (other);
-    }
-    return *this;
-  }
-  
-//   void NuMoonTrigger::copy (NuMoonTrigger const &other)
-//   {;}
-
   // ============================================================================
   //
   //  Parameters
@@ -1844,7 +1783,7 @@ namespace CR { // Namespace  -- begin
     
    //_______________________________________________________________________________________
 
-    Vector<double> NuMoonTrigger::FFT_processed( Matrix<double> const& data,
+    Vector<double> NuMoonTrigger::FFT_processed (Matrix<double> const& data,
     						 uint const& n_samples,
 					         double const& simTEC,
 						 double const& sampling_rate,
@@ -1864,155 +1803,69 @@ namespace CR { // Namespace  -- begin
 		  				 const Vector<double> freq_range,
 						 double const& peak_height ) 
     {
-    	Vector<double> timeSeries_FFT( n_samples,0.0 );
+      Vector<double> timeSeries_FFT( n_samples,0.0 );
+      casa::Matrix<double> Added_Signal_data;
+
+      try{
 	
-     try{
-    
-     	casa::Matrix<double> Added_Signal_data = NuMoonTrigger::Added_SignalData( data,
-    						    			       n_samples,
-									       simTEC, 
-									       nyquist_zone,
-									       peak_height,
-									       sampling_rate,
-									       TEC,
-									       source_latitude,
-									       source_longitude,
-									       pointing_latitude,
-									       pointing_longitude,
-									       gain_scale_factor,
-									       position_x,
-									       position_y,
-									       position_z,
-									       freq_range )  ;
-     
-    // Added_Signal_data = Added_Signal_data*512. ;
+	Added_Signal_data = NuMoonTrigger::Added_SignalData( data,
+							     n_samples,
+							     simTEC, 
+							     nyquist_zone,
+							     peak_height,
+							     sampling_rate,
+							     TEC,
+							     source_latitude,
+							     source_longitude,
+							     pointing_latitude,
+							     pointing_longitude,
+							     gain_scale_factor,
+							     position_x,
+							     position_y,
+							     position_z,
+							     freq_range )  ;
+	
+	// Added_Signal_data = Added_Signal_data*512. ;
         timeSeries_FFT = NuMoonTrigger::BeamFormed_data( Added_Signal_data,
-							n_samples,
-							simTEC,
-							nyquist_zone,
-							sampling_rate,
-							TEC,
-							freq_range,
-							pointing_latitude,
-							pointing_longitude,
-							gain_scale_factor,
-							position_x,
-							position_y,
-							position_z ) ;
-									
-	//timeSeries_FFT = timeSeries_FFT*73. ;
-// 	   uint n_rcu = data.columns() ;
-// 	   
-// 	   uint n_frames = n_samples/1024 ;
-// 	   
-// 	   casa::Vector<double> FREQ_vector = NuMoonTrigger::freq_vector( sampling_rate,
-// 		   	               					  nyquist_zone ) ;
-// 	   
-// 	   casa::Matrix<double> Geometric_weights = NuMoonTrigger::phase_delay( FREQ_vector,
-// 				 				 		source_latitude,
-// 					        		 		source_longitude,
-// 										position_x,
-// 										position_y,
-// 										position_z ) ;
-										
-//            Matrix<DComplex> Beam_formed( 513, n_frames, 0.0 ) ;
-//        
-// 	   for( uint antenna=0; antenna< n_rcu; antenna++ ) {
-// 	   
-// 	   	casa::Vector<double> samples = Added_Signal_data.column(antenna ) ;
-// 		
-// 		casa::Matrix<DComplex> FFT_data = NuMoonTrigger::fft_data( samples,
-//     		 	     						   n_frames,
-// 			     						   nyquist_zone ) ;
-// 				
-// 		casa::Matrix<DComplex> phase_corrected = NuMoonTrigger::weights_applied( FFT_data,
-//   					             					 Geometric_weights,
-// 						      					 antenna ) ;
-// 		
-// 		DComplex beamed_value(0.0) ;
-// 												
-// 		for( uint frame=0; frame< n_frames; frame++ ){
-// 		
-// 			for( uint freQchannel =0 ; freQchannel< 513; freQchannel++ ){
-// 			
-// 				beamed_value = phase_corrected( freQchannel, frame);
-// 			
-// 				Beam_formed( freQchannel,frame) = Beam_formed( freQchannel,frame)+ beamed_value;
-// 			 	}
-// 			}
-// 			
-// 		}
-// 		
-// 	    Beam_formed = Beam_formed*(1./n_rcu) ;
-// 	    
-// 	    casa::Matrix<DComplex> RFI_rejected = NuMoonTrigger::RFI_removal( Beam_formed ) ; 
-// 	   
-// 	    casa::Matrix<DComplex> de_dispersedData = NuMoonTrigger::de_dispersion( RFI_rejected,
-// 		      		  						    TEC,
-// 				  						    FREQ_vector ) ;
-// 	    
-// 	    casa::Vector<double> IFFT_data = NuMoonTrigger::ifft_data( de_dispersedData,
-//     			    						n_frames,
-// 									nyquist_zone ) ;
-// 																		    uint n_samples =  IFFT_data.nelements() ;
-// 	    
-// 	    casa::Vector<double> time_integrated( n_samples-time_int_bins, 0.0 ) ;
-// 	    
-// 	    for( uint nsample=0; nsample< n_samples-time_int_bins; nsample++ ){
-// 	    
-// 	    	for( uint t_bins=nsample; t_bins< (nsample+time_int_bins); t_bins++ ){
-// 		
-// 			time_integrated(nsample) += IFFT_data(t_bins)* IFFT_data(t_bins);
-// 			
-// 			}
-//    		}
-     
-       
+							 n_samples,
+							 simTEC,
+							 nyquist_zone,
+							 sampling_rate,
+							 TEC,
+							 freq_range,
+							 pointing_latitude,
+							 pointing_longitude,
+							 gain_scale_factor,
+							 position_x,
+							 position_y,
+							 position_z ) ;
       } 
-       catch ( AipsError x ){
-       cerr << "  NuMoonTrigger::FFT_processed" << x.getMesg () << endl ;
+      catch ( AipsError x ){
+	cerr << "  NuMoonTrigger::FFT_processed" << x.getMesg () << endl ;
         Vector<double> ();
-	}
-     return timeSeries_FFT ;
-  }   
-   
-    //_______________________________________________________________________________________
-
-/*   void NuMoonTrigger::root_histograms( const Vector<double>& IFFT_vector )
-   
-   {
-     cout << "To produce histogram to check for pulsed noise" << endl ;
-     
-     try {
-     
-     	 
-     	}
-     catch ( AipsError x ){
-    	   cerr << "  NuMoonTrigger::root_histograms" << x.getMesg () << endl ;
-          }
-   
-  } */  
-
-  //_________________________________________________________________________________________
-    void NuMoonTrigger::root_ntuples( Matrix<double> const& data,
-    					uint const& n_samples,
-					double const& simTEC,
-					double const& sampling_rate,
-					uint const& nyquist_zone,
-					uint const& time_int_bins,
-  					double const& TEC,
-					const double& source_latitude,
-					const double& source_longitude,
-			    		const double& pointing_latitude,
-		   			const double& pointing_longitude,
-		   			const Vector<double>& gain_scale_factor,
-			    	  	const Vector<double>& position_x,
-		   	    		const Vector<double>& position_y,
-		   	    		const Vector<double>& position_z,
-					const Vector<double>& ppf_coeff,
-		   			const Vector<double>& ppf_invcoeff,
-		  			const Vector<double> freq_range,
-					double const& peak_height )
+      }
+      return timeSeries_FFT ;
+    }   
+  
+  void NuMoonTrigger::root_ntuples( Matrix<double> const& data,
+				    uint const& n_samples,
+				    double const& simTEC,
+				    double const& sampling_rate,
+				    uint const& nyquist_zone,
+				    uint const& time_int_bins,
+				    double const& TEC,
+				    const double& source_latitude,
+				    const double& source_longitude,
+				    const double& pointing_latitude,
+				    const double& pointing_longitude,
+				    const Vector<double>& gain_scale_factor,
+				    const Vector<double>& position_x,
+				    const Vector<double>& position_y,
+				    const Vector<double>& position_z,
+				    const Vector<double>& ppf_coeff,
+				    const Vector<double>& ppf_invcoeff,
+				    const Vector<double> freq_range,
+				    double const& peak_height )
     
   {
     cout << "To store data informaton in ntuples" << endl ;
@@ -2024,9 +1877,9 @@ namespace CR { // Namespace  -- begin
       casa::Vector<double> No_Signal;
       casa::Vector<double> FFT_Signal;
       casa::Vector<double> Average_P;
-
-//       std::string outfile ("pulse_data.root");
-
+      
+      //       std::string outfile ("pulse_data.root");
+      
       TNtuple *eventuple_FFT = new TNtuple ("eventuple_FFT",
 					    "eventuple_FFT",
 					    "time:frame:Average_P5:sample_value") ;

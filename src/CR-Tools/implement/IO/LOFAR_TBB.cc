@@ -82,6 +82,8 @@ namespace CR { // Namespace CR -- begin
            one.
   */
   LOFAR_TBB::LOFAR_TBB (LOFAR_TBB const &other)
+    : TBB_Timeseries (other),
+      DataReader (other)
   {
     copy (other);
   }
@@ -281,7 +283,8 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
-  // ----------------------------------------------------------------- setStreams
+  //_______________________________________________________________________________
+  //                                                                     setStreams
   
   bool LOFAR_TBB::setStreams ()
   {
@@ -338,7 +341,8 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
-  // ------------------------------------------------------------ setHeaderRecord
+  //_______________________________________________________________________________
+  //                                                                setHeaderRecord
   
   /*!
     \param header -- Record containing the header information
@@ -348,19 +352,20 @@ namespace CR { // Namespace CR -- begin
   */
   bool LOFAR_TBB::setHeaderRecord () 
   {
-    /* Get basic record entries from the attributes attached to the data set */
-    header_p = DAL::TBB_Timeseries::attributes2headerRecord();
-    
+    bool status (true);
+
     try {
+      /* Set mandatory fields within the header record */
+//       header_p.define("Date",headerpoint_p->JDR);
+      header_p.define("AntennaIDs",channelID());
+      header_p.define("Observatory","LOFAR");
       header_p.define("SampleFreq",DataReader::sampleFrequency());
-      //      header_p.define("StartSample",headerpoint_p->SampleNr);
-      //      header_p.define("dDate",(Double)headerpoint_p->Date + 
-      //		      (Double)headerpoint_p->SampleNr/(Double)headerpoint_p->sampleFreq/1e6);
     } catch (AipsError x) {
       cerr << "[LOFAR_TBB::setHeaderRecord] " << x.getMesg() << endl;
-      return false;
+      status = false;
     }; 
-    return true;
+    
+    return status;
   };
   
   //_______________________________________________________________________________

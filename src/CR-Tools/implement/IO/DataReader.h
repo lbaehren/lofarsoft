@@ -257,14 +257,12 @@ namespace CR {  //  Namespace CR -- begin
     Bool applyHanning_p;
     //! At which block of the data volume do we start reading data
     uint startBlock_p;
-    
+
   protected:
     
     //! Record structure to store the meta data.
     Record header_p;
-    
-    // ------------------------------------------------------------- data streams
-    
+        
     //! Number of filestream, from which data are read
     uint nofStreams_p;
     

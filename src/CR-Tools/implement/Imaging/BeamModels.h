@@ -59,16 +59,12 @@ namespace CR { // Namespace CR -- begin
 
   public:
 
-    /*!
-      Source: beam.c
-    */
-    static double sqr (double x){
+    //! Source: beam.c
+    static double sqr (double const &x){
       return x*x;
     }
-
-    /*!
-      Source: beam.c
-    */
+    
+    //! Source: beam.c
     static complex<double> test_complex (const complex<double> *par,
 					 const complex<double> *x) {
       return 0;

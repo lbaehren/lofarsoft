@@ -41,14 +41,12 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/MatrixMath.h>
-
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/Complex.h>
 #include <casa/BasicMath/Math.h>
 #include <casa/BasicMath/Random.h>
-
 #include <casa/Quanta.h>
 #include <casa/namespace.h>
 #include <casa/Exceptions/Error.h>
@@ -106,24 +104,18 @@ using casa::DComplex ;
 using casa::Matrix ;
 using casa::Vector ;
 
+using DAL::TBB_Timeseries ;
+using DAL::TBB_StationGroup ;
+
 using CR::CoordinateType ;
 using CR::GeomDelay ;
-//using CR::GeaomPhase ;
 using CR::GeomWeight ;
 using CR::Beamformer ;
 using CR::SkymapQuantity ;
 using CR::ppfinversion  ;
 using CR::ppfimplement ;
 using CR::SubbandID ;
-using CR::TimeFreq ;
 using CR::RFIMitigation ; 
-
-using DAL::TBB_Timeseries ;
-using DAL::TBB_StationGroup ;
-
-
-//enum Type_data : int
-//       { FFT =0, PPF=1 } ;
 
 namespace CR{ // Namespace  -- begin
   
@@ -140,12 +132,6 @@ namespace CR{ // Namespace  -- begin
 
     \test tNuMoonTrigger.cc
     
-    <h3>Prerequisite</h3>
-    
-    <ul type="square">
-      <li>[start filling in your text here]
-    </ul>
-    
     <h3>Synopsis</h3>
     
     <h3>Example(s)</h3>
@@ -155,58 +141,12 @@ namespace CR{ // Namespace  -- begin
     
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
     //! Default constructor
     NuMoonTrigger ();
     
-    /*!
-    \brief Argumented constructor
-    
-    */
-    NuMoonTrigger( std::string const &filename,
-    		   uint const& n_samples,
-		   double const& simTEC,
-		   double const& sampling_rate,
-		   uint const& nyquist_zone,
-		   uint const& time_int_bins,
-		   double const& TEC,
-		   const double& source_latitude,
-		   const double& source_longitude,
-		   const double& pointing_latitude,
-		   const double& pointing_longitude,
-		   const Vector<double>& position_x,
-		   const Vector<double>& position_y,
-		   const Vector<double>& position_z,
-		   const Vector<double>& gain_scale_factor,
-		   const Vector<double>& ppf_coeff,
-		   const Vector<double>& ppf_invcoeff,
-		   const Vector<double> freq_range,
-		   double const& peak_height ) ;
-    
-    /*!
-      \brief Copy constructor
-      
-      \param other -- Another NuMoonTrigger object from which to create this new
-             one.
-    */
-    NuMoonTrigger (NuMoonTrigger const &other);
-    
-    // -------------------------------------------------------------- Destruction
-
-    //! Destructor
-    ~NuMoonTrigger ();
-    
-    // ---------------------------------------------------------------- Operators
-    
-    /*!
-      \brief Overloading of the copy operator
-      
-      \param other -- Another NuMoonTrigger object from which to make a copy.
-    */
-    NuMoonTrigger& operator= (NuMoonTrigger const &other); 
-    
-    // --------------------------------------------------------------- Parameters
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class
@@ -217,9 +157,7 @@ namespace CR{ // Namespace  -- begin
       return "NuMoonTrigger";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }
@@ -231,9 +169,9 @@ namespace CR{ // Namespace  -- begin
     */
     void summary (std::ostream &os);    
 
-    // ------------------------------------------------------------------ Methods
-    #ifdef HAVE_ROOT
-  
+    // === Methods ==============================================================
+
+#ifdef HAVE_ROOT
   Matrix<double> reading_data( std::string const &filename,
     			       uint const& n_frames ) ;
 		     
@@ -241,27 +179,27 @@ namespace CR{ // Namespace  -- begin
     		 	     uint const& n_frames,
 			     uint const& nyquist_zone ) ;
   
-  casa::Matrix<DComplex> zero_channel_flagging( Vector<double>&  data,
+  casa::Matrix<DComplex> zero_channel_flagging (Vector<double>&  data,
      		                         	uint const& n_frames,
 					        uint const& nyquist_zone ) ;
-						
+  
   Matrix<DComplex> RFI_removal( Matrix<DComplex> fft_samples ) ;
-
+  
   Matrix<DComplex> Average_effect_RFI( Matrix<DComplex> fft_samples,
 				       Matrix<DComplex> RFI_mitigated );
-
+  
   Matrix<DComplex> de_dispersion( Matrix<DComplex> fft_samples,
 		      		  double const& TEC,
 				  const Vector<double> freq_Vector ) ;
-
+  
   Vector<double> ifft_data( Matrix<DComplex> const& data,
     			    uint const& n_frames,
 			    uint const& nyquist_zone ) ;
-		       
+  
   Matrix<DComplex> ppf_implement( Vector<double>& samples,
                                   uint const& nyquist_zone,
 				  const Vector<double>& ppf_coeff ) ;
- 
+  
   Vector<double> ppf_inversion( const Matrix<DComplex>& FTData,
                                	const Vector<double>& ppf_invcoeff,
 				const Vector<uint> subBand_ID )  ;
@@ -441,21 +379,10 @@ namespace CR{ // Namespace  -- begin
 			 double const& peak_height ) ;
    
   #endif    
- 
- 
-    
-    
-  private:
-    
-    //! Unconditional copying
-    void copy (NuMoonTrigger const &other);
-    
-    //! Unconditional deletion 
-    void destroy(void);
    
   }; // Class NuMoonTrigger -- end
  
 } // Namespace  -- end
 
 #endif /* NUMOONTRIGGER_H */
- 
+

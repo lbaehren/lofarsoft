@@ -427,14 +427,15 @@ Vector<double> bandFilter(const Vector<double> &trace, double freq, double width
   \return upTrace	     -- upsampled trace
 */
 
-Vector<double> upsampleTrace(const Vector<double> &trace, int upsamplingExp)
+Vector<double> upsampleTrace (const Vector<double> &trace,
+			      int upsamplingExp)
 {
   Vector<double> upTrace;		// return value for upsampled trace
 
   try
   {
     // create upsampling factor by upsampling exponent
-    unsigned int upsampled = pow(2,upsampling_exp);
+    unsigned int upsampled = pow(2,upsamplingExp);
 
     // get length of trace
     unsigned int tracelength = trace.size();
@@ -526,9 +527,8 @@ Vector<double> envelope(const Vector<double> &trace, unsigned int upsamplingExp 
   return envelope;
 }
 
-
-
-
+//_______________________________________________________________________________
+//                                                               upsampleTimeAxis
 
 /*!
   \brief interpolates time axis for upsampled traces
@@ -539,14 +539,15 @@ Vector<double> envelope(const Vector<double> &trace, unsigned int upsamplingExp 
   \return upTimeAxis   -- interpolated time axis
 */
 
-Vector<double> upsampleTimeAxis(DataReader &dr, int upsamplingExp)
+Vector<double> upsampleTimeAxis (DataReader &dr,
+				 int upsamplingExp)
 {
   Vector<double> upTimeAxis;		// return value for upsampled trace
 
   try 
   {
     // create upsampling factor by upsampling exponent
-    unsigned int upsampled = pow(2,upsampling_exp);
+    unsigned int upsampled = pow(2,upsamplingExp);
 
     // Get time between samples
     double sampleTime = 1/(dr.sampleFrequency() * upsampled);

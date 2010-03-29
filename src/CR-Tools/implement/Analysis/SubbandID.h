@@ -90,11 +90,9 @@ namespace CR { // Namespace CR -- begin
     
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     SubbandID ();
     
     /*!
@@ -114,50 +112,12 @@ namespace CR { // Namespace CR -- begin
 	       uint const &nofSubbands);
     
     /*!
-      \brief Argumented Constructor
-      
-      Sets the  vector of subband IDs if the initial subband frequency of first
-      subband, which is used in observation is given, and number of subbands
-      used in observation is given.
-      
-      \param sampleFrequency  -- clock rate at which data is sampled
-      \param subband_freq_1 -- initial frequency of first subband which is used
-                               for observation
-      \param nofSubbands    -- number of subbands used for observation, basically
-                               for beamforming, number of datafiles which is
-			       given for processing
-    */
-    SubbandID (double const &sampleFrequency,
-	       double const &subband_freq_1,
-	       uint const &nofSubbands);
-
-    /*!
-      \brief Arguemented Constructor
-      
-      Sets the vector of subband IDs for given vector of subband intial
-      frequencies which are used for beamforming at station level or for tied
-      array beam
-      
-      \param sampleFrequency     -- clock rate at which data is sampled
-      \param subband_frequencies -- vector of subband frequencies.
-    */
-    SubbandID (double const &sampleFrequency,
-	       const Vector<double>& subband_frequencies ) ;
-    
-    /*!
       \brief Copy constructor
       
       \param other -- Another SubbandID object from which to create this new
                       one.
     */
     SubbandID (SubbandID const &other);
-    
-    // -------------------------------------------------------------- Destruction
-    
-    /*!
-      \brief Destructor
-    */
-    ~SubbandID ();
     
     // ---------------------------------------------------------------- Operators
     
@@ -288,15 +248,8 @@ namespace CR { // Namespace CR -- begin
     
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy(SubbandID const &other);
-    
-    /*!
-      \brief Unconditional deletion 
-    */
-    void destroy(void);
     
   };
   

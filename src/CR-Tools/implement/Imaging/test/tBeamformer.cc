@@ -257,18 +257,17 @@ int test_Beamformer (uint blocksize=1024,
   \brief Test the methods providing access to internal parameters
 
   \param blocksize -- The number of samples per input block of data
-  \param fftLength -- Output size of the FFT.
 
   \return nofFailedTests -- The number of failed test encountered within this
           function.
 */
-int test_parameters (uint blocksize=1024,
-		     uint fftLength=513)
+int test_parameters (uint blocksize=1024)
 {
   cout << "\n[tBeamformer::test_parameters]\n" << endl;
 
   int nofFailedTests (0);
   Beamformer bf;
+  uint fftLength = (blocksize+1)/2;
 
   cout << "[1] Set antenna positions ..." << endl;
   try {
@@ -485,12 +484,12 @@ int test_methods ()
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_weights (uint blocksize=1024,
-		  uint fftLength=513)
+int test_weights (uint blocksize=1024)
 {
   cout << "\n[tBeamformer::test_weights]\n" << endl;
 
   int nofFailedTests (0);
+  uint fftLength = (blocksize+1)/2;
 
   /* Create beamformer object to work with */
   CR::Beamformer bf (get_antennaPositions(),
@@ -502,6 +501,8 @@ int test_weights (uint blocksize=1024,
 		     false,
 		     CR::test_frequencyValues(),
 		     false);
+
+  bf.summary();
 
   /* Work with default settings (geometrical weights only) */
   try {

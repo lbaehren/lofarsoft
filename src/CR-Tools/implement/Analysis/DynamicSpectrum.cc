@@ -30,15 +30,17 @@ namespace CR {  // Namespace CR -- begin
   //  Construction
   //
   // ============================================================================
-  
-  // ------------------------------------------------------------ DynamicSpectrum
+
+  //_____________________________________________________________________________
+  //                                                              DynamicSpectrum
   
   DynamicSpectrum::DynamicSpectrum ()
   {
     dynamicSpectrum_p.resize(1,1);
   }
   
-  // ------------------------------------------------------------ DynamicSpectrum
+  //_____________________________________________________________________________
+  //                                                              DynamicSpectrum
   
   /*!
     \param crval -- [freq,time] 
@@ -55,7 +57,8 @@ namespace CR {  // Namespace CR -- begin
     setTimeAxis      (crval(1),cdelt(1),units(1));
   }
   
-  // ------------------------------------------------------------ DynamicSpectrum
+  //_____________________________________________________________________________
+  //                                                              DynamicSpectrum
   
   /*!
     \param obsInfo  -- 
@@ -71,7 +74,8 @@ namespace CR {  // Namespace CR -- begin
     freqAxis_p = freqAxis;
   }
   
-  // ------------------------------------------------------------ DynamicSpectrum
+  //_____________________________________________________________________________
+  //                                                              DynamicSpectrum
   
   /*!
     \param ts2       -- LOFAR_TBB timeseries
@@ -90,7 +94,7 @@ namespace CR {  // Namespace CR -- begin
     const double alphaHanning = 0.5;
     cout << "Hanning filter set to " << alphaHanning << endl;
     ts2.setHanningFilter(alphaHanning);
-    int maxnrblocks = (int) ts2.data_length()(antennanr)/ts2.blocksize();
+    int maxnrblocks = (int) ts2.data_length()[antennanr]/ts2.blocksize();
     if(nrblocks == 0 || nrblocks > maxnrblocks){
       nrblocks = maxnrblocks;
     }
@@ -128,7 +132,8 @@ namespace CR {  // Namespace CR -- begin
     
   }
   
-  // ------------------------------------------------------------ DynamicSpectrum
+  //_____________________________________________________________________________
+  //                                                              DynamicSpectrum
   
   /*!
     \param other -- Another DynamicSpectrum object from which to create this

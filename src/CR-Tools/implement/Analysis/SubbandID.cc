@@ -32,9 +32,6 @@ namespace CR { // Namespace CR -- begin
   
   SubbandID::SubbandID ()
   {
- //   sampleFrequency_p = 80e06;
-  //  bandID_p          = 0;
-  //  nofSubbands_p     = 256;
   }
   
   SubbandID::SubbandID (Double const &sampleFrequency,
@@ -47,40 +44,10 @@ namespace CR { // Namespace CR -- begin
     nofSubbands_p     = nofSubbands;
   }
   
-  SubbandID::SubbandID ( const Double& sampleFrequency,
-                         const Double& subband_freq_1,
-                         const uint& nofSubbands  ) 
-  {
-    sampleFrequency_p = sampleFrequency;
-    bandID_p          = 0;
-    nofSubbands_p     = nofSubbands;
-  }
-  
-  SubbandID::SubbandID (const Double& sampleFrequency,
-                        const Vector<Double>& subband_frequencies)
-  {
-    sampleFrequency_p = sampleFrequency;
-  }			 
-  
-  
   SubbandID::SubbandID (SubbandID const &other)
   {
     copy (other);
   }
-  
-  // ============================================================================
-  //
-  //  Destruction
-  //
-  // ============================================================================
-  
-  SubbandID::~SubbandID ()
-  {
-    destroy();
-  }
-  
-  void SubbandID::destroy ()
-  {;}
   
   // ============================================================================
   //
@@ -91,7 +58,6 @@ namespace CR { // Namespace CR -- begin
   SubbandID& SubbandID::operator= (SubbandID const &other)
   {
     if (this != &other) {
-      destroy ();
       copy (other);
     }
     return *this;
