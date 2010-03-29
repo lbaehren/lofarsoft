@@ -14,23 +14,6 @@ class control(LOFARrecipe):
     """
     Basic pipeline control framework.
     """
-    def _setup(self):
-        # Set up logging to file
-        os.makedirs(self.config.get("layout", "log_directory"))
-        stream_handler = logging.StreamHandler(sys.stdout)
-        file_handler = logging.FileHandler('%s/pipeline.log' % (
-                self.config.get("layout", "log_directory")
-            )
-        )
-        formatter = logging.Formatter(
-            "%(asctime)s %(levelname)-7s %(name)s: %(message)s",
-            "%Y-%m-%d %H:%M:%S"
-        )
-        stream_handler.setFormatter(formatter)
-        file_handler.setFormatter(formatter)
-        self.logger.addHandler(stream_handler)
-        self.logger.addHandler(file_handler)
-
     def pipeline_logic(self):
         # Define pipeline logic here in subclasses
         raise NotImplementedError
@@ -84,7 +67,6 @@ class MAC_control(control):
 
     def go(self):
         super(control, self).go()
-        self._setup()
 
         self.logger.info(
             "Standard Imaging Pipeline (%s) starting." %

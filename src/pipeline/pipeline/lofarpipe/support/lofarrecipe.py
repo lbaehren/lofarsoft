@@ -70,6 +70,23 @@ class LOFARrecipe(WSRTrecipe):
             raise PipelineRecipeFailed("%s failed", configblock)
         return outputs
 
+    def _setup_logging(self):
+        # Set up logging to file
+        os.makedirs(self.config.get("layout", "log_directory"))
+        stream_handler = logging.StreamHandler(sys.stdout)
+        file_handler = logging.FileHandler('%s/pipeline.log' % (
+                self.config.get("layout", "log_directory")
+            )
+        )
+        formatter = logging.Formatter(
+            "%(asctime)s %(levelname)-7s %(name)s: %(message)s",
+            "%Y-%m-%d %H:%M:%S"
+        )
+        stream_handler.setFormatter(formatter)
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(stream_handler)
+        self.logger.addHandler(file_handler)
+
     def go(self):
         # Every recipe needs a job identifier
         if not self.inputs["job_name"]:
@@ -126,6 +143,9 @@ class LOFARrecipe(WSRTrecipe):
             )
             if not os.access(self.inputs['runtime_directory'], os.F_OK):
                 raise IOError, "Runtime directory doesn't exist"
+
+        if not self.logger.handlers:
+            self._setup_logging()
 
     def _get_cluster(self):
         self.logger.info("Connecting to IPython cluster")
