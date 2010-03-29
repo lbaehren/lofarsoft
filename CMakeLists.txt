@@ -185,6 +185,11 @@ endif (svn_executable)
 
 ## Packages with build handled through shell script
 
+configure_file (
+  ${USG_ROOT}/devel_common/scripts/build_package.sh.in
+  ${USG_BUILD}/build_package.sh
+  )
+
 set (packages_external
   blas
   cfitsio
