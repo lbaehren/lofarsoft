@@ -144,7 +144,9 @@ class LOFARrecipe(WSRTrecipe):
             if not os.access(self.inputs['runtime_directory'], os.F_OK):
                 raise IOError, "Runtime directory doesn't exist"
 
-        if not self.logger.handlers:
+        if isinstance(self.logger.parent, logging.RootLogger):
+            # Only configure handlers if our parent is the root logger.
+            # Otherwise, our parent should have done it for us.
             self._setup_logging()
 
     def _get_cluster(self):
