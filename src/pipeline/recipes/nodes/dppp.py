@@ -1,7 +1,7 @@
 # Python standard library
 from __future__ import with_statement
 from contextlib import closing
-from subprocess import check_call, CalledProcessError
+from subprocess import Popen, CalledProcessError, PIPE, STDOUT
 import os.path, tempfile, shutil
 
 from lofarpipe.support.lofarnode import LOFARnode
@@ -71,15 +71,15 @@ class dppp(LOFARnode):
                 # What is the '1' for? Required by DP3...
                 cmd = [executable, temp_parset_filename, '1']
                 self.logger.debug("Running: %s" % (' '.join(cmd),))
-                result = check_call(
-                    cmd,
-                    cwd=working_dir,
-                    env=env,
-                    close_fds=True
-                )
+                ndppp_process = Popen(cmd, cwd=working_dir, env=env, close_fds=True, stdout=PIPE, stderr=STDOUT)
+                sout, serr = ndppp_process.communicate()
+                self.logger.debug(sout)
+                self.logger.debug(serr)
                 self.logger.debug(
-                    "%s returned exit status %d" % (executable, result)
+                    "%s returned exit status %d" % (executable, ndppp_process.returncode)
                 )
+                if ndppp_process.returncode != 0:
+                    raise CalledProcessError(ndppp_process.returncode, executable)
             except ExecutableMissing, e:
                 self.logger.error("%s not found" % (e.args[0]))
                 raise
