@@ -42,7 +42,6 @@ endif (USG_ROOT)
 ## ==============================================================================
 
 option (LUS_VERBOSE_CONFIGURE   "Be verbose during configuration?"            NO  )
-option (ENABLE_DASHBOARD       "Send a build report to the Dashboard server?" YES )
 option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO  )
 option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO  )
 option (TEST_DATASETS          "Download and install sample test datasets?"   NO  )
@@ -73,6 +72,32 @@ find_program (perl_executable       perl    PATHS ${bin_locations})
 find_program (svn_executable        svn     PATHS ${bin_locations})
 find_program (tar_executable        tar     PATHS ${bin_locations})
 find_program (wget_executable       wget    PATHS ${bin_locations})
+
+## ==============================================================================
+##
+##  Macro definitions
+##
+## ==============================================================================
+
+macro (build_package _packageName _packageSource)
+  ## get components of the path to the package's source code
+  get_filename_component (_packageLocation ${_packageSource} PATH)
+  ## feedback
+  if (${_packageLocation} STREQUAL "external")
+    message (STATUS "Adding external package ${_packageName} ...")
+    set (_packageBuildLocation ${USG_BUILD}/external/${_packageName})
+  else (${_packageLocation} STREQUAL "external")
+    set (_packageBuildLocation ${USG_BUILD}/${_packageName})
+  endif (${_packageLocation} STREQUAL "external")
+  ## create the directory within which the build is performed
+  file (MAKE_DIRECTORY ${_packageBuildLocation})
+  add_custom_target (${_packageName}
+    COMMAND cmake ${USG_ROOT}/${_packageSource}
+    COMMAND make install
+    WORKING_DIRECTORY ${_packageBuildLocation}
+    COMMENT "Building package ${package_name} ..."
+    )
+endmacro (build_package _packageName _packageSource)
 
 ## ==============================================================================
 ##
@@ -123,15 +148,11 @@ endif (doxygen_executable)
 
 add_custom_target (clean-build
   COMMAND rm -rf *~
-  COMMAND rm -rf external
+  COMMAND rm -rf contrib devel_common external
+  COMMAND rm -rf bdsm cr dal lasa pulsar pybdsm smosaic
   COMMAND rm -rf cmake_install.cmake
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeFiles
-  COMMAND rm -rf cfitsio cr
-  COMMAND rm -rf dal devel_common
-  COMMAND rm -rf numeric num_util
-  COMMAND rm -rf sip startools
-  COMMAND rm -rf wcslib wcstools
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Cleaning up build directory ..."
 )
@@ -155,6 +176,7 @@ add_custom_target (clean-release
   COMMAND rm -rf include
   COMMAND rm -rf info
   COMMAND rm -rf lib
+  COMMAND rm -rf plugins
   COMMAND rm -rf share
   WORKING_DIRECTORY ${USG_ROOT}/release
   COMMENT "Cleaning up release directory ..."
@@ -192,7 +214,6 @@ configure_file (
 
 set (packages_external
   blas
-  cfitsio
   num_util
   wcslib
   wcstools
@@ -207,16 +228,10 @@ endif (CR_WITH_STARTOOLS)
 add_subdirectory (${USG_ROOT}/external)
 add_subdirectory (${USG_ROOT}/devel_common)
 
-##____________________________________________________________________
-## generic build instructions for the packages
+## Build instructions for packages
 
 foreach (package_name ${packages_external})
-  add_custom_target (${package_name}
-    COMMAND mkdir -p ${package_name}
-    COMMAND ./build_package.sh ${package_name} ${USG_EXTERNAL}/${package_name}
-    WORKING_DIRECTORY ${USG_BUILD}
-    COMMENT "Building package ${package_name} ..."
-    )
+  build_package (${package_name} external/${package_name})
 endforeach (package_name)
 
 ##____________________________________________________________________
@@ -281,21 +296,15 @@ endif (wget_executable)
 ##____________________________________________________________________
 ##                                                                BDSM
 
-add_custom_target (bdsm
-  COMMAND ./build_package.sh bdsm ${USG_ROOT}/src/BDSM
-  WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Building package BDSM ..."
-  )
+build_package (bdsm src/BDSM)
+
 add_dependencies (bdsm cfitsio wcslib)
 
 ##____________________________________________________________________
 ##                                           Data Access Library (DAL)
 
-add_custom_target (dal
-  COMMAND ./build_package.sh dal ${USG_ROOT}/src/DAL -DDAL_PYTHON_BINDINGS:BOOL=${DAL_PYTHON_BINDINGS} -DDAL_ENABLE_DASHBOARD:BOOL=${ENABLE_DASHBOARD}
-  WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Building package DAL ..."
-  )
+build_package (dal src/DAL)
+
 if (DAL_PYTHON_BINDINGS)
   if (TEST_DATASETS)
     add_dependencies (dal casacore num_util test-data)
@@ -332,30 +341,20 @@ endif (CR_WITH_GUI)
 ##____________________________________________________________________
 ##                                       LASA (LOFAR Air-Shower Array)
 
-add_custom_target (lasa
-  COMMAND ./build_package.sh lasa ${USG_ROOT}/src/LASA
-  WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Building package LASA ..."
-  )
+build_package (lasa src/LASA)
 
 ##____________________________________________________________________
 ##                                                              Pulsar
 
-add_custom_target (pulsar
-  COMMAND ./build_package.sh pulsar ${USG_ROOT}/src/Pulsar
-  WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Building package Pulsar ..."
-  )
+build_package (pulsar src/Pulsar)
+
 add_dependencies (pulsar cfitsio)
 
 ##____________________________________________________________________
 ##                                                              pybdsm
 
-add_custom_target (pybdsm
-  COMMAND ./build_package.sh pybdsm ${USG_ROOT}/src/pybdsm
-  WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Building package pybdsm ..."
-  )
+build_package (pybdsm src/pybdsm)
+
 add_dependencies (pybdsm boost num_util wcslib)
 
 ##____________________________________________________________________
@@ -380,21 +379,15 @@ endif (RM_ENABLE_ITPP)
 ##____________________________________________________________________
 ##                                                             smosaic
 
-add_custom_target (smosaic
-  COMMAND ./build_package.sh smosaic ${USG_ROOT}/src/smosaic
-  WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Building package smosaic ..."
-  )
+build_package (smosaic src/smosaic)
+
 add_dependencies (smosaic casacore cfitsio wcslib)
 
 ##____________________________________________________________________
 ##                                                             contrib
 
-add_custom_target (contrib
-  COMMAND ./build_package.sh contrib ${USG_ROOT}/src/contrib
-  WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Building user-contributed software (programs, scripts, ...)"
-  )
+build_package (contrib src/contrib)
+
 add_dependencies (contrib dal)
 
 ## ==============================================================================
