@@ -60,32 +60,20 @@ set (CMAKE_FIND_LIBRARY_PREFIXES "")
 
 ## Search for the libraries
 
-find_library (PYQT_QT_LIBRARY Qt
-  PATHS ${lib_locations}
-  PATH_SUFFIXES python${PYTHON_VERSION}/site-packages/PyQt4
-  NO_DEFAULT_PATH
-  )
-if (PYQT_QT_LIBRARY)
-  list (APPEND PYQT_LIBRARIES ${PYQT_QT_LIBRARY})
-endif (PYQT_QT_LIBRARY)
-
-find_library (PYQT_QTCORE_LIBRARY QtCore
-  PATHS ${lib_locations}
-  PATH_SUFFIXES python${PYTHON_VERSION}/site-packages/PyQt4
-  NO_DEFAULT_PATH
-  )
-if (PYQT_QTCORE_LIBRARY)
-  list (APPEND PYQT_LIBRARIES ${PYQT_QTCORE_LIBRARY})
-endif (PYQT_QTCORE_LIBRARY)
-
-find_library (PYQT_QTDESIGNER_LIBRARY QtDesigner
-  PATHS ${lib_locations}
-  PATH_SUFFIXES python${PYTHON_VERSION}/site-packages/PyQt4
-  NO_DEFAULT_PATH
-  )
-if (PYQT_QTDESIGNER_LIBRARY)
-  list (APPEND PYQT_LIBRARIES ${PYQT_QTDESIGNER_LIBRARY})
-endif (PYQT_QTDESIGNER_LIBRARY)
+foreach (_lib Qt QtCore QtDesigner QtGui QtHelper QtNetwork QtTest)
+  ## convert to upper-case
+  string (TOUPPER ${_lib} _var)
+  ## locate library
+  find_library (PYQT_${_var}_LIBRARY ${_lib}
+    PATHS ${lib_locations}
+    PATH_SUFFIXES python${PYTHON_VERSION}/site-packages/PyQt4
+    NO_DEFAULT_PATH
+    )
+  ## augment list of libraries
+  if (PYQT_${_var}_LIBRARY)
+    list (APPEND PYQT_LIBRARIES ${PYQT_${_var}_LIBRARY})
+  endif (PYQT_${_var}_LIBRARY)
+endforeach (_lib)
 
 ## adjust the ordering
 
