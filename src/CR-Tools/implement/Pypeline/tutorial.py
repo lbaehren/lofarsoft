@@ -2,6 +2,7 @@ def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)
     else: print " ",var,"=>",eval(var)
 
+figno=0
 """
 ========================================================================
                           pycrtools TUTORIAL
@@ -852,9 +853,8 @@ History tracking can be switched off with
 Let's see how we can open a file. First define a filename, e.g.:
 
 """
-LOFARSOFT=os.environ["LOFARSOFT"]
 filename_sun=LOFARSOFT+"/data/lopes/example.event"
-#filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+filename_biglofar=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
 p_("filename_sun")
 p_("filename_lofar")
@@ -1065,16 +1065,20 @@ slicing
 ant0data=fxdata[0].vec()
 """
 
-To get the x-Axis we create a second vector
+If you do not have yet a pre-existing array into which you want to read
+data, you can automatically create one, using the square brackets
+syntax already known from retrieving the file header keywords. So, for
+example, to get the x-Axis we create a second vector
 
 """
-times=hArray(float,[blocksize],name="Time").setUnit("","s")
-times.read(datafile,"Time")
+times=datafile["Time"]
 #%SKIP
 """
 
-This is the time relative to the trigger in seconds. So, let's have
-that in microseconds, by using setUnit
+In the square bracket notation python will actually set the name and
+units of the data accordingly. 
+
+So, let's have the time axis in microseconds, by using setUnit
 
 """
 times.setUnit("\\mu","")
@@ -1085,57 +1089,17 @@ length we have to take the length of the Fourier transformed time
 block (which is blocksize/2+1).
 
 """
-frequencies=hArray(float,dimensions=[fftlength],name="Frequency").setUnit("","Hz")
-frequencies.read(datafile,"Frequency")
-
-frequencies.setUnit("M","Hz")
-"""
-
-(+) Fourier Transforms (FFT)
-----------------------------
-
-We can make a FFT of a float vector. This function will only return
-the non-redundant part of the FFT (i.e., just one half).  Again we
-need to provide a properly sized output vector (input length/2+1). We
-also have to specify as a second parameter in which NyquistZone the
-data was take. 
-
-Nyquist sampling means that one needs, for example, 200 MHz sampling
-rate to digitize a bandwidth of 100 MHz. The first Nyquist zone is
-then 0-100 MHz, and the second is 100-200 MHz.
-
-So, let's do the transform:
-"""
-fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
-fxdata[...].fft(fftdata[...],1)
-
-p_("fftdata")
-"""
-
-Here we have used the fft method of the float array, which is just a
-call to the stand-alone function hFFT defined in hftools.cc.
-
-We can convert the data back into the time domain by using the inverse
-Fourier transform.
-"""
-fxinvdata=hArray(float,dimensions=fxdata,name="E-Field'").setUnit("","Counts")
-fftdata[...].invfft(fxinvdata[...],1)
-"""
-
-To get the spectral power from the FFTed vector, we have to square the
-complex data and convert it to floats. This can be done using the
-complex function "norm" (unusual name, but used in c++).
-
-"""
-spectrum=hArray(float,dimensions=fftdata,name="E-field Spectrum")
-fftdata[...].norm(spectrum)
+frequencies=datafile["Frequency"].setUnit("M","")
 """
 
 We can now try to calulcate the average spectum of the data set for
-one antenna, by looping over all blocks.
+one antenna, by looping over all blocks. Here we do not use the square
+bracket notation, since we want to read the data repeatedly into the
+same memory location.
 
 """
-avspectrum=hArray(float,dimensions=fftdata,name="avg. Spectrum")
+fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
+avspectrum=hArray(float,dimensions=fftdata,name="avgerage spectrum")
 for block in range(nBlocks):
     fftdata.read(datafile.set("Block",block),"FFT").none()
     fftdata[...].spectralpower(avspectrum[...])
@@ -1144,6 +1108,7 @@ for block in range(nBlocks):
 (The .none() method is appended to suppress uwanted output in
 generating the tutorial, when an operation returns an array or
 vector.)
+
 
 (+) Basic Plotting
 ------------------
@@ -1248,6 +1213,7 @@ plt.ylabel("Electric Field [ADC counts]")
 #%SKIP
 plt.xlabel("Time [$\mu$s]")
 #%SKIP
+figno+=1; plt.savefig("tutorial-fig"+str(figno))
 """
 So, for a linear plot use .plot, for a loglog plot use .loglog and for
 a log-linear plot use .semilogx or .semilogy ...
@@ -1266,6 +1232,7 @@ unsing the built-in plot method of array.
 avspectrum.par.xvalues=frequencies
 avspectrum.par.title="Average Spectrum"
 avspectrum[0].plot(logplot="y").none()
+figno+=1; plt.savefig("tutorial-fig"+str(figno))
 """
 
 This creates a semilog-plot with appropriate lables and units (if they
@@ -1280,6 +1247,7 @@ If the array is in looping mode, multiple curves are plotted in one windows. Hen
 """
 avspectrum.par.logplot="y"
 avspectrum[...].plot()
+figno+=1; plt.savefig("tutorial-fig"+str(figno))
 """
 
 will simply plot all spectra of all antennas (=highest array index) in
@@ -1447,7 +1415,100 @@ rms, npeaks, and nonGaussianity, and finally the failed fields)
 Note, that this function can be called with "file=None". In this case
 the data provided in the datararray will be used.
 
-(+) Coordinates
+(++) Fourier Transforms (FFT) & Cross Correlation
+-------------------------------------------------
+
+We can make a FFT of a float vector. This function will only return
+the non-redundant part of the FFT (i.e., just one half).  Again we
+need to provide a properly sized output vector (input length/2+1). We
+also have to specify as a second parameter in which NyquistZone the
+data was take. 
+
+Nyquist sampling means that one needs, for example, 200 MHz sampling
+rate to digitize a bandwidth of 100 MHz. The first Nyquist zone is
+then 0-100 MHz, and the second is 100-200 MHz.
+
+So, let's do the transform:
+"""
+fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
+fxdata[...].fft(fftdata[...],1)
+
+p_("fftdata")
+"""
+
+Here we have used the fft method of the float array, which is just a
+call to the stand-alone function hFFT defined in hftools.cc.
+
+We can convert the data back into the time domain by using the inverse
+Fourier transform.
+"""
+fxinvdata=hArray(float,dimensions=fxdata,name="E-Field'").setUnit("","Counts")
+fftdata[...].invfft(fxinvdata[...],1)
+"""
+
+To get the spectral power from the FFTed vector, we have to square the
+complex data and convert it to floats. This can be done using the
+complex function "norm" (unusual name, but used in c++).
+
+"""
+spectrum=hArray(float,dimensions=fftdata,name="E-field Spectrum")
+fftdata[...].norm(spectrum)
+"""
+
+Finally, we want to see, if we can do some cross correlation, which
+mathematically is directly related to the Fourier transform.
+
+We will do this with a data set from a slor burst (taken with LOPES in
+2003), since that is dominated by a single point source and hence
+gives a nice and clear cross correlation.
+
+"""
+sun=crfile(filename_sun)
+"""
+
+Now we read in the FFTed data
+
+"""
+sunfft=sun["FFT"]
+"""
+
+and make a complex scratch vector to hold an intermediated data
+product which is a copy of the fft vector.
+
+"""
+crosscorr_cmplx=hArray(copy=sunfft)
+"""
+
+We then multiply the FFTs of all antennas with the complex conjugate
+of a reference antenna (here antenna 0) and store that in the vector
+crosscorr_cmplx, which is done by the following method.
+
+"""
+crosscorr_cmplx[...].crosscorrelatecomplex(sunfft[0])
+"""
+
+This vector will then actually hold the FFT of the cross correlation
+of the antenna time series. Hence, what we now need to do is to FFT
+back into the time domain and store it in a vector crosscorr.
+
+"""
+crosscorr=hArray(float,dimensions=[sun.nofSelectedAntennas,sun.blocksize],name="Cross Correlation") 
+crosscorr_cmplx[...].invfft(crosscorr[...],1)
+"""
+
+We can now plot this and use as the x-axis vector the Time Lags
+conveniently provided by our cr file object.
+
+"""
+crosscorr.par.xvalues=sun["TimeLag"].setUnit("\\mu","")
+crosscorr[1].plot()
+figno+=1; plt.savefig("tutorial-fig"+str(figno))
+"""
+
+Note, plotting crosscorr[0].plot() will give the autocorrelation of
+the first antenna (which we used as reference antenna in this example).
+
+(++) Coordinates
 ---------------
 
 We also have access to a few functions dealing with astronomical
@@ -1460,11 +1521,9 @@ supposed to hold the Cartesian coordinates. Note that the AzEL vector
 is actually AzElRadius, where we need to set the radius to unity.
 
 """
-azel=FloatVec()
-azel.extend((178,28,1))
+azel=hArray([178.+90,28,1000])
 cartesian=azel.new()
-azel
-cartesian
+
 """
 
 We then do the conversion, using 
@@ -1479,11 +1538,50 @@ yielding the following output vector:
 cartesian
 """
 
+Reading in Antennapositions:
+"""
+#antenna_positions_original=hArray(Vector().extendflat(hgetAntennaPositions(sun)),dimensions=[sun["nofAntennas"],3])
+#antenna_positions2=hArray(copy=antenna_positions_original)
+
+#antenna_positions2[...] -= antenna_positions_original[0]
+
+obsdelays=hArray([0.0,0.05, -0.05 ,0, -0.125,-0.0375,0.125,0.175])
+
+antenna_positions=hArray(hgetAntennaPositions(sun))
+
+#for i in range(8):
+#    antenna_positions.vec()[i*3]=antenna_positions2.vec()[i*3+1]  
+#    antenna_positions.vec()[i*3+1]=antenna_positions2.vec()[i*3]  
+
+result=[]
+plt.clf()
+for j in range(29,30):
+    x=[]; y=[]
+    for i in range(177,178):
+        azel[0]=float(i)
+        azel[1]=float(j)
+        hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
+        hGeometricDelays(antenna_positions,hArray(cartesian),delays,True)
+        delays *= 10**6
+        deviations=delays-obsdelays
+        deviations.abs()
+        sum=deviations.vec().sum()
+        x.append(i); y.append(sum)
+    result.append(y)
+    plt.plot(x,y)
+
+figno+=1; plt.savefig("tutorial-fig"+str(figno))
+
+#plt.clf()
+#plt.plot(x,result[0])
+"""
+
+
 (+) Appendix: Listing of all Functions:
 =======================================
 
 """
-help(all)
+#help(all)
 """
 
 """

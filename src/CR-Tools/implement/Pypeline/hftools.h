@@ -121,6 +121,7 @@ template <class T>
     bool trackHistory;
     vector<HString> history;
     map<HString,HString> keywords;
+    map<HString,HPyObjectPtr> keywords_py;
   }; 
 
     void init();
@@ -179,6 +180,9 @@ template <class T>
     void printHistory();
     HString getKey(HString key);
     hArray<T> & setKey(HString key, HString contents);
+
+    //hArray<T> & setKeyPy(HString key, HPyObjectPtr pyobj);
+    //HPyObject & getKeyPy(HString key);
 
     //These are the basic parameters describing the data
     //structure. They can be shared

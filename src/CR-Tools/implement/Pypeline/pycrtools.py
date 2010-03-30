@@ -1,4 +1,8 @@
 # Import module
+#import pdb
+#pdb.set_trace()
+
+
 from math import *
 from hftools import *
 from pydoc import help as pyhelp
@@ -223,6 +227,7 @@ def extendflat(self,l):
     vector with a flat dat structure (just 1D).
     """
     map(lambda x:self.extend(x),l)
+    return self
 
 def hArray_none(self):
     """
@@ -241,7 +246,9 @@ def hArray_newreference(self):
     vector. Hence the new array can be assigned a new slice, but will
     still access the same underlying vector in memory.
     """
-    return self.shared_copy()
+    ary=self.shared_copy()
+    ary.par=self.par
+    return ary
 
 def hArray_setDim(self,dimensions_list):
     """setDim([dim1,dim2,...,dimN]) -> hArray with new dimensions
@@ -406,10 +413,19 @@ class hArray_par:
     paramaters used by python methods (e.g. xvalues for the plotting
     command).
     """
-    pass
+    def __repr__(self):
+        s=""
+        for attr in dir(self)[2:]:
+            if not (attr.find("_")==0):
+                s+="par."+str(attr)+" = "+str(getattr(self,attr))+"\n"
+        return s
+
+def hArray_setUnit(self,*arg):
+    self.setUnit_(*arg)
+    return self
 
 #======================================================================
-#  Define Plotting fucntions for vectors and arrays
+#  Define Plotting functions for vectors and arrays
 #======================================================================
 
 #    plt.subplot(1,2,1)
@@ -451,9 +467,9 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     if xvalues==None:
         if hasattr(self.par,"xvalues"): xvalues=self.par.xvalues
         else: xvalues=hArray(range(len(self.vec())))
-    xunit=xvalues.getUnit() 
+    xunit=xvalues.getUnit().replace("\\mu","$\\mu$") 
     if not xunit=="": xunit=" ["+xunit+"]"
-    yunit=self.getUnit()
+    yunit=self.getUnit().replace("\\mu","$\\mu$") 
     if not yunit=="": yunit=" ["+yunit+"]"
     if xlabel==None: xlabel=xvalues.getKey("name")
     if ylabel==None: ylabel=self.getKey("name")
@@ -784,13 +800,13 @@ for v in hAllArrayTypes:
     setattr(v,"none",hArray_none)
     setattr(v,"read",hArray_read)
     setattr(v,"list",hArray_list)
-    setattr(v,"par",hArray_par())
     setattr(v,"plt",plt)
     setattr(v,"plot",hPlot_plot)
     setattr(v,"copy_resize",hArray_copy_resize)
     setattr(v,"newreference",hArray_newreference)
     setattr(v,"__getitem__",hArray_getitem)
     setattr(v,"__setitem__",hArray_setitem)
+    setattr(v,"setUnit",hArray_setUnit)
 
 for v in hAllVectorTypes:
     setattr(v,"__repr__",VecToPrintString)
@@ -805,6 +821,7 @@ for v in hAllVectorTypes:
     setattr(v,"ndim",0)
     for s in ["hResize","hNew"]:
         setattr(v,s[1:].lower(),eval(s))
+
 
 for v in hAllContainerTypes:
     for s in ["hFill","hCopy","hSort"]:
@@ -827,7 +844,7 @@ for v in hNumericalContainerTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
+    for s in ["hFillRange","hAbs","hConvert","hMul","hDiv","hSub","hAdd","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
         setattr(v,s[1:].lower(),eval(s))
 
 #========================================================================
@@ -886,7 +903,7 @@ def Vector(Type=float,size=-1,fill=None):
 #  hArray Class and Vector Methods/Attributes
 #======================================================================
 
-def hArray(Type=float,dimensions=None,fill=None,name=None):
+def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None):
     """
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
@@ -922,7 +939,17 @@ def hArray(Type=float,dimensions=None,fill=None,name=None):
     input. Hence if you create a array with Array([1,2,3],dimension=[2]) it
     will contain only [1,2]. Array([1,2,3],dimension=[2],fill=4) will give
     [4,4].
+
+    Parameters:
+
+    copy=array: make a copy of array in terms of type, dimension, and
+    fill.
+
     """
+    if type(copy) in hAllArrayTypes:
+        Type=basetype(copy)
+        dimensions=copy.getDim()
+        fill=copy
     if isVector(Type):  #Make a new array with refernece to the input vector
         ary=type2array(basetype(Type))
         ary.stored_vector=Type
@@ -934,6 +961,7 @@ def hArray(Type=float,dimensions=None,fill=None,name=None):
         ary=type2array(basetype(vec))
         ary.stored_vector=vec
         ary.setVector(ary.stored_vector)
+    setattr(ary,"par",hArray_par())
     if (type(dimensions) in [list,tuple,IntVec]): ary.setDim(dimensions)
     if (type(dimensions) in hAllArrayTypes): ary.setDim(dimensions.getDim())
     if not (fill == None): 
@@ -954,8 +982,8 @@ def DataReader_getHeaderVariables(self):
     Method to read out the header information from the DataReader and
     put it into attributes of the DataReader object.
     """
-    self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample']))
-    for v in self.keywords:
+    self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample',"Filesize",'Date','dDate']))
+y    for v in self.keywords:
         setattr(self,v,self.get(v))
 
 def DataReader_getitem(self,*keys):
@@ -965,7 +993,19 @@ def DataReader_getitem(self,*keys):
 
     Method to obtain header information from the DataReader.
     """
-    if type(keys[0])==tuple: return map(lambda k:hFileGetParameter(self,k),keys[0])
+    if keys[0] in ["Time","Frequency","Fx","Voltage","FFT","CalFFT","TimeLag"]:
+        if keys[0]=="Time": return hArray(float,dimensions=[self["blocksize"]],name="Time").setUnit("","s").read(self,"Time")
+        if keys[0]=="Frequency": return hArray(float,dimensions=[self["fftLength"]],name="Frequency").setUnit("","Hz").read(self,"Frequency")
+        if keys[0]=="Fx": return hArray(float,dimensions=[self["nofSelectedAntennas"],self["blocksize"]],name="E-Field").setUnit("","ADC Counts").read(self,"Fx")
+        if keys[0]=="Voltage": return hArray(float,dimensions=[self["nofSelectedAntennas"],self["blocksize"]],name="Voltage").setUnit("","V").read(self,"Voltage")
+        if keys[0]=="FFT": return hArray(complex,dimensions=[self["nofSelectedAntennas"],self["fftLength"]],name="FFT(E-Field)").read(self,"FFT")
+        if keys[0]=="CalFFT": return hArray(complex,dimensions=[self["nofSelectedAntennas"],self["fftLength"]],name="CalFFT(E-Field)").read(self,"CalFFT")
+        if keys[0]=="TimeLag": 
+            ary=hArray(float,dimensions=[self["blocksize"]],name="Time Lag").setUnit("","s")
+            ary.fillrange(-self["blocksize"]/2,self["sampleInterval"])
+            return ary
+        else: print "Something is really wrong here ...! DataReader_getitem"
+    elif type(keys[0])==tuple: return map(lambda k:hFileGetParameter(self,k),keys[0])
     else: return hFileGetParameter(self,keys[0])
 
 def DataReader_set(self,key,val):
@@ -1017,8 +1057,19 @@ DataReader.__getitem__=DataReader_getitem
 DataReader.getHeaderVariables=DataReader_getHeaderVariables
 DataReader.__doc__=crfile.__doc__
 
+#------------------------------------------------------------------------
+# Getting Metadata like Antenna positions
+#------------------------------------------------------------------------
 
-
+def hgetAntennaPositions(datafile):
+    obsname=datafile["observatory"]
+    if obsname=='LOPES':
+        antennapositions=hCalTablePositions(LOFARSOFT+"/data/lopes/LOPES-CalTable",datafile["date"],list(datafile["antennaIDs"]))
+        print "Antenna positions from LOPES caltable."
+        return antennapositions
+    else:
+        print "ERROR: No caltables for non-LOPES files."
+        
 #------------------------------------------------------------------------
 # Pypeline Extension, Functions and Algorithms
 #------------------------------------------------------------------------

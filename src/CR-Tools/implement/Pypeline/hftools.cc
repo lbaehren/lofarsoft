@@ -491,7 +491,7 @@ template<class T> inline T hfcast(HComplex v){return static_cast<T>(v);}
 template<class T> inline T hfcast(/*const*/ HPointer v){return hfcast<T>(reinterpret_cast<HInteger>(v));}
 template<class T> inline T hfcast(/*const*/ HString v){T t; std::istringstream is(v); is >> t; return t;}
 
-template<class T> inline T hfcast(CR::DataReader v){return hfcast<T>((void*)&v);}
+template<class T> inline T hfcast(CR::DataReader v){return hfcast<T>((HInteger)((void*)&v));}
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
 template<>  inline HInteger hfcast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v));}
@@ -500,6 +500,7 @@ template<>  inline HNumber hfcast<HNumber>(HComplex v){return real(v);}
 
 //Convert Numbers to Strings
 template<> inline HString hfcast<HString>(HPointer v){std::ostringstream os; os << v; return os.str();}
+template<> inline HString hfcast<HString>(uint v){std::ostringstream os; os << v; return os.str();}
 template<> inline HString hfcast<HString>(HInteger v){std::ostringstream os; os << v; return os.str();}
 template<> inline HString hfcast<HString>(HNumber v){std::ostringstream os; os << v; return os.str();}
 template<> inline HString hfcast<HString>(HComplex v){std::ostringstream os; os << v; return os.str();}
@@ -1262,6 +1263,31 @@ template <class T> HString hArray<T>::getKey(HString key){
   return "";
 }
 
+/*!  
+
+\brief Set the value of a particular key word as a Python object. 
+
+
+template <class T> hArray<T> &  hArray<T>::setKeyPy(HString key, HPyObjectPtr pyobj){
+  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  storage_p->keywords_py[key]=pyobj;
+  addHistory("setKey",key + " = ..." );
+  return *this;
+}
+ */
+
+/*!  
+
+\brief Set the value of a particular key word from a python object. 
+
+template <class T> HPyObject & hArray<T>::getKeyPy(HString key){
+  if (storage_p==NULL) return HPyObject(false); //Check if vector was deleted elsewhere
+  map<HString,HPyObjectPtr>::iterator it=storage_p->keywords_py.find(key);
+  if (it!=storage_p->keywords_py.end()) return *(it->second);
+  return HPyObject(false);
+} 
+ */
+
 
 /*!
 \brief Set the unit of the data array and multiply all data with the
@@ -1418,7 +1444,7 @@ return_internal_reference<1,
     .def("noOn",&hArray<TYPE>::loopOn,return_internal_reference<>())				\
     .def("noOff",&hArray<TYPE>::loopOff,return_internal_reference<>())				\
     .def("next",&hArray<TYPE>::next,return_internal_reference<>())       \
-    .def("setUnit",&hArray<TYPE>::setUnit,return_internal_reference<>())	\
+    .def("setUnit_",&hArray<TYPE>::setUnit,return_internal_reference<>())	\
     .def("getUnit",&hArray<TYPE>::getUnit)	\
     .def("clearUnit",&hArray<TYPE>::clearUnit,return_internal_reference<>())	\
     .def("addHistory",&hArray<TYPE>::addHistory,return_internal_reference<>())	\
@@ -1429,6 +1455,8 @@ return_internal_reference<1,
     .def("history",&hArray<TYPE>::printHistory)	\
     .def("setKey",&hArray<TYPE>::setKey,return_internal_reference<>())	\
     .def("getKey",&hArray<TYPE>::getKey)	\
+    //.def("setKeyPy",&hArray<TYPE>::setKeyPy,return_internal_reference<>()) \
+    //.def("getKeyPy",&hArray<TYPE>::getKeyPy)				\
 
 //========================================================================
 //                        Helper Functions
@@ -1485,6 +1513,34 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType fill_
   while (it!=vec_end) {
     *it=fill_value;
     ++it;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Fills a vector with a series of values increasing by one and mutliplying the entire vector by a fixed factor.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFillRange
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to fill.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(start)()("Integer start value of the loop variable.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(factor)()("Factor to multiply loop variable with.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hFillRange(vec,-2,2.,) -> [-4.0,-2.0,0.0,2.0,4.0,...] 
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger start,  const IterValueType factor)
+{
+  Iter it=vec;
+  HInteger i=start;
+  while (it!=vec_end) {
+    *it=factor*i;
+    ++it; ++i;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -2052,6 +2108,8 @@ void  HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 #define HFPP_PARDEF_1 (HComplex)(vec2)()("Second complex vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
+  fftvec1.crosscorrelatecomplex(fftvec2) -> fftvec1 return FFT of cross correlation between   
+
   \brief $DOCSTRING
   $PARDOCSTRING
 
@@ -3011,8 +3069,24 @@ HNumber HFPP_FUNC_NAME (
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
-  $PARDOCSTRING
-*/
+  $PARDOCSTRINGresult=[]
+plt.clf()
+for j in range(29,30):
+    x=[]; y=[]
+    for i in range(177,178):
+        azel[0]=float(i)
+        azel[1]=float(j)
+        hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
+        hGeometricDelays(antenna_positions,hArray(cartesian),delays,True)
+        delays *= 10**6
+        deviations=delays-obsdelays
+        deviations.abs()
+        sum=deviations.vec().sum()
+        x.append(i); y.append(sum)
+    result.append(y)
+    plt.plot(x,y)
+b
+*/ 
 
 template <class Iter>
 void HFPP_FUNC_NAME (
@@ -3909,7 +3983,7 @@ CRDataReader & HFPP_FUNC_NAME(
 
 Example:
 antennaIDs=hFileGetParameter(file,"AntennaIDs")
-x=hCalTable("~/LOFAR/usg/data/lopes/LOPES-CalTable",obsdate,list(antennaIDs))
+x=hCalTable("~/LOFAR/usg/data/lopes/LOPES-CalTable","Positions",obsdate,list(antennaIDs))
 
 */
 HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob) {
@@ -3926,7 +4000,47 @@ HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HP
       PyList_Append(list,tuple);
     };
   };
+  delete CTRead;
   return list;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//------------------------------------------------------------------------
+//$DOCSTRING: Return a list of antenna positions from the CalTables as a float vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCalTablePositions
+//-----------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HString)(filename)()("Filename of the caltable")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HInteger)(date)()("Date for which the information is requested (I guess Julian days? As output from DataReader)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HPyObjectPtr)(pyob)()("(Python) List  with antenna IDs")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+
+
+Example:
+antennaIDs=hFileGetParameter(file,"AntennaIDs")
+vec=hCalTablePositions("~/LOFAR/usg/data/lopes/LOPES-CalTable",obsdate,list(antennaIDs))
+
+*/ 
+vector<HNumber> HFPP_FUNC_NAME(HString filename, HInteger date, HPyObjectPtr pyob) {
+  CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
+  vector<HNumber> outvec;
+  HInteger i,ant,size;
+  casa::Vector<Double> tmpvec; 
+  if (CTRead != NULL && PyList_Check(pyob)) {  //Check if CalTable was opened ... and Python object is a list
+    size=PyList_Size(pyob);
+    for (i=0;i<size;++i){  //loop over all antennas
+      ant=PyInt_AsLong(PyList_GetItem(pyob,i));  //Get the ith element of the list, i.e. the antenna ID
+      CTRead->GetData((uint)date, ant, "Positions", &tmpvec);
+      outvec.push_back(tmpvec[1]); outvec.push_back(tmpvec[0]); outvec.push_back(tmpvec[2]);
+    };
+  };
+  delete CTRead;
+  return outvec;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
