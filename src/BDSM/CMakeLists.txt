@@ -6,7 +6,7 @@
 PROJECT (BDSM Fortran)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.8)
 
 ## ==============================================================================
 ##
@@ -35,9 +35,9 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
-option (BDSM_BUILD_TESTS "Build the test programs?" 1)
-option (BDSM_ENABLE_TESTING "Build the test programs?" 1)
-option (BDSM_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
+option (BDSM_BUILD_TESTS       "Build the test programs?"             YES )
+option (BDSM_ENABLE_TESTING    "Build the test programs?"             YES )
+option (BDSM_VERBOSE_CONFIGURE "Verbose output during configuration?" NO  )
 
 ## ------------------------------------------------------------------------------
 ## Find external libraries
@@ -49,13 +49,14 @@ if (NOT BDSM_VERBOSE_CONFIGURE)
 endif (NOT BDSM_VERBOSE_CONFIGURE)
 
 ## --- CFITSIO ---------------------------------
+
 if (NOT HAVE_CFITSIO)
-  include (${bdsm_cmake}/FindCFITSIO.cmake)
+  include (FindCFITSIO)
 endif (NOT HAVE_CFITSIO)
 
 ## --- PGPLOT ----------------------------------
 if (NOT HAVE_PGPLOT)
-  include (${bdsm_cmake}/FindPGPLOT.cmake)
+  include (FindPGPLOT)
 endif (NOT HAVE_PGPLOT)
 
 ## ------------------------------------------------------------------------------
