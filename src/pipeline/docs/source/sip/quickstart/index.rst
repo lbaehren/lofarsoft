@@ -1,3 +1,5 @@
+.. _sip-quickstart:
+
 ==========
 Quickstart
 ==========

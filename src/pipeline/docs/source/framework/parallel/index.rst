@@ -1,4 +1,4 @@
-.. _node-docs:
+.. _parallelisation-docs:
 
 ============================
 Parallelisation with IPython

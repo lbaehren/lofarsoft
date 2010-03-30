@@ -1,6 +1,6 @@
-#############################
-LOFAR Pipelines Documentation
-#############################
+###################################
+LOFAR Pipeline System Documentation
+###################################
 
 This document provides a brief overview of the so-called "pipeline framework"
 developed for supporting LOFAR pipelines, and describes how it has been used

@@ -1,8 +1,8 @@
 .. _recipe-docs:
 
-=====================
-Constructing a recipe
-=====================
+*******
+Recipes
+*******
 
 A pipeline is composed of a hierarchical tree of so-called *recipes*. Each
 recipe takes a list of inputs, performs some processing on them, and
@@ -14,11 +14,170 @@ components like DPPP, BBS and the imager.
 Recipes are derived from the :class:`LOFARrecipe` class, which provides some
 standard functionality common to all recipes. In turn, :class:`LOFARrecipe`
 inherits from Cuisine's :class:`WSRTrecipe`. Neither of these should be
-instantiated directly [#f1]_. 
+instantiated directly.
 
 In the "original" :mod:`Cuisine` framework, and in the extended LOFAR pipeline
 version, the fundamental job of the recipe author is to extend the base class
 by overriding the :meth:`go` method.
+
+
+Example
+=======
+
+This section is designed to illustrate all the basic concepts required for
+constructing a single-threaded recipe. That is, this recipe will run solely on
+the cluster head node (as specified in your pipeline configuration; see
+:ref:`infrastructure-setup`). The :ref:`parallelisation-docs` section will
+show how this recipe can be extended to run in parallel across a cluster.
+
+A basic recipe
+--------------
+
+.. literalinclude:: ../../../../recipes/master/dummy_echo.py
+   :linenos:
+
+
+This example recipe simple spawns a simple shell script and collects its
+results. When run independently of the pipeline system, the script outputs:
+
+.. code-block:: bash
+
+  $ ./dummy_echo.sh test
+  Starting script dummy_echo.sh at  Mon Mar 29 12:50:22 CEST 2010
+  The number of files is:  1
+  The file names are:  test
+  These same file name can be echo'd one by one to STDOUT:
+  test
+  Ended script dummy_echo.sh successfully at  Mon Mar 29 12:50:22 CEST 2010
+
+We will consider the recipe line by line.
+
+Lines 1 and 2 are basic import statements. :mod:`subprocess` and :mod:`sys` are from
+the Python standard library, and are not essential to the framework (but are
+used elsewhere in this recipe). :class:`LOFARrecipe` is the superclass of all
+pipeline recipes.
+
+Line 4 starts the definition of our recipe. As described, it inherits from
+:class:`LOFARrecipe`. Recipes are saved one-per-file, and the file name should
+match the recipe name; ie, in this case, :class:`dummy_echo` is saved in
+``dummy_echo.py`` in the ``recipes/master`` directory.
+
+:meth:`__init__` (line 5) must first call the superclass constructor
+(line 5). It may then perform other initialisation steps for the recipe.
+Typically, this will include adding options to
+:attr:`LOFARrecipe.optionparser`. All the arguments that a recipe requires
+must be defined here, following the model seen in lines 7--10 above. Refer to
+the Python standard library documentation for :class:`optparse.OptionParser`
+the definition syntax. When the recipe is run, option values will be made
+available in :attr:`LOFARrecipe.inputs`, which is accessible with a
+dictionary-like syntax; ie, if it is not overriden with the recipe is called,
+the above will result in:
+
+  >>> dummy_echo().inputs['executable']
+  /home/swinbank/sw/bin/dummy_echo.sh
+
+Optionparser defaults may be overriden from the command line, by the code
+which calls the recipe, or by a :ref:`task-definition`.
+
+:meth:`go` (line 14) is the core of the recipe definition: this is
+ultimately what is called when the recipe is run, and contains all the logic
+determining what happens. It takes no arguments directly, but has access to
+the :attr:`LOFARrecipe.inputs` input information, as shown above.
+
+Line 15 illustrates the use of the :attr:`LOFARrecipe.logger`. This is an
+instance of :class:`logging.Logger` from the Python standard library, and the
+reader should acquaint themselves with the documentation available there for
+details. In brief, a number of methods are defined which send messages of
+varying degrees of severity to the log: :meth:`debug`, :meth:`info`,
+:meth:`warn`, :meth:`critical` and :meth:`error`, in order of increasing
+severity. By default, only messages of level ``warning`` and above are logged,
+but this can be changed to ``info`` by providing the ``-v`` switch on recipe
+invocation or ``debug`` by providing ``-d``. Logs are written to the console,
+and also saved to the ``runtime_directory`` (see :ref:`infrastructure-setup`).
+
+Line 16 calls the superclass definition of :meth:`LOFARrecipe.go`: this is
+required at the start of all ``go()`` methods (but may occur after logging
+etc, as shown).
+
+Lines 18 and 19 construct the command line which will be executed by the
+recipe. This is composed of ``self.inputs['executable']``, defined as above,
+and ``self.inputs['args']``. This latter contains a list of any commany line
+*arguments* (as opposed to options; see the :mod:`optparse` documentation)
+supplied to the recipe. Thus, build a command string consisting of the
+executable script name and any filenames specified on the command line.
+
+Lines 20 and 21 use the Python :mod:`subprocess` module (refer to the
+standard library documenation) to spawn the executable command line, wait for
+it to finish, and collect any output it produced in the variables ``sout`` and
+``serr``. These are then sent to the log (lines 23 and 24).
+
+Lines 26 to 29 cause the method to finish, checking the return status of the
+spawned process and returning 0 or 1 to indicated success or failure.
+
+Lines 32 and 33 make it possible to execute the recipe from the command line;
+see the following.
+
+Command line execution
+----------------------
+
+All recipes can be independently executed from the command line. They require
+one parameter, ``-j`` or ``--job-name``, which should uniquely identify the
+pipeline run, in addition to any options or arguments required by the recipe.
+For example, the code above can be executed as follows:
+
+.. code-block:: bash
+
+   $ python dummy_echo.py -j test_job -d foo bar
+   2010-03-29 14:20:44 INFO    dummy_echo: stdout: Starting script dummy_echo.sh
+   at  Mon Mar 29 14:20:44 CEST 2010
+   The number of files is:  2
+   The file names are:  foo bar
+   These same file name can be echo'd one by one to STDOUT:
+   foo
+   bar
+   Ended script dummy_echo.sh successfully at  Mon Mar 29 14:20:44 CEST 2010
+
+   2010-03-29 14:20:44 INFO    dummy_echo: stderr: 
+   2010-03-29 14:20:44 INFO    dummy_echo: recipe dummy_echo completed
+
+.. _task-definition:
+
+Task definition
+---------------
+
+The above recipe was very simple, with only one option -- and that option had
+a sensible default. Often, however, recipes will be much more elaborate, and
+have a much richer set of options. In thse cases, it may be useful to define
+a *task*, which represents the combination of a recipe and a given set of
+options.
+
+As per :ref:`infrastructure-setup`, it is possible to define a ``task_files``
+parameter in your pipeline configuration file. Each task you wish to define
+corresponds to one stanza in the file. The stanza is headed with the name of
+the task. The recipe should then be defined, followed by any required
+arguments.
+
+For example, a task definition for our :class:`dummy_echo` recipe could might
+look like:
+
+.. code-block:: none
+
+   [dummy_echo_task]
+   recipe = dummy_echo
+   executable = /a/different/executable
+
+This can then be invoked using the :meth:`LOFARrecipe.run_task` method in
+another recipe. For instance:
+
+.. code-block:: python
+
+   def go():
+       [.. lines elided ..]
+       self.run_task("dummy_echo_task", ['foo', 'bar'])
+
+
+API Reference
+=============
 
 Relevant Cuisine Classes
 ------------------------
@@ -105,8 +264,7 @@ Relevant Cuisine Classes
 
         The :attr:`~WSRTrecipe.optionparser` is used for validating all inputs
         to the recipe. Therefore, any additional inputs required by derived
-        recipes should be declared in their own ``__init__()`` methods. See
-        the :ref:`recipe-example` below.
+        recipes should be declared in their own ``__init__()`` methods.
 
 
 .. class:: WSRTingredient()
@@ -179,8 +337,7 @@ LOFAR Extensions
 
         :meth:`LOFARrecipe.go` performs some initialisation of the recipe. It
         should therefore not simply be ignored by derived classes, but called
-        at the start of their own ``go()`` methods. See the
-        :ref:`recipe-example` below.
+        at the start of their own ``go()`` methods.
 
         :meth:`~LOFARrecipe.go` ensures that a job name is defined, that a
         configuration file is available (and defined in
@@ -220,48 +377,9 @@ standard meanings for return codes have not been defined: they should be
 agreed between the callee and the caller.
 
 When invoked from the command line, the result should recipe should be
-accessed via its :meth:`main` method. See the :ref:`recipe-example` below for
-how this can be conveniently organised.
+accessed via its :meth:`main` method. 
 
 When one recipe wishes to call another, it should use it's own
 :meth:`cook_recipe` method. For instance::
 
     self.cook_recipe('recipe_name', inputs, outputs)
-
-
-.. _recipe-example:
-
-Example
--------
-
-A trivial recipe could be constructed as follows::
-
-    import sys
-    from pipeline.support.lofarrecipe import LOFARrecipe
-
-    class NewRecipe(LOFARrecipe):
-        def __init__(self):
-            super(NewRecipe, self).__init__()
-            self.optionparser.add_option('--dummy')
-
-        def go(self):
-            super(NewRecipe, self).go()
-            self.outputs['dummy'] = self.inputs['dummy']
-
-    if __name__ == '__main__':
-        sys.exit(NewRecipe().main())
-
-It could then be invoked as follows:
-
-.. code-block:: bash
-
-    $ python NewRecipe.py -j job_name --dummy dummy_argument
-    Results:
-    dummy = dummy_argument
-
-.. rubric:: Footnotes
-
-.. [#f1] In an ideal world, these would be implemented as Abstract Base
-  Classes, so they *cannot* be instantiated. However, this is precluded by the
-  necessity of Python 2.5 compatibility.
-

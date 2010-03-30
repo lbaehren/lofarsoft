@@ -11,19 +11,6 @@ concepts. We will consider each of these in turn below.
 
 .. image:: ../pipeline-flowchart.png
 
-Cluster Layout
-==============
-
-The pipeline framework makes the assumption that it will run on a cluster
-comprised of a "head node" and a number of "compute nodes". The pipeline
-control logic runs on the head node, and may perform less compute-intensive
-jobs here. When required, jobs are dispatched over the network to the compute
-nodes: the head node may then wait and receive the results before continuing.
-Job definition and parameters may be pushed to the compute nodes directly from
-the head using :ref:`ipython-blurb`; however, for bandwidth and latency
-reasons, large data files should be written to and read from shared NFS
-mounts.
-
 Recipes
 =======
 
@@ -36,6 +23,28 @@ it takes a given set of inputs (visibility data) and produces some outputs
 In fact, each of those steps is itself a recipe -- one for flagging, one for
 calibration, and so on.
 
+Although some recipes are provided with the pipeline framework, it is
+anticipated that users will wish to define their own. A search path for
+recipes can be specified, enabling each user to maintain their own private (or
+shared) repositories of recipes.
+
+Tasks and Configuration
+=======================
+
+A recipe describes the steps that need to be taken to perform some particular
+action on the data. For instance, a recipe might describe how to set up and
+run an imager process. Often, the recipe will take a series of parameters
+describing how it should be run -- what time steps to image, whether to use
+the W-projection algorithm, the shape or the restoring beam, and so on. These
+are provided as a series of input arguments to the recipe. Some sets of
+arguments will be used repeatedly: a set of default configurations for
+different modes, say. These can be bundled together as a *task*: a recipe
+together with a set of defined parameters, and saved in a configuration file
+for easy access.
+
+As with recipes, it is anticipated that users will build up their own
+libraries of pre-defined tasks for whatever applications they find necessary.
+
 Control
 =======
 
@@ -45,12 +54,18 @@ may be useful for starting a pipeline. For instance, the control recipe can
 configure a logging system for the pipeline, and may be used to interface with
 LOFAR's MAC/SAS control system.
 
-Distributed Processing
-======================
+.. _cluster-layout:
 
-Tasks and Configuration
-=======================
+Cluster Layout
+==============
 
-
-
+The pipeline framework makes the assumption that it will run on a cluster
+comprised of a "head node" and a number of "compute nodes". The pipeline
+control logic runs on the head node, and may perform less compute-intensive
+jobs here. When required, jobs are dispatched over the network to the compute
+nodes: the head node may then wait and receive the results before continuing.
+Job definition and parameters may be pushed to the compute nodes directly from
+the head using :ref:`ipython-blurb`; however, for bandwidth and latency
+reasons, large data files should be written to and read from shared NFS
+mounts.
 
