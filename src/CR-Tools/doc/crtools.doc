@@ -62,16 +62,233 @@
   \endverbatim
 
   The sub-directories and their contribution to the CR-Tools is as follows:
-  <ul>
-    <li><b>apps</b> -- Source code for application programs which can be run
-        from the command line or through a secondary control layer. 
-    <li><b>data</b> -- Collection of data used for test programs.
-    <li><b>docs</b>
-    <li><b>implement</b> -- Source code, mainly C++ classes, which are compiled
-        into a library, based on which application programs are build.
-    <li><b>private</b> -- Source code from private projects of the individual
-        users; this is not part of the default build, but optionally can be
-	enabled.
-  </ul>
+
+  <table border=0>
+    <tr valign=top>
+      <td width="15%">\b apps</td>
+      <td width="80%">Source code for application programs which can be run
+      from the command line or through a secondary control layer.</td>
+    </tr>
+    <tr valign=top>
+      <td width="15%">\b data</td>
+      <td width="80%">Collection of data used for test programs.</td>
+    </tr>
+    <tr valign=top>
+      <td width="15%">\b docs</td>
+      <td width="80%"></td>
+    </tr>
+    <tr valign=top>
+      <td width="15%">\b implement</td>
+      <td width="80%">Source code, mainly C++ classes, which are compiled
+      into a library (\e libcr), based on which application programs are build.</td>
+    </tr>
+    <tr valign=top>
+      <td width="15%">\b private</td>
+      <td width="80%">Source code from private projects of the individual
+      users; this is not part of the default build, but optionally can be
+      enabled.</td>
+    </tr>
+  </table>
+
+  <hr>
+
+  \section crtools_overview_modules Overview of modules and their functionality
+
+  \subsection crtools_module_analysis Analysis
+
+  <table border=0 width="100%">
+    <tr>
+      <td class="indexkey" width="25%">Class/File</td>
+      <td class="indexkey" width="50%">Functionality</td>
+      <td class="indexkey" width="25%">Comments</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::CRflaggingPlugin</td>
+      <td>Flaggs antennas based on spikyness, high-power, low-power</td>
+      <td>LOPES Plugin</td>
+    </tr>
+    <tr valign=top>
+      <td>DataBlockStatistics</td>
+      <td>???</td>
+      <td>?</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::dfitgauss</td>
+      <td>Fit a Gaussian to 1d-data </td>
+      <td>Same as the Glish routine</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::DynamicSpectrum</td>
+      <td>Calculates Dynamic spectra and e.g. generates FITS files</td>
+      <td>CASA-heavy</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::fitCR2gauss</td>
+      <td>Guipipeline-style X-Beam -> CC-Beam fitting</td>
+      <td></td>
+    </tr>
+    <tr valign=top>
+      <td>PulseProperties</td>
+      <td>Storage container for pulse parameters</td>
+      <td></td>
+    </tr>
+    <tr valign=top>
+      <td>CR::tbbTools</td>
+      <td>Simulation of TBB FPGA algorithms</td>
+      <td></td>
+    </tr>
+  </table>
+
+  \subsection crtools_module_calibration Calibration
+
+  <table border=0 width="100%">
+    <tr>
+      <td class="indexkey" width="25%">Class/File</td>
+      <td class="indexkey" width="50%">Functionality</td>
+      <td class="indexkey" width="25%">Comments</td>
+    </tr>
+    <tr valign=top>
+      <td>AverageGain</td>
+      <td>Calculate baseline of spectra and then normalize the Spectra</td>
+      <td>uses BaselineGain</td>
+    </tr>
+    <tr valign=top>
+      <td>BaselineGain</td>
+      <td>Different ways to calculate the baseline of spectra</td>
+      <td></td>
+    </tr>
+    <tr valign=top>
+      <td>CR::CalTableReader[/Writer/Creator]</td>
+      <td>LOPES CalTable calibration database</td>
+      <td></td>
+    </tr>
+    <tr valign=top>
+      <td>CR::CalTableInterpolater</td>
+      <td>Interpolates CalTable-calibration data to needed grid</td>
+      <td>Includes multi-d interpolation routine</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::RFIMitigation[/Plugin]</td>
+      <td>Flagging of RFI lines in a spectrum</td>
+      <td>IMHO unnecessary complicated</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::TVCalibrationPlugin</td>
+      <td>LOPES-style phase calibration</td>
+      <td>LOPES "Plugin"</td>
+    </tr>
+  </table>
+
+  \subsection crtools_module_coordinates Coordinates
+
+  <table border=0 width="100%">
+    <tr>
+      <td class="indexkey" width="25%">Class/File</td>
+      <td class="indexkey" width="50%">Functionality</td>
+      <td class="indexkey" width="25%">Comments</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::TimeFreq</td>
+      <td>Container for the basic parameters in the time-frequency
+      domain.</td>
+      <td></td>
+    </tr>
+  </table>
+
+  \subsection crtools_module_data Data
+
+  <table border=0 width="100%">
+    <tr>
+      <td class="indexkey" width="25%">Class/File</td>
+      <td class="indexkey" width="50%">Functionality</td>
+      <td class="indexkey" width="25%">Comments</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+  \subsection crtools_module_display Display
+
+  <table border=0 width="100%">
+    <tr>
+      <td class="indexkey" width="25%">Class/File</td>
+      <td class="indexkey" width="50%">Functionality</td>
+      <td class="indexkey" width="25%">Comments</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::SimplePlot</td>
+      <td>Routines for plotting into PS-files</td>
+      <td></td>
+    </tr>
+  </table>
+
+  \subsection crtools_module_imaging Imaging
+
+  <table border=0 width="100%">
+    <tr>
+      <td class="indexkey" width="25%">Class/File</td>
+      <td class="indexkey" width="50%">Functionality</td>
+      <td class="indexkey" width="25%">Comments</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::GeomDelay</td>
+      <td>Class to handle the computation of geometrical delays as needed for
+       beamforming.</td>
+      <td>Supports far-field and near-field geometry.</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::GeomPhase</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr valign=top>
+      <td>CR::GeomWeight</td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+  \subsection crtools_module_io IO
+
+  <table border=0 width="100%">
+    <tr>
+      <td class="indexkey" width="25%">Class/File</td>
+      <td class="indexkey" width="50%">Functionality</td>
+      <td class="indexkey" width="25%">Comments</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::DataIterator</td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+  \subsection crtools_module_math Math
+
+  <table border=0 width="100%">
+    <tr>
+      <td class="indexkey" width="25%">Class/File</td>
+      <td class="indexkey" width="50%">Functionality</td>
+      <td class="indexkey" width="25%">Comments</td>
+    </tr>
+    <tr valign=top>
+      <td>CR::HanningFilter</td>
+      <td>Generate array with (modified) Hanning window</td>
+      <td></td>
+    </tr>
+    <tr valign=top>
+      <td>StatisticsFilter</td>
+      <td>Min/Max/Mean/Median/RMS/stddev - filter</td>
+      <td></td>
+    </tr>
+    <tr valign=top>
+      <td>LinearRegression</td>
+      <td>Linear fit through data points</td>
+      <td></td>
+    </tr>
+  </table>
 
 */
