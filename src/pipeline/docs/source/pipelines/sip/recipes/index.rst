@@ -14,6 +14,7 @@ be familiar with the :ref:`recipe-docs` section.
     dppp
     colmaker
     vdsmaker
+    vdsreader
     bbs
     mwimager
     sextractor

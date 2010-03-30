@@ -24,20 +24,13 @@ various components of the framework and how they fit together.
    framework/infrastructure/index.rst
    framework/dependencies/index.rst
 
-The Standard Imaging Pipeline
-=============================
-
-The Standard Imaging Pipeline (or SIP) will accept raw data from the LOFAR
-correlator, pre-process it, calibrate it, image it, and update the sky model
-with the sources detected in the data. This section describes the components
-of the SIP and how they fit together.
+Pipeline Specific Documenation
+==============================
 
 .. toctree::
    :maxdepth: 2
 
-   sip/quickstart/index.rst
-   sip/recipes/index.rst
-
+   pipelines/sip/index.rst
 
 Indices and tables
 ==================

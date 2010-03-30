@@ -2,4 +2,4 @@
 Imaging column creation
 =======================
 
-.. literalinclude:: ../../../../recipes/master/colmaker.py
+.. literalinclude:: ../../../../../recipes/master/colmaker.py

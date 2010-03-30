@@ -18,4 +18,4 @@ framework.
 ``sip.py``
 ----------
 
-.. literalinclude:: ../../../../examples/definition/sip/sip.py
+.. literalinclude:: ../../../../../examples/definition/sip/sip.py

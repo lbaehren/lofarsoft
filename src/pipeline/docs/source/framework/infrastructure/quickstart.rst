@@ -68,6 +68,8 @@ available in LOFAR Subversion. A minimal file for subcluster three could be:
 It doesn't matter where you save this, but you might find it convenient to
 leave it in the runtime directory.
 
+.. _pipeline-config:
+
 Produce a pipeline configuration file
 -------------------------------------
 

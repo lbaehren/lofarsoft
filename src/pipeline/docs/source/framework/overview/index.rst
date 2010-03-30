@@ -1,6 +1,8 @@
-*****************
-Pipeline Overview
-*****************
+.. _framework-overview:
+
+**********************
+Overview of a Pipeline
+**********************
 
 Before plunging into the nitty-gritty of all the various components that make
 up a pipeline, let's first take a bird's-eye overview of the concepts
