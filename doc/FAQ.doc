@@ -1,33 +1,35 @@
 /*!
-	\page faq Frequenctly Asked Questions
+  \page troubleshooting Troubleshooting
 	
-	<hr>
+  <hr>
 	
-	<dl>
-	  <dt>Question:</dt>
-	  <dd>"I seem to remember there was some script "build.sh" which would
-	  drive the build of the various packages; is this no longer supported?"</dd>
-	  <dt>Answer:</dt>
-	  <dd>Yes, initially the complete build and installation was run through a
-	  shell script, but this has been phased out in favor of having CMake do
-	  most of the job. The method therefore to build any of the packages is
-	  \code
-	  cd $LOFARSOFT/build
-	  make <package>
-	  \endcode</dd>
+  <dl>
+    <dt>Question:</dt>
+    <dd>"I seem to remember there was some script "build.sh" which would
+    drive the build of the various packages; is this no longer supported?"</dd>
 
-	  <dt>Question:</dt>
-	  <dd>"When I am running a command like e.g. <tt>make dal</tt> from within
-	  the build directory, all I am getting is
-	  \verbatim
-	  make: *** No rule to make target `dal'.  Stop.
-	  \endverbatim
-	  Why is that?</dd>
-	  <dt>Answer:</dt>
-	  <dd>The most likely explanation is that you haven't yet run CMake to
-	  parse the master configuration script to create the list of build
-	  targets.
-	  \code
+    <dt>Answer:</dt>
+    <dd>Yes, initially the complete build and installation was run through a
+    shell script, but this has been phased out in favor of having CMake do
+    most of the job. Follow the instructions under \ref configure_build_install</dd>
+  </dl>
+
+   <hr>
+
+   <dl>
+     <dt>Question:</dt>
+     <dd>"When I am running a command like e.g. <tt>make dal</tt> from within the
+     build directory, all I am getting is
+     \verbatim
+     make: *** No rule to make target `dal'.  Stop.
+     \endverbatim
+     Why is that?</dd>
+
+     <dt>Answer:</dt>
+     <dd>The most likely explanation is that you haven't yet run CMake to
+     parse the master configuration script to create the list of build
+     targets.
+     \code
 	  cd $LOFARSOFT/build
 	  ./bootstrap
 	  \endcode

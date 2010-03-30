@@ -38,7 +38,7 @@
     <li>\ref build_targets_doc
     <li>\ref build_targets_clean
     <li>\ref external_packages
-    <li>\ref faq
+    <li>\ref troubleshooting
   </ul>
 
   <hr>
@@ -69,39 +69,50 @@
       |-- contrib
       |-- CR-Tools
       |-- DAL
+      |-- LASA
+      |-- pipeline
       |-- pybdsm
       `-- RM
    \endverbatim
 
    In this:
-   <ul>
-     <li>\b lofarsoft is the root of the User Software code tree - go there if you
-     want to synchronize your local working version against the repository.
-     <li>\b build is used for building individual packages in the code
-     distribution; using a separate directory for this purpose makes it easy to
-     simply erase all compile and link attempts and start again from a clean plate.
-     <li>\b devel_common hold common tools for development; this includes e.g.
-     the find scripts for CMake or file templates for creating new C++ classes. Unless
-     you consider collaborating on the framework, you will not need to touch this
-     (but you will need it).
-     <li>\b doc contains a local version of the Doxygen-based source code
-     documentation; just go in there, fire up Doxygen and get an up-to-date version
-     of the source code documentation.
-     <li>\b external hosts the various external packages which will be required
-     to build parts of the LOFAR User Software.
-     <li>\b src contains the source code of the various projects and packages 
-     developed and written within the framework of the USG. The main components are:
-     <ul>
-       <li><a href="group__DAL.html">DAL</a> - The <i>Data Access Library</i> is the
-       interface for the creation of and access to LOFAR's standard data products.
-       <li><a href="group__CR.html">CR-Tools</a> - Tools for the analysis of cosmic
-       ray data.
-       <li><a href="group__pybdsm.html">pybdsm</a> - <i>Blob detection and source
-       modelling</i> package developed by the Surveys KSP.
-       <li><a href="group__RM.html">RM</a> - Rotation-measure synthesis imaging
-       package developed by the Cosmic Magnetism KSP.
-     </ul>
-   </ul>
+
+   <table border=0>
+     <tr valign=top>
+	<td width="15%">\b lofarsoft</td>
+	<td width="80%">Root of the User Software code tree - go there if you
+	want to synchronize your local working version against the repository.</td>
+     </tr>
+     <tr valign=top>
+	<td width="15%">\b build</td>
+	<td width="80%">Directory used for building individual packages in the code
+	distribution; using a separate directory for this purpose makes it easy to
+     	simply erase all compile and link attempts and start again from a clean
+	plate.</td>
+     </tr>
+     <tr valign=top>
+	<td width="15%">\b devel_common</td>
+	<td width="80%">Directory holding common tools for development; this
+	includes e.g. the find scripts for CMake or file templates for creating
+	new C++ classes. Unless you consider collaborating on the framework, you
+	will not need to touch this (but you will need it).</td>
+     </tr>
+     <tr valign=top>
+	<td width="15%">\b doc</td>
+	<td width="80%">Local version of the Doxygen-based source code
+	documentation.</td>
+     </tr>
+     <tr valign=top>
+	<td width="15%">\b external</td>
+	<td width="80%">Hosts the various \ref build_targets_external which will
+	be required to build parts of the LOFAR User Software.</td>
+     </tr>
+     <tr valign=top>
+	<td width="15%">\b src</td>
+	<td width="80%">Contains the source code of the various projects and
+	packages developed and written within the framework of the USG.</td>
+     </tr>
+   </table>
 
    <hr>
 
@@ -158,7 +169,7 @@
 
    <table border=0>
      <tr>
-	<td class="indexkey" width="20%">Target</td>
+	<td class="indexkey" width="15%">Target</td>
 	<td class="indexkey" width="80%">Description</td>
      </tr>
      <tr valign="top">
@@ -193,11 +204,11 @@
 
    <hr>
 
-   \section build_targets_external Targets to build external packages
+   \section build_targets_external External packages
 
    <table border=0>
      <tr>
-	<td class="indexkey" width="20%">Target</td>
+	<td class="indexkey" width="15%">Target</td>
 	<td class="indexkey" width="80%">Description</td>
      </tr>
      <tr bgcolor="eeeeee">
@@ -307,7 +318,7 @@
 
    <table border=0>
      <tr>
-	<td class="indexkey" width="20%">Target</td>
+	<td class="indexkey" width="15%">Target</td>
 	<td class="indexkey" width="80%">Description</td>
      </tr>
      <tr bgcolor="eeeeee" valign="top">
@@ -323,7 +334,7 @@
 
    <table border=0>
      <tr>
-	<td class="indexkey" width="20%">Target</td>
+	<td class="indexkey" width="15%">Target</td>
 	<td class="indexkey" width="80%">Description</td>
      </tr>
      <tr bgcolor="eeeeee" valign="top">
@@ -350,226 +361,6 @@
        run <tt>./bootstrap</tt>.</td>
      </tr>
    </table>
-*/
 
-// ==============================================================================
-//
-//  Group definitions
-//
-// ==============================================================================
-
-//_______________________________________________________________________________
-//                                                                         pyBDSM
-
-/*!
-  \defgroup pybdsm pyBDSM : Python version of the BDSM software
-	
-  \verbatim
-  lofarsoft
-  |-- data
-  |-- doc
-  |-- release
-  |-- build
-  |-- devel_common
-  |-- external
-  `-- src
-      |-- contrib
-      |-- CR-Tools
-      |-- DAL
-      `-- pybdsm      <-- you are here
-  \endverbatim
-*/
-
-//_______________________________________________________________________________
-//                                                                        contrib
-
-/*!
-  \defgroup contrib Collection of user contributed code
-	
-  \verbatim
-  lofarsoft
-  |-- data
-  |-- doc
-  |-- release
-  |-- build
-  |-- devel_common
-  |-- external
-  `-- src
-      |-- contrib        <-- you are here
-      |   |-- shapelets
-      |   |-- testing
-      |   `-- utilities
-      |-- CR-Tools
-      |-- DAL
-      `-- pybdsm
-  \endverbatim
-*/
-
-//_______________________________________________________________________________
-//                                                                     Star-Tools
-
-/*!
-  \defgroup startools Star-Tools function collection
-
-  \verbatim
-  lofarsoft
-  |-- data
-  |-- doc
-  |-- release
-  |-- build
-  |-- devel_common
-  |-- external
-  |   |-- casacore
-  |   |-- hdf5
-  |   `-- startools   <-- you are here
-  `-- src
-  \endverbatim
-*/
-
-//_______________________________________________________________________________
-//                                                                   RM Synthesis
-
-/*!
-  \defgroup RM RM-Synthesis package
-
-  \verbatim
-  lofarsoft
-  |-- data
-  |-- doc
-  |-- release
-  |-- build
-  |-- devel_common
-  |-- external
-  `-- src
-      `-- RM          <-- you are here
-  \endverbatim
-
-  <h3>External packages</h3>
-
-  - \ref external_packages_armadillo
-  - \ref external_packages_itpp
-*/
-
-//_______________________________________________________________________________
-//                                                                           LASA
-
-/*!
-  \defgroup LASA LOFAR Air-Shower Array (LASA)
-
-  - \ref lasa_setup
-  - \ref lasa_build
-  - \ref lasa_update
-  - \ref lasa_commit
-
-  \section lasa_setup Setting up your working copy
-
-  \b Note: This essentially is the  same procedure as already described in the
-  \ref configure_build_install.
-
-  <ol>
-    <li>For the initial checkout of your working copy run:
-    \verbatim
-    svn co http://usg.lofar.org/svn/code/trunk lofarsoft
-    \endverbatim
-    Once the checkout is complete, you will find a new directory \b lofarsoft
-    with the following sub-structure:
-    \verbatim
-    lofarsoft
-    |-- data
-    |-- doc
-    |-- release
-    |-- build
-    |-- devel_common
-    |-- external
-    `-- src
-        `-- LASA
-            |-- analysis
-	    `-- test
-    \endverbatim
-    The source code is in \b src/LASA, while the compile and installation is done
-    from \b build.
-
-    <li>Set up your environment: Add the location of the new executables to your
-    PATH variable:
-    \verbatim
-    # csh, tcsh
-    setenv LOFARSOFT <root directory of code tree>
-    source $LOFARSOFT/devel_common/scripts/init.csh
-
-    # sh, bash
-    export LOFARSOFT=<root directory of code tree>
-    . $LOFARSOFT/devel_common/scripts/init.sh
-    \endverbatim
-    If you want this information to be persistent, you should add the setting to
-    the configuration file of your shell; for bash users this is done in either
-    $HOME/.profile or $HOME/.bashrc – users of tcsh or csh need to add the 
-    appropriate statement to $HOME/.cshrc. 
-  </ol>
-
-  \section lasa_build Compile the software
-
-  <ol>
-    <li>Change into the \b build directory and run the \e bootstrap script:
-    \verbatim
-    cd build
-    ./bootstrap
-    \endverbatim
-    The major job of the script is to check whether or not a recent version of
-    CMake is available on your system; if this is not the case, CMake will be
-    build from the provided sources and installed into \b release/bin (which 
-    means that of course you should have that directory in your PATH).
-
-    <li>Build the components  of the LASA software package:
-    \verbatim
-    make lasa
-    \endverbatim
-
-    <li>Once the initial build of the package is done -- which also includes
-    checking the presence (and if required  build) of external packages, the
-    fastest route to build the LASA software while developing and writing new
-    code, is by running \e make within the \b build/lasa directory:
-    \verbatim
-    cd build/lasa
-    make
-    \endverbatim
-  </ol>
-
-  \section lasa_update Update your working copy
-
-  <ol>
-    <li>The savest way to update your existing working copy is to run
-    \verbatim
-    cd build
-    make update
-    \endverbatim
-    from the \e build directory; this will ensure, that not only you will be
-    picking up changes in the source code, but also adjustments to the build
-    environment.
-  </ol>
-
-  \section lasa_commit Committing changes
-
-  Once  you have made changes to the source code, checking them back into the
-  repository works as follows:
-
-  <ol>
-    <li>Change into the directory holding the source code:
-    \verbatim
-    cd src/LASA
-    \endverbatim
-
-    <li>Commit the changes by typing
-    \verbatim
-    svn commit
-    \endverbatim
-    or
-    \verbatim
-    svn commit -m "Your short comment about the changes made."
-    \endverbatim
-    While the first variant will open an editor window for you to type in a
-    short commit report, the second variant allows you to directly provide such
-    a short statement -- describing what changes were done to the code -- from
-    the command line.
-  </ol>
 */
 
