@@ -5,6 +5,7 @@ foreach (external_package
     blitz
     boost
     casacore
+    cfitsio
     flex
     fftw3
     gsl

@@ -3,28 +3,20 @@
 project (CFITSIO)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
-
-## Minimum required version of CFITSIO
-set (CFITSIO_REQUIRED_MAJOR_VERSION 3)
-set (CFITSIO_REQUIRED_MINOR_VERSION 14)
+cmake_minimum_required (VERSION 2.8)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (CFITSIO_FORCE_BUILD       "Force rebuild and local installation?"      NO  )
-option (CFITSIO_CMAKE_BUILD       "Use CMake to configure and build CFITSIO?"  YES )
-option (CFITSIO_VERBOSE_CONFIGURE "Be verbose during configuration?"           NO  )
-option (CFITSIO_VERBOSE_BUILD     "Be verbose during build process?"           NO  )
-option (CFITSIO_BUILD_TESTS       "Build the test programs?"                   NO  )
+option (CFITSIO_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
+option (CFITSIO_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO  )
+option (CFITSIO_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
 
-## Options of the library itself
-
-option (CFITSIO_enable_lfs       "Enable large file system support?" YES )
-option (CFITSIO_enable_reentrant "Enable reentrant multithreading?"  NO  )
-option (CFITSIO_enable_hera      "Build for HERA project?"           NO  )
+option (CFITSIO_enable_lfs        "Enable large file system support?"      YES )
+option (CFITSIO_enable_reentrant  "Enable reentrant multithreading?"       NO  )
+option (CFITSIO_enable_hera       "Build for HERA project?"                NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -48,143 +40,57 @@ endif (USG_ROOT)
 ## Check if the program/package/library is already available
 
 if (NOT CFITSIO_VERBOSE_CONFIGURE)
-  set (CFITSIO_FIND_QUIETLY  YES )
+  set (CFITSIO_FIND_QUIETLY YES )
 endif (NOT CFITSIO_VERBOSE_CONFIGURE)
 
 include (FindCFITSIO)
 
-## Check for major version
-if (CFITSIO_MAJOR_VERSION LESS CFITSIO_REQUIRED_MAJOR_VERSION)
-  message (STATUS "CFITSIO installation found - major version too small!")
-  set (CFITSIO_FORCE_BUILD TRUE)
-else (CFITSIO_MAJOR_VERSION LESS CFITSIO_REQUIRED_MAJOR_VERSION)
-  ## Check for major version
-  if (CFITSIO_MINOR_VERSION LESS CFITSIO_REQUIRED_MINOR_VERSION)
-    message (STATUS "CFITSIO installation found - minor version too small!")
-    set (CFITSIO_FORCE_BUILD TRUE)
-  endif (CFITSIO_MINOR_VERSION LESS CFITSIO_REQUIRED_MINOR_VERSION)
-endif (CFITSIO_MAJOR_VERSION LESS CFITSIO_REQUIRED_MAJOR_VERSION)
-
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
-  
-  ## ------------------------------------------------------------------------------
-  ## 
 
-  set (CFITSIO_VERSION "3140")
-  set (CFITSIO_DIRECTORY "cfitsio${CFITSIO_VERSION}")
-  set (CFITSIO_TAR_ARCHIVE "${CFITSIO_DIRECTORY}.tar.gz")
+  set (cfitsio_version "3140")
+  set (CFITSIO_TAR_ARCHIVE "cfitsio${cfitsio_version}.tar.gz")
+
+  ##__________________________________________________________________
+  ## Build the project
+  
+  include (ExternalProject)
   
   find_file (have_cfitsio_tgz ${CFITSIO_TAR_ARCHIVE} ${CFITSIO_SOURCE_DIR})
-  find_program (tar_executable tar ${bin_locations})
   
-  if (have_cfitsio_tgz AND tar_executable)
-    
-    ## expand the tar-archive
-    if (CFITSIO_VERBOSE_BUILD)
-      add_custom_target (cfitsio_expand
-	COMMAND ${tar_executable} -xvzf ${have_cfitsio_tgz}
-	WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}
-	COMMENT "[CFITSIO] Expanding tar-archive ..."
-	)
-    else (CFITSIO_VERBOSE_BUILD)
-      add_custom_target (cfitsio_expand
-	COMMAND ${tar_executable} -xzf ${have_cfitsio_tgz}
-	WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}
-	COMMENT "[CFITSIO] Expanding tar-archive ..."
-	)
-    endif (CFITSIO_VERBOSE_BUILD)
-    
-    ## configure the package
+  if (have_cfitsio_tgz)
     if (CFITSIO_enable_lfs)
-      if (CFITSIO_enable_reentrant)
-	add_custom_target (cfitsio_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --includedir=${USG_INSTALL_PREFIX}/include/cfitsio --enable-lfs --enable-reentrant
-	  WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
-	  COMMENT "[CFITSIO] Configuring package ..."
-	  )
-      else (CFITSIO_enable_reentrant)
-	add_custom_target (cfitsio_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --includedir=${USG_INSTALL_PREFIX}/include/cfitsio --enable-lfs
-	  WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
-	  COMMENT "[CFITSIO] Configuring package ..."
-	  )
-      endif (CFITSIO_enable_reentrant)
+      ExternalProject_Add (cfitsio
+	PREFIX ${CFITSIO_BINARY_DIR}
+	DOWNLOAD_DIR ${CFITSIO_BINARY_DIR}
+	SOURCE_DIR ${CFITSIO_BINARY_DIR}
+	URL ${have_cfitsio_tgz}
+	BUILD_IN_SOURCE 1
+	CONFIGURE_COMMAND ${CFITSIO_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}  --enable-lfs
+	)
     else (CFITSIO_enable_lfs)
-      if (CFITSIO_enable_reentrant)
-	add_custom_target (cfitsio_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --includedir=${USG_INSTALL_PREFIX}/include/cfitsio --enable-reentrant
-	  WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
-	  COMMENT "[CFITSIO] Configuring package ..."
-	  )
-      else (CFITSIO_enable_reentrant)
-	add_custom_target (cfitsio_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --includedir=${USG_INSTALL_PREFIX}/include/cfitsio 
-	  WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
-	  COMMENT "[CFITSIO] Configuring package ..."
-	  )
-      endif (CFITSIO_enable_reentrant)
+      ExternalProject_Add (cfitsio
+	PREFIX ${CFITSIO_BINARY_DIR}
+	DOWNLOAD_DIR ${CFITSIO_BINARY_DIR}
+	SOURCE_DIR ${CFITSIO_BINARY_DIR}
+	URL ${have_cfitsio_tgz}
+	BUILD_IN_SOURCE 1
+	CONFIGURE_COMMAND ${CFITSIO_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
+	)
     endif (CFITSIO_enable_lfs)
-    ## target dependency
-    add_dependencies (cfitsio_configure cfitsio_expand)
-    
-    ## build the package
-      add_custom_target (cfitsio_build
-	COMMAND make
-	WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
-	COMMENT "[CFITSIO] Starting building library ..."
-	)
-    add_dependencies (cfitsio_build cfitsio_configure)
-    
-    if (CFITSIO_BUILD_TESTS)
-      add_custom_target (cfitsio_tests
-	COMMAND make fpack smem testprog speed
-	WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
-	COMMENT "[CFITSIO] Start building test programs ..."
-	)
-      add_dependencies (cfitsio_tests cfitsio_build)
-    endif (CFITSIO_BUILD_TESTS)
-    
-    ## build and install the package
-    add_custom_target (cfitsio_install
-      COMMAND mkdir -p ${USG_INSTALL_PREFIX}/include/cfitsio
-      COMMAND make install
-      COMMAND mv ${USG_INSTALL_PREFIX}/include/*.h ${USG_INSTALL_PREFIX}/include/cfitsio
-      WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
-      COMMENT "[CFITSIO] Installing package ..."
-      )
-    if (CFITSIO_BUILD_TESTS)
-      add_dependencies (cfitsio_install cfitsio_tests cfitsio_build)
-    else (CFITSIO_BUILD_TESTS)
-      add_dependencies (cfitsio_install cfitsio_build)
-    endif (CFITSIO_BUILD_TESTS)
-    
-    ## post-install clean-up
-    add_custom_target (install
-      COMMAND rm -rf *
+  else (have_cfitsio_tgz)
+    add_custom_target (cfitsio
       WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}
-      COMMENT "[CFITSIO] Cleaning up build directory ..."
+      COMMENT "[CFITSIO] Unable to build package - missing sources!"
       )
-    add_dependencies (install cfitsio_install)
-    
-  else (have_cfitsio_tgz AND tar_executable)
-    message (STATUS "[CFITSIO] Unable to install - missing tar-archive!")
-  endif (have_cfitsio_tgz AND tar_executable)
+  endif (have_cfitsio_tgz)
   
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
-  message (STATUS "Found system-wide installation of CFITSIO; skipping rebuild!")
+  add_custom_target (cfitsio
+    WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}
+    COMMENT "[CFITSIO] Found system-wide installation; skipping rebuild!"
+    )
 endif (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
-
-## ------------------------------------------------------------------------------
-## Configuration summary
-
-message ("--------------------------------------------------")
-message ("   [CFITSIO] Configuration summary.")
-message (" ")
-message (STATUS "CFITSIO_LIBRARIES = ${CFITSIO_LIBRARIES}")
-message (STATUS "enable HERA       = ${CFITSIO_enable_hera}")
-message (STATUS "enable_reentrant  = ${CFITSIO_enable_reentrant}")
-message ("--------------------------------------------------")

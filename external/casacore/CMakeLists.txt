@@ -82,8 +82,13 @@ else (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
     )
 endif (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
 
-## ------------------------------------------------------------------------------
-## Update the tar-archive to the latest version of the source
+## ==============================================================================
+##
+##  Service targets
+##
+## ==============================================================================
+
+## Update tar-archive from code repository _______
 
 if (svn_executable AND tar_executable)
   add_custom_target (update_casacore
@@ -94,7 +99,9 @@ if (svn_executable AND tar_executable)
     WORKING_DIRECTORY ${CASACORE_SOURCE_DIR}
     COMMENT "Retrieving latest version of casacore source code ..."
     )
-endif (svn_executable AND tar_executable)  
+endif (svn_executable AND tar_executable)
+
+## Create tar-archive with CMake scripts _________
 
 if (tar_executable)
   add_custom_target (update_casacore_cmake
@@ -104,4 +111,6 @@ if (tar_executable)
     COMMENT "Retrieving latest version of casacore source code ..."
     )
 endif (tar_executable)
+
+## Download and install Measures database ________
 
