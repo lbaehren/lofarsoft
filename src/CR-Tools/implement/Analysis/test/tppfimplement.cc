@@ -94,7 +94,6 @@ int test_ppfimplement ()
   try {
     ppfimplement ppf_impl;
     ppfinversion ppf_inv ;
-    ionoCalibration iono_cal ;
     SubbandID band_ID ;
     tbbctlIn newtbbctlIn ;
     RawSubbandIn newRawSubbandIn ;  

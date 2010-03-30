@@ -87,7 +87,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
   */  
-  class LOFAR_TBB : public DAL::TBB_Timeseries, public CR::DataReader {
+  class LOFAR_TBB : private DAL::TBB_Timeseries, public CR::DataReader {
 
     //! List of channel IDs pointing to the dipole datasets holding the TBB data
     std::vector <std::string> channelID_p;
@@ -134,15 +134,31 @@ namespace CR { // Namespace CR -- begin
     // === Methods ==============================================================
     
     //! Get a block of raw time-series data for the available data channels
-    casa::Matrix<double> fx ();
-    //! Get a block of raw time-series data for the available data channels
     void fx (casa::Matrix<double> &data);
+
+    //! Get a block of raw time-series data for the available data channels
+    casa::Matrix<double> fx ();
 
     //! Set the record with the header information
     bool setHeaderRecord (casa::Record const &rec) {
       return DataReader::setHeaderRecord (rec);
     }
-    
+
+    //! Get the number of samples of the embedded dipole datasets
+    casa::Vector<uint> dataLength ();
+
+    //! Get the sample frequency
+    casa::Vector<casa::MFrequency> sampleFrequency ();
+
+    //! Retrieve the list of channel IDs. 
+    casa::Vector<int> channelID ();
+
+    //! Get the number of samples elapsed since the last full second. 
+    casa::Vector<uint> sampleNumber ();
+
+    //! Time offset between the individual antennas in units of samples
+    casa::Vector<int> sampleOffset (uint const &refAntenna=0);
+
   protected:
     
     /*!
@@ -160,7 +176,6 @@ namespace CR { // Namespace CR -- begin
               went fine.
     */
     bool setHeaderRecord ();
-    
     
   private:
 

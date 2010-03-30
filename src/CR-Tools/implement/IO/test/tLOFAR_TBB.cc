@@ -506,17 +506,11 @@ int test_data (std::string const &filename)
   cout << "[5] Test DataReader::nextBlock() ..." << endl;
   try {
     uint nofBlocks (10);
-    uint nofDipoles = dr.nofDipoleDatasets();
-    casa::Matrix<double> fx (dr.blocksize(),
-			     nofDipoles);
-    
-    cout << "-- blocksize    = " << blocksize  << endl;
-    cout << "-- nof. dipoles = " << nofDipoles << endl;
-    cout << "-- shape(fx)    = " << fx.shape() << endl;
+    casa::Matrix<double> fx;
     
     for (uint block(0); block<nofBlocks; block++) {
       // get the data for the current block
-      fx = dr.fx();
+      dr.fx(fx);
       // feedback
       cout << "\t" << block << "/" << nofBlocks
 	   << "\t" << min(fx)

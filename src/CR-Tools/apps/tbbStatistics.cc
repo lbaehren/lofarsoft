@@ -172,7 +172,7 @@ int dynamic_spectrum (std::string const &filename,
 
   uint block       = 0;
   uint channel     = 0;
-  uint nofDipoles  = dataset.nofDipoleDatasets();
+  uint nofDipoles  = dataset.dataLength().nelements();
   uint nofChannels = dataset.fftLength();
   casa::Matrix<casa::DComplex> spectra (nofChannels,
 					nofDipoles);

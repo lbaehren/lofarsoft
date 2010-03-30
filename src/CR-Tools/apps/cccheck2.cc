@@ -73,9 +73,9 @@ int ccmaker (string const &infile1,
   dr1 = new CR::LOFAR_TBB(infile1,blocksize);
   dr2 = new CR::LOFAR_TBB(infile2,blocksize);
   //second
-  int start1 = dr1->sample_number()[0];
+  int start1 = dr1->sampleNumber()[0];
   dr1->setBlock(offset1);
-  int start2 = dr2->sample_number()[0];
+  int start2 = dr2->sampleNumber()[0];
   int offset2=offset1;//-(start2-start1)/blocksize;
   int difference=start1-start2;
   dr2->setBlock(offset2);

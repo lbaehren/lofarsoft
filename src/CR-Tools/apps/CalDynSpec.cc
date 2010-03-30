@@ -185,7 +185,7 @@ int main (int argc, char *argv[])
   if(weight!=0){
     Matrix< DComplex > fft2calfft; 
     
-    int maxnrblocks = (int) ts2.data_length()[antennanr]/ts2.blocksize();
+    int maxnrblocks = (int) ts2.dataLength()[antennanr]/ts2.blocksize();
     if(nrblocks == 0 || nrblocks > maxnrblocks){
       nrblocks = maxnrblocks;
     }
@@ -228,20 +228,13 @@ int main (int argc, char *argv[])
   //./apps/CalDynSpec -n 10240 -i ~/Astro/data/lightning/CS302C-B0T16\:48\:58.h5 -o ~/Astro/data/lightning/fits/CS302C-B0T16\:48\:58UnWeighted -b 18750 -n 2000 -w 0 -s 10240
   //./apps/CalDynSpec -n 10240 -i ~/Astro/data/lightning/CS302C-B0T16\:48\:58.h5 -o ~/Astro/data/lightning/fits/CS302C-B0T16\:48\:58Weighted -b 18750 -n 2000 -w 1 -s 10240
   
-  
-  
-  
-  
-  
-  
-  
-  
   // Create time and frequency axes.
   casa::Vector<double> freqs = ts2.frequencyValues(antennanr);
   //cout << freqs(0) << std::endl;
-  double samplefreq = ts2.sample_frequency_value()(antennanr);
-  string frequnit = ts2.sample_frequency_unit()(antennanr);
-  double timestep = 1 / samplefreq * ts2.blocksize();
+  casa::MFrequency sampleFrequency = ts2.sampleFrequency()(antennanr);
+  double samplefreq = sampleFrequency.get(casa::Unit("Hz")).getValue();
+  string frequnit   = sampleFrequency.get(casa::Unit("Hz")).getUnit();
+  double timestep   = 1 / samplefreq * ts2.blocksize();
   string timeunit;
   if(frequnit == "MHz"){
     timeunit = "us";

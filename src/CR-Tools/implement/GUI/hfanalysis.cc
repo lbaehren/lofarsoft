@@ -210,7 +210,7 @@ HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets) {
     opened=drp!=NULL;
     MSG("Opening File="<<Filename);drp->summary();
     if (opened) {
-      CasaVector<int> OffsetsCasa = tbb->sample_offset();
+      CasaVector<int> OffsetsCasa = tbb->sampleOffset();
       aipsvec2stlvec(OffsetsCasa, Offsets);
       };
   } else {

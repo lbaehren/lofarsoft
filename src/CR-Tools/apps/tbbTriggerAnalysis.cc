@@ -171,34 +171,42 @@ void addFPGATriggersToList(uint rcu, uint startTime, uint startSample, Vector<In
  \param filename -- Name of the HDF5 dataset to work with
  \param triggerList -- A list in which we output the trigger info
  */
-void triggerAnalysisOnFile (std::string const &filename, uint blocksize, Vector<TBBTrigger> &triggerList, FILE * triggerOutputFile, uint threshold, uint start, uint stop, uint windowSize, uint rcuOffset)
+void triggerAnalysisOnFile (std::string const &filename,
+			    uint blocksize,
+			    Vector<TBBTrigger> &triggerList,
+			    FILE * triggerOutputFile,
+			    uint threshold,
+			    uint start,
+			    uint stop,
+			    uint windowSize,
+			    uint rcuOffset)
 {
   cout << "Starting trigger analysis on file: " << filename << endl;
-   
+  
   // create object to handle the data
   LOFAR_TBB data (filename,
 		  blocksize);
   // cout << "Starting at block: " << data.block() << endl;
-
-  uint nofBlocks = data.data_length()[0] / blocksize; // assuming same size for all antennas...
+  
+  uint nofBlocks = data.dataLength()[0] / blocksize; // assuming same size for all antennas...
   
   uint startTime = data.headerRecord().asInt("Date");
-//  uint startSample = data.headerRecord().asInt("StartSample"); // NOT IMPLEMENTED
-  casa::Vector<uint> startSampleNumbers = data.sample_number();
+  //  uint startSample = data.headerRecord().asInt("StartSample"); // NOT IMPLEMENTED
+  casa::Vector<uint> startSampleNumbers = data.sampleNumber();
   
-//  nofBlocks = 1000;
+  //  nofBlocks = 1000;
   cout << nofBlocks << " = blocks to be processed, blocksize = " << blocksize << endl;
   
-  uint nofDipoles = data.nofDipoleDatasets();
-//  data.toStartBlock(); // !! Reset file pointers to the start of the data !! Doesn't work properly !!
-//  cout << "Reset to block: " << data.block() << endl;
+  uint nofDipoles = data.dataLength().nelements();
+  //  data.toStartBlock(); // !! Reset file pointers to the start of the data !! Doesn't work properly !!
+  //  cout << "Reset to block: " << data.block() << endl;
   data.setBlock(0);
   cout << "Now set tot block: " << data.block() << endl;
-
+  
   casa::Matrix<double> fx (data.blocksize(),
 			   nofDipoles);
   Vector<double> tempArray;
-
+  
   tbbTools * tbbToolsArray = new tbbTools[96];
   
   Vector<int> index, sum, width, peak, meanval, afterval; // output for trigger function

@@ -106,94 +106,20 @@
 */
 
 class PhaseCalibration {
- 
-  private : 
-   
-   enum antBoolVector{ F, T } ; 
- 
-//  private:
-// 
-//   /*!
-//     \brief Unconditional copying
-//   */
-//   void copy (PhaseCalibration const &other);
-// 
-//   /*!
-//     \brief Unconditional deletion 
-//   */
-//   void destroy(void);
-
-public :
-
- // --------------------------------------------------------------- Construction
-
-  /*!
-    \brief Default constructor
-  */
   
+  enum antBoolVector{ F, T } ; 
+  
+ public :
+  
+  // === Construction ===========================================================
+  
+  //! Default constructor
   PhaseCalibration ();
 
+  // === Methods ================================================================
+
   /*!
-    \brief argumented constructor
-    
-      \param spectra		--	Sets the data array of the gain curve to the 2-dimensional complex
-    					array in which number of rows indicates the number of frequency channels
-					however, number of columns indicate the number of antennas to be scanned.
-    
-    \param frequencyRanges	--	Minimum and maximum value of frequencies to define frequency ranges
-    					in which power peaks of the signal lies (we set these frequency ranges 
-			         	greater than three, i.e., picture and audio subcarriers of TV transmission)
-
-    \param expectedPhases	--	Expected Phase delays for various antennas due to the fact that different
-    					antennas are pointing towards different directions and due to the time delay 
-					of electronic circuit as well.
-					
-    \param frequencyValues	--	Vector gives the exact frequency values correspoding to the frequency indices
-    					(or row index) of the given data array (i.e., spectra or FFT Pattern) of 
-					complex values.	
-	
-    \param sampleJumps	   	--	multisamle jumps to correct time delays because of the electronic circuits.
-    
-    \param referenceAntenna	--	Phase calibration is done with respect to this particular antenna
-    
-    \param sampleRate		--	rate with which sampling of the data is performed.
-    
-    \param badnessWeight	--	Wheight for the two components of the "badness". (Value between 0 and 1, default 0.5)
-
-    \param badnessThreshold	--	Maximum acceptable "badness" before antenna is flagged. (default 0.15 sample times)
-
-   	
-				
-  */
- 
-  PhaseCalibration ( const Matrix<DComplex>& spectra,
-  		     const Matrix<Double>& frequencyRanges,
-		     const Matrix<Double>& expectedPhases,
-		     const Matrix<Double>& phaseGrad,
-		     const Vector<Double>& frequencyValues,
-		     const Vector<Double>& sampleJumps,
-		     const Int& referenceAntenna,
-		     const Double& sampleRate,
-		     const Double& badnessWeight,
-		     const Double& badnessThreshold ) ;
-		     
-
-  // ---------------------------------------------------------------- Destruction
-
-  /*!\param frequencyRanges	--	Minimum and maximum value of frequencies to define frequency ranges
-    					in which power peaks of the signal lies (we set these frequency ranges 
-			         	greater than three, i.e., picture and audio subcarriers of TV transmission)
-    \brief Destructor
-  */
-   ~PhaseCalibration ();
-  
-  //---------------------------------------------Computation methods---------------
-  
-    
-  
-/*!
-  
-  \ brief get the frequency indices of the input frequency values vector corresponding to the frequency 
+    \ brief get the frequency indices of the input frequency values vector corresponding to the frequency 
     ranges for which minimum and maximum ranges are given in a form of matrix for various peaks of the signal.
   
   \param frequencyRanges	--	Minimum and maximum value of frequencies to define frequency ranges

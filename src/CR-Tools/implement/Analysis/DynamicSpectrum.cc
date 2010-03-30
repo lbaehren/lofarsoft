@@ -94,7 +94,7 @@ namespace CR {  // Namespace CR -- begin
     const double alphaHanning = 0.5;
     cout << "Hanning filter set to " << alphaHanning << endl;
     ts2.setHanningFilter(alphaHanning);
-    int maxnrblocks = (int) ts2.data_length()[antennanr]/ts2.blocksize();
+    int maxnrblocks = (int) ts2.dataLength()(antennanr)/ts2.blocksize();
     if(nrblocks == 0 || nrblocks > maxnrblocks){
       nrblocks = maxnrblocks;
     }
@@ -112,9 +112,10 @@ namespace CR {  // Namespace CR -- begin
     // Create time and frequency axes.
     casa::Vector<double> freqs = ts2.frequencyValues(antennanr);
     //cout << freqs(0) << std::endl;
-    double samplefreq = ts2.sample_frequency_value()(antennanr);
-    string frequnit = ts2.sample_frequency_unit()(antennanr);
-    double timestep = 1 / samplefreq * ts2.blocksize();
+    casa::MFrequency sampleFrequency = ts2.sampleFrequency()(antennanr);
+    double samplefreq = sampleFrequency.get(casa::Unit("Hz")).getValue();
+    string frequnit   = sampleFrequency.get(casa::Unit("Hz")).getUnit();
+    double timestep   = 1 / samplefreq * ts2.blocksize();
     string timeunit;
     if(frequnit == "MHz"){
       timeunit = "us";
@@ -172,8 +173,9 @@ namespace CR {  // Namespace CR -- begin
     return *this;
   }
   
-  // ----------------------------------------------------------------------- copy
-
+  //_____________________________________________________________________________
+  //                                                                         copy
+  
   void DynamicSpectrum::copy (DynamicSpectrum const& other)
   {
     dynamicSpectrum_p.resize(other.dynamicSpectrum_p.shape());
@@ -184,7 +186,8 @@ namespace CR {  // Namespace CR -- begin
     freqAxis_p = other.freqAxis_p;
   }
   
-  // -------------------------------------------------------------------- destroy
+  //_____________________________________________________________________________
+  //                                                                      destroy
 
   void DynamicSpectrum::destroy ()
   {;}
@@ -195,8 +198,9 @@ namespace CR {  // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ---------------------------------------------------------------- setTimeAxis
-  
+  //_____________________________________________________________________________
+  //                                                                  setTimeAxis
+
   void DynamicSpectrum::setTimeAxis (const double& crval,
 				     const double& cdelt,
 				     const String& unit)
@@ -208,8 +212,9 @@ namespace CR {  // Namespace CR -- begin
 		 increment);
   }
   
-  // ---------------------------------------------------------------- setTimeAxis
-  
+  //_____________________________________________________________________________
+  //                                                                  setTimeAxis
+
   void DynamicSpectrum::setTimeAxis (const Quantum<double>& crval,
 				     const Quantum<double>& cdelt)
   {
@@ -234,8 +239,9 @@ namespace CR {  // Namespace CR -- begin
     timeAxis_p = lc;
   }
   
-  // ----------------------------------------------------------- setFrequencyAxis
-  
+  //_____________________________________________________________________________
+  //                                                             setFrequencyAxis
+
   void DynamicSpectrum::setFrequencyAxis (const double& crval,
 					  const double& cdelt,
 					  const String& unit)
@@ -263,25 +269,25 @@ namespace CR {  // Namespace CR -- begin
     freqAxis_p = sc;
   }
   
-	
+  
   // ----------------------------------------------------------- setSpectrum
-	
-	void DynamicSpectrum::setSpectrum ( casa::Matrix<double> const &data)
-	{
-		dynamicSpectrum_p.resize(data.shape());
-		dynamicSpectrum_p = data;
-		
-    }
-	
+  
+  void DynamicSpectrum::setSpectrum ( casa::Matrix<double> const &data)
+  {
+    dynamicSpectrum_p.resize(data.shape());
+    dynamicSpectrum_p = data;
+    
+  }
+  
   // ----------------------------------------------------------- setFilename 	
-	
-	void DynamicSpectrum::setFilename ( std::string &filename )
-	{
-		filename_p = filename;
-	}
-	
+  
+  void DynamicSpectrum::setFilename ( std::string &filename )
+  {
+    filename_p = filename;
+  }
+  
   // ----------------------------------------------------------- coordinateSystem
-
+  
   casa::CoordinateSystem DynamicSpectrum::coordinateSystem ()
   {
     casa::CoordinateSystem cs;

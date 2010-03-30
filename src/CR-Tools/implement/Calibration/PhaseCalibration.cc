@@ -32,30 +32,6 @@
 PhaseCalibration::PhaseCalibration ()
 {;}   
 
-PhaseCalibration::PhaseCalibration( const Matrix<DComplex>& spectra,
-				    const Matrix<Double>& frequencyRanges,
-				    const Matrix<Double>& expectedPhases,
-				    const Matrix<Double>& phaseGrad,
-				    const Vector<Double>& frequencyValues,
-				    const Vector<Double>& sampleJumps,
-				    const Int& referenceAntenna,
-				    const Double& sampleRate,
-				    const Double& badnessWeight,
-				    const Double& badnessThreshold)
-{ 
-  ;//Matrix<DComplex> gainValues ;
-}
-
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-PhaseCalibration :: ~PhaseCalibration ()
-{;}   
-
-
 // ==============================================================================
 //
 //  Methods

@@ -355,11 +355,17 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
 
     try {
-      /* Set mandatory fields within the header record */
+      // Mandatory fields ________________________
+
 //       header_p.define("Date",headerpoint_p->JDR);
       header_p.define("AntennaIDs",channelID());
       header_p.define("Observatory","LOFAR");
       header_p.define("SampleFreq",DataReader::sampleFrequency());
+
+      // Optional fields _________________________
+
+      header_p.define("SampleNumber",sampleNumber());
+      header_p.define("SampleOffset",sampleOffset());
     } catch (AipsError x) {
       cerr << "[LOFAR_TBB::setHeaderRecord] " << x.getMesg() << endl;
       status = false;
@@ -409,6 +415,74 @@ namespace CR { // Namespace CR -- begin
     TBB_Timeseries::fx (data,
 			start,
 			blocksize_p);
+  }
+
+  //_______________________________________________________________________________
+  //                                                                     dataLength
+  
+  casa::Vector<uint> LOFAR_TBB::dataLength ()
+  {
+    std::vector<uint> val = TBB_Timeseries::data_length();
+    casa::Vector<uint> length (val.size());
+
+    for (uint n(0); n<val.size(); ++n) {
+      length(n) = val[n];
+    }
+
+    return length;
+  }
+
+  //_______________________________________________________________________________
+  //                                                                     dataLength
+  
+  casa::Vector<casa::MFrequency> LOFAR_TBB::sampleFrequency ()
+  {
+    return TBB_Timeseries::sample_frequency();
+  }
+  
+  //_______________________________________________________________________________
+  //                                                                      channelID
+  
+  casa::Vector<int> LOFAR_TBB::channelID ()
+  {
+    std::vector<int> val = TBB_Timeseries::channelID();
+    casa::Vector<int> sample (val.size());
+
+    for (unsigned int n(0); n<val.size(); ++n) {
+      sample(n) = val[n];
+    }
+
+    return sample;
+  }
+
+  //_______________________________________________________________________________
+  //                                                                   sampleNumber
+  
+  casa::Vector<uint> LOFAR_TBB::sampleNumber ()
+  {
+    std::vector<uint> val = TBB_Timeseries::sample_number();
+    casa::Vector<uint> sample (val.size());
+
+    for (unsigned int n(0); n<val.size(); ++n) {
+      sample(n) = val[n];
+    }
+
+    return sample;
+  }
+
+  //_______________________________________________________________________________
+  //                                                                   sampleOffset
+  
+  casa::Vector<int> LOFAR_TBB::sampleOffset (uint const &refAntenna)
+  {
+    std::vector<int> val = TBB_Timeseries::sample_offset (refAntenna);
+    casa::Vector<int> offset (val.size());
+
+    for (unsigned int n(0); n<val.size(); ++n) {
+      offset(n) = val[n];
+    }
+
+    return offset;
   }
   
 } // Namespace CR -- end
