@@ -1,5 +1,10 @@
 /* $Id: lofar_config.h.cmake 14745 2010-01-05 11:05:22Z loose $ */
 
+/*!
+	\file lofar_config.h
+	\ingroup pipeline
+*/
+
 /*-------------------------------------------------------------------------*\
 |     Defines for the presence or absence of (system) header files          |
 \*-------------------------------------------------------------------------*/

@@ -1,9 +1,18 @@
 #ifndef EP_ECHOWRAPPERS_H
 #define EP_ECHOWRAPPERS_H
 
+/*!
+	\file echowrappers.h
+	\ingroup pipeline
+*/
+
 #include "Echo_Protocol.ph"
 #include "eventwrappers.h"
 
+/*!
+	\class EchoPingEventWrapper
+	\ingroup pipeline
+*/
 class EchoPingEventWrapper : public GenericEventWrapper {
 private:
     EchoPingEvent* my_event;
@@ -17,6 +26,10 @@ public:
     virtual EchoPingEvent* get_event_ptr() { return this->my_event; }
 };
 
+/*!
+	\class EchoEchoEventWrapper
+	\ingroup pipeline
+*/
 class EchoEchoEventWrapper : public GenericEventWrapper {
 private:
     EchoEchoEvent* my_event;

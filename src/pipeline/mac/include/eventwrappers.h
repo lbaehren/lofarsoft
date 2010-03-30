@@ -1,10 +1,20 @@
 #ifndef EP_EVENTWRAPPERS_H
 #define EP_EVENTWRAPPERS_H
 
+/*!
+	\file eventwrappers.h
+	\ingroup pipeline
+*/
+
 #include <lofar_config.h>
 #include <Common/LofarLogger.h>
 #include <sys/time.h>
 
+/*!
+	\class GenericEventWrapper
+	\ingroup pipeline
+	\brief Interface definition class for a generic event
+*/
 class GenericEventWrapper {
 private:
     LOFAR::MACIO::GCFEvent* my_event;

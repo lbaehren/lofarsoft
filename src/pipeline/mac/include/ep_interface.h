@@ -1,6 +1,11 @@
 #ifndef EP_INTERFACE_H
 #define EP_INTERFACE_H
 
+/*!
+  \file ep_interface.h
+  \ingroup pipeline
+*/
+
 #include <boost/python.hpp>
 #include <lofar_config.h>
 #include <Common/LofarLogger.h>
@@ -9,10 +14,11 @@
 
 #include "eventwrappers.h"
 
-//
-// Event Port Interface
-//
-
+/*!
+  \class EP_Interface
+  \ingroup pipeline
+  \brief Event Port Interface
+*/
 class EP_Interface {
 private:
     LOFAR::MACIO::EventPort* my_EventPort;
