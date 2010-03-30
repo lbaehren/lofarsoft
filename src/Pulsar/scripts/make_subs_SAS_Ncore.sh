@@ -320,9 +320,9 @@ then
 #          (( sub_rsp_counter += 1 ))
 #       done
 #    done
-      ls ../RSP0/*sub0??? ../RSP1/*sub0??? ../RSP2/*sub0??? ../RSP3/*sub0??? ../RSP4/*sub0??? ../RSP5/*sub0??? ../RSP6/*sub0??? ../RSP7/*sub0??? | sed 's/\// /g' | awk '{print $3}' | sed 's/RSP/ RSP /' | sed 's/ RSP/RSP/g' | sed 's/\.sub/ /' | awk '{printf("ln -s ../RSP%d/%s%d.sub%04d %sA.sub%04d\n"),$2,$1,$2,$3,$1,$2*496+$3}' >> run.sh
-      
-      status=$?
+         offset=$(( 248 / $core * 16 ))
+
+         ls ../RSP[0-7]/*sub[0-9]??? | sed 's/\// /g' | awk '{print $3}' | sed 's/RSP/ RSP /' | sed 's/ RSP/RSP/g' | sed 's/\.sub/ /' | awk -v offset=$offset '{printf("ln -s ../RSP%d/%s%d.sub%04d %sA.sub%04d\n"),$2,$1,$2,$3,$1,$2*offset+$3}' >> run.sh
 
       if [ $status -ne 0 ]
       then
