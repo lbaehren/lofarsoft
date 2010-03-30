@@ -40,9 +40,11 @@ set (CASACORE_FIND_QUIETLY YES)
 
 include (FindCASACORE)
 
-find_program (svn_executable  svn  PATHS ${bin_locations})
-find_program (tar_executable  tar  PATHS ${bin_locations})
-find_program (find_executable find PATHS ${bin_locations})
+find_program (bunzip2_executable   bunzip2   PATHS ${bin_locations})
+find_program (svn_executable       svn       PATHS ${bin_locations})
+find_program (tar_executable       tar       PATHS ${bin_locations})
+find_program (find_executable      find      PATHS ${bin_locations})
+find_program (wget_executable      wget      PATHS ${bin_locations})
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -91,7 +93,7 @@ endif (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
 ## Update tar-archive from code repository _______
 
 if (svn_executable AND tar_executable)
-  add_custom_target (update_casacore
+  add_custom_target (casacore_update_archive
     COMMAND rm -rf casacore
     COMMAND ${svn_executable} co http://casacore.googlecode.com/svn/trunk casacore
     COMMAND ${tar_executable} -cvzf casacore.tgz casacore --exclude .svn
@@ -104,7 +106,7 @@ endif (svn_executable AND tar_executable)
 ## Create tar-archive with CMake scripts _________
 
 if (tar_executable)
-  add_custom_target (update_casacore_cmake
+  add_custom_target (casacore_update_cmake
     COMMAND rm -rf ../cmake.tgz
     COMMAND ${tar_executable} -cvzf ../cmake.tgz . --exclude .svn
     WORKING_DIRECTORY ${CASACORE_SOURCE_DIR}/cmake
@@ -114,3 +116,15 @@ endif (tar_executable)
 
 ## Download and install Measures database ________
 
+if (wget_executable AND bunzip2_executable AND tar_executable)
+  add_custom_target (casacore_update_data
+    COMMAND ${wget_executable} ftp://ftp.atnf.csiro.au/pub/software/asap/data/asap_data.tar.bz2
+    COMMAND ${bunzip2_executable} asap_data.tar.bz2
+    COMMAND ${tar_executable} -xvf asap_data.tar
+    COMMAND rm -rf ephemerides geodetic
+    COMMAND mv data/* .
+    COMMAND rm -rf asap_data.* data
+    WORKING_DIRECTORY ${USG_ROOT}/data
+    COMMENT "Retrieving latest version of measures database ..."
+    )
+endif (wget_executable AND bunzip2_executable AND tar_executable)
