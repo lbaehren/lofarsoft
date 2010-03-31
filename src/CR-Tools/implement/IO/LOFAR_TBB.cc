@@ -426,11 +426,7 @@ namespace CR { // Namespace CR -- begin
   
   casa::Vector<uint> LOFAR_TBB::dataLength ()
   {
-    casa::Vector<uint> val;
-
-    convertVector (val,TBB_Timeseries::data_length());
-
-    return val;
+    return TBB_Timeseries::data_length();
   }
 
   //_______________________________________________________________________________
@@ -461,14 +457,7 @@ namespace CR { // Namespace CR -- begin
   
   casa::Vector<uint> LOFAR_TBB::time ()
   {
-    std::vector<uint> val = TBB_Timeseries::time();
-    casa::Vector<uint> t (val.size());
-
-    for (unsigned int n(0); n<val.size(); ++n) {
-      t(n) = val[n];
-    }
-
-    return t;
+    return TBB_Timeseries::time();
   }
 
   //_______________________________________________________________________________
@@ -476,11 +465,7 @@ namespace CR { // Namespace CR -- begin
   
   casa::Vector<uint> LOFAR_TBB::sampleNumber ()
   {
-    casa::Vector<uint> val;
-    
-    convertVector (val,TBB_Timeseries::sample_number());
-
-    return val;
+    return TBB_Timeseries::sample_number();
   }
 
   //_______________________________________________________________________________
@@ -488,11 +473,7 @@ namespace CR { // Namespace CR -- begin
   
   casa::Vector<int> LOFAR_TBB::sampleOffset (uint const &refAntenna)
   {
-    casa::Vector<int> val;
-
-    convertVector (val,TBB_Timeseries::sample_offset (refAntenna));
-
-    return val;
+    return TBB_Timeseries::sample_offset (refAntenna);
   }
   
 } // Namespace CR -- end

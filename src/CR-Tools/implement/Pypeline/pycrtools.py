@@ -983,7 +983,7 @@ def DataReader_getHeaderVariables(self):
     put it into attributes of the DataReader object.
     """
     self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample',"Filesize",'Date','dDate']))
-y    for v in self.keywords:
+    for v in self.keywords:
         setattr(self,v,self.get(v))
 
 def DataReader_getitem(self,*keys):
@@ -1061,12 +1061,12 @@ DataReader.__doc__=crfile.__doc__
 # Getting Metadata like Antenna positions
 #------------------------------------------------------------------------
 
-def hgetAntennaPositions(datafile):
+def hgetCalData(datafile,keyword):
     obsname=datafile["observatory"]
     if obsname=='LOPES':
-        antennapositions=hCalTablePositions(LOFARSOFT+"/data/lopes/LOPES-CalTable",datafile["date"],list(datafile["antennaIDs"]))
-        print "Antenna positions from LOPES caltable."
-        return antennapositions
+        result=hCalTableVector(LOFARSOFT+"/data/lopes/LOPES-CalTable",keyword,datafile["date"],list(datafile["antennaIDs"]))
+        print "Getting antenna ",keyword,"from LOPES caltable."
+        return result
     else:
         print "ERROR: No caltables for non-LOPES files."
         

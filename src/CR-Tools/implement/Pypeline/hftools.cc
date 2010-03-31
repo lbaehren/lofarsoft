@@ -3996,7 +3996,11 @@ HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HP
     for (i=0;i<size;++i){  //loop over all antennas
       ant=PyInt_AsLong(PyList_GetItem(pyob,i));  //Get the ith element of the list, i.e. the antenna ID
       CTRead->GetData((uint)date, ant, keyword, &tmpvec);
-      tuple=PyTuple_Pack(3,PyFloat_FromDouble(tmpvec[0]),PyFloat_FromDouble(tmpvec[1]),PyFloat_FromDouble(tmpvec[2]));
+      if (keyword=="Positions") {
+	tuple=PyTuple_Pack(3,PyFloat_FromDouble(tmpvec[0]),PyFloat_FromDouble(tmpvec[1]),PyFloat_FromDouble(tmpvec[2]));
+      } else if (keyword=="Delay") {
+	tuple=PyTuple_Pack(1,PyFloat_FromDouble(tmpvec[0]));
+      };
       PyList_Append(list,tuple);
     };
   };
@@ -4006,19 +4010,22 @@ HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HP
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //------------------------------------------------------------------------
-//$DOCSTRING: Return a list of antenna positions from the CalTables as a float vector.
+//$DOCSTRING: Return a list of antenna calibration values from the CalTables as a float vector.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hCalTablePositions
+#define HFPP_FUNC_NAME hCalTableVector
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HString)(filename)()("Filename of the caltable")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_1 (HInteger)(date)()("Date for which the information is requested (I guess Julian days? As output from DataReader)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HPyObjectPtr)(pyob)()("(Python) List  with antenna IDs")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be read out from the file metadata (currenly only Position is implemented)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(date)()("Date for which the information is requested (I guess Julian days? As output from DataReader)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HPyObjectPtr)(pyob)()("(Python) List  with antenna IDs")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
  $PARDOCSTRING
+
+ possible keywords: Positions, Delay
 
 
 Example:
@@ -4026,17 +4033,27 @@ antennaIDs=hFileGetParameter(file,"AntennaIDs")
 vec=hCalTablePositions("~/LOFAR/usg/data/lopes/LOPES-CalTable",obsdate,list(antennaIDs))
 
 */ 
-vector<HNumber> HFPP_FUNC_NAME(HString filename, HInteger date, HPyObjectPtr pyob) {
+vector<HNumber> HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob) {
   CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
+  /*  cout << "summary:" << CTRead.summary() << endl;
+  uint t = time();
+  cout << "current time:" << t << endl;
+  */
   vector<HNumber> outvec;
   HInteger i,ant,size;
   casa::Vector<Double> tmpvec; 
+  Double tmpval;
   if (CTRead != NULL && PyList_Check(pyob)) {  //Check if CalTable was opened ... and Python object is a list
     size=PyList_Size(pyob);
     for (i=0;i<size;++i){  //loop over all antennas
       ant=PyInt_AsLong(PyList_GetItem(pyob,i));  //Get the ith element of the list, i.e. the antenna ID
-      CTRead->GetData((uint)date, ant, "Positions", &tmpvec);
-      outvec.push_back(tmpvec[1]); outvec.push_back(tmpvec[0]); outvec.push_back(tmpvec[2]);
+      if (keyword=="Position") {
+	CTRead->GetData((uint)date, ant, keyword, &tmpvec);
+	outvec.push_back(tmpvec[1]); outvec.push_back(tmpvec[0]); outvec.push_back(tmpvec[2]);
+      } else if (keyword=="Delay") {
+	CTRead->GetData((uint)date, ant, keyword, &tmpval);
+	outvec.push_back(tmpvec[0]);
+      };
     };
   };
   delete CTRead;

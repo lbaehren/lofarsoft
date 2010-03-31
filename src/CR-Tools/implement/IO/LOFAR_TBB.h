@@ -190,16 +190,30 @@ namespace CR { // Namespace CR -- begin
     void destroy(void);
 
     //! Convert std::vector<T> to casac::Vector<T>
-    template <class T>
+    template <class T, class S>
       void convertVector (casa::Vector<T> &to,
-			  std::vector<T> const &from)
+			  std::vector<S> const &from)
       {
 	unsigned int nelem = from.size();
 	// adjust the shape of the returned casa::Vector<T>
 	to.resize(nelem);
 
 	for (unsigned int n(0); n<nelem; ++n) {
-	  to(n) = from[n];
+	  to(n) = (T)from[n];
+	}
+      }
+    
+    //! Convert std::vector<T> to casac::Vector<T>
+    template <class T, class S>
+      void convertVector (std::vector<T> & to,
+			   const casa::Vector<S> from)
+      {
+	unsigned int nelem = from.size();
+	// adjust the shape of the returned casa::Vector<T>
+	to.resize(nelem);
+
+	for (unsigned int n(0); n<nelem; ++n) {
+	  to(n) = (T)from[n];
 	}
       }
     
