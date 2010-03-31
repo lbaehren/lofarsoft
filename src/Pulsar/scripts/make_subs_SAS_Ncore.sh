@@ -15,8 +15,8 @@ USAGE="\nusage : make_subs_SAS_Ncore.sh -id OBS_ID -p Pulsar_name -o Output_Proc
 "      [-all] ==> optional parameter perform folding on entire subband set in addition to 8-splits (takes 11 extra min)\n"\
 "      [-rfi] ==> optional parameter perform Vlas's RFI checker and only use clean results (takes 7 extra min)\n"\
 "      [-C | -c] ==> optional parameter to switch on COLLAPSE\n"\
-"      [-del] ==> optional parameter to delete the previous Output_Processing_Location if it exists (override previous results!)\n"
-"      [-core N] ==> optional parameter to change the number of cores\/slipts used for processing (default = 8)\n"
+"      [-del] ==> optional parameter to delete the previous Output_Processing_Location if it exists (override previous results!)\n"\
+"      [-core N] ==> optional parameter to change the number of cores (slipts) used for processing (default = 8)\n"
 
 if [ $# -lt 6 ]                    # this script needs at least 6 args, including -switches
 then
@@ -33,6 +33,7 @@ delete=0
 all=0
 rfi=0
 core=8
+input_string=$*
 while [ $# -gt 0 ]
 do
     case "$1" in
@@ -111,7 +112,7 @@ STOKES=incoherentstokes
 #STOKES=stokes
 ###COLLAPSE=              #To collapse put "-C" here
 
-alias bf2presto=/home/hassall/bin/bf2presto-working
+#alias bf2presto=/home/hassall/bin/bf2presto-working
 
 ######################
 # DON'T CHANGE BELOW #
@@ -120,8 +121,9 @@ date_start=`date`
 
 #Set up generic pipeline version log file
 log=${location}/make_subs_SAS_Ncore.log
-echo "$0 $*" > $log
+echo "Pulsar Pipeline run with: $0" > $log
 echo "Pipeline V$VERSION" >> $log
+echo "$0 $input_string" > $log
 echo "Start date: $date_start" >> $log
 
 ARRAY=`cat $PARSET | grep "Observation.bandFilter" | awk -F "= " '{print $2}' | awk -F "_" '{print $1}'`
@@ -218,6 +220,7 @@ echo "Found a total of $all_num SB MS incoherentstokes input datafiles to proces
 if [ $all_num -lt $core ]
 then
   echo "Error: Less than $core subbands found, unlikely to be a valid observation"
+  echo "Error: Less than $core subbands found, unlikely to be a valid observation" >> $log
   exit 1
 fi
 
@@ -232,6 +235,9 @@ if [ $status -ne 0 ]
 then
    echo "ERROR: 'split' command unable to split ($all_num files/$core cores) into $div_files chunks each (not integer number);"
    echo "       you may need to run with a different number of cores which divide $all_num files evenly"
+   echo "ERROR: 'split' command unable to split ($all_num files/$core cores) into $div_files chunks each (not integer number);" >> $log
+   echo "       you may need to run with a different number of cores which divide $all_num files evenly"  >> $log
+
    exit 1
 fi
 
@@ -258,13 +264,15 @@ echo "Running bf2presto in the background..."
 #Create .sub.inf files with par2inf.py
 cp $PARSET ./${OBSID}.parset
 cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
-python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo 248 $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
 status=$?
 
 
 if [ $status -ne 0 ]
 then
    echo "ERROR: Unable to successfully run par2inf task"
+   echo "ERROR: Unable to successfully run par2inf task" >> $log
    exit 1
 fi
 
@@ -278,7 +286,8 @@ done
 #Create the .sub.inf file for the entire set (in background, as there is plenty of time to finish before file is needed
 if [ $all -eq 1 ]
 then 
-     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n 248 -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf &
+#     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n $all_num -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf &
+     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n $all_num -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf &
 fi
 
 #Check when all 8 DONE files are available, then all processes have exited
@@ -320,7 +329,7 @@ then
 #          (( sub_rsp_counter += 1 ))
 #       done
 #    done
-         offset=$(( 248 / $core * 16 ))
+         offset=$(( $all_num / $core * 16 ))
 
          ls ../RSP[0-7]/*sub[0-9]??? | sed 's/\// /g' | awk '{print $3}' | sed 's/RSP/ RSP /' | sed 's/ RSP/RSP/g' | sed 's/\.sub/ /' | awk -v offset=$offset '{printf("ln -s ../RSP%d/%s%d.sub%04d %sA.sub%04d\n"),$2,$1,$2,$3,$1,$2*offset+$3}' >> run.sh
 
@@ -337,11 +346,12 @@ then
      echo "Performing subband linking for all RPSs in one location"
      chmod 777 run.sh
      check_number=`wc -l run.sh | awk '{print $1}'`
-     if [ $check_number -ne 3969 ]
+     total=$(( $all_num * 16 + 1 ))
+     if [ $check_number -ne $total ]
      then
         all=0
-        echo "Warning - problem running on ALL subbands;  master list is too short (is $check_number but should be 3969 rows)"
-        echo "Warning - problem running on ALL subbands;  master list is too short (is $check_number but should be 3969 rows)" >> $log
+        echo "Warning - possible problem running on ALL subbands;  master list is too short (is $check_number but should be $total rows)"
+        echo "Warning - possible problem running on ALL subbands;  master list is too short (is $check_number but should be $total rows)" >> $log
       else
         ./run.sh &
       fi
