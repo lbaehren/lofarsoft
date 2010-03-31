@@ -19,16 +19,16 @@ typedef LOFAR::TYPES::uint32 uint32;
   \ingroup pipeline
 */
 class CONTROLConnectEventWrapper : public GenericEventWrapper {
- private:
-  CONTROLConnectEvent* my_event;
- public:
-  CONTROLConnectEventWrapper(std::string cntlrName) {
-    this->my_event = new CONTROLConnectEvent;
-    this->my_event->cntlrName = cntlrName;
-  }
-  std::string get_cntlrName() { return this->my_event->cntlrName; }
-  virtual uint16 get_signal() { return this->my_event->signal; }
-  virtual CONTROLConnectEvent* get_event_ptr() { return this->my_event; }
+private:
+    CONTROLConnectEvent* my_event;
+public:
+    CONTROLConnectEventWrapper(std::string cntlrName) {
+        this->my_event = new CONTROLConnectEvent;
+        this->my_event->cntlrName = cntlrName;
+    }
+    std::string get_cntlrName() { return this->my_event->cntlrName; }
+    virtual uint16 get_signal() { return this->my_event->signal; }
+    virtual CONTROLConnectEvent* get_event_ptr() { return this->my_event; }
 };
 
 /*!
@@ -36,7 +36,7 @@ class CONTROLConnectEventWrapper : public GenericEventWrapper {
   \ingroup pipeline
 */
 class CONTROLResyncedEventWrapper : public GenericEventWrapper {
- private:
+private:
     CONTROLResyncedEvent* my_event;
 public:
     CONTROLResyncedEventWrapper(std::string cntlrName, uint16 result) {
