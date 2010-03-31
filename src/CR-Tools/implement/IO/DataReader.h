@@ -198,6 +198,26 @@ namespace CR {  //  Namespace CR -- begin
 	<td>String
 	<td>Name of the Observatory, e.g. LOPES, LORUN, ITS, etc.
       </tr>
+      <tr>
+	<td class="indexkey">Filesize
+	<td>yes
+	<td>Int
+	<td>Size (number of samples) of the file(s).
+      </tr>
+      <tr>
+	<td class="indexkey">dDate
+	<td>yes
+	<td>Double
+	<td>Like \e Date but with sub-second precision. Either time when the
+	first sample was taken, or time when sample with delay==0 was taken.
+      </tr>
+      <tr>
+	<td class="indexkey">presync
+	<td>no
+	<td>Int
+	<td>Number of samples taken before the trigger (currently LOPES and LORUN
+	only).
+      </tr>
     </table>
   </ul>
 

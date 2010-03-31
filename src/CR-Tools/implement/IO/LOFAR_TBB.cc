@@ -353,17 +353,21 @@ namespace CR { // Namespace CR -- begin
   bool LOFAR_TBB::setHeaderRecord () 
   {
     bool status (true);
+    int filesize = min(dataLength());
+    uint time    = min(LOFAR_TBB::time());
 
     try {
       // Mandatory fields ________________________
 
-//       header_p.define("Date",headerpoint_p->JDR);
+      header_p.define("Date",time); 
       header_p.define("AntennaIDs",channelID());
       header_p.define("Observatory","LOFAR");
       header_p.define("SampleFreq",DataReader::sampleFrequency());
+      header_p.define("Filesize",filesize);
 
       // Optional fields _________________________
 
+      header_p.define("Time",LOFAR_TBB::time());
       header_p.define("SampleNumber",sampleNumber());
       header_p.define("SampleOffset",sampleOffset());
     } catch (AipsError x) {
@@ -420,25 +424,13 @@ namespace CR { // Namespace CR -- begin
   //_______________________________________________________________________________
   //                                                                     dataLength
   
-template <class S, class T>
-void aipsvec2stlvec(const casa::Vector<S> data, std::vector<T>& stlvec){
-    int i,n=data.size();
-    stlvec.resize(n);
-    for (i=0;i<n;i++) {
-      stlvec[i]=(T)data[i];
-    };
-}
-
   casa::Vector<uint> LOFAR_TBB::dataLength ()
   {
-    std::vector<uint> val; aipsvec2stlvec(TBB_Timeseries::data_length(),val);
-    casa::Vector<uint> length (val.size());
+    casa::Vector<uint> val;
 
-    for (uint n(0); n<val.size(); ++n) {
-      length(n) = val[n];
-    }
+    convertVector (val,TBB_Timeseries::data_length());
 
-    return length;
+    return val;
   }
 
   //_______________________________________________________________________________
@@ -454,7 +446,7 @@ void aipsvec2stlvec(const casa::Vector<S> data, std::vector<T>& stlvec){
   
   casa::Vector<int> LOFAR_TBB::channelID ()
   {
-    std::vector<int> val; aipsvec2stlvec(TBB_Timeseries::channelID(),val);
+    std::vector<int> val;
     casa::Vector<int> sample (val.size());
 
     for (unsigned int n(0); n<val.size(); ++n) {
@@ -465,18 +457,30 @@ void aipsvec2stlvec(const casa::Vector<S> data, std::vector<T>& stlvec){
   }
 
   //_______________________________________________________________________________
+  //                                                                           time
+  
+  casa::Vector<uint> LOFAR_TBB::time ()
+  {
+    std::vector<uint> val = TBB_Timeseries::time();
+    casa::Vector<uint> t (val.size());
+
+    for (unsigned int n(0); n<val.size(); ++n) {
+      t(n) = val[n];
+    }
+
+    return t;
+  }
+
+  //_______________________________________________________________________________
   //                                                                   sampleNumber
   
   casa::Vector<uint> LOFAR_TBB::sampleNumber ()
   {
-    std::vector<uint> val; aipsvec2stlvec(TBB_Timeseries::sample_number(),val);
-    casa::Vector<uint> sample (val.size());
+    casa::Vector<uint> val;
+    
+    convertVector (val,TBB_Timeseries::sample_number());
 
-    for (unsigned int n(0); n<val.size(); ++n) {
-      sample(n) = val[n];
-    }
-
-    return sample;
+    return val;
   }
 
   //_______________________________________________________________________________
@@ -484,14 +488,11 @@ void aipsvec2stlvec(const casa::Vector<S> data, std::vector<T>& stlvec){
   
   casa::Vector<int> LOFAR_TBB::sampleOffset (uint const &refAntenna)
   {
-    std::vector<int> val; aipsvec2stlvec(TBB_Timeseries::sample_offset (refAntenna),val);
-    casa::Vector<int> offset (val.size());
+    casa::Vector<int> val;
 
-    for (unsigned int n(0); n<val.size(); ++n) {
-      offset(n) = val[n];
-    }
+    convertVector (val,TBB_Timeseries::sample_offset (refAntenna));
 
-    return offset;
+    return val;
   }
   
 } // Namespace CR -- end

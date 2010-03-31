@@ -240,6 +240,7 @@ endif (CMAKE_SIZEOF_VOID_P)
 
 if (CR_BUILD_TESTS OR CR_BUILD_EXTERNAL_TESTS)
   set (UPDATE_TYPE "svn")
+  set (CTEST_TESTING_TIMEOUT "500")
   include (CTest)
   enable_testing()
 endif (CR_BUILD_TESTS OR CR_BUILD_EXTERNAL_TESTS)

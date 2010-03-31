@@ -60,6 +60,7 @@ NDABeam::NDABeam (String const &metafile,
 }
 
 NDABeam::NDABeam (NDABeam const &other)
+  : DataReader (other)
 {
   copy (other);
 }

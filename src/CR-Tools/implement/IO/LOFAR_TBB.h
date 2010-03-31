@@ -176,6 +176,9 @@ namespace CR { // Namespace CR -- begin
               went fine.
     */
     bool setHeaderRecord ();
+
+    //! Time in full seconds.
+    casa::Vector<uint> time ();
     
   private:
 
@@ -185,6 +188,20 @@ namespace CR { // Namespace CR -- begin
     void copy (LOFAR_TBB const &other);
     //! Unconditional deletion 
     void destroy(void);
+
+    //! Convert std::vector<T> to casac::Vector<T>
+    template <class T>
+      void convertVector (casa::Vector<T> &to,
+			  std::vector<T> const &from)
+      {
+	unsigned int nelem = from.size();
+	// adjust the shape of the returned casa::Vector<T>
+	to.resize(nelem);
+
+	for (unsigned int n(0); n<nelem; ++n) {
+	  to(n) = from[n];
+	}
+      }
     
   };
   

@@ -403,17 +403,22 @@ int test_headerRecord (std::string const &filename)
   cout << "[1] Set header record from external values ..." << endl;
   try {
     bool status (true);
-    // new LOFAR_TBB object to test
+    // Create LOFAR_TBB object ...
     LOFAR_TBB data (filename,
 		    blocksize);
-    // set up record
+    // ... and display the header record
+    cout << "-- Original header record = " << data.headerRecord() << endl;
+    // Set up the new record to be stored into the object
     casa::Record rec;
     rec.define("Date",0);
     rec.define("AntennaIDs",casa::Vector<int>(1,1));
     rec.define("Observatory","LOFAR");
     rec.define("Filesize",1);
-    // try writing the record back into the LOFAR_TBB object
+    // Set the new header record
     status = data.setHeaderRecord (rec);
+    // Display new values
+    cout << "-- New header record      = " << rec << endl;
+    cout << "--                        = " << data.headerRecord() << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
