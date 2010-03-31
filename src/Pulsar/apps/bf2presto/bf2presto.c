@@ -10,7 +10,7 @@
  so "pad" needs to be ignored (line 82) and also the data does not need to 
 be "floatswapped" (line 119). Same applies for convert_collapse() too.*/
 
-char OUTNAME[99] = "PULSAR_OBS";
+char OUTNAME[248] = "PULSAR_OBS";
 int BASESUBBAND = 0;
 int BEAMS = 1;
 int CHANNELS = 1;
