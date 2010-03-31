@@ -1257,6 +1257,7 @@ int main (int argc, char *argv[])
   char eventfilename[64] ;                               // Name of event file (first 64 characters)
   double CCheight, CCheight_NS, CCheight_VE;                          // CCheight will be used for EW polarization or ANY polarization
   double CCwidth, CCwidth_NS, CCwidth_VE;
+  double CCcenter, CCcenter_NS, CCcenter_VE;                    // time of CC beam
   double CCheight_error, CCheight_error_NS, CCheight_error_VE;
   bool CCconverged, CCconvergedNS, CCconvergedVE;                       // is true if the Gaussian fit to the CCbeam converged
   double Xheight, Xheight_NS, Xheight_VE;                            // CCheight will be used for EW polarization or ANY polarization
@@ -1500,6 +1501,7 @@ int main (int argc, char *argv[])
         roottree->Branch("Distance",&distanceResult,"Distance/D");	// radius of curvature
         roottree->Branch("CCheight",&CCheight,"CCheight/D");
         roottree->Branch("CCwidth",&CCwidth,"CCwidth/D");
+        roottree->Branch("CCcenter",&CCcenter,"CCcenter/D");
         roottree->Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
         roottree->Branch("CCconverged",&CCconverged,"CCconverged/B");
         roottree->Branch("Xheight",&Xheight,"Xheight/D");
@@ -1538,6 +1540,7 @@ int main (int argc, char *argv[])
         roottree->Branch("Distance_EW",&distanceResult,"Distance_EW/D");	// radius of curvature
         roottree->Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
         roottree->Branch("CCwidth_EW",&CCwidth,"CCwidth_EW/D");
+        roottree->Branch("CCcenter_EW",&CCcenter,"CCcenter_EW/D");
         roottree->Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
         roottree->Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
         roottree->Branch("Xheight_EW",&Xheight,"Xheight_EW/D");
@@ -1576,6 +1579,7 @@ int main (int argc, char *argv[])
         roottree->Branch("Distance_NS",&distanceResultNS,"Distance_NS/D");	// radius of curvature
         roottree->Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
         roottree->Branch("CCwidth_NS",&CCwidth_NS,"CCwidth_NS/D");
+        roottree->Branch("CCcenter_NS",&CCcenter_NS,"CCcenter_NS/D");
         roottree->Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
         roottree->Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
         roottree->Branch("Xheight_NS",&Xheight_NS,"Xheight_NS/D");
@@ -1614,6 +1618,7 @@ int main (int argc, char *argv[])
         roottree->Branch("Distance_VE",&distanceResultNS,"Distance_VE/D");      // radius of curvature
         roottree->Branch("CCheight_VE",&CCheight_NS,"CCheight_VE/D");
         roottree->Branch("CCwidth_VE",&CCwidth_NS,"CCwidth_VE/D");
+        roottree->Branch("CCcenter_VE",&CCcenter_VE,"CCcenter_VE/D");       
         roottree->Branch("CCheight_error_VE",&CCheight_error_NS,"CCheight_error_VE/D");
         roottree->Branch("CCconverged_VE",&CCconverged,"CCconverged_VE/B");
         roottree->Branch("Xheight_VE",&Xheight_NS,"Xheight_VE/D");
@@ -1721,6 +1726,7 @@ int main (int argc, char *argv[])
       gt = 0;
       CCheight = 0, CCheight_NS = 0, CCheight_VE = 0;
       CCwidth = 0, CCwidth_NS = 0, CCwidth_VE = 0;
+      CCcenter = 0, CCcenter_NS = 0, CCcenter_VE = 0;
       CCheight_error = 0, CCheight_error_NS = 0, CCheight_error_VE = 0;
       CCconverged = 0, CCconvergedNS = 0, CCconvergedVE = 0;
       Xheight = 0, Xheight_NS = 0, Xheight_VE = 0;
@@ -1875,6 +1881,7 @@ int main (int argc, char *argv[])
             distanceResult = results.asDouble("Distance");
             CCheight = results.asDouble("CCheight");
             CCwidth = results.asDouble("CCwidth");
+            CCcenter = results.asDouble("CCcenter");
             CCheight_error = results.asDouble("CCheight_error");
             CCconverged = results.asBool("CCconverged");
             Xheight = results.asDouble("Xheight");
@@ -2004,6 +2011,7 @@ int main (int argc, char *argv[])
             distanceResultNS = results.asDouble("Distance");
             CCheight_NS = results.asDouble("CCheight");
             CCwidth_NS = results.asDouble("CCwidth");
+            CCcenter_NS = results.asDouble("CCcenter");
             CCheight_error_NS = results.asDouble("CCheight_error");
             CCconvergedNS = results.asBool("CCconverged");
             Xheight_NS = results.asDouble("Xheight");
@@ -2138,6 +2146,7 @@ int main (int argc, char *argv[])
             distanceResultVE = results.asDouble("Distance");
             CCheight_VE = results.asDouble("CCheight");
             CCwidth_VE = results.asDouble("CCwidth");
+            CCcenter_VE = results.asDouble("CCcenter");
             CCheight_error_VE = results.asDouble("CCheight_error");
             CCconvergedVE = results.asBool("CCconverged");
             Xheight_VE = results.asDouble("Xheight");

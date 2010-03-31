@@ -284,7 +284,7 @@ namespace CR { // Namespace CR -- begin
       TFile *rootfile=NULL;
       stringstream filename;
       filename << "resultsSNR-" << lowerSNR << "-" << upperSNR << ".root";
-      rootfile = new TFile(filename.str().c_str(),"UPDATE","Results for SNR test pulse study");
+      rootfile = new TFile(filename.str().c_str(),"RECREATE","Results for SNR test pulse study");
 
       // check if file is open
       if (rootfile->IsZombie()) {
@@ -294,7 +294,7 @@ namespace CR { // Namespace CR -- begin
     
       // create tree and tree structure
       TTree *roottree = NULL;
-      roottree = new TTree(filename.str().c_str(),filename.str().c_str());
+      roottree = new TTree("resultsSNR",filename.str().c_str());
       roottree->Branch("ant",&ant,"ant/i");
       roottree->Branch("noiseInterval",&interval,"noiseInterval/i");
       roottree->Branch("SNR",&SNR,"SNR/D");
