@@ -73,11 +73,8 @@ class dppp(LOFARnode):
                 self.logger.debug("Running: %s" % (' '.join(cmd),))
                 ndppp_process = Popen(cmd, cwd=working_dir, env=env, close_fds=True, stdout=PIPE, stderr=STDOUT)
                 sout, serr = ndppp_process.communicate()
-                self.logger.debug(sout)
-                self.logger.debug(serr)
-                self.logger.debug(
-                    "%s returned exit status %d" % (executable, ndppp_process.returncode)
-                )
+                self.logger.debug("NDPPP stdout: %s" % (sout,))
+                self.logger.debug("NDPPP stderr: %s" % (serr,))
                 if ndppp_process.returncode != 0:
                     raise CalledProcessError(ndppp_process.returncode, executable)
             except ExecutableMissing, e:
@@ -93,4 +90,4 @@ class dppp(LOFARnode):
                 os.unlink(temp_parset_filename)
                 shutil.rmtree(working_dir)
 
-            return result
+            return 0
