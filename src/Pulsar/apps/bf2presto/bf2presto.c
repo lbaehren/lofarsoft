@@ -11,7 +11,7 @@
 be "floatswapped" (line 119). Same applies for convert_collapse() too.*/
 
 char OUTNAME[99] = "PULSAR_OBS";
-int BASESUBBAND = 200;
+int BASESUBBAND = 0;
 int BEAMS = 1;
 int CHANNELS = 1;
 int STOKES = 1;	
@@ -92,13 +92,13 @@ swap_endian(u.buffer);
  unsigned nul_samples = 0;
  unsigned toobig = 0, toosmall = 0;
  double scale = SCALE;
- double offset = 0;
+ double offset=0;
+ double max = -1e9, min= 1e9;
  int x = 0;
  
  stokesdata = malloc( sizeof *stokesdata * AVERAGE_OVER );
 
  fseek( input, 0, SEEK_SET );
- //fread( &stokesdata[0], sizeof stokesdata[0], 60, input ); // discard 60s
 
  while( !feof( input ) ) {
    if (x == NUM_BLOCKGROUPS) break;
@@ -109,13 +109,11 @@ swap_endian(u.buffer);
 
    /* read data */
    num = fread( &stokesdata[0], sizeof stokesdata[0], AVERAGE_OVER, input );
-   //fprintf(stderr,"read %d blocks\n", num);
    for( i = 0; i < num; i++ ) {
      for( c = 0; c < CHANNELS; c++ ) {
        unsigned b,t,s;
 
        b = beamnr;
-
        for( t = 0; t < SAMPLES; t++ ) {
          for( s = 0; s < STOKES; s++ ) {
 	   floatSwap( &stokesdata[i].samples[b][c][t][s] );
@@ -123,7 +121,7 @@ swap_endian(u.buffer);
        }
      }
    }
-
+   
    if( !num ) {
      break;
    }
@@ -137,7 +135,6 @@ swap_endian(u.buffer);
      /* detect gaps */
      if( prev_seqnr + 1 != stokesdata[i].sequence_number ) {
        fprintf(stderr,"num %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[i].sequence_number );
-       
      }
      prev_seqnr = stokesdata[i].sequence_number;
    }
@@ -149,7 +146,6 @@ swap_endian(u.buffer);
      int z = 0;
      unsigned validsamples = 0;
      float prev = WRITEFUNC( stokesdata[0].samples[beamnr][c][0]);
-     //fprintf( stderr, "Channel %d\n", c );
 
      /* compute average */
      for( i = 0; i < num; i++ ) {
@@ -169,13 +165,18 @@ swap_endian(u.buffer);
      N = validsamples?validsamples:1;
      average = sum/N;
      rms = sqrt((ms-(N*average*average))/(N-1));
-     //fprintf( stderr, "Average: %.2f rms: %.2f (over %d samples)\n", average, rms, N );
 
      if (writefloats == 0){
-     /* select a scale factor */
-     scale = (256*256) / (N_sigma*2*rms);
-     offset = average - (N_sigma*rms);
-     //fprintf(stderr,"Scale: %f Offset: %f\n",1/scale,offset);
+       /* select a scale factor */
+       //scale = 128/(N_sigma*2*rms); //8-bit dynamic
+       scale = (256*256)/(N_sigma*2*rms); //16-bit dynamic
+       offset = average - (N_sigma*rms);
+       //scale = 1.0/(65536); //16-bit static
+       //scale = 1.0/(256*256*128); //8-bit static (sketchy)
+       //if ( x == 1 && c == 0 ) {
+       //offset = average;
+       //fprintf(stderr,"Scale: %f Offset: %f\n",c, 1/scale,offset);
+       //}
      }
 
      /* convert and write the data */
@@ -185,55 +186,64 @@ swap_endian(u.buffer);
 
        for( gap = prev_seqnr + 1; gap < stokesdata[i].sequence_number; gap++ ) {
          /* gaps, fill in zeroes */
-         for( time = 0; time < SAMPLES; time++ ) {
+	 for( time = 0; time < SAMPLES; time++ ) {
 	   if (writefloats==1){
            float sum = 0;
            fwrite( &sum, sizeof sum, 1, output[c] );
 	   }else{
-           short shsum = 0;
+	   //int8_t shsum = 0; // 8-bit
+	   short shsum = 0; // 16-bit
            fwrite( &shsum, sizeof shsum, 1, output[c] );
 	   }
-         }
+	 }
          output_samples += SAMPLES;
          nul_samples += SAMPLES;
        }
-
+       stokesdata[i].sequence_number =  prev_seqnr + 1;       
        prev_seqnr = stokesdata[i].sequence_number;
+
        /* process data */
        float prev = 0;
        float x = 0;
        for( time = 0; time < SAMPLES; time++ ) {
          float sum;
          float avr;
-         signed short shsum;
+         //int8_t shsum; //8-bit
+	 signed short shsum; //16-bit
          sum = WRITEFUNC( stokesdata[i].samples[beamnr][c][time] );
-
-	 /*remove wiggles
-	   if( fabs(sum - prev) > 1e10 ){
-	     printf("%f\n", fabs(sum - prev));
-	      x = prev - sum;
-	   }
-	   sum = sum + x; 
-	   prev = sum;
-	   /*remove wiggles*/
 
 	 if(writefloats==1){
 	   sum = isnan(sum) || sum <= 0.01f && sum >= -0.01f ? average : sum;
 	   fwrite( &sum, sizeof sum, 1, output[c] );
 	 }else{
-	   sum = isnan(sum) || sum <= 0.01f && sum >= -0.01f ? 0 : floor((sum-offset)*scale)-128*256;	   
-	   //convert to signed short
-	   if( sum >= 128*256 ) {
-	     sum = 128*256 - 1;
+	   	   
+	   /*convert to 16-bit*/
+	   sum = isnan(sum) || sum <= 0.01f && sum >= -0.01f ? 0 : floor((sum-offset)*scale - 128*256);
+	   if( sum >= 256*128 ) {
+	     sum = 256*128 - 1;
 	     toobig++;
 	   }	  
-	   if( sum < -128*256 ) {
-	     sum = -128*256;
+	   if( sum < -256*128 ) {
+	     sum = -256*128;
 	     toosmall++;
 	   }	   
+	   /******************/
+	   
+	   /*8-bit
+	   sum = isnan(sum) ? 0 : floor((sum-offset)*scale)-128;
+	   if( sum >= 128 ) {
+	     sum = 127;
+	     toobig++;
+	   }	  
+	   if( sum < -128 ) {
+	     sum = -128;
+	     toosmall++;
+	   }	
+	   /*******/
+
 	   shsum = sum;
+	   //printf("%d\n",shsum );
 	   fwrite( &shsum, sizeof shsum, 1, output[c] );
-	   //fwrite( &sum, sizeof sum, 1, output );
 	   output_samples++;
 	   if( sum == 0 ) nul_samples++;
 	 }
@@ -241,7 +251,23 @@ swap_endian(u.buffer);
      }
    }
  }
- 
+
+ /*add zeros to make subbands an equal length*/
+ if (NUM_BLOCKGROUPS > 0 && writefloats==0) {
+   printf("adding zeros");
+   unsigned c,t,a;
+   t=NUM_BLOCKGROUPS*SAMPLES*AVERAGE_OVER - output_samples/CHANNELS;
+   for (a=0; a < t; a++){
+     for (c = 0; c < CHANNELS; c++){
+       //int8_t shsum = 0; //8 bit
+       signed short shsum = 0; //16 bit
+       fwrite( &shsum, sizeof shsum, 1, output[c] );
+       output_samples++;
+     }
+   }
+ }
+ /**********************************************/
+
  fprintf(stderr,"%u samples in output, %.2f%% null values, %.2f%% too big, %.2f%% too small\n",output_samples,100.0*nul_samples/output_samples,100.0*toobig/output_samples,100.0*toosmall/output_samples);
  fprintf(stderr,"%.10f seconds per sample\n",SAMPLEDURATION);
  
@@ -264,13 +290,12 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
   unsigned nul_samples = 0;
   unsigned toobig = 0, toosmall = 0;
   double scale = SCALE;
-  double offset = 0;
+  double offset=0;
   int x=0;
 
   stokesdata = malloc( sizeof *stokesdata * AVERAGE_OVER );
   
   fseek( input, 0, SEEK_SET );
-  //fread( &stokesdata[0], sizeof stokesdata[0], 60, input ); // discard 60s
 
   while( !feof( input ) ) {
     if (x == NUM_BLOCKGROUPS)break;
@@ -281,7 +306,6 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
 
     /* read data */
     num=fread( &stokesdata[0], sizeof stokesdata[0], AVERAGE_OVER, input );
-    //fprintf(stderr,"read %d blocks\n", num);
     for( i = 0; i < num; i++ ) {
       for( c = 0; c < CHANNELS; c++ ) {
         unsigned b,t,s;
@@ -340,14 +364,16 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
       N = validsamples?validsamples:1;
       average = sum / N;
       rms = sqrt((ms-(N*average*average))/(N-1));
-      //fprintf( stderr, "Average: %.2f (over %d samples)\n", average, validsamples );   
-      
 	
       if (writefloats == 0){
 	/* select a scale factor */
 	scale = (256*256*CHANNELS/2) / (N_sigma*2*rms);
 	offset = average - (N_sigma*rms*2/CHANNELS);
-	//fprintf(stderr,"Scale: %f Offset: %f\n",1/scale,offset);
+	//scale = 1.0/(65536);
+	//if ( x == 1 ) {
+	// offset = average;
+	//fprintf(stderr,"Scale: %f Offset: %f\n", 1/scale,offset);
+	//}
       }
       
       /* convert and write the data */
@@ -376,10 +402,8 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
           float sum = 0;
           float avr;
           signed short shsum;
-	  //
 	  float prev = 0;
 	  float x = 0;
-	  //
 	  
 	  /* getting sum while summing all channels */
           for( c = 0; c < CHANNELS; c++ ) {
@@ -390,15 +414,8 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
 	    if(writefloats==1){
 	      s = isnan(s) || s <= 0.01f && s >= -0.01f ? average : s;
 	    }else{
-	      s = isnan(s) || s <= 0.01f && s >= -0.01f ? 0 : floor((s-offset)*scale)-128*256;
+	      s = isnan(s) || s <= 0.01f && s >= -0.01f ? 0 : floor((s-offset)*scale);
 	    }
-	    /*remove wiggles
-	    if( fabs(s - prev) > 1000000 ){
-	      x = prev - s;
-	    }
-	    s = s + x;
-	    prev = s;
-	    /*remove wiggles*/
 	    sum += s;
           }
 	  sum = (sum/CHANNELS);
@@ -411,10 +428,6 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
 	      sum = 128*256 - 1;
 	      toobig++;
 	    }
-	    /* to remove oscillations? 
-	    if( sum >  32700) sum = 0;
-	    if( sum < -32700) sum = 0;
-	    /**************************/
 
 	    if( sum < -128*256 ) {
 	      sum = -128*256;
@@ -431,7 +444,7 @@ void convert_collapse( FILE *input, FILE **output, int beamnr )
     }
   }
   
-  fprintf(stderr,"%u samples in output, %.2f%% null values, %.2f%% too big, %.2f%% too small\n",output_samples,100.0*nul_samples/output_samples,100.0*toobig/output_samples,100.0*toosmall/output_samples);
+  fprintf(stderr,"%u samples in output, %.2f%% null values, %.2f%% too big, %.2f%% too small %d Blocks\n",output_samples,100.0*nul_samples/output_samples,100.0*toobig/output_samples,100.0*toosmall/output_samples, x);
   fprintf(stderr,"%.10f seconds per sample\n",SAMPLEDURATION);
   free( stokesdata );
 }
@@ -441,10 +454,10 @@ int main( int argc, char **argv ) {
  int f,b,c,y;
  char buf[1024];
 
- for( y = 0; y < argc; y++ ){
-   printf("%s ",argv[y]);
- }
- printf("\n");
+ // for( y = 0; y < argc; y++ ){
+ // printf("%s ",argv[y]);
+ //}
+ //printf("\n");
  int i=0;
  while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:hCF")) != -1)
     {
@@ -527,7 +540,7 @@ int main( int argc, char **argv ) {
 	    printf("ERROR: Basesubband = %d\n", optarg);
 	    exit(-1);
 	  }
-	  if (BASESUBBAND > 99999 || BASESUBBAND < 1){
+	  if (BASESUBBAND > 99999 || BASESUBBAND < 0){
 	    printf("ERROR: Lowest subband = %d\n", BASESUBBAND);
 	    exit(-1);
 	  }
@@ -651,144 +664,3 @@ int main( int argc, char **argv ) {
 
  return 0;
 }
-
-
-// BITS WHICH I HAVE REMOVED:
-
-     /* subtract running average 
-     for( i = 0; i < num; i++ ) {
-       for( c = 0; c < CHANNELS; c++ ) {
-	 for( time = 0; time < SAMPLES; time++ ) {
-	   float sum;
-	   float avr;
-	   signed short shsum;
-	   int ii=0;
-	   int num_mean=0;
-	   int MAX = SAMPLES;
-	   float sum2=0;
-	   if(i==0){
-	     for (ii=0;ii<SAMPLES; ii=ii+24){
-	       if ((WRITEFUNC( stokesdata[i].samples[beamnr][c][time+ii]) <3*rms+average)&&(WRITEFUNC( stokesdata[i].samples[beamnr][c][time+ii]) > (average - 3*rms))){
-		 sum2 +=  WRITEFUNC( stokesdata[i].samples[beamnr][c][time] );
-		 num_mean++;
-		   }
-	     }
-	   }else{
-	     for( ii = 0; ii < MAX; ii=ii+24){ 
-	       if((time + ii) < MAX/2){
-		 if ((WRITEFUNC( stokesdata[i-1].samples[beamnr][c][SAMPLES+time+ii-MAX/2] ) < 3*rms+average)&&(WRITEFUNC( stokesdata[i-1].samples[beamnr][c][SAMPLES+time+ii-MAX/2] ) > (average - 3*rms))){
-		   sum2 += WRITEFUNC( stokesdata[i-1].samples[beamnr][c][SAMPLES+time+ii-MAX/2]);
-		   num_mean++;
-		 }
-	       } else if((time + ii) > (MAX/2 + SAMPLES)){
-		 if (( WRITEFUNC( stokesdata[i+1].samples[beamnr][c][time+ii-MAX/2-SAMPLES]) < 3*rms+average)&& ( WRITEFUNC( stokesdata[i+1].samples[beamnr][c][time+ii-MAX/2-SAMPLES]) > (average-3*rms))){
-		   sum2 += WRITEFUNC( stokesdata[i+1].samples[beamnr][c][time+ii-MAX/2-SAMPLES]);
-		   num_mean++;
-		 }
-	       } else{
-		 if ((WRITEFUNC( stokesdata[i].samples[beamnr][c][time+ii-(MAX/2)]) <3*rms+average)&&(WRITEFUNC( stokesdata[i].samples[beamnr][c][time+ii-(MAX/2)]) > (average - 3*rms))){
-		   sum2 += WRITEFUNC( stokesdata[i].samples[beamnr][c][time+ii-(MAX/2)]);
-		   num_mean++; 
-		 }
-	       }
-	     }
-	   }
-	   sum2 = sum2/num_mean;
-	   sum = WRITEFUNC( stokesdata[i].samples[beamnr][c][time] );
-	   printf("%d ",stokesdata[i].samples[beamnr][c][time]);
-	   if(writefloats==1){
-	     WRITEFUNC(stokesdata[i].samples[beamnr][c][time]) = isnan(sum) || sum <= 0.01f && sum >= -0.01f ? average : sum;
-	   }else{
-	     WRITEFUNC(stokesdata[i].samples[beamnr][c][time]) = isnan(sum) || sum <= 0.01f && sum >= -0.01f ? 0 : sum-sum2;	
-	   }   
-	   printf("%d\n",stokesdata[i].samples[beamnr][c][time]);
-	 }
-       }
-     }
-     /*************************/
-
-
-/*class Converter {
- public:
-   Converter( const unsigned channels, const unsigned beams, const unsigned samples, const unsigned stokes );
-   void convert( FILE *input, FILE **output, int beamnr );
- private:
-   const unsigned itsChannels;
-   const unsigned itsBeams;
-   const unsigned itsSamples;
-   const unsigned itsStokes;
-};
-
-Converter::Converter( const unsigned channels, const unsigned beams, const unsigned samples, const unsigned stokes ):
- itsChannels( channels ),
- itsBeams( beams ),
- itsSamples( samples ),
- itsStokes( stokes )
-{
-}*/
-
-   /* check all beams */
-/*
-   unsigned different = 0;
-   for( i = 0; i < num; i++ ) {
-     for( time = 0; time < SAMPLES; time++ ) {
-       float channelsum = 0.0f;
-
-       for( channel = 0; channel < CHANNELS; channel++ ) {
-         float first = stokesdata[i].samples[channel][0][time][0];
-         unsigned j;
-
-         for( j = 1; j < BEAMS; j++ ) {
-           if( stokesdata[i].samples[channel][j][time][0] != first ) {
-             different++;
-           }
-         }
-       }
-     }
-   }
-   fprintf( stderr, "Differences: %u (over %d samples)\n", different, SAMPLES*num*CHANNELS*(BEAMS-1) );
-*/
-
-
-     /* JAN DAVID'S SCALING CODE:
-     do {
-       changescale = 0;
-       clipped = 0;
-
-       // process data 
-       float prev = 0;
-       float x = 0;
-       for( i = 0; i < num; i++ ) {
-         for( time = 0; time < SAMPLES; time++ ) {
-           float sum;
-           float avr;
-
-	   sum = WRITEFUNC( stokesdata[i].samples[beamnr][c][time] );
-	   /*remove wiggles
-	   if( fabs(sum - prev) > 1e10){
-	     x = prev-sum;
-	   }
-	   sum = sum + x;
-	   prev = sum;
-	   /*remove wiggles
-	   
-	   sum = isnan(sum) || sum <= 0.01f ? 0 : floor( (sum-average)/scale + 0.5 );
-           if( sum >= 128*256 || sum < -128*256 ) {
-             clipped++;
-           }
-         }
-       }
-
-       if( 100.0*clipped / validsamples > 5.0 && changedir >= 0 ) {
-         scale *= 1.5;
-         changescale = 1;
-         changedir = +1;
-         fprintf( stderr, "Increased scaling factor to %.3f\n", scale );
-       } else if( average > 0.001 && 100.0*clipped / validsamples < 0.1 && changedir <= 0 ) {
-         scale /= 1.5;
-	 changescale = 1;
-         changedir = -1;
-         fprintf( stderr, "Decreased scaling factor to %.3f\n", scale );
-       } 
-     } while( changescale );
-     }*/
