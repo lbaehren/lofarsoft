@@ -33,4 +33,6 @@ class vdsreader(LOFARrecipe):
         self.logger.debug(ms_names)
 
         self.outputs['data'] = ms_names
+        self.outputs['start_time'] = gvds['StartTime']
+        self.outputs['end_time'] = gvds['EndTime']
         return 0
