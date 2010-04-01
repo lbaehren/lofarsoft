@@ -21,7 +21,7 @@ log_format = "log4cplus.appender.FILE.layout.ConversionPattern=%x %D{%d-%m-%y %H
 
 
 class dppp(LOFARnode):
-    def run(self, infile, outfile, parset, log_location, executable, initscript):
+    def run(self, infile, outfile, parset, log_location, executable, initscript. start_time, end_time):
         # Time execution of this job
         with log_time(self.logger):
             self.logger.info("Processing %s" % (infile,))
@@ -39,13 +39,17 @@ class dppp(LOFARnode):
             else:
                 create_directory(os.path.dirname(outfile))
 
-            # Patch the parset with the correct input/output MS names.
-            temp_parset_filename = patch_parset(
-                parset, {
-                    'msin': infile,
-                    'msout': outfile,
-                }
-            )
+            # Patch the parset with the correct input/output MS names and, if
+            # available, start & end times.
+            patch_dictionary = {
+                'msin': infile,
+                'msout': outfile,
+            }
+            if start_time:
+                patch_dictionary['msin.starttime'] = start_time
+            if end_time:
+                patch_dictionary['msin.endtime'] = end_time
+            temp_parset_filename = patch_parset(parset, patch_dictionary)
 
             try:
                 if not os.access(executable, os.X_OK):

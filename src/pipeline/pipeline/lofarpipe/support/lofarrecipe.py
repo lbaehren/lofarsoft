@@ -57,7 +57,7 @@ class LOFARrecipe(WSRTrecipe):
         return full_location.replace('/data/users', '/home')
 
 
-    def run_task(self, configblock, datafiles=[]):
+    def run_task(self, configblock, datafiles=[], **kwargs):
         self.logger.info("Running task: %s" % (configblock,))
         try:
             recipe = self.task_definitions.get(configblock, "recipe")
@@ -66,6 +66,9 @@ class LOFARrecipe(WSRTrecipe):
         inputs = LOFARinput(self.inputs)
         inputs['args'] = datafiles
         inputs.update(self.task_definitions.items(configblock))
+        # Any kwargs supplied by the caller override (or supplement) the configblock
+        for key, value in kwargs.iteritems():
+            inputs[key] = value
         # These inputs are never required:
         for inp in ('recipe', 'recipe_directories', 'lofarroot', 'default_working_directory', 'cwd'):
             del(inputs[inp])

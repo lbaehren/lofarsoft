@@ -36,6 +36,15 @@ class dppp(LOFARrecipe):
             dest="working_directory",
             help="Working directory used on compute nodes"
         )
+        self.optionparser.add_option(
+            '--start-time',
+            help="Start time to be passed to DPPP (optional)",
+        )
+        self.optionparser.add_option(
+            '--end-time',
+            help="End time to be passed to DPPP (optional)",
+        )
+
 
     def go(self):
         self.logger.info("Starting DPPP run")
@@ -90,7 +99,7 @@ class dppp(LOFARrecipe):
                         'dppp'
                     )
                     task = LOFARTask(
-                        "result = run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript)",
+                        "result = run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript, start_time, end_time)",
                         push=dict(
                             recipename=self.name,
                             nodepath=os.path.dirname(self.__file__.replace('master', 'nodes')),
@@ -100,6 +109,8 @@ class dppp(LOFARrecipe):
                             log_location=log_location,
                             executable=self.inputs['executable'],
                             initscript=self.inputs['initscript'],
+                            start_time=start_time,
+                            end_time=end_time,
                             loghost=loghost,
                             logport=logport
                         ),
