@@ -3,6 +3,17 @@ def p_(var):
     else: print " ",var,"=>",eval(var)
 
 figno=0
+
+pltax=plt.axes()
+def savefigure():
+    global figno
+    figno+=1
+    plt.text(0.5, 1.075,"Figure "+str(figno),horizontalalignment='center',verticalalignment='center',transform = pltax.transAxes,fontsize=18)
+    plt.savefig("tutorial-fig"+str(figno)+".pdf",format="pdf")
+    print " "
+    print "- ###################"
+    print "- #### Figure {0:2d} ####".format(figno)
+    print "- ###################"
 """
 ========================================================================
                           pycrtools TUTORIAL
@@ -854,9 +865,11 @@ Let's see how we can open a file. First define a filename, e.g.:
 
 """
 filename_sun=LOFARSOFT+"/data/lopes/example.event"
-filename_biglofar=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+filename_lofar_big=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
+
 p_("filename_sun")
+p_("filename_lofar_big")
 p_("filename_lofar")
 """
 
@@ -911,20 +924,20 @@ datafile.get("frequencyRange")
 
 actually returns a vector. 
 
-Here no difference is made where the data comes frome. The keyword
+Here no difference is made where the data comes from. The keyword
 Obervatory accesses the header record in the data file while the
 frequencRange accesses a method of the DataReader.
 
-
-A second way do retreive data is to use square brackets. Hence
+A second way do retreive data is to use square brackets, since
 datafile[key] is equivalent to datafile.get(key).
 
 """
 datafile["blocksize"]
 """
 
-Now we will define a number of useful variables that contain essential
-parameters that we later will use.
+Just for fun let's define a number of variables that contain essential
+parameters (we will later actually use different ones which are
+automatically stored in the datafile object).
 
 """
 obsdate   =datafile["Date"] 
@@ -941,6 +954,13 @@ maxblocksize=min(filesize,1024*1024);
 nBlocks=filesize/blocksize; 
 
 p_(["obsdate","filesize","blocksize","nAntennas","antennas","antennaIDs","selectedAntennas","nofSelectedAntennas","fftlength","sampleFrequency","maxblocksize","nBlocks"])
+"""
+
+To get a readable version of the observing date use the python time module
+
+"""
+import time
+p_("time.asctime(time.localtime(obsdate))")
 """
 
 Luckily, you do not have to do this all the time, since all the
@@ -994,6 +1014,7 @@ line, so you need to provide lists of keywords and list of values, like
 
 """
 datafile["blocksize","selectedAntennas"]=[2048,[0,2]]
+
 datafile["blocksize","selectedAntennas"]
 """
 
@@ -1004,7 +1025,8 @@ antenna 0 and 2 and the number of selected antennas is
 datafile["nofSelectedAntennas"]
 """
 
-However, now we want to work on all antennas again:
+However, in the follwing we want to work on all antennas again, so we
+do
 
 """
 datafile.set("block",0).set("selectedAntennas",range(nAntennas))
@@ -1041,7 +1063,7 @@ array.
 
 
 Currently implemented keywords for reading data fields are: "Fx",
-"Voltage", "FFT", "CalFFT","Time", "Frequency".
+"Voltage", "FFT", "CalFFT","Time", "Frequency" (and "TimeLag").
 
 So, let us read in the raw time series data, i.e. the electric field
 in the antenna as digitized by the ADC. This is provided by the
@@ -1058,7 +1080,7 @@ file. Note that we had to use the .vec method for the array, since
 datafile.read does not yet accept arrays (since it can't handle c++
 iterators).
 
-No, you can access the individual antennas as single vectors through
+Now, you can access the individual antennas as single vectors through
 slicing
 
 """
@@ -1074,6 +1096,9 @@ example, to get the x-Axis we create a second vector
 times=datafile["Time"]
 #%SKIP
 """
+(Note: you can also create an empty array with the same properties and
+dimensions, but without reading data into the array, by preceding the
+keyword with the word "empty", i.e. times=datafile["emptyTime"].)
 
 In the square bracket notation python will actually set the name and
 units of the data accordingly. 
@@ -1084,28 +1109,26 @@ So, let's have the time axis in microseconds, by using setUnit
 times.setUnit("\\mu","")
 """
 
-We do the same now for the frequency axis, which we convert to MHz. As
-length we have to take the length of the Fourier transformed time
-block (which is blocksize/2+1).
+We do the same now for the frequency axis, which we convert to MHz.
 
 """
 frequencies=datafile["Frequency"].setUnit("M","")
 """
 
-We can now try to calulcate the average spectum of the data set for
-one antenna, by looping over all blocks. Here we do not use the square
-bracket notation, since we want to read the data repeatedly into the
-same memory location.
+We can calulcate the average spectum of the data set for one antenna,
+by looping over all blocks. Here we do not use the square bracket
+notation, since we want to read the data repeatedly into the same
+memory location.
 
 """
-fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
+fftdata=datafile["emptyFFT"]
 avspectrum=hArray(float,dimensions=fftdata,name="avgerage spectrum")
 for block in range(nBlocks):
     fftdata.read(datafile.set("Block",block),"FFT").none()
     fftdata[...].spectralpower(avspectrum[...])
 """
 
-(The .none() method is appended to suppress uwanted output in
+(The .none() method is appended to suppress unwanted output in
 generating the tutorial, when an operation returns an array or
 vector.)
 
@@ -1117,9 +1140,9 @@ In order to plot the data, we can use external packages. Two packages
 are being provided here: matplotlib and mathgl. The former is
 specifically designed for python and thus slightly easier to use
 interactively. Since version 0.99 it is supposed to bea capable of 3D
-plots (at the time of writing we use 0.98). Mathgl is perhaps a little
-faster and convenient for real time applications and hence is used in
-our GUI programming.
+plots (at the time of writing we use 0.98). Mathgl is faster and is
+therefore used in our GUI programming. Eventually we will make it
+available for interactive plotting as well.
 
 (++) Mathgl
 -------------
@@ -1189,15 +1212,13 @@ plt.xlabel(frequencies.getKey("name")+" ["+frequencies.getUnit()+"]")
 """
 
 To plot the time series of the entire data set, we first read in all
-sample from all antennas
+samples from all antennas
 
 """
 datafile["block","blocksize"]=(0,maxblocksize)
 #%SKIP
-fxall=Vector(); fxall.setDim([datafile.nofSelectedAntennas,maxblocksize])
-timeall=Vector(float,maxblocksize) 
-datafile.read("Time",timeall); timeall *= 10**6.
-datafile.read("Fx",fxall)
+timeall=datafile["Time"]
+fxall=datafile["Fx"]
 """
 
 and then we plot it 
@@ -1207,20 +1228,17 @@ plt.subplot(1,2,2)
 #%SKIP
 plt.title("Time Series of Antenna 0")
 #%SKIP
-plt.plot(timeall,fxall.elem(0))
+plt.plot(timeall.vec(),fxall[0].vec())
 #%SKIP
 plt.ylabel("Electric Field [ADC counts]")
 #%SKIP
 plt.xlabel("Time [$\mu$s]")
 #%SKIP
-figno+=1; plt.savefig("tutorial-fig"+str(figno))
+savefigure()
 """
+
 So, for a linear plot use .plot, for a loglog plot use .loglog and for
 a log-linear plot use .semilogx or .semilogy ...
-
-Note, that we have used vectors here instead of hArrays - this is
-actually depreceated in normal interactive use (but may be faster in
-automatic pipelines)
 
 (++) Plotting Using the hArray Plotting Method
 -------------------------------------------------
@@ -1231,8 +1249,8 @@ unsing the built-in plot method of array.
 """
 avspectrum.par.xvalues=frequencies
 avspectrum.par.title="Average Spectrum"
-avspectrum[0].plot(logplot="y").none()
-figno+=1; plt.savefig("tutorial-fig"+str(figno))
+avspectrum[0].plot(logplot="y") 
+savefigure()
 """
 
 This creates a semilog-plot with appropriate lables and units (if they
@@ -1246,8 +1264,8 @@ If the array is in looping mode, multiple curves are plotted in one windows. Hen
 
 """
 avspectrum.par.logplot="y"
-avspectrum[...].plot()
-figno+=1; plt.savefig("tutorial-fig"+str(figno))
+avspectrum[...].plot(legend=datafile.antennas)
+savefigure()
 """
 
 will simply plot all spectra of all antennas (=highest array index) in
@@ -1266,6 +1284,10 @@ The availabe parameters are:
     ylabel: the y-axis label, if not specified, use the "name" keyword
     of the array - units will be added automatically
 
+    xlim: tuple with minimum and maximum limits for the x-axis
+
+    ylim: tuple with minimum and maximum limits for the y-axis
+
     title: a title for the plot
 
     clf: if True (default) clear the screen beforehand (use False to
@@ -1275,6 +1297,7 @@ The availabe parameters are:
             "x" ->semilog in x 
             "y" ->semilog in y
             "xy"->loglog plot
+
 
 (+) CR Pipeline Modules
 ---------------------------
@@ -1302,8 +1325,7 @@ blocksize=min(filesize/4,maxblocksize)
 We will then read this block of data into an apropriately sized data array.
 
 """
-dataarray=hArray(float,[nofSelectedAntennas,blocksize])
-dataarray.read(datafile.set("blocksize",blocksize).set("block",3),"Voltage")
+dataarray=datafile.set("blocksize",blocksize).set("block",3)["Voltage"]
 """
 
 The array now contains all the measured voltages of the selected
@@ -1429,6 +1451,7 @@ rate to digitize a bandwidth of 100 MHz. The first Nyquist zone is
 then 0-100 MHz, and the second is 100-200 MHz.
 
 So, let's do the transform:
+
 """
 fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
 fxdata[...].fft(fftdata[...],1)
@@ -1441,6 +1464,7 @@ call to the stand-alone function hFFT defined in hftools.cc.
 
 We can convert the data back into the time domain by using the inverse
 Fourier transform.
+
 """
 fxinvdata=hArray(float,dimensions=fxdata,name="E-Field'").setUnit("","Counts")
 fftdata[...].invfft(fxinvdata[...],1)
@@ -1458,25 +1482,43 @@ fftdata[...].norm(spectrum)
 Finally, we want to see, if we can do some cross correlation, which
 mathematically is directly related to the Fourier transform.
 
-We will do this with a data set from a slor burst (taken with LOPES in
-2003), since that is dominated by a single point source and hence
+We will do this with a data set from a solar burst (taken with LOPES
+in 2003), since that is dominated by a single point source and hence
 gives a nice and clear cross correlation.
 
 """
 sun=crfile(filename_sun)
 """
 
-Now we read in the FFTed data
+Now we read in the raw time series data as well as the Frequencies and
+Time value arrays.
 
 """
-sunfft=sun["FFT"]
+sun_time=sun["Time"].setUnit("\\mu","s")
+sun_frequencies=sun["Frequency"]
+sun_efield=sun["Fx"].setPar("xvalues",sun_time)
 """
 
-and make a complex scratch vector to hold an intermediated data
-product which is a copy of the fft vector.
+As a next step we create an empty vector to hold the Fourierspectrum
+of the data
 
 """
-crosscorr_cmplx=hArray(copy=sunfft)
+sun_fft=sun["emptyFFT"].setPar("xvalues",sun_frequencies)
+"""
+
+and then make the Fourier transform (noting that the data is in the
+second Nyquist domain)
+
+"""
+sun_efield[...].fft(sun_fft[...],2)
+"""
+
+We will now try to make a crosscorrelation of the data. Let's start by
+making a complex scratch vector to hold an intermediated data product
+which is a copy of the fft vector.
+
+"""
+crosscorr_cmplx=hArray(copy=sun_fft)
 """
 
 We then multiply the FFTs of all antennas with the complex conjugate
@@ -1484,7 +1526,7 @@ of a reference antenna (here antenna 0) and store that in the vector
 crosscorr_cmplx, which is done by the following method.
 
 """
-crosscorr_cmplx[...].crosscorrelatecomplex(sunfft[0])
+crosscorr_cmplx[...].crosscorrelatecomplex(sun_fft[0])
 """
 
 This vector will then actually hold the FFT of the cross correlation
@@ -1492,17 +1534,18 @@ of the antenna time series. Hence, what we now need to do is to FFT
 back into the time domain and store it in a vector crosscorr.
 
 """
-crosscorr=hArray(float,dimensions=[sun.nofSelectedAntennas,sun.blocksize],name="Cross Correlation") 
-crosscorr_cmplx[...].invfft(crosscorr[...],1)
+sun_timelags=sun["TimeLag"].setUnit("\\mu","")
+crosscorr=hArray(float,dimensions=sun_efield,name="Cross Correlation",xvalues=sun_timelags) 
+crosscorr_cmplx[...].invfft(crosscorr[...],2)
 """
 
 We can now plot this and use as the x-axis vector the Time Lags
 conveniently provided by our cr file object.
 
 """
-crosscorr.par.xvalues=sun["TimeLag"].setUnit("\\mu","")
+crosscorr.par.xlim=(-1,1)
 crosscorr[1].plot()
-figno+=1; plt.savefig("tutorial-fig"+str(figno))
+savefigure()
 """
 
 Note, plotting crosscorr[0].plot() will give the autocorrelation of
@@ -1521,67 +1564,160 @@ supposed to hold the Cartesian coordinates. Note that the AzEL vector
 is actually AzElRadius, where we need to set the radius to unity.
 
 """
-azel=hArray([178.+90,28,1000])
+azel=hArray([178.,28,1],dimensions=[1,3])
 cartesian=azel.new()
-
 """
 
-We then do the conversion, using 
+We then do the conversion, using
 
 """
-hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
+hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],CoordinateTypes.Cartesian,True)
+#%SKIP
 """
 
 yielding the following output vector:
 
 """
-cartesian
+p_("cartesian")
 """
 
-Reading in Antennapositions:
+
+(++) Coordinates
+---------------
+
+For doing actual beamforming we need to know the antenna
+positions. For this we will use the method getCalData:
+
 """
-#antenna_positions_original=hArray(Vector().extendflat(hgetAntennaPositions(sun)),dimensions=[sun["nofAntennas"],3])
-#antenna_positions2=hArray(copy=antenna_positions_original)
-
-#antenna_positions2[...] -= antenna_positions_original[0]
-
-obsdelays=hArray([0.0,0.05, -0.05 ,0, -0.125,-0.0375,0.125,0.175])
-
-antenna_positions=hArray(hgetAntennaPositions(sun))
-
-#for i in range(8):
-#    antenna_positions.vec()[i*3]=antenna_positions2.vec()[i*3+1]  
-#    antenna_positions.vec()[i*3+1]=antenna_positions2.vec()[i*3]  
-
-result=[]
-plt.clf()
-for j in range(29,30):
-    x=[]; y=[]
-    for i in range(177,178):
-        azel[0]=float(i)
-        azel[1]=float(j)
-        hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
-        hGeometricDelays(antenna_positions,hArray(cartesian),delays,True)
-        delays *= 10**6
-        deviations=delays-obsdelays
-        deviations.abs()
-        sum=deviations.vec().sum()
-        x.append(i); y.append(sum)
-    result.append(y)
-    plt.plot(x,y)
-
-figno+=1; plt.savefig("tutorial-fig"+str(figno))
-
-#plt.clf()
-#plt.plot(x,result[0])
+antenna_positions=sun.getCalData("Position")
+p_("antenna_positions")
 """
 
+As a next step we need to put the antenna coordinates on a reference
+frame that is relative to the phase center. Here we will choose the
+location of the first antenna as our phase center (that makes life a
+little easier for checking) and we simply subtract the reference
+position from the antenna locations so that our phase center lies at
+0,0,0.
+
+"""
+phase_center=hArray(antenna_positions[0].vec())
+antenna_positions -= phase_center
+""""
+
+Now we read in instrumental delays for each antenna in a similar way
+and store it for later use.
+
+"""
+cal_delays=sun.getCalData("Delay")
+p_("cal_delays")
+"""
+
+We now convert the Azimuth-Elevation position into a vector in
+Cartesian coordinates, which is what is used by the beamformer.
+"""
+
+hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
+#%SKIP
+"""
+
+Then calculate geometric delays and add the instrumental delays.
+
+"""
+delays=hArray(float,dimensions=cal_delays)
+hGeometricDelays(antenna_positions,cartesian,delays,True)
+"""
+
+To get the total delay we add the geometric and the calibration delays.
+
+"""
+delays += cal_delays
+"""
+
+The delays can be converted to phases of coplex weights (to be applied
+in the Fourier domain).
+
+"""
+phases=hArray(float,dimensions=sun_fft,name="Phases",xvalues=sun_frequencies)
+hGeometricPhases(sun_frequencies,antenna_positions,cartesian,phases,True)
+"""
+
+Similarly, the corresponding complex weights are calculated.
+
+"""
+weights=hArray(complex,dimensions=sun_fft,name="Complex Weights")
+hGeometricWeights(sun_frequencies,antenna_positions,cartesian,weights,True)
+"""
+
+To shift the time series data (or rather the FFTed time series data)
+we multiply the fft data with the complex weights from above.
+
+"""
+sun_calfft_shifted=hArray(copy=sun_fft)
+sun_calfft_shifted *= weights
+"""
+
+We can check whether the shifts were doing what we expected it to do
+by making another crosscorrelation (using the shifted FFT data as
+starting point).
+
+"""
+crosscorr_cmplx_shifted=hArray(copy=sun_calfft_shifted)
+crosscorr_cmplx_shifted[...].crosscorrelatecomplex(sun_calfft_shifted[0])
+crosscorr_shifted=hArray(float,dimensions=sun_efield,name="Cross Correlation",xvalues=sun_timelags)
+crosscorr_cmplx_shifted[...].invfft(crosscorr_shifted[...],2)
+crosscorr_shifted[...].plot(xlim=(-0.25,0.25),legend=sun.antennaIDs)
+savefigure()
+"""
+
+And indeed now most of the antennas show a lag peaking around 0, with
+the exception of two antennas (whick likely experienced an additional
+two-sample shift).
+
+So, let's transform back into time and see the final, shifted time
+series.
+
+"""
+sun_efield_shifted = sun["emptyFx"].setPar("xvalues",sun_time)
+sun_calfft_shifted[...].invfft(sun_efield_shifted[...],2)
+sun_efield_shifted[0:3,...].plot(xlim=(-2,0),ylim=(-1500,1500),legend=sun.antennaIDs[0:3])
+savefigure()
+"""
+
+Obviously the three time series are now tracing each other nicely,
+indicating that the delays were about right. To now "form a beam" we
+just need to add all time series data (or their FFTs),
+
+"""
+sun_calfft_shifted_added=hArray(sun_calfft_shifted[0].vec())
+sun_calfft_shifted_added.add(sun_calfft_shifted[1:,...])
+"""
+
+normalize by the number of antennas (which for some reason we don't
+need to do after all), 
+sun_calfft_shifted_added /= sun.nofSelectedAntennas
+
+and then FFT back into the time domain:
+
+"""
+sun_efield_shifted_added=hArray(float,dimensions=sun_time,name="beamformed E-field",xvalues=sun_time)
+sun_calfft_shifted_added.invfft(sun_efield_shifted_added,2)
+
+sun_efield[0].plot()
+sun_efield_shifted_added.plot(xlim=(-2,0),clf=False,legend=["Reference Antenna","Beam"])
+savefigure()
+"""
+
+In the plot one can see how the green line (beamformed) traces the
+<data in antenna one (which was our reference antenna). Of course, I
+still do not understand why we do not need to normalize the beamformed
+data by the number of antennas ...
 
 (+) Appendix: Listing of all Functions:
 =======================================
 
 """
-#help(all)
+help(all)
 """
 
 """

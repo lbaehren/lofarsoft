@@ -2972,6 +2972,16 @@ void HFPP_FUNC_NAME (const DataIter  idata,
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Example:
+
+  in_array.runningaverage(array_out,7,hWEIGHTS.GAUSSIAN)
+
+  Available Weights:
+
+  FLAT:  all have the same value
+  LINEAR: linearly rising, peaking at the center (i.e., /\)
+  GAUSSIAN: Gaussian distribution falling of to 2 sigma at the ends
 */
 template <class DataIter>
 void HFPP_FUNC_NAME (const DataIter idata,
@@ -3990,16 +4000,17 @@ HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HP
   CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
   HInteger i,ant,size;
   casa::Vector<Double> tmpvec;
+  Double tmpval;
   HPyObjectPtr list=PyList_New(0),tuple;
   if (CTRead != NULL && PyList_Check(pyob)) {  //Check if CalTable was opened ... and Python object is a list
     size=PyList_Size(pyob);
     for (i=0;i<size;++i){  //loop over all antennas
       ant=PyInt_AsLong(PyList_GetItem(pyob,i));  //Get the ith element of the list, i.e. the antenna ID
       CTRead->GetData((uint)date, ant, keyword, &tmpvec);
-      if (keyword=="Positions") {
+      if (keyword=="Position") {
 	tuple=PyTuple_Pack(3,PyFloat_FromDouble(tmpvec[0]),PyFloat_FromDouble(tmpvec[1]),PyFloat_FromDouble(tmpvec[2]));
       } else if (keyword=="Delay") {
-	tuple=PyTuple_Pack(1,PyFloat_FromDouble(tmpvec[0]));
+	tuple=PyTuple_Pack(1,PyFloat_FromDouble(tmpval));
       };
       PyList_Append(list,tuple);
     };
@@ -4052,8 +4063,8 @@ vector<HNumber> HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date,
 	outvec.push_back(tmpvec[1]); outvec.push_back(tmpvec[0]); outvec.push_back(tmpvec[2]);
       } else if (keyword=="Delay") {
 	CTRead->GetData((uint)date, ant, keyword, &tmpval);
-	outvec.push_back(tmpvec[0]);
-      };
+	outvec.push_back(tmpval);
+      }; 
     };
   };
   delete CTRead;

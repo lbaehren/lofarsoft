@@ -1,127 +1,175 @@
 #gdb --annotate=3 -quiet -f --args python -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pycrtools.py -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/test.py
-from pycrtools import *
+
+def p_(var): 
+    if (type(var)==list): map(lambda x:p_(x),var)
+    else: print " ",var,"=>",eval(var)
+
+#from pycrtools import *
 
 filename_sun=LOFARSOFT+"/data/lopes/example.event"
 filename_biglofar=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
-
-#------------------------------------------------------------------------sun=crfile(filename_sun)
-sun=hFileOpen(filename_sun)
-sun.filename=filename_sun
-
 figno=0
+
+plt.clf()
+#------------------------------------------------------------------------
+filename_cr=LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event"
+cr_direction=[41.9898208, 64.70544, 1750.]
+cr_shower_core=[-25.44, 8.94, 0]
+FarField=False
+
+cr=crfile(filename_cr)
 """
 
-Now we read in the FFTed data
+Now we read in the raw time series data as well as the Frequencies and
+Time value arrays.
 
 """
-sunfft=sun["FFT"]
+cr_time=cr["Time"].setUnit("\\mu","s")
+cr_frequencies=cr["Frequency"]
+cr_efield=cr["Fx"].setPar("xvalues",cr_time)
 """
 
-and make a complex scratch vector to hold an intermediated data
-product which is a copy of the fft vector.
+As a next step we create an empty vector to hold the Fourierspectrum
+of the data
 
 """
-crosscorr_cmplx=hArray(copy=sunfft)
+cr_fft=cr["emptyFFT"].setPar("xvalues",cr_frequencies)
 """
 
-We then multiply the FFTs of all antennas with the complex conjugate
-of a reference antenna (here antenna 0) and store that in the vector
-crosscorr_cmplx, which is done by the following method.
+and then make the Fourier transform (noting that the data is in the
+second Nyquist domain)
 
 """
-crosscorr_cmplx[...].crosscorrelatecomplex(sunfft[0])
+cr_efield[...].fft(cr_fft[...],2)
 """
-
-This vector will then actually hold the FFT of the cross correlation
-of the antenna time series. Hence, what we now need to do is to FFT
-back into the time domain and store it in a vector crosscorr.
-
-"""
-crosscorr=hArray(float,dimensions=[sun["nofSelectedAntennas"],sun["blocksize"]],name="Cross Correlation") 
-crosscorr_cmplx[...].invfft(crosscorr[...],1)
-"""
-
-We can now plot this and use as the x-axis vector the Time Lags
-conveniently provided by our cr file object.
-
-"""
-crosscorr.par.xvalues=sun["TimeLag"].setUnit("\\mu","")
-#crosscorr[1].plot()
-#figno+=1; plt.savefig("tutorial-fig"+str(figno))
-"""
-
-Note, plotting crosscorr[0].plot() will give the autocorrelation of
-the first antenna (which we used as reference antenna in this example).
-
-(++) Coordinates
----------------
-
-We also have access to a few functions dealing with astronomical
-coordinates. Assume, we have a source at an Azmiut/Elevation position
-of (178 Degree,28 Degree) and we want to convert that into Cartesian
-coordinates (which, for example, is required by our beamformer).
 
 We first turn this into std vector and create a vector that is
 supposed to hold the Cartesian coordinates. Note that the AzEL vector
 is actually AzElRadius, where we need to set the radius to unity.
 
 """
-azel=hArray([178.+90,28,1000])
+azel=hArray(cr_direction,dimensions=[1,3])
 cartesian=azel.new()
+"""
+
+We then do the conversion, using
+
+"""
+hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],CoordinateTypes.Cartesian,FarField)
+"""
+
+
+(++) Coordinates
+---------------
+
+For doing actual beamforming we need to know the antenna
+positions. For this we will use the method getCalData:
+
+"""
+antenna_positions=cr.getCalData("Position")
+p_("antenna_positions")
+"""
+
+As a next step we need to put the antenna coordinates on a reference
+frame that is relative to the phase center. Here we will choose the
+location of the first antenna as our phase center (that makes life a
+little easier for checking) and we simply subtract the reference
+position from the antenna locations so that our phase center lies at
+0,0,0.
+
+"""
+phase_center=hArray(cr_shower_core)
+antenna_positions -= phase_center
+""""
+
+Now we read in instrumental delays for each antenna in a similar way
+and store it for later use.
+
+"""
+cal_delays=cr.getCalData("Delay")
+p_("cal_delays")
+"""
+
+We now convert the Azimuth-Elevation position into a vector in
+Cartesian coordinates, which is what is used by the beamformer.
+"""
+
+hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,FarField)
+"""
+
+Then calculate geometric delays and add the instrumental delays.
+
+"""
+delays=hArray(float,dimensions=cal_delays)
+hGeometricDelays(antenna_positions,cartesian,delays,FarField)
+"""
+
+To get the total delay we add the geometric and the calibration delays.
+
+"""
+delays += cal_delays
+"""
+
+The delays can be converted to phases of coplex weights (to be applied
+in the Fourier domain).
+
+"""
+phases=hArray(float,dimensions=cr_fft,name="Phases",xvalues=cr_frequencies)
+hGeometricPhases(cr_frequencies,antenna_positions,cartesian,phases,FarField)
+"""
+
+Similarly, the corresponding complex weights are calculated.
+
+"""
+weights=hArray(complex,dimensions=cr_fft,name="Complex Weights")
+hGeometricWeights(cr_frequencies,antenna_positions,cartesian,weights,FarField)
+"""
+
+To shift the time series data (or rather the FFTed time series data)
+we multiply the fft data with the complex weights from above.
+
+"""
+cr_calfft_shifted=hArray(copy=cr_fft)
+cr_calfft_shifted *= weights
+"""
+
+Convert back into time domain
 
 """
 
-We then do the conversion, using 
-
-"""
-hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
+cr_efield_shifted = cr["emptyFx"].setPar("xvalues",cr_time)
+cr_calfft_shifted[...].invfft(cr_efield_shifted[...],2)
 """
 
-yielding the following output vector:
+To now "form a beam" we just need to add all time series data (or
+their FFTs),
 
 """
-cartesian
+cr_calfft_shifted_added=hArray(cr_calfft_shifted[0].vec())
+cr_calfft_shifted_added.add(cr_calfft_shifted[1:,...])
 """
 
-Reading in Antennapositions:
+normalize by the number of antennas (which for some reason we don't
+need to do after all), 
+cr_calfft_shifted_added /= cr.nofSelectedAntennas
+
+and then FFT back into the time domain:
+
 """
-#antenna_positions_original=hArray(Vector().extendflat(hgetAntennaPositions(sun)),dimensions=[sun["nofAntennas"],3])
-#antenna_positions2=hArray(copy=antenna_positions_original)
+cr_efield_shifted_added=hArray(float,dimensions=cr_time,name="beamformed E-field",xvalues=cr_time)
+cr_calfft_shifted_added.invfft(cr_efield_shifted_added,2)
 
-#antenna_positions2[...] -= antenna_positions_original[0]
-
-obsdelays=hArray([0.0,0.05, -0.05 ,0, -0.125,-0.0375,0.125,0.175])
-
-antenna_positions=hArray(hgetCalData(sun,"Positions"))
-
-sun.Date=1265926154-6*3.15*10**7
-
-#for i in range(8):
-#    antenna_positions.vec()[i*3]=antenna_positions2.vec()[i*3+1]  
-#    antenna_positions.vec()[i*3+1]=antenna_positions2.vec()[i*3]  
-
-result=[]
-#plt.clf()
 """
-for j in range(29,30):
-    x=[]; y=[]
-    for i in range(177,178):
-        azel[0]=float(i)
-        azel[1]=float(j)
-        hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
-        hGeometricDelays(antenna_positions,hArray(cartesian),delays,True)
-        delays *= 10**6
-        deviations=delays-obsdelays
-        deviations.abs()
-        sum=deviations.vec().sum()
-        x.append(i); y.append(sum)
-    result.append(y)
-
-#    plt.plot(x,y)
-
-#figno+=1; plt.savefig("tutorial-fig"+str(figno))
-
-#plt.clf()
-#plt.plot(x,result[0])
+Finally, we take the absolute and smooth it with a running average
 """
+cr_efield_shifted_added_abs=hArray(copy=cr_efield_shifted_added,xvalues=cr_time)
+cr_efield_shifted_added_abs.abs()
+cr_efield_shifted_added_smoothed=hArray(float,dimensions=[cr.blocksize],xvalues=cr_time,name="E-Field")
+cr_efield_shifted_added_abs.runningaverage(cr_efield_shifted_added_smoothed,7,hWEIGHTS.GAUSSIAN)
+
+"""
+... and plot.
+"""
+cr_efield_shifted_added_smoothed.plot(xlim=(-3,-0.5),title=cr.filename)
+

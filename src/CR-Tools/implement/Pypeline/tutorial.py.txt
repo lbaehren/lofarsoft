@@ -38,15 +38,16 @@ Table of Contents
 4.1.  Opening and Closing a CR Data File
 4.2.  Setting and retrieving metadata (parameters)
 4.3.  Reading in Data
-5.  Fourier Transforms (FFT)
-6.  Basic Plotting
-6.1.  Mathgl
-6.2.  Matplotlib
-6.3.  Plotting Using the hArray Plotting Method
-7.  CR Pipeline Modules
-7.1.  Quality Checking of Time Series Data
-8.  Coordinates
-9.  Appendix: Listing of all Functions:
+5.  Basic Plotting
+5.1.  Mathgl
+5.2.  Matplotlib
+5.3.  Plotting Using the hArray Plotting Method
+6.  CR Pipeline Modules
+6.1.  Quality Checking of Time Series Data
+6.2.  Fourier Transforms (FFT) & Cross Correlation
+6.3.  Coordinates
+6.4.  Coordinates
+7.  Appendix: Listing of all Functions:
 
 
 
@@ -270,9 +271,9 @@ standard python syntax.
 We can also resize vectors and change their memory allocation:
 
 >>> v1=Vector([0.0,1,2,3,4,5]);v1
-  Vec(float,6)=[0.0,1.0,2.0,3.0,4.0,5.0]
+  Vec(float,6)=[0.0,1.0,2.0,3.0,4.0,...]
 >>> v2=Vector(float,len(v1),2.0);v2
-  Vec(float,6)=[2.0,2.0,2.0,2.0,2.0,2.0]
+  Vec(float,6)=[2.0,2.0,2.0,2.0,2.0,...]
 
 With the resize attribute you allocate new memory while keeping the
 data. It is not guaranteed that the new memory actually occupies the
@@ -280,31 +281,31 @@ same physical space.
 
 >>> v2.resize(8);
 >>> v2
-  Vec(float,8)=[2.0,2.0,2.0,2.0,2.0,2.0,0.0,0.0]
+  Vec(float,8)=[2.0,2.0,2.0,2.0,2.0,...]
 
 Resize a vector and fill with non-zero values:
 
 >>> v2.resize(10,-1)
 >>> v2
-  Vec(float,10)=[2.0,2.0,2.0,2.0,2.0,2.0,0.0,0.0,-1.0,-1.0]
+  Vec(float,10)=[2.0,2.0,2.0,2.0,2.0,...]
 
 Resize a vector to same size as another vector:
 
 >>> v2.resize(v1)
 >>> v2
-  Vec(float,6)=[2.0,2.0,2.0,2.0,2.0,2.0]
+  Vec(float,6)=[2.0,2.0,2.0,2.0,2.0,...]
 
 Make a new vector of same size and type as the original one:
 
 >>> v3=v2.new()
 >>> v3
-  Vec(float,6)=[0.0,0.0,0.0,0.0,0.0,0.0]
+  Vec(float,6)=[0.0,0.0,0.0,0.0,0.0,...]
 
 Fill a vector with values
 
 >>> v3.fill(-2)
 >>> v3
-  Vec(float,6)=[-2.0,-2.0,-2.0,-2.0,-2.0,-2.0]
+  Vec(float,6)=[-2.0,-2.0,-2.0,-2.0,-2.0,...]
 
 3.2.2.  Vector arithmetic
 ........................................................
@@ -313,14 +314,14 @@ The vectors have a number of mathematical functions attached to
 them. A full list can be seen by typing
 
 >>> dir(v1)
-  ['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__isub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd', 'append', 'asin', 'atan', 'ceil', 'convert', 'copy', 'cos', 'cosh', 'countgreaterequal', 'countgreaterequalabs', 'countgreaterthan', 'countgreaterthanabs', 'countlessequal', 'countlessequalabs', 'countlessthan', 'countlessthanabs', 'dimension', 'div', 'divadd', 'downsample', 'elem', 'exp', 'extend', 'extendflat', 'fft', 'fill', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'findgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findlessthanabs', 'findlowerbound', 'floor', 'getDim', 'list', 'log', 'log10', 'mean', 'median', 'mul', 'muladd', 'mulsum', 'ndim', 'negate', 'new', 'norm', 'normalize', 'random', 'resize', 'setDim', 'sin', 'sinh', 'sort', 'sortmedian', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'sum', 'tan', 'tanh', 'type', 'val', 'vec']
+  ['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__isub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd', 'append', 'asin', 'atan', 'ceil', 'convert', 'copy', 'cos', 'cosh', 'countgreaterequal', 'countgreaterequalabs', 'countgreaterthan', 'countgreaterthanabs', 'countlessequal', 'countlessequalabs', 'countlessthan', 'countlessthanabs', 'dimension', 'div', 'divadd', 'downsample', 'elem', 'exp', 'extend', 'extendflat', 'fft', 'fill', 'fillrange', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'findgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findlessthanabs', 'findlowerbound', 'floor', 'getDim', 'list', 'log', 'log10', 'mean', 'median', 'mul', 'muladd', 'mulsum', 'ndim', 'negate', 'new', 'norm', 'normalize', 'random', 'resize', 'setDim', 'sin', 'sinh', 'sort', 'sortmedian', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'sum', 'tan', 'tanh', 'type', 'val', 'vec']
 
 Some of the basic arithmetic is available in an intuitve way.
 
 You can add a scalar to a vector by
 
 >>> v1+3
-  Vec(float,6)=[3.0,4.0,5.0,6.0,7.0,8.0]
+  Vec(float,6)=[3.0,4.0,5.0,6.0,7.0,...]
 
 This will actually create a new vector (and destroy it right away,
 since no reference was kept). The original vector is unchanged.
@@ -332,7 +333,7 @@ has to come as the second argument.
 You can also add two vectors (which is commutative):
 
 >>> v1+v2
-  Vec(float,6)=[2.0,3.0,4.0,5.0,6.0,7.0]
+  Vec(float,6)=[2.0,3.0,4.0,5.0,6.0,...]
 
 In order to change the vector, you can use the "in place" operators
 +=, -=, /=, *= :
@@ -340,7 +341,7 @@ In order to change the vector, you can use the "in place" operators
 Adding a vector in place:
 
 >>> v1+=v2
-    v1 => Vec(float,6)=[2.0,3.0,4.0,5.0,6.0,7.0]
+    v1 => Vec(float,6)=[2.0,3.0,4.0,5.0,6.0,...]
 
 now v1 was actually modified such that v2 was added to the content of
 v1 and the results is stored in v1.
@@ -413,7 +414,7 @@ type.
 
 >>> a=hArray(v,[3,3])
 
-    a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
+    a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,...]
 
 One may wonder what the representation of the Array actually
 means. 
@@ -432,14 +433,14 @@ The underlying vector of an array can be retrieved with the .vec()
 method. I.e.,
 
 >>> a.vec()
-  Vec(int,9)=[0,1,2,3,4,5,6,7,8]
+  Vec(int,9)=[0,1,2,3,4,...]
 
 The arrays have most of the vector methods defined, so you can also
 add, multiply, etc. with scalars or other arrays.
 
-    a*2 => hArray(int, [3, 3]=9, [0:9]) -> [0,2,4,6,8,10,12,14,16]
+    a*2 => hArray(int, [3, 3]=9, [0:9]) -> [0,2,4,6,8,...]
 
-    a*a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,4,9,16,25,36,49,64]
+    a*a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,4,9,16,...]
 
 Underlying these operations are the basic hftools functions, e.g. the
 multiplication is essentially a python method that first creates a new
@@ -448,7 +449,7 @@ array and then calls hMul.
 >>> tmp_array=a.new()
 >>> tmp_array.mul(a,2)
 
-    a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
+    a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,...]
 
 BTW, this could also be done calling the function hMul(tmp_array,a,2),
 rather than the corresponding method. 
@@ -469,10 +470,10 @@ zeros, if necessary.
   [3, 3]
 
 >>> a.setDim([3,3,2])
-  hArray(int, [3, 3, 2]=18, [0:18]) -> [0,1,2,3,4,5,6,7,8,0,...]
+  hArray(int, [3, 3, 2]=18, [0:18]) -> [0,1,2,3,4,...]
 
 >>> a.setDim([3,3])
-  hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
+  hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,...]
 
 3.3.3.  Memory sharing
 ......................
@@ -482,8 +483,8 @@ an element in the vector
 
 >>> v[0]=-1
 
-    v => Vec(int,9)=[-1,1,2,3,4,5,6,7,8]
-    a => hArray(int, [3, 3]=9, [0:9]) -> [-1,1,2,3,4,5,6,7,8]
+    v => Vec(int,9)=[-1,1,2,3,4,...]
+    a => hArray(int, [3, 3]=9, [0:9]) -> [-1,1,2,3,4,...]
 
 will also change the corresponding element in the array. The same is,
 btw, true if one creates an array from an array. Both will share the
@@ -494,13 +495,13 @@ and dimensions.
 
 >>> b[0,0]=-2
 
-    b => hArray(int, [3, 3]=9, [0:9]) -> [-2,1,2,3,4,5,6,7,8]
-    a => hArray(int, [3, 3]=9, [0:9]) -> [-2,1,2,3,4,5,6,7,8]
-    v => Vec(int,9)=[-2,1,2,3,4,5,6,7,8]
+    b => hArray(int, [3, 3]=9, [0:9]) -> [-2,1,2,3,4,...]
+    a => hArray(int, [3, 3]=9, [0:9]) -> [-2,1,2,3,4,...]
+    v => Vec(int,9)=[-2,1,2,3,4,...]
 
 >>> v[0]=0
 
-    a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
+    a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,...]
 
 To actually make a pyhsically distinct copy, you need to explicitly
 copy the data over.
@@ -525,7 +526,7 @@ of python.
 
 Let us take our two-dimensional array from before:
 
-    a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
+    a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,...]
 
 The vector followed by a single number in square brackets 
 will "in principle" obtain the first column of the array.
@@ -573,7 +574,7 @@ however, currently this is restricted to the last dimension only, in
 order to point to a contiguous memory slice. Hence:
 
 >>> a[0:2]
-  hArray(int, [3, 3]=9, [0:6]) -> [0,1,2,3,4,5]
+  hArray(int, [3, 3]=9, [0:6]) -> [0,1,2,3,4,...]
 
 is possible, but not
 
@@ -595,9 +596,9 @@ will return the sum over the first row of the array, i.e. the first
 three elements of the underlying vector. While 
 
 >>> a[0].negate()
-    a => hArray(int, [3, 3]=9, [0:9]) -> [0,-1,-2,3,4,5,6,7,8]
+    a => hArray(int, [3, 3]=9, [0:9]) -> [0,-1,-2,3,4,...]
 >>> a[0].negate()
-    a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
+    a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,...]
 
 returns nothing, but will actually change ths sign of the first three
 elements in the underlying vector.
@@ -605,9 +606,9 @@ elements in the underlying vector.
 In principle one could now loop over all slices using a for loop:
 
 >>> for i in range(a.getDim()[0]): print "Row",i,":",a[i].val(), " => a =", a
-  Row 0 : [0, 1, 2]  => a = hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
-  Row 1 : [3, 4, 5]  => a = hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
-  Row 2 : [6, 7, 8]  => a = hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
+  Row 0 : [0, 1, 2]  => a = hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,...]
+  Row 1 : [3, 4, 5]  => a = hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,...]
+  Row 2 : [6, 7, 8]  => a = hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,...]
 
 However, looping over slices in simple way is aready built into the
 arrays, by appending the Ellipsis symbol "..." to the dimensions. This
@@ -715,7 +716,7 @@ and fill it with slices from "a" multiplied by the scalar value 2
 
 >>> x[[0,2],...].mul(a[[0,2],...],2)
 
-    x => hArray(int, [3, 3]=9, [0:9]) -> [0,2,4,0,0,0,12,14,16]
+    x => hArray(int, [3, 3]=9, [0:9]) -> [0,2,4,0,0,...]
 
 and indeed now the first and last slice were operated on and filled
 with the results of the operation.
@@ -727,7 +728,7 @@ three elements of x, containing at the end only the results of the
 mutliplication of the last slice in a.
 >>> x.fill(0); x[...].mul(a,2)
 
-    x => hArray(int, [3, 3]=9, [0:9]) -> [0,2,4,0,2,4,0,2,4]
+    x => hArray(int, [3, 3]=9, [0:9]) -> [0,2,4,0,2,...]
 
 3.3.6.  Units and Scale Factors
 ................................
@@ -738,7 +739,7 @@ the scale factor, which is specified as a string being one of
 "f","p","n","micro","m","c","d","","h","k","M","G","T","P","E","Z".
 
 >>> a.setUnit("M","Hz")
-  hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,6,7,8]
+  hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,...]
 
 will set the unitname to MHz without modifiying the values in the
 array (assuming that the values were deliverd initially in this
@@ -746,7 +747,7 @@ unit). However, the scaling can be changed by calling setUnit again
 (with or without a unit name), e.g.:
 
 >>> a.setUnit("k","")
-  hArray(int, [3, 3]=9, [0:9]) -> [0,1000,2000,3000,4000,5000,6000,7000,8000]
+  hArray(int, [3, 3]=9, [0:9]) -> [0,1000,2000,3000,4000,...]
 
 Which has converted the values to kHz.  The name of the unit can be
 retrieved with
@@ -763,7 +764,7 @@ For documenting the vector further and to store certain values, one
 can store keywords and values in the array. This is done with
 
 >>> a.setKey("name","TestArray")
-  TestArray(int, [3, 3]=9, [0:9]) -> [0,1000,2000,3000,4000,5000,6000,7000,8000]
+  TestArray(int, [3, 3]=9, [0:9]) -> [0,1000,2000,3000,4000,...]
 
 The keywords can be arbitrary strings ann the values also arbirtrary
 strings. Thus numbers need to be converted to strings and back. The
@@ -784,34 +785,34 @@ can be viewed by using the getHistory (retrieves a vector of strings)
 or simply the .history() method, which prints the activity log.
 
 >>> a.history()
-    2010-03-28 16:56:29 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
-    2010-03-28 16:56:29 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.
-    2010-03-28 16:56:29 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
-    2010-03-28 16:56:29 [setDimension]: Dimensions set to [10]
-    2010-03-28 16:56:29 [setDimension]: Dimensions set to [3,3]
-    2010-03-28 16:56:29 [setDimension]: Dimensions set to [3,3,2]
-    2010-03-28 16:56:29 [setDimension]: Dimensions set to [3,3]
-    2010-03-28 16:56:29 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...]
-    2010-03-28 16:56:29 [hFill]:   Par 1: fill_value = -2
-    2010-03-28 16:56:29 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-28 16:56:29 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...]
-    2010-03-28 16:56:29 [hSum]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-28 16:56:29 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-28 16:56:29 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...]
-    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-28 16:56:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-03-28 16:56:29 [setUnit]: Unit set to MHz.
-    2010-03-28 16:56:29 [setUnit]: Unit set to kHz.
-    2010-03-28 16:56:29 [setKey]: name = TestArray
+    2010-04-02 01:00:57 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
+    2010-04-02 01:00:57 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.
+    2010-04-02 01:00:57 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
+    2010-04-02 01:00:57 [setDimension]: Dimensions set to [10]
+    2010-04-02 01:00:57 [setDimension]: Dimensions set to [3,3]
+    2010-04-02 01:00:57 [setDimension]: Dimensions set to [3,3,2]
+    2010-04-02 01:00:57 [setDimension]: Dimensions set to [3,3]
+    2010-04-02 01:00:57 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...]
+    2010-04-02 01:00:57 [hFill]:   Par 1: fill_value = -2
+    2010-04-02 01:00:57 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-04-02 01:00:57 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...]
+    2010-04-02 01:00:57 [hSum]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-04-02 01:00:57 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-04-02 01:00:57 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...]
+    2010-04-02 01:00:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-04-02 01:00:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-04-02 01:00:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-04-02 01:00:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-04-02 01:00:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-04-02 01:00:57 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-04-02 01:00:57 [setUnit]: Unit set to MHz.
+    2010-04-02 01:00:57 [setUnit]: Unit set to kHz.
+    2010-04-02 01:00:57 [setKey]: name = TestArray
 
 You can add a line to the history log yourself with 
 
 >>> a.addHistory("TEST","This is a test.")
-  TestArray(int, [3, 3]=9, [0:9]) -> [0,1000,2000,3000,4000,5000,6000,7000,8000]
+  TestArray(int, [3, 3]=9, [0:9]) -> [0,1000,2000,3000,4000,...]
 
 and clear the entire log with .clearHistory().
 
@@ -827,10 +828,12 @@ History tracking can be switched off with
 
 Let's see how we can open a file. First define a filename, e.g.:
 
->>> LOFARSOFT=os.environ["LOFARSOFT"]
 >>> filename_sun=LOFARSOFT+"/data/lopes/example.event"
+>>> filename_lofar_big=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 >>> filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
+
     filename_sun => /Users/falcke/LOFAR/usg/data/lopes/example.event
+    filename_lofar_big => /Users/falcke/LOFAR/usg/data/lofar/rw_20080701_162002_0109.h5
     filename_lofar => /Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5
 
 We can create a new file object, using the "crfile" class, which is an
@@ -876,19 +879,19 @@ makes use of the power of python with automatic typing. For, example
 
 actually returns a vector. 
 
-Here no difference is made where the data comes frome. The keyword
+Here no difference is made where the data comes from. The keyword
 Obervatory accesses the header record in the data file while the
 frequencRange accesses a method of the DataReader.
 
-
-A second way do retreive data is to use square brackets. Hence
+A second way do retreive data is to use square brackets, since
 datafile[key] is equivalent to datafile.get(key).
 
 >>> datafile["blocksize"]
   2048
 
-Now we will define a number of useful variables that contain essential
-parameters that we later will use.
+Just for fun let's define a number of variables that contain essential
+parameters (we will later actually use different ones which are
+automatically stored in the datafile object).
 
 >>> obsdate   =datafile["Date"] 
 >>> filesize  =datafile["Filesize"]
@@ -907,14 +910,19 @@ parameters that we later will use.
     filesize => 132096
     blocksize => 2048
     nAntennas => 16
-    antennas => Vec(int,16)=[0,1,2,3,4,5,6,7,8,9,...]
-    antennaIDs => Vec(int,16)=[128002016,128002017,128002018,128002019,128002020,128002021,128002022,128002023,128003024,128003025,...]
-    selectedAntennas => Vec(int,16)=[0,1,2,3,4,5,6,7,8,9,...]
+    antennas => Vec(int,16)=[0,1,2,3,4,...]
+    antennaIDs => Vec(int,0)=[]
+    selectedAntennas => Vec(int,16)=[0,1,2,3,4,...]
     nofSelectedAntennas => 16
     fftlength => 1025
     sampleFrequency => 200000000.0
     maxblocksize => 132096
     nBlocks => 64
+
+To get a readable version of the observing date use the python time module
+
+>>> import time
+    time.asctime(time.localtime(obsdate)) => Thu Feb 11 23:09:14 2010
 
 Luckily, you do not have to do this all the time, since all the
 parameters will be read out at the beginning and will be stored as
@@ -923,24 +931,24 @@ attributes to the file object.
 >>> for kw in datafile.keywords: p_("datafile."+kw)
     datafile.observatory => LOFAR
     datafile.blocksize => 2048
-    datafile.antennaIDs => Vec(int,16)=[128002016,128002017,128002018,128002019,128002020,128002021,128002022,128002023,128003024,128003025,...]
+    datafile.antennaIDs => Vec(int,0)=[]
     datafile.nyquistZone => 1
-    datafile.antennas => Vec(int,16)=[0,1,2,3,4,5,6,7,8,9,...]
+    datafile.antennas => Vec(int,16)=[0,1,2,3,4,...]
     datafile.nofBaselines => 120
     datafile.filesize => 132096
-    datafile.increment => Vec(float,2)=[5e-09,195312.5]
-    datafile.selectedAntennas => Vec(int,16)=[0,1,2,3,4,5,6,7,8,9,...]
-    datafile.selectedChannels => Vec(int,513)=[0,1,2,3,4,5,6,7,8,9,...]
+    datafile.increment => Vec(float,2)=[5e-09,97656.25]
+    datafile.selectedAntennas => Vec(int,16)=[0,1,2,3,4,...]
+    datafile.selectedChannels => Vec(int,1025)=[0,1,2,3,4,...]
     datafile.nofAntennas => 16
     datafile.sampleFrequency => 200000000.0
     datafile.nofSelectedAntennas => 16
     datafile.referenceTime => 0.0
-    datafile.frequencyValues => Vec(float,513)=[0.0,195312.5,390625.0,585937.5,781250.0,976562.5,1171875.0,1367187.5,1562500.0,1757812.5,...]
-    datafile.nofSelectedChannels => 513
+    datafile.frequencyValues => Vec(float,1025)=[0.0,97656.25,195312.5,292968.75,390625.0,...]
+    datafile.nofSelectedChannels => 1025
     datafile.stride => 0
     datafile.sampleInterval => 5e-09
     datafile.frequencyRange => Vec(float,2)=[0.0,100000000.0]
-    datafile.fftLength => 513
+    datafile.fftLength => 1025
     datafile.date => 1265926154
     datafile.block => 0
 
@@ -975,6 +983,7 @@ but then it is not possible to append multiple set commands in one
 line, so you need to provide lists of keywords and list of values, like
 
 >>> datafile["blocksize","selectedAntennas"]=[2048,[0,2]]
+
 >>> datafile["blocksize","selectedAntennas"]
   [2048, Vec(int,2)=[0,2]]
 
@@ -984,7 +993,8 @@ antenna 0 and 2 and the number of selected antennas is
 >>> datafile["nofSelectedAntennas"]
   2
 
-However, now we want to work on all antennas again:
+However, in the follwing we want to work on all antennas again, so we
+do
 
 >>> datafile.set("block",0).set("selectedAntennas",range(nAntennas))
 
@@ -1016,105 +1026,75 @@ array.
 
 
 Currently implemented keywords for reading data fields are: "Fx",
-"Voltage", "FFT", "CalFFT","Time", "Frequency".
+"Voltage", "FFT", "CalFFT","Time", "Frequency" (and "TimeLag").
 
 So, let us read in the raw time series data, i.e. the electric field
 in the antenna as digitized by the ADC. This is provided by the
 keyword "Fx" (means f(x) ).
 
 >>> fxdata.read(datafile,"Fx")
-    fxdata => E-Field(float, [16, 2048]=32768, [0:32768]) -> [16.0,17.0,10.0,18.0,17.0,6.0,16.0,17.0,-1.0,0.0,...]
+    fxdata => E-Field(float, [16, 2048]=32768, [0:32768]) -> [16.0,17.0,10.0,18.0,17.0,...]
 
 and voila the vector is filled with time series data from the data
 file. Note that we had to use the .vec method for the array, since
 datafile.read does not yet accept arrays (since it can't handle c++
 iterators).
 
-No, you can access the individual antennas as single vectors through
+Now, you can access the individual antennas as single vectors through
 slicing
 
 >>> ant0data=fxdata[0].vec()
 
-To get the x-Axis we create a second vector
+If you do not have yet a pre-existing array into which you want to read
+data, you can automatically create one, using the square brackets
+syntax already known from retrieving the file header keywords. So, for
+example, to get the x-Axis we create a second vector
 
->>> times=hArray(float,[blocksize],name="Time").setUnit("","s")
->>> times.read(datafile,"Time")
+>>> times=datafile["Time"]
+(Note: you can also create an empty array with the same properties and
+dimensions, but without reading data into the array, by preceding the
+keyword with the word "empty", i.e. times=datafile["emptyTime"].)
 
-This is the time relative to the trigger in seconds. So, let's have
-that in microseconds, by using setUnit
+In the square bracket notation python will actually set the name and
+units of the data accordingly. 
+
+So, let's have the time axis in microseconds, by using setUnit
 
 >>> times.setUnit("\\mu","")
-  Time(float, [2048]=2048, [0:2048]) -> [0.0,0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,...]
+  Time(float, [2048]=2048, [0:2048]) -> [0.0,0.005,0.01,0.015,0.02,...]
 
-We do the same now for the frequency axis, which we convert to MHz. As
-length we have to take the length of the Fourier transformed time
-block (which is blocksize/2+1).
+We do the same now for the frequency axis, which we convert to MHz.
 
->>> frequencies=hArray(float,dimensions=[fftlength],name="Frequency").setUnit("","Hz")
->>> frequencies.read(datafile,"Frequency")
-  Frequency(float, [1025]=1025, [0:1025]) -> [0.0,97656.25,195312.5,292968.75,390625.0,488281.25,585937.5,683593.75,781250.0,878906.25,...]
+>>> frequencies=datafile["Frequency"].setUnit("M","")
 
->>> frequencies.setUnit("M","Hz")
-  Frequency(float, [1025]=1025, [0:1025]) -> [0.0,0.09765625,0.1953125,0.29296875,0.390625,0.48828125,0.5859375,0.68359375,0.78125,0.87890625,...]
+We can calulcate the average spectum of the data set for one antenna,
+by looping over all blocks. Here we do not use the square bracket
+notation, since we want to read the data repeatedly into the same
+memory location.
 
-5.  Fourier Transforms (FFT)
-----------------------------
-
-We can make a FFT of a float vector. This function will only return
-the non-redundant part of the FFT (i.e., just one half).  Again we
-need to provide a properly sized output vector (input length/2+1). We
-also have to specify as a second parameter in which NyquistZone the
-data was take. 
-
-Nyquist sampling means that one needs, for example, 200 MHz sampling
-rate to digitize a bandwidth of 100 MHz. The first Nyquist zone is
-then 0-100 MHz, and the second is 100-200 MHz.
-
-So, let's do the transform:
->>> fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
->>> fxdata[...].fft(fftdata[...],1)
-
-    fftdata => FFT(E)(complex, [16, 1025]=16400, [0:16400]) -> [(14776+0j),(-78.0619954633+23.5840915053j),(49.6800536667+19.8582762045j),(-69.6240335619+15.9113124235j),(2.28131321087-46.0593431603j),(-50.7134694718-6.38083930207j),(-11.8103929808+4.5431205938j),(-52.0847348972+52.0362484443j),(72.7593935051-54.1910307411j),(-30.9353873089+10.1986827514j),...]
-
-Here we have used the fft method of the float array, which is just a
-call to the stand-alone function hFFT defined in hftools.cc.
-
-We can convert the data back into the time domain by using the inverse
-Fourier transform.
->>> fxinvdata=hArray(float,dimensions=fxdata,name="E-Field'").setUnit("","Counts")
->>> fftdata[...].invfft(fxinvdata[...],1)
-
-To get the spectral power from the FFTed vector, we have to square the
-complex data and convert it to floats. This can be done using the
-complex function "norm" (unusual name, but used in c++).
-
->>> spectrum=hArray(float,dimensions=fftdata,name="E-field Spectrum")
->>> fftdata[...].norm(spectrum)
-
-We can now try to calulcate the average spectum of the data set for
-one antenna, by looping over all blocks.
-
->>> avspectrum=hArray(float,dimensions=fftdata,name="avg. Spectrum")
+>>> fftdata=datafile["emptyFFT"]
+>>> avspectrum=hArray(float,dimensions=fftdata,name="avgerage spectrum")
 >>> for block in range(nBlocks):
 ...     fftdata.read(datafile.set("Block",block),"FFT").none()
 ...     fftdata[...].spectralpower(avspectrum[...])
 
-(The .none() method is appended to suppress uwanted output in
+(The .none() method is appended to suppress unwanted output in
 generating the tutorial, when an operation returns an array or
 vector.)
 
-6.  Basic Plotting
+
+5.  Basic Plotting
 ------------------
 
 In order to plot the data, we can use external packages. Two packages
 are being provided here: matplotlib and mathgl. The former is
 specifically designed for python and thus slightly easier to use
 interactively. Since version 0.99 it is supposed to bea capable of 3D
-plots (at the time of writing we use 0.98). Mathgl is perhaps a little
-faster and convenient for real time applications and hence is used in
-our GUI programming.
+plots (at the time of writing we use 0.98). Mathgl is faster and is
+therefore used in our GUI programming. Eventually we will make it
+available for interactive plotting as well.
 
-6.1.  Mathgl
+5.1.  Mathgl
 -------------
 
 Here is a simple example on how to use mathgl code (here without a
@@ -1141,7 +1121,7 @@ gr.Label("y","y-Axis",1)
 gr.Plot(x,y);
 gr.WriteEPS("test-y.eps","Test Plot")
 
-6.2.  Matplotlib
+5.2.  Matplotlib
 ------------------
 
 Now, in principle, we need to import matplotlib
@@ -1174,32 +1154,28 @@ Now, we can use some of the plotting commands.
 >>> plt.xlabel(frequencies.getKey("name")+" ["+frequencies.getUnit()+"]")
 
 To plot the time series of the entire data set, we first read in all
-sample from all antennas
+samples from all antennas
 
 >>> datafile["block","blocksize"]=(0,maxblocksize)
->>> fxall=Vector(); fxall.setDim([datafile.nofSelectedAntennas,maxblocksize])
-  Vec(float,2113536)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...]
->>> timeall=Vector(float,maxblocksize) 
->>> datafile.read("Time",timeall); timeall *= 10**6.
-  <hftools.DataReader object at 0x539b20>
->>> datafile.read("Fx",fxall)
-  <hftools.DataReader object at 0x77308>
+>>> timeall=datafile["Time"]
+>>> fxall=datafile["Fx"]
 
 and then we plot it 
 
 >>> plt.subplot(1,2,2)
 >>> plt.title("Time Series of Antenna 0")
->>> plt.plot(timeall,fxall.elem(0))
+>>> plt.plot(timeall.vec(),fxall[0].vec())
 >>> plt.ylabel("Electric Field [ADC counts]")
 >>> plt.xlabel("Time [$\mu$s]")
+   
+  - ###################
+  - #### Figure  1 ####
+  - ###################
+
 So, for a linear plot use .plot, for a loglog plot use .loglog and for
 a log-linear plot use .semilogx or .semilogy ...
 
-Note, that we have used vectors here instead of hArrays - this is
-actually depreceated in normal interactive use (but may be faster in
-automatic pipelines)
-
-6.3.  Plotting Using the hArray Plotting Method
+5.3.  Plotting Using the hArray Plotting Method
 -------------------------------------------------
 
 There is also a simpler way to make the kind of plots described above,
@@ -1207,7 +1183,11 @@ unsing the built-in plot method of array.
 
 >>> avspectrum.par.xvalues=frequencies
 >>> avspectrum.par.title="Average Spectrum"
->>> avspectrum[0].plot(logplot="y").none()
+>>> avspectrum[0].plot(logplot="y") 
+   
+  - ###################
+  - #### Figure  2 ####
+  - ###################
 
 This creates a semilog-plot with appropriate lables and units (if they
 were provided beforehand.)
@@ -1219,8 +1199,11 @@ e.g., "array.par.xvalues=x_vector; array.plot()"
 If the array is in looping mode, multiple curves are plotted in one windows. Hence,
 
 >>> avspectrum.par.logplot="y"
->>> avspectrum[...].plot()
-  avg. Spectrum(float, [16, 1025]=16400, [0:1025]*) -> [13868864905.0,186600.668168,163848.440523,135588.910231,171181.713829,125052.341697,149167.47994,191654.209722,168893.679542,138273.603106,...]
+>>> avspectrum[...].plot(legend=datafile.antennas)
+   
+  - ###################
+  - #### Figure  3 ####
+  - ###################
 
 will simply plot all spectra of all antennas (=highest array index) in
 the array.
@@ -1238,6 +1221,10 @@ The availabe parameters are:
     ylabel: the y-axis label, if not specified, use the "name" keyword
     of the array - units will be added automatically
 
+    xlim: tuple with minimum and maximum limits for the x-axis
+
+    ylim: tuple with minimum and maximum limits for the y-axis
+
     title: a title for the plot
 
     clf: if True (default) clear the screen beforehand (use False to
@@ -1248,10 +1235,11 @@ The availabe parameters are:
             "y" ->semilog in y
             "xy"->loglog plot
 
-7.  CR Pipeline Modules
+
+6.  CR Pipeline Modules
 ---------------------------
 
-7.1.  Quality Checking of Time Series Data
+6.1.  Quality Checking of Time Series Data
 ----------------------------------------------
 
 For an automatic pipeline it is essential to check whether the data is
@@ -1271,9 +1259,7 @@ data set and set the block size accordingly.
 
 We will then read this block of data into an apropriately sized data array.
 
->>> dataarray=hArray(float,[nofSelectedAntennas,blocksize])
->>> dataarray.read(datafile.set("blocksize",blocksize).set("block",3),"Voltage")
-  hArray(float, [16, 33024]=528384, [0:528384]) -> [6.0,15.0,1.0,8.0,19.0,11.0,11.0,23.0,16.0,8.0,...]
+>>> dataarray=datafile.set("blocksize",blocksize).set("block",3)["Voltage"]
 
 The array now contains all the measured voltages of the selected
 antennas in the file.
@@ -1282,18 +1268,18 @@ First we calculate the mean over all samples for each antennas (and
 make use of the looping through the Ellipsis object).
 
 >>> datamean = dataarray[...].mean()
-    datamean => Vec(float,16)=[7.17281371124,-7.79051598837,-1.9765625,-0.283490794574,5.22622940891,-1.5335816376,0.44046753876,-6.22256540698,1.53373304264,4.74460998062,...]
+    datamean => Vec(float,16)=[7.17281371124,-7.79051598837,-1.9765625,-0.283490794574,5.22622940891,...]
 
 Similarly we get the rms (where we spare the algorithm from recalculating the
 mean, by providing it as input - actually a list of means).
 
 >>> datarms = dataarray[...].stddev(datamean)
-    datarms => Vec(float,16)=[10.4218369439,10.3521070448,10.1878041442,11.9229119576,10.0156780471,11.8848006355,9.56962788658,10.0075920432,10.7717471629,10.1781039241,...]
+    datarms => Vec(float,16)=[10.4218369439,10.3521070448,10.1878041442,11.9229119576,10.0156780471,...]
 
 and finally we get the total number of peaks 5 sigma above the noise.
 
 >>> datanpeaks = dataarray[...].countgreaterthanabs(datarms*5)
-    datanpeaks => Vec(int,16)=[45,3,32,0,53,0,46,0,43,4,...]
+    datanpeaks => Vec(int,16)=[45,3,32,0,53,...]
 
 To see whether we have more peaks than expected, we first calculate
 the expected number of peaks for a Gaussian distribution and our
@@ -1372,7 +1358,116 @@ rms, npeaks, and nonGaussianity, and finally the failed fields)
 Note, that this function can be called with "file=None". In this case
 the data provided in the datararray will be used.
 
-8.  Coordinates
+6.2.  Fourier Transforms (FFT) & Cross Correlation
+-------------------------------------------------
+
+We can make a FFT of a float vector. This function will only return
+the non-redundant part of the FFT (i.e., just one half).  Again we
+need to provide a properly sized output vector (input length/2+1). We
+also have to specify as a second parameter in which NyquistZone the
+data was take. 
+
+Nyquist sampling means that one needs, for example, 200 MHz sampling
+rate to digitize a bandwidth of 100 MHz. The first Nyquist zone is
+then 0-100 MHz, and the second is 100-200 MHz.
+
+So, let's do the transform:
+
+>>> fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
+>>> fxdata[...].fft(fftdata[...],1)
+
+    fftdata => FFT(E)(complex, [16, 1025]=16400, [0:16400]) -> [(14776+0j),(-78.0619954633+23.5840915053j),(49.6800536667+19.8582762045j),(-69.6240335619+15.9113124235j),(2.28131321087-46.0593431603j),...]
+
+Here we have used the fft method of the float array, which is just a
+call to the stand-alone function hFFT defined in hftools.cc.
+
+We can convert the data back into the time domain by using the inverse
+Fourier transform.
+
+>>> fxinvdata=hArray(float,dimensions=fxdata,name="E-Field'").setUnit("","Counts")
+>>> fftdata[...].invfft(fxinvdata[...],1)
+
+To get the spectral power from the FFTed vector, we have to square the
+complex data and convert it to floats. This can be done using the
+complex function "norm" (unusual name, but used in c++).
+
+>>> spectrum=hArray(float,dimensions=fftdata,name="E-field Spectrum")
+>>> fftdata[...].norm(spectrum)
+
+Finally, we want to see, if we can do some cross correlation, which
+mathematically is directly related to the Fourier transform.
+
+We will do this with a data set from a solar burst (taken with LOPES
+in 2003), since that is dominated by a single point source and hence
+gives a nice and clear cross correlation.
+
+>>> sun=crfile(filename_sun)
+  Opening LOPES File=/Users/falcke/LOFAR/usg/data/lopes/example.event
+  [DataReader::summary]
+   -- blocksize ............ = 65536
+   -- FFT length ........... = 32769
+   -- file streams connected?  0
+   -- shape(adc2voltage) ... = [65536, 8]
+   -- shape(fft2calfft) .... = [32769, 8]
+   -- nof. antennas ........ = 8
+   -- nof. selected antennas = 8
+   -- nof. selected channels = 32769
+   -- shape(fx) ............ = [65536, 8]
+   -- shape(voltage) ....... = [65536, 8]
+   -- shape(fft) ........... = [32769, 8]
+   -- shape(calfft) ........ = [32769, 8]
+
+Now we read in the raw time series data as well as the Frequencies and
+Time value arrays.
+
+>>> sun_time=sun["Time"].setUnit("\\mu","s")
+>>> sun_frequencies=sun["Frequency"]
+>>> sun_efield=sun["Fx"].setPar("xvalues",sun_time)
+
+As a next step we create an empty vector to hold the Fourierspectrum
+of the data
+
+>>> sun_fft=sun["emptyFFT"].setPar("xvalues",sun_frequencies)
+
+and then make the Fourier transform (noting that the data is in the
+second Nyquist domain)
+
+>>> sun_efield[...].fft(sun_fft[...],2)
+
+We will now try to make a crosscorrelation of the data. Let's start by
+making a complex scratch vector to hold an intermediated data product
+which is a copy of the fft vector.
+
+>>> crosscorr_cmplx=hArray(copy=sun_fft)
+
+We then multiply the FFTs of all antennas with the complex conjugate
+of a reference antenna (here antenna 0) and store that in the vector
+crosscorr_cmplx, which is done by the following method.
+
+>>> crosscorr_cmplx[...].crosscorrelatecomplex(sun_fft[0])
+
+This vector will then actually hold the FFT of the cross correlation
+of the antenna time series. Hence, what we now need to do is to FFT
+back into the time domain and store it in a vector crosscorr.
+
+>>> sun_timelags=sun["TimeLag"].setUnit("\\mu","")
+>>> crosscorr=hArray(float,dimensions=sun_efield,name="Cross Correlation",xvalues=sun_timelags) 
+>>> crosscorr_cmplx[...].invfft(crosscorr[...],2)
+
+We can now plot this and use as the x-axis vector the Time Lags
+conveniently provided by our cr file object.
+
+>>> crosscorr.par.xlim=(-1,1)
+>>> crosscorr[1].plot()
+   
+  - ###################
+  - #### Figure  4 ####
+  - ###################
+
+Note, plotting crosscorr[0].plot() will give the autocorrelation of
+the first antenna (which we used as reference antenna in this example).
+
+6.3.  Coordinates
 ---------------
 
 We also have access to a few functions dealing with astronomical
@@ -1384,25 +1479,132 @@ We first turn this into std vector and create a vector that is
 supposed to hold the Cartesian coordinates. Note that the AzEL vector
 is actually AzElRadius, where we need to set the radius to unity.
 
->>> azel=FloatVec()
->>> azel.extend((178,28,1))
+>>> azel=hArray([178.,28,1],dimensions=[1,3])
 >>> cartesian=azel.new()
->>> azel
-  Vec(float,3)=[178.0,28.0,1.0]
->>> cartesian
-  Vec(float,3)=[0.0,0.0,0.0]
 
-We then do the conversion, using 
+We then do the conversion, using
 
->>> hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
-  True
+>>> hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],CoordinateTypes.Cartesian,True)
 
 yielding the following output vector:
 
->>> cartesian
-  Vec(float,3)=[0.0308144266055,-0.882409725042,0.469471562786]
+    cartesian => hArray(float, [1, 3]=3, [0:3]) -> [0.0308144266055,-0.882409725042,0.469471562786]
 
-9.  Appendix: Listing of all Functions:
+
+6.4.  Coordinates
+---------------
+
+For doing actual beamforming we need to know the antenna
+positions. For this we will use the method getCalData:
+
+>>> antenna_positions=sun.getCalData("Position")
+    antenna_positions => hArray(float, [8, 3]=24, [0:24]) -> [-84.5346026,36.1095688,0.0,-52.6146025237,54.4735691204,...]
+
+As a next step we need to put the antenna coordinates on a reference
+frame that is relative to the phase center. Here we will choose the
+location of the first antenna as our phase center (that makes life a
+little easier for checking) and we simply subtract the reference
+position from the antenna locations so that our phase center lies at
+0,0,0.
+
+>>> phase_center=hArray(antenna_positions[0].vec())
+>>> antenna_positions -= phase_center
+
+Now we read in instrumental delays for each antenna in a similar way
+and store it for later use.
+
+>>> cal_delays=sun.getCalData("Delay")
+    cal_delays => hArray(float, [8]=8, [0:8]) -> [0.0,2.3875e-09,-1.3625e-09,-2.8925e-09,-2.4375e-08,...]
+
+We now convert the Azimuth-Elevation position into a vector in
+Cartesian coordinates, which is what is used by the beamformer.
+
+>>> hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
+
+Then calculate geometric delays and add the instrumental delays.
+
+>>> delays=hArray(float,dimensions=cal_delays)
+>>> hGeometricDelays(antenna_positions,cartesian,delays,True)
+
+To get the total delay we add the geometric and the calibration delays.
+
+>>> delays += cal_delays
+
+The delays can be converted to phases of coplex weights (to be applied
+in the Fourier domain).
+
+>>> phases=hArray(float,dimensions=sun_fft,name="Phases",xvalues=sun_frequencies)
+>>> hGeometricPhases(sun_frequencies,antenna_positions,cartesian,phases,True)
+
+Similarly, the corresponding complex weights are calculated.
+
+>>> weights=hArray(complex,dimensions=sun_fft,name="Complex Weights")
+>>> hGeometricWeights(sun_frequencies,antenna_positions,cartesian,weights,True)
+
+To shift the time series data (or rather the FFTed time series data)
+we multiply the fft data with the complex weights from above.
+
+>>> sun_calfft_shifted=hArray(copy=sun_fft)
+>>> sun_calfft_shifted *= weights
+
+We can check whether the shifts were doing what we expected it to do
+by making another crosscorrelation (using the shifted FFT data as
+starting point).
+
+>>> crosscorr_cmplx_shifted=hArray(copy=sun_calfft_shifted)
+>>> crosscorr_cmplx_shifted[...].crosscorrelatecomplex(sun_calfft_shifted[0])
+>>> crosscorr_shifted=hArray(float,dimensions=sun_efield,name="Cross Correlation",xvalues=sun_timelags)
+>>> crosscorr_cmplx_shifted[...].invfft(crosscorr_shifted[...],2)
+>>> crosscorr_shifted[...].plot(xlim=(-0.25,0.25),legend=sun.antennaIDs)
+   
+  - ###################
+  - #### Figure  5 ####
+  - ###################
+
+And indeed now most of the antennas show a lag peaking around 0, with
+the exception of two antennas (whick likely experienced an additional
+two-sample shift).
+
+So, let's transform back into time and see the final, shifted time
+series.
+
+>>> sun_efield_shifted = sun["emptyFx"].setPar("xvalues",sun_time)
+>>> sun_calfft_shifted[...].invfft(sun_efield_shifted[...],2)
+>>> sun_efield_shifted[0:3,...].plot(xlim=(-2,0),ylim=(-1500,1500),legend=sun.antennaIDs[0:3])
+   
+  - ###################
+  - #### Figure  6 ####
+  - ###################
+
+Obviously the three time series are now tracing each other nicely,
+indicating that the delays were about right. To now "form a beam" we
+just need to add all time series data (or their FFTs),
+
+>>> sun_calfft_shifted_added=hArray(sun_calfft_shifted[0].vec())
+>>> sun_calfft_shifted_added.add(sun_calfft_shifted[1:,...])
+
+normalize by the number of antennas (which for some reason we don't
+need to do after all), 
+sun_calfft_shifted_added /= sun.nofSelectedAntennas
+
+and then FFT back into the time domain:
+
+>>> sun_efield_shifted_added=hArray(float,dimensions=sun_time,name="beamformed E-field",xvalues=sun_time)
+>>> sun_calfft_shifted_added.invfft(sun_efield_shifted_added,2)
+
+>>> sun_efield[0].plot()
+>>> sun_efield_shifted_added.plot(xlim=(-2,0),clf=False,legend=["Reference Antenna","Beam"])
+   
+  - ###################
+  - #### Figure  7 ####
+  - ###################
+
+In the plot one can see how the green line (beamformed) traces the
+data in antenna one (which was our reference antenna). Of course, I
+still do not understand why we do not need to normalize the beamformed
+data by the number of antennas ...
+
+7.  Appendix: Listing of all Functions:
 =======================================
 
 >>> help(all)
@@ -1411,6 +1613,10 @@ yielding the following output vector:
   SECTION: Administrative Vector Function
   --------------------------------------------------
   hFill(vec, fill_value) - Fills a vector with a constant value.
+   
+  hFillRange(vec, start, factor) - Fills a vector with a series of values 
+                           increasing by one and mutliplying the entire vector 
+                           by a fixed factor.
    
   hFill(vec, fill_vec)   - Fills a vector with the content of another vector.
    
@@ -1841,6 +2047,10 @@ yielding the following output vector:
    
   hCalTable(filename, keyword, date, pyob) - Return a list of antenna positions 
                            from the CalTables - this is a test.
+   
+  hCalTableVector(filename, keyword, date, pyob) - Return a list of antenna 
+                           calibration values from the CalTables as a float 
+                           vector.
    
   
   SECTION: Coordinate Conversion (VectorConversion.cc)

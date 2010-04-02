@@ -50,7 +50,8 @@ BEGIN{
     print $0 |& process
 }
 
-/^p_\(/{next} # take out the printing commands
+/^ *p_\(/{next} # take out the printing commands
+/^ *savefigure\(/{next} # take out the savefigure commands
 /^ *$/ && (command) {print; next}
 
 (command) {print ">>> " $0; next}
