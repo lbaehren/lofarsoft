@@ -12,9 +12,9 @@ USAGE="\nusage : make_subs_SAS_Ncore.sh -id OBS_ID -p Pulsar_name -o Output_Proc
 "      -p Pulsar_name ==> Specify the Pulsar Name (i.e. B2111+46) \n"\
 "      -o Output_Processing_Location ==> Specify the Output Processing Location \n"\
 "         (i.e. /net/sub5/lse013/data4/LOFAR_PULSAR_ARCHIVE_lse013/L2010_06296_red) \n"\
-"      [-all] ==> optional parameter perform folding on entire subband set in addition to 8-splits (takes 11 extra min)\n"\
-"      [-rfi] ==> optional parameter perform Vlas's RFI checker and only use clean results (takes 7 extra min)\n"\
-"      [-C | -c] ==> optional parameter to switch on COLLAPSE\n"\
+"      [-all] ==> optional parameter perform folding on entire subband set in addition to N-splits (takes 11 extra min)\n"\
+"      [-rfi] ==> optional parameter perform Vlad's RFI checker and only use clean results (takes 7 extra min)\n"\
+"      [-C | -c] ==> optional parameter to switch on bf2presto COLLAPSE (Collapse all channels in MS to a single .sub file)\n"\
 "      [-del] ==> optional parameter to delete the previous Output_Processing_Location if it exists (override previous results!)\n"\
 "      [-core N] ==> optional parameter to change the number of cores (splits) used for processing (default = 8)\n"
 
