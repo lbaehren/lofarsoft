@@ -510,6 +510,19 @@ if (HAVE_ROOT)
 endif (HAVE_ROOT)
 
 ##_______________________________________________________________________________
+##                                                               genREASinputList
+
+if (HAVE_ROOT)
+  add_executable (genREASinputList genREASinputList.cc)
+  ## linker instructions
+  target_link_libraries (genREASinputList
+      ${ROOT_LIBRARIES}
+      )
+  ## installation instructions
+  list (APPEND cr_apps genREASinputList)
+endif (HAVE_ROOT)
+
+##_______________________________________________________________________________
 ##                                                             tbbTriggerAnalysis
 
 if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
