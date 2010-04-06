@@ -39,6 +39,12 @@ class vdsmaker(LOFARrecipe):
 
         ms_names = self.inputs['args']
 
+        try:
+            os.makedirs(self.inputs['directory'])
+        except OSError, failure:
+            if failure.errno != errno.EEXIST:
+                raise
+
         tc, mec = self._get_cluster()
         mec.push_function(
             dict(
