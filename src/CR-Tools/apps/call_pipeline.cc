@@ -834,6 +834,7 @@ double azimuthError = 0, zenithError = 0, coreError = 0; // errors (in m and rad
 float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;			// KASCADE direction and core
 float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;		// Grande direction and core
 float_t Size = 0, Sizeg = 0;				// Electron numbers (KASCADE + Grande)
+float_t Age = 0, Ageg = 0;                              // Age parameter
 float_t Nmu = 0, Lmuo = 0, Sizmg = 0;			// Muon number, trucated muon number (KASCADE), Muon number (Grande)
 double_t lgE = 0, err_lgE = 0;				// estimated energy (KASCADE)
 double_t lgEg = 0, err_lgEg = 0;			// estimated energy (Grande)
@@ -843,6 +844,7 @@ double_t err_core = 0, err_coreg = 0;                   // error of core positio
 double_t err_Az = 0, err_Azg = 0;                       // error of azimuth (KASCADE + Grande)
 double_t err_Ze = 0, err_Zeg = 0;                       // error of zenith (KASCADE + Grande)
 double_t geomag_angle = 0, geomag_angleg = 0;           // geomagnetic angle (KASCADE + Grande)
+char KRETAver[1024] = "unknown";
  
 char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande reconstruction taken
 
@@ -1123,6 +1125,8 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->SetBranchAddress("Ycg",&Ycg);
       inputTree->SetBranchAddress("Size",&Size);
       inputTree->SetBranchAddress("Sizeg",&Sizeg);
+      inputTree->SetBranchAddress("Age",&Age);
+      inputTree->SetBranchAddress("Ageg",&Ageg);
       inputTree->SetBranchAddress("Nmu",&Nmu);
       inputTree->SetBranchAddress("Lmuo",&Lmuo);
       inputTree->SetBranchAddress("Sizmg",&Sizmg);
@@ -1143,6 +1147,7 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->SetBranchAddress("geomag_angle",&geomag_angle);
       inputTree->SetBranchAddress("geomag_angleg",&geomag_angleg);
       inputTree->SetBranchAddress("Eventname",&Eventname);
+      inputTree->SetBranchAddress("KRETAver",&KRETAver);
 
       // as there is no radius of curvature in the file, set ignoreDistance to true
       if (!config["ignoreDistance"]->bValue()) {
@@ -1472,6 +1477,8 @@ int main (int argc, char *argv[])
         roottree->Branch("Zeg",&Zeg,"Zeg/F");
         roottree->Branch("Size",&Size,"Size/F");
         roottree->Branch("Sizeg",&Sizeg,"Sizeg/F");
+        roottree->Branch("Age",&Age,"Age/F");
+        roottree->Branch("Ageg",&Ageg,"Ageg/F");
         roottree->Branch("Nmu",&Nmu,"Nmu/F");
         roottree->Branch("Lmuo",&Lmuo,"Lmuo/F");
         roottree->Branch("Sizmg",&Sizmg,"Sizmg/F");
@@ -1492,6 +1499,7 @@ int main (int argc, char *argv[])
         roottree->Branch("geomag_angle",&geomag_angle,"geomag_angle/D");
         roottree->Branch("geomag_angleg",&geomag_angleg,"geomag_angleg/D");
         roottree->Branch("reconstruction",&reconstruction,"reconstruction/B");
+        roottree->Branch("KRETAver",&KRETAver,"KRETAver/C");
       }
 
       // one result, if polarization = ANY

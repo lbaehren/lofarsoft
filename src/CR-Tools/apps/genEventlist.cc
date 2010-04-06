@@ -89,6 +89,9 @@
   energy_min              1e17
   energy_max              1e20
 
+  # Select KRETA version of KASCADE results
+  KRETAversion            1.18/05
+
   # Write an additional textfile with all information
   createInfoFile          1
 
@@ -197,6 +200,8 @@ int main(int argc, char* argv[])
   string cut_str(""), fn2005(""), fn2006(""), fn2007(""), fn2008(""), fn2009(""), namebase="eventlist";
   Double_t geomag_min=0, geomag_max=90, energy_min=0, energy_max=1e20;
   Bool_t createInfoFile=false, createCopyScript=false, Grande=false;
+  string KRETAversion("");
+  char KRETAver[1024];
 
    TCut cut;
 
@@ -237,7 +242,9 @@ int main(int argc, char* argv[])
       opt>>fn2009;
     if(buf.compare("namebase")==0) 
       opt>>namebase;
-    
+    if(buf.compare("KRETAversion")==0) 
+      opt>>KRETAversion;
+   
     buf="";
   }
   // add cut_string to cut
@@ -301,6 +308,20 @@ int main(int argc, char* argv[])
   t2->SetBranchAddress("Sizeg",&Sizeg);
   t2->SetBranchAddress("Age",&Age);
   t2->SetBranchAddress("Ageg",&Ageg);
+  
+  // check if KRETA version was provided
+  if (KRETAversion == "") {
+    cerr << "\n\nERROR: Please define KRETA version of KASCADE reconstruction in option file." << endl;
+    return 1;
+  } else {
+    cout << "\nImportant: Please confirm KRETA version of input file!\n"
+         << "(if neccessary change KRETA version in option file)\n"
+         << "KRETA version = " << KRETAversion 
+         << "\nCorrect? --> if not, change config file and call genEventlist again.\n"
+         << endl;
+    strncpy(KRETAver,KRETAversion.c_str(),1023);     
+  }
+
 
   int nentries = t2->GetEntries();
   cout<<"Number of events that passed the cut conditions: "<<nentries<<endl<<endl;
@@ -328,6 +349,8 @@ int main(int argc, char* argv[])
   k->Branch("Eventname",&eventname,"Eventname/C");
   k->Branch("Size",&Size,"Size/F");
   k->Branch("Sizeg",&Sizeg,"Sizeg/F");
+  k->Branch("Age",&Age,"Age/F");
+  k->Branch("Ageg",&Ageg,"Age/F");
   k->Branch("Nmu",&Nmu,"Nmu/F");
   k->Branch("Lmuo",&Lmuo,"Lmuo/F");
   k->Branch("Sizmg",&Sizmg,"Sizmg/F");
@@ -363,6 +386,10 @@ int main(int argc, char* argv[])
   // geomagnetic angle
   k->Branch("geomag_angle",&geomag_angle,"geomag_angle/D");
   k->Branch("geomag_angleg",&geomag_angleg,"geomag_angleg/D");
+
+  // KRETA version
+  k->Branch("KRETAver",&KRETAver,"KRETAver/C");
+  
 
   // Additional eventlist info file *******************************************************************
   ofstream f1, f2, copyScript;
