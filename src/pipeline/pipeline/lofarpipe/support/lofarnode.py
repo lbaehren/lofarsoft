@@ -22,10 +22,12 @@ class LOFARnode(object):
         )
         self.logger.setLevel(logging.DEBUG)
         if loghost:
-            if not hasattr(self, "mySocketHandler"):
-                self.mySocketHandler = logging.handlers.SocketHandler(loghost, logport)
-            if len(self.logger.handlers) < 1:
-                self.logger.addHandler(self.mySocketHandler)
+            # Remove old, stale handlers and install a new one.
+            for handler in self.logger.handlers:
+                self.logger.removeHandler(handler)
+            self.logger.addHandler(
+                logging.handlers.SocketHandler(loghost, logport)
+            )
 
     def run(self):
         # Override in subclass.
