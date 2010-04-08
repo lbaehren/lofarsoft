@@ -73,6 +73,8 @@ find_program (svn_executable        svn     PATHS ${bin_locations})
 find_program (tar_executable        tar     PATHS ${bin_locations})
 find_program (wget_executable       wget    PATHS ${bin_locations})
 
+include (FindROOT)
+
 ## ==============================================================================
 ##
 ##  Macro definitions
@@ -219,9 +221,9 @@ set (packages_external
   wcstools
   )
 
-if (CR_WITH_STARTOOLS)
+if (CR_WITH_STARTOOLS AND HAVE_ROOT)
   list (APPEND packages_external startools)
-endif (CR_WITH_STARTOOLS)
+endif (CR_WITH_STARTOOLS AND HAVE_ROOT)
 
 ## Packages handled directly through CMake
 
@@ -254,6 +256,10 @@ add_dependencies (pyqt sip)
 add_dependencies (wcslib boost flex)
 
 add_dependencies (plplot numpy swig)
+
+if (HAVE_ROOT)
+add_dependencies (startools fftw3)
+endif (HAVE_ROOT)
 
 ##____________________________________________________________________
 ## Packages/Targets needing extra attention
