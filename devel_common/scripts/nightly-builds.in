@@ -28,5 +28,6 @@ for USG_PACKAGE in dal cr
     make $USG_PACKAGE
     echo "-- Nightly build of $USG_PACKAGE ..."
     cd ${USG_ROOT}/build/$USG_PACKAGE
+    make install
     make Nightly
 }
