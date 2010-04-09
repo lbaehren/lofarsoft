@@ -6,6 +6,7 @@ from contextlib import closing
 # Local helpers
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
+from lofarpipe.support.group_data import group_files
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.clusterdesc import ClusterDesc
 
@@ -88,34 +89,9 @@ class bbs(LOFARrecipe):
         self.logger.info("Starting BBS run")
         super(bbs, self).go()
 
-        # Now set up a vdsmaker recipe to build a GDS file describing the
-        # processed data
-        self.logger.info("Calling vdsmaker")
-        inputs = LOFARinput(self.inputs)
-        inputs['directory'] = self.config.get('layout', 'vds_directory')
-        inputs['gvds'] = self.inputs['gvds']
-        inputs['args'] = self.inputs['args']
-        inputs['makevds'] = self.inputs['makevds_exec']
-        inputs['combinevds'] = self.inputs['combinevds_exec']
-        outputs = LOFARoutput()
-        if self.cook_recipe('vdsmaker', inputs, outputs):
-            self.logger.warn("vdsmaker reports failure")
-            return 1
-
         clusterdesc = ClusterDesc(
             self.config.get('cluster', 'clusterdesc')
         )
-
-        self.inputs['gvds'] = os.path.join(
-            self.config.get("layout", "vds_directory"),
-            self.inputs['gvds']
-        )
-        self.logger.info("Using %s for %s gvds" %
-            (self.inputs['gvds'], "BBS")
-        )
-        if not os.access(self.inputs['gvds'], os.R_OK):
-            self.logger.info("couldn't find gvds")
-            raise IOError
 
         self.inputs['skymodel'] = os.path.join(
             self.config.get("layout", "parset_directory"),
@@ -139,178 +115,216 @@ class bbs(LOFARrecipe):
             self.logger.info("couldn't find parset")
             raise IOError
 
-        env = utilities.read_initscript(self.inputs['initscript'])
-        
         log_location = "%s/%s" % (
             self.config.get('layout', 'log_directory'),
             self.inputs['log'],
         )
         self.logger.debug("Logging to %s" % (log_location))
-        self.logger.debug("Building BBS command string")
-        bbs_cmd = [
-            self.inputs['executable'],
-            "--db", self.inputs['db_host'],
-            "--db-name", self.inputs['db_name'],
-            "--db-user", self.inputs['db_user'],
-            "--cluster-desc", self.config.get('cluster', 'clusterdesc'),
-            "--key", self.inputs['key'],
-            self.inputs['gvds'],
-            self.inputs['parset'],
-            self.inputs['skymodel'],
-            os.path.join(
-                self.inputs['working_directory'],
-                self.inputs['job_name']
+
+
+
+        # Given a limited number of processes per node, the first task is to
+        # partition up the data for processing.
+        self.logger.debug('Listing data on nodes')
+        for data_group in group_files(
+            self.logger,
+            clusterdesc,
+            os.path.join(self.inputs['working_directory'], self.inputs['job_name']),
+            int(self.inputs['max_bands_per_node']),
+            self.inputs['args']
+        ):
+            # Now set up a vdsmaker recipe to build a GDS file describing the
+            # processed data
+            self.logger.info("Calling vdsmaker")
+            inputs = LOFARinput(self.inputs)
+            inputs['directory'] = self.config.get('layout', 'vds_directory')
+            inputs['gvds'] = self.inputs['gvds']
+            inputs['args'] = self.inputs['args']
+            inputs['makevds'] = self.inputs['makevds_exec']
+            inputs['combinevds'] = self.inputs['combinevds_exec']
+            outputs = LOFARoutput()
+            if self.cook_recipe('vdsmaker', inputs, outputs):
+                self.logger.warn("vdsmaker reports failure")
+                return 1
+
+            self.inputs['gvds'] = os.path.join(
+                self.config.get("layout", "vds_directory"),
+                self.inputs['gvds']
             )
-        ]
-        if self.inputs['force'] is True or self.inputs['force'] == "True":
-            bbs_cmd.insert(1, '-f')
-        # Should BBS verbosity be linked to that of the pipeline, or should be
-        # be a separate setting?
-        if self.logger.level <= logging.INFO and self.logger.level != logging.NOTSET:
-            bbs_cmd.insert(1, '-v')
+            self.logger.info("Using %s for %s gvds" %
+                (self.inputs['gvds'], "BBS")
+            )
+            if not os.access(self.inputs['gvds'], os.R_OK):
+                self.logger.info("couldn't find gvds")
+                raise IOError
 
-        # Use a temporary directory to grab all the logs.
-        log_root = tempfile.mkdtemp(dir=self.config.get('layout', 'log_directory'))
-        self.logger.debug("Logs dumped to %s" % (log_root))
+            env = utilities.read_initscript(self.inputs['initscript'])
+            
+            self.logger.debug("Building BBS command string")
+            bbs_cmd = [
+                self.inputs['executable'],
+                "--db", self.inputs['db_host'],
+                "--db-name", self.inputs['db_name'],
+                "--db-user", self.inputs['db_user'],
+                "--cluster-desc", self.config.get('cluster', 'clusterdesc'),
+                "--key", self.inputs['key'],
+                self.inputs['gvds'],
+                self.inputs['parset'],
+                self.inputs['skymodel'],
+                os.path.join(
+                    self.inputs['working_directory'],
+                    self.inputs['job_name']
+                )
+            ]
+            if self.inputs['force'] is True or self.inputs['force'] == "True":
+                bbs_cmd.insert(1, '-f')
+            # Should BBS verbosity be linked to that of the pipeline, or should be
+            # be a separate setting?
+            if self.logger.level <= logging.INFO and self.logger.level != logging.NOTSET:
+                bbs_cmd.insert(1, '-v')
 
-        try:
-            self.logger.info("Running BBS")
-            self.logger.debug("Executing: %s" % " ".join(bbs_cmd))
-            if not self.inputs['dry_run']:
-                with utilities.log_time(self.logger):
-                    with closing(open(log_location, 'w')) as log:
-                        result = check_call(
-                            bbs_cmd,
-                            env=env,
-                            stdout=log,
-                            stderr=log,
-                            cwd=log_root
-                        )
-            else:
-                self.logger.info("Dry run: execution skipped")
-                result = 0
-        except CalledProcessError, e:
-            self.logger.exception("Call to BBS failed")
-            result = 1
-            return result
+            # Use a temporary directory to grab all the logs.
+            log_root = tempfile.mkdtemp(dir=self.config.get('layout', 'log_directory'))
+            self.logger.debug("Logs dumped to %s" % (log_root))
 
-        self.logger.info("Moving logfiles")
-        for log_file in glob.glob("%s/%s_%s" % (
-            log_root, self.inputs["key"], "control*log")
-        ):
-            self.logger.debug("Processing %s" % (log_file))
-            shutil.move(log_file, self.config.get('layout', 'log_directory'))
-        for log_file in glob.glob("%s/%s_%s" % (
-            log_root, self.inputs["key"], "calibrate*log*")
-        ):
-            self.logger.debug("Processing %s" % (log_file))
-            ms_name = ""
-            with closing(open(log_file)) as file:
-                for line in file.xreadlines():
-                    if line.split() and line.split()[0] == "part:":
-                        ms_name = os.path.basename(line.split()[1].rstrip())
-                        break
-            if not ms_name:
-                self.logger.info("Couldn't identify file for %s" % (log_file))
-            else:
-                destination = "%s/%s" % (
-                    self.config.get('layout', 'log_directory'),
-                    ms_name
-                )
-                self.logger.debug(
-                    "Moving logfile %s to %s" % (log_file, destination)
-                )
-                utilities.move_log(log_file, destination)
-
-        for log_file in glob.glob("%s/%s_%s" % (
-            log_root, self.inputs["key"], "setupparmdb*log*")
-        ):
-            self.logger.debug("Processing %s" % (log_file))
-            ms_name = ""
-            with closing(open(log_file)) as file:
-                ms_name = os.path.basename(file.readline().split()[5])
-            if not ms_name:
-                self.logger.info("Couldn't identify file for %s" % (log_file))
-            else:
-                destination = "%s/%s" % (
-                    self.config.get('layout', 'log_directory'),
-                    ms_name
-                )
-                self.logger.debug(
-                    "Moving logfile %s to %s" % (log_file, destination)
-                )
-                utilities.move_log(log_file, destination)
-
-        for log_file in glob.glob("%s/%s_%s" % (
-            log_root, self.inputs["key"], "setupsourcedb*log*")
-        ):
-            self.logger.debug("Processing %s" % (log_file))
-            ms_name = ""
-            with closing(open(log_file)) as file:
-                for line in file.xreadlines():
-                    if line.split() and line.split()[0] == "Create":
-                        ms_name = os.path.basename(os.path.dirname(line.split()[1]))
-                        break
-            if not ms_name:
-                self.logger.info("Couldn't identify file for %s" % (log_file))
-            else:
-                destination = "%s/%s" % (
-                    self.config.get('layout', 'log_directory'),
-                    ms_name
-                )
-                self.logger.debug(
-                    "Moving logfile %s to %s" % (log_file, destination)
-                )
-                utilities.move_log(log_file, destination)
-
-        # Now pull in the logs from the individual cluster nodes
-        self.logger.debug("Copying remote logs to %s"  % (log_root))
-        for node in clusterdesc.get('ComputeNodes'):
-            self.logger.debug("Node: %s" % (node))
             try:
-                check_call(
-                    [
-                        "ssh",
-                        node,
-                        "--",
-                        "mv",
-                        "%s/%s/%s*log" % (
-                            self.inputs['working_directory'],
-                            self.inputs['job_name'],
-                            self.inputs['key']
-                        ),
-                        log_root
-                    ])
-            except CalledProcessError:
-                self.logger.warn("No logs moved on %s" % (node))
-        for log_file in glob.glob("%s/%s_%s" % (
-            log_root, self.inputs["key"], "kernel*log*")
-        ):
-            self.logger.debug("Processing %s" % (log_file))
-            ms_name = ""
-            with closing(open(log_file)) as file:
-                for line in file.xreadlines():
-                    if line.split(":") and line.split(":")[0] == "INFO - Observation part":
-                        ms_name = os.path.basename(line.split()[6].rstrip())
-                        break
-            if not ms_name:
-                self.logger.info("Couldn't identify file for %s" % (log_file))
-            else:
-                destination = "%s/%s" % (
-                    self.config.get('layout', 'log_directory'),
-                    ms_name
-                )
-                self.logger.debug(
-                    "Moving logfile %s to %s" % (log_file, destination)
-                )
-                utilities.move_log(log_file, destination)
+                self.logger.info("Running BBS")
+                self.logger.debug("Executing: %s" % " ".join(bbs_cmd))
+                if not self.inputs['dry_run']:
+                    with utilities.log_time(self.logger):
+                        with closing(open(log_location, 'w')) as log:
+                            result = check_call(
+                                bbs_cmd,
+                                env=env,
+                                stdout=log,
+                                stderr=log,
+                                cwd=log_root
+                            )
+                else:
+                    self.logger.info("Dry run: execution skipped")
+                    result = 0
+            except CalledProcessError, e:
+                self.logger.exception("Call to BBS failed")
+                result = 1
+                return result
 
-        try:
-            self.logger.debug("Removing temporary log directory")
-            shutil.rmtree(log_root)
-        except OSError, failure:
-            self.logger.info("Failed to remove temporary directory")
-            self.logger.debug(failure)
+            self.logger.info("Moving logfiles")
+            for log_file in glob.glob("%s/%s_%s" % (
+                log_root, self.inputs["key"], "control*log")
+            ):
+                self.logger.debug("Processing %s" % (log_file))
+                shutil.move(log_file, self.config.get('layout', 'log_directory'))
+            for log_file in glob.glob("%s/%s_%s" % (
+                log_root, self.inputs["key"], "calibrate*log*")
+            ):
+                self.logger.debug("Processing %s" % (log_file))
+                ms_name = ""
+                with closing(open(log_file)) as file:
+                    for line in file.xreadlines():
+                        if line.split() and line.split()[0] == "part:":
+                            ms_name = os.path.basename(line.split()[1].rstrip())
+                            break
+                if not ms_name:
+                    self.logger.info("Couldn't identify file for %s" % (log_file))
+                else:
+                    destination = "%s/%s" % (
+                        self.config.get('layout', 'log_directory'),
+                        ms_name
+                    )
+                    self.logger.debug(
+                        "Moving logfile %s to %s" % (log_file, destination)
+                    )
+                    utilities.move_log(log_file, destination)
+
+            for log_file in glob.glob("%s/%s_%s" % (
+                log_root, self.inputs["key"], "setupparmdb*log*")
+            ):
+                self.logger.debug("Processing %s" % (log_file))
+                ms_name = ""
+                with closing(open(log_file)) as file:
+                    ms_name = os.path.basename(file.readline().split()[5])
+                if not ms_name:
+                    self.logger.info("Couldn't identify file for %s" % (log_file))
+                else:
+                    destination = "%s/%s" % (
+                        self.config.get('layout', 'log_directory'),
+                        ms_name
+                    )
+                    self.logger.debug(
+                        "Moving logfile %s to %s" % (log_file, destination)
+                    )
+                    utilities.move_log(log_file, destination)
+
+            for log_file in glob.glob("%s/%s_%s" % (
+                log_root, self.inputs["key"], "setupsourcedb*log*")
+            ):
+                self.logger.debug("Processing %s" % (log_file))
+                ms_name = ""
+                with closing(open(log_file)) as file:
+                    for line in file.xreadlines():
+                        if line.split() and line.split()[0] == "Create":
+                            ms_name = os.path.basename(os.path.dirname(line.split()[1]))
+                            break
+                if not ms_name:
+                    self.logger.info("Couldn't identify file for %s" % (log_file))
+                else:
+                    destination = "%s/%s" % (
+                        self.config.get('layout', 'log_directory'),
+                        ms_name
+                    )
+                    self.logger.debug(
+                        "Moving logfile %s to %s" % (log_file, destination)
+                    )
+                    utilities.move_log(log_file, destination)
+
+            # Now pull in the logs from the individual cluster nodes
+            self.logger.debug("Copying remote logs to %s"  % (log_root))
+            for node in clusterdesc.get('ComputeNodes'):
+                self.logger.debug("Node: %s" % (node))
+                try:
+                    check_call(
+                        [
+                            "ssh",
+                            node,
+                            "--",
+                            "mv",
+                            "%s/%s/%s*log" % (
+                                self.inputs['working_directory'],
+                                self.inputs['job_name'],
+                                self.inputs['key']
+                            ),
+                            log_root
+                        ])
+                except CalledProcessError:
+                    self.logger.warn("No logs moved on %s" % (node))
+            for log_file in glob.glob("%s/%s_%s" % (
+                log_root, self.inputs["key"], "kernel*log*")
+            ):
+                self.logger.debug("Processing %s" % (log_file))
+                ms_name = ""
+                with closing(open(log_file)) as file:
+                    for line in file.xreadlines():
+                        if line.split(":") and line.split(":")[0] == "INFO - Observation part":
+                            ms_name = os.path.basename(line.split()[6].rstrip())
+                            break
+                if not ms_name:
+                    self.logger.info("Couldn't identify file for %s" % (log_file))
+                else:
+                    destination = "%s/%s" % (
+                        self.config.get('layout', 'log_directory'),
+                        ms_name
+                    )
+                    self.logger.debug(
+                        "Moving logfile %s to %s" % (log_file, destination)
+                    )
+                    utilities.move_log(log_file, destination)
+
+            try:
+                self.logger.debug("Removing temporary log directory")
+                shutil.rmtree(log_root)
+            except OSError, failure:
+                self.logger.info("Failed to remove temporary directory")
+                self.logger.debug(failure)
 
         # Output filenames are the same as the input
         self.outputs['data'] = self.inputs['args']
