@@ -145,7 +145,7 @@ class bbs(LOFARrecipe):
             inputs = LOFARinput(self.inputs)
             inputs['directory'] = self.config.get('layout', 'vds_directory')
             inputs['gvds'] = self.inputs['gvds']
-            inputs['args'] = self.inputs['args']
+            inputs['args'] = data_group
             inputs['makevds'] = self.inputs['makevds_exec']
             inputs['combinevds'] = self.inputs['combinevds_exec']
             outputs = LOFARoutput()
