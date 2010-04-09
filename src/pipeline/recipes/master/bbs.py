@@ -84,6 +84,12 @@ class bbs(LOFARrecipe):
             dest="combinevds_exec",
             help="combinevds executable"
         )
+        self.optionparser.add_option(
+            '--max-bands-per-node',
+            dest="max_bands_per_node",
+            help="Maximum number of subbands to farm out to a given cluster node",
+            default="8"
+        )
 
     def go(self):
         self.logger.info("Starting BBS run")
