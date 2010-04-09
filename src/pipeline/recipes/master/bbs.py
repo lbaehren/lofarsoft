@@ -153,14 +153,14 @@ class bbs(LOFARrecipe):
                 self.logger.warn("vdsmaker reports failure")
                 return 1
 
-            self.inputs['gvds'] = os.path.join(
+            bbs_gvds = os.path.join(
                 self.config.get("layout", "vds_directory"),
                 self.inputs['gvds']
             )
             self.logger.info("Using %s for %s gvds" %
-                (self.inputs['gvds'], "BBS")
+                (bbs_gvds, "BBS")
             )
-            if not os.access(self.inputs['gvds'], os.R_OK):
+            if not os.access(bbs_gvds, os.R_OK):
                 self.logger.info("couldn't find gvds")
                 raise IOError
 
@@ -174,7 +174,7 @@ class bbs(LOFARrecipe):
                 "--db-user", self.inputs['db_user'],
                 "--cluster-desc", self.config.get('cluster', 'clusterdesc'),
                 "--key", self.inputs['key'],
-                self.inputs['gvds'],
+                bbs_gvds,
                 self.inputs['parset'],
                 self.inputs['skymodel'],
                 os.path.join(
