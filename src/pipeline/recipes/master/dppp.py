@@ -37,11 +37,11 @@ class dppp(LOFARrecipe):
             help="Working directory used on compute nodes"
         )
         self.optionparser.add_option(
-            '--start-time',
+            '--data-start-time',
             help="Start time to be passed to DPPP (optional)",
         )
         self.optionparser.add_option(
-            '--end-time',
+            '--data-end-time',
             help="End time to be passed to DPPP (optional)",
         )
 
@@ -109,8 +109,8 @@ class dppp(LOFARrecipe):
                             log_location=log_location,
                             executable=self.inputs['executable'],
                             initscript=self.inputs['initscript'],
-                            start_time=start_time,
-                            end_time=end_time,
+                            start_time=self.inputs['data_start_time'],
+                            end_time=self.inputs['data_end_time'],
                             loghost=loghost,
                             logport=logport
                         ),
