@@ -50,7 +50,6 @@ option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO
 ## Options affecting the build of individual packages
 
 option (CR_WITH_GUI          "Build CR-Tools with graphical interface?"   NO  )
-option (CR_WITH_STARTOOLS    "Enable using routines from LOPES-Star?"     YES )
 option (DAL_PYTHON_BINDINGS  "Create python bindings for DAL?"            YES )
 option (RM_ENABLE_ITPP       "Enable using IT++ library?"                 NO  )
 option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"            YES )
@@ -72,6 +71,8 @@ find_program (perl_executable       perl    PATHS ${bin_locations})
 find_program (svn_executable        svn     PATHS ${bin_locations})
 find_program (tar_executable        tar     PATHS ${bin_locations})
 find_program (wget_executable       wget    PATHS ${bin_locations})
+
+set (ROOT_FIND_QUIETLY YES )
 
 include (FindROOT)
 
@@ -221,9 +222,9 @@ set (packages_external
   wcstools
   )
 
-if (CR_WITH_STARTOOLS AND HAVE_ROOT)
+if (HAVE_ROOT)
   list (APPEND packages_external startools)
-endif (CR_WITH_STARTOOLS AND HAVE_ROOT)
+endif (HAVE_ROOT)
 
 ## Packages handled directly through CMake
 
@@ -258,7 +259,7 @@ add_dependencies (wcslib boost flex)
 add_dependencies (plplot numpy swig)
 
 if (HAVE_ROOT)
-add_dependencies (startools fftw3)
+  add_dependencies (startools fftw3)
 endif (HAVE_ROOT)
 
 ##____________________________________________________________________
@@ -336,9 +337,9 @@ add_custom_target (cr
 
 add_dependencies (cr dal mathgl plplot)
 
-if (CR_WITH_STARTOOLS)
+if (HAVE_ROOT)
   add_dependencies (cr startools fftw3)
-endif (CR_WITH_STARTOOLS)
+endif (HAVE_ROOT)
 
 if (CR_WITH_GUI)
   add_dependencies (cr pyqt)
