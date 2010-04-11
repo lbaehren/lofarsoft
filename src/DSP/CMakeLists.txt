@@ -7,16 +7,40 @@
 project (DSP)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
 
-## -----------------------------------------------------------------------------
-## User defined build/install options
+## ==============================================================================
+##
+##  CMake configuration settings
+##
+## ==============================================================================
 
-option (DSP_BUILD_TESTS "Build the test programs?" 1)
-option (DSP_ENABLE_TESTING "Build the test programs?" 1)
-option (DSP_DEBUGGING_MESSAGES "Print debugging information?" 0)
-option (DSP_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
-option (DSP_PYTHON_SUPPORT "Activate support for Glish applications?" 0)
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+  PATHS 
+  ${DSP_SOURCE_DIR}
+  ${DSP_SOURCE_DIR}/..
+  ${DSP_SOURCE_DIR}/../..
+  ${DSP_SOURCE_DIR}/../../..
+  $ENV{LOFARSOFT}
+  )
+
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (USG_ROOT)
+
+## ==============================================================================
+##
+##  Options
+##
+## ==============================================================================
+
+option (DSP_BUILD_TESTS        "Build the test programs?"                 1 )
+option (DSP_ENABLE_TESTING     "Build the test programs?"                 1 )
+option (DSP_DEBUGGING_MESSAGES "Print debugging information?"             0 )
+option (DSP_VERBOSE_CONFIGURE  "Verbose output during configuration?"     0 )
+option (DSP_PYTHON_SUPPORT     "Activate support for Glish applications?" 0 )
 
 ## Handle option: testing mode on/off
 
@@ -83,14 +107,18 @@ find_path (DSP_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
   devel_common/cmake
   )
 
+##__________________________________________________________
+## Blitz++
+
+if (NOT HAVE_BLITZ)
+  include (FindBlitz)
+endif (NOT HAVE_BLITZ)
+
+if (HAVE_BLITZ)
+  add_definitions (-DHAVE_BLITZ)
+endif (HAVE_BLITZ)
+
 if (DSP_cmake)
-  ## Blitz++
-  if (NOT HAVE_BLITZ)
-    include (${DSP_cmake}/FindBlitz.cmake)
-  endif (NOT HAVE_BLITZ)
-  if (HAVE_BLITZ)
-    add_definitions (-DHAVE_BLITZ)
-  endif (HAVE_BLITZ)
   ## CASACORE
   if (NOT HAVE_CASACORE)
     include (${DSP_cmake}/FindCASACORE.cmake)
