@@ -111,6 +111,29 @@
 */
 
 //_______________________________________________________________________________
+//                                                                   Pulsar-Tools
+
+/*!
+  \defgroup pulsar Pulsar-Tools : Collection of tools for pulsar data reduction
+	
+  \verbatim
+  lofarsoft
+  |-- data
+  |-- doc
+  |-- release
+  |-- build
+  |-- devel_common
+  |-- external
+  `-- src
+      |-- contrib
+      |-- CR-Tools
+      |-- DAL
+      |-- Pulsar         <-- you are here
+      `-- pybdsm
+  \endverbatim
+*/
+
+//_______________________________________________________________________________
 //                                                                     Star-Tools
 
 /*!
