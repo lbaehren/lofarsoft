@@ -131,6 +131,99 @@
       |-- Pulsar         <-- you are here
       `-- pybdsm
   \endverbatim
+
+  \section pulsar_presto Basic installation steps for Presto
+
+  <ol>
+    <li>Install FFTW3.X  You need to compile FFTW for _single_ precision (see
+    the config flags I recommend below). <br>
+    For all architectures I recommend the following configuration:
+    \verbatim
+    ./configure --enable-shared --enable-single
+    \endverbatim
+    Use the <tt>--prefix=SOME_PATH</tt> option to install the library and
+    its related files to SOME_PATH.  (If you have admin access to your machine,
+    <tt>--prefix=/usr/local</tt> is the default for FFTW and is a safe bet). <br>
+    If you have a modern version of GCC installed (v3.2 or better) 
+    and a modern CPU (Intel Pentium IV, or newer; AMD Opteron 
+    or better, G5), you can get _drastically_ better performance by
+    adding the following options:
+    <ul>
+      <li>For Intel PIVs or later, EM64Ts, or AMD64s:
+      \verbatim
+      --enable-sse
+      \endverbatim
+      <li>For Mac G5s:
+      \verbatim
+      --enable-altivec
+      \endverbatim
+    </ul>
+
+    <li>Install <a href="http://www.astro.caltech.edu/~tjp/pgplot">PGPLOT</a>.
+    You need the X-windows and postscript drivers at a minimum.
+
+    <li>Install <a href="http://pulsar.princeton.edu/tempo/index.html">TEMPO</a>.
+    Make sure to set the TEMPO environment variable.
+
+    <li>Install <a href="http://library.gnome.org/devel/glib">GLIB</a> (v2.X). 
+    On Linux machines this is almost certainly already on your system (check in
+    <tt>/usr/lib</tt> and <tt>/usr/include/glib*</tt>). Although you may need to
+    install a glib development package in order to have the required include 
+    files...
+
+    <li>Install <a href="http://heasarc.gsfc.nasa.gov/fitsio">CFITSIO</a>.
+    This is a very easy install and is now needed since PSRFITS
+    is now being written by several pulsar instruments (Nice!
+    a pulsar data standard that external tools can actually
+    view!  How about that!)
+
+    <li>Define the PRESTO environment variable to the top level
+    directory of the PRESTO distribution (i.e. this directory).
+
+    <li>cd to <tt>$PRESTO/src</tt>.  Check and modify the Makefile for your
+    machine of choice.  Insure that the library and include file
+    directories are correct for FFTW, PGPLOT, GLIB, CFITSIO, 
+    and TEMPO.
+
+    <li>If you are using FFTW, do a 'make makewisdom'.  This gets
+    FFTW acquainted with your system.  It is best if you are the
+    only user on the machine when you run this, as it is very
+    computation intensive and may take a while.
+
+    <li>Just for safety's sake (and because SVN sometimes messes up
+    file access times), do a "make prep".  That will make sure
+    that make does not try to run Clig to re-generate all of the
+    command line interface files.
+
+    <li>Do a \e make.  This will make all of the executables.  If you
+    want mpiprepsubband (for parallel de-dispersion on clusters) 
+    you will need to do a 'make mpi' as well.
+
+    <li>The required libraries and miscellaneous files will be
+    located in $PRESTO/lib. The executable will be in <tt>$PRESTO/bin</tt>.
+    You may copy or move the executables wherever you like, but 
+    the library files should stay put.  (That's why you define the 
+    PRESTO variable -- so the routines can find them).
+
+    <li>If you want to save some disk space, do a 'make clean' in
+    the 'src' directory.  This will leave the libraries and
+    binaries in their respective directories but will get rid of
+    all the extra stuff in the 'src' directory.
+
+    <li>If you want to use all the python routines (which if you are
+    doing anything but the most rudimentary analyses you will want 
+    to), you need Python >= version 2.3, and the _new_ Numpy/SciPy.  
+    You can get Numpy/Scipy here: <a href="http://www.scipy.org/download">http://www.scipy.org/download</a> <br>
+    I recommend using the Subversion versions (and for PRESTO 
+    as well).  In general, the following should work:
+    \verbatim
+    "cd $PRESTO/python ; make ; make fftfit"
+    \endverbatim
+    If it doesnt, you will probably need to edit the Makefile 
+    or setup.py.
+
+    <li>Go find pulsars!
+  </ol>
 */
 
 //_______________________________________________________________________________
