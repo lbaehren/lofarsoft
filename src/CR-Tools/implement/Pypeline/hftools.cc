@@ -1725,10 +1725,14 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
 /*!
   vec1.copy(vec2) -> copy elements of vec1 to vec2
 
+  If the input vector is shorter than the output vector, it will be
+  copied mutliple times until the output vector is filled.  Use
+  vec.resize first if you want to ensure that both vectors have the
+  same size.
+
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  Use vec.resize first if you want to ensure that both vectors have the same size.
 */
 template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_end)
@@ -1736,9 +1740,11 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const 
   typedef IterValueType T;
   Iterin it=vec;
   Iter itout=out;
-  while ((it!=vec_end) && (itout !=out_end)) {
+  if (it>=vec_end) return;
+  while (itout !=out_end) {
     *itout=*it;
     ++it; ++itout;
+    if (it==vec_end) it=vec;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1927,6 +1933,44 @@ void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const 
 //========================================================================
 
 
+//$DOCSTRING: Performs a $MFUNC between the two vectors, which is returned in the second vector. If the first vector is shorter it will be applied multiple times.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC}To
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input  vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing the second operand and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  
+  hMulTo(vecA,vecB) -> vecB=[ vecA[0]*vecB[0], vecA[1]*vecB[1], ..., vecA[n]*vecB[n] ]
+  hAddTo(vecA,vecB) -> vecB=[ vecA[0]+vecB[0], vecA[1]+vecB[1], ..., vecA[n]+vecB[n] ]
+  hSubTo(vecA,vecB) -> vecB=[ vecA[0]-vecB[0], vecA[1]-vecB[1], ..., vecA[n]-vecB[n] ]
+  hDivTo(vecA,vecB) -> vecB=[ vecA[0]/vecB[0], vecA[1]/vecB[1], ..., vecA[n]/vecB[n] ]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+
+  Alternative usages are:
+
+  hMul(vecA,vecB) = vecA.mul(vecB)  etc.
+
+*/
+template <class Iterin, class Iter>
+void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,const Iter vec2_end)
+{
+  typedef IterValueType T;
+  Iterin it1=vec1;
+  Iter it2=vec2;
+  while (it2!=vec2_end) {
+    *it2 =  hfcast<T>(*it1 HFPP_OPERATOR_$MFUNC (*it2));
+    ++it1; ++it2;
+    if (it1==vec1_end) it1=vec1;
+  };
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 //$DOCSTRING: Performs a $MFUNC between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h$MFUNC
@@ -1936,8 +1980,19 @@ void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const 
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing the second operands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
+  
+  vecA *= vecB  -> vecA=[ vecA[0]*vecB[0], vecA[1]*vecB[1], ..., vecA[n]*vecB[n] ]
+  vecA += vecB  -> vecA=[ vecA[0]+vecB[0], vecA[1]+vecB[1], ..., vecA[n]+vecB[n] ]
+  vecA -= vecB  -> vecA=[ vecA[0]-vecB[0], vecA[1]-vecB[1], ..., vecA[n]-vecB[n] ]
+  vecA /= vecB  -> vecA=[ vecA[0]/vecB[0], vecA[1]/vecB[1], ..., vecA[n]/vecB[n] ]
+
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Alternative usages are:
+
+  hMul(vecA,vecB) of vecA.mul(vecB)  etc.
+
 */
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end)

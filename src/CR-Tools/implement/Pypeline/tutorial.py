@@ -1472,7 +1472,7 @@ fftdata[...].invfft(fxinvdata[...],1)
 
 To get the spectral power from the FFTed vector, we have to square the
 complex data and convert it to floats. This can be done using the
-complex function "norm" (unusual name, but used in c++).
+complex function "norm" (unusual name, but that's what is used in c++).
 
 """
 spectrum=hArray(float,dimensions=fftdata,name="E-field Spectrum")
@@ -1690,13 +1690,13 @@ just need to add all time series data (or their FFTs),
 
 """
 sun_calfft_shifted_added=hArray(sun_calfft_shifted[0].vec())
-sun_calfft_shifted_added.add(sun_calfft_shifted[1:,...])
+sun_calfft_shifted[1:,...].addto(sun_calfft_shifted_added)
 """
 
-normalize by the number of antennas (which for some reason we don't
-need to do after all), 
+normalize by the number of antennas
+"""
 sun_calfft_shifted_added /= sun.nofSelectedAntennas
-
+"""
 and then FFT back into the time domain:
 
 """
@@ -1709,9 +1709,7 @@ savefigure()
 """
 
 In the plot one can see how the green line (beamformed) traces the
-<data in antenna one (which was our reference antenna). Of course, I
-still do not understand why we do not need to normalize the beamformed
-data by the number of antennas ...
+data in antenna one (which was our reference antenna).
 
 (+) Appendix: Listing of all Functions:
 =======================================
