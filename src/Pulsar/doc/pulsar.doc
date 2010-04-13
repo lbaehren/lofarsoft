@@ -1,0 +1,69 @@
+//_______________________________________________________________________________
+//                                                                   Pulsar-Tools
+
+/*!
+  \defgroup pulsar Pulsar-Tools : Collection of tools for pulsar data reduction
+	
+  \verbatim
+  lofarsoft
+  |-- data
+  |-- doc
+  |-- release
+  |-- build
+  |-- devel_common
+  |-- external
+  `-- src
+      |-- contrib
+      |-- CR-Tools
+      |-- DAL
+      |-- Pulsar         <-- you are here
+      `-- pybdsm
+  \endverbatim
+
+  <b>Table of contents:</b>
+
+  <ul>
+    <li>\ref pulsar_install
+    <li>\ref pulsar_presto
+  </ul>
+
+  <hr>
+
+  \section pulsar_install Installation instructions
+
+  <ol>
+    <li>Check out the source code from the SVN repository holding the LOFAR User
+    Software:
+    \verbatim
+    svn co http://usg.lofar.org/svn/code/trunk usg
+    \endverbatim
+  
+    <li>Once you have finished checking out the source code, you should set up your
+    environment: in the simplest case you can do everything from within your curent
+    shell (assuming bash here, but similar when working with tcsh).
+    \code
+    cd usg
+    export LOFARSOFT=`pwd`
+    . devel_common/scripts/init.sh
+    \endcode
+    In order to make the settings more permanent you should put the above into the
+    configuration file of your shell (<tt>.bashrc</tt> in the case of \e bash):
+    \code
+    export LOFARSOFT=<path to to root of the USG code tree>
+    . devel_common/scripts/init.sh
+    \endcode
+
+    <li>Run the bootstrap script to set up the CMake environment:
+    \code
+    cd $LOFARSOFT/build
+    ./bootstrap
+    \endcode
+
+    <li>Build the pulsar tools:
+    \code
+    cd $LOFARSOFT/build
+    make pulsar
+    \endcode
+  </ol>
+
+*/
