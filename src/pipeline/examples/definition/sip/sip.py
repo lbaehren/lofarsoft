@@ -14,28 +14,29 @@ class sip(control):
     def pipeline_logic(self):
         # Customise this to the requirements of a specific job.
         with log_time(self.logger):
-            datafiles = ['/net/sub3/lse007/data2/L2009_16007/SB0.MS']
-            datafiles = self.run_task("vdsreader")['data']
-            datafiles = self.run_task("ndppp", datafiles)['data']
-            datafiles = self.run_task("bbs", datafiles)['data']
+            # vdsreader returns a list of MeasurementSets to process, as well
+            # as start and end times for the observation.
+            vdsinfo = self.run_task("vdsreader")
+
+            # ndppp returns a list of processed MeasurementSets
+            datafiles = self.run_task(
+                "ndppp",
+                vdsinfo['data'],
+                start_time=vdsinfo['start_time'],
+                end_time=vdsinfo['end_time']
+            )['data']
+
+            # bbs works on the MeasurementSets produced by ndppp without
+            # changing their names
+            self.run_task("bbs", datafiles)
+
+            # mwimager works on the MeasurementSets processed by ndppp and
+            # bbs, returning a list of resultant images
             self.outputs['images'] = self.run_task("mwimager", datafiles)['data']
+
+            # collector searches for results using globs (specified in
+            # tasks.cfg), and returns the filename of an averaged image
             self.outputs['average'] = self.run_task("collector")['data']
-
-
-
-
-#            datafiles = self.run_task("vdsreader")
-#            datafiles = self.run_task("dppp_pass2", datafiles)
-#            datafiles = self.run_task("dppp_pass3", datafiles)
-#            datafiles = self.run_task("dppp_pass4", datafiles)
-#            datafiles = self.run_task("exclude_DE001LBA", datafiles)
-#            datafiles = self.run_task("trim_300", datafiles)
-#            datafiles = self.run_task("bbs", datafiles)
-#            datafiles = self.run_task("local_flag", datafiles)
-#            self.outputs['images'] = self.run_task("mwimager", datafiles)
-#            self.outputs['average'] = self.run_task("collector")
-#            self.run_task("qcheck", self.outputs['images'])
-#            self.run_task("sourcefinder", self.outputs['average'])
        
 if __name__ == '__main__':
     sys.exit(sip().main())
