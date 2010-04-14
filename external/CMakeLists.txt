@@ -1,29 +1,39 @@
 
-foreach (external_package
-    armadillo
-    bison
-    blitz
-    boost
-    casacore
-    cfitsio
-    flex
-    fftw3
-    gsl
-    hdf5
-    itpp
-    mathgl
-    matplotlib
-    numeric
-    numpy
-    plplot
-    pyqt
-    python
-    qt
-    root
-    sip
-    swig
-    szip
-    valgrind
+## List of external packages _____________________
+
+set (external_packages
+  armadillo
+  bison
+  boost
+  casacore
+  cfitsio
+  flex
+  fftw3
+  gsl
+  hdf5
+  itpp
+  mathgl
+  matplotlib
+  numeric
+  numpy
+  plplot
+  pyqt
+  python
+  qt
+  root
+  sip
+  swig
+  szip
+  valgrind
+  )
+
+if (NOT HAVE_BLITZ)
+  list (APPEND external_packages blitz)
+endif (NOT HAVE_BLITZ)
+
+## Targets for external packages _________________
+
+foreach (external_package ${external_packages}
     )
   ## search for CMakeLists.txt file
   find_file (external_package_${external_package}
