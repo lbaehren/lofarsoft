@@ -72,8 +72,10 @@ find_program (svn_executable        svn     PATHS ${bin_locations})
 find_program (tar_executable        tar     PATHS ${bin_locations})
 find_program (wget_executable       wget    PATHS ${bin_locations})
 
-set (ROOT_FIND_QUIETLY YES )
+set (BLITZ_FIND_QUIETLY YES )
+set (ROOT_FIND_QUIETLY  YES )
 
+include (FindBlitz)
 include (FindROOT)
 
 ## ==============================================================================
@@ -178,7 +180,7 @@ add_custom_target (clean-release
   COMMAND rm -rf etc
   COMMAND rm -rf include
   COMMAND rm -rf info
-  COMMAND rm -rf lib
+  COMMAND rm -rf lib lib64
   COMMAND rm -rf plugins
   COMMAND rm -rf share
   WORKING_DIRECTORY ${USG_ROOT}/release
@@ -193,6 +195,7 @@ add_custom_target (clean-src
 
 if (svn_executable)
   add_custom_target (update
+    COMMAND svn cleanup
     COMMAND svn up
     COMMAND cd ${USG_ROOT}/build && rm -rf CMake* && ./bootstrap
     WORKING_DIRECTORY ${USG_ROOT}
