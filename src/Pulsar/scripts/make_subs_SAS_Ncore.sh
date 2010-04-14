@@ -4,7 +4,7 @@
 # where the default N = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.3
+VERSION=1.4
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-rfi] [-C] [-del]\n\n"\
@@ -190,8 +190,6 @@ done
 for ii in $num_dir
 do
   mkdir -p ${STOKES}/RSP$ii
-  chmod 774 ${STOKES}/RSP$ii
-  chgrp pulsar ${STOKES}/RSP$ii
 done
 
 if [ $core -eq 1 ]
@@ -200,6 +198,9 @@ then
    echo "Warning - turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0" >> $log
    all=0
 fi
+
+chmod -R 774 . * 
+chgrp -R pulsar . *
 
 if [ $all -eq 1 ]
 then 
@@ -464,8 +465,8 @@ gzip ${PULSAR}_${OBSID}_plots.tar
 #Change permissions and move files
 echo "Changing permissions of files"
 date
-chmod -R 774 * 
-chgrp -R pulsar * 
+chmod -R 774 . * 
+chgrp -R pulsar . * 
 mv *.tar.gz *.pdf ${STOKES}
 
 date_end=`date`
