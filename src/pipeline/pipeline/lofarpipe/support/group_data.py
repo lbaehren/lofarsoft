@@ -1,12 +1,13 @@
 import subprocess
 import lofarpipe.support.utilities as utilities
+from lofarpipe.support.clusterdesc import get_compute_nodes
 
 def group_files(logger, clusterdesc, node_directory, group_size, filenames):
         # Given a limited number of processes per node, the first task is to
         # partition up the data for processing.
         logger.debug('Listing data on nodes')
         data = {}
-        for node in clusterdesc.get('ComputeNodes'):
+        for node in get_compute_nodes(clusterdesc):
             logger.debug("Node: %s" % (node))
             try:
                 exec_string = ["ssh", node, "--", "find",
