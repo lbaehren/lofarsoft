@@ -1,6 +1,6 @@
 from fabric.api import env, hosts, run, put, get, require
 from lofarpipe.support.clusterdesc import ClusterDesc
-from lofarpipe.support.clusterdesc import get_compute_ndoes, get_head_node
+from lofarpipe.support.clusterdesc import get_compute_nodes, get_head_node
 import os.path
 
 from ConfigParser import SafeConfigParser as ConfigParser
