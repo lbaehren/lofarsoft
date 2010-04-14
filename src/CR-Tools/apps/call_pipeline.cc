@@ -2394,6 +2394,7 @@ int main (int argc, char *argv[])
       delete meanRawPulses[i];
     }
 
+    
     cout << "\nPipeline finished successfully.\n" << endl;
 
   } catch (AipsError x) {
