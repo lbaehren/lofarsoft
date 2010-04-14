@@ -78,6 +78,11 @@ class mwimager(LOFARrecipe):
             self.config.get('cluster', 'clusterdesc')
         )
 
+        # Individual subband logs go in a temporary directory
+        # to be sorted out later.
+        log_root = os.path.join(tempfile.mkdtemp(), self.inputs['log'])
+        self.logger.debug("Logs dumped with root %s" % (log_root))
+
         # Given a limited number of processes per node, the first task is to
         # partition up the data for processing.
         for data_group in group_files(
@@ -123,10 +128,6 @@ class mwimager(LOFARrecipe):
                 self.inputs['log']
             )
             self.logger.debug("Logging to %s" % (log_location))
-            # Individual subband logs go in a temporary directory
-            # to be sorted out later.
-            log_root = os.path.join(tempfile.mkdtemp(), self.inputs['log'])
-            self.logger.debug("Logs dumped with root %s" % (log_root))
 
             mwimager_cmd = [
                 self.inputs['executable'],
