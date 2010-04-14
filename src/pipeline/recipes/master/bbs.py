@@ -131,7 +131,6 @@ class bbs(LOFARrecipe):
 
         # Given a limited number of processes per node, the first task is to
         # partition up the data for processing.
-        self.logger.debug('Listing data on nodes')
         for data_group in group_files(
             self.logger,
             clusterdesc,
