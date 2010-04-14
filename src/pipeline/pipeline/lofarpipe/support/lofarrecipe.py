@@ -1,4 +1,4 @@
-import os, sys, inspect, logging
+import os, sys, inspect, logging, errno
 import utilities
 from lofarpipe.support.lofarexceptions import PipelineException, ClusterError
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
@@ -82,7 +82,12 @@ class LOFARrecipe(WSRTrecipe):
 
     def _setup_logging(self):
         # Set up logging to file
-        os.makedirs(self.config.get("layout", "log_directory"))
+        try:
+            os.makedirs(self.config.get("layout", "log_directory"))
+        except OSError, failure:
+            if failure.errno != errno.EEXIST:
+                raise
+
         stream_handler = logging.StreamHandler(sys.stdout)
         file_handler = logging.FileHandler('%s/pipeline.log' % (
                 self.config.get("layout", "log_directory")
