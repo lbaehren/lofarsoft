@@ -1,5 +1,6 @@
 from fabric.api import env, hosts, run, put, get, require
 from lofarpipe.support.clusterdesc import ClusterDesc
+from lofarpipe.support.clusterdesc import get_compute_ndoes, get_head_node
 import os.path
 
 from ConfigParser import SafeConfigParser as ConfigParser
@@ -19,7 +20,7 @@ def head_node(configfile='~/.pipeline.cfg'):
             os.path.expanduser(configfile)
         ).get('cluster', 'clusterdesc')
     )
-    env.hosts = clusterdesc.get('HeadNode')
+    env.hosts = get_head_node(clusterdesc)
 
 def compute_nodes(configfile='~/.pipeline.cfg'):
     clusterdesc = ClusterDesc(
@@ -27,7 +28,7 @@ def compute_nodes(configfile='~/.pipeline.cfg'):
             os.path.expanduser(configfile)
         ).get('cluster', 'clusterdesc')
     )
-    env.hosts = clusterdesc.get('ComputeNodes')
+    env.hosts = get_compute_nodes(clusterdesc)
 
 def start_controller(configfile='~/.pipeline.cfg'):
     configfile = os.path.expanduser(configfile)

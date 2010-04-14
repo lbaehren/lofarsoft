@@ -1,7 +1,7 @@
 # Local helpers
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.ipython import LOFARTask
-from lofarpipe.support.clusterdesc import ClusterDesc
+from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
 import lofarpipe.support.utilities as utilities
 import pyrap.images
 from skim.main import run as create_hdf5
@@ -56,7 +56,7 @@ class collector(LOFARrecipe):
                 raise
 
         self.logger.debug("Copying CASA images to to %s"  % (results_dir))
-        for node in clusterdesc.get('ComputeNodes'):
+        for node in get_compute_nodes(clusterdesc):
             self.logger.debug("Node: %s" % (node))
             try:
                 exec_string = [

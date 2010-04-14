@@ -62,8 +62,8 @@ available in LOFAR Subversion. A minimal file for subcluster three could be:
 
 .. code-block:: bash
 
-   HeadNode = lfe001
-   ComputeNodes = [ lce019, lce020, lce021, lce022, lce023, lce024, lce025, lce026, lce027 ]
+   Head.Nodes = [ lfe001..2 ]
+   Compute.Nodes = [ lce019..027 ]
 
 It doesn't matter where you save this, but you might find it convenient to
 leave it in the runtime directory.

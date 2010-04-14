@@ -41,3 +41,10 @@ class ClusterDesc(object):
 
     def __str__(self):
         return "ClusterDesc: " + self.name
+
+def get_compute_nodes(clusterdesc):
+    return clusterdesc.get('Compute.Nodes')
+
+def get_head_node(clusterdesc):
+    # Always return the first head node, even if there are several defined
+    return clusterdesc.get('Head.Nodes')[0]

@@ -8,7 +8,7 @@ from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
 from lofarpipe.support.group_data import group_files
 import lofarpipe.support.utilities as utilities
-from lofarpipe.support.clusterdesc import ClusterDesc
+from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
 
 class bbs(LOFARrecipe):
     def __init__(self):
@@ -284,7 +284,7 @@ class bbs(LOFARrecipe):
 
             # Now pull in the logs from the individual cluster nodes
             self.logger.debug("Copying remote logs to %s"  % (log_root))
-            for node in clusterdesc.get('ComputeNodes'):
+            for node in get_compute_nodes(clusterdesc):
                 self.logger.debug("Node: %s" % (node))
                 try:
                     check_call(
