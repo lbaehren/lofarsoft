@@ -47,4 +47,4 @@ def get_compute_nodes(clusterdesc):
 
 def get_head_node(clusterdesc):
     # Always return the first head node, even if there are several defined
-    return clusterdesc.get('Head.Nodes')[0]
+    return [clusterdesc.get('Head.Nodes')[0]]
