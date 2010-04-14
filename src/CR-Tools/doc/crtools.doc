@@ -137,6 +137,15 @@
     cd $LOFARSOFT/build
     make cr
     \endcode
+
+    <li><b>Install the Measures database:</b>
+    
+    In order to successfully run the build software, you will require the Measures
+    tables, which are used by the \e casacore library to properly set up conversion 
+    engines to transform physical quantities such as frequencies or directions:
+    \code
+    make casacore_update_data
+    \endcode
   </ol>
 
   <hr>
