@@ -1558,6 +1558,20 @@ namespace CR { // Namespace  -- begin
   {
     casa::Matrix<double> Cleaned_DATA;
     Vector<double> beamformed_Timeseries(n_samples,0.0) ;
+    casa::Vector<double> ppfCoefficients;
+    casa::Vector<double> ppfCoefficientsInversion;
+    uint timeIntegrationBins;
+    double sourceLongitude;
+    double sourceLatitude;
+    double peakHeight;
+
+    /* Avoid compiler warnings */
+    timeIntegrationBins      = time_int_bins;
+    ppfCoefficients          = ppf_coeff;
+    ppfCoefficientsInversion = ppf_invcoeff;
+    sourceLongitude          = source_latitude;
+    sourceLatitude           = source_longitude;
+    peakHeight               = peak_height;
     
     try{
       Cleaned_DATA = NuMoonTrigger::Cleaned_data (data,
@@ -1764,25 +1778,32 @@ namespace CR { // Namespace  -- begin
   {
     Vector<double> timeSeries_FFT( n_samples,0.0 );
     casa::Matrix<double> addedSignalData;
+    casa::Vector<double> ppfCoefficients;
+    casa::Vector<double> ppfCoefficientsInversion;
+    uint timeIntegrationBins;
+
+    /* Avoid compiler warnings */
+    timeIntegrationBins      = time_int_bins;
+    ppfCoefficients          = ppf_coeff;
+    ppfCoefficientsInversion = ppf_invcoeff;
     
     try{
-      
       addedSignalData = NuMoonTrigger::Added_SignalData( data,
-							   n_samples,
-							   simTEC, 
-							   nyquist_zone,
-							   peak_height,
-							   sampling_rate,
-							   TEC,
-							   source_latitude,
-							   source_longitude,
-							   pointing_latitude,
-							   pointing_longitude,
-							   gain_scale_factor,
-							   position_x,
-							   position_y,
-							   position_z,
-							   freq_range )  ;
+							 n_samples,
+							 simTEC, 
+							 nyquist_zone,
+							 peak_height,
+							 sampling_rate,
+							 TEC,
+							 source_latitude,
+							 source_longitude,
+							 pointing_latitude,
+							 pointing_longitude,
+							 gain_scale_factor,
+							 position_x,
+							 position_y,
+							 position_z,
+							 freq_range )  ;
       
       // addedSignalData = addedSignalData*512. ;
       timeSeries_FFT = NuMoonTrigger::BeamFormed_data( addedSignalData,
