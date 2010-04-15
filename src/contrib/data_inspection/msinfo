@@ -1,6 +1,6 @@
 #! /bin/bash
 
 dir=`dirname $0`
-export LD_LIBRARY_PATH=/opt/LofIm/daily/pyrap/lib:/opt/LofIm/daily/casacore/lib:/opt/hdf5/lib:/opt/LofIm/daily/lofar/lib
+export LD_LIBRARY_PATH=/opt/LofIm/daily/pyrap/lib:/opt/LofIm/daily/casacore/lib:/opt/hdf5/lib:/opt/external/boost/boost-1.40.0/lib:/opt/LofIm/daily/lofar/lib
 export PYTHONPATH=/opt/LofIm/daily/pyrap/lib:${dir}
 ${dir}/msinfo.py $@
