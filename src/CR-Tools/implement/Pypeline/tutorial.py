@@ -1,4 +1,4 @@
-def p_(var): 
+def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)
     else: print " ",var,"=>",eval(var)
 
@@ -26,12 +26,12 @@ Version History:
 The library makes use of algotithms and code developed by Andreas
 Horneffer, Lars B"ahren, Martin vd Akker, Heino Falcke, ...
 
-To create a PDF version of the tutorial.py script use 
+To create a PDF version of the tutorial.py script use
 
 ./prettypy tutorial.py
 
 in the $LOFARSOFT/src/CR-Tools/implement/Pypeline directory.
-  
+
 %%MERGE: toc
 
 (+) StartUp
@@ -50,7 +50,7 @@ your search path)
 from pycrtools import *
 """
 
-The most convenient way is probably to define an alias in your .bashr
+The most convenient way is probably to define an alias in your .bashrc
 or .profile files, like
 
 alias pycr='/sw/bin/python2.6 -i $LOFARSOFT/src/CR-Tools/implement/Pypeline/pycrinit.py'
@@ -62,7 +62,7 @@ executed, like this one here. So, you can run the tutorial with
 
 pycr -i tutorial.py
 
-from the UNIX prompt.
+from the console prompt.
 
 
 (+) Getting Help
@@ -104,7 +104,7 @@ exposed to python using the Boost Python system.
 
 (NB: Unfortunately different systems provide different python data
 structures. Hence a function exposed to python with SWIG or SIP is not
-diretcly able to accept a BOOST PYTHON wrapped vector as input or vice
+directly able to accept a BOOST PYTHON wrapped vector as input or vice
 versa. If you want to do this you have to provide extra conversion
 routines.)
 
@@ -123,11 +123,11 @@ For that reason MEMORY ALLOCATION is done almost exculsively in the
 Python layer. The fast majority of c++ functions is not even able to
 allocate or free any memory. This allows for very efficient memory
 management and processing, but also means that the user is responsible
-for providing properly sized vectors as inputs AND output
+for providing properly sized vectors as input AND output
 vectors. I.e.: you need to know beforehand what sized vector you
 expect in return!
 
-That may be annoying, but forces you to think carefully about how to
+This may be annoying, but forces you to think carefully about how to
 use memory. For example, if there is a processing done multiple times
 using a scratch vector of fixed size, you reuse the same vector over
 and over again, thus avoiding a lot of unnecessary allocation and
@@ -150,8 +150,8 @@ To creat a vector most efficently, use the original vector constructors:
 
 - BoolVec()
 - IntVec()
-- FloatVec() 
-- ComplexVec() 
+- FloatVec()
+- ComplexVec()
 - StringVec()
 
 e.g.
@@ -160,7 +160,7 @@ e.g.
 v=FloatVec(); v
 """
 
-will create a floating point vector of size 0. 
+will create a floating point vector of size 0.
 
 The vector can be filled with a python list or tuple, by using the extend attribute:
 
@@ -191,7 +191,7 @@ p_("v.list()")
 
 However, the basic Boost Python STL vector constructor takes no
 arguments and is a bit cumbersome to use in the long run.  Here we
-provide a wrapper function that is useful for interactive use.  
+provide a wrapper function that is useful for interactive use.
 
 Usage:
 
@@ -254,7 +254,7 @@ destroyed, since there is still a reference to it left. Only if you
 destroy x and v the memory will be freed.
 
 
-As note above, this vector is subscriptable and sliceable, using the
+As noted above, this vector is subscriptable and sliceable, using the
 standard python syntax.
 
 >>> v[1:3]
@@ -276,7 +276,7 @@ v2.resize(8);
 v2
 """
 
-Resize a vector and fill with non-zero values:
+Resize a vector and fill new entries with non-zero values:
 
 """
 v2.resize(10,-1)
@@ -356,7 +356,7 @@ Similarly you can do
 
 Here are examples of some basic statistics functions one can use
 
-Mean: 
+Mean:
 
 """
 p_("v1.mean()")
@@ -368,7 +368,7 @@ Median:
 p_("v1.median()")
 """
 
-Summing all elements in a vector: 
+Summing all elements in a vector:
 
 """
 p_("v1.sum()")
@@ -429,7 +429,7 @@ p_("a")
 """
 
 One may wonder what the representation of the Array actually
-means. 
+means.
 
 a => hArray(int, [3, 3]=9, [0:9]) -> [0,1,2,3,4,5,0,0,0]
 
@@ -469,10 +469,10 @@ p_("a")
 """
 
 BTW, this could also be done calling the function hMul(tmp_array,a,2),
-rather than the corresponding method. 
+rather than the corresponding method.
 
 An important constraint is that all these functions or methods only
-work with either vector or array clases, a mix in the paramters
+work with either vector or array clases, a mix in the parameters
 between vectors and arrays is currently not supported.
 
 (+++) Changing Dimensions
@@ -523,7 +523,7 @@ v[0]=0
 p_("a")
 """
 
-To actually make a pyhsically distinct copy, you need to explicitly
+To actually make a physically distinct copy, you need to explicitly
 copy the data over.
 
 """
@@ -554,7 +554,7 @@ Let us take our two-dimensional array from before:
 p_("a")
 """
 
-The vector followed by a single number in square brackets 
+The vector followed by a single number in square brackets
 will "in principle" obtain the first column of the array.
 
 """
@@ -578,7 +578,7 @@ you want to have are reference to a slice only.
 In contrast, a.vec(), without slicing, will give you a reference to
 the underlying vector.
 
-Similarly, 
+Similarly,
 
 """
 a[0,1].vec()
@@ -628,7 +628,7 @@ a[0].sum()
 """
 
 will return the sum over the first row of the array, i.e. the first
-three elements of the underlying vector. While 
+three elements of the underlying vector. While
 
 """
 a[0].negate()
@@ -710,7 +710,7 @@ increment values into account:
 a[1:,...].mean()
 """
 
-will loop over all top-level slices starting at the 2nd slice 
+will loop over all top-level slices starting at the 2nd slice
 (slice #1) until the last.
 
 """
@@ -736,7 +736,7 @@ a[...].mean()
 
 will do the same as a[0:,..].mean().
 
-Finally, it is even possible to specify an array of indices for the slicing. 
+Finally, it is even possible to specify an array of indices for the slicing.
 
 """
 a[[0,2],...].mean()
@@ -843,7 +843,7 @@ or simply the .history() method, which prints the activity log.
 a.history()
 """
 
-You can add a line to the history log yourself with 
+You can add a line to the history log yourself with
 
 """
 a.addHistory("TEST","This is a test.")
@@ -851,7 +851,7 @@ a.addHistory("TEST","This is a test.")
 
 and clear the entire log with .clearHistory().
 
-History tracking can be switched off with 
+History tracking can be switched off with
 
 >>> a.setHistory(False)
 
@@ -874,7 +874,7 @@ p_("filename_lofar")
 """
 
 We can create a new file object, using the "crfile" class, which is an
-interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py. 
+interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py.
 
 The following will open a data file and return a DataReader object:
 
@@ -922,7 +922,7 @@ makes use of the power of python with automatic typing. For, example
 datafile.get("frequencyRange")
 """
 
-actually returns a vector. 
+actually returns a vector.
 
 Here no difference is made where the data comes from. The keyword
 Obervatory accesses the header record in the data file while the
@@ -940,18 +940,18 @@ parameters (we will later actually use different ones which are
 automatically stored in the datafile object).
 
 """
-obsdate   =datafile["Date"] 
+obsdate   =datafile["Date"]
 filesize  =datafile["Filesize"]
-blocksize =datafile["blocksize"] 
-nAntennas =datafile["nofAntennas"] 
-antennas  =datafile["antennas"] 
-antennaIDs=datafile["AntennaIDs"] 
+blocksize =datafile["blocksize"]
+nAntennas =datafile["nofAntennas"]
+antennas  =datafile["antennas"]
+antennaIDs=datafile["AntennaIDs"]
 selectedAntennas=datafile["selectedAntennas"]
-nofSelectedAntennas=datafile["nofSelectedAntennas"] 
+nofSelectedAntennas=datafile["nofSelectedAntennas"]
 fftlength =datafile["fftLength"]
 sampleFrequency =datafile["sampleFrequency"]
-maxblocksize=min(filesize,1024*1024); 
-nBlocks=filesize/blocksize; 
+maxblocksize=min(filesize,1024*1024);
+nBlocks=filesize/blocksize;
 
 p_(["obsdate","filesize","blocksize","nAntennas","antennas","antennaIDs","selectedAntennas","nofSelectedAntennas","fftlength","sampleFrequency","maxblocksize","nBlocks"])
 """
@@ -1039,12 +1039,12 @@ datafile.set("block",0).set("selectedAntennas",range(nAntennas))
 
 The next step is to actually read in data. This is done with the read
 method (accessing "hFileRead"). The data is read flatly into a 1D
-vector. This is also true if mutliple antennas are read out at
+vector. This is also true if multiple antennas are read out at
 once. Here simply the data from the antennas follow each other.
 
 Also, by default memory allocation of the vectors has to be done in
 python before calling any of the functions. This improves speed and
-efficiency, but requires one to programme carefully and to understand
+efficiency, but requires one to program carefully and to understand
 the data structrue.
 
 First we create a FloatArray of the correct dimensions, naming it
@@ -1101,7 +1101,7 @@ dimensions, but without reading data into the array, by preceding the
 keyword with the word "empty", i.e. times=datafile["emptyTime"].)
 
 In the square bracket notation python will actually set the name and
-units of the data accordingly. 
+units of the data accordingly.
 
 So, let's have the time axis in microseconds, by using setUnit
 
@@ -1115,14 +1115,14 @@ We do the same now for the frequency axis, which we convert to MHz.
 frequencies=datafile["Frequency"].setUnit("M","")
 """
 
-We can calulcate the average spectum of the data set for one antenna,
+We can calculate the average spectum of the data set for one antenna,
 by looping over all blocks. Here we do not use the square bracket
 notation, since we want to read the data repeatedly into the same
 memory location.
 
 """
 fftdata=datafile["emptyFFT"]
-avspectrum=hArray(float,dimensions=fftdata,name="avgerage spectrum")
+avspectrum=hArray(float,dimensions=fftdata,name="average spectrum")
 for block in range(nBlocks):
     fftdata.read(datafile.set("Block",block),"FFT").none()
     fftdata[...].spectralpower(avspectrum[...])
@@ -1139,8 +1139,8 @@ vector.)
 In order to plot the data, we can use external packages. Two packages
 are being provided here: matplotlib and mathgl. The former is
 specifically designed for python and thus slightly easier to use
-interactively. Since version 0.99 it is supposed to bea capable of 3D
-plots (at the time of writing we use 0.98). Mathgl is faster and is
+interactively. Since version 0.99 it is supposed to be capable of 3D
+plots (at the time of writing we use version 0.98). Mathgl is faster and is
 therefore used in our GUI programming. Eventually we will make it
 available for interactive plotting as well.
 
@@ -1177,15 +1177,15 @@ gr.WriteEPS("test-y.eps","Test Plot")
 Now, in principle, we need to import matplotlib
 
 >>> import matplotlib.pyplot as plt
- 
-however, that should have been done already for you.
+
+however, that should have been done already for you when pycrtools was loaded.
 
 Depending on the system you may have to use
 
 >>> plt.show()
 
 and an empty plot window should pop up somehwere (in the background?)
-!! On the Mac it seems to pop up automatically. 
+!! On the Mac it seems to pop up automatically.
 
 (NB: At least on a Mac the window likes to stubbornly hide behind
 other windows, so search your screen carefully if no window pops up.)
@@ -1221,7 +1221,7 @@ timeall=datafile["Time"]
 fxall=datafile["Fx"]
 """
 
-and then we plot it 
+and then we plot it
 
 """
 plt.subplot(1,2,2)
@@ -1244,12 +1244,12 @@ a log-linear plot use .semilogx or .semilogy ...
 -------------------------------------------------
 
 There is also a simpler way to make the kind of plots described above,
-unsing the built-in plot method of array.
+using the built-in plot method of array.
 
 """
 avspectrum.par.xvalues=frequencies
 avspectrum.par.title="Average Spectrum"
-avspectrum[0].plot(logplot="y") 
+avspectrum[0].plot(logplot="y")
 savefigure()
 """
 
@@ -1293,8 +1293,8 @@ The availabe parameters are:
     clf: if True (default) clear the screen beforehand (use False to
     compose plots with multiple lines from different arrays.
 
-    logplot: can be used to make loglog or semilog plots: 
-            "x" ->semilog in x 
+    logplot: can be used to make loglog or semilog plots:
+            "x" ->semilog in x
             "y" ->semilog in y
             "xy"->loglog plot
 
@@ -1322,7 +1322,7 @@ data set and set the block size accordingly.
 blocksize=min(filesize/4,maxblocksize)
 """
 
-We will then read this block of data into an apropriately sized data array.
+We will then read this block of data into an appropriately sized data array.
 
 """
 dataarray=datafile.set("blocksize",blocksize).set("block",3)["Voltage"]
@@ -1359,13 +1359,13 @@ the expected number of peaks for a Gaussian distribution and our
 blocksize, as well as the error on that number.
 
 """
-npeaksexpected=funcGaussian(5,1,0)*blocksize 
+npeaksexpected=funcGaussian(5,1,0)*blocksize
 p_("npeaksexpected")
-npeakserror=sqrt(npeaksexpected) 
+npeakserror=sqrt(npeaksexpected)
 p_("npeakserror")
 """
 
-So, that we can get a normalized quantity 
+So, that we can get a normalized quantity
 
 G = (Npeaks_detected - Npeaks_expected)/Npeaks_error
 
@@ -1384,7 +1384,7 @@ dataNonGaussianity /= npeakserror
 
 The next stept is to make a nice table of the results and check
 whether these parameters are within the limits we have imposed (based
-on empirical studies of the data). 
+on empirical studies of the data).
 
 To ease the operation we combine all the data into one python array
 (using the zip function - zip, as in zipper).
@@ -1413,7 +1413,7 @@ qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
 CheckParameterConformance(dataproperties[0],{"mean":1,"rms":2,"nonGaussianity":4},qualitycriteria)
 """
 
-The first paramter is just the list of numbers of the mean, rms,
+The first parameter is just the list of numbers of the mean, rms,
 etc. of one antenna we created above. The second parameter is a dict,
 describing which parameter to find at which position in the input
 list, and the third parameter is yet another dict specifying for each
@@ -1426,7 +1426,7 @@ python function is available, that does the quality checking for you
 and returns a list with failed antennas and their properties.
 
 """
-badantennalist=CRQualityCheck(qualitycriteria,datafile,dataarray,verbose=False) 
+badantennalist=CRQualityCheck(qualitycriteria,datafile,dataarray,verbose=False)
 
 p_("badantennalist[0]")
 """
@@ -1444,7 +1444,7 @@ We can make a FFT of a float vector. This function will only return
 the non-redundant part of the FFT (i.e., just one half).  Again we
 need to provide a properly sized output vector (input length/2+1). We
 also have to specify as a second parameter in which NyquistZone the
-data was take. 
+data was take.
 
 Nyquist sampling means that one needs, for example, 200 MHz sampling
 rate to digitize a bandwidth of 100 MHz. The first Nyquist zone is
@@ -1499,7 +1499,7 @@ sun_frequencies=sun["Frequency"]
 sun_efield=sun["Fx"].setPar("xvalues",sun_time)
 """
 
-As a next step we create an empty vector to hold the Fourierspectrum
+As a next step we create an empty vector to hold the Fourier spectrum
 of the data
 
 """
@@ -1514,8 +1514,8 @@ sun_efield[...].fft(sun_fft[...],2)
 """
 
 We will now try to make a crosscorrelation of the data. Let's start by
-making a complex scratch vector to hold an intermediated data product
-which is a copy of the fft vector.
+making a complex scratch vector to hold an intermediate data product
+which is a copy of the FFT vector.
 
 """
 crosscorr_cmplx=hArray(copy=sun_fft)
@@ -1535,7 +1535,7 @@ back into the time domain and store it in a vector crosscorr.
 
 """
 sun_timelags=sun["TimeLag"].setUnit("\\mu","")
-crosscorr=hArray(float,dimensions=sun_efield,name="Cross Correlation",xvalues=sun_timelags) 
+crosscorr=hArray(float,dimensions=sun_efield,name="Cross Correlation",xvalues=sun_timelags)
 crosscorr_cmplx[...].invfft(crosscorr[...],2)
 """
 
@@ -1555,12 +1555,12 @@ the first antenna (which we used as reference antenna in this example).
 ---------------
 
 We also have access to a few functions dealing with astronomical
-coordinates. Assume, we have a source at an Azmiut/Elevation position
+coordinates. Assume, we have a source at an Azimuth/Elevation position
 of (178 Degree,28 Degree) and we want to convert that into Cartesian
 coordinates (which, for example, is required by our beamformer).
 
-We first turn this into std vector and create a vector that is
-supposed to hold the Cartesian coordinates. Note that the AzEL vector
+We first turn this into a STD vector and create a vector that is
+supposed to hold the Cartesian coordinates. Note that the AzEl vector
 is actually AzElRadius, where we need to set the radius to unity.
 
 """
@@ -1598,7 +1598,7 @@ frame that is relative to the phase center. Here we will choose the
 location of the first antenna as our phase center (that makes life a
 little easier for checking) and we simply subtract the reference
 position from the antenna locations so that our phase center lies at
-0,0,0.
+(0,0,0).
 
 """
 phase_center=hArray(antenna_positions[0].vec())
@@ -1634,7 +1634,7 @@ To get the total delay we add the geometric and the calibration delays.
 delays += cal_delays
 """
 
-The delays can be converted to phases of coplex weights (to be applied
+The delays can be converted to phases of complex weights (to be applied
 in the Fourier domain).
 
 """
@@ -1650,7 +1650,7 @@ hGeometricWeights(sun_frequencies,antenna_positions,cartesian,weights,True)
 """
 
 To shift the time series data (or rather the FFTed time series data)
-we multiply the fft data with the complex weights from above.
+we multiply the FFT data with the complex weights from above.
 
 """
 sun_calfft_shifted=hArray(copy=sun_fft)
