@@ -280,7 +280,7 @@ hSum(vec)              - Performs a sum over the values in a vector and
 hProduct(vec)          - Multiplies all elements in the vector with each
                          other and return the result
 
-hNorm(vec)             - Returns the lengths or norm of a vector (i.e.
+hVectorLength(vec)     - Returns the lengths or norm of a vector (i.e.
                          Sqrt(Sum_i(xi*+2))).
 
 hNormalize(vec)        - Normalizes a vector to length unity.
@@ -480,19 +480,6 @@ template<> inline HComplex hfnull<HComplex>(){return 0.0;}
 //Identity
 template<class T> inline T hfcast(/*const*/ T v){return v;}
 
-//Convert to arbitrary class T if not specified otherwise
-template<class T> inline T hfcast(uint v){return static_cast<T>(v);}
-#if H_OS64BIT
-template<class T> inline T hfcast(int v){return static_cast<T>(v);}
-#endif
-template<class T> inline T hfcast(HInteger v){return static_cast<T>(v);}
-template<class T> inline T hfcast(HNumber v){return static_cast<T>(v);}
-template<class T> inline T hfcast(HComplex v){return static_cast<T>(v);}
-template<class T> inline T hfcast(/*const*/ HPointer v){return hfcast<T>(reinterpret_cast<HInteger>(v));}
-template<class T> inline T hfcast(/*const*/ HString v){T t; std::istringstream is(v); is >> t; return t;}
-
-template<class T> inline T hfcast(CR::DataReader v){return hfcast<T>((HInteger)((void*)&v));}
-
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
 template<>  inline HInteger hfcast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v));}
 template<>  inline HInteger hfcast<HInteger>(HComplex v){return static_cast<HInteger>(floor(real(v)));}
@@ -509,8 +496,26 @@ template<> inline HInteger hfcast(/*const*/ HString v){HInteger t=0; std::istrin
 template<> inline HNumber hfcast(/*const*/ HString v){HNumber t=0.0; std::istringstream is(v); is >> t; return t;}
 template<> inline HComplex hfcast(/*const*/ HString v){HComplex t=0.0; std::istringstream is(v); is >> t; return t;}
 
+//Convert to arbitrary class T if not specified otherwise
+template<class T> inline T hfcast(uint v){return static_cast<T>(v);}
+#if H_OS64BIT
+template<class T> inline T hfcast(int v){return static_cast<T>(v);}
+#endif
+template<class T> inline T hfcast(HInteger v){return static_cast<T>(v);}
+template<class T> inline T hfcast(HNumber v){return static_cast<T>(v);}
+template<class T> inline T hfcast(HComplex v){return static_cast<T>(v);}
+template<class T> inline T hfcast(/*const*/ HPointer v){return hfcast<T>(reinterpret_cast<HInteger>(v));}
+template<class T> inline T hfcast(/*const*/ HString v){T t; std::istringstream is(v); is >> t; return t;}
+
+template<class T> inline T hfcast(CR::DataReader v){return hfcast<T>((HInteger)((void*)&v));}
+
+
+
 inline HInteger ptr2int(HPointer v){return reinterpret_cast<HInteger>(v);}
 inline HPointer int2ptr(HInteger v){return reinterpret_cast<HPointer>(v);}
+
+template<class T> inline HString hf2string(T v){std::ostringstream os; os << v; return os.str();}
+template<> inline HString hf2string(CR::DataReader v){return hf2string((HInteger)((void*)&v));}
 
 
 inline HComplex operator*(HInteger i, HComplex c) {return hfcast<HComplex>(i)*c;}
@@ -1517,29 +1522,30 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType fill_
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Fills a vector with a series of values increasing by one and mutliplying the entire vector by a fixed factor.
+//$DOCSTRING: Fills a vector with a series of values starting at a start value and then increasing by an increment until it is filled
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFillRange
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to fill.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HInteger)(start)()("Integer start value of the loop variable.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(factor)()("Factor to multiply loop variable with.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(start)()("Start value of the range.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(increment)()("Increment (to multiply loop variable with).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hFillRange(vec,-2,2.,) -> [-4.0,-2.0,0.0,2.0,4.0,...] 
+  hFillRange(vec,-2.5,2.) -> [-2.5,-0.5,1.5,3.5,...] 
+  vec.fillrange(start,increment) -> vec=[start, start+1*increment, start+2*increment ...]
 
   \brief $DOCSTRING
   $PARDOCSTRING
 
 */
 template <class Iter>
-void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger start,  const IterValueType factor)
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  IterValueType start,  const IterValueType increment)
 {
   Iter it=vec;
-  HInteger i=start;
+  HInteger i=0;
   while (it!=vec_end) {
-    *it=factor*i;
+    *it=start+increment*i;
     ++it; ++i;
   };
 }
@@ -1577,6 +1583,47 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter fill_vec, cons
     *it1=*it2;
     ++it1;++it2;
     if (it2==fill_vec_end) it2=fill_vec;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Combines two vectors into one where the elements of the vectors follow each other alternating between the input vectors. Equivalent to python "zip".
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hZipper
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to fill")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecA)()("Input vector #1 of values to fill it with")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vecB)()("Input vector #2 of values to fill it with")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hZipper(vec,vecA,vecB) -> vec=[vecA_0,vecB_0,vecA_1,vecB_1,...,vecA_n,vecB_n]
+  vec.zipper(vecA,vecB) -> vec=[vecA_0,vecB_0,vecA_1,vecB_1,...,vecA_n,vecB_n]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  If the input vectors are shorther than vec they will wrap around and
+  start from the beginning.
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter vecA, const Iter vecA_end, const Iter vecB, const Iter vecB_end)
+{
+  Iter it=vec;
+  Iter itA=vecA;
+  Iter itB=vecB;
+  if (itA>=vecA_end) return;
+  if (itB>=vecB_end) return;
+  while (it!=vec_end) {
+    *it=*itA;
+    ++it; if (it==vec_end) return;
+    ++itA; if (itA==vecA_end) itA=vecA; 
+    *it=*itB;
+    ++it; if (it==vec_end) return;
+    ++itB; if (itB==vecB_end) itB=vecB; 
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1790,6 +1837,43 @@ inline T square(T val)
 inline HNumber hPhase(HNumber frequency, HNumber time)
 {
   return CR::_2pi*frequency*time;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Coverts a real phase and amplitude to a complex number
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME hAmplitudePhaseToComplex
+//------------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HComplex)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(amplitude)()("Amplitude of complex number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HNumber)(phase)()("Phase of complex number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+inline HComplex HFPP_FUNC_NAME(HNumber amplitude, HNumber phase)
+{
+  return amplitude*exp(HComplex(0.0,phase));
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Coverts a real phase to a complex number (with amplitude of unity)
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME hPhaseToComplex
+//------------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HComplex)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(phase)()("Phase of complex number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+inline HComplex HFPP_FUNC_NAME(HNumber phase)
+{
+  return exp(HComplex(0.0,phase));
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -2132,6 +2216,72 @@ void h{$MFUNC}2(const Iter vec,const Iter vec_end,  const Iterin1 vec1,const Ite
 //COMPLEX FUNCTIONS
 ///////////////////
 
+
+//$DOCSTRING: Coverts a vector of real phase to a vector of corresponding complex numbers (with amplitude of unity). 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hPhaseToComplex
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Output vector returning complex numbers")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(phasevec)()("Input vector with real phases")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hPhaseToComplex(outvec,phase) -> outvec = [exp(i*phase_1),exp(i*phase_2),...,exp(i*phase_n)]
+  outvec.phasetocomplex(phase) -> outvec = [exp(i*phase_1),exp(i*phase_2),...,exp(i*phase_n)]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  If input vector is shorter it will be repeated until output vector is full.
+
+*/
+template <class Iter1,class Iter2>
+void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 phasevec, const Iter2 phasevec_end)
+{
+  Iter1 it1=vec;
+  Iter2 it2=phasevec;
+  if (it2>=phasevec_end) return;
+  while (it1!=vec_end) {
+    *it1=hPhaseToComplex(*it2);
+    ++it1; 
+    ++it2; if (it2==phasevec_end) it2=phasevec; // loop over input vector if necessary ...
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Coverts a vector of real phases and amplitudes to a vector of corresponding complex numbers.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hAmplitudePhaseToComplex
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Output vector returning complex numbers")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(ampphase)()("Input vector with real amplitudes and phases (2 numbers per entry: [amp_0, phase_0, amp_1, phase_1, ...])")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hAmplitudePhaseToComplex(vec,ampphase) -> vec = [ampphase_0,0*exp(i*ampphase_0,1),ampphase_1,0*exp(i*ampphase_1,1),...,ampphase_n,0*exp(i*ampphase_n,1)]
+  vec.amplitudephasetocomplex(ampphase) -> vec = [ampphase_0,0*exp(i*ampphase_0,1),ampphase_1,0*exp(i*ampphase_1,1),...,ampphase_n,0*exp(i*ampphase_n,1)]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  If input vector is shorter it will be repeated until output vector is full.
+
+*/
+template <class Iter1,class Iter2>
+void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 ampphase, const Iter2 ampphase_end)
+{
+  Iter1 it1=vec;
+  Iter2 it2=ampphase;
+  if (it2+1>=ampphase_end) return;
+  while (it1!=vec_end) {
+    *it1=hAmplitudePhaseToComplex(*it2,*it2+1);
+    ++it1; 
+    it2+=2; if (it2>=ampphase_end) it2=ampphase; // loop over input vector if necessary ...
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Calculate the complex conjugate of all elements in the complex vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hConj
@@ -2153,6 +2303,7 @@ void  HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Multiplies the elements of the first vector with the complex conjugate of the elements in the second and returns the results in the first.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -2334,7 +2485,7 @@ IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 
 //$DOCSTRING: Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2))).
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hNorm
+#define HFPP_FUNC_NAME hVectorLength
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2369,7 +2520,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
-  HNumber norm=hNorm(vec,vec_end);
+  HNumber norm=hVectorLength(vec,vec_end);
   Iter it=vec;
   while (it!=vec_end) {*it=(*it)/norm; ++it;};
 
@@ -3063,6 +3214,47 @@ void HFPP_FUNC_NAME (const DataIter idata,
 //$SECTION:           RF (Radio Frequency) Function
 //========================================================================
 
+//$DOCSTRING: Coverts a vector of time delays and a vector of frequencies to a corresponding vector of phases (of a complex number).
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDelayToPhase
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vec)()("Output vector returning real phases of complex numbers")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(frequencies)()("Input vector with real delays in units of time [second]")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(delays)()("Input vector with real delays in units of time [second]")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hDelayToPhase(vec,frequencies,delays) -> vec = [phase(frequencies_0,delays_0),phase(frequencies_1,delays_0),...,phase(frequencies_n,delays_0),phase(frequencies_1,delays_1),...]
+
+ 
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  The frequencies always run fastest in the output vector.  If input
+  vectors are shorter they will be wrapped until the output vector is
+  full.
+
+*/
+template <class Iter>
+void  HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const Iter frequencies, const Iter frequencies_end, const Iter delays, const Iter delays_end)
+{
+  Iter it1=vec;
+  Iter it2=frequencies;
+  Iter it3=delays;
+  if (it2>=frequencies_end) return;
+  if (it3>=delays_end) return;
+  while (it1!=vec_end) {
+    *it1=hPhase(*it2,*it3);
+    ++it1; 
+    ++it2; if (it2==frequencies_end) {
+      it2=frequencies; 
+      ++it3; if (it3==delays_end) it3=delays; // loop over input vector if necessary ...
+    };
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located in a certain direction in farfield (based on L. Bahren).
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGeometricDelayFarField
@@ -3127,14 +3319,16 @@ HNumber HFPP_FUNC_NAME (
 #define HFPP_FUNC_NAME hGeometricDelays
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(antPositions)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length number of antennas times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(skyPositions)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length number of skypositions times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(delays)()("Output vector containing the delays in seconds for all antennas and positions [antenna index runs fastest: (ant1,pos1),(ant2,pos1),...] - length of vector has to be number of antennas times positions")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(delays)()("Output vector containing the delays in seconds for all antennas and positions [antenna index runs fastest: (ant1,pos1),(ant2,pos1),...] - length of vector has to be number of antennas times positions")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(antPositions)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length number of antennas times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(skyPositions)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length number of skypositions times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_3 (bool)(farfield)()("Calculate in farfield approximation if true, otherwise do near field calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
-  $PARDOCSTRINGresult=[]
+  $PARDOCSTRING
+
+result=[]
 plt.clf()
 for j in range(29,30):
     x=[]; y=[]
@@ -3142,7 +3336,7 @@ for j in range(29,30):
         azel[0]=float(i)
         azel[1]=float(j)
         hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
-        hGeometricDelays(antenna_positions,hArray(cartesian),delays,True)
+        hGeometricDelays(delays,antenna_positions,hArray(cartesian),True)
         delays *= 10**6
         deviations=delays-obsdelays
         deviations.abs()
@@ -3155,42 +3349,42 @@ b
 
 template <class Iter>
 void HFPP_FUNC_NAME (
+			const Iter delays,
+			const Iter delays_end,
 			const Iter antPositions,
 			const Iter antPositions_end,
 			const Iter skyPositions,
 			const Iter skyPositions_end,
-			const Iter delays,
-			const Iter delays_end,
 			const bool farfield
 			)
 {
   HNumber distance;
   Iter
-    ant,
+    ant=antPositions,
     sky=skyPositions,
     del=delays,
     ant_end=antPositions_end-2,
     sky_end=skyPositions_end-2;
 
   if (farfield) {
-    while (sky < sky_end && del < delays_end) {
-      distance = hNorm(sky,sky+3);
-      ant=antPositions;
-      while (ant < ant_end && del < delays_end) {
-	*del=hGeometricDelayFarField(ant,sky,distance);
-	ant+=3; ++del;
+    while (del < delays_end) {
+      distance = hVectorLength(sky,sky+3);
+      *del=hGeometricDelayFarField(ant,sky,distance);
+      ++del;
+      ant+=3; if (ant>=ant_end) {
+	ant=antPositions;
+	sky+=3; if (sky>=sky_end) sky=skyPositions;
       };
-      sky+=3;
     };
   } else {
-    while (sky < sky_end && del < delays_end) {
-      distance = hNorm(sky,sky+3); //distance from phase center
-      ant=antPositions;
-      while (ant < ant_end && del < delays_end) {
-	*del=hGeometricDelayNearField(ant,sky,distance);
-	ant+=3; ++del;
+    while (del < delays_end) {
+      distance = hVectorLength(sky,sky+3);
+      *del=hGeometricDelayFarField(ant,sky,distance);
+      ++del;
+      ant+=3; if (ant>=ant_end) {
+	ant=antPositions;
+	sky+=3; if (sky>=sky_end) sky=skyPositions;
       };
-      sky+=3;
     };
   };
 }
@@ -3237,7 +3431,7 @@ void HFPP_FUNC_NAME (
 
   if (farfield) {
     while (sky < sky_end && phase < phases_end) {
-      distance = hNorm(sky,sky+3);
+      distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && phase < phases_end) {
 	freq=frequencies;
@@ -3251,7 +3445,7 @@ void HFPP_FUNC_NAME (
     };
   } else {
     while (sky < sky_end && phase < phases_end) {
-      distance = hNorm(sky,sky+3);
+      distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && phase < phases_end) {
 	freq=frequencies;
@@ -3307,7 +3501,7 @@ void HFPP_FUNC_NAME (
 
   if (farfield) {
     while (sky < sky_end && weight < weights_end) {
-      distance = hNorm(sky,sky+3);
+      distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && weight < weights_end) {
 	freq=frequencies;
@@ -3321,7 +3515,7 @@ void HFPP_FUNC_NAME (
     };
   } else {
     while (sky < sky_end && weight < weights_end) {
-      distance = hNorm(sky,sky+3);
+      distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && weight < weights_end) {
 	freq=frequencies;

@@ -79,7 +79,7 @@ def help(func=help,brief=True):
     to get a more basic introduction to the pycrtools.
 
     With "help(func,brief=False)" or "help(func,False)" you get a more
-    extensive listing which includeds references to the uncerlying c++
+    extensive listing which includeds references to the underlying c++
     code (if the function was wrapped from c++).
     """
     if func==None: func=help
@@ -89,7 +89,7 @@ def help(func=help,brief=True):
     methods=dir(func)
     methods2=[]
     for m in methods:
-        if not ((m.find("_")==0) | (m.find("func_")==0)): methods2.append(m)
+        if not ((m.find("_")==0) | (m.find("func_")==0) | (m.find("im_")==0)): methods2.append(m)
     if len(methods2)>0:
         print "\nAvailable methods: ",
         for m in methods2[0:-1]:
@@ -397,7 +397,7 @@ def hArray_setitem(self,dims,fill):
 
 def hArray_read(self,datafile,key):
     """
-    array[file,"Time"] -> read key Data Array "Time" from file into array.
+    array.read(file,"Time") -> read key Data Array "Time" from file into array.
 
     Will also set the attributes par.file and par.filename of the array and
     make a history entry.
@@ -863,15 +863,15 @@ for v in hAllVectorTypes:
 
 
 for v in hAllContainerTypes:
-    for s in ["hFill","hCopy","hSort"]:
+    for s in ["hFill","hCopy","hSort","hZipper"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hStdDev","hDownsample","hNegate","hNorm","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage"]:
+    for s in ["hMean","hStdDev","hDownsample","hNegate","hVectorLength","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage","hDelayToPhase"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hComplexContainerTypes:
-    for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex","hInvFFT"]:
+    for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex","hInvFFT","hPhaseToComplex","hAmplitudePhaseToComplex"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hNumericalContainerTypes:
@@ -1060,7 +1060,7 @@ def DataReader_getitem(self,*keys):
         if keys0=="CalFFT": ary=hArray(complex,dimensions=[self.nofSelectedAntennas,self.fftLength],name="CalFFT(E-Field)",units="ar.u.")
         if keys0=="TimeLag": ary=hArray(float,dimensions=[self.blocksize],name="Time Lag",units="s")
         if not emptyarray:
-            if keys0=="TimeLag": ary.fillrange(-self.blocksize/2,self.sampleInterval)
+            if keys0=="TimeLag": ary.fillrange(-self.blocksize/2*self.sampleInterval,self.sampleInterval)
             else: ary.read(self,keys0)
         return ary
     else: return hFileGetParameter(self,keys0)

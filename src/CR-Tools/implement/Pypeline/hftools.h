@@ -210,16 +210,24 @@ template <class T>
 template<class T> inline T hfcast(/*const*/ T v);
 
 //Convert to arbitrary class T if not specified otherwise
+template<class T> inline T hfcast(uint v);
+#if H_OS64BIT
+template<class T> inline T hfcast(int v);
+#endif
 template<class T> inline T hfcast(HInteger v);
 template<class T> inline T hfcast(HNumber v);
 template<class T> inline T hfcast(HComplex v);
+template<class T> inline T hfcast(/*const*/ HPointer v);
+template<class T> inline T hfcast(/*const*/ HString v);
+
+template<class T> inline T hfcast(CR::DataReader v);
+
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
 template<>  inline HInteger hfcast<HInteger>(HNumber v);
 template<>  inline HInteger hfcast<HInteger>(HComplex v);
 template<>  inline HNumber hfcast<HNumber>(HComplex v);
 
-template<class T> inline T hfcast(/*const*/ HPointer v);
 template<> inline HString hfcast<HString>(HPointer v);
 template<> inline HString hfcast<HString>(HInteger v);
 template<> inline HString hfcast<HString>(HNumber v);
@@ -230,6 +238,10 @@ template<> inline HPointer hfcast(/*const*/ HString v);
 template<> inline HInteger hfcast(/*const*/ HString v);
 template<> inline HNumber hfcast(/*const*/ HString v);
 template<> inline HComplex hfcast(/*const*/ HString v);
+
+
+template<class T> inline HString hf2string(T v);
+template<> inline HString hf2string(CR::DataReader v);
 
 template <class T>
 HString pretty_vec(vector<T> & v,const HInteger maxlen=8);

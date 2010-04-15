@@ -102,7 +102,7 @@ Then calculate geometric delays and add the instrumental delays.
 
 """
 delays=hArray(float,dimensions=cal_delays)
-hGeometricDelays(antenna_positions,cartesian,delays,FarField)
+hGeometricDelays(delays,antenna_positions,cartesian,FarField)
 """
 
 To get the total delay we add the geometric and the calibration delays.

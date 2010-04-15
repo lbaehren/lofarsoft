@@ -102,7 +102,7 @@ Then calculate geometric delays and add the instrumental delays.
 
 """
 delays=hArray(float,dimensions=cal_delays)
-hGeometricDelays(antenna_positions,cartesian,delays,FarField)
+hGeometricDelays(delays,antenna_positions,cartesian,FarField)
 """
 
 To get the total delay we add the geometric and the calibration delays.
@@ -116,15 +116,17 @@ in the Fourier domain).
 
 """
 phases=hArray(float,dimensions=cr_fft,name="Phases",xvalues=cr_frequencies)
-hGeometricPhases(cr_frequencies,antenna_positions,cartesian,phases,FarField)
+phases.delaytophase(cr_frequencies,delays)
 """
+#hGeometricPhases(cr_frequencies,antenna_positions,cartesian,phases,FarField)
 
 Similarly, the corresponding complex weights are calculated.
 
 """
 weights=hArray(complex,dimensions=cr_fft,name="Complex Weights")
-hGeometricWeights(cr_frequencies,antenna_positions,cartesian,weights,FarField)
+weights.phasetocomplex(phases)
 """
+#hGeometricWeights(cr_frequencies,antenna_positions,cartesian,weights,FarField)
 
 To shift the time series data (or rather the FFTed time series data)
 we multiply the fft data with the complex weights from above.
@@ -147,13 +149,13 @@ their FFTs),
 
 """
 cr_calfft_shifted_added=hArray(cr_calfft_shifted[0].vec())
-cr_calfft_shifted_added.add(cr_calfft_shifted[1:,...])
+cr_calfft_shifted[1:,...].addto(cr_calfft_shifted_added)
 """
 
-normalize by the number of antennas (which for some reason we don't
-need to do after all), 
+normalize by the number of antennas 
+"""
 cr_calfft_shifted_added /= cr.nofSelectedAntennas
-
+"""
 and then FFT back into the time domain:
 
 """
@@ -166,4 +168,6 @@ cr_efield_shifted_added_abs.abs()
 cr_efield_shifted_added_smoothed=hArray(float,dimensions=[cr.blocksize],xvalues=cr_time,name="E-Field")
 cr_efield_shifted_added_abs.runningaverage(cr_efield_shifted_added_smoothed,7,hWEIGHTS.GAUSSIAN)
 cr_efield_shifted_added_smoothed.plot(xlim=(-3,-0.5),title=cr.filename)
+#cr_efield_shifted[...].abs()
+#cr_efield_shifted[...].plot(xlim=(-2,-1.5),clf=False)
 

@@ -1625,7 +1625,7 @@ Then calculate geometric delays and add the instrumental delays.
 
 """
 delays=hArray(float,dimensions=cal_delays)
-hGeometricDelays(antenna_positions,cartesian,delays,True)
+hGeometricDelays(delays,antenna_positions,cartesian,True)
 """
 
 To get the total delay we add the geometric and the calibration delays.
@@ -1639,15 +1639,17 @@ in the Fourier domain).
 
 """
 phases=hArray(float,dimensions=sun_fft,name="Phases",xvalues=sun_frequencies)
-hGeometricPhases(sun_frequencies,antenna_positions,cartesian,phases,True)
+phases.delaytophase(sun_frequencies,delays)
 """
+#hGeometricPhases(sun_frequencies,antenna_positions,cartesian,phases,True)
 
 Similarly, the corresponding complex weights are calculated.
 
 """
 weights=hArray(complex,dimensions=sun_fft,name="Complex Weights")
-hGeometricWeights(sun_frequencies,antenna_positions,cartesian,weights,True)
+weights.phasetocomplex(phases)
 """
+#hGeometricWeights(sun_frequencies,antenna_positions,cartesian,weights,True)
 
 To shift the time series data (or rather the FFTed time series data)
 we multiply the FFT data with the complex weights from above.

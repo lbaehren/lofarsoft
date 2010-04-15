@@ -14,19 +14,23 @@ figno=0
 plt.clf()
 #------------------------------------------------------------------------
 
+print "t=",time.clock(),"s -","Reading in data and setting parameters"
 file=crfile(filename_sun)
-file["blocksize"]=2048
+file["blocksize"]=2**12
+nblocks=10
 NyquistZone=2
-size=5
-center=[178.,28.,1]
+size=60
+pixel_sep=1
+center=[178.9,27.7,1]
+center=[178.9,30.0,1]
 FarField=True
 
 size2=size/2
-azrange=(center[0]-size2,center[0]+size2+1,1)
-elrange=(center[1]-size2,center[1]+size2+1,1)
+azrange=(center[0]-size2,center[0]+size2+1,pixel_sep)
+elrange=(center[1]-size2,center[1]+size2+1,pixel_sep)
 n_az=int((azrange[1]-azrange[0])/azrange[2])
 n_el=int((elrange[1]-elrange[0])/elrange[2])
-n_pixel=n_az*n_el
+n_pixels=n_az*n_el
 
 file_time=file["Time"].setUnit("\\mu","s")
 file_frequencies=file["Frequency"]
@@ -36,72 +40,82 @@ file_fft=file["emptyFFT"].setPar("xvalues",file_frequencies)
 
 file_efield[...].fft(file_fft[...],NyquistZone)
 
+print "t=",time.clock(),"s -","Reading in Calibration Data"
 antenna_positions=file.getCalData("Position")
 cal_delays=file.getCalData("Delay")
-delays=hArray(float,dimensions=cal_delays)
-weights=hArray(complex,dimensions=[n_pixel,file["nofSelectedAntennas"]],name="Complex Weights")
+delays=hArray(float,dimensions=[n_pixels,file["nofSelectedAntennas"]])
 
-shifted_fft=hArray(complex,dimensions=weights)
-beamformed_fft=hArray(complex,dimensions=[n_pixel,file["fftLength"]])
+print "t=",time.clock(),"s -","Initializing results arrays"
+phases=hArray(float,dimensions=[n_pixels,file["nofSelectedAntennas"],file["fftLength"]],name="Phases")
+weights=hArray(complex,dimensions=[n_pixels,file["nofSelectedAntennas"],file["fftLength"]],name="Complex Weights")
 
+shifted_fft=hArray(complex,dimensions=weights,name="FFT times Weights")
+beamformed_fft=hArray(complex,dimensions=[n_pixels,file["fftLength"]],name="Beamformed FFT")
+power=hArray(float,dimensions=beamformed_fft,name="Spectral Power",xvalues=file_frequencies,fill=0.0)
 
 phase_center=hArray(antenna_positions[0].vec())
 antenna_positions -= phase_center
 
 
-azel=hArray(float,dimensions=[n_pixel,3])
+azel=hArray(float,dimensions=[n_pixels,3])
 cartesian=azel.new()
 
 #------------------------------------------------------------------------
 
+print "t=",time.clock(),"s -","Creating pximap GRID"
 n=0
-for az in range(*azrange):
-    for el in range (*elrange):
+for el in np.arange (*elrange):
+    for az in np.arange(*azrange):
         azel[n,0]=az
         azel[n,1]=el
         azel[n,2]= 1
         n+=1
 
+print "t=",time.clock(),"s -","Calculating coordinates and delays"
 hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],CoordinateTypes.Cartesian,FarField)
-hGeometricDelays(antenna_positions,cartesian,delays,FarField)
+hGeometricDelays(delays,antenna_positions,cartesian,FarField)
 delays += cal_delays
-hGeometricWeights(file_frequencies,antenna_positions,cartesian,weights,FarField)
 
-file_fft.copy(shifted_fft)
-shifted_fft *= weights
-
-for n in range(n_pixels):
-    beamformed_fft[n] = shifted_fft[n,0]
-    shifted_fft[n,1:,...].addto(beamformed_fft[n])
+print "t=",time.clock(),"s -","Calculating phases"
+#phases=hArray(float,dimensions=sun_fft,name="Phases",xvalues=sun_frequencies)
+phases.delaytophase(file_frequencies,delays)
+#hGeometricPhases(sun_frequencies,antenna_positions,cartesian,phases,True)
 
 
-"""
+print "t=",time.clock(),"s -","Calculating weights"
+weights.phasetocomplex(phases)
+#hGeometricWeights(file_frequencies,antenna_positions,cartesian,weights,FarField)
 
-normalize by the number of antennas (which for some reason we don't
-need to do after all), 
-file_calfft_shifted_added /= file.nofSelectedAntennas
 
-and then FFT back into the time domain:
+for block in range(nblocks):
+    print "t=",time.clock(),"s -","Reading in Block #",block
+    file["block"]=block
+    file_efield.read(file,"Fx")
+    file_efield[...].fft(file_fft[...],NyquistZone)
+#
+    print "t=",time.clock(),"s -","Applying weights"
+    file_fft.copy(shifted_fft)
+    shifted_fft *= weights
+#
+    print "t=",time.clock(),"s -","Beamforming"
+    for n in range(n_pixels):
+        beamformed_fft[n] = shifted_fft[n]
+        shifted_fft[n,1:,...].addto(beamformed_fft[n])
+#
+    print "t=",time.clock(),"s -","Adding up spectral power"
+    beamformed_fft.spectralpower(power)
 
-"""
-file_efield_shifted_added=hArray(float,dimensions=file_time,name="beamformed E-field",xvalues=file_time)
-file_calfft_shifted_added.invfft(file_efield_shifted_added,2)
+print "t=",time.clock(),"s -","Binning and Normalizing"
+intpower=np.array(power[...].sum())
+maxval=intpower.max()
+intpower /= maxval
+intpower.resize([n_az,n_el])
 
-file_efield[0].plot()
-file_efield_shifted_added.plot(xlim=(-2,0),clf=False,legend=["Reference Antenna","Beam"])
-savefigure()
-"""
+print "t=",time.clock(),"s -","Plotting"
+plt.clf()
+plt.imshow(intpower,cmap=plt.cm.hot)
+plt.savefig("sunimage2.pdf")
+#print intpower
+print "t=",time.clock(),"s -","Done"
 
-In the plot one can see how the green line (beamformed) traces the
-data in antenna one (which was our reference antenna). Of course, I
-still do not understand why we do not need to normalize the beamformed
-data by the number of antennas ...
 
-(+) Appendix: Listing of all Functions:
-=======================================
-
-"""
-help(all)
-"""
-
-"""
