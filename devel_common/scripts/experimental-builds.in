@@ -1,4 +1,4 @@
-#!/bin/bash
+#!${bash_executable}
 
 echo "-- Set environment variables ..."
 

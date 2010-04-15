@@ -21,6 +21,7 @@
 foreach (infile 
     experimental-builds
     nightly-builds
+    install_doxygen
     )
   configure_file (${infile}.in ${USG_ROOT}/release/bin/${infile})
 endforeach (infile )

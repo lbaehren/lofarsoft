@@ -1,0 +1,54 @@
+#!${bash_executable}
+
+##____________________________________________________________________
+## Set up environment variables
+
+export LOFARSOFT=${USG_ROOT}
+. ${USG_ROOT}/devel_common/scripts/init.sh
+
+##____________________________________________________________________
+## Update the working copy
+
+cd ${USG_ROOT}
+
+svn cleanup
+svn up
+
+##____________________________________________________________________
+## Run the bootstrap script
+
+cd ${USG_ROOT}/build
+
+rm -rf CMake*
+rm -rf Makefile
+
+./bootstrap
+
+##____________________________________________________________________
+## Build the documentation
+
+cd ${USG_ROOT}/build
+
+make doc
+
+##____________________________________________________________________
+## (optional) Move documentation to separate location
+
+if [[ -z $1 ]] ; then 
+   echo "No command line option - done."
+else
+    ## Check if the target directory exists; if not create it
+    if [[ -d $1 ]] ; then
+	echo "Found directory $1.";
+    else 
+	echo "Missing directory $1 - creating it now.";
+	mkdir $1;
+    fi
+    ## copy the generated documentation to the target directory
+    cd ${USG_ROOT}/doc/html
+    tar -cf doc.tar *
+    mv doc.tar $1
+    cd $1
+    tar -xf doc.tar
+    rm doc.tar
+fi
