@@ -9,17 +9,18 @@ def group_files(logger, clusterdesc, node_directory, group_size, filenames):
         data = {}
         for node in get_compute_nodes(clusterdesc):
             logger.debug("Node: %s" % (node))
-            try:
-                exec_string = ["ssh", node, "--", "find",
-                    node_directory,
-                    "-maxdepth 1",
-                    "-print0"
-                    ]
-                my_process = subprocess.Popen(exec_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                sout, serr = my_process.communicate()
-                data[node] = sout.split('\x00')
-            except: 
-                pass
+#            try:
+            exec_string = ["ssh", node, "--", "find",
+                node_directory,
+                "-maxdepth 1",
+                "-print0"
+                ]
+            self.logger.debug("Executing: %s" % (" ".join(exec_string)))
+            my_process = subprocess.Popen(exec_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            sout, serr = my_process.communicate()
+            data[node] = sout.split('\x00')
+#            except:
+#                pass
             data[node] = utilities.group_iterable(
                 [element for element in data[node] if element in filenames],
                 group_size,
