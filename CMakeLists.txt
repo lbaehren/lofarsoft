@@ -63,6 +63,7 @@ option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"            YES )
 ##
 ## ==============================================================================
 
+find_program (bash_executable       bash    PATHS ${bin_locations})
 find_program (bison_executable      bison   PATHS ${bin_locations})
 find_program (curl_executable       curl    PATHS ${bin_locations})
 find_program (doxygen_executable    doxygen PATHS ${bin_locations})
@@ -72,10 +73,12 @@ find_program (svn_executable        svn     PATHS ${bin_locations})
 find_program (tar_executable        tar     PATHS ${bin_locations})
 find_program (wget_executable       wget    PATHS ${bin_locations})
 
-set (BLITZ_FIND_QUIETLY YES )
-set (ROOT_FIND_QUIETLY  YES )
+set (BLITZ_FIND_QUIETLY   YES )
+set (OPENGL_FIND_QUIETLY  YES )
+set (ROOT_FIND_QUIETLY    YES )
 
 include (FindBlitz)
+include (FindOpenGL)
 include (FindROOT)
 
 ## ==============================================================================
@@ -136,6 +139,7 @@ if (doxygen_executable)
     WORKING_DIRECTORY ${USG_ROOT}/doc
     COMMENT "Creating browsable documentation in ${USG_ROOT}/doc ..."
     )
+  ## Source file dependency of build target
 else (doxygen_executable)
   add_custom_target (doc
     COMMAND cmake --help-html CMake.html

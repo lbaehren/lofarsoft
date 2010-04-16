@@ -147,7 +147,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     ${MATHGL_BINARY_DIR}/tmp/setup.py
     )
 
-  ## have CMake configure the project
+  ## Have CMake configure the project
   
   if (MATHGL_SVN_BUILD)
     ExternalProject_Add (mathgl
@@ -218,7 +218,6 @@ else (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
     COMMENT "[MathGL] Found system-wide installation; skipping rebuild!"
     )
-  message (STATUS "[MathGL] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 
 ## ------------------------------------------------------------------------------

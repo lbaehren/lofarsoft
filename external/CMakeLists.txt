@@ -12,7 +12,6 @@ set (external_packages
   gsl
   hdf5
   itpp
-  mathgl
   matplotlib
   numeric
   numpy
@@ -30,6 +29,15 @@ set (external_packages
 if (NOT HAVE_BLITZ)
   list (APPEND external_packages blitz)
 endif (NOT HAVE_BLITZ)
+
+if (OPENGL_FOUND)
+  list (APPEND external_packages mathgl)
+else (OPENGL_FOUND)
+  add_custom_target (mathgl
+    WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
+    COMMENT "[MathGL] Unable to find OpenGL; skipping build!"
+    )
+endif (OPENGL_FOUND)
 
 ## Targets for external packages _________________
 
