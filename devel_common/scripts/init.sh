@@ -60,7 +60,7 @@ else
 fi
 
 for PY_VERSION in 2.6 2.5 2.4 
-{
+do
   if test -d $LOFARSOFT/release/lib/python$PY_VERSION ; then
     export PYTHONPATH=$LOFARSOFT/release/lib/python$PY_VERSION:$PYTHONPATH
   fi
@@ -78,7 +78,7 @@ for PY_VERSION in 2.6 2.5 2.4
   if test -d /sw/lib/python$PY_VERSION/site-packages/PyQt4 ; then
     export PYTHONPATH=$PYTHONPATH:/sw/lib/python$PY_VERSION/site-packages/PyQt4
   fi
-}
+done
 
 ##______________________________________________________________________________
 ## Define the AIPSPATH environment variable, used to locate measures data
