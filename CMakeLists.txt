@@ -100,7 +100,7 @@ macro (build_package _packageName _packageSource)
   ## create the directory within which the build is performed
   file (MAKE_DIRECTORY ${_packageBuildLocation})
   add_custom_target (${_packageName}
-    COMMAND cmake ${USG_ROOT}/${_packageSource}
+    COMMAND ${CMAKE_COMMAND} ${USG_ROOT}/${_packageSource}
     COMMAND make install
     WORKING_DIRECTORY ${_packageBuildLocation}
     COMMENT "Building package ${package_name} ..."
