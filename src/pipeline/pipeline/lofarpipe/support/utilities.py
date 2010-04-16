@@ -102,6 +102,11 @@ def log_time(logger):
                 time.time() - start_time, total_rusage[0], total_rusage[1]
             )
         )
+        logger.debug(
+            "Start time was %.4fs; end time was %.4fs" % (
+                start_time, time.time()
+            )
+        )
 
 def string_to_list(my_string):
     """
