@@ -21,8 +21,11 @@
 #ifndef RM_PARALLEL_H
 #define RM_PARALLEL_H
 
+#include <iostream>
 #include <sys/types.h>
+#ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
+#endif
 
 namespace RM {
   
@@ -50,22 +53,52 @@ namespace RM {
     //! Number of cpus found on system
     unsigned int numcpus;
     //! Number of cores found on system (if using OpenMP)
-    unsigned int numcores;
+    unsigned int nofCores_p;
     //! Available (physical) memory on the machine
     unsigned int availmem;
     //! Number of threads to parallelize computiation into
-    unsigned int numthreads;
+    unsigned int nofThreads_p;
     
   public:
+
+    // === Construction =========================================================
+
+    //! Default constructor
+    parallel ();
+
+    // === Parameter access =====================================================
+
+    //! Get the number of CPU core available
+    inline unsigned int nofCores () const {
+      return nofCores_p;
+    }
+
+    //! Get number of threads the computation is working on
+    inline unsigned int nofThreads () const {
+      return nofThreads_p;
+    }
+
+    // === Methods ==============================================================
     
     //! Get the number of available CPUs
     unsigned int getAvailCPUs();
-    //! Determine number of CPU cores available
-    unsigned int getNumCores();
     //! Determine the amount of physical memory
     unsigned long getPhysmem();
+    
+    //! Provide a summary of the internal status
+    inline void summary () {
+      summary (std::cout);
+    }
+    
+    //! Provide a summary of the internal status
+    void summary (std::ostream &os);
+
+  private:
+    
+    //! Determine number of CPU cores available
+    unsigned int getNofCores ();
     //! Get number of threads the computation is working on
-    unsigned int getNumThreads();
+    unsigned int getNofThreads ();
     
   };  //  END -- class parallel
   
