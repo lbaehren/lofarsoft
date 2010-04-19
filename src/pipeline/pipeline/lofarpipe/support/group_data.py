@@ -15,7 +15,7 @@ def group_files(logger, clusterdesc, node_directory, group_size, filenames):
                 "-maxdepth 1",
                 "-print0"
                 ]
-            self.logger.debug("Executing: %s" % (" ".join(exec_string)))
+            logger.debug("Executing: %s" % (" ".join(exec_string)))
             my_process = subprocess.Popen(exec_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             sout, serr = my_process.communicate()
             data[node] = sout.split('\x00')
