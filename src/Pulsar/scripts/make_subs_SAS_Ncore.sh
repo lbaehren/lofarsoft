@@ -4,7 +4,7 @@
 # where the default N = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.4
+VERSION=1.5
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-rfi] [-C] [-del]\n\n"\
@@ -123,7 +123,7 @@ date_start=`date`
 log=${location}/make_subs_SAS_Ncore.log
 echo "Pulsar Pipeline run with: $0" > $log
 echo "Pipeline V$VERSION" >> $log
-echo "$0 $input_string" > $log
+echo "$0 $input_string" >> $log
 echo "Start date: $date_start" >> $log
 
 ARRAY=`cat $PARSET | grep "Observation.bandFilter" | awk -F "= " '{print $2}' | awk -F "_" '{print $1}'`
@@ -133,12 +133,18 @@ MAGIC_NUM=`cat $PARSET | grep "OLAP.CNProc.integrationSteps" | awk -F "= " '{pri
 SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
 
 echo "PULSAR:" $PULSAR 
+echo "PULSAR:" $PULSAR >> $log
 echo "ARRAY:" $ARRAY 
+echo "ARRAY:" $ARRAY >> $log
 echo "CHANNELS:" $CHAN 
+echo "CHANNELS:" $CHAN >> $log
 echo "Number of SAMPLES:" $SAMPLES
+echo "Number of SAMPLES:" $SAMPLES >> $log
 
 echo "Starting Time"
+echo "Starting Time" >> $log
 date
+date >> $log
 
 if [ $core -eq 1 ]
 then
@@ -249,15 +255,17 @@ do
 done
 
 echo "Starting bf2presto conversion"
+echo "Starting bf2presto conversion" >> $log
 date
+date >> $log
 
 #Convert the subbands with bf2presto
 for ii in $num_dir
 do
   echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
-###  bf2presto ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 && touch ${STOKES}/"RSP"$ii"/DONE"  >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out"  2>&1 &
+  echo bf2presto ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
   bf2presto ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
-   set bf2presto_pid_$ii=$!
+  set bf2presto_pid_$ii=$!
 done
 
 echo "Running bf2presto in the background..." 
@@ -266,6 +274,8 @@ echo "Running bf2presto in the background..."
 cp $PARSET ./${OBSID}.parset
 cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
 #python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+echo "Running par2inf" 
+echo "Running par2inf" >> $log
 python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
 status=$?
 
@@ -310,6 +320,11 @@ do
    wait $bf2presto_pid_$ii
 done
 
+echo "Done bf2presto (splits)" 
+echo "Done bf2presto (splits)" >> $log
+date
+date >> $log
+
 #Make a master subband location with all subbands (run in the background, while other tasks are being done)
 if [ $all -eq 1 ]
 then 
@@ -345,6 +360,7 @@ then
      fi
 
      echo "Performing subband linking for all RPSs in one location"
+     echo "Performing subband linking for all RPSs in one location" >> $log
      chmod 777 run.sh
      check_number=`wc -l run.sh | awk '{print $1}'`
      total=$(( $all_num * 16 + 1 ))
@@ -355,18 +371,25 @@ then
         echo "Warning - possible problem running on ALL subbands;  master list is too short (is $check_number but should be $total rows)" >> $log
       else
         ./run.sh &
+        echo "Done subband linking for all RPSs in one location"
+        echo "Done subband linking for all RPSs in one location" >> $log
       fi
       cd $location
 fi
 
 echo "Starting folding"
+echo "Starting folding" >> $log
 date
+date >> $log
 
 #Fold the data
 for ii in $num_dir
 do
    cd ${location}/${STOKES}/RSP${ii}
+   echo cd ${location}/${STOKES}/RSP${ii} >> $log
+   echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 
    prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
+   echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
    sleep 5
 done
 
@@ -383,13 +406,19 @@ do
    then
       zz=1
       cd ${location}/${STOKES}/RSPA
+      echo cd ${location}/${STOKES}/RSPA >> $log
+      echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${PULSAR}_${OBSID}_RSPA.prepout 
       prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${PULSAR}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSPA.prepout 2>&1 &
+      echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> $log
       cd ${location}
    fi
    
    if [ -e $done_list ]
    then
       echo "All prepfold RSP0-7 tasks have completed!" 
+      echo "All prepfold RSP0-7 tasks have completed!" >> $log
+      date 
+      date >> $log 
       yy=1
    fi
    sleep 15
@@ -403,16 +432,23 @@ done
 
 #Make a cumulative plot of the profiles
 echo "Running plot summary script plot_profs8.py"
+echo "Running plot summary script plot_profs8.py" >> $log
 date
-python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8.py
+date >> $log
+echo python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8.py >> $log
+python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8.py >> $log 2>&1
+echo convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf >> $log
 convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf
 rm profiles.ps
 
 #Make a .pdf version of the plots
 echo "Running convert on ps to pdf of the plots"
+echo "Running convert on ps to pdf of the plots" >> $log
 date
+date >> $log
 for ii in $num_dir
 do
+   echo convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf >> $log
    convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
 done
 
@@ -420,10 +456,14 @@ done
 if [ $rfi -eq 1 ]
 then 
    echo "Producing rfi report"
+   echo "Producing rfi report" >> $log
    date
+   date >> $log
    for ii in $num_dir
    do
+      echo cd ${location}/${STOKES}/RSP${ii} >> $log
       cd ${location}/${STOKES}/RSP${ii}
+      echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  >> $log
       python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  && touch DONE &
       set subdyn_pid_$ii=$!
    done
@@ -444,21 +484,30 @@ then
    ii=1
    yy=0
    echo "Wiating for prepfold on entire subband list to complete..." 
+   echo "Wiating for prepfold on entire subband list to complete..." >> $log
+   date 
+   date >> $log
    while [ $ii -ne $yy ]
    do
       if [ -e ${STOKES}/RSPA/DONE ]
       then
          echo "prepfold on the total list has completed!" 
+         echo "prepfold on the total list has completed!" >> $log
+         date
+         date >> $log
          yy=1
       fi
       sleep 15
    done
+   echo convert ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf >> $log
    convert ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf
 fi
 
 #Make a tarball of all the plots
 echo "Creating tar file of plots"
+echo "Creating tar file of plots" >> $log
 date
+date >> $log
 tar cvf ${PULSAR}_${OBSID}_plots.tar *profiles.pdf ${STOKES}/RSP*/*pfd.ps ${STOKES}/RSP*/*pfd.pdf ${STOKES}/RSP*/*pfd.bestprof ${STOKES}/RSP*/*.sub.inf
 gzip ${PULSAR}_${OBSID}_plots.tar
 
@@ -471,8 +520,8 @@ mv *.tar.gz *.pdf ${STOKES}
 
 date_end=`date`
 echo "Start Time: " $date_start
+echo "Start Time: " $date_start >> $log
 echo "End Time: " $date_end
-
-echo "End date: $date_end" >> $log
+echo "End Time: $date_end" >> $log
 
 exit 0
