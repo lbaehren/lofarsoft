@@ -194,6 +194,7 @@ include_directories (BEFORE
   ${RM_SOURCE_DIR}/implement/rmLib
   ${RM_SOURCE_DIR}/implement/rmClean
   ${RM_SOURCE_DIR}/implement/rmSim
+  ${RM_SOURCE_DIR}/implement/rmSynthesis
   ${RM_SOURCE_DIR}/implement/rmWiener
   ${RM_SOURCE_DIR}/apps/rmcmd
   ${RM_SOURCE_DIR}/test

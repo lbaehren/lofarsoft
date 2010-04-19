@@ -66,7 +66,7 @@ namespace RM {
     unsigned long getPhysmem();
     //! Get number of threads the computation is working on
     unsigned int getNumThreads();
-
+    
   };  //  END -- class parallel
   
 }  // END -- namespace RM
