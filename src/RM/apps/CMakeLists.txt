@@ -1,14 +1,29 @@
 
-add_executable (rmsynth main.cpp)
+##_______________________________________________________________________________
+##                                                           List of source files
 
-target_link_libraries (rmsynth
-  rm
-  ${rm_link_libraries}
-  )
+file (GLOB tests_rm *.cpp)
 
-install (
-  TARGETS rmsynth
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
+##_______________________________________________________________________________
+##                                                     Build/Install instructions
+
+foreach (src ${tests_rm})
+
+  ## Get the name of the file without the extension
+  get_filename_component (src ${src} NAME_WE)
+  ## Compiler instructions
+  add_executable(${src} ${src}.cpp)  
+  ## Linker instructions
+  target_link_libraries (${src}
+    rm
+    ${rm_link_libraries}
+    )
+  ## Installation instructions
+  install (
+    TARGETS ${src}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
+endforeach (src)
+

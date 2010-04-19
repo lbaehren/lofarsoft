@@ -7,7 +7,7 @@
 project (RM)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
 
 ## Load CMake modules
 include (CTest)
@@ -55,6 +55,7 @@ option (RM_ENABLE_ARMADILLO     "Enable using Armadillo library?"            YES
 
 if (NOT RM_VERBOSE_CONFIGURE)
   ## output of the find scripts
+  set (ARMADILLO_FIND_QUIETLY  YES )
   set (BOOST_FIND_QUIETLY      YES )
   set (CASA_FIND_QUIETLY       YES )
   set (CASACORE_FIND_QUIETLY   YES )
