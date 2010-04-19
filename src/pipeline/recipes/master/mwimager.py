@@ -85,13 +85,13 @@ class mwimager(LOFARrecipe):
 
         # Given a limited number of processes per node, the first task is to
         # partition up the data for processing.
-        for data_group in group_files(
+        for iteration, data_group in enumerate(group_files(
             self.logger,
             clusterdesc,
             os.path.join(self.inputs['working_directory'], self.inputs['job_name']),
             int(self.inputs['max_bands_per_node']),
             self.inputs['args']
-        ):
+        )):
             self.logger.info("Calling vdsmaker")
             inputs = LOFARinput(self.inputs)
             inputs['directory'] = self.config.get('layout', 'vds_directory')
@@ -146,14 +146,14 @@ class mwimager(LOFARrecipe):
                 self.logger.debug("Executing: %s" % " ".join(mwimager_cmd))
                 if not self.inputs['dry_run']:
                     with utilities.log_time(self.logger):
-                        with closing(open(log_location, 'w')) as log:
+                        with closing(open(log_location + '-' + str(iteration), 'w')) as log:
                             result = subprocess.check_call(
                                 mwimager_cmd,
                                 env=env,
                                 stdout=log,
                                 stderr=log,
                                 close_fds=True
-                                )
+                            )
                 else:
                     self.logger.info("Dry run: execution skipped")
                     result = 0
@@ -163,51 +163,52 @@ class mwimager(LOFARrecipe):
             finally:
                 os.unlink(temp_parset_filename)
 
-        # Now parse the log files to:
-        # 1: find the name of the images that have been written
-        # 2: save the logs in appropriate places
-        # This is ugly!
-        self.logger.info("Parsing logfiles")
-        for log_file in glob.glob("%s%s" % (log_root, "*")):
-            self.logger.debug("Processing %s" % (log_file))
-            ms_name, image_name = "", ""
-            with closing(open(log_file)) as file:
-                for line in file.xreadlines():
-                    if 'Cimager.Images.Names' in line.strip():
-                        try:
-                            image_name = line.strip().split("=")[1].lstrip("['").rstrip("]'")
+            # Now parse the log files to:
+            # 1: find the name of the images that have been written
+            # 2: save the logs in appropriate places
+            # This is ugly!
+            self.logger.info("Parsing logfiles")
+            for log_file in glob.glob("%s%s" % (log_root, "*")):
+                self.logger.debug("Processing %s" % (log_file))
+                ms_name, image_name = "", ""
+                with closing(open(log_file)) as file:
+                    for line in file.xreadlines():
+                        if 'Cimager.Images.Names' in line.strip():
+                            try:
+                                image_name = line.strip().split("=")[1].lstrip("['").rstrip("]'")
+                                break
+                            except IndexError:
+                                pass
+                    file.seek(0)
+                    for line in file.xreadlines():
+                        split_line = line.split('=')
+                        if split_line[0] == "Cimager.dataset":
+                            ms_name = os.path.basename(split_line[1].rstrip())
                             break
-                        except IndexError:
-                            pass
-                file.seek(0)
-                for line in file.xreadlines():
-                    split_line = line.split('=')
-                    if split_line[0] == "Cimager.dataset":
-                        ms_name = os.path.basename(split_line[1].rstrip())
-                        break
-            if not image_name:
-                self.logger.info("Couldn't identify image for %s "% (log_file))
-            else:
-                self.logger.debug("Found image: %s" % (image_name))
-                self.outputs["data"].append(image_name)
-            if not ms_name:
-                self.logger.info("Couldn't identify file for %s" % (log_file))
-            else:
-                destination = "%s/%s/%s" % (
-                    self.config.get('layout', 'log_directory'),
-                    ms_name,
-                    self.inputs['log']
-                )
-                self.logger.debug(
-                    "Moving logfile %s to %s" % (log_file, destination)
-                )
-                utilities.move_log(log_file, destination)
-        try:
-            self.logger.debug("Removing temporary log directory")
-            os.rmdir(os.path.dirname(log_root))
-        except OSError, failure:
-            self.logger.info("Failed to remove temporary directory")
-            self.logger.debug(failure)
+                if not image_name:
+                    self.logger.info("Couldn't identify image for %s "% (log_file))
+                else:
+                    self.logger.debug("Found image: %s" % (image_name))
+                    self.outputs["data"].append(image_name)
+                if not ms_name:
+                    self.logger.info("Couldn't identify file for %s" % (log_file))
+                else:
+                    destination = "%s/%s/%s" % (
+                        self.config.get('layout', 'log_directory'),
+                        ms_name,
+                        self.inputs['log']
+                    )
+                    self.logger.debug(
+                        "Moving logfile %s to %s" % (log_file, destination)
+                    )
+                    utilities.move_log(log_file, destination)
+            try:
+                self.logger.debug("Removing temporary log directory")
+                os.rmdir(os.path.dirname(log_root))
+            except OSError, failure:
+                self.logger.info("Failed to remove temporary directory; archiving")
+                self.logger.debug(failure)
+                utilities.move_log(os.path.dirname(log_root), log_location)
 
         return result
 
