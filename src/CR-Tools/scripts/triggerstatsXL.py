@@ -20,8 +20,9 @@ from math import *
 import os
 
 numberOfRCUsperStation = 96;
+ADCRange = 2048
 mglGraphPS = 1
-timeWindowForCoincidence = 10000 # window for coincident pulse in samples
+timeWindowForCoincidence = 200 # window for coincident pulse in samples
 latestTimeInFile = -1 # needed for determining bin-sizes in non-24-hour plots
 TwentyfourHourPlot = True
 #totalNumberOfTriggers = 0
@@ -32,18 +33,27 @@ TwentyfourHourPlot = True
 #blockSizeForTriggerList = 100000
 rcuCount = [0] * numberOfRCUsperStation; # creates a list of 96 zeros
 nBins = 240 # bins for time-series
+maxThreshold = 100.0
+thresholdStep = 1/3.0
+nBinsThresholdPlot = 1 + int(maxThreshold / thresholdStep)
+
 firstTime = 0
 lastTime = 0
 timeSeriesHistogram = [0] * nBins 
-timeSeriesProfileCount = [[0 for i in range(nBins)] for j in range(96)]
-timeSeriesProfileValue = [[0 for i in range(nBins)] for j in range(96)]
+timeSeriesProfileCount = [[0 for i in range(nBins)] for j in range(numberOfRCUsperStation)]
+timeSeriesProfileValue = [[0 for i in range(nBins)] for j in range(numberOfRCUsperStation)]
+
+thresholdHistogram = [0] * nBinsThresholdPlot
+absPeakValueHistogram = [0] * ADCRange
 
 # define RCU groups for noise profile plot.
-group1 = range(16) + range(48,64)
-group2 = range(16,32) + range(64,80)
-group3 = range(32,48) + range(80,96)
-RCUgroups = [group1, group2, group3]
+#group1 = range(16) + range(48,64)
+#group2 = range(16,32) + range(64,80)
+#group3 = range(32,48) + range(80,96)
+#RCUgroups = [group1, group2, group3]
 
+group1 = range(numberOfRCUsperStation) # one single group
+RCUgroups = [group1]
 
 # keys for our trigger dictionary; separate lists for some of the statistics
 RCUnrKey = 'RCUnr';             RCUnr = [] 
@@ -136,9 +146,11 @@ def processCSVFile(filename): # directly make histogram, not making triggerList
             if thisTime < 2.2e9: # Unix timestamps are signed ints, and they don't go that far...
     #            triggerList.append(record)
                 updateRCUHistogram(record)
+                updateThresholdHistogram(record)
+                updateAbsPeakValueHistogram(record)
                 updateTimeSeriesAndNoiseProfile(record) 
-            else:
-                print 'Invalid timestamp! ' + str(thisTime)
+         #   else:
+                #print 'Invalid timestamp! ' + str(thisTime)
                 
     global totalNumberOfTriggers
     totalNumberOfTriggers = triggerReader.line_num
@@ -148,6 +160,28 @@ def processCSVFile(filename): # directly make histogram, not making triggerList
 def updateRCUHistogram(trigger):
     thisRCU = int(trigger[RCUnrKey])
     rcuCount[thisRCU] += 1
+    
+def updateThresholdHistogram(trigger):
+    thisPeak = float(trigger[peakKey])
+    thisPowerBefore = float(trigger[powerBeforeKey])
+    
+    binIndex = (thisPeak / thisPowerBefore) / thresholdStep
+    if binIndex >= nBinsThresholdPlot:
+        binIndex = nBinsThresholdPlot
+    
+    binIndex = int(binIndex)
+#    print 'This peak = ' + str(thisPeak) + ', this power before = ' + str(thisPowerBefore) + ', this bin index = ' + str(binIndex)
+    # if cumulative plot, i.e. 'all triggers _exceeding_ this threshold', then increment everything below this index
+    for i in range(binIndex):
+        thresholdHistogram[i] += 1
+        
+#    print thresholdHistogram[10]
+#   otherwise just use:     thresholdHistogram[binIndex] += 1
+
+def updateAbsPeakValueHistogram(trigger):
+    thisPeak = int(trigger[peakKey])
+    
+    absPeakValueHistogram[thisPeak] += 1 # counting every single peak value in 1..2047 as we a priori don't know the maximum i.e. our plot range     
 
 def updateTimeSeriesAndNoiseProfile(trigger):
     thisRCU = int(trigger[RCUnrKey])
@@ -190,7 +224,7 @@ def timeSpanInMinutes(triggerList): # also fractional minutes
 def makeTriggersVersusRCUHistogram(rcuCount): # also uses RCUnr global input
 #    (y, x) = RCUhisto = numpy.histogram(RCUnr, 96, (0, 96)) # (counts, bins) comes out
     print totalNumberOfTriggers
-    x = range(96)
+    x = range(numberOfRCUsperStation)
     y = rcuCount
     maxY = max(y)
     maxX = max(x)+1
@@ -229,24 +263,28 @@ def makeTriggersVersusRCUHistogram(rcuCount): # also uses RCUnr global input
     graph.WriteEPS("triggersVersusRCUNumber-"+fileName+".eps","Histogram of triggers vs RCU number")
 
 
-def makeTriggersVersusThresholdPlot(triggerList):
+def makeTriggersVersusThresholdPlot():
     # no. triggers filtered by threshold factor
     # in counts per minute - extract first and last time
 
     # float roundoff problems ?!
-    minutes = timeSpanInMinutes(triggerList)
-    nofPoints=100
-    stepsize = 1/3.0
-    startThreshold = 3.0
+#    minutes = timeSpanInMinutes(triggerList)
+    minutes = (lastTime - firstTime) / 60.0 # note that it's 86400 always when doing 24-hour plots... change? Y-axis is a bit arbitrary anyway??
+    nofPoints=nBinsThresholdPlot
+    
+    #stepsize = 1/3.0
+    startThreshold = 0.0
     gX = mglData(nofPoints)
     gY = mglData(nofPoints)
 
     for i in range(nofPoints):
-        print str(i) + "th point for threshold plot"
-        thisThreshold = startThreshold + float(i) * stepsize
-        filteredByThreshold = nofTriggersFilteredByThreshold(triggerList, thisThreshold)
+#        print str(i) + "th point for threshold plot"
+        thisThreshold = startThreshold + float(i) * thresholdStep
+        #filteredByThreshold = nofTriggersFilteredByThreshold(triggerList, thisThreshold)
+        thisThresholdCount = thresholdHistogram[i]
         gX[i] = thisThreshold
-        gY[i] = filteredByThreshold / minutes
+        gY[i] = thisThresholdCount / minutes
+#        print str(i) + ': ' + str(gY[i])
 
     width = 800
     height = 600
@@ -268,11 +306,11 @@ def makeTriggersVersusThresholdPlot(triggerList):
     graph.Puts(float(maxX) * 0.5, float(maxY) * 1.15, 0, "Single triggers per minute, vs threshold")
     graph.SetFontSize(3.0)
 
-    graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total triggers per minute = " + format(len(triggerList) / minutes, "8.1f"))
+    graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total triggers per minute = " + format(totalNumberOfTriggers / minutes, "8.1f"))
 
     graph.SetFunc("","lg(y)","") 
     graph.SetTicks('y',0)		 
-    graph.SetTicks('x',5.0, 5)
+    graph.SetTicks('x',20.0)
     #graph.SetRanges(0.0, gX.Max('x')[0], gY.Min('x')[0], gY.Max('x')[0])
 
 
@@ -283,6 +321,81 @@ def makeTriggersVersusThresholdPlot(triggerList):
     graph.Plot(gX,gY, 'b o#'); # ' ' means no line; 'o' means o symbols; '#' means solid symbols.
 
     graph.WriteEPS("triggersVersusThreshold.eps","Counts per minute")
+
+def makeTriggersVersusAbsPeakValuePlot():
+    # no. triggers versus absolute peak value
+    # in counts per minute - extract first and last time
+
+#    minutes = timeSpanInMinutes(triggerList)
+    minutes = (lastTime - firstTime) / 60.0 # note that it's 86400 always when doing 24-hour plots... change? Y-axis is a bit arbitrary anyway??
+    nofPoints=100 # -> needs re-binning!
+    # Get maximum peak value that actually occurs
+    maxPeakValue = 0
+    for i in range(ADCRange): # can be done more efficiently, but don't care...
+        if absPeakValueHistogram[i] > 0:
+            maxPeakValue = i
+    # Now re-bin for 100 points between 1 and maxPeakValue
+    
+    stepsize = int(round(float(maxPeakValue) / float(nofPoints))) # all bins should be equally wide!
+    nofPoints = 1 + maxPeakValue / stepsize
+    gX = mglData(nofPoints)
+    gY = mglData(nofPoints)
+
+    for i in range(1, nofPoints):
+#        print str(i) + "th point for threshold plot"
+#        thisThreshold = startThreshold + float(i) * stepsize
+        #thisMaxPeak = int(round(float(i) * stepsize))
+        #thisMinPeak = int(round(float(i-1) * stepsize)) # hmm, bins won't be all equally wide
+#        print str(thisMinPeak) + ' ' + str(thisMaxPeak)
+ 
+        thisMinPeak = (i-1) * stepsize
+        thisMaxPeak = i * stepsize
+        
+        thisBinValue = 0
+        for j in range(thisMinPeak, thisMaxPeak): # should avoid double-counting at boundaries - check!
+            thisBinValue += absPeakValueHistogram[j]
+            
+        #filteredByThreshold = nofTriggersFilteredByThreshold(triggerList, thisThreshold)
+#        thisThresholdCount = thresholdHistogram[i]
+        gX[i] = thisMinPeak + 0.5 * (thisMaxPeak - thisMinPeak)
+        gY[i] = thisBinValue / minutes
+
+    width = 800
+    height = 600
+    graph = mglGraph(mglGraphPS, width, height)
+
+    maxX = gX.Max('x')[0]
+    maxY = gY.Max('x')[0] # min, max is complicated in mglData... the 'x' means first dimension not graph-x !
+
+    graph.Clf()
+    graph.SetFontSize(3.0)
+
+    # set y-min range so you can just see 1 count in the entire interval.
+    yRangeMin = 0.95 / minutes
+    graph.SetRanges(0.0, maxX, yRangeMin, maxY) # SetRanges goes before Axis to include ranges in axes
+    graph.SetOrigin(0.0, yRangeMin)
+
+    graph.SetFontSize(5.0)
+    #graph.Title("Single triggers per minute, vs threshold")
+    graph.Puts(float(maxX) * 0.5, float(maxY) * 1.15, 0, "Single triggers per minute, vs peak value")
+    graph.SetFontSize(3.0)
+
+    graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total triggers per minute = " + format(totalNumberOfTriggers / minutes, "8.1f"))
+
+    graph.SetFunc("","lg(y)","") 
+    graph.SetTicks('y',0)		 
+    graph.SetTicks('x',20.0)
+    #graph.SetRanges(0.0, gX.Max('x')[0], gY.Min('x')[0], gY.Max('x')[0])
+
+
+    graph.Axis() # comes after all definitions as before
+    graph.Grid()
+    graph.Label("x","ADC peak value",1)
+    graph.Label("y","Counts per minute",1)
+    graph.Plot(gX,gY, 'b o#'); # ' ' means no line; 'o' means o symbols; '#' means solid symbols.
+
+    graph.WriteEPS("triggersVersusPeakValue.eps","Counts per minute")
+
 
 def plotBinnedTimeSeriesOfTriggers(binnedData, firstTime, lastTime): 
     # make binned timeseries of trigger counts to see variations over time
@@ -385,7 +498,7 @@ def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstT
                     maxY = thisValue
                 gY.Put(thisValue, i, n)
             else:
-                gY.Put(NaN, i, n)
+                gY.Put(float('nan'), i, n)
             gX.Put(float(x[i]) / 3600.0, i, n)  
  
                    # if timeSeriesProfileCount[RCU][i] != 0:
@@ -430,6 +543,8 @@ def runFullAnalysis():
     plotBinnedTimeSeriesOfTriggers(timeSeriesHistogram, firstTime, lastTime)
    
     plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstTime, lastTime, RCUgroups)
+    makeTriggersVersusThresholdPlot()
+    makeTriggersVersusAbsPeakValuePlot()
     print 'Done!'
 
 # main
