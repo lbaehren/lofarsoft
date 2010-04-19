@@ -235,6 +235,7 @@ endif (HAVE_ROOT)
 
 ## Packages handled directly through CMake
 
+add_subdirectory (${USG_ROOT}/data)
 add_subdirectory (${USG_ROOT}/external)
 add_subdirectory (${USG_ROOT}/devel_common)
 
@@ -268,38 +269,6 @@ add_dependencies (plplot numpy swig)
 if (HAVE_ROOT)
   add_dependencies (startools fftw3)
 endif (HAVE_ROOT)
-
-##____________________________________________________________________
-## Packages/Targets needing extra attention
-
-add_custom_target (cmake-modules
-  COMMAND mkdir -p cmake_modules
-  COMMAND cd cmake_modules && cmake ${USG_ROOT}/devel_common/cmake
-  WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Running test of CMake-modules ..."
-  )
-
-if (wget_executable)
-  add_custom_target (test-data
-    COMMAND ${wget_executable} -c ${USG_DOWNLOAD}/datasets/usg_data_test.tgz
-    COMMAND tar -xvzf usg_data_test.tgz
-    COMMAND rm -f usg_data_test.tgz
-    WORKING_DIRECTORY ${USG_DATA}
-    COMMENT "Retrieving test data-sets ..."
-    )
-else (wget_executable)
-  if (curl_executable)
-    add_custom_target (test-data
-      COMMAND ${curl_executable} ${USG_DOWNLOAD}/datasets/usg_data_test.tgz -o usg_data_test.tgz -C -
-      COMMAND tar -xvzf usg_data_test.tgz
-      COMMAND rm -f usg_data_test.tgz
-      WORKING_DIRECTORY ${USG_DATA}
-      COMMENT "Retrieving test data-sets ..."
-      )
-  else (curl_executable)
-    message (STATUS "WARNING: Unable to retrieve sample datasets - missing wget and curl!")
-  endif (curl_executable)
-endif (wget_executable)
 
 ## ==============================================================================
 ##
