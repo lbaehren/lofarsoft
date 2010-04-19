@@ -384,7 +384,7 @@ def makeTriggersVersusAbsPeakValuePlot():
 
     graph.SetFunc("","lg(y)","") 
     graph.SetTicks('y',0)		 
-    graph.SetTicks('x',20.0)
+    graph.SetTicks('x', maxX / 8.0)
     #graph.SetRanges(0.0, gX.Max('x')[0], gY.Min('x')[0], gY.Max('x')[0])
 
 
