@@ -266,6 +266,10 @@ inline HComplex operator/(HComplex c, HInteger i);
 casa::Int hSum(const casa::Int*, const casa::Int*);
 casa::Int hSum(casa::Int* const&, casa::Int* const&);
 
+#if H_OS64BIT
+long int hSum(const long int*, long int*);
+#endif
+
 //========================================================================
 //                        Helper Functions
 //========================================================================
