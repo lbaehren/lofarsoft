@@ -127,17 +127,15 @@ class bbs(LOFARrecipe):
         )
         self.logger.debug("Logging to %s" % (log_location))
 
-
-
         # Given a limited number of processes per node, the first task is to
         # partition up the data for processing.
-        for data_group in group_files(
+        for iteration, data_group in enumerate(group_files(
             self.logger,
             clusterdesc,
             os.path.join(self.inputs['working_directory'], self.inputs['job_name']),
             int(self.inputs['max_bands_per_node']),
             self.inputs['args']
-        ):
+        )):
             # Now set up a vdsmaker recipe to build a GDS file describing the
             # processed data
             self.logger.info("Calling vdsmaker")
@@ -197,7 +195,7 @@ class bbs(LOFARrecipe):
                 self.logger.debug("Executing: %s" % " ".join(bbs_cmd))
                 if not self.inputs['dry_run']:
                     with utilities.log_time(self.logger):
-                        with closing(open(log_location, 'w')) as log:
+                        with closing(open(log_location + '-' + str(iteration), 'w')) as log:
                             result = check_call(
                                 bbs_cmd,
                                 env=env,
