@@ -15,7 +15,19 @@ plt.clf()
 #------------------------------------------------------------------------
 filename_cr=LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event"
 cr_direction=[41.9898208, 64.70544, 1750.]
-cr_shower_core=[-25.44, 8.94, 0]
+XC=-25.44; YC=8.94; #shower core in KASCADE coordinates
+
+#	// Rotation by 15.25 degrees
+#	// (GPS measurement of angle between KASCADE and LOPES coordinate system)
+#	// remark: the value in the Gauss-Kuerger coordinate system is 15.7 Degree
+#	// which would correspond to 15.23 Degree to geographic north
+#	// Value used in the KRETA-evaluation is 15.0 Degree.
+#	// cos 15.25 Degree = 0.964787323  ;  sin 15.25 Degree = 0.263031214
+#	XCn = XC*0.964787323+YC*0.263031214;
+#	YCn = XC*-0.263031214+YC*0.964787323;
+
+cr_shower_core=[XC*0.964787323+YC*0.263031214,XC*-0.263031214+YC*0.964787323,0.0]
+
 FarField=False
 
 cr=crfile(filename_cr)
@@ -88,6 +100,16 @@ and store it for later use.
 
 """
 cal_delays=cr.getCalData("Delay")
+
+"""
+However, we actually also need to take care of sample-jumps that
+occured in LOPES, which were calculated using a calibration on a TV
+transmitter signal. Asking Andreas horneffer, we get the following
+correct delays:
+"""
+horneffer_delays=Vector([0.00,  -1.87,  -0.22,  -0.30,  -2.02,  -2.06,   1.05,  -1.35])
+horneffer_delays *= 12.5*10**-9 
+cal_delays-=horneffer_delays
 p_("cal_delays")
 """
 
@@ -169,5 +191,5 @@ cr_efield_shifted_added_smoothed=hArray(float,dimensions=[cr.blocksize],xvalues=
 cr_efield_shifted_added_abs.runningaverage(cr_efield_shifted_added_smoothed,7,hWEIGHTS.GAUSSIAN)
 cr_efield_shifted_added_smoothed.plot(xlim=(-3,-0.5),title=cr.filename)
 #cr_efield_shifted[...].abs()
-#cr_efield_shifted[...].plot(xlim=(-2,-1.5),clf=False)
+#cr_efield_shifted[...].plot(xlim=(-1.9,-1.7),clf=False)
 

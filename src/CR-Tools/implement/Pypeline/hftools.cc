@@ -534,9 +534,9 @@ HString pretty_vec(vector<T> & v,const HInteger maxlen){
   int i=1;
   typename vector<T>::iterator it=v.begin();
   HString s=("[");
-  s+=hfcast<HString>(*it); ++it; ++i;
+  s+=hf2string(*it); ++it; ++i;
   while (it!=v.end() && i< maxlen) {
-    s+=","+hfcast<HString>(*it); ++it;  ++i;
+    s+=","+hf2string(*it); ++it;  ++i;
   };
   if ((HInteger)v.size()>maxlen) s+=",...]";
   else s+="]";
@@ -550,9 +550,9 @@ HString pretty_vec(hArray<T> & a,const HInteger maxlen){
   int i=1;
   typename vector<T>::iterator it=v->begin();
   HString s=("[");
-  s+=hfcast<HString>(*it); ++it;  ++i;
+  s+=hf2string(*it); ++it;  ++i;
   while (it!=v->end() && i< maxlen) {
-    s+=","+hfcast<HString>(*it); ++it; ++i;
+    s+=","+hf2string(*it); ++it; ++i;
   };
   if ((HInteger)v->size() > maxlen) s+=",...]";
   else s+="]";
@@ -787,7 +787,7 @@ template <class T> hArray<T> & hArray<T>::shared_copy(){hArray<T> * ary_p=new hA
 template <class T> void hArray<T>::delVector(){
   if (storage_p==NULL) return; //Check if vector was deleted elsewhere
   if ((storage_p->vec_p != NULL) && !storage_p->vector_is_shared) {
-    addHistory((HString)"delVector",(HString)"Vector of type"+typeid(*storage_p->vec_p).name()+" and size="+hfcast<HString>((HInteger)storage_p->vec_p->size())+" deleted.");
+    addHistory((HString)"delVector",(HString)"Vector of type"+typeid(*storage_p->vec_p).name()+" and size="+hf2string((HInteger)storage_p->vec_p->size())+" deleted.");
     delete storage_p->vec_p;
   }
   storage_p->vec_p=NULL;
@@ -863,7 +863,7 @@ template <class T> std::vector<HInteger> & hArray<T>::getSizes(){
 template <class T> void  hArray<T>::setDimensions1(HInteger dim0){
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hfcast<HString>(dim0)+"]");
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+"]");
   (*storage_p->ndims_p)=1;
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
@@ -880,7 +880,7 @@ template <class T> void  hArray<T>::setDimensions1(HInteger dim0){
 template <class T> void  hArray<T>::setDimensions2(HInteger dim0, HInteger dim1){
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hfcast<HString>(dim0)+","+hfcast<HString>(dim1)+"]");
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+"]");
   (*storage_p->ndims_p)=2;
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
@@ -899,7 +899,7 @@ template <class T> void  hArray<T>::setDimensions3(HInteger dim0, HInteger dim1,
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=3;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hfcast<HString>(dim0)+","+hfcast<HString>(dim1)+","+hfcast<HString>(dim2)+"]");
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+"]");
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
   (*storage_p->dimensions_p)[1]=dim1;
@@ -918,7 +918,7 @@ template <class T> void  hArray<T>::setDimensions4(HInteger dim0, HInteger dim1,
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=4;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hfcast<HString>(dim0)+","+hfcast<HString>(dim1)+","+hfcast<HString>(dim2)+","+hfcast<HString>(dim3)+"]");
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+"]");
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
   (*storage_p->dimensions_p)[1]=dim1;
@@ -938,7 +938,7 @@ template <class T> void  hArray<T>::setDimensions5(HInteger dim0, HInteger dim1,
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=5;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hfcast<HString>(dim0)+","+hfcast<HString>(dim1)+","+hfcast<HString>(dim2)+","+hfcast<HString>(dim3)+","+hfcast<HString>(dim4)+"]");
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+"]");
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
   (*storage_p->dimensions_p)[1]=dim1;
@@ -2366,7 +2366,7 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const I
 The following functions are available for getting real values from
 complex numbers:
   abs - absolute value of a complex number
-  norm - magnitude of a complex number squared, i.e. c * conj(c)
+  norm - magnitude (length) of a complex number, i.e. Sqrt(c * conj(c))
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
@@ -2423,7 +2423,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
  $PARDOCSTRING
 */
 template <class Iter>
-IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
+IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
 {
   typedef IterValueType T;
   T sum=hfnull<T>();
@@ -3557,6 +3557,147 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const 
   while ((it!=vec_end) && (itout !=out_end)) {
     *itout+=real((*it)*conj(*it));
     ++it; ++itout;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates the upper half of the cross-correlation matrix of a number of antenna data in the frequency domain and adds it to the output vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCrossCorrelationMatrix
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(ccm)()("Upper half of the cross-correlation matrix (output) containing complex visibilities as a function of frequency. The ordering is ant0*ant1,ant0*ant2,...,ant1*ant2,... - where each antN contains many frequency bins.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(fftdata)()("Vector containing the FFTed data of all antennas subsequently.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nfreq)()("Number of frequency bins per antenna.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  hCrossCorrelationMatrix(ccm,fftdata,nfreq) -> ccm = ccm(old) + ccm(fftdata)
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  The length of the ccm vector is N*(N-1)/2 * N_freq, where N is the
+  number of antennas and N_freq the number of frequency bins per
+  antenna. The length of the (input) vector is then N*N_freq.
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter ccm,const Iter ccm_end, const Iter fftdata,const Iter fftdata_end, const HInteger nfreq)
+{
+  Iter it(ccm);
+  Iter it1_start(fftdata);
+  Iter it1_end(fftdata+nfreq);
+  Iter it1(it1_start);
+  Iter it2(it1_end);
+  if (it1>=fftdata_end) return;
+  if (it2>=fftdata_end) return;
+  while (it!=ccm_end) {
+    *it+=(*it1)*conj(*it2);
+    ++it; ++it1; ++it2; 
+    if (it1==it1_end) {
+      if (it2>=fftdata_end) {
+	it1_start+=nfreq;
+	it1_end+=nfreq;
+	if (it1_end>=fftdata_end) return;
+	it2=it1_end;
+      };
+      it1=it1_start;
+    };
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates an image (or single pixel) vector from 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hImageFromCCM
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(image)()("Image vector containing N_pixel pixels and N_bands frequency bands in the order [power(pix0,band0),power(pix0,band1),...,power(pix1,band0),...]. Size of vector is N_pixel*N_bands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(ccm)()("Upper half of the cross-correlation matrix (input) containing complex visibilities as a function of frequency. The ordering is ant0*ant1,ant0*ant2,...,ant1*ant2,... - where each antN contains nfreq frequency bins.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HComplex)(weights)()("Vector containing the weights to be applied for each pixel, antenna, and frequency bin (in that order, i.e. frequency index runs fastest).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(binning)()("Vector containing the number of frequency bins to be summed for each frequency band in the output image. The length of the vector must equal the number of frequency bands used in the input image and the sum of all values in the vector must equal the number of frequency bins (nfreq) in the weights vector and in the CCM.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HInteger)(nfreq)()("Number of frequency bins per antenna used to calculate the CCM.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  hCrossCorrelationMatrix(ccm,fftdata,nfreq) -> ccm = ccm(old) + ccm(fftdata)
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+  
+  The image contains the power as a function of pixel and frequency
+  bands. Each value is the sum over all baselines of the norm
+  of the complex visibilities times complex weights for that pixel and
+  frequency band.
+
+  The results will be added to the image, hence for a new image the
+  image must be initialized to zero! Otherwise an old image can be
+  provided and the new data will simply be added to it.
+
+  The length of the ccm vector is (N-1)/2*N_freq, where N is the
+  number of antennas and N_freq the number of frequency bins per
+  antenna. The length of the weights vector is N_pixel*N_ant*N_freq.
+
+  Example for binning: if the CCM was calculated with 9 frequency
+  channels, say 61,62,63,64,65,66,67,68,69 MHz (which is actually too
+  large a bandwidth) and the output image is supposed to be split up
+  in three frequency bands, then provide a binning vector continaing
+  [3,3,3]. The first band will then be centered at frequency 62MHz and
+  contain a sum over the first three bins (61,62,63), the second band
+  will be 65 and the last 68 MHz. The parameter nfreq must then be
+  9. Of course, the binning intervals need not be equal in size (you
+  could have also requested 1,2,3,3) leading to a rather irregular
+  (but perfectly possible) definition of frequency bands.
+
+*/
+template <class IterN,class IterC,class IterI>
+void HFPP_FUNC_NAME(
+		    const IterN image, const IterN image_end, 
+		    const IterC ccm,const IterC ccm_end, 
+		    const IterC weights,const IterC weights_end, 
+		    const IterI binning, const IterI binning_end, 
+		    HInteger nfreq)
+{
+  IterN it_im(image);
+  IterC it_ccm(ccm);
+  IterC it_w1_start(weights);
+  IterC it_w1_end(weights+nfreq);
+  IterC it_w1(it_w1_start); //start at antenna 0
+  IterC it_w2(it_w1_end); //start at antenna 1
+  IterI it_b(binning);
+  HInteger i;
+  i=hSum(binning,binning_end);
+  if (i!=nfreq) {
+    cout << "Error - hPixelFromCCM: Bins vector [sum(binnning)=" <<i<<"] does not add up to number of frequency bins (nfreq="<<nfreq<<") provided."<<endl;
+    return;
+  };
+  if (it_ccm>=ccm_end) return;
+  if (it_w1>=weights_end) return;
+  if (it_b>=binning_end) return;
+  while (it_im<image_end) {
+    for (i=0; i < (*it_b); ++i)  {  //Here comes a binning step where the power over multiple frequency bins is summed
+      *it_im+=norm((*it_ccm) * (*it_w1)*(*it_w2));
+      ++it_w1; ++it_w2; ++it_ccm;
+    };
+    if (it_w1>=it_w1_end) { //reached the end of frequency bins of first antenna, restart at first bin and advance second antennas by one
+      if (it_w2>=weights_end) { //the second antenna has reached the last antenna value, so increase first antenna by one
+	it_w1_start+=nfreq; //advance by one antenna (each containing nfreq frequencies)
+	it_w1_end+=nfreq;
+	if (it_w1_end>=weights_end) { //cycled through all antenna pairs, restart at beginning and advance to next pixel
+	  it_w1_start=weights;
+	  it_w1_end=weights+nfreq;
+	  it_w1=it_w1_start; //start at antenna 0
+	  it_w2=it_w1_end; //start at antenna 1
+	  if (it_ccm!=ccm_end) {
+	    cout << "Error - hPixelFromCCM: Mismatch between ccm and weights" <<endl;
+	  };
+	  it_ccm=ccm;
+	};
+	it_w2=it_w1_end;
+      };
+      it_w1=it_w1_start;
+    };
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"

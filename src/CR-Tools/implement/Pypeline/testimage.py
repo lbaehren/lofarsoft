@@ -16,13 +16,14 @@ plt.clf()
 
 print "t=",time.clock(),"s -","Reading in data and setting parameters"
 file=crfile(filename_sun)
-file["blocksize"]=2**12
+file["blocksize"]=128 #2**12
 nblocks=10
 NyquistZone=2
-size=60
+size=7
 pixel_sep=1
 center=[178.9,27.7,1]
 center=[178.9,30.0,1]
+center=[178.9,28.0,1]
 FarField=True
 
 size2=size/2
@@ -119,3 +120,10 @@ plt.savefig("sunimage2.pdf")
 print "t=",time.clock(),"s -","Done"
 
 
+"""
+ccm=Vector(complex,file["nofSelectedAntennas"]*(file["nofSelectedAntennas"]-1)/2*file["fftLength"])
+hCrossCorrelationMatrix(ccm,file_fft.vec(),file["fftLength"])
+binning=Vector(int,1,fill=file["fftLength"])
+image=Vector(float,int(size/pixel_sep)**2,fill=0)
+hImageFromCCM(image,ccm,weights.vec(),binning.vec(),file["fftLength"])
+"""

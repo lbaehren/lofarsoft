@@ -263,6 +263,9 @@ inline HComplex operator-(HComplex c, HInteger i);
 inline HComplex operator/(HInteger i, HComplex c);
 inline HComplex operator/(HComplex c, HInteger i);
 
+casa::Int hSum(const casa::Int*, const casa::Int*);
+casa::Int hSum(casa::Int* const&, casa::Int* const&);
+
 //========================================================================
 //                        Helper Functions
 //========================================================================
