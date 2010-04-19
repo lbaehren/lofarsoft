@@ -512,15 +512,22 @@ endif (HAVE_ROOT)
 ##_______________________________________________________________________________
 ##                                                               genREASinputList
 
-if (HAVE_ROOT)
-  add_executable (genREASinputList genREASinputList.cc)
+if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
+  add_executable (genREASinputList
+    genREASinputList.cc
+    ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C
+    )
   ## linker instructions
   target_link_libraries (genREASinputList
+      cr
+      ${STARTOOLS_LIBRARIES}
       ${ROOT_LIBRARIES}
+      ${HAVE_LIBUTIL}
+      ${HAVE_LIBM}
       )
   ## installation instructions
   list (APPEND cr_apps genREASinputList)
-endif (HAVE_ROOT)
+endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
 ##_______________________________________________________________________________
 ##                                                             tbbTriggerAnalysis
