@@ -81,9 +81,9 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
       SOURCE_DIR ${NUMPY_BINARY_DIR}
       URL ${have_numpy_tgz}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} setup.py --help
-      BUILD_COMMAND ${PYTHON_EXECUTABLE} setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/setup.py --help
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/setup.py build
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
       )
   else (have_numpy_tgz)
     message (WARNING "[Numpy] Unable to build project - missing source!")
