@@ -200,6 +200,12 @@ include_directories (BEFORE
   ${RM_SOURCE_DIR}/test
   )
 
+## System header files
+
+if (HAVE_SYS_SYSCTL_H)
+  add_definitions (-DHAVE_SYS_SYSCTL_H)
+endif (HAVE_SYS_SYSCTL_H)
+
 ## External header files
 
 if (HAVE_ARMADILLO)
