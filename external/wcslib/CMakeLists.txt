@@ -127,5 +127,8 @@ if (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
   ## <-- end build condition --------------------------------------------------->
   
 else (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
-  message (STATUS "Found system-wide installation of WCSLIB; skipping rebuild!")
+  add_custom_target (install
+    WORKING_DIRECTORY ${WCSLIB_BINARY_DIR}
+    COMMENT "[WCSLIB] Found system-wide installation; skipping rebuild!"
+    )
 endif (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
