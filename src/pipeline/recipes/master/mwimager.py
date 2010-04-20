@@ -206,9 +206,12 @@ class mwimager(LOFARrecipe):
                 self.logger.debug("Removing temporary log directory")
                 os.rmdir(os.path.dirname(log_root))
             except OSError, failure:
-                self.logger.info("Failed to remove temporary directory; archiving")
+                self.logger.info("Failed to remove temporary directory")
                 self.logger.debug(failure)
-                utilities.move_log(os.path.dirname(log_root), log_location)
+                try:
+                    utilities.move_log(os.path.dirname(log_root), log_location)
+                except:
+                    pass
 
         return result
 
