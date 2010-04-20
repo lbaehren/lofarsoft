@@ -33,9 +33,9 @@ namespace RM {
   
   parallel::parallel ()
   {
-    numcpus      = 0;
+    numcpus      = getAvailCPUs();
     nofCores_p   = getNofCores();
-    availmem     = 0;
+    availmem     = getPhysmem();
     nofThreads_p = 0;
   }
 

@@ -43,6 +43,7 @@ find_file (trmClean_gaussian gaussian.dat ${RM_SOURCE_DIR}/data)
 ## Run the tests
 
 add_test (tRMSim tRMSim)
+add_test (trmParallel trmParallel)
 
 if (HAVE_ITPP AND RM_ENABLE_ITPP)
   add_test (trmnoise trmnoise)
