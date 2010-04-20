@@ -178,5 +178,4 @@ else (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
     WORKING_DIRECTORY ${BOOST_BINARY_DIR}
     COMMENT "[HDF5] Found system-wide installation; skipping rebuild!"
     )
-  message (STATUS "[HDF5] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
