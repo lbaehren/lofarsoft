@@ -24,7 +24,7 @@ ADCRange = 2048
 mglGraphPS = 1
 timeWindowForCoincidence = 200 # window for coincident pulse in samples
 latestTimeInFile = -1 # needed for determining bin-sizes in non-24-hour plots
-TwentyfourHourPlot = True
+TwentyfourHourPlot = False
 #totalNumberOfTriggers = 0
 
 # define global processed-data variables
@@ -320,7 +320,7 @@ def makeTriggersVersusThresholdPlot():
     graph.Label("y","Counts per minute",1)
     graph.Plot(gX,gY, 'b o#'); # ' ' means no line; 'o' means o symbols; '#' means solid symbols.
 
-    graph.WriteEPS("triggersVersusThreshold.eps","Counts per minute")
+    graph.WriteEPS("triggersVersusThreshold-"+fileName+".eps","Counts per minute")
 
 def makeTriggersVersusAbsPeakValuePlot():
     # no. triggers versus absolute peak value
@@ -394,7 +394,7 @@ def makeTriggersVersusAbsPeakValuePlot():
     graph.Label("y","Counts per minute",1)
     graph.Plot(gX,gY, 'b o#'); # ' ' means no line; 'o' means o symbols; '#' means solid symbols.
 
-    graph.WriteEPS("triggersVersusPeakValue.eps","Counts per minute")
+    graph.WriteEPS("triggersVersusPeakValue-"+fileName+".eps","Counts per minute")
 
 
 def plotBinnedTimeSeriesOfTriggers(binnedData, firstTime, lastTime): 
