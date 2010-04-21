@@ -215,10 +215,10 @@ bool checkFiles(const vector<string> &list)
 	fitsfile *infptr=NULL;											// fileptr for current input file
 	//      ofstream outfile(const_cast<const char*>(freqlist.c_str()),  ofstream::out); // output filestream to create frequency list file
 	int fitsstatus=0;                                                                       // status returned from cfitsio functions
-	unsigned int prevx=0, prevy=0;                                  // x and y dimensions of previous  image in list
+	int prevx=0, prevy=0;                                  // x and y dimensions of previous  image in list
 	int naxis=1;													// number of axes for output image
 	long naxes[3];                                                  // array holding dimensions for each axis
-//	void *nulval;													// null value to be used if nan is encountered in FITS file
+	//	void *nulval;													// null value to be used if nan is encountered in FITS file
 	char errortext[255];											// char string to contain fits error message
 	
 	// Check input parameters
@@ -448,29 +448,29 @@ void writeCube(fitsfile *fptr, float *cube, void* nulval)
 	fits_get_img_size(fptr, naxis, naxes, &fitsstatus);		// get axes sizes
 		
 	fpixel=(long*)malloc(sizeof(long)*naxis);
-	for(unsigned i=0; i < naxis; i++)
-		fpixel[i]=1;
+	for(int i=0; i < naxis; i++)
+	  fpixel[i]=1;
 	
-	for(unsigned int i=0; i < naxis; i++)					// loop over (hyper)cube's axes
-	{
-		nelements*=naxes[i];								// compute nelements in cube
-		cout << nelements << endl;
-	}
+	/* Loop over (hyper)cube's axes */
+	for(int i=0; i < naxis; i++) {
+	    nelements*=naxes[i];								// compute nelements in cube
+	    cout << nelements << endl;
+	  }
 	if(nelements==0)
-		throw "fitsmerge::writeCube nelements is 0";
+	  throw "fitsmerge::writeCube nelements is 0";
 	
 	fits_write_pixnull(fptr, TFLOAT, fpixel, nelements, cube, nulval, &fitsstatus);
 	if(fitsstatus)
-	{
-		fits_get_errstatus(fitsstatus, errormessage);
-		cout << errormessage << endl;
-		throw "fitsmerge::writeCube failed";
-	}
+	  {
+	    fits_get_errstatus(fitsstatus, errormessage);
+	    cout << errormessage << endl;
+	    throw "fitsmerge::writeCube failed";
+	  }
 }
 
 
 /*!
-	\brief For debugging purposes output an image plane
+  \brief For debugging purposes output an image plane
 
 	\param *plane - buffer containing image plane
 	\param x - x dimension of plane

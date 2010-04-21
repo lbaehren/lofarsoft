@@ -1,14 +1,32 @@
-/*
- Small helper tool that displays 
- list
- into one 3-D (spectral / faraday) FITS cube
- 
- File:                 fitscube.cpp
- Author:               Sven Duscha (sduscha@mpa-garching.mpg.de)
- Date:                 01-09-2009
- Last change:		   08-09-2009
- */
+/***************************************************************************
+ *   Copyright (C) 2009                                                    *
+ *   Sven Duscha (sduscha@mpa-garching.mpg.de)                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
+/*!
+  \file fitscube.cpp
+  \ingroup RM
+
+  \brief Small helper tool that displays list into one 3-D (spectral / faraday) FITS cube
+
+  \author Sven Duscha
+  \date 01-09-2009 (Last change: 08-09-2009)
+*/
 
 #include <iostream>
 #include <fstream>                      // file stream functions
@@ -187,233 +205,244 @@ void merge2Dto3D(const vector<string> &list, const string
  \brief Check images for consistency
  
  \param &list - vector containing list of FITS files
- */
+*/
 bool checkFiles(const vector<string> &list)
 {
-	fitsfile *infptr=NULL;											// fileptr for current input file
-	//      ofstream outfile(const_cast<const char*>(freqlist.c_str()),  ofstream::out); // output filestream to create frequency list file
-	int fitsstatus=0;                                                                       // status returned from cfitsio functions
-	unsigned int prevx=0, prevy=0;                                  // x and y dimensions of previous  image in list
-	int naxis=1;													// number of axes for output image
-	long naxes[3];                                                  // array holding dimensions for each axis
-	//	void *nulval;													// null value to be used if nan is encountered in FITS file
-	char errortext[255];											// char string to contain fits error message
-	
-	// Check input parameters
-	if(list.size()==0)
-		throw "fitsmerge::merge2Dto3D file list has length 0";
-	
-	//-----------------------------------------------
-	// For each image in list... (a) check if it is an image extension  (b) check dimensions
-	for(unsigned int i=0; i < list.size(); i++)
+  fitsfile *infptr=NULL;											// fileptr for current input file
+  //      ofstream outfile(const_cast<const char*>(freqlist.c_str()),  ofstream::out); // output filestream to create frequency list file
+  int fitsstatus=0;                                                                       // status returned from cfitsio functions
+  int prevx=0;      // x dimension of previous image in list
+  int prevy=0;      // y dimension of previous image in list
+  int naxis=1;													// number of axes for output image
+  long naxes[3];                                                  // array holding dimensions for each axis
+  //	void *nulval;													// null value to be used if nan is encountered in FITS file
+  char errortext[255];											// char string to contain fits error message
+  
+  // Check input parameters
+  if(list.size()==0)
+    throw "fitsmerge::merge2Dto3D file list has length 0";
+  
+  //-----------------------------------------------
+  // For each image in list... (a) check if it is an image extension  (b) check dimensions
+  for(unsigned int i=0; i < list.size(); i++)
+    {
+      int hdutype=0;          // hdutype variable needed to check we have an image  HDU
+      //		double freq=0;          // frequency to be read from keyword
+      string filename;        // name of current file
+      
+      //-----------------------------------------------
+      filename=list[i];       // get filename from list
+      
+      if(filename=="")
+	throw "fitsmerge::merge2Dto3D filename is empty";
+      
+      
+      fits_open_image(&infptr, filename.c_str(), READONLY, &fitsstatus);    // Open Image
+      
+      if(fitsstatus)
 	{
-		int hdutype=0;          // hdutype variable needed to check we have an image  HDU
-		//		double freq=0;          // frequency to be read from keyword
-		string filename;        // name of current file
-		
-		//-----------------------------------------------
-		filename=list[i];       // get filename from list
-		
-		if(filename=="")
-			throw "fitsmerge::merge2Dto3D filename is empty";
-		
-		
-		fits_open_image(&infptr, filename.c_str(), READONLY, &fitsstatus);    // Open Image
-		
-		if(fitsstatus)
-		{
-			fits_get_errstatus(fitsstatus, errortext);
-			throw "fitsmerge::merge2Dto3D could not open image " + filename;
-        }                
-		fits_get_hdu_type(infptr, &hdutype ,&fitsstatus);                       // Check if  current HDU is an image extension
-		if(fitsstatus)
-			throw "fitsmerge::merge2Dto3D";
-		
-		fits_get_img_dim(infptr, &naxis, &fitsstatus);
-		fits_get_img_size(infptr, naxis, naxes, &fitsstatus);					// check  img  dimensions of input FITS
-		
-		if((prevx!=naxes[0] || prevy!=naxes[1]) && i>0)                         // only compare  2nd image to 1st and so on...
-			throw "fitsmerge::merge2Dto3D input images differ in size";
-		else
-		{
-			prevx=naxes[0];         // keep current x dimension as previous for later  comparison
-			prevy=naxes[1];         // keep current y dimension as previous for later  comparison
-		}
+	  fits_get_errstatus(fitsstatus, errortext);
+	  throw "fitsmerge::merge2Dto3D could not open image " + filename;
+	}                
+      fits_get_hdu_type(infptr, &hdutype ,&fitsstatus);                       // Check if  current HDU is an image extension
+      if(fitsstatus)
+	throw "fitsmerge::merge2Dto3D";
+      
+      fits_get_img_dim(infptr, &naxis, &fitsstatus);
+      fits_get_img_size(infptr, naxis, naxes, &fitsstatus);					// check  img  dimensions of input FITS
+      
+      if((prevx!=naxes[0] || prevy!=naxes[1]) && i>0)                         // only compare  2nd image to 1st and so on...
+	throw "fitsmerge::merge2Dto3D input images differ in size";
+      else
+	{
+	  prevx=naxes[0];         // keep current x dimension as previous for later  comparison
+	  prevy=naxes[1];         // keep current y dimension as previous for later  comparison
 	}
-	
-	fits_close_file(infptr, &fitsstatus);
-	
-	return true;
+    }
+  
+  fits_close_file(infptr, &fitsstatus);
+  
+  return true;
 }
 
-
+//_______________________________________________________________________________
+//                                                         preemptivelyDeleteFITS
 
 /*!
- \brief Preemptively delete an existing FITS file
- 
- \param filename - name of file to check for
- */
+  \brief Preemptively delete an existing FITS file
+  
+  \param filename - name of file to check for
+*/
 void preemptivelyDeleteFITS(const string &filename)
 {
-	int exists=0;
-	int fitsstatus=0;
-	fitsfile *outfptr;
-	char errortext[255];											// char string to contain fits error message	
-	
-	
-	//------------------------------------------------------------------
-	// Preemptively delete FITS file
-	fits_file_exists(filename.c_str(), &exists, &fitsstatus);
-	if(exists)				// Check if it exists...
+  int exists=0;
+  int fitsstatus=0;
+  fitsfile *outfptr;
+  char errortext[255];											// char string to contain fits error message	
+  
+  
+  //------------------------------------------------------------------
+  // Preemptively delete FITS file
+  fits_file_exists(filename.c_str(), &exists, &fitsstatus);
+  if(exists)				// Check if it exists...
+    {
+      /* need to open it, since delete only works on fileptr not filename */
+      fits_open_file(&outfptr, filename.c_str(), READWRITE, &fitsstatus);
+
+      if(fitsstatus)
 	{
-		fits_open_file(&outfptr, filename.c_str(), READWRITE, &fitsstatus);	// need to open it, since delete only works on fileptr not filename		
-		if(fitsstatus)
-		{
-			fits_get_errstatus(fitsstatus, errortext);
-			cout << "fitserror: " << errortext << endl;
-			throw "fitsmerge::merge2Dto3D could not open output file for deletion";			//  throw exception				
-		}
-		fits_delete_file(outfptr, &fitsstatus);									// ... then delete it
-		if(fitsstatus)
-		{
-			fits_get_errstatus(fitsstatus, errortext);	
-			cout << "fitserror: " << errortext << endl;
-			throw "fitsmerge::merge2Dto3D could not delete old output file";    //  throw exception				
-		}			
-	}	
-	
-	
-}
-
-
-
-void readPlane(fitsfile *fptr, float *plane, const unsigned long z, void *nulval, int &fitsstatus)
-{
-    long fpixel[3];		// read vector where reading starts
-    int hdutype=0;		// HDU type which is checked for
-    int nelements=0;	// number of elements to read
-    int anynul=0;		// indicator if any nul value has been read
-    int naxis=0;		// number axes present in image
-    long naxes[3];		// dimensions of these axes
-	
-	
-	//-------------------------------------------------------------
-	if (fits_get_hdu_type(fptr, &hdutype ,&fitsstatus)!=IMAGE_HDU)	// Check if current HDU is an image extension
-    {
-        throw "fitsmerge::readPlane CHDU is not an image";
-    }
-	
-    // Read from FITS file one plane at depth z
-    fpixel[0]=1;
-    fpixel[1]=1;
-    fpixel[2]=z;
-	
-	fits_get_img_dim(fptr, &naxis, &fitsstatus);
-    fits_get_img_size(fptr, naxis, naxes, &fitsstatus); // get image dimensions
-	
-    nelements=naxes[0]*naxes[1];	// compute number of elements in plane
-	
-    if (plane!=NULL)	// only if valid pointer is given
-    {
-        fits_read_pix(fptr, TFLOAT, fpixel, nelements, nulval, plane, &anynul, &fitsstatus);
+	  fits_get_errstatus(fitsstatus, errortext);
+	  cout << "fitserror: " << errortext << endl;
+	  throw "fitsmerge::merge2Dto3D could not open output file for deletion";			//  throw exception				
 	}
-    else
+      fits_delete_file(outfptr, &fitsstatus);									// ... then delete it
+      if(fitsstatus)
+	{
+	  fits_get_errstatus(fitsstatus, errortext);	
+	  cout << "fitserror: " << errortext << endl;
+	  throw "fitsmerge::merge2Dto3D could not delete old output file";    //  throw exception				
+	}			
+    }	
+  
+  
+}
+
+//_______________________________________________________________________________
+//                                                                      readPlane
+
+void readPlane (fitsfile *fptr,
+		float *plane,
+		const unsigned long z,
+		void *nulval,
+		int &fitsstatus)
+{
+  long fpixel[3];	// read vector where reading starts
+  int hdutype=0;	// HDU type which is checked for
+  int nelements=0;	// number of elements to read
+  int anynul=0;		// indicator if any nul value has been read
+  int naxis=0;		// number axes present in image
+  long naxes[3];	// dimensions of these axes
+  
+  //-------------------------------------------------------------
+
+  if (fits_get_hdu_type(fptr, &hdutype ,&fitsstatus)!=IMAGE_HDU)	// Check if current HDU is an image extension
     {
-        throw "fitsmerge::readPlane pointer is NULL";
+      throw "fitsmerge::readPlane CHDU is not an image";
+    }
+  
+  // Read from FITS file one plane at depth z
+  fpixel[0]=1;
+  fpixel[1]=1;
+  fpixel[2]=z;
+  
+  fits_get_img_dim(fptr, &naxis, &fitsstatus);
+  fits_get_img_size(fptr, naxis, naxes, &fitsstatus); // get image dimensions
+  
+  nelements=naxes[0]*naxes[1];	// compute number of elements in plane
+  
+  if (plane!=NULL)	// only if valid pointer is given
+    {
+      fits_read_pix(fptr, TFLOAT, fpixel, nelements, nulval, plane, &anynul, &fitsstatus);
+    }
+  else
+    {
+      throw "fitsmerge::readPlane pointer is NULL";
     }
 }
 
+//_______________________________________________________________________________
+//                                                                     writePlane
 
 /*!
- \brief Write an image plane to a FITS file at z position
- 
- \param fptr - file pointer of FITS file
+  \brief Write an image plane to a FITS file at z position
+  
+  \param fptr - file pointer of FITS file
  \param x - X dimension of image
  \param y - Y dimension of image
  \param z - z coordinate plane to write plane to
  \param nulval - pointer to nulval which is used for NULL pixels
  \parm fitsstatus - fits status variable
- */
+*/
 void writePlane (fitsfile *fptr,
-				 float *plane,
-				 const long x,
-				 const long y,
-				 const long z,
-				 void *nulval,
-				 int &fitsstatus)
+		 float *plane,
+		 const long x,
+		 const long y,
+		 const long z,
+		 void *nulval,
+		 int &fitsstatus)
 {
-	long fpixel[3];          // first pixel position to read
-	long nelements=0;        // number of elements to write
-	int naxis=0;			// number of axes in FITS file
-	long naxes[3];			// dimensions of these axes
-	char errortext[255];
-	
-	//-------------------------------------------------------------	
-	fpixel[0]=1;
-	fpixel[1]=1;
-	fpixel[2]=z;
-	
-	fits_get_img_dim(fptr, &naxis, &fitsstatus);	
-	fits_get_img_size(fptr, naxis, naxes, &fitsstatus); // get image dimensions 
-	nelements=naxes[0]*naxes[1];        // compute nelements  in plane
-	
-	if(x*y!=nelements)
-		throw "fitsmerge::writePlane dimensions of plane does not fit image size";
-	
-	// Write to FITS file
-	if (plane==NULL)
+  long fpixel[3];          // first pixel position to read
+  long nelements=0;        // number of elements to write
+  int naxis=0;			// number of axes in FITS file
+  long naxes[3];			// dimensions of these axes
+  char errortext[255];
+  
+  //-------------------------------------------------------------	
+  fpixel[0]=1;
+  fpixel[1]=1;
+  fpixel[2]=z;
+  
+  fits_get_img_dim(fptr, &naxis, &fitsstatus);	
+  fits_get_img_size(fptr, naxis, naxes, &fitsstatus); // get image dimensions 
+  nelements=naxes[0]*naxes[1];        // compute nelements  in plane
+  
+  if(x*y!=nelements)
+    throw "fitsmerge::writePlane dimensions of plane does not fit image size";
+  
+  // Write to FITS file
+  if (plane==NULL)
+    {
+      throw "fitsmerge::writePlane NULL pointer";
+    }
+  else if (nulval==NULL)
+    {
+      fits_write_pix(fptr, TFLOAT, fpixel, nelements, plane,  &fitsstatus);                
+      if(fitsstatus)
 	{
-		throw "fitsmerge::writePlane NULL pointer";
+	  cout << "fitserror: " << errortext << endl;
+	  throw "fitsmerge::writePlane could not write pixels";
 	}
-	else if (nulval==NULL)
+    }
+  else       // write pixels with substituting null value
+    {
+      fits_write_pixnull(fptr, TFLOAT, fpixel, nelements, plane,  nulval, &fitsstatus);
+      if(fitsstatus)
 	{
-		fits_write_pix(fptr, TFLOAT, fpixel, nelements, plane,  &fitsstatus);                
-		if(fitsstatus)
-		{
-			cout << "fitserror: " << errortext << endl;
-			throw "fitsmerge::writePlane could not write pixels";
-		}
+	  cout << "fitserror: " << errortext << endl;
+	  throw "fitsmerge::writePlane could not write pixels";
 	}
-	else       // write pixels with substituting null value
-	{
-		fits_write_pixnull(fptr, TFLOAT, fpixel, nelements, plane,  nulval, &fitsstatus);
-		if(fitsstatus)
-		{
-			cout << "fitserror: " << errortext << endl;
-			throw "fitsmerge::writePlane could not write pixels";
-		}
-	}
+    }
 }
 
 
 /*!
- \brief For debugging purposes output an image plane
- 
- \param *plane - buffer containing image plane
- \param x - x dimension of plane
- \param y - y dimension of plane
- */
+  \brief For debugging purposes output an image plane
+  
+  \param *plane - buffer containing image plane
+  \param x - x dimension of plane
+  \param y - y dimension of plane
+*/
 void printPlane(float *plane, unsigned int x, unsigned int y)
 {
-	for(unsigned int i=0; i < x*y; i++)		// loop over x dimension (rows)
-	{
-		cout << plane[i] << "\t";
-		if((i % x)==0)						// every row print an endline
-			cout << endl;
-	}
+  for(unsigned int i=0; i < x*y; i++)		// loop over x dimension (rows)
+    {
+      cout << plane[i] << "\t";
+      if((i % x)==0)						// every row print an endline
+	cout << endl;
+    }
 }
 
 
 /*!
- \brief Functions that tries to check frequency header info and  
- correct it if necessary
- 
- \param ftpr - FITS file ptr of image to check
- */
+  \brief Functions that tries to check frequency header info and  
+  correct it if necessary
+  
+  \param ftpr - FITS file ptr of image to check
+*/
 void correctFreqHeader(vector<string> &list, vector<double> &freqs)
 {
-	for(unsigned int i=0; i < list.size(); i++)
-	{
-		
-	}
+  for(unsigned int i=0; i < list.size(); i++)
+    {
+      
+    }
 }
