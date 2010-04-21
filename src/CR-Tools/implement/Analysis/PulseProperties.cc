@@ -68,7 +68,9 @@
     lateralPowHeight(0.),
     lateralPowDeviation(0.),
     lateralCut(false),
-    polarization("")
+    polarization(""),
+    minMaxSign(0),
+    envSign(0)
   {}
 
   // ============================================================================

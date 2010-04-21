@@ -1277,7 +1277,8 @@ namespace CR { // Namespace CR -- begin
       vector<double> noiseValues;                // Mean of trace in a region before the cc-beam
       vector<double> snrValues;                    // Envelope height / noise
       Vector<Double> geomDelays;                // geometrical delays of beamforming in getShiftedFFT
- 
+
+
       if (rawData)
         cout << "\nLooking for maxima in the envelope of the raw data FX: \n";
       else
@@ -1349,7 +1350,7 @@ namespace CR { // Namespace CR -- begin
         timeRangeNoise = calculateNoiseRange(timeValues, noiseStart, noiseStop);
  
       // print header line of output
-      cout << "Ant   env height   max height   min height     noise        SNR     env time   max time   min time   time of half height     FWHM\n"
+      cout << "Ant   env height   max height   min height   minMax    Sign   noise        SNR     env time   max time   min time   time of half height     FWHM\n"
            << "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]    (env)      [us]       [us]       [us]           [us]             [ns]\n"
            <<  "---------------------------------------------------------------------------------------------------------------------------------\n";
 
@@ -1365,6 +1366,8 @@ namespace CR { // Namespace CR -- begin
         int envMaxtimevalue = 0;
         double noise=0;
         double snr=0;
+        int minMaxSign=0;
+        int envSign=0;
 
         // save values in addition into pulse property class
         PulseProperties pulse;
@@ -1392,7 +1395,6 @@ namespace CR { // Namespace CR -- begin
               minimum = trace(j);
             }
           }
-
           // loop through the values of the envelope and search for the heighest one
           for(unsigned int j = 0; j < timeRange.nelements(); j++) {
             if ( envMaximum < envTrace(j)) {
@@ -1460,7 +1462,17 @@ namespace CR { // Namespace CR -- begin
               cerr << "WARNING: Local maximum of the envelope ambigious: Up-Sampling rate is probably too low!" << endl;
           }  
            envMaximum = envTrace(envMaxtimevalue);
+        //define sign of the signal at the time of the maxEnvelope (Second methods)
+           if(trace(envMaxtimevalue)>0.){ envSign = 1; cout << "\n  POSITIVE Envelope \n";}
+           if(trace(envMaxtimevalue)<0.){ envSign = -1;cout << "\n  NEGATIVE Envelope \n";}
+           if(trace(envMaxtimevalue)==0.){ envSign = 0;cout << "\n  NULL     Envelope  \n";}
         }
+
+        // define sign of the Electric field max peak (First method)
+        double diffSign=(maximum+minimum);
+        if(diffSign>0.) {minMaxSign = 1; cout << "\n  POSITIVE  \n";  }
+        if(diffSign<0.) {minMaxSign = -1;cout << "\n  NEGATIVE  \n";  }
+        if(diffSign==0.) {minMaxSign = 0;cout << "\n  NULL  \n";  }
 
         // calculate FWHM
         double pulsestart = 0;
@@ -1509,8 +1521,7 @@ namespace CR { // Namespace CR -- begin
         envMaxima_time.push_back(timeRange(envMaxtimevalue)*1e6);
         noiseValues.push_back(noise*1e6);
         snrValues.push_back(snr);
-
-        // make quality check before push back (calculation of FWHM and pulsestart can fail)
+         // make quality check before push back (calculation of FWHM and pulsestart can fail)
         // if ((pulsestop-pulsestart) < 200e-9) fwhm.push_back( (pulsestop-pulsestart)*1e9);
         fwhm.push_back( (pulsestop-pulsestart)*1e9);
         // if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
@@ -1530,7 +1541,8 @@ namespace CR { // Namespace CR -- begin
         pulse.fwhm = (pulsestop-pulsestart)*1e9;
         pulse.noise = noise*1e6;
         pulse.polarization = Polarization;
-
+        pulse.minMaxSign = minMaxSign;
+        pulse.envSign = envSign;
         // store pulse properties in map
         pulses[antennaIDs(i)] = pulse;
 
@@ -1539,6 +1551,8 @@ namespace CR { // Namespace CR -- begin
              << setw(11)<< envMaximum*1e6 << "  "
              << setw(11)<< maximum*1e6 << "  "
              << setw(11)<< minimum*1e6 << " "
+             //<< setw(11)<< minMaxSign << " "
+             << setw(11)<< envSign << " "
              << setw(11)<< noise*1e6 << "   "
              << setw(8) << snr << "  "
              << setw(8) << timeRange(envMaxtimevalue)*1e6 << "   "

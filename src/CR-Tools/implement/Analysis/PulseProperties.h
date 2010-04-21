@@ -136,6 +136,11 @@
     bool lateralCut;
     //! polarization
     std::string polarization;
+    //!sign of the signal (example positive if max-min >0)
+    int minMaxSign;
+    //!sign of the signal at the time of the Max Envelope
+    int envSign;
+
 
     // --------------------------------------------------------------- Parameters
 
