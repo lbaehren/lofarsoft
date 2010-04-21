@@ -59,15 +59,27 @@ namespace RM {
     int mib[4];
     size_t len; 
 
-    // set the mib for hw.ncpu 
+#ifdef CTL_HW
     mib[0] = CTL_HW;
+#else
+    mib[0] = 1;
+#endif
+
+#ifdef HW_AVAILCPU
     mib[1] = HW_AVAILCPU;  // alternatively, try HW_NCPU;
+#else
+    mib[1] = 1;
+#endif
     
     // get the number of CPUs from the system 
     sysctl(mib, 2, &numCPU, &len, NULL, 0);
     
     if( numCPU < 1 ) {
+#ifdef HW_NCPU
       mib[1] = HW_NCPU;
+#else
+      mib[1] = 1;
+#endif
       sysctl( mib, 2, &numCPU, &len, NULL, 0 );
       
       if( numCPU < 1 ) {
@@ -136,10 +148,22 @@ namespace RM {
   unsigned long parallel::getPhysmem()
   {
     unsigned int physmem = 0;
-
     size_t len           = sizeof(physmem);
+
+#ifdef CTL_HW
+#ifdef HW_PHYSMEM
     static int mib[2]    = {CTL_HW, HW_PHYSMEM};
-    
+#else
+    static int mib[2]    = {CTL_HW, 1};
+#endif
+#else
+#ifdef HW_PHYSMEM
+    static int mib[2]    = {1, HW_PHYSMEM};
+#else
+    static int mib[2]    = {1, 1};
+#endif
+#endif
+
     if((sysctl(mib, 2, &physmem, &len, NULL, 0)) == -1) {
       throw "availmem sysctl failed";
     }
