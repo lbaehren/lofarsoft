@@ -59,7 +59,6 @@ namespace RM {
     int mib[4];
     size_t len; 
 
-#ifdef HAVE_SYS_SYSCTL_H    
     // set the mib for hw.ncpu 
     mib[0] = CTL_HW;
     mib[1] = HW_AVAILCPU;  // alternatively, try HW_NCPU;
@@ -77,7 +76,6 @@ namespace RM {
     }	
     //cout << "Number of processors (OpenMP) = " omp_get_num_procs() << endl;
     // debug: openMP functions does not work?
-#endif
     
     return numCPU;	
   }
@@ -95,16 +93,24 @@ namespace RM {
     int mib[2];
     size_t len;
     unsigned int numcores (1);
-    
-#ifdef HAVE_SYS_SYSCTL_H
+   
+#ifdef CTL_HW
     mib[0] = CTL_HW;
+#else
+    mib[0] = 1;
+#endif
+
+#ifdef HW_NCPU
     mib[1] = HW_NCPU;
+#else
+    mib[1] = 1;
+#endif
+
     len    = sizeof(numcores);
     
     if((sysctl(mib, 2, &numcores, &len, NULL, NULL))==-1) {
       throw "parallel::getNumberCores sysctl failed";
     }
-#endif
     
     return numcores;
   }
@@ -131,19 +137,45 @@ namespace RM {
   {
     unsigned int physmem = 0;
 
-#ifdef HAVE_SYS_SYSCTL_H
     size_t len           = sizeof(physmem);
     static int mib[2]    = {CTL_HW, HW_PHYSMEM};
     
     if((sysctl(mib, 2, &physmem, &len, NULL, 0)) == -1) {
       throw "availmem sysctl failed";
     }
-#endif
     
     // Return amount of physical memory
     return physmem;
   }
+  
+  //_____________________________________________________________________________
+  //                                                          nofAllowedProcesses
+  
+  int parallel::nofAllowedProcesses ()
+  {
+    int mib[2];
+    int maxproc;
+    size_t len;
     
+#ifdef CTL_KERN
+    mib[0] = CTL_KERN;
+#else
+    mib[0] = 0;
+#endif
+
+#ifdef KERN_MAXPROC
+    mib[1] = KERN_MAXPROC;
+#else
+    mib[1] = 1;
+#endif
+
+    len = sizeof(maxproc);
+
+    sysctl(mib, 2, &maxproc, &len, NULL, 0); 
+
+    return maxproc;
+  }
+  
   //_____________________________________________________________________________
   //                                                                      summary
   
@@ -154,10 +186,11 @@ namespace RM {
   {
     os << "[parallel] Summary of internal parameters" << std::endl;
     
-    os << "-- nof. CPUs       = " << numcpus      << std::endl;
-    os << "-- nof. cores      = " << nofCores_p   << std::endl;
-    os << "-- Physical memory = " << availmem     << std::endl;
-    os << "-- nof. threads    = " << nofThreads_p << std::endl;
+    os << "-- nof. CPUs              = " << numcpus      << std::endl;
+    os << "-- nof. cores             = " << nofCores_p   << std::endl;
+    os << "-- Physical memory        = " << availmem     << std::endl;
+    os << "-- nof. threads           = " << nofThreads_p << std::endl;
+    os << "-- nof. allowed processes = " << nofAllowedProcesses() << std::endl;
 
   }
   

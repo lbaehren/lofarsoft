@@ -23,9 +23,7 @@
 
 #include <iostream>
 #include <sys/types.h>
-#ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
-#endif
 
 namespace RM {
   
@@ -36,10 +34,72 @@ namespace RM {
     
     \brief Parallelization functions for RM-Synthesis
     
-    \author Sven (sduscha@mpa-garching.mpg.de)
+    \author Sven Duscha
+    \author Lars B&auml;hren
     
     \date 03.09.2009.
+
+    <h3>Prerequisite</h3>
+
+    - http://www.gsp.com/cgi-bin/man.cgi?section=3&topic=sysctl
+
+    The string and integer information available for the CTL_HW level is detailed
+    below. The changeable column shows whether a process with appropriate
+    privilege may change the value.
     
+    <table border=0>
+      <tr>
+        <td>Second level name</td>
+        <td>Type</td>
+        <td>Changeable</td>
+      </tr>
+      <tr>
+        <td>HW_MACHINE</td>
+        <td>string</td>
+        <td>no</td>
+      </tr>
+      <tr>
+        <td>HW_MODEL</td>
+        <td>string</td>
+        <td>no</td>
+      </tr>
+      <tr>
+        <td>HW_NCPU</td>
+        <td>integer</td>
+        <td>no</td>
+      </tr>
+      <tr>
+        <td>HW_BYTEORDER</td>
+        <td>integer</td>
+        <td>no</td>
+      </tr>
+      <tr>
+        <td>HW_PHYSMEM</td>
+        <td>integer</td>
+        <td>no</td>
+      </tr>
+      <tr>
+        <td>HW_USERMEM</td>
+        <td>integer</td>
+        <td>no</td>
+      </tr>
+      <tr>
+        <td>HW_PAGESIZE</td>
+        <td>integer</td>
+        <td>no</td>
+      </tr>
+      <tr>
+        <td>HW_FLOATINGPOINT</td>
+        <td>integer</td>
+        <td>no</td>
+      </tr>
+      <tr>
+        <td>HW_MACHINE_ARCH</td>
+        <td>string</td>
+        <td>no</td>
+      </tr>
+    </table>
+
     <h3>Synopsis</h3>
     
     This class contains high-level RM-Synthesis functions that parallelize the
@@ -84,6 +144,8 @@ namespace RM {
     unsigned int getAvailCPUs();
     //! Determine the amount of physical memory
     unsigned long getPhysmem();
+
+    static int nofAllowedProcesses ();
     
     //! Provide a summary of the internal status
     inline void summary () {
