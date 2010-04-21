@@ -11,16 +11,16 @@ import numpy
 define_macros = []
 undef_macros = []
 extra_compile_args = []
-include_dirs = ["/Users/lars/Code/lofar/usg/src/Pulsar/../../release/share/pulsar/include", "PGPLOT_INCLUDES-NOTFOUND"]
-#library_dirs = ["/Users/lars/Code/lofar/usg/src/Pulsar/../../release/share/pulsar/lib", ""]
+include_dirs = ["/Users/anoutsos/Work/Programming/lofarsoft/src/Pulsar/../../release/share/pulsar/include", "/sw/lib/pgplot"]
+#library_dirs = ["/Users/anoutsos/Work/Programming/lofarsoft/src/Pulsar/../../release/share/pulsar/lib", "/sw/lib/pgplot"]
 library_dirs = []
 
 #ppgplot_libraries = ["cpgplot", "pgplot", "X11", "png", "m", "g2c"]
 ppgplot_libraries = ["cpgplot", "pgplot", "X11", "png", "m"]
-ppgplot_library_dirs = [""]
+ppgplot_library_dirs = ["/sw/lib/pgplot"]
 
 presto_libraries = ["presto", "fftw3f", "m"]
-presto_library_dirs = ["/Users/lars/Code/lofar/usg/src/Pulsar/../../release/share/pulsar/lib"]
+presto_library_dirs = ["/Users/anoutsos/Work/Programming/lofarsoft/src/Pulsar/../../release/share/pulsar/lib"]
 
 # Use NumPy instead of Numeric or numarray
 make_extension = Extension
