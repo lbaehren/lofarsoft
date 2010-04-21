@@ -1900,6 +1900,63 @@ inline HNumber funcGaussian (HNumber x,
 };
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Return the maximum value in a vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMax
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  vec.max() -> maximum value
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
+{
+  Iter it(vec);
+  IterValueType val=*it;
+  while (it!=vec_end) {
+    if (*it > val) val=*it;
+    ++it;
+  };
+  return val;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Return the minimum value in a vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMin
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  vec.max() -> minimum value
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
+{
+  Iter it(vec);
+  IterValueType val=*it;
+  while (it!=vec_end) {
+    if (*it < val) val=*it;
+    ++it;
+  };
+  return val;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+
 //========================================================================
 //$ITERATE MFUNC abs,cos,cosh,exp,log,log10,sin,sinh,sqrt,square,tan,tanh
 //========================================================================
@@ -3608,16 +3665,16 @@ void HFPP_FUNC_NAME(const Iter ccm,const Iter ccm_end, const Iter fftdata,const 
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Calculates an image (or single pixel) vector from 
+//$DOCSTRING: Calculates a single complex pixel or a pixel vector (i.e., an image), from an cross correlation matrix and complex geometrical weights for each antenna by multiplying ccm and weights and summing over all baselines.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hImageFromCCM
+#define HFPP_FUNC_NAME hCImageFromCCM
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(image)()("Image vector containing N_pixel pixels and N_bands frequency bands in the order [power(pix0,band0),power(pix0,band1),...,power(pix1,band0),...]. Size of vector is N_pixel*N_bands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HComplex)(image)()("Image vector containing N_freq frequency bins in the order [power(pix0,bin0),power(pix0,bin1),...,power(pix1,bin0),...]. Size of vector is N_pixel*N_bins")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HComplex)(ccm)()("Upper half of the cross-correlation matrix (input) containing complex visibilities as a function of frequency. The ordering is ant0*ant1,ant0*ant2,...,ant1*ant2,... - where each antN contains nfreq frequency bins.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HComplex)(weights)()("Vector containing the weights to be applied for each pixel, antenna, and frequency bin (in that order, i.e. frequency index runs fastest).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HInteger)(binning)()("Vector containing the number of frequency bins to be summed for each frequency band in the output image. The length of the vector must equal the number of frequency bands used in the input image and the sum of all values in the vector must equal the number of frequency bins (nfreq) in the weights vector and in the CCM.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_4 (HInteger)(nfreq)()("Number of frequency bins per antenna used to calculate the CCM.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(nofAntennas)()("Number of antennas used for weights and ccm")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(nfreq)()("Number of frequency bins used for weights and ccm")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -3627,9 +3684,9 @@ void HFPP_FUNC_NAME(const Iter ccm,const Iter ccm_end, const Iter fftdata,const 
   $PARDOCSTRING
   
   The image contains the power as a function of pixel and frequency
-  bands. Each value is the sum over all baselines of the norm
+  bins. Each value is the sum over all baselines of the norm
   of the complex visibilities times complex weights for that pixel and
-  frequency band.
+  frequency bin.
 
   The results will be added to the image, hence for a new image the
   image must be initialized to zero! Otherwise an old image can be
@@ -3639,66 +3696,74 @@ void HFPP_FUNC_NAME(const Iter ccm,const Iter ccm_end, const Iter fftdata,const 
   number of antennas and N_freq the number of frequency bins per
   antenna. The length of the weights vector is N_pixel*N_ant*N_freq.
 
-  Example for binning: if the CCM was calculated with 9 frequency
-  channels, say 61,62,63,64,65,66,67,68,69 MHz (which is actually too
-  large a bandwidth) and the output image is supposed to be split up
-  in three frequency bands, then provide a binning vector continaing
-  [3,3,3]. The first band will then be centered at frequency 62MHz and
-  contain a sum over the first three bins (61,62,63), the second band
-  will be 65 and the last 68 MHz. The parameter nfreq must then be
-  9. Of course, the binning intervals need not be equal in size (you
-  could have also requested 1,2,3,3) leading to a rather irregular
-  (but perfectly possible) definition of frequency bands.
+Example:
+  ccm=Vector(complex,file["nofSelectedAntennas"]*(file["nofSelectedAntennas"]-1)/2*file["fftLength"])
+  cimage=Vector(complex,n_pixels*nbins,fill=0)
+  image=hArray(float,[n_pixels,file["fftLength"]])
+
+  hCrossCorrelationMatrix(ccm,file_fft.vec(),file["fftLength"])
+  hCImageFromCCM(cimage,ccm,weights.vec(),file["nofSelectedAntennas"],file["fftLength"])
+  cimage.norm(image.vec())
+  intimage=np.array(image[...].sum()) # convert to numpy array
+  immax=intimage.max()
+  intimage /= immax
+  intimage.resize([n_az,n_el])
+  plt.imshow(intimage,cmap=plt.cm.hot)
 
 */
-template <class IterN,class IterC,class IterI>
+template <class IterC>
 void HFPP_FUNC_NAME(
-		    const IterN image, const IterN image_end, 
+		    const IterC image, const IterC image_end, 
 		    const IterC ccm,const IterC ccm_end, 
 		    const IterC weights,const IterC weights_end, 
-		    const IterI binning, const IterI binning_end, 
-		    HInteger nfreq)
+		    const HInteger nofAntennas,
+		    const HInteger nfreq
+		    )
 {
-  IterN it_im(image);
+  IterC it_im(image);
+  IterC it_im_start=image;
+  IterC it_im_end=image+nfreq;
   IterC it_ccm(ccm);
   IterC it_w1_start(weights);
   IterC it_w1_end(weights+nfreq);
+  IterC it_w2_end = it_w1_start+nofAntennas*nfreq;
   IterC it_w1(it_w1_start); //start at antenna 0
   IterC it_w2(it_w1_end); //start at antenna 1
-  IterI it_b(binning);
-  HInteger i;
-  i=hSum(binning,binning_end);
-  if (i!=nfreq) {
-    cout << "Error - hPixelFromCCM: Bins vector [sum(binnning)=" <<i<<"] does not add up to number of frequency bins (nfreq="<<nfreq<<") provided."<<endl;
-    return;
-  };
   if (it_ccm>=ccm_end) return;
   if (it_w1>=weights_end) return;
-  if (it_b>=binning_end) return;
-  while (it_im<image_end) {
-    for (i=0; i < (*it_b); ++i)  {  //Here comes a binning step where the power over multiple frequency bins is summed
-      *it_im+=norm((*it_ccm) * (*it_w1)*(*it_w2));
-      ++it_w1; ++it_w2; ++it_ccm;
-    };
-    if (it_w1>=it_w1_end) { //reached the end of frequency bins of first antenna, restart at first bin and advance second antennas by one
-      if (it_w2>=weights_end) { //the second antenna has reached the last antenna value, so increase first antenna by one
-	it_w1_start+=nfreq; //advance by one antenna (each containing nfreq frequencies)
+  while (it_im_start<image_end) {
+    *it_im+=(*it_ccm) * (*it_w1)*conj(*it_w2);
+    ++it_w1; ++it_w2; ++it_ccm; ++it_im;
+    if (it_w1>=it_w1_end) { //reached the end of frequency bins of first antenna, restart at first bin and advance second antenna by one
+      if (it_w2>=it_w2_end) { //the second antenna has reached the last antenna value (last baseline to first antenna), so increase first antenna by one
+	it_w1_start+=nfreq; //advance by one antenna (each containing nfreq frequencies), i.e. next baseline
 	it_w1_end+=nfreq;
-	if (it_w1_end>=weights_end) { //cycled through all antenna pairs, restart at beginning and advance to next pixel
-	  it_w1_start=weights;
-	  it_w1_end=weights+nfreq;
-	  it_w1=it_w1_start; //start at antenna 0
-	  it_w2=it_w1_end; //start at antenna 1
-	  if (it_ccm!=ccm_end) {
-	    cout << "Error - hPixelFromCCM: Mismatch between ccm and weights" <<endl;
+	if (it_w1_end>=it_w2_end) { //has cycled through all antenna pairs/all baselines, restart at beginning and advance to next pixel
+	  if (it_im!=it_im_end) {
+	    ERROR("hImageFromCCM: Mismatch between image vector, ccm, and weights");
+	    return;
 	  };
-	  it_ccm=ccm;
+	  if (it_ccm!=ccm_end) {
+	    ERROR("Error - hImageFromCCM: Mismatch between ccm and weights");
+	    return;
+	  };
+	  it_im_start=it_im_end;  //first frequency bin of NEXT PIXEL
+	  it_im_end=it_im_start+nfreq;
+	  it_w1_start=it_w2_end;  // at the end of w2 comes the next sequence fo weights for the next pixel
+	  it_w1_end=it_w1_start+nfreq;
+	  it_w2_end = it_w1_start+nofAntennas*nfreq;
+	  it_ccm=ccm; //ccm begins at first frequency first baseline again
 	};
-	it_w2=it_w1_end;
+	it_w2=it_w1_end; //start second antenna pair pointer at antenna 1 - start with baseline 0-1
       };
-      it_w1=it_w1_start;
+      it_w1=it_w1_start;  //start over at first frequency bin in weights (with next baseline)
+      it_im=it_im_start; //start over at first frequency bin in image (with next baseline)
     };
-  };
+    if (it_im>=it_im_end) {
+      ERROR("hImageFromCCM: Mismatch between image vector, ccm, and weights");
+      return;
+    };
+  }; 
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

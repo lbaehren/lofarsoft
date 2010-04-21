@@ -8,9 +8,10 @@ from hftools import *
 from pydoc import help as pyhelp
 import os,sys,re
 import matplotlib.pyplot as plt
+import time as time
+import numpy as np
 
 LOFARSOFT=os.environ["LOFARSOFT"]
-
 pydocpyfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.py"
 pydoctxtfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.tex"
 
@@ -883,7 +884,7 @@ for v in hNumericalContainerTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hFillRange","hAbs","hConvert","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
+    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
         setattr(v,s[1:].lower(),eval(s))
 
 #========================================================================

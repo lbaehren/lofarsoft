@@ -17,10 +17,11 @@ plt.clf()
 print "t=",time.clock(),"s -","Reading in data and setting parameters"
 file=crfile(filename_sun)
 file["blocksize"]=128 #2**12
-nblocks=10
+nblocks1=5
+nblocks2=5
 NyquistZone=2
-size=7
-pixel_sep=1
+size=60
+pixel_sep=0.5
 center=[178.9,27.7,1]
 center=[178.9,30.0,1]
 center=[178.9,28.0,1]
@@ -57,7 +58,6 @@ power=hArray(float,dimensions=beamformed_fft,name="Spectral Power",xvalues=file_
 phase_center=hArray(antenna_positions[0].vec())
 antenna_positions -= phase_center
 
-
 azel=hArray(float,dimensions=[n_pixels,3])
 cartesian=azel.new()
 
@@ -87,8 +87,7 @@ print "t=",time.clock(),"s -","Calculating weights"
 weights.phasetocomplex(phases)
 #hGeometricWeights(file_frequencies,antenna_positions,cartesian,weights,FarField)
 
-
-for block in range(nblocks):
+for block in range(nblocks1):
     print "t=",time.clock(),"s -","Reading in Block #",block
     file["block"]=block
     file_efield.read(file,"Fx")
@@ -114,16 +113,38 @@ intpower.resize([n_az,n_el])
 
 print "t=",time.clock(),"s -","Plotting"
 plt.clf()
+plt.subplot(1,2,1)
 plt.imshow(intpower,cmap=plt.cm.hot)
 plt.savefig("sunimage2.pdf")
 #print intpower
-print "t=",time.clock(),"s -","Done"
+print "t=",time.clock(),"s -","Done Method 1"
 
+t0=time.clock()
 
-"""
+print "t=",time.clock()-t0,"s -","Method 2 (CCM) - Initializing"
+
 ccm=Vector(complex,file["nofSelectedAntennas"]*(file["nofSelectedAntennas"]-1)/2*file["fftLength"])
-hCrossCorrelationMatrix(ccm,file_fft.vec(),file["fftLength"])
-binning=Vector(int,1,fill=file["fftLength"])
-image=Vector(float,int(size/pixel_sep)**2,fill=0)
-hImageFromCCM(image,ccm,weights.vec(),binning.vec(),file["fftLength"])
-"""
+cimage=Vector(complex,n_pixels*file["fftLength"],fill=0)
+image=hArray(float,[n_pixels,file["fftLength"]])
+
+for block in range(nblocks2):
+    print "t=",time.clock()-t0,"s -","Reading in Block #",block
+    file["block"]=block
+    file_efield.read(file,"Fx")
+    file_efield[...].fft(file_fft[...],NyquistZone)
+#
+    print "t=",time.clock()-t0,"s -","Calculating and adding Cross Correlation Matrix"
+    hCrossCorrelationMatrix(ccm,file_fft.vec(),file["fftLength"])
+
+print "t=",time.clock()-t0,"s -","Calculating complex image"
+hCImageFromCCM(cimage,ccm,weights.vec(),file["nofSelectedAntennas"],file["fftLength"])
+print "t=",time.clock()-t0,"s -","Normalizing and integrating"
+cimage.norm(image.vec())
+intimage=np.array(image[...].sum())
+immax=intimage.max()
+intimage /= immax
+intimage.resize([n_az,n_el])
+print "t=",time.clock()-t0,"s -","Plotting ccm image"
+plt.subplot(1,2,2)
+plt.imshow(intimage,cmap=plt.cm.hot)
+print "t=",time.clock()-t0,"s -","Done Method 2"

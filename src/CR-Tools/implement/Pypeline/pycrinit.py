@@ -6,8 +6,6 @@
 
 from pycrtools import *
 from getopt import *
-import time as time
-import numpy as np
 
 try:
     opts, args = getopt(sys.argv[1:],"hi:", ["help","include="])
