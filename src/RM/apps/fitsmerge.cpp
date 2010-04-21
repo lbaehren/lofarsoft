@@ -1,14 +1,35 @@
-/*
+/***************************************************************************
+ *   Copyright (C) 2009                                                    *
+ *   Sven Duscha (sduscha@mpa-garching.mpg.de)                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+/*!
+  \file fitsmerge.cpp
+  \ingroup RM
+
+  \brief Small helper tool that merges a list of 2-D FITS files
+
+  \author Sven Duscha
+  \date 01-09-2009 (Last change: 10-09-2009)
+  
   Small helper tool that merges a list of 2-D FITS files provided in a  
-list
-  into one 3-D (spectral / faraday) FITS cube
-
-  File:                 fitsmerge.cpp
-  Author:               Sven Duscha (sduscha@mpa-garching.mpg.de)
-  Date:                 01-09-2009
-  Last change:			10-09-2009
-  */
-
+  list into one 3-D (spectral / faraday) FITS cube
+*/
 
 #include <iostream>
 #include <fstream>                      // file stream functions
@@ -16,63 +37,97 @@ list
 #include <stdio.h>
 #include "fitsio.h"
 
-
 using namespace std;
 
+// ==============================================================================
+//
+//  Function prototypes
+//
+// ==============================================================================
 
-void readList(const string &listfilename, vector<string> &list);
-bool checkFiles(const vector<string> &list);
-void merge2Dto3D(const vector<string> &list, const string  
-&outfilename);
-void preemptivelyDeleteFITS(const string &filename);
-void correctFreqHeader(vector<string> &list, vector<double> &freqs);
-void readPlane(fitsfile *fptr, float *plane, const unsigned long z, void *nulval, int &fitsstatus);
-
+//! Read list of input FITS images from file
+void readList (const string &listfilename,
+	       vector<string> &list);
+//! Check images for consistency
+bool checkFiles (const vector<string> &list);
+//! Merge a list of 2D images into a 3-D cube
+void merge2Dto3D(const vector<string> &list,
+		 const string &outfilename);
+//! Preemptively delete an existing FITS file
+void preemptivelyDeleteFITS (const string &filename);
+void correctFreqHeader (vector<string> &list,
+			vector<double> &freqs);
+//! Read an image plane from a FITS file at z position
+void readPlane (fitsfile *fptr,
+		float *plane,
+		const unsigned long z,
+		void *nulval,
+		int &fitsstatus);
+//! Write an image plane to a FITS file at z position
 void writePlane (fitsfile *fptr,
-				 float *plane,
-				 const long x,
-				 const long y,
-				 const long z,
-				 void *nulval,
-				 int &fitsstatus);
+		 float *plane,
+		 const long x,
+		 const long y,
+		 const long z,
+		 void *nulval,
+		 int &fitsstatus);
+//! Write an entire FITS cube (can be higher-dimensional) into a FITS file
+void writeCube (fitsfile *fptr,
+		float *cube,
+		void* nulval);
+//! For debugging purposes output an image plane
+void printPlane (float *plane,
+		 unsigned int x,
+		 unsigned int y);
 
-void writeCube(fitsfile *fptr, float *cube, void* nulval);
-void printPlane(float *plane, unsigned int x, unsigned int y);
+// ==============================================================================
+//
+//  Function implementations
+//
+// ==============================================================================
 
+//_______________________________________________________________________________
+//                                                                           main
 
-int main (int argc, const char * argv[]) {
-        string listfilename, outfilename;
-        
-        //-------------------------------------
-        // Command line argument parsing
-        if(argc!=3)
-        {
-                cout << "usage: fitsmerge <list.txt> <output.fits>" << endl;
-                cout << endl;
-                cout << "This program reads in a list of 2-D FITS images from <list.tx>" << endl;
-                cout << "and merges them into a 3-D cube." << endl;
-        }
-        else
-        {
-                listfilename=argv[1];					// 1st cmd argument is filename for input list
-                outfilename="!" + (string) argv[2];    // 2nd cmd argument is output filename, exclamation mark for overwriting with fits_create_file
-        }
-                
-        //-------------------------------------
-        try {
-            vector<string> list;            // vector to contain list of FITS files
-                
-			readList(listfilename, list);
-			merge2Dto3D(list, outfilename);
-        }
-        
-        catch (const char* s) {
-			cout << s << endl;
-        }
-        
-        return 0;
+int main (int argc, const char * argv[])
+{
+  string listfilename;
+  string outfilename;
+  
+  //-------------------------------------
+  // Command line argument parsing
+
+  if(argc!=3) {
+    cout << "usage: fitsmerge <list.txt> <output.fits>" << endl;
+    cout << endl;
+    cout << "This program reads in a list of 2-D FITS images from <list.tx>" << endl;
+    cout << "and merges them into a 3-D cube." << endl;
+  }
+  else {
+    /* 1st cmd argument is filename for input list */
+    listfilename=argv[1];					
+    /* 2nd cmd argument is output filename, exclamation mark for overwriting
+       with fits_create_file */
+    outfilename="!" + (string) argv[2];
+  }
+  
+  //-------------------------------------
+  try {
+    vector<string> list;            // vector to contain list of FITS files
+    
+    readList(listfilename, list);
+    merge2Dto3D(list, outfilename);
+  }
+  
+  catch (const char* s) {
+    cout << s << endl;
+  }
+  
+  return 0;
 }
 
+//_______________________________________________________________________________
+//                                                                       readList
 
 /*!
   \brief Read a text file and put filenames into a vector
@@ -102,9 +157,10 @@ void readList(const string &listfilename, vector<string> &list)
 }
 
 
-/*!
-  \brief Merge a list of 2D images into a 3-D cube
+//_______________________________________________________________________________
+//                                                                       readList
 
+/*!
   \param list - vector containing a list of 2-D FITS files
   \param outfilename - filename of 3-D FITS file to be created
  // \param freqlist - text file the frequencies of the input files is written to
@@ -203,12 +259,11 @@ void merge2Dto3D(const vector<string> &list, const string
 		delete[] cube;
 }
 
-
+//_______________________________________________________________________________
+//                                                                     checkFiles
 
 /*!
-	\brief Check images for consistency
-
-	\param &list - vector containing list of FITS files
+  \param &list - vector containing list of FITS files
 */
 bool checkFiles(const vector<string> &list)
 {
@@ -268,11 +323,10 @@ bool checkFiles(const vector<string> &list)
 	return true;
 }
 
-
+//_______________________________________________________________________________
+//                                                         preemptivelyDeleteFITS
 
 /*!
- \brief Preemptively delete an existing FITS file
- 
  \param filename - name of file to check for
 */
 void preemptivelyDeleteFITS(const string &filename)
@@ -307,17 +361,22 @@ void preemptivelyDeleteFITS(const string &filename)
 	
 }
 
+//_______________________________________________________________________________
+//                                                                      readPlane
 
-
-void readPlane(fitsfile *fptr, float *plane, const unsigned long z, void *nulval, int &fitsstatus)
+void readPlane (fitsfile *fptr,
+		float *plane,
+		const unsigned long z,
+		void *nulval,
+		int &fitsstatus)
 {
-    long fpixel[3];			// read vector where reading starts
-    int hdutype=0;			// HDU type which is checked for
+    long fpixel[3];		// read vector where reading starts
+    int hdutype=0;		// HDU type which is checked for
     int nelements=0;		// number of elements to read
-    int anynul=0;			// indicator if any nul value has been read
-    int naxis=0;			// number axes present in image
-    long naxes[3];			// dimensions of these axes
-	char errortext[255];	// char array for fits messages
+    int anynul=0;		// indicator if any nul value has been read
+    int naxis=0;		// number axes present in image
+    long naxes[3];		// dimensions of these axes
+    char errortext[255];	// char array for fits messages
 	
 	//-------------------------------------------------------------
 	if (fits_get_hdu_type(fptr, &hdutype ,&fitsstatus)!=IMAGE_HDU)	// Check if current HDU is an image extension
@@ -349,10 +408,10 @@ void readPlane(fitsfile *fptr, float *plane, const unsigned long z, void *nulval
     }
 }
 
+//_______________________________________________________________________________
+//                                                                     writePlane
 
-/*!
- \brief Write an image plane to a FITS file at z position
- 
+/*! 
  \param fptr - file pointer of FITS file
  \param x - X dimension of image
  \param y - Y dimension of image
@@ -413,16 +472,18 @@ void writePlane (fitsfile *fptr,
      }
 }
 
+//_______________________________________________________________________________
+//                                                                      writeCube
 
 /*!
- \brief Write an entire FITS cube (can be higher-dimensional) into a FITS file
-
  \param fptr - file pointer of file to write into
  \param cube - pointer to float containing the cube data
  \param naxis - number of axis
  \param naxes - dimension of each axis
 */
-void writeCube(fitsfile *fptr, float *cube, void* nulval)
+void writeCube (fitsfile *fptr,
+		float *cube,
+		void* nulval)
 {
 	unsigned long nelements=1;	// number of elements to write
 	int fitsstatus=0;
@@ -438,15 +499,15 @@ void writeCube(fitsfile *fptr, float *cube, void* nulval)
 	
 	fits_get_img_dim(fptr, &naxis, &fitsstatus);			// get image dimensions
 	if(fitsstatus)
-	{
-		fits_get_errstatus(fitsstatus, errormessage);
-		cout << errormessage << endl;
-		throw "fitsmerge::writeCube fits_get_img_dim failed";		
-	}
-		
+	  {
+	    fits_get_errstatus(fitsstatus, errormessage);
+	    cout << errormessage << endl;
+	    throw "fitsmerge::writeCube fits_get_img_dim failed";		
+	  }
+	
 	naxes=new long[naxis];									// get memory for naxes to hold axes sizes 
 	fits_get_img_size(fptr, naxis, naxes, &fitsstatus);		// get axes sizes
-		
+	
 	fpixel=(long*)malloc(sizeof(long)*naxis);
 	for(int i=0; i < naxis; i++)
 	  fpixel[i]=1;
@@ -468,15 +529,17 @@ void writeCube(fitsfile *fptr, float *cube, void* nulval)
 	  }
 }
 
+//_______________________________________________________________________________
+//                                                                     printPlane
 
 /*!
-  \brief For debugging purposes output an image plane
-
-	\param *plane - buffer containing image plane
-	\param x - x dimension of plane
-	\param y - y dimension of plane
+  \param *plane - buffer containing image plane
+  \param x - x dimension of plane
+  \param y - y dimension of plane
 */
-void printPlane(float *plane, unsigned int x, unsigned int y)
+void printPlane (float *plane,
+		 unsigned int x, 
+		 unsigned int y)
 {
 	if(plane==NULL)
 		throw "fitsmerge::printPlane plane is a NULL pointer";
