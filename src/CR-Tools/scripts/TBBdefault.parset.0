@@ -1,0 +1,12 @@
+Observation.Campaign.title =  
+Observation.Campaign.PI = 
+Observation.Campaign.CO_I = 
+Observation.Campaign.contact = 
+Observation.ObserverName = A.Horneffer, A.Corstanje 
+Observation.ObsID = 
+Observation.startTime = 
+Observation.stopTime = 
+Observation.antennaSet = HBA_BOTH
+Observation.bandFilter = HBA_110_190
+Observation.sampleClock = 200
+Observation.VirtualInstrument.stationList = [RS205]
