@@ -84,6 +84,14 @@
     virtual ~PulseProperties ();
     
     // ---------------------------------------------------------------- Variables
+    //! height of pulse (usually after correction for noise)
+    double height;
+    //! error of pulse height (usually calculated from noise)    
+    double heightError;
+    //! time of pulse (usually time of envelope maximum)
+    double time;
+    //! error of pulse time (usually calculated from noise)    
+    double timeError;
     //! ID of antenna which recorde the pulse
     int antennaID;
     //! number of antenna
@@ -138,7 +146,7 @@
     std::string polarization;
     //!sign of the signal (example positive if max-min >0)
     int minMaxSign;
-    //!sign of the signal at the time of the Max Envelope
+    //!sign of the signal at the time of the maximum of the envelope
     int envSign;
 
 

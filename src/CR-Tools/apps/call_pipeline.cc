@@ -1179,21 +1179,17 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->GetEntry(eventNumber);
       eventNumber++;
       // choose if Kascade or Grande date should be used:
-      bool grande = false;
-
-      // if the Grande reconstruction should be prefered, then take it, if either the
-      // core is outside of 90 m radius, or if the core lies inside the Grande array
-      // if Kascade shall be prefered, then switch to Grande only if it is inside the 
-      // Grande Array and not inside the 90 m radius
-      if (config["preferGrande"]->bValue()) {
-        if ( sqrt(Xc*Xc+Yc*Yc)>90 )
-          grande = true;
-        if ( (Xcg<-50) && (Ycg<-30) )
-          grande = true;
-      } else {
-        if ( (sqrt(Xc*Xc+Yc*Yc)>90) && ((Xcg<-50) && (Xcg>-420) && (Ycg<-30) && (Ycg>-550)) )
-          grande = true;
-      }
+      // this can be done by looking, if there is any energy estimation avaiable from KASCADE or Grande
+      if ((lgE == 0) && (lgEg == 0)) {
+        cerr << "call_pipeline:getEventFromKASCADE: ERROR: For this event there is neither KASCADE nor Grande data available!" << endl;
+        return false;
+      }  
+      bool grande = config["preferGrande"]->bValue(); // default: if both reconstructions are available
+      // if only one reconstruction is available, choose that one
+      if ((lgE != 0) && (lgEg == 0)) 
+        grande = false;
+      if ((lgE == 0) && (lgEg != 0)) 
+        grande = true;
 
       // set variables (Grande or KASCADE reconstruction)
       eventname = string(Eventname);
@@ -1291,10 +1287,10 @@ int main (int argc, char *argv[])
   int CutSNR, CutSNR_NS, CutSNR_VE;                              // # of cut antennas in lateral distribution fit
   double latMeanDist, latMeanDist_NS, latMeanDist_VE;                 // mean distance of the antennas in the lateral distribution
   double latMeanDistCC, latMeanDistCC_NS, latMeanDistCC_VE;             // mean distance of the antennas used for the CC beam
-  int total_minMaxSign, total_minMaxSign_NS, total_minMaxSign_Ve;
-  int total_envSign, total_envSign_NS, total_envSign_Ve;
-  double ratioDiffSign, ratioDiffSign_NS, ratioDiffSign_Ve;
-  double ratioDiffSignEnv, ratioDiffSignEnv_NS, ratioDiffSignEnv_Ve;
+  int total_minMaxSign, total_minMaxSign_NS, total_minMaxSign_VE;
+  int total_envSign, total_envSign_NS, total_envSign_VE;
+  double ratioDiffSign, ratioDiffSign_NS, ratioDiffSign_VE;
+  double ratioDiffSignEnv, ratioDiffSignEnv_NS, ratioDiffSignEnv_VE;
 
   PulseProperties* rawPulses[MAX_NUM_ANTENNAS];       // use array of pointers to store pulse properties in root tree
   PulseProperties* calibPulses[MAX_NUM_ANTENNAS];     // use array of pointers to store pulse properties in root tree
@@ -1577,7 +1573,7 @@ int main (int argc, char *argv[])
           roottree->Branch("total_envSign_EW",&total_envSign,"total_envSign_EW/I");
           roottree->Branch("ratioDiffSign_EW",&ratioDiffSign,"ratioDiffSign_EW/D");
           roottree->Branch("ratioDiffSignEnv_EW",&ratioDiffSignEnv,"ratioDiffSignEnv_EW/D");
-         }
+        }
         if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0_EW",&R_0,"R_0_EW/D");
           roottree->Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
@@ -1618,11 +1614,11 @@ int main (int argc, char *argv[])
         roottree->Branch("latMeanDistCC_NS",&latMeanDistCC_NS,"latMeanDistCC_NS/D");
         roottree->Branch("NCCbeamAntennas_NS",&NCCbeamAntennas_NS,"NCCbeamAntennas_NS/I");
         if(config["CalculateMaxima"]->bValue()) {
-          roottree->Branch("total_minMaxSign_NS",&total_minMaxSign,"total_minMaxSign_NS/I");
-          roottree->Branch("total_envSign_NS",&total_envSign,"total_envSign_NS/I");
-          roottree->Branch("ratioDiffSign_NS",&ratioDiffSign,"ratioDiffSign_NS/D");
-          roottree->Branch("ratioDiffSignEnv_NS",&ratioDiffSignEnv,"ratioDiffSignEnv_NS/D");
-         }
+          roottree->Branch("total_minMaxSign_NS",&total_minMaxSign_NS,"total_minMaxSign_NS/I");
+          roottree->Branch("total_envSign_NS",&total_envSign_NS,"total_envSign_NS/I");
+          roottree->Branch("ratioDiffSign_NS",&ratioDiffSign_NS,"ratioDiffSign_NS/D");
+          roottree->Branch("ratioDiffSignEnv_NS",&ratioDiffSignEnv_NS,"ratioDiffSignEnv_NS/D");
+        }
         if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
           roottree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
@@ -1663,11 +1659,11 @@ int main (int argc, char *argv[])
         roottree->Branch("latMeanDistCC_VE",&latMeanDistCC_NS,"latMeanDistCC_VE/D");
         roottree->Branch("NCCbeamAntennas_VE",&NCCbeamAntennas_NS,"NCCbeamAntennas_VE/I");
         if(config["CalculateMaxima"]->bValue()) {
-          roottree->Branch("total_minMaxSign_Ve",&total_minMaxSign,"total_minMaxSign_Ve/I");
-          roottree->Branch("total_envSign_Ve",&total_envSign,"total_envSign_Ve/I");
-          roottree->Branch("ratioDiffSign_Ve",&ratioDiffSign,"ratioDiffSign_Ve/D");
-          roottree->Branch("ratioDiffSignEnv_Ve",&ratioDiffSignEnv,"ratioDiffSignEnv_Ve/D");
-         }
+          roottree->Branch("total_minMaxSign_VE",&total_minMaxSign_VE,"total_minMaxSign_VE/I");
+          roottree->Branch("total_envSign_VE",&total_envSign_VE,"total_envSign_VE/I");
+          roottree->Branch("ratioDiffSign_VE",&ratioDiffSign_VE,"ratioDiffSign_VE/D");
+          roottree->Branch("ratioDiffSignEnv_VE",&ratioDiffSignEnv_VE,"ratioDiffSignEnv_VE/D");
+        }
         if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0_VE",&R_0_NS,"R_0_VE/D");
           roottree->Branch("sigR_0_VE",&sigR_0_NS,"sigR_0_VE/D");
@@ -1793,10 +1789,10 @@ int main (int argc, char *argv[])
       latMeanDistCC = 0, latMeanDistCC_NS = 0, latMeanDistCC_VE = 0;
       rawPulsesMap = map <int,PulseProperties>();
       calibPulsesMap = map <int,PulseProperties>();
-      total_minMaxSign=0, total_minMaxSign_NS=0, total_minMaxSign_Ve=0;
-      total_envSign=0, total_envSign_NS=0, total_envSign_Ve=0;
-      ratioDiffSign=0, ratioDiffSign_NS=0, ratioDiffSign_Ve=0;
-      ratioDiffSignEnv=0, ratioDiffSignEnv_NS=0, ratioDiffSignEnv_Ve=0;
+      total_minMaxSign=0, total_minMaxSign_NS=0, total_minMaxSign_VE=0;
+      total_envSign=0, total_envSign_NS=0, total_envSign_VE=0;
+      ratioDiffSign=0, ratioDiffSign_NS=0, ratioDiffSign_VE=0;
+      ratioDiffSignEnv=0, ratioDiffSignEnv_NS=0, ratioDiffSignEnv_VE=0;
 
       // increase random seed
       ++randomSeed;
@@ -1849,9 +1845,6 @@ int main (int argc, char *argv[])
         // get the pulse properties
         rawPulsesMap = eventPipeline.getRawPulseProperties();
         calibPulsesMap = eventPipeline.getCalibPulseProperties();
-
-
-
 
         // adding results to variables (needed to fill them into the root tree)
         goodEW = results.asBool("goodReconstructed");
@@ -1989,15 +1982,15 @@ int main (int argc, char *argv[])
             }
 
             //taking the sign of the signal, looping on all the antennas
-             if (config["CalculateMaxima"]->bValue()) {
-             int sign=0, signAtEnvTime=0;
-             double antPositive=0., antNegative=0., antTot=0.; 
-             double antPositiveEnv=0., antNegativeEnv=0.; 
-             for(map<int,PulseProperties>::iterator iter = calibPulsesMap.begin(); iter != calibPulsesMap.end(); ++iter){ 
-
-                 sign=iter->second.minMaxSign;
-                 signAtEnvTime=iter->second.envSign;
-                 //cout<<"signal sign "<<sign<<endl;
+            if (config["CalculateMaxima"]->bValue()) {
+              int sign=0, signAtEnvTime=0;
+              double antPositive=0., antNegative=0., antTot=0.; 
+              double antPositiveEnv=0., antNegativeEnv=0.; 
+              
+              for(map<int,PulseProperties>::iterator iter = calibPulsesMap.begin(); iter != calibPulsesMap.end(); ++iter){ 
+                sign=iter->second.minMaxSign;
+                signAtEnvTime=iter->second.envSign;
+                
                  if(sign>0){antPositive++;}
                  if(sign<0){antNegative++;}
                  if(signAtEnvTime>0){antPositiveEnv++;}
@@ -2005,18 +1998,16 @@ int main (int argc, char *argv[])
                  antTot++;
                  total_minMaxSign += sign;
                  total_envSign += signAtEnvTime;
-                }//for map
-                cout<<"Positive:  "<<antPositive<<"   Negative:  "<<antNegative<<"   Tot  :"<<antTot<<endl;
-                cout<<"Positive @ envTime:  "<<antPositiveEnv<<"   Negative@ envTime:  "<<antNegativeEnv<<endl;
-                ratioDiffSign=(antPositive-antNegative)/antTot;
-                ratioDiffSignEnv=(antPositiveEnv-antNegativeEnv)/antTot;
-	cout<<"total_sign                       "<<total_minMaxSign<<endl;
-	cout<<"total_sign  env                  "<<total_envSign<<endl;
-	cout<<"ratio (Nposit-Nnegat)/Ntot       "<<ratioDiffSign<<endl;
-	cout<<"ratio (Nposit-Nnegat)/Ntot @ env "<<ratioDiffSignEnv<<endl;
-              }// if
-
-
+              }//for map
+              cout<<"Positive:  "<<antPositive<<"   Negative:  "<<antNegative<<"   Tot  :"<<antTot<<endl;
+              cout<<"Positive @ envTime:  "<<antPositiveEnv<<"   Negative@ envTime:  "<<antNegativeEnv<<endl;
+              ratioDiffSign=(antPositive-antNegative)/antTot;
+              ratioDiffSignEnv=(antPositiveEnv-antNegativeEnv)/antTot;
+              cout<<"total_sign                       "<<total_minMaxSign<<endl;
+              cout<<"total_sign  env                  "<<total_envSign<<endl;
+              cout<<"ratio (Nposit-Nnegat)/Ntot       "<<ratioDiffSign<<endl;
+              cout<<"ratio (Nposit-Nnegat)/Ntot @ env "<<ratioDiffSignEnv<<endl;
+            }// if
           } else {
             cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
                  << config["polarization"]->sValue() << "' polarization, skipping..." << endl;
@@ -2154,33 +2145,32 @@ int main (int argc, char *argv[])
             }
 
             //taking the sign of the signal, looping on all the antennas
-             if (config["CalculateMaxima"]->bValue()) {
-             int sign=0, signAtEnvTime=0;
-             double antPositive=0., antNegative=0., antTot=0.; 
-             double antPositiveEnv=0., antNegativeEnv=0.; 
-             for(map<int,PulseProperties>::iterator iter = calibPulsesMap.begin(); iter != calibPulsesMap.end(); ++iter){ 
-
-                 sign=iter->second.minMaxSign;
-                 signAtEnvTime=iter->second.envSign;
-                 //cout<<"signal sign "<<sign<<endl;
+            if (config["CalculateMaxima"]->bValue()) {
+              int sign=0, signAtEnvTime=0;
+              double antPositive=0., antNegative=0., antTot=0.; 
+              double antPositiveEnv=0., antNegativeEnv=0.; 
+              
+              for(map<int,PulseProperties>::iterator iter = calibPulsesMap.begin(); iter != calibPulsesMap.end(); ++iter){ 
+                sign=iter->second.minMaxSign;
+                signAtEnvTime=iter->second.envSign;
+                
                  if(sign>0){antPositive++;}
                  if(sign<0){antNegative++;}
                  if(signAtEnvTime>0){antPositiveEnv++;}
                  if(signAtEnvTime<0){antNegativeEnv++;}
                  antTot++;
-                 total_minMaxSign += sign;
-                 total_envSign += signAtEnvTime;
-                }//for map
-                cout<<"Positive:  "<<antPositive<<"   Negative:  "<<antNegative<<"   Tot  :"<<antTot<<endl;
-                cout<<"Positive @ envTime:  "<<antPositiveEnv<<"   Negative@ envTime:  "<<antNegativeEnv<<endl;
-                ratioDiffSign=(antPositive-antNegative)/antTot;
-                ratioDiffSignEnv=(antPositiveEnv-antNegativeEnv)/antTot;
-	cout<<"total_sign                       "<<total_minMaxSign<<endl;
-	cout<<"total_sign  env                  "<<total_envSign<<endl;
-	cout<<"ratio (Nposit-Nnegat)/Ntot       "<<ratioDiffSign<<endl;
-	cout<<"ratio (Nposit-Nnegat)/Ntot @ env "<<ratioDiffSignEnv<<endl;
-              }// if
-
+                 total_minMaxSign_NS += sign;
+                 total_envSign_NS += signAtEnvTime;
+              }//for map
+              cout<<"Positive:  "<<antPositive<<"   Negative:  "<<antNegative<<"   Tot  :"<<antTot<<endl;
+              cout<<"Positive @ envTime:  "<<antPositiveEnv<<"   Negative@ envTime:  "<<antNegativeEnv<<endl;
+              ratioDiffSign_NS=(antPositive-antNegative)/antTot;
+              ratioDiffSignEnv_NS=(antPositiveEnv-antNegativeEnv)/antTot;
+              cout<<"total_sign                       "<<total_minMaxSign_NS<<endl;
+              cout<<"total_sign  env                  "<<total_envSign_NS<<endl;
+              cout<<"ratio (Nposit-Nnegat)/Ntot       "<<ratioDiffSign_NS<<endl;
+              cout<<"ratio (Nposit-Nnegat)/Ntot @ env "<<ratioDiffSignEnv_NS<<endl;
+            }// if
           } else {
             cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
                  << config["polarization"]->sValue() << "' polarization, skipping..." << endl;
@@ -2318,33 +2308,32 @@ int main (int argc, char *argv[])
             }
 
             //taking the sign of the signal, looping on all the antennas
-             if (config["CalculateMaxima"]->bValue()) {
-             int sign=0, signAtEnvTime=0;
-             double antPositive=0., antNegative=0., antTot=0.; 
-             double antPositiveEnv=0., antNegativeEnv=0.; 
-             for(map<int,PulseProperties>::iterator iter = calibPulsesMap.begin(); iter != calibPulsesMap.end(); ++iter){ 
-
-                 sign=iter->second.minMaxSign;
-                 signAtEnvTime=iter->second.envSign;
-                 //cout<<"signal sign "<<sign<<endl;
+            if (config["CalculateMaxima"]->bValue()) {
+              int sign=0, signAtEnvTime=0;
+              double antPositive=0., antNegative=0., antTot=0.; 
+              double antPositiveEnv=0., antNegativeEnv=0.; 
+              
+              for(map<int,PulseProperties>::iterator iter = calibPulsesMap.begin(); iter != calibPulsesMap.end(); ++iter){ 
+                sign=iter->second.minMaxSign;
+                signAtEnvTime=iter->second.envSign;
+                
                  if(sign>0){antPositive++;}
                  if(sign<0){antNegative++;}
                  if(signAtEnvTime>0){antPositiveEnv++;}
                  if(signAtEnvTime<0){antNegativeEnv++;}
                  antTot++;
-                 total_minMaxSign += sign;
-                 total_envSign += signAtEnvTime;
-                }//for map
-                cout<<"Positive:  "<<antPositive<<"   Negative:  "<<antNegative<<"   Tot  :"<<antTot<<endl;
-                cout<<"Positive @ envTime:  "<<antPositiveEnv<<"   Negative@ envTime:  "<<antNegativeEnv<<endl;
-                ratioDiffSign=(antPositive-antNegative)/antTot;
-                ratioDiffSignEnv=(antPositiveEnv-antNegativeEnv)/antTot;
-	cout<<"total_sign                       "<<total_minMaxSign<<endl;
-	cout<<"total_sign  env                  "<<total_envSign<<endl;
-	cout<<"ratio (Nposit-Nnegat)/Ntot       "<<ratioDiffSign<<endl;
-	cout<<"ratio (Nposit-Nnegat)/Ntot @ env "<<ratioDiffSignEnv<<endl;
-              }// if
-
+                 total_minMaxSign_VE += sign;
+                 total_envSign_VE += signAtEnvTime;
+              }//for map
+              cout<<"Positive:  "<<antPositive<<"   Negative:  "<<antNegative<<"   Tot  :"<<antTot<<endl;
+              cout<<"Positive @ envTime:  "<<antPositiveEnv<<"   Negative@ envTime:  "<<antNegativeEnv<<endl;
+              ratioDiffSign_VE=(antPositive-antNegative)/antTot;
+              ratioDiffSignEnv_VE=(antPositiveEnv-antNegativeEnv)/antTot;
+              cout<<"total_sign                       "<<total_minMaxSign_VE<<endl;
+              cout<<"total_sign  env                  "<<total_envSign_VE<<endl;
+              cout<<"ratio (Nposit-Nnegat)/Ntot       "<<ratioDiffSign_VE<<endl;
+              cout<<"ratio (Nposit-Nnegat)/Ntot @ env "<<ratioDiffSignEnv_VE<<endl;
+            }// if
           } else {
             cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
                  << config["polarization"]->sValue() << "' polarization, skipping..." << endl;
@@ -2492,43 +2481,7 @@ int main (int argc, char *argv[])
           cout << "WARNING: Event is not written into root file because it is marked as badly reconstructed." << endl;
         }
       }
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // print mean values of lateral distribution
     if ((config["calculateMeanValues"]->bValue()) && (config["lateralDistribution"]->bValue())) {

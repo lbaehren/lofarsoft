@@ -1462,17 +1462,25 @@ namespace CR { // Namespace CR -- begin
               cerr << "WARNING: Local maximum of the envelope ambigious: Up-Sampling rate is probably too low!" << endl;
           }  
            envMaximum = envTrace(envMaxtimevalue);
-        //define sign of the signal at the time of the maxEnvelope (Second methods)
-           if(trace(envMaxtimevalue)>0.){ envSign = 1; cout << "\n  POSITIVE Envelope \n";}
-           if(trace(envMaxtimevalue)<0.){ envSign = -1;cout << "\n  NEGATIVE Envelope \n";}
-           if(trace(envMaxtimevalue)==0.){ envSign = 0;cout << "\n  NULL     Envelope  \n";}
         }
 
-        // define sign of the Electric field max peak (First method)
-        double diffSign=(maximum+minimum);
-        if(diffSign>0.) {minMaxSign = 1; cout << "\n  POSITIVE  \n";  }
-        if(diffSign<0.) {minMaxSign = -1;cout << "\n  NEGATIVE  \n";  }
-        if(diffSign==0.) {minMaxSign = 0;cout << "\n  NULL  \n";  }
+        // loom for the sign of the pulse:   
+        // define (envelope) sign of the signal at the time of the maxEnvelope
+        // the deault value of the sign is zero, e.g. if the trace equals exactly 0.
+        if (trace(envMaxtimevalue)>0.)
+          envSign = 1;
+        if (trace(envMaxtimevalue)<0.)
+          envSign = -1;
+        if (verbose) 
+          cout << "Sign of trace at time of envelope maximum: " << envSign << endl;
+        
+        // define sign of the electric field, by looking if maximum of mininum is higher
+        if (maximum > -minimum) 
+          minMaxSign = 1;
+        if (maximum < -minimum)
+          minMaxSign = -1;
+        if (verbose) 
+          cout << "Sign of trace by looking if positive or negative maximum is height: " << minMaxSign << endl;
 
         // calculate FWHM
         double pulsestart = 0;

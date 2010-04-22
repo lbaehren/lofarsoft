@@ -43,6 +43,10 @@
   // ============================================================================
   
  PulseProperties::PulseProperties ():
+    height(0.),
+    heightError(0.),
+    time(0.),
+    timeError(0.),
     antennaID(0),
     antenna(0),
     maximum(0.),
