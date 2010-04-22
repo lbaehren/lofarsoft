@@ -1,0 +1,12 @@
+Observation.Campaign.title =  
+Observation.Campaign.PI =  The Boss!
+Observation.Campaign.CO_I = 
+Observation.Campaign.contact = 
+Observation.ObserverName = A.Horneffer, A.Corstanje 
+Observation.ObsID = 
+Observation.startTime = 
+Observation.stopTime = 
+Observation.antennaSet = LBA_OUTER
+Observation.bandFilter = LBA_30_90
+Observation.sampleClock = 200
+Observation.VirtualInstrument.stationList = [RS205]
