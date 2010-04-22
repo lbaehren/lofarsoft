@@ -28,8 +28,8 @@
 #include<sstream>
 #include<time.h>
 
-//#include <crtools.h>
-//#include <Analysis/PulseProperties.h>
+#include <crtools.h>
+#include <Analysis/PulseProperties.h>
 
 #include<TFile.h>
 #include<TTree.h>
@@ -60,17 +60,11 @@
 
   Example:
   \verbatim
-  # use default radio cut for kascade
+  # use default radio cut for EW, NS or BOTH polarizations
 
-  useKASCADE_EWpol
-  #useKASCADE_NSpol
-  #useKASCADE_BOTHpol
-
-  # use default radio cut for Grande 
-
-  #useGrande_EWpol
-  #useGrande_NSpol
-  #useGrande_BOTHpol
+  useEWpol
+  #useNSpol
+  #useBOTHpol
 
   # Define minimum number of the antennas for the lateral distribution 
   Nant_lopes30_min        15
@@ -111,7 +105,7 @@ int main(int argc, char* argv[])
 
   // variables to read in
   string cut_str(""), namebase="REASinputList";
-  Bool_t createInfoFile=false, Grande=false;
+  Bool_t createInfoFile=false;
   string KRETAversion("");
   char KRETAver[1024];
   Int_t Nant_lopes30_min=10,Nant_lopesPol_min=5;
@@ -130,22 +124,13 @@ int main(int argc, char* argv[])
       opt >> Nant_lopesPol_min;
     if(buf.compare("TCut")==0)
       opt>>cut_str;
-    if(buf.compare("useKASCADE_EWpol")==0) 
-      cut = TCut("(((CCheight_EW/rmsCCbeam_EW)>9.5)&&((Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4))&&(Size>0.&&Nmu>0.)");
-    if(buf.compare("useKASCADE_NSpol")==0) 
-      cut = TCut("(((CCheight_NS/rmsCCbeam_NS)>9.5)&&((Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4))&&(Size>0.&&Nmu>0.)");
-    if(buf.compare("useKASCADE_BOTHpol")==0) 
-      cut = TCut("(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)+pow(CCheight_NS/rmsCCbeam_NS,2))>9.5.)&&((Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4)&&((Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4)&&(Size>0.&&Nmu>0.)");
+    if(buf.compare("useEWpol")==0) 
+      cut = TCut("(Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4");
+    if(buf.compare("useNSpol")==0) 
+      cut = TCut("(Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4");
+    if(buf.compare("useBOTHpol")==0) 
+      cut = TCut("((Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4)&&((Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4)");
 
-    if(buf.compare("useGrande_EWpol")==0) 
-      cut =
-      TCut("(((CCheight_EW/rmsCCbeam_EW)>7.)&&((Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4))&&(Sizeg>0.&&Sizmg>0.)");
-    if(buf.compare("useGrande_NSpol")==0) 
-      cut =
-      TCut("(((CCheight_NS/rmsCCbeam_NS)>7.)&&((Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4))&&(Sizeg>0.&&Sizmg>0.)");
-    if(buf.compare("useGrande_BOTHpol")==0) 
-      cut =
-      TCut("(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)+pow(CCheight_NS/rmsCCbeam_NS,2))>7.)&&((Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4))&&((Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4))&&(Sizeg>0.&&Sizmg>0.)");
     if(buf.compare("createInfoFile")==0) 
       opt>>createInfoFile;
     if(buf.compare("namebase")==0) 
@@ -158,17 +143,6 @@ int main(int argc, char* argv[])
   // add cut_string to cut
   cut += cut_str.c_str();
 
-
-  // Decide which reconstruction should be used...
-  if(string(cut).find("Size>0.&&Nmu>0.")!=string::npos) {
-    cout << "\nUsing KASCADE cut..." << endl;
-
-    Grande = false;
-  } else if (string(cut).find("Sizeg>0.&&Sizmg>0.")!=string::npos) {
-    cout << "\nUsing Grande cut..." << endl;
-    Grande = true;
-  } else
-    cerr << "\n\nWARNING: Either KASCADE or Grande default cuts should be used!" << endl;
 
   if(argc==4)
     cut += argv[3];
@@ -199,6 +173,7 @@ int main(int argc, char* argv[])
   Double_t Xheight_EW,Xheight_NS,Xheight_error_EW,Xheight_error_NS;
   Double_t CCheight_EW,CCheight_NS,CCheight_error_EW,CCheight_error_NS,R_0_EW,R_0_NS;
   Double_t rmsCCbeam_EW,rmsCCbeam_NS,sigR_0_EW,sigR_0_NS,sigeps_EW,sigeps_NS;
+  Char_t reconstruction;
 
   t2->SetBranchAddress("Age",&Age);
   t2->SetBranchAddress("Ageg",&Ageg);
@@ -280,7 +255,7 @@ int main(int argc, char* argv[])
   t2->SetBranchAddress("lgEg",&lgEg);
   t2->SetBranchAddress("lnA",&lnA);
   t2->SetBranchAddress("lnAg",&lnAg);
-  //t2->SetBranchAddress("reconstruction",&reconstruction);
+  t2->SetBranchAddress("reconstruction",&reconstruction);
   t2->SetBranchAddress("rmsCCbeam_EW", &rmsCCbeam_EW);
   t2->SetBranchAddress("rmsCCbeam_NS", &rmsCCbeam_NS);
   //t2->SetBranchAddress("rmsPbeam_EW", &rmsPbeam_EW);
@@ -409,76 +384,84 @@ int main(int argc, char* argv[])
     E=pow(10,lgE);
     Eg=pow(10,lgEg); 
 
-      if( !Grande )
+    //cout<<"Reconstruction    "<<reconstruction<<endl;
+    string recon;
+    recon=reconstruction;
+      //if( !Grande )
+      if( recon=="A" ) // KASCADE reconstruction!!!!
        {
-        if(string(cut).find("(CCheight_EW/rmsCCbeam_EW)")!=string::npos) 
+        if(string(cut).find("(Xheight_EW/CCheight_EW)")!=string::npos) 
         {
-         cout << "\nUsing KASCADE EW cut..." << endl;
+         cout << "\nUsing EW cut..." << endl;
 
          if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min) )
           {
-            //KASCADE EW
-            f1<<Gt<<"\t"<<"A"<<"\t"<<KRETAver<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
+          if((CCheight_EW/rmsCCbeam_EW)>9.5){
+            f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
             count++;
             k->Fill();
+           }
           }
-        } else if (string(cut).find("(CCheight_NS/rmsCCbeam_NS)")!=string::npos) {
-          cout << "\nUsing KASCADE NS cut..." << endl;
+        } else if (string(cut).find("(Xheight_NS/CCheight_NS)")!=string::npos) {
+          cout << "\nUsing NS cut..." << endl;
           if((Gt <= 1165389469 && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_NS>Nant_lopesPol_min) )
           {
-            //KASCADE NS
-            f1<<Gt<<"\t"<<"A"<<"\t"<<KRETAver<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
+          if((CCheight_EW/rmsCCbeam_EW)>9.5){
+            f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
             count++;
             k->Fill();
+           }
           }
-        } else if (string(cut).find("(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)")!=string::npos) {
-          cout << "\nUsing KASCADE BOTH pol. cut..." << endl;
+        } else if (string(cut).find("(Xheight_EW/CCheight_EW)<=1.4)&&((Xheight_NS/CCheight_NS)")!=string::npos) {
+          cout << "\nUsing BOTH pol. cut..." << endl;
           if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min && NlateralAntennas_NS>Nant_lopesPol_min) )
           {
-            //KASCADE BOTH pol
-            f1<<Gt<<"\t"<<"A"<<"\t"<<KRETAver<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
+           if(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)+pow(CCheight_NS/rmsCCbeam_NS,2))>9.5){
+            f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
             count++;
             k->Fill();
+            }
+           }
           }
-          }
-          }// if kascade
+         }
 
-        else if ( Grande)
+        //else if ( Grande)
+        else if(recon=="G")
         {
-         if(string(cut).find("(CCheight_EW/rmsCCbeam_EW)")!=string::npos) 
+         if(string(cut).find("(Xheight_EW/CCheight_EW)")!=string::npos) 
          {
-          cout << "\nUsing  Grande EW cut..." << endl;
+          cout << "\nUsing EW cut..." << endl;
 
           if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min) )
            {
-            //Grande EW
-            f1<<Gt<<"\t"<<"G"<<"\t"<<KRETAver<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
+            if((CCheight_EW/rmsCCbeam_EW)>7.){
+            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
             count++;
             k->Fill();
+            }
            }
-          } else if (string(cut).find("(CCheight_NS/rmsCCbeam_NS)")!=string::npos) {
-            cout << "\nUsing  Grande NS cut..." << endl;
-             if((Gt <= 1165389469 && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_NS>Nant_lopesPol_min) )
-             {
-            //Grande NS
-            f1<<Gt<<"\t"<<"G"<<"\t"<<KRETAver<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
+        } else if (string(cut).find("(Xheight_NS/CCheight_NS)")!=string::npos) {
+          cout << "\nUsing NS cut..." << endl;
+          if((Gt <= 1165389469 && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_NS>Nant_lopesPol_min) )
+          {
+          if((CCheight_EW/rmsCCbeam_EW)>7.){
+            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
             count++;
             k->Fill();
-
+            }
            }
-        } else if (string(cut).find("(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)")!=string::npos) {
-          cout << "\nUsing  Grande BOTH pol. cut..." << endl;
+        } else if (string(cut).find("(Xheight_EW/CCheight_EW)<=1.4)&&((Xheight_NS/CCheight_NS)")!=string::npos) {
+          cout << "\nUsing BOTH pol. cut..." << endl;
           if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min && NlateralAntennas_NS>Nant_lopesPol_min) )
           {
-            //Grande both
-            f1<<Gt<<"\t"<<"G"<<"\t"<<KRETAver<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
+           if(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)+pow(CCheight_NS/rmsCCbeam_NS,2))>7.){
+
+            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
             count++;
             k->Fill();
-
+            }
            }
           }
-          //Grande
-
         }// if Grande
 
     }//loop on events
@@ -489,8 +472,8 @@ int main(int argc, char* argv[])
 
   ftemp->Close();
   ftemp->Delete();
-  cout<<namebase<<".txt written"<<endl
-      <<namebase<<".root written"<<endl;
+  cout<<namebase<<".txt written"<<endl;
+  cout<<namebase<<".root written"<<endl;
 
   } catch (...) {
     cerr << "\nError in genREASinputList!" << endl;
