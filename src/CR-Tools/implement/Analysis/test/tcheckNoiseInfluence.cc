@@ -68,8 +68,8 @@ const int pulseAnt = 1;
 const double pulseStart = -4e-6;
 // const double pulseStart = -1e-5;
 // const double pulseStop  = 1e-5;
-const int upsamplingExponent = 1;
-const int NnoiseIntervals = 2; // number of noise intervals (do not use more than 20)
+const int upsamplingExponent = 6;
+const int NnoiseIntervals = 20; // number of noise intervals (do not use more than 20)
 string resultFileName = "summary.dat";
 
 //_______________________________________________________________________________
