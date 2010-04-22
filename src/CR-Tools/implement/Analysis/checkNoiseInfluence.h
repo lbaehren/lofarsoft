@@ -27,12 +27,7 @@
 
 #include <crtools.h>
 
-// Standard library header files
-// #include <iostream>
-// #include <iomanip>
-// #include <fstream>
 #include <string>
-// #include <algorithm>
 
 #ifdef HAVE_STARTOOLS
 
@@ -159,7 +154,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Loads the pattern of a (calibration) test pulse
 
-      \param evname          - path to the eventfile to be processed
+      \param evname          - path to the eventfile with the pulse
       \param antenna         - Antenna number to take the test pulse from
       \param pulseStart      - start time of pulse interval (in s)
     */
@@ -170,7 +165,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Loads noise event
       
-      \param evname          - path to the eventfile to be processed
+      \param evname          - path to the eventfile with noise
     */
     void loadNoiseEvent(const string& evname);                          
 
@@ -184,6 +179,13 @@ namespace CR { // Namespace CR -- begin
     void addPulseToNoise(const double& lowerSNR,
                          const double& upperSNR,
                          const string& resultsFileName = "");                          
+ 
+    /*!
+      \brief Loads noise event, and studies SNR of pure noise with different noise defintions
+      
+      \param evname          - path to the eventfile with noise
+    */
+    void SNRofNoise(const string& evname);                          
 
                           
   }; // class definition

@@ -68,8 +68,8 @@ const int pulseAnt = 1;
 const double pulseStart = -4e-6;
 // const double pulseStart = -1e-5;
 // const double pulseStop  = 1e-5;
-const int upsamplingExponent = 6;
-const int NnoiseIntervals = 20; // number of noise intervals (do not use more than 20)
+const int upsamplingExponent = 1;
+const int NnoiseIntervals = 2; // number of noise intervals (do not use more than 20)
 string resultFileName = "summary.dat";
 
 //_______________________________________________________________________________
@@ -121,35 +121,32 @@ int main (int argc, char *argv[])
     }
 
     // Check if options are set correctly
-    if (pulseEvent == "") {
-      cerr << "ERROR: Please specify pulse event with -p option!\n";
-      cerr << "Use --help for more information." << endl;
-      return 1;
-    }
     if (noiseEvent == "") {
       cerr << "ERROR: Please specify noise event with -n option!\n";
       cerr << "Use --help for more information." << endl;
       return 1;
     }
-    
-    
+
     // create instance of checkNoiseInfluence and intialize it for LOPES
     checkNoiseInfluence noisetest;
     Record obsrec;
     obsrec.define("LOPES",caltable_lopes);
     noisetest.initPipeline(obsrec);
-    
-    // load pulse pattern from calibration event
     noisetest.setUpsamplingExponent(upsamplingExponent);
     noisetest.setCCWindowWidth(1e-7);
     noisetest.setNnoiseIntervals(NnoiseIntervals);
-    noisetest.loadPulsePattern(pulseEvent, pulseAnt, pulseStart);
+
+    if (pulseEvent == "") {
+      cout << "Looking to signal-to-noise ratio of pure noise..." << endl;
+      
+      noisetest.SNRofNoise(noiseEvent);
+    } else { 
+      cout << "Looking how pulse is changed by noise..." << endl;
     
-    // load noise event
-    noisetest.loadNoiseEvent(noiseEvent);
-    
-    // add pulse to noise
-    noisetest.addPulseToNoise(0, 6);
+      noisetest.loadPulsePattern(pulseEvent, pulseAnt, pulseStart);
+      noisetest.loadNoiseEvent(noiseEvent);
+      noisetest.addPulseToNoise(0, 6);
+    }  
 
     cout << "\nEnd of program.\n" << endl;
   } catch (AipsError x) {

@@ -475,6 +475,162 @@ namespace CR { // Namespace CR -- begin
       cerr << "checkNoiseInfluence::addPulseToNoise: " << x.getMesg() << endl;
     }  
   }
+  
+  void checkNoiseInfluence::SNRofNoise(const string& evname)
+  {
+    try {   
+      cout << "\nLoading noise from file: " << evname << endl;      
+
+      // first reset potentially existing old pipeline
+      pipeline.init();
+      upsamplePipe.init();
+
+      // Generate the Data Reader
+      if (! lev_p->attachFile(evname) ) {
+        cerr << "checkNoiseInfluence::SNRofNoise: " << "Failed to attach file: " << evname << endl;
+        return;
+      }
+
+      //  do all corrections which have an effect on the pulse shape
+      pipeline_p->doGainCal(true);
+      pipeline_p->doDispersionCal(true);
+      pipeline_p->doDelayCal(false);
+      pipeline_p->doFlagNotActiveAnts(false);
+
+      // initialize the Data Reader
+      if (! pipeline_p->InitEvent(lev_p)) {
+        cerr << "checkNoiseInfluence::SNRofNoise: " << "Failed to initialize the DataReader!" << endl;
+        return;
+      }
+
+      //  Enable/disable calibration steps for the SecondStagePipeline
+      pipeline_p->doPhaseCal(false);
+      pipeline_p->doRFImitigation(true);
+
+      // Generate the antenna selection (all antennas)
+      Vector <Bool> AntennaSelection = pipeline_p->GetAntennaMask(lev_p).copy();
+      AntennaSelection.set(true);
+      
+      // initialize Complete Pipeline
+      CompleteBeamPipe_p = static_cast<CompletePipeline*>(pipeline_p);
+
+      // create a plot to see, if things work
+      CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+      CompleteBeamPipe_p->setCalibrationMode(true);
+
+      // Plot noise
+      CompleteBeamPipe_p->plotAllAntennas("noise", lev_p, AntennaSelection, false,
+                                          getUpsamplingExponent(),false, false);
+
+      // store upsampled noise
+      upsampledNoise=CompleteBeamPipe_p->getUpsampledFieldstrength(lev_p, getUpsamplingExponent(), AntennaSelection);
+      noiseTimeAxis =CompleteBeamPipe_p->getUpsampledTimeAxis(lev_p, getUpsamplingExponent());
+      
+      // create variables to save resutls in root filename
+      int NnoiseMethods = 6;
+      int interval = 0;
+      int ant = 0;
+      double refNoise = 0;    // noise level of reference method
+      double pulseHeight = 0; // pulse height of pure noise
+      double noise[NnoiseMethods];      // noise level for method i 
+      double noiseRatio[NnoiseMethods]; // ratio of noise height of method i and reference method
+      double SNRofNoise[NnoiseMethods]; // ratio of pulse height of noise and noise level
+      
+      // prepare rootfile for results
+      TFile *rootfile=NULL;
+      rootfile = new TFile("SNRofNoise.root","RECREATE","Results for SNR test pulse study: SNR of pure noise");
+
+      // check if file is open
+      if (rootfile->IsZombie()) {
+        cerr << "\nError: Could not create root file! \n" << endl;
+        return;               // exit
+      }
+    
+      // create tree and tree structure
+      TTree *roottree = NULL;
+      roottree = new TTree("SNRofNoise","SNRofNoise.root");
+      roottree->Branch("ant",&ant,"ant/i");
+      roottree->Branch("noiseInterval",&interval,"noiseInterval/i");
+      roottree->Branch("refNoise",&refNoise,"refNoise/D");
+      roottree->Branch("pulseHeight",&pulseHeight,"pulseHeight/D");
+      stringstream fieldname;
+      for (int method = 0; method < NnoiseMethods; ++method) {
+        fieldname.str("");
+        fieldname << "noise_" << method;
+        roottree->Branch(fieldname.str().c_str(),&noise[method],string(fieldname.str()+"/D").c_str());
+        fieldname.str("");
+        fieldname << "noiseRatio_" << method;
+        roottree->Branch(fieldname.str().c_str(),&noiseRatio[method],string(fieldname.str()+"/D").c_str());
+        fieldname.str("");
+        fieldname << "SNRofNoise_" << method;
+        roottree->Branch(fieldname.str().c_str(),&SNRofNoise[method],string(fieldname.str()+"/D").c_str());        
+      }
+
+      // calculate the maxima
+      for (interval = 0; interval < NnoiseIntervals; ++interval) {
+        setPlotInterval(startTime + interval*(noiseIntervalLength+noiseIntervalGap),
+                        startTime + interval*(noiseIntervalLength+noiseIntervalGap) + noiseIntervalLength);
+        CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+        double noiseTime = (plotStop()+plotStart())/2.;   // assume pulse in the middle of the noise 
+        
+        // get values for refernce method
+        calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
+                                                          noiseTime, noiseMethod, plotStart(), plotStop());
+        vector<double> refNoiseValues;
+        vector<double> refPulseValues;
+        for( map<int, PulseProperties>::iterator it = calibPulses.begin(); it != calibPulses.end(); ++it ) {
+          refNoiseValues.push_back(it->second.noise);
+          refPulseValues.push_back(it->second.envelopeMaximum);
+        } 
+        
+        // loop through all noise methods
+        vector<double> noiseValues[NnoiseMethods];
+        vector<double> noiseRatioValues[NnoiseMethods];
+        vector<double> SNRofNoiseValues[NnoiseMethods];
+        for (int method = 0; method < NnoiseMethods; ++method) {
+          calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
+                                                            noiseTime, method, plotStart(), plotStop());
+          ant = 0;                                                            
+          for( map<int, PulseProperties>::iterator it = calibPulses.begin(); it != calibPulses.end(); ++it ) {
+            pulseHeight = refPulseValues[ant];
+            refNoise = refNoiseValues[ant];
+            noise[method] = it->second.noise;
+            noiseRatio[method] = noise[method]/refNoise;
+            SNRofNoise[method] = pulseHeight/noise[method];
+            noiseValues[method].push_back(noise[method]);
+            noiseRatioValues[method].push_back(noiseRatio[method]);
+            SNRofNoiseValues[method].push_back(SNRofNoise[method]);
+            
+            // cross-check
+            if (pulseHeight != it->second.envelopeMaximum) {
+              cerr << "\nERROR: pulse heights do not match!" << endl;
+              return;
+            }
+            ++ant;
+          }  
+        } 
+        
+        // store values in root file
+        for (ant = 0; ant < int(refNoiseValues.size()); ++ant) {
+          refNoise = refNoiseValues[ant];
+          pulseHeight = refPulseValues[ant];
+          for (int method = 0; method < NnoiseMethods; ++method) {
+            noise[method] = noiseValues[method][ant];
+            noiseRatio[method] = noiseRatioValues[method][ant];
+            SNRofNoise[method] = SNRofNoiseValues[method][ant];        
+          }  
+         
+          roottree->Fill(); // store data in root tree
+          rootfile->Write("",TObject::kOverwrite);
+        }  
+      }  
+      
+      rootfile->Close();
+    } catch (AipsError x) {
+      cerr << "checkNoiseInfluence::SNRofNoise: " << x.getMesg() << endl;
+    }  
+  }
+
 
 
 } // Namespace CR -- end

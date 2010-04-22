@@ -410,7 +410,8 @@ namespace CR { // Namespace CR -- begin
                                  1: RMS of field strength
                                  2: mean of absolute of maxima and minima of field strength
                                  3: mean of local maxima of envelope
-                                 4: weighted average of local maxima of envelope
+                                 4: weighted average of local maxima of envelope (recommended)
+                                 5: sqare root of RMS of power (= square of field strength)
 
       \return noise           -- noise (different methods will be implemented)
     */
@@ -542,9 +543,9 @@ namespace CR { // Namespace CR -- begin
       \param rawData          -- uses the raw ADC data instead of the calibrated fieldstrength
       \param cc_center        -- center (time) of CC-beam fit (tries to calculate the noise before the pulse,
                                  if this information is given)
-      \param noiseMethod      -- method for calculation of noise (0 means no calculation of noise)
-      \param noiseStart       -- start of noise range (must be specified, if noiseMethod != 0)
-      \param noiseStop        -- stop of noise range (must be specified, if noiseMethod != 0)
+      \param noiseMethod      -- method for calculation of noise (-1 means no calculation of noise)
+      \param noiseStart       -- start of noise range (must be specified, if noiseMethod != -1)
+      \param noiseStop        -- stop of noise range (must be specified, if noiseMethod != -1)
 
       \return pulses          -- a map with the calculated pulse parameters (keys = antennaIDs)
     */
@@ -554,7 +555,7 @@ namespace CR { // Namespace CR -- begin
                                                const int& upsampling_exp = 0,
                                                const bool& rawData = false,
                                                const double& cc_center = 1e99,
-                                               int noiseMethod = 0,
+                                               int noiseMethod = -1,
                                                const double& noiseStart = 0,
                                                const double& noiseStop = 0);
     /*!

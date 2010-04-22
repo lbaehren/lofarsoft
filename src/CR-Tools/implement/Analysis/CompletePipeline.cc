@@ -513,11 +513,15 @@ namespace CR { // Namespace CR -- begin
       
       // first: calculate trace for noise calculation
       Vector<Double> noiseTrace(trace.nelements());   
-      if ((method == 0) || (method == 2))       // choose abolute of trace
+      if ((method == 0) || (method == 2))       // abolute of trace
         for(unsigned int j = 0; j < trace.nelements(); ++j)
           noiseTrace(j) = abs(trace(j));
-      if ((method == 3) || (method == 4))  // envelope
+      if ((method == 3) || (method == 4))       // envelope
         noiseTrace = envelope(trace);
+      if (method==5)                            // power
+        for(unsigned int j = 0; j < trace.nelements(); ++j)
+          noiseTrace(j) = trace(j)*trace(j);
+        
         
       // search for local maxima for methods 2,3, and 4  
       if ((method == 2) || (method == 3) || (method == 4)) { 
@@ -564,6 +568,8 @@ namespace CR { // Namespace CR -- begin
         // cout << "Mean =  " << mean(static_cast< Vector<double> >(localExtrema)) << ",\t weighted mean = " << noise << endl;  
         return noise;
       }
+      if (method==5) // square root of rms(power)
+        return sqrt(rms(noiseTrace));
       
       // if it comes here, something went wrong  
       cerr << "CompletePipeline:calculateNoise: " << "Unkown method for noise calculation!" << endl;       
@@ -1326,7 +1332,7 @@ namespace CR { // Namespace CR -- begin
 
       // Define the time range considered (the same as the plot range)
       Slice range;
-      if ((noiseMethod != 0) && (!calibrationMode))
+      if ((noiseMethod != -1) && (!calibrationMode))
         range = calculateCCRange(timeValues,cc_center);
       else
         range = calculatePlotRange(timeValues);
@@ -1346,7 +1352,7 @@ namespace CR { // Namespace CR -- begin
       }
 
       // get the time range for noise calculation
-      if (noiseMethod != 0)
+      if (noiseMethod != -1)
         timeRangeNoise = calculateNoiseRange(timeValues, noiseStart, noiseStop);
  
       // print header line of output
@@ -1471,16 +1477,14 @@ namespace CR { // Namespace CR -- begin
           envSign = 1;
         if (trace(envMaxtimevalue)<0.)
           envSign = -1;
-        if (verbose) 
-          cout << "Sign of trace at time of envelope maximum: " << envSign << endl;
+        // cout << "Sign of trace at time of envelope maximum: " << envSign << endl;
         
         // define sign of the electric field, by looking if maximum of mininum is higher
         if (maximum > -minimum) 
           minMaxSign = 1;
         if (maximum < -minimum)
           minMaxSign = -1;
-        if (verbose) 
-          cout << "Sign of trace by looking if positive or negative maximum is height: " << minMaxSign << endl;
+        // cout << "Sign of trace by looking if positive or negative maximum is height: " << minMaxSign << endl;
 
         // calculate FWHM
         double pulsestart = 0;
@@ -1514,7 +1518,7 @@ namespace CR { // Namespace CR -- begin
         }
 
         // calculate the noise as mean of the part before of the trace before the pulse 
-        if (noiseMethod!=0) {
+        if (noiseMethod!=-1) {
           noise = calculateNoise(yValues.column(i)(timeRangeNoise),noiseMethod);
           snr = envMaximum / noise;
         }  
