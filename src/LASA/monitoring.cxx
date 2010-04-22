@@ -132,7 +132,7 @@ void MONITORING::Read_Detector_Cord()
 	float X,Y,Z ;
 	int i=0 ;
 	FILE *fp ;
-	fp=fopen("Detector_Cord.dat","r") ;
+	fp=fopen("./data/Detector_Cord.dat","r") ;
 	while(fgets(content,200,fp)!=NULL)
 	{
 		if(strncmp(content,"//",strlen("//"))==0) continue ;
@@ -458,7 +458,7 @@ void MONITORING::DRAW_Landau(TH1F *landau,int n,float a,float b,float d)
 	char temp[20] ;
 	sprintf(temp,"Landau Det%d",n) ;
 	TH1F *h_landau=(TH1F*)landau->Clone() ;
-	TF1 *fit=new TF1("fit","landau",0,15000) ;
+	TF1 *fit=new TF1("fit","landau",Landau_Fit_Min,Landau_Fit_Max) ;
 	fit->SetParameters(a,b,d) ;
 	c->Update() ;
 	c->cd() ;

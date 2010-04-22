@@ -12,27 +12,27 @@ KEYWORD8		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		yyy
 KEYWORD9		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		yyy
 KEYWORD10		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		yyy
 //------------------------------------------------HIASPARC control settings-------------------------------------
-CHANNEL_1_OFFSET+	127		152		143		146		138		125		128		128		128		128		ADC offset(+) adjust (default)	
-CHANNEL_1_OFFSET-	116		102		95		103		108		113		128		128		128		128		ADC offset(-) adjust (default)	
-CHANNEL_2_OFFSET+	140		130		127		134		124		120		128		128		128		128		ADC offset(+) adjust (default)	
-CHANNEL_2_OFFSET-	111		99		100		106		114		116		128		128		128		128		ADC offset(-) adjust (default)	
-CHANNEL_1_GAIN+		111		71		124		91		98		54		128		128		128		128		ADC gain adjust(+) for channel 1 (default) 
-CHANNEL_1_GAIN-		142		184		145		169		148		208		128		128		128		128		ADC gain adjust(-) for channel 1 (default)
-CHANNEL_2_GAIN+		65		61		46		50		70		6		128		128		128		128		ADC gain adjust(+) for channel 2 (default)
-CHANNEL_2_GAIN-		188		195		196		200		198		246		128		128		128		128		ADC gain adjust(-) for channel 2 (default)
-COMMON_OFFSET_ADJ	62		54		46		43		40		44		0		0		0		0		ADC common offset adjust? (default)
+CHANNEL_1_OFFSET+	127		152		143		146		139		125		128		128		133		129		ADC offset(+) adjust (default)	
+CHANNEL_1_OFFSET-	116		102		95		103		113		115		128		128		115		116		ADC offset(-) adjust (default)	
+CHANNEL_2_OFFSET+	140		130		127		134		126		119		128		128		114		117		ADC offset(+) adjust (default)	
+CHANNEL_2_OFFSET-	111		99		100		106		119		118		128		128		132		122		ADC offset(-) adjust (default)	
+CHANNEL_1_GAIN+		111		71		124		91		101		58		128		128		61		113		ADC gain adjust(+) for channel 1 (default) 
+CHANNEL_1_GAIN-		142		184		145		169		145		205		128		128		215		174		ADC gain adjust(-) for channel 1 (default)
+CHANNEL_2_GAIN+		65		61		46		50		73		13		128		128		21		63		ADC gain adjust(+) for channel 2 (default)
+CHANNEL_2_GAIN-		188		195		196		200		193		239		128		128		208		164		ADC gain adjust(-) for channel 2 (default)
+COMMON_OFFSET_ADJ	62		54		46		43		34		33		0		0		49		25		ADC common offset adjust? (default)
 FULL_SCALE_ADJ		0		0		0		0		0		0		0		0		0		0		ADC full scale adjust? (default)
 CHANNEL_1_INTE_TIME	255		255		255		255		255		255		255		255		255		255		Channel 1 integrator time? (default)
 CHANNEL_2_INTE_TIME	255		255		255		255		255		255		255		255		255		255		Channel 2 integrator time? (default)
 COMP_THRES_LOW		88		88		88		88		88		88		88		88		88		88		Comparator threshold low (default)
 COMP_THRES_HIGH		230		230		230		230		230		230		230		230		230		230		Comparator threshold high (default)
-CHANNEL_1_HV		0		0		1400		1400		0		0		1200		1200		1200		1200		Channel 1 PMT high voltage in Volts
-CHANNEL_2_HV		1600		1600		1400		1400		0		0		1200		1200		1200		1200		Channel 2 PMT high voltage in Volts
-CHANNEL_1_THRES_LOW	15		15		15		15		15		15		40		40		40		40		Channel 1 threshold low in mV
+CHANNEL_1_HV		1500		1500		1500		1500		1200		1200		1200		1200		1200		1200		Channel 1 PMT high voltage in Volts
+CHANNEL_2_HV		1500		1500		1500		1500		1200		1200		1200		1200		1200		1200		Channel 2 PMT high voltage in Volts
+CHANNEL_1_THRES_LOW	20		20		20		20		15		15		40		40		15		15		Channel 1 threshold low in mV
 CHANNEL_1_THRES_HIGH	1000		1000		1000		1000		1000		1000		1000		1000		1000		1000		Channel 1 threshold high in mV (default)
-CHANNEL_2_THRES_LOW	15		15		15		15		15		15		40		40		40		40		Channel 2 threshold low in mV (default)
+CHANNEL_2_THRES_LOW	20		20		20		20		15		15		40		40		15		15		Channel 2 threshold low in mV (default)
 CHANNEL_2_THRES_HIGH	1000		1000		1000		1000		1000		1000		1000		1000		1000		1000		Channel 2 threshold high in mV (default)
-TRIGG_CONDITION		2		2		1		1		1		1		1		1		1		1		Atleast 1 out of 4 channels low
+TRIGG_CONDITION		2		2		2		2		2		2		2		2		2		2		Atleast 1 out of 4 channels low
 PRE_COIN_TIME		2000		2000		2000		2000		2000		2000		2000		2000		2000		2000		Pre-coincidence time in nsecs.
 COIN_TIME		400		400		400		400		4000		4000		400		400		400		400		Coincidence time in nsecs.
 POST_COIN_TIME		7600		7600		7600		7600		7600		7600		7600		7600		7600		7600		Post-coincidence time in nsecs.

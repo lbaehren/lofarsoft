@@ -5,21 +5,23 @@
 #include <stdio.h>
 #include <signal.h>
 #include "Constants.h"
-#include "Data_Processing.h"
 #include "monitoring.h"
 #include "arrival_direction.h"
+#include "Global_Variables.h"
 
-int Calibration ;	//[1:on and 0:off]
-int Monitor2 ;		//No. of events Interval for monitoring event display
+void Read_Detector_Cord() ;
+void Initialise_Variables() ;
+void Create_ROOT_File() ;
+void Write_ROOT_File() ;
+void Get_Data() ;
 void Store_Sec_Data() ;
 void Store_Control_Data() ;
 void Check_Coincidence() ;
+void Sort_Event_Times(int) ;
+
 MONITORING *Monitoring ;
 ARRIVAL_DIRECTION *Arrival_Direction ;
-char* Hostname="dwingeloo" ;
-time_t timeA,timeB ;		//To display no. of trigger events/channel
 #include "FUNCTION_Device.h"
-#include "Global_Variables.h"
 #include "Get_Data.h"
 
 /*int handler=0 ;
@@ -91,9 +93,9 @@ int main(int argc, char **argv)
 		lasa[i].Slave=new DEVICE() ;
 	
 		printf("-------------------------\n") ;
-		lasa[i].Master->Read_Message_File("Lasa_Settings.dat",2*i+1) ;
+		lasa[i].Master->Read_Message_File("./data/Lasa_Settings.dat",2*i+1) ;
 		printf("-------------------------\n") ;
-		lasa[i].Slave->Read_Message_File("Lasa_Settings.dat",2*i+2) ;
+		lasa[i].Slave->Read_Message_File("./data/Lasa_Settings.dat",2*i+2) ;
 	
 		lasa[i].Master->Open_Socket() ;
 		lasa[i].Slave->Open_Socket() ;
@@ -142,7 +144,7 @@ int main(int argc, char **argv)
 		if(Calib_Done==2*no_pcs)
 		{
 			FILE *calib ;
-			calib=fopen("Calibration.dat","w") ;
+			calib=fopen("./data/Calibration.dat","w") ;
 			fprintf(calib,"LASA\t\tOffset[1+]\tOffset[1-]\tOffset[2+]\tOffset[2-]\tGain[1+]\tGain[1-]\tGain[2+]\tGain[2-]\tCommon Offset\n") ;
 			for(int i=0;i<NO_LASAs;i++)
 			{

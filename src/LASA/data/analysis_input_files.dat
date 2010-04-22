@@ -1,0 +1,4 @@
+//List of event files to be read
+//Path			File name
+../output/		lasa2.root
+../output/		lasa3.root

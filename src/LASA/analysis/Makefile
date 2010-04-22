@@ -210,6 +210,21 @@ TEST_ROOT_FILEO      = test_root_file.$(ObjSuf)
 TEST_ROOT_FILES      = test_root_file.$(SrcSuf)
 TEST_ROOT_FILE       = test_root_file$(ExeSuf)
 
+DETECTORO      = detector.$(ObjSuf)
+DETECTORS      = detector.$(SrcSuf)
+
+SHOWERO      = shower.$(ObjSuf)
+SHOWERS      = shower.$(SrcSuf)
+
+ANALYSISO      = analysis.$(ObjSuf)
+ANALYSISS      = analysis.$(SrcSuf)
+
+EVENT_TIMEO      = event_time.$(ObjSuf)
+EVENT_TIMES      = event_time.$(SrcSuf)
+
+ARRIVAL_DIRECTIONO      = arrival_direction.$(ObjSuf)
+ARRIVAL_DIRECTIONS      = arrival_direction.$(SrcSuf)
+
 MAIN_ANALYSISO      = main_analysis.$(ObjSuf)
 MAIN_ANALYSISS      = main_analysis.$(SrcSuf)
 MAIN_ANALYSIS      = main_analysis$(ExeSuf)
@@ -234,7 +249,8 @@ OBJS          = $(EVENTO) $(MAINEVENTO) $(HWORLDO) $(HSIMPLEO) $(MINEXAMO) \
                 $(STRESSMATHO) $(STRESSFITO) $(STRESSHEPIXO) \
                 $(STRESSENTRYLISTO) $(STRESSROOFITO) $(STRESSPROOFO) \
                 $(STRESSMATHMOREO) $(STRESSITERO) $(TEST_LANDAU_DISTRIO) $(TEST_ROOT_FILEO) \
-		$(MONITORINGO) $(TEST_READO) $(MAIN_ANALYSISO)
+		$(MONITORINGO) $(TEST_READO) $(MAIN_ANALYSISO) $(DETECTORO) $(SHOWERO) \
+		$(ANALYSISO) $(EVENT_TIMEO) $(ARRIVAL_DIRECTIONO)
 
 PROGRAMS      = $(EVENT) $(HWORLD) $(HSIMPLE) $(MINEXAM) $(TSTRING) \
                 $(TCOLLEX) $(TCOLLBM) $(VVECTOR) $(VMATRIX) $(VLAZY) \
@@ -326,8 +342,8 @@ $(TEST_READ):     $(TEST_READO) $(MONITORINGO)
 		$(MT_EXE)
 		@echo "$@ done"
 
-$(MAIN_ANALYSIS):     $(MAIN_ANALYSISO)
-		$(LD) $(LDFLAGS) $^ $(LIBS) $(GLIBS) $(OutPutOpt)$@
+$(MAIN_ANALYSIS):     $(MAIN_ANALYSISO) $(DETECTORO) $(SHOWERO) $(ANALYSISO) $(EVENT_TIMEO) $(ARRIVAL_DIRECTIONO)
+		$(LD) $(LDFLAGS) $^ $(LIBS) -lMinuit $(GLIBS) $(OutPutOpt)$@
 		$(MT_EXE)
 		@echo "$@ done"
 

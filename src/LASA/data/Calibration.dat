@@ -1,0 +1,11 @@
+LASA		Offset[1+]	Offset[1-]	Offset[2+]	Offset[2-]	Gain[1+]	Gain[1-]	Gain[2+]	Gain[2-]	Common Offset
+1 (Master)	0		0		0		0		0		0		0		0		0
+1 (Slave)	0		0		0		0		0		0		0		0		0
+2 (Master)	0		0		0		0		0		0		0		0		0
+2 (Slave)	0		0		0		0		0		0		0		0		0
+3 (Master)	139		113		126		119		101		145		73		193		34
+3 (Slave)	125		115		119		118		58		205		13		239		33
+4 (Master)	0		0		0		0		0		0		0		0		0
+4 (Slave)	0		0		0		0		0		0		0		0		0
+5 (Master)	133		115		114		132		61		215		21		208		49
+5 (Slave)	129		116		117		122		113		174		63		164		25

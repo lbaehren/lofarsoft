@@ -91,10 +91,10 @@ class DEVICE
 			short unsigned int month ;
 			short unsigned int year ;
 			short unsigned int sync ;
-			long unsigned int CTP ;
+			unsigned int CTP ;
 			float quant ;
 		} one_sec_time[NO_One_Sec] ;
-		long unsigned int current_CTP ;
+		unsigned int current_CTP ;
 
 		struct CONTROL_PARAMETERS	//Structure of control parameters (returned by the Hisparc units) + headers to be stored in ROOT file
 		{

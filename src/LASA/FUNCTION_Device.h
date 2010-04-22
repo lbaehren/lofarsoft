@@ -368,7 +368,7 @@ void DEVICE:: Get_Sec_Time(int no,int Lasa,int flag)		//Flag=0(slave) or 1(maste
 		buf[i]=handle_messages.One_Sec_Message[no][16-i] ;
 	one_sec_time[no].quant=*(float*)buf ;
 
-	printf("one sec[%2d] %d/%d/%d\t%d:%d:%d\tsync=%d\tCTP=%lu\tquant=%f\n",no,one_sec_time[no].day,one_sec_time[no].month,one_sec_time[no].year,one_sec_time[no].hour,one_sec_time[no].min,one_sec_time[no].sec,one_sec_time[no].sync,one_sec_time[no].CTP,one_sec_time[no].quant) ;
+	printf("one sec[%2d] %d/%d/%d\t%d:%d:%d\tLasa=%2d\tFlag=%2d\tsync=%d\tCTP=%u\tquant=%f\n",no,one_sec_time[no].day,one_sec_time[no].month,one_sec_time[no].year,one_sec_time[no].hour,one_sec_time[no].min,one_sec_time[no].sec,Lasa,flag,one_sec_time[no].sync,one_sec_time[no].CTP,one_sec_time[no].quant) ;
 	
 	if(no>=(Store_One_Sec-1) && Lasa==0 && flag==1) Store_Sec_Data() ;
 }
@@ -475,8 +475,6 @@ void DEVICE:: Get_Event_Time(int no)
 	//The calculation below assumes:-> 1 year=365 days; 1 month=30 days; 1 day=24 hrs; 1 hour=60 mins; 1 min=60 sec  
 	handle_messages.event_time[no].time_stamp=(long long unsigned)(((handle_messages.event_time[no].year-time0.year)*31536000+(handle_messages.event_time[no].month-time0.month)*2592000+(handle_messages.event_time[no].day-time0.day)*86400+(handle_messages.event_time[no].hour-time0.hour)*3600+(handle_messages.event_time[no].min-time0.min)*60+(handle_messages.event_time[no].sec-time0.sec))*(1000000000.0)+handle_messages.event_time[no].nsec) ;
 	//-----------xxx--------------
-	
-	//printf("event [%2d] %d/%d/%d\t%d:%d:%d\tCTD=%lu\tnsec=%lu\ttime=%lf",no,handle_messages.event_time[no].day,handle_messages.event_time[no].month,handle_messages.event_time[no].year,handle_messages.event_time[no].hour,handle_messages.event_time[no].min,handle_messages.event_time[no].sec,handle_messages.event_time[no].CTD,handle_messages.event_time[no].nsec,handle_messages.event_time[no].time_stamp) ;
 	printf("event [%2d] %d/%d/%d\t%d:%d:%d CTD=%u ns=%u ",no,handle_messages.event_time[no].day,handle_messages.event_time[no].month,handle_messages.event_time[no].year,handle_messages.event_time[no].hour,handle_messages.event_time[no].min,handle_messages.event_time[no].sec,handle_messages.event_time[no].CTD,handle_messages.event_time[no].nsec) ;
 }
 
@@ -538,7 +536,7 @@ int DEVICE:: Data_Processing(unsigned char* buf,int bytes,int lasa,int flag)	//F
 						array_event_times[pointer_event].lasa=lasa ;
 						array_event_times[pointer_event].event_no=handle_messages.event_no ;
 						array_event_times[pointer_event].time_stamp=handle_messages.event_time[handle_messages.event_no].time_stamp ;
-						printf(" Ev_no=%d\tlasa=%d\ttime=%llu\n",pointer_event,array_event_times[pointer_event].lasa,array_event_times[pointer_event].time_stamp) ;
+						printf(" Ev_no=%d\tlasa=%d\ttime stamp(ns)=%llu\n",pointer_event,array_event_times[pointer_event].lasa,array_event_times[pointer_event].time_stamp) ;
 
 						if((((counter*Max_Event)+pointer_event+1)/Spy_Event)*Spy_Event==((counter*Max_Event)+pointer+1))
 						{
@@ -595,7 +593,7 @@ int DEVICE:: Data_Processing(unsigned char* buf,int bytes,int lasa,int flag)	//F
 				break ;	
 			}
 		}
-		else	//If the data does NOT start with a header or with a header and "waiting!=0"
+		else	//If the data does NOT start with a header or (with a header and "waiting!=0)"
 		{
 			switch(handle_messages.waiting)
 			{
@@ -645,7 +643,7 @@ int DEVICE:: Data_Processing(unsigned char* buf,int bytes,int lasa,int flag)	//F
 						array_event_times[pointer_event].lasa=lasa ;
 						array_event_times[pointer_event].event_no=handle_messages.event_no ;
 						array_event_times[pointer_event].time_stamp=handle_messages.event_time[handle_messages.event_no].time_stamp ;
-						printf(" Ev_no=%d\tlasa=%d\ttime=%llu\n",pointer_event,array_event_times[pointer_event].lasa,array_event_times[pointer_event].time_stamp) ;
+						printf(" Ev_no=%d\tlasa=%d\ttime stamp(ns)=%llu\n",pointer_event,array_event_times[pointer_event].lasa,array_event_times[pointer_event].time_stamp) ;
 
 						if((((counter*Max_Event)+pointer_event+1)/Spy_Event)*Spy_Event==((counter*Max_Event)+pointer_event+1))
 						{
@@ -728,6 +726,7 @@ void DEVICE:: Build_Final_Events(int Lasa,int flag,int no)	//flag=1(master) or 0
 			final_data[Lasa].master[j].GPS_time_stamp=event_time[Lasa].GPS_time_stamp ;
 			final_data[Lasa].master[j].CTD=event_time[Lasa].CTD ;
 			final_data[Lasa].master[j].nsec=event_time[Lasa].nsec ;
+			final_data[Lasa].master[j].Trigg_condition=handle_messages.Event_Message[no][2] ;
 			final_data[Lasa].master[j].Trigg_pattern=(handle_messages.Event_Message[no][3]<<8)+handle_messages.Event_Message[no][4] ;
 		}
 	}
@@ -739,9 +738,11 @@ void DEVICE:: Build_Final_Events(int Lasa,int flag,int no)	//flag=1(master) or 0
 			final_data[Lasa].slave[j].GPS_time_stamp=event_time[Lasa].GPS_time_stamp ;
 			final_data[Lasa].slave[j].CTD=event_time[Lasa].CTD ;
 			final_data[Lasa].slave[j].nsec=event_time[Lasa].nsec ;
+			final_data[Lasa].slave[j].Trigg_condition=final_data[Lasa].master[j].Trigg_condition ;
 			final_data[Lasa].slave[j].Trigg_pattern=(handle_messages.Event_Message[no][3]<<8)+handle_messages.Event_Message[no][4] ;
 		}
 	}
+
 	short unsigned a1,b1,a2,b2,a3,b3,data1,data2 ;	//For channel 1
 	short unsigned A1,B1,A2,B2,A3,B3,DATA1,DATA2 ;	//For channel 2
 	int k=0 ;
@@ -853,7 +854,7 @@ void DEVICE:: Build_Final_Events(int Lasa,int flag,int no)	//flag=1(master) or 0
 					timeA=time(NULL) ;
 				}
 				Fit_1= new TF1("Fit1","landau",0,15000) ;
-				Landau_1->Fit("Fit1","Q0") ;
+				Landau_1->Fit("Fit1","Q0","",Landau_Fit_Min,Landau_Fit_Max) ;
 				Monitoring->Fill_MPV_Sigma(final_data[Lasa].master[0].detector,Fit_1->GetParameter(1),Fit_1->GetParameter(2)) ;
 				printf("Det=%d\tConst=%lf\tMPV=%lf\tSigma=%lf\n",final_data[Lasa].master[0].detector,Fit_1->GetParameter(0),Fit_1->GetParameter(1),Fit_1->GetParameter(2)) ;
 				Monitoring->Draw_MPV_Sigma() ;
@@ -905,7 +906,7 @@ void DEVICE:: Build_Final_Events(int Lasa,int flag,int no)	//flag=1(master) or 0
 					timeA=time(NULL) ;
 				}
 				Fit_2= new TF1("Fit2","landau",0,15000) ;
-				Landau_2->Fit("Fit2","Q0") ;
+				Landau_2->Fit("Fit2","Q0","",Landau_Fit_Min,Landau_Fit_Max) ;
 				Monitoring->Fill_MPV_Sigma(final_data[Lasa].master[1].detector,Fit_2->GetParameter(1),Fit_2->GetParameter(2)) ;
 				printf("Det=%d\tMPV=%f\tSigma=%f\n",final_data[Lasa].master[1].detector,Fit_2->GetParameter(1),Fit_2->GetParameter(2)) ;
 				Monitoring->Draw_MPV_Sigma() ;
@@ -958,7 +959,7 @@ void DEVICE:: Build_Final_Events(int Lasa,int flag,int no)	//flag=1(master) or 0
 					timeA=time(NULL) ;
 				}
 				Fit_1= new TF1("Fit1","landau",0,15000) ;
-				Landau_1->Fit("Fit1","Q0") ;
+				Landau_1->Fit("Fit1","Q0","",Landau_Fit_Min,Landau_Fit_Max) ;
 				Monitoring->Fill_MPV_Sigma(final_data[Lasa].slave[0].detector,Fit_1->GetParameter(1),Fit_1->GetParameter(2)) ;
 				printf("Det=%d\tMPV=%f\tSigma=%f\n",final_data[Lasa].slave[0].detector,Fit_1->GetParameter(1),Fit_1->GetParameter(2)) ;
 				Monitoring->Draw_MPV_Sigma() ;
@@ -1010,7 +1011,7 @@ void DEVICE:: Build_Final_Events(int Lasa,int flag,int no)	//flag=1(master) or 0
 					timeA=time(NULL) ;
 				}
 				Fit_2= new TF1("Fit2","landau",0,15000) ;
-				Landau_2->Fit("Fit2","Q0") ;
+				Landau_2->Fit("Fit2","Q0","",Landau_Fit_Min,Landau_Fit_Max) ;
 				Monitoring->Fill_MPV_Sigma(final_data[Lasa].slave[1].detector,Fit_2->GetParameter(1),Fit_2->GetParameter(2)) ;
 				printf("Det=%d\tMPV=%f\tSigma=%f\n",final_data[Lasa].slave[1].detector,Fit_2->GetParameter(1),Fit_2->GetParameter(2)) ;
 				Monitoring->Draw_MPV_Sigma() ;

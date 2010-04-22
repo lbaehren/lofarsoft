@@ -7,7 +7,7 @@ void Read_Detector_Cord()
 	float X,Y,Z ;
 	int i=0 ;
 	FILE *fp ;
-	fp=fopen("Detector_Cord.dat","r") ;
+	fp=fopen("./data/Detector_Cord.dat","r") ;
 	while(fgets(content,200,fp)!=NULL)
 	{
 		if(strncmp(content,"//",strlen("//"))==0) continue ;
@@ -28,29 +28,10 @@ void Read_Detector_Cord()
 	fclose(fp) ;
 }
 
-void Initialise_Variables()
+void Reset_Final_Data()
 {
 	for(int i=0;i<NO_LASAs;i++)
 	{
-		//if(lasa_select[i]==0) continue ;
-		lasa[i].tot_bytes_read_master=0 ;
-		lasa[i].tot_bytes_read_slave=0 ;
-		lasa[i].pointer_data_master=0 ;
-		lasa[i].pointer_data_slave=0 ;
-		lasa[i].flag_master=0 ;
-		lasa[i].flag_slave=0 ;
-
-		sec_data[i].Lasa=i+1 ;
-
-		log_book[i].master[0].Detector=4*i+1 ;
-		log_book[i].master[1].Detector=4*i+2 ;
-		log_book[i].slave[0].Detector=4*i+3 ;
-		log_book[i].slave[1].Detector=4*i+4 ;
-		
-		final_data[i].master[0].detector=4*i+1 ;
-		final_data[i].master[1].detector=4*i+2 ;
-		final_data[i].slave[0].detector=4*i+3 ;
-		final_data[i].slave[1].detector=4*i+4 ;
 		final_data[i].master[0].YMD=0 ;
 		final_data[i].master[1].YMD=0 ;
 		final_data[i].slave[0].YMD=0 ;
@@ -87,7 +68,36 @@ void Initialise_Variables()
 		memset(final_data[i].master[1].counts,0,sizeof(final_data[i].master[1].counts)) ;
 		memset(final_data[i].slave[0].counts,0,sizeof(final_data[i].slave[0].counts)) ;
 		memset(final_data[i].slave[1].counts,0,sizeof(final_data[i].slave[1].counts)) ;
+		final_data[i].Trigg_Status=0 ;
+	}
+}
+
+void Initialise_Variables()
+{
+	for(int i=0;i<NO_LASAs;i++)
+	{
+		//if(lasa_select[i]==0) continue ;
+		lasa[i].tot_bytes_read_master=0 ;
+		lasa[i].tot_bytes_read_slave=0 ;
+		lasa[i].pointer_data_master=0 ;
+		lasa[i].pointer_data_slave=0 ;
+		lasa[i].flag_master=0 ;
+		lasa[i].flag_slave=0 ;
+
+		sec_data[i].Lasa=i+1 ;
+		sec_data[i].CTP=0 ;
+
+		log_book[i].master[0].Detector=4*i+1 ;
+		log_book[i].master[1].Detector=4*i+2 ;
+		log_book[i].slave[0].Detector=4*i+3 ;
+		log_book[i].slave[1].Detector=4*i+4 ;
 		
+		final_data[i].master[0].detector=4*i+1 ;
+		final_data[i].master[1].detector=4*i+2 ;
+		final_data[i].slave[0].detector=4*i+3 ;
+		final_data[i].slave[1].detector=4*i+4 ;
+		Reset_Final_Data() ;
+			
 		last_trigger_events[i].time_stamp=0 ;
 		printf("final_data[%d].master[0].detector=%d\n",i,final_data[i].master[0].detector) ;
 		printf("final_data[%d].master[1].detector=%d\n",i,final_data[i].master[1].detector) ;
@@ -122,7 +132,7 @@ void Initialise_Variables()
 
 void Create_ROOT_File()	//Creating ROOT file
 {
-	f=new TFile("lasa.root","recreate") ;
+	f=new TFile("./output/lasa.root","recreate") ;
 
 	tree_sec=new TTree("Tree_sec","Title") ;	//One sec tree
 	tree_sec->SetAutoSave(1000000) ;		//Autosave every 1Mbyte of data
@@ -175,22 +185,22 @@ void Create_ROOT_File()	//Creating ROOT file
 		strcpy(detector,"Det") ;
 		sprintf(num,"%d",4*i+1) ;
 		strcat(detector,num) ;
-		tree_event->Branch(detector,&final_data[i].master[0].detector,"detector/i:YMD:GPS_time_stamp:CTD:nsec:Trigg_pattern:Total_counts:Pulse_height:Pulse_width:counts[4000]/s") ;
+		tree_event->Branch(detector,&final_data[i].master[0].detector,"detector/i:YMD:GPS_time_stamp:CTD:nsec:Trigg_condition:Trigg_pattern:Total_counts:Pulse_height:Pulse_width:counts[4000]/s") ;
 		strcpy(detector,"") ;
 		strcpy(detector,"Det") ;
 		sprintf(num,"%d",4*i+2) ;
 		strcat(detector,num) ;
-		tree_event->Branch(detector,&final_data[i].master[1].detector,"detector/i:YMD:GPS_time_stamp:CTD:nsec:Trigg_Pattern:Total_counts:Pulse_height:Pulse_width:counts[4000]/s") ;
+		tree_event->Branch(detector,&final_data[i].master[1].detector,"detector/i:YMD:GPS_time_stamp:CTD:nsec:Trigg_condition:Trigg_Pattern:Total_counts:Pulse_height:Pulse_width:counts[4000]/s") ;
 		strcpy(detector,"") ;
 		strcpy(detector,"Det") ;
 		sprintf(num,"%d",4*i+3) ;
 		strcat(detector,num) ;
-		tree_event->Branch(detector,&final_data[i].slave[0].detector,"detector/i:YMD:GPS_time_stamp:CTD:nsec:Trigger_pattern:Total_counts:Pulse_height:Pulse_width:counts[4000]/s") ;
+		tree_event->Branch(detector,&final_data[i].slave[0].detector,"detector/i:YMD:GPS_time_stamp:CTD:nsec:Trigg_condition:Trigger_pattern:Total_counts:Pulse_height:Pulse_width:counts[4000]/s") ;
 		strcpy(detector,"") ;
 		strcpy(detector,"Det") ;
 		sprintf(num,"%d",4*i+4) ;
 		strcat(detector,num) ;
-		tree_event->Branch(detector,&final_data[i].slave[1].detector,"detector/i:YMD:GPS_time_stamp:CTD:nsec:Trigger_pattern:Total_counts:Pulse_height:Pulse_width:counts[4000]/s") ;
+		tree_event->Branch(detector,&final_data[i].slave[1].detector,"detector/i:YMD:GPS_time_stamp:CTD:nsec:Trigg_condition:Trigger_pattern:Total_counts:Pulse_height:Pulse_width:counts[4000]/s") ;
 	}
 }
 
@@ -333,7 +343,7 @@ void Check_Coincidence()	//Checking coincidence
 {
 	int k ;
 	int jmin=0 ;
-	double tmin=0 ;
+	long long unsigned tmin=0 ;
 	long long unsigned time3=0 ;	//To calculate time difference between 2 events	
 	unsigned int Event_Size=0 ;
 	
@@ -343,6 +353,7 @@ void Check_Coincidence()	//Checking coincidence
 	float weight[NO_LASAs*4] ;	//Event weight
 	Max_Count=0 ;*/
 
+	Reset_Final_Data() ;
 	float SumX,SumY,X_Core,Y_Core ;
 	SumX=0 ;
 	SumY=0 ;
@@ -351,11 +362,12 @@ void Check_Coincidence()	//Checking coincidence
 	{
 		if(temp_array[j].time_stamp>0)
 		{	
-			printf("Ev no[%d] [%d] time=%llu\n",x[j],j,temp_array[j].time_stamp) ;
+			printf("Ev no1[%d] [%d] time=%llu\n",x[j],j,temp_array[j].time_stamp) ;
 			lasa[temp_array[j].lasa].Master->Build_Final_Events(temp_array[j].lasa,1,temp_array[j].event_no) ;
-
 			lasa[temp_array[j].lasa].Slave->Build_Final_Events(temp_array[j].lasa,0,temp_array[j].event_no) ;
+			final_data[temp_array[j].lasa].Trigg_Status=1 ;
 			tmin=temp_array[j].time_stamp ;
+			//printf("\ttmin=%llu\n",tmin) ;
 			jmin=j ;
 			k=j ;
 			break ;
@@ -367,17 +379,24 @@ void Check_Coincidence()	//Checking coincidence
 	{
 		if(temp_array[j].time_stamp<=(tmin+Coin_Window))
 		{
-			printf("Ev no[%d] [%d] time=%llu\n",x[j],j,temp_array[j].time_stamp) ;
+			printf("Ev no2[%d] [%d] time=%llu\ttmin=%llu\tCoin=%llu\t(tmin+Coin)=%llu\n",x[j],j,temp_array[j].time_stamp,tmin,Coin_Window,tmin+Coin_Window) ;
 			lasa[temp_array[j].lasa].Master->Build_Final_Events(temp_array[j].lasa,1,temp_array[j].event_no) ;
-
 			lasa[temp_array[j].lasa].Slave->Build_Final_Events(temp_array[j].lasa,0,temp_array[j].event_no) ;
+			final_data[temp_array[j].lasa].Trigg_Status=1 ;
 			continue ;
 		}
 		else
 		{
-			printf("\n") ;
-			printf("Ev no[%d] [%d] time=%llu\n",x[j],j,temp_array[j].time_stamp) ;
+		//tmin=temp_array[j].time_stamp ;
+		//jmin=j ;
+		//final_data[temp_array[j].lasa].Trigg_Status=0 ;
+		if(final_data[0].Trigg_Status+final_data[1].Trigg_Status+final_data[2].Trigg_Status+final_data[3].Trigg_Status+final_data[4].Trigg_Status==Station_Trigger)
+		{
 			tree_event->Fill() ;		//Storing events for all the detectors
+			printf("\n") ;
+			printf("Ev no3[%d] [%d] time=%llu\n",x[j],j,temp_array[j].time_stamp) ;
+			printf("\tGPS1=%u\tnsec1=%u\tTrigg1=%u\tGPS2=%u\tnsec2=%u\tTrigg2=%u\n",final_data[0].master[0].GPS_time_stamp,final_data[0].master[0].nsec,final_data[0].Trigg_Status,final_data[1].master[0].GPS_time_stamp,final_data[1].master[0].nsec,final_data[1].Trigg_Status);
+
 			int w=0 ;
 			for(int i=0;i<NO_LASAs;i++)
 			{
@@ -471,56 +490,21 @@ void Check_Coincidence()	//Checking coincidence
 
 			if(counter_Event_Size==Monitor1 && Monitoring->Click1_return()==1)
 				Monitoring->DRAW_HV() ;		//HV display
-
-			tmin=temp_array[j].time_stamp ;
-			jmin=j ;
-
-			for(int i=0;i<NO_LASAs;i++)
-			{
-				if(lasa_select[i]==0) continue ;
-				final_data[i].master[0].YMD=0 ;
-				final_data[i].master[1].YMD=0 ;
-				final_data[i].slave[0].YMD=0 ;
-				final_data[i].slave[1].YMD=0 ;
-				final_data[i].master[0].GPS_time_stamp=0 ;
-				final_data[i].master[1].GPS_time_stamp=0 ;
-				final_data[i].slave[0].GPS_time_stamp=0 ;
-				final_data[i].slave[1].GPS_time_stamp=0 ;
-				final_data[i].master[0].nsec=0 ;
-				final_data[i].master[1].nsec=0 ;
-				final_data[i].slave[0].nsec=0 ;
-				final_data[i].slave[1].nsec=0 ;
-				final_data[i].master[0].CTD=0 ;
-				final_data[i].master[1].CTD=0 ;
-				final_data[i].slave[0].CTD=0 ;
-				final_data[i].slave[1].CTD=0 ;
-				final_data[i].master[0].Trigg_pattern=0 ;
-				final_data[i].master[1].Trigg_pattern=0 ;
-				final_data[i].slave[0].Trigg_pattern=0 ;
-				final_data[i].slave[1].Trigg_pattern=0 ;
-				final_data[i].master[0].Total_counts=0 ;
-				final_data[i].master[1].Total_counts=0 ;
-				final_data[i].slave[0].Total_counts=0 ;
-				final_data[i].slave[1].Total_counts=0 ;
-				final_data[i].master[0].Pulse_height=0 ;
-				final_data[i].master[1].Pulse_height=0 ;
-				final_data[i].slave[0].Pulse_height=0 ;
-				final_data[i].slave[1].Pulse_height=0 ;
-				final_data[i].master[0].Pulse_width=0 ;
-				final_data[i].master[1].Pulse_width=0 ;
-				final_data[i].slave[0].Pulse_width=0 ;
-				final_data[i].slave[1].Pulse_width=0 ;
-				memset(final_data[i].master[0].counts,0,sizeof(final_data[i].master[0].counts)) ;
-				memset(final_data[i].master[1].counts,0,sizeof(final_data[i].master[1].counts)) ;
-				memset(final_data[i].slave[0].counts,0,sizeof(final_data[i].slave[0].counts)) ;
-				memset(final_data[i].slave[1].counts,0,sizeof(final_data[i].slave[1].counts)) ;
-			}
+			
+			/*Reset_Final_Data() ;
 			lasa[temp_array[j].lasa].Master->Build_Final_Events(temp_array[j].lasa,1,temp_array[j].event_no) ;
-
 			lasa[temp_array[j].lasa].Slave->Build_Final_Events(temp_array[j].lasa,0,temp_array[j].event_no) ;
+			final_data[temp_array[j].lasa].Trigg_Status=1 ;*/
+		}
+		tmin=temp_array[j].time_stamp ;
+		jmin=j ;
+		Reset_Final_Data() ;
+		lasa[temp_array[j].lasa].Master->Build_Final_Events(temp_array[j].lasa,1,temp_array[j].event_no) ;
+		lasa[temp_array[j].lasa].Slave->Build_Final_Events(temp_array[j].lasa,0,temp_array[j].event_no) ;
+		final_data[temp_array[j].lasa].Trigg_Status=1 ;
 		}
 	}
-	//-----------Storing in buffer events belonging to the last trigger---------
+	//-----------Storing in buffer those events belonging to the last trigger---------
 	for(int j=0;j<NO_LASAs;j++)
 	{
 		if(lasa_select[j]==0) continue ;
@@ -531,5 +515,49 @@ void Check_Coincidence()	//Checking coincidence
 		jmin++ ;
 	}
 	//-----------------------------------------
+	}
+}
+
+void Sort_Event_Times(int pointer)	//Sorting event times in increasing order
+{
+	short unsigned temp_lasa,temp_event ;
+	long long unsigned temp_time ;
+
+	if(pointer<0) pointer=pointer+Max_Event ;
+	for(int j=0;j<NO_LASAs;j++)
+	{
+		memmove(temp_array+j,last_trigger_events+j,sizeof(temp_array[j])) ;
+		last_trigger_events[j].time_stamp=0 ;
+		x[j]=0 ;
+	}
+	for(int j=NO_LASAs;j<Spy_Event+NO_LASAs;j++)
+	{
+		memmove(temp_array+j,array_event_times+pointer,sizeof(temp_array[j])) ;
+		x[j]=pointer ;
+		if(pointer==(Max_Event-1)) pointer=0 ;
+		else pointer++ ;
+	}	
+	for(int j=0;j<Spy_Event+NO_LASAs;j++)
+	{
+		temp_time=temp_array[j].time_stamp ;
+		temp_lasa=temp_array[j].lasa ;
+		temp_event=temp_array[j].event_no ;
+		for(int i=j+1;i<Spy_Event+NO_LASAs;i++)
+		{
+			if(temp_array[i].time_stamp<temp_time)
+			{
+				temp_array[j].time_stamp=temp_array[i].time_stamp ;
+				temp_array[j].lasa=temp_array[i].lasa ;	
+				temp_array[j].event_no=temp_array[i].event_no ;	
+
+				temp_array[i].time_stamp=temp_time ;
+				temp_array[i].lasa=temp_lasa ;
+				temp_array[i].event_no=temp_event ;
+
+				temp_time=temp_array[j].time_stamp ;
+				temp_lasa=temp_array[j].lasa ;
+				temp_event=temp_array[j].event_no ;
+			}
+		}
 	}
 }
