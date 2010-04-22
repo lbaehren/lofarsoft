@@ -15,6 +15,7 @@ set (external_packages
   matplotlib
   numeric
   numpy
+  pfile
   plplot
   pyqt
   python

@@ -52,7 +52,7 @@ if (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
 
   include (ExternalProject)
   
-  set (matplotlib_version "0.98.5.3")
+  set (matplotlib_version "0.99.1.2")
   set (matplotlib_tar_archive "matplotlib-${matplotlib_version}.tar.gz")
 
   find_file (have_matplotlib_tgz ${matplotlib_tar_archive} ${MATPLOTLIB_SOURCE_DIR})
