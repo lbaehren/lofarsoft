@@ -16,6 +16,47 @@ import time
 
 from subprocess import call
 
+import getopt, sys
+# import command-line options
+
+print " "
+
+def usage():
+    print "Usage: python VHECRpolarMovie <filename> [--name=stationName, --antennamode=antennaMode, --channels=coincidentChannels]"
+    print " "
+    print "The file needs to be an output file from VHECRtask (TBBControl online software), or its offline program VHECRtest."
+    print "The station name, antenna mode and # coincident channels are used only to print as title text above the animation."
+    print "This script requires MathGL 10.1 or higher, imagemagick and mpeg2vidcodec to run. A MPEG-1.par file should be enclosed."
+    print " "
+    
+try:
+    opts, args = getopt.getopt(sys.argv[2:], "hn:a:c:", ["help", "name=", "antennamode=", "channels="])
+except getopt.GetoptError, err:
+    # print help information and exit:
+    print str(err) # will print something like "option -a not recognized"
+    usage()
+    sys.exit(2)
+
+stationName = "RS205"
+antennaMode = "LBA_OUTER"
+numberOfCoincidentChannels = 96 # default values
+
+for option, argument in opts:
+    if option in ("-h", "--help"):
+        usage()
+        sys.exit()
+    elif option in ("-n", "--name"):
+        stationName = argument
+        print "Station name set to: " + stationName
+    elif option in ("-o", "--antennamode"):
+        antennaMode = argument
+        print "Antenna mode set to: " + antennaMode
+    elif option in ("-o", "--channels"):
+        numberOfCoincidentChannels = int(argument)
+        print "# channels set to: " + str(numberOfCoincidentChannels)
+    else:
+        assert False, "unhandled option"
+
 timeKey = 'time';           #time = []
 phiKey = 'phi';             #phi = []
 thetaKey = 'theta';         #theta = []
@@ -29,7 +70,7 @@ randomizationInDegrees = 1.0 # randomize angular positions with sigma = this num
 mglGraphZB = 0
 mglGraphPS = 1
 
-graphTitle = "80-channel coincidences for RS205"
+graphTitle = str(numberOfCoincidentChannels) + "-channel coincidences for " + stationName
 numFrames = 1000          # needs to go into the MPEG1.par file!
 width=800                 # idem
 height=800                # idem; make it square for circle plot
@@ -200,6 +241,9 @@ for k in range(numFrames):
     gr.Grid('xy','g-')
     gr.SetFontSize(2.0)
     gr.Puts(maxDistanceInPlot * 5, 120.0, 0, graphTitle, ':w')
+#    gr.SetFontDef('rL:w') werkt niet!?
+#    gr.Puts(maxDistanceInPlot * 15, 135.0, 0, antennaMode, ':w')
+#    gr.SetFontDef('rC:w')
     
     gr.SetFontSize(3.0)
     gr.Puts(maxDistanceInPlot * 1.2, 90.0, 0, "N", ':w')

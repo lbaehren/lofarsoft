@@ -26,6 +26,7 @@ def usage():
     print " "
     print "The file needs to be an output file from VHECRtask (TBBControl online software), or its offline program VHECRtest."
     print "The station name, antenna mode and # coincident channels are used only to print as title text above the animation."
+    print "This script requires MathGL 10.1 or higher, imagemagick and mpeg2vidcodec to run. A MPEG-1.par file should be enclosed."
     print " "
     
 try:
@@ -76,7 +77,7 @@ mglGraphZB = 0
 mglGraphPS = 1
 
 graphTitle = str(numberOfCoincidentChannels) + "-channel coincidences for " + stationName
-print graphTitle
+
 numFrames = 1000          # needs to go into the MPEG1.par file!
 width=800                 # idem
 height=800                # idem; make it square for circle plot
