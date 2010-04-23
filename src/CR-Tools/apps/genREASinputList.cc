@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     if(buf.compare("useNSpol")==0) 
       cut = TCut("(Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4");
     if(buf.compare("useBOTHpol")==0) 
-      cut = TCut("((Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4)&&((Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4)");
+      cut = TCut("((Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4)||((Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4)");
 
     if(buf.compare("createInfoFile")==0) 
       opt>>createInfoFile;
@@ -384,11 +384,8 @@ int main(int argc, char* argv[])
     E=pow(10,lgE);
     Eg=pow(10,lgEg); 
 
-    //cout<<"Reconstruction    "<<reconstruction<<endl;
-    string recon;
-    recon=reconstruction;
       //if( !Grande )
-      if( recon=="A" ) // KASCADE reconstruction!!!!
+      if( reconstruction=='A' ) // KASCADE reconstruction!!!!
        {
         if(string(cut).find("(Xheight_EW/CCheight_EW)")!=string::npos) 
         {
@@ -426,7 +423,7 @@ int main(int argc, char* argv[])
          }
 
         //else if ( Grande)
-        else if(recon=="G")
+        else if(reconstruction=='G')
         {
          if(string(cut).find("(Xheight_EW/CCheight_EW)")!=string::npos) 
          {
@@ -462,6 +459,8 @@ int main(int argc, char* argv[])
             }
            }
           }
+        } else {
+          cerr << "\n\nERROR: Event reconstruction is neither Array (KASCADE) nor Grande!\n" << endl;
         }// if Grande
 
     }//loop on events
