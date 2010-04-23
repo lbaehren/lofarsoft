@@ -70,6 +70,10 @@
   Nant_lopes30_min        15
   Nant_lopesPol_min       10
 
+  # minimum CC height for KASCADE and Grande triggered events
+  CCcutA 9.5
+  CCcutG 7
+
   # Name of the different files that should be created ( .txt and .root )
   namebase		REASinpuiList
   \endverbatim
@@ -106,11 +110,12 @@ int main(int argc, char* argv[])
   // variables to read in
   string cut_str(""), namebase="REASinputList";
   Bool_t createInfoFile=false;
-  string KRETAversion("");
   char KRETAver[1024];
   Int_t Nant_lopes30_min=10,Nant_lopesPol_min=5;
+  // default cuts for CC beam
+  double CCcutA = 9.5, CCcutG = 7;
 
-   TCut cut;
+  TCut cut;
 
   while (conf.getline(tmp,1024)) {
     opt.clear();
@@ -124,20 +129,22 @@ int main(int argc, char* argv[])
       opt >> Nant_lopesPol_min;
     if(buf.compare("TCut")==0)
       opt>>cut_str;
+    if(buf.compare("CCcutA")==0) 
+      opt >> CCcutA;
+    if(buf.compare("CCcutG")==0) 
+      opt >> CCcutG;
+
     if(buf.compare("useEWpol")==0) 
       cut = TCut("(Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4");
     if(buf.compare("useNSpol")==0) 
       cut = TCut("(Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4");
     if(buf.compare("useBOTHpol")==0) 
-      cut = TCut("((Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4)||((Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4)");
+      cut = TCut("((Xheight_EW/CCheight_EW)>=-0.6&&(Xheight_EW/CCheight_EW)<=1.4)&&((Xheight_NS/CCheight_NS)>=-0.6&&(Xheight_NS/CCheight_NS)<=1.4)");
 
     if(buf.compare("createInfoFile")==0) 
       opt>>createInfoFile;
     if(buf.compare("namebase")==0) 
       opt>>namebase;
-    if(buf.compare("KRETAversion")==0) 
-      opt>>KRETAversion;
-   
     buf="";
   }
   // add cut_string to cut
@@ -384,86 +391,71 @@ int main(int argc, char* argv[])
     E=pow(10,lgE);
     Eg=pow(10,lgEg); 
 
-      //if( !Grande )
-      if( reconstruction=='A' ) // KASCADE reconstruction!!!!
-       {
-        if(string(cut).find("(Xheight_EW/CCheight_EW)")!=string::npos) 
-        {
-         cout << "\nUsing EW cut..." << endl;
-
-         if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min) )
-          {
-          if((CCheight_EW/rmsCCbeam_EW)>9.5){
+    if( reconstruction=='A' ) {// KASCADE reconstruction!!!!
+      if(string(cut).find("(Xheight_EW/CCheight_EW)")!=string::npos) {
+        cout << "\nUsing EW cut..." << endl;
+        if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min) ) {
+          if((CCheight_EW/rmsCCbeam_EW)>CCcutA) {
             f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
             count++;
             k->Fill();
-           }
           }
-        } else if (string(cut).find("(Xheight_NS/CCheight_NS)")!=string::npos) {
-          cout << "\nUsing NS cut..." << endl;
-          if((Gt <= 1165389469 && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_NS>Nant_lopesPol_min) )
-          {
-          if((CCheight_EW/rmsCCbeam_EW)>9.5){
+        }
+      } else if (string(cut).find("(Xheight_NS/CCheight_NS)")!=string::npos) {
+        cout << "\nUsing NS cut..." << endl;
+        if((Gt <= 1165389469 && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_NS>Nant_lopesPol_min) ) {
+          if((CCheight_EW/rmsCCbeam_EW)>CCcutA) {
             f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
             count++;
             k->Fill();
-           }
           }
-        } else if (string(cut).find("(Xheight_EW/CCheight_EW)<=1.4)&&((Xheight_NS/CCheight_NS)")!=string::npos) {
-          cout << "\nUsing BOTH pol. cut..." << endl;
-          if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min && NlateralAntennas_NS>Nant_lopesPol_min) )
-          {
-           if(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)+pow(CCheight_NS/rmsCCbeam_NS,2))>9.5){
-            f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
-            count++;
-            k->Fill();
-            }
-           }
+        }
+      } else if (string(cut).find("(Xheight_EW/CCheight_EW)<=1.4)&&((Xheight_NS/CCheight_NS)")!=string::npos) {
+        cout << "\nUsing BOTH pol. cut..." << endl;
+        if(   (Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min && NlateralAntennas_NS>Nant_lopes30_min) 
+            || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min && NlateralAntennas_NS>Nant_lopesPol_min) ) {
+          if(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)+pow(CCheight_NS/rmsCCbeam_NS,2))>CCcutA) {
+              f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
+              count++;
+              k->Fill();
           }
-         }
-
-        //else if ( Grande)
-        else if(reconstruction=='G')
-        {
-         if(string(cut).find("(Xheight_EW/CCheight_EW)")!=string::npos) 
-         {
-          cout << "\nUsing EW cut..." << endl;
-
-          if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min) )
-           {
-            if((CCheight_EW/rmsCCbeam_EW)>7.){
+        }
+      }
+      
+    } else if(reconstruction=='G') {
+      if(string(cut).find("(Xheight_EW/CCheight_EW)")!=string::npos) {
+        cout << "\nUsing EW cut..." << endl;
+        if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min) ) {
+          if((CCheight_EW/rmsCCbeam_EW)>CCcutG) {
             f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
             count++;
             k->Fill();
-            }
-           }
-        } else if (string(cut).find("(Xheight_NS/CCheight_NS)")!=string::npos) {
-          cout << "\nUsing NS cut..." << endl;
-          if((Gt <= 1165389469 && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_NS>Nant_lopesPol_min) )
-          {
-          if((CCheight_EW/rmsCCbeam_EW)>7.){
-            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
-            count++;
-            k->Fill();
-            }
-           }
-        } else if (string(cut).find("(Xheight_EW/CCheight_EW)<=1.4)&&((Xheight_NS/CCheight_NS)")!=string::npos) {
-          cout << "\nUsing BOTH pol. cut..." << endl;
-          if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min && NlateralAntennas_NS>Nant_lopesPol_min) )
-          {
-           if(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)+pow(CCheight_NS/rmsCCbeam_NS,2))>7.){
-
-            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
-            count++;
-            k->Fill();
-            }
-           }
           }
-        } else {
-          cerr << "\n\nERROR: Event reconstruction is neither Array (KASCADE) nor Grande!\n" << endl;
-        }// if Grande
-
-    }//loop on events
+        }
+      } else if (string(cut).find("(Xheight_NS/CCheight_NS)")!=string::npos) {
+        cout << "\nUsing NS cut..." << endl;
+        if((Gt <= 1165389469 && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_NS>Nant_lopesPol_min) ) {
+          if((CCheight_EW/rmsCCbeam_EW)>CCcutG) {
+            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
+            count++;
+            k->Fill();
+          }
+        }
+      } else if (string(cut).find("(Xheight_EW/CCheight_EW)<=1.4)&&((Xheight_NS/CCheight_NS)")!=string::npos) {
+        cout << "\nUsing BOTH pol. cut..." << endl;
+        if(   (Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min && NlateralAntennas_NS>Nant_lopes30_min) 
+            || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min && NlateralAntennas_NS>Nant_lopesPol_min) ) {
+          if(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)+pow(CCheight_NS/rmsCCbeam_NS,2))>CCcutG) {
+            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
+            count++;
+            k->Fill();
+          }
+        }
+      }
+    } else {
+      cerr << "\n\nERROR: Event reconstruction is neither Array (KASCADE) nor Grande!\n" << endl;
+    }
+  }//loop on events
 
   k->Write();
   fout->Close();
