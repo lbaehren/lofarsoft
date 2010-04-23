@@ -63,11 +63,14 @@ else:
     fileName = 'VHECRTaskLogfile.dat'   #  that's just handy for rapid testing...
     print 'No filename given; usage: python VHECRpolarplot.py <filename>. Using file ' + fileName + ' by default.'
 
-
+prefixKey = 'prefix'
 timeKey = 'time';           #time = []
 phiKey = 'phi';             #phi = []
 thetaKey = 'theta';         #theta = []
 varianceKey = 'variance';   #variance = []
+
+myKeys = [timeKey, thetaKey, phiKey, varianceKey]
+
 pointList = []
 
 maximumVarianceAllowed = 40.0
@@ -119,10 +122,32 @@ internalPointsize = 0.8 * pointSizeInDegreesTheta / 90.0 # 0.8 found by trial-an
 firstTime = 0
 lastTime = 0
 
+def nextFitResult(triggerReader):
+    try:
+        thisRecord = triggerReader.next()
+    except StopIteration:
+        return ""
+#     print thisRecord
+    if prefixKey in myKeys:
+        while thisRecord[prefixKey] != 'FitResult:':
+            try:
+                thisRecord = triggerReader.next()
+            except StopIteration:
+                return ""
+    return thisRecord
+
 def processCSVFile(filename): # directly make histogram, not making triggerList
-    myKeys = [timeKey, thetaKey, phiKey, varianceKey]
-    triggerReader = csv.DictReader(open(fileName), myKeys, delimiter=' ')
-    firstRecord = triggerReader.next()
+    global myKeys
+    file = open(fileName)
+    headerLine = file.next()
+    print headerLine
+    if 'VHECR' in headerLine: # then we have a new-style (> Apr 23, 2010) logfile
+        myKeys = [prefixKey] + myKeys
+        print myKeys
+    
+    triggerReader = csv.DictReader(file, myKeys, delimiter=' ')
+    
+    firstRecord = nextFitResult(triggerReader)
     global firstTime
     global lastTime
     firstTime = int(firstRecord[timeKey])
@@ -130,7 +155,8 @@ def processCSVFile(filename): # directly make histogram, not making triggerList
         pointList.append(firstRecord)
     nofPoints = 0
     numberDiscarded = 0
-    for record in triggerReader:
+    record = firstRecord
+    while record != "":
         if float(record[varianceKey]) < maximumVarianceAllowed: 
            # phi.append(float(record[phiKey]))
            # theta.append(float(record[thetaKey]))
@@ -139,6 +165,8 @@ def processCSVFile(filename): # directly make histogram, not making triggerList
             nofPoints += 1
         else:
             numberDiscarded += 1
+        record = nextFitResult(triggerReader) # ok, not-so-obvious order...
+        
     print 'Number of points: ' + str(nofPoints)
     print 'Amount of discarded points due to high variance: ' + str(numberDiscarded)
     lastTime = int(pointList[len(pointList) - 1][timeKey])
