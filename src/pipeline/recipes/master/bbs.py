@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import sys, os, logging, tempfile, glob, shutil
+import sys, os, logging, tempfile, glob, shutil, defaultdict, numpy
 from subprocess import check_call, CalledProcessError
 from contextlib import closing
 
@@ -300,16 +300,26 @@ class bbs(LOFARrecipe):
                         ])
                 except CalledProcessError:
                     self.logger.warn("No logs moved on %s" % (node))
+
+            totals = defaultdict(list)
+            counts = defaultdict(list)
             for log_file in glob.glob("%s/%s_%s" % (
                 log_root, self.inputs["key"], "kernel*log*")
             ):
                 self.logger.debug("Processing %s" % (log_file))
                 ms_name = ""
                 with closing(open(log_file)) as file:
-                    for line in file.xreadlines():
+                    for line in file:
                         if line.split(":") and line.split(":")[0] == "INFO - Observation part":
                             ms_name = os.path.basename(line.split()[6].rstrip())
-                            break
+                        line = line.split():
+                        # Try to extract profiling information from file.
+                        try:
+                            if line[2] == "TIMER":
+                                totals[line[4]].append(float(line[6]))
+                                counts[line[4]].append(int(line[8]))
+                        except IndexError:
+                            pass
                 if not ms_name:
                     self.logger.info("Couldn't identify file for %s" % (log_file))
                 else:
@@ -321,6 +331,13 @@ class bbs(LOFARrecipe):
                         "Moving logfile %s to %s" % (log_file, destination)
                     )
                     utilities.move_log(log_file, destination)
+
+            for key in totals.iterkeys():
+                values = totals[key]
+                self.logger.info(
+                    "%s: count: %d, total: %f, mean: %f, std: %f" %
+                    (key, numpy.sum(counts[key]), numpy.sum(values), numpy.mean(values), numpy.std(values))
+                )
 
             try:
                 self.logger.debug("Removing temporary log directory")
