@@ -1,0 +1,118 @@
+ninputfiles 1 
+filedir /Users/STV/Astro/data/lightning/ 
+filenames lightning_17_23.h5
+pixels 70  
+depth 1
+startdepth 1000000.
+depthstride 0000.
+nframes 1 
+blocksperframe 10
+startblock 226098
+antennaselection even
+arrayspread inner 
+azimuth 180
+elevation 60.0
+partofsky 1.0
+freqstart 10
+freqend 90
+calibration 0 
+calibrationfactor 0
+
+DO NOT ALTER THE ORDER OF THE VARIABLES!
+freqstart and end should be integers
+
+
+ninputfiles
+filedir
+filenames
+
+pixels depth startdepth depthstr
+nframes blocksperframe startblock
+
+selection
+arrayspread
+
+5
+ninputfiles 6
+filedir /Users/STV/Astro/data/TBB/Crab/
+filenames CS302C-B0T5:00:39.h5 CS302C-B4T5:00:39.h5 CS302C-B1T5:00:39.h5	CS302C-B5T5:00:39.h5 CS302C-B2T5:00:39.h5 CS302C-B3T5:00:39.h5
+
+azimuth 183.831
+elevation 59.0699
+
+
+ninputfiles 6
+filedir /Users/STV/Astro/data/TBB/Crab/
+filenames CS302C-B0T5:00:39.h5 CS302C-B4T5:00:39.h5 CS302C-B1T5:00:39.h5	CS302C-B5T5:00:39.h5 CS302C-B2T5:00:39.h5 CS302C-B3T5:00:39.h5
+pixels 15
+
+pixels 30
+/mnt/lofar/CS1_tbb/Thu13-08-2009/
+CS302C-B1T11:01:50.h5 CS302C-B2T11:01:50.h5 CS302C-B3T11:01:50.h5 CS302C-B4T11:01:50.h5 CS302C-B5T11:01:50.h5
+3
+/mnt/lofar/CS1_tbb/Wed29-07-2009/
+CS302C-B2T12:20:03.h5  CS302C-B4T12:20:03.h5 CS302C-B5T12:20:03.h5
+
+
+CS302C-B2T11:38:03.h5 CS302C-B3T11:38:03.h5 CS302C-B4T11:38:03.h5 CS302C-B5T11:38:03.h5
+
+5
+/mnt/lofar/CS1_tbb/Thu13-08-2009/
+CS302C-B1T11:01:50.h5 CS302C-B2T11:01:50.h5 CS302C-B3T11:01:50.h5 CS302C-B4T11:01:50.h5 CS302C-B5T11:01:50.h5
+
+
+
+
+1
+/mnt/lofar/lightning/
+lightning_17_23.h5  
+
+70 1 10000. 5000.
+1 1 226098
+
+2
+2 4 1
+0 513 1
+0 3 1
+
+even
+0	2.55	0
+0	2.55	0
+-2.36	5.3	0
+-10.03	1.06	0
+-9.04	-12.13	0
+0	65.05	0
+
+0	2.55	0
+0	2.55	0
+-2.36	5.3	0
+-10.03	1.06	0
+-9.04	-12.13	0
+0	65.05	0
+
+
+
+
+5
+/mnt/lofar/CS1_tbb/Fri26-06-2009/
+CS302C-B0T17:23:21X.h5  CS302C-B1T17:23:21.h5  CS302C-B2T17:23:21.h5  CS302C-B4T17:23:21.h5  CS302C-B5T17:23:21.h5
+
+10 23.1 1 3000. 3000.
+5 150 225500
+
+CS302C-B0T21:09:27.h5 CS302C-B1T21:09:27.h5  CS302C-B2T21:09:27.h5  
+CS302C-B4T21:09:27.h5 CS302C-B5T21:09:27.h5
+
+CS302C-B0T13:55:12.h5 CS302C-B1T13:55:12.h5 CS302C-B2T13:55:12.h5 CS302C-B4T13:55:12.h5 CS302C-B5T13:55:12.h5
+
+CS302C-B0T16:48:58X.h5  CS302C-B1T16:48:58.h5  CS302C-B2T16:48:58.h5 
+CS302C-B4T16:48:58.h5  CS302C-B5T16:48:58.h5
+
+6
+/mnt/lofar/CS1_tbb/Wed29-07-2009/
+CS302C-B0T12:20:03.h5
+CS302C-B1T12:20:03.h5
+CS302C-B2T12:20:03.h5
+CS302C-B3T12:20:03.h5
+CS302C-B4T12:20:03.h5
+CS302C-B5T12:20:03.h5
