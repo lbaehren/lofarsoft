@@ -1,7 +1,8 @@
 from __future__ import with_statement
-import sys, os, logging, tempfile, glob, shutil, defaultdict, numpy
+import sys, os, logging, tempfile, glob, shutil, numpy
 from subprocess import check_call, CalledProcessError
 from contextlib import closing
+from collections import defaultdict
 
 # Local helpers
 from lofarpipe.support.lofarrecipe import LOFARrecipe
@@ -312,7 +313,7 @@ class bbs(LOFARrecipe):
                     for line in file:
                         if line.split(":") and line.split(":")[0] == "INFO - Observation part":
                             ms_name = os.path.basename(line.split()[6].rstrip())
-                        line = line.split():
+                        line = line.split()
                         # Try to extract profiling information from file.
                         try:
                             if line[2] == "TIMER":
