@@ -5,7 +5,7 @@ import os
 def run_node(*args):
     import imp
     control_script = getattr(imp.load_module(recipename, *imp.find_module(recipename, [nodepath])), recipename)
-    return control_script(loghost=loghost, logport=logport).run_with_logging(*args, **kwargs)
+    return control_script(loghost=loghost, logport=logport).run_with_logging(*args)
 
 class LOFARnode(object):
     """
@@ -24,13 +24,13 @@ class LOFARnode(object):
         self.loghost = loghost
         self.logport = logport
 
-    def run_with_logging(*args, **kwargs):
+    def run_with_logging(self, *args):
         # Call the run() method, ensuring that the logging handler is added
         # and removed properly.
         if self.loghost:
             my_tcp_handler = logging.handlers.SocketHandler(self.loghost, self.logport)
             self.logger.addHandler(my_tcp_handler)
-        self.run(*args, **kwargs)
+        self.run(*args)
         if self.loghost:
             my_tcp_handler.close()
             self.logger.removeHandler(my_tcp_handler)

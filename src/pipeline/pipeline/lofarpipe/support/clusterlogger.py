@@ -41,7 +41,10 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
         """
         while True:
             chunk = self.request.recv(4)
-            slen = struct.unpack(">L", chunk)[0]
+            try:
+                slen = struct.unpack(">L", chunk)[0]
+            except:
+                break
             chunk = self.connection.recv(slen)
             while len(chunk) < slen:
                 chunk = chunk + self.connection.recv(slen - len(chunk))
