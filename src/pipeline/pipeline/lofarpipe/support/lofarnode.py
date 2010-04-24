@@ -5,7 +5,7 @@ import os
 def run_node(*args):
     import imp
     control_script = getattr(imp.load_module(recipename, *imp.find_module(recipename, [nodepath])), recipename)
-    return control_script(loghost=loghost, logport=logport).run(*args)
+    return control_script(loghost=loghost, logport=logport).run_with_logging(*args)
 
 class LOFARnode(object):
     """
@@ -21,13 +21,19 @@ class LOFARnode(object):
             'node.%s.%s' % (platform.node(), self.__class__.__name__)
         )
         self.logger.setLevel(logging.DEBUG)
-        if loghost:
-            # Remove old, stale handlers and install a new one.
-            for handler in self.logger.handlers:
-                self.logger.removeHandler(handler)
-            self.logger.addHandler(
-                logging.handlers.SocketHandler(loghost, logport)
-            )
+        self.loghost = loghost
+        self.logport = logport
+
+    def run_with_logging(self):
+        # Call the run() method, ensuring that the logging handler is added
+        # and removed properly.
+        if self.loghost:
+            my_tcp_handler = logging.handlers.SocketHandler(self.loghost, self.logport)
+            self.logger.addHandler(my_tcp_handler)
+        self.run()
+        if self.loghost:
+            my_tcp_handler.close()
+            self.logger.removeHandler(my_tcp_handler)
 
     def run(self):
         # Override in subclass.
