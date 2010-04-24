@@ -109,10 +109,6 @@ class vdsmaker(LOFARrecipe):
         executable = self.inputs['combinevds']
         gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gvds'])
         try:
-            # When we get an OSError 24, it seems we have
-            # /sys/devices/virtual/vtconsole/vtcon0 open many times.
-            # Speculating this is due to a failure of subprocess to write to
-            # the console (why?); try writing to pipes instead.
             command = [executable, gvds_out] + vdsnames
             combineproc = subprocess.Popen(
                 command,
@@ -129,8 +125,6 @@ class vdsmaker(LOFARrecipe):
             self.logger.exception("combinevds failed with status %d: %s" % (cpe.returncode, serr))
             return 1
         except OSError, failure:
-            # This has previously bombed out with OSError 24: too many open
-            # files. Attempt to print something useful if that happens again.
             try:
                 if failure.errno == errno.EMFILE:
                     count = 0
@@ -141,6 +135,18 @@ class vdsmaker(LOFARrecipe):
                         except:
                             pass
                     self.logger.info("Had %d open files" % (count,))
+                elif failure.errno == ENOMEM:
+                    self.logger.info("Failed to run: %s" % str(command))
+                    import operataor
+                    total = reduce(operator.add, (len(x) for x in command))
+                    self.logger.debug("Num args: %d, num characters: %d" % (len(command), total))
+                    try:
+                        subprocess.Popen(['free'], stdout=subprocess.PIPE)
+                        sout, serr = p.communicate()
+                        self.logger.free(sout)
+                    except:
+                        self.logger.warn("Failed to spawn free")
+                    self.logger.exception(failure)
                 else:
                     self.logger.exception(failure)
             finally:
