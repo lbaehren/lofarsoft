@@ -93,6 +93,8 @@ class vdsmaker(LOFARrecipe):
             self.logger.info("Waiting for all makevds tasks to complete")
             tc.barrier(tasks)
 
+        # Save space on engines by clearing out old file lists
+        mec.execute("clear_available_list(\"%s\")" % (available_list,))
         failure = False
         for task in tasks:
             res = tc.get_task_result(task)
@@ -120,11 +122,11 @@ class vdsmaker(LOFARrecipe):
             if combineproc.returncode != 0:
                 raise subprocess.CalledProcessError(combineproc.returncode, command)
             self.outputs['gvds'] = gvds_out
-            return 0
         except subprocess.CalledProcessError, cpe:
             self.logger.exception("combinevds failed with status %d: %s" % (cpe.returncode, serr))
-            return 1
+            failure = True
         except OSError, failure:
+            self.logger.warn("Caught OSError")
             try:
                 if failure.errno == errno.EMFILE:
                     count = 0
@@ -135,13 +137,13 @@ class vdsmaker(LOFARrecipe):
                         except:
                             pass
                     self.logger.info("Had %d open files" % (count,))
-                elif failure.errno == ENOMEM:
+                elif failure.errno == errno.ENOMEM:
                     self.logger.info("Failed to run: %s" % str(command))
-                    import operataor
+                    import operator
                     total = reduce(operator.add, (len(x) for x in command))
                     self.logger.debug("Num args: %d, num characters: %d" % (len(command), total))
                     try:
-                        subprocess.Popen(['free'], stdout=subprocess.PIPE)
+                        p = subprocess.Popen(['free'], stdout=subprocess.PIPE)
                         sout, serr = p.communicate()
                         self.logger.free(sout)
                     except:
@@ -150,11 +152,13 @@ class vdsmaker(LOFARrecipe):
                 else:
                     self.logger.exception(failure)
             finally:
-                return 1
+                failure = True
         finally:
-            # Save space on engines by clearing out old file lists
-            mec.execute("clear_available_list(\"%s\")" % (available_list,))
-        self.logger.info("vdsmaker done")
+            self.logger.info("vdsmaker done")
+        if failure:
+            return 1
+        else:
+            return 0
 
 if __name__ == '__main__':
     sys.exit(vdsmaker().main())
