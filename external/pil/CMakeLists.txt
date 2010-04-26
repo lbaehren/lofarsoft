@@ -51,6 +51,14 @@ if (NOT HAVE_PIL OR PIL_FORCE_BUILD)
       URL ${have_pil_tgz}
       CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${USG_INSTALL_PREFIX}
       )
+    ## Pre-configure of configuration scripts
+    ExternalProject_Add_Step (pil pil_preconfig
+      COMMAND cp ${PIL_SOURCE_DIR}/pil.cmake CMakeLists.txt
+      COMMENT "Replacing original CMakeLists.txt"
+      DEPENDEES patch
+      DEPENDERS configure
+      WORKING_DIRECTORY ${PIL_BINARY_DIR}
+      )
   else (have_pil_tgz)
     message (WARNING "[pil] Unable to build project - no sources found!")
   endif (have_pil_tgz)
