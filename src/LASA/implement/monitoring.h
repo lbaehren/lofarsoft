@@ -15,9 +15,9 @@
 #define	Bin_Size_X	5	//Bin size for the 2D event display
 #define	Bin_Size_Y	5	//Bin size for the 2D event display
 	
-class TGWindow ;
-class TGMainFrame ;
-class TRootEmbeddedCanvas ;
+class TGWindow;
+class TGMainFrame;
+class TRootEmbeddedCanvas;
 
 /*!
   \class MONITORING

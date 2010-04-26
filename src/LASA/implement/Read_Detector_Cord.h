@@ -1,3 +1,8 @@
+
+/*!
+	\file Read_Detector_Cord.h
+	\ingroup LASA
+*/
 void Read_Detector_Cord(FILE *fp)
 {
 	char content[200] ;

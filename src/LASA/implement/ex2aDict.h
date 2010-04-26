@@ -15,7 +15,7 @@
 #define G__ANSIHEADER
 #define G__DICTIONARY
 #define G__PRIVATE_GVALUE
-#include "cint/G__ci.h"
+#include "G__ci.h"
 extern "C" {
 extern void G__cpp_setup_tagtableex2aDict();
 extern void G__cpp_setup_inheritanceex2aDict();
@@ -30,7 +30,7 @@ extern void G__set_cpp_environmentex2aDict();
 
 #include "TObject.h"
 #include "TMemberInspector.h"
-#include "monitoring.h"
+#include <monitoring.h>
 #include <algorithm>
 namespace std { }
 using namespace std;

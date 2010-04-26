@@ -78,6 +78,8 @@ set (lasa_link_libraries "")
 include_directories (
   ${LASA_SOURCE_DIR}
   ${LASA_SOURCE_DIR}/analysis
+  ${LASA_SOURCE_DIR}/implement
+  ${LASA_SOURCE_DIR}/external/ftd2xx
   )
 
 ##__________________________________________________________
@@ -169,44 +171,13 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
 ##
 ## =============================================================================
 
-##__________________________________________________________
-##                                                   liblasa
-
-add_library (lasa
-  monitoring.cxx
-  ex2aDict.cxx
-  arrival_direction.cxx
-  )
-
-target_link_libraries (lasa ${lasa_link_libraries})
-
-##__________________________________________________________
-##                                              main program
-
-add_executable (lasa_main
-  main_program.cxx
-  )
-
-target_link_libraries (lasa_main lasa)
-
-##__________________________________________________________
-##                                           Sub-directories
-
-add_subdirectory (analysis)
+add_subdirectory (external)
+add_subdirectory (implement)
+add_subdirectory (apps)
 
 if (LASA_ENABLE_TESTING)
   add_subdirectory (test)
 endif (LASA_ENABLE_TESTING)
-
-##__________________________________________________________
-##                                              Installation
-
-install (
-  TARGETS lasa lasa_main
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
 
 ## =============================================================================
 ##
