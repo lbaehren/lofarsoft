@@ -43,7 +43,7 @@ endif (HAVE_FFTW3)
 
 foreach (cr_module ${cr_modules})
   ## list of source files for this module
-  FILE (GLOB cr_${cr_module} ${cr_module}/*.cc)
+  FILE (GLOB cr_${cr_module} ${cr_module}/*.cc ${cr_module}/*.tcc)
   ## list of header files for this module
   FILE (GLOB cr_${cr_module}_headers ${cr_module}/*.h)
   ## add to global source files list

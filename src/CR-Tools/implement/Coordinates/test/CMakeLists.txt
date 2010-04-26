@@ -28,7 +28,7 @@ foreach (src ${tests})
   ## compiler instructions
   add_executable (${src} ${src}.cc)
   ## linker instructions
-  target_link_libraries (${src} cr)
+  target_link_libraries (${src} cr ${cr_link_libraries})
   ## testing
   add_test (${src} ${src})
 endforeach (src)

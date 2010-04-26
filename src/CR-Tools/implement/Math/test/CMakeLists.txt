@@ -20,7 +20,10 @@ set (tests
 foreach (src ${tests})
   ## build executable
   add_executable (${src} ${src}.cc)
-  target_link_libraries (${src} cr)
+  target_link_libraries (${src}
+    cr
+    ${cr_link_libraries}
+    )
   ## testing
   add_test (${src} ${src})
 endforeach (src)
