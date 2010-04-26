@@ -302,23 +302,26 @@ class bbs(LOFARrecipe):
                 except CalledProcessError:
                     self.logger.warn("No logs moved on %s" % (node))
 
-            totals = defaultdict(list)
-            counts = defaultdict(list)
+            totals = defaultdict(lambda: defaultdict(list))
+            counts = defaultdict(lambda: defaultdict(list))
             for log_file in glob.glob("%s/%s_%s" % (
                 log_root, self.inputs["key"], "kernel*log*")
             ):
                 self.logger.debug("Processing %s" % (log_file))
                 ms_name = ""
                 with closing(open(log_file)) as file:
+                    step = -1
                     for line in file:
                         if line.split(":") and line.split(":")[0] == "INFO - Observation part":
                             ms_name = os.path.basename(line.split()[6].rstrip())
                         line = line.split()
                         # Try to extract profiling information from file.
                         try:
+                            if line[0] == "Step:":
+                                step += 1
                             if line[2] == "TIMER":
-                                totals[line[4]].append(float(line[6]))
-                                counts[line[4]].append(int(line[8]))
+                                totals[step][line[4]].append(float(line[6]))
+                                counts[step][line[4]].append(int(line[8]))
                         except IndexError:
                             pass
                 if not ms_name:
@@ -333,12 +336,12 @@ class bbs(LOFARrecipe):
                     )
                     utilities.move_log(log_file, destination)
 
-            for key in totals.iterkeys():
-                values = totals[key]
-                self.logger.info(
-                    "%s: count: %d, total: %f, mean: %f, std: %f" %
-                    (key, numpy.sum(counts[key]), numpy.sum(values), numpy.mean(values), numpy.std(values))
-                )
+            for step in totals.iterkeys():
+                for key, values in totals[step].iteritems():
+                    self.logger.info(
+                        "Step: %d :: %s: count: %d, total: %f, mean: %f, std: %f" %
+                        (step, key, numpy.sum(counts[step][key]), numpy.sum(values), numpy.mean(values), numpy.std(values)
+                    )
 
             try:
                 self.logger.debug("Removing temporary log directory")
