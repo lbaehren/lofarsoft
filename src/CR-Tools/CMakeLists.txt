@@ -669,6 +669,10 @@ if (HAVE_LIBUTIL)
   list (APPEND cr_link_libraries ${HAVE_LIBUTIL})
 endif (HAVE_LIBUTIL)
 
+if (HAVE_LIBDL)
+  list (APPEND cr_link_libraries ${HAVE_LIBDL})
+endif (HAVE_LIBDL)
+
 if (HAVE_LIBM)
   list (APPEND cr_link_libraries ${HAVE_LIBM})
 endif (HAVE_LIBM)
