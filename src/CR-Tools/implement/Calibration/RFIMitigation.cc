@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2006                                                    *
- *   Kalpana Singh (<k.singh@astro.ru.nl>)                                 *
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2010                                                  *
+ *   maaijke mevius (<mail>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,468 +21,380 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #include <Calibration/RFIMitigation.h>
 
-namespace CR { //namespace CR -- begin
-
-// =============================================================================
-//
-//  Construction
-//
-// =============================================================================
-
-RFIMitigation :: RFIMitigation ()
-{;}   
-
-//Argumented Consturctor
-
-
-RFIMitigation :: RFIMitigation( const Matrix<DComplex>& spectra,
-				const uint& nOfSegments,
-		                const uint& dataBlockSize )
-				
-{ 
-  //FilterType:: filter filterType_p;
+namespace CR { // Namespace CR -- begin
   
-  Matrix<DComplex> gainValues;
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
   
-  //Int& nOfSegments ;   
+  RFIMitigation::RFIMitigation ()
+  {;}
   
-  //uInt strength_filter ;
-}
-
-// =============================================================================
-//
-//  Destruction
-//
-// =============================================================================
-
-RFIMitigation :: ~RFIMitigation()
-{;} 
-
-// =============================================================================
-//
-//  Methods
-//
-// =============================================================================
-
-// ------------------------- getinterpolatedGains-------------------------------------
-
-
- Matrix<Double> getAbsoluteGainValues( const Matrix<DComplex>& spectra ) 
- 
- {
- Matrix<Double> absoluteValueArray( amplitude( spectra )) ;
- 
- return absoluteValueArray ;
- 
- }
- 
- 
- Vector<uint> RFIMitigation ::getSegmentationVector( const uint& dataBlockSize, 
- 				                    const uint& nOfSegments ) 
- {
- 
- try {
- 
- // nOfSegments = 25; optimized no. of segment for each data blocksize
- Int fft_Length = ( dataBlockSize/2 )+1 ;
- 
- Vector<uint> segmentation( nOfSegments-1 );
- 
- Int frequencyChannels = int( fft_Length/ nOfSegments ) ;
- 
- for( uint ns=0; ns <( nOfSegments -1 ); ns++ ) {
- 
-  segmentation( ns ) = ( ns +1 )*frequencyChannels ;
+  RFIMitigation::RFIMitigation (RFIMitigation const &other)
+  {
+    copy (other);
+  }
+  
+  // ============================================================================
+  //
+  //  Destruction
+  //
+  // ============================================================================
+  
+  RFIMitigation::~RFIMitigation ()
+  {
+    destroy();
+  }
+  
+  void RFIMitigation::destroy ()
+  {;}
+  
+  // ============================================================================
+  //
+  //  Operators
+  //
+  // ============================================================================
+  
+  //_____________________________________________________________________________
+  //                                                                    operator=
+  
+  RFIMitigation& RFIMitigation::operator= (RFIMitigation const &other)
+  {
+    if (this != &other) {
+      destroy ();
+      copy (other);
     }
-  
-    return segmentation ;
+    return *this;
   }
-  catch ( AipsError x ) {
-  cerr << "RFIMitigation :: getSegmentationVector " << x.getMesg () << endl ;
-  return Vector<uint> ();
- }
-}
-
- 
-Matrix<Double> RFIMitigation :: getinterpolatedGains( const Matrix<DComplex>& spectra,
-						     const uint& dataBlockSize,
-				                     const uint& nOfSegments  ) 
-
-{
-  try {
- 
-  RFIMitigation rf;
   
-  Matrix<Double> absoluteArray ( amplitude ( spectra )) ;
+  //_____________________________________________________________________________
+  //                                                                         copy
   
-  Vector<uint> segmentationIndices = rf.getSegmentationVector( dataBlockSize, nOfSegments ) ;
-   
-   uInt segCount = segmentationIndices.nelements()+1;
-   
-   uInt nOfRows = absoluteArray.nrow();
-   // no. of columns of the segmentation matrix
-   uInt nOfColumns = absoluteArray.ncolumn();
-     
-   uInt ele =1 ;
-   
-   uInt segmentInit = 0;
-   
-   uInt segmentFinal;
-   
-   Matrix<Double> filteredMatrix (segCount, nOfColumns) ;
-   
-   Vector<Double> filteredIndexMedian( segCount );
-   
-   Vector<Double> filteredDataIndexInit( segCount+1 );
-   
-   Vector<Double> filteredDataIndexFinal( segCount );
-   
-   for(uint i=0; i< segCount; i++) {
-   
-   filteredDataIndexInit( i )= segmentInit ;
-   
-   if( i == ( segCount-1 )) {
-   segmentFinal = nOfRows -1;
-   filteredDataIndexFinal( i )= segmentFinal;
-   filteredIndexMedian( i )=( filteredDataIndexInit( i )+ filteredDataIndexFinal( i ))/2;
-   }
-   else {
-   segmentFinal = segmentationIndices( ele-1 ) ;
-   filteredDataIndexFinal( i )= segmentFinal;
-   filteredIndexMedian( i )=( filteredDataIndexInit( i )+ filteredDataIndexFinal( i ))/2;
-    } ;
-   
-     filteredDataIndexInit( i+1 )= filteredDataIndexFinal( i )+1;
-     
-  uint segmentLength = ( segmentFinal - segmentInit + 1) ;
-   
-    Matrix<Double> segmentMatrix( absoluteArray(Slice(segmentInit, segmentLength),
-   					       Slice(0, nOfColumns) ) );
-					       
-   //StatisticsFilter <Double> mf ( filterStrength, filterType_p );
-    Bool sorted( False );
-    Bool takeEvenMean( False );
-    Bool inPlace( False );
+  void RFIMitigation::copy (RFIMitigation const &other)
+  {;}
+
+  // ============================================================================
+  //
+  //  Parameters
+  //
+  // ============================================================================
+  
+  //_____________________________________________________________________________
+  //                                                                      summary
+  
+  void RFIMitigation::summary (std::ostream &os)
+  {
+    os << "[RFIMitigation] Summary of internal parameters." << std::endl;
+  }
+
+  // ============================================================================
+  //
+  //  Methods
+  //
+  // ============================================================================
+
+  void RFIMitigation::doDownsampling(const Vector<Double> &spectrumVec,
+				    const uint nr_samples,
+				    Vector<Double> &amplVec,
+				    Vector<Double> &rmsVec)
+  {
     
-    for ( uint j = 0; j < nOfColumns; j++) {
-    
-    Vector<Double> segmentVector = segmentMatrix.column(j);
-    
-     filteredMatrix (i,j) = median( segmentVector,sorted,takeEvenMean,inPlace );
-    } 
-     segmentInit = segmentFinal+1;
-    ele = ele+1;
+    if(!amplVec.size()==nr_samples){
+      std::cerr << "[RFIMitigation] Warning, amplVec size wrong, resizing." << std::endl;
+    //warning
+      amplVec.resize(nr_samples);
     }
-   
-  uInt nOfRowsFilteredGains = filteredMatrix.nrow() ;
-  
-  Vector<Double> xin( nOfRowsFilteredGains );
-  
-  Vector<Double> xout( nOfRows );
-  
-  Vector<Double> yout( nOfRows );
-  
-  for( uint k = 0; k< nOfRows; k++){
-  
-  xout( k )= k*1.0000;
-  }
-  
-   Matrix<Double> interpolatedGains( nOfRows, nOfColumns, 0.0);
-  
-   for( uint p =0; p< segCount; p++){
-  
-     xin( p )= filteredIndexMedian( p );
-  }
- 
-  for( uint column = 0; column< nOfColumns ; column++ ){
-  
-  Vector<Double> yin = filteredMatrix.column( column );
-  
-  InterpolateArray1D<Double,Double>::interpolate( yout,xout,xin,yin,InterpolateArray1D<Double,Double>::linear);
-  
-   interpolatedGains.column( column ) = yout;
-  }
-  
-  return interpolatedGains ; 
- }
-  catch ( AipsError x ) {
-  cerr << "RFIMitigation :: getFilteredGainValues " << x.getMesg () << endl ;
-  return Matrix<Double> ();
-  }
-  
-} // end of the function getinterpolatedGains
-
-
- 
-
-// ------------------------- getdifferenceSpectra-------------------------------------
-			  
- Matrix<Double> RFIMitigation :: getdifferenceSpectra( const Matrix<DComplex>& spectra,
- 						      const uint& dataBlockSize,
-				                      const uint& nOfSegments )
- {
- 
- try {
-  
-  RFIMitigation rf;
-  
-  Matrix<Double> gainValues( amplitude( spectra ) );
-  // no. of rows of the segmentation matrix
-  uint rows_segArray = gainValues.nrow();
-  
-  // no. of columns of the segmentation matrix
-  uint columns_segArray = gainValues.ncolumn();		
-  
-  Vector<uint> segmentationIndices = rf.getSegmentationVector( dataBlockSize, nOfSegments ) ;
-     
-  Matrix<Double> derivedSpectra = rf. getinterpolatedGains( spectra, 
-  							   dataBlockSize, 
-							   nOfSegments ) ;
-  
-  // no. of rows of the interpolated segmented matrix
-  uInt rows_derivedSpectra = derivedSpectra.nrow();
-  
-  // no. of columns of the interpolated segmented matrix
-  uInt columns_derivedSpectra = derivedSpectra.ncolumn();   
-  
-  Matrix<Double> spectra ( rows_derivedSpectra, columns_derivedSpectra, 0.0);
-  
-  if ( (rows_segArray == rows_derivedSpectra) &&
-       (columns_segArray == columns_derivedSpectra) ) {
-    
-    for( uInt column=0; column< columns_segArray; column++) {
-      
-      segmentInit = segmentFinal ;
-      
-      for(uInt row=0; row < rows_segArray; row++){
+    if(!rmsVec.size()==nr_samples){
+      //warning
+       std::cerr << "[RFIMitigation] Warning, rmsVec size wrong, resizing." << std::endl;
+       rmsVec.resize(nr_samples);
+    }
+    uint nr_channels = spectrumVec.size();
+    uint nr_channels_per_segment = nr_channels/nr_samples;
+    int extra_channels= (nr_channels%nr_samples); 
+    if(extra_channels > 0){
+      std::cerr << "[RFIMitigation] Warning, nr_samples does not match. Putting extra channels in last bin" << std::endl;
+      ;//warning: add extra channels to last bin
+    }
+    Vector<Double> tempVec(nr_channels_per_segment);
+    for(uint isamp=0;isamp<nr_samples;isamp++)
+      {
+	for(uint ichan=0;ichan<nr_channels_per_segment;ichan++){
+	  tempVec(ichan)=spectrumVec(isamp*nr_channels_per_segment+ichan);
+	  
+	}
+	if(isamp==(nr_samples-1))
+	  {//add extra channels to last bin
+	    tempVec.resize(nr_channels_per_segment+extra_channels);
+	    for(uint ichan=nr_channels_per_segment;ichan<extra_channels+nr_channels_per_segment;ichan++){
+	      tempVec(ichan)=spectrumVec(isamp*nr_channels_per_segment+ichan);
+	      
+	    }
+	  }
+	//now calculate RMS and mean
+	amplVec(isamp)= mean(tempVec);
+	rmsVec(isamp) = rms(tempVec);
 	
-	spectra( row, column) = gainValues( row, column )-derivedSpectra( row, column);
+      }
+    
+    
+  }
+  
+  
+  void RFIMitigation::doBaselineFitting(const Vector<Double> &amplVec,
+				       const Vector<Double> &rmsVec,
+				       const Double rmsThresholdValue,
+				       Vector<Double> &fitVec,
+				       int method){
+    assert(amplVec.size() == rmsVec.size());
+    uint nr_channels = fitVec.size();
+    uint nr_samples = amplVec.size();
+    uint nr_channels_per_segment = nr_channels/nr_samples;
+    assert(nr_channels_per_segment>0);
+    int extra_channels= (nr_channels%nr_samples); 
+    if(extra_channels > 0){
+      std::cerr << "[RFIMitigation] Warning, nr_samples does not match. Assuming extra channels in last bin" << std::endl;
+      //warning: assume extra channels in last bin
+    }
+    uint eff_nr_samples=0;
+    //first get effective nr of samples
+    for( uint isamp=0;isamp<nr_samples;isamp++)
+      if(rmsVec(isamp)<rmsThresholdValue)
+	eff_nr_samples++;
+    
+    Vector<Double> xin(eff_nr_samples);
+    Vector<Double> yin(eff_nr_samples);
+    Vector<Double> xout(nr_channels);
+    
+    for( uint ichan=0;ichan<nr_channels;ichan++)
+      xout(ichan)= Double(ichan);
+    uint eff_isamp=0;
+    for( uint isamp=0;isamp<nr_samples-1;isamp++){
+      if(rmsVec(isamp)<rmsThresholdValue){//only add data point if rms below treshold
+	xin(eff_isamp)=isamp+nr_channels_per_segment*0.5;
+	yin(eff_isamp) = amplVec(isamp);
+	eff_isamp++;
       }
     }
-  } else {
-    cerr << "[RFIMitigation::differenceSpectra ]"
-	 << " Arguments are of incompatible dimensions. "
-	 << endl;
-  }
-
-  return spectra ;
-  }
-   
-  catch ( AipsError x ) {
-  cerr << "RFIMitigation :: getdifferenceSpectra " << x.getMesg () << endl ;
-  return Matrix<Double> ();
-  }
- 
- } // end of the function differenceSpectra
- 
- 
-
-// ------------------------------ getnormalizeSpectra---------------------------------
-
- 
- Matrix<Double> RFIMitigation :: getnormalizeSpectra( const Matrix<DComplex>& spectra,
- 						     const uint& dataBlockSize,
-				                     const uint& nOfSegments )
- 	        		  		     
-{
- 
- try {
- 
-  RFIMitigation rf;
-  
-  Matrix<Double> gainValues( amplitude( spectra ) );
-  
-  // no. of rows of the segmentation matrix
-  uInt rows_segArray = gainValues.nrow();
-  
-  // no. of columns of the segmentation matrix
-  uInt columns_segArray = gainValues.ncolumn();		
-  
-  Vector<uint> segmentationIndices = rf.getSegmentationVector( dataBlockSize, nOfSegments ) ;
-     
-  Matrix<Double> derivedSpectra = rf. getinterpolatedGains( spectra, 
-  							   dataBlockSize, 
-							   nOfSegments ) ;
-  
-  // no. of rows of the interpolated segmented matrix
-  uInt rows_derivedSpectra = derivedSpectra.nrow();
-  
-  // no. of columns of the interpolated segmented matrix
-  uInt columns_derivedSpectra = derivedSpectra.ncolumn();   
-  
-  Int wasDivError = 0;
- 
-  Int Counter = 0;											  
- 
-   //define a matrix to store the normalize spectra
-  Matrix<Double> normalizeSpectra( rows_segArray, columns_segArray, 0.0); 
- 
-  if( (rows_segArray == rows_derivedSpectra) && 
-     (columns_segArray == columns_derivedSpectra) ){
- 
-  for (uInt segcolumn = 0; segcolumn< columns_segArray; segcolumn++ ){
- 
-   for (uInt segrow = 0; segrow< rows_segArray; segrow++ ){
- 
-  //division by zero error flagging
- 
-     if ( derivedSpectra( segrow,segcolumn )== 0 )
- 
-       wasDivError++;
- 
-     if( wasDivError ){
- 
-  Counter++;
-  
- normalizeSpectra( segrow, segcolumn) = 0.0 ;
- 
- cerr << "[Error: normalizeSpectra ]"
-      << "Division by zero."
-      << Counter
-      << "errors out of"
-      << gainValues.nelements()
-      << "elements."
-      << endl;
-  }
-else {
-        normalizeSpectra ( segrow, segcolumn)= gainValues( segrow,segcolumn)/derivedSpectra( segrow, segcolumn) ;
-//	cout << segrow << segcolumn << gainValues( segrow,segcolumn)<< derivedSpectra( segrow, segcolumn)
-//	       << normalizeSpectra (segrow, segcolumn) << endl ;
-	}
-	/*
-	  It must be set to zero otherwise in every iteration will be satisfied
-	  and else condition, i.e., division will never be incorporated "counter"
-	  will count no. of times you have done division by zero.
-	*/
-	wasDivError = 0;
-      } // end of the for loop for rows
-    } // end of the for loop for columns
-  
-    } // end of the outer if loop
-
-else {
- cerr << "[Error: normalizeSpectra ]"
-      << "Arguments are incompatible dimensions"
-      << endl;
-     }
-     
-     return normalizeSpectra ;
-   }
+    //treat last channel separately
+    if(rmsVec(nr_samples-1)<rmsThresholdValue){//only add data point if rms below treshold
+      xin(eff_isamp)=nr_samples-1+(nr_channels_per_segment+extra_channels)*0.5;
+      yin(eff_isamp) = amplVec(nr_samples-1);
+    }
     
-  catch ( AipsError x ) {
-  cerr << "RFIMitigation :: getNormalizeSpectra " << x.getMesg () << endl ;
-  return Matrix<Double> ();
-  }
- } // end of the function getNormalizeSpectra
-      
- 
-
-
-
-
-// -------------------------- retraceOriginalSpectra---------------------------------
-
-
-
-Matrix<Double> RFIMitigation :: getOptimizedSpectra( const Matrix<DComplex>& spectra,
-					             const uint& dataBlockSize,
-				                     const uint& nOfSegments )
-
-{
- 
- try {
-     
-  RFIMitigation rf;
-  
-  Matrix<Double> gainValueSpectra = rf.getnormalizeSpectra( spectra,
- 						         dataBlockSize,
-				                         nOfSegments );
-							 
-   uInt nOfRows = gainValueSpectra.nrow();
-   
-   uInt nOfColumns = gainValueSpectra.ncolumn();
- 
-   Matrix<Double> spectra( nOfRows, nOfColumns, 1.0 );
-   
-   Vector<uint> segmentationIndices = rf.getSegmentationVector( dataBlockSize, 
-   							       nOfSegments ) ;
-        
-   for( uInt i =0; i< nOfColumns ; i++ ) {
-   
-   uInt segCount = segmentationIndices.nelements()+1 ;	 
-      
-   Int ele = 1;
-   
-   Int segmentInit = 0;
-   
-   Int segmentFinal ;
-  
-   Double stdDeviationFinal( 1e35 );
-      
-   Double stdDeviationValue( 0.0);
-   
-   //Double mean(1.000);
-
-   Vector<Double> spectraColumn = gainValueSpectra.column( i );
-   
-   for(uInt j = 0; j< segCount ; j++) {
-      
-   if( j == ( segCount -1 )) {
-     segmentFinal = nOfRows-1 ;
-     //cout<< " segment final :" << segmentFinal << endl ;
-         }
-     else {
-     segmentFinal = segmentationIndices ( ele -1);
-     
+    int casamethod;
+    switch(method){
+    case RFIMitigation::linear:
+      casamethod=  InterpolateArray1D<Double,Double>::linear;
+      break;
+    case RFIMitigation::cubic:
+      casamethod=  InterpolateArray1D<Double,Double>::cubic;
+      break;
+    case RFIMitigation::spline:
+      casamethod=  InterpolateArray1D<Double,Double>::spline;
+      break;
+    default:
+      casamethod=  InterpolateArray1D<Double,Double>::linear;
+      break;
     }
-      
-      Int segmentLength = (segmentFinal - segmentInit + 1) ;
-      
-     Vector<Double> segmentedVector( spectraColumn ( Slice( segmentInit, segmentLength ) ) );
-     
-     stdDeviationValue = stddev( segmentedVector ) ;
-      
-      if ( stdDeviationValue < stdDeviationFinal ){
-   
-     stdDeviationFinal = stdDeviationValue ; 
-     }
-   
-   //  cout<< " Final standard deviation value : " << stdDeviationFinal << endl; 
-     
-   segmentInit = segmentFinal + 1;
-   
-   ele = ele + 1 ;
-    }  
-     
-   uInt spectraVecElements = spectraColumn.nelements() ;
-   
-   Vector<Double> rfirejectedspectra( spectraVecElements, 1.0 );
-   
-    for( uInt k = 0; k < spectraVecElements ; k++ ) {    
-   
-   if(  spectraColumn( k ) > 5*stdDeviationFinal ) {
-   
-      rfirejectedspectra( k ) = stdDeviationFinal/ spectraColumn( k ) ;
-      
-       }
-    }
-        
-    spectra.column(i) = rfirejectedspectra ;
+    //now do the interpolation
     
-  } 
-   
-  return spectra ;
-    }
-
- catch ( AipsError x ) {
-  cerr << "RFIMitigation :: getRFIRemovedSpectra " << x.getMesg () << endl ;
-  return Matrix<Double> ();
+    InterpolateArray1D<Double,Double>::interpolate(fitVec,xout,xin,yin,casamethod);
+    
+    
+    
   }
+  
+  void RFIMitigation::doBaselineFitting(const Vector<Double> &spectrumVec,
+				       const uint nr_samples,
+				       const Double rmsThresholdValue,
+				       Vector<Double> &fitVec,
+				       int method){
+    Vector<Double> amplVec(nr_samples);
+    Vector<Double> rmsVec(nr_samples);
+    RFIMitigation::doDownsampling(spectrumVec,
+				 nr_samples,
+				 amplVec,
+				 rmsVec);
+    
+    RFIMitigation::doBaselineFitting(amplVec,
+				    rmsVec,
+				    rmsThresholdValue,
+				    fitVec,
+				    method);
+  }
+
+
+
+  
+  void RFIMitigation::doRFIFlagging(const Vector<Double> &spectrumVec,
+				   const Vector<Double> &fitVec,
+				   const Double flagThresholdValue,
+				   Vector<Int> &flagVec){
+
+    assert(spectrumVec.size()==fitVec.size());
+    uint nr_channels=fitVec.size();
+    
+    if(!(flagVec.size()==nr_channels)){
+      std::cerr << "[RFIMitigation] Warning, flagVec size wrong, resizing." << std::endl;
+      //warning
+      flagVec.resize(nr_channels);
+    }
+    for(uint ichan=0;ichan<nr_channels;ichan++){
+      if(fitVec(ichan)!=0)   flagVec(ichan) = (spectrumVec(ichan)/fitVec(ichan))>flagThresholdValue;
+      else flagVec(ichan)=1;
+    }
+    
+  }
+
+  
+
+  void RFIMitigation::doRFIFlagging(const Vector<Double> &spectrumVec,
+				   const uint nr_samples,
+				   const Double rmsThresholdValue,
+				   const Double flagThresholdValue,
+				   Vector<Int> &flagVec,
+				   int method){
+    Vector<Double> amplVec(nr_samples);
+    Vector<Double> rmsVec(nr_samples);
+    RFIMitigation::doDownsampling(spectrumVec,
+				 nr_samples,
+				 amplVec,
+				 rmsVec);
  
- } // end of the function retraceOriginalSpectra
+    uint nr_channels= spectrumVec.size();
+    Vector<Double> fitVec(nr_channels);
+    RFIMitigation::doBaselineFitting(amplVec,
+				    rmsVec,
+				    rmsThresholdValue,
+				    fitVec,
+				    method);
+    
+    RFIMitigation::doRFIFlagging(spectrumVec,
+				fitVec,
+				flagThresholdValue,
+				flagVec);
+  }
+      
+
+  
+
+  void RFIMitigation::doRFIMitigation(const Vector<Double> &spectrumVec,
+				     const Vector<Double> &fitVec,
+				     const Vector<Int> &flagVec,
+				     Vector<Double> &mitigatedSpectrumVec){
+    assert(spectrumVec.size()==fitVec.size());
+    assert(spectrumVec.size()==flagVec.size());
+    uint nr_channels=fitVec.size();
+    
+    if(!(mitigatedSpectrumVec.size()==nr_channels)){
+      std::cerr << "[RFIMitigation] Warning, mitigatedSpectrumVec size wrong, resizing." << std::endl;
+      //warning
+      mitigatedSpectrumVec.resize(nr_channels);
+    }
+    
+    for(uint ichan=0;ichan<nr_channels;ichan++)
+      {
+	if(flagVec(ichan))
+	  mitigatedSpectrumVec(ichan) = fitVec(ichan);
+	else
+	  mitigatedSpectrumVec(ichan) = spectrumVec(ichan);
+      }
+    
+  }
+
+  void RFIMitigation::doRFIMitigation(const Vector<Double> &spectrumVec,
+				     const Vector<Int> &flagVec,
+				     const Double fitValue,
+				     Vector<Double> &mitigatedSpectrumVec){
+    assert(spectrumVec.size()==flagVec.size());
+    uint nr_channels=spectrumVec.size();
+    
+    if(!(mitigatedSpectrumVec.size()==nr_channels)){
+      std::cerr << "[RFIMitigation] Warning, mitigatedSpectrumVec size wrong, resizing." << std::endl;
+      //warning
+      mitigatedSpectrumVec.resize(nr_channels);
+    }
+    
+    for(uint ichan=0;ichan<nr_channels;ichan++)
+      {
+	if(flagVec(ichan))
+	  mitigatedSpectrumVec(ichan) = fitValue;
+	else
+	  mitigatedSpectrumVec(ichan) = spectrumVec(ichan);
+      }
+    
+  }
+
+  
+
+
+  void RFIMitigation::doRFIMitigation(const Vector<Double> &spectrumVec,
+				     const uint nr_samples,
+				     const Double rmsThresholdValue,
+				     const Double flagThresholdValue,
+				     Vector<Double> &mitigatedSpectrumVec,
+				     int method){
+     
+    uint nr_channels= spectrumVec.size();
+    Vector<Double> fitVec(nr_channels);
+    RFIMitigation::doBaselineFitting(spectrumVec,
+				    nr_samples,
+				    rmsThresholdValue,
+				    fitVec,
+				    method);
+    Vector<Int> flagVec(nr_channels);
+    RFIMitigation::doRFIFlagging(spectrumVec,
+				fitVec,
+				flagThresholdValue,
+				flagVec);
+    
+    RFIMitigation::doRFIMitigation(spectrumVec,
+				  fitVec,
+				  flagVec,
+				  mitigatedSpectrumVec);
+    
+				  
+  }
+
+  
+  void RFIMitigation::doRFIMitigation(const Vector<Double> &spectrumVec,
+				     const uint nr_samples,
+				     const Double rmsThresholdValue,
+				     const Double flagThresholdValue,
+				     const Double fitValue,
+				     Vector<Double> &mitigatedSpectrumVec,
+				     int method){
+     
+    uint nr_channels= spectrumVec.size();
+    Vector<Double> fitVec(nr_channels);
+    RFIMitigation::doBaselineFitting(spectrumVec,
+				    nr_samples,
+				    rmsThresholdValue,
+				    fitVec,
+				    method);
+    Vector<Int> flagVec(nr_channels);
+    RFIMitigation::doRFIFlagging(spectrumVec,
+				fitVec,
+				flagThresholdValue,
+				flagVec);
+    
+    RFIMitigation::doRFIMitigation(spectrumVec,
+				  flagVec,
+				  fitValue,
+				  mitigatedSpectrumVec);
+    
+				  
+  }
+
+
+
+  
+
  
- }  // Namespace CR -- end
+
+} // Namespace CR -- end

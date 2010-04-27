@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2006                                                    *
- *   Kalpana Singh (<k.singh@astro.ru.nl>)                                 *
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2010                                                  *
+ *   maaijke mevius (<mail>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,40 +21,21 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
+#ifndef RFIMITIGATION_H
+#define RFIMITIGATION_H
 
-#ifndef _RFIMITIGATION_H_
-#define _RFIMITIGATION_H_
-
-// AIPS++ header files
-#include <casa/aips.h>
-#include <casa/iostream.h>
-#include <casa/fstream.h>
-#include <casa/string.h>
+// Standard library header files
+#include <iostream>
+#include <string>
+#include <assert.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Vector.h>
-#include <casa/BasicSL/Complex.h>
-
-#include <casa/Quanta.h>
-#include <scimath/Functionals/Interpolate1D.h>
-#include <scimath/Functionals/ScalarSampledFunctional.h>
 #include <scimath/Mathematics/InterpolateArray1D.h>
-#include <tables/Tables/Table.h>
-#include <tables/Tables/TableDesc.h>
-#include <tables/Tables/SetupNewTab.h>
-#include <tables/Tables/ScalarColumn.h>
-#include <tables/Tables/ScaColDesc.h>
-#include <tables/Tables/ScaRecordColDesc.h>
-#include <tables/Tables/ArrColDesc.h>
-#include <tables/Tables/ArrayColumn.h>
 
-#include <Filters/StatisticsFilter.h>
 
-#include <casa/namespace.h>
-
-namespace CR { //namespace CR -- begin
+using namespace casa;
+namespace CR { // Namespace CR -- begin
   
   /*!
     \class RFIMitigation
@@ -60,275 +44,279 @@ namespace CR { //namespace CR -- begin
     
     \brief Brief description for class RFIMitigation
     
-    \author Kalpana Singh
-    
-    \date 2006/03/15
-    
+    Class to remove RFI from a frequency spectrum. Based on the old code developed by Kalpana Singh. 
+
+    \author maaijke mevius
+
+    \date 2010/04/23
+
     \test tRFIMitigation.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+      <li>[start filling in your text here]
+    </ul>
     
     <h3>Synopsis</h3>
     
-    Extract a gaincurve from a complex spectra of \f$N_{\rm Ant}\f$ array elements. 
-    Also provides the functionality to normalize a complex gain spectra by the 
-    extracted the gaincurves. Then normalized gain spectra is subjected for the rejection
-    of noise signals by adopting a certain kind of filter. 
+    <h3>Example(s)</h3>
     
-    The gain curve is extracted by the following method:
-    
-    Given a discrete complex spectrum
-    \f[
-    f[\nu_{k}] = A[\nu_{k}] \exp(i \phi[\nu_{k}])
-    \f]
-    where
-    \f[
-    k=0, 1, 2...(N_{\rm FreqChan}-1)
-    \f]
-    and
-    \f[
-    \nu_{\rm Bandwidth} \equiv \nu_{(N_{\rm FreqChan}-1)}-\nu_{0}
-    \f]
-    we extract the amplitudes of the terms,
-    \f$A[\nu_{k}]\f$, and call these the terms of the absolute spectrum.
-    The absolute spectrum is then divided into
-    \f$N_{\rm Segments}\f$ segments, referred to as frequency sub bands. 
-    Each sub band consists of \f$M_{\rm FreqChan}\f$ members, where
-    \f[
-    M_{\rm FreqChan} = \frac{N_{\rm FreqChan}}{N_{\rm SubBands}}
-    \f]
-    According to the scanning method ( by impelementing median filter) one of these
-    members is chosen as representative of the gain curve on that sub band. 
-    
-    A natural cubic spline is used to interpolate the gain curve for any
-    frequency sub bands across the original segment. 
-    Also provides the functionality to normalize a complex gain spectra by
-    the extracted the gaincurves. Then normalize gain spectra is subjected 
-    for the rejection of noise signals. 
-    
-    <h3>Terminology</h3>
-    
-    In the RFIMitigation class, we employ specific terminology. To
-    clarify subtle differences, the important terms
-    (and their derivatives) are explained below in logical groups:
-    <ul>
-      <li><em>segmentationVector</em>
-      <li><b>gainValues</b> --  Complex spectra of \f$N_{\rm Ant}\f$ array
-      elements with rows equal to number of frequency channels = (dataBlockSize/2)+1
-      and columns define the number of antennas selected for processing. 
-      <li><b> dataBlockSize </b> -- Has to be provided by the user, which will
-      define number of frequency channels.
-      <li><b> nOfSegments </b> -- no of segments in which array of gain curves has
-      to be segmented, default value is 25.
-    </ul>
-
-    <h3>Motivation</h3>
-    
-    This class was motivated by two needs:
-    <ol>
-      <li>We wish to to remove RFIs from gaincurves extracted from the antennas.
-      To do this, we need some relative measure of gain.
-      <li>We wish to flag regions of RFI. The method applied is to normalize a
-      spectrum by dividing it by its underlying gain curve. From this normalized
-      spectrum, we are able to easily identify RFI flooded regions. And then
-      deviations from average gaincurves is measured, minimum noise levl has been
-      calculated, and for the frequencyindices where RFI is identified that
-      gaincurve values is substituted by the inverse of the normalized gaincurve
-      value. 
-    </ol>
-  */
-  
-  
+  */  
   class RFIMitigation {
     
-  private:
-    
-    //! Index of the first segment element
-    uint segmentInit;
-    //! Index of the last/final segment element
-    uint segmentFinal;
-    
   public:
-    
-    // --- Construction ----------------------------------------------------------
-    
     /*!
-      \brief Constructor without argument
+      Interpolation can be done using the following methods:
+      Linear (default unless there is only one data point)
+      Cubic Polynomial
+      Natural Cubic Spline
+      (see casacore InterpolateArray1D)
     */
+
+    enum InterpolationMethod {
+      linear,
+      cubic,
+      spline
+    };
+   
+    // === Construction =========================================================
+    
+    //! Default constructor
     RFIMitigation ();
     
     /*!
-      \brief Argumented Constructor
+      \brief Copy constructor
       
-      Sets the data array of the gain curves to the 2-dimensional specifications, 
-      number of rows indicate the number of frequency indices, however no of columns 
-      indicate the number of antennas to be scanned.
-      
-      \param spectra	--	two dimensional array of data that depends on 
-      number of antennas and the whole frequency range
-      to be scanned.
-      
-      \param nOfSegments    --      No of segments in which the gainvalue array has to be divided.
-      
-      \param dataBlockSize  --	dimension of the array of gaincurves,number of frequency channels are related 
-      like frequency channels = (dataBlockSize/2)+1 .
+      \param other -- Another RFIMitigation object from which to create this new
+             one.
     */
-    RFIMitigation (const Matrix<DComplex>& spectra,
-		   const uint& nOfSegments,
-		   const uint& dataBlockSize );
+    RFIMitigation (RFIMitigation const &other);
+    
+    // === Destruction ==========================================================
 
-    // --- Destruction -----------------------------------------------------------
+    //! Destructor
+    ~RFIMitigation ();
+    
+    // === Operators ============================================================
     
     /*!
-      \brief Destructor
+      \brief Overloading of the copy operator
+      
+      \param other -- Another RFIMitigation object from which to make a copy.
     */
-    virtual ~RFIMitigation ();
-
-  // --- Computation methods ----------------------------------------------------
-
-   /*!
- 
- \brief absolute gainvalues of the input complex (fft) data
-
- \param spectra	--	two dimensional complex array of data that depends on 
-  			number of antennas and the whole frequency range
-			to be scanned.
-
- \ returns the array of absolute values of gain
- */
- 
- 
- Matrix<Double> getAbsoluteGainValues( const Matrix<DComplex>& spectra ) ;
- 
- 
-  /*!
-\brief frequency indices with respect to which segmentation of the gain curve array has to be done.
-
- \param dataBlockSize  --  imension of the array of gaincurves.
- 
- \param nOfSegments    --      No of segments in which the gainvalue array has to be divided.
-		
- \ returns the segmentation vector which consist of frequency indices for segmentation.
- */
- 
- 
- Vector<uint> getSegmentationVector( const uint& dataBlockSize, 
- 				      const uint& nOfSegments ) ;
- 
- 
-/*!
-
-\brief Interpolation of spectral trend after extraction with one of the scanning method
-      for requested antenna and frequency index.
-
- 
- Scan the argument matrix with any statistical filter, the arguement must be 
- of the same dimensions, i.e., no. of frequency bins and number of antennas must be 
- same as defined at construction.
- Construct a linear interpolation across the argument 'gains' after extraction of gainvalues within 
-  each segment with median filter. The returned matrix will be of the same dimension of the input matrix.
- 
- \param gainValues	--	gain Values across which to construct a linear interpolation.
- 
-  \param dataBlockSize  --	dimension of the array of gaincurves.
-  
-  \param nOfSegments    --      No of segments in which the gainvalue array has to be divided.
- 
- \returns interpolatedGains --  the matrix of interpolated gain Values for each antenna requested.
- 
- */
-   
- 
-Matrix<Double>  getinterpolatedGains ( const Matrix<DComplex>& spectra,
-				      const uint& dataBlockSize,
-				      const uint& nOfSegments );
-				  
- 
-				      
-/*!
- \brief get difference of extracted gainValues with the interpolated gains.
-
- Give difference spectra of interpolated gainvalues with respect to the filtered spectra.
- 
-  \param gainValues	--	gain Values across which to construct a linear interpolation.
-  
-  \param dataBlockSize  --	dimension of the array of gaincurves.
-  
-  \param nOfSegments    --      No of segments in which the gainvalue array has to be divided.
+    RFIMitigation& operator= (RFIMitigation const &other); 
     
- \returns an array of difference spectra -- difference of original spectra with interpolated spectra.
- 
- */
+    // === Parameter access =====================================================
+    
+    /*!
+      \brief Get the name of the class
+      
+      \return className -- The name of the class, RFIMitigation.
+    */
+    inline std::string className () const {
+      return "RFIMitigation";
+    }
 
- 				  
- Matrix<Double> getdifferenceSpectra( const Matrix<DComplex>& spectra,
- 				     const uint& dataBlockSize,
-				     const uint& nOfSegments ) ;
-				  
-/*!
-\brief get normalized(division) extracted gainValues with respect to the interpolated gains.
+    //! Provide a summary of the object's internal parameters and status
+    inline void summary () {
+      summary (std::cout);
+    }
 
- Give normalized spectra of interpolated gainvalues with respect to the filtered spectra.
- 
- \param gainValues	--	gain Values across which to construct a linear interpolation.
+    /*!
+      \brief Provide a summary of the internal status
+
+      \param os -- Output stream to which the summary is written.
+    */
+     void summary (std::ostream &os);    
+
+    // === Methods ==============================================================
+    
+    
+    /*!
+      
+    \brief downsampling of the input spectrum
+    \param spectrumVec	-- double vector of data of the whole frequency range
+    \param nr_samples   -- number of samples the input vector should be divided  in
+    \param amplVec      -- output vector of average amplitude per sample, should have size of nr_samples! 
+    \param rmsVec       -- output vector of rms per sample, should have size of nr_samples! 
+    
+    \ returns the array of absolute values of gain
+    */
+    
+     static void doDownsampling(const Vector<Double> &spectrumVec,
+			const uint nr_samples,
+			Vector<Double> &amplVec,
+			Vector<Double> &rmsVec
+			);
+    
+
+    /*!
+   
+    \brief baseline fitting of the sampled amplitudes
+    \param amplVec      -- output vector of average amplitude per sample, should have size of nr_samples! 
+    \param rmsVec       -- output vector of rms per sample, should have size of nr_samples!     
+    \param rmsThresholdValue -- Threshold value: if RMS_i < RMSThreshold then bin i is taken into account for the fit  
+    \param fitVec       -- output vector of fitted values, the vector is assumed to be evenly distributed over the nr_samples, i.e. nr points per sample = fitVec.size()/nr_samples
+    \ returns the array of interpolated amplitudes
+    */
+    
+     static void doBaselineFitting(const Vector<Double> &amplVec,
+				   const Vector<Double> &rmsVec,
+				   const Double rmsThresholdValue,
+				   Vector<Double> &fitVec,
+				   int method = 0
+				   );
+    
+   /*!
+   
+    \brief baseline fitting of the sampled amplitudes.
+    \param spectrumVec	-- double vector of data of the whole frequency range
+    \param nr_samples   -- number of samples the input vector should be divided  in
+    \param rmsThresholdValue -- Threshold value: if RMS_i < RMSThreshold then bin i is taken into account for the fit   
+    \param fitVec       -- output vector of fitted values, the vector is assumed to be evenly distributed over the nr_samples, i.e. nr points per sample = fitVec.size()/nr_samples
+    \ Does the downsampling and baseline fitting in one method.
+    \ returns the array of absolute values of gain
+    */
+     static void doBaselineFitting(const Vector<Double> &spectrumVec,
+				   const uint nr_samples,
+				   const Double rmsThresholdValue,
+				   Vector<Double> &fitVec,
+		 		   int method = 0
+				   );
+
+
+    /*!
+   
+    \brief rfi flagging of the initial spectrum, given the baseline of the spectrum.
+    \param spectrumVec	-- double vector of data of the whole frequency range
+    \param fitVec       -- input vector of fitted baseline. Note: fitVec should have the same size as spectrumVec!
+    \param flagThresholdValue -- Treshold for flagging  
+    \param flagVec       -- output vector of flags. Note: flagVec should have the same size as SpectrumVec and fitVec!!
+    \ if  Spectrum_i/BaselineFit_i > FlagThreshold flag this data point (0=unflagged,1=flagged)
+    \ returns the vector of flags
+    */
+
+     static void doRFIFlagging(const Vector<Double> &spectrumVec,
+		       const Vector<Double> &fitVec,
+		       const Double flagThresholdValue,
+		       Vector<Int> &flagVec
+		       );
+    
+    /*!
+   
+    \brief rfi flagging of the initial spectrum.
+    \param spectrumVec	-- double vector of data of the whole frequency range
+    \param flagThresholdValue -- Treshold for flagging  
+    \param flagVec       -- output vector of flags. Note: flagVec should have the same size as SpectrumVec and fitVec!!
+    \ if  Spectrum_i/BaselineFit_i < FlagThreshold flag this data point
+    \ Does the downsampling and baseline fitting and flagging in one method.
+    \ returns the vector of flags
+    */
+
+     static void doRFIFlagging(const Vector<Double> &spectrumVec,
+			       const uint nr_samples,
+			       const Double rmsThresholdValue,
+			       const Double flagThresholdValue,
+			       Vector<Int> &flagVec,
+			       int method = 0
+			       );
+      
+    /*!
+   
+    \brief rfi mitigation of the initial spectrum,given the flags and the fitted baseline
+    \param spectrumVec	-- double vector of data of the whole frequency range
+    \param fitVec       -- input vector of fitted baseline. Note: fitVec should have the same size as spectrumVec!
+    \param flagVec      -- input vector of flags. Note: flagVec should have the same size as SpectrumVec and fitVec!!
+    \param mitigatedSpectrumVec      -- output vector of Mitigated Spectrum. Note: mitigatedSpectrumVec should have the same size as SpectrumVec, fitVec and flagVec!!
+    \ replaces spectrumVec_i with fitVec_i value if flagVec_i==1
+    \ returns the RFI mitigated spectrum  
+    */
   
-  \param dataBlockSize  --	dimension of the array of gaincurves.
+    
+     static void doRFIMitigation(const Vector<Double> &spectrumVec,
+			 const Vector<Double> &fitVec,
+			 const Vector<Int> &flagVec,
+			 Vector<Double> &mitigatedSpectrumVec
+			 );
+
+    /*!
+   
+    \brief rfi mitigation of the initial spectrum,given the flags and the fitted baseline
+    \param spectrumVec	-- double vector of data of the whole frequency range
+    \param fitVec       -- input vector of fitted baseline. Note: fitVec should have the same size as spectrumVec!
+    \param flagVec      -- input vector of flags. Note: flagVec should have the same size as SpectrumVec and fitVec!!
+    \param mitigatedSpectrumVec      -- output vector of Mitigated Spectrum. Note: mitigatedSpectrumVec should have the same size as SpectrumVec, fitVec and flagVec!!
+    \ replaces spectrumVec_i with fitVec_i value if flagVec_i==1
+    \ Does the downsampling, baseline fitting, flagging and rfi mitigation in one method.
+     \ returns the RFI mitigated spectrum  
+    */
   
-  \param nOfSegments    --      No of segments in which the gainvalue array has to be divided.
+    
+     static void doRFIMitigation(const Vector<Double> &spectrumVec,
+				 const uint nr_samples,
+				 const Double rmsThresholdValue,
+				 const Double flagThresholdValue,
+				 Vector<Double> &mitigatedSpectrumVec,
+				 int method = 0
+				 );
+     
+    /*!
+   
+    \brief rfi mitigation of the initial spectrum,given the flags and the fitted baseline
+    \param spectrumVec	-- double vector of data of the whole frequency range
+    \param flagVec      -- input vector of flags. Note: flagVec should have the same size as SpectrumVec!!
+    \param fitValue       -- double value to replace
+    \param mitigatedSpectrumVec      -- output vector of Mitigated Spectrum. Note: mitigatedSpectrumVec should have the same size as SpectrumVec and flagVec!!
+    \ replaces spectrumVec_i with fitValue value if flagVec_i==1
+    \ returns the RFI mitigated spectrum  
+    */
   
-  \returns an array of normalized spectra -- normalization of original spectra with respect to interpolated spectra.
- 
- */
+    
+     static void doRFIMitigation(const Vector<Double> &spectrumVec,
+			 const Vector<Int> &flagVec,
+			 const Double fitValue,
+			 Vector<Double> &mitigatedSpectrumVec
+			 );
 
- 	  
- Matrix<Double> getnormalizeSpectra( const Matrix<DComplex>& spectra,
- 				    const uint& dataBlockSize,
-				    const uint& nOfSegments ) ;
-
- 
- /*!
-\brief detect the position of RFI and remove it. 
-
- Position of RFI is detected by comparing the standard deviation value with the 
- minimum rms value for whole set of data of the normalized gainvalues array, and then at that position 
- gainvalue is replaced by inverse of the gainvalue.
+     /*!
+   
+    \brief rfi mitigation of the initial spectrum,given the flags and the fitted baseline
+    \param spectrumVec	-- double vector of data of the whole frequency range
+    \param flagVec      -- input vector of flags. Note: flagVec should have the same size as SpectrumVec!!
+    \param fitValue       -- double value to replace
+    \param mitigatedSpectrumVec      -- output vector of Mitigated Spectrum. Note: mitigatedSpectrumVec should have the same size as SpectrumVec and flagVec!!
+    \ replaces spectrumVec_i with fitValue value if flagVec_i==1
+    \ Does the downsampling, baseline fitting, flagging and rfi mitigation in one method.
+     \ returns the RFI mitigated spectrum  
+    */
   
- \param gainValues	--	gain Values across which to construct a spline.
- 
- \param dataBlockSize  --	dimension of the array of gaincurves.
+    
+    static void doRFIMitigation(const Vector<Double> &spectrumVec,
+				const uint nr_samples,
+				const Double rmsThresholdValue,
+				const Double flagThresholdValue,
+				const Double fitValue,
+				Vector<Double> &mitigatedSpectrumVec,
+				int method = 0
+				);
+
+    
+  private:
+ /*    uint Nsamples; */
+/*     double rmsTreshold; */
+/*     double flagTreshold; */
+/*     uint blocksize; */
+
+    //! Unconditional copying
+    void copy (RFIMitigation const &other);
+    
+    //! Unconditional deletion 
+    void destroy(void);
+    
+  }; // Class RFIMitigation -- end
   
-  \param nOfSegments    --      No of segments in which the gainvalue array has to be divided.
- 
- \returns gainValue array with the same dimension as that of input spectra after removal of RFI.
- 
- */
+} // Namespace CR -- end
 
- 
- Matrix<Double> getOptimizedSpectra( const Matrix<DComplex>& spectra,
-				     const uint& dataBlockSize,
-				     const uint& nOfSegments ) ;
- 
-
-/*!
-\brief retrace original dimension of gainValues array after implementation of various steps. 
-
- Divides the original gainValue array in various segments according to the input 
- segmentation vector, various steps implemented to reduce the noise level, and then 
- original dimension of the spectra array is retraced again.
- 
- \param gainValues	--	gain Values across which to construct a spline.
- 
- \param segmentVector  --	A vector which gives the refrence indices in which a 
-  				frequency band (row of array) has to be divided.
- 
- \returns an array of gainValues with the same dimension as to that of the input spectra .
- 
- */
-
- 
-// Matrix<Double> retraceOriginalSpectra( const Matrix<Double>& gainValueSpectra,
-// 	        		       const Vector<uint>& segmentationIndices ) ;
-
-};
-
-}  // Namespace CR -- end
-
-#endif /* _RFIMITIGATION_H_ */
+#endif /* RFIMITIGATION_H */
+  
