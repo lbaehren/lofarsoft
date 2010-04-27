@@ -90,16 +90,17 @@
 #include <Pypeline/hfcommon.h>
 #include <Pypeline/hfppnew.h>
 #include <Calibration/CalTableReader.h>
+#include <Calibration/RFIMitigator.h>
 
 using namespace std;
 
 //========================================================================
-//                             Array Class 
+//                             Array Class
 //========================================================================
 
 template <class T>
   class hArray {
-  
+
   public:
 
   struct unit_container {
@@ -122,7 +123,7 @@ template <class T>
     vector<HString> history;
     map<HString,HString> keywords;
     map<HString,HPyObjectPtr> keywords_py;
-  }; 
+  };
 
     void init();
     void initialize_storage();
