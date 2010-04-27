@@ -28,7 +28,7 @@
 #include <crtools.h>
 #include <Analysis/analyseLOPESevent.h>
 #include <Analysis/tbbTools.h>
-#include <Calibration/RFIMitigationPlugin.h>
+//#include <Calibration/RFIMitigationPlugin.h>
 #include <Data/tbbctlIn.h>
 #include <IO/LOFAR_TBB.h>
 
@@ -469,7 +469,7 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
     Int i;
     Vector<Double> Fc,BW,FilterTypes,data2add(0);
     // Local RFI mitigation object
-    CR::RFIMitigationPlugin rfiM_p;
+    // CR::RFIMitigationPlugin rfiM_p;
     //Vector<Int> FilterTypes;
     Double resolution=1024.;
 
@@ -569,9 +569,11 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
 	  server.fft(tfdata,data);
 	  fdata.resize(fftlen,1);
 	  fdata.column(0) = tfdata;
-	  rfiM_p.parameters().define("dataBlockSize",blocksize);
+
+	  /*	  rfiM_p.parameters().define("dataBlockSize",blocksize);
 	  // Do the RFI mitigation
 	  rfiM_p.apply(fdata,True);
+	  */ //rfi mitigation has changed, commented out for now
 	  data.resize(0);
 	  server.fft(data,fdata.column(0));
 	} else if (confRec.asBool("doFiltering")){
