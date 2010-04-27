@@ -23,6 +23,7 @@
 #include <Analysis/CRinvFFT.h>
 #include <IO/LopesEventIn.h>
 #include <Analysis/fitCR2gauss.h>
+#include <Filters/StatisticsFilter.h>
 
 /*!
   \file tfitCR2gauss.cc

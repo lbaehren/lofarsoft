@@ -232,17 +232,18 @@ namespace CR { // Namespace  -- begin
 			}
 			
 		}
-			  
-	  CR::RFIMitigation  rfi( fft_samples,
-	  		          dataBlockSize,
-			          n_segments ) ;
+	  			  
+	  // CR::RFIMitigation  rfi( fft_samples,
+	  //		          dataBlockSize,
+	  //		          n_segments ) ;
 	  
 	  casa::Matrix<double> RFIrejected_array( n_row, n_colum,0.0 ) ;
-	   
-	  RFIrejected_array= rfi.getOptimizedSpectra( fft_samples,
-	 	                                      dataBlockSize,
-						      n_segments  ) ;	
-	 
+	  for(uint i=0;i<n_row;i++){
+	    //	    RFIrejected_array= rfi.getOptimizedSpectra( fft_samples,
+	    //dataBlockSize,
+	    casa::Vector<Double> rfiVec=RFIrejected_array.row(i);
+	      RFIMitigation::doRFIMitigation(amplitude(fft_samples.row(i)),n_segments,1e20,5.,rfiVec) ;	
+	  }
 	  casa::Matrix<double> RFIrejected_absolutearray( n_row, n_colum,0.0 ) ;
 	  
 	  RFIrejected_absolutearray = RFIrejected_array ; //*amplitude_spectra ;

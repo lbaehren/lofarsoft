@@ -115,10 +115,11 @@ namespace CR { // Namespace CR -- begin
       };
 
       if (DoRFImitigation_p) {
-	rfiM_p.parameters().define("dataBlockSize",(Int)dr->blocksize());
+	/*	rfiM_p.parameters().define("dataBlockSize",(Int)dr->blocksize());
 	// Do the RFI mitigation
 	rfiM_p.apply(data,True);
-      };
+	*/;//nothing  since RFIPLugin has been removed....MM
+    };
 
       if (DoFlagNotActiveAnts_p) {
         FlagNotActiveAntennas(dr);

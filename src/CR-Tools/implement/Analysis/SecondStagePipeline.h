@@ -31,7 +31,7 @@
 #include <crtools.h>
 #include <Analysis/FirstStagePipeline.h>
 #include <Calibration/TVCalibrationPlugin.h>
-#include <Calibration/RFIMitigationPlugin.h>
+//#include <Calibration/RFIMitigationPlugin.h>
 
 // AIPS++/CASA header files
 #include <casa/Exceptions/Error.h>
@@ -82,7 +82,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Local RFI mitigation object
     */
-    RFIMitigationPlugin rfiM_p;
+    //    RFIMitigationPlugin rfiM_p;
 
     /*!
       \brief Do the phase calibration (default=True)

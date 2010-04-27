@@ -44,6 +44,7 @@
 #include <startools/reconstruction.hh>
 
 #include <Analysis/PulseProperties.h>
+#include <Filters/StatisticsFilter.h>
 
 namespace CR { // Namespace CR -- begin
   

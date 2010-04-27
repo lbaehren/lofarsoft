@@ -38,6 +38,7 @@
 #include <IO/UpSampledDR.h>
 #include <Utilities/SimplePlot.h>
 #include <Coordinates/SkymapQuantity.h>
+#include <Filters/StatisticsFilter.h>
 
 // CASA/casacore header files
 #include <casa/Arrays/IPosition.h>
