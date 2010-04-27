@@ -68,9 +68,13 @@ namespace CR { // Namespace CR -- begin
   public:
     /*!
       Interpolation can be done using the following methods:
-      Linear (default unless there is only one data point)
+      
+      Linear 
+
       Cubic Polynomial
+
       Natural Cubic Spline
+
       (see casacore InterpolateArray1D)
     */
 
@@ -141,7 +145,7 @@ namespace CR { // Namespace CR -- begin
     \param amplVec      -- output vector of average amplitude per sample, should have size of nr_samples! 
     \param rmsVec       -- output vector of rms per sample, should have size of nr_samples! 
     
-    \ returns the array of absolute values of gain
+    returns the array of absolute values of gain
     */
     
      static void doDownsampling(const Vector<Double> &spectrumVec,
@@ -158,7 +162,8 @@ namespace CR { // Namespace CR -- begin
     \param rmsVec       -- output vector of rms per sample, should have size of nr_samples!     
     \param rmsThresholdValue -- Threshold value: if RMS_i < RMSThreshold then bin i is taken into account for the fit  
     \param fitVec       -- output vector of fitted values, the vector is assumed to be evenly distributed over the nr_samples, i.e. nr points per sample = fitVec.size()/nr_samples
-    \ returns the array of interpolated amplitudes
+    
+    returns the array of interpolated amplitudes
     */
     
      static void doBaselineFitting(const Vector<Double> &amplVec,
@@ -175,8 +180,9 @@ namespace CR { // Namespace CR -- begin
     \param nr_samples   -- number of samples the input vector should be divided  in
     \param rmsThresholdValue -- Threshold value: if RMS_i < RMSThreshold then bin i is taken into account for the fit   
     \param fitVec       -- output vector of fitted values, the vector is assumed to be evenly distributed over the nr_samples, i.e. nr points per sample = fitVec.size()/nr_samples
-    \ Does the downsampling and baseline fitting in one method.
-    \ returns the array of absolute values of gain
+    
+    Does the downsampling and baseline fitting in one method.
+    returns the array of absolute values of gain
     */
      static void doBaselineFitting(const Vector<Double> &spectrumVec,
 				   const uint nr_samples,
@@ -193,8 +199,9 @@ namespace CR { // Namespace CR -- begin
     \param fitVec       -- input vector of fitted baseline. Note: fitVec should have the same size as spectrumVec!
     \param flagThresholdValue -- Treshold for flagging  
     \param flagVec       -- output vector of flags. Note: flagVec should have the same size as SpectrumVec and fitVec!!
-    \ if  Spectrum_i/BaselineFit_i > FlagThreshold flag this data point (0=unflagged,1=flagged)
-    \ returns the vector of flags
+    
+    if  Spectrum_i/BaselineFit_i > FlagThreshold flag this data point (0=unflagged,1=flagged)
+    returns the vector of flags
     */
 
      static void doRFIFlagging(const Vector<Double> &spectrumVec,
@@ -209,9 +216,10 @@ namespace CR { // Namespace CR -- begin
     \param spectrumVec	-- double vector of data of the whole frequency range
     \param flagThresholdValue -- Treshold for flagging  
     \param flagVec       -- output vector of flags. Note: flagVec should have the same size as SpectrumVec and fitVec!!
-    \ if  Spectrum_i/BaselineFit_i < FlagThreshold flag this data point
-    \ Does the downsampling and baseline fitting and flagging in one method.
-    \ returns the vector of flags
+    
+    if  Spectrum_i/BaselineFit_i < FlagThreshold flag this data point
+    Does the downsampling and baseline fitting and flagging in one method.
+    returns the vector of flags
     */
 
      static void doRFIFlagging(const Vector<Double> &spectrumVec,
@@ -229,8 +237,9 @@ namespace CR { // Namespace CR -- begin
     \param fitVec       -- input vector of fitted baseline. Note: fitVec should have the same size as spectrumVec!
     \param flagVec      -- input vector of flags. Note: flagVec should have the same size as SpectrumVec and fitVec!!
     \param mitigatedSpectrumVec      -- output vector of Mitigated Spectrum. Note: mitigatedSpectrumVec should have the same size as SpectrumVec, fitVec and flagVec!!
-    \ replaces spectrumVec_i with fitVec_i value if flagVec_i==1
-    \ returns the RFI mitigated spectrum  
+    
+    replaces spectrumVec_i with fitVec_i value if flagVec_i==1
+    returns the RFI mitigated spectrum  
     */
   
     
@@ -247,9 +256,10 @@ namespace CR { // Namespace CR -- begin
     \param fitVec       -- input vector of fitted baseline. Note: fitVec should have the same size as spectrumVec!
     \param flagVec      -- input vector of flags. Note: flagVec should have the same size as SpectrumVec and fitVec!!
     \param mitigatedSpectrumVec      -- output vector of Mitigated Spectrum. Note: mitigatedSpectrumVec should have the same size as SpectrumVec, fitVec and flagVec!!
-    \ replaces spectrumVec_i with fitVec_i value if flagVec_i==1
-    \ Does the downsampling, baseline fitting, flagging and rfi mitigation in one method.
-     \ returns the RFI mitigated spectrum  
+    
+    replaces spectrumVec_i with fitVec_i value if flagVec_i==1
+    Does the downsampling, baseline fitting, flagging and rfi mitigation in one method.
+    returns the RFI mitigated spectrum  
     */
   
     
@@ -268,8 +278,9 @@ namespace CR { // Namespace CR -- begin
     \param flagVec      -- input vector of flags. Note: flagVec should have the same size as SpectrumVec!!
     \param fitValue       -- double value to replace
     \param mitigatedSpectrumVec      -- output vector of Mitigated Spectrum. Note: mitigatedSpectrumVec should have the same size as SpectrumVec and flagVec!!
-    \ replaces spectrumVec_i with fitValue value if flagVec_i==1
-    \ returns the RFI mitigated spectrum  
+    
+    replaces spectrumVec_i with fitValue value if flagVec_i==1
+    returns the RFI mitigated spectrum  
     */
   
     
@@ -286,9 +297,10 @@ namespace CR { // Namespace CR -- begin
     \param flagVec      -- input vector of flags. Note: flagVec should have the same size as SpectrumVec!!
     \param fitValue       -- double value to replace
     \param mitigatedSpectrumVec      -- output vector of Mitigated Spectrum. Note: mitigatedSpectrumVec should have the same size as SpectrumVec and flagVec!!
-    \ replaces spectrumVec_i with fitValue value if flagVec_i==1
-    \ Does the downsampling, baseline fitting, flagging and rfi mitigation in one method.
-     \ returns the RFI mitigated spectrum  
+    
+    replaces spectrumVec_i with fitValue value if flagVec_i==1
+    Does the downsampling, baseline fitting, flagging and rfi mitigation in one method.
+    returns the RFI mitigated spectrum  
     */
   
     
