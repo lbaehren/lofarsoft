@@ -90,7 +90,7 @@
 #include <Pypeline/hfcommon.h>
 #include <Pypeline/hfppnew.h>
 #include <Calibration/CalTableReader.h>
-#include <Calibration/RFIMitigator.h>
+//#include <Calibration/RFIMitigator.h>
 
 using namespace std;
 
