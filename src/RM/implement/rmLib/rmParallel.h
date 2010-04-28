@@ -22,7 +22,7 @@
 #define RM_PARALLEL_H
 
 #include <iostream>
-#include <sys/types.h>q
+#include <sys/types.h>
 #include <sys/sysctl.h>
 
 namespace RM {
