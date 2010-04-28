@@ -74,19 +74,19 @@ namespace RM {
     
     // Use stepsize to create a vector of equally spaced Faraday depths
     if(fmod(faradaySize, stepsize))
-      {
-	throw "rmCube: faradaySize is not an integral multiple of stepsize";
-      }
+	{
+	 throw "rmCube: faradaySize is not an integral multiple of stepsize";
+	}
     else
-      {
-	steps=faradaySize/stepsize;
-	this->faradayDepths.resize(steps);	// set faradayDepths vector's size to size of steps
+    {
+		steps=faradaySize/stepsize;
+		this->faradayDepths.resize(steps);	// set faradayDepths vector's size to size of steps
 	
-	for(i=0; i<steps; i++)
-	  {
-	    faradayDepths[i]=i*stepsize;
-	  }
-      } 
+		for(i=0; i<steps; i++)
+		{
+			faradayDepths[i]=i*stepsize;
+		}
+	} 
     
     // Set remaining attributes to defaults
     this->currentX=0;
@@ -146,7 +146,7 @@ namespace RM {
   }
   
   
-  //===============================================================================
+//===============================================================================
 //
 //  Methods
 //

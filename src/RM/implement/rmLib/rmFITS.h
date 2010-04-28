@@ -21,6 +21,8 @@
 #ifndef RMFITS_H
 #define RMFITS_H
 
+#define MAX_MESSAGE_LENGTH 255
+
 // C++ Standard library
 #include <stdio.h>
 #include <fstream>
@@ -73,14 +75,30 @@ namespace RM {
   class rmFITS {
     
   private:
+	 //*********************************************************
+	 // 
+	 // FITS internal status variables
+	 //
+	 //*********************************************************
+	  
     //! file handle for direct file access
     fitsfile *fptr;
     
     //! Status of last cfitsio operation
-    int fitsstatus_p;
+    int fitsstatus;
     
+	 //! I/O Mode of file (READONLY=0, READWRITE=1)
+	 int iomode;
+	 
     //! FITS error message
-    char fits_error_message[255];
+    char fits_error_message[MAX_MESSAGE_LENGTH];
+	
+	 //! nulval pointer to nulval substitute
+	 double nulval;
+
+	 //! anynul holding information if any null value was encountered
+	 int anynul;
+
 
 #ifdef HAVE_CASA
     //! casacore lattice handle
@@ -127,7 +145,7 @@ namespace RM {
     };
     
     DALimageType imageType;
-    
+
   public:
 
     // === Construction =========================================================
@@ -151,10 +169,14 @@ namespace RM {
     ~rmFITS ();
 
     // === Methods ==============================================================
+ 
+	 // ============================================================================
+	 //
+	 //	FITS administrative functions
+	 //
+	 // ============================================================================	  
     
-    //! open the FITS file that is specified by the class attribute filename and iomode
-    void open();
-    //! open a FITS file for read or readwrite
+	 //! open a FITS file for read or readwrite
     void open(const std::string &filename, const int iomode);
     //! open a FITS file for read or readwrite and move to first HDU with significant data
     void openData(const std::string &filename, int iomode);
@@ -165,12 +187,17 @@ namespace RM {
     //! Close a FITS file handle
     void close();
     //! Get the filename of the FITS file opened in this rmFITS object
-    std::string filename();
+    std::string filename(void);
     //! Get Lattice in object
-    void getLattice();
+    void getLattice(void);
     //! cfitsio error functions
-    std::string getFitsError();
-    void printFitsError();
+    std::string getError(void);
+	 std::vector<std::string> getAllErrors(void);
+	 void printAllErrors(void);
+	 void writeErrorMark(void);
+	 void clearErrorMark(void);
+	 void clearErrorMessages(void);
+	  
     //! Get the number of HDUs in the FITS file
     int readNumHDUs();
     //! Read the current header postion (HDU) in FITS file
@@ -181,6 +208,10 @@ namespace RM {
     void moveRelativeHDU(int hdu);
     //! Move to hdu extension with name, \e extname
     int moveNameHDU (const std::string &extname);
+	 //! Write the current HDU to the output stream
+	 void writeHDU(std::ostream &outstream); 
+	  
+	  
     //! Image dimension functions
     std::vector<int64_t> dimensions();
     long X();
@@ -193,8 +224,20 @@ namespace RM {
     std::string readURLType();
     void deleteFITSfile();
     void flushFITSfile();
-    void flushFITSBuffer();
-    
+	 void flushFITSBuffer();
+	  
+	 void setNulval(double);
+	 double getNulval(); 
+
+	 // ============================================================================
+	 //
+	 //	File related functions
+	 //
+	 // ============================================================================	  
+	    
+	 void preemptivelyDelete(const string &filename); 
+
+	  
     // ============================================================================
     //
     //	Image access functions
@@ -216,12 +259,18 @@ namespace RM {
     void createImg(int bitpix,
 		   int naxis,
 		   long *naxes);
+	 void createImg(int bitpix,
+						 std::vector<int64_t> &dimensions); 
     void readPix(int datatype,
 		 long *fpixel,
 		 long nelements,
 		 void *nulval,
 		 void *array,
 		 int *anynul);
+	 void readPix(int datatype,
+					  long *fpixel,
+					  long nelements,
+					  void *array);	    
     void writePix(int datatype,
 		  long *fpixel,
 		  long nelements,
@@ -394,8 +443,8 @@ namespace RM {
     // ============================================================================
     
     void readPlane (double *plane,
-		    const unsigned long z,
-		    void *nulval=NULL);
+						  unsigned long z,
+						  void *nulval=NULL);
     
 	 void read2D(double *array, const long long dim1);
 
@@ -405,21 +454,26 @@ namespace RM {
 		   long *inc,
 		   void *nulval=NULL);
 
-	 void readLine(	double *line,
+	 void readLine(double *line,
 				    	const unsigned long x,
 						const unsigned long y,
 						long *inc,
 						void *nulval=NULL);
 
 	 void readZLine (double *line,
-	  					const unsigned long x,
-						const unsigned long y);
+						  const unsigned long x,
+						  const unsigned long y,
+						  void *nulval=NULL);
 
+	 void readCube (double *cube,
+						 void *nulval=NULL);
+	  
     void readSubCube (double *subCube,
-		      const unsigned long x_pos,
-		      const unsigned long y_pos,
-		      const unsigned long x_size,
-		      const unsigned long y_size);
+							 unsigned long x_pos,
+							 unsigned long y_pos,
+							 unsigned long x_size,
+							 unsigned long y_size,
+							 void *nulval=NULL);
     
     // ============================================================================
     //
@@ -428,11 +482,15 @@ namespace RM {
     // ============================================================================
     
     //! Write an image-plane to a FITS file
+	 void writePlane (double *plane,
+							unsigned long z,
+							void *nulval=NULL);
+	  
     void writePlane (double *plane,
-		     const long x,
-		     const long y,
-		     const long z,
-		     void *nulval=NULL);
+							unsigned long x,
+							unsigned long y,
+							unsigned long z,
+							void *nulval=NULL);
 		
 	 //! Write a 2D array into a FITS image
 	 void write2D(double *array, const long long dim1);
@@ -449,7 +507,8 @@ namespace RM {
 		    const long x_pos,
 		    const long y_pos);
 
-    void writeCube(double* cube, const long x, const long y, const long z);
+	 void writeCube(double *cube, void* nulval=NULL);
+    void writeCube(double *cube, const long x, const long y, const long z, void* nulval=NULL);
     
     void writeSubCube(  double* subcube,
 			const long x_size,
@@ -457,6 +516,9 @@ namespace RM {
 			const long x_pos,
 			const long y_pos);
     
+	  
+	 void printPlane(const float *plane, const unsigned int x, const unsigned int y);	  
+	  
     
     // ============================================================================
     //

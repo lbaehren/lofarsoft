@@ -24,7 +24,7 @@ namespace RM {
 
   // ============================================================================
   //
-  //  Construction
+  //  Construction / Destruction
   //
   // ============================================================================
   
@@ -39,6 +39,15 @@ namespace RM {
     nofThreads_p = 0;
   }
 
+	
+  //_____________________________________________________________________________
+  //                                                                    ~parallel	
+	
+  parallel::~parallel()
+  {
+     // do nothing
+  }  
+	  
   // ============================================================================
   //
   //  Methods
@@ -72,8 +81,10 @@ namespace RM {
 #endif
     
     // get the number of CPUs from the system 
-    sysctl(mib, 2, &numCPU, &len, NULL, 0);
-    
+	 if(sysctl(mib, 2, &numCPU, &len, NULL, 0)==-1) {
+	    throw "parallel::getAvailCPUs sysctl failed";
+	 }	  
+		  
     if( numCPU < 1 ) {
 #ifdef HW_NCPU
       mib[1] = HW_NCPU;
@@ -83,7 +94,7 @@ namespace RM {
       sysctl( mib, 2, &numCPU, &len, NULL, 0 );
       
       if( numCPU < 1 ) {
-	numCPU = 1;
+			numCPU = 1;
       }
     }	
     //cout << "Number of processors (OpenMP) = " omp_get_num_procs() << endl;
@@ -165,7 +176,7 @@ namespace RM {
 #endif
 
     if((sysctl(mib, 2, &physmem, &len, NULL, 0)) == -1) {
-      throw "availmem sysctl failed";
+      throw "getPhysmem sysctl failed";
     }
     
     // Return amount of physical memory
@@ -195,8 +206,10 @@ namespace RM {
 
     len = sizeof(maxproc);
 
-    sysctl(mib, 2, &maxproc, &len, NULL, 0); 
-
+	 if(sysctl(mib, 2, &maxproc, &len, NULL, 0)==-1) {
+	    throw "rmParallel::nofAllowedProcesses sysctl failed";
+	 }
+		  
     return maxproc;
   }
   

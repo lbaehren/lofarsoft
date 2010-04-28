@@ -22,7 +22,7 @@
 #define RM_PARALLEL_H
 
 #include <iostream>
-#include <sys/types.h>
+#include <sys/types.h>q
 #include <sys/sysctl.h>
 
 namespace RM {
@@ -125,6 +125,9 @@ namespace RM {
 
     //! Default constructor
     parallel ();
+	  
+	 //! Destructor
+	 ~parallel ();
 
     // === Parameter access =====================================================
 
