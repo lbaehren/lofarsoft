@@ -461,7 +461,10 @@ namespace RM {
   {
      fits_write_errmark();		// this routine does not set the fitsstatus, nor does it return success/failure
   }
+
 	
+  //_____________________________________________________________________________
+  //                                                               clearErrorMark	
 	  
   /*!
     \brief Clear error mark on the FITS error stack	
@@ -479,6 +482,9 @@ namespace RM {
 	  fits_clear_errmsg();
   }
 	
+	
+  //_____________________________________________________________________________
+  //                                                               printAllErrors	
 
   /*!
     \brief Get the corresponding cfits error message to the current fitsstatus
@@ -543,16 +549,19 @@ namespace RM {
   void rmFITS::moveAbsoluteHDU(int hdu)
   {
     if (fits_movabs_hdu(fptr, hdu, NULL, &fitsstatus))
-      {
+	 {
         throw "rmFITS::moveAbsoluteHDU";
-      }
+    }
 
     if (getHDUType()==IMAGE_HDU)	 // if it is an image extension
-      {
+    {
         updateImageDimensions();		// Update dimensions-vector,
-      }
+	 }
   }
 
+	
+  //_____________________________________________________________________________
+  //                                                              moveRelativeHDU	
 
   /*!
     \brief Move relative by hdu units
@@ -562,15 +571,14 @@ namespace RM {
   void rmFITS::moveRelativeHDU(int nhdu)
   {
     if (fits_movrel_hdu(fptr, nhdu, NULL, &fitsstatus))	// try to move nhdu
-      {
+    {
         throw "rmFITS::moveRelativeHDU";
-      }
+    }
 
     if (getHDUType()==IMAGE_HDU)	 // if it is an image extension
-      {
-        updateImageDimensions();		// Update dimensions-vector,
-      }
-
+    {
+       updateImageDimensions();		// Update dimensions-vector,
+    }
   }
 
   //_____________________________________________________________________________
@@ -634,8 +642,6 @@ namespace RM {
 		{
 			
 		}
-
-	
 	}
 	
 	
@@ -1277,7 +1283,7 @@ namespace RM {
 	\param array - 2-dimensional array to read into
 	\param dim1 - first dimension of array (corresponds to y-axis of image)
 */
-void rmFITS::read2D(double *array, long long dim1)
+void rmFITS::read2D(double *array, unsigned long long dim1)
 {
 	double nulval=0;		// null value
 	int anynul=0;			// indicater if any null value was returned from image

@@ -314,36 +314,36 @@ namespace RM {
     
     //! Get size of Header space of current HDU
     void getHDRspace (int &keysexist,
-		      int &morekeys);
+							 int &morekeys);
     //! Get a record from the current HDU
     void readRecord (int keynum,
-		     std::string record);
+							std::string record);
     //! Get the record card from the current HDU
     void readCard (std::string keyname,
-		   std::string record);
-    //
+						 std::string record);
+    //! Read header key with key number keynum
     void readKeyn (int keynum,
-		   std::string keyname,
-		   std::string value,
-		   std::string comment);
-    //
+						 std::string keyname,
+						 std::string value,
+						 std::string comment);
+    //! Read header key with these specifics
     void readKey(int datatype,
-		 std::string keyname,
-		 void *value,
-		 std::string comment);
-    //
+					  std::string keyname,
+					  void *value,
+					  std::string comment);
+    //! Read keyword of key with keyname
     void readKeyword(std::string keyname,
-		     std::string value,
-		     std::string comment);
-    //
+							std::string value,
+							std::string comment);
+    //! FInd the next key
     void findNextKey(char **inclist,
-		     int ninc,
-		     char **exclist,
-		     int nexc,
-		     std::string card);
-    //
+							int ninc,
+							char **exclist,
+							int nexc,
+							std::string card);
+    //! Read the corresponding unit of key with keyname
     void readKeyUnit(std::string keyname,
-		     std::string unit);
+							std::string unit);
     
     //===============================================================
     //
@@ -351,14 +351,17 @@ namespace RM {
     //
     //===============================================================
     
+	 //! Write key to FITS header
     void writeKey (int datatype,
-		   std::string keyname,
-		   void *value,
-		   std::string comment);
-    void updateKey (int datatype,
-		    std::string &keyname,
-		    void *value,
-		    std::string &comment);
+						 std::string keyname,
+						 void *value,
+						 std::string comment);
+	 //! Update key in FITS header
+	 void updateKey (int datatype,
+						  std::string &keyname,
+						  void *value,
+						  std::string &comment);
+	 //! Write record card
     void writeRecord (std::string &card);
     void modifyComment (std::string &keyname,
 		       std::string &comment);
@@ -399,10 +402,12 @@ namespace RM {
     
     
     // Strictly speaking: writeRMHeader and bin-functions should be part of
-    // RM class?
+    // RM class? (default hdu is 1)
     
+	 //! Write RM Synthesis specific header to CHDU
     void writeRMHeader(int hdu=1);
     
+	 //! Check if a file exists
     bool fileExists(const std::string &filename);
     
     /*!
@@ -442,18 +447,22 @@ namespace RM {
     //
     // ============================================================================
     
+	 //! Read a complete plane from image at depth z
     void readPlane (double *plane,
 						  unsigned long z,
 						  void *nulval=NULL);
     
-	 void read2D(double *array, const long long dim1);
+	 //! Read a 2D plane form an image at dim1 (obsolete functions)
+	 void read2D(double *array, unsigned long long dim1);
 
+	 //! Read a line into a vector at position x and y along the z axis
     void readLine (std::vector<double> &line,
-		   const unsigned long x,
-		   const unsigned long y,
-		   long *inc,
-		   void *nulval=NULL);
+						 const unsigned long x,
+						 const unsigned long y,
+						 long *inc,
+						 void *nulval=NULL);
 
+	 //! Read a line into an array at position x and y along the z axis
 	 void readLine(double *line,
 				    	const unsigned long x,
 						const unsigned long y,
@@ -465,9 +474,11 @@ namespace RM {
 						  const unsigned long y,
 						  void *nulval=NULL);
 
+	 //! Read a (complete dimensions) 3D cube from an image into an array
 	 void readCube (double *cube,
 						 void *nulval=NULL);
 	  
+	 //! Read a sub cube from an image into an array
     void readSubCube (double *subCube,
 							 unsigned long x_pos,
 							 unsigned long y_pos,
@@ -486,13 +497,14 @@ namespace RM {
 							unsigned long z,
 							void *nulval=NULL);
 	  
+	 //! Write an image-plane of dimensions x and y (must match image dimensions)
     void writePlane (double *plane,
 							unsigned long x,
 							unsigned long y,
 							unsigned long z,
 							void *nulval=NULL);
 		
-	 //! Write a 2D array into a FITS image
+	 //! Write a 2D array into a FITS image (obsolete)
 	 void write2D(double *array, const long long dim1);
 		
     //! Write a line of sight to a FITS file
@@ -500,23 +512,26 @@ namespace RM {
 		   const long x,
 		   const long y,
 		   void *nulval=NULL);
-    //! Write a tile to a FITS file
-    void writeTile( double* tile,
-		    const long x_size,
-		    const long y_size,
-		    const long x_pos,
-		    const long y_pos);
+	  
+    //! Write an image tile to a FITS file
+    void writeTile(double* tile,
+						 const long x_size,
+						 const long y_size,
+						 const long x_pos,
+						 const long y_pos);
 
+	 //! Write a complete image cube
 	 void writeCube(double *cube, void* nulval=NULL);
     void writeCube(double *cube, const long x, const long y, const long z, void* nulval=NULL);
     
-    void writeSubCube(  double* subcube,
-			const long x_size,
-			const long y_size,
-			const long x_pos,
-			const long y_pos);
+	 //! Write a subcube of an image
+    void writeSubCube(double* subcube,
+							 const long x_size,
+							 const long y_size,
+							 const long x_pos,
+							 const long y_pos);
     
-	  
+	 //! Print image plane in array of dimensions x and y to stdout 
 	 void printPlane(const float *plane, const unsigned int x, const unsigned int y);	  
 	  
     
