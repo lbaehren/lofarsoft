@@ -200,18 +200,19 @@ namespace CR { // Namespace CR -- begin
     casa::Matrix<double> data;
 
     // Get the IDs/names of the dipoles attached to the station group
-    (daldata[filenr[ant]]->stationGroup(0)).dipoleNames (dipoleIDs);
+    convertVector(dipoleIDs,
+		  (daldata[filenr[ant]]->stationGroup(0)).dipoleNames ());
     // Select dipole
     dipoleSelection.clear();
     dipoleSelection.insert(dipoleIDs[ant]);
-    (daldata[filenr[ant]]->stationGroup(0)).setSelectedDipoles(dipoleSelection);
+    (daldata[filenr[ant]]->stationGroup(0)).selectDipoles(dipoleSelection);
     // Set the position from which to start reading data
     start              = offsets[ant] + startSample;
     // read the data
-    (daldata[filenr[ant]]->stationGroup(0)).fx(data,
-					       start,
-					       blocksize);
-
+    (daldata[filenr[ant]]->stationGroup(0)).readData(data,
+						     start,
+						     blocksize);
+    
     out = data.row(0);
   };
   

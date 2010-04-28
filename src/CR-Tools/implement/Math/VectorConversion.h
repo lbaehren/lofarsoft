@@ -213,44 +213,50 @@ namespace CR { // Namespace CR -- begin
     </ol>
   */  
 
-  // ============================================================================
-  //
-  //  Conversion between angle representations
-  //
-  // ============================================================================
+  // === Conversion between vector classes ======================================
 
-  //-----------------------------------------------------------------------------
-  // [1] degree -> radian
+  //! Convert std::vector<T> to casac::Vector<T>
+  template <class T, class S>
+    void convertVector (casa::Vector<T> &to,
+			std::vector<S> const &from)
+  {
+    unsigned int nelem = from.size();
+    // adjust the shape of the returned casa::Vector<T>
+    to.resize(nelem);
+    
+    for (unsigned int n(0); n<nelem; ++n) {
+      to(n) = (T)from[n];
+    }
+  }
+  
+  //! Convert std::vector<T> to casac::Vector<T>
+  template <class T, class S>
+    void convertVector (std::vector<T> & to,
+			const casa::Vector<S> from)
+  {
+    unsigned int nelem = from.size();
+    // adjust the shape of the returned casa::Vector<T>
+    to.resize(nelem);
+    
+    for (unsigned int n(0); n<nelem; ++n) {
+      to(n) = (T)from[n];
+    }
+  }
 
-  /*!
-    \brief Convert radian to degrees
+  // === Conversion between angle representations ===============================
 
-    \param deg -- Angle in degrees
-
-    \return rad -- Angle in radian
-  */
+  //! Convert radian to degrees
   inline double deg2rad (double const &deg) {
     return deg*CR::pi/180.0;
   }
   
-  /*!
-    \brief Convert radian to degrees
-    
-    \retval rad -- Angle in radian
-    \param deg -- Angle in degrees
-  */
+  //! Convert radian to degrees
   inline void deg2rad (double &rad,
 		       double const &deg) {
     rad = deg2rad (deg);
   }
   
-  /*!
-    \brief Convert radian to degrees
-
-    \param deg -- Vector with angles given in degrees
-
-    \return rad -- Vector with angles given in radian
-  */
+  //! Convert radian to degrees
   inline vector<double> deg2rad (vector<double> const &deg) {
     vector<double> rad (deg.size());
     for (unsigned int n(0); n<deg.size(); n++) {
@@ -260,13 +266,7 @@ namespace CR { // Namespace CR -- begin
   }
 
 #ifdef HAVE_CASA
-  /*!
-    \brief Convert angular positions from degree to radian
-
-    \param deg -- Vector with angles given in degrees
-
-    \return rad -- Vector with angles given in radian
-  */
+  //! Convert radian to degrees
   inline casa::Vector<double> deg2rad (const casa::Vector<double>& deg) {
     casa::Vector<double> rad = deg*casa::C::pi/180.0;
     return rad;
@@ -275,22 +275,17 @@ namespace CR { // Namespace CR -- begin
   /*!
     \brief Convert angular components from angles to degrees
     
-    \param in -- Input vector with angular components in degrees.
-    
+    \param in   -- Input vector with angular components in degrees.
     \return out -- Output vector with angular components in radian.
   */
   casa::Vector<double> deg2rad (casa::Vector<double> const &in,
 				CR::CoordinateType::Types const &coordType);
 #endif
   
-  //-----------------------------------------------------------------------------
-  // [2] radian -> degree
-  
   /*!
     \brief Convert radian to degrees
     
-    \param rad -- Angle in radian
-    
+    \param rad  -- Angle in radian
     \return deg -- Angle in degrees
   */
   inline double rad2deg (double const &rad) {
@@ -301,7 +296,7 @@ namespace CR { // Namespace CR -- begin
     \brief Convert radian to degrees
     
     \retval deg -- Angle in degrees
-    \param rad -- Angle in radian
+    \param rad  -- Angle in radian
   */
   inline void rad2deg (double &deg,
 		       double const &rad) {
@@ -311,8 +306,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \brief Convert radian to degrees
 
-    \param rad -- Vector with angles given in radian
-
+    \param rad  -- Vector with angles given in radian
     \return deg -- Vector with angles given in degree
   */
   inline vector<double> rad2deg (vector<double> const &rad) {
@@ -327,8 +321,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \brief Convert angular position from radian to degree
 
-    \param rad -- Vector with angles given in radian
-
+    \param rad  -- Vector with angles given in radian
     \return deg -- Vector with angles given in degree
   */
   inline casa::Vector<double> rad2deg (const casa::Vector<double>& rad) {
@@ -1200,15 +1193,15 @@ namespace CR { // Namespace CR -- begin
   //  Conversion using CASA array classes
   //
   // ============================================================================
-
+  
 #ifdef HAVE_CASA
-    
+  
   /*!
     \brief Convert polar spherical coordinates to cartesian coordinates
-
+    
     Convert polar spherical coordinates, \f$ (\phi,\theta,r) \f$, to cartesian
     coordinates, \f$ (x,y,z) \f$.
-
+    
     \f[ 
       x = \rho\, \sin(\theta)\, \cos(\phi) \,, \quad
       y = \rho\, \sin(\theta)\, \sin(\phi) \,, \quad

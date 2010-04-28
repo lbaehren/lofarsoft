@@ -27,6 +27,7 @@
 /* CR-Tools header files */
 #include <crtools.h>
 #include <IO/DataReader.h>
+#include <Math/VectorConversion.h>
 #include <Utilities/StringTools.h>
 
 /* casacore header files */
@@ -56,6 +57,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class LOFAR_TBB
     
+    \ingroup CR
     \ingroup IO
     
     \brief Interface between Data Access Library (DAL) and DataReader framework
@@ -90,7 +92,7 @@ namespace CR { // Namespace CR -- begin
   class LOFAR_TBB : private DAL::TBB_Timeseries, public CR::DataReader {
 
     //! List of channel IDs pointing to the dipole datasets holding the TBB data
-    std::vector <std::string> channelID_p;
+    std::vector <std::string> dipoleNames_p;
 
   public:
     
@@ -188,34 +190,6 @@ namespace CR { // Namespace CR -- begin
     void copy (LOFAR_TBB const &other);
     //! Unconditional deletion 
     void destroy(void);
-
-    //! Convert std::vector<T> to casac::Vector<T>
-    template <class T, class S>
-      void convertVector (casa::Vector<T> &to,
-			  std::vector<S> const &from)
-      {
-	unsigned int nelem = from.size();
-	// adjust the shape of the returned casa::Vector<T>
-	to.resize(nelem);
-
-	for (unsigned int n(0); n<nelem; ++n) {
-	  to(n) = (T)from[n];
-	}
-      }
-    
-    //! Convert std::vector<T> to casac::Vector<T>
-    template <class T, class S>
-      void convertVector (std::vector<T> & to,
-			   const casa::Vector<S> from)
-      {
-	unsigned int nelem = from.size();
-	// adjust the shape of the returned casa::Vector<T>
-	to.resize(nelem);
-
-	for (unsigned int n(0); n<nelem; ++n) {
-	  to(n) = (T)from[n];
-	}
-      }
     
   };
   

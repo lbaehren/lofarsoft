@@ -21,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #ifndef _TIM40HEADER_H_
 #define _TIM40HEADER_H_
 
@@ -42,7 +40,8 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \class TIM40Header
     
-    \ingroup CR_Data
+    \ingroup CR
+    \ingroup IO
     
     \brief Brief description for class TIM40Header
     

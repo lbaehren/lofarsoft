@@ -31,40 +31,48 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // --------------------------------------------------------------- LopesEventIn
+  //_____________________________________________________________________________
+  //                                                                 LopesEventIn
   
-  LopesEventIn::LopesEventIn()
-    : DataReader (1){
+  LopesEventIn::LopesEventIn ()
+    : DataReader (1)
+  {
     init();
   }
 
-  // --------------------------------------------------------------- LopesEventIn
+  //_____________________________________________________________________________
+  //                                                                 LopesEventIn
   
   LopesEventIn::LopesEventIn(String const &filename)
-    : DataReader (1){
+    : DataReader (1)
+  {
     init();
     attachFile(filename);
   }
   
-  // --------------------------------------------------------------- LopesEventIn
+  //_____________________________________________________________________________
+  //                                                                 LopesEventIn
   
   LopesEventIn::LopesEventIn (String const &filename,
 			      uint const &blocksize)
-    : DataReader (1){
+    : DataReader (1)
+  {
     init();
     attachFile(filename);
     DataReader::setBlocksize(blocksize);
   }
- 
-  //________________________________________________________________________ init
- 
-  void LopesEventIn::init(){
+  
+  //_____________________________________________________________________________
+  //                                                                         init
+  
+  void LopesEventIn::init()
+  {
     DataReader::setNyquistZone(LOPES_NYQUIST_ZONE);
     DataReader::setSampleFrequency(LOPES_SAMPLERATE);
     NumAntennas_p = 0;
-    filename_p = "";
-    attached_p = False;
-    iterator_p = NULL;
+    filename_p    = "";
+    attached_p    = False;
+    iterator_p    = NULL;
     headerpoint_p = (lopesevent_v1*)malloc(LOPESEV_HEADERSIZE);
   }
   
@@ -85,13 +93,6 @@ namespace CR { // Namespace CR -- begin
     if (iterator_p != NULL) { delete [] iterator_p; iterator_p=NULL; };
   }
 
-  
-  // ============================================================================
-  //
-  //  Operators
-  //
-  // ============================================================================  
-  
   // ============================================================================
   //
   //  Methods
@@ -103,7 +104,8 @@ namespace CR { // Namespace CR -- begin
     
     \return ok -- True if successfull
   */
-  Bool LopesEventIn::attachFile(String filename){
+  Bool LopesEventIn::attachFile(String filename)
+  {
     int i;
     uint ui,tmpchan,tmplen;
     short *tmppoint;

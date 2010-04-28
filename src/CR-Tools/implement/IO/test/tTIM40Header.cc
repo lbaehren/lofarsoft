@@ -21,16 +21,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
-#include <Data/TIM40Header.h>
+#include <IO/TIM40Header.h>
 
 using CR::TIM40Header;
 
 /*!
   \file tTIM40Header.cc
 
-  \ingroup CR_Data
+  \ingroup CR
+  \ingroup IO
   
   \brief A collection of test routines for TIM40Header
  

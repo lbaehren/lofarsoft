@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2009                                                    *
- *   Maaijke Mevius (<mail>)                                            *
+ *   Maaijke Mevius (<mail>)                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -34,6 +34,7 @@
 #include <dal/TBB_StationGroup.h>
 
 // CR-Tools header files
+#include <Math/VectorConversion.h>
 #include <Analysis/Utils/TimeSeriesData.h>
 
 // AIPS++/CASA header files

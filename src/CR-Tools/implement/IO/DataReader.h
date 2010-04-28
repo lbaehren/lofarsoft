@@ -701,7 +701,7 @@ namespace CR {  //  Namespace CR -- begin
   */
   bool setAntennas (Vector<uint> const &antennas,
 		    Vector<bool> const &antennaSelection);
-
+  
   /*!
     \brief Return array with the antenna selection flags
 

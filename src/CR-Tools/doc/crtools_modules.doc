@@ -838,6 +838,27 @@ for (uint block(0); block<nofBlocks; block++) {
 
 // ==============================================================================
 //
+//  CR-Tools/implement/Pypeline
+//
+// ==============================================================================
+
+/*!
+  \defgroup CR_Pypeline CR-Tools :: Pypeline module
+
+  \ingroup CR
+
+  \brief Basic algorithms for the CR pipeline
+
+  <h3>Synopsis</h3>
+
+  HFTOOLS Version 0.2 - Basic algorithms for the CR pipeline with
+  automatic wrapper generation for python.  Includes various tools to
+  manipulate stl vectors in python and wrapper function for CR Tool classes.
+  
+*/
+
+// ==============================================================================
+//
 //  CR-Tools/implement/Bindings
 //
 // ==============================================================================

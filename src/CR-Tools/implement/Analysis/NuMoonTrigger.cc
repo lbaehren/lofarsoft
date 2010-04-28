@@ -54,31 +54,6 @@ namespace CR { // Namespace  -- begin
 #ifdef HAVE_ROOT
 
   //_____________________________________________________________________________
-  //                                                                 reading_data
-
-  Matrix<double> NuMoonTrigger::reading_data( std::string const &filename,
-					      uint const& n_frames ) 
-  {
-    Matrix<double> data ;
-    try {
-      DAL::TBB_Timeseries timeseries() ;
-      
-      // uint nofSamples = n_frames*1024 ;
-      
-      // uint start =0 ;
-      
-      //  data = timeseries.fx( start,
-      // 		       nofSamples ) ;
-      
-    }
-    
-    catch ( AipsError x ){
-      cerr << " NuMoonTrigger::reading_data " << x.getMesg () << endl ;
-    }
-    return data ;
-  }  
-  
-  //_____________________________________________________________________________
   //                                                                     fft_data
 
   casa::Matrix<DComplex> NuMoonTrigger::fft_data( Vector<double>&  data,

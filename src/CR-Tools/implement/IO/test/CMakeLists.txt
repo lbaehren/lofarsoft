@@ -15,20 +15,22 @@ endif (NOT HAVE_CASACORE OR NOT DAL_LIBRARIES OR NOT HDF5_LIBRARIES)
 ##                                                     Build/Install instructions
 
 foreach (src ${tests_IO})
-  ## get the name of the file without the extension
-  get_filename_component (src ${src} NAME_WE)
+
+  ## extract the components of the filename
+  get_filename_component (_name ${src} NAME_WE)
+  get_filename_component (_ext ${src} EXT)
   ## compiler instructions
-  add_executable(${src} ${src}.cc)
+  add_executable(${_name} ${_name}${_ext})
   ## linker instructions
-  target_link_libraries (${src}
-    cr
-    ${cr_link_libraries}
-    )
+  target_link_libraries (${_name} cr ${cr_link_libraries})
   ## installation instructions
-  install (TARGETS ${src}
+  install (
+    TARGETS ${_name}
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
     )
+
 endforeach (src)
 
 ##_______________________________________________________________________________
@@ -71,6 +73,7 @@ foreach (test
     tgenTVSpec
     tsimulation2event
     ttbbctlIn
+    tTIM40Header
     ttoLOPESgrid
     )
   add_test (${test} ${test})
@@ -80,8 +83,10 @@ endforeach (test)
     
 if (dataset_lopes_example)
   add_test (tUpSampledDR tUpSampledDR ${dataset_lopes_example})
+  add_test (tLopesEventIn tLopesEventIn ${dataset_lopes_example})
 else (dataset_lopes_example)
   add_test (tUpSampledDR tUpSampledDR)
+  add_test (tLopesEventIn tLopesEventIn)
 endif (dataset_lopes_example)
 
 if (dataset_tbb)

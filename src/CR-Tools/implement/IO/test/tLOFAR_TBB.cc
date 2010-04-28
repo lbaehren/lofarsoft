@@ -398,27 +398,37 @@ int test_headerRecord (std::string const &filename)
   cout << "\n[test_data]\n" << endl;
   
   int nofFailedTests (0);
+  bool status (false);
   uint blocksize (1024);
 
-  cout << "[1] Set header record from external values ..." << endl;
+  cout << "[1] Set header record from dataset metadata ..." << endl;
   try {
     bool status (true);
     // Create LOFAR_TBB object ...
     LOFAR_TBB data (filename,
 		    blocksize);
     // ... and display the header record
-    cout << "-- Original header record = " << data.headerRecord() << endl;
+    cout << data.headerRecord() << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Assign new values to header record ..." << endl;
+  try {
+    // Create new LOFAR_TBB object
+    LOFAR_TBB data (filename,
+		    blocksize);
     // Set up the new record to be stored into the object
     casa::Record rec;
-    rec.define("Date",0);
+    rec.define("Date",1234567890);
     rec.define("AntennaIDs",casa::Vector<int>(1,1));
     rec.define("Observatory","LOFAR");
-    rec.define("Filesize",1);
-    // Set the new header record
+    rec.define("Filesize",1234567890);
+    // Set the new header record ...
     status = data.setHeaderRecord (rec);
-    // Display new values
-    cout << "-- New header record      = " << rec << endl;
-    cout << "--                        = " << data.headerRecord() << endl;
+    // ... and display the header record
+    cout << data.headerRecord() << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

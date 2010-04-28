@@ -181,19 +181,19 @@ int test_data (std::string const &filename)
   cout << "\n[tLopesEventIn::test_data]\n" << endl;
 
   int nofFailedTests (0);
-  CR::LopesEventIn newObject (filename);
+  CR::LopesEventIn le (filename);
   
   cout << "[1] Testing retrieval of fx() data ..." << endl;
   try {
     Matrix<Double> data;
     //
     cout << "--> LopesEventIn::fx()" << endl;
-    data = newObject.fx();
+    data = le.fx();
     show_data (data);
     //
     cout << "--> LopesEventIn::fx(Matrix<double>&)" << endl;
     data = 0.0;
-    newObject.fx(data);
+    le.fx(data);
     show_data (data);
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
@@ -205,12 +205,12 @@ int test_data (std::string const &filename)
     Matrix<Double> data;
     //
     cout << "--> LopesEventIn::voltage()" << endl;
-    data = newObject.voltage();
+    data = le.voltage();
     show_data (data);
     //
     cout << "--> LopesEventIn::voltage(Matrix<double>&)" << endl;
     data = 0.0;
-    newObject.voltage(data);
+    le.voltage(data);
     show_data (data);
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
@@ -222,12 +222,12 @@ int test_data (std::string const &filename)
     Matrix<DComplex> data;
     //
     cout << "--> LopesEventIn::fft()" << endl;
-    data = newObject.fft();
+    data = le.fft();
     show_data (data);
     //
     cout << "--> LopesEventIn::fft(Matrix<DComplex>&)" << endl;
     data = 0.0;
-    newObject.fft(data);
+    le.fft(data);
     show_data (data);
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
@@ -239,12 +239,12 @@ int test_data (std::string const &filename)
     Matrix<DComplex> data;
     //
     cout << "--> LopesEventIn::calfft()" << endl;
-    data = newObject.calfft();
+    data = le.calfft();
     show_data (data);
     //
     cout << "--> LopesEventIn::calfft(Matrix<DComplex>&)" << endl;
     data = 0.0;
-    newObject.calfft(data);
+    le.calfft(data);
     show_data (data);
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
@@ -336,25 +336,39 @@ int test_header (std::string const &filename)
 int main (int argc, char *argv[])
 {
   int nofFailedTests (0);
-  std::string filename ("example.event");
+  bool haveDataset (false);
+  std::string filename;
   
-  /* Check if a filename has been provided on the command line */
-  if (argc > 1) {
-    std::string tmp = argv[1];
-    filename        = tmp;
+  //________________________________________________________
+  // Process parameters from the command line
+  
+  if (argc < 2) {
+    haveDataset = false;
+  } else {
+    filename    = argv[1];
+    haveDataset = true;
   }
-  
+
+  //________________________________________________________
+  // Run the tests
+
   // Timing tests for different array access schemes
   nofFailedTests += test_arrays ();
-  
-  // Test for the constructor(s)
-  nofFailedTests += test_construction (filename);
-  // Test access to the data
-  nofFailedTests += test_data (filename);
-  // Test settings for the control parameters
-  nofFailedTests += test_parameters (filename);
-  // Test working with the header record
-  nofFailedTests += test_header (filename);
+
+  if (haveDataset) {
+    // Test for the constructor(s)
+    nofFailedTests += test_construction (filename);
+    // Test access to the data
+    nofFailedTests += test_data (filename);
+    // Test settings for the control parameters
+    nofFailedTests += test_parameters (filename);
+    // Test working with the header record
+    nofFailedTests += test_header (filename);
+  }
+  else {
+    std::cerr << "[tLopesEventIn] Skipping tests which require input dataset!"
+	      << std::endl;
+  }
   
   return nofFailedTests;
 }

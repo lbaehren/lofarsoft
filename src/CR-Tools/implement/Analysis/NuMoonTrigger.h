@@ -172,9 +172,7 @@ namespace CR{ // Namespace  -- begin
     // === Methods ==============================================================
 
 #ifdef HAVE_ROOT
-  Matrix<double> reading_data( std::string const &filename,
-    			       uint const& n_frames ) ;
-		     
+
   Matrix<DComplex> fft_data( Vector<double>& data,
     		 	     uint const& n_frames,
 			     uint const& nyquist_zone ) ;
