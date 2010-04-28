@@ -98,8 +98,8 @@ int main (int argc, char * const argv[])
       image.getImgDim();
       image.getImgSize();
       
-      cout << image.X() << "," << image.Y() << "," << image.Z() << endl;
-      spectralLine.resize(image.Z());	
+      cout << image.getX() << "," << image.getY() << "," << image.getZ() << endl;
+      spectralLine.resize(image.getZ());	
       image.readLine(spectralLine, xpos, ypos, inc, 0);
       
       if(coordfilename!="")		// if a frequency / Faraday depths file was given...

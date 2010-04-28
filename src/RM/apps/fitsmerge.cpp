@@ -212,9 +212,9 @@ void merge2Dto3D(const vector<string> &list, const string
 // naxes[2]=list.size();                   // Length of list = z-axis of output  FITS
 	
 	//	fits_get_img_size(infptr, naxis, naxes, &fitsstatus);					// check  img  dimensions of input FITS
-	inFITS.getImgSize();							 // get image size of input images
+	inFITS.getImgDim();							 // get image size of input images
 	z=list.size();
-	nelements=inFITS.X()*inFITS.Y()*z;
+	nelements=inFITS.getX()*inFITS.getY()*z;
 	
 	/*
 	fits_create_file(&outfptr, outfilename.c_str(),  &fitsstatus);      // create output fits image
@@ -247,7 +247,7 @@ void merge2Dto3D(const vector<string> &list, const string
 	
 	
 	//double *cube=new double[inFITS.X()*inFITS.Y()*z];		// create buffer to read cube into
-	double *plane=new double[inFITS.X()*inFITS.Y()];
+	double *plane=new double[inFITS.getX()*inFITS.getY()];
 	
 //	long fpixel[3]={1,1,1};
 	
