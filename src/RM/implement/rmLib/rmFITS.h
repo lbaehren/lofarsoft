@@ -214,9 +214,9 @@ namespace RM {
 	  
     //! Image dimension functions
     std::vector<int64_t> getImageDimensions();
-    long X();
-    long Y();
-    long Z();
+    long getX();
+    long getY();
+    long getZ();
     void updateImageDimensions();
     int getHDUType();
     std::string getFilename();
@@ -249,13 +249,14 @@ namespace RM {
     //! Get the dimensions of the image
     int getImgDim();
     //! Get the size of the image
-    void getImgSize();
-    void getImgSize(int maxdim,
-		    long *naxes);
+    std::vector<int64_t> getImgSize();
+    //! Get the size of the image (legacy interface)
+	 void getImgSize(int maxdim,
+						  long *naxes);
     void getImgParam(int maxdim,
-		     int &bitpix,
-		     int &naxis,
-		     long *naxes);
+							int &bitpix,
+							int &naxis,
+							long *naxes);
     void createImg(int bitpix,
 		   int naxis,
 		   long *naxes);

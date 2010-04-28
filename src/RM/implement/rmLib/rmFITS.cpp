@@ -646,14 +646,14 @@ namespace RM {
 	
 	
   //_____________________________________________________________________________
-  // 																									  X	
+  // 																								  getX	
 	
 	/*!
 		\brief Get the X dimension of the FITS image
 	
 		\return X - X dimension of an image
 	*/
-	long rmFITS::X()
+	long rmFITS::getX()
 	{
 		if(dimensions.size()==0)
 			throw "rmFITS::X dimensions not set";
@@ -662,14 +662,14 @@ namespace RM {
 	}
 
 	//_____________________________________________________________________________
-	// 																									Y	
+	// 																								getY	
 	
 	/*!
 		\brief Get the Y dimension of the FITS image
 	
 		\return Y - Y dimension of an image
 	*/	
-	long rmFITS::Y()
+	long rmFITS::getY()
 	{
 		if(dimensions.size()==0)
 			throw "rmFITS::Y dimensions not set";
@@ -678,16 +678,19 @@ namespace RM {
 	}
 
 	//_____________________________________________________________________________
-	// 																									Z	
+	// 																								getZ	
 	
 	/*!
 		\brief Get the Z dimension of the FITS image
 
 		\return Z - Z dimension of an image
 	*/	
-	long rmFITS::Z()
+	long rmFITS::getZ()
 	{
-		return this->dimensions[2];
+		if(dimensions.size()==0)
+			throw "rmFITS::Y dimensions not set";
+		else
+			return this->dimensions[2];
 	}
 
 	
@@ -753,6 +756,9 @@ namespace RM {
     return hdutype;
   }
 
+	
+  //_____________________________________________________________________________
+  //                                                                  getFilename	
 
   /*!
     \brief Read the filename of the currently opened FITS file
@@ -771,6 +777,9 @@ namespace RM {
     return filename;
   }
 
+	
+  //_____________________________________________________________________________
+  //                                                                  getFileMode
 
   /*!
     \brief Read the IO mode of the currently opened FITS file
@@ -787,6 +796,9 @@ namespace RM {
     return mode;
   }
 
+	
+  //_____________________________________________________________________________
+  //                                                                   getURLType	
 
   /*!
     \brief Read the url type, e.g. file://, ftp:// of the currently opened FITS file
@@ -803,6 +815,9 @@ namespace RM {
     return urltype;
   }
 
+	
+  //_____________________________________________________________________________
+  //                                                               deleteFITSfile	
 
   /*!
     \brief Delete the fitsfile of the rmFITS object
@@ -911,6 +926,10 @@ namespace RM {
   //
   // ============================================================================
 
+	
+  //_____________________________________________________________________________
+  //                                                                   getImgType	
+	
   /*!
       \brief Get image type of the FITS image
 
@@ -928,6 +947,9 @@ namespace RM {
     return bitpix;	// pass on cfitsio return value
   }
 
+
+  //_____________________________________________________________________________
+  //                                                                    getImgDim
 
   /*!
     \brief Get image dimensions of the FITS image
@@ -956,9 +978,9 @@ namespace RM {
       
       This functions will only update rmFITS object do not pass parameters
   */
-  void rmFITS::getImgSize()
+  std::vector<int64_t> rmFITS::getImgSize()
   {
-    unsigned int i=0;		// loop variable
+    unsigned int i=0;			// loop variable
     int maxdim=getImgDim();	// maximum number of dimensions
     long *naxes=(long *) calloc(maxdim, sizeof(long));
 
@@ -967,31 +989,36 @@ namespace RM {
         throw "rmFITS::getImageSize";
       }
 
+	 dimensions.resize(maxdim); 
     for (i=0; i<dimensions.size(); i++)
       dimensions[i]=naxes[i];
+	  
+	 return dimensions;
   }
 
-    //___________________________________________________________________________
-    //																					  getImgSize
+    
+  //___________________________________________________________________________
+  //	 																				  getImgSize
 
-    /*!
-      \brief Get image size of the FITS image
+  /*!
+     \brief Get image size of the FITS image (legacy interface)
       
-      \param maxdim - Maximum number of dimensions
-      \param &naxes - Array to hold axes lengths
-    */
-    void rmFITS::getImgSize(int maxdim,  long *naxes)
-    {
-      unsigned int i=0;		// loop variable
+     \param maxdim - Maximum number of dimensions
+     \param &naxes - Array to hold axes lengths
+  */
+  void rmFITS::getImgSize(int maxdim,  long *naxes)
+  {
+     unsigned int i=0;		// loop variable
       
-      if (fits_get_img_size(fptr, maxdim, naxes , &fitsstatus))
-	{
-	  throw "rmFITS::getImageSize";
-	}
+     if (fits_get_img_size(fptr, maxdim, naxes , &fitsstatus))
+	  {
+	    throw "rmFITS::getImageSize";
+	  }
       
-      for (i=0; i<dimensions.size(); i++)
-	dimensions[i]=naxes[i];
-    }
+	  dimensions.resize(maxdim);
+	  for (i=0; i<dimensions.size(); i++)
+	     dimensions[i]=naxes[i];
+  }
 
 	
   //___________________________________________________________________________
@@ -1008,16 +1035,16 @@ namespace RM {
   void rmFITS::getImgParam(int maxdim,  int &bitpix, int &naxis, long *naxes)
   {
     if (fits_get_img_param(fptr, maxdim, &bitpix, &naxis, naxes, &fitsstatus))
-      {
+	 {
         throw "rmFITS::getImageParam";
-      }
+    }
   }
 
 	
   //___________________________________________________________________________
   //                                                                  createImg
   /*!
-    \brief Create an image extension
+    \brief Create an image extension (legacy interface)
 
     \param bitpix - Bits per pixel
     \param naxis - Number of axes
@@ -1094,9 +1121,9 @@ namespace RM {
   void rmFITS::writePix(int datatype, long *fpixel, long nelements, void *array)
   {
     if (fits_write_pix(fptr, datatype, fpixel, nelements, array, &fitsstatus))
-      {
+	 {
         throw "rmFITS::writePix";
-      }
+    }
   }
 
 	
@@ -1115,9 +1142,9 @@ namespace RM {
   void rmFITS::writePixNull(int datatype, long *fpixel, long nelements, void *array, void *nulval)
   {
     if (fits_write_pixnull(fptr, datatype, fpixel , nelements, array, nulval, &fitsstatus))
-      {
+	 {
         throw "rmFITS::writePix";
-      }
+    }
   }
 
 	
