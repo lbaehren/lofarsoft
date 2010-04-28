@@ -25,7 +25,7 @@ int main (int argc, char * const argv[])
 {
   // Input and output
   string fitsfilename;						// filename of FITS file to extract spectrum from
-  string spectralfilename="spectral.dat";		// default output name for spectral line file
+  string spectralfilename="spectral.dat";	// default output name for spectral line file
   string coordfilename;						// text file containing
   unsigned long xpos=0, ypos=0;				// x and y coordinate to read spectral line in cube
   

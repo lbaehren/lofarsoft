@@ -17,7 +17,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
+/*
+  File:              fitsmerge.cpp
+  Author:            Sven Duscha (sduscha@mpa-garching.mpg.de)
+  Date:              01-09-2009
+  Last change:			28-04-2010
+*/
 /*!
   \file fitsmerge.cpp
   \ingroup RM
@@ -36,6 +41,7 @@
 #include <vector>                       // vector used to keep list of input images
 #include <stdio.h>
 #include "fitsio.h"
+#include "../implement/rmLib/rmFITS.h"	 // rmFITS class
 
 using namespace std;
 
@@ -45,7 +51,17 @@ using namespace std;
 //
 // ==============================================================================
 
-//! Read list of input FITS images from file
+void readList(const string &listfilename, vector<string> &list);
+bool checkFiles(const vector<string> &list);
+void merge2Dto3D(const vector<string> &list, const string  
+&outfilename);
+
+/*
+void preemptivelyDeleteFITS(const string &filename);
+void correctFreqHeader(vector<string> &list, vector<double> &freqs);
+void readPlane(fitsfile *fptr, float *plane, const unsigned long z, void *nulval, int &fitsstatus);
+
+ //! Read list of input FITS images from file
 void readList (const string &listfilename,
 	       vector<string> &list);
 //! Check images for consistency
@@ -64,6 +80,7 @@ void readPlane (fitsfile *fptr,
 		void *nulval,
 		int &fitsstatus);
 //! Write an image plane to a FITS file at z position
+>>>>>>> .r4763
 void writePlane (fitsfile *fptr,
 		 float *plane,
 		 const long x,
@@ -85,45 +102,41 @@ void printPlane (float *plane,
 //  Function implementations
 //
 // ==============================================================================
+*/
 
 //_______________________________________________________________________________
 //                                                                           main
-
-int main (int argc, const char * argv[])
-{
-  string listfilename;
-  string outfilename;
-  
-  //-------------------------------------
-  // Command line argument parsing
-
-  if(argc!=3) {
-    cout << "usage: fitsmerge <list.txt> <output.fits>" << endl;
-    cout << endl;
-    cout << "This program reads in a list of 2-D FITS images from <list.tx>" << endl;
-    cout << "and merges them into a 3-D cube." << endl;
-  }
-  else {
-    /* 1st cmd argument is filename for input list */
-    listfilename=argv[1];					
-    /* 2nd cmd argument is output filename, exclamation mark for overwriting
-       with fits_create_file */
-    outfilename="!" + (string) argv[2];
-  }
-  
-  //-------------------------------------
-  try {
-    vector<string> list;            // vector to contain list of FITS files
-    
-    readList(listfilename, list);
-    merge2Dto3D(list, outfilename);
-  }
-  
-  catch (const char* s) {
-    cout << s << endl;
-  }
-  
-  return 0;
+int main (int argc, const char * argv[]) {
+        string listfilename, outfilename;
+	
+        //-------------------------------------
+        // Command line argument parsing
+        if(argc!=3)
+        {
+                cout << "usage: fitsmerge <list.txt> <output.fits>" << endl;
+                cout << endl;
+                cout << "This program reads in a list of 2-D FITS images from <list.tx>" << endl;
+                cout << "and merges them into a 3-D cube." << endl;
+        }
+        else
+        {
+                listfilename=argv[1];					// 1st cmd argument is filename for input list
+                outfilename="!" + (string) argv[2];    // 2nd cmd argument is output filename, exclamation mark for overwriting with fits_create_file
+        }
+                
+        //-------------------------------------
+        try {
+			 vector<string> list;            // vector to contain list of FITS files
+                
+			 readList(listfilename, list);
+			 merge2Dto3D(list, outfilename);
+        }
+        
+        catch (const char* s) {
+		    cout << s << endl;
+        }
+        
+        return 0;
 }
 
 //_______________________________________________________________________________
@@ -137,29 +150,28 @@ int main (int argc, const char * argv[])
   */
 void readList(const string &listfilename, vector<string> &list)
 {
-        string filenameitem;    // local variable for filename
+      string filenameitem;    // local variable for filename
 
-        ifstream infile(listfilename.c_str(), ifstream::in);    // input filestream
+      ifstream infile(listfilename.c_str(), ifstream::in);    // input filestream
         
 		filenameitem.resize(100);                       // resize filenameitem string (needed on OS X)
         list.clear();				// empty vector
 	
-        if(infile.fail())
-			throw "fitsmerge::readList failed to open file";
+      if(infile.fail())
+		  throw "fitsmerge::readList failed to open file";
         
-        while(infile.good())                            // as long as we can read from the text file
-        {
-          infile >> filenameitem;                 // read one line into filename    
+		while(infile.good())                            // as long as we can read from the text file
+		{
+        infile >> filenameitem;                 // read one line into filename    
 		  list.push_back(filenameitem);           // push back into vector
 		}
         
-        infile.close();
+		infile.close();
 }
 
 
 //_______________________________________________________________________________
-//                                                                       readList
-
+//                                                                    merge2Dto3D
 /*!
   \param list - vector containing a list of 2-D FITS files
   \param outfilename - filename of 3-D FITS file to be created
@@ -168,95 +180,108 @@ void readList(const string &listfilename, vector<string> &list)
 void merge2Dto3D(const vector<string> &list, const string  
 &outfilename)
 {
-        fitsfile *infptr=NULL, *outfptr=NULL;                           // fileptr for current input  and (one) output file
+	RM::rmFITS inFITS;						// rmFITS input image
+	RM::rmFITS outFITS;						// rmFITS output image
+
+  // These are now all handled in rmFITS objects:
+  //     fitsfile *infptr=NULL, *outfptr=NULL;                           // fileptr for current input  and (one) output file
   //      ofstream outfile(const_cast<const char*>(freqlist.c_str()),  ofstream::out); // output filestream to create frequency list file
-        int fitsstatus=0;                                                                       // status returned from cfitsio functions
-        int naxis=0;													// number of axes for output image
-        long *naxes;													// array holding dimensions for each axis
-		long nelements=0;												// number of elements in a plane
-		float nulval;													// null value to be used if nan is encountered in FITS file
-		char errortext[255];											// char string to contain fits error message
+  //      int fitsstatus=0;                                                                       // status returned from cfitsio functions
+  //      int naxis=0;													// number of axes for output image
+  //      long *naxes;													// array holding dimensions for each axis
+	unsigned long z=0;
+	long nelements=0;												// number of elements in a plane
 	
-        // Check input parameters
-        if(list.size()==0)
-                throw "fitsmerge::merge2Dto3D file list has length 0";
-        if(outfilename=="")
-                throw "fitsmerge::merge2Dto3D no filename given";
+	// Check input parameters
+   if(list.size()==0)
+		throw "fitsmerge::merge2Dto3D file list has length 0";
+	if(outfilename=="")
+		throw "fitsmerge::merge2Dto3D no filename given";
         
-        //-----------------------------------------------
-		checkFiles(list);		
+   //-----------------------------------------------
+	checkFiles(list);		
 
-		fits_open_image(&infptr, list[0].c_str(), READONLY, &fitsstatus);
-		fits_get_img_dim(infptr, &naxis, &fitsstatus);
+	//fits_open_image(&infptr, list[0].c_str(), READONLY, &fitsstatus);
+	//fits_get_img_dim(infptr, &naxis, &fitsstatus);
+	inFITS.open(list[0], READONLY);
+	inFITS.getImgDim();
+	
+	// Prepare creation of 3D FITS image
+//naxis=3;
+//	naxes=new long[naxis];
+// naxes[2]=list.size();                   // Length of list = z-axis of output  FITS
+	
+	//	fits_get_img_size(infptr, naxis, naxes, &fitsstatus);					// check  img  dimensions of input FITS
+	inFITS.getImgSize();							 // get image size of input images
+	z=list.size();
+	nelements=inFITS.X()*inFITS.Y()*z;
+	
+	/*
+	fits_create_file(&outfptr, outfilename.c_str(),  &fitsstatus);      // create output fits image
+	if(fitsstatus)
+	{
+		fits_get_errstatus(fitsstatus, errortext);	
+		cout << "fitserror: " << errortext << endl;
+		throw "fitsmerge::merge2Dto3D could not create output file";    //  throw exception
+	}
+			
+	// Create the primary array image (32-bit float pixels)
+	fits_create_img(outfptr, FLOAT_IMG, naxis, naxes, &fitsstatus);
+	if(fitsstatus)
+	{
+		fits_get_errstatus(fitsstatus, errortext);	
+		cout << "fitserror: " << errortext << endl;
+		throw "fitsmerge::merge2Dto3D could not create image extension";    //  throw exception
+	}
+	
+	if(fitsstatus)
+	{
+		fits_get_errstatus(fitsstatus, errortext);	
+		cout << "fitserror: " << errortext << endl;
+		throw "fitsmerge::merge2Dto3D could not copy header from source to destination";    //  throw exception
+	}
+
+	outFITS.createImg(FLOAT_IMG, naxis, naxes);
+	nelements=naxes[0]*naxes[1];		// number of elements in one image plane
+	*/
+	
+	
+	//double *cube=new double[inFITS.X()*inFITS.Y()*z];		// create buffer to read cube into
+	double *plane=new double[inFITS.X()*inFITS.Y()];
+	
+//	long fpixel[3]={1,1,1};
+	
+
+	inFITS.setNulval(0.0);											// set nulval
+   // Loop over list and copy 2-D FITS files into output file
+   for(unsigned long int i=0; i<list.size(); i++)
+   {
+//		fits_open_image(&infptr, list[i].c_str(), READONLY , &fitsstatus);			// update infptr
+		inFITS.open(list[i], READONLY);		// open current file in list
 		
-		// Prepare creation of 3D FITS image
-		naxis=3;
-		naxes=new long[naxis];
-		fits_get_img_size(infptr, naxis, naxes, &fitsstatus);					// check  img  dimensions of input FITS
-			
-		naxes[2]=list.size();                   // Length of list = z-axis of output  FITS
- 
-		nelements=naxes[0]*naxes[1]*naxes[2];
-	
-		fits_create_file(&outfptr, outfilename.c_str(),  &fitsstatus);      // create output fits image
-		if(fitsstatus)
-		{
-			fits_get_errstatus(fitsstatus, errortext);	
-			cout << "fitserror: " << errortext << endl;
-			throw "fitsmerge::merge2Dto3D could not create output file";    //  throw exception
-        }
-			
-		// Create the primary array image (32-bit float pixels)
-		fits_create_img(outfptr, FLOAT_IMG, naxis, naxes, &fitsstatus);
-		if(fitsstatus)
-		{
-			fits_get_errstatus(fitsstatus, errortext);	
-			cout << "fitserror: " << errortext << endl;
-			throw "fitsmerge::merge2Dto3D could not create image extension";    //  throw exception
-		}
-	
-		if(fitsstatus)
-		{
-			fits_get_errstatus(fitsstatus, errortext);	
-			cout << "fitserror: " << errortext << endl;
-			throw "fitsmerge::merge2Dto3D could not copy header from source to destination";    //  throw exception
-		}
-	
-		cout << "cube-size = " << naxes[0]*naxes[1]*naxes[2] << endl;
-	
-//		float *plane=new float[naxes[0]*naxes[1]];				// create buffer to read plane into
-		float *cube=new float[naxes[0]*naxes[1]*naxes[2]];		// create buffer to read cube into
-
-		long fpixel[3]={1,1,1};
-	
-		nelements=naxes[0]*naxes[1];		// number of elements in one image plane
-		nulval=0.0; // set nulval
-      // Loop over list and copy 2-D FITS files into output file
-        for(unsigned long int i=0; i<list.size(); i++)
-        {
-			fits_open_image(&infptr, list[i].c_str(), READONLY , &fitsstatus);			// update infptr
-			
-			fits_file_name(infptr, errortext, &fitsstatus);
-			cout << "i = " << i << "\t" << list[i].c_str() << "\t" << errortext << endl;
-	
-			
-			fits_read_pix(infptr, TFLOAT, fpixel, nelements, &nulval, cube+(i*nelements), NULL, &fitsstatus);			
+//		fits_file_name(infptr, errortext, &fitsstatus);
+//		cout << "i = " << i << "\t" << list[i].c_str() << "\t" << errortext << endl;
+//		fits_read_pix(infptr, TFLOAT, fpixel, nelements, &nulval, cube+(i*nelements), NULL, &fitsstatus);			
 			
 //			readPlane(infptr, cube+(i*nelements), 1, &nulval, fitsstatus);				// read plane from input file: FITS start with index 1!							
 			
 //			writePlane(outfptr, plane, naxes[0], naxes[1], i+1, &nulval, fitsstatus);	// write to i-th plane in output file
+
+		inFITS.readPlane(plane, 1);
+		outFITS.writePlane(plane, 1);
+	//	fits_close_file(infptr, &fitsstatus);
+		inFITS.close();
+	}
 			
-			fits_close_file(infptr, &fitsstatus);
-	    }
-			
-		writeCube(outfptr, cube, &nulval);
-	
-        // Close input and output files
-        fits_close_file(outfptr, &fitsstatus);
-    //    outfile.close();
-		delete[] naxes;
-//		delete[] plane;
-		delete[] cube;
+	//writeCube(outfptr, cube, &nulval);	
+   // Close input and output files
+   //fits_close_file(outfptr, &fitsstatus);
+	//	delete[] naxes;
+		delete[] plane;
+	//	delete[] cube;
+
+	//outFITS.writeCube(cube);
+	outFITS.close();
 }
 
 //_______________________________________________________________________________
@@ -301,7 +326,7 @@ bool checkFiles(const vector<string> &list)
 		{
 			fits_get_errstatus(fitsstatus, errortext);
 			throw "fitsmerge::merge2Dto3D could not open image " + filename;
-        }                
+      }                
 		fits_get_hdu_type(infptr, &hdutype ,&fitsstatus);                       // Check if  current HDU is an image extension
 		if(fitsstatus)
 			throw "fitsmerge::merge2Dto3D";
@@ -329,6 +354,7 @@ bool checkFiles(const vector<string> &list)
 /*!
  \param filename - name of file to check for
 */
+/*
 void preemptivelyDeleteFITS(const string &filename)
 {
 	int exists=0;
@@ -357,10 +383,11 @@ void preemptivelyDeleteFITS(const string &filename)
 			throw "fitsmerge::merge2Dto3D could not delete old output file";    //  throw exception				
 		}			
 	}	
-	
-	
 }
+*/
 
+/*
+void readPlane(fitsfile *fptr, float *plane, const unsigned long z, void *nulval, int &fitsstatus)
 //_______________________________________________________________________________
 //                                                                      readPlane
 
@@ -419,6 +446,7 @@ void readPlane (fitsfile *fptr,
  \param nulval - pointer to nulval which is used for NULL pixels
  \parm fitsstatus - fits status variable
 */
+/*
 void writePlane (fitsfile *fptr,
                                  float *plane,
                                  const long x,
@@ -471,6 +499,7 @@ void writePlane (fitsfile *fptr,
 		 }
      }
 }
+*/
 
 //_______________________________________________________________________________
 //                                                                      writeCube
@@ -481,6 +510,8 @@ void writePlane (fitsfile *fptr,
  \param naxis - number of axis
  \param naxes - dimension of each axis
 */
+/*
+void writeCube(fitsfile *fptr, float *cube, void* nulval)
 void writeCube (fitsfile *fptr,
 		float *cube,
 		void* nulval)
@@ -512,7 +543,7 @@ void writeCube (fitsfile *fptr,
 	for(int i=0; i < naxis; i++)
 	  fpixel[i]=1;
 	
-	/* Loop over (hyper)cube's axes */
+	// Loop over (hyper)cube's axes
 	for(int i=0; i < naxis; i++) {
 	    nelements*=naxes[i];								// compute nelements in cube
 	    cout << nelements << endl;
@@ -528,15 +559,16 @@ void writeCube (fitsfile *fptr,
 	    throw "fitsmerge::writeCube failed";
 	  }
 }
+*/
 
 //_______________________________________________________________________________
 //                                                                     printPlane
-
 /*!
   \param *plane - buffer containing image plane
   \param x - x dimension of plane
   \param y - y dimension of plane
 */
+/*
 void printPlane (float *plane,
 		 unsigned int x, 
 		 unsigned int y)
@@ -551,7 +583,7 @@ void printPlane (float *plane,
 			cout << endl;
 	}
 }
-
+*/
 
 /*!
   \brief Functions that tries to check frequency header info and  
@@ -559,6 +591,7 @@ correct it if necessary
 
   \param ftpr - FITS file ptr of image to check
 */
+/*
 void correctFreqHeader(vector<string> &list, vector<double> &freqs)
 {
         for(unsigned int i=0; i < list.size(); i++)
@@ -566,3 +599,4 @@ void correctFreqHeader(vector<string> &list, vector<double> &freqs)
 
         }
 }
+*/
