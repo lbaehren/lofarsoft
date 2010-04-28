@@ -246,7 +246,7 @@ namespace RM {
         throw "rmFITS::openData";
       }
     
-    if (readHDUType()==IMAGE_HDU)	 // if it is an image extension
+    if (getHDUType()==IMAGE_HDU)	 // if it is an image extension
       {
         updateImageDimensions();		// Update dimensions-vector,
       }
@@ -267,7 +267,7 @@ namespace RM {
         throw "rmFITS::openImage";
       }
     
-    if (readHDUType()==IMAGE_HDU)	 // if it is an image extension
+    if (getHDUType()==IMAGE_HDU)	 // if it is an image extension
       {
         updateImageDimensions();		// Update dimensions-vector,
       }
@@ -515,18 +515,18 @@ namespace RM {
 
 
   //_____________________________________________________________________________
-  //                                                                  readNumHDUs
+  //                                                                   getNumHDUs
 
   /*!
     \return numHDUS - number of HDUs in FITS file
   */
-  int rmFITS::readNumHDUs ()
+  int rmFITS::getNumHDUs ()
   {
     int nofHDUs=0;	// number of hdus in FITS file
 
     if (fits_get_num_hdus(fptr, &nofHDUs ,&fitsstatus))
       {
-        throw "rmFITS::readNumHDUs";
+        throw "rmFITS::getNumHDUs";
       }
 
     return nofHDUs;
@@ -547,7 +547,7 @@ namespace RM {
         throw "rmFITS::moveAbsoluteHDU";
       }
 
-    if (readHDUType()==IMAGE_HDU)	 // if it is an image extension
+    if (getHDUType()==IMAGE_HDU)	 // if it is an image extension
       {
         updateImageDimensions();		// Update dimensions-vector,
       }
@@ -566,7 +566,7 @@ namespace RM {
         throw "rmFITS::moveRelativeHDU";
       }
 
-    if (readHDUType()==IMAGE_HDU)	 // if it is an image extension
+    if (getHDUType()==IMAGE_HDU)	 // if it is an image extension
       {
         updateImageDimensions();		// Update dimensions-vector,
       }
@@ -574,18 +574,18 @@ namespace RM {
   }
 
   //_____________________________________________________________________________
-  //                                                               readCurrentHDU
+  //                                                                getCurrentHDU
 
   /*!
     \return chdu - current HDU in FITS file
   */
-  int rmFITS::readCurrentHDU()
+  int rmFITS::getCurrentHDU()
   {
     int hdupos=0;		// local variable to hold chdu
 
     if (fits_get_hdu_num(fptr, &hdupos))
     {
-    	throw "rmFITS::readCurrentHDU";
+    	throw "rmFITS::getCurrentHDU";
     }
 
     return hdupos;		// return to caller
@@ -609,7 +609,7 @@ namespace RM {
         throw "rmFITS::moveNameHDU";
       }
 
-    if (readHDUType()==IMAGE_HDU)	 // if it is an image extension
+    if (getHDUType()==IMAGE_HDU)	 // if it is an image extension
       {
         updateImageDimensions();		// Update dimensions-vector,
       }
@@ -640,8 +640,8 @@ namespace RM {
 	
 	
   //_____________________________________________________________________________
-  //                                                        updateImageDimensions
-
+  // 																									  X	
+	
 	/*!
 		\brief Get the X dimension of the FITS image
 	
@@ -649,40 +649,58 @@ namespace RM {
 	*/
 	long rmFITS::X()
 	{
-		return this->dimensions_p[0];
+		if(dimensions.size()==0)
+			throw "rmFITS::X dimensions not set";
+		else
+			return this->dimensions[0];
 	}
 
+	//_____________________________________________________________________________
+	// 																									Y	
+	
 	/*!
-		\brief Get the X dimension of the FITS image
+		\brief Get the Y dimension of the FITS image
 	
 		\return Y - Y dimension of an image
 	*/	
 	long rmFITS::Y()
 	{
-		return this->dimensions_p[1];
+		if(dimensions.size()==0)
+			throw "rmFITS::Y dimensions not set";
+		else		
+			return this->dimensions[1];
 	}
 
+	//_____________________________________________________________________________
+	// 																									Z	
+	
 	/*!
-		\brief Get the X dimension of the FITS image
+		\brief Get the Z dimension of the FITS image
 
 		\return Z - Z dimension of an image
 	*/	
 	long rmFITS::Z()
 	{
-		return this->dimensions_p[2];
+		return this->dimensions[2];
 	}
+
 	
+  //_____________________________________________________________________________
+  // 																						  dimensions	
 	
   /*!
   		\brief Get image dimensions
 	
 		\return dim - vector of length equal the number of axes and in each entry length of that axis
   */
-  vector<int64_t> rmFITS::dimensions()
+  vector<int64_t> rmFITS::getImageDimensions()
   {
-  		return this->dimensions_p;
+  		return this->dimensions;
   }
 
+	
+  //_____________________________________________________________________________
+  //                                                        updateImageDimensions	
 
   /*!
     \brief Update the information contained in the dimensions-vector of the rmFITS object
@@ -693,34 +711,37 @@ namespace RM {
     int naxis=0;
     long *naxes=0;
 
-    if (readHDUType()==IMAGE_HDU)
-      {
+    if (getHDUType()==IMAGE_HDU)
+	 {
         naxis=getImgDim();			// get number of axis
         naxes=(long*) calloc(sizeof(long), naxis);// allocate memory for axis dimensions
 
-        dimensions_p.resize(naxis);		// resize dimensions vector
+        dimensions.resize(naxis);		// resize dimensions vector
         getImgSize(naxis, naxes);		// get the size of each axis
 
         for (i=0; i<naxis; i++)
-          {
-            dimensions_p[i]=naxes[i];
-          }
-      }
+        {
+           dimensions[i]=naxes[i];
+		  }
+	 }
   }
 
+	
+  //_____________________________________________________________________________
+  //                                                        updateImageDimensions	
 
   /*!
     \brief Read type of HDU (IMAGE_HDU, ASCII_TBL, or BINARY_TBL)
 
     \return hduype - Type of current HDU
   */
-  int rmFITS::readHDUType()
+  int rmFITS::getHDUType()
   {
     int hdutype=0;
 
     if (fits_get_hdu_type(fptr,  &hdutype, &fitsstatus))
       {
-        throw "rmFITS::readHDUType";
+        throw "rmFITS::getDUType";
       }
 
     return hdutype;
@@ -732,14 +753,14 @@ namespace RM {
 
     \return filename - Name of FITS file currently opened in rmFITS object
   */
-  std::string rmFITS::readFilename()
+  std::string rmFITS::getFilename()
   {
     std::string filename;	// local variable to hold FITS filename
 
     if (fits_file_name(fptr, const_cast<char *>(filename.c_str()), &fitsstatus))
-      {
-        throw "rmFITS::readFilename";
-      }
+    {
+        throw "rmFITS::getFilename";
+    }
 
     return filename;
   }
@@ -748,14 +769,14 @@ namespace RM {
   /*!
     \brief Read the IO mode of the currently opened FITS file
   */
-  int rmFITS::readFileMode()
+  int rmFITS::getFileMode()
   {
     int mode;
 
     if (fits_file_mode(fptr, &mode, &fitsstatus))
-      {
-        throw "rmFITS::readFileMode";
-      }
+    {
+        throw "rmFITS::getFileMode";
+    }
 
     return mode;
   }
@@ -764,14 +785,14 @@ namespace RM {
   /*!
     \brief Read the url type, e.g. file://, ftp:// of the currently opened FITS file
   */
-  std::string rmFITS::readURLType()
+  std::string rmFITS::getURLType()
   {
     string urltype;
 
     if (fits_url_type(fptr, const_cast<char *> (urltype.c_str()), &fitsstatus))
-      {
-        throw "rmFITS::readURLType";
-      }
+    {
+        throw "rmFITS::getURLType";
+    }
 
     return urltype;
   }
@@ -916,7 +937,7 @@ namespace RM {
         throw "rmFITS::getImgDim";
       }
 
-    dimensions_p.resize(naxis);	// resize dimensions vector in rmFITS object
+    dimensions.resize(naxis);	// resize dimensions vector in rmFITS object
 
     return naxis;	// return number of axes
   }
@@ -940,8 +961,8 @@ namespace RM {
         throw "rmFITS::getImageSize";
       }
 
-    for (i=0; i<dimensions_p.size(); i++)
-      dimensions_p[i]=naxes[i];
+    for (i=0; i<dimensions.size(); i++)
+      dimensions[i]=naxes[i];
   }
 
     //___________________________________________________________________________
@@ -962,8 +983,8 @@ namespace RM {
 	  throw "rmFITS::getImageSize";
 	}
       
-      for (i=0; i<dimensions_p.size(); i++)
-	dimensions_p[i]=naxes[i];
+      for (i=0; i<dimensions.size(); i++)
+	dimensions[i]=naxes[i];
     }
 
 	
@@ -1190,7 +1211,7 @@ namespace RM {
 			throw "rmFITS::readSubset fpixel is NULL pointer";
       //-------------------------------------------------------
 
-		for(unsigned int i=0; i < dimensions_p.size(); i++)
+		for(unsigned int i=0; i < dimensions.size(); i++)
       {
 	 		nelements*=(lpixel[i]-fpixel[i]+1);
       }
@@ -1273,13 +1294,13 @@ void rmFITS::read2D(double *array, long long dim1)
 	// get naxis1 and naxis2 from image dimensions
 	getImgDim();
 
-	if(dimensions_p[0]<=0)
+	if(dimensions[0]<=0)
 		throw "rmFITS::read2D naxis1 <= 0";
-	if(dimensions_p[0]<=0)
+	if(dimensions[0]<=0)
 		throw "rmFITS::read2D naxis2 <= 0";
 		
 	
-	fits_read_2d_dbl(fptr, group, nulval, dim1, dimensions_p[0], dimensions_p[1], array, &anynul, &fitsstatus);
+	fits_read_2d_dbl(fptr, group, nulval, dim1, dimensions[0], dimensions[1], array, &anynul, &fitsstatus);
 	if(fitsstatus)
 	{
 		fits_get_errstatus(fitsstatus, fits_error_message);		
@@ -1310,7 +1331,7 @@ void rmFITS::write2D(double *array, const long long dim1)
 		throw "rmFITS::write2D dim1 is <= 0";
 	
 	//**********************************************************	
-	fits_write_2d_dbl(fptr, group, dim1, dimensions_p[0], dimensions_p[1], array, &fitsstatus);
+	fits_write_2d_dbl(fptr, group, dim1, dimensions[0], dimensions[1], array, &fitsstatus);
 	if(fitsstatus)
 	{
 		fits_get_errstatus(fitsstatus, fits_error_message);		
@@ -1339,7 +1360,7 @@ void rmFITS::write2D(double *array, const long long dim1)
     int anynul=0;
 
     // Check if vector has right dimension, same as z dimension of cube
-    if (readHDUType()!=IMAGE_HDU)	 // Check if current HDU is an image extension
+    if (getHDUType()!=IMAGE_HDU)	 // Check if current HDU is an image extension
     {
         throw "rmFITS::readLine CHDU is not an image";
     }
@@ -1350,19 +1371,19 @@ void rmFITS::write2D(double *array, const long long dim1)
     fpixel[2]=1;
     lpixel[0]=x;
     lpixel[1]=y;
-    lpixel[2]=dimensions_p[2];
+    lpixel[2]=dimensions[2];
 
 	 //-------------------------------------------------------
 	 // Check consistency of pixel data
 	 //
-	 if(x > static_cast<unsigned int>(dimensions_p[0]))
+	 if(x > static_cast<unsigned int>(dimensions[0]))
 		throw "rmFITS::readLine x is out of range";
-	 if(y > static_cast<unsigned int>(dimensions_p[1]))
+	 if(y > static_cast<unsigned int>(dimensions[1]))
 		throw "rmFITS::readLine y is out of range";
-	 if(dimensions_p[2]==0)
+	 if(dimensions[2]==0)
 		throw "rmFITS::readLine image is only 2-D";
     //-------------------------------------------------------
-    //line.resize(dimensions_p[2]);
+    //line.resize(dimensions[2]);
     // Read subset from FITS file
     readSubset(TDOUBLE, fpixel, lpixel, inc, nulval, line, &anynul);   	 
   	 if(fitsstatus)
@@ -1394,7 +1415,7 @@ void rmFITS::write2D(double *array, const long long dim1)
    int anynul=0;
 
    // Check if vector has right dimension, same as z dimension of cube
-   if (readHDUType()!=IMAGE_HDU)	 // Check if current HDU is an image extension
+   if (getHDUType()!=IMAGE_HDU)	 // Check if current HDU is an image extension
    {
        throw "rmFITS::readLine CHDU is not an image";
    }
@@ -1405,14 +1426,14 @@ void rmFITS::write2D(double *array, const long long dim1)
    fpixel[2]=1;
    lpixel[0]=x;
    lpixel[1]=y;
-   lpixel[2]=dimensions_p[2];
+   lpixel[2]=dimensions[2];
 
  //-------------------------------------------------------
  // Check consistency of pixel data
  //
- if(x > static_cast<unsigned int>(dimensions_p[0]))
+ if(x > static_cast<unsigned int>(dimensions[0]))
 	throw "rmFITS::readLine x is out of range";
- if(y > static_cast<unsigned int>(dimensions_p[1]))
+ if(y > static_cast<unsigned int>(dimensions[1]))
 	throw "rmFITS::readLine y is out of range";
  if(line==NULL)
 	throw "rmFITS::readLine line is NULL pointer";
@@ -1455,7 +1476,7 @@ void rmFITS::readZLine (double *line,
 //  int anynul=0;
 
     // Check if vector has right dimension, same as z dimension of cube
-    if (readHDUType()!=IMAGE_HDU)	 // Check if current HDU is an image extension
+    if (getHDUType()!=IMAGE_HDU)	 // Check if current HDU is an image extension
     {
         throw "rmFITS::readLine CHDU is not an image";
     }
@@ -1470,14 +1491,14 @@ void rmFITS::readZLine (double *line,
     fpixel[2]=1;
     lpixel[0]=x;
     lpixel[1]=y;
-    lpixel[2]=dimensions_p[2];
+    lpixel[2]=dimensions[2];
 
 	 //-------------------------------------------------------
 	 // Check consistency of pixel data
 	 //
-	 if(x > static_cast<unsigned int>(dimensions_p[0]))
+	 if(x > static_cast<unsigned int>(dimensions[0]))
 		throw "rmFITS::readLine x is out of range";
-	 if(y > static_cast<unsigned int>(dimensions_p[1]))
+	 if(y > static_cast<unsigned int>(dimensions[1]))
 		throw "rmFITS::readLine y is out of range";
   	 if(line==NULL)
 		throw "rmFITS::readLine NULL pointer";
@@ -1577,7 +1598,7 @@ void rmFITS::readZLine (double *line,
 		for(unsigned int i=0; i<naxis; i++)
 		{
 			fpixel[i]=1;
-			lpixel[i]=dimensions_p[i];
+			lpixel[i]=dimensions[i];
 			inc[i]=1;							// default increment is 1
 		}
 
@@ -1620,13 +1641,13 @@ void rmFITS::readZLine (double *line,
 	 //-------------------------------------------------------
 	 // Check consistency of pixel data
 	 //
-	 if(x_pos > static_cast<unsigned int>(dimensions_p[0]))
+	 if(x_pos > static_cast<unsigned int>(dimensions[0]))
 		throw "rmFITS::readSubCube x_pos is out of range";
-	 if(y_pos > static_cast<unsigned int>(dimensions_p[1]))
+	 if(y_pos > static_cast<unsigned int>(dimensions[1]))
 		throw "rmFITS::readSubCube y_pos is out of range";
-	 if(x_pos+x_size > static_cast<unsigned int>(dimensions_p[0]))
+	 if(x_pos+x_size > static_cast<unsigned int>(dimensions[0]))
 		throw "rmFITS::readSubCube x_size is out of range";
-	 if(y_pos+y_size > static_cast<unsigned int>(dimensions_p[1]))
+	 if(y_pos+y_size > static_cast<unsigned int>(dimensions[1]))
 		throw "rmFITS::readSubCube y_size is out of range";
   	 if(subCube==NULL)
 		throw "rmFITS::readSubCube NULL pointer";
@@ -1640,11 +1661,11 @@ void rmFITS::readZLine (double *line,
 	 fpixel[1]=y_pos;
 	 fpixel[2]=1;
 
-	 lpixel[0]=dimensions_p[0]+x_size;
-	 lpixel[1]=dimensions_p[1]+y_size;
-	 lpixel[2]=dimensions_p[2];
+	 lpixel[0]=dimensions[0]+x_size;
+	 lpixel[1]=dimensions[1]+y_size;
+	 lpixel[2]=dimensions[2];
 
-    if (readHDUType()!=IMAGE_HDU)   // Check if current HDU is an image extension
+    if (getHDUType()!=IMAGE_HDU)   // Check if current HDU is an image extension
     {
     	throw "rmFITS::readSubCube CHDU is not an image";
     }
@@ -1743,12 +1764,12 @@ void rmFITS::readZLine (double *line,
 		long nelements=0;	// number of elements to write
 
 		// check if plane counter is above limit
-		if (z > (unsigned long) dimensions_p[2]) {
+		if (z > (unsigned long) dimensions[2]) {
 			throw "rmFITS::writePlane z out of range";
 		}
 		
 		/* Check if current HDU is an image extension */
-		if (readHDUType()!=IMAGE_HDU) {
+		if (getHDUType()!=IMAGE_HDU) {
 			throw "rmFITS::writePlane CHDU is not an image";
 		}
 		
@@ -1757,7 +1778,7 @@ void rmFITS::readZLine (double *line,
 		fpixel[1]=1;
 		fpixel[2]=z;
 		
-		nelements=dimensions_p[0]*dimensions_p[1];	// compute nelements in plane
+		nelements=dimensions[0]*dimensions[1];	// compute nelements in plane
 		
 		// Write to FITS file
 		if (plane==NULL)
@@ -1794,17 +1815,17 @@ void rmFITS::readZLine (double *line,
 	  
     // Check if Faraday plane has the same x-/y-dimensions as naxes dimensions of FITS
 	 updateImageDimensions();
-    if ((int64_t)x > dimensions_p[0] || (int64_t)y > dimensions_p[1]) {
+    if ((int64_t)x > dimensions[0] || (int64_t)y > dimensions[1]) {
       throw "rmFITS::writePlane dimensions do not match";
     }
     
     // check if plane counter is above limit
-    if (z > (unsigned) dimensions_p[2]) {
+    if (z > (unsigned) dimensions[2]) {
       throw "rmFITS::writePlane z out of range";
     }
     
     /* Check if current HDU is an image extension */
-    if (readHDUType()!=IMAGE_HDU) {
+    if (getHDUType()!=IMAGE_HDU) {
       throw "rmFITS::writePlane CHDU is not an image";
     }
     
@@ -1813,7 +1834,7 @@ void rmFITS::readZLine (double *line,
     fpixel[1]=1;
     fpixel[2]=z;
 
-    nelements=dimensions_p[0]*dimensions_p[1];	// compute nelements in plane
+    nelements=dimensions[0]*dimensions[1];	// compute nelements in plane
 
     // Write to FITS file
     if (plane==NULL)
@@ -2376,7 +2397,7 @@ void rmFITS::readZLine (double *line,
   {
     moveAbsoluteHDU(hdu);
 
-    if(readHDUType()!=IMAGE_HDU) // Check if it is an image extension
+    if(getHDUType()!=IMAGE_HDU) // Check if it is an image extension
       throw "rmFITS:writeRMHeader HDU is not an image extension";
     // Copy rmFITS image header
 

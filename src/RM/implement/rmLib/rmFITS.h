@@ -106,7 +106,7 @@ namespace RM {
 #endif
     
     //! dimensions of FITS image
-    std::vector<int64_t> dimensions_p;
+    std::vector<int64_t> dimensions;
     
     //! define types of bins
     enum DALbinType {
@@ -199,9 +199,9 @@ namespace RM {
 	 void clearErrorMessages(void);
 	  
     //! Get the number of HDUs in the FITS file
-    int readNumHDUs();
+    int getNumHDUs();
     //! Read the current header postion (HDU) in FITS file
-    int readCurrentHDU();
+    int getCurrentHDU();
     void copyCHDU(rmFITS const &other);
     //! Move to HDU unit given by \e hdu
     void moveAbsoluteHDU(int hdu);
@@ -213,15 +213,15 @@ namespace RM {
 	  
 	  
     //! Image dimension functions
-    std::vector<int64_t> dimensions();
+    std::vector<int64_t> getImageDimensions();
     long X();
     long Y();
     long Z();
     void updateImageDimensions();
-    int readHDUType();
-    std::string readFilename();
-    int readFileMode();
-    std::string readURLType();
+    int getHDUType();
+    std::string getFilename();
+    int getFileMode();
+    std::string getURLType();
     void deleteFITSfile();
     void flushFITSfile();
 	 void flushFITSBuffer();
