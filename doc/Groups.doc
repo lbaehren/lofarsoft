@@ -146,20 +146,27 @@
   |-- devel_common
   |-- external
   `-- src
-      `-- RM          <-- you are here
+      `-- RM                  <-- you are here
+          |-- apps
+          |-- data
+          |-- implement
+	  |   |-- rmClean
+	  |   |-- rmLib
+	  |   `-- rmSim
+          `-- test
   \endverbatim
 
   <h3>External packages</h3>
 
-  - \ref external_packages_armadillo
-  - \ref external_packages_itpp
+  - Armadillo
+  - IT++
 */
 
 //_______________________________________________________________________________
 //                                                                           LASA
 
 /*!
-  \defgroup LASA LOFAR Air-Shower Array (LASA)
+  \defgroup LASA LASA - LOFAR Air-Shower Array
 
   - \ref lasa_setup
   - \ref lasa_build
@@ -189,10 +196,24 @@
     `-- src
         `-- LASA
             |-- analysis
+            |-- apps
+            |-- implement
 	    `-- test
     \endverbatim
     The source code is in \b src/LASA, while the compile and installation is done
     from \b build.
+
+    The individual sub-directores underneath <tt>src/LASA</tt> are used as follows:
+    <ul>
+      <li>\b implement contains the source files with the classes which are
+      compiled into a library (\e liblasa); this library represents the core
+      of the algorithm collection. Executables of application programs link
+      against this library.
+      <li>\b apps holds the source code of application programs, which later can
+      be run from the command line.
+      <li>\b test collects a number of test programs to test the classes and 
+      algorithms within the library.
+    </ul>
 
     <li>Set up your environment: Add the location of the new executables to your
     PATH variable:
@@ -240,6 +261,11 @@
   </ol>
 
   \section lasa_update Update your working copy
+
+  Once you have a working copy of the code base, keep in mind, that not only
+  you yourself might be making adjustments, but also other developers. Therefore
+  in regular intervals you should update your working copy to be in sync with
+  the evolution of the project's code base.
 
   <ol>
     <li>The savest way to update your existing working copy is to run

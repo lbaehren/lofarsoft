@@ -37,7 +37,6 @@
     <li>\ref build_targets_external
     <li>\ref build_targets_doc
     <li>\ref build_targets_clean
-    <li>\ref external_packages
     <li>\ref troubleshooting
   </ul>
 
@@ -143,13 +142,14 @@
      <tt>$HOME/.cshrc</tt>.
      <li>Change into the \e build directory and run the \e bootstrap script:
      \code
-     cd build
+     cd $LOFARSOFT/build
      ./bootstrap
      \endcode
      The script will check if there is a recent enough version of CMake available
      <li>Run \e make for the package/module in question, e.g. for the
      <a href="group__DAL.html">Data Access Library</a>
      \code
+     cd $LOFARSOFT/build
      make dal
      \endcode
      Typing

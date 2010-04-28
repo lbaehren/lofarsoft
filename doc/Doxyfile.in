@@ -556,7 +556,7 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = ${USG_ROOT}/src/BDSM ${USG_ROOT}/src/Pulsar/external ${USG_ROOT}/src/pybdsm
+EXCLUDE                = ${USG_ROOT}/src/BDSM ${USG_ROOT}/src/Pulsar/external ${USG_ROOT}/src/pybdsm ${USG_ROOT}/src/RM/soft
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
