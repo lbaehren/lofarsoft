@@ -74,8 +74,8 @@ gr.CirclePts = 1000 # don't know how to improve circle drawing... this is obsole
 
 datalen = len(pointList)
 
-gX = mglData(datalen)
-gY = mglData(datalen)
+gX = mglData(10)
+gY = mglData(10)
 # X = theta, Y = phi
 # theta = 0 is zenit, have to adjust for coincidence log coordinates.
 qw = hfQtPlot()
@@ -94,28 +94,33 @@ gr.SetRanges(0.0, 90, 0.0, 360)
 gr.SetTicks('x', 15.0, 0)
 gr.SetFontSize(2.0)
 gr.SetMarkSize(0.005) # makes the points smaller
+gr.Axis();          
+gr.Grid();
 
 import random
 i=0
 for record in pointList:
-    gX[i] = 90 - float(record[thetaKey]) + random.gauss(0.0, randomizationInDegrees) # set the horizon to 90 degrees
-    gY[i] = float(record[phiKey]) + random.gauss(0.0, randomizationInDegrees)
+    gX[i%10] = 90 - float(record[thetaKey]) + random.gauss(0.0, randomizationInDegrees) # set the horizon to 90 degrees
+    gY[i%10] = float(record[phiKey]) + random.gauss(0.0, randomizationInDegrees)
     i += 1
-#    gr.Plot(gX,gY, 'r o#'); # 'r' means red; ' ' means no line; 'o' means o symbols; '#' means solid symbols.
-#    qw.update()
+    if i % 10 == 0:
+        print 'Plot no. ' + str(i/10)
+        gr.Plot(gX,gY, 'r o#'); # 'r' means red; ' ' means no line; 'o' means o symbols; '#' means solid symbols.
+        gr.Axis();          
+        gr.Grid();
+        qw.setgraph(gr)
+        qw.repaint()
+        app.processEvents() # why is it slowing down even tho only storing/plotting 10 pts at a time?
 
 #gX[1]=30; gY[1]=85 
 #gX[2] = 80; gY[2] = 1 ;
 #gX[0] = 45; gY[0] = 45 ;
 gr.Plot(gX,gY, 'r o#'); # 'r' means red; ' ' means no line; 'o' means o symbols; '#' means solid symbols.
 
-gr.Axis();          
-gr.Grid();
+#qw = hfQtPlot()
+#qw.show()
+#qw.setgraph(gr)
+#qw.raise_()
+#gr.WriteEPS("VHECRPolarPlotLive.eps","test")
 
-qw = hfQtPlot()
-qw.show()
-qw.setgraph(gr)
-qw.raise_()
-gr.WriteEPS("VHECRPolarPlotLive.eps","test")
-
-dontquit = input('boe')    
+#dontquit = input('boe')    
