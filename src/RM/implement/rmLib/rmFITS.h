@@ -99,7 +99,9 @@ namespace RM {
 	 //! anynul holding information if any null value was encountered
 	 int anynul;
 
-
+	 //! datatype of image (currently only TDOUBLE supported)
+	 int datatype;  
+	  
 #ifdef HAVE_CASA
     //! casacore lattice handle
     casa::Lattice<casa::Float>* lattice_p;
@@ -154,14 +156,15 @@ namespace RM {
     rmFITS ();
     //! Constructor with associated filename
     rmFITS (const std::string &,
-	     int mode);
+				int mode,
+				int extension=0);
     //! Copy constructor
     rmFITS (rmFITS const& other);
     //! Copy constructor
     rmFITS(rmFITS const &other,
-	    bool previous,
-	    bool current,
-	    bool following);
+			  bool previous,
+			  bool current,
+			  bool following);
 
     // === Destruction ==========================================================
 
@@ -177,13 +180,18 @@ namespace RM {
 	 // ============================================================================	  
     
 	 //! open a FITS file for read or readwrite
-    void open(const std::string &filename, const int iomode);
+    void open(const std::string &filename, 
+				  int iomode, 
+				  int extension=0);
     //! open a FITS file for read or readwrite and move to first HDU with significant data
-    void openData(const std::string &filename, int iomode);
+    void openData(const std::string &filename, 
+						int iomode);
     //! open a FITS file for read or readwrite and move to first HDU with an image
-    void openImage(const std::string &filename, int iomode);
+    void openImage(const std::string &filename, 
+						 int iomode);
     //! open a FITS file for read or readwrite and move to first HDU with a table
-    void openTable(const std::string &filename, int iomode);
+    void openTable(const std::string &filename, 
+						 int iomode);
     //! Close a FITS file handle
     void close();
     //! Get the filename of the FITS file opened in this rmFITS object
@@ -214,9 +222,9 @@ namespace RM {
 	  
     //! Image dimension functions
     std::vector<int64_t> getImageDimensions();
-    long getX();
-    long getY();
-    long getZ();
+    int64_t getX();
+    int64_t getY();
+    int64_t getZ();
     void updateImageDimensions();
     int getHDUType();
     std::string getFilename();
@@ -227,8 +235,10 @@ namespace RM {
 	 void flushFITSBuffer();
 	  
 	 void setNulval(double);
-	 double getNulval(); 
-
+	 double getNulval(void); 
+	 int getAnynul(void);
+	  
+	  
 	 // ============================================================================
 	 //
 	 //	File related functions

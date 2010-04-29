@@ -48,36 +48,33 @@ namespace RM {
 	 anynul			= 0;
 	 iomode		   = 0;								// default READONLY mode
 
+	 memset(this->fits_error_message, 0, MAX_MESSAGE_LENGTH); 	  
+	  
 	 #ifdef HAVE_CASA	   
 	 lattice_p    = NULL;    // initialise casa lattice
 	 #endif	  
-	  
-	 
-	 memset(this->fits_error_message, 0, MAX_MESSAGE_LENGTH); 
-	 /*for(unsigned int i=0; i < MAX_MESSAGE_LENGTH; i++)		// initialize character array for fits error message
-	 	fits_error_message[i]='0'; 
-	*/
   }
   
   
   //_____________________________________________________________________________
-  //                                                                      rmFITS
+  //                                                                       rmFITS
   
   /*!
     \param &filename - filename of FITS file
     \param iomode - I/O Read () OR Write
+	 \param extension - FITS extension to open (optional)
   */
   rmFITS::rmFITS (const string &filename,
-						int iomode)
+						int iomode,
+						int extension)
   {
     fptr				= NULL;    // initialise FITS filepointer
     fitsstatus		= 0;       // initialise FITS status
 	 nulval			= 0.0;
 	 anynul			= 0;
 	  
-  	 for(unsigned int i=0; i < MAX_MESSAGE_LENGTH; i++)		// initialize character array for fits error message
-		fits_error_message[i]='0';
-
+	 memset(this->fits_error_message, 0, MAX_MESSAGE_LENGTH);  
+	  
 	 #ifdef HAVE_CASA	   
 	 lattice_p    = NULL;    // initialise casa lattice
 	 #endif
@@ -224,7 +221,7 @@ namespace RM {
 	 \param filename - name of file to open
 	 \param iomode - I/O mode to open the file READONLY / READWRITE
   */
-  void rmFITS::open(const string &filename, const int iomode)
+  void rmFITS::open(const string &filename, int iomode, int extension)
   {
   		if(fits_open_file(&fptr, const_cast<char *>(filename.c_str()), iomode, &fitsstatus))
 		{
@@ -239,7 +236,7 @@ namespace RM {
     \param iomode - I/O-mode: READONLY, READWRITE
   */
   void rmFITS::openData (const std::string &filename,
-                          int iomode)
+								 int iomode)
   {
     if (fits_open_data(&fptr, const_cast<char *>(filename.c_str()), iomode , &fitsstatus))
       {
@@ -653,7 +650,7 @@ namespace RM {
 	
 		\return X - X dimension of an image
 	*/
-	long rmFITS::getX()
+	int64_t rmFITS::getX()
 	{
 		if(dimensions.size()==0)
 			throw "rmFITS::X dimensions not set";
@@ -669,7 +666,7 @@ namespace RM {
 	
 		\return Y - Y dimension of an image
 	*/	
-	long rmFITS::getY()
+	int64_t rmFITS::getY()
 	{
 		if(dimensions.size()==0)
 			throw "rmFITS::Y dimensions not set";
@@ -685,7 +682,7 @@ namespace RM {
 
 		\return Z - Z dimension of an image
 	*/	
-	long rmFITS::getZ()
+	int64_t rmFITS::getZ()
 	{
 		if(dimensions.size()==0)
 			throw "rmFITS::Y dimensions not set";
@@ -695,7 +692,7 @@ namespace RM {
 
 	
   //_____________________________________________________________________________
-  // 																						  dimensions	
+  // 																				getImageDimensions	
 	
   /*!
   		\brief Get image dimensions
@@ -704,7 +701,8 @@ namespace RM {
   */
   vector<int64_t> rmFITS::getImageDimensions()
   {
-  		return this->dimensions;
+	  updateImageDimensions();
+	  return this->dimensions;
   }
 
 	
@@ -749,9 +747,9 @@ namespace RM {
     int hdutype=0;
 
     if (fits_get_hdu_type(fptr,  &hdutype, &fitsstatus))
-      {
-        throw "rmFITS::getDUType";
-      }
+	 {
+       throw "rmFITS::getDUType";
+    }
 
     return hdutype;
   }
@@ -783,10 +781,12 @@ namespace RM {
 
   /*!
     \brief Read the IO mode of the currently opened FITS file
+	
+	 \return mode - file I/0 mode of FITS file (0=READONLY, 1=READWRITE, -1=error)
   */
   int rmFITS::getFileMode()
   {
-    int mode;
+    int mode=-1;
 
     if (fits_file_mode(fptr, &mode, &fitsstatus))
     {
@@ -830,42 +830,37 @@ namespace RM {
     }
   }
 
-	//_____________________________________________________________________________
-	//                                                           preemptivelyDelete
+  //_____________________________________________________________________________
+  //                                                           preemptivelyDelete
 	
-	/*!
+  /*!
 	 \brief Preemptively delete an existing FITS file
 	 
 	 \param filename - name of file to check for preemptive deletion
-	 */
-	void rmFITS::preemptivelyDelete(const string &filename)
-	{
+  */
+  void rmFITS::preemptivelyDelete(const string &filename)
+  {
 		int exists=0;
-		//		int fitsstatus=0;
-		//		fitsfile *outfptr;
-		//		char errortext[MAX_MESSAGE_LENGTH];											// char string to contain fits error message	
-		
-		
-		//------------------------------------------------------------------
-		// Preemptively delete FITS file
-		fits_file_exists(filename.c_str(), &exists, &this->fitsstatus);
-		if(exists)				// Check if it exists...
-		{
-			fits_open_file(&this->fptr, filename.c_str(), READWRITE, &this->fitsstatus);	// need to open it, since delete only works on fileptr not filename		
-			if(this->fitsstatus)
-			{
-				fits_get_errstatus(this->fitsstatus, this->fits_error_message);
-				throw "rmFITS::merge2Dto3D could not open output file for deletion";			//  throw exception				
-			}
-			fits_delete_file(this->fptr, &this->fitsstatus);									// ... then delete it
-			if(this->fitsstatus)
-			{
-				fits_get_errstatus(this->fitsstatus, this->fits_error_message);	
-//				cout << "fitserror: " << errortext << endl;
-				throw "rmFITS::merge2Dto3D could not delete old output file";    //  throw exception				
-			}			
-		}	
-	}	
+
+ 	  //------------------------------------------------------------------
+	  // Preemptively delete FITS file
+	  fits_file_exists(filename.c_str(), &exists, &this->fitsstatus);
+	  if(exists)				// Check if it exists...
+	  {
+	     fits_open_file(&this->fptr, filename.c_str(), READWRITE, &this->fitsstatus);	// need to open it, since delete only works on fileptr not filename		
+		  if(this->fitsstatus)
+		  {
+		     fits_get_errstatus(this->fitsstatus, this->fits_error_message);
+			  throw "rmFITS::merge2Dto3D could not open output file for deletion";			//  throw exception				
+		  }
+		  fits_delete_file(this->fptr, &this->fitsstatus);									// ... then delete it
+		  if(this->fitsstatus)
+		  {
+		     fits_get_errstatus(this->fitsstatus, this->fits_error_message);	
+			  throw "rmFITS::merge2Dto3D could not delete old output file";    //  throw exception				
+		  }			
+		}
+  }	
 	
 	
   //___________________________________________________________________________
@@ -908,17 +903,32 @@ namespace RM {
 		return this->nulval;
 	}
 	
-
-	//___________________________________________________________________________
-	//																					     setNulval	 
-	/*!
-	   \brief Set the current nulval setting of the FITS object
-	   \param nulvalue - new nulval to set in FITS object
-	*/
-	void rmFITS::setNulval(double nulvalue)
-	{
+ 
+  //___________________________________________________________________________
+  //																					     setNulval	 
+  /*!
+     \brief Set the current nulval setting of the FITS object
+	  \param nulvalue - new nulval to set in FITS object
+  */
+  void rmFITS::setNulval(double nulvalue)
+  {
 		this->nulval=nulvalue;
-	}	
+  }	
+
+	
+  //___________________________________________________________________________
+  //																					     getAnynul	
+	
+  /*!
+     \brief Get anynul value
+   
+	  \return anynul - indicator if there has been any nulvalue read or written
+  */
+  int rmFITS::getAnynul(void)
+  {
+     return this->anynul;		
+  }
+	
 	
   // ============================================================================
   //
@@ -940,9 +950,9 @@ namespace RM {
     int bitpix=0;
 
     if (fits_get_img_type(fptr, &bitpix, &fitsstatus))
-      {
-        throw "rmFITS::getImgType";
-      }
+	 {
+       throw "rmFITS::getImgType";
+	 }
 
     return bitpix;	// pass on cfitsio return value
   }
@@ -954,29 +964,30 @@ namespace RM {
   /*!
     \brief Get image dimensions of the FITS image
 
-    \return naxis - Number of axis in image
+    \return naxis - Number of axes in image
   */
   int rmFITS::getImgDim()
   {
     int naxis=0;
 
     if (fits_get_img_dim(fptr, &naxis,  &fitsstatus))
-      {
-        throw "rmFITS::getImgDim";
-      }
+	 {
+	    throw "rmFITS::getImgDim";
+    }
 
     dimensions.resize(naxis);	// resize dimensions vector in rmFITS object
 
     return naxis;	// return number of axes
   }
-    
+
+	
   //___________________________________________________________________________
   //                                                                 getImgSize
     
   /*!
-      \brief Get image size of the FITS image
+     \brief Get image size of the FITS image
       
-      This functions will only update rmFITS object do not pass parameters
+	  This functions will also update rmFITS object
   */
   std::vector<int64_t> rmFITS::getImgSize()
   {
@@ -985,9 +996,9 @@ namespace RM {
     long *naxes=(long *) calloc(maxdim, sizeof(long));
 
     if (fits_get_img_size(fptr, maxdim, naxes , &fitsstatus))
-      {
+	 {
         throw "rmFITS::getImageSize";
-      }
+    }
 
 	 dimensions.resize(maxdim); 
     for (i=0; i<dimensions.size(); i++)
