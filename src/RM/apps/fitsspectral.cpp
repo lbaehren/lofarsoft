@@ -103,18 +103,18 @@ int main (int argc, char * const argv[])
       image.readLine(spectralLine, xpos, ypos, inc, 0);
       
       if(coordfilename!="")		// if a frequency / Faraday depths file was given...
-	{
-	  io.readVectorFromFile(coordinate, coordfilename);
+    	{
+		   io.readVectorFromFile(coordinate, coordfilename);
 	  
-	  if(coordinate.size()!=spectralLine.size())
-	    throw "fitsspectral spectral line and coordinate differ in size";
-	  else
-	    io.write2VectorsToFile(coordinate, spectralLine, spectralfilename);
-	}
+	      if(coordinate.size()!=spectralLine.size())
+	         throw "fitsspectral spectral line and coordinate differ in size";
+	      else
+	         io.write2VectorsToFile(coordinate, spectralLine, spectralfilename);
+	   }
       else
-	{
-	  io.writeRMtoFile(spectralLine, spectralfilename);	
-	}
+	   {
+	      io.writeRMtoFile(spectralLine, spectralfilename);	
+	   }
       
       image.close();
       

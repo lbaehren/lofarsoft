@@ -113,15 +113,15 @@ int main (int argc, const char * argv[]) {
         // Command line argument parsing
         if(argc!=3)
         {
-                cout << "usage: fitsmerge <list.txt> <output.fits>" << endl;
-                cout << endl;
-                cout << "This program reads in a list of 2-D FITS images from <list.tx>" << endl;
-                cout << "and merges them into a 3-D cube." << endl;
+		     cout << "usage: fitsmerge <list.txt> <output.fits>" << endl;
+           cout << endl;
+           cout << "This program reads in a list of 2-D FITS images from <list.tx>" << endl;
+           cout << "and merges them into a 3-D cube." << endl;
         }
         else
         {
-                listfilename=argv[1];					// 1st cmd argument is filename for input list
-                outfilename="!" + (string) argv[2];    // 2nd cmd argument is output filename, exclamation mark for overwriting with fits_create_file
+           listfilename=argv[1];					// 1st cmd argument is filename for input list
+           outfilename="!" + (string) argv[2];    // 2nd cmd argument is output filename, exclamation mark for overwriting with fits_create_file
         }
                 
         //-------------------------------------
@@ -154,18 +154,19 @@ void readList(const string &listfilename, vector<string> &list)
 
       ifstream infile(listfilename.c_str(), ifstream::in);    // input filestream
         
-		filenameitem.resize(100);                       // resize filenameitem string (needed on OS X)
-        list.clear();				// empty vector
+		filenameitem.resize(100);  // resize filenameitem string (needed on OS X)
+      list.clear();   				// empty vector
 	
       if(infile.fail())
 		  throw "fitsmerge::readList failed to open file";
         
-		while(infile.good())                            // as long as we can read from the text file
+		while(infile.good())                       // as long as we can read from the text file
 		{
-        infile >> filenameitem;                 // read one line into filename    
-		  list.push_back(filenameitem);           // push back into vector
+         infile >> filenameitem;                 // read one line into filename    
+		   list.push_back(filenameitem);           // push back into vector
 		}
-        
+		list.pop_back();		// delete last duplicate, why do we need this?
+	
 		infile.close();
 }
 
@@ -204,7 +205,9 @@ void merge2Dto3D(const vector<string> &list, const string
 	//fits_open_image(&infptr, list[0].c_str(), READONLY, &fitsstatus);
 	//fits_get_img_dim(infptr, &naxis, &fitsstatus);
 	inFITS.open(list[0], READONLY);
-	inFITS.getImgDim();
+	int naxis=inFITS.getImgDim();
+	
+	cout << "naxis = " << naxis << endl;	
 	
 	// Prepare creation of 3D FITS image
 //naxis=3;
@@ -212,7 +215,7 @@ void merge2Dto3D(const vector<string> &list, const string
 // naxes[2]=list.size();                   // Length of list = z-axis of output  FITS
 	
 	//	fits_get_img_size(infptr, naxis, naxes, &fitsstatus);					// check  img  dimensions of input FITS
-	inFITS.getImgDim();							 // get image size of input images
+	inFITS.updateImageDimensions();			 // get image size of input images
 	z=list.size();
 	nelements=inFITS.getX()*inFITS.getY()*z;
 	
@@ -294,12 +297,13 @@ bool checkFiles(const vector<string> &list)
 {
 	fitsfile *infptr=NULL;											// fileptr for current input file
 	//      ofstream outfile(const_cast<const char*>(freqlist.c_str()),  ofstream::out); // output filestream to create frequency list file
-	int fitsstatus=0;                                                                       // status returned from cfitsio functions
-	int prevx=0, prevy=0;                                  // x and y dimensions of previous  image in list
+	int fitsstatus=0;                                  // status returned from cfitsio functions
+	int prevx=0, prevy=0;                              // x and y dimensions of previous  image in list
 	int naxis=1;													// number of axes for output image
-	long naxes[3];                                                  // array holding dimensions for each axis
-	//	void *nulval;													// null value to be used if nan is encountered in FITS file
+	long naxes[3];                                     // array holding dimensions for each axis
+	//	void *nulval;												// null value to be used if nan is encountered in FITS file
 	char errortext[255];											// char string to contain fits error message
+	int hdu=1;														// HDU containing image
 	
 	// Check input parameters
 	if(list.size()==0)
@@ -319,22 +323,22 @@ bool checkFiles(const vector<string> &list)
 		if(filename=="")
 			throw "fitsmerge::merge2Dto3D filename is empty";
 		
-		
 		fits_open_image(&infptr, filename.c_str(), READONLY, &fitsstatus);    // Open Image
+		fits_movabs_hdu(infptr, hdu, NULL, &fitsstatus);
 		
 		if(fitsstatus)
 		{
 			fits_get_errstatus(fitsstatus, errortext);
 			throw "fitsmerge::merge2Dto3D could not open image " + filename;
       }                
-		fits_get_hdu_type(infptr, &hdutype ,&fitsstatus);                       // Check if  current HDU is an image extension
+		fits_get_hdu_type(infptr, &hdutype ,&fitsstatus);                 // Check if  current HDU is an image extension
 		if(fitsstatus)
 			throw "fitsmerge::merge2Dto3D";
 		
 		fits_get_img_dim(infptr, &naxis, &fitsstatus);
 		fits_get_img_size(infptr, naxis, naxes, &fitsstatus);					// check  img  dimensions of input FITS
 		
-		if((prevx!=naxes[0] || prevy!=naxes[1]) && i>0)                         // only compare  2nd image to 1st and so on...
+		if((prevx!=naxes[0] || prevy!=naxes[1]) && i>0)                   // only compare  2nd image to 1st and so on...
 			throw "fitsmerge::merge2Dto3D input images differ in size";
 		else
 		{
@@ -589,14 +593,28 @@ void printPlane (float *plane,
   \brief Functions that tries to check frequency header info and  
 correct it if necessary
 
-  \param ftpr - FITS file ptr of image to check
+  \param list - vector of list of filenames
+  \param freqs - vector containing corresponding frequencies
 */
-/*
-void correctFreqHeader(vector<string> &list, vector<double> &freqs)
+void correctFreqHeaders(vector<string> &list, vector<double> &freqs)
 {
         for(unsigned int i=0; i < list.size(); i++)
         {
 
         }
 }
+
+
+/*!
+ \brief Add necessary information to incomplete FITS headers (legacy interface)
+ 
+ \param
 */
+void correctFITSHeader(int naxis, long *naxes, int bitpix)
+{
+
+
+
+
+
+}
