@@ -19,6 +19,7 @@
 #include <limits.h>
 #include <typeinfo>
 #include <ctime>
+#include <fftw3.h>
 
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>

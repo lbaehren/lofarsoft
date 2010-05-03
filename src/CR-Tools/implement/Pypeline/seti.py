@@ -10,7 +10,8 @@ datafile=crfile(filename)
 antennas=list(datafile["antennas"])
 datafile.set("selectedAntennas",[0]).set("blocksize",min(2**22,2**22))
 #datafile.set("blocksize",min(2**16,2**22))
-nBlocks=min(datafile["filesize"]/datafile["blocksize"],100)
+nBlocks=min(datafile["filesize"]/datafile["blocksize"],2)
+
 print time.asctime()
 print "File     : ", datafile.filename
 print "Filesize : ", datafile["filesize"]/10**6, "MSample"
@@ -25,7 +26,7 @@ fft=datafile["emptyFFT"]
 
 avspectrum=hArray(float,dimensions=fft,name="average spectrum")
 print "t=",time.clock()-t0,"s -","Created vectors"
-for ant in antennas:
+for ant in antennas[0:1]:
     print "\nAntenna = ",ant
     print "----------------"
     datafile["selectedAntennas"]=[ant]
@@ -39,6 +40,11 @@ for ant in antennas:
         fft.spectralpower(avspectrum)
         print "t=",time.clock()-t0,"s -","Finished calculating average spectrum"
 
+dumpfile="seti-avspectrum.dmp"
+print "Dumping spectrum to file",dumpfile 
+avspectrum.writedump(dumpfile)
+#avspectrum.readdump(dumpfile)
+
 fblocklen=2**11
 nfBlocks=datafile["fftLength"]/fblocklen
 
@@ -51,12 +57,13 @@ freq=hArray(frequency.vec(),[datafile["fftLength"]/fblocklen,fblocklen],units=("
 freq.setUnit("k","Hz")
 spec=hArray(avspectrum.vec(),[datafile["fftLength"]/fblocklen,fblocklen],xvalues=freq)
 spec[nfBlocks/2].plot(logplot="y",xvalues=freq[nfBlocks/2],xlabel="Frequency",ylabel="Spectral Power",title="SETI Spectrum from TBB")
+"""
 plt.savefig("setispec.pdf")
 for i in range(nfBlocks):
     print "Plotting Spectrum ",i
     spec[i].plot(logplot="y",xvalues=freq[i],xlabel="Frequency",ylabel="Spectral Power",title="SETI Spectrum from TBB ("+str(i)+")")
     plt.savefig("setispec"+str(i)+".pdf")
-
+"""
 print time.asctime()
 
 

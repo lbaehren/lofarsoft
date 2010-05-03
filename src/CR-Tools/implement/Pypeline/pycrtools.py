@@ -864,15 +864,15 @@ for v in hAllVectorTypes:
 
 
 for v in hAllContainerTypes:
-    for s in ["hFill","hCopy","hSort","hZipper"]:
+    for s in ["hFill","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hStdDev","hDownsample","hNegate","hVectorLength","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage","hDelayToPhase"]:
+    for s in ["hMean","hStdDev","hDownsample","hNegate","hVectorLength","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage","hDelayToPhase","hInvFFT","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hComplexContainerTypes:
-    for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex","hInvFFT","hPhaseToComplex","hAmplitudePhaseToComplex"]:
+    for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex","hInvFFT","hInvFFTw","hFFTw","hPhaseToComplex","hAmplitudePhaseToComplex"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hNumericalContainerTypes:
@@ -884,7 +884,7 @@ for v in hNumericalContainerTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
+    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
         setattr(v,s[1:].lower(),eval(s))
 
 #========================================================================
@@ -951,7 +951,7 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=Non
     
     Usage:
 
-    hArray(Type=float,dimensions=[n1,n2,n3...],fill=None) -> FloatArray
+    hArray(Type=float,dimensions=[n1,n2,n3...],fill=None,name=None,copy=None, xvalues=None,units=None) -> FloatArray
 
     Array(Type) -  will create an empty array of type "Type", where Type is
     a basic Python type, i.e.  bool, int, float, complex, str.
@@ -1022,8 +1022,6 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=Non
         else: ary.fill(fill)
     if type(name)==str: ary.setKey("name",name);
     return ary
-
-hArray.__doc__=Arraydoc
 
 #------------------------------------------------------------------------
 # cr DataReader Class

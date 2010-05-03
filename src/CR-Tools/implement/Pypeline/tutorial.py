@@ -867,6 +867,8 @@ Let's see how we can open a file. First define a filename, e.g.:
 filename_sun=LOFARSOFT+"/data/lopes/example.event"
 filename_lofar_big=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
+filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecond.h5"
+
 
 p_("filename_sun")
 p_("filename_lofar_big")

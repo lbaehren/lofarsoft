@@ -16,9 +16,9 @@ plt.clf()
 
 print "t=",time.clock(),"s -","Reading in data and setting parameters"
 file=crfile(filename_sun)
-file["blocksize"]=128 #2**12
-nblocks1=5
-nblocks2=5
+file["blocksize"]=1024 #2**12
+nblocks1=1
+nblocks2=64
 NyquistZone=2
 size=60
 pixel_sep=0.5
@@ -115,7 +115,6 @@ print "t=",time.clock(),"s -","Plotting"
 plt.clf()
 plt.subplot(1,2,1)
 plt.imshow(intpower,cmap=plt.cm.hot)
-plt.savefig("sunimage2.pdf")
 #print intpower
 print "t=",time.clock(),"s -","Done Method 1"
 
@@ -148,3 +147,4 @@ print "t=",time.clock()-t0,"s -","Plotting ccm image"
 plt.subplot(1,2,2)
 plt.imshow(intimage,cmap=plt.cm.hot)
 print "t=",time.clock()-t0,"s -","Done Method 2"
+plt.savefig("sunimage.pdf")
