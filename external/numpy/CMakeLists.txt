@@ -39,7 +39,6 @@ else (USG_ROOT)
   message (FATAL_ERROR "[Numpy] Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
-
 ## ------------------------------------------------------------------------------
 ## System inspection
 
@@ -63,6 +62,24 @@ endif (NOT LAPACK_BLAS_LIBRARY)
 if (NOT LAPACK_LAPACK_LIBRARY)
   message (SEND_ERROR "[NumPy] Unable to build project - missing LAPACK library!")
 endif (NOT LAPACK_LAPACK_LIBRARY)
+
+## Check version number of NumPy installation
+
+set (NUMPY_REQUIRED_MAJOR_VERSION   1)
+set (NUMPY_REQUIRED_MINOR_VERSION   1)
+
+if (NUMPY_API_VERSION)
+  if (NUMPY_MAJOR_VERSION LESS ${NUMPY_REQUIRED_MAJOR_VERSION})
+    message (STATUS "[NumPy] Installation found - Major version too small!")
+    set (NUMPY_FORCE_BUILD TRUE)
+  else (NUMPY_MAJOR_VERSION LESS ${NUMPY_REQUIRED_MAJOR_VERSION})
+    ## Check for major version
+    if (NUMPY_MINOR_VERSION LESS ${NUMPY_REQUIRED_MINOR_VERSION})
+      message (STATUS "[NumPy] Installation found - minor version too small!")
+      set (NUMPY_FORCE_BUILD TRUE)
+    endif (NUMPY_MINOR_VERSION LESS ${NUMPY_REQUIRED_MINOR_VERSION})
+  endif (NUMPY_MAJOR_VERSION LESS ${NUMPY_REQUIRED_MAJOR_VERSION})
+endif (NUMPY_API_VERSION)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -122,5 +139,4 @@ else (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
     WORKING_DIRECTORY ${BOOST_BINARY_DIR}
     COMMENT "[Numpy] Found system-wide installation; skipping rebuild!"
     )
-  message (STATUS "[Numpy] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)

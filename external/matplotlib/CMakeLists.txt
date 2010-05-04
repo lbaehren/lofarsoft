@@ -46,6 +46,8 @@ include (FindPython)
 include (FindNumPy)
 include (FindMatplotlib)
 
+message (STATUS "Python = ${PYTHON_EXECUTABLE}")
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
@@ -56,7 +58,10 @@ if (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
   set (matplotlib_tar_archive "matplotlib-${matplotlib_version}.tar.gz")
 
   find_file (have_matplotlib_tgz ${matplotlib_tar_archive} ${MATPLOTLIB_SOURCE_DIR})
-  
+  find_file (have_setupext_py setupext.py.in ${MATPLOTLIB_SOURCE_DIR})
+
+  ## Build the project
+
   if (have_matplotlib_tgz)
     ExternalProject_Add (matplotlib
       PREFIX ${MATPLOTLIB_BINARY_DIR}
@@ -71,6 +76,21 @@ if (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
   else (have_matplotlib_tgz)
     status (WARNING "[Matplotlib] Unable to build project - no sources found!")
   endif (have_matplotlib_tgz)
+
+  ## Patch the setup script to check for external packages
+
+  if (have_setupext_py)
+    ## create patched version of the configuration script
+    configure_file (${have_setupext_py} ${MATPLOTLIB_SOURCE_DIR}/setupext.py)
+    ## patch the original script provided by Matplotlib
+    ExternalProject_Add_Step (matplotlib matplotlib_setupext
+      COMMAND mv ${MATPLOTLIB_SOURCE_DIR}/setupext.py setupext.py
+      COMMENT "Replacing original setupext.py ..."
+      DEPENDEES patch
+      DEPENDERS configure
+      WORKING_DIRECTORY ${MATPLOTLIB_BINARY_DIR}
+      )
+  endif (have_setupext_py)
   
   ## <-- end build condition ----------------------------------------------------->
   
