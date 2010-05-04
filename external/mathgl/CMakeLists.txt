@@ -129,8 +129,8 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ## Configure and build the project using CMake
 
   find_file (have_mathgl_tgz 
+    mathgl-1.10.2.1.tgz
     mathgl-1.10.tgz
-    mathgl-1.9.tgz
     mathgl.tgz
     PATHS ${MATHGL_SOURCE_DIR}
     )
@@ -183,7 +183,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
     )
   
-  ## Post-installation patch of include paths
+  ## Pre-configure patch of include paths
   ExternalProject_Add_Step (mathgl mathgl_links
     COMMAND rm -f gsl
     COMMAND ${ln_executable} -s ${GSL_INCLUDES}/gsl .
@@ -193,6 +193,14 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     DEPENDEES patch
     DEPENDERS configure
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/include
+    )
+  
+  ## Pre-configure patch of include paths
+  ExternalProject_Add_Step (mathgl mathgl_fonts
+    COMMAND mkdir fonts
+    COMMENT "Creating missing sub-directory."
+    DEPENDERS install
+    WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
     )
   
   ##__________________________________________________________________
