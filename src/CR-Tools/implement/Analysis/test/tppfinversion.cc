@@ -212,9 +212,9 @@ int test_data (std::string const &filename)
   try {
     casa::Matrix<double> data;
 
-    timeseries.fx (data,
-		   start,
-		   nofSamples);
+    timeseries.readData (data,
+			 start,
+			 nofSamples);
     // feedback 
     cout << "-- Data start     = " << start        << std::endl;
     cout << "-- Data blocksize = " << nofSamples   << std::endl;
@@ -267,9 +267,9 @@ int test_inversions (std::string const &filename)
     Vector<Double> samples( nofSamples,0.0 );
     casa::Matrix<double> data;
     
-    timeseries.fx (data,
-		   start,
-		   nofSamples);
+    timeseries.readData (data,
+			 start,
+			 nofSamples);
     
     cout << "-- Data start     = " << start        << std::endl;
     cout << "-- Data blocksize = " << nofSamples   << std::endl;
