@@ -33,6 +33,9 @@
 #  NUMPY_LFLAGS             = Linker flags (optional)
 #  NUMPY_API_VERSION        = API version of the installed and available NumPy
 #                             package
+#  NUMPY_MAJOR_VERSION      = NumPy major version
+#  NUMPY_MINOR_VERSION      = NumPy minor version
+#  NUMPY_RELEASE_VERSION    = NumPy release/patch version
 
 ## -----------------------------------------------------------------------------
 ## Search locations
@@ -165,21 +168,17 @@ else (NUMPY_VERSION_PY AND PYTHON_EXECUTABLE)
 endif (NUMPY_VERSION_PY AND PYTHON_EXECUTABLE)
 
 if (numpy_version_test_output)
-
+  ## copy the output from the Python prompt
   set (NUMPY_API_VERSION ${numpy_version_test_output})
-
+  ## Extract major version
+  string (REGEX MATCH "[0-9]" NUMPY_MAJOR_VERSION ${numpy_version_test_output})
+  ## Extract minor version
+  string (REGEX REPLACE "${NUMPY_MAJOR_VERSION}." "" numpy_version_test_output ${numpy_version_test_output})
+  string (REGEX MATCH "[0-9]" NUMPY_MINOR_VERSION ${numpy_version_test_output})
+  ## Extract patch version
+  string (REGEX REPLACE "${NUMPY_MINOR_VERSION}." "" numpy_version_test_output ${numpy_version_test_output})
+  string (REGEX MATCH "[0-9]" NUMPY_RELEASE_VERSION ${numpy_version_test_output})
 else (numpy_version_test_output)
-
-#   if (NUMPY_NDARRAYOBJECT_H)
-#     file (STRINGS ${NUMPY_NDARRAYOBJECT_H} NPY_VERSION
-#       REGEX "NPY_VERSION"
-#       )
-#     if (NPY_VERSION)
-#       string (REGEX REPLACE "#define NPY_VERSION 0x" "" NUMPY_VERSION ${NPY_VERSION})
-#     else (NPY_VERSION)
-#       message (STATUS "[NumPy] Unable to extract version from header file.")
-#     endif (NPY_VERSION)
-#   endif (NUMPY_NDARRAYOBJECT_H)
 
   find_file (NUMPY_TEST_PROGRAM TestNumPyVersion.cc
     PATHS ${CMAKE_MODULE_PATH} ${USG_ROOT}
