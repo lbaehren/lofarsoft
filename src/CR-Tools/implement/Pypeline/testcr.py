@@ -68,6 +68,13 @@ cr_fft.spectralpower(cr_spectrum)
 cr_spectrum[0].plot()
 """
 
+"""
+
+
+"""
+
+
+
 Now let's look at the beam forming:
 
 We first turn the cooridnates into a std vector and create a vector that is
