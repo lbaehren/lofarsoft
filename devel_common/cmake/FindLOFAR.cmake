@@ -23,14 +23,9 @@
 # - Check for the presence of the LOFAR libraries and header files
 #
 # Defines the following variables:
-#  HAVE_LOFAR               = Set to true, if all components of LOFAR have been
-#                             found.
-#  LOFAR_INCLUDES           = Include path for the header files of LOFAR
-#  LOFAR_LIBRARIES          = Link these to use LOFAR
-#  HAVE_LOFAR_PARSET_READER = If LOFAR libraries and header files are found
-#  LOFAR_COMMON_LIBRARY     = Path to lofar libraries
-#  LOFAR_PARSET_HEADERS     = Directory containing the LOFAR RTCP parset reader
-#                             header files
+#  HAVE_LOFAR_PARSET_READER   -- If LOFAR libraries and header files are found
+#  LOFAR_COMMON_LIBRARY       -- Path to lofar libraries
+#  LOFAR_PARSET_HEADERS       -- Directory containing the LOFAR RTCP parset reader header files
 
 ## -----------------------------------------------------------------------------
 ## Search locations
@@ -41,18 +36,12 @@ INCLUDE(FindPackageHandleStandardArgs)
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-set (LOFAR_LIBRARIES "")
-
 FIND_LIBRARY (LOFAR_COMMON_LIBRARY
   NAMES common
   HINTS ENV LOFARROOT
   PATH_SUFFIXES lib
   NO_DEFAULT_PATH
 )
-
-if (LOFAR_COMMON_LIBRARY)
-  list (APPEND LOFAR_LIBRARIES ${LOFAR_COMMON_LIBRARY})
-endif (LOFAR_COMMON_LIBRARY)
 
 FIND_LIBRARY (LOFAR_INTERFACE_LIBRARY
   NAMES interface
@@ -61,21 +50,11 @@ FIND_LIBRARY (LOFAR_INTERFACE_LIBRARY
   NO_DEFAULT_PATH
 )
 
-if (LOFAR_INTERFACE_LIBRARY)
-  list (APPEND LOFAR_LIBRARIES ${LOFAR_INTERFACE_LIBRARY})
-endif (LOFAR_INTERFACE_LIBRARY)
-
-
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-<<<<<<< .mine
 FIND_PATH (LOFAR_PARSET_HEADERS
   Parset.h
-=======
-FIND_PATH (LOFAR_INCLUDES
-  Interface/Parset.h
->>>>>>> .r4807
   HINTS ENV LOFARROOT
   PATH_SUFFIXES Interface
   )
@@ -83,23 +62,7 @@ FIND_PATH (LOFAR_INCLUDES
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-<<<<<<< .mine
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LOFAR DEFAULT_MSG LOFAR_PARSET_HEADERS LOFAR_COMMON_LIBRARY LOFAR_INTERFACE_LIBRARY)
-=======
-if (LOFAR_INCLUDES AND LOFAR_LIBRARIES)
-  set (HAVE_LOFAR TRUE)
-else (LOFAR_INCLUDES AND LOFAR_LIBRARIES)
-  set (HAVE_LOFAR FALSE)
-  if (NOT LOFAR_FIND_QUIETLY)
-    if (NOT LOFAR_INCLUDES)
-      message (STATUS "Unable to find LOFAR header files!")
-    endif (NOT LOFAR_INCLUDES)
-    if (NOT LOFAR_LIBRARIES)
-      message (STATUS "Unable to find LOFAR library files!")
-    endif (NOT LOFAR_LIBRARIES)
-  endif (NOT LOFAR_FIND_QUIETLY)
-endif (LOFAR_INCLUDES AND LOFAR_LIBRARIES)
->>>>>>> .r4807
 
 IF (LOFAR_FOUND)
   SET(LOFAR_INCLUDES ${LOFAR_PARSET_HEADERS})
