@@ -242,6 +242,13 @@ if (NOT USG_CMAKE_CONFIG)
 
   ## ============================================================================
   ##
+  ##  Macro definitions
+  ##
+  ## ============================================================================
+
+
+  ## ============================================================================
+  ##
   ##  System inspection
   ##
   ## ============================================================================
@@ -251,22 +258,23 @@ if (NOT USG_CMAKE_CONFIG)
   
   include (CheckTypeSize)
   
-  check_type_size ("short"         SIZEOF_SHORT       )
-  check_type_size ("int"           SIZEOF_INT         )
-  check_type_size ("float"         SIZEOF_FLOAT       )
-  check_type_size ("double"        SIZEOF_DOUBLE      )
-  check_type_size ("long"          SIZEOF_LONG        )
-  check_type_size ("long int"      SIZEOF_LONG_INT    )
-  check_type_size ("long long"     SIZEOF_LONG_LONG   )
-  check_type_size ("uint"          SIZEOF_UINT        )
-  check_type_size ("int8_t"        SIZEOF_INT8_T      )
-  check_type_size ("int16_t"       SIZEOF_INT16_T     )
-  check_type_size ("int32_t"       SIZEOF_INT32_T     )
-  check_type_size ("int64_t"       SIZEOF_INT64_T     )
-  check_type_size ("uint8_t"       SIZEOF_UINT8_T     )
-  check_type_size ("uint16_t"      SIZEOF_UINT16_T    )
-  check_type_size ("uint32_t"      SIZEOF_UINT32_T    )
-  check_type_size ("uint64_t"      SIZEOF_UINT64_T    )
+  check_type_size ("short"          SIZEOF_SHORT         )
+  check_type_size ("int"            SIZEOF_INT           )
+  check_type_size ("float"          SIZEOF_FLOAT         )
+  check_type_size ("double"         SIZEOF_DOUBLE        )
+  check_type_size ("long"           SIZEOF_LONG          )
+  check_type_size ("long int"        SIZEOF_LONG_INT     )
+  check_type_size ("long long"      SIZEOF_LONG_LONG     )
+  check_type_size ("long long int"  SIZEOF_LONG_LONG_INT )
+  check_type_size ("uint"           SIZEOF_UINT          )
+  check_type_size ("int8_t"         SIZEOF_INT8_T        )
+  check_type_size ("int16_t"        SIZEOF_INT16_T       )
+  check_type_size ("int32_t"        SIZEOF_INT32_T       )
+  check_type_size ("int64_t"        SIZEOF_INT64_T       )
+  check_type_size ("uint8_t"        SIZEOF_UINT8_T       )
+  check_type_size ("uint16_t"       SIZEOF_UINT16_T      )
+  check_type_size ("uint32_t"       SIZEOF_UINT32_T      )
+  check_type_size ("uint64_t"       SIZEOF_UINT64_T      )
   
   if (CMAKE_SIZEOF_VOID_P)
     if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
@@ -289,8 +297,11 @@ if (NOT USG_CMAKE_CONFIG)
   ## System header files
   
   find_path (HAVE_LIBGEN_H      libgen.h      PATHS ${include_locations} )
+  find_path (HAVE_LIMITS_H      limits.h      PATHS ${include_locations} )
   find_path (HAVE_MATH_H        math.h        PATHS ${include_locations} )
+  find_path (HAVE_MEMORY_H      memory.h      PATHS ${include_locations} )
   find_path (HAVE_STDINT_H      stdint.h      PATHS ${include_locations} )
+  find_path (HAVE_STDIO_H       stdio.h       PATHS ${include_locations} )
   find_path (HAVE_STDLIB_H      stdlib.h      PATHS ${include_locations} )
   find_path (HAVE_STRING_H      string.h      PATHS ${include_locations} )
   find_path (HAVE_STRINGS_H     strings.h     PATHS ${include_locations} )
@@ -300,7 +311,7 @@ if (NOT USG_CMAKE_CONFIG)
   find_path (HAVE_SYS_TIME_H    sys/time.h    PATHS ${include_locations} )
   find_path (HAVE_SYS_TYPES_H   sys/types.h   PATHS ${include_locations} )
   find_path (HAVE_SYS_UTIME_H   sys/utime.h   PATHS ${include_locations} )
-  
+
   ##__________________________________________________________
   ## System Libraries
   
