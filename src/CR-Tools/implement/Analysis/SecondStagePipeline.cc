@@ -115,10 +115,10 @@ namespace CR { // Namespace CR -- begin
       };
 
       if (DoRFImitigation_p) {
-	/*	rfiM_p.parameters().define("dataBlockSize",(Int)dr->blocksize());
+	//rfiM_p.parameters().define("dataBlockSize",(Int)dr->blocksize());
 	// Do the RFI mitigation
 	rfiM_p.apply(data,True);
-	*/;//nothing  since RFIPLugin has been removed....MM
+	
     };
 
       if (DoFlagNotActiveAnts_p) {
@@ -217,7 +217,7 @@ namespace CR { // Namespace CR -- begin
     return True;
 
   };
-  /*
+  
   Bool SecondStagePipeline::InitRFIMitigation(DataReader *dr){
     try {
       
@@ -227,7 +227,7 @@ namespace CR { // Namespace CR -- begin
     }; 
     return True;
   };
-  */
+  
 
   Bool SecondStagePipeline::FlagNotActiveAntennas(DataReader *dr) {
     try {
