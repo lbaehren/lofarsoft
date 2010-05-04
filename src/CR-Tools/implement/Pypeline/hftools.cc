@@ -4379,258 +4379,220 @@ void HFPP_FUNC_NAME(const IterIn data_in,   const IterIn data_in_end,
 // ___________________________________________________________________
 //                                                    hRFIDownsampling
 
-// //$DOCSTRING: Generate a downsampled vector containing the mean and rms values of the spectrum amplitudes. This is needed to generate a baseline for the RFI mitigation.
-// //$COPY_TO HFILE START --------------------------------------------------
-// #define HFPP_FUNC_NAME hRFIDownSampling
-// //-----------------------------------------------------------------------
-// #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-// #define HFPP_PARDEF_0 (HNumber)(spectrumVec)()("Vector containing the spectrum data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// #define HFPP_PARDEF_1 (uint)(nrOfSamples)()("Number of samples used for the output vectors.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-// #define HFPP_PARDEF_2 (HNumber)(amplitudeVec)()("Return vector containing the average value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// #define HFPP_PARDEF_3 (HNumber)(rmsVec)()("Return vector containing the root mean square value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// //$COPY_TO END ----------------------------------------------------------
-// /*!
-//   \brief $DOCSTRING
-//   $PARDOCSTRING
-// */
-// template <class Iter>
-// void hRFIDownSampling(const Iter spectrumVec, const Iter spectrumVec_end,
-// 		      const uint nrOfSamples,
-// 		      Iter amplitudeVec, Iter amplitudeVec_end,
-// 		      Iter rmsVec, Iter rmsVec_end
-// 		      ) {
-//   CR::RFIMitigation rfiMitigation;
+//$DOCSTRING: Generate a downsampled vector containing the mean and rms values of the spectrum amplitudes. This is needed to generate a baseline for the RFI mitigation.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRFIDownSampling
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(spectrumVec)()("Vector containing the spectrum data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (uint)(nrOfSamples)()("Number of samples used for the output vectors.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HNumber)(amplitudeVec)()("Return vector containing the average value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(rmsVec)()("Return vector containing the root mean square value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void hRFIDownSampling(const Iter spectrumVec, const Iter spectrumVec_end,
+		      const uint nrOfSamples,
+		      Iter amplitudeVec, Iter amplitudeVec_end,
+		      Iter rmsVec, Iter rmsVec_end
+		      ) {
+  CR::RFIMitigation rfiMitigation;
 
-//   // === Check vector size ===================================
-//   uint fullSize = spectrumVec_end - spectrumVec;
+  // === Check vector size ===================================
+  uint fullSize = spectrumVec_end - spectrumVec;
 
-//   uint amplitudeVecSize = amplitudeVec_end - amplitudeVec;
-//   uint rmsVecSize = rmsVec_end - rmsVec;
-//   if ((amplitudeVecSize != nrOfSamples) ||
-//       (rmsVecSize != nrOfSamples)) {
-//     cout << "ERROR: Output vectors are not of the specified size." << endl;
-//   }
+  uint amplitudeVecSize = amplitudeVec_end - amplitudeVec;
+  uint rmsVecSize = rmsVec_end - rmsVec;
+  if ((amplitudeVecSize != nrOfSamples) ||
+      (rmsVecSize != nrOfSamples)) {
+    cout << "ERROR: Output vectors are not of the specified size." << endl;
+  }
 
-//   // === Create correct vector types =========================
-//   IPosition shape_FullSize(1, fullSize);
-//   IPosition shape_NrOfSamples (1, nrOfSamples);
-//   Vector<Double> spectrumVector(shape_FullSize, reinterpret_cast<Double*>(&(*spectrumVec)), casa::SHARE);
-//   Vector<Double> amplitudeVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*amplitudeVec)), casa::SHARE);
-//   Vector<Double> rmsVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*rmsVec)), casa::SHARE);
+  // === Create correct vector types =========================
+  IPosition shape_FullSize(1, fullSize);
+  IPosition shape_NrOfSamples (1, nrOfSamples);
+  Vector<Double> spectrumVector(shape_FullSize, reinterpret_cast<Double*>(&(*spectrumVec)), casa::SHARE);
+  Vector<Double> amplitudeVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*amplitudeVec)), casa::SHARE);
+  Vector<Double> rmsVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*rmsVec)), casa::SHARE);
 
-//   // === Call RM::doDownSampling() ===========================
-//   cout << "Warning: functionality not implemented yet." << endl;
-//   rfiMitigation.doDownsampling(spectrumVector,
-// 			       nrOfSamples,
-// 			       amplitudeVector,
-// 			       rmsVector);
-// }
-// //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-
-// //$DOCSTRING: Generate a downsampled vector containing the mean and rms values of the spectrum amplitudes. This is needed to generate a baseline for the RFI mitigation.
-// //$COPY_TO HFILE START --------------------------------------------------
-// #define HFPP_FUNC_NAME hRFIDownSampling
-// //-----------------------------------------------------------------------
-// #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-// #define HFPP_PARDEF_0 (HComplex)(spectrumVec)()("Vector containing the spectrum data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// #define HFPP_PARDEF_1 (uint)(nrOfSamples)()("Number of samples used for the output vectors.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-// #define HFPP_PARDEF_2 (HNumber)(amplitudeVec)()("Return vector containing the average value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// #define HFPP_PARDEF_3 (HNumber)(rmsVec)()("Return vector containing the root mean square value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// //$COPY_TO END ----------------------------------------------------------
-// /*!
-//   \brief $DOCSTRING
-//   $PARDOCSTRING
-// */
-// template <class IterC, class IterN>
-// void hRFIDownSampling(const IterC spectrumVec, const IterC spectrumVec_end,
-// 		      const uint nrOfSamples,
-// 		      IterN amplitudeVec, IterN amplitudeVec_end,
-// 		      IterN rmsVec, IterN rmsVec_end
-// 		      ) {
-//   CR::RFIMitigation rfiMitigation;
-
-//   // === Check vector size ===================================
-//   uint fullSize = spectrumVec_end - spectrumVec;
-
-//   uint amplitudeVecSize = amplitudeVec_end - amplitudeVec;
-//   uint rmsVecSize = rmsVec_end - rmsVec;
-//   if ((amplitudeVecSize != nrOfSamples) ||
-//       (rmsVecSize != nrOfSamples)) {
-//     cout << "ERROR: Output vectors are not of the specified size." << endl;
-//   }
-
-//   // === Create correct vector types =========================
-//   IPosition shape_FullSize(1, fullSize);
-//   IPosition shape_NrOfSamples (1, nrOfSamples);
-//   Vector<Double> spectrumVector(shape_FullSize, 0.);
-
-//   hSpectralPower(spectrumVec, spectrumVec_end, spectrumVector.begin(), spectrumVector.end());
-//   Vector<Double> amplitudeVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*amplitudeVec)), casa::SHARE);
-//   Vector<Double> rmsVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*rmsVec)), casa::SHARE);
-
-//   // === Call RM::doDownSampling() ===========================
-//   cout << "Warning: functionality not implemented yet." << endl;
-//   rfiMitigation.doDownsampling(spectrumVector,
-// 			       nrOfSamples,
-// 			       amplitudeVector,
-// 			       rmsVector);
-// }
-// //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+  // === Call RM::doDownSampling() ===========================
+  cout << "Warning: functionality not implemented yet." << endl;
+  rfiMitigation.doDownsampling(spectrumVector,
+			       nrOfSamples,
+			       amplitudeVector,
+			       rmsVector);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-// // ___________________________________________________________________
-// //                                                 hRFIBaselineFitting
+//$DOCSTRING: Generate a downsampled vector containing the mean and rms values of the spectrum amplitudes. This is needed to generate a baseline for the RFI mitigation.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRFIDownSampling
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(spectrumVec)()("Vector containing the spectrum data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (uint)(nrOfSamples)()("Number of samples used for the output vectors.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HNumber)(amplitudeVec)()("Return vector containing the average value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(rmsVec)()("Return vector containing the root mean square value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class IterC, class IterN>
+void hRFIDownSampling(const IterC spectrumVec, const IterC spectrumVec_end,
+		      const uint nrOfSamples,
+		      IterN amplitudeVec, IterN amplitudeVec_end,
+		      IterN rmsVec, IterN rmsVec_end
+		      ) {
+  CR::RFIMitigation rfiMitigation;
 
-// //$DOCSTRING: Perform a baseline fitting on the amplitude of the spectrum vector and use the fit to crea an interpolated spectrum.
-// //$COPY_TO HFILE START --------------------------------------------------
-// #define HFPP_FUNC_NAME hRFIBaselineFitting
-// //-----------------------------------------------------------------------
-// #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-// #define HFPP_PARDEF_0 (HNumber)(amplitudeVec)()("Input vector containing the average value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// #define HFPP_PARDEF_1 (HNumber)(rmsVec)()("Input vector containing the root mean square value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// #define HFPP_PARDEF_2 (HNumber)(rmsThresholdValue)()("RMS values oabove this threshold value will be excluded from the fit.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-// #define HFPP_PARDEF_3 (HNumber)(fitVec)()("Output vector containing the baseline fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// //$COPY_TO END ----------------------------------------------------------
-// /*!
-//   \brief $DOCSTRING
-//   $PARDOCSTRING
-// */
-// template <class Iter>
-// void hRFIBaselineFitting(const Iter amplitudeVec, const Iter amplitudeVec_end,
-// 			 const Iter rmsVec, const Iter rmsVec_end,
-// 			 const HNumber rmsThresholdValue,
-// 			 Iter fitVec, Iter fitVec_end
-// 			 //			 std::vector<HNumber>::iterator fitVec, std::vector<HNumber>::iterator fitVec_end
-// 			 ) {
-//   CR::RFIMitigation rfiMitigation;
-//   int methodType = 0;
+  // === Check vector size ===================================
+  uint fullSize = spectrumVec_end - spectrumVec;
 
-//   // === Check vector size ===================================
-//   uint fullSize = fitVec_end - fitVec;
-//   uint nrOfSamples = amplitudeVec_end - amplitudeVec;
+  uint amplitudeVecSize = amplitudeVec_end - amplitudeVec;
+  uint rmsVecSize = rmsVec_end - rmsVec;
+  if ((amplitudeVecSize != nrOfSamples) ||
+      (rmsVecSize != nrOfSamples)) {
+    cout << "ERROR: Output vectors are not of the specified size." << endl;
+  }
 
-//   uint amplitudeVecSize = amplitudeVec_end - amplitudeVec;
-//   uint rmsVecSize = rmsVec_end - rmsVec;
-//   if (amplitudeVecSize != rmsVecSize) {
-//     cout << "ERROR: Input vectors are not of the same size." << endl;
-//     exit(0);
-//   }
+  // === Create correct vector types =========================
+  IPosition shape_FullSize(1, fullSize);
+  IPosition shape_NrOfSamples (1, nrOfSamples);
+  Vector<Double> spectrumVector(shape_FullSize, 0.);
 
-//   // === Create correct vector types =========================
-//   IPosition shape_FullSize(1,fullSize);
-//   IPosition shape_NrOfSamples(1,nrOfSamples);
-//   Vector<Double> amplitudeVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*amplitudeVec)), casa::SHARE);
-//   Vector<Double> rmsVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*rmsVec)), casa::SHARE);
-//   Vector<Double> fitVector(shape_FullSize, reinterpret_cast<Double*>(&(*fitVec)), casa::SHARE);
+  hSpectralPower(spectrumVec, spectrumVec_end, spectrumVector.begin(), spectrumVector.end());
+  Vector<Double> amplitudeVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*amplitudeVec)), casa::SHARE);
+  Vector<Double> rmsVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*rmsVec)), casa::SHARE);
 
-//   // === call RM::doBaselineFitting() ========================
-//   cout << "Warning: functionality not implemented yet." << endl;
-//   rfiMitigation.doBaselineFitting(amplitudeVector,
-// 				  rmsVector,
-// 				  rmsThresholdValue,
-// 				  fitVector,
-// 				  methodType);
-// }
-// //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+  // === Call RM::doDownSampling() ===========================
+  cout << "Warning: functionality not implemented yet." << endl;
+  rfiMitigation.doDownsampling(spectrumVector,
+			       nrOfSamples,
+			       amplitudeVector,
+			       rmsVector);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-// // ___________________________________________________________________
-// //                                                        hRFIFlagging
+// ___________________________________________________________________
+//                                                 hRFIBaselineFitting
 
-// //$DOCSTRING: Create a flag vector defining the regions that need to be mitigated in the spectrum.
-// //$COPY_TO HFILE START --------------------------------------------------
-// #define HFPP_FUNC_NAME hRFIFlagging
-// //-----------------------------------------------------------------------
-// #define HFPP_FUNC_SLICED HFPP_FALSE
-// #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-// #define HFPP_PARDEF_0 (HNumber)(spectrumVec)()("Input vector containing the spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// #define HFPP_PARDEF_1 (HNumber)(fitVec)()("Input vector containing the baseline fit of the spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// #define HFPP_PARDEF_2 (HNumber)(flagThresholdValue)()("Value of the threshold above which a frequency bin will be flagged.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-// #define HFPP_PARDEF_3 (HInteger)(flagVec)()("Vector describing which parts of the spectrum vector need to be mitigated.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// //$COPY_TO END ----------------------------------------------------------
-// /*!
-//   \brief $DOCSTRING
-//   $PARDOCSTRING
-// */
-// template <class IterN, class IterI>
-// void hRFIFlagging(const IterN spectrumVec, const IterN spectrumVec_end,
-// 		  const IterN fitVec, const IterN fitVec_end,
-// 		  //		  const std::vector<HNumber>::iterator fitVec, const std::vector<HNumber>::iterator fitVec_end,
-// 		  const HNumber flagThresholdValue,
-// 		  IterI flagVec, IterI flagVec_end
-// 		  //		  std::vector<HInteger>::iterator flagVec, std::vector<HInteger>::iterator flagVec_end
-// 		  ) {
-//   CR::RFIMitigation rfiMitigation;
+//$DOCSTRING: Perform a baseline fitting on the amplitude of the spectrum vector and use the fit to crea an interpolated spectrum.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRFIBaselineFitting
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(amplitudeVec)()("Input vector containing the average value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(rmsVec)()("Input vector containing the root mean square value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(rmsThresholdValue)()("RMS values oabove this threshold value will be excluded from the fit.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(fitVec)()("Output vector containing the baseline fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void hRFIBaselineFitting(const Iter amplitudeVec, const Iter amplitudeVec_end,
+			 const Iter rmsVec, const Iter rmsVec_end,
+			 const HNumber rmsThresholdValue,
+			 Iter fitVec, Iter fitVec_end
+			 //			 std::vector<HNumber>::iterator fitVec, std::vector<HNumber>::iterator fitVec_end
+			 ) {
+  CR::RFIMitigation rfiMitigation;
+  int methodType = 0;
 
-//   // === Check vector size ===================================
-//   uint fullSize = spectrumVec_end - spectrumVec;
+  // === Check vector size ===================================
+  uint fullSize = fitVec_end - fitVec;
+  uint nrOfSamples = amplitudeVec_end - amplitudeVec;
 
-//   uint fitVecSize = fitVec_end - fitVec;
-//   uint flagVecSize = flagVec_end - flagVec;
-//   if ((fitVecSize != fullSize) ||
-//       (flagVecSize != fullSize)) {
-//     cout << "ERROR: Input vectors are not of the same size." << endl;
-//     exit(0);
-//   }
+  uint amplitudeVecSize = amplitudeVec_end - amplitudeVec;
+  uint rmsVecSize = rmsVec_end - rmsVec;
+  if (amplitudeVecSize != rmsVecSize) {
+    cout << "ERROR: Input vectors are not of the same size." << endl;
+    exit(0);
+  }
 
-//   // === create correct vector types =========================
-//   IPosition shape_FullSize(1,fullSize);
-//   Vector<Double> spectrumVector(shape_FullSize, reinterpret_cast<Double*>(&(*spectrumVec)), casa::SHARE);
-//   Vector<Double> fitVector(shape_FullSize, reinterpret_cast<Double*>(&(*fitVec)), casa::SHARE);
-//   Vector<Int> flagVector(shape_FullSize, reinterpret_cast<Int*>(&(*flagVec)), casa::SHARE);
+  // === Create correct vector types =========================
+  IPosition shape_FullSize(1,fullSize);
+  IPosition shape_NrOfSamples(1,nrOfSamples);
+  Vector<Double> amplitudeVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*amplitudeVec)), casa::SHARE);
+  Vector<Double> rmsVector(shape_NrOfSamples, reinterpret_cast<Double*>(&(*rmsVec)), casa::SHARE);
+  Vector<Double> fitVector(shape_FullSize, reinterpret_cast<Double*>(&(*fitVec)), casa::SHARE);
 
-//   // === call RM::doFlagging() ===============================
-//   cout << "Warning: functionality not implemented yet." << endl;
-//   rfiMitigation.doRFIFlagging(spectrumVector,
-// 			      fitVector,
-// 			      flagThresholdValue,
-// 			      flagVector);
-// }
-// //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+  // === call RM::doBaselineFitting() ========================
+  cout << "Warning: functionality not implemented yet." << endl;
+  rfiMitigation.doBaselineFitting(amplitudeVector,
+				  rmsVector,
+				  rmsThresholdValue,
+				  fitVector,
+				  methodType);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+// ___________________________________________________________________
+//                                                        hRFIFlagging
+
+//$DOCSTRING: Create a flag vector defining the regions that need to be mitigated in the spectrum.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRFIFlagging
+//-----------------------------------------------------------------------
+#define HFPP_FUNC_SLICED HFPP_FALSE
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(spectrumVec)()("Input vector containing the spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(fitVec)()("Input vector containing the baseline fit of the spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(flagThresholdValue)()("Value of the threshold above which a frequency bin will be flagged.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(flagVec)()("Vector describing which parts of the spectrum vector need to be mitigated.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class IterN, class IterI>
+void hRFIFlagging(const IterN spectrumVec, const IterN spectrumVec_end,
+		  const IterN fitVec, const IterN fitVec_end,
+		  //		  const std::vector<HNumber>::iterator fitVec, const std::vector<HNumber>::iterator fitVec_end,
+		  const HNumber flagThresholdValue,
+		  IterI flagVec, IterI flagVec_end
+		  //		  std::vector<HInteger>::iterator flagVec, std::vector<HInteger>::iterator flagVec_end
+		  ) {
+  CR::RFIMitigation rfiMitigation;
+
+  // === Check vector size ===================================
+  uint fullSize = spectrumVec_end - spectrumVec;
+
+  uint fitVecSize = fitVec_end - fitVec;
+  uint flagVecSize = flagVec_end - flagVec;
+  if ((fitVecSize != fullSize) ||
+      (flagVecSize != fullSize)) {
+    cout << "ERROR: Input vectors are not of the same size." << endl;
+    exit(0);
+  }
+
+  // === create correct vector types =========================
+  IPosition shape_FullSize(1,fullSize);
+  Vector<Double> spectrumVector(shape_FullSize, reinterpret_cast<Double*>(&(*spectrumVec)), casa::SHARE);
+  Vector<Double> fitVector(shape_FullSize, reinterpret_cast<Double*>(&(*fitVec)), casa::SHARE);
+  Vector<Int> flagVector(shape_FullSize, reinterpret_cast<Int*>(&(*flagVec)), casa::SHARE);
+
+  // === call RM::doFlagging() ===============================
+  cout << "Warning: functionality not implemented yet." << endl;
+  rfiMitigation.doRFIFlagging(spectrumVector,
+			      fitVector,
+			      flagThresholdValue,
+			      flagVector);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 
-// // ___________________________________________________________________
-// //                                                      hRFIMitigation
-
-// // //$DOCSTRING: Final part of the RFI mitigation: remove the flagged regions from the spectrum
-// // //$COPY_TO HFILE START --------------------------------------------------
-// // #define HFPP_FUNC_NAME hRFIMitigation
-// // //-----------------------------------------------------------------------
-// // #define HFPP_FUNC_SLICED HFPP_FALSE
-// // #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-// // #define HFPP_PARDEF_0 (HNumber)(spectrumVec)()("Input vector containing the spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// // #define HFPP_PARDEF_1 (HNumber)(fitValue)()("Input vector containing the baseline fit of the spectrum.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-// // #define HFPP_PARDEF_2 (HInteger)(flagVec)()("Input vector describing which parts of the spectrum vector need to be mitigated.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// // #define HFPP_PARDEF_3 (HNumber)(mitigatedSpectrumVec)()("Output vector containing the mitigated spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// // //$COPY_TO END ----------------------------------------------------------
-// // /*!
-// //   \brief $DOCSTRING
-// //   $PARDOCSTRING
-// // */
-// // template <class IterN, class IterI>
-// // void hRFIMitigation(const IterN spectrumVec, const IterN spectrumVec_end,
-// // 		    const HNumber fitValue,
-// // 		    const IterI flagVec, const IterI flagVec_end,
-// // 		    IterN mitigatedSpectrumVec, IterN mitigatedSpectrumVec_end
-// // 		    ) {
-// //   // === Create correct vector types =========================
-// //   uint fullSize = spectrumVec_end - spectrumVec;
-// //   IPosition shape_FullSize(1,fullSize);
-
-// //   std::vector<HNumber> vFitVec(fullSize, fitValue);
-// //   std::vector<HNumber>::iterator fitVec = vFitVec.begin();
-// //   std::vector<HNumber>::iterator fitVec_end = vFitVec.end();
-
-// //   // === call RM::doRFIMitigation() ==========================
-// //   hRFIMitigation(spectrumVec, spectrumVec_end,
-// // 		 fitVec, fitVec_end,
-// // 		 flagVec, flagVec_end,
-// // 		 mitigatedSpectrumVec, mitigatedSpectrumVec_end);
-// // }
-// // //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
+// ___________________________________________________________________
+//                                                      hRFIMitigation
 
 // //$DOCSTRING: Final part of the RFI mitigation: remove the flagged regions from the spectrum
 // //$COPY_TO HFILE START --------------------------------------------------
@@ -4639,7 +4601,7 @@ void HFPP_FUNC_NAME(const IterIn data_in,   const IterIn data_in_end,
 // #define HFPP_FUNC_SLICED HFPP_FALSE
 // #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 // #define HFPP_PARDEF_0 (HNumber)(spectrumVec)()("Input vector containing the spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-// #define HFPP_PARDEF_1 (HNumber)(fitVec)()("Input vector containing the baseline fit of the spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+// #define HFPP_PARDEF_1 (HNumber)(fitValue)()("Input vector containing the baseline fit of the spectrum.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 // #define HFPP_PARDEF_2 (HInteger)(flagVec)()("Input vector describing which parts of the spectrum vector need to be mitigated.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 // #define HFPP_PARDEF_3 (HNumber)(mitigatedSpectrumVec)()("Output vector containing the mitigated spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 // //$COPY_TO END ----------------------------------------------------------
@@ -4649,41 +4611,79 @@ void HFPP_FUNC_NAME(const IterIn data_in,   const IterIn data_in_end,
 // */
 // template <class IterN, class IterI>
 // void hRFIMitigation(const IterN spectrumVec, const IterN spectrumVec_end,
-// 		    const IterN fitVec, const IterN fitVec_end,
+// 		    const HNumber fitValue,
 // 		    const IterI flagVec, const IterI flagVec_end,
 // 		    IterN mitigatedSpectrumVec, IterN mitigatedSpectrumVec_end
 // 		    ) {
-//   CR::RFIMitigation rfiMitigation;
-
-//   // === Check vector size ===================================
-//   uint fullSize = spectrumVec_end - spectrumVec;
-
-//   uint fitVecSize = fitVec_end - fitVec;
-//   uint flagVecSize = flagVec_end - flagVec;
-//   uint mitigatedSpectrumVecSize = mitigatedSpectrumVec_end - mitigatedSpectrumVec;
-
-//   if ((fitVecSize != fullSize) ||
-//       (flagVecSize != fullSize) ||
-//       (mitigatedSpectrumVecSize != fullSize)) {
-//     cout << "ERROR: Input and output vectors are not of the same size." << endl;
-//     exit(0);
-//   }
-
 //   // === Create correct vector types =========================
+//   uint fullSize = spectrumVec_end - spectrumVec;
 //   IPosition shape_FullSize(1,fullSize);
-//   Vector<Double> spectrumVector(shape_FullSize, reinterpret_cast<Double*>(&(*spectrumVec)), casa::SHARE);
-//   Vector<Int> flagVector(shape_FullSize, reinterpret_cast<Int*>(&(*flagVec)), casa::SHARE);
-//   Vector<Double> fitVector(shape_FullSize, reinterpret_cast<Double*>(&(*fitVec)), casa::SHARE);
-//   Vector<Double> mitigatedSpectrumVector(shape_FullSize, reinterpret_cast<Double*>(&(*mitigatedSpectrumVec)), casa::SHARE);
+
+//   std::vector<HNumber> vFitVec(fullSize, fitValue);
+//   std::vector<HNumber>::iterator fitVec = vFitVec.begin();
+//   std::vector<HNumber>::iterator fitVec_end = vFitVec.end();
 
 //   // === call RM::doRFIMitigation() ==========================
-//   cout << "Warning: functionality not implemented yet." << endl;
-//   rfiMitigation.doRFIMitigation(spectrumVector,
-// 				fitVector,
-// 				flagVector,
-// 				mitigatedSpectrumVector);
+//   hRFIMitigation(spectrumVec, spectrumVec_end,
+// 		 fitVec, fitVec_end,
+// 		 flagVec, flagVec_end,
+// 		 mitigatedSpectrumVec, mitigatedSpectrumVec_end);
 // }
 // //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Final part of the RFI mitigation: remove the flagged regions from the spectrum
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRFIMitigation
+//-----------------------------------------------------------------------
+#define HFPP_FUNC_SLICED HFPP_FALSE
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(spectrumVec)()("Input vector containing the spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(fitVec)()("Input vector containing the baseline fit of the spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(flagVec)()("Input vector describing which parts of the spectrum vector need to be mitigated.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(mitigatedSpectrumVec)()("Output vector containing the mitigated spectrum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class IterN, class IterI>
+void hRFIMitigation(const IterN spectrumVec, const IterN spectrumVec_end,
+		    const IterN fitVec, const IterN fitVec_end,
+		    const IterI flagVec, const IterI flagVec_end,
+		    IterN mitigatedSpectrumVec, IterN mitigatedSpectrumVec_end
+		    ) {
+  CR::RFIMitigation rfiMitigation;
+
+  // === Check vector size ===================================
+  uint fullSize = spectrumVec_end - spectrumVec;
+
+  uint fitVecSize = fitVec_end - fitVec;
+  uint flagVecSize = flagVec_end - flagVec;
+  uint mitigatedSpectrumVecSize = mitigatedSpectrumVec_end - mitigatedSpectrumVec;
+
+  if ((fitVecSize != fullSize) ||
+      (flagVecSize != fullSize) ||
+      (mitigatedSpectrumVecSize != fullSize)) {
+    cout << "ERROR: Input and output vectors are not of the same size." << endl;
+    exit(0);
+  }
+
+  // === Create correct vector types =========================
+  IPosition shape_FullSize(1,fullSize);
+  Vector<Double> spectrumVector(shape_FullSize, reinterpret_cast<Double*>(&(*spectrumVec)), casa::SHARE);
+  Vector<Int> flagVector(shape_FullSize, reinterpret_cast<Int*>(&(*flagVec)), casa::SHARE);
+  Vector<Double> fitVector(shape_FullSize, reinterpret_cast<Double*>(&(*fitVec)), casa::SHARE);
+  Vector<Double> mitigatedSpectrumVector(shape_FullSize, reinterpret_cast<Double*>(&(*mitigatedSpectrumVec)), casa::SHARE);
+
+  // === call RM::doRFIMitigation() ==========================
+  cout << "Warning: functionality not implemented yet." << endl;
+  rfiMitigation.doRFIMitigation(spectrumVector,
+				fitVector,
+				flagVector,
+				mitigatedSpectrumVector);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 

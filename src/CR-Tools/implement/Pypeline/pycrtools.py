@@ -872,7 +872,7 @@ for v in hRealContainerTypes:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hComplexContainerTypes:
-    for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex","hInvFFT","hInvFFTw","hFFTw","hPhaseToComplex","hAmplitudePhaseToComplex"]:
+    for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex","hInvFFT","hInvFFTw","hFFTw","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hNumericalContainerTypes:

@@ -26,7 +26,7 @@ XC=-25.44; YC=8.94; #shower core in KASCADE coordinates
 #	XCn = XC*0.964787323+YC*0.263031214;
 #	YCn = XC*-0.263031214+YC*0.964787323;
 
-cr_shower_core=[XC*0.964787323+YC*0.263031214,XC*-0.263031214+YC*0.964787323,0.0]
+cr_shower_core=[XC*0.964787323 + YC*0.263031214,-XC*0.263031214 + YC*0.964787323,0.0]
 
 FarField=False
 
@@ -46,17 +46,31 @@ As a next step we create an empty vector to hold the Fourierspectrum
 of the data
 
 """
+cr_ffto=cr["emptyFFT"].setPar("xvalues",cr_frequencies)
 cr_fft=cr["emptyFFT"].setPar("xvalues",cr_frequencies)
 """
 
-and then make the Fourier transform (noting that the data is in the
-second Nyquist domain)
+and then make the Fourier transform followed by a reordering of the output, noting that the data was taken in the
+second Nyquist domain
 
 """
-cr_efield[...].fft(cr_fft[...],2)
+cr_fft[...].fftw(cr_efield[...])
+cr_fft[...].nyquistswap(cr["nyquistZone"])
+
+
+
+"""
+Let's create a spectrum that we can plot:
+"""
+cr_spectrum=hArray(float,cr_fft,xvalues=cr_frequencies,fill=0,name="Power")
+cr_spectrum.par.logplot="y"
+cr_fft.spectralpower(cr_spectrum)
+cr_spectrum[0].plot()
 """
 
-We first turn this into std vector and create a vector that is
+Now let's look at the beam forming:
+
+We first turn the cooridnates into a std vector and create a vector that is
 supposed to hold the Cartesian coordinates. Note that the AzEL vector
 is actually AzElRadius, where we need to set the radius to unity.
 
