@@ -41,14 +41,28 @@ endif (USG_ROOT)
 
 
 ## ------------------------------------------------------------------------------
-## Check for system-wide NUMPY library installation
+## System inspection
 
 if (NOT NUMPY_VERBOSE_CONFIGURE)
-  set (PYTHON_FIND_QUIETLY YES )
+  set (LAPACK_FIND_QUIETLY   YES )
   set (NUMPY_FIND_QUIETLY  YES )
+  set (PYTHON_FIND_QUIETLY YES )
 endif (NOT NUMPY_VERBOSE_CONFIGURE)
 
 include (FindNumPy)
+include (FindLAPACK)
+
+if (NOT HAVE_PYTHON)
+  message (SEND_ERROR "[NumPy] Unable to build project - missing Python!")
+endif (NOT HAVE_PYTHON)
+
+if (NOT LAPACK_BLAS_LIBRARY)
+  message (SEND_ERROR "[NumPy] Unable to build project - missing BLAS library!")
+endif (NOT LAPACK_BLAS_LIBRARY)
+
+if (NOT LAPACK_LAPACK_LIBRARY)
+  message (SEND_ERROR "[NumPy] Unable to build project - missing LAPACK library!")
+endif (NOT LAPACK_LAPACK_LIBRARY)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -95,6 +109,7 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   if (NUMPY_VERBOSE_CONFIGURE)
     message ("-------------------------------------------------------------")
     message (STATUS "[NumPy] Summary of configuration status.")
+    message (STATUS "BLAS_LIBRARIES   = ${BLAS_LIBRARIES}")
     message (STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
     message (STATUS "PYTHON_VERSION   = ${PYTHON_VERSION}")
     message ("-------------------------------------------------------------")
