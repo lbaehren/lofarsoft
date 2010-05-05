@@ -1,6 +1,6 @@
 # Import module
-#import pdb
-#pdb.set_trace()
+import pdb
+debugon=False
 
 
 from math import *
@@ -311,6 +311,24 @@ def hNone2Value(none,defval):
     if none==None: return defval
     else: return none
 
+def hSliceToNormalValues(s,dim): 
+    """
+    Returns a slice object where none and negative numbers are replaced by the appropriate integers, given a dimension (length) dim of the full slice.
+    """
+    if type(s)==int:
+        if s<0: return s+dim
+    if not type(s)==slice: return s
+    s1=s.start;s2=s.stop;s3=s.step
+    if s1==None: s1=0
+    elif s1<0: s1+=dim
+    elif s1>dim: s1=dim;
+    if s2==None: s2=dim
+    elif s2<0: s2+=dim
+    elif s2>dim: s2=dim;
+    if s3==None: s3=1
+    return slice(s1,s2,s3)
+
+
 def hArray_vec(self):
     """
     array.vec() -> Vector([x1,x2,x3, ...])
@@ -361,7 +379,7 @@ def hArray_copy_resize(self,ary):
     ary.copy(self)
     return ary
 
-def hArray_getitem(self,dimlist):
+def hArray_getitem(self,indexlist):
     """
     self[n1,n2,n3]-> return Element with these indices
     
@@ -370,22 +388,49 @@ def hArray_getitem(self,dimlist):
 
     Use array.setDim([dim1,dim2,...,dimN]) to set the dimensions. 
     """
-    if not type(dimlist)==tuple: dimlist=(dimlist,)
+    if type(indexlist)==tuple: indexlist=list(indexlist)
+    else: indexlist=[indexlist]
     ary=hArray(self)
-    ary.par=self.par
-    lastelement=dimlist[-1]
-    dimliststarts=Vector(map(hArray_return_slice_start,dimlist))
-    if (lastelement==Ellipsis):   # looping is requested
-        if len(dimlist)>=2:      # but ...
-            if not type(dimlist[-2])==int:  # .. there is a slice or list preceding the ellipsis, over which to loop
-                lastelement=dimlist[-2]
-        if type(lastelement)==slice: ary.loop(dimliststarts[0:-2],hNone2Value(lastelement.start,0),hNone2Value(lastelement.stop,-1),hNone2Value(lastelement.step,1))
-        elif lastelement==Ellipsis: ary.loop(dimliststarts[0:-1],0,-1,1)
-        elif type(lastelement)==list: ary.loop(dimliststarts[0:-2],Vector(lastelement))
+#    ary.par=self.par
+    dimensions=ary.getDim()
+#   Now check if there is an ellipsis in the index list, which indicates looping.
+    ellipsiscount=indexlist.count(Ellipsis)
+    if debugon: pdb.set_trace()
+    if ellipsiscount==0:
+        ellipsislocation=0
+    elif ellipsiscount==1:
+        ellipsislocation=indexlist.index(Ellipsis)
+        if ellipsislocation==0:
+            indexlist[0]=slice(0,None,None) # replace ellipsis with slice
+        else:
+            if type(indexlist[ellipsislocation-1]) in [slice,list]: # check if Ellipsis is preceded by a slice specification over which to loop.
+                del indexlist[ellipsislocation] # delete ellipsis
+                ellipsislocation -= 1; #looping is over preceding index
+            else:
+                indexlist[ellipsislocation]=slice(0,None,None) # replace ellipsis with slice
+    else: 
+        print "Error: hArray_getitem - only one Ellipsis (...) allowed in index list"
+        return ary
+    nindices=len(indexlist)
+    for i in range(nindices):
+        indexlist[i]=hSliceToNormalValues(indexlist[i],dimensions[i])
+    indexliststarts=Vector(map(hArray_return_slice_start,indexlist))
+    lastelement=indexlist[-1]
+    start_off=0; end_off=0;
+    if ellipsiscount:
+        ellipsiselement=indexlist[ellipsislocation]
+        if ellipsislocation<nindices-1:
+            dims=ary.getDim()
+            start_off=hArray_return_slice_start(lastelement); 
+            end_off=dims[nindices-1]-hArray_return_slice_end(lastelement)
+            indexlist=indexlist[0:-1]
+        if type(ellipsiselement)==slice: ary.loop(indexliststarts[0:ellipsislocation],hNone2Value(ellipsiselement.start,0),hNone2Value(ellipsiselement.stop,-1),hNone2Value(ellipsiselement.step,1),start_off,end_off)
+        elif type(lastelement)==list:
+            ary.loop(indexliststarts[0:ellipsislocation],Vector(indexlist[ellipsislocation]),start_off,end_off)
     elif type(lastelement) in [slice,list]: #Non-looping slice
-        ary.setSliceVector(dimliststarts[0:-1],hArray_return_slice_start(lastelement),hArray_return_slice_end(lastelement))
+        ary.setSliceVector(indexliststarts[0:-1],hArray_return_slice_start(lastelement),hArray_return_slice_end(lastelement))
     else: # normal integer index
-        ary.setSliceVector(dimliststarts[0:-1],lastelement,lastelement+1)
+        ary.setSliceVector(indexliststarts[0:-1],lastelement,lastelement+1)
     return ary;
 
 def hArray_setitem(self,dims,fill):
@@ -864,15 +909,15 @@ for v in hAllVectorTypes:
 
 
 for v in hAllContainerTypes:
-    for s in ["hFill","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute"]:
+    for s in ["hFill","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute","hPrettyPrint","hPrettyString"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hStdDev","hDownsample","hNegate","hVectorLength","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage","hDelayToPhase","hInvFFT","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter"]:
+    for s in ["hMean","hStdDev","hDownsample","hNegate","hVectorLength","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage","hDelayToPhase","hInvFFT","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hComplexContainerTypes:
-    for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex","hInvFFT","hInvFFTw","hFFTw","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex"]:
+    for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex","hInvFFT","hInvFFTw","hFFTw","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex","hRFIDownsampling"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hNumericalContainerTypes:
@@ -1003,6 +1048,7 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=Non
         ary.setVector(ary.stored_vector)
     elif ishArray(Type):  # Just make a copy with reference to same vector
         ary=Type.newreference()
+        ary.par=Type.par
     else: # Create a new vector
         vec=Vector(Type=Type)
         ary=type2array(basetype(vec))

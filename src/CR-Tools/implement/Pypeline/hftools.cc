@@ -681,7 +681,8 @@ template <class T> void hArray<T>::init(){
   slice_size=0;
   array_is_shared=false;
   doiterate=false;
-  loop_slice_begin=0; loop_slice_end=0; loop_slice_size=0;
+  loop_slice_begin=0; loop_slice_end=0; loop_slice_size=0; loop_lower_level_size=0;
+  loop_slice_start_offset=0; loop_slice_end_offset=0;
   loop_i=0; loop_start=0; loop_end=0; loop_increment=1; loop_maxn=0;
   loop_next=false;
   loop_nslice=0;
@@ -1016,15 +1017,15 @@ template <class T> typename std::vector<T>::iterator hArray<T>::end(){
 \brief Returns the offset of the current slice from the begin iterator of the stored vector
  */
 template <class T> HInteger hArray<T>::getBegin(){
-  if (doiterate) return std::min(loop_slice_begin+loop_nslice*loop_slice_size,loop_slice_end);
+  if (doiterate) return std::min(loop_slice_begin+loop_nslice*loop_slice_size+loop_slice_start_offset*loop_lower_level_size,loop_slice_end);
   else return slice_begin;
 }
-
+  
 /*!
 \brief Returns the offset of the end of the current slice from the begin iterator of the stored vector
  */
 template <class T> HInteger hArray<T>::getEnd(){
-  if (doiterate) return std::min(loop_slice_begin+(loop_nslice+1)*loop_slice_size,loop_slice_end);
+  if (doiterate) return std::max(std::min(loop_slice_begin+(loop_nslice+1)*loop_slice_size-loop_slice_end_offset*loop_lower_level_size,loop_slice_end),loop_slice_begin);
   else return slice_end;
 }
 
@@ -1125,7 +1126,7 @@ will be done over the next higher dimension.
 many slices the iteration should proceed.
 
  */
-template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_element_index, HInteger start, HInteger end, HInteger increment){
+template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_element_index, HInteger start, HInteger end, HInteger increment, HInteger start_off, HInteger end_off){
   if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   HInteger level=setLoopSlice(start_element_index);
@@ -1137,18 +1138,24 @@ template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_elemen
   loopOn();
   loop_over_indexvector=false;
   loop_i=start; loop_start=start; loop_end=end; loop_increment=increment;
+  loop_slice_start_offset=start_off; loop_slice_end_offset=end_off;
   loop_nslice = loop_i;
   return *this;
 }
 
-/*!
-\brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector).
+/*! 
 
-The parameters start (statring at 0), end, increment indicate over how
-many slices the iteration should proceed.
+ \brief Sets the array to looping mode (i.e. the next function will
+loop over all slices in the vector) using and index vector to indicate
+over which slices to loop.
+
+\param start_off & end_off: provide an additional offset counted from the
+beginning and the end of the looping slice to further narrow it down
+(allows one to select a loop over all vectors of the last dimensions,
+thereby exclcuding the first and last element, for example.)
 
  */
-template <class T> hArray<T> & hArray<T>::loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec){
+template <class T> hArray<T> & hArray<T>::loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec, HInteger start_off, HInteger end_off){
   if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   HInteger level=setLoopSlice(start_element_index);
@@ -1156,6 +1163,7 @@ template <class T> hArray<T> & hArray<T>::loopVector(vector<HInteger> & start_el
   loopOn();
   loop_over_indexvector=true;
   loop_i=0; loop_start=0; loop_end=vec.size(); loop_increment=1;
+  loop_slice_start_offset=start_off; loop_slice_end_offset=end_off;
   index_vector=vec;
   loop_nslice=index_vector[loop_i];
   return *this;
@@ -1174,7 +1182,6 @@ template <class T> hArray<T> & hArray<T>::resetLoop(){
 }
 
 
-
 /*!
 \brief Sets the slice parameters used by the looping algorithm to calculate the currently worked on slice.
 
@@ -1191,6 +1198,8 @@ template <class T> HInteger hArray<T>::setLoopSlice(vector<HInteger> & start_ele
   loop_maxn = storage_p->dimensions_p->at(level);
   loop_slice_begin=hMulSum(start_element_index,*storage_p->slice_sizes_p); // multiplies the start element indices with the (cummulaitve) sizes of slices per dimension - giving the total offset
   loop_slice_size=storage_p->slice_sizes_p->at(level);
+  if (level+1 >= *storage_p->ndims_p) loop_lower_level_size=0;
+  else loop_lower_level_size=storage_p->slice_sizes_p->at(level+1);
   loop_slice_end=loop_slice_begin+loop_slice_size*loop_maxn;
   return level;
 }
@@ -1522,6 +1531,60 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType fill_
     *it=fill_value;
     ++it;
   };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Returns the contents of a vector (up to a maximum length) as a pretty string for printing
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hPrettyString
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HString)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(maxlen)()("Maximum length to output.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hPrettyString(vec,3) -> "[vec_0,vec_1,vec_3,...]"
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
+{
+  HString s=("[");
+  Iter it(vec), maxit(vec+maxlen);
+  if (vec<vec_end) s+=hf2string(*it);
+  ++it;
+  while ((it<vec_end) && (it<maxit)) {
+    s+=","+hf2string(*it); 
+    ++it;
+  };
+  if ( it < vec_end ) s+=",...";
+  s+="]";
+  return s;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Prints the contents of a vector (up to a maximum length) as a pretty string 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hPrettyPrint
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(maxlen)()("Maximum length to output.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hPrettyString(vec,3) -> '[vec_0,vec_1,vec_3,...]' 
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
+{
+  cout << hPrettyString(vec,vec_end,maxlen) << endl;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

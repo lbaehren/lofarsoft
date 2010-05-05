@@ -617,6 +617,20 @@ a[0:2,0:2]
 
 where the first slice is simply ignored.
 
+Finally, negative indices count from the end of the slice, i.e. 
+
+"""
+a[-1]
+"""
+
+gives the last slice of the first index, while 
+
+"""
+a[0:-1]
+"""
+
+gives all but the last slice of the first index.
+
 (+++) Applying Methods to Slices
 ................................
 
@@ -736,7 +750,7 @@ a[...].mean()
 
 will do the same as a[0:,..].mean().
 
-Finally, it is even possible to specify an array of indices for the slicing.
+it is even possible to specify an array of indices for the slicing.
 
 """
 a[[0,2],...].mean()
@@ -744,6 +758,14 @@ a[[0,2],...].mean()
 
 will loop over slices 0 and 2.
 
+
+Finally, it is possible to specify a slice after the ellipse, e.g.,
+"""
+a[...,0:2].mean()
+"""
+
+which means that the mean is taken only from the first two elements
+of each top-level slice.
 
 Looping can also be done for methods that require multiple arrays as
 inputs (remember a mix of vectors and arrays is not implemented). In this

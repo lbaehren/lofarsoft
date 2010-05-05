@@ -314,7 +314,7 @@ The vectors have a number of mathematical functions attached to
 them. A full list can be seen by typing
 
 >>> dir(v1)
-  ['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__isub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd', 'addto', 'append', 'asin', 'atan', 'ceil', 'convert', 'copy', 'cos', 'cosh', 'countgreaterequal', 'countgreaterequalabs', 'countgreaterthan', 'countgreaterthanabs', 'countlessequal', 'countlessequalabs', 'countlessthan', 'countlessthanabs', 'delaytophase', 'dimension', 'div', 'divadd', 'divto', 'downsample', 'elem', 'exp', 'extend', 'extendflat', 'fft', 'fill', 'fillrange', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'findgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findlessthanabs', 'findlowerbound', 'floor', 'getDim', 'list', 'log', 'log10', 'mean', 'median', 'mul', 'muladd', 'mulsum', 'multo', 'ndim', 'negate', 'new', 'normalize', 'random', 'resize', 'runningaverage', 'setDim', 'sin', 'sinh', 'sort', 'sortmedian', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'subto', 'sum', 'tan', 'tanh', 'type', 'val', 'vec', 'vectorlength', 'zipper']
+  ['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__isub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd', 'addto', 'append', 'applyhanningfilter', 'asin', 'atan', 'ceil', 'convert', 'convertresize', 'copy', 'cos', 'cosh', 'countgreaterequal', 'countgreaterequalabs', 'countgreaterthan', 'countgreaterthanabs', 'countlessequal', 'countlessequalabs', 'countlessthan', 'countlessthanabs', 'delaytophase', 'dimension', 'div', 'divadd', 'divto', 'downsample', 'elem', 'exp', 'extend', 'extendflat', 'fft', 'fftw', 'fill', 'fillrange', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'findgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findlessthanabs', 'findlowerbound', 'floor', 'getDim', 'gethanningfilter', 'invfft', 'invfftw', 'list', 'log', 'log10', 'max', 'mean', 'median', 'min', 'mul', 'muladd', 'mulsum', 'multo', 'ndim', 'negate', 'new', 'normalize', 'prettyprint', 'prettystring', 'random', 'readdump', 'redistribute', 'resize', 'rfibaselinefitting', 'rfidownsampling', 'rfiflagging', 'runningaverage', 'setDim', 'sin', 'sinh', 'sort', 'sortmedian', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'subto', 'sum', 'tan', 'tanh', 'type', 'val', 'vec', 'vectorlength', 'writedump', 'zipper']
 
 Some of the basic arithmetic is available in an intuitve way.
 
@@ -583,6 +583,18 @@ is possible, but not
 
 where the first slice is simply ignored.
 
+Finally, negative indices count from the end of the slice, i.e. 
+
+>>> a[-1]
+  hArray(int, [3, 3]=9, [6:9]) -> [6,7,8]
+
+gives the last slice of the first index, while 
+
+>>> a[0:-1]
+  hArray(int, [3, 3]=9, [0:6]) -> [0,1,2,3,4,...]
+
+gives all but the last slice of the first index.
+
 3.3.5.  Applying Methods to Slices
 ................................
 
@@ -693,13 +705,20 @@ leaving away the slice specification. Hence,
 
 will do the same as a[0:,..].mean().
 
-Finally, it is even possible to specify an array of indices for the slicing.
+it is even possible to specify an array of indices for the slicing.
 
 >>> a[[0,2],...].mean()
   Vec(float,2)=[1.0,7.0]
 
 will loop over slices 0 and 2.
 
+
+Finally, it is possible to specify a slice after the ellipse, e.g.,
+>>> a[...,0:2].mean()
+  Vec(float,3)=[0.5,3.5,6.5]
+
+which means that the mean is taken only from the first two elements
+of each top-level slice.
 
 Looping can also be done for methods that require multiple arrays as
 inputs (remember a mix of vectors and arrays is not implemented). In this
@@ -785,29 +804,30 @@ can be viewed by using the getHistory (retrieves a vector of strings)
 or simply the .history() method, which prints the activity log.
 
 >>> a.history()
-    2010-04-15 23:25:33 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
-    2010-04-15 23:25:33 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.
-    2010-04-15 23:25:33 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
-    2010-04-15 23:25:33 [setDimension]: Dimensions set to [10]
-    2010-04-15 23:25:33 [setDimension]: Dimensions set to [3,3]
-    2010-04-15 23:25:33 [setDimension]: Dimensions set to [3,3,2]
-    2010-04-15 23:25:33 [setDimension]: Dimensions set to [3,3]
-    2010-04-15 23:25:33 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...]
-    2010-04-15 23:25:33 [hFill]:   Par 1: fill_value = -2
-    2010-04-15 23:25:33 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-04-15 23:25:33 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...]
-    2010-04-15 23:25:33 [hSum]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-04-15 23:25:33 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-04-15 23:25:33 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...]
-    2010-04-15 23:25:33 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-04-15 23:25:33 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-04-15 23:25:33 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-04-15 23:25:33 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-04-15 23:25:33 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-04-15 23:25:33 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
-    2010-04-15 23:25:33 [setUnit]: Unit set to MHz.
-    2010-04-15 23:25:33 [setUnit]: Unit set to kHz.
-    2010-04-15 23:25:33 [setKey]: name = TestArray
+    2010-05-05 22:31:29 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
+    2010-05-05 22:31:29 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.
+    2010-05-05 22:31:29 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
+    2010-05-05 22:31:29 [setDimension]: Dimensions set to [10]
+    2010-05-05 22:31:29 [setDimension]: Dimensions set to [3,3]
+    2010-05-05 22:31:29 [setDimension]: Dimensions set to [3,3,2]
+    2010-05-05 22:31:29 [setDimension]: Dimensions set to [3,3]
+    2010-05-05 22:31:29 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...]
+    2010-05-05 22:31:29 [hFill]:   Par 1: fill_value = -2
+    2010-05-05 22:31:29 [hCopy]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-05-05 22:31:29 [hCopy]:   Par 1: outvec = array[T,9] : [0,0,...]
+    2010-05-05 22:31:29 [hSum]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-05-05 22:31:29 [hNegate]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-05-05 22:31:29 [hNegate]:   Par 0: vec = array[T,9] : [0,-1,...]
+    2010-05-05 22:31:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-05-05 22:31:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-05-05 22:31:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-05-05 22:31:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-05-05 22:31:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-05-05 22:31:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-05-05 22:31:29 [hMean]:   Par 0: vec = array[T,9] : [0,1,...]
+    2010-05-05 22:31:29 [setUnit]: Unit set to MHz.
+    2010-05-05 22:31:29 [setUnit]: Unit set to kHz.
+    2010-05-05 22:31:29 [setKey]: name = TestArray
 
 You can add a line to the history log yourself with
 
@@ -831,6 +851,8 @@ Let's see how we can open a file. First define a filename, e.g.:
 >>> filename_sun=LOFARSOFT+"/data/lopes/example.event"
 >>> filename_lofar_big=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 >>> filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
+>>> filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecond.h5"
+
 
     filename_sun => /Users/falcke/LOFAR/usg/data/lopes/example.event
     filename_lofar_big => /Users/falcke/LOFAR/usg/data/lofar/rw_20080701_162002_0109.h5
@@ -1610,6 +1632,12 @@ data in antenna one (which was our reference antenna).
   --------------------------------------------------
   hFill(vec, fill_value) - Fills a vector with a constant value.
    
+  hPrettyString(vec, maxlen) - Returns the contents of a vector (up to a 
+                           maximum length) as a pretty string for printing
+   
+  hPrettyPrint(vec, maxlen) - Prints the contents of a vector (up to a maximum 
+                           length) as a pretty string 
+   
   hFillRange(vec, start, increment) - Fills a vector with a series of values 
                            starting at a start value and then increasing by an 
                            increment until it is filled
@@ -1623,10 +1651,29 @@ data in antenna one (which was our reference antenna).
   hNew(vec)              - Make and return a new vector of the same size and 
                            type as the input vector.
    
+  hResize(vec, newsize)  - Resize a vector to a new length.
+   
+  hResize(vec, newsize, fill) - Resize a vector to a new length and fill new 
+                           elements in vector with a specific value.
+   
+  hResize(vec1, vec2)    - Resize an STL vector to the same length as a second 
+                           vector.
+   
+  hResize(vec1, vec2)    - Resize a casa vector to the same length as a second 
+                           vector.
+   
   hConvert(vec1, vec2)   - Copies and converts a vector to a vector of another 
                            type.
    
+  hConvertResize(vec1, vec2) - Copies and converts a vector to a vector of 
+                           another type and resizes the output vector.
+   
   hCopy(vec, outvec)     - Copies a vector to another one without resizing them.
+   
+  hRedistribute(vec, invec, offset, stride) - Redistributes the values in one 
+                           vector sequentially into another vector, given an 
+                           offset and stride (interval) - can be used for a 
+                           transpose operation
    
   
   SECTION: Math Function
@@ -1643,6 +1690,10 @@ data in antenna one (which was our reference antenna).
                            amplitude of unity)
    
   funcGaussian(x, sigma, mu) - Implementation of the Gauss function.
+   
+  hMax(vec)              - Return the maximum value in a vector
+   
+  hMin(vec)              - Return the minimum value in a vector
    
   hExp(vec)              - Take the exp of all the elements in the vector.
    
@@ -1742,7 +1793,7 @@ data in antenna one (which was our reference antenna).
                            returned in the first vector. If the second vector 
                            is shorter it will be applied multiple times.
    
-  hSub(vec1, operand)    - Performs a Sub between the vector and a scalar 
+  hSub(vec1, scalar1)    - Performs a Sub between the vector and a scalar 
                            (applied to each element), which is returned in the 
                            first vector.
    
@@ -1765,7 +1816,7 @@ data in antenna one (which was our reference antenna).
                            returned in the first vector. If the second vector 
                            is shorter it will be applied multiple times.
    
-  hMul(vec1, operand)    - Performs a Mul between the vector and a scalar 
+  hMul(vec1, scalar1)    - Performs a Mul between the vector and a scalar 
                            (applied to each element), which is returned in the 
                            first vector.
    
@@ -1788,7 +1839,7 @@ data in antenna one (which was our reference antenna).
                            returned in the first vector. If the second vector 
                            is shorter it will be applied multiple times.
    
-  hAdd(vec1, operand)    - Performs a Add between the vector and a scalar 
+  hAdd(vec1, scalar1)    - Performs a Add between the vector and a scalar 
                            (applied to each element), which is returned in the 
                            first vector.
    
@@ -1811,7 +1862,7 @@ data in antenna one (which was our reference antenna).
                            returned in the first vector. If the second vector 
                            is shorter it will be applied multiple times.
    
-  hDiv(vec1, operand)    - Performs a Div between the vector and a scalar 
+  hDiv(vec1, scalar1)    - Performs a Div between the vector and a scalar 
                            (applied to each element), which is returned in the 
                            first vector.
    
@@ -1828,7 +1879,7 @@ data in antenna one (which was our reference antenna).
    
   hPhaseToComplex(vec, phasevec) - Coverts a vector of real phase to a vector 
                            of corresponding complex numbers (with amplitude of 
-                           unity). 
+                           unity).
    
   hAmplitudePhaseToComplex(vec, ampphase) - Coverts a vector of real phases and 
                            amplitudes to a vector of corresponding complex 
@@ -2041,6 +2092,17 @@ data in antenna one (which was our reference antenna).
   hSpectralPower(vec, outvec) - Calculates the power of a complex spectrum and 
                            add it to an output vector.
    
+  hCrossCorrelationMatrix(ccm, fftdata, nfreq) - Calculates the upper half of 
+                           the cross-correlation matrix of a number of antenna 
+                           data in the frequency domain and adds it to the 
+                           output vector.
+   
+  hCImageFromCCM(image, ccm, weights, nofAntennas, nfreq) - Calculates a single 
+                           complex pixel or a pixel vector (i.e., an image), 
+                           from an cross correlation matrix and complex 
+                           geometrical weights for each antenna by multiplying 
+                           ccm and weights and summing over all baselines.
+   
   hADC2Voltage(vec, adc2voltage) - Convert the ADC value to a voltage.
    
   hGetHanningFilter(vec, Alpha, Beta, BetaRise, BetaFall) - Create a Hanning 
@@ -2056,9 +2118,43 @@ data in antenna one (which was our reference antenna).
    
   hApplyHanningFilter(data) - Apply a Hanning filter on a vector.
    
+  hFFTw(data_out, data_in) - Apply a forward FFT on a complex vector and return 
+                           it in a second
+   
+  hInvFFTw(data_out, data_in) - Apply a backward FFT on a complex vector and 
+                           return it in a second
+   
+  hFFTw(data_out, data_in) - Apply a real-to-complex FFT using fftw3
+   
+  hInvFFTw(data_out, data_in) - Apply a complex-to-real (inverse) FFT using 
+                           fftw3
+   
+  hNyquistSwap(vec, nyquistZone) - Reorders the elements in a complex vector 
+                           that was created by a FFT according to its 
+                           Nyquistzone, such that frequencies always increase 
+                           from left to right
+   
   hFFT(data_in, data_out, nyquistZone) - Apply an FFT on a vector.
    
   hInvFFT(data_in, data_out, nyquistZone) - Apply an Inverse FFT on a vector.
+   
+  hRFIDownsampling(amplitudeVec, rmsVec, spectrumVec) - Generate a downsampled 
+                           vector containing the mean and rms values of the 
+                           spectrum amplitudes. This is needed to generate a 
+                           baseline for the RFI mitigation.
+   
+  hRFIBaselineFitting(fitVec, amplitudeVec, rmsVec, rmsThresholdValue) - 
+                           Perform a baseline fitting on the amplitude of the 
+                           spectrum vector and use the fit to crea an 
+                           interpolated spectrum.
+   
+  hRFIFlagging(flagVec, flagThresholdValue, spectrumVec, fitVec) - Create a 
+                           flag vector defining the regions that need to be 
+                           mitigated in the spectrum.
+   
+  hRFIMitigation(mitigatedSpectrumVec, spectrumVec, fitVec, flagVec) - Final 
+                           part of the RFI mitigation: remove the flagged 
+                           regions from the spectrum
    
   
   SECTION: I/O Function (DataReader)
@@ -2085,6 +2181,12 @@ data in antenna one (which was our reference antenna).
   hCalTableVector(filename, keyword, date, pyob) - Return a list of antenna 
                            calibration values from the CalTables as a float 
                            vector.
+   
+  hWriteDump(vec, filename) - Dump a single vector to a file in binary format 
+                           (machine dependent)
+   
+  hReadDump(vec, filename) - Read a single vector from a file which was dumped 
+                           in binary format
    
   
   SECTION: Coordinate Conversion (VectorConversion.cc)

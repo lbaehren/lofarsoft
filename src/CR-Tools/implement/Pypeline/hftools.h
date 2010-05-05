@@ -156,6 +156,8 @@ template <class T>
     HInteger getLoop_nslice();
     HInteger getLoop_start();
     HInteger getLoop_end();
+    HInteger loop_slice_start_offset;
+    HInteger loop_slice_end_offset; 
     HInteger getLoop_increment();
     HInteger getBegin();
     HInteger getEnd();
@@ -163,8 +165,8 @@ template <class T>
     HInteger length();
     bool loopingMode();
     bool doLoopAgain();
-    hArray<T> & loop(vector<HInteger> & start_element_index, HInteger start=0, HInteger end=-1, HInteger increment=1);
-    hArray<T> & loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec);
+    hArray<T> & loop(vector<HInteger> & start_element_index, HInteger start=0, HInteger end=-1, HInteger increment=1, HInteger start_off=0, HInteger end_off=0);
+    hArray<T> & loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec, HInteger start_off=0, HInteger end_off=0);
     HInteger setLoopSlice(vector<HInteger> & start_element_index);
     hArray<T> &  next();
     hArray<T> &  loopOn();
@@ -196,7 +198,7 @@ template <class T>
 
   private:
     HInteger slice_begin, slice_end, slice_size;
-    HInteger loop_slice_begin, loop_slice_end, loop_slice_size;
+    HInteger loop_slice_begin, loop_slice_end, loop_slice_size, loop_lower_level_size;
     HInteger loop_start, loop_end, loop_increment, loop_i, loop_nslice, loop_maxn;
     vector<HInteger> index_vector;
     bool loop_over_indexvector;

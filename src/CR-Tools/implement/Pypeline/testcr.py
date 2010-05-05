@@ -50,15 +50,12 @@ cr_ffto=cr["emptyFFT"].setPar("xvalues",cr_frequencies)
 cr_fft=cr["emptyFFT"].setPar("xvalues",cr_frequencies)
 """
 
-and then make the Fourier transform followed by a reordering of the output, noting that the data was taken in the
-second Nyquist domain
+and then make the Fourier transform followed by a reordering of the
+output, noting that the data was taken in the second Nyquist domain
 
 """
 cr_fft[...].fftw(cr_efield[...])
 cr_fft[...].nyquistswap(cr["nyquistZone"])
-
-
-
 """
 Let's create a spectrum that we can plot:
 """
@@ -69,7 +66,13 @@ cr_spectrum[0].plot()
 """
 
 """
+RFIVectorLength=127
+cr_spectrum=hArray(float,cr_fft,xvalues=cr_frequencies,fill=0,name="Power")
 
+cr_rfi_amplitudes=hArray(float,[cr.nofAntennas,RFIVectorLength])
+cr_rfi_rms=hArray(float,cr_rfi_amplitudes)
+cr_rfi_amplitudes[...].rfidownsampling(cr_rfi_rms[...],cr_spectrum[...])
+cr_rfi_amplitudes[...].rfidownsampling(cr_rfi_rms[...],cr_spectrum[...])
 
 """
 
