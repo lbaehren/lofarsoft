@@ -76,8 +76,7 @@ if (NOT HAVE_SZIP OR SZIP_FORCE_BUILD)
   
 else (NOT HAVE_SZIP OR SZIP_FORCE_BUILD)
   add_custom_target (szip
-    WORKING_DIRECTORY ${BOOST_BINARY_DIR}
+    WORKING_DIRECTORY ${SZIP_BINARY_DIR}
     COMMENT "[Szip] Found system-wide installation; skipping rebuild!"
     )
-  message (STATUS "[Szip] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_SZIP OR SZIP_FORCE_BUILD)

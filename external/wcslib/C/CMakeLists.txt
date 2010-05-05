@@ -21,24 +21,11 @@ include (TestBigEndian)
 
 check_include_files (errno.h      HAVE_ERRNO_H     )
 check_include_files (inttypes.h   HAVE_INTTYPES_H  )
-check_include_files (limits.h     HAVE_LIMITS_H    )
-check_include_files (math.h       HAVE_MATH_H      )
-check_include_files (memory.h     HAVE_MEMORY_H    )
-check_include_files (stdint.h     HAVE_STDINT_H    )
-check_include_files (stdio.h      HAVE_STDIO_H     )
-check_include_files (stdlib.h     HAVE_STDLIB_H    )
-check_include_files (strings.h    HAVE_STRINGS_H   )
-check_include_files (string.h     HAVE_STRING_H    )
-check_include_files (sys/stat.h   HAVE_SYS_STAT_H  )
-check_include_files (sys/types.h  HAVE_SYS_TYPES_H )
 check_include_files (unistd.h     HAVE_UNISTD_H    )
 
 ## Check type sizes ----------------------------------------
 
-check_type_size ("int"            SIZEOF_INT            )
 check_type_size ("int *"          SIZEOF_INT_P          )
-check_type_size ("long int"       SIZEOF_LONG_INT       )
-check_type_size ("long long int"  SIZEOF_LONG_LONG_INT  )
 check_type_size ("size_t"         SIZEOF_SIZE_T         )
 
 ## Define to `unsigned' if <sys/types.h> does not define
@@ -72,12 +59,12 @@ set (WCSLIB_flex_inputs
   wcsutrn
 )
 
-if (flex_bin)
+if (flex_executable)
   foreach (src ${WCSLIB_flex_inputs})
     message (STATUS "Flex processing ${src}...")
     execute_process (
       WORKING_DIRECTORY ${WCSLIB_SOURCE_DIR}/C
-      COMMAND flex -o${WCSLIB_BINARY_DIR}/C/${src}.c -P${src} ${src}.l
+      COMMAND ${flex_executable} -o${WCSLIB_BINARY_DIR}/C/${src}.c -P${src} ${src}.l
       TIMEOUT 20
       ERROR_VARIABLE flex_error
       OUTPUT_QUIET
@@ -87,9 +74,9 @@ if (flex_bin)
       message (SEND_ERROR ${flex_error})
     endif (flex_error)
   endforeach (src)
-else (flex_bin)
+else (flex_executable)
   message (SEND_ERROR "Unable to process flex input files!")
-endif (flex_bin)
+endif (flex_executable)
 
 ## -----------------------------------------------------------------------------
 ## Sources and instructions to build the library

@@ -78,7 +78,10 @@ if (NOT HAVE_GSL OR GSL_FORCE_BUILD)
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_GSL OR GSL_FORCE_BUILD)
-  message (STATUS "[GSL] Found system-wide installation; skipping rebuild!")
+  add_custom_target (gsl
+    WORKING_DIRECTORY ${GSL_BINARY_DIR}
+    COMMENT "[GSL] Found system-wide installation; skipping rebuild!"
+    )
 endif (NOT HAVE_GSL OR GSL_FORCE_BUILD)
 
 ## ------------------------------------------------------------------------------

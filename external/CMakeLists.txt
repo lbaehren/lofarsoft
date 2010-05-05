@@ -7,8 +7,8 @@ set (external_packages
   boost
   casacore
   cfitsio
-  flex
   fftw3
+  flex
   gsl
   hdf5
   itpp

@@ -76,8 +76,7 @@ if (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)
   
 else (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)
   add_custom_target (flex
-    WORKING_DIRECTORY ${BOOST_BINARY_DIR}
+    WORKING_DIRECTORY ${FLEX_BINARY_DIR}
     COMMENT "[Flex] Found system-wide installation; skipping rebuild!"
     )
-  message (STATUS "[Flex] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)

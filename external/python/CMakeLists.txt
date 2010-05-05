@@ -91,5 +91,4 @@ else (NOT HAVE_PYTHON OR PYTHON_FORCE_BUILD)
     WORKING_DIRECTORY ${PYTHON_BINARY_DIR}
     COMMENT "[Python] Found system-wide installation; skipping rebuild!"
     )
-  message (STATUS "[Python] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_PYTHON OR PYTHON_FORCE_BUILD)

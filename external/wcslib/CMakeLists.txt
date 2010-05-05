@@ -9,10 +9,10 @@
 project (WCSLIB)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 ## Enforced CMake policy 
-cmake_policy (VERSION 2.6)
+cmake_policy (VERSION 2.8)
 
 set (WCSLIB_VERSION_MAJOR 4)
 set (WCSLIB_VERSION_MINOR 2)
@@ -29,26 +29,29 @@ option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  YES )
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-if (NOT USG_ROOT)
-  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
-    PATHS 
-    ${WCSLIB_SOURCE_DIR}
-    ${WCSLIB_SOURCE_DIR}/..
-    ${WCSLIB_SOURCE_DIR}/../..
-    ${WCSLIB_SOURCE_DIR}/../../..
-    ENV LOFARSOFT
-    )
-endif (NOT USG_ROOT)
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+  PATHS 
+  ${WCSLIB_SOURCE_DIR}
+  ${WCSLIB_SOURCE_DIR}/..
+  ${WCSLIB_SOURCE_DIR}/../..
+  ${WCSLIB_SOURCE_DIR}/../../..
+  $ENV{LOFARSOFT}
+  )
 
 if (USG_ROOT)
-  ## load general settings
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  ## check if package is installed already
-  set (WCSLIB_FIND_QUIETLY YES)
-  include (FindWCSLIB)
 else (USG_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  message (FATAL_ERROR "[WCSLIB] Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
+
+## ------------------------------------------------------------------------------
+## Check if the program/package/library is already available
+
+if (NOT WCSLIB_VERBOSE_CONFIGURE)
+  set (WCSLIB_FIND_QUIETLY YES)
+endif (NOT WCSLIB_VERBOSE_CONFIGURE)
+
+include (FindWCSLIB)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -74,8 +77,9 @@ if (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
     enable_testing()
   endif (WCSLIB_ENABLE_TESTING)
   
-  find_library (HAVE_LIBM m PATHS ${lib_locations})
-  find_program (flex_bin flex)
+  if (NOT flex_executable)
+    find_program (flex_executable flex ${bin_locations} )
+  endif (NOT flex_executable)
   
   ## ----------------------------------------------------------------------------
   ## Installation

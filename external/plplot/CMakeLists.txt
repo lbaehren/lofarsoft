@@ -82,5 +82,4 @@ else (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
     WORKING_DIRECTORY ${PLPLOT_BINARY_DIR}
     COMMENT "[Plplot] Found system-wide installation; skipping rebuild!"
     )
-  message (STATUS "[Plplot] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
