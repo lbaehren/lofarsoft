@@ -101,11 +101,7 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
       summary (std::cout);
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-
-      \param os -- Output stream to which the summary is written.
-    */
+    //! Provide a summary of the object's internal parameters and status
     void summary (std::ostream &os);    
 
     // === Methods ==============================================================

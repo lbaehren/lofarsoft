@@ -86,11 +86,14 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //_____________________________________________________________________________
   //                                                                      summary
   
+  /*!
+    \param os -- Output stream to which the summary is written.
+  */
   void <newClass>::summary (std::ostream &os)
   {
     os << "[<newClass>] Summary of internal parameters." << std::endl;
   }
-
+  
   // ============================================================================
   //
   //  Methods

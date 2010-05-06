@@ -14,8 +14,8 @@ rm -rf build/*
 echo "-- Updating working copy ..."
 
 cd ${USG_ROOT}
-svn cleanup
-svn up
+${svn_executable} cleanup
+${svn_executable} up
 
 echo "-- Building projects ..."
 
