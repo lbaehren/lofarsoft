@@ -87,87 +87,87 @@ funcGaussian(x, sigma, mu) - Implementation of the Gauss function.
 
 hExp(vec)              - Take the exp of all the elements in the vector.
 
-hExp(vec, vecout)      - Take the exp of all the elements in the vector and
+hExp(vecout, vecin)    - Take the exp of all the elements in the vector and
                          return results in a second vector.
 
 hLog(vec)              - Take the log of all the elements in the vector.
 
-hLog(vec, vecout)      - Take the log of all the elements in the vector and
+hLog(vecout, vecin)    - Take the log of all the elements in the vector and
                          return results in a second vector.
 
 hLog10(vec)            - Take the log10 of all the elements in the vector.
 
-hLog10(vec, vecout)    - Take the log10 of all the elements in the vector and
+hLog10(vecout, vecin)  - Take the log10 of all the elements in the vector and
                          return results in a second vector.
 
 hSin(vec)              - Take the sin of all the elements in the vector.
 
-hSin(vec, vecout)      - Take the sin of all the elements in the vector and
+hSin(vecout, vecin)    - Take the sin of all the elements in the vector and
                          return results in a second vector.
 
 hSinh(vec)             - Take the sinh of all the elements in the vector.
 
-hSinh(vec, vecout)     - Take the sinh of all the elements in the vector and
+hSinh(vecout, vecin)   - Take the sinh of all the elements in the vector and
                          return results in a second vector.
 
 hSqrt(vec)             - Take the sqrt of all the elements in the vector.
 
-hSqrt(vec, vecout)     - Take the sqrt of all the elements in the vector and
+hSqrt(vecout, vecin)   - Take the sqrt of all the elements in the vector and
                          return results in a second vector.
 
 hSquare(vec)           - Take the square of all the elements in the vector.
 
-hSquare(vec, vecout)   - Take the square of all the elements in the vector
+hSquare(vecout, vecin) - Take the square of all the elements in the vector
                          and return results in a second vector.
 
 hTan(vec)              - Take the tan of all the elements in the vector.
 
-hTan(vec, vecout)      - Take the tan of all the elements in the vector and
+hTan(vecout, vecin)    - Take the tan of all the elements in the vector and
                          return results in a second vector.
 
 hTanh(vec)             - Take the tanh of all the elements in the vector.
 
-hTanh(vec, vecout)     - Take the tanh of all the elements in the vector and
+hTanh(vecout, vecin)   - Take the tanh of all the elements in the vector and
                          return results in a second vector.
 
 hAbs(vec)              - Take the abs of all the elements in the vector.
 
-hAbs(vec, vecout)      - Take the abs of all the elements in the vector and
+hAbs(vecout, vecin)    - Take the abs of all the elements in the vector and
                          return results in a second vector.
 
 hCos(vec)              - Take the cos of all the elements in the vector.
 
-hCos(vec, vecout)      - Take the cos of all the elements in the vector and
+hCos(vecout, vecin)    - Take the cos of all the elements in the vector and
                          return results in a second vector.
 
 hCosh(vec)             - Take the cosh of all the elements in the vector.
 
-hCosh(vec, vecout)     - Take the cosh of all the elements in the vector and
+hCosh(vecout, vecin)   - Take the cosh of all the elements in the vector and
                          return results in a second vector.
 
 hCeil(vec)             - Take the ceil of all the elements in the vector.
 
-hCeil(vec, vecout)     - Take the ceil of all the elements in the vector and
+hCeil(vecout vecin)    - Take the ceil of all the elements in the vector and
                          return results in a second vector.
 
 hFloor(vec)            - Take the floor of all the elements in the vector.
 
-hFloor(vec, vecout)    - Take the floor of all the elements in the vector and
+hFloor(vecout, vecin)  - Take the floor of all the elements in the vector and
                          return results in a second vector.
 
 hAcos(vec)             - Take the acos of all the elements in the vector.
 
-hAcos(vec, vecout)     - Take the acos of all the elements in the vector and
+hAcos(vecout, vecin)   - Take the acos of all the elements in the vector and
                          return results in a second vector.
 
 hAsin(vec)             - Take the asin of all the elements in the vector.
 
-hAsin(vec, vecout)     - Take the asin of all the elements in the vector and
+hAsin(vecout, vecin)   - Take the asin of all the elements in the vector and
                          return results in a second vector.
 
 hAtan(vec)             - Take the atan of all the elements in the vector.
 
-hAtan(vec, vecout)     - Take the atan of all the elements in the vector and
+hAtan(vecout, vecin)   - Take the atan of all the elements in the vector and
                          return results in a second vector.
 
 hSub(vec1, vec2)       - Performs a Sub between the two vectors, which is
@@ -261,16 +261,16 @@ hCrossCorrelateComplex(vec1, vec2) - Multiplies the elements of the first
                          vector with the complex conjugate of the elements in
                          the second and returns the results in the first.
 
-hReal(vec, vecout)     - Take the real of all the elements in the complex
+hReal(vecout, vecin)   - Take the real of all the elements in the complex
                          vector and return results in a float vector.
 
-hArg(vec, vecout)      - Take the arg of all the elements in the complex
+hArg(vecout, vecin)    - Take the arg of all the elements in the complex
                          vector and return results in a float vector.
 
-hImag(vec, vecout)     - Take the imag of all the elements in the complex
+hImag(vecout, vecin)   - Take the imag of all the elements in the complex
                          vector and return results in a float vector.
 
-hNorm(vec, vecout)     - Take the norm of all the elements in the complex
+hNorm(vecout, vecin)   - Take the norm of all the elements in the complex
                          vector and return results in a float vector.
 
 hNegate(vec)           - Multiplies each element in the vector with -1 in
@@ -369,10 +369,10 @@ hGaussianWeights(wlen) - Returns vector of weights of length wlen with
 
 hWeights(wlen, wtype)  - Create a normalized weight vector.
 
-hRunningAverage(idata, odata, weights) - Calculate the running average of an
+hRunningAverage(odata, idata, weights) - Calculate the running average of an
                          input vector using a weight vector.
 
-hRunningAverage(idata, odata, wlen, wtype) - Overloaded function to
+hRunningAverage(odata, idata, wlen, wtype) - Overloaded function to
                          automatically calculate weights.
 
 
@@ -390,27 +390,27 @@ hGeometricDelayNearField(antPosition, skyPosition, distance) - Calculates the
                          source located at a certain 3D space coordinate in
                          nearfield (based on L. Bahren).
 
-hGeometricDelays(antPositions, skyPositions, delays, farfield) - Calculates
+hGeometricDelays(delays, antPositions, skyPositions, farfield) - Calculates
                          the time delay in seconds for signals received at
                          various antenna positions relative to a phase center
                          from sources located at certain 3D space coordinates
                          in near or far field.
 
-hGeometricPhases(frequencies, antPositions, skyPositions, phases, farfield) -
+hGeometricPhases(phases, frequencies, antPositions, skyPositions, farfield) -
                          Calculates the phase gradients for signals received
                          at various antenna positions relative to a phase
                          center from sources located at certain 3D space
                          coordinates in near or far field and for different
                          frequencies.
 
-hGeometricWeights(frequencies, antPositions, skyPositions, weights, farfield)
+hGeometricWeights(weights, frequencies, antPositions, skyPositions, farfield)
                          - Calculates the phase gradients as complex weights
                          for signals received at various antenna positions
                          relative to a phase center from sources located at
                          certain 3D space coordinates in near or far field
                          and for different frequencies.
 
-hSpectralPower(vec, outvec) - Calculates the power of a complex spectrum and
+hSpectralPower(vecout, vecin) - Calculates the power of a complex spectrum and
                          add it to an output vector.
 
 hADC2Voltage(vec, adc2voltage) - Convert the ADC value to a voltage.
@@ -428,9 +428,9 @@ hApplyFilter(data, filter) - Apply a predefined filter on a vector.
 
 hApplyHanningFilter(data) - Apply a Hanning filter on a vector.
 
-hFFT(data_in, data_out, nyquistZone) - Apply an FFT on a vector.
+hFFTCasa(data_out, data_in, nyquistZone) - Apply an FFT on a vector.
 
-hInvFFT(data_in, data_out, nyquistZone) - Apply an Inverse FFT on a vector.
+hInvFFTCasa(data_out, data_in, nyquistZone) - Apply an Inverse FFT on a vector.
 
 
 SECTION: I/O Function (DataReader)
@@ -1020,7 +1020,7 @@ template <class T> HInteger hArray<T>::getBegin(){
   if (doiterate) return std::min(loop_slice_begin+loop_nslice*loop_slice_size+loop_slice_start_offset*loop_lower_level_size,loop_slice_end);
   else return slice_begin;
 }
-  
+
 /*!
 \brief Returns the offset of the end of the current slice from the begin iterator of the stored vector
  */
@@ -1143,7 +1143,7 @@ template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_elemen
   return *this;
 }
 
-/*! 
+/*!
 
  \brief Sets the array to looping mode (i.e. the next function will
 loop over all slices in the vector) using and index vector to indicate
@@ -1544,7 +1544,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType fill_
 #define HFPP_PARDEF_1 (HInteger)(maxlen)()("Maximum length to output.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hPrettyString(vec,3) -> "[vec_0,vec_1,vec_3,...]"
+  hPrettyString(vec,3) -> [vec_0,vec_1,vec_3,...]
 
   \brief $DOCSTRING
   $PARDOCSTRING
@@ -1557,7 +1557,7 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
   if (vec<vec_end) s+=hf2string(*it);
   ++it;
   while ((it<vec_end) && (it<maxit)) {
-    s+=","+hf2string(*it); 
+    s+=","+hf2string(*it);
     ++it;
   };
   if ( it < vec_end ) s+=",...";
@@ -1566,7 +1566,7 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Prints the contents of a vector (up to a maximum length) as a pretty string 
+//$DOCSTRING: Prints the contents of a vector (up to a maximum length) as a pretty string
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hPrettyPrint
 //-----------------------------------------------------------------------
@@ -1576,7 +1576,7 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
 #define HFPP_PARDEF_1 (HInteger)(maxlen)()("Maximum length to output.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hPrettyString(vec,3) -> '[vec_0,vec_1,vec_3,...]' 
+  hPrettyString(vec,3) -> '[vec_0,vec_1,vec_3,...]'
 
   \brief $DOCSTRING
   $PARDOCSTRING
@@ -1813,10 +1813,12 @@ void HFPP_FUNC_NAME (casa::Vector<T> & vec1,casa::Vector<S> & vec2)
 #define HFPP_FUNC_NAME hConvert
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Output vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
+  vec1.convert(vec2) -> Copy vec1 to vec2
+
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -1840,23 +1842,25 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter2 vec2,const 
 #define HFPP_WRAPPER_CLASSES (STL) // since it does memory management, using resize
 #define HFPP_PYTHON_WRAPPER_CLASSES (STL) // since it does memory management, using resize
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_CODE_PRE hResize(vec2,vec1); //code will be inserted in wrapper generation in cc file
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_CODE_PRE hResize(vecout,vecin); //code will be inserted in wrapper generation in cc file
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vecout)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
+  vec1.convert(vec2) -> Copy vec1 to vec2
+
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iterin, class Iter>
-void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,const Iter vec2_end)
+template <class Iter, class Iterin>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
 {
   typedef IterValueType T;
-  Iterin it=vec1;
-  Iter itout=vec2;
-  while ((it!=vec1_end) && (itout !=vec2_end)) {
-    *itout=hfcast<T>(*it);
-    ++it; ++itout;
+  Iter itout(vecout);
+  Iterin itin(vecin);
+  while ((itin != vecin_end) && (itout != vecout_end)) {
+    *itout=hfcast<T>(*itin);
+    ++itin; ++itout;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1865,8 +1869,8 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
 #define HFPP_FUNC_NAME hCopy
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(outvec)()("Vector containing a copy of the input values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vecout)()("Vector containing a copy of the input values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vecin)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   vec1.copy(vec2) -> copy elements of vec1 to vec2
@@ -1880,17 +1884,17 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
   $PARDOCSTRING
 
 */
-template <class Iterin, class Iter>
-void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_end)
+template <class Iter, class Iterin>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
 {
   typedef IterValueType T;
-  Iterin it=vec;
-  Iter itout=out;
-  if (it>=vec_end) return;
-  while (itout !=out_end) {
-    *itout=*it;
-    ++it; ++itout;
-    if (it==vec_end) it=vec;
+  Iter itout(vecout);
+  Iterin itin(vecin);
+  if (itin >= vecin_end) return;
+  while (itout != vecout_end) {
+    *itout=*itin;
+    ++itin; ++itout;
+    if (itin==vecin_end) itin=vecin;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -2122,21 +2126,21 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 //-----------------------------------------------------------------------
 #define HFPP_FUNC_VARIANT 2
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
 template <class Iter>
-void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
+void h{$MFUNC!CAPS}2(const Iter vecout,const Iter vecout_end, const Iter vecin,const Iter vecin_end)
 {
-  Iter it=vec;
-  Iter itout=out;
-  while ((it!=vec_end) && (itout !=out_end)) {
-    *itout=$MFUNC(*it);
-    ++it; ++itout;
+  Iter itin=vecin;
+  Iter itout=vecout;
+  while ((itin!=vecin_end) && (itout !=vecout_end)) {
+    *itout=$MFUNC(*itin);
+    ++itin; ++itout;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -2157,6 +2161,8 @@ void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out,const Ite
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
+  vec.$MFUNC() -> $MFUNC operation on vec.
+
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -2179,21 +2185,22 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 #define HFPP_FUNC_VARIANT 2
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
+  vec2.$MFUNC(vec1) -> return result of $MFUNC operation on vec1 in vec2.
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter1,class Iter2>
-void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out_end)
+template <class IterOut, class IterIn>
+void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterIn vecin, const IterIn vecin_end)
 {
-  Iter1 it=vec;
-  Iter2 itout=out;
-  while ((it!=vec_end) && (itout !=out_end)) {
-    *itout=$MFUNC(*it);
-    ++it; ++itout;
+  IterIn itin=vecin;
+  IterOut itout=vecout;
+  while ((itin != vecin_end) && (itout != vecout_end)) {
+    *itout=$MFUNC(*itin);
+    ++itin; ++itout;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -2544,29 +2551,30 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const I
 #define HFPP_FUNC_NAME h{$MFUNC!CAPS}
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HComplex)(vec)()("Complex input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(vecout)()("Float output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Float output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vecin)()("Complex input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
+  vec2.$MFUNC(vec1) -> vec2 = [$MFUNC(vec1_0), $MFUNC(vec1_1), ... , $MFUNC(vec1_n)]
+
   \brief $DOCSTRING
   $PARDOCSTRING
 
 The following functions are available for getting real values from
 complex numbers:
-  abs - absolute value of a complex number
   norm - magnitude (length) of a complex number, i.e. Sqrt(c * conj(c))
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
 */
-template <class Iter, class Iterout>
-void h{$MFUNC!CAPS}(const Iter vec,const Iter vec_end, const Iterout vecout,const Iterout vecout_end)
+template <class IterOut, class IterIn>
+void h{$MFUNC!CAPS}(const IterOut vecout,const IterOut vecout_end, const IterIn vecin, const IterIn vecin_end)
 {
-  Iter it=vec;
-  Iterout itout=vecout;
-  while ((it!=vec_end) && (itout !=vecout_end)) {
-    *itout=$MFUNC(*it);
-    ++it; ++itout;
+  IterIn itin(vecin);
+  IterOut itout(vecout);
+  while ((itin != vecin_end) && (itout != vecout_end)) {
+    *itout=$MFUNC(*itin);
+    ++itin; ++itout;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -3027,8 +3035,8 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -3043,27 +3051,28 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
 */
 
 template <class Iter>
-void HFPP_FUNC_NAME (const Iter vec1,
-		  const Iter vec1_end,
-		  const Iter vec2,
-		  const Iter vec2_end)
+void HFPP_FUNC_NAME (const Iter vecout,
+		     const Iter vecout_end,
+		     const Iter vecin,
+		     const Iter vecin_end
+		     )
 {
-  if (vec2>=vec2_end) return; //If size 0 do nothing
-  if (vec1>=vec1_end) return; //If size 0 do nothing
-  HInteger ilen=(vec1_end-vec1);
-  HInteger olen=(vec2_end-vec2);
+  if (vecout>=vecout_end) return; //If size 0 do nothing
+  if (vecin>=vecin_end) return; //If size 0 do nothing
+  HInteger ilen=(vecin_end-vecin);
+  HInteger olen=(vecout_end-vecout);
   HInteger blen=max(ilen/(olen-1),1);
   //use max to avoid infinite loops if output vector is too large
-  Iter it2,it1=vec1;
-  Iter ito=vec2,ito_end=vec2_end-1;
+  Iter it1=vecin, it2;
+  Iter itout=vecout, itout_end=vecout_end-1;
   //only produce the first N-1 blocks in the output vector
-  while ((it1<vec1_end) && (ito<ito_end)) {
-    it2=min(it1+blen,vec1_end);
-    *ito=hMean(it1,it2);
+  while ((it1<vecin_end) && (itout<itout_end)) {
+    it2=min(it1+blen,vecin_end);
+    *itout=hMean(it1,it2);
     it1=it2;
-    ++ito;
+    ++itout;
     }
-  *ito=hMean(it2,vec1_end);
+  *itout=hMean(it2,vecin_end);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -3097,7 +3106,7 @@ std::vector<T> HFPP_FUNC_NAME (
 		  )
 {
   std::vector<T> newvec(floor(vec.size()/downsample_factor+0.5));
-  hDownsample(vec,newvec);
+  hDownsample(newvec,vec);
   return newvec;
 }
 
@@ -3303,8 +3312,8 @@ vector<HNumber> HFPP_FUNC_NAME (HInteger wlen, hWEIGHTS wtype){
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(idata)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(idata)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(weights)()("Weight vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -3313,10 +3322,10 @@ vector<HNumber> HFPP_FUNC_NAME (HInteger wlen, hWEIGHTS wtype){
 */
 
 template <class DataIter, class NumVecIter>
-void HFPP_FUNC_NAME (const DataIter  idata,
-		     const DataIter  idata_end,
-		     const DataIter  odata,
+void HFPP_FUNC_NAME (const DataIter  odata,
 		     const DataIter  odata_end,
+		     const DataIter  idata,
+		     const DataIter  idata_end,
 		     const NumVecIter weights,
 		     const NumVecIter weights_end)
 {
@@ -3358,8 +3367,8 @@ void HFPP_FUNC_NAME (const DataIter  idata,
 #define HFPP_FUNC_NAME hRunningAverage
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(idata)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(idata)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HInteger)(wlen)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_3 (hWEIGHTS)(wtype)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -3378,18 +3387,18 @@ void HFPP_FUNC_NAME (const DataIter  idata,
   GAUSSIAN: Gaussian distribution falling of to 2 sigma at the ends
 */
 template <class DataIter>
-void HFPP_FUNC_NAME (const DataIter idata,
-		     const DataIter idata_end,
-		     const DataIter odata,
+void HFPP_FUNC_NAME (const DataIter odata,
 		     const DataIter odata_end,
+		     const DataIter idata,
+		     const DataIter idata_end,
 		     HInteger wlen,
 		     hWEIGHTS wtype)
 {
   vector<HNumber> weights = hWeights(wlen, wtype);
-  hRunningAverage<DataIter, vector<HNumber>::iterator> (idata,
-							idata_end,
-							odata,
+  hRunningAverage<DataIter, vector<HNumber>::iterator> (odata,
 							odata_end,
+							idata,
+							idata_end,
 							weights.begin(),
 							weights.end());
 }
@@ -3536,15 +3545,14 @@ b
 */
 
 template <class Iter>
-void HFPP_FUNC_NAME (
-			const Iter delays,
-			const Iter delays_end,
-			const Iter antPositions,
-			const Iter antPositions_end,
-			const Iter skyPositions,
-			const Iter skyPositions_end,
-			const bool farfield
-			)
+void HFPP_FUNC_NAME (const Iter delays,
+		     const Iter delays_end,
+		     const Iter antPositions,
+		     const Iter antPositions_end,
+		     const Iter skyPositions,
+		     const Iter skyPositions_end,
+		     const bool farfield
+		     )
 {
   HNumber distance;
   Iter
@@ -3584,10 +3592,10 @@ void HFPP_FUNC_NAME (
 #define HFPP_FUNC_NAME hGeometricPhases
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(frequencies)()("Vector of frequencies (in Hz) to calculate phases for")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(antPositions)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length number of antennas times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(skyPositions)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length number of skypositions times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HNumber)(phases)()("Output vector containing the phases in radians for all frequencies, antennas and positions [frequency index, runs fastest, then antenna index: (nu1,ant1,pos1),(nu2,ant1,pos1),...] - length of vector has to be number of antennas times positions time frequency bins")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(phases)()("Output vector containing the phases in radians for all frequencies, antennas and positions [frequency index, runs fastest, then antenna index: (nu1,ant1,pos1),(nu2,ant1,pos1),...] - length of vector has to be number of antennas times positions time frequency bins")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(frequencies)()("Vector of frequencies (in Hz) to calculate phases for")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(antPositions)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length number of antennas times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(skyPositions)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length number of skypositions times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_4 (bool)(farfield)()("Calculate in farfield approximation if true, otherwise do near field calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -3596,17 +3604,16 @@ void HFPP_FUNC_NAME (
 */
 
 template <class Iter>
-void HFPP_FUNC_NAME (
-			const Iter frequencies,
-			const Iter frequencies_end,
-			const Iter antPositions,
-			const Iter antPositions_end,
-			const Iter skyPositions,
-			const Iter skyPositions_end,
-			const Iter phases,
-			const Iter phases_end,
-			const bool farfield
-			)
+void HFPP_FUNC_NAME (const Iter phases,
+		     const Iter phases_end,
+		     const Iter frequencies,
+		     const Iter frequencies_end,
+		     const Iter antPositions,
+		     const Iter antPositions_end,
+		     const Iter skyPositions,
+		     const Iter skyPositions_end,
+		     const bool farfield
+		     )
 {
   HNumber distance;
   Iter
@@ -3654,10 +3661,10 @@ void HFPP_FUNC_NAME (
 #define HFPP_FUNC_NAME hGeometricWeights
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(frequencies)()("Vector of frequencies (in Hz) to calculate phases for")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(antPositions)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length number of antennas times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(skyPositions)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length number of skypositions times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HComplex)(weights)()("Output vector containing the phases in radians for all frequencies, antennas and positions [frequency index, runs fastest, then antenna index: (nu1,ant1,pos1),(nu2,ant1,pos1),...] - length of vector has to be number of antennas times positions time frequency bins")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HComplex)(weights)()("Output vector containing the phases in radians for all frequencies, antennas and positions [frequency index, runs fastest, then antenna index: (nu1,ant1,pos1),(nu2,ant1,pos1),...] - length of vector has to be number of antennas times positions time frequency bins")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(frequencies)()("Vector of frequencies (in Hz) to calculate phases for")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(antPositions)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length number of antennas times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(skyPositions)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length number of skypositions times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_4 (bool)(farfield)()("Calculate in farfield approximation if true, otherwise do near field calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -3665,18 +3672,17 @@ void HFPP_FUNC_NAME (
   $PARDOCSTRING
 */
 
-template <class Iter, class CIter>
-void HFPP_FUNC_NAME (
-			const Iter frequencies,
-			const Iter frequencies_end,
-			const Iter antPositions,
-			const Iter antPositions_end,
-			const Iter skyPositions,
-			const Iter skyPositions_end,
-			const CIter weights,
-			const CIter weights_end,
-			const bool farfield
-			)
+template <class CIter, class Iter>
+void HFPP_FUNC_NAME (const CIter weights,
+		     const CIter weights_end,
+		     const Iter frequencies,
+		     const Iter frequencies_end,
+		     const Iter antPositions,
+		     const Iter antPositions_end,
+		     const Iter skyPositions,
+		     const Iter skyPositions_end,
+		     const bool farfield
+		     )
 {
   HNumber distance;
   Iter
@@ -3725,8 +3731,8 @@ void HFPP_FUNC_NAME (
 #define HFPP_FUNC_NAME hSpectralPower
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HComplex)(vec)()("Input vector containing the complex spectrum")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vecin)()("Input vector containing the complex spectrum")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -3737,14 +3743,14 @@ void HFPP_FUNC_NAME (
   call the function multiple times and get a summed spectrum. If you
   need it only once, just fill the vector with zeros.
 */
-template <class Iterin, class Iter>
-void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_end)
+template <class Iter, class Iterin>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
 {
-  Iterin it(vec);
-  Iter itout(out);
-  while ((it!=vec_end) && (itout !=out_end)) {
-    *itout+=real((*it)*conj(*it));
-    ++it; ++itout;
+  Iterin itin(vecin);
+  Iter itout(vecout);
+  while ((itin != vecin_end) && (itout != vecout_end)) {
+    *itout+=real((*itin)*conj(*itin));
+    ++itin; ++itout;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -4301,21 +4307,22 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply an FFT on a vector.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hFFT
+#define HFPP_FUNC_NAME hFFTCasa
 //-----------------------------------------------------------------------
-#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // 2nd parameter is output, use for looping and history informations
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(data_in)()("Vector containing the data on which the FFT will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HComplex)(data_out)()("Return vector in which the FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HComplex)(data_out)()("Return vector in which the FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(data_in)()("Vector containing the input data of the FFT.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
+  complexvec.fftcasa(floatvec) -> return FFT for floatvec in complexvec.
+
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class IterIn, class IterOut>
-void HFPP_FUNC_NAME(const IterIn  data_in,  const IterIn  data_in_end,
-		    const IterOut data_out, const IterOut data_out_end,
+template <class IterOut, class IterIn>
+void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
+		    const IterIn  data_in,  const IterIn  data_in_end,
 		    const HInteger nyquistZone) {
   uint channel;
   uint blocksize(data_in_end - data_in);
@@ -4378,21 +4385,22 @@ void HFPP_FUNC_NAME(const IterIn  data_in,  const IterIn  data_in_end,
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply an Inverse FFT on a vector.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hInvFFT
+#define HFPP_FUNC_NAME hInvFFTCasa
 //-----------------------------------------------------------------------
-#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // 2nd parameter is output, use for looping and history informations
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HComplex)(data_in)()("Vector containing the input data on which the inverse FFT will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(data_out)()("Return vector in which the inverse FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(data_out)()("Return vector in which the inverse FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(data_in)()("Vector containing the input data of the FFT.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
+  floatvec.invfftcasa(complexvec) -> return inverse FFT for complexvecvec in floatvec.
+
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class IterIn, class IterOut>
-void HFPP_FUNC_NAME(const IterIn data_in,   const IterIn data_in_end,
-		    const IterOut data_out, const IterOut data_out_end,
+template <class IterOut, class IterIn>
+void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
+		    const IterIn data_in,   const IterIn data_in_end,
 		    const HInteger nyquistZone) {
   uint channel;
   uint blocksize(data_out_end - data_out);
@@ -4442,8 +4450,58 @@ void HFPP_FUNC_NAME(const IterIn data_in,   const IterIn data_in_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Apply an FFT on a vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFFT
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(data_out)()("Return vector in which the FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(data_in)()("Vector containing the input data of the FFT.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  complexvec.fft(floatvec) -> return FFT of floatvec in complexvec.
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class IterOut, class IterIn>
+void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
+		    const IterIn  data_in,  const IterIn  data_in_end,
+		    const HInteger nyquistZone) {
+
+  hFFTCasa(const IterOut data_out, const IterOut data_out_end,
+	   const IterIn  data_in,  const IterIn  data_in_end,
+	   const HInteger nyquistZone);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+//$DOCSTRING: Apply an inverse FFT on a vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hInvFFT
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(data_out)()("Return vector in which the inverse FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(data_in)()("Vector containing the input data of the FFT.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  floatvec.invfft(complexvec) -> return inverse FFT of complexvec in floatvec.
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class IterIn, class IterOut>
+void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
+		    const IterIn data_in,   const IterIn data_in_end,
+		    const HInteger nyquistZone) {
+
+  hInvFFTCasa(const IterOut data_out, const IterOut data_out_end,
+	      const IterIn data_in,   const IterIn data_in_end,
+	      const HInteger nyquistZone);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 // ================================================================================
@@ -5339,7 +5397,7 @@ void HFPP_FUNC_NAME(std::vector<T> & vec,
     }  else {
       std::vector<double> tmpvec;
       drp->timeValues(tmpvec);
-      hConvert(tmpvec,vec);
+      hConvert(vec,tmpvec);
     };
   }
   else if (Datatype=="Frequency") {

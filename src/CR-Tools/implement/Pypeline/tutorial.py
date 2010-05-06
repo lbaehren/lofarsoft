@@ -617,13 +617,13 @@ a[0:2,0:2]
 
 where the first slice is simply ignored.
 
-Finally, negative indices count from the end of the slice, i.e. 
+Finally, negative indices count from the end of the slice, i.e.
 
 """
 a[-1]
 """
 
-gives the last slice of the first index, while 
+gives the last slice of the first index, while
 
 """
 a[0:-1]
@@ -1149,7 +1149,7 @@ fftdata=datafile["emptyFFT"]
 avspectrum=hArray(float,dimensions=fftdata,name="average spectrum")
 for block in range(nBlocks):
     fftdata.read(datafile.set("Block",block),"FFT").none()
-    fftdata[...].spectralpower(avspectrum[...])
+    avspectrum[...].spectralpower(fftdata[...])
 """
 
 (The .none() method is appended to suppress unwanted output in
@@ -1478,7 +1478,7 @@ So, let's do the transform:
 
 """
 fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
-fxdata[...].fft(fftdata[...],1)
+fftdata[...].fftcasa(fxdata[...],1)
 
 p_("fftdata")
 """
@@ -1491,7 +1491,7 @@ Fourier transform.
 
 """
 fxinvdata=hArray(float,dimensions=fxdata,name="E-Field'").setUnit("","Counts")
-fftdata[...].invfft(fxinvdata[...],1)
+fxinvdata[...].invfftcasa(fftdata[...],1)
 """
 
 To get the spectral power from the FFTed vector, we have to square the
@@ -1500,7 +1500,7 @@ complex function "norm" (unusual name, but that's what is used in c++).
 
 """
 spectrum=hArray(float,dimensions=fftdata,name="E-field Spectrum")
-fftdata[...].norm(spectrum)
+spectrum.norm(fftdata[...])
 """
 
 Finally, we want to see, if we can do some cross correlation, which
@@ -1534,7 +1534,7 @@ and then make the Fourier transform (noting that the data is in the
 second Nyquist domain)
 
 """
-sun_efield[...].fft(sun_fft[...],2)
+sun_fft[...].fftcasa(sun_efield[...],2)
 """
 
 We will now try to make a crosscorrelation of the data. Let's start by
@@ -1560,7 +1560,7 @@ back into the time domain and store it in a vector crosscorr.
 """
 sun_timelags=sun["TimeLag"].setUnit("\\mu","")
 crosscorr=hArray(float,dimensions=sun_efield,name="Cross Correlation",xvalues=sun_timelags)
-crosscorr_cmplx[...].invfft(crosscorr[...],2)
+crosscorr[...].invfftcasa(crosscorr_cmplx[...],2)
 """
 
 We can now plot this and use as the x-axis vector the Time Lags
@@ -1665,7 +1665,7 @@ in the Fourier domain).
 phases=hArray(float,dimensions=sun_fft,name="Phases",xvalues=sun_frequencies)
 phases.delaytophase(sun_frequencies,delays)
 """
-#hGeometricPhases(sun_frequencies,antenna_positions,cartesian,phases,True)
+#hGeometricPhases(phases,sun_frequencies,antenna_positions,cartesian,True)
 
 Similarly, the corresponding complex weights are calculated.
 
@@ -1673,7 +1673,7 @@ Similarly, the corresponding complex weights are calculated.
 weights=hArray(complex,dimensions=sun_fft,name="Complex Weights")
 weights.phasetocomplex(phases)
 """
-#hGeometricWeights(sun_frequencies,antenna_positions,cartesian,weights,True)
+#hGeometricWeights(weights,sun_frequencies,antenna_positions,cartesian,True)
 
 To shift the time series data (or rather the FFTed time series data)
 we multiply the FFT data with the complex weights from above.
@@ -1691,7 +1691,7 @@ starting point).
 crosscorr_cmplx_shifted=hArray(copy=sun_calfft_shifted)
 crosscorr_cmplx_shifted[...].crosscorrelatecomplex(sun_calfft_shifted[0])
 crosscorr_shifted=hArray(float,dimensions=sun_efield,name="Cross Correlation",xvalues=sun_timelags)
-crosscorr_cmplx_shifted[...].invfft(crosscorr_shifted[...],2)
+crosscorr_shifted[...].invfftcasa(crosscorr_cmplx_shifted[...],2)
 crosscorr_shifted[...].plot(xlim=(-0.25,0.25),legend=sun.antennaIDs)
 savefigure()
 """
@@ -1705,7 +1705,7 @@ series.
 
 """
 sun_efield_shifted = sun["emptyFx"].setPar("xvalues",sun_time)
-sun_calfft_shifted[...].invfft(sun_efield_shifted[...],2)
+sun_efield_shifted[...].invfftcasa(sun_calfft_shifted[...],2)
 sun_efield_shifted[0:3,...].plot(xlim=(-2,0),ylim=(-1500,1500),legend=sun.antennaIDs[0:3])
 savefigure()
 """
@@ -1727,7 +1727,7 @@ and then FFT back into the time domain:
 
 """
 sun_efield_shifted_added=hArray(float,dimensions=sun_time,name="beamformed E-field",xvalues=sun_time)
-sun_calfft_shifted_added.invfft(sun_efield_shifted_added,2)
+sun_efield_shifted_added.invfftcasa(sun_calfft_shifted_added,2)
 
 sun_efield[0].plot()
 sun_efield_shifted_added.plot(xlim=(-2,0),clf=False,legend=["Reference Antenna","Beam"])

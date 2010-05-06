@@ -1,6 +1,6 @@
 #gdb --annotate=3 -quiet -f --args python -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pycrtools.py -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/test.py
 
-def p_(var): 
+def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)
     else: print " ",var,"=>",eval(var)
 
@@ -40,7 +40,7 @@ file_efield=file["Fx"].setPar("xvalues",file_time)
 
 file_fft=file["emptyFFT"].setPar("xvalues",file_frequencies)
 
-file_efield[...].fft(file_fft[...],NyquistZone)
+file_fft[...].fftcasa(file_efield[...],NyquistZone)
 
 print "t=",time.clock(),"s -","Reading in Calibration Data"
 antenna_positions=file.getCalData("Position")
@@ -80,18 +80,18 @@ delays += cal_delays
 print "t=",time.clock(),"s -","Calculating phases"
 #phases=hArray(float,dimensions=sun_fft,name="Phases",xvalues=sun_frequencies)
 phases.delaytophase(file_frequencies,delays)
-#hGeometricPhases(sun_frequencies,antenna_positions,cartesian,phases,True)
+#hGeometricPhases(phases,sun_frequencies,antenna_positions,cartesian,True)
 
 
 print "t=",time.clock(),"s -","Calculating weights"
 weights.phasetocomplex(phases)
-#hGeometricWeights(file_frequencies,antenna_positions,cartesian,weights,FarField)
+#hGeometricWeights(weights,file_frequencies,antenna_positions,cartesian,FarField)
 
 for block in range(nblocks1):
     print "t=",time.clock(),"s -","Reading in Block #",block
     file["block"]=block
     file_efield.read(file,"Fx")
-    file_efield[...].fft(file_fft[...],NyquistZone)
+    file_fft[...].fftcasa(file_efield[...],NyquistZone)
 #
     print "t=",time.clock(),"s -","Applying weights"
     file_fft.copy(shifted_fft)
@@ -103,7 +103,7 @@ for block in range(nblocks1):
         shifted_fft[n,1:,...].addto(beamformed_fft[n])
 #
     print "t=",time.clock(),"s -","Adding up spectral power"
-    beamformed_fft.spectralpower(power)
+    power.spectralpower(beamformed_fft)
 
 print "t=",time.clock(),"s -","Binning and Normalizing"
 intpower=np.array(power[...].sum())
@@ -130,7 +130,7 @@ for block in range(nblocks2):
     print "t=",time.clock()-t0,"s -","Reading in Block #",block
     file["block"]=block
     file_efield.read(file,"Fx")
-    file_efield[...].fft(file_fft[...],NyquistZone)
+    file_fft[...].fftcasa(file_efield[...],NyquistZone)
 #
     print "t=",time.clock()-t0,"s -","Calculating and adding Cross Correlation Matrix"
     hCrossCorrelationMatrix(ccm,file_fft.vec(),file["fftLength"])
@@ -138,7 +138,7 @@ for block in range(nblocks2):
 print "t=",time.clock()-t0,"s -","Calculating complex image"
 hCImageFromCCM(cimage,ccm,weights.vec(),file["nofSelectedAntennas"],file["fftLength"])
 print "t=",time.clock()-t0,"s -","Normalizing and integrating"
-cimage.norm(image.vec())
+image.vec().norm(cimage)
 intimage=np.array(image[...].sum())
 immax=intimage.max()
 intimage /= immax

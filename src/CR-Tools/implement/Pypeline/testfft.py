@@ -24,7 +24,7 @@ t1=time.clock()-t0
 print "t=",t1,"s -","FFTW"
 t0=time.clock()
 for i in range(LOOPS):
-    fx.fft(fft,1)
+    fft.fftcasa(fx,1)
 t2=time.clock()-t0
 print "t=",t2,"s -","CASA"
 print "t2/t1=",t2/t1
@@ -34,5 +34,5 @@ print "t2/t1=",t2/t1
 #print "fft2",list(fft2.vec())
 #hNyquistSwap(fft2,2)
 #print "fft2,swap",list(fft2.vec())
-#fx.fft(fft,2)
+#fft.fftcasa(fx,2)
 #print "fft",list(fft.vec())

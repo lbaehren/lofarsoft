@@ -1,6 +1,6 @@
 #gdb --annotate=3 -quiet -f --args python -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pycrtools.py -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/test.py
 
-def p_(var): 
+def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)
     else: print " ",var,"=>",eval(var)
 
@@ -61,7 +61,7 @@ Let's create a spectrum that we can plot:
 """
 cr_spectrum=hArray(float,cr_fft,xvalues=cr_frequencies,fill=0,name="Power")
 cr_spectrum.par.logplot="y"
-cr_fft.spectralpower(cr_spectrum)
+cr_spectrum.spectralpower(cr_fft)
 cr_spectrum[0].plot()
 """
 
@@ -132,7 +132,7 @@ transmitter signal. Asking Andreas horneffer, we get the following
 correct delays:
 """
 horneffer_delays=Vector([0.00,  -1.87,  -0.22,  -0.30,  -2.02,  -2.06,   1.05,  -1.35])
-horneffer_delays *= 12.5*10**-9 
+horneffer_delays *= 12.5*10**-9
 cal_delays-=horneffer_delays
 p_("cal_delays")
 """
@@ -164,7 +164,7 @@ in the Fourier domain).
 phases=hArray(float,dimensions=cr_fft,name="Phases",xvalues=cr_frequencies)
 phases.delaytophase(cr_frequencies,delays)
 """
-#hGeometricPhases(cr_frequencies,antenna_positions,cartesian,phases,FarField)
+#hGeometricPhases(phases,cr_frequencies,antenna_positions,cartesian,FarField)
 
 Similarly, the corresponding complex weights are calculated.
 
@@ -172,7 +172,7 @@ Similarly, the corresponding complex weights are calculated.
 weights=hArray(complex,dimensions=cr_fft,name="Complex Weights")
 weights.phasetocomplex(phases)
 """
-#hGeometricWeights(cr_frequencies,antenna_positions,cartesian,weights,FarField)
+#hGeometricWeights(weights,cr_frequencies,antenna_positions,cartesian,FarField)
 
 To shift the time series data (or rather the FFTed time series data)
 we multiply the fft data with the complex weights from above.
@@ -187,7 +187,7 @@ Convert back into time domain
 """
 
 cr_efield_shifted = cr["emptyFx"].setPar("xvalues",cr_time)
-cr_calfft_shifted[...].invfft(cr_efield_shifted[...],2)
+cr_efield_shifted[...].invfftcasa(cr_calfft_shifted[...],2)
 """
 
 To now "form a beam" we just need to add all time series data (or
@@ -198,7 +198,7 @@ cr_calfft_shifted_added=hArray(cr_calfft_shifted[0].vec())
 cr_calfft_shifted[1:,...].addto(cr_calfft_shifted_added)
 """
 
-normalize by the number of antennas 
+normalize by the number of antennas
 """
 cr_calfft_shifted_added /= cr.nofSelectedAntennas
 """
@@ -206,13 +206,12 @@ and then FFT back into the time domain:
 
 """
 cr_efield_shifted_added=hArray(float,dimensions=cr_time,name="beamformed E-field",xvalues=cr_time)
-cr_calfft_shifted_added.invfft(cr_efield_shifted_added,2)
-
+cr_efield_shifted_added.invfftcasa(cr_calfft_shifted_added,2)
 
 cr_efield_shifted_added_abs=hArray(copy=cr_efield_shifted_added,xvalues=cr_time)
 cr_efield_shifted_added_abs.abs()
 cr_efield_shifted_added_smoothed=hArray(float,dimensions=[cr.blocksize],xvalues=cr_time,name="E-Field")
-cr_efield_shifted_added_abs.runningaverage(cr_efield_shifted_added_smoothed,7,hWEIGHTS.GAUSSIAN)
+cr_efield_shifted_added_smoothed.runningaverage(cr_efield_shifted_added_abs,7,hWEIGHTS.GAUSSIAN)
 cr_efield_shifted_added_smoothed.plot(xlim=(-3,-0.5),title=cr.filename)
 #cr_efield_shifted[...].abs()
 #cr_efield_shifted[...].plot(xlim=(-1.9,-1.7),clf=False)
