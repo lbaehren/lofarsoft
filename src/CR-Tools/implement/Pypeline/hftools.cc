@@ -4470,9 +4470,9 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 		    const IterIn  data_in,  const IterIn  data_in_end,
 		    const HInteger nyquistZone) {
 
-  hFFTCasa(const IterOut data_out, const IterOut data_out_end,
-	   const IterIn  data_in,  const IterIn  data_in_end,
-	   const HInteger nyquistZone);
+  hFFTCasa(data_out, data_out_end,
+	   data_in,  data_in_end,
+	   nyquistZone);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -4497,9 +4497,9 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 		    const IterIn data_in,   const IterIn data_in_end,
 		    const HInteger nyquistZone) {
 
-  hInvFFTCasa(const IterOut data_out, const IterOut data_out_end,
-	      const IterIn data_in,   const IterIn data_in_end,
-	      const HInteger nyquistZone);
+  hInvFFTCasa(data_out, data_out_end,
+	      data_in, data_in_end,
+	      nyquistZone);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
