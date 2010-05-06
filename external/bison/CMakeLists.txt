@@ -42,7 +42,11 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check for system-wide BISON library installation
 
-find_program (HAVE_BISON bison PATHS ${bin_locations})
+if (bison_executable)
+  set (HAVE_BISON YES)
+else (bison_executable)
+  set (HAVE_BISON NO)
+endif (bison_executable)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -76,8 +80,7 @@ if (NOT HAVE_BISON OR BISON_FORCE_BUILD)
   
 else (NOT HAVE_BISON OR BISON_FORCE_BUILD)
   add_custom_target (bison
-    WORKING_DIRECTORY ${BOOST_BINARY_DIR}
+    WORKING_DIRECTORY ${BISON_BINARY_DIR}
     COMMENT "[Bison] Found system-wide installation; skipping rebuild!"
     )
-  message (STATUS "[Bison] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_BISON OR BISON_FORCE_BUILD)

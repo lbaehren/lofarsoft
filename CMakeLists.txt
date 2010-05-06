@@ -265,7 +265,7 @@ endforeach (package_name)
 ##____________________________________________________________________
 ##                                        Dependencies of the packages
 
-add_dependencies (casacore hdf5 cfitsio wcslib bison)
+add_dependencies (casacore hdf5 cfitsio wcslib bison flex)
 
 add_dependencies (hdf5 szip)
 
@@ -328,10 +328,10 @@ add_custom_target (cr
   COMMENT "Building package CR-Tools ..."
   )
 
-add_dependencies (cr dal mathgl plplot)
+add_dependencies (cr dal mathgl plplot fftw3)
 
 if (HAVE_ROOT)
-  add_dependencies (cr startools fftw3)
+  add_dependencies (cr startools)
 endif (HAVE_ROOT)
 
 if (CR_WITH_GUI)
