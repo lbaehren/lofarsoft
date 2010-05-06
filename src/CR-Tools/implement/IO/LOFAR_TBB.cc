@@ -375,6 +375,37 @@ namespace CR { // Namespace CR -- begin
     
     return status;
   };
+
+  //_______________________________________________________________________________
+  //                                                                 getDipoleNames
+  
+  bool LOFAR_TBB::getDipoleNames ()
+  {
+    bool status (true);
+
+    return status;
+  }
+  
+  //_______________________________________________________________________________
+  //                                                            setSelectedAntennas
+  
+  Bool LOFAR_TBB::setSelectedAntennas (Vector<uint> const &antennaSelection,
+				       bool const &absolute)
+  {
+    Bool status (true);
+    
+    return status;
+  }
+  
+  //_______________________________________________________________________________
+  //                                                            setSelectedAntennas
+  
+  Bool LOFAR_TBB::setSelectedAntennas (Vector<Bool> const &antennaSelection)
+  {
+    Bool status (true);
+    
+    return status;
+  }
   
   //_______________________________________________________________________________
   //                                                                             fx

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -35,7 +35,6 @@
 
 #include <casa/namespace.h>
 
-#define PI 3.141592653589793238462643
 #define LIGHTSPEED 299792458.
 
 namespace CR { // Namespace CR -- begin

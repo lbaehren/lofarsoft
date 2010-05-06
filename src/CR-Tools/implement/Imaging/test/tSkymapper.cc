@@ -37,10 +37,8 @@
 #include <images/Images/HDF5Image.h>
 #endif
 
-using casa::AipsError;
 using casa::Array;
 using casa::IPosition;
-using casa::ObsInfo;
 using casa::PagedImage;
 using casa::TiledShape;
 
@@ -56,7 +54,6 @@ using CR::Beamformer;
 using CR::ProgressBar;
 using CR::SkymapCoordinate;
 using CR::Skymapper;
-using CR::TimeFreq;
 
 /*!
   \file tSkymapper.cc
@@ -118,7 +115,7 @@ int test_ImageInterface (uint const &blocksize=1024)
     cout << "-- creating HDF5Image<double> ..." << endl;
     casa::HDF5Image<double> img_hdf5_double (tile,csys,"skymap_hdf5_double.h5");
 #endif
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -135,7 +132,7 @@ int test_ImageInterface (uint const &blocksize=1024)
     //
     cout << "-- release assigned pointer ..." << endl;
     delete image;
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -171,7 +168,7 @@ int test_Beamformer (uint const &blocksize=1024)
   cout << "[1] Add observation data to the coordinate ..." << endl << std::flush;
   try {
     coord.setObsInfo (CR::test_ObsInfo());
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -196,7 +193,7 @@ int test_Beamformer (uint const &blocksize=1024)
 				 nofFrames);
     //
     coord.setTimeFreqCoordinate(timeFreq);
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -216,7 +213,7 @@ int test_Beamformer (uint const &blocksize=1024)
     //
     coord.setSpatialCoordinate(azel);
     coord.summary();
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -240,7 +237,7 @@ int test_Beamformer (uint const &blocksize=1024)
     cout << "-- geometrical phases  [1,,] = " << bf.phases().yzPlane(1)  << endl;
     cout << "-- geometrical weights [1,,] = " << bf.weights().yzPlane(1) << endl;
     cout << "-- Beamformer weights  [1,,] = " << bf.beamformerWeights().yzPlane(1) << endl;
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -273,7 +270,7 @@ int test_Skymapper (uint const &blocksize=1024,
     Skymapper casa_image ("skymap01.img",
 			  Skymapper::PagedImage);
     casa_image.summary();
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl << std::flush;
     nofFailedTests++;
   }
@@ -299,7 +296,7 @@ int test_Skymapper (uint const &blocksize=1024,
     Skymapper skymapper2 (coord2,
 			 "skymap02b.h5");
     skymapper2.summary();
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl << std::flush;
     nofFailedTests++;
   }
@@ -329,7 +326,7 @@ int test_Skymapper (uint const &blocksize=1024,
 			 antPositions,
 			 "skymap03.h5");
     skymapper.summary();
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl << std::flush;
     nofFailedTests++;
   }
@@ -366,7 +363,7 @@ int test_methods (uint const &blocksize=1024)
     cout << "-- Filename of image     = " << skymapper.filename()   << endl;
     cout << "-- Image shape           = " << skymapper.imageShape() << endl;
     cout << "-- nof. processed blocks = " << skymapper.nofProcessedBlocks() << endl;
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[tSkymapper::test_methods] " << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -381,7 +378,7 @@ int test_methods (uint const &blocksize=1024)
     CR::Beamformer bf = skymapper.beamformer();
     cout << "-- shape of the weights = " << bf.shapeWeights() << endl;
     cout << "-- shape of the beam    = " << bf.shapeBeam()    << endl;
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[tSkymapper::test_methods] " << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -402,7 +399,7 @@ int test_methods (uint const &blocksize=1024)
     cout << "-- Reference value  = " << csys.referenceValue() << endl;
     cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
     cout << "-- Increment        = " << csys.increment()      << endl;
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[tSkymapper::test_methods] " << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -480,7 +477,7 @@ int test_processing (string const &infile,
       // process the data
       skymapper.processData (data);
     }
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -498,7 +495,7 @@ int test_processing (string const &infile,
     // Convert the image to FITS
     status = CR::image2fits (image,
 			     "skymap-processing01.fits");
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -541,7 +538,7 @@ int test_processing (string const &infile,
     casa::PagedImage<float> image (outfile);
     CR::image2fits (image,
 		    "skymap-lopes.fits");
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;
   }

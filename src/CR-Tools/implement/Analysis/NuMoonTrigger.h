@@ -139,6 +139,9 @@ namespace CR{ // Namespace  -- begin
   */  
   class NuMoonTrigger {
     
+    uint itsNyquistZone;
+    casa::Vector<double> itsFrequencyRange;
+
   public:
     
     // === Construction =========================================================

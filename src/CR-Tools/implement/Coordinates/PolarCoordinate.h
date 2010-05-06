@@ -33,7 +33,8 @@
 #include <vector>
 using namespace std;
 
-#define PI 3.141592653589793238462643
+#include <crtools.h>
+
 #define DEG2RAD PI/180.0
 #define RAD2DEG 180.0/PI
 

@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,8 +23,6 @@
 
 #include <Analysis/tbbTools.h>
 
-#define PI 3.1415926536
-
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
@@ -35,9 +33,16 @@ namespace CR { // Namespace CR -- begin
   
   tbbTools::tbbTools ()
   {
-// initialize private vars that were previously declared 'static' inside meanFPGAtrigger  
-    pos1=0; pos2=0; pos3=0; pos4=0; pos5=0;
-    apos2=0; apos3=0; apos4=0;
+    /* Initialize private vars that were previously declared 'static' inside
+       meanFPGAtrigger */
+    pos1=0;
+    pos2=0;
+    pos3=0;
+    pos4=0;
+    pos5=0;
+    apos2=0;
+    apos3=0;
+    apos4=0;
     pos6=False; isTrigger=False; doAfterTrigger=False; isAfterTrigger=False;
     startcount=0; stopcount=0; startindex=0; startmean=0; psum=0; pmax=0; aftercount=0;
    }
@@ -61,18 +66,45 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
+
+  //_____________________________________________________________________________
+  //                                                              meanFPGAtrigger
   
-  Bool tbbTools::meanFPGAtrigger(Vector<Double> inary, int level, int start, int stop, int window,
-				 int afterwindow,
-				 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
-				 Vector<Int> &peak, Vector<Int> &meanval, Vector<Int> &afterval,
-				 Bool reset){
+  /*!
+    \param inary[in]   - input data that is to be searched for pulses
+    \param level[in]   - trigger parameter, threshold level
+    \param start[in]   - trigger parameter, start level
+    \param stop[in]    - trigger parameter, stop level
+    \param window[in]  - trigger parameter, window size index
+    \param index[out]  - indices of the first sample of the found pulses
+    \param sum[out]    - sum of the samples in the pulse
+    \param width[out]  - width of the pulse
+    \param peak[out]   - peak value inside the pulse
+    \param reset[in]   - reset internal values? (Set to False if inary follows 
+           seamlessly the previous block)
+    
+    \return ok -- True if successfull
+  */
+  Bool tbbTools::meanFPGAtrigger (Vector<Double> inary,
+				  int level,
+				  int start,
+				  int stop,
+				  int window,
+				  int afterwindow,
+				  Vector<Int> &index,
+				  Vector<Int> &sum,
+				  Vector<Int> &width, 
+				  Vector<Int> &peak,
+				  Vector<Int> &meanval,
+				  Vector<Int> &afterval,
+				  Bool reset)
+  {
     try {
       int i,numPulses=0,outsize=100;
-//      static int pos1=0, pos2=0, pos3=0, pos4=0, pos5=0, opos;
-//      static int apos2=0, apos3=0, apos4=0;
-//      static Bool pos6=False, isTrigger=False, doAfterTrigger=False, isAfterTrigger=False;
-//      static int startcount=0, stopcount=0, startindex=0, startmean=0, psum=0, pmax=0, aftercount=0;
+      //      static int pos1=0, pos2=0, pos3=0, pos4=0, pos5=0, opos;
+      //      static int apos2=0, apos3=0, apos4=0;
+      //      static Bool pos6=False, isTrigger=False, doAfterTrigger=False, isAfterTrigger=False;
+      //      static int startcount=0, stopcount=0, startindex=0, startmean=0, psum=0, pmax=0, aftercount=0;
 //      Removed static vars as they are class vars. Using 'static' only works if you have just one instance of the class!      
       
       doAfterTrigger=False;
@@ -170,24 +202,43 @@ namespace CR { // Namespace CR -- begin
       meanval.resize(numPulses,True);
       afterval.resize(numPulses,True);
       
-    } catch (AipsError x) {
+    } catch (casa::AipsError x) {
       cerr << "tbbTools::meanFPGAtrigger: " << x.getMesg() << endl;
       return False;
     }; 
     return True;    
   };
   
-  Bool tbbTools::meanFPGAtrigger(Vector<Double> inary, int level, int start, int stop, int window,
-				 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
-				 Vector<Int> &peak){
+  //_____________________________________________________________________________
+  //                                                              meanFPGAtrigger
+  
+  Bool tbbTools::meanFPGAtrigger (Vector<Double> inary,
+				  int level,
+				  int start,
+				  int stop,
+				  int window,
+				  Vector<Int> &index,
+				  Vector<Int> &sum,
+				  Vector<Int> &width, 
+				  Vector<Int> &peak)
+  {
     Vector<Int> tmpvec;
     return meanFPGAtrigger(inary, level, start, stop, window, 0,
 			   index, sum, width, peak, tmpvec, tmpvec);
   };
-
-
-  Vector<Double> tbbTools::FPGAfilter(Vector<Double> &inary, int B0B2, int B1, int A1, int A2, 
-				      Double resolution, Bool reset){
+  
+  
+  //_____________________________________________________________________________
+  //                                                                   FPGAfilter
+  
+  Vector<Double> tbbTools::FPGAfilter (Vector<Double> &inary,
+				       int B0B2,
+				       int B1,
+				       int A1,
+				       int A2, 
+				       Double resolution,
+				       Bool reset)
+  {
     Vector<Double> outdata;
     try {
       static Double oldin1=0., oldin2=0., oldout1=0., oldout2=0.;
@@ -217,7 +268,7 @@ namespace CR { // Namespace CR -- begin
       oldout1 = outdata(len-1);
       oldout2 = outdata(len-2);
 
-    } catch (AipsError x) {
+    } catch (casa::AipsError x) {
       cerr << "tbbTools::FPGAfilter: " << x.getMesg() << endl;
       return Vector<Double>();
     }; 
@@ -248,7 +299,7 @@ namespace CR { // Namespace CR -- begin
  	   << " B1A1: " << (int)B1A1 << " A2: " << (int)A2 << endl;
 #endif      
 
-    } catch (AipsError x) {
+    } catch (casa::AipsError x) {
       cerr << "tbbTools::FPGAfilterNotch: " << x.getMesg() << endl;
       return Vector<Double>();
     }; 
@@ -281,7 +332,7 @@ namespace CR { // Namespace CR -- begin
 	   << " B1: " << (int)B1 << " A1: " << (int)A1 << " A2: " << (int)A2 << endl;
 #endif      
  
-    } catch (AipsError x) {
+    } catch (casa::AipsError x) {
       cerr << "tbbTools::FPGAfilterLPF: " << x.getMesg() << endl;
       return Vector<Double>();
     }; 
@@ -314,7 +365,7 @@ namespace CR { // Namespace CR -- begin
 	   << " B1: " << (int)B1 << " A1: " << (int)A1 << " A2: " << (int)A2 << endl;
 #endif      
  
-    } catch (AipsError x) {
+    } catch (casa::AipsError x) {
       cerr << "tbbTools::FPGAfilterHPF: " << x.getMesg() << endl;
       return Vector<Double>();
     }; 

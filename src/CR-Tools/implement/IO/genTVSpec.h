@@ -2,8 +2,8 @@
  | $Id                                                                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -31,6 +31,7 @@
 #include <casa/Arrays.h>
 #include <casa/BasicMath/Math.h>
 
+#include <crtools.h>
 #include <Calibration/CalTableReader.h> 
 #include <Calibration/CalTableInterpolater.h>
 

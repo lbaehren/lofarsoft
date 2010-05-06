@@ -30,11 +30,10 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
+#include <crtools.h>
 #include <Calibration/DelayCorrectionPlugin.h>
 
 #include <casa/namespace.h>
-
-#define PI 3.141592653589793238462643
 
 namespace CR { // Namespace CR -- begin
   

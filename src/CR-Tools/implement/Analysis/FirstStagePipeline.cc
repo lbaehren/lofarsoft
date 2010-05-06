@@ -22,8 +22,6 @@
 
 #include <Analysis/FirstStagePipeline.h>
 
-#define PI 3.1415926536
-
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================

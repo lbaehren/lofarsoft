@@ -167,210 +167,203 @@ namespace CR { // Namespace  -- begin
 
   //_____________________________________________________________________________
   //                                                                  RFI_removal
-
-   Matrix<DComplex> NuMoonTrigger::RFI_removal( Matrix<DComplex> fft_samples ) 
-   {
-     
-     uint n_row   = fft_samples.nrow() ;
-     uint n_colum =fft_samples.ncolumn() ;
-     casa::Matrix<DComplex> RFIMitigated_array( n_row, n_colum,0.0 ) ; 
-     
-     try {
-     	   casa::Vector<double>freq_Vector = NuMoonTrigger::freq_vector(  200e6,
-		   	                				 2) ;
-	   
-     	  uint dataBlockSize = 1024 ;
-	  
-	  DComplex expo(0, 1);
-	   
-	 // uint n_freqbins = dataBlockSize/2+1 ;
-	  
-	  uint n_segments = 3 ; //n_freqbins/16 ;
-	  
-	  casa::Matrix<double> phase_array(n_row, n_colum,0.0 ) ;
-	  phase_array = phase(fft_samples);
-	  
-	  casa::Matrix<double> amplitude_spectra(n_row, n_colum,0.0 ) ;
-	   
-	 amplitude_spectra = 1.0 ; //amplitude(fft_samples) ;
+  
+  Matrix<DComplex> NuMoonTrigger::RFI_removal( Matrix<DComplex> fft_samples ) 
+  {
+    uint n_row   = fft_samples.nrow() ;
+    uint n_colum =fft_samples.ncolumn() ;
+    casa::Matrix<DComplex> RFIMitigated_array( n_row, n_colum,0.0 ) ; 
+    
+    try {
+      casa::Vector<double>freq_Vector = NuMoonTrigger::freq_vector(  200e6,
+								     2) ;
+      
+      DComplex expo(0, 1);
+      
+      // uint n_freqbins = dataBlockSize/2+1 ;
+      
+      uint n_segments = 3 ; //n_freqbins/16 ;
+      
+      casa::Matrix<double> phase_array(n_row, n_colum,0.0 ) ;
+      phase_array = phase(fft_samples);
+      
+      casa::Matrix<double> amplitude_spectra(n_row, n_colum,0.0 ) ;
+      
+      amplitude_spectra = 1.0 ; //amplitude(fft_samples) ;
+      
+      casa::Matrix<DComplex> array_phases( n_row, n_colum,0.0 ) ;
+      
+      for(uint i=0; i<n_row ; i++ ){
 	
-	 casa::Matrix<DComplex> array_phases( n_row, n_colum,0.0 ) ;
+	for(uint j=0; j<n_colum; j++ ){
 	  
-	  for(uint i=0; i<n_row ; i++ ){
+	  double phase_value = phase_array(i,j) ;
 	  
-	  	for(uint j=0; j<n_colum; j++ ){
-		
-			double phase_value = phase_array(i,j) ;
-			
-			array_phases(i,j) = exp(expo*phase_value) ;
-			
-			}
-			
-		}
-	  			  
-	  // CR::RFIMitigation  rfi( fft_samples,
-	  //		          dataBlockSize,
-	  //		          n_segments ) ;
+	  array_phases(i,j) = exp(expo*phase_value) ;
 	  
-	  casa::Matrix<double> RFIrejected_array( n_row, n_colum,0.0 ) ;
-	  for(uint i=0;i<n_colum;i++){
-	    //	    RFIrejected_array= rfi.getOptimizedSpectra( fft_samples,
-	    //dataBlockSize,
-	    casa::Vector<Double> rfiVec=RFIrejected_array.column(i);
-	      RFIMitigation::doRFIMitigation(amplitude(fft_samples.column(i)),n_segments,1e20,5.,rfiVec) ;	
-	  }
-	  casa::Matrix<double> RFIrejected_absolutearray( n_row, n_colum,0.0 ) ;
-	  
-	  RFIrejected_absolutearray = RFIrejected_array ; //*amplitude_spectra ;
-	  //RFIrejected_absolutearray = amplitude_spectra ;
-	  
-	 // uint n_freq = freq_Vector.nelements() ;
+	}
 	
-	 // uint n_RFIremoved = RFIrejected_absolutearray.ncolumn() ;
-	  /*
-
-	  double f_init = 150e+6 ;
-		
-	  double f_final = 180e+6 ;
+      }
+      
+      // CR::RFIMitigation  rfi( fft_samples,
+      //		          dataBlockSize,
+      //		          n_segments ) ;
+      
+      casa::Matrix<double> RFIrejected_array( n_row, n_colum,0.0 ) ;
+      for(uint i=0;i<n_colum;i++){
+	//	    RFIrejected_array= rfi.getOptimizedSpectra( fft_samples,
+	//dataBlockSize,
+	casa::Vector<Double> rfiVec=RFIrejected_array.column(i);
+	RFIMitigation::doRFIMitigation(amplitude(fft_samples.column(i)),n_segments,1e20,5.,rfiVec) ;	
+      }
+      casa::Matrix<double> RFIrejected_absolutearray( n_row, n_colum,0.0 ) ;
+      
+      RFIrejected_absolutearray = RFIrejected_array ; //*amplitude_spectra ;
+      //RFIrejected_absolutearray = amplitude_spectra ;
+      
+      // uint n_freq = freq_Vector.nelements() ;
+      
+      // uint n_RFIremoved = RFIrejected_absolutearray.ncolumn() ;
+      /*
 	
-	  for( uint nc_RFI=0; nc_RFI< n_RFIremoved; nc_RFI++ ){
+	double f_init = 150e+6 ;
 	
-		for( uint fr=0; fr< n_freq; fr++ ){
+	double f_final = 180e+6 ;
 	
-			double frequency = freq_Vector(fr) ;
-		
-			if( frequency >f_init && frequency < f_final ){
-			
-				//cout << "frequency values :" << frequency <<endl ;
-			
+	for( uint nc_RFI=0; nc_RFI< n_RFIremoved; nc_RFI++ ){
+	
+	for( uint fr=0; fr< n_freq; fr++ ){
+	
+	double frequency = freq_Vector(fr) ;
+	
+	if( frequency >f_init && frequency < f_final ){
+	
+	//cout << "frequency values :" << frequency <<endl ;
+	
 				RFIrejected_absolutearray(fr,nc_RFI) =0.0 ;
 				
 				}
-			}
-		}	
-*/ 
-	  casa::Matrix<DComplex> RFIreject_array( n_row, n_colum,0.0 ) ;  ;
-	  
-	  //convertArray( RFIreject_array,amplitude_spectra) ;
-
-	  convertArray( RFIreject_array, RFIrejected_absolutearray ) ;
-	  	  
-	  RFIMitigated_array = RFIreject_array*array_phases  ;
-	  
-	}
-	
-       catch ( AipsError x ){
-       cerr << " NuMoonTrigger::RFI_removal " << x.getMesg () << endl ;
-       Matrix<DComplex> ();
-       }
-       
-      return RFIMitigated_array ;   
-   } 						
-
+				}
+				}	
+      */ 
+      casa::Matrix<DComplex> RFIreject_array( n_row, n_colum,0.0 ) ;  ;
+      
+      //convertArray( RFIreject_array,amplitude_spectra) ;
+      
+      convertArray( RFIreject_array, RFIrejected_absolutearray ) ;
+      
+      RFIMitigated_array = RFIreject_array*array_phases  ;
+      
+    }
+    
+    catch ( AipsError x ){
+      cerr << " NuMoonTrigger::RFI_removal " << x.getMesg () << endl ;
+      Matrix<DComplex> ();
+    }
+    
+    return RFIMitigated_array ;   
+  } 						
+  
   //_____________________________________________________________________________
   //                                                           Average_effect_RFI
-
+  
   Matrix<DComplex> NuMoonTrigger::Average_effect_RFI( Matrix<DComplex> fft_samples,
 						      Matrix<DComplex> RFI_mitigated ) 
-   {
-      uint n_row   = fft_samples.nrow() ;
-      uint n_colum = fft_samples.ncolumn() ;
-      casa::Matrix<DComplex> RFI_Average_effect( n_row,n_colum,0.0);
-	    
-      try {
-	DComplex expo(0, 1);
+  {
+    uint n_row   = fft_samples.nrow() ;
+    uint n_colum = fft_samples.ncolumn() ;
+    casa::Matrix<DComplex> RFI_Average_effect( n_row,n_colum,0.0);
+    
+    try {
+      DComplex expo(0, 1);
+      
+      casa::Matrix<double> fft_phase_array( n_row, n_colum,0.0 ) ;
+      
+      fft_phase_array = phase( fft_samples );
+      
+      casa::Matrix<DComplex> fft_array_phases( n_row, n_colum,0.0 ) ;
+      
+      for(uint i=0; i<n_row ; i++ ){
 	
-	casa::Matrix<double> fft_phase_array( n_row, n_colum,0.0 ) ;
-	
-	fft_phase_array = phase( fft_samples );
-	
-	casa::Matrix<DComplex> fft_array_phases( n_row, n_colum,0.0 ) ;
-	
-	for(uint i=0; i<n_row ; i++ ){
+	for(uint j=0; j<n_colum; j++ ){
 	  
-	  for(uint j=0; j<n_colum; j++ ){
-	    
-	    double phase_value = fft_phase_array(i,j) ;
-	    
-	    fft_array_phases(i,j) = exp(expo*phase_value) ;
-	    
-	  }
+	  double phase_value = fft_phase_array(i,j) ;
+	  
+	  fft_array_phases(i,j) = exp(expo*phase_value) ;
 	  
 	}
 	
-	
-	casa::Matrix<double> fft_amplitude_spectra( n_row, n_colum,0.0 ) ;
-	
-	fft_amplitude_spectra = amplitude( fft_samples ) ;
-	
-	casa::Matrix<double> RFI_amplitude_spectra( n_row, n_colum,0.0 ) ;
-	
-	RFI_amplitude_spectra = amplitude( RFI_mitigated ) ;
-	
-	casa::Matrix<double> RFI_Bin_Average( n_row, n_colum, 0.0 ) ;
-	
-	for( uint col=0; col< n_colum; col++ ){
-	  
-	  casa::Vector<double> RFI_column_Vector = RFI_amplitude_spectra.column(col) ;
-	  
-	  for( uint row=0; row< n_row -10; row++ ){
-	    
-	    casa::Vector<double> sort_RFI_vector = RFI_column_Vector( Slice( row,10 )) ; 
-	    
-	    //double average_value = mean( sort_RFI_vector ) ;
-	    
-	    double standard_deviation = stddev( sort_RFI_vector ) ;
-	    
-	    RFI_Bin_Average( row,col )= standard_deviation ;
-	  }
-	}
-	
-	casa::Vector<double> bin_av_filled = RFI_Bin_Average.row(n_row-11) ;
-	
-	for( uint l_row= n_row-10; l_row< n_row; l_row++ ){
-	  
-	  RFI_Bin_Average.row(l_row)= bin_av_filled ;
-	  
-	}
-	for( uint coll=0; coll< n_colum; coll++ ){
-	  
-	  //casa::Vector<double> RFI_column_Vector = RFI_amplitude_spectra.column(coll) ;
-	  
-	  //casa::Vector<double> fft_column_vector =  fft_amplitude_spectra.column(coll) ;
-	  
-	  for( uint roww=0; roww< n_row ; roww++ ){
-	    
-	    double bin_average = RFI_Bin_Average(roww, coll) ;
-	    
-	    if( fft_amplitude_spectra( roww,coll ) > 2*bin_average )
-	      
-	      { fft_amplitude_spectra( roww,coll ) =1.0 ;
-		
-		// cout << "fft bin content has made unity" << endl ;
-		
-	      }
-	  }
-	}
-	
-	casa::Matrix<DComplex> fft_complex_array( n_row, n_colum,0.0 ) ;  
-	
-	convertArray( fft_complex_array, fft_amplitude_spectra ) ;
-	
-	RFI_Average_effect = fft_complex_array*fft_array_phases ;
-	
-        
       }
       
-      catch ( AipsError x ){
-	cerr << " NuMoonTrigger::Average_effect_RFI" << x.getMesg () << endl ;
-	Matrix<DComplex> ();
+      
+      casa::Matrix<double> fft_amplitude_spectra( n_row, n_colum,0.0 ) ;
+      
+      fft_amplitude_spectra = amplitude( fft_samples ) ;
+      
+      casa::Matrix<double> RFI_amplitude_spectra( n_row, n_colum,0.0 ) ;
+      
+      RFI_amplitude_spectra = amplitude( RFI_mitigated ) ;
+      
+      casa::Matrix<double> RFI_Bin_Average( n_row, n_colum, 0.0 ) ;
+      
+      for( uint col=0; col< n_colum; col++ ){
+	
+	casa::Vector<double> RFI_column_Vector = RFI_amplitude_spectra.column(col) ;
+	
+	for( uint row=0; row< n_row -10; row++ ){
+	  
+	  casa::Vector<double> sort_RFI_vector = RFI_column_Vector( Slice( row,10 )) ; 
+	  
+	  //double average_value = mean( sort_RFI_vector ) ;
+	  
+	  double standard_deviation = stddev( sort_RFI_vector ) ;
+	  
+	  RFI_Bin_Average( row,col )= standard_deviation ;
+	}
       }
-      return RFI_Average_effect ;   
-   } 
+      
+      casa::Vector<double> bin_av_filled = RFI_Bin_Average.row(n_row-11) ;
+      
+      for( uint l_row= n_row-10; l_row< n_row; l_row++ ){
+	
+	RFI_Bin_Average.row(l_row)= bin_av_filled ;
+	
+      }
+      for( uint coll=0; coll< n_colum; coll++ ){
+	
+	//casa::Vector<double> RFI_column_Vector = RFI_amplitude_spectra.column(coll) ;
+	
+	//casa::Vector<double> fft_column_vector =  fft_amplitude_spectra.column(coll) ;
+	
+	for( uint roww=0; roww< n_row ; roww++ ) {
+	  
+	  double bin_average = RFI_Bin_Average(roww, coll) ;
+	  
+	  if( fft_amplitude_spectra( roww,coll ) > 2*bin_average ) {
+	    fft_amplitude_spectra( roww,coll ) =1.0 ;
+	  }
+	}
+      }
+      
+      casa::Matrix<DComplex> fft_complex_array( n_row, n_colum,0.0 ) ;  
+      
+      convertArray( fft_complex_array, fft_amplitude_spectra ) ;
+      
+      RFI_Average_effect = fft_complex_array*fft_array_phases ;
+      
+      
+    }
+    
+    catch ( AipsError x ){
+      cerr << " NuMoonTrigger::Average_effect_RFI" << x.getMesg () << endl ;
+      Matrix<DComplex> ();
+    }
+    return RFI_Average_effect ;   
+  } 
   
   //_____________________________________________________________________________
   //                                                                  freq_vector
-
+  
   Vector<double> NuMoonTrigger::freq_vector (double const& sampling_rate,
 					     uint const& nyquist_zone ) 
   {
@@ -1116,6 +1109,8 @@ namespace CR { // Namespace  -- begin
     uint blocksize  = 1024 ;
     uint fftLength  = blocksize/2+1 ;
     uint n_elements = data.nelements() ;
+
+    itsNyquistZone = nyquist_zone;
     
     casa::Vector<double> addedSignal( n_elements,0.0 ) ;
     casa::Vector<double> amp( fftLength, 0.0 ) ;
@@ -1200,6 +1195,8 @@ namespace CR { // Namespace  -- begin
     uint n_frames  = n_samples/blocksize ;
     uint nc_rcu    = data.ncolumn() ;
     
+    itsFrequencyRange = freq_range;
+
     casa::Matrix<double> Cleaned_data(n_samples, nc_rcu,0.0 ) ;  
     
     try {

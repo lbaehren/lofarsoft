@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,9 +28,8 @@
 #include <iostream>
 #include <string>
 
+#include <crtools.h>
 #include <Calibration/PluginBase.h>
-
-#define PI 3.141592653589793238462643
 
 namespace CR { // Namespace CR -- begin
   

@@ -124,6 +124,13 @@ namespace CR { // Namespace CR -- begin
     
     // === Parameters access ====================================================
 
+    //! Selection of the antennas in the dataset
+    Bool setSelectedAntennas (Vector<uint> const &antennaSelection,
+			      bool const &absolute=true);
+    
+    //! Selection of the antennas in the dataset
+    Bool setSelectedAntennas (Vector<Bool> const &antennaSelection);
+    
     //! Get the name of the class, "LOFAR_TBB".
     std::string className () const {
       return "LOFAR_TBB";
@@ -183,6 +190,9 @@ namespace CR { // Namespace CR -- begin
     casa::Vector<uint> time ();
     
   private:
+
+    //! Get the names of the dipoles which are included in the dataset
+    bool getDipoleNames ();
 
     //! Initialize the internal settings
     bool init ();

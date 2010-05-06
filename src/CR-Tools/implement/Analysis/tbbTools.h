@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -34,13 +34,23 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/Arrays/ArrayMath.h>
 
-#include <casa/namespace.h>
+using std::cerr;
+using std::cout;
+using std::endl;
+
+using casa::Bool;
+using casa::Double;
+using casa::False;
+using casa::Int;
+using casa::True;
+using casa::Vector;
 
 namespace CR { // Namespace CR -- begin
   
   /*!
     \class tbbTools
     
+    \ingroup CR
     \ingroup Analysis
     
     \brief Collection of routines to test the TBBs
@@ -66,22 +76,17 @@ namespace CR { // Namespace CR -- begin
     
   public:
     
-    // ------------------------------------------------------------- Construction
-    
-    /*!
-      \brief Default constructor
-    */
-    tbbTools ();
-        
-    // -------------------------------------------------------------- Destruction
+    // === Construction =========================================================
 
-    /*!
-      \brief Destructor
-    */
+    //! Default constructor
+    tbbTools ();
+
+    // === Destruction ==========================================================
+
+    //! Deafult destructor
     ~tbbTools ();
-    
-    
-    // --------------------------------------------------------------- Parameters
+
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class
@@ -92,35 +97,39 @@ namespace CR { // Namespace CR -- begin
       return "tbbTools";
     }
 
+    // === Methods ==============================================================
 
-    // ------------------------------------------------------------------ Methods
-    
+    //! Perform the simplified (mean-based) version of the FPGA trigger
+    casa::Bool meanFPGAtrigger (Vector<Double> inary,
+				int level,
+				int start,
+				int stop,
+				int window,
+				int afterwindow,
+				Vector<Int> &index,
+				Vector<Int> &sum,
+				Vector<Int> &width, 
+				Vector<Int> &peak,
+				Vector<Int> &meanval,
+				Vector<Int> &afterval,
+				Bool reset=True);
+
     /*!
-      \brief Perform the simplified (mean-based) version of the FPGA trigger
-      
       \param inary[in]   - input data that is to be searched for pulses
       \param level[in]   - trigger parameter, threshold level
       \param start[in]   - trigger parameter, start level
       \param stop[in]    - trigger parameter, stop level
       \param window[in]  - trigger parameter, window size index
-      \param index[out]  - indices of the first sample of the found pulses
-      \param sum[out]    - sum of the samples in the pulse
-      \param width[out]  - width of the pulse
-      \param peak[out]   - peak value inside the pulse
-      \param reset[in]   - reset internal values? (Set to False if inary follows 
-                           seamlessly the previous block)
-      
-      \return ok -- True if successfull
     */
-    Bool meanFPGAtrigger(Vector<Double> inary, int level, int start, int stop, int window,
-			 int afterwindow,
-			 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
-			 Vector<Int> &peak, Vector<Int> &meanval, Vector<Int> &afterval,
-			 Bool reset=True);
-    
-    Bool meanFPGAtrigger(Vector<Double> inary, int level, int start, int stop, int window,
-			 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
-			 Vector<Int> &peak);
+    Bool meanFPGAtrigger (Vector<Double> inary,
+			  int level,
+			  int start,
+			  int stop,
+			  int window,
+			  Vector<Int> &index,
+			  Vector<Int> &sum,
+			  Vector<Int> &width, 
+			  Vector<Int> &peak);
     
     /*!
       \brief Apply a single biquad-filter to the data

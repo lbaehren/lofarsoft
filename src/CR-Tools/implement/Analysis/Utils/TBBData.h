@@ -37,10 +37,10 @@
 #include <Math/VectorConversion.h>
 #include <Analysis/Utils/TimeSeriesData.h>
 
-// AIPS++/CASA header files
-
+// Namespace usage
 using namespace std;
-using namespace DAL;
+using DAL::TBB_Timeseries;
+using DAL::TBB_StationGroup;
 
 namespace CR { // Namespace CR -- begin
   
@@ -70,14 +70,22 @@ namespace CR { // Namespace CR -- begin
     See tTBBData.cc
 
   */
-  class TBBData:public TimeSeriesData{
+  class TBBData : public TimeSeriesData {
 
   public:
 
+    // === Construction =========================================================
+
     //! Default constructor
     TBBData();
+
+    // === Destruction ==========================================================
+
     //! Default destructor
     ~TBBData();
+
+    // === Methods ==============================================================
+
     //! Get time-series data
     void getTimeSeries (vector<double>& out,
 			uint blocksize,

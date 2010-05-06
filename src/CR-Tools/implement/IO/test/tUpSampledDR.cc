@@ -205,7 +205,7 @@ int test_UpSampledDR (std::string const &filename)
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_sampleValues (std::string const &filename)
+int test_sampleValues ()
 {
   cout << "\n[tUpSampledDR::test_sampleValues]\n" << endl;
 
@@ -304,7 +304,7 @@ int test_sampleValues (std::string const &filename)
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
  */
-int test_timeValues (std::string const &filename)
+int test_timeValues ()
 {
   cout << "\n[tUpSampledDR::test_timeValues]\n" << endl;
 
@@ -417,9 +417,9 @@ int main (int argc,
   // Test for the constructor(s)
   nofFailedTests += test_UpSampledDR (filename);
   //! Test retrieval of the values along the sample axis
-  nofFailedTests += test_sampleValues (filename);
+  nofFailedTests += test_sampleValues ();
   //! Test retrieval of the values along the time axis
-  nofFailedTests += test_timeValues (filename);
+  nofFailedTests += test_timeValues ();
   
   return nofFailedTests;
 }

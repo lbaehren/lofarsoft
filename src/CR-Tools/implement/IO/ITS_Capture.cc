@@ -69,6 +69,7 @@ ITS_Capture::ITS_Capture (String const &metafile,
 // ------------------------------------------------------------------ ITS_Capture
 
 ITS_Capture::ITS_Capture (ITS_Capture const &other)
+  : DataReader (other)
 {
   copy (other);
 }

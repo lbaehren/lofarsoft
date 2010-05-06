@@ -2,8 +2,8 @@
  | $Id                                                                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -22,8 +22,6 @@
  ***************************************************************************/
 
 #include <IO/ApplyInstrumentEffects.h>
-
-#define PI 3.1415926536
 
 namespace CR { // Namespace CR -- begin
   

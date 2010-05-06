@@ -742,18 +742,18 @@ namespace CR {  //  Namespace CR -- begin
    
    \param antennaSelection -- Selection of the antennas in the dataset
   */
-  Bool setSelectedAntennas (Vector<uint> const &antennaSelection,
-			    bool const &absolute=true);
-
+  virtual Bool setSelectedAntennas (Vector<uint> const &antennaSelection,
+				    bool const &absolute=true);
+  
   /*!
-   \brief Selection of the antennas in the dataset
-   
-   \param antennaSelection -- Selection of the antennas in the dataset
+    \brief Selection of the antennas in the dataset
+    
+    \param antennaSelection -- Selection of the antennas in the dataset
   */
-  Bool setSelectedAntennas (Vector<Bool> const &antennaSelection);
-
+  virtual Bool setSelectedAntennas (Vector<Bool> const &antennaSelection);
+  
   // -------------------------------------------- Selection of frequency channels
-
+  
   Vector<uint> selectedChannels () const {
     return selectedChannels_p;
   }
