@@ -1500,7 +1500,7 @@ complex function "norm" (unusual name, but that's what is used in c++).
 
 """
 spectrum=hArray(float,dimensions=fftdata,name="E-field Spectrum")
-spectrum.norm(fftdata[...])
+spectrum[...].norm(fftdata[...])
 """
 
 Finally, we want to see, if we can do some cross correlation, which

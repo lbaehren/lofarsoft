@@ -2856,7 +2856,7 @@ T HFPP_FUNC_NAME(std::vector<T> & vec)
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(mean)()("The mean value of the vector caluclated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HNumber)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -2864,7 +2864,7 @@ T HFPP_FUNC_NAME(std::vector<T> & vec)
   $PARDOCSTRING
 */
 template <class Iter>
-HNumber hStdDev (const Iter vec,const Iter vec_end, const IterValueType mean)
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType mean)
 {
   typedef IterValueType T;
   HNumber scrt,sum=0.0;
@@ -2880,6 +2880,70 @@ HNumber hStdDev (const Iter vec,const Iter vec_end, const IterValueType mean)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//========================================================================
+//$ITERATE MFUNC GreaterThan,GreaterEqual,LessThan,LessEqual
+//========================================================================
+
+//$DOCSTRING: Calculates the mean of all values which are $MFUNC a certain threshold value
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMean{$MFUNC}Threshold
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold above which elements are taken into account")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, const IterValueType threshold)
+{
+  Iter it(vec);
+  IterValueType sum(0),extremum(*it);
+  HInteger n(0);
+  while (it<vec_end) {
+    if (*it HFPP_OPERATOR_$MFUNC extremum) extremum = *it;
+    if (*it HFPP_OPERATOR_$MFUNC threshold) {
+      sum += *it; ++n;
+    };
+    ++it;
+  };
+  if (n>0) return sum/n;
+  else return extremum;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+//$ENDITERATE
+
+
+//$DOCSTRING: Calculates the mean of all values which are 'nsigma' standard deviations above or below the mean
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMeanThreshold
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(mean)()("The mean of the values in the input vector provided as input.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HNumber)(rms)()("The rms value of the vector - also calculated beforehand.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(nsigma)()("Only consider values that are nsigma above (positive) or below (negative) the mean")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  This simply call hMeanGreaterThanThreshold or hMeanLessThanThreshold with a
+  threshold value of mean+nsigma*rms.
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, HNumber mean, HNumber rms, HNumber nsigma)
+{
+  if (nsigma>=0) return hMeanGreaterThanThreshold(vec,vec_end,(IterValueType)(mean+nsigma*rms));
+  else return hMeanLessThanThreshold(vec,vec_end,(IterValueType)(mean+nsigma*rms));
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Calculates the standard deviation of a vector of values.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hStdDev
@@ -2887,7 +2951,6 @@ HNumber hStdDev (const Iter vec,const Iter vec_end, const IterValueType mean)
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -3035,7 +3098,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Downsampled output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 
 //$COPY_TO END --------------------------------------------------
@@ -3075,6 +3138,128 @@ void HFPP_FUNC_NAME (const Iter vecout,
   *itout=hMean(it2,vecin_end);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Downsample the input vector to a smaller output vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDownsample
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Downsampled output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecrms)()("Output vector containgin the RMS in each bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+ Downsample the input vector to a smaller output vector, by replacing
+     subsequent blocks of values by their mean value. The block size
+     is automatically chosen such that the input vector fits exactly
+     into the output vector. All blocks have the same length with a
+     possible exception of the last block.
+
+     As a second output the root mean square (RMS, standard deviation)
+     of the mean in each downsampled bin is returned.
+*/
+
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vecout,
+		     const Iter vecout_end,
+		     const Iter vecrms,
+		     const Iter vecrms_end,
+		     const Iter vecin,
+		     const Iter vecin_end
+		     )
+{
+  if (vecout>=vecout_end) return; //If size 0 do nothing
+  if (vecin>=vecin_end) return; //If size 0 do nothing
+  if (vecrms>=vecrms_end) return; //If size 0 do nothing
+  HInteger ilen(vecin_end-vecin);
+  HInteger olen(vecout_end-vecout);
+  HInteger blen(max(ilen/(olen-1),1));
+  //use max to avoid infinite loops if output vector is too large
+  Iter it1(vecin), it2;
+  Iter itrms(vecrms);
+  Iter itout(vecout), itout_end(vecout_end-1);
+  //only produce the first N-1 blocks in the output vector
+  while ((it1<vecin_end) && (itout<itout_end) && (itrms<vecrms_end)) {
+    it2=min(it1+blen,vecin_end);
+    *itout=hMean(it1,it2);
+    *itrms=hStdDev(it1,it2,*itout);
+    it1=it2;
+    ++itout;
+    }
+  *itout=hMean(it2,vecin_end);
+  *itrms=hStdDev(it2,vecin_end,*itout);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Downsample the input vector to a smaller output vector trying to exclude spikes in the data.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDownsampleSpikyData
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Downsampled output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecrms)()("Output vector containgin the RMS in each bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(nsigma)()("Only consider values for averaging that are nsigma above (positive) or below (negative) the mean.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+ Downsample the input vector to a smaller output vector, by replacing
+     subsequent blocks of values by their mean value. The block size
+     is automatically chosen such that the input vector fits exactly
+     into the output vector. All blocks have the same length with a
+     possible exception of the last block.
+
+     As a second output the root mean square (RMS, standard deviation)
+     of the mean in each downsampled bin is returned.
+
+     The mean here is taken only of data that is nsigma below
+     (negative) or above (positive) the RMS in the bin.
+*/
+
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vecout,
+		     const Iter vecout_end,
+		     const Iter vecrms,
+		     const Iter vecrms_end,
+		     const Iter vecin,
+		     const Iter vecin_end,
+		     HNumber nsigma
+		     )
+{
+  if (vecout>=vecout_end) return; //If size 0 do nothing
+  if (vecin>=vecin_end) return; //If size 0 do nothing
+  if (vecrms>=vecrms_end) return; //If size 0 do nothing
+  HInteger ilen(vecin_end-vecin);
+  HInteger olen(vecout_end-vecout);
+  HInteger blen(max(ilen/(olen-1),1));
+  //use max to avoid infinite loops if output vector is too large
+  Iter it1(vecin), it2;
+  Iter itrms(vecrms);
+  Iter itout(vecout), itout_end(vecout_end-1);
+  //only produce the first N-1 blocks in the output vector
+  HNumber mean;
+  while ((it1<vecin_end) && (itout<itout_end) && (itrms<vecrms_end)) {
+    it2=min(it1+blen,vecin_end);
+    mean=hMean(it1,it2);
+    *itrms=hStdDev(it1,it2,mean);
+    *itout=hMeanThreshold(it1,it2,mean,*itrms,nsigma);
+    it1=it2;
+    ++itout;
+  }
+  mean=hMean(it2,vecin_end);
+  *itrms=hStdDev(it2,vecin_end,mean);
+  *itout=hMeanThreshold(it2,vecin_end,mean,*itrms,nsigma);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Downsample the input vector by a cetain factor and return a new vector.
 //$COPY_TO HFILE START --------------------------------------------------

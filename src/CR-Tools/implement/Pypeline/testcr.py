@@ -39,6 +39,7 @@ Time value arrays.
 """
 cr_time=cr["Time"].setUnit("\\mu","s")
 cr_frequencies=cr["Frequency"]
+cr_frequencies.setUnit("M","")
 cr_efield=cr["Fx"].setPar("xvalues",cr_time)
 """
 
@@ -66,13 +67,27 @@ cr_spectrum[0].plot()
 """
 
 """
-RFIVectorLength=127
-cr_spectrum=hArray(float,cr_fft,xvalues=cr_frequencies,fill=0,name="Power")
+cr_logspec=hArray(copy=cr_spectrum)
+cr_logspec.log()
 
-cr_rfi_amplitudes=hArray(float,[cr.nofAntennas,RFIVectorLength])
-cr_rfi_rms=hArray(float,cr_rfi_amplitudes)
-cr_rfi_amplitudes[...].rfidownsampling(cr_rfi_rms[...],cr_spectrum[...])
-cr_rfi_amplitudes[...].rfidownsampling(cr_rfi_rms[...],cr_spectrum[...])
+RFIVectorLength=128
+cr_rfi_freqs=hArray(float,dimensions=[1,RFIVectorLength],name="Frequency",units="MHz")
+cr_rfi_freqs.downsample(cr_frequencies[1:])
+
+cr_rfi_amplitudes1=hArray(float,[cr.nofAntennas,RFIVectorLength],xvalues=cr_rfi_freqs,par=("logplot","y"))
+cr_rfi_amplitudes2=hArray(float,[cr.nofAntennas,RFIVectorLength],xvalues=cr_rfi_freqs,par=("logplot","y"))
+cr_rfi_amplitudes3=hArray(float,[cr.nofAntennas,RFIVectorLength],xvalues=cr_rfi_freqs,par=("logplot","y"))
+cr_rfi_rms=hArray(float,dimensions=cr_rfi_amplitudes,xvalues=cr_rfi_freqs)
+
+cr_rfi_amplitudes1[...].downsample(cr_rfi_rms[...],cr_spectrum[...,1:])
+cr_rfi_amplitudes2[...].downsamplespikydata(cr_rfi_rms[...],cr_spectrum[...,1:],-0.1)
+cr_rfi_amplitudes3[...].downsamplespikydata(cr_rfi_rms[...],cr_logspec[...,1:],-0.1)
+cr_rfi_amplitudes3.exp()
+
+cr_spectrum[0].plot(title="RFI Downsampling")
+cr_rfi_amplitudes1[0].plot(clf=False)
+cr_rfi_amplitudes2[0].plot(clf=False)
+cr_rfi_amplitudes3[0].plot(clf=False)
 
 """
 

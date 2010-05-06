@@ -391,7 +391,7 @@ def hArray_getitem(self,indexlist):
     if type(indexlist)==tuple: indexlist=list(indexlist)
     else: indexlist=[indexlist]
     ary=hArray(self)
-#    ary.par=self.par
+    ary.par=self.par
     dimensions=ary.getDim()
 #   Now check if there is an ellipsis in the index list, which indicates looping.
     ellipsiscount=indexlist.count(Ellipsis)
@@ -482,6 +482,13 @@ class hArray_par:
             if not (attr.find("_")==0):
                 s+="par."+str(attr)+" = "+str(getattr(self,attr))+"\n"
         return s
+    def __list__(self):
+        l=[]
+        for attr in dir(self)[2:]:
+            if not (attr.find("_")==0):
+                l.append((str(attr),getattr(self,attr)))
+        return l
+        
 
 def hArray_setUnit(self,*arg):
     self.setUnit_(*arg)
@@ -913,11 +920,11 @@ for v in hAllContainerTypes:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hStdDev","hDownsample","hNegate","hVectorLength","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging"]:
+    for s in ["hMean","hStdDev","hDownsample","hDownsampleSpikyData","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hComplexContainerTypes:
-    for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex","hInvFFTCasa","hInvFFTw","hFFTw","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex","hRFIDownsampling"]:
+    for s in ["hConj","hCrossCorrelateComplex","hFFTCasa","hInvFFTw","hFFTw","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex","hRFIDownsampling"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hNumericalContainerTypes:
@@ -988,7 +995,7 @@ def Vector(Type=float,size=-1,fill=None):
 #  hArray Class and Vector Methods/Attributes
 #======================================================================
 
-def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=None,units=None):
+def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=None,units=None,par=None):
     """
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
@@ -996,7 +1003,7 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=Non
 
     Usage:
 
-    hArray(Type=float,dimensions=[n1,n2,n3...],fill=None,name=None,copy=None, xvalues=None,units=None) -> FloatArray
+    hArray(Type=float,dimensions=[n1,n2,n3...],fill=array/scalar,name="String",copy=array, xvalues=array,units=("prefix","unit"),par=(keyword,value)) -> FloatArray
 
     Array(Type) -  will create an empty array of type "Type", where Type is
     a basic Python type, i.e.  bool, int, float, complex, str.
@@ -1010,56 +1017,68 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=Non
     the vector as its underlying memory storage. To copy the value,
     use the fill parameter described below.
 
-    Array(Type,dimension) - will create an array of type "Type",
+    Array(Type,dimensions) - will create an array of type "Type",
     specifiying its dimensions. Input for dimensions can be a list or
     a another array (who's dimensions are coopied).
 
-    Array(Type,dimension,fill) - same as above but fill the array with
+    Array(Type,dimensions,fill) - same as above but fill the array with
     particular values. Input can be a single value, a list, a vector,
     or another array.
 
     Array() defaults to a float array.
 
-    Note, that dimension and fill take precedence over the list and tuple
+    Note, that dimensions and fill take precedence over the list and tuple
     input. Hence if you create a array with Array([1,2,3],dimension=[2]) it
     will contain only [1,2]. Array([1,2,3],dimension=[2],fill=4) will give
     [4,4].
 
     Parameters:
+    ===========
 
-    copy=array: make a copy of array in terms of type, dimension, and
-    fill.
+    dimensions = list or array: set the dimension of the array
+    specified as a list of integers, or an array from which to copy
+    the dimensions.
 
-    xvalues=array: set the default x-axis values for plotting to array
+    copy = array: make a copy of 'array' in terms of type, dimension,
+    fill, and parameter object.
+
+    xvalues = array: set the default x-axis values for plotting to array
     (simply sets self.par.xvalues to array)
 
-    units=(prefixstring,unitname) - will set the initial units of the
+    units = (prefixstring,unitname) - will set the initial units of the
     array accordingly, e.g. units=("M","Hz") states that the values
     are provided in units of MHz.
+
+    par = tuple or list of tuples: set additional (arbitrary)
+    parameter values that are stored in the .par attribute of the
+    array, and are used, e.g., by the plot method to use certain
+    defaults.
 
     """
     if type(copy) in hAllArrayTypes:
         Type=basetype(copy)
         dimensions=copy.getDim()
         fill=copy
-    if isVector(Type):  #Make a new array with refernece to the input vector
+        par=copy.par.__list__()
+    if isVector(Type):  #Make a new array with reference to the input vector
         ary=type2array(basetype(Type))
         ary.stored_vector=Type
         ary.setVector(ary.stored_vector)
     elif ishArray(Type):  # Just make a copy with reference to same vector
         ary=Type.newreference()
-        ary.par=Type.par
     else: # Create a new vector
         vec=Vector(Type=Type)
         ary=type2array(basetype(vec))
         ary.stored_vector=vec
         ary.setVector(ary.stored_vector)
-    setattr(ary,"par",hArray_par())
+    if not hasattr(ary,"par"): setattr(ary,"par",hArray_par())
     if (type(dimensions) in [list,tuple,IntVec]): ary.setDim(dimensions)
     if (type(dimensions) in hAllArrayTypes): ary.setDim(dimensions.getDim())
     if not (xvalues == None): ary.par.xvalues=xvalues
-    if not (units == None):
-        if type(units)==str: ary.setUnit("",units)
+    if type(par) == tuple: setattr(ary.par,par[0],par[1])
+    if type(par) == list: map(lambda elem:setattr(ary.par,elem[0],elem[1]),par)
+    if not (units == None): 
+        if type(units)==str: ary.setUnit("",units) 
         elif type(units)==tuple: ary.setUnit(*units)
         else: print "Error - hArray: Wrong format for units specified."
     if not (fill == None):
