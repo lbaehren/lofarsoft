@@ -4040,8 +4040,9 @@ void HFPP_FUNC_NAME (const CIter weights,
 #define HFPP_FUNC_NAME hSpectralPower
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
 #define HFPP_PARDEF_0 (HNumber)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HComplex)(vecin)()("Input vector containing the complex spectrum")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vecin)()("Input vector containing the complex spectrum. (Looping parameter)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -4051,6 +4052,14 @@ void HFPP_FUNC_NAME (const CIter weights,
   The fact that the result is added to the output vector allows one to
   call the function multiple times and get a summed spectrum. If you
   need it only once, just fill the vector with zeros.
+
+  The number of loops (if used with an hArray) is here determined by
+  the second parameter!
+
+Example:
+spectrum=hArray(float,[1,128])
+cplxfft=hArray(complex,[10,128],fill=1+0j)
+spectrum[...].spectralpower(cplxfft[...])
 */
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
