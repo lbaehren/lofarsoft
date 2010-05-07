@@ -4,16 +4,50 @@
 
 crabdir="/Volumes/MyBook/data/TBB/Crab/"
 directory_pulse4=crabdir+"pulse4/"
+stationname="RS503"
 blocksize=2**16
 data_directory=directory_pulse4
 
 filenames=os.listdir(data_directory)
 
 filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
-filename=data_directory+filenames[0]
-cfile=crfile(filename)
+
+
+#antennapositions
+
+antennaset="HBA"
+antennafilename=LOFARSOFT+"/data/calibration/AntennaArrays/"+stationname+"-AntennaArrays.conf"
+antfile = open(antennafilename,'r') 
+antfile.seek(0)
+str = ''
+while antennaset not in str:
+    str = antfile.readline()
+
+str = antfile.readline()
+str = antfile.readline()
+nrantennas = str.split()[0]
+nrdir = str.split()[4]
+ant = []
+for i in range(0,int(nrantennas)):
+    str=antfile.readline()
+    ant.extend([float(str.split()[0]),float(str.split()[1]),float(str.split()[2])])  #X polarization
+    ant.extend([float(str.split()[0]),float(str.split()[1]),float(str.split()[2])])  #Y polarization
+
+
+antenna_positions=hArray(ant,[int(nrantennas),int(nrdir)])
+
+
+
+
+
 
 #Initialization
+
+#filename=data_directory+filenames[0]
+filename=filenames[0]
+TBBboard=0
+cfile=crfile(data_directory+filename)
+
 cfile["blocksize"]=blocksize
 
 nsegments=50
@@ -33,8 +67,32 @@ c_fft.par.xvalues=c_frequency
 c_fft.par.logplot="y"
 
 c_dynspec=hArray(float,[nblocks,cfile.fftLength],fill=0,name="Dynamic Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
-
+c_complex_dynspec=hArray(complex,[nblocks,cfile.fftLength],fill=0,name="Dynamic Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
 spectrum=hArray(float,[cfile.fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
+complexspectrum=hArray(complex,[cfile.fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
+#spectrum=hArray(float,[1,cfile.fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
+
+#calculatin phases
+FarField=True
+n_pixels=1
+azel=hArray([218.476,54.4378,1],dimensions=[n_pixels,3])
+cartesian=azel.new()
+hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],CoordinateTypes.Cartesian,FarField)
+delays=hArray(float,dimensions=[n_pixels,cfile["nofSelectedAntennas"]])
+phases=hArray(float,dimensions=[n_pixels,cfile["nofSelectedAntennas"],cfile["fftLength"]],name="Phases")
+weights=hArray(complex,dimensions=[n_pixels,cfile["nofSelectedAntennas"],cfile["fftLength"]],name="Complex Weights")
+
+#used_antenna_positions=hArray(float,dimensions=[cfile["nofSelectedAntennas"]*2])
+#fill with the used antenna positions
+
+
+#hGeometricDelays(delays,used_antenna_positions,cartesian,FarField)
+hGeometricDelays(delays,antenna_positions,cartesian,FarField)
+#delays += cal_delays
+
+phases.delaytophase(c_frequency,delays)
+weights.phasetocomplex(phases)
+
 
 #Reading in one File
 
@@ -46,16 +104,26 @@ for block in range(nblocks):
     c_efield.read(cfile,"Fx").none()
     c_fft[...].fftw(c_efield[...])
     c_fft[...].nyquistswap(2)
-    spectrum.fill(0)
+    c_fft *= weights
+    complexspectrum.fill(0)
     for i in range(cfile.nofAntennas):
-        spectrum.spectralpower(c_fft[i])
-    c_dynspec[block].add(spectrum)
+        complexspectrum.add(c_fft[i])
+#    spectrum[...].spectralpower(c_fft[...])
+    c_complex_dynspec[block].add(complexspectrum)
+
+
 print "Make Numpy array"
-#c_dynspec.writedump("dynspec.dat")
+#c_complex_dynspec.writedump("dynspec.dat")
 
+c_complex_dynspec.abs()
+c_dynspec.real(c_complex_dynspec)
 c_dynspec.log()
-
 ds=np.array(c_dynspec.vec())
 ds.resize([nblocks,cfile.fftLength])
 print "plot Numpy array"
 plt.imshow(ds,cmap=plt.cm.hot,aspect='auto')
+
+
+
+
+
