@@ -37,10 +37,6 @@ for i in range(0,int(nrantennas)):
 antenna_positions=hArray(ant,[int(nrantennas),int(nrdir)])
 
 
-
-
-
-
 #Initialization
 
 #filename=data_directory+filenames[0]
@@ -58,8 +54,7 @@ c_time.read(cfile,"Time")
 c_time.setUnit("mu","")
 c_frequency=cfile["emptyFrequency"]
 c_frequency.read(cfile,"Frequency")
-c_frequency.setUnit("M","")
-c_frequency+=100
+c_frequency+=100*10**6.
 c_efield=cfile["emptyFx"]
 c_efield.par.xvalues=c_time
 c_fft=cfile["emptyFFT"]
@@ -67,9 +62,9 @@ c_fft.par.xvalues=c_frequency
 c_fft.par.logplot="y"
 
 c_dynspec=hArray(float,[nblocks,cfile.fftLength],fill=0,name="Dynamic Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
-c_complex_dynspec=hArray(complex,[nblocks,cfile.fftLength],fill=0,name="Dynamic Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
+c_complex_dynspec=hArray(complex,[nblocks,cfile.fftLength],fill=0.+j0,name="Dynamic Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
 spectrum=hArray(float,[cfile.fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
-complexspectrum=hArray(complex,[cfile.fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
+#complexspectrum=hArray(complex,[1,cfile.fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
 #spectrum=hArray(float,[1,cfile.fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
 
 #calculatin phases
@@ -81,6 +76,7 @@ hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],Coordinat
 delays=hArray(float,dimensions=[n_pixels,cfile["nofSelectedAntennas"]])
 phases=hArray(float,dimensions=[n_pixels,cfile["nofSelectedAntennas"],cfile["fftLength"]],name="Phases")
 weights=hArray(complex,dimensions=[n_pixels,cfile["nofSelectedAntennas"],cfile["fftLength"]],name="Complex Weights")
+
 
 #used_antenna_positions=hArray(float,dimensions=[cfile["nofSelectedAntennas"]*2])
 #fill with the used antenna positions
@@ -105,18 +101,22 @@ for block in range(nblocks):
     c_fft[...].fftw(c_efield[...])
     c_fft[...].nyquistswap(2)
     c_fft *= weights
-    complexspectrum.fill(0)
-    for i in range(cfile.nofAntennas):
-        complexspectrum.add(c_fft[i])
+    c_fft[...].addto(c_complex_dynspec[[block],...])
+#    complexspectrum.fill(0)
+#    for i in range(cfile.nofAntennas):
 #    spectrum[...].spectralpower(c_fft[...])
-    c_complex_dynspec[block].add(complexspectrum)
+#    c_fft[...].addto(complexspectrum[...])
 
+#Now we can set the unit in the frequency array. Before this had to
+#match the inverse units of the delays (1/second=Hz).
+c_frequency.setUnit("M","")
 
 print "Make Numpy array"
 #c_complex_dynspec.writedump("dynspec.dat")
 
-c_complex_dynspec.abs()
-c_dynspec.real(c_complex_dynspec)
+#c_complex_dynspec.abs()
+#c_dynspec.real(c_complex_dynspec)
+c_dynspec.spectralpower(c_complex_dynspec)
 c_dynspec.log()
 ds=np.array(c_dynspec.vec())
 ds.resize([nblocks,cfile.fftLength])
