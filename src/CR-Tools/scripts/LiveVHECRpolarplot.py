@@ -13,10 +13,10 @@ import sys
 from math import *
 import time
 
-timeKey = 0
-thetaKey = 1
-phiKey = 2
-varianceKey = 3 # indices in list after stripping the 'prefix' (if present)
+timeKey = 1
+thetaKey = 2
+phiKey = 3
+varianceKey = 4 # indices in list after stripping the 'prefix' (if present)
 
 keepGoing = True
 
@@ -67,11 +67,15 @@ def processCSVFile(): # Work on global filename to keep file handle around, for 
             triggerFile.seek(where)
         else:
             thisPoint = line.split()
-            if float(thisPoint[varianceKey]) < maximumVarianceAllowed:
-                pointList.append(thisPoint)
-                nofPoints += 1
-            else:
-                numberDiscarded += 1
+            # for new-style logfiles, the 'if', and all keys + 1:
+            if thisPoint[0] == 'FitResult:':
+                if float(thisPoint[varianceKey]) < maximumVarianceAllowed:
+                    thisStrippedPoint = thisPoint[1:]
+                    print thisPoint
+                    pointList.append(thisPoint)
+                    nofPoints += 1
+                else:
+                    numberDiscarded += 1
 #    for record in triggerReader:
 #        if float(record[varianceKey]) < maximumVarianceAllowed: 
 #           # phi.append(float(record[phiKey]))
@@ -101,10 +105,10 @@ gr = mglGraph(mglGraphPS, width, height)
 #gr.CirclePts = 1000 # don't know how to improve circle drawing... this is obsolete and not working
 
 datalen = len(pointList)
-pointsAtATime = 500
+pointsAtATime = 10 # 1 for live stuff!
 
-gX = mglData(pointsAtATime)
-gY = mglData(pointsAtATime)
+#gX = mglData(2)
+#gY = mglData(2)
 # X = theta, Y = phi
 # theta = 0 is zenit, have to adjust for coincidence log coordinates.
 qw = hfQtPlot()
@@ -123,25 +127,36 @@ gr.SetFontSize(2.0)
 gr.SetMarkSize(0.01) # makes the points smaller
 gr.Axis();          
 gr.Grid();
+app.processEvents()
 
 import random
-i=0
 while True: # in C++ this is yucky, but in Python it's good practice according to Google...
     pointList = processCSVFile()
     if len(pointList) == 0:
+        app.processEvents()
         time.sleep(1) # so don't hammer to quickly on the file
-    for record in pointList:
-        gX[i%pointsAtATime] = 90 - float(record[thetaKey]) + random.gauss(0.0, randomizationInDegrees) # set the horizon to 90 degrees
-        gY[i%pointsAtATime] = float(record[phiKey]) + random.gauss(0.0, randomizationInDegrees)
-        i += 1
-        if i % pointsAtATime == 0:
-            print 'Plot no. ' + str(i/pointsAtATime)
-            gr.Plot(gX,gY, 'r o#'); # 'r' means red; ' ' means no line; 'o' means o symbols; '#' means solid symbols.
-            gr.Axis();          
-            gr.Grid();
-            qw.setgraph(gr)
-            qw.update()
-            app.processEvents() # why is it slowing down even tho only storing/plotting 10 pts at a time?
+    else:
+        print len(pointList)
+        
+        i=0
+        gX = mglData(len(pointList) + 1)
+        gY = mglData(len(pointList) + 1) # may leak memory!
+        for record in pointList:
+
+    #        print 'entered loop'
+    #        print i%pointsAtATime
+            gX[i] = 90 - float(record[thetaKey]) + random.gauss(0.0, randomizationInDegrees) # set the horizon to 90 degrees
+            gY[i] = float(record[phiKey]) + random.gauss(0.0, randomizationInDegrees)
+            i += 1
+
+    #        if i % pointsAtATime == 0:
+        print 'Plot no. ' + str(i/pointsAtATime)
+        gr.Plot(gX,gY, 'r o#'); # 'r' means red; ' ' means no line; 'o' means o symbols; '#' means solid symbols.
+        gr.Axis();          
+        gr.Grid();
+        qw.setgraph(gr)
+        qw.update()
+        app.processEvents() # why is it slowing down even tho only storing/plotting 10 pts at a time?
 
     if not keepGoing:
         break;
