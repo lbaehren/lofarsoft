@@ -916,11 +916,11 @@ for v in hAllVectorTypes:
 
 
 for v in hAllContainerTypes:
-    for s in ["hFill","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute","hPrettyPrint","hPrettyString"]:
+    for s in ["hFill","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute","hPPrint","hPrettyString"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hStdDev","hDownsample","hDownsampleSpikyData","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging"]:
+    for s in ["hMean","hStdDev","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hComplexContainerTypes:
@@ -995,7 +995,7 @@ def Vector(Type=float,size=-1,fill=None):
 #  hArray Class and Vector Methods/Attributes
 #======================================================================
 
-def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=None,units=None,par=None):
+def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None):
     """
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
@@ -1003,7 +1003,7 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=Non
 
     Usage:
 
-    hArray(Type=float,dimensions=[n1,n2,n3...],fill=array/scalar,name="String",copy=array, xvalues=array,units=("prefix","unit"),par=(keyword,value)) -> FloatArray
+    hArray(Type=float,dimensions=[n1,n2,n3...],fill=array/scalar,name="String", copy=array, properties=array, xvalues=array,units=("prefix","unit"),par=(keyword,value)) -> FloatArray
 
     Array(Type) -  will create an empty array of type "Type", where Type is
     a basic Python type, i.e.  bool, int, float, complex, str.
@@ -1042,6 +1042,9 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=Non
     copy = array: make a copy of 'array' in terms of type, dimension,
     fill, and parameter object.
 
+    properties = array: make a new object with the same properties of 'array' in terms of type, dimension,
+    and parameter object, but NOT copying the data.
+
     xvalues = array: set the default x-axis values for plotting to array
     (simply sets self.par.xvalues to array)
 
@@ -1056,10 +1059,12 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None, xvalues=Non
 
     """
     if type(copy) in hAllArrayTypes:
-        Type=basetype(copy)
-        dimensions=copy.getDim()
+        properties=copy
         fill=copy
-        par=copy.par.__list__()
+    if type(properties) in hAllArrayTypes:
+        Type=basetype(properties)
+        dimensions=properties.getDim()
+        par=properties.par.__list__()
     if isVector(Type):  #Make a new array with reference to the input vector
         ary=type2array(basetype(Type))
         ary.stored_vector=Type

@@ -66,9 +66,10 @@ cr_spectrum.spectralpower(cr_fft)
 cr_spectrum[0].plot()
 """
 
+The following section on RFI excision is in a TESTING PHASE ....!
 """
-cr_logspec=hArray(copy=cr_spectrum)
-cr_logspec.log()
+cr_logspec=hArray(properties=cr_spectrum)
+cr_logspec.log(cr_spectrum)
 
 RFIVectorLength=128
 cr_rfi_freqs=hArray(float,dimensions=[1,RFIVectorLength],name="Frequency",units="MHz")
@@ -77,7 +78,7 @@ cr_rfi_freqs.downsample(cr_frequencies[1:])
 cr_rfi_amplitudes1=hArray(float,[cr.nofAntennas,RFIVectorLength],xvalues=cr_rfi_freqs,par=("logplot","y"))
 cr_rfi_amplitudes2=hArray(float,[cr.nofAntennas,RFIVectorLength],xvalues=cr_rfi_freqs,par=("logplot","y"))
 cr_rfi_amplitudes3=hArray(float,[cr.nofAntennas,RFIVectorLength],xvalues=cr_rfi_freqs,par=("logplot","y"))
-cr_rfi_rms=hArray(float,dimensions=cr_rfi_amplitudes,xvalues=cr_rfi_freqs)
+cr_rfi_rms=hArray(properties=cr_rfi_amplitudes1)
 
 cr_rfi_amplitudes1[...].downsample(cr_rfi_rms[...],cr_spectrum[...,1:])
 cr_rfi_amplitudes2[...].downsamplespikydata(cr_rfi_rms[...],cr_spectrum[...,1:],-0.1)
@@ -88,6 +89,10 @@ cr_spectrum[0].plot(title="RFI Downsampling")
 cr_rfi_amplitudes1[0].plot(clf=False)
 cr_rfi_amplitudes2[0].plot(clf=False)
 cr_rfi_amplitudes3[0].plot(clf=False)
+
+cr_rfi_baseline=hArray(properties=cr_spectrum)
+cr_rfi_baseline[...,1:].rfibaselinefitting(cr_rfi_amplitudes2[...],cr_rfi_rms[...],2.)
+cr_rfi_baseline[...].upsample(cr_rfi_amplitudes2[...])
 
 """
 

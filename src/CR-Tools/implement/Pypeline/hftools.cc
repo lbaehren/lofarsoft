@@ -1568,7 +1568,7 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
 
 //$DOCSTRING: Prints the contents of a vector (up to a maximum length) as a pretty string
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hPrettyPrint
+#define HFPP_FUNC_NAME hPPrint
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -3139,6 +3139,85 @@ void HFPP_FUNC_NAME (const Iter vecout,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Interpolate a vector between two end points, which are part also start and end points of the new vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hInterpolate2P
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Interpolated output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(startvalue)()("Starting value of the output vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(endvalue)()("End value of the output vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Example:
+v=hArray(float, [10])
+v.interpolate2p(0.,9.)  #-> [0,1,2,3,4,5,6,7,8,9]
+v.interpolate2psubpiece(0.,10.) #-> [0,1,2,3,4,5,6,7,8,9]
+*/
+
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vec,
+		     const Iter vec_end,
+		     const IterValueType startvalue,
+		     const IterValueType endvalue
+		     )
+{
+  HInteger count(0), len(vec_end-vec);
+  if (len==1) {*vec=startvalue; return;}; 
+  HNumber slope((endvalue-startvalue)/(len-1));
+  Iter it(vec);
+  while (it<vec_end) {
+    *it=(IterValueType)(startvalue+count*slope);
+    ++it; ++count;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Interpolate a vector between two end points, where the 2nd end point marks the last element of the output vector plus one. Useful for piecing interpolations together.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hInterpolate2PSubpiece
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Interpolated output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(startvalue)()("Starting value of the output vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(endvalue)()("End value of the output vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Example:
+v=hArray(float, [10])
+v.interpolate2p(0.,9.) #-> [0,1,2,3,4,5,6,7,8,9]
+v.interpolate2psubpiece(0.,10.) #-> [0,1,2,3,4,5,6,7,8,9]
+*/
+
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vec,
+		     const Iter vec_end,
+		     const IterValueType startvalue,
+		     const IterValueType endvalue
+		     )
+{
+  HInteger count(0), len(vec_end-vec);
+  if (len==1) {*vec=startvalue; return;}; 
+  HNumber slope((endvalue-startvalue)/len);
+  Iter it(vec);
+  while (it<vec_end) {
+    *it=(IterValueType)(startvalue+count*slope);
+    ++it; ++count;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Downsample the input vector to a smaller output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDownsample
@@ -3193,6 +3272,51 @@ void HFPP_FUNC_NAME (const Iter vecout,
     }
   *itout=hMean(it2,vecin_end);
   *itrms=hStdDev(it2,vecin_end,*itout);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Upsample the input vector to a larger output vector by linear interpolation.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hUpsample
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Upampled output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Shorter vector to be upsampled.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Example:
+x=hArray(float, [31])
+v=hArray(float, [10])
+v.interpolate2p(0.,9.) #-> [0,1,2,3,4,5,6,7,8,9]
+x.upsample(v) 
+*/
+
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vecout,
+		     const Iter vecout_end,
+		     const Iter vecin,
+		     const Iter vecin_end
+		     )
+{
+  if (vecout>=vecout_end) return; //If size 0 do nothing
+  if (vecin>=vecin_end) return; //If size 0 do nothing
+  HInteger ilen(vecin_end-vecin);
+  HInteger olen(vecout_end-vecout);
+  HNumber blen(max(olen/(ilen-1.0),1.0));
+  HInteger count(1);
+  //use max to avoid infinite loops if input vector is too large
+  Iter it1(vecout), it2(it1+((HInteger)blen)),  itin(vecin), itin_end(vecin_end-2);
+  //only produce the first N-1 blocks in the input vector
+  while ((it2<vecout_end) && (itin<itin_end)) {
+    hInterpolate2PSubpiece(it1,it2,*itin,*(itin+1));
+    ++count; it1=it2; it2=vecout+(HInteger)(count*blen); ++itin;
+  }
+  hInterpolate2P(it1,vecout_end,*itin,*itin+1);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -4747,7 +4871,7 @@ void HFPP_FUNC_NAME (Iter amplitudeVec, Iter amplitudeVec_end,
 // ___________________________________________________________________
 //                                                 hRFIBaselineFitting
 
-//$DOCSTRING: Perform a baseline fitting on the amplitude of the spectrum vector and use the fit to crea an interpolated spectrum.
+//$DOCSTRING: Perform a baseline fitting on the amplitude of the spectrum vector and use the fit to create an interpolated spectrum.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hRFIBaselineFitting
 //-----------------------------------------------------------------------
@@ -4755,7 +4879,7 @@ void HFPP_FUNC_NAME (Iter amplitudeVec, Iter amplitudeVec_end,
 #define HFPP_PARDEF_0 (HNumber)(fitVec)()("Output vector containing the baseline fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(amplitudeVec)()("Input vector containing the average value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(rmsVec)()("Input vector containing the root mean square value of the amplitude of the resampled spectrum bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HNumber)(rmsThresholdValue)()("RMS values oabove this threshold value will be excluded from the fit.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(rmsThresholdValue)()("RMS values above this threshold value will be excluded from the fit.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
