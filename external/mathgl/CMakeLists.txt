@@ -196,12 +196,14 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     )
   
   ## Pre-configure patch of include paths
-  ExternalProject_Add_Step (mathgl mathgl_fonts
-    COMMAND mkdir fonts
-    COMMENT "Creating missing sub-directory."
-    DEPENDERS install
-    WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
-    )
+  if (NOT MATHGL_SVN_BUILD)
+    ExternalProject_Add_Step (mathgl mathgl_fonts
+      COMMAND mkdir fonts
+      COMMENT "Creating missing sub-directory."
+      DEPENDERS install
+      WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
+      )
+  endif (NOT MATHGL_SVN_BUILD)
   
   ##__________________________________________________________________
   ## Configuration summary
