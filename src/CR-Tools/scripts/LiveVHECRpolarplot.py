@@ -105,10 +105,13 @@ gr = mglGraph(mglGraphPS, width, height)
 #gr.CirclePts = 1000 # don't know how to improve circle drawing... this is obsolete and not working
 
 datalen = len(pointList)
-pointsAtATime = 10 # 1 for live stuff!
+#pointsAtATime = 10 # 1 for live stuff!
+decayTimeInSeconds = 60.0
 
-#gX = mglData(2)
-#gY = mglData(2)
+gX = mglData(1)
+gY = mglData(1)
+gC = mglData(1)
+gT = mglData(1)
 # X = theta, Y = phi
 # theta = 0 is zenit, have to adjust for coincidence log coordinates.
 qw = hfQtPlot()
@@ -138,20 +141,39 @@ while True: # in C++ this is yucky, but in Python it's good practice according t
     else:
         print len(pointList)
         
-        i=0
-        gX = mglData(len(pointList) + 1)
-        gY = mglData(len(pointList) + 1) # may leak memory!
+        i=1 # TEMPORARY workaround for mathgl.mglData.Insert() bug (1-based instead of 0-based insert)
+        currentTime = time.time()
+        #print 'Size ' + str(gX.GetNx())
+        gX.Insert('x', 0, len(pointList) )
+        #print 'Size After ' + str(gX.GetNx())
+        gY.Insert('x', 0, len(pointList) )
+        
+        gC.Insert('x', 0, len(pointList))
+        gT.Insert('x', 0, len(pointList)) # used to store time info
         for record in pointList:
 
     #        print 'entered loop'
     #        print i%pointsAtATime
             gX[i] = 90 - float(record[thetaKey]) + random.gauss(0.0, randomizationInDegrees) # set the horizon to 90 degrees
             gY[i] = float(record[phiKey]) + random.gauss(0.0, randomizationInDegrees)
+            thisTime = int(record[timeKey])
+            gT[i] = (thisTime - int(thisTime / 200e6)) / 200.0e6 # gives float seconds since epoch
+
             i += 1
+            
+        for i in range(gX.GetNx()):
+# color coding done separately
+            timeOffset = currentTime - gT[i]
+            print timeOffset
+            thisColorCode = exp( - timeOffset*timeOffset / (decayTimeInSeconds * decayTimeInSeconds)) 
+            #print thisColorCode
+            gC[i] = thisColorCode + 0.1
 
     #        if i % pointsAtATime == 0:
-        print 'Plot no. ' + str(i/pointsAtATime)
-        gr.Plot(gX,gY, 'r o#'); # 'r' means red; ' ' means no line; 'o' means o symbols; '#' means solid symbols.
+        print 'Plot no. ' + str(i)
+#        gr.Plot(gX,gY, 'r o#'); # 'r' means red; ' ' means no line; 'o' means o symbols; '#' means solid symbols.
+        gr.Clf()
+        gr.Tens(gX, gY, gC, 'whr o#')
         gr.Axis();          
         gr.Grid();
         qw.setgraph(gr)
