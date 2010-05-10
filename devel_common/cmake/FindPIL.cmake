@@ -1,7 +1,7 @@
 # +-----------------------------------------------------------------------------+
 # | $Id:: template_FindXX.cmake 1643 2008-06-14 10:19:20Z baehren             $ |
 # +-----------------------------------------------------------------------------+
-# |   Copyright (C) 2007                                                        |
+# |   Copyright (C) 2010                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
 # |   This program is free software; you can redistribute it and/or modify      |
