@@ -4,7 +4,7 @@
 # where the default N = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.6
+VERSION=1.7
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-rfi] [-C] [-del]\n\n"\
@@ -109,7 +109,7 @@ location=`pwd`
 
 #Set up the parset location:
 # (1) OLD parset was here: /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
-# (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset.0
+# (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
 
 #Check if case 1; else case 2
 PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
