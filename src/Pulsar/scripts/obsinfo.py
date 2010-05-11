@@ -98,18 +98,34 @@ for counter in np.arange(np.size(obsids)):
 	obstable.append([])
 	id=obsids[counter]
 	obstable[counter].append(id)
+
+	# prefix of ID, like L2010 or L2009
+        id_prefix=id.split("_")[0]   
+	# suffix of ID, the sequence number of observation
+        id_suffix=id.split("_")[1]   
+
 	# checking first if the directory with the parset file exists
 	logdir=parset_logdir + id + "/"
 	if not os.path.exists(logdir):
+		# checking in the oldlog directory
 		logdir=parset_oldlogdir + id + "/"
 		if not os.path.exists(logdir):
-			comment = "Oops!.. The log directory does not exist!"
-			obstable[counter].append(comment)
-			for k in np.arange(11): obstable[counter].append("")
-			totsz[counter] = 0.
-			if tosort == False:
-				print "%d       %s      %s" % (counter, id, comment)
-			continue
+			# Due to new naming convention and location of the parset files, also looking for the parset file
+			# in any L2010-??-??_?????? directories	
+			cmd="find %s -type f -name 'RTCP-%s.parset' -print" % (parset_logdir, id_suffix)
+			logdir=os.popen(cmd).readlines()
+			if np.size(logdir) > 0:
+				# it means we found the directory with parset file
+				logdir=os.popen(cmd).readlines()[0][:-1].split("RTCP-%s.parset" % (id_suffix,))[0]
+			else:
+				# no directory found
+				comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
+				obstable[counter].append(comment)
+				for k in np.arange(11): obstable[counter].append("")
+				totsz[counter] = 0.
+				if tosort == False:
+					print "%d       %s      %s" % (counter, id, comment)
+				continue
 
 	# get the full path for the parset file for the current ID
 	log=logdir + parset
@@ -117,13 +133,16 @@ for counter in np.arange(np.size(obsids)):
 		# also checking that maybe the parset file has name the same as Obs ID
 		log=logdir + id + ".parset"
 		if not os.path.exists(log):
-			comment = "Oops!.. The parset file '%s' does not exist neither in 'log' not 'oldlog' directory!" % (parset,)
-			obstable[counter].append(comment)
-			for k in np.arange(11): obstable[counter].append("")
-			totsz[counter] = 0.
-			if tosort == False:
-				print "%d       %s      %s" % (counter, id, comment)
-			continue
+			# also checking that maybe the name of parset file has new naming convention, like "RTCP-<id_suffix>.parset"
+			log=logdir + "RTCP-" + id_suffix + ".parset"
+			if not os.path.exists(log):
+				comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
+				obstable[counter].append(comment)
+				for k in np.arange(11): obstable[counter].append("")
+				totsz[counter] = 0.
+				if tosort == False:
+					print "%d       %s      %s" % (counter, id, comment)
+				continue
 	obstable[counter].append("")
 
         # reading the parset file
