@@ -307,10 +307,10 @@ namespace CR { // Namespace CR -- begin
         if (SinglePlots)
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true,
                                               getUpsamplingExponent(),false);
-
-        // calculate the maxima (only if CC-beam was reconstructed successfully):
-        // calculate noise as mean of local maxima of the envelope in time range of -10.5 to -0.5 µs before CC center)
-        if (fiterg.asBool("CCconverged")) {
+                                              
+        // calculate the maxima (only if CC-beam was reconstructed successfully and its time is ok):
+        // calculate noise as mean of local maxima of the envelope in time range of -10.5 to -0.5 µs before CC center)      
+        if ( (fiterg.asBool("CCconverged")) && (erg.asDouble("CCcenter") > fitStart()) && (erg.asDouble("CCcenter") < fitStop()) ) {
           if (CalculateMaxima)
             calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
                                                             false, fiterg.asDouble("CCcenter"),
