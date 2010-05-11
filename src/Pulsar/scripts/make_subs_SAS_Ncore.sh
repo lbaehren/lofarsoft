@@ -106,7 +106,34 @@ location=`pwd`
 
 #Set these parameters by hand
 ###OBSID=L2010_06296
+
+#Set up the parset location:
+# (1) OLD parset was here: /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
+# (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset.0
+
+#Check if case 1; else case 2
 PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
+
+if [ ! -f /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0 ] 
+then
+   short_id=`echo $OBSID | sed 's/L.....//g'`
+   new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
+   if [[ $new_parset == "" ]]
+   then
+      echo "ERROR: Unable to find parset for $short_id in /globalhome/lofarsystem/log/ directory"
+      exit 1
+   else
+      found_nof_parsets=`echo $new_parset | wc -l | awk '{print $1}'`
+      if (( $found_nof_parsets !=  1 ))
+      then
+         echo "ERROR: Found more than one parset for $short_id in /globalhome/lofarsystem/log/ directory; unable to resolve problem"
+         exit 1
+      fi
+   fi
+   PARSET=$new_parset
+fi
+
+
 ###PULSAR=B2111+46
 STOKES=incoherentstokes
 #STOKES=stokes
