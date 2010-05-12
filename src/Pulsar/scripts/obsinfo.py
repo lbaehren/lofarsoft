@@ -37,10 +37,11 @@ obsids=[]
 # 9 - "+" if Imaging obs
 # 10 - "+" if Incoherent Stokes obs
 # 11 - "+" if Coherent Stokes obs
-# 12 - status about reduced data
-# 13 - pointing
-# 14 - Date (MMDD)
-# 15 - duration
+# 12 - "+" if Fly's Eye obs
+# 13 - status about reduced data
+# 14 - pointing
+# 15 - Date (MMDD)
+# 16 - duration
 
 # help
 def usage (prg):
@@ -93,9 +94,9 @@ totsz = np.zeros(np.size(obsids))
 obstable=[]
 
 # printing out the header of the table
-# The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes CohStokes Reduced Pointing
+# The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes CohStokes Fly'sEye	Reduced Pointing
 print "#================================================================================================================================================="
-print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	lse013	lse014	lse015	Total(GB)	BF IM IS CS	Reduced		Pointing"
+print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	lse013	lse014	lse015	Total(GB)	BF IM IS CS FE	Reduced		Pointing"
 print "#================================================================================================================================================="
 
 # loop for every observation
@@ -239,6 +240,19 @@ for counter in np.arange(np.size(obsids)):
 	else:
 		cstype = "?"
 	obstable[counter].append(cstype)
+	# check if data are fly's eye mode data
+	cmd="grep PencilInfo.flysEye %s" % (log,)
+	fetype=os.popen(cmd).readlines()
+	if np.size(fetype) > 0:
+		# this info exists in parset file
+		fetype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+		if fetype == 'f':
+			fetype = "-"
+		else:
+			fetype = "+"
+	else:
+		fetype = "?"
+	obstable[counter].append(fetype)
 
 
 	# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
@@ -324,7 +338,7 @@ for counter in np.arange(np.size(obsids)):
 	# Printing out the report (if we want unsorted list)
 	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes Reduced Pointing
 	if tosort == False:
-		print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c	%-11s	%s" % (counter, id, datestring, duration, nodeslist, datadir, obstable[counter][4], obstable[counter][5], obstable[counter][6], obstable[counter][7], bftype, imtype, istype, cstype, statusline, pointing)
+		print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (counter, id, datestring, duration, nodeslist, datadir, obstable[counter][4], obstable[counter][5], obstable[counter][6], obstable[counter][7], bftype, imtype, istype, cstype, fetype, statusline, pointing)
 
 # printing the sorted list
 if tosort == True:
@@ -334,5 +348,5 @@ if tosort == True:
 		if obstable[i][1] != "":
 			print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
 		else:
-			print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[14], obstable[15], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12], obstable[i][13])
+			print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[15], obstable[16], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12], obstable[i][13], obstable[i][14])
 		j=j+1
