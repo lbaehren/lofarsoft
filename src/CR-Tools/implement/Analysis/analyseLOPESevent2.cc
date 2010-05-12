@@ -280,6 +280,13 @@ namespace CR { // Namespace CR -- begin
         cerr << "analyseLOPESevent2::RunPipeline: " << "Error during GaussFitData()!" << endl;
         return erg;
       }
+      
+      // check if time of CC beam is within fit range
+      if ( (erg.asDouble("CCcenter") < fitStart()) || (erg.asDouble("CCcenter") > fitStop()) ) {
+        cout << "\nBad reconstruction: Time of CC beam is outside of fit range!\n" << endl;
+        erg.define("CCconverged", false);
+        erg.define("Xconverged", false);
+      }    
 
       // Generate plots
       if (generatePlots) {
@@ -310,7 +317,7 @@ namespace CR { // Namespace CR -- begin
                                               
         // calculate the maxima (only if CC-beam was reconstructed successfully and its time is ok):
         // calculate noise as mean of local maxima of the envelope in time range of -10.5 to -0.5 µs before CC center)      
-        if ( (fiterg.asBool("CCconverged")) && (erg.asDouble("CCcenter") > fitStart()) && (erg.asDouble("CCcenter") < fitStop()) ) {
+        if (fiterg.asBool("CCconverged")) {
           if (CalculateMaxima)
             calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
                                                             false, fiterg.asDouble("CCcenter"),
