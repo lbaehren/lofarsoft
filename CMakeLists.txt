@@ -46,7 +46,6 @@ option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO
 option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO )
 option (TEST_DATASETS          "Download and install sample test datasets?"   NO )
 option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO )
-option (GIT_VERSION_CONTROL    "Use Git as version control client?"           NO )
 
 ## Options affecting the build of individual packages
 
@@ -69,45 +68,20 @@ find_program (bison_executable      bison   PATHS ${bin_locations})
 find_program (curl_executable       curl    PATHS ${bin_locations})
 find_program (doxygen_executable    doxygen PATHS ${bin_locations})
 find_program (flex_executable       flex    PATHS ${bin_locations})
-find_program (git_executable        git     PATHS ${bin_locations})
 find_program (perl_executable       perl    PATHS ${bin_locations})
-find_program (svn_executable        svn     PATHS ${bin_locations})
 find_program (tar_executable        tar     PATHS ${bin_locations})
 find_program (wget_executable       wget    PATHS ${bin_locations})
 
-set (BLITZ_FIND_QUIETLY   YES )
-set (OPENGL_FIND_QUIETLY  YES )
-set (ROOT_FIND_QUIETLY    YES )
+set (BLITZ_FIND_QUIETLY           YES )
+set (OPENGL_FIND_QUIETLY          YES )
+set (ROOT_FIND_QUIETLY            YES )
+set (VERSION_CONTROL_FIND_QUIETLY YES )
 
+include (BuildPackage)
 include (FindBlitz)
 include (FindOpenGL)
 include (FindROOT)
-
-## ==============================================================================
-##
-##  Macro definitions
-##
-## ==============================================================================
-
-macro (build_package _packageName _packageSource)
-  ## get components of the path to the package's source code
-  get_filename_component (_packageLocation ${_packageSource} PATH)
-  ## feedback
-  if (${_packageLocation} STREQUAL "external")
-    message (STATUS "Adding external package ${_packageName} ...")
-    set (_packageBuildLocation ${USG_BUILD}/external/${_packageName})
-  else (${_packageLocation} STREQUAL "external")
-    set (_packageBuildLocation ${USG_BUILD}/${_packageName})
-  endif (${_packageLocation} STREQUAL "external")
-  ## create the directory within which the build is performed
-  file (MAKE_DIRECTORY ${_packageBuildLocation})
-  add_custom_target (${_packageName}
-    COMMAND ${CMAKE_COMMAND} ${USG_ROOT}/${_packageSource}
-    COMMAND make install
-    WORKING_DIRECTORY ${_packageBuildLocation}
-    COMMENT "Building package ${package_name} ..."
-    )
-endmacro (build_package _packageName _packageSource)
+include (FindVersionControl)
 
 ## ==============================================================================
 ##
@@ -199,32 +173,41 @@ add_custom_target (clean-src
   COMMENT "Cleaning up build directory ..."
 )
 
-if (GIT_VERSION_CONTROL)
-  if (git_executable)
-    add_custom_target (update
-      COMMAND ${git_executable} stash
-      COMMAND ${git_executable} svn rebase
-      COMMAND ${git_executable} stash apply
-      COMMAND cd ${USG_ROOT}/build && rm -rf CMake* && ./bootstrap
-      WORKING_DIRECTORY ${USG_ROOT}
-      COMMENT "Updating working version of the source code from repository ..."
-      )
-  else (git_executable)
-    message (STATUS "Disabling update of working copy -- missing Git!")
-  endif (git_executable)
-else (GIT_VERSION_CONTROL)
-  if (svn_executable)
-    add_custom_target (update
-      COMMAND ${svn_executable} cleanup
-      COMMAND ${svn_executable} up
-      COMMAND cd ${USG_ROOT}/build && rm -rf CMake* && ./bootstrap
-      WORKING_DIRECTORY ${USG_ROOT}
-      COMMENT "Updating working version of the source code from repository ..."
-      )
-  else (svn_executable)
-    message (STATUS "Disabling update of working copy -- missing Subversion!")
-  endif (svn_executable)
-endif (GIT_VERSION_CONTROL)
+## ==============================================================================
+##
+##  Update of working copy
+##
+## ==============================================================================
+
+if (VERSION_CONTROL_SYSTEM STREQUAL "git")
+  ## Update the working version
+  add_custom_target (update
+    COMMAND ${GIT_EXECUTABLE} stash
+    COMMAND ${GIT_EXECUTABLE} svn rebase
+    COMMAND ${GIT_EXECUTABLE} stash apply
+    COMMAND cd ${USG_ROOT}/build && rm -rf CMake* && ./bootstrap
+    WORKING_DIRECTORY ${USG_ROOT}
+    COMMENT "Updating working version of the source code from repository ..."
+    )
+  ## Pusd local changes to repository
+  add_custom_target (commit
+    COMMAND ${GIT_EXECUTABLE} stash
+    COMMAND ${GIT_EXECUTABLE} svn dcommit
+    COMMAND ${GIT_EXECUTABLE} stash apply
+    WORKING_DIRECTORY ${USG_ROOT}
+    COMMENT "Updating working version of the source code from repository ..."
+    )
+endif (VERSION_CONTROL_SYSTEM STREQUAL "git")
+
+if (VERSION_CONTROL_SYSTEM STREQUAL "svn")
+  add_custom_target (update
+    COMMAND ${SVN_EXECUTABLE} cleanup
+    COMMAND ${SVN_EXECUTABLE} up
+    COMMAND cd ${USG_ROOT}/build && rm -rf CMake* && ./bootstrap
+    WORKING_DIRECTORY ${USG_ROOT}
+    COMMENT "Updating working version of the source code from repository ..."
+    )
+endif (VERSION_CONTROL_SYSTEM STREQUAL "svn")
 
 ## ==============================================================================
 ##
@@ -328,7 +311,7 @@ add_custom_target (cr
   COMMENT "Building package CR-Tools ..."
   )
 
-add_dependencies (cr dal mathgl plplot fftw3)
+add_dependencies (cr dal mathgl plplot fftw3 gsl)
 
 if (HAVE_ROOT)
   add_dependencies (cr startools)
