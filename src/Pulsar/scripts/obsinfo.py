@@ -348,5 +348,5 @@ if tosort == True:
 		if obstable[i][1] != "":
 			print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
 		else:
-			print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[15], obstable[16], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12], obstable[i][13], obstable[i][14])
+			print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[i][15], obstable[i][16], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12], obstable[i][13], obstable[i][14])
 		j=j+1
