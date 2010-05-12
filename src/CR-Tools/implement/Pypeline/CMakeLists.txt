@@ -85,6 +85,7 @@ target_link_libraries (hftools
   ${BOOST_LIBRARIES}
   ${PYTHON_LIBRARIES}
   ${FFTW3_LIBRARIES}
+  ${GSL_LIBRARIES}	
   )
 
 ## additional target properties
