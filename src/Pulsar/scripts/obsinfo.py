@@ -7,7 +7,6 @@ import time
 tosort=False
 # if True then will show only those observations newer than some date
 is_from=False
-fromstring=""
 fromdate=""
 
 # storage nodes to collect info about Pulsar Observations
@@ -70,10 +69,8 @@ def parsecmd(prg, argv):
 			if opt in ("-f", "--from"):
 				global is_from
 				is_from = True
-				global fromstring
-				fromstring=arg
 				global fromdate
-				fromdate = time.mktime(time.strptime(arg, "%Y-%m-%d"))
+				fromdate = arg
 
 	except getopt.GetoptError:
 		print "Wrong option!"
@@ -92,13 +89,17 @@ if __name__ == "__main__":
 			indlist=glob.glob(mask)			
 			obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
 
+# number of storage nodes
+Nnodes=np.size(storage_nodes)
+
 # getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
 # and sort in reverse order (most recent obs go first)
 # more recent obs is the obs with higher ID (as it should be)
 obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 print "Number of observations in Sub5: %d" % (np.size(obsids), )
 if is_from == True:
-	print "List only observations since %s" % (fromstring, )
+	print "List only observations since %s" % (fromdate, )
+	fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
 print
 
 # array of total sizes for every ObsID
@@ -109,7 +110,11 @@ obstable=[]
 # printing out the header of the table
 # The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes CohStokes Fly'sEye	Reduced Pointing
 print "#================================================================================================================================================="
-print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	lse013	lse014	lse015	Total(GB)	BF IM IS CS FE	Reduced		Pointing"
+storage_nodes_string=""
+for i in np.arange(Nnodes-1):
+	storage_nodes_string=storage_nodes_string+storage_nodes[i]+"\t"
+storage_nodes_string=storage_nodes_string+storage_nodes[-1]
+print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF IM IS CS FE	Reduced		Pointing" % (storage_nodes_string,)
 print "#================================================================================================================================================="
 
 j=0 # extra index to follow only printed lines
@@ -188,12 +193,14 @@ for counter in np.arange(np.size(obsids)):
 
 	# checking if the datadir exists in all sub5 lse nodes and if it does, gets the size of directory
 	totsize=0
+	dirsize_string=""
 	for lse in storage_nodes:
 		ddir=storage_prefix + lse + datadir + "/" + id
 		dirsize="x"
 		if os.path.exists(ddir):
 			dirsize=os.popen("du -sh %s | cut -f 1" % (ddir,)).readlines()[0][:-1]
 			totsize=totsize + float(os.popen("du -s -B 1 %s | cut -f 1" % (ddir,)).readlines()[0][:-1])
+		dirsize_string=dirsize_string+dirsize+"\t"
 		obstable[counter].append(dirsize)
 
 	# converting total size to GB
@@ -357,7 +364,7 @@ for counter in np.arange(np.size(obsids)):
 	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes Reduced Pointing
 	if tosort == False:
 		if is_from == False or (is_from == True and to_show > 0):
-			print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, id, datestring, duration, nodeslist, datadir, obstable[counter][4], obstable[counter][5], obstable[counter][6], obstable[counter][7], bftype, imtype, istype, cstype, fetype, statusline, pointing)
+			print "%d	%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, id, datestring, duration, nodeslist, datadir, dirsize_string, obstable[counter][4+Nnodes], bftype, imtype, istype, cstype, fetype, statusline, pointing)
 			j=j+1
 
 # printing the sorted list
@@ -369,15 +376,22 @@ if tosort == True:
 			if obstable[i][1] != "":
 				print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
 			else:
-				print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[i][15], obstable[i][16], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12], obstable[i][13], obstable[i][14])
+				dirsize_string=""
+				for w in np.arange(Nnodes):
+					dirsize_string=dirsize_string+obstable[4+w]+"\t"
+				print "%d	%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[i][12+Nnodes], obstable[i][13+Nnodes], obstable[i][2], obstable[i][3], dirsize_string, obstable[i][4+Nnodes], obstable[i][5+Nnodes], obstable[i][6+Nnodes], obstable[i][7+Nnodes], obstable[i][8+Nnodes], obstable[i][9+Nnodes], obstable[i][10+Nnodes], obstable[i][11+Nnodes])
 			j=j+1
 	else:   # show only newer observations
 		for i in np.flipud(sorted_indices):
-			c1=time.strptime(obstable[i][15], "%m%d")
-			to_show=time.mktime(c1)-fromdate
-			if to_show > 0:
-				if obstable[i][1] != "":
-					print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
-				else:
-					print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[i][15], obstable[i][16], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12], obstable[i][13], obstable[i][14])
+			if obstable[i][1] != "":
+				print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
 				j=j+1
+			else:
+				c1=time.strptime(obstable[i][15], "%m%d")
+				to_show=time.mktime(c1)-fromdate
+				if to_show > 0:
+					dirsize_string=""
+					for w in np.arange(Nnodes):
+						dirsize_string=dirsize_string+obstable[4+w]+"\t"
+					print "%d	%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[i][12+Nnodes], obstable[i][13+Nnodes], obstable[i][2], obstable[i][3], dirsize_string, obstable[i][4+Nnodes], obstable[i][5+Nnodes], obstable[i][6+Nnodes], obstable[i][7+Nnodes], obstable[i][8+Nnodes], obstable[i][9+Nnodes], obstable[i][10+Nnodes], obstable[i][11+Nnodes])
+					j=j+1
