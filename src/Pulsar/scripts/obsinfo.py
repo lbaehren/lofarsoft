@@ -27,24 +27,6 @@ parset="RTCP.parset.0"
 
 # list of obs ids
 obsids=[]
-# table info description
-# 0 - id
-# 1 - comment (empty if both logdir and parset file exist)
-# 2 - nodelist
-# 3 - datadir
-# 4 - size in lse013
-# 5 - size in lse014
-# 6 - size in lse015
-# 7 - total size
-# 8 - "+" if BeamFormed obs
-# 9 - "+" if Imaging obs
-# 10 - "+" if Incoherent Stokes obs
-# 11 - "+" if Coherent Stokes obs
-# 12 - "+" if Fly's Eye obs
-# 13 - status about reduced data
-# 14 - pointing
-# 15 - Date (MMDD)
-# 16 - duration
 
 # help
 def usage (prg):
@@ -99,13 +81,15 @@ obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 print "Number of observations in Sub5: %d" % (np.size(obsids), )
 if is_from == True:
 	print "List only observations since %s" % (fromdate, )
+	fromyear = fromdate.split("-")[0]
 	fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
 print
 
 # array of total sizes for every ObsID
 totsz = np.zeros(np.size(obsids))
-# 2D table
-obstable=[]
+# table with obs info
+if tosort == True:
+	obstable=[]
 
 # printing out the header of the table
 # The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes CohStokes Fly'sEye	Reduced Pointing
@@ -121,14 +105,19 @@ j=0 # extra index to follow only printed lines
 # loop for every observation
 for counter in np.arange(np.size(obsids)):
 	
-	obstable.append([])
 	id=obsids[counter]
-	obstable[counter].append(id)
 
 	# prefix of ID, like L2010 or L2009
         id_prefix=id.split("_")[0]   
 	# suffix of ID, the sequence number of observation
         id_suffix=id.split("_")[1]   
+
+	# if request only newer observations, check first the year from the ID
+	# if it's less than specified year, then continue with the next ID
+	if is_from == True:
+		obsyear=id_prefix.split("L")[1]
+		if fromyear > obsyear:
+			continue
 
 	# checking first if the directory with the parset file exists
 	logdir=parset_logdir + id + "/"
@@ -145,12 +134,13 @@ for counter in np.arange(np.size(obsids)):
 				logdir=os.popen(cmd).readlines()[0][:-1].split("RTCP-%s.parset" % (id_suffix,))[0]
 			else:
 				# no directory found
-				comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
-				obstable[counter].append(comment)
-				for k in np.arange(11): obstable[counter].append("")
-				totsz[counter] = 0.
+				comment = "%s	Oops!.. The log directory or parset file in new naming convention does not exist!" % (id, )
+				totsz[j] = 0.
 				if tosort == False:
-					print "%d       %s      %s" % (counter, id, comment)
+					print "%d	%s" % (j, comment)
+				else:
+					obstable=np.append(obstable, comment)
+				j=j+1
 				continue
 
 	# get the full path for the parset file for the current ID
@@ -162,19 +152,38 @@ for counter in np.arange(np.size(obsids)):
 			# also checking that maybe the name of parset file has new naming convention, like "RTCP-<id_suffix>.parset"
 			log=logdir + "RTCP-" + id_suffix + ".parset"
 			if not os.path.exists(log):
-				comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
-				obstable[counter].append(comment)
-				for k in np.arange(11): obstable[counter].append("")
-				totsz[counter] = 0.
+				comment = "%s	Oops!.. The parset file '%s' does not exist in any possible location!" % (id, parset)
+				totsz[j] = 0.
 				if tosort == False:
-					print "%d       %s      %s" % (counter, id, comment)
+					print "%d	%s" % (j, comment)
+				else:
+					obstable=np.append(obstable, comment)
+				j=j+1
 				continue
-	obstable[counter].append("")
+
+	# Getting the Date of observation
+	cmd="grep Observation.startTime %s | tr -d \\'" % (log,)
+	datestring1=os.popen(cmd).readlines()
+	if np.size(datestring1) > 0:
+		# it means that this keyword exist and we can extract the info
+		datestring1=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+		c1 = time.strptime(datestring1, "%Y-%m-%d %H:%M:%S")
+		smonth=datestring1.split("-")[1]
+		sday=datestring1.split("-")[2].split(" ")[0]
+		datestring=smonth+sday
+	else:
+		datestring="????"
+
+	# check if we want to show only newer data and check if the current obs is newer than specified date
+	if is_from == True and np.size(datestring1) > 0:
+		to_show=time.mktime(c1)-fromdate
+		if to_show < 0:   # continue with the next ObsID
+			continue
 
         # reading the parset file
 	# getting the info about StorageNodes. Note! For old parsets there seems to be no such a keyword Virtual...
 	# However, the old keyword OLAP.storageNodeList has "non-friendly" format, so I just ignore this by now
-	cmd="grep Observation.VirtualInstrument.storageNodeList %s | tr -d lse" % (log,)
+	cmd="grep Observation.VirtualInstrument.storageNodeList %s | sed -e 's/lse//g'" % (log,)
 	nodeslist=os.popen(cmd).readlines()
 	if np.size(nodeslist) > 0:
 		# it means that this keyword exist and we can extract the info
@@ -182,14 +191,10 @@ for counter in np.arange(np.size(obsids)):
 	# cut the string of nodes if it is too long
 	if len(nodeslist)>13:
 		nodeslist=nodeslist[:13] + "..."
-	# adding the nodes' list to the table
-	obstable[counter].append(nodeslist)
 
 	# getting the name of /data? where the data are stored
 	cmd="grep Observation.MSNameMask %s" % (log,)
 	datadir="/" + os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("/")[1]
-	# adding  the datadir to the table
-	obstable[counter].append(datadir)
 
 	# checking if the datadir exists in all sub5 lse nodes and if it does, gets the size of directory
 	totsize=0
@@ -201,12 +206,10 @@ for counter in np.arange(np.size(obsids)):
 			dirsize=os.popen("du -sh %s | cut -f 1" % (ddir,)).readlines()[0][:-1]
 			totsize=totsize + float(os.popen("du -s -B 1 %s | cut -f 1" % (ddir,)).readlines()[0][:-1])
 		dirsize_string=dirsize_string+dirsize+"\t"
-		obstable[counter].append(dirsize)
 
 	# converting total size to GB
-	totsize = totsize / 1024. / 1024. / 1024.
-	obstable[counter].append("%.1f" % (totsize))
-	totsz[counter] =  totsize
+	totsz[j] = totsize / 1024. / 1024. / 1024.
+	totsize = "%.1f" % (totsz[j],)
 
 	# getting info about the Type of the data (BF, Imaging, etc.)
 	# check first if data are beamformed
@@ -221,7 +224,6 @@ for counter in np.arange(np.size(obsids)):
 			bftype = "+"
 	else:
 		bftype = "?"
-	obstable[counter].append(bftype)
 	# check if data are imaging
 	cmd="grep outputCorrelatedData %s" % (log,)
 	imtype=os.popen(cmd).readlines()
@@ -234,7 +236,6 @@ for counter in np.arange(np.size(obsids)):
 			imtype = "+"
 	else:
 		imtype = "?"
-	obstable[counter].append(imtype)
 	# check if data are incoherent stokes data
 	cmd="grep outputIncoherentStokes %s" % (log,)
 	istype=os.popen(cmd).readlines()
@@ -247,7 +248,6 @@ for counter in np.arange(np.size(obsids)):
 			istype = "+"
 	else:
 		istype = "?"
-	obstable[counter].append(istype)
 	# check if data are coherent stokes data
 	cmd="grep outputCoherentStokes %s" % (log,)
 	cstype=os.popen(cmd).readlines()
@@ -260,7 +260,6 @@ for counter in np.arange(np.size(obsids)):
 			cstype = "+"
 	else:
 		cstype = "?"
-	obstable[counter].append(cstype)
 	# check if data are fly's eye mode data
 	cmd="grep PencilInfo.flysEye %s" % (log,)
 	fetype=os.popen(cmd).readlines()
@@ -273,8 +272,6 @@ for counter in np.arange(np.size(obsids)):
 			fetype = "+"
 	else:
 		fetype = "?"
-	obstable[counter].append(fetype)
-
 
 	# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
 	# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file in ./incoherentstokes/ directory
@@ -291,7 +288,6 @@ for counter in np.arange(np.size(obsids)):
 			else:
 				statusline=statusline+" x"
 			break
-	obstable[counter].append(statusline)
 
 	# getting info about the pointing
 	cmd="grep 'Beam\[0\].angle1' %s" % (log,)
@@ -323,20 +319,6 @@ for counter in np.arange(np.size(obsids)):
 	else:
 		decstring="_????"
 	pointing="%s%s" % (rastring, decstring)
-	obstable[counter].append(pointing)
-
-	# Getting the Date of observation
-	cmd="grep Observation.startTime %s | tr -d \\'" % (log,)
-	datestring1=os.popen(cmd).readlines()
-	if np.size(datestring1) > 0:
-		# it means that this keyword exist and we can extract the info
-		datestring1=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
-		smonth=datestring1.split("-")[1]
-		sday=datestring1.split("-")[2].split(" ")[0]
-		datestring=smonth+sday
-	else:
-		datestring="????"
-	obstable[counter].append(datestring)
 
 	# Getting the Duration
 	cmd="grep Observation.stopTime %s | tr -d \\'" % (log,)
@@ -344,7 +326,6 @@ for counter in np.arange(np.size(obsids)):
 	if np.size(datestring1) > 0 and np.size(datestring2) > 0:
 		# it means that both start and stop Times exist in parset file
 		datestring2=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
-		c1 = time.strptime(datestring1, "%Y-%m-%d %H:%M:%S")
 		c2 = time.strptime(datestring2, "%Y-%m-%d %H:%M:%S")
 		diff=time.mktime(c2)-time.mktime(c1)  # difference in seconds
 		if float(diff/3600.0) > 1.:
@@ -353,45 +334,23 @@ for counter in np.arange(np.size(obsids)):
 			duration="%.1fm" % (diff/60.)
 	else:
 		duration="?"
-	obstable[counter].append(duration)
 
-	# check if we want to show only newer data and check if the current obs is newer than specified date
-	if is_from == True:
-		to_show=time.mktime(c1)-fromdate
-
+	# combining info
+	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes Reduced Pointing
+	info="%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c	%-11s	%s" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, imtype, istype, cstype, fetype, statusline, pointing)
 
 	# Printing out the report (if we want unsorted list)
-	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes Reduced Pointing
 	if tosort == False:
-		if is_from == False or (is_from == True and to_show > 0):
-			print "%d	%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, id, datestring, duration, nodeslist, datadir, dirsize_string, obstable[counter][4+Nnodes], bftype, imtype, istype, cstype, fetype, statusline, pointing)
-			j=j+1
+		print "%d	%s" % (j, info)
+	else:
+		obstable=np.append(obstable, info)
 
+	# increase counter
+	j=j+1
+
+Nrecs=j
 # printing the sorted list
 if tosort == True:
-	sorted_indices=np.argsort(totsz, kind='mergesort')
-	j=0
-	if is_from == False:   # show every record
-		for i in np.flipud(sorted_indices):
-			if obstable[i][1] != "":
-				print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
-			else:
-				dirsize_string=""
-				for w in np.arange(Nnodes):
-					dirsize_string=dirsize_string+obstable[4+w]+"\t"
-				print "%d	%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[i][12+Nnodes], obstable[i][13+Nnodes], obstable[i][2], obstable[i][3], dirsize_string, obstable[i][4+Nnodes], obstable[i][5+Nnodes], obstable[i][6+Nnodes], obstable[i][7+Nnodes], obstable[i][8+Nnodes], obstable[i][9+Nnodes], obstable[i][10+Nnodes], obstable[i][11+Nnodes])
-			j=j+1
-	else:   # show only newer observations
-		for i in np.flipud(sorted_indices):
-			if obstable[i][1] != "":
-				print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
-				j=j+1
-			else:
-				c1=time.strptime(obstable[i][15], "%m%d")
-				to_show=time.mktime(c1)-fromdate
-				if to_show > 0:
-					dirsize_string=""
-					for w in np.arange(Nnodes):
-						dirsize_string=dirsize_string+obstable[4+w]+"\t"
-					print "%d	%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[i][12+Nnodes], obstable[i][13+Nnodes], obstable[i][2], obstable[i][3], dirsize_string, obstable[i][4+Nnodes], obstable[i][5+Nnodes], obstable[i][6+Nnodes], obstable[i][7+Nnodes], obstable[i][8+Nnodes], obstable[i][9+Nnodes], obstable[i][10+Nnodes], obstable[i][11+Nnodes])
-					j=j+1
+	sorted_indices=np.flipud(np.argsort(totsz[:Nrecs], kind='mergesort'))
+	for i in np.arange(Nrecs):
+		print "%d	%s" % (i, obstable[sorted_indices[i]])
