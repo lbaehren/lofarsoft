@@ -504,7 +504,7 @@ class hArray_par:
             if not (attr.find("_")==0):
                 l.append((str(attr),getattr(self,attr)))
         return l
-        
+
 
 def hArray_setUnit(self,*arg):
     self.setUnit_(*arg)

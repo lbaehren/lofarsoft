@@ -302,42 +302,42 @@ hStdDev(vec, mean)     - Calculates the standard deviation around a mean
 hStdDev(vec)           - Calculates the standard deviation of a vector of
                          values.
 
-hFindLessEqual(vec, threshold, vecout) - Find the samples that are LessEqual
+hFindLessEqual(vecout, vec, threshold) - Find the samples that are LessEqual
                          a certain threshold value and returns the number of
                          samples found and the positions of the samples in a
                          second vector.
 
-hFindLessEqualAbs(vec, threshold, vecout) - Find the samples whose absolute
+hFindLessEqualAbs(vecout, vec, threshold) - Find the samples whose absolute
                          values are LessEqual a certain threshold value and
                          returns the number of samples found and the
                          positions of the samples in a second vector.
 
-hFindGreaterThan(vec, threshold, vecout) - Find the samples that are
+hFindGreaterThan(vecout, vec, threshold) - Find the samples that are
                          GreaterThan a certain threshold value and returns
                          the number of samples found and the positions of the
                          samples in a second vector.
 
-hFindGreaterThanAbs(vec, threshold, vecout) - Find the samples whose absolute
+hFindGreaterThanAbs(vecout, vec, threshold) - Find the samples whose absolute
                          values are GreaterThan a certain threshold value and
                          returns the number of samples found and the
                          positions of the samples in a second vector.
 
-hFindGreaterEqual(vec, threshold, vecout) - Find the samples that are
+hFindGreaterEqual(vecout, vec, threshold) - Find the samples that are
                          GreaterEqual a certain threshold value and returns
                          the number of samples found and the positions of the
                          samples in a second vector.
 
-hFindGreaterEqualAbs(vec, threshold, vecout) - Find the samples whose
+hFindGreaterEqualAbs(vecout, vec, threshold) - Find the samples whose
                          absolute values are GreaterEqual a certain threshold
                          value and returns the number of samples found and
                          the positions of the samples in a second vector.
 
-hFindLessThan(vec, threshold, vecout) - Find the samples that are LessThan a
+hFindLessThan(vecout, vec, threshold) - Find the samples that are LessThan a
                          certain threshold value and returns the number of
                          samples found and the positions of the samples in a
                          second vector.
 
-hFindLessThanAbs(vec, threshold, vecout) - Find the samples whose absolute
+hFindLessThanAbs(vecout, vec, threshold) - Find the samples whose absolute
                          values are LessThan a certain threshold value and
                          returns the number of samples found and the
                          positions of the samples in a second vector.
@@ -1916,11 +1916,11 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   If the index vector is shorter than the output vector, the (indexed
   part of the) input vector will be copied mutliple times until the
   output vector is filled.  Use vec.resize first if you want to ensure
-  that both vectors have the same size.  
+  that both vectors have the same size.
 
   If number_of_elements is larger than zero and smaller than the
   length of the index vector, the remaining elements in the index
-  vector are simply ignored. 
+  vector are simply ignored.
 
 See also: hFindGreaterThan, etc..
 */
@@ -3040,18 +3040,21 @@ HNumber hStdDev (const Iter vec,const Iter vec_end)
   $PARDOCSTRING
 */
 template <class Iter>
-HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end, const Iter vec , const Iter vec_end, const IterValueType lower_limit,  const IterValueType upper_limit)
+HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
+			 const Iter vecin , const Iter vecin_end,
+			 const IterValueType lower_limit,
+			 const IterValueType upper_limit)
 {
-  Iter it=vec;
+  Iter itin=vecin;
   typename vector<HInteger>::iterator itout=vecout;
-  while (it<vec_end) {
-    if ({$MFUNC}(*it,lower_limit,upper_limit)) {
+  while (itin<vecin_end) {
+    if ({$MFUNC}(*itin,lower_limit,upper_limit)) {
       if (itout < vecout_end) {
-	*itout=(it-vec);
+	*itout=(itin-vecin);
 	++itout;
       };
     };
-    ++it;
+    ++itin;
   };
   return (itout-vecout);
 }
@@ -3069,27 +3072,30 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HInteger)(vecout)()("Output vector - contains a list of positions in the input vector which satisfy the threshold condition.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in the input vector which satisfy the threshold condition.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
 template <class Iter>
-HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueType threshold, const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end)
+HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
+			 const Iter vecin , const Iter vecin_end,
+			 const IterValueType threshold
+			 )
 {
-  Iter it=vec;
+  Iter itin=vecin;
   typename vector<HInteger>::iterator itout=vecout;
-  while (it<vec_end) {
-    if (*it HFPP_OPERATOR_$MFUNC threshold) {
+  while (itin<vecin_end) {
+    if (*itin HFPP_OPERATOR_$MFUNC threshold) {
       if (itout < vecout_end) {
-	*itout=(it-vec);
+	*itout=(itin-vecin);
 	++itout;
       };
     };
-    ++it;
+    ++itin;
   };
   return (itout-vecout);
 }
@@ -3101,27 +3107,30 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HInteger)(vecout)()("Output vector - contains a list of positions in input vector which are above threshold")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in input vector which are above threshold")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
 template <class Iter>
-HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueType threshold, const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end)
+HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
+			 const Iter vecin , const Iter vecin_end,
+			 const IterValueType threshold
+			 )
 {
-  Iter it=vec;
+  Iter itin=vecin;
   typename vector<HInteger>::iterator itout=vecout;
-  while (it<vec_end) {
-    if (abs(*it) HFPP_OPERATOR_$MFUNC threshold) {
+  while (itin<vecin_end) {
+    if (abs(*itin) HFPP_OPERATOR_$MFUNC threshold) {
       if (itout < vecout_end) {
-	*itout=(it-vec);
+	*itout=(itin-vecin);
 	++itout;
       };
     };
-    ++it;
+    ++itin;
   };
   return (itout-vecout);
 }
@@ -3533,8 +3542,7 @@ This requires random access iterators, in order to have an optimal search result
 
 */
 template <class Iter>
-HInteger HFPP_FUNC_NAME (const Iter vec,
-			 const Iter vec_end,
+HInteger HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
 			 const IterValueType value)
 //iterator_traits<Iter>::value_type value)
 {
@@ -4948,7 +4956,7 @@ gsl_vector * STL2GSL(const Iter vec, const Iter vec_end) {
   return m;
 }
 
-//$DOCSTRING: Calculate the XValues matrix vector for the polynomial (linear-fitting) routine, calculating essentially all powers of the input vector. 
+//$DOCSTRING: Calculate the XValues matrix vector for the polynomial (linear-fitting) routine, calculating essentially all powers of the input vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hLinearFitPolynomialX
 //-----------------------------------------------------------------------
@@ -4996,7 +5004,7 @@ void HFPP_FUNC_NAME(
       *itout=pow(*itx,*itn);
       break;
     };
-    ++itout; ++itn; 
+    ++itout; ++itn;
     if (itn==powers_end) { //We have cycled through all powers, start at the beginning and go to next x value
       itn=powers;
       ++itx;
@@ -5059,7 +5067,7 @@ void HFPP_FUNC_NAME(
     ++itn; ++itc;
     if ((itn==powers_end )|| (itc==coeff_end)) { //We have cycled through all powers, start at the beginning and go to next x value
       itn=powers; itc=coeff;
-      ++itx; ++itout; 
+      ++itx; ++itout;
     };
   };
 }
@@ -5091,7 +5099,7 @@ void HFPP_FUNC_NAME(
   Iter itout(vecout), itin(vecin);
   while ((itout != vecout_end) && (itin != vecin_end)) {
     *itout = 1/((*itin) * (*itin));
-    ++itout; ++itin; 
+    ++itout; ++itin;
   };
 }
 
@@ -5143,16 +5151,16 @@ HNumber HFPP_FUNC_NAME(
     return -1.0;
   };
 
-  if (ndata>0) Ndata=min(ndata,Ndata); 
+  if (ndata>0) Ndata=min(ndata,Ndata);
 
   X = STL2GSLM(xvec, Ndata, Ncoeff);
   y = STL2GSL(yvec, yvec+Ndata);
   w = STL2GSL(wvec, wvec+Ndata);
-     
+
   c = STL2GSL(vecout, vecout_end);
   cov = STL2GSLM(veccov, Ncoeff, Ncoeff);
-     
-  //If one can find out how much memory is needed, "work" could be provided as a scratch input vector to this function ...     
+
+  //If one can find out how much memory is needed, "work" could be provided as a scratch input vector to this function ...
   gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc (Ndata, Ncoeff);
   gsl_multifit_wlinear (X, w, y, c, cov,&chisq, work);
   gsl_multifit_linear_free (work);
@@ -5207,15 +5215,15 @@ HNumber HFPP_FUNC_NAME(
     return -1.0;
   };
 
-  if (ndata>0) Ndata=min(ndata,Ndata); 
+  if (ndata>0) Ndata=min(ndata,Ndata);
 
   X = STL2GSLM(xvec, Ndata, Ncoeff);
   y = STL2GSL(yvec, yvec+Ndata);
-     
+
   c = STL2GSL(vecout, vecout_end);
   cov = STL2GSLM(veccov, Ncoeff, Ncoeff);
-     
-  //If one can find out how much memory is needed, "work" could be provided as a scratch input vector to this function ...     
+
+  //If one can find out how much memory is needed, "work" could be provided as a scratch input vector to this function ...
   gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc (Ndata, Ncoeff);
   gsl_multifit_linear (X, y, c, cov,&chisq, work);
   gsl_multifit_linear_free (work);
