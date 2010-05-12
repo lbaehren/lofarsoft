@@ -116,10 +116,10 @@ namespace CR { // Namespace CR -- begin
     uint nr_channels = spectrumVec.size();
     uint nr_channels_per_segment = nr_channels/nr_samples;
     int extra_channels= (nr_channels%nr_samples); 
-    if(extra_channels > 0){
-      std::cerr << "[RFIMitigation] Warning, nr_samples does not match. Putting extra channels in last bin" << std::endl;
-      ;//warning: add extra channels to last bin
-    }
+//     if(extra_channels > 0){
+//       std::cerr << "[RFIMitigation] Warning, nr_samples does not match. Putting extra channels in last bin" << std::endl;
+//       ;//warning: add extra channels to last bin
+//     }
     Vector<Double> tempVec(nr_channels_per_segment);
     for(uint isamp=0;isamp<nr_samples;isamp++)
       {
@@ -136,7 +136,7 @@ namespace CR { // Namespace CR -- begin
 	    }
 	  }
 	//now calculate RMS and mean
-	amplVec(isamp)= mean(tempVec);
+	amplVec(isamp)= median(tempVec);
 	rmsVec(isamp) = rms(tempVec);
 	
       }
@@ -156,10 +156,10 @@ namespace CR { // Namespace CR -- begin
     uint nr_channels_per_segment = nr_channels/nr_samples;
     assert(nr_channels_per_segment>0);
     int extra_channels= (nr_channels%nr_samples); 
-    if(extra_channels > 0){
-      std::cerr << "[RFIMitigation] Warning, nr_samples does not match. Assuming extra channels in last bin" << std::endl;
-      //warning: assume extra channels in last bin
-    }
+//     if(extra_channels > 0){
+//       std::cerr << "[RFIMitigation] Warning, nr_samples does not match. Assuming extra channels in last bin" << std::endl;
+//       //warning: assume extra channels in last bin
+//     }
     uint eff_nr_samples=0;
     //first get effective nr of samples
     for( uint isamp=0;isamp<nr_samples;isamp++)
@@ -175,7 +175,7 @@ namespace CR { // Namespace CR -- begin
     uint eff_isamp=0;
     for( uint isamp=0;isamp<nr_samples-1;isamp++){
       if(rmsVec(isamp)<rmsThresholdValue){//only add data point if rms below treshold
-	xin(eff_isamp)=isamp+nr_channels_per_segment*0.5;
+	xin(eff_isamp)=isamp*nr_channels_per_segment+nr_channels_per_segment*0.5;
 	yin(eff_isamp) = amplVec(isamp);
 	eff_isamp++;
       }
