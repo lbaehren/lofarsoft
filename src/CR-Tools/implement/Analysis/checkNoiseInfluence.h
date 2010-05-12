@@ -185,7 +185,16 @@ namespace CR { // Namespace CR -- begin
       
       \param evname          - path to the eventfile with noise
     */
-    void SNRofNoise(const string& evname);                          
+    void SNRofNoise(const string& evname);   
+    
+    
+    /*!
+      \brief Plots the noise trace and the step function for calculation of the noise level
+    
+      \param filename         -- Name of the .ps file (without ".ps") the plot will be written to
+    */    
+    void plotNoise (const string& filename);
+
 
                           
   }; // class definition

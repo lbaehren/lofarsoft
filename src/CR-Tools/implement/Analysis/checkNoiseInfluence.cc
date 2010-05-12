@@ -43,7 +43,7 @@ namespace CR { // Namespace CR -- begin
     pulseTime(0.),
     startTime(-150e-6),
     noiseMethod(4),
-    noiseIntervalLength(10e-6),
+    noiseIntervalLength(3e-6),
     noiseIntervalGap(5e-6),
     NnoiseIntervals(20),
     upsampledNoise( Matrix<Double>() ),
@@ -628,6 +628,172 @@ namespace CR { // Namespace CR -- begin
       rootfile->Close();
     } catch (AipsError x) {
       cerr << "checkNoiseInfluence::SNRofNoise: " << x.getMesg() << endl;
+    }  
+  }
+
+  void checkNoiseInfluence::plotNoise(const string& filename)
+  {
+    try {   
+      SimplePlot plotter;                            // define plotter
+      Vector<Double> xaxis;                          // xaxis
+      double xmax,xmin,ymin=0,ymax=0;                // Plotrange
+      int color = 9;                                 // starting color
+
+      // make antennaSelection unique, as casacore-Vectors are allways passed by reference
+      Vector<Bool> antennaSelection = CompleteBeamPipe_p->GetAntennaMask(lev_p).copy();
+
+      // Get the (not upsampled) time axis
+      lev_p->timeValues(xaxis);
+
+      // Get the yValues of all antennas (raw data or fieldstrength)
+      Matrix<Double> yValues = CompleteBeamPipe_p->GetUnshiftedTimeSeries(lev_p).copy();
+
+      // Upsampled yValues
+      Matrix<Double> upYvalues = CompleteBeamPipe_p->getUpsampledFieldstrength(lev_p, getUpsamplingExponent(), antennaSelection);
+
+      // Upsampled x-axis
+      Vector<Double> upxaxis = CompleteBeamPipe_p->getUpsampledTimeAxis(lev_p, getUpsamplingExponent());
+
+      // check length of time axis and yValues traces for consistency
+      if (upxaxis.size() != upYvalues.column(0).size())
+        cerr << "checkNoiseInfluence::plotNoise: Length of time axis differs from length of the antenna traces!\n" << endl;
+
+
+      // Define plotrange for not upsampled and upsampled data
+      setPlotInterval(-2.5e-6, -2e-6);
+      CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+
+      Slice plotRange = CompleteBeamPipe_p->calculatePlotRange(xaxis);
+      Slice upplotRange = CompleteBeamPipe_p->calculatePlotRange(upxaxis);
+
+      // conversion to micro (no conversion for height of raw data)
+      xaxis *= 1e6;
+      yValues *= 1e6;
+      upxaxis *= 1e6;
+      upYvalues *= 1e6;  
+
+      // define Plotrange
+      xmin = min(xaxis(plotRange));
+      xmax = max(xaxis(plotRange));
+
+      // set up label for plots and filename
+      string plotfilename;
+      string label;
+      uInt gtdate;
+      stringstream gtlabel, antennanumber;
+      // Get the AntennaIDs for labeling
+      lev_p->headerRecord().get("Date",gtdate);
+      gtlabel << gtdate;
+
+
+      // Create empty vector for not existing error bars 
+      Vector<Double> empty;
+
+      // Make the plots (either all antennas together or seperated)
+      stringstream antennaid;
+      Vector<Int> AntennaIDs;
+      lev_p->headerRecord().get("AntennaIDs",AntennaIDs);
+
+      // Create the plots for each individual antenna looping through antennas
+      cout <<"Plotting the field strength\n Antenna ..." ;
+
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++){
+        // consider only selected antennas
+        if (antennaSelection(i)){
+          cout << " " << i;
+          // create traces for plotting and for noise calculation
+          Vector<Double> trace = upYvalues.column(i)(upplotRange);
+          Vector<Double> envelope = CompleteBeamPipe_p->envelope(trace);
+          Vector<Double> noiseTrace = envelope.copy();
+          
+          // find local maxima and their weight (length of step)
+          vector<double> localExtrema; //  vector to store local extrema of trace
+          vector<double> localExtremaWeight; // weight of local extrema (for method 4)    
+          int max1 = 0, max2 = 0; // position of second last and last maximum (for weight calculation) 
+          double wsum = 0.;         
+          for(unsigned int j = 1; j < noiseTrace.nelements()-1; ++j) {
+            if ( (noiseTrace(j-1) < noiseTrace(j)) && (noiseTrace(j) > noiseTrace(j+1)) ) {
+              localExtrema.push_back(noiseTrace(j));
+              if (max2 == 0) {
+                max2 = j;         // for the first maximum, just store the position
+                max1 = -max2;
+              } else {
+                // weight = distance between neighbouring maxima
+                wsum += double(j-max1)/2.;
+                localExtremaWeight.push_back(wsum);
+                // cout << "max 1 = " << max1 << "   max 2 = " << max2 << "   j = " << j << "   w = " << double(j-max1)/2. << "   wsum = " << wsum << endl;
+                max1 = max2;
+                max2 = j;
+              }            
+            }  
+          }
+          // store weight for last maximum
+          localExtremaWeight.push_back(noiseTrace.nelements()+1);
+      
+          unsigned int ex = 0; // counter for local extrema
+          for(unsigned int j = 0; j < noiseTrace.nelements(); ++j) {
+            noiseTrace(j) = localExtrema[ex];   // set trace to step height (= height of closest local maximum)
+            if (j > localExtremaWeight[ex]) { // weight defines length of step
+              ++ex;
+            }  
+            if (ex > localExtrema.size()) {
+              cout << "\nSomething goes wrong with the number of steps:"
+                   << "\nnoiseTrace.nelements() = " << noiseTrace.nelements()
+                   << "\nj = " << j
+                   << "\nlocalExtrema.size() = " << localExtrema.size()
+                   << "\nlocalExtremaWeight.size() = " << localExtremaWeight.size()
+                   << "\nex = " << ex
+                   << endl;
+              return;           
+            }
+          }
+
+          // find the minimal and maximal y values for the plot
+          // do it with the upsampled data only as they are as least as heigh as the original ones
+          ymin = min(trace);
+          ymax = max(envelope);
+
+          // make y-axis symmetrical around 0
+          if (ymax < (-ymin))
+            ymax = -ymin;
+
+          // round y-axis height
+          int digit = trunc(log10(ymax));
+          ymax = double(ceil(ymax*pow(10.,-digit)*25))/25./pow(10.,-digit)*1.19;
+          ymin = -ymax;
+      
+          
+        
+          // create filename and label
+          antennanumber.str("");
+          antennanumber.clear();
+          antennanumber << (i+1);
+          antennaid << AntennaIDs(i);
+
+          //set the plotfilename to filename + "-" + antennanumber.str() + ".ps";
+          if ( (i+1) < 10 ){
+             plotfilename = filename + "-0" + antennanumber.str() + ".ps";
+          }else{
+             plotfilename = filename + "-" + antennanumber.str() + ".ps";
+          }
+          //set label "GT - Ant.Nr"
+          label = "GT " + gtlabel.str() + " - Antenna " + antennanumber.str();
+
+          // Initialize the plot giving xmin, xmax, ymin and ymax
+          plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
+
+          plotter.AddLabels("time t [#gms]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
+
+          // Plot (upsampled) trace
+          plotter.PlotLine(upxaxis(upplotRange),trace,color,1);
+          plotter.PlotLine(upxaxis(upplotRange),envelope,color,1);
+          plotter.PlotLine(upxaxis(upplotRange),noiseTrace,color,1);
+          plotter.PlotSymbols(xaxis(plotRange),yValues.column(i)(plotRange),empty, empty, color, 2, 5);
+        }
+      }
+      cout << endl;
+    } catch (AipsError x) {
+      cerr << "checkNoiseInfluence::plotNoise: " << x.getMesg() << endl;
     }  
   }
 

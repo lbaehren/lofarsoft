@@ -68,7 +68,7 @@ const int pulseAnt = 1;
 const double pulseStart = -4e-6;
 // const double pulseStart = -1e-5;
 // const double pulseStop  = 1e-5;
-const int upsamplingExponent = 6;
+const int upsamplingExponent = 5;
 const int NnoiseIntervals = 20; // number of noise intervals (do not use more than 20)
 string resultFileName = "summary.dat";
 
@@ -140,6 +140,8 @@ int main (int argc, char *argv[])
       cout << "Looking to signal-to-noise ratio of pure noise..." << endl;
       
       noisetest.SNRofNoise(noiseEvent);
+      //noisetest.loadNoiseEvent(noiseEvent);    
+      //noisetest.plotNoise("noiseSteps");
     } else { 
       cout << "Looking how pulse is changed by noise..." << endl;
     
