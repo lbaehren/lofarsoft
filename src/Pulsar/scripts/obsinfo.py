@@ -5,6 +5,10 @@ import time
 
 # True if we want the output list to be sorted by the TotalSize
 tosort=False
+# if True then will show only those observations newer than some date
+is_from=False
+fromstring=""
+fromdate=""
 
 # storage nodes to collect info about Pulsar Observations
 # we assume that even for the case of long observations when data were spreaded out
@@ -48,14 +52,14 @@ def usage (prg):
         """ Prints info how to use the script.
         """
         print "Program %s lists info about sub5 observations" % (prg, )
-        print "Usage: %s [-s, --sorted] [-h, --help]\n" % (prg, )
+        print "Usage: %s [-s, --sorted] [-f, --from <YYYY-MM-DD>] [-h, --help]\n" % (prg, )
 
 # Parse the command line
 def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hs", ["help", "sorted"])
+		opts, args = getopt.getopt (argv, "hsf:", ["help", "sorted", "from="])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -63,6 +67,13 @@ def parsecmd(prg, argv):
 			if opt in ("-s", "--sorted"):
 				global tosort
 				tosort = True
+			if opt in ("-f", "--from"):
+				global is_from
+				is_from = True
+				global fromstring
+				fromstring=arg
+				global fromdate
+				fromdate = time.mktime(time.strptime(arg, "%Y-%m-%d"))
 
 	except getopt.GetoptError:
 		print "Wrong option!"
@@ -86,6 +97,8 @@ if __name__ == "__main__":
 # more recent obs is the obs with higher ID (as it should be)
 obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 print "Number of observations in Sub5: %d" % (np.size(obsids), )
+if is_from == True:
+	print "List only observations since %s" % (fromstring, )
 print
 
 # array of total sizes for every ObsID
@@ -99,6 +112,7 @@ print "#========================================================================
 print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	lse013	lse014	lse015	Total(GB)	BF IM IS CS FE	Reduced		Pointing"
 print "#================================================================================================================================================="
 
+j=0 # extra index to follow only printed lines
 # loop for every observation
 for counter in np.arange(np.size(obsids)):
 	
@@ -334,19 +348,36 @@ for counter in np.arange(np.size(obsids)):
 		duration="?"
 	obstable[counter].append(duration)
 
+	# check if we want to show only newer data and check if the current obs is newer than specified date
+	if is_from == True:
+		to_show=time.mktime(c1)-fromdate
+
 
 	# Printing out the report (if we want unsorted list)
 	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes Reduced Pointing
 	if tosort == False:
-		print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (counter, id, datestring, duration, nodeslist, datadir, obstable[counter][4], obstable[counter][5], obstable[counter][6], obstable[counter][7], bftype, imtype, istype, cstype, fetype, statusline, pointing)
+		if is_from == False or (is_from == True and to_show > 0):
+			print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, id, datestring, duration, nodeslist, datadir, obstable[counter][4], obstable[counter][5], obstable[counter][6], obstable[counter][7], bftype, imtype, istype, cstype, fetype, statusline, pointing)
+			j=j+1
 
 # printing the sorted list
 if tosort == True:
 	sorted_indices=np.argsort(totsz, kind='mergesort')
 	j=0
-	for i in np.flipud(sorted_indices):
-		if obstable[i][1] != "":
-			print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
-		else:
-			print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[i][15], obstable[i][16], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12], obstable[i][13], obstable[i][14])
-		j=j+1
+	if is_from == False:   # show every record
+		for i in np.flipud(sorted_indices):
+			if obstable[i][1] != "":
+				print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
+			else:
+				print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[i][15], obstable[i][16], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12], obstable[i][13], obstable[i][14])
+			j=j+1
+	else:   # show only newer observations
+		for i in np.flipud(sorted_indices):
+			c1=time.strptime(obstable[i][15], "%m%d")
+			to_show=time.mktime(c1)-fromdate
+			if to_show > 0:
+				if obstable[i][1] != "":
+					print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
+				else:
+					print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[i][15], obstable[i][16], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12], obstable[i][13], obstable[i][14])
+				j=j+1
