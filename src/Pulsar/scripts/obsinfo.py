@@ -1,6 +1,7 @@
 import os, sys, glob
 import getopt
 import numpy as np
+import time
 
 # True if we want the output list to be sorted by the TotalSize
 tosort=False
@@ -35,8 +36,11 @@ obsids=[]
 # 8 - "+" if BeamFormed obs
 # 9 - "+" if Imaging obs
 # 10 - "+" if Incoherent Stokes obs
-# 11 - status about reduced data
-# 12 - pointing
+# 11 - "+" if Coherent Stokes obs
+# 12 - status about reduced data
+# 13 - pointing
+# 14 - Date (MMDD)
+# 15 - duration
 
 # help
 def usage (prg):
@@ -77,7 +81,9 @@ if __name__ == "__main__":
 			obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
 
 # getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
-obsids = np.unique(obsids)
+# and sort in reverse order (most recent obs go first)
+# more recent obs is the obs with higher ID (as it should be)
+obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 print "Number of observations in Sub5: %d" % (np.size(obsids), )
 print
 
@@ -87,9 +93,9 @@ totsz = np.zeros(np.size(obsids))
 obstable=[]
 
 # printing out the header of the table
-# The columns are ObsID   NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes Reduced Pointing
+# The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes CohStokes Reduced Pointing
 print "#================================================================================================================================================="
-print "# No.	ObsID			NodesList		Datadir	lse013	lse014	lse015	Total(GB)	BF IM IS	Reduced		Pointing"
+print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	lse013	lse014	lse015	Total(GB)	BF IM IS CS	Reduced		Pointing"
 print "#================================================================================================================================================="
 
 # loop for every observation
@@ -148,14 +154,14 @@ for counter in np.arange(np.size(obsids)):
         # reading the parset file
 	# getting the info about StorageNodes. Note! For old parsets there seems to be no such a keyword Virtual...
 	# However, the old keyword OLAP.storageNodeList has "non-friendly" format, so I just ignore this by now
-	cmd="grep Observation.VirtualInstrument.storageNodeList %s" % (log,)
+	cmd="grep Observation.VirtualInstrument.storageNodeList %s | tr -d lse" % (log,)
 	nodeslist=os.popen(cmd).readlines()
 	if np.size(nodeslist) > 0:
 		# it means that this keyword exist and we can extract the info
 		nodeslist=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
 	# cut the string of nodes if it is too long
-	if len(nodeslist)>22:
-		nodeslist=nodeslist[:22] + "..."
+	if len(nodeslist)>13:
+		nodeslist=nodeslist[:13] + "..."
 	# adding the nodes' list to the table
 	obstable[counter].append(nodeslist)
 
@@ -220,6 +226,20 @@ for counter in np.arange(np.size(obsids)):
 	else:
 		istype = "?"
 	obstable[counter].append(istype)
+	# check if data are coherent stokes data
+	cmd="grep outputCoherentStokes %s" % (log,)
+	cstype=os.popen(cmd).readlines()
+	if np.size(cstype) > 0:
+		# this info exists in parset file
+		cstype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+		if cstype == 'f':
+			cstype = "-"
+		else:
+			cstype = "+"
+	else:
+		cstype = "?"
+	obstable[counter].append(cstype)
+
 
 	# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
 	# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file in ./incoherentstokes/ directory
@@ -270,10 +290,41 @@ for counter in np.arange(np.size(obsids)):
 	pointing="%s%s" % (rastring, decstring)
 	obstable[counter].append(pointing)
 
+	# Getting the Date of observation
+	cmd="grep Observation.startTime %s | tr -d \\'" % (log,)
+	datestring1=os.popen(cmd).readlines()
+	if np.size(datestring1) > 0:
+		# it means that this keyword exist and we can extract the info
+		datestring1=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+		smonth=datestring1.split("-")[1]
+		sday=datestring1.split("-")[2].split(" ")[0]
+		datestring=smonth+sday
+	else:
+		datestring="????"
+	obstable[counter].append(datestring)
+
+	# Getting the Duration
+	cmd="grep Observation.stopTime %s | tr -d \\'" % (log,)
+	datestring2=os.popen(cmd).readlines()
+	if np.size(datestring1) > 0 and np.size(datestring2) > 0:
+		# it means that both start and stop Times exist in parset file
+		datestring2=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+		c1 = time.strptime(datestring1, "%Y-%m-%d %H:%M:%S")
+		c2 = time.strptime(datestring2, "%Y-%m-%d %H:%M:%S")
+		diff=time.mktime(c2)-time.mktime(c1)  # difference in seconds
+		if float(diff/3600.0) > 1.:
+			duration="%.1fh" % (diff/3600.)
+		else:
+			duration="%.1fm" % (diff/60.)
+	else:
+		duration="?"
+	obstable[counter].append(duration)
+
+
 	# Printing out the report (if we want unsorted list)
-	# The columns are ObsID   NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes Reduced Pointing
+	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes Reduced Pointing
 	if tosort == False:
-		print "%d	%s	%25s	%s	%s	%s	%s	%s		%c  %c  %c		%-11s	%s" % (counter, id, nodeslist, datadir, obstable[counter][4], obstable[counter][5], obstable[counter][6], obstable[counter][7], bftype, imtype, istype, statusline, pointing)
+		print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c	%-11s	%s" % (counter, id, datestring, duration, nodeslist, datadir, obstable[counter][4], obstable[counter][5], obstable[counter][6], obstable[counter][7], bftype, imtype, istype, cstype, statusline, pointing)
 
 # printing the sorted list
 if tosort == True:
@@ -283,5 +334,5 @@ if tosort == True:
 		if obstable[i][1] != "":
 			print "%d	%s      %s" % (j, obstable[i][0], obstable[i][1])
 		else:
-			print "%d	%s	%25s	%s	%s	%s	%s	%s		%c  %c  %c		%-11s	%s" % (j, obstable[i][0], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12])
+			print "%d	%s	%s	%s	%-16s %s	%s	%s	%s	%s		%c  %c  %c  %c	%-11s	%s" % (j, obstable[i][0], obstable[14], obstable[15], obstable[i][2], obstable[i][3], obstable[i][4], obstable[i][5], obstable[i][6], obstable[i][7], obstable[i][8], obstable[i][9], obstable[i][10], obstable[i][11], obstable[i][12], obstable[i][13])
 		j=j+1
