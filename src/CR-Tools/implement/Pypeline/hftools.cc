@@ -2784,6 +2784,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSort
 //-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
@@ -3168,7 +3169,7 @@ void HFPP_FUNC_NAME (const Iter vec,
 		     )
 {
   HInteger count(0), len(vec_end-vec);
-  if (len==1) {*vec=startvalue; return;}; 
+  if (len==1) {*vec=startvalue; return;};
   HNumber slope((endvalue-startvalue)/(len-1));
   Iter it(vec);
   while (it<vec_end) {
@@ -3208,7 +3209,7 @@ void HFPP_FUNC_NAME (const Iter vec,
 		     )
 {
   HInteger count(0), len(vec_end-vec);
-  if (len==1) {*vec=startvalue; return;}; 
+  if (len==1) {*vec=startvalue; return;};
   HNumber slope((endvalue-startvalue)/len);
   Iter it(vec);
   while (it<vec_end) {
@@ -3281,7 +3282,7 @@ void HFPP_FUNC_NAME (const Iter vecout,
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Upampled output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Upsampled output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Shorter vector to be upsampled.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 
 //$COPY_TO END --------------------------------------------------
@@ -3293,7 +3294,7 @@ Example:
 x=hArray(float, [31])
 v=hArray(float, [10])
 v.interpolate2p(0.,9.) #-> [0,1,2,3,4,5,6,7,8,9]
-x.upsample(v) 
+x.upsample(v)
 */
 
 template <class Iter>
