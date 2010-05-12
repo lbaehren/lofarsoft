@@ -861,6 +861,7 @@ namespace CR { // Namespace CR -- begin
                                         const double& distance,
                                         const string& beamtype,
                                         const double& hanning)
+
  {
    bool status=1;
    try {
@@ -1070,6 +1071,63 @@ namespace CR { // Namespace CR -- begin
      }
    return status;
  }
+
+
+ void analyseLOPESevent2::calculateSign (map <int,PulseProperties> & eventPulses,
+                                         double& ratioDiffSign,
+                                         double& ratioDiffSignEnv,
+                                         double& weightedTotSign,
+                                         double& weightedTotSignEnv)
+
+ {
+    try {
+
+	int sign=0, signAtEnvTime=0;
+     double antP=0., antN=0.; 
+     double antPEnv=0., antNEnv=0.; 
+     double envMax=0.,noise=0.,snr=0.,nume=0.,numeEnv=0.,denom=0.;
+     double total_minMaxSign=0., total_envSign=0.;
+
+
+     for(map<int,PulseProperties>::iterator iter=eventPulses.begin(); iter !=eventPulses.end(); ++iter)
+	{ 
+     	sign=iter->second.minMaxSign;
+          signAtEnvTime=iter->second.envSign;
+		envMax=iter->second.envelopeMaximum;
+		noise=iter->second.noise;
+
+		snr=(envMax/noise);
+		nume += (sign*snr);
+		numeEnv += (signAtEnvTime*snr);
+		denom += snr;
+
+		if(sign>0)
+            antP++;
+          if(sign<0)
+            antN++;
+          if(signAtEnvTime>0)
+		  antPEnv++;
+          if(signAtEnvTime<0)
+		  antNEnv++;
+
+	}//for map
+
+	total_minMaxSign = (antP-antN);
+     total_envSign = (antPEnv-antNEnv);
+//     cout<<"Positive:  "<<antP<<"   Negative:  "<<antN<<"   Tot  :"<<(antP+antN)<<endl;
+//     cout<<"@ envelope Positive: "<<antPEnv<<" Negative:  "<<antNEnv<<" Tot  :"<<(antPEnv+antNEnv)<<endl;
+
+	ratioDiffSign=(antP-antN)/(antP+antN);
+     ratioDiffSignEnv=(antPEnv-antNEnv)/(antPEnv+antNEnv);
+
+	weightedTotSign= nume/denom;
+	weightedTotSignEnv= numeEnv/denom;
+
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent2::calculateSign: " << x.getMesg() << endl;
+    }
+  }
+
 
 
 } // Namespace CR -- end

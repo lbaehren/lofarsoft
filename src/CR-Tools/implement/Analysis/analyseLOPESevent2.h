@@ -572,6 +572,13 @@ namespace CR { // Namespace CR -- begin
                        const string& beamtype="CC",
                        const double& hanning=0);
 
+
+ void calculateSign (map <int,PulseProperties> & eventPulses,
+                                         double& ratioDiffSign,
+                                         double& ratioDiffSignEnv,
+                                         double& weightedTotSign,
+                                         double& weightedTotSignEnv);
+
   };
 
 } // Namespace CR -- end
