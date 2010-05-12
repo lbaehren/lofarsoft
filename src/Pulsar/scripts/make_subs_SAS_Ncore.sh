@@ -4,7 +4,7 @@
 # where the default N = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.7
+VERSION=1.8
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-rfi] [-C] [-del]\n\n"\
@@ -315,7 +315,7 @@ then
 fi
 
 jj=0
-for ii in `ls test*.inf`
+for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
 do
  mv ${ii} ${STOKES}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
  jj=`expr $jj + 1`
