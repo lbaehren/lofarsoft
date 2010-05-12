@@ -107,6 +107,9 @@
 /* Define to 1 if we have Glish installed */
 #cmakedefine HAVE_GLISH 1
 
+/* Define to 1 if we have a working installation of the GSL library */
+#cmakedefine HAVE_GSL 1
+
 /* Define to 1 if we have a working installation of the GTK library */
 #cmakedefine HAVE_GTK 1
 
