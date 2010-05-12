@@ -20,6 +20,7 @@
 #include <typeinfo>
 #include <ctime>
 #include <fftw3.h>
+#include <gsl/gsl_multifit.h>
 
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>

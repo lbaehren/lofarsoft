@@ -28,7 +28,6 @@
 */
 #include <memory>
 
-
 #undef HFPP_VERBOSE
 #include "hftools.h"
 
@@ -1715,8 +1714,8 @@ std::vector<T> HFPP_FUNC_NAME(std::vector<T> & vec)
   std::vector<T> vnew(vec.size());
   return vnew;
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Resize a vector to a new length.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -1864,6 +1863,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Copies a vector to another one without resizing them.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCopy
@@ -1895,6 +1895,52 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
     *itout=*itin;
     ++itin; ++itout;
     if (itin==vecin_end) itin=vecin;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Copies all elements provided in an indexlist from one vector to another (no resizing is done!).
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCopy
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vecout)()("Vector containing a copy of the input values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecin)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(indexlist)()("Index list containing the positions of the elements to be copied over, (e.g. [0,2,4,...] will copy every second element).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(number_of_elements)()("Maximum number of elements to be copied, if this value is <0, then copying will be repeated until the output vector is filled.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  If the index vector is shorter than the output vector, the (indexed
+  part of the) input vector will be copied mutliple times until the
+  output vector is filled.  Use vec.resize first if you want to ensure
+  that both vectors have the same size.  
+
+  If number_of_elements is larger than zero and smaller than the
+  length of the index vector, the remaining elements in the index
+  vector are simply ignored. 
+
+See also: hFindGreaterThan, etc..
+*/
+template <class Iter, class Iterin, class IterI>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end, const IterI index, const IterI index_end, const HInteger number_of_elements)
+{
+  typedef IterValueType T;
+  Iter itout(vecout);
+  IterI itidx(index);
+  Iterin itin;
+  HInteger count(number_of_elements);
+  if ((index >= index_end) || count==0) return;
+  if (vecin >= vecin_end) return;
+  if (count<0) count=(vecout_end-vecout);
+  while (itout != vecout_end) {
+    itin = vecin + *itidx;
+    if (itin < vecin_end) *itout=hfcast<T>(*itin);
+    --count; if (count==0) return;
+    ++itidx; ++itout;
+    if (itidx==index_end) itidx=index;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -2969,6 +3015,50 @@ HNumber hStdDev (const Iter vec,const Iter vec_end)
 //========================================================================
 
 
+#define Between(x,lower,upper) ((x > lower) && (x < upper))
+#define BetweenOrEqual(x,lower,upper) ((x >= lower) && (x <= upper))
+#define Outside(x,lower,upper) ((x < lower) || (x > upper))
+#define OutsideOrEqual(x,lower,upper) ((x <= lower) || (x >= upper))
+
+//========================================================================
+//$ITERATE MFUNC Between,BetweenOrEqual,Outside,OutsideOrEqual
+//========================================================================
+
+//$DOCSTRING: Find the samples that are $MFUNC upper and lower threshold values and returns the number of samples found and the positions of the samples in a second vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFind{$MFUNC}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in input vector which are between the limits.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(lower_limit)()("The lower limit of values to find.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HFPP_TEMPLATED_TYPE)(upper_limit)()("The upper limit of values to find.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end, const Iter vec , const Iter vec_end, const IterValueType lower_limit,  const IterValueType upper_limit)
+{
+  Iter it=vec;
+  typename vector<HInteger>::iterator itout=vecout;
+  while (it<vec_end) {
+    if ({$MFUNC}(*it,lower_limit,upper_limit)) {
+      if (itout < vecout_end) {
+	*itout=(it-vec);
+	++itout;
+      };
+    };
+    ++it;
+  };
+  return (itout-vecout);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+//$ENDITERATE
+
+
 //========================================================================
 //$ITERATE MFUNC GreaterThan,GreaterEqual,LessThan,LessEqual
 //========================================================================
@@ -2981,7 +3071,7 @@ HNumber hStdDev (const Iter vec,const Iter vec_end)
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HInteger)(vecout)()("Output vector - contains a list of positions in input vector which are above threshold")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(vecout)()("Output vector - contains a list of positions in the input vector which satisfy the threshold condition.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -3269,7 +3359,7 @@ void HFPP_FUNC_NAME (const Iter vecout,
     *itout=hMean(it1,it2);
     *itrms=hStdDev(it1,it2,*itout);
     it1=it2;
-    ++itout;
+    ++itout;++itrms;
     }
   *itout=hMean(it2,vecin_end);
   *itrms=hStdDev(it2,vecin_end,*itout);
@@ -3377,7 +3467,7 @@ void HFPP_FUNC_NAME (const Iter vecout,
     *itrms=hStdDev(it1,it2,mean);
     *itout=hMeanThreshold(it1,it2,mean,*itrms,nsigma);
     it1=it2;
-    ++itout;
+    ++itout;++itrms;
   }
   mean=hMean(it2,vecin_end);
   *itrms=hStdDev(it2,vecin_end,mean);
@@ -4822,10 +4912,323 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+// ================================================================================
+//$SECTION: GSL Fitting
+// ================================================================================
+
+//$COPY_TO HFILE: #ifdef HAVE_GSL
+//!Makes a shared memory GSL Matrix. Note that m->block needs to be deleted explicitly afterwards ...
+template <class Iter>
+gsl_matrix * STL2GSLM(const Iter vec, const HInteger dim1, const HInteger dim2) {
+  gsl_matrix * m = new gsl_matrix;
+  m->size1 = dim1;
+  m->size2 = dim2;
+  m->tda = dim2;
+  m->data = (double*) &(*vec);
+  m->block = NULL;
+  //  m->block = new gsl_block;
+  //  m->block->data = m->data;
+  //  m->block->size=dim1*dim2;
+  m->owner = 0;
+  return m;
+}
+
+template <class Iter>
+gsl_vector * STL2GSL(const Iter vec, const Iter vec_end) {
+  gsl_vector * m = new gsl_vector;
+  m->size = vec_end-vec;
+  m->stride = 1;
+  m->data = (double*) &(*vec);
+  m->block = NULL;
+  /*  m->block = new gsl_block;
+  m->block->data = m->data;
+  m->block->size=m->size;
+  */
+  m->owner = 0; //owner=0 Means block of memory is not owned by the GSL vector and hence not freed.
+  return m;
+}
+
+//$DOCSTRING: Calculate the XValues matrix vector for the polynomial (linear-fitting) routine, calculating essentially all powers of the input vector. 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hLinearFitPolynomialX
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing rows with all the requested powers of the x vector. Size is (n+1)*len(xvec), where n=len(powers).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with x values for the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(powers)()("Input vector with the powers to consider in the fitting. For an n-th order polynomial, this is simply [0,1,2,...,n].")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  [x_0,x_1,x_2,...] -> [0,x_0,x_0**2,...,x_0**n,0,x_1,x_1**2,...,x_1**n]
+
+  n is the number of powers of the polynomial to fit,
+  i.e. len(powers). The length of the output vector is the length of
+  xvec*(n+1).
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: LinearFit
+*/
+template <class Iter, class IterI>
+void HFPP_FUNC_NAME(
+		    const Iter vecout, const Iter vecout_end,
+		    const Iter xvec, const Iter xvec_end,
+		    const IterI powers, const IterI powers_end
+		       )
+{
+  Iter itout(vecout), itx(xvec);
+  IterI itn(powers);
+  if (powers_end<=powers) return;
+  if (vecout_end<=vecout) return;
+  if (xvec_end<=xvec) return;
+  while ((itout != vecout_end) && (itx != xvec_end)) {
+    switch (*itn) {
+    case 0:
+      *itout=1.0;
+      break;
+    case 1:
+      *itout=*itx;
+      break;
+    case 2:
+      *itout=(*itx) * (*itx);
+      break;
+    default:
+      *itout=pow(*itx,*itn);
+      break;
+    };
+    ++itout; ++itn; 
+    if (itn==powers_end) { //We have cycled through all powers, start at the beginning and go to next x value
+      itn=powers;
+      ++itx;
+    };
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Calculates a polynomial and adds it to the output vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hPolynomial
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the polynomial y-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with x-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(coeff)()("Coefficients for each  power in powers.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(powers)()("Input vector with the powers to take into account. For an n-th order polynomial, this is simply [0,1,2,...,n].")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  xvec=[x_0,x_1,x_2,...]
+  coeff=[C_0,C_1,C_2,...] -> [sum(C_0,C_1*x_0,C_2*x_0**2),...,sum(C_0,C_1*x_1,C_2*x_1**2,...,C_n*x_1**n)]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Note that the polynomical is added to the output vector, so you need
+  to initialize the output vector to zero!
+
+See also: LinearFit, hLinearFitPolynomialX
+*/
+template <class Iter, class IterI>
+void HFPP_FUNC_NAME(
+		    const Iter vecout, const Iter vecout_end,
+		    const Iter xvec, const Iter xvec_end,
+		    const Iter coeff, const Iter coeff_end,
+		    const IterI powers, const IterI powers_end
+		       )
+{
+  Iter itout(vecout), itx(xvec);
+  IterI itn(powers); Iter itc(coeff);
+  if (powers_end<=powers) return;
+  if (vecout_end<=vecout) return;
+  if (xvec_end<=xvec) return;
+  while ((itout != vecout_end) && (itx != xvec_end)) {
+    switch (*itn) {
+    case 0:
+      *itout+=*itc;
+      break;
+    case 1:
+      *itout+=*itc * *itx;
+      break;
+    case 2:
+      *itout+=*itc * (*itx) * (*itx);
+      break;
+    default:
+      *itout+=*itc * pow(*itx,*itn);
+      break;
+    };
+    ++itn; ++itc;
+    if ((itn==powers_end )|| (itc==coeff_end)) { //We have cycled through all powers, start at the beginning and go to next x value
+      itn=powers; itc=coeff;
+      ++itx; ++itout; 
+    };
+  };
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates a weight factor from an error for a fitting routine, i.e. w=1/Error**2.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hErrorsToWeights
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the weights.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(vecin)()("Input vector with errorvalues.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  [x_0,x_1,x_2,...] -> [1/x_0**2,1/x_1**2,...]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: hLinearFit, hLinearFitPolynomialX, hPolynomial
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(
+		    const Iter vecout, const Iter vecout_end,
+		    const Iter vecin, const Iter vecin_end
+		    )
+{
+  Iter itout(vecout), itin(vecin);
+  while ((itout != vecout_end) && (itin != vecin_end)) {
+    *itout = 1/((*itin) * (*itin));
+    ++itout; ++itin; 
+  };
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Do a linear fit (e.g. to an n-th order polynomial) to a data set provided a vector of weights and return the coefficients and covariance matrix in two vectors. Returns as function value the chi-square value of the fit.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hLinearFit
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the bets fit coefficients C_n of the polynomial Sum_n(C_n*x**n). The first element is C_0, i.e. the constant. Its length determines the order of the polynomial.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(veccov)()("Output vector of length n*n containing the covariance matrix of the fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(xvec)()("Vector containing the x values of the data, where each value is actually one row of (n+1) values of x**n (e.g., if x values are [2,3] => xvec=[0,2,4,0,3,9] for a quadratic polynomical (n=2)).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(yvec)()("Vector containing the y values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(wvec)()("Vector containing the weights of the data (which are 1/Error^2).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_5 (HInteger)(ndata)()("Number of data points to take into account (ndata=-1 -> take all elements in yvec, if ndata>0 only take the first ndata). ")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: hLinearFitPolynomialX,hPolynomial
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME(
+		    const Iter vecout, const Iter vecout_end,
+		    const Iter veccov, const Iter veccov_end,
+		    const Iter xvec, const Iter xvec_end,
+		    const Iter yvec, const Iter yvec_end,
+		    const Iter wvec, const Iter wvec_end,
+		    const HInteger ndata
+		    )
+{
+  HInteger Ndata(yvec_end-yvec);  // Number of data points to fit
+  HInteger Ncoeff(vecout_end-vecout);
+  double chisq;
+  gsl_matrix *X, *cov;
+  gsl_vector *y, *w, *c;
+  if ((wvec_end-wvec)!=Ndata) {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": weights vector has wrong size! len(wvec)=" << (wvec_end-wvec)  <<  ", should be = " << Ndata << ". Ndata=" << Ndata);
+    return -1.0;
+  };
+  if ((xvec_end-xvec)!=(Ndata*Ncoeff)) {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": X input matrix vector has wrong size! len(xvec)=" << (xvec_end-xvec)  <<  ", should be = " << Ndata*Ncoeff << ". Ndata=" << Ndata << ", Ncoeff=" << Ncoeff);
+    return -1.0;
+  };
+  if ((veccov_end-veccov)!=(Ncoeff*Ncoeff)) {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Covariance matrix vector has wrong size! len(veccov)=" << (veccov_end-veccov)  <<  ", should be = " << Ncoeff*Ncoeff << ". Ncoeff=" << Ncoeff);
+    return -1.0;
+  };
+
+  if (ndata>0) Ndata=min(ndata,Ndata); 
+
+  X = STL2GSLM(xvec, Ndata, Ncoeff);
+  y = STL2GSL(yvec, yvec+Ndata);
+  w = STL2GSL(wvec, wvec+Ndata);
+     
+  c = STL2GSL(vecout, vecout_end);
+  cov = STL2GSLM(veccov, Ncoeff, Ncoeff);
+     
+  //If one can find out how much memory is needed, "work" could be provided as a scratch input vector to this function ...     
+  gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc (Ndata, Ncoeff);
+  gsl_multifit_wlinear (X, w, y, c, cov,&chisq, work);
+  gsl_multifit_linear_free (work);
+
+  /*  delete X->block;
+  delete y->block;
+  delete w->block;
+  delete c->block;
+  delete cov->block;
+  */
+  return chisq;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Do a linear fit (e.g. to an n-th order polynomial) to a data set (without weights) and return the coefficients and covariance matrix in two vectors. Returns as function value the chi-square value of the fit.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hLinearFit
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the bets fit coefficients C_n of the polynomial Sum_n(C_n*x**n). The first element is C_0, i.e. the constant. Its length determines the order of the polynomial.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(veccov)()("Output vector of length n*n containing the covariance matrix of the fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(xvec)()("Vector containing the x values of the data, where each value is actually one row of (n+1) values of x**n (e.g., if x values are [2,3] => xvec=[0,2,4,0,3,9] for a quadratic polynomical (n=2)).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(yvec)()("Vector containing the y values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HInteger)(ndata)()("Number of data points to take into account (ndata=-1 -> take all elements in yvec, if ndata>0 only take the first ndata). ")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: hLinearFitPolynomialX,hPolynomial
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME(
+		    const Iter vecout, const Iter vecout_end,
+		    const Iter veccov, const Iter veccov_end,
+		    const Iter xvec, const Iter xvec_end,
+		    const Iter yvec, const Iter yvec_end,
+		    const HInteger ndata
+		    )
+{
+  HInteger Ndata(yvec_end-yvec);  // Number of data points to fit
+  HInteger Ncoeff(vecout_end-vecout);
+  double chisq;
+  gsl_matrix *X, *cov;
+  gsl_vector *y, *c;
+  if ((xvec_end-xvec)!=(Ndata*Ncoeff)) {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": X input matrix vector has wrong size! len(xvec)=" << (xvec_end-xvec)  <<  ", should be = " << Ndata*Ncoeff << ". Ndata=" << Ndata << ", Ncoeff=" << Ncoeff);
+    return -1.0;
+  };
+  if ((veccov_end-veccov)!=(Ncoeff*Ncoeff)) {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Covariance matrix vector has wrong size! len(veccov)=" << (veccov_end-veccov)  <<  ", should be = " << Ncoeff*Ncoeff << ". Ncoeff=" << Ncoeff);
+    return -1.0;
+  };
+
+  if (ndata>0) Ndata=min(ndata,Ndata); 
+
+  X = STL2GSLM(xvec, Ndata, Ncoeff);
+  y = STL2GSL(yvec, yvec+Ndata);
+     
+  c = STL2GSL(vecout, vecout_end);
+  cov = STL2GSLM(veccov, Ncoeff, Ncoeff);
+     
+  //If one can find out how much memory is needed, "work" could be provided as a scratch input vector to this function ...     
+  gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc (Ndata, Ncoeff);
+  gsl_multifit_linear (X, y, c, cov,&chisq, work);
+  gsl_multifit_linear_free (work);
+
+  return chisq;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+//$COPY_TO HFILE: #endif
 
 // ================================================================================
-// RFI mitigation
+//$SECTION: RFI mitigation
 // ================================================================================
+
 
 // ___________________________________________________________________
 //                                                    hRFIDownsampling

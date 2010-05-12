@@ -289,6 +289,10 @@ def hArray_return_slice_start(val):
          return val.start
     elif type(val)==list:
         return val[0]
+    elif type(val) in hAllArrayTypes:
+        return val[0].val()
+    elif type(val) in hAllVectorTypes:
+        return val[0]
     else:
         return val
 
@@ -299,6 +303,10 @@ def hArray_return_slice_end(val):
     elif type(val)==slice:
         return hNone2Value(val.stop,-1)
     elif type(val)==list:
+        return val[-1]
+    elif type(val) in hAllArrayTypes:
+        return val[-1].val()
+    elif type(val) in hAllVectorTypes:
         return val[-1]
     else:
         return val+1
@@ -395,7 +403,7 @@ def hArray_getitem(self,indexlist):
     dimensions=ary.getDim()
 #   Now check if there is an ellipsis in the index list, which indicates looping.
     ellipsiscount=indexlist.count(Ellipsis)
-    if debugon: pdb.set_trace()
+#    pdb.set_trace()
     if ellipsiscount==0:
         ellipsislocation=0
     elif ellipsiscount==1:
@@ -420,15 +428,23 @@ def hArray_getitem(self,indexlist):
     if ellipsiscount:
         ellipsiselement=indexlist[ellipsislocation]
         if ellipsislocation<nindices-1:
-            dims=ary.getDim()
             start_off=hArray_return_slice_start(lastelement);
-            end_off=dims[nindices-1]-hArray_return_slice_end(lastelement)
+            end_off=dimensions[nindices-1]-hArray_return_slice_end(lastelement)
             indexlist=indexlist[0:-1]
         if type(ellipsiselement)==slice: ary.loop(indexliststarts[0:ellipsislocation],hNone2Value(ellipsiselement.start,0),hNone2Value(ellipsiselement.stop,-1),hNone2Value(ellipsiselement.step,1),start_off,end_off)
         elif type(lastelement)==list:
             ary.loop(indexliststarts[0:ellipsislocation],Vector(indexlist[ellipsislocation]),start_off,end_off)
-    elif type(lastelement) in [slice,list]: #Non-looping slice
+    elif type(lastelement)==slice: #Non-looping slice
         ary.setSliceVector(indexliststarts[0:-1],hArray_return_slice_start(lastelement),hArray_return_slice_end(lastelement))
+    elif type(lastelement) in [list,IntVec,IntArray]: #make new vector 
+        if len(dimensions)==nindices: ## only implemented for last slice.
+            arycopy=hArray(Type=basetype(ary),dimensions=[len(lastelement)])
+            if nindices>1: 
+                ary.setSliceVector(indexliststarts[0:-1],0,-1)
+            arycopy.copy(ary,hArray(lastelement),-1)
+            return arycopy
+        else:
+            print "Error: hArray_getitem - list of indices has to be at the position of the last index."
     else: # normal integer index
         ary.setSliceVector(indexliststarts[0:-1],lastelement,lastelement+1)
     return ary;
@@ -438,7 +454,7 @@ def hArray_setitem(self,dims,fill):
     vec[n1,n2,..] = [0,1,2] -> set slice of array to input vector/value
 
     """
-    if (type(fill)) in [list,tuple]: fill=hArray(fill)
+    if (type(fill)) in hAllListTypes: fill=hArray(fill)
     hFill(hArray_getitem(self,dims),fill)
 
 def hArray_read(self,datafile,key):
@@ -920,7 +936,7 @@ for v in hAllContainerTypes:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hStdDev","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging"]:
+    for s in ["hMean","hStdDev","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hErrorsToWeights","hPolynomial"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hComplexContainerTypes:
@@ -1059,11 +1075,11 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None,properties=N
 
     """
     if type(copy) in hAllArrayTypes:
-        properties=copy
-        fill=copy
+        if properties==None: properties=copy
+        if fill==None: fill=copy
     if type(properties) in hAllArrayTypes:
-        Type=basetype(properties)
-        dimensions=properties.getDim()
+        if Type==None: Type=basetype(properties)
+        if dimensions==None: dimensions=properties.getDim()
         par=properties.par.__list__()
     if isVector(Type):  #Make a new array with reference to the input vector
         ary=type2array(basetype(Type))
@@ -1079,9 +1095,9 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None,properties=N
     if not hasattr(ary,"par"): setattr(ary,"par",hArray_par())
     if (type(dimensions) in [list,tuple,IntVec]): ary.setDim(dimensions)
     if (type(dimensions) in hAllArrayTypes): ary.setDim(dimensions.getDim())
-    if not (xvalues == None): ary.par.xvalues=xvalues
     if type(par) == tuple: setattr(ary.par,par[0],par[1])
     if type(par) == list: map(lambda elem:setattr(ary.par,elem[0],elem[1]),par)
+    if not (xvalues == None): ary.par.xvalues=xvalues
     if not (units == None): 
         if type(units)==str: ary.setUnit("",units) 
         elif type(units)==tuple: ary.setUnit(*units)

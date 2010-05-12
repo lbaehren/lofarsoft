@@ -14,6 +14,48 @@ def savefigure():
     print "- ###################"
     print "- #### Figure {0:2d} ####".format(figno)
     print "- ###################"
+
+
+#Functions with a changed API (output first ...)
+# 1 hConvert
+# 2 hConvertResize
+# 3 hCopy
+# 4 hExp
+# 5 hLog
+# 6 hLog10
+# 7 hSin
+# 8 hSinh
+# 9 hSqrt
+# 10 hSquare
+# 11 hTan
+# 12 hTanh
+# 13 hAbs
+# 14 hCos
+# 15 hCosh
+# 16 hCeil
+# 17 hFloor
+# 18 hRound
+# 19 hAcos
+# 20 hAsin
+# 21 hAtan
+# 22 hReal
+# 23 hArg
+# 24 hImag
+# 25 hNorm
+# 26 hDownsample
+# 27 hRunningAverage(i,o,wgt)
+# 28 hRunningAverage(i,o,wht,wtype)
+# 29 hGeometricPhases
+# 30 hGeometricDelays
+# 31 hGeometricWeights
+# 32 hSpectralPower
+# 33 hFFT
+# 34 hInvFFT
+# 35 hRFIDownsampling
+# 36 hRFIBaselineFitting
+# 37 hRFIFlagging
+# 38 hRFIMitigation
+
 """
 ========================================================================
                           pycrtools TUTORIAL
@@ -630,6 +672,32 @@ a[0:-1]
 """
 
 gives all but the last slice of the first index.
+
+(+++) Copying parts of the array - a list as index
+..................................................
+
+
+It is possible to provide a list of indices as the last index to copy parts of the array. 
+
+"""
+a[[0,2,3]] 
+"""
+
+This will return a new array containing the first third and fourth
+element of array a.
+
+You can do this explicitly, using the copy method:
+
+"""
+acopy=a.new()
+acopy.copy(a,Vector([0,2,3]),-1)
+p_("acopy")
+"""
+
+The last parameter of "copy" (-1) provides the possibility to copy
+only the first nth elements of the index vector (if the last parameter
+is n>0) - hence it is possible to operate with fixed length index
+vectors.
 
 (+++) Applying Methods to Slices
 ................................
