@@ -71,6 +71,9 @@ if __name__ == "__main__":
 		for d in data_dirs:
 			mask = storage_prefix + s + d + "/L20??_?????"
 			indlist=glob.glob(mask)			
+			indlist = np.append(indlist, glob.glob(mask + "?"))
+			indlist = np.append(indlist, glob.glob(mask + "??"))
+			indlist = np.append(indlist, glob.glob(mask + "???"))
 			obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
 
 # number of storage nodes
