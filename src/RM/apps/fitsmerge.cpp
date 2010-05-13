@@ -80,7 +80,6 @@ void readPlane (fitsfile *fptr,
 		void *nulval,
 		int &fitsstatus);
 //! Write an image plane to a FITS file at z position
->>>>>>> .r4763
 void writePlane (fitsfile *fptr,
 		 float *plane,
 		 const long x,
