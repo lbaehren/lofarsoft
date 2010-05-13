@@ -28,61 +28,67 @@
 #  TCL_LIBRARIES  = Link these to use TCL
 #  TCL_LFGLAS     = Linker flags (optional)
 
-## -----------------------------------------------------------------------------
-## Standard locations where to look for required components
+if (NOT FIND_TCL_CMAKE)
 
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-find_path (TCL_INCLUDES tcl.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES tcl tcl8.4 tcl8.3
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-find_library (TCL_LIBRARIES tcl tcl8.4 tcl8.3
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-if (TCL_INCLUDES AND TCL_LIBRARIES)
-  set (HAVE_TCL TRUE)
-else (TCL_INCLUDES AND TCL_LIBRARIES)
-  set (HAVE_TCL FALSE)
-  if (NOT TCL_FIND_QUIETLY)
-    if (NOT TCL_INCLUDES)
-      message (STATUS "Unable to find TCL header files!")
-    endif (NOT TCL_INCLUDES)
-    if (NOT TCL_LIBRARIES)
-      message (STATUS "Unable to find TCL library files!")
-    endif (NOT TCL_LIBRARIES)
-  endif (NOT TCL_FIND_QUIETLY)
-endif (TCL_INCLUDES AND TCL_LIBRARIES)
-
-if (HAVE_TCL)
-  if (NOT TCL_FIND_QUIETLY)
-    message (STATUS "Found components for TCL")
-    message (STATUS "TCL_INCLUDES  = ${TCL_INCLUDES}")
-    message (STATUS "TCL_LIBRARIES = ${TCL_LIBRARIES}")
-  endif (NOT TCL_FIND_QUIETLY)
-else (HAVE_TCL)
-  if (TCL_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find TCL!")
-  endif (TCL_FIND_REQUIRED)
-endif (HAVE_TCL)
-
-## -----------------------------------------------------------------------------
-## Mark advanced variables
-
-mark_as_advanced (
-  TCL_INCLUDES
-  TCL_LIBRARIES
-  )
+  set (FIND_TCL_CMAKE TRUE)
+  
+  ##_____________________________________________________________________________
+  ## Standard locations where to look for required components
+  
+  include (CMakeSettings)
+  
+  ##_____________________________________________________________________________
+  ## Check for the header files
+  
+  find_path (TCL_INCLUDES tcl.h
+    PATHS ${include_locations}
+    PATH_SUFFIXES tcl tcl8.4 tcl8.3
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the library
+  
+  find_library (TCL_LIBRARIES tcl tcl8.4 tcl8.3
+    PATHS ${lib_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Actions taken when all components have been found
+  
+  if (TCL_INCLUDES AND TCL_LIBRARIES)
+    set (HAVE_TCL TRUE)
+  else (TCL_INCLUDES AND TCL_LIBRARIES)
+    set (HAVE_TCL FALSE)
+    if (NOT TCL_FIND_QUIETLY)
+      if (NOT TCL_INCLUDES)
+	message (STATUS "Unable to find TCL header files!")
+      endif (NOT TCL_INCLUDES)
+      if (NOT TCL_LIBRARIES)
+	message (STATUS "Unable to find TCL library files!")
+      endif (NOT TCL_LIBRARIES)
+    endif (NOT TCL_FIND_QUIETLY)
+  endif (TCL_INCLUDES AND TCL_LIBRARIES)
+  
+  if (HAVE_TCL)
+    if (NOT TCL_FIND_QUIETLY)
+      message (STATUS "Found components for TCL")
+      message (STATUS "TCL_INCLUDES  = ${TCL_INCLUDES}")
+      message (STATUS "TCL_LIBRARIES = ${TCL_LIBRARIES}")
+    endif (NOT TCL_FIND_QUIETLY)
+  else (HAVE_TCL)
+    if (TCL_FIND_REQUIRED)
+      message (FATAL_ERROR "Could not find TCL!")
+    endif (TCL_FIND_REQUIRED)
+  endif (HAVE_TCL)
+  
+  ##_____________________________________________________________________________
+  ## Mark advanced variables
+  
+  mark_as_advanced (
+    TCL_INCLUDES
+    TCL_LIBRARIES
+    )
+  
+endif (NOT FIND_TCL_CMAKE)

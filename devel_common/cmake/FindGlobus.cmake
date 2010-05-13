@@ -28,52 +28,58 @@
 #  Globus_INCLUDES   = Include path for the header files of Globus
 #  Globus_LIBRARIES  = Link these to use Globus
 
-## -----------------------------------------------------------------------------
-## Search locations
+if (NOT FIND_GLOBUS_CMAKE)
 
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-find_path (Globus_INCLUDES globus.h
-  PATHS ${include_locations}
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-find_library (Globus_LIBRARIES globus
-  PATHS ${lib_locations}
-  )
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-if (Globus_INCLUDES AND Globus_LIBRARIES)
-  set (HAVE_Globus TRUE)
-else (Globus_INCLUDES AND Globus_LIBRARIES)
-  if (NOT Globus_FIND_QUIETLY)
-    if (NOT Globus_INCLUDES)
-      message (STATUS "Unable to find Globus header files!")
-    endif (NOT Globus_INCLUDES)
-    if (NOT Globus_LIBRARIES)
-      message (STATUS "Unable to find Globus library files!")
-    endif (NOT Globus_LIBRARIES)
-  endif (NOT Globus_FIND_QUIETLY)
-endif (Globus_INCLUDES AND Globus_LIBRARIES)
-
-if (HAVE_Globus)
-  if (NOT Globus_FIND_QUIETLY)
-    message (STATUS "Found components for Globus")
-    message (STATUS "Globus_INCLUDES  = ${Globus_INCLUDES}")
-    message (STATUS "Globus_LIBRARIES = ${Globus_LIBRARIES}")
-  endif (NOT Globus_FIND_QUIETLY)
-else (HAVE_Globus)
-  if (Globus_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find Globus!")
-  endif (Globus_FIND_REQUIRED)
-endif (HAVE_Globus)
-
-## -----------------------------------------------------------------------------
-## Mark as advanced ...
+  set (FIND_GLOBUS_CMAKE TRUE)
+  
+  ##_____________________________________________________________________________
+  ## Search locations
+  
+  include (CMakeSettings)
+  
+  ##_____________________________________________________________________________
+  ## Check for the header files
+  
+  find_path (Globus_INCLUDES globus.h
+    PATHS ${include_locations}
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the library
+  
+  find_library (Globus_LIBRARIES globus
+    PATHS ${lib_locations}
+    )
+  
+  ##_____________________________________________________________________________
+  ## Actions taken when all components have been found
+  
+  if (Globus_INCLUDES AND Globus_LIBRARIES)
+    set (HAVE_Globus TRUE)
+  else (Globus_INCLUDES AND Globus_LIBRARIES)
+    if (NOT Globus_FIND_QUIETLY)
+      if (NOT Globus_INCLUDES)
+	message (STATUS "Unable to find Globus header files!")
+      endif (NOT Globus_INCLUDES)
+      if (NOT Globus_LIBRARIES)
+	message (STATUS "Unable to find Globus library files!")
+      endif (NOT Globus_LIBRARIES)
+    endif (NOT Globus_FIND_QUIETLY)
+  endif (Globus_INCLUDES AND Globus_LIBRARIES)
+  
+  if (HAVE_Globus)
+    if (NOT Globus_FIND_QUIETLY)
+      message (STATUS "Found components for Globus")
+      message (STATUS "Globus_INCLUDES  = ${Globus_INCLUDES}")
+      message (STATUS "Globus_LIBRARIES = ${Globus_LIBRARIES}")
+    endif (NOT Globus_FIND_QUIETLY)
+  else (HAVE_Globus)
+    if (Globus_FIND_REQUIRED)
+      message (FATAL_ERROR "Could not find Globus!")
+    endif (Globus_FIND_REQUIRED)
+  endif (HAVE_Globus)
+  
+  ##_____________________________________________________________________________
+  ## Mark as advanced ...
+  
+endif (NOT FIND_GLOBUS_CMAKE)
