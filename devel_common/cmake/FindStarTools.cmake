@@ -29,75 +29,81 @@
 #  STARTOOLS_LIBRARIES  = Link these to use STARTOOLS
 #  STARTOOLS_LFLAGS     = Linker flags (optional)
 
-## -----------------------------------------------------------------------------
-## Search locations
+if (NOT FIND_STARTOOLS_CMAKE)
 
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-find_path (STARTOOLS_INCLUDES startools/util.hh startools/trigger.hh
-  PATHS ${include_locations}
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-set (STARTOOLS_LIBRARIES "")
-
-find_library (libstarutil starutil
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-if (libstarutil)
-  list (APPEND STARTOOLS_LIBRARIES ${libstarutil})
-endif (libstarutil)
-
-find_library (librecradio recradio
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-if (librecradio)
-  list (APPEND STARTOOLS_LIBRARIES ${librecradio})
-endif (librecradio)
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-if (STARTOOLS_INCLUDES AND STARTOOLS_LIBRARIES)
-  set (HAVE_STARTOOLS TRUE)
-else (STARTOOLS_INCLUDES AND STARTOOLS_LIBRARIES)
-  set (HAVE_STARTOOLS FALSE)
-  if (NOT STARTOOLS_FIND_QUIETLY)
-    if (NOT STARTOOLS_INCLUDES)
-      message (STATUS "Unable to find STARTOOLS header files!")
-    endif (NOT STARTOOLS_INCLUDES)
-    if (NOT STARTOOLS_LIBRARIES)
-      message (STATUS "Unable to find STARTOOLS library files!")
-    endif (NOT STARTOOLS_LIBRARIES)
-  endif (NOT STARTOOLS_FIND_QUIETLY)
-endif (STARTOOLS_INCLUDES AND STARTOOLS_LIBRARIES)
-
-if (HAVE_STARTOOLS)
-  if (NOT STARTOOLS_FIND_QUIETLY)
-    message (STATUS "Found components for STARTOOLS")
-    message (STATUS "STARTOOLS_INCLUDES  = ${STARTOOLS_INCLUDES}")
-    message (STATUS "STARTOOLS_LIBRARIES = ${STARTOOLS_LIBRARIES}")
-  endif (NOT STARTOOLS_FIND_QUIETLY)
-else (HAVE_STARTOOLS)
-  if (STARTOOLS_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find STARTOOLS!")
-  endif (STARTOOLS_FIND_REQUIRED)
-endif (HAVE_STARTOOLS)
-
-## -----------------------------------------------------------------------------
-## Mark advanced variables
-
-mark_as_advanced (
-  STARTOOLS_INCLUDES
-  STARTOOLS_LIBRARIES
-  )
+  set (FIND_STARTOOLS_CMAKE TRUE)
+  
+  ##_____________________________________________________________________________
+  ## Search locations
+  
+  include (CMakeSettings)
+  
+  ##_____________________________________________________________________________
+  ## Check for the header files
+  
+  find_path (STARTOOLS_INCLUDES startools/util.hh startools/trigger.hh
+    PATHS ${include_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the library
+  
+  set (STARTOOLS_LIBRARIES "")
+  
+  find_library (libstarutil starutil
+    PATHS ${lib_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  if (libstarutil)
+    list (APPEND STARTOOLS_LIBRARIES ${libstarutil})
+  endif (libstarutil)
+  
+  find_library (librecradio recradio
+    PATHS ${lib_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  if (librecradio)
+    list (APPEND STARTOOLS_LIBRARIES ${librecradio})
+  endif (librecradio)
+  
+  ##_____________________________________________________________________________
+  ## Actions taken when all components have been found
+  
+  if (STARTOOLS_INCLUDES AND STARTOOLS_LIBRARIES)
+    set (HAVE_STARTOOLS TRUE)
+  else (STARTOOLS_INCLUDES AND STARTOOLS_LIBRARIES)
+    set (HAVE_STARTOOLS FALSE)
+    if (NOT STARTOOLS_FIND_QUIETLY)
+      if (NOT STARTOOLS_INCLUDES)
+	message (STATUS "Unable to find STARTOOLS header files!")
+      endif (NOT STARTOOLS_INCLUDES)
+      if (NOT STARTOOLS_LIBRARIES)
+	message (STATUS "Unable to find STARTOOLS library files!")
+      endif (NOT STARTOOLS_LIBRARIES)
+    endif (NOT STARTOOLS_FIND_QUIETLY)
+  endif (STARTOOLS_INCLUDES AND STARTOOLS_LIBRARIES)
+  
+  if (HAVE_STARTOOLS)
+    if (NOT STARTOOLS_FIND_QUIETLY)
+      message (STATUS "Found components for STARTOOLS")
+      message (STATUS "STARTOOLS_INCLUDES  = ${STARTOOLS_INCLUDES}")
+      message (STATUS "STARTOOLS_LIBRARIES = ${STARTOOLS_LIBRARIES}")
+    endif (NOT STARTOOLS_FIND_QUIETLY)
+  else (HAVE_STARTOOLS)
+    if (STARTOOLS_FIND_REQUIRED)
+      message (FATAL_ERROR "Could not find STARTOOLS!")
+    endif (STARTOOLS_FIND_REQUIRED)
+  endif (HAVE_STARTOOLS)
+  
+  ##_____________________________________________________________________________
+  ## Mark advanced variables
+  
+  mark_as_advanced (
+    STARTOOLS_INCLUDES
+    STARTOOLS_LIBRARIES
+    )
+  
+endif (NOT FIND_STARTOOLS_CMAKE)

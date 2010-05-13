@@ -29,61 +29,67 @@
 #  <PACKAGE>_LIBRARIES  = Link these to use <PACKAGE>
 #  <PACKAGE>_LFLAGS     = Linker flags (optional)
 
-## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-find_path (<PACKAGE>_INCLUDES <header file(s)>
-  PATHS ${include_locations}
-  PATH_SUFFIXES <optional path extension>
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-find_library (<PACKAGE>_LIBRARIES <package name>
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-if (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
-  set (HAVE_<PACKAGE> TRUE)
-else (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
-  set (HAVE_<PACKAGE> FALSE)
-  if (NOT <PACKAGE>_FIND_QUIETLY)
-    if (NOT <PACKAGE>_INCLUDES)
-      message (STATUS "Unable to find <PACKAGE> header files!")
-    endif (NOT <PACKAGE>_INCLUDES)
-    if (NOT <PACKAGE>_LIBRARIES)
-      message (STATUS "Unable to find <PACKAGE> library files!")
-    endif (NOT <PACKAGE>_LIBRARIES)
-  endif (NOT <PACKAGE>_FIND_QUIETLY)
-endif (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
-
-if (HAVE_<PACKAGE>)
-  if (NOT <PACKAGE>_FIND_QUIETLY)
-    message (STATUS "Found components for <PACKAGE>")
-    message (STATUS "<PACKAGE>_INCLUDES  = ${<PACKAGE>_INCLUDES}")
-    message (STATUS "<PACKAGE>_LIBRARIES = ${<PACKAGE>_LIBRARIES}")
-  endif (NOT <PACKAGE>_FIND_QUIETLY)
-else (HAVE_<PACKAGE>)
-  if (<PACKAGE>_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find <PACKAGE>!")
-  endif (<PACKAGE>_FIND_REQUIRED)
-endif (HAVE_<PACKAGE>)
-
-## -----------------------------------------------------------------------------
-## Mark advanced variables
-
-mark_as_advanced (
-  <PACKAGE>_INCLUDES
-  <PACKAGE>_LIBRARIES
-  )
+if (NOT FIND_<PACKAGE>_CMAKE)
+  
+  set (FIND_<PACKAGE>_CMAKE TRUE)
+  
+  ##_____________________________________________________________________________
+  ## Search locations
+  
+  include (CMakeSettings)
+  
+  ##_____________________________________________________________________________
+  ## Check for the header files
+  
+  find_path (<PACKAGE>_INCLUDES <header file(s)>
+    PATHS ${include_locations}
+    PATH_SUFFIXES <optional path extension>
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the library
+  
+  find_library (<PACKAGE>_LIBRARIES <package name>
+    PATHS ${lib_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Actions taken when all components have been found
+  
+  if (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
+    set (HAVE_<PACKAGE> TRUE)
+  else (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
+    set (HAVE_<PACKAGE> FALSE)
+    if (NOT <PACKAGE>_FIND_QUIETLY)
+      if (NOT <PACKAGE>_INCLUDES)
+	message (STATUS "Unable to find <PACKAGE> header files!")
+      endif (NOT <PACKAGE>_INCLUDES)
+      if (NOT <PACKAGE>_LIBRARIES)
+	message (STATUS "Unable to find <PACKAGE> library files!")
+      endif (NOT <PACKAGE>_LIBRARIES)
+    endif (NOT <PACKAGE>_FIND_QUIETLY)
+  endif (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
+  
+  if (HAVE_<PACKAGE>)
+    if (NOT <PACKAGE>_FIND_QUIETLY)
+      message (STATUS "Found components for <PACKAGE>")
+      message (STATUS "<PACKAGE>_INCLUDES  = ${<PACKAGE>_INCLUDES}")
+      message (STATUS "<PACKAGE>_LIBRARIES = ${<PACKAGE>_LIBRARIES}")
+    endif (NOT <PACKAGE>_FIND_QUIETLY)
+  else (HAVE_<PACKAGE>)
+    if (<PACKAGE>_FIND_REQUIRED)
+      message (FATAL_ERROR "Could not find <PACKAGE>!")
+    endif (<PACKAGE>_FIND_REQUIRED)
+  endif (HAVE_<PACKAGE>)
+  
+  ##_____________________________________________________________________________
+  ## Mark advanced variables
+  
+  mark_as_advanced (
+    <PACKAGE>_INCLUDES
+    <PACKAGE>_LIBRARIES
+    )
+  
+endif (NOT FIND_<PACKAGE>_CMAKE)

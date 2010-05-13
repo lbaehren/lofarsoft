@@ -29,69 +29,75 @@
 #  PGET_EXECUTABLE = pget application executable
 #  PIL_LFLAGS      = Linker flags (optional)
 
-## -----------------------------------------------------------------------------
-## Search locations
+if (NOT FIND_PIL_CMAKE)
+  
+  set (FIND_PIL_CMAKE TRUE)
 
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-find_path (PIL_INCLUDES pil.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES pil
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-find_library (PIL_LIBRARIES pil
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the executables
-
-find_program (PGET_EXECUTABLE pget
-  PATHS ${bin_locations}
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-if (PIL_INCLUDES AND PIL_LIBRARIES)
-  set (HAVE_PIL TRUE)
-else (PIL_INCLUDES AND PIL_LIBRARIES)
-  set (HAVE_PIL FALSE)
-  if (NOT PIL_FIND_QUIETLY)
-    if (NOT PIL_INCLUDES)
-      message (STATUS "Unable to find PIL header files!")
-    endif (NOT PIL_INCLUDES)
-    if (NOT PIL_LIBRARIES)
-      message (STATUS "Unable to find PIL library files!")
-    endif (NOT PIL_LIBRARIES)
-  endif (NOT PIL_FIND_QUIETLY)
-endif (PIL_INCLUDES AND PIL_LIBRARIES)
-
-if (HAVE_PIL)
-  if (NOT PIL_FIND_QUIETLY)
-    message (STATUS "Found components for PIL")
-    message (STATUS "PIL_INCLUDES  = ${PIL_INCLUDES}")
-    message (STATUS "PIL_LIBRARIES = ${PIL_LIBRARIES}")
-  endif (NOT PIL_FIND_QUIETLY)
-else (HAVE_PIL)
-  if (PIL_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find PIL!")
-  endif (PIL_FIND_REQUIRED)
-endif (HAVE_PIL)
-
-## -----------------------------------------------------------------------------
-## Mark advanced variables
-
-mark_as_advanced (
-  PIL_INCLUDES
-  PIL_LIBRARIES
-  )
+  ##_____________________________________________________________________________
+  ## Search locations
+  
+  include (CMakeSettings)
+  
+  ##_____________________________________________________________________________
+  ## Check for the header files
+  
+  find_path (PIL_INCLUDES pil.h
+    PATHS ${include_locations}
+    PATH_SUFFIXES pil
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the library
+  
+  find_library (PIL_LIBRARIES pil
+    PATHS ${lib_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the executables
+  
+  find_program (PGET_EXECUTABLE pget
+    PATHS ${bin_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Actions taken when all components have been found
+  
+  if (PIL_INCLUDES AND PIL_LIBRARIES)
+    set (HAVE_PIL TRUE)
+  else (PIL_INCLUDES AND PIL_LIBRARIES)
+    set (HAVE_PIL FALSE)
+    if (NOT PIL_FIND_QUIETLY)
+      if (NOT PIL_INCLUDES)
+	message (STATUS "Unable to find PIL header files!")
+      endif (NOT PIL_INCLUDES)
+      if (NOT PIL_LIBRARIES)
+	message (STATUS "Unable to find PIL library files!")
+      endif (NOT PIL_LIBRARIES)
+    endif (NOT PIL_FIND_QUIETLY)
+  endif (PIL_INCLUDES AND PIL_LIBRARIES)
+  
+  if (HAVE_PIL)
+    if (NOT PIL_FIND_QUIETLY)
+      message (STATUS "Found components for PIL")
+      message (STATUS "PIL_INCLUDES  = ${PIL_INCLUDES}")
+      message (STATUS "PIL_LIBRARIES = ${PIL_LIBRARIES}")
+    endif (NOT PIL_FIND_QUIETLY)
+  else (HAVE_PIL)
+    if (PIL_FIND_REQUIRED)
+      message (FATAL_ERROR "Could not find PIL!")
+    endif (PIL_FIND_REQUIRED)
+  endif (HAVE_PIL)
+  
+  ##_____________________________________________________________________________
+  ## Mark advanced variables
+  
+  mark_as_advanced (
+    PIL_INCLUDES
+    PIL_LIBRARIES
+    )
+  
+endif (NOT FIND_PIL_CMAKE)
