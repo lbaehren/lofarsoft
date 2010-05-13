@@ -29,62 +29,68 @@
 #  ARMADILLO_LIBRARIES  = Link these to use ARMADILLO
 #  ARMADILLO_LFLAGS     = Linker flags (optional)
 
-## -----------------------------------------------------------------------------
-## Search locations
+if (NOT FIND_ARMADILLO_CMAKE) 
 
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-find_path (ARMADILLO_INCLUDES arma_ostream_proto.hpp
-  PATHS ${include_locations}
-  PATH_SUFFIXES armadillo armadillo_bits
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-find_library (ARMADILLO_LIBRARIES armadillo
-  PATHS ${lib_locations}
-  PATH_SUFFIXES
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-if (ARMADILLO_INCLUDES AND ARMADILLO_LIBRARIES)
-  set (HAVE_ARMADILLO TRUE)
-else (ARMADILLO_INCLUDES AND ARMADILLO_LIBRARIES)
-  set (HAVE_ARMADILLO FALSE)
-  if (NOT ARMADILLO_FIND_QUIETLY)
-    if (NOT ARMADILLO_INCLUDES)
-      message (STATUS "Unable to find ARMADILLO header files!")
-    endif (NOT ARMADILLO_INCLUDES)
-    if (NOT ARMADILLO_LIBRARIES)
-      message (STATUS "Unable to find ARMADILLO library files!")
-    endif (NOT ARMADILLO_LIBRARIES)
-  endif (NOT ARMADILLO_FIND_QUIETLY)
-endif (ARMADILLO_INCLUDES AND ARMADILLO_LIBRARIES)
-
-if (HAVE_ARMADILLO)
-  if (NOT ARMADILLO_FIND_QUIETLY)
-    message (STATUS "Found components for ARMADILLO")
-    message (STATUS "ARMADILLO_INCLUDES  = ${ARMADILLO_INCLUDES}")
-    message (STATUS "ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
-  endif (NOT ARMADILLO_FIND_QUIETLY)
-else (HAVE_ARMADILLO)
-  if (ARMADILLO_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find ARMADILLO!")
-  endif (ARMADILLO_FIND_REQUIRED)
-endif (HAVE_ARMADILLO)
-
-## -----------------------------------------------------------------------------
-## Mark advanced variables
-
-mark_as_advanced (
-  ARMADILLO_INCLUDES
-  ARMADILLO_LIBRARIES
-  )
+  set (FIND_ARMADILLO_CMAKE TRUE)
+  
+  ##_____________________________________________________________________________
+  ## Search locations
+  
+  include (CMakeSettings)
+  
+  ##_____________________________________________________________________________
+  ## Check for the header files
+  
+  find_path (ARMADILLO_INCLUDES arma_ostream_proto.hpp
+    PATHS ${include_locations}
+    PATH_SUFFIXES armadillo armadillo_bits
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the library
+  
+  find_library (ARMADILLO_LIBRARIES armadillo
+    PATHS ${lib_locations}
+    PATH_SUFFIXES
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Actions taken when all components have been found
+  
+  if (ARMADILLO_INCLUDES AND ARMADILLO_LIBRARIES)
+    set (HAVE_ARMADILLO TRUE)
+  else (ARMADILLO_INCLUDES AND ARMADILLO_LIBRARIES)
+    set (HAVE_ARMADILLO FALSE)
+    if (NOT ARMADILLO_FIND_QUIETLY)
+      if (NOT ARMADILLO_INCLUDES)
+	message (STATUS "Unable to find ARMADILLO header files!")
+      endif (NOT ARMADILLO_INCLUDES)
+      if (NOT ARMADILLO_LIBRARIES)
+	message (STATUS "Unable to find ARMADILLO library files!")
+      endif (NOT ARMADILLO_LIBRARIES)
+    endif (NOT ARMADILLO_FIND_QUIETLY)
+  endif (ARMADILLO_INCLUDES AND ARMADILLO_LIBRARIES)
+  
+  if (HAVE_ARMADILLO)
+    if (NOT ARMADILLO_FIND_QUIETLY)
+      message (STATUS "Found components for ARMADILLO")
+      message (STATUS "ARMADILLO_INCLUDES  = ${ARMADILLO_INCLUDES}")
+      message (STATUS "ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
+    endif (NOT ARMADILLO_FIND_QUIETLY)
+  else (HAVE_ARMADILLO)
+    if (ARMADILLO_FIND_REQUIRED)
+      message (FATAL_ERROR "Could not find ARMADILLO!")
+    endif (ARMADILLO_FIND_REQUIRED)
+  endif (HAVE_ARMADILLO)
+  
+  ##_____________________________________________________________________________
+  ## Mark advanced variables
+  
+  mark_as_advanced (
+    ARMADILLO_INCLUDES
+    ARMADILLO_LIBRARIES
+    )
+  
+endif (NOT FIND_ARMADILLO_CMAKE) 

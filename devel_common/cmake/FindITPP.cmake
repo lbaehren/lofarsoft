@@ -28,61 +28,67 @@
 #  ITPP_LIBRARIES  = Link these to use IT++
 #  ITPP_LFLAGS     = Linker flags (optional)
 
-## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-find_path (ITPP_INCLUDES itbase.h itcomm.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES itpp
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-find_library (ITPP_LIBRARIES itpp
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-if (ITPP_INCLUDES AND ITPP_LIBRARIES)
-  set (HAVE_ITPP TRUE)
-else (ITPP_INCLUDES AND ITPP_LIBRARIES)
-  set (HAVE_ITPP FALSE)
-  if (NOT ITPP_FIND_QUIETLY)
-    if (NOT ITPP_INCLUDES)
-      message (STATUS "Unable to find ITPP header files!")
-    endif (NOT ITPP_INCLUDES)
-    if (NOT ITPP_LIBRARIES)
-      message (STATUS "Unable to find ITPP library files!")
-    endif (NOT ITPP_LIBRARIES)
-  endif (NOT ITPP_FIND_QUIETLY)
-endif (ITPP_INCLUDES AND ITPP_LIBRARIES)
-
-if (HAVE_ITPP)
-  if (NOT ITPP_FIND_QUIETLY)
-    message (STATUS "Found components for ITPP")
-    message (STATUS "ITPP_INCLUDES  = ${ITPP_INCLUDES}")
-    message (STATUS "ITPP_LIBRARIES = ${ITPP_LIBRARIES}")
-  endif (NOT ITPP_FIND_QUIETLY)
-else (HAVE_ITPP)
-  if (ITPP_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find ITPP!")
-  endif (ITPP_FIND_REQUIRED)
-endif (HAVE_ITPP)
-
-## -----------------------------------------------------------------------------
-## Mark advanced variables
-
-mark_as_advanced (
-  ITPP_INCLUDES
-  ITPP_LIBRARIES
-  )
+if (NOT FIND_ITPP_CMAKE)
+  
+  set (FIND_ITPP_CMAKE TRUE)
+  
+  ##_____________________________________________________________________________
+  ## Search locations
+  
+  include (CMakeSettings)
+  
+  ##_____________________________________________________________________________
+  ## Check for the header files
+  
+  find_path (ITPP_INCLUDES itbase.h itcomm.h
+    PATHS ${include_locations}
+    PATH_SUFFIXES itpp
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the library
+  
+  find_library (ITPP_LIBRARIES itpp
+    PATHS ${lib_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Actions taken when all components have been found
+  
+  if (ITPP_INCLUDES AND ITPP_LIBRARIES)
+    set (HAVE_ITPP TRUE)
+  else (ITPP_INCLUDES AND ITPP_LIBRARIES)
+    set (HAVE_ITPP FALSE)
+    if (NOT ITPP_FIND_QUIETLY)
+      if (NOT ITPP_INCLUDES)
+	message (STATUS "Unable to find ITPP header files!")
+      endif (NOT ITPP_INCLUDES)
+      if (NOT ITPP_LIBRARIES)
+	message (STATUS "Unable to find ITPP library files!")
+      endif (NOT ITPP_LIBRARIES)
+    endif (NOT ITPP_FIND_QUIETLY)
+  endif (ITPP_INCLUDES AND ITPP_LIBRARIES)
+  
+  if (HAVE_ITPP)
+    if (NOT ITPP_FIND_QUIETLY)
+      message (STATUS "Found components for ITPP")
+      message (STATUS "ITPP_INCLUDES  = ${ITPP_INCLUDES}")
+      message (STATUS "ITPP_LIBRARIES = ${ITPP_LIBRARIES}")
+    endif (NOT ITPP_FIND_QUIETLY)
+  else (HAVE_ITPP)
+    if (ITPP_FIND_REQUIRED)
+      message (FATAL_ERROR "Could not find ITPP!")
+    endif (ITPP_FIND_REQUIRED)
+  endif (HAVE_ITPP)
+  
+  ##_____________________________________________________________________________
+  ## Mark advanced variables
+  
+  mark_as_advanced (
+    ITPP_INCLUDES
+    ITPP_LIBRARIES
+    )
+  
+endif (NOT FIND_ITPP_CMAKE)
