@@ -28,61 +28,67 @@
 #  SSL_LIBRARIES  = Link these to use SSL
 #  SSL_LFLAGS     = Linker flags (optional)
 
-## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-find_path (SSL_INCLUDES crypto.h ssl.h ssl2.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES ssl openssl
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-find_library (SSL_LIBRARIES ssl
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-if (SSL_INCLUDES AND SSL_LIBRARIES)
-  set (HAVE_SSL TRUE)
-else (SSL_INCLUDES AND SSL_LIBRARIES)
-  set (HAVE_SSL FALSE)
-  if (NOT SSL_FIND_QUIETLY)
-    if (NOT SSL_INCLUDES)
-      message (STATUS "Unable to find SSL header files!")
-    endif (NOT SSL_INCLUDES)
-    if (NOT SSL_LIBRARIES)
-      message (STATUS "Unable to find SSL library files!")
-    endif (NOT SSL_LIBRARIES)
-  endif (NOT SSL_FIND_QUIETLY)
-endif (SSL_INCLUDES AND SSL_LIBRARIES)
-
-if (HAVE_SSL)
-  if (NOT SSL_FIND_QUIETLY)
-    message (STATUS "Found components for SSL")
-    message (STATUS "SSL_INCLUDES  = ${SSL_INCLUDES}")
-    message (STATUS "SSL_LIBRARIES = ${SSL_LIBRARIES}")
-  endif (NOT SSL_FIND_QUIETLY)
-else (HAVE_SSL)
-  if (SSL_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find SSL!")
-  endif (SSL_FIND_REQUIRED)
-endif (HAVE_SSL)
-
-## -----------------------------------------------------------------------------
-## Mark advanced variables
-
-mark_as_advanced (
-  SSL_INCLUDES
-  SSL_LIBRARIES
-  )
+if (NOT FIND_SSL_CMAKE)
+  
+  set (FIND_SSL_CMAKE TRUE)
+  
+  ##_____________________________________________________________________________
+  ## Search locations
+  
+  include (CMakeSettings)
+  
+  ##_____________________________________________________________________________
+  ## Check for the header files
+  
+  find_path (SSL_INCLUDES crypto.h ssl.h ssl2.h
+    PATHS ${include_locations}
+    PATH_SUFFIXES ssl openssl
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the library
+  
+  find_library (SSL_LIBRARIES ssl
+    PATHS ${lib_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Actions taken when all components have been found
+  
+  if (SSL_INCLUDES AND SSL_LIBRARIES)
+    set (HAVE_SSL TRUE)
+  else (SSL_INCLUDES AND SSL_LIBRARIES)
+    set (HAVE_SSL FALSE)
+    if (NOT SSL_FIND_QUIETLY)
+      if (NOT SSL_INCLUDES)
+	message (STATUS "Unable to find SSL header files!")
+      endif (NOT SSL_INCLUDES)
+      if (NOT SSL_LIBRARIES)
+	message (STATUS "Unable to find SSL library files!")
+      endif (NOT SSL_LIBRARIES)
+    endif (NOT SSL_FIND_QUIETLY)
+  endif (SSL_INCLUDES AND SSL_LIBRARIES)
+  
+  if (HAVE_SSL)
+    if (NOT SSL_FIND_QUIETLY)
+      message (STATUS "Found components for SSL")
+      message (STATUS "SSL_INCLUDES  = ${SSL_INCLUDES}")
+      message (STATUS "SSL_LIBRARIES = ${SSL_LIBRARIES}")
+    endif (NOT SSL_FIND_QUIETLY)
+  else (HAVE_SSL)
+    if (SSL_FIND_REQUIRED)
+      message (FATAL_ERROR "Could not find SSL!")
+    endif (SSL_FIND_REQUIRED)
+  endif (HAVE_SSL)
+  
+  ##_____________________________________________________________________________
+  ## Mark advanced variables
+  
+  mark_as_advanced (
+    SSL_INCLUDES
+    SSL_LIBRARIES
+    )
+  
+endif (NOT FIND_SSL_CMAKE)

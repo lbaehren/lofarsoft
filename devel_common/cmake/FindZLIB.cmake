@@ -28,61 +28,67 @@
 #  ZLIB_LIBRARIES  = Link these to use ZLIB
 #  ZLIB_LFLAGS     = Linker flags (optional)
 
-## -----------------------------------------------------------------------------
-## Search locations
+if (NOT FIND_ZLIB_CMAKE)
 
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-find_path (ZLIB_INCLUDES zlib.h zutil.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES zlib
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-find_library (ZLIB_LIBRARIES z
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-if (ZLIB_INCLUDES AND ZLIB_LIBRARIES)
-  set (HAVE_ZLIB TRUE)
-else (ZLIB_INCLUDES AND ZLIB_LIBRARIES)
-  set (HAVE_ZLIB FALSE)
-  if (NOT ZLIB_FIND_QUIETLY)
-    if (NOT ZLIB_INCLUDES)
-      message (STATUS "Unable to find ZLIB header files!")
-    endif (NOT ZLIB_INCLUDES)
-    if (NOT ZLIB_LIBRARIES)
-      message (STATUS "Unable to find ZLIB library files!")
-    endif (NOT ZLIB_LIBRARIES)
-  endif (NOT ZLIB_FIND_QUIETLY)
-endif (ZLIB_INCLUDES AND ZLIB_LIBRARIES)
-
-if (HAVE_ZLIB)
-  if (NOT ZLIB_FIND_QUIETLY)
-    message (STATUS "Found components for ZLIB")
-    message (STATUS "ZLIB_INCLUDES  = ${ZLIB_INCLUDES}")
-    message (STATUS "ZLIB_LIBRARIES = ${ZLIB_LIBRARIES}")
-  endif (NOT ZLIB_FIND_QUIETLY)
-else (HAVE_ZLIB)
-  if (ZLIB_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find ZLIB!")
-  endif (ZLIB_FIND_REQUIRED)
-endif (HAVE_ZLIB)
-
-## -----------------------------------------------------------------------------
-## Mark advanced variables
-
-mark_as_advanced (
-  ZLIB_INCLUDES
-  ZLIB_LIBRARIES
-  )
+  set (FIND_ZLIB_CMAKE TRUE)
+  
+  ##_____________________________________________________________________________
+  ## Search locations
+  
+  include (CMakeSettings)
+  
+  ##_____________________________________________________________________________
+  ## Check for the header files
+  
+  find_path (ZLIB_INCLUDES zlib.h zutil.h
+    PATHS ${include_locations}
+    PATH_SUFFIXES zlib
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the library
+  
+  find_library (ZLIB_LIBRARIES z
+    PATHS ${lib_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Actions taken when all components have been found
+  
+  if (ZLIB_INCLUDES AND ZLIB_LIBRARIES)
+    set (HAVE_ZLIB TRUE)
+  else (ZLIB_INCLUDES AND ZLIB_LIBRARIES)
+    set (HAVE_ZLIB FALSE)
+    if (NOT ZLIB_FIND_QUIETLY)
+      if (NOT ZLIB_INCLUDES)
+	message (STATUS "Unable to find ZLIB header files!")
+      endif (NOT ZLIB_INCLUDES)
+      if (NOT ZLIB_LIBRARIES)
+	message (STATUS "Unable to find ZLIB library files!")
+      endif (NOT ZLIB_LIBRARIES)
+    endif (NOT ZLIB_FIND_QUIETLY)
+  endif (ZLIB_INCLUDES AND ZLIB_LIBRARIES)
+  
+  if (HAVE_ZLIB)
+    if (NOT ZLIB_FIND_QUIETLY)
+      message (STATUS "Found components for ZLIB")
+      message (STATUS "ZLIB_INCLUDES  = ${ZLIB_INCLUDES}")
+      message (STATUS "ZLIB_LIBRARIES = ${ZLIB_LIBRARIES}")
+    endif (NOT ZLIB_FIND_QUIETLY)
+  else (HAVE_ZLIB)
+    if (ZLIB_FIND_REQUIRED)
+      message (FATAL_ERROR "Could not find ZLIB!")
+    endif (ZLIB_FIND_REQUIRED)
+  endif (HAVE_ZLIB)
+  
+  ##_____________________________________________________________________________
+  ## Mark advanced variables
+  
+  mark_as_advanced (
+    ZLIB_INCLUDES
+    ZLIB_LIBRARIES
+    )
+  
+endif (NOT FIND_ZLIB_CMAKE)
