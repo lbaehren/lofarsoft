@@ -175,42 +175,6 @@ add_custom_target (clean-src
 
 ## ==============================================================================
 ##
-##  Update of working copy
-##
-## ==============================================================================
-
-if (VERSION_CONTROL_SYSTEM STREQUAL "git")
-  ## Update the working version
-  add_custom_target (update
-    COMMAND ${GIT_EXECUTABLE} stash
-    COMMAND ${GIT_EXECUTABLE} svn rebase
-    COMMAND ${GIT_EXECUTABLE} stash apply
-    COMMAND cd ${USG_ROOT}/build && rm -rf CMake* && ./bootstrap
-    WORKING_DIRECTORY ${USG_ROOT}
-    COMMENT "Updating working version of the source code from repository ..."
-    )
-  ## Pusd local changes to repository
-  add_custom_target (commit
-    COMMAND ${GIT_EXECUTABLE} stash
-    COMMAND ${GIT_EXECUTABLE} svn dcommit
-    COMMAND ${GIT_EXECUTABLE} stash apply
-    WORKING_DIRECTORY ${USG_ROOT}
-    COMMENT "Updating working version of the source code from repository ..."
-    )
-endif (VERSION_CONTROL_SYSTEM STREQUAL "git")
-
-if (VERSION_CONTROL_SYSTEM STREQUAL "svn")
-  add_custom_target (update
-    COMMAND ${SVN_EXECUTABLE} cleanup
-    COMMAND ${SVN_EXECUTABLE} up
-    COMMAND cd ${USG_ROOT}/build && rm -rf CMake* && ./bootstrap
-    WORKING_DIRECTORY ${USG_ROOT}
-    COMMENT "Updating working version of the source code from repository ..."
-    )
-endif (VERSION_CONTROL_SYSTEM STREQUAL "svn")
-
-## ==============================================================================
-##
 ##  External packages
 ##
 ## ==============================================================================
