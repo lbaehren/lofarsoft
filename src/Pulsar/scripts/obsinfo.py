@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 import os, sys, glob
 import getopt
 import numpy as np
@@ -33,7 +35,7 @@ def usage (prg):
         """ Prints info how to use the script.
         """
         print "Program %s lists info about sub5 observations" % (prg, )
-        print "Usage: %s [-s, --sorted] [-f, --from <YYYY-MM-DD>] [-h, --help]\n" % (prg, )
+	print "Usage: %s [-s, --sorted] [-f, --from <YYYY-MM-DD>] [-h, --help]\n" % (prg, )
 
 # Parse the command line
 def parsecmd(prg, argv):
