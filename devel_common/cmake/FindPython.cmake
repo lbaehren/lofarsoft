@@ -20,7 +20,7 @@
 # |   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                 |
 # +-----------------------------------------------------------------------------+
 
-# - Check for the presence of <PACKAGE>
+# - Check for the presence of Python
 #
 # The following variables are set when PYTHON is found:
 #
