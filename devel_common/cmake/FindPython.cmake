@@ -91,10 +91,15 @@ if (PYTHON_SELECTOR)
     endif (NOT PYTHON_FIND_QUIETLY)
   else (python_default_version MATCHES ".*apple")
     # The headers should be available in the standard MacPorts location
-    list (APPEND python_include_locations /opt/local/Library/Frameworks/Python.framework/Headers)
+    list (APPEND python_include_locations
+      /opt/local/Library/Frameworks/Python.framework/Headers
+      )
   endif (python_default_version MATCHES ".*apple")
 
-  string (REGEX REPLACE "python(.)(.).*" "\\1.\\2;" python_version_list ${python_default_version})
+  string (REGEX REPLACE
+    "python(.)(.).*" "\\1.\\2;"
+    python_version_list ${python_default_version}
+    )
 
 endif (PYTHON_SELECTOR)
 
@@ -115,7 +120,9 @@ foreach (python_version ${python_version_list})
 	)
     else (PYTHON_PYTHONHOME)
       find_program (PYTHON_EXECUTABLE python${python_version}
-	PATHS ${python_bin_locations}
+	PATHS 
+	${python_bin_locations}
+	/Library/Frameworks/Python.framework/Versions/${python_version}/bin
 	ENV PATH
 	NO_DEFAULT_PATH
 	)
