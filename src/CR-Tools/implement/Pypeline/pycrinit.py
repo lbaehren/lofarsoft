@@ -6,6 +6,7 @@
 
 from pycrtools import *
 from getopt import *
+hInit()
 
 try:
     opts, args = getopt(sys.argv[1:],"hi:", ["help","include="])

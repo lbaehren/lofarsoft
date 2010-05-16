@@ -1,6 +1,8 @@
 # Import module
+
 import pdb
-debugon=False
+#pdb.set_trace()
+#debugon=False
 
 
 from math import *
@@ -282,17 +284,13 @@ def hArray_getDim(self):
 
 def hArray_return_slice_start(val):
     """ Reduces a slice to its start value"""
-    if (val==Ellipsis):
+    if val==Ellipsis:
         return 0
     elif type(val)==slice:
          if (val.start == None): return 0
          return val.start
-    elif type(val)==list:
-        return val[0]
-    elif type(val) in hAllArrayTypes:
-        return val[0].val()
-    elif type(val) in hAllVectorTypes:
-        return val[0]
+    elif type(val) in hListAndArrayTypes:
+        return Vector(val)
     else:
         return val
 
@@ -302,12 +300,8 @@ def hArray_return_slice_end(val):
         return -1
     elif type(val)==slice:
         return hNone2Value(val.stop,-1)
-    elif type(val)==list:
-        return val[-1]
-    elif type(val) in hAllArrayTypes:
-        return val[-1].val()
-    elif type(val) in hAllVectorTypes:
-        return val[-1]
+    elif type(val) in hListAndArrayTypes:
+        return Vector(val)
     else:
         return val+1
 
@@ -319,6 +313,16 @@ def hNone2Value(none,defval):
     if none==None: return defval
     else: return none
 
+def hSliceListElementToNormalValuesStart(s,dim):
+    if s==None: return 0
+    if s>=0: return s
+    else: return s+dim
+
+def hSliceListElementToNormalValuesEnd(s,dim):
+    if s==None: return dim
+    if s>=0: return s
+    else: return s+dim
+
 def hSliceToNormalValues(s,dim):
     """
     Returns a slice object where none and negative numbers are replaced by the appropriate integers, given a dimension (length) dim of the full slice.
@@ -327,12 +331,16 @@ def hSliceToNormalValues(s,dim):
         if s<0: return s+dim
     if not type(s)==slice: return s
     s1=s.start;s2=s.stop;s3=s.step
-    if s1==None: s1=0
+    if type(s1) in hListAndArrayTypes:
+        s1=Vector(map(lambda x:hSliceListElementToNormalValuesStart(x,dim),s1))
+    elif s1==None: s1=0
     elif s1<0: s1+=dim
-    elif s1>dim: s1=dim;
-    if s2==None: s2=dim
+    elif s1>dim: s1=dim
+    if type(s2) in hListAndArrayTypes:
+        s2=Vector(map(lambda x:hSliceListElementToNormalValuesEnd(x,dim),s2))
+    elif s2==None: s2=dim
     elif s2<0: s2+=dim
-    elif s2>dim: s2=dim;
+    elif s2>dim: s2=dim
     if s3==None: s3=1
     return slice(s1,s2,s3)
 
@@ -401,9 +409,9 @@ def hArray_getitem(self,indexlist):
     ary=hArray(self)
     ary.par=self.par
     dimensions=ary.getDim()
+    subslice_start=0; subslice_end=-1;
 #   Now check if there is an ellipsis in the index list, which indicates looping.
     ellipsiscount=indexlist.count(Ellipsis)
-#    pdb.set_trace()
     if ellipsiscount==0:
         ellipsislocation=0
     elif ellipsiscount==1:
@@ -420,33 +428,42 @@ def hArray_getitem(self,indexlist):
         print "Error: hArray_getitem - only one Ellipsis (...) allowed in index list"
         return ary
     nindices=len(indexlist)
+    subslice_level=nindices-1
     for i in range(nindices):
         indexlist[i]=hSliceToNormalValues(indexlist[i],dimensions[i])
-    indexliststarts=Vector(map(hArray_return_slice_start,indexlist))
+    indexliststarts=map(hArray_return_slice_start,indexlist)
     lastelement=indexlist[-1]
-    start_off=0; end_off=0;
     if ellipsiscount:
         ellipsiselement=indexlist[ellipsislocation]
-        if ellipsislocation<nindices-1:
-            start_off=hArray_return_slice_start(lastelement);
-            end_off=dimensions[nindices-1]-hArray_return_slice_end(lastelement)
-            indexlist=indexlist[0:-1]
-        if type(ellipsiselement)==slice: ary.loop(indexliststarts[0:ellipsislocation],hNone2Value(ellipsiselement.start,0),hNone2Value(ellipsiselement.stop,-1),hNone2Value(ellipsiselement.step,1),start_off,end_off)
-        elif type(lastelement)==list:
-            ary.loop(indexliststarts[0:ellipsislocation],Vector(indexlist[ellipsislocation]),start_off,end_off)
+        if ellipsislocation<nindices-1: #The slice to return is itself not a slice over a full dimension, but just a part
+            subslice_start=hArray_return_slice_start(lastelement);
+            subslice_end=hArray_return_slice_end(lastelement)
+            indexlist=indexlist[0:-1]; lastelement=indexlist[-1]
+        else: #Take an entire dimension as a slice to return
+            subslice_start=0
+            subslice_end=1
+        if type(ellipsiselement)==slice: #loop over a slice of a higher index
+            ary.setSubSlice(subslice_start,subslice_end,subslice_level)
+            ary.loop(Vector(int,ellipsislocation,fill=indexliststarts[0:ellipsislocation]),hNone2Value(ellipsiselement.start,0),hNone2Value(ellipsiselement.stop,-1),hNone2Value(ellipsiselement.step,1))
+        elif type(lastelement)==list: # loop over a list of indices
+            ary.setSubSlice(subslice_start,subslice_end,subslice_level)
+            ary.loop(Vector(int,ellipsislocation,fill=indexliststarts[0:ellipsislocation]),Vector(indexlist[ellipsislocation]))
     elif type(lastelement)==slice: #Non-looping slice
-        ary.setSliceVector(indexliststarts[0:-1],hArray_return_slice_start(lastelement),hArray_return_slice_end(lastelement))
+        ary.setSubSlice(hArray_return_slice_start(lastelement),hArray_return_slice_end(lastelement),subslice_level)
+        ary.setSliceVector(Vector(int,nindices-1,fill=indexliststarts[0:-1]))
     elif type(lastelement) in [list,IntVec,IntArray]: #make new vector 
         if len(dimensions)==nindices: ## only implemented for last slice.
             arycopy=hArray(Type=basetype(ary),dimensions=[len(lastelement)])
             if nindices>1: 
-                ary.setSliceVector(indexliststarts[0:-1],0,-1)
+                ary.setSubSlice(subslice_start,subslice_end,subslice_level)
+                ary.setSliceVector(Vector(int,nindices-1,fill=indexliststarts[0:-1]))
             arycopy.copy(ary,hArray(lastelement),-1)
             return arycopy
         else:
             print "Error: hArray_getitem - list of indices has to be at the position of the last index."
     else: # normal integer index
-        ary.setSliceVector(indexliststarts[0:-1],lastelement,lastelement+1)
+        ary.setSubSlice(lastelement,lastelement+1,subslice_level)
+        ary.setSliceVector(Vector(int,nindices-1,fill=indexliststarts[0:-1]))
     return ary;
 
 def hArray_setitem(self,dims,fill):
@@ -652,6 +669,8 @@ for i in range(len(hBaseTypes)):
     hTypeNamesDictionary[btype]=hBaseNamesPy[i]
 
 hAllListTypes=hAllVectorTypes+[list,tuple]
+hListAndArrayTypes=[list,tuple]+hAllVectorTypes+hAllArrayTypes
+
 
 
 basetypedictionary=dict(zip(hVectorBaseTypeDictionary.keys()+hArrayBaseTypeDictionary.keys()+hTypeDictionary.keys(),hVectorBaseTypeDictionary.values()+hArrayBaseTypeDictionary.values()+hTypeDictionary.values()))
@@ -735,6 +754,8 @@ hAllContainerTypes=hAllVectorTypes+hAllArrayTypes
 #======================================================================
 #  Vector Methods/Attributes
 #======================================================================
+
+from pycranalysis import *
 
 """
 Here we add the functions defined in the hftools.cc as
@@ -932,11 +953,11 @@ for v in hAllVectorTypes:
 
 
 for v in hAllContainerTypes:
-    for s in ["hFill","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute","hPPrint","hPrettyString"]:
+    for s in ["hFill","hSet","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute","hPPrint","hPrettyString"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hStdDev","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hErrorsToWeights","hPolynomial"]:
+    for s in ["hMean","hStdDev","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hErrorsToWeights","hPolynomial","hCRAverageSpectrum"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hComplexContainerTypes:
@@ -952,7 +973,7 @@ for v in hNumericalContainerTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
+    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hLogSave","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
         setattr(v,s[1:].lower(),eval(s))
 
 #========================================================================
@@ -1001,7 +1022,9 @@ def Vector(Type=float,size=-1,fill=None):
         vec=type2vector(vtype)
     vec.type=vtype
     if (size>=0): vec.resize(size)
-    if type(fill) in [tuple,list]: fill=Vector(fill)
+    if type(fill) in [tuple,list]: 
+        if len(fill)>0: fill=Vector(fill)
+        else: fill=None
     if type(fill) in hAllArrayTypes: fill=fill.vec()
     if (not fill==None):
         vec.fill(fill)
@@ -1011,7 +1034,7 @@ def Vector(Type=float,size=-1,fill=None):
 #  hArray Class and Vector Methods/Attributes
 #======================================================================
 
-def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None):
+def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None):
     """
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
@@ -1079,8 +1102,11 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None,properties=N
         if fill==None: fill=copy
     if type(properties) in hAllArrayTypes:
         if Type==None: Type=basetype(properties)
+        if name==None: name=properties.getKey("name")
         if dimensions==None: dimensions=properties.getDim()
+        if units==None: units=(properties.getUnitPrefix(),properties.getUnitName())
         par=properties.par.__list__()
+    if Type==None: Type=float
     if isVector(Type):  #Make a new array with reference to the input vector
         ary=type2array(basetype(Type))
         ary.stored_vector=Type
@@ -1104,7 +1130,8 @@ def hArray(Type=float,dimensions=None,fill=None,name=None,copy=None,properties=N
         else: print "Error - hArray: Wrong format for units specified."
     if not (fill == None):
         if type(fill) in hAllVectorTypes: ary.vec().fill(fill)
-        if type(fill) in [tuple,list]: ary.vec().fill(Vector(fill))
+        if type(fill) in [tuple,list]: 
+            if len(fill)>0: ary.vec().fill(Vector(fill))
         else: ary.fill(fill)
     if type(name)==str: ary.setKey("name",name);
     return ary
@@ -1214,117 +1241,4 @@ DataReader.__getitem__=DataReader_getitem
 DataReader.getHeaderVariables=DataReader_getHeaderVariables
 DataReader.__doc__=crfile.__doc__
 DataReader.getCalData = hgetCalData
-#------------------------------------------------------------------------
-# Pypeline Extension, Functions and Algorithms
-#------------------------------------------------------------------------
-
-def CheckParameterConformance(data,keys,limits):
-    """
-    Usage:
-
-    qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
-
-    CheckParameterConformance([Antenna,mean,rms,npeaks,nonGaussianity],{"mean":1,"rms":2,"nonGaussianity":4},qualitycriteria)  ->  ["rms",...]
-
-    Parameters:
-
-    data -  is a list of quality values (i.e. numbers) to check
-
-    keys - a dictionary of fieldnames to be checked and indices
-           telling, where in data the field can be found
-
-    limits - a dictionary of fieldnames and limits (lowerlimit,
-             upperlimit)
-
-    Checks whether a list of numbers is within a range of limits. The
-    limits are provided as a dictionary of fieldnames and tuples, of
-    the form FIELDNAME:(LOWERLIMT,UPPERLIMIT). A list of fieldnames is
-    returned where the data does not fall within the specified range.
-
-    """
-    result=[]
-    for k in keys:
-        if (data[keys[k]]<limits[k][0]) | (data[keys[k]]>limits[k][1]): result.append(k)
-    return result
-
-
-def CRQualityCheck(limits,datafile=None,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True):
-    """
-    Usage:
-
-    CRQualityCheck(qualitycriteria,datafile,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True) -> list of antennas failing the limits
-
-    qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
-
-    Will step through all antennas of a file assess the data quality
-    and return a list with antennas which have failed the quality
-    check and their statistical properties.
-
-    Parameters:
-
-
-    qualitycriteria - a Python dict with keywords of parameters and limits thereof (lower, upper)
-
-    datafile - Data Reader file object, if none, use values in dataarray and don't read in again
-
-    array - an optional data storage array to read in the data
-
-    maxblocksize - The algorithms takes by default the first and last
-    quarter of a file but not more samples than given in this
-    paramter.
-
-    nsigma - determines for the peak counting algorithm the threshold
-    for peak detection in standard deviations
-
-    verbose - sets whether or not to print additional information
-    """
-#Initialize some parameters
-    if not datafile==None:
-        nAntennas=datafile.get("nofSelectedAntennas")
-        selected_antennas=datafile.get("selectedAntennas")
-        filesize=datafile.get("filesize")
-        blocksize=min(filesize/4,maxblocksize)
-        datafile.set("blocksize",blocksize)
-        nBlocks=filesize/blocksize;
-        blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
-        if dataarray==None: dataarray=hArray(float,[nAntennas,blocksize])
-    else:
-        nAntennas=dataarray.getDim()[0]
-        blocksize=dataarray.getDim()[1]
-        selected_antennas=range(nAntennas)
-        blocklist=[0]
-#Create the some scratch vectors
-    qualityflaglist=[]
-#Calculate probabilities to find certain peaks
-    probability=funcGaussian(nsigma,1,0) # what is the probability of a 5 sigma peak
-    npeaksexpected=probability*blocksize # what is the probability to see such a peak with the blocksize
-    npeakserror=sqrt(npeaksexpected) # what is the statisitcal error on that expectation
-#Start checking
-    if verbose:
-        if not datafile==None: print "Quality checking of file ",datafile.filename
-        print "Considering",nAntennas," antennas and the Blocks:",blocklist
-        print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected
-    for Block in blocklist:
-        if verbose:
-            print "\nBlock = ", Block
-            print "-----------------------------------------------------------------------------------------"
-        if not datafile==None: datafile.set("block",Block).read("Voltage",dataarray.vec())
-        datamean = dataarray[...].mean()
-        datarms = dataarray[...].stddev(datamean)
-        datanpeaks = dataarray[...].countgreaterthanabs(datarms*nsigma)
-        dataNonGaussianity = Vector(float,nAntennas)
-        dataNonGaussianity.sub(datanpeaks,npeaksexpected)
-        dataNonGaussianity /= npeakserror
-        dataproperties=zip(selected_antennas,datamean,datarms,datanpeaks,dataNonGaussianity)
-        noncompliancelist=[]
-        for prop in iter(dataproperties):
-            noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"nonGaussianity":4},limits)
-            if noncompliancelist: qualityflaglist.append([prop[0],Block,prop[1:],noncompliancelist])
-            if verbose:
-                print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, nonGaussianity={4: 7.2f}".format(*prop)," ",noncompliancelist
-    return qualityflaglist
-
-
-#qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
-#CRQualityCheck(datafile,qualitycriteria,maxblocksize=65536,nsigma=5,verbose=True)
 

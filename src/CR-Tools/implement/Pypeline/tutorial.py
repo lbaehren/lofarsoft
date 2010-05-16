@@ -673,8 +673,8 @@ a[0:-1]
 
 gives all but the last slice of the first index.
 
-(+++) Copying parts of the array - a list as index
-..................................................
+(+++) Selecting & Copying Parts of the Array - a List as Index
+...............................................................
 
 
 It is possible to provide a list of indices as the last index to copy parts of the array. 
@@ -690,7 +690,7 @@ You can do this explicitly, using the copy method:
 
 """
 acopy=a.new()
-acopy.copy(a,Vector([0,2,3]),-1)
+acopy.copy(a,hArray([0,2,3]),-1)
 p_("acopy")
 """
 
@@ -699,10 +699,79 @@ only the first nth elements of the index vector (if the last parameter
 is n>0) - hence it is possible to operate with fixed length index
 vectors.
 
+
+Where this becomes important is when selecting certain elements in an
+array, e.g. based on its values. For, example, the the "Find" methods
+will return a list of indices of elements for which a particular
+condition is true. Most commonly used may be the methods "hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual".
+
+Assume, we want to have a list of all the elements of a that are
+between the values (but excluding) 0 and 10 and perform an operation
+on it. Then we need to create an index vector first.
+
+"""
+indices=hArray(int,dimensions=a,fill=-1)
+"""
+
+and fill it with the indices according to our condition
+
+"""
+number_of_indices=indices[...].findbetween(a[...],0,8)
+p_("number_of_indices")
+indices[...].pprint(-1)
+"""
+
+As the result we get a vector with the number of elements in each row
+that have satisfied the condition and in 'indices' we get their
+position. Note that the indices vector must be of large enough to hold
+all indices, hence in the general case needs to be of the same size
+(and dimension) as the input data array. Following our basic philosophy,
+the index vector will not be automatically resized. If the number of
+selected indices is smaller than the remaining spaces simply remain
+untouched (containin whatever was in there before). To illustrate this
+effect, we filled the indices array with "-1"s. If, on the other hand,
+the vector were too short it will be filled until the end and then the
+search stops. No error message will be given in this case - this is a
+feature.
+
+To retreive the selected elements we make use of the copy method again
+to create a new array.
+
+"""
+b=a.new(); b.fill(-99)
+b[...].copy(a[...],indices[...,[0]:number_of_indices],number_of_indices)
+b.pprint(-1)
+"""
+
+This (contiguous) with variable length we can use for further looping
+operations (as described below) on the rows of the array. E.g., 
+
+"""
+b[...,[0]:number_of_indices].sum()
+"""
+
+will take the sum of the first n elements in each row of our array,
+where n given by the vector number_of_indices that were returned by
+out find operation. Clearly, the -99 values that we put into our array
+for demonstration purposes were not taken into account for the sum of
+the rows. Note, that the slice specification in the line above needs
+to have either vectors or scalar values, but not a mix of the
+two. This is the reason for using [0]:number_of_indices rather than
+just 0:number_of_indices.
+
+
+BTW, nicer would have been to do right away something like the
+following:
+
+a[indices[...,[0]:number_of_indices],...].sum()   (NOT!)
+
+but that is not yet implemented, since looping cannot yet be done over
+nested indices!
+
 (+++) Applying Methods to Slices
 ................................
 
-First, of all, we can now apply the known vector functions also to
+First, of all, we can apply the known vector functions also to
 array slices directly. E.g.,
 
 """
@@ -827,7 +896,7 @@ a[[0,2],...].mean()
 will loop over slices 0 and 2.
 
 
-Finally, it is possible to specify a slice after the ellipse, e.g.,
+It is possible to specify a slice after the ellipse, e.g.,
 """
 a[...,0:2].mean()
 """
@@ -859,6 +928,7 @@ p_("x")
 and indeed now the first and last slice were operated on and filled
 with the results of the operation.
 
+
 Forgetting slicing in a parameter can lead to unexpected results,
 e.g., in the following example "a" is looped over but x is not. Hence,
 the result will always be written (and overwritten) into the first
@@ -869,6 +939,7 @@ x.fill(0); x[...].mul(a,2)
 
 p_("x")
 """
+
 
 (+++) Units and Scale Factors
 ................................

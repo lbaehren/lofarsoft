@@ -148,9 +148,13 @@ template <class T>
     void setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
     void setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3);
     void setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
-    hArray<T> & setSlice(HInteger beg, HInteger end=-1);
-    hArray<T> & setSliceVector(vector<HInteger> & index_vector, HInteger offset_start=0, HInteger offset_end=-1);
     HInteger getNumberOfDimensions();
+    hArray<T> & setSlice(HInteger beg, HInteger end=-1);
+    hArray<T> & setSliceVector(vector<HInteger> & index_vector);
+    HInteger getSubSliceEnd();
+    HInteger getSubSliceStart();
+    hArray<T> & setSubSlice(HInteger start, HInteger end, HInteger level);
+    hArray<T> & setSubSliceVec(const vector<HInteger> start, const vector<HInteger> & end, const HInteger level);
     typename std::vector<T>::iterator begin();
     typename std::vector<T>::iterator end();
     HInteger getLoop_i();
@@ -166,8 +170,8 @@ template <class T>
     HInteger length();
     bool loopingMode();
     bool doLoopAgain();
-    hArray<T> & loop(vector<HInteger> & start_element_index, HInteger start=0, HInteger end=-1, HInteger increment=1, HInteger start_off=0, HInteger end_off=0);
-    hArray<T> & loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec, HInteger start_off=0, HInteger end_off=0);
+    hArray<T> & loop(vector<HInteger> & start_element_index, HInteger start=0, HInteger end=-1, HInteger increment=1);
+    hArray<T> & loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec);
     HInteger setLoopSlice(vector<HInteger> & start_element_index);
     hArray<T> &  next();
     hArray<T> &  loopOn();
@@ -177,6 +181,8 @@ template <class T>
     hArray<T> &  setUnit(HString prefix, HString name);
     hArray<T> &  clearUnit();
     HString  getUnit();
+    HString  getUnitName();
+    HString  getUnitPrefix();
     hArray<T> &  setHistory(bool on_or_off);
     bool isTrackingHistory();
     hArray<T> &  clearHistory();
@@ -201,6 +207,9 @@ template <class T>
     HInteger slice_begin, slice_end, slice_size;
     HInteger loop_slice_begin, loop_slice_end, loop_slice_size, loop_lower_level_size;
     HInteger loop_start, loop_end, loop_increment, loop_i, loop_nslice, loop_maxn;
+    HInteger subslice_level,subslice_start,subslice_end;
+    vector<HInteger> subslice_vec_start,subslice_vec_end;
+    vector<HInteger>::iterator subslice_start_it,subslice_end_it;
     vector<HInteger> index_vector;
     bool loop_over_indexvector;
     bool loop_next;
@@ -275,10 +284,13 @@ casa::Int hSum(casa::Int* const&, casa::Int* const&);
 long int hSum(const long int*, long int*);
 #endif
 
+#define A_LOW_NUMBER 1.0e-32
+
 //========================================================================
 //                        Helper Functions
 //========================================================================
 
+void hInit();
 HString hgetFiletype(HString filename);
 HString hgetFileExtension(HString filename);
 

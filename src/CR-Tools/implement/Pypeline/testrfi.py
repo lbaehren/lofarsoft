@@ -1,99 +1,133 @@
 filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecond.h5"
 filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecondtbb1.h5"
 filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+#------------------------------------------------------------------------
+#Input section
+#------------------------------------------------------------------------
+filename=filename_lofar_onesecond
+blocksize=2**16
+nbins_small=2**10
+max_nblocks=3
+maxorder=17
+nsigma=7
+doplot=True
+verbose=True
+#------------------------------------------------------------------------
+
+
 datafile=crfile(filename)
-datafile["blocksize"]=2**16
-fx=datafile["Fx"]
-fft=datafile["emptyFFT"]
-fft[...].fftw(fx[...])
+datafile["blocksize"]=min(blocksize,datafile.filesize)
+nblocks=min(datafile.filesize/datafile.blocksize,max_nblocks)
+ncoeffs=maxorder+1
+t0=time.clock()
+#------------------------------------------------------------------------
+#Array definitions
+#------------------------------------------------------------------------
+if verbose: print time.clock()-t0,"s: Setting up work arrays."
+"""
+Define the basic arrays to work with
+"""
 frequency=datafile["Frequency"]
 frequency.setUnit("M","")
-spectrum=hArray(float,[1,datafile.fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=frequency,par=[("logplot","y")])
-lgspectrum=hArray(float,[1,datafile.fftLength],fill=0,name="lg Spectrum",units="a.u.",xvalues=frequency)
-spectrum.spectralpower(fft[...])
-lgspectrum.log(spectrum)
+spectrum=hArray(float,[datafile.nofAntennas,datafile.fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=frequency,par=[("logplot","y")])
 
+"""
+Define binned spectrum arrays
+"""
+rfi_freqs=hArray(float,dimensions=[1,nbins_small],name="Frequency",units=("M","Hz"))
+rfi_spectrum=hArray(float,[datafile.nofAntennas,nbins_small],name="Binned Spectrum",units="a.u.",xvalues=rfi_freqs,par=("logplot","y"))
+rfi_rms=hArray(properties=rfi_spectrum, name="RMS of Spectrum")
+rfi_rms2=hArray(properties=rfi_rms)
 
-RFIVectorLength=128
-rfi_freqs=hArray(float,dimensions=[1,RFIVectorLength],name="Frequency",units="MHz")
-rfi_freqs.downsample(frequency[1:])
-
-rfi_amplitudes1=hArray(float,[datafile.nofAntennas,RFIVectorLength],xvalues=rfi_freqs,par=("logplot","y"))
-rfi_amplitudes2=hArray(float,[datafile.nofAntennas,RFIVectorLength],xvalues=rfi_freqs,par=("logplot","y"))
-rfi_amplitudes3=hArray(float,[datafile.nofAntennas,RFIVectorLength],xvalues=rfi_freqs)
-rfi_rms1=hArray(properties=rfi_amplitudes1)
-rfi_rms2=hArray(properties=rfi_amplitudes2)
-rfi_rms3=hArray(properties=rfi_amplitudes3)
-
-rfi_amplitudes1[...].downsample(rfi_rms1[...],spectrum[...,1:])
-rfi_amplitudes2[...].downsamplespikydata(rfi_rms2[...],spectrum[...,1:],-0.1)
-rfi_amplitudes3[...].downsamplespikydata(rfi_rms3[...],lgspectrum[...,1:],-0.1)
-
-spectrum[0].plot(title="RFI Downsampling")
-rfi_amplitudes1[0].plot(clf=False)
-rfi_amplitudes2[0].plot(clf=False)
-rfi_amplitudes3[0].plot(clf=False)
-raw_input("Press Enter to continue...")
-
-yvalues=rfi_amplitudes3
-xvalues=lgspectrum
-rms=rfi_rms3
-
-maxorder=13
-ncoeffs=maxorder+1
+"""
+Define arrays to calculate the polynomial fit
+"""
 powers=hArray(int,[datafile.nofAntennas,ncoeffs],range(ncoeffs))
 covariance=hArray(float,[datafile.nofAntennas,ncoeffs,ncoeffs])
 coeffs=hArray(float,[datafile.nofAntennas,ncoeffs])
-ratio=hArray(properties=yvalues)
+ratio=hArray(properties=rfi_spectrum,name="RMS/Ampltude",par=("logplot",False))
+xpowers=hArray(float,[datafile.nofAntennas,nbins_small,ncoeffs],name="Powers of Frequency")
+baseline=hArray(properties=spectrum,xvalues=frequency)
+baseline_binned=hArray(properties=rfi_spectrum,xvalues=rfi_freqs)
 
-#rfi_rms1[0,0]=rfi_rms[0,1].val()
-#weights=hArray(properties=yvalues)
-#weights.copy(rms)
-#weights.errorstoweights(weights)
-#weights[0,1]=0
-#weights[0,-1,]=0
-#weights.fill(1.0)
-#ratio=weights.new()
-ratio.div(rfi_amplitudes2,rfi_rms2)
-mratio=hArray(ratio.mean())
+"""
+Define arrays used to select and hold the clean bins
+"""
+bad_channels=hArray(int,spectrum,name="Bad Channels")
+selected_bins=hArray(int,rfi_spectrum,name="Selected bins")
+clean_bins_x=hArray(properties=rfi_freqs,name="Clean Frequencies")
+clean_bins_y=hArray(properties=rfi_spectrum,xvalues=clean_bins_x)
+
+#------------------------------------------------------------------------
+#Begin Calculations
+#------------------------------------------------------------------------
+"""
+Calculate a spectrum averaged over all blocks
+"""
+spectrum.craveragespectrum(datafile,blocks=range(nblocks),verbose=verbose)
+
+"""
+Downsample spectrum and frequencies to lower resolution, obtain rms and select good bins.
+"""
+if verbose:
+    print "Downsampling spectrum to ",nbins_small,"bins."
+    rfi_freqs.downsample(frequency[1:])
+    rfi_spectrum[...].downsamplespikydata(rfi_rms[...],spectrum[...,1:],-0.01)
+
+if doplot:
+    spectrum[0].plot(title="RFI Downsampling")
+    rfi_spectrum[0].plot(clf=False)
+    raw_input("Plotted downsampled spectrum - press Enter to continue...")
+
+ratio.div(rfi_spectrum,rfi_rms)
+mratio=hArray(ratio[...].mean())
 ratio[...] /= mratio[...]
 ratio.square()
 
-selected_channels=hArray(int,spectrum)
-clean_channels_x=hArray(properties=rfi_freqs,name="Clean Frequencies")
-clean_channels_y=hArray(properties=yvalues,xvalues=clean_channels_x)
-#nselected_channels=ratio[...].findbetween(0.3,selected_channels[...])
-nselected_channels=selected_channels[...].findbetween(ratio[...],0.5,2.0)
+#Now select bins where the ratio between RMS and amplitude is within a factor 2 of the mean value
+nselected_bins=selected_bins[...].findbetween(ratio[...],0.5,2)
 
-#Now copy only the channels which have no strong RFI in the,
-clean_channels_x[...].copy(rfi_freqs,selected_channels[...],nselected_channels)
-clean_channels_y[...].copy(yvalues,selected_channels[...],nselected_channels)
+#Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
+clean_bins_x[...].copy(rfi_freqs,selected_bins[...],nselected_bins)
+clean_bins_y[...].copy(rfi_spectrum,selected_bins[...],nselected_bins)
+clean_bins_y[...,[0]:nselected_bins].log()
 
-xpowers=hArray(float,[datafile.nofAntennas,RFIVectorLength,ncoeffs])
-xpowers[...].linearfitpolynomialx(clean_channels_x[...],powers[...])
+if verbose: print time.clock()-t0,"s: Fitting baseline."
 
-#coeffs.linearfit(covariance,xpowers,yvalues,weights)
-#coeffs.linearfit(covariance,xpowers,yvalues,ratio)
-coeffs[...].linearfit(covariance[...],xpowers[...],clean_channels_y[...],nselected_channels)
+#Create the nth powers of the x value, i.e. the frequency, for the fitting
+xpowers[...,[0]:nselected_bins].linearfitpolynomialx(clean_bins_x[...,[0]:nselected_bins],powers[...])
 
-baseline=hArray(properties=spectrum,xvalues=frequency)
+#Fit an nth order polynomial to the log data
+coeffs[...].linearfit(covariance[...],xpowers[...],clean_bins_y[...],nselected_bins)
+
+#Caluclate a smooth baseline for the full (large) spectrum
 baseline.fill(0.0)
 baseline[...].polynomial(frequency,coeffs[...],powers[...])
-clean_channels_y.plot()
-baseline.plot(clf=False)
-raw_input("Press Enter to continue...")
-#baseline.exp()
+baseline_binned[...].polynomial(rfi_freqs,coeffs[...],powers[...])
 
-xvalues.plot()
-yvalues.plot(clf=False)
-baseline.plot(clf=False)
-raw_input("Press Enter to continue...")
+#clean_bins_y[0,0:nselected_bins[0]].plot(xvalues=rfi_freqs[0,0:nselected_bins[0]])
+if doplot:
+    clean_bins_y[0,0:nselected_bins[0]].plot(xvalues=clean_bins_x[0,0:nselected_bins[0]],logplot=False)
+    baseline[0].plot(clf=False)
+    raw_input("Plotted logarithmic spectrum and baseline - Press Enter to continue...")
+
+if verbose: print time.clock()-t0,"s: Straightening out spectrum."
 
 baseline.exp()
-
+baseline_binned.exp()
 cleanspec=hArray(copy=spectrum)
-
 cleanspec /= baseline
 
-cleanspec.plot()
+rfi_rms /= baseline_binned
+rfi_rms2[...].copy(rfi_rms,selected_bins[...],nselected_bins)
+rfi_meanrms=rfi_rms2[...,[0]:nselected_bins].mean()
 
+rfi_meanrms *= nsigma
+
+nbad_channels=bad_channels[...].findgreaterthan(cleanspec[...],rfi_meanrms)
+cleanspec2=hArray(copy=cleanspec)
+cleanspec2[...].set(bad_channels[...,[0]:nbad_channels],1.0)
+if doplot: 
+    cleanspec[0].plot()
+    cleanspec2[0].plot(clf=False)
+if verbose: print time.clock()-t0,"s: Done."

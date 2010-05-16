@@ -681,11 +681,12 @@ template <class T> void hArray<T>::init(){
   array_is_shared=false;
   doiterate=false;
   loop_slice_begin=0; loop_slice_end=0; loop_slice_size=0; loop_lower_level_size=0;
-  loop_slice_start_offset=0; loop_slice_end_offset=0;
+  loop_slice_start_offset=0; loop_slice_end_offset=-1;
   loop_i=0; loop_start=0; loop_end=0; loop_increment=1; loop_maxn=0;
   loop_next=false;
   loop_nslice=0;
   loop_over_indexvector=false;
+  setSubSlice(0,-1,-1);
 }
 
 template <class T> void hArray<T>::new_storage(){
@@ -850,6 +851,7 @@ template <class T> void hArray<T>::calcSizes(){
   (*storage_p->slice_sizes_p).resize((*storage_p->dimensions_p).size());
   (*storage_p->slice_sizes_p)[(*storage_p->dimensions_p).size()-1]=1;
   for (int i=(*storage_p->dimensions_p).size()-1; i>0; --i) (*storage_p->slice_sizes_p)[i-1]=(*storage_p->slice_sizes_p)[i]*(*storage_p->dimensions_p)[i];
+  setSubSlice(0,-1,-1);
 }
 
 /*!
@@ -976,18 +978,57 @@ dimensions, this will provide a slice over the remanining dimensions
 (belonging to the element indicated by the index vector)
 
  */
-template <class T> hArray<T> &  hArray<T>::setSliceVector(vector<HInteger> & index_vector, HInteger offset_start, HInteger offset_end){
+template <class T> hArray<T> &  hArray<T>::setSliceVector(vector<HInteger> & index_vector){
   if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   HInteger level=index_vector.size();
   if ((level > *storage_p->ndims_p) || (level < 0)) {ERROR("setSliceVector: Dimension wrong"); return *this;};
-  offset_start=offset_start * (storage_p->slice_sizes_p->at(level));
-  if (offset_end==-1) offset_end=storage_p->dimensions_p->at(level);
-  offset_end=offset_end * (storage_p->slice_sizes_p->at(level));
-  slice_begin=hfmax(0,std::min(hMulSum(index_vector,*storage_p->slice_sizes_p)+offset_start,(HInteger)storage_p->vec_p->size()));
-  slice_end=hfmax(0,std::min(hMulSum(index_vector,*storage_p->slice_sizes_p)+offset_end,(HInteger)storage_p->vec_p->size()));
-  //  slice_end=min(hfmax(slice_begin+storage_p->slice_sizes_p->at(level-1),slice_begin),storage_p->vec_p->size());
+  if (subslice_level==-1) subslice_level=level;
+  slice_begin=hfmax(0,std::min(hMulSum(index_vector,*storage_p->slice_sizes_p)+getSubSliceStart(),(HInteger)storage_p->vec_p->size()));
+  slice_end=hfmax(0,std::min(hMulSum(index_vector,*storage_p->slice_sizes_p)+getSubSliceEnd(),(HInteger)storage_p->vec_p->size()));
   slice_size=slice_end-slice_begin;
+  return *this;
+}
+
+//!Calculate the begin of the current subslice (the last slice) as an offset from the begin of the 2nd to last index. If *subslice_end_it == -1 then calculate from end 
+template <class T> HInteger hArray<T>::getSubSliceStart(){
+  subslice_start=*subslice_start_it;
+  //If negative (i.e. -N), then take full slice minus (N-1) number of elements
+  if (subslice_start<0) subslice_start=storage_p->dimensions_p->at(subslice_level)+subslice_start;
+  subslice_start *= (storage_p->slice_sizes_p->at(subslice_level));
+  return subslice_start;
+}
+
+//!Calculate the end of the current subslice (the last slice) as an offset from the begin of the 2nd to last index. If *subslice_end_it == -1 then take full slice.
+template <class T> HInteger hArray<T>::getSubSliceEnd(){
+  subslice_end=*subslice_end_it;
+  //If negative (i.e. -N), then take full slice minus (N-1) number of elements
+  if (subslice_end<0) subslice_end=storage_p->dimensions_p->at(subslice_level)+subslice_end+1;
+  subslice_end *= (storage_p->slice_sizes_p->at(subslice_level));
+  return subslice_end;
+}
+
+
+//!Sets a second slice at the end (last index) of an already sliced array (e.g. used for array[0:2,...,0:4] -loops over first index and takes only the first 4 elements of each)
+template <class T> hArray<T> &  hArray<T>::setSubSlice(HInteger start, HInteger end, HInteger level)
+{
+  subslice_vec_start.resize(1);
+  subslice_vec_end.resize(1);
+  subslice_start_it=subslice_vec_start.begin();
+  subslice_end_it=subslice_vec_end.begin();
+  *subslice_start_it=start;
+  *subslice_end_it=end;
+  subslice_level=level;
+  return *this;
+}
+
+//!Sets a second slice at the end (last index) of an already sliced array (e.g. used for array[0:2,...,0:4] -loops over first index and takes only the first 4 elements of each). With each call of next the next slice is taken from the vectors.
+template <class T> hArray<T> &  hArray<T>::setSubSliceVec(const vector<HInteger> start, const vector<HInteger> & end, const HInteger level){
+  subslice_vec_start=start;
+  subslice_vec_end=end;
+  subslice_start_it=subslice_vec_start.begin();
+  subslice_end_it=subslice_vec_end.begin();
+  subslice_level=level;
   return *this;
 }
 
@@ -1016,7 +1057,7 @@ template <class T> typename std::vector<T>::iterator hArray<T>::end(){
 \brief Returns the offset of the current slice from the begin iterator of the stored vector
  */
 template <class T> HInteger hArray<T>::getBegin(){
-  if (doiterate) return std::min(loop_slice_begin+loop_nslice*loop_slice_size+loop_slice_start_offset*loop_lower_level_size,loop_slice_end);
+  if (doiterate) return std::min(loop_slice_begin+loop_nslice*loop_slice_size+getSubSliceStart(),loop_slice_end);
   else return slice_begin;
 }
 
@@ -1024,7 +1065,7 @@ template <class T> HInteger hArray<T>::getBegin(){
 \brief Returns the offset of the end of the current slice from the begin iterator of the stored vector
  */
 template <class T> HInteger hArray<T>::getEnd(){
-  if (doiterate) return std::max(std::min(loop_slice_begin+(loop_nslice+1)*loop_slice_size-loop_slice_end_offset*loop_lower_level_size,loop_slice_end),loop_slice_begin);
+  if (doiterate) return std::max(loop_slice_begin+loop_nslice*loop_slice_size+getSubSliceEnd(),loop_slice_begin);
   else return slice_end;
 }
 
@@ -1125,7 +1166,7 @@ will be done over the next higher dimension.
 many slices the iteration should proceed.
 
  */
-template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_element_index, HInteger start, HInteger end, HInteger increment, HInteger start_off, HInteger end_off){
+template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_element_index, HInteger start, HInteger end, HInteger increment){
   if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   HInteger level=setLoopSlice(start_element_index);
@@ -1137,7 +1178,7 @@ template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_elemen
   loopOn();
   loop_over_indexvector=false;
   loop_i=start; loop_start=start; loop_end=end; loop_increment=increment;
-  loop_slice_start_offset=start_off; loop_slice_end_offset=end_off;
+  loop_slice_start_offset=*subslice_start_it; loop_slice_end_offset=*subslice_end_it;
   loop_nslice = loop_i;
   return *this;
 }
@@ -1148,13 +1189,8 @@ template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_elemen
 loop over all slices in the vector) using and index vector to indicate
 over which slices to loop.
 
-\param start_off & end_off: provide an additional offset counted from the
-beginning and the end of the looping slice to further narrow it down
-(allows one to select a loop over all vectors of the last dimensions,
-thereby exclcuding the first and last element, for example.)
-
  */
-template <class T> hArray<T> & hArray<T>::loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec, HInteger start_off, HInteger end_off){
+template <class T> hArray<T> & hArray<T>::loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec){
   if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   HInteger level=setLoopSlice(start_element_index);
@@ -1162,7 +1198,7 @@ template <class T> hArray<T> & hArray<T>::loopVector(vector<HInteger> & start_el
   loopOn();
   loop_over_indexvector=true;
   loop_i=0; loop_start=0; loop_end=vec.size(); loop_increment=1;
-  loop_slice_start_offset=start_off; loop_slice_end_offset=end_off;
+  loop_slice_start_offset=*subslice_start_it; loop_slice_end_offset=*subslice_end_it;
   index_vector=vec;
   loop_nslice=index_vector[loop_i];
   return *this;
@@ -1174,6 +1210,8 @@ template <class T> hArray<T> & hArray<T>::loopVector(vector<HInteger> & start_el
  */
 template <class T> hArray<T> & hArray<T>::resetLoop(){
   loop_i=loop_start;
+  subslice_start_it=subslice_vec_start.begin();
+  subslice_end_it=subslice_vec_end.begin();
   if (loop_over_indexvector) loop_nslice=index_vector[loop_i];
   else loop_nslice = loop_i;
   loopOn();
@@ -1185,7 +1223,7 @@ template <class T> hArray<T> & hArray<T>::resetLoop(){
 \brief Sets the slice parameters used by the looping algorithm to calculate the currently worked on slice.
 
 \param start_element_index: a vector of n indices which remain
-constant during the looping. Looping will be done over the n+1st
+constant during the looping. Looping will be done over the npipil+1st
 index.
 
  */
@@ -1217,6 +1255,8 @@ template <class T> hArray<T> &  hArray<T>::next(){
   if (!doiterate) return *this;
   if (loop_next==false) loop_next=true;  // start all over again
   loop_i+=loop_increment;
+  subslice_start_it+=loop_increment; if (subslice_start_it>=subslice_vec_start.end()) subslice_start_it=subslice_vec_start.begin();
+  subslice_end_it+=loop_increment; if (subslice_end_it>=subslice_vec_end.end()) subslice_end_it=subslice_vec_end.begin();
   if (loop_i>=loop_end) { // the end is near, stop looping ...
     resetLoop();
     loop_next=false;
@@ -1229,12 +1269,30 @@ template <class T> hArray<T> &  hArray<T>::next(){
 }
 
 /*!
-\brief Get the unit name of the data array
+\brief Get the unit name and prefix of the data array
  */
 template <class T> HString hArray<T>::getUnit(){
   if (storage_p==NULL) return ""; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ""; //Check if vector was deleted elsewhere
   return storage_p->unit.prefix + storage_p->unit.name;
+};
+
+/*!
+\brief Get the unit name of the data array
+ */
+template <class T> HString hArray<T>::getUnitName(){
+  if (storage_p==NULL) return ""; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return ""; //Check if vector was deleted elsewhere
+  return storage_p->unit.name;
+};
+
+/*!
+\brief Get the unit prefix of the data array
+ */
+template <class T> HString hArray<T>::getUnitPrefix(){
+  if (storage_p==NULL) return ""; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL) return ""; //Check if vector was deleted elsewhere
+  return storage_p->unit.prefix;
 };
 
 /*!
@@ -1441,6 +1499,8 @@ return_internal_reference<1,
     .def("setDimensions",&hArray<TYPE>::setDimensions4)			\
     .def("setSlice",&hArray<TYPE>::setSlice,return_internal_reference<>())				\
     .def("setSliceVector",&hArray<TYPE>::setSliceVector,return_internal_reference<>())				\
+    .def("setSubSlice",&hArray<TYPE>::setSubSlice,return_internal_reference<>())				\
+    .def("setSubSlice",&hArray<TYPE>::setSubSliceVec,return_internal_reference<>())				\
     .def("getNumberOfDimensions",&hArray<TYPE>::getNumberOfDimensions)	\
     .def("getBegin",&hArray<TYPE>::getBegin)				\
     .def("getEnd",&hArray<TYPE>::getEnd)				\
@@ -1462,6 +1522,8 @@ return_internal_reference<1,
     .def("next",&hArray<TYPE>::next,return_internal_reference<>())       \
     .def("setUnit_",&hArray<TYPE>::setUnit,return_internal_reference<>())	\
     .def("getUnit",&hArray<TYPE>::getUnit)	\
+    .def("getUnitName",&hArray<TYPE>::getUnitName)	\
+    .def("getUnitPrefix",&hArray<TYPE>::getUnitPrefix)	\
     .def("clearUnit",&hArray<TYPE>::clearUnit,return_internal_reference<>())	\
     .def("addHistory",&hArray<TYPE>::addHistory,return_internal_reference<>())	\
     .def("clearHistory",&hArray<TYPE>::clearHistory,return_internal_reference<>())	\
@@ -1506,6 +1568,16 @@ HString hgetFileExtension(HString filename){
 //$SECTION:           Administrative Vector Function
 //========================================================================
 
+//!Initialize functions of the library
+void hInit(){
+#ifdef HAVE_GSL
+  gsl_set_error_handler_off ();
+#else
+  ERROR("hInit: GSL-Libraries not installed. Some are not defined.")
+#endif
+}
+
+
 //$DOCSTRING: Fills a vector with a constant value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFill
@@ -1521,6 +1593,8 @@ HString hgetFileExtension(HString filename){
 
   \brief $DOCSTRING
   $PARDOCSTRING
+
+See also: hSet
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType fill_value)
@@ -1532,6 +1606,37 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType fill_
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Sets certain elements specified in an indexlist to a constant value.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSet
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Vector of in which to set elements.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(indexlist)()("Index list containing the positions of the elements to be set, (e.g. [0,2,4,...] will set every second element).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_1)(val)()("Value to assign to the indexed elements.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: hFill, hCopy
+*/
+template <class Iter, class IterI>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const IterValueType val)
+{
+  Iter it;
+  IterI itidx(index);
+  if (index >= index_end) return;
+  while (itidx != index_end) {
+    it = vec + *itidx;
+    if (it < vec_end && it >= vec) *it=val;
+    ++itidx;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Returns the contents of a vector (up to a maximum length) as a pretty string for printing
 //$COPY_TO HFILE START --------------------------------------------------
@@ -1552,10 +1657,12 @@ template <class Iter>
 HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
 {
   HString s=("[");
-  Iter it(vec), maxit(vec+maxlen);
+  Iter it(vec), maxit;
+  if (maxlen>=0) maxit=(vec+min(maxlen,vec_end-vec));
+  else maxit=vec_end;
   if (vec<vec_end) s+=hf2string(*it);
   ++it;
-  while ((it<vec_end) && (it<maxit)) {
+  while (it<maxit) {
     s+=","+hf2string(*it);
     ++it;
   };
@@ -2002,6 +2109,26 @@ inline T square(T val)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Returns the natural logarithm of the value if the value is larger than zero, otherwise return a low number.
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME logSave
+//------------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED)(val)()("Value to be squared")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class T>
+inline T HFPP_FUNC_NAME(T val)
+{
+  if (val>0) return log(val);
+  else return A_LOW_NUMBER;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Returns the interferometer phase in radians for a given frequency and time.
 //$COPY_TO HFILE START ---------------------------------------------------
 #define HFPP_FUNC_NAME hPhase
@@ -2136,10 +2263,8 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-
-
 //========================================================================
-//$ITERATE MFUNC abs,cos,cosh,exp,log,log10,sin,sinh,sqrt,square,tan,tanh
+//$ITERATE MFUNC abs,cos,cosh,exp,log,log10,logSave,sin,sinh,sqrt,square,tan,tanh
 //========================================================================
 
 //$DOCSTRING: Take the $MFUNC of all the elements in the vector.
@@ -4797,8 +4922,6 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-
-
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply an Inverse FFT on a vector.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -5135,6 +5258,7 @@ HNumber HFPP_FUNC_NAME(
 {
   HInteger Ndata(yvec_end-yvec);  // Number of data points to fit
   HInteger Ncoeff(vecout_end-vecout);
+  HInteger error;
   double chisq;
   gsl_matrix *X, *cov;
   gsl_vector *y, *w, *c;
@@ -5162,15 +5286,10 @@ HNumber HFPP_FUNC_NAME(
 
   //If one can find out how much memory is needed, "work" could be provided as a scratch input vector to this function ...
   gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc (Ndata, Ncoeff);
-  gsl_multifit_wlinear (X, w, y, c, cov,&chisq, work);
+  error=gsl_multifit_wlinear (X, w, y, c, cov,&chisq, work);
   gsl_multifit_linear_free (work);
+  if (error!=0) ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": GSL Fitting Routine returned error code " << error);
 
-  /*  delete X->block;
-  delete y->block;
-  delete w->block;
-  delete c->block;
-  delete cov->block;
-  */
   return chisq;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -5203,6 +5322,7 @@ HNumber HFPP_FUNC_NAME(
 {
   HInteger Ndata(yvec_end-yvec);  // Number of data points to fit
   HInteger Ncoeff(vecout_end-vecout);
+  HInteger error;
   double chisq;
   gsl_matrix *X, *cov;
   gsl_vector *y, *c;
@@ -5225,8 +5345,9 @@ HNumber HFPP_FUNC_NAME(
 
   //If one can find out how much memory is needed, "work" could be provided as a scratch input vector to this function ...
   gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc (Ndata, Ncoeff);
-  gsl_multifit_linear (X, y, c, cov,&chisq, work);
+  error=gsl_multifit_linear (X, y, c, cov,&chisq, work);
   gsl_multifit_linear_free (work);
+  if (error!=0) ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": GSL Fitting Routine returned error code " << error);
 
   return chisq;
 }
