@@ -990,7 +990,7 @@ template <class T> hArray<T> &  hArray<T>::setSliceVector(vector<HInteger> & ind
   return *this;
 }
 
-//!Calculate the begin of the current subslice (the last slice) as an offset from the begin of the 2nd to last index. If *subslice_end_it == -1 then calculate from end 
+//!Calculate the begin of the current subslice (the last slice) as an offset from the begin of the 2nd to last index. If *subslice_end_it == -1 then calculate from end
 template <class T> HInteger hArray<T>::getSubSliceStart(){
   subslice_start=*subslice_start_it;
   //If negative (i.e. -N), then take full slice minus (N-1) number of elements
@@ -5184,7 +5184,7 @@ void HFPP_FUNC_NAME(
       *itout+=*itc * (*itx) * (*itx);
       break;
     default:
-      *itout+=*itc * pow(*itx,*itn);
+      *itout+=*itc * pow(*itx,(int)*itn);
       break;
     };
     ++itn; ++itc;
