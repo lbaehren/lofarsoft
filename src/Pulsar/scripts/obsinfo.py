@@ -97,14 +97,14 @@ if tosort == True:
 	obstable=[]
 
 # printing out the header of the table
-# The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes CohStokes Fly'sEye	Reduced Pointing
-print "#================================================================================================================================================="
+# The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed FilteredData Imaging IncohStokes CohStokes Fly'sEye	Reduced Pointing
+print "#========================================================================================================================================================="
 storage_nodes_string=""
 for i in np.arange(Nnodes-1):
 	storage_nodes_string=storage_nodes_string+storage_nodes[i]+"\t"
 storage_nodes_string=storage_nodes_string+storage_nodes[-1]
-print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF IM IS CS FE	Reduced		Pointing" % (storage_nodes_string,)
-print "#================================================================================================================================================="
+print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing" % (storage_nodes_string,)
+print "#========================================================================================================================================================="
 
 j=0 # extra index to follow only printed lines
 # loop for every observation
@@ -229,6 +229,18 @@ for counter in np.arange(np.size(obsids)):
 			bftype = "+"
 	else:
 		bftype = "?"
+	# check first if data are filtered
+	cmd="grep outputFilteredData %s" % (log,)
+	fdtype=os.popen(cmd).readlines()
+	if np.size(fdtype) > 0:
+		# this info exists in parset file
+		fdtype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+		if fdtype == 'f':
+			fdtype = "-"
+		else:
+			fdtype = "+"
+	else:
+		fdtype = "?"
 	# check if data are imaging
 	cmd="grep outputCorrelatedData %s" % (log,)
 	imtype=os.popen(cmd).readlines()
@@ -341,8 +353,8 @@ for counter in np.arange(np.size(obsids)):
 		duration="?"
 
 	# combining info
-	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Imaging IncohStokes Reduced Pointing
-	info="%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c	%-11s	%s" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, imtype, istype, cstype, fetype, statusline, pointing)
+	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Filtered Imaging IncohStokes Reduced Pointing
+	info="%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing)
 
 	# Printing out the report (if we want unsorted list)
 	if tosort == False:
