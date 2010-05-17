@@ -167,78 +167,11 @@ if (NOT USG_CMAKE_CONFIG)
 
   ## ============================================================================
   ##
-  ##  Test datasets
+  ##  Check for test datasets
   ##
   ## ============================================================================
 
-  ## FITS
-  
-  find_file (dataset_fits WN65341H.fits
-    PATHS
-    ${USG_ROOT}/data
-    ${USG_ROOT}/data/test
-    )
-  
-  ## Measurement Set
-
-  find_path (dataset_ms table.dat table.info
-    PATHS
-    ${USG_ROOT}/data
-    ${USG_ROOT}/data/test
-    PATH_SUFFIXES
-    L2007_01810_SB18-20_OB20.MS
-    lofar/cs1/L2007_01810_SB18-20_OB20.MS
-    10602381_S0_T20.MS
-    wsrt/lffe/10602381_S0_T20.MS
-    )
-
-  ## TBB time-series data
-  
-  find_file (dataset_tbb
-    NAMES
-    lightning_16_48.h5
-    rw_20090417_181700.h5
-    PATHS
-    ${USG_ROOT}/data
-    ${USG_ROOT}/data/test
-    )
-  
-  find_file (dataset_tbb_raw
-    NAMES
-    triggered-pulse-2010-02-11-TBB1.h5
-    rw_20071024_090656_0101.dat
-    rw_20071024_090656_0102.dat
-    PATHS
-    ${USG_ROOT}/data
-    ${USG_ROOT}/data/test
-    ${USG_ROOT}/data/lofar/trigger-2010-02-11
-    )
-
-  ## Beam-formed data
-
-  find_file (dataset_bf_raw
-    NAMES
-    bf_20080604_121337.cor
-    PATHS
-    ${USG_ROOT}/data
-    ${USG_ROOT}/data/test
-    )
-  
-  find_file (dataset_beamformed
-    NAMES
-    bf_20080604_121337.cor.h5 bf_20080604_121337.h5 TBB1.cor.h5
-    PATHS
-    ${USG_ROOT}/data
-    ${USG_ROOT}/data/test
-    )
-  
-  find_file (dataset_lopes 2007.01.31.23:59:33.960.event
-    PATHS
-    ${USG_ROOT}/data
-    ${USG_ROOT}/data/test
-    PATH_SUFFIXES
-    lopes
-    )
+  include (FindTestDatasets)
 
   ## ============================================================================
   ##

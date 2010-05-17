@@ -463,6 +463,8 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ##
 ## =============================================================================
 
+include (FindTestDatasets)
+
 ## LOPES Cal-Table
 
 find_path (caltable_lopes table.dat table.info
