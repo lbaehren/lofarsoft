@@ -5124,7 +5124,7 @@ void HFPP_FUNC_NAME(
       *itout=(*itx) * (*itx);
       break;
     default:
-      *itout=pow(*itx,*itn);
+      *itout=pow(*itx,(int)*itn);
       break;
     };
     ++itout; ++itn;
