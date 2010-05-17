@@ -24,6 +24,16 @@ class LOFARrecipe(WSRTrecipe):
             help="Runtime directory"
         )
         self.optionparser.add_option(
+            '--working-directory',
+            dest="default_working_directory",
+            help="Default working directory"
+        )
+        self.optionparser.add_option(
+            '--lofarroot',
+            dest="lofarroot",
+            help="Root of LOFAR software tree"
+        )
+        self.optionparser.add_option(
             '-c', '--config', 
             dest="config",
             help="Configuration file"
