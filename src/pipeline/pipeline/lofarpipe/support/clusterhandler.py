@@ -1,3 +1,4 @@
+import shlex, subprocess
 from lofarpipe.support.clusterdesc import ClusterDesc
 from lofarpipe.support.clusterdesc import get_compute_nodes, get_head_node
 
