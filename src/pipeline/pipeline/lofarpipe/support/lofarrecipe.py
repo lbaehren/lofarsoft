@@ -24,7 +24,7 @@ class LOFARrecipe(WSRTrecipe):
             help="Runtime directory"
         )
         self.optionparser.add_option(
-            '--working-directory',
+            '--default-working-directory',
             dest="default_working_directory",
             help="Default working directory"
         )
