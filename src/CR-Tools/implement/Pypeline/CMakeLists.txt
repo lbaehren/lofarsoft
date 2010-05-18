@@ -2,21 +2,6 @@
 message (STATUS "[CR-Tools] Adding implement/Pypeline ...")
 
 ##_______________________________________________________________________________
-## Include directories
-
-if (GTK_INCLUDES AND BOOST_INCLUDES)
-  set (libhfget_includes "-I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
-endif (GTK_INCLUDES AND BOOST_INCLUDES)
-
-if (QT_INCLUDES)
-  include_directories (${QT_INCLUDES})
-endif (QT_INCLUDES)
-
-if (MATHGL_INCLUDES)
-  include_directories (${MATHGL_INCLUDES})
-endif (MATHGL_INCLUDES)
-
-##_______________________________________________________________________________
 ## Pre-processing of the source files
 
 file (GLOB hftools_cc hftools.cc)

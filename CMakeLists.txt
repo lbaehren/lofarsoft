@@ -275,7 +275,11 @@ add_custom_target (cr
   COMMENT "Building package CR-Tools ..."
   )
 
-add_dependencies (cr dal mathgl plplot fftw3 gsl)
+add_dependencies (cr dal plplot fftw3 gsl)
+
+if (CR_WITH_GUI)
+  add_dependencies (cr mathgl)
+endif (CR_WITH_GUI)
 
 if (HAVE_ROOT)
   add_dependencies (cr startools)
