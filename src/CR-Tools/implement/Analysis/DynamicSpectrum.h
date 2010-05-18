@@ -51,6 +51,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class DynamicSpectrum
     
+    \ingroup CR
     \ingroup Analysis
     
     \brief A framework for handling dynamic spectra
