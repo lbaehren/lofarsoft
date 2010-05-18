@@ -1,4 +1,4 @@
-import shlex, subprocess
+import shlex, subprocess, threading
 from lofarpipe.support.clusterdesc import ClusterDesc
 from lofarpipe.support.clusterdesc import get_compute_nodes, get_head_node
 
@@ -19,9 +19,9 @@ class ClusterHandler(object):
         self.__stop_engines()
 
     def __execute_ssh(self, host, command):
-        print "  *", host
         ssh_cmd = shlex.split("ssh %s -- %s" % (host, command))
         subprocess.check_call(ssh_cmd)
+        print "  *", host
 
     def __start_controller(self):
         print "Starting controller:"
@@ -42,13 +42,25 @@ class ClusterHandler(object):
         controlpath = self.config.get('DEFAULT', 'runtime_directory')
         engine_ppath = self.config.get('deploy', 'engine_ppath')
         engine_lpath = self.config.get('deploy', 'engine_lpath')
-        for node in self.compute_nodes:
-            self.__execute_ssh(node, "bash %s/ipengine.sh %s start %s %s" % (self.script_path, controlpath, engine_ppath, engine_lpath))
+        ssh_connections = [
+            threading.Thread(
+                target = self.__execute_ssh,
+                args = (node, "bash %s/ipengine.sh %s start %s %s" % (self.script_path, controlpath, engine_ppath, engine_lpath))
+            ) for node in self.compute_nodes
+        ]
+        [thread.start() for thread in ssh_connections]
+        [thread.join() for thread in ssh_connections]
         print "done."
 
     def __stop_engines(self):
         print "Stopping engines:"
         controlpath = self.config.get('DEFAULT', 'runtime_directory')
-        for node in self.compute_nodes:
-            self.__execute_ssh(node, "bash %s/ipengine.sh %s stop" % (self.script_path, controlpath))
+        ssh_connections = [
+            threading.Thread(
+                target = self.__execute_ssh,
+                args = (node, "bash %s/ipengine.sh %s stop" % (self.script_path, controlpath))
+            ) for node in self.compute_nodes
+        ]
+        [thread.start() for thread in ssh_connections]
+        [thread.join() for thread in ssh_connections]
         print "done."
