@@ -10,16 +10,17 @@ class ClusterHandler(object):
         self.script_path = config.get('deploy', 'script_path')
         self.config = config
 
-    def start_cluster(self):
+    def start_cluster(self, nproc=""):
+        # Optional nproc argument specifies number of engines per node
         self.__start_controller()
-        self.__start_engines()
+        self.__start_engines(nproc)
 
     def stop_cluster(self):
         self.__stop_controller()
         self.__stop_engines()
 
     def __execute_ssh(self, host, command):
-        ssh_cmd = shlex.split("ssh %s -- %s" % (host, command))
+        ssh_cmd = shlex.split("ssh -x %s -- %s" % (host, command))
         subprocess.check_call(ssh_cmd)
         print "  *", host
 
@@ -47,12 +48,12 @@ class ClusterHandler(object):
         self.__execute_ssh(self.head_node, "bash %s/ipcontroller.sh %s stop %s" % (self.script_path, controlpath, controller_ppath))
         print "done."
 
-    def __start_engines(self):
+    def __start_engines(self, nproc):
         print "Starting engines:"
         controlpath = self.config.get('DEFAULT', 'runtime_directory')
         engine_ppath = self.config.get('deploy', 'engine_ppath')
         engine_lpath = self.config.get('deploy', 'engine_lpath')
-        command = "bash %s/ipengine.sh %s start %s %s" % (self.script_path, controlpath, engine_ppath, engine_lpath)
+        command = "bash %s/ipengine.sh %s start %s %s %s" % (self.script_path, controlpath, engine_ppath, engine_lpath, str(nproc))
         self.__multinode_ssh(self.compute_nodes, command)
         print "done."
 
