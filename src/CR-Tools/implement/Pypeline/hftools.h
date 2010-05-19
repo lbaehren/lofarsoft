@@ -20,7 +20,6 @@
 #include <typeinfo>
 #include <ctime>
 #include <fftw3.h>
-#include <gsl/gsl_multifit.h>
 
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
@@ -93,6 +92,11 @@
 #include <Pypeline/hfppnew.h>
 #include <Calibration/CalTableReader.h>
 #include <Calibration/RFIMitigation.h>
+
+#ifdef HAVE_GSL
+#include <gsl/gsl_multifit.h>
+#endif
+
 
 using namespace std;
 

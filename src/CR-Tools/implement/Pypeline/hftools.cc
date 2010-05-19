@@ -1573,7 +1573,7 @@ void hInit(){
 #ifdef HAVE_GSL
   gsl_set_error_handler_off ();
 #else
-  ERROR("hInit: GSL-Libraries not installed. Some are not defined.")
+  ERROR("hInit: GSL-Libraries not installed. Some functions are not defined.")
 #endif
 }
 
@@ -5773,7 +5773,7 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(double,PyFloat_AsDouble,ReferenceTime)
     HFPP_REPEAT(double,PyFloat_AsDouble,SampleFrequency)
     HFPP_REPEAT(int,PyInt_AsLong,Shift)
-    if ((key=="SelectedAntennas") || (key2=="SelectedAntennas")) {
+    if ((key=="selectedAntennas") || (key2=="SelectedAntennas")) {
       vector<uint> stlvec(PyList2STLuIntVec(pyob));
       uint * storage = &(stlvec[0]);
       casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector

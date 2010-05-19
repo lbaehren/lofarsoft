@@ -16,6 +16,7 @@ import numpy as np
 LOFARSOFT=os.environ["LOFARSOFT"]
 pydocpyfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.py"
 pydoctxtfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.tex"
+DEFAULTDATAFILE=LOFARSOFT+"/data/lopes/example.event"
 
 #Read in the doc strings for the functions in hftools
 execfile(pydocpyfilename)
@@ -132,6 +133,13 @@ def hArrayToPrintString(self,maxlen=5):
     name=self.getKey("name");
     if name=="": name="hArray";
     return name+"("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+
+def hArray_repr(self,maxlen=8):
+    loops=""
+    if self.loopingMode(): loops="*"
+    name=self.getKey("name");
+    if not name=="": name=', name="'+name+'"'
+    return "hArray("+hTypeNamesDictionary[basetype(self)]+","+str(list(self.getDim()))+name+") # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
 
 #========================================================================
 # Adding multi-dimensional array capabilities to vector class
@@ -917,7 +925,7 @@ setattr(FloatVec,"fft",hFFTCasa)
 setattr(FloatArray,"fft",hFFTCasa)
 
 for v in hAllArrayTypes:
-    setattr(v,"__repr__",hArrayToPrintString)
+    setattr(v,"__repr__",hArray_repr)
     setattr(v,"setPar",hArray_setPar)
     setattr(v,"setDim",hArray_setDim)
     setattr(v,"getDim",hArray_getDim)
@@ -952,15 +960,18 @@ for v in hAllVectorTypes:
 
 for v in hAllContainerTypes:
     for s in ["hFill","hSet","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute","hPPrint","hPrettyString"]:
-        setattr(v,s[1:].lower(),eval(s))
+        if s in locals(): setattr(v,s[1:].lower(),eval(s))
+        else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hRealContainerTypes:
     for s in ["hMean","hStdDev","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hErrorsToWeights","hPolynomial"]:
-        setattr(v,s[1:].lower(),eval(s))
+        if s in locals(): setattr(v,s[1:].lower(),eval(s))
+        else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hComplexContainerTypes:
     for s in ["hConj","hCrossCorrelateComplex","hFFTCasa","hInvFFTw","hFFTw","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex","hRFIDownsampling"]:
-        setattr(v,s[1:].lower(),eval(s))
+        if s in locals(): setattr(v,s[1:].lower(),eval(s))
+        else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hNumericalContainerTypes:
     setattr(v,"__add__",Vec_add)
@@ -972,7 +983,8 @@ for v in hNumericalContainerTypes:
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
     for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hLogSave","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
-        setattr(v,s[1:].lower(),eval(s))
+        if s in locals(): setattr(v,s[1:].lower(),eval(s))
+        else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 #========================================================================
 # Convenience Vector Constructor
@@ -1032,7 +1044,8 @@ def Vector(Type=float,size=-1,fill=None):
 #  hArray Class and Vector Methods/Attributes
 #======================================================================
 
-def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None):
+def hArray(
+Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None):
     """
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
@@ -1255,21 +1268,14 @@ DataReader.__repr__=DataReader_repr
 #------------------------------------------------------------------------
 # Pypeline Extension, Functions and Algorithms
 #------------------------------------------------------------------------
-
-
-#------------------------------------------------------------------------
-# Pypeline Extension, Functions and Algorithms
-#------------------------------------------------------------------------
+CRWorkSpaceList = []
 
 class CRWorkSpace():
     """
     This class holds the arrays and vectors used by the various
     analysis tasks. Hence this is the basic workspace in the memory.
     """
-    def __init__(self,parent=None,name=None,modulename=None,**keywords):
-        if name==None: 
-            print "Error: no name provided for CRWorkSpace."
-        self.name=name
+    def __init__(self,parent=None,modulename=None,**keywords):
         self.modules=[]
         if modulename==None: 
             self.modulename=self.name
@@ -1280,101 +1286,169 @@ class CRWorkSpace():
             self.parent=parent
             self.parent.modules.append(self.modulename)
             setattr(parent,self.modulename,self)
-        l=len(self.name)+1
+        l=len("default")+1
 #Create a list of all the parameters with default values (and initialization functions)
-        self.parameters+=list(set(map(lambda s:s[l:],filter(lambda s:s.find(self.name+"_")==0,dir(self)))).difference(set(self.parameters)))
+        if not hasattr(self,"parameters"): self.parameters=[]
+        self.parameters+=list(set(map(lambda s:s[l:],filter(lambda s:s.find("default_")==0,dir(self)))).difference(set(self.parameters)))
         self.auxparameters=[]
-#Now set the named parameters specified at startup
+        if not hasattr(self,"locals"): self.locals=set()
         self.setParameters(**keywords)
     def initParameters(self,**keywords):
         """
         This method will create all parameters that are not yet
-        available as attributes and assign the default value. Also do
-        the same for all modules. You can explicitly set a parameter
-        and override the default, if it is passed as a keyword=value
-        pair in the argumentlist.
+        available as attributes or find higher up and assign the
+        default value. Also do the same for all modules. You can
+        explicitly set a parameter and override the default, if it is
+        passed as a keyword=value pair in the argumentlist.
         """
         self.setParameters(**keywords)
         for par in self.parameters:
-            if not hasattr(self,par): 
-                setattr(self,par,getattr(self,self.name+"_"+par)())
-                if type(getattr(self,self.name+"_"+par).__doc__)==str:
-                    setattr(self,"__"+par+"__doc__",getattr(self,self.name+"_"+par).__doc__)
-        for m in self.modules:
+            self[par]
+#            if type(getattr(self,"default_"+par).__doc__)==str: #assign docstring, reusing the one from the initialization function
+#                setattr(self,"__"+par+"__doc__",getattr(self,"default_"+par).__doc__)
+        for m in self.modules: #Now, also initialize the modules
             getattr(self,m).initParameters()
         return self
+    def __setitem__(self,par,val):
+        """Sets the value of a parameter and make it local."""
+        if par not in self.parameters+self.auxparameters: self.auxparameters.append(par)
+        if not self.isLocal(par): self.locals.add(par)
+        setattr(self,par,val)
+    def __getitem__(self,par):
+        """
+        Retrieve a parameter value from the workspace. If it does not
+        exist locally, search the parent modules. If it is not
+        available there execute the default function and assign the
+        value locally. If no default value function exists, return
+        None.
+        """
+        if self.isLocal(par):
+            if hasattr(self,par): # return local copy
+                return getattr(self,par) 
+            else:
+                return self.setParameterDefault(par) # no local copy exists, return default paramter and make local
+        elif hasattr(self,"parent"): #Is global, hence recursively retrieve it from the higher level (parent)
+            val=self.parent[par]
+            if not val==None: 
+                setattr(self,par,val) # Make a local copy, but don't mark as local
+                return val
+        #else: Does not exist localy or globaly, so create local default 
+        return self.setParameterDefault(par) 
+    def isLocal(self,par):
+        return (par in self.locals)
+    def markLocal(self,par):
+        if not self.isLocal(par): self.locals.add(par) # Make parameter local
+    def markGlobal(self,par):
+        if self.isLocal():
+            self.locals.discard(par)
+            self["par"]
+    def setParameterDefault(self,par):
+        """Assign a parameter its default value and make it local."""
+        if hasattr(self,"default_"+par):
+            val=getattr(self,"default_"+par)()
+            setattr(self,par,val)
+            self.markLocal(par) # Make parameter local
+        else: #no Defaults defined!
+            val=None
+        return val
     def setParameters(self,**keywords):
         """
         This method will set the parameters listed as arguments in the
         function call, i.e. modify the workspace attributes accordingly.
         """
-        for k in keywords.keys(): 
-            setattr(self,k,keywords[k])
-            if k not in self.auxparameters: self.auxparameters.append(k)
+        for k in keywords.keys(): self[k]=keywords[k]
         return self
-    def getParentAttribute(self,attrib,default):
-        if hasattr(self,"parent"): 
-            if hasattr(self.parent,attrib): return getattr(self.parent,attrib)
-        return default
-    def __repr__(self):
+    def __repr__(self,parentname=""):
         """
         Returns a readable summary of all parameters in the workspace.
         """
-        s="WorkSpace."+self.name+":\n"
+        s="#WorkSpace("+self.name+"):\n"
+        myname=parentname+self.modulename
         for par in self.parameters+self.auxparameters:
-            if hasattr(self,par):
-                if hasattr(self,"__"+par+"__doc__"):
-                    s+="#"+getattr(self,"__"+par+"__doc__")+"\n"
-                s+="    "+self.modulename+"."+par+" = "+getattr(self,par).__repr__()+"\n"
-            else:
-                s+="    "+self.modulename+"."+par+" = not set!\n"
+#            if hasattr(self,par):
+#                if hasattr(self,"__"+par+"__doc__"):
+#                    s+="#"+getattr(self,"__"+par+"__doc__")+"\n"
+            s+=myname+'["'+par+'"] = '+str(self[par])
+            if self.isLocal(par): s+=" # (local)\n"
+            else: s+=" # (parent)\n"
         for m in self.modules:
-            s+=self.modulename+"."+m+":\n"
+            s+=getattr(self,m).__repr__(parentname=myname+".")+"\n"
         return s
+    def getModule(self,name):
+        if self.name==name: return self
+        for m in self.modules:
+            val=getattr(self,m).getModule(name)
+            if not val==None: return val
+        return None
 
-class CRParametersFitBaseline(CRWorkSpace):
-    def __init__(self,parent=None,name="fitbaseline",modulename=None,**keywords):
+class CRAverageSpectrumWorkSpace(CRWorkSpace):
+    """Workspace for hCRAverageSpectrum. See also CRMainWorkSpace and CRWorkSpace."""
+    def __init__(self,parent=None,modulename=None,**keywords):
+        self.parameters=["datafile","max_nblocks","nblocks"] # Create those parameters first and in this order
+        CRWorkSpace.__init__(self,parent=parent,modulename=modulename,**keywords)
+    def default_datafile(self): 
+        return crfile(DEFAULTDATAFILE)
+    def default_nblocks(self): 
+        return min(self["datafile"].filesize/self["datafile"].blocksize,self["max_nblocks"])
+    def default_max_nblocks(self): 
+        return 100000
+    def default_blocks(self): 
+        return range(self["nblocks"])
+    def default_fx(self): 
+        return self["datafile"]["emptyFx"]
+    def default_fft(self): 
+        return self["datafile"]["emptyFFT"]
+
+#Now add the new workspsace to the overall workspace list
+CRWorkSpaceList.append(CRAverageSpectrumWorkSpace)
+#And tell it its name ...
+CRWorkSpaceList[-1].name="AverageSpectrum"
+
+class CRFitBaselineWorkSpace(CRWorkSpace):
+    """Workspace for hCRFitBaseline. See also CRMainWorkSpace and CRWorkSpace."""
+    def __init__(self,parent=None,modulename=None,**keywords):
         self.parameters=["nbins","maxorder","ncoeffs","nofAntennas","freqs","spectrum"]
-        CRWorkSpace.__init__(self,parent=parent,name=name,modulename=modulename,**keywords)
-    def fitbaseline_nbins(self): 
+        self.locals=set(["nbins","maxorder","freqs","spectrum","rms","ratio","selected_bins"])
+        CRWorkSpace.__init__(self,parent=parent,modulename=modulename,**keywords)
+    def default_nbins(self): 
         return 2**8
-    def fitbaseline_maxorder(self): 
+    def default_maxorder(self): 
         return 17
-    def fitbaseline_rmsfactor(self): 
+    def default_rmsfactor(self): 
         return 2.0
-    def fitbaseline_doplot(self): 
-        return self.getParentAttribute("doplot",False)
-    def fitbaseline_nofAntennas(self): 
-        return self.getParentAttribute("nofAntennas",1)
-    def fitbaseline_ncoeffs(self): 
+    def default_nofAntennas(self): 
+        return 1
+    def default_ncoeffs(self): 
         return self.maxorder+1
-    def fitbaseline_freqs(self):
-        return hArray(float,dimensions=[1,self.nbins],name="Frequency",units=("M","Hz"))
-    def fitbaseline_freqs(self):
-        return hArray(float,dimensions=[1,self.nbins],name="Frequency",units=("M","Hz"))
-    def fitbaseline_spectrum(self):
-        return hArray(float,[self.nofAntennas,self.nbins],name="Binned Spectrum",units="a.u.",xvalues=self.freqs,par=("logplot","y"))
-    def fitbaseline_rms(self):
-        return hArray(properties=self.spectrum, name="RMS of Spectrum")
-    def fitbaseline_ratio(self):
-        return hArray(properties=self.spectrum,name="RMS/Ampltude",par=("logplot",False))
-    def fitbaseline_powers(self):
-        return hArray(int,[self.nofAntennas,self.ncoeffs],range(self.ncoeffs))
-    def fitbaseline_xpowers(self):
-        return hArray(float,[self.nofAntennas,self.nbins,self.ncoeffs],name="Powers of Frequency")
-    def fitbaseline_covariance(self):
-        return hArray(float,[self.nofAntennas,self.ncoeffs,self.ncoeffs])
-    def fitbaseline_clean_bins_x(self):
-        return self.freqs #hArray(properties=self.freqs,name="Clean Frequencies")
-    def fitbaseline_clean_bins_y(self):
-        return self.spectrum #hArray(properties=self.spectrum,xvalues=self.clean_bins_x)
-    def fitbaseline_selected_bins(self):
-        return hArray(int,self.spectrum,name="Selected bins")
+    def default_freqs(self):
+        return hArray(float,dimensions=[1,self["nbins"]],name="Frequency",units=("M","Hz"))
+    def default_spectrum(self):
+        return hArray(float,[self["nofAntennas"],self["nbins"]],name="Binned Spectrum",units="a.u.",xvalues=self["freqs"],par=("logplot","y"))
+    def default_rms(self):
+        return hArray(properties=self["spectrum"], name="RMS of Spectrum")
+    def default_ratio(self):
+        return hArray(properties=self["spectrum"],name="RMS/Ampltude",par=("logplot",False))
+    def default_powers(self):
+        return hArray(int,[self["nofAntennas"],self["ncoeffs"]],range(self["ncoeffs"]))
+    def default_xpowers(self):
+        return hArray(float,[self["nofAntennas"],self["nbins"],self["ncoeffs"]],name="Powers of Frequency")
+    def default_covariance(self):
+        return hArray(float,[self["nofAntennas"],self["ncoeffs"],self["ncoeffs"]])
+    def default_clean_bins_x(self):
+        return self["freqs"] #hArray(properties=self["freqs"],name="Clean Frequencies")
+    def default_clean_bins_y(self):
+        return self["spectrum"] #hArray(properties=self["spectrum"],xvalues=self["clean"]_bins_x)
+    def default_selected_bins(self):
+        return hArray(int,self["spectrum"],name="Selected bins")
 
+#Now add the new workspsace to the overall workspace list
+CRWorkSpaceList.append(CRFitBaselineWorkSpace)
+#And tell it its name ...
+CRWorkSpaceList[-1].name="FitBaseline"
 
-class CRGlobalParameters(CRWorkSpace):
+class CRMainWorkSpace(CRWorkSpace):
     """
-    ws=CRGlobalParameters()
+    ws=CRMainWorkSpace()
 
     WorkSpace for global parameters.
 
@@ -1397,61 +1471,110 @@ class CRGlobalParameters(CRWorkSpace):
 # Here list the parameters which have to be initialized in a
 # particular order at the beginning (e.g., if the depend on each
 # other). The attribute will be extended automatically.
-        self.parameters=["filename","datafile"]
-        CRWorkSpace.__init__(self,name="global",modulename=modulename,parent=None,**keywords)
-    def global_filename(self): 
+        self.parameters=["filename","datafile","nofAntennas","frequency"]
+        CRWorkSpace.__init__(self,modulename=modulename,parent=None,**keywords)
+    def default_filename(self): 
         """Name of the data file to process"""
         return LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
-    def global_datafile(self): 
+    def default_datafile(self): 
         """Datafile object"""
-        return crfile(self.filename)
-    def global_blocksize(self):
+        return crfile(self["filename"])
+    def default_blocksize(self):
         """Size (number of values) of each block to be read in"""
         return 2**16
-    def global_nofAntennas(self):
+    def default_nofAntennas(self):
         """Number of antennas in the datafile (output only)"""
-        return self.datafile["nofAntennas"]
-    def global_doplot(self):
-        """Make plots during processing to inspect data"""
-        return False
-    def global_verbose(self):
-        """Print progress information during processing"""
-        return False
-    def createFitbaseline(self,modulename=None,**keywords):
-        return CRParametersFitBaseline(self,modulename=modulename,**keywords)
+        return self["datafile"]["nofAntennas"]
+    def default_frequency(self):
+        """Frequency values (x-axis) corresponding to FFT and spectrum"""
+        return self["datafile"]["Frequency"]
+    def default_spectrum(self):
+        """Power as a function of frequency."""
+        return hArray(float,[self["nofAntennas"],self["datafile"].fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=self["frequency"],par=[("logplot","y")])
+    def default_fx(self): 
+        """Raw time series antenna data."""
+        return self["datafile"]["emptyFx"]
+    def default_fft(self): 
+        """FFT of the Raw time series antenna data."""
+        return self["datafile"]["emptyFFT"]
+
+def CRWorkSpace_default_doplot(self):
+    """Make plots during processing to inspect data."""
+    return False
+def CRWorkSpace_default_t0(self):
+    """The starting time of the processing for benchmarking."""
+    return time.clock()
+def CRWorkSpace_default_verbose(self):
+    """Print progress information during processing."""
+    return False
+
+
+#Now add the new workspsace to the overall workspace list, the main workspace should be the first entry in the list
+CRWorkSpaceList=[CRMainWorkSpace]+CRWorkSpaceList
+#And tell it its name ...
+CRWorkSpaceList[0].name="Main"
+
+#Automatically add certain workspace methods
+for ws in CRWorkSpaceList:
+#Add creation methods to main WorkSpace
+    setattr(CRMainWorkSpace,"make"+ws.name,ws)
+#Add some of generic control methods and parameters to all workspaces
+    for m in ["doplot","verbose","t0"]:
+        setattr(ws,"default_"+m,eval("CRWorkSpace_default_"+m))
+
+
+def CRsetWorkSpace(ws,modulename,**keywords):
+    """
+    Sets the workspace in a function if not defined already and
+    initialize parameters. One can provide a global workspace and the
+    functions will pick the module corresponding to modulename.
+
+    ws - the workspace, if ws==None then create new one using function func
+
+    modulename - name of the (sub)module to use, will call the
+    initialization function (naming convention:
+    "CR"+modulename+"WorkSpace") if workspace does not exist.
+
+    keywords - local parameters to overwrite
+    
+    """
+    func=eval("CR"+modulename+"WorkSpace")
+    if ws==None: ws=func(**keywords)
+    ws=ws.getModule(modulename)
+    if ws==None: ws=func(**keywords)
+    ws.initParameters(**keywords)
+    return ws
+
 
 def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, t0=None,**keywords):
 #Defining the workspace, setting up the arrays, if not existing
     keywords["nofAntennas"]=spectrum.getDim()[0]
-    if ws==None:
-        ws=CRParametersFitBaseline(**keywords).initParameters()
-    else:
-        ws.setParameters(**keywords)
-    if t0==None: t0=time.clock()
+    ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
 #
-    if ws.verbose:
-        print "Downsampling spectrum to ",ws.nbins,"bins."
+    if ws["verbose"]:
+        if hasattr(ws,"t0"): ws.t0=time.clock()
+        print ws["t0"],"s: Starting FitBaseline - Downsampling spectrum to ",ws["nbins"],"bins."
 #Donwsample spectrum
-    ws.freqs.downsample(frequency[1:])
-    ws.spectrum[...].downsamplespikydata(ws.rms[...],spectrum[...,1:],-0.001)
+    ws["freqs"].downsample(frequency[1:])
+    ws["spectrum"][...].downsamplespikydata(ws["rms"][...],spectrum[...,1:],-0.001)
 #Plotting
-    if ws.doplot:
+    if ws["doplot"]:
         spectrum[0].plot(title="RFI Downsampling")
-        ws.spectrum[0].plot(clf=False)
+        ws["spectrum"][0].plot(clf=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
 #Calculate RMS/amplitude for each bin
-    ws.ratio.div(ws.spectrum,ws.rms)
-    mratio=hArray(ws.ratio[...].mean())
-    ws.ratio[...] /= mratio[...]
-    ws.ratio.square()
+    ws["ratio"].div(ws["spectrum"],ws["rms"])
+    mratio=hArray(ws["ratio"][...].mean())
+    ws["ratio"][...] /= mratio[...]
+    ws["ratio"].square()
 #Now select bins where the ratio between RMS and amplitude is within a factor 2 of the mean value
-    nselected_bins=ws.selected_bins[...].findbetween(ws.ratio[...],1.0/ws.rmsfactor,ws.rmsfactor)
+    nselected_bins=ws["selected_bins"][...].findbetween(ws["ratio"][...],1.0/ws["rmsfactor"],ws["rmsfactor"])
 #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
-    ws.clean_bins_x[...].copy(ws.freqs,ws.selected_bins[...],nselected_bins)
-    ws.clean_bins_y[...].copy(ws.spectrum,ws.selected_bins[...],nselected_bins)
-    ws.clean_bins_y[...,[0]:nselected_bins].log()
+    ws["clean_bins_x"][...].copy(ws["freqs"],ws["selected_bins"][...],nselected_bins)
+    ws["clean_bins_y"][...].copy(ws["spectrum"],ws["selected_bins"][...],nselected_bins)
+    ws["clean_bins_y"][...,[0]:nselected_bins].log()
 #
-    if ws.verbose: print time.clock()-t0,"s: Fitting baseline."
+    if ws.verbose: print time.clock()-ws["t0"],"s: Fitting baseline."
 #Create the nth powers of the x value, i.e. the frequency, for the fitting
     ws.xpowers[...,[0]:nselected_bins].linearfitpolynomialx(ws.clean_bins_x[...,[0]:nselected_bins],ws.powers[...])
 #Fit an nth order polynomial to the log data
@@ -1469,7 +1592,7 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, t0=None,**keywords):
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
     return meanrms
 
-def hCRAverageSpectrum(spectrum,datafile,blocks=None,fx=None,fft=None, verbose=False):
+def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=None,fft=None, verbose=False)
     """
     Usage: CRAverageSpectrum(spectrum,datafile,blocks=None,fx=None,fft=None)
 
@@ -1498,24 +1621,22 @@ def hCRAverageSpectrum(spectrum,datafile,blocks=None,fx=None,fft=None, verbose=F
     verbose - Provide progress messages
 
     """
-    if fx==None: fx=datafile["emptyFx"]
-    if fft==None: fft=datafile["emptyFFT"]
-    if blocks==None: blocks=range(datafile.filesize/datafile.blocksize)
-    if verbose:
+    ws=CRsetWorkSpace(ws,"AverageSpectrum",**keywords)
+    if ws["verbose"]:
         count=0; 
-        maxcount=len(blocks)
+        maxcount=len(ws["blocks"])
         lastprogress=-1
-        print "Calculating",maxcount,"blocks of size",datafile.blocksize
-        t0=time.clock()
-    for block in blocks:
-        fx.read(datafile,"Fx")
-        fft[...].fftw(fx[...])
-        spectrum[...].spectralpower(fft[...])
-        if verbose:
+        if hasattr(ws,"t0"): ws.t0=time.clock()
+        print ws["t0"],"s: Calculating",maxcount,"blocks of size",datafile.blocksize
+    for block in ws["blocks"]:
+        ws["fx"].read(datafile,"Fx")
+        ws["fft"][...].fftw(ws["fx"][...])
+        spectrum[...].spectralpower(ws["fft"][...])
+        if ws["verbose"]:
             count +=1
             progress=count*10/maxcount
             if not lastprogress == progress:
-                t=time.clock()-t0
+                t=time.clock()-ws["t0"]
                 print progress*10,"% -",t,"s (Remaining:",t/count*maxcount-t,"s) - Calculated block #",block
                 lastprogress=progress
 
