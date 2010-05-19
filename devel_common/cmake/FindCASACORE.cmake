@@ -31,6 +31,8 @@
 ##
 ## -----------------------------------------------------------------------------
 
+include (CMakeSettings)
+
 ## ==============================================================================
 ##
 ##  Organization of casacore and its components
@@ -141,11 +143,6 @@ endmacro (casacore_find_module _name)
 ##  Search for installation of casacore
 ##
 ## ==============================================================================
-
-## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
 
 list (APPEND include_locations
   ${USG_ROOT}/release/include

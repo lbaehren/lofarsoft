@@ -42,6 +42,10 @@
 
 include (CMakeSettings)
 
+if (NUMPY_FIND_QUIETLY)
+  set (PYTHON_FIND_QUIETLY TRUE)
+endif (NUMPY_FIND_QUIETLY)
+
 include (FindPython)
 
 ## -----------------------------------------------------------------------------

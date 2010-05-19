@@ -42,11 +42,12 @@ option (CR_DEBUGGING_MESSAGES   "Print debugging information?"               NO 
 option (CR_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO  )
 option (CR_WITH_LEGACY          "Include building legacy code?"              YES )
 option (CR_WITH_GLISH           "Support for Glish applications?"            NO  )
-option (CR_WITH_PYCR            "Support for Python applications?"           YES )
+option (CR_WITH_PYCR            "Support for Python applications?"           NO  )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"           YES )
 option (CR_WITH_GUI             "Build the graphical interface?"             NO  )
 option (CR_WITH_PYPELINE        "Build the Pypeline library?"                YES )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
+option (CR_WITH_CASAPY          "Build Pyline library against CASApy?"       NO  )
 
 ## ==============================================================================
 ##
@@ -149,79 +150,53 @@ endmacro (cr_process_awk _file _script)
 ##
 ## =============================================================================
 
-## Verbose during configure? If not, then mute the output from the search scripts
-
-if (NOT CR_VERBOSE_CONFIGURE)
-  ## output of the find scripts
-  set (BLITZ_FIND_QUIETLY      YES )
-  set (BOOST_FIND_QUIETLY      YES )
-  set (CASA_FIND_QUIETLY       YES )
-  set (CASACORE_FIND_QUIETLY   YES )
-  set (CFITSIO_FIND_QUIETLY    YES )
-  set (DAL_FIND_QUIETLY        YES )
-  set (FFTW3_FIND_QUIETLY      YES )
-  set (GFORTRAN_FIND_QUIETLY   YES )
-  set (GLISH_FIND_QUIETLY      YES )
-  set (GSL_FIND_QUIETLY        YES )
-  set (GTK_FIND_QUIETLY        YES )
-  set (HDF5_FIND_QUIETLY       YES )
-  set (LAPACK_FIND_QUIETLY     YES )
-  set (MATHGL_FIND_QUIETLY     YES )
-  set (NUMPY_FIND_QUIETLY      YES )
-  set (NUM_UTIL_FIND_QUIETLY   YES )
-  set (PGPLOT_FIND_QUIETLY     YES )
-  set (PLPLOT_FIND_QUIETLY     YES )
-  set (PNG_FIND_QUIETLY        YES )
-  set (POPT_FIND_QUIETLY       YES )
-  set (POSTGRESQL_FIND_QUIETLY YES )
-  set (PYTHON_FIND_QUIETLY     YES )
-  set (ROOT_FIND_QUIETLY       YES )
-  set (STARTOOLS_FIND_QUIETLY  YES )
-  set (SZIP_FIND_QUIETLY       YES )
-  set (WCSLIB_FIND_QUIETLY     YES )
-  set (ZLIB_FIND_QUIETLY       YES )
-  ## output of the generated makefile
-  set (CMAKE_VERBOSE_MAKEFILE  NO  )
-endif (NOT CR_VERBOSE_CONFIGURE)
-
-## Check functions -------------------------------
+##___ Check if functions exist ___________________
 
 include (CheckFunctionExists)
 
 check_function_exists (abs   HAVE_ABS )
 check_function_exists (fabs  HAVE_FABS )
 
-## Standard CMake modules ------------------------
+##___ CMake find modules _________________________
 
-find_package (Motif)
-find_package (X11)
-find_package (ZLIB)
+include (IncludeFindModule)
 
-## Custom CMake modules --------------------------
+set (cr_cmake_modules
+  Blitz
+  Boost 
+  CFITSIO
+  DAL
+  FFTW3
+  GFortran
+  GSL
+  GTK
+  HDF5
+  LAPACK
+  Motif
+  NumPy
+  NumUtil
+  PLplot
+  POPT
+  PostgreSQL
+  Python
+  Qt4
+  ROOT
+  SZIP
+  WCSLIB
+  ZLIB
+  X11
+  )
 
-include (FindBlitz)
-include (FindBoost)
-include (FindCFITSIO)
-include (FindDAL)
-include (FindFFTW3)
-include (FindGFortran)
-include (FindGSL)
-include (FindGTK)
-include (FindHDF5)
-include (FindLAPACK)
-include (FindNumPy)
-include (FindNumUtil)
-include (FindPLplot)
-include (FindPNG)
-include (FindPOPT)
-include (FindPostgreSQL)
-include (FindPython)
-include (FindROOT)
-include (FindSZIP)
-include (FindWCSLIB)
+if (CR_WITH_GLISH)
+  list (APPEND cr_cmake_modules Glish)
+else (CR_WITH_GLISH)
+  list (APPEND cr_cmake_modules CASACORE)
+endif (CR_WITH_GLISH)
+
+include_find_module (${cr_cmake_modules} ${CR_VERBOSE_CONFIGURE})
 
 if (NOT HAVE_PLPLOT)
-  include (FindPGPLOT)
+  include_find_module (PGPLOT ${CR_VERBOSE_CONFIGURE})
 endif (NOT HAVE_PLPLOT)
 
 ## =============================================================================
@@ -237,7 +212,14 @@ if (CMAKE_SIZEOF_VOID_P)
   endif (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
 endif (CMAKE_SIZEOF_VOID_P)
 
-## -------------------------------------------------------------------
+##____________________________________________________________________
+## Handle option: verbose configuration
+
+if (NOT CR_VERBOSE_CONFIGURE)
+  set (CMAKE_VERBOSE_MAKEFILE  NO )
+endif (NOT CR_VERBOSE_CONFIGURE)
+
+##____________________________________________________________________
 ## Handle option: testing mode on/off
 
 if (CR_BUILD_TESTS OR CR_BUILD_EXTERNAL_TESTS)
@@ -247,14 +229,14 @@ if (CR_BUILD_TESTS OR CR_BUILD_EXTERNAL_TESTS)
   enable_testing()
 endif (CR_BUILD_TESTS OR CR_BUILD_EXTERNAL_TESTS)
 
-## -------------------------------------------------------------------
+##____________________________________________________________________
 ## Handle option: debugging messages on/off
 
 if (CR_DEBUGGING_MESSAGES)
   set (DEBUGGING_MESSAGES ON)
 endif (CR_DEBUGGING_MESSAGES)
 
-## -------------------------------------------------------------------
+##____________________________________________________________________
 ## Handle option: Enable standard set of compiler warnings?  ON/OFF
 
 if (CR_CXX_FLAGS)
@@ -263,7 +245,7 @@ if (CR_CXX_FLAGS)
     )
 endif (CR_CXX_FLAGS)
     
-## -------------------------------------------------------------------
+##____________________________________________________________________
 ## Handle option: Support for Glish applications?  ON/OFF
 
 if (CR_WITH_GLISH)
@@ -271,7 +253,7 @@ if (CR_WITH_GLISH)
   ## First check if we actually have a working version of Glish; if
   ## this is not the case, we can immediately switch off this option.
   
-  include (FindGlish)
+  include_find_module (Glish ${CR_VERBOSE_CONFIGURE})
   
   if (HAVE_GLISH)
     include_directories (${GLISH_INCLUDES})
@@ -284,17 +266,16 @@ if (CR_WITH_GLISH)
   
   if (HAVE_GLISH)
     ## Check for installation of CASA
-    include (FindCASA)
+    include_find_module (CASA ${CR_VERBOSE_CONFIGURE})
     ## ... and process the outcome
     if (NOT HAVE_CASA)
       set (CR_WITH_GLISH NO)
     endif (NOT HAVE_CASA)
   endif (HAVE_GLISH)
   
-else (CR_WITH_GLISH)
-  include (FindCASACORE)
 endif (CR_WITH_GLISH)
 
+##____________________________________________________________________
 ## Handle configuration to use CASA/casacore
 
 if (HAVE_CASA OR HAVE_CASACORE)
@@ -311,7 +292,7 @@ if (HAVE_CASA OR HAVE_CASACORE)
   
 endif (HAVE_CASA OR HAVE_CASACORE)
 
-## -------------------------------------------------------------------
+##____________________________________________________________________
 ## Handle option: Activate support for generation of plots ON/OFF
 
 if (CR_WITH_PLOTTING)
@@ -326,7 +307,7 @@ if (CR_WITH_PLOTTING)
 
 endif (CR_WITH_PLOTTING)
 
-## -------------------------------------------------------------------
+##____________________________________________________________________
 ## Handle option: Additional routines from LOPES-Star
 
 ## check if ROOT is available
@@ -346,8 +327,8 @@ else (NOT HAVE_FFTW3)
 endif (NOT HAVE_FFTW3)
 
 if (CR_WITH_STARTOOLS)
-  
-  include (FindStarTools)
+
+  include_find_module (StarTools {CR_VERBOSE_CONFIGURE})
   
   if (HAVE_STARTOOLS)
     include_directories (${STARTOOLS_INCLUDES})
@@ -360,8 +341,8 @@ else (CR_WITH_STARTOOLS)
   set (HAVE_STARTOOLS FALSE)
 endif (CR_WITH_STARTOOLS)
 
-## -------------------------------------------------------------------
-## Option: Create graphical user interface? ON/OFF
+##____________________________________________________________________
+## Handle option: Create graphical user interface? ON/OFF
 
 if (CR_WITH_GUI)
 
@@ -376,8 +357,6 @@ if (CR_WITH_GUI)
   endif (NOT HAVE_BOOST)
 
   ## Check for Qt4 _______________________________
-
-  include (FindQt4)
 
   if (NOT QT4_FOUND)
     include (FindQtFink)
@@ -395,7 +374,7 @@ if (CR_WITH_GUI)
 
   ## Check for MathGL ____________________________
 
-  include (FindMathGL)
+  include_find_module (MathGL {CR_VERBOSE_CONFIGURE})
 
   if (NOT HAVE_MATHGL)
     message (STATUS "[CR-Tools] Unable to build GUI - missing MathGL!")
@@ -403,8 +382,8 @@ if (CR_WITH_GUI)
 
 endif (CR_WITH_GUI)
 
-## -------------------------------------------------------------------
-## Option: Create Python pipeline module? ON/OFF
+##____________________________________________________________________
+## Handle option: Create Python pipeline module? ON/OFF
 
 if (CR_WITH_PYPELINE)
 
@@ -433,6 +412,14 @@ if (CR_WITH_PYPELINE)
 else (CR_WITH_PYPELINE)
   set (CR_WITH_GUI NO)
 endif (CR_WITH_PYPELINE)
+
+##____________________________________________________________________
+## Handle option: Build Pyline library against CASApy [on/off]
+
+if (CR_WITH_CASAPY)
+  include_find_module (CASApy YES)
+#  include_find_module (CASApy ${CR_VERBOSE_CONFIGURE})
+endif (CR_WITH_CASAPY)
 
 ## =============================================================================
 ##
@@ -595,10 +582,6 @@ if (HAVE_PLPLOT)
   include_directories (${PLPLOT_INCLUDES})
 endif (HAVE_PLPLOT)
 
-if (PNG_INCLUDES)
-  include_directories (${PNG_INCLUDES})
-endif (PNG_INCLUDES)
-
 if (HAVE_POSTGRESQL)
   include_directories (${POSTGRESQL_INCLUDES})
 endif (HAVE_POSTGRESQL)
@@ -664,10 +647,6 @@ endif (PGPLOT_LIBRARIES)
 if (PLPLOT_LIBRARIES)
   list (APPEND cr_link_libraries ${PLPLOT_LIBRARIES})
 endif (PLPLOT_LIBRARIES)
-
-if (PNG_LIBRARIES)
-  list (APPEND cr_link_libraries ${PNG_LIBRARIES})
-endif (PNG_LIBRARIES)
 
 if (FFTW3_LIBRARIES)
   list (APPEND cr_link_libraries ${FFTW3_LIBRARIES})
@@ -772,7 +751,6 @@ message (STATUS " HDF5 ..................... : ${HAVE_HDF5}")
 message (STATUS " LAPACK ................... : ${HAVE_LAPACK}")
 message (STATUS " PGPLOT ................... : ${HAVE_PGPLOT}")
 message (STATUS " PLplot ................... : ${HAVE_PLPLOT}")
-message (STATUS " PNG ...................... : ${HAVE_PNG}")
 message (STATUS " POPT ..................... : ${HAVE_POPT}")
 message (STATUS " PostgreSQL ............... : ${HAVE_POSTGRESQL}")
 message (STATUS " Python ................... : ${HAVE_PYTHON}")
