@@ -302,29 +302,36 @@ class bbs(LOFARrecipe):
                 except CalledProcessError:
                     self.logger.warn("No logs moved on %s" % (node))
 
-            totals = defaultdict(lambda: defaultdict(list))
-            counts = defaultdict(lambda: defaultdict(list))
             for log_file in glob.glob("%s/%s_%s" % (
                 log_root, self.inputs["key"], "kernel*log*")
             ):
                 self.logger.debug("Processing %s" % (log_file))
-                ms_name = ""
+                ms_name = "Unknown"
                 with closing(open(log_file)) as file:
-                    step = -1
+                    error_messages = {
+                        'WARN': set(),
+                        'ERROR': set(),
+                        'FATAL': set()
+                    }
+                    totals = defaultdict(lambda: defaultdict(list))
+                    counts = defaultdict(lambda: defaultdict(list))
                     for line in file:
                         if line.split(":") and line.split(":")[0] == "INFO - Observation part":
                             ms_name = os.path.basename(line.split()[6].rstrip())
-                        line = line.split()
-                        # Try to extract profiling information from file.
+                        sline = line.split()
                         try:
-                            if line[0] == "Step:":
+                            if sline[0] in error_messages.keys():
+                                error_messages[sline[0]].add(line.rstrip())
+                            elif sline[0] == "Step:":
                                 step += 1
-                            if line[2] == "TIMER":
-                                totals[step][line[4]].append(float(line[6]))
-                                counts[step][line[4]].append(int(line[8]))
+                            elif sline[1] == "NextChunk":
+                                step = -1
+                            elif sline[2] == "TIMER":
+                                totals[step][sline[4]].append(float(sline[6]))
+                                counts[step][sline[4]].append(int(sline[8]))
                         except IndexError:
                             pass
-                if not ms_name:
+                if ms_name == "Unknown":
                     self.logger.info("Couldn't identify file for %s" % (log_file))
                 else:
                     destination = "%s/%s" % (
@@ -336,12 +343,18 @@ class bbs(LOFARrecipe):
                     )
                     utilities.move_log(log_file, destination)
 
-            for step in totals.iterkeys():
-                for key, values in totals[step].iteritems():
-                    self.logger.info(
-                        "Step: %d :: %s: count: %d, total: %f, mean: %f, std: %f" %
-                        (step, key, numpy.sum(counts[step][key]), numpy.sum(values), numpy.mean(values), numpy.std(values)
-                    )
+                for value in error_messages.itervalues():
+                    for message in list(value):
+                        self.logger.warn("BBS error in %s :: %s" % (ms_name, message))
+
+                self.logger.info("%s profiling information ------------" % (ms_name))
+                for step in totals.iterkeys():
+                    for key, values in totals[step].iteritems():
+                        self.logger.info(
+                            "Step: %d :: %s: count: %d, total: %f, mean: %f, std: %f" %
+                            (step, key, numpy.sum(counts[step][key]), numpy.sum(values), numpy.mean(values), numpy.std(values))
+                        )
+                self.logger.info("-------------------------------------")
 
             try:
                 self.logger.debug("Removing temporary log directory")
