@@ -1551,30 +1551,30 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, t0=None,**keywords):
     keywords["nofAntennas"]=spectrum.getDim()[0]
     ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
 #
-    if ws["verbose"]:
+    if ws.verbose:
         if hasattr(ws,"t0"): ws.t0=time.clock()
-        print ws["t0"],"s: Starting FitBaseline - Downsampling spectrum to ",ws["nbins"],"bins."
+        print ws.t0,"s: Starting FitBaseline - Downsampling spectrum to ",ws.nbins,"bins."
 #Donwsample spectrum
-    ws["freqs"].downsample(frequency[1:])
-    ws["spectrum"][...].downsamplespikydata(ws["rms"][...],spectrum[...,1:],-0.001)
+    ws.freqs.downsample(frequency[1:])
+    ws.spectrum[...].downsamplespikydata(ws.rms[...],spectrum[...,1:],-0.001)
 #Plotting
-    if ws["doplot"]:
+    if ws.doplot:
         spectrum[0].plot(title="RFI Downsampling")
-        ws["spectrum"][0].plot(clf=False)
+        ws.spectrum[0].plot(clf=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
 #Calculate RMS/amplitude for each bin
-    ws["ratio"].div(ws["spectrum"],ws["rms"])
-    mratio=hArray(ws["ratio"][...].mean())
-    ws["ratio"][...] /= mratio[...]
-    ws["ratio"].square()
+    ws.ratio.div(ws.spectrum,ws.rms)
+    mratio=hArray(ws.ratio[...].mean())
+    ws.ratio[...] /= mratio[...]
+    ws.ratio.square()
 #Now select bins where the ratio between RMS and amplitude is within a factor 2 of the mean value
-    nselected_bins=ws["selected_bins"][...].findbetween(ws["ratio"][...],1.0/ws["rmsfactor"],ws["rmsfactor"])
+    nselected_bins=ws.selected_bins[...].findbetween(ws.ratio[...],1.0/ws.rmsfactor,ws.rmsfactor)
 #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
-    ws["clean_bins_x"][...].copy(ws["freqs"],ws["selected_bins"][...],nselected_bins)
-    ws["clean_bins_y"][...].copy(ws["spectrum"],ws["selected_bins"][...],nselected_bins)
-    ws["clean_bins_y"][...,[0]:nselected_bins].log()
+    ws.clean_bins_x[...].copy(ws.freqs,ws.selected_bins[...],nselected_bins)
+    ws.clean_bins_y[...].copy(ws.spectrum,ws.selected_bins[...],nselected_bins)
+    ws.clean_bins_y[...,[0]:nselected_bins].log()
 #
-    if ws.verbose: print time.clock()-ws["t0"],"s: Fitting baseline."
+    if ws.verbose: print time.clock()-ws.t0,"s: Fitting baseline."
 #Create the nth powers of the x value, i.e. the frequency, for the fitting
     ws.xpowers[...,[0]:nselected_bins].linearfitpolynomialx(ws.clean_bins_x[...,[0]:nselected_bins],ws.powers[...])
 #Fit an nth order polynomial to the log data
@@ -1622,21 +1622,21 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
 
     """
     ws=CRsetWorkSpace(ws,"AverageSpectrum",**keywords)
-    if ws["verbose"]:
+    if ws.verbose:
         count=0; 
-        maxcount=len(ws["blocks"])
+        maxcount=len(ws.blocks)
         lastprogress=-1
         if hasattr(ws,"t0"): ws.t0=time.clock()
-        print ws["t0"],"s: Calculating",maxcount,"blocks of size",datafile.blocksize
-    for block in ws["blocks"]:
-        ws["fx"].read(datafile,"Fx")
-        ws["fft"][...].fftw(ws["fx"][...])
-        spectrum[...].spectralpower(ws["fft"][...])
-        if ws["verbose"]:
+        print ws.t0,"s: Calculating",maxcount,"blocks of size",datafile.blocksize
+    for block in ws.blocks:
+        ws.fx.read(datafile,"Fx")
+        ws.fft[...].fftw(ws.fx[...])
+        spectrum[...].spectralpower(ws.fft[...])
+        if ws.verbose:
             count +=1
             progress=count*10/maxcount
             if not lastprogress == progress:
-                t=time.clock()-ws["t0"]
+                t=time.clock()-ws.t0
                 print progress*10,"% -",t,"s (Remaining:",t/count*maxcount-t,"s) - Calculated block #",block
                 lastprogress=progress
 
