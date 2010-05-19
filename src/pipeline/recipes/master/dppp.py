@@ -122,21 +122,21 @@ class dppp(LOFARrecipe):
                     if self.inputs['dry_run'] == "False":
                         self.inputs['dry_run'] = False
                     if not self.inputs['dry_run']:
-                        tasks.append(tc.run(task))
+                        tasks.append((tc.run(task), ms_name))
                     else:
                         self.logger.info("Dry run: scheduling skipped")
 
                 # Wait for all jobs to finish
                 self.logger.info("Waiting for all DPPP tasks to complete")
-                tc.barrier(tasks)
+                tc.barrier([task for task, subband in tasks])
 
         failure = False
-        for task in tasks:
+        for task, subband in tasks:
             ##### Print failing tasks?
             ##### Abort if all tasks failed?
             res = tc.get_task_result(task)
             if res.failure:
-                self.logger.warn("Task %s failed" % (task))
+                self.logger.warn("Task %s failed (processing %s)" % (task, subband))
                 self.logger.warn(res)
                 self.logger.warn(res.failure.getTraceback())
                 failure = True
