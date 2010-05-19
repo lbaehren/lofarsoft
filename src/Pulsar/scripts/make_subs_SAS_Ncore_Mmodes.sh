@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.9
+VERSION=1.10
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-rfi] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo]\n\n"\
@@ -67,7 +67,7 @@ do
     shift
 done
 
-echo "Running make_subs_SAS_Ncore.sh with the following input arguments:"
+echo "Running make_subs_SAS_Ncore_Mmodes.sh with the following input arguments:"
 echo "    OBSID = $OBSID"
 echo "    PULSAR = $PULSAR"
 echo "    Output Processing Location = $location"
@@ -181,7 +181,6 @@ then
    PARSET=$new_parset
 fi
 
-
 ###PULSAR=B2111+46
 #STOKES=incoherentstokes
 #STOKES=stokes
@@ -195,11 +194,13 @@ fi
 date_start=`date`
 
 #Set up generic pipeline version log file
-log=${location}/make_subs_SAS_Ncore.log
+log=${location}/make_subs_SAS_Ncore_Mmodes.log
 echo "Pulsar Pipeline run with: $0" > $log
 echo "Pipeline V$VERSION" >> $log
 echo "$0 $input_string" >> $log
 echo "Start date: $date_start" >> $log
+echo "PARSET:" $PARSET
+echo "PARSET:" $PARSET >> $log
 
 NBEAMS=`cat $PARSET | grep "OLAP.storageStationNames" | grep -v Control | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F\, '{print NF}'`
 ARRAY=`cat $PARSET | grep "Observation.bandFilter" | awk -F "= " '{print $2}' | awk -F "_" '{print $1}'`
@@ -221,7 +222,7 @@ echo "Number of SAMPLES:" $SAMPLES
 echo "Number of SAMPLES:" $SAMPLES >> $log
 echo "Incoherentstokes set to:" $INCOHERENTSTOKES
 echo "Incoherentstokes set to:" $INCOHERENTSTOKES >> $log
-echo "Coherentstokes set to:" $INCOHERENTSTOKES
+echo "Coherentstokes set to:" $COHERENTSTOKES
 echo "Coherentstokes set to:" $COHERENTSTOKES >> $log
 echo "FlysEye set to:" $FLYSEYE 
 echo "FlysEye set to:" $FLYSEYE >> $log
@@ -457,6 +458,8 @@ do
 	count=0
 	
 	#Create 8-sections of the file list
+	echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+	echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_" >> $log
 	split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
 	status=$?
 	
@@ -475,6 +478,7 @@ do
 	then
 		for ii in $num_dir
 		do
+		  echo mv ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"$ii"/RSP"$ii".list" >> $log
 		  mv ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"$ii"/RSP"$ii".list"
 		done
 	else
@@ -482,9 +486,11 @@ do
 		do
 			for ii in $num_dir
 			do
+			  echo cp ${STOKES}/$$"_split_"$ii ${STOKES}/${jjj}/"RSP"$ii"/RSP"$ii".list" >> $log
 			  cp ${STOKES}/$$"_split_"$ii ${STOKES}/${jjj}/"RSP"$ii"/RSP"$ii".list"
 			done
 		done
+		echo rm ${STOKES}/$$"_split_"* >> $log
 		rm ${STOKES}/$$"_split_"*
     fi	
 	
@@ -517,12 +523,15 @@ do
 	echo "Running bf2presto in the background..." 
 	
 	#Create .sub.inf files with par2inf.py
+	echo cp $PARSET ./${OBSID}.parset >> $log
 	cp $PARSET ./${OBSID}.parset
+	echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
 	cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
 	#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
 	echo "Running par2inf" 
 	echo "Running par2inf" >> $log
 	
+    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset >> $log
     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
     status=$?
 
@@ -538,6 +547,7 @@ do
     then
 		for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
 		do
+		   echo mv ${ii} ${STOKES}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf >> $log
 		   mv ${ii} ${STOKES}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
 		   jj=`expr $jj + 1`
 		done
@@ -548,6 +558,7 @@ do
 		    for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
 		    do
 		       #cp ${ii} ${STOKES}/${jjj}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
+		       echo cp ${ii} ${STOKES}/${jjj}/RSP${jj}/${PULSAR}_${OBSID}.sub.inf >> $log
 		       cp ${ii} ${STOKES}/${jjj}/RSP${jj}/${PULSAR}_${OBSID}.sub.inf
 		       jj=`expr $jj + 1`
 		    done
@@ -556,6 +567,7 @@ do
 	
     if (( $flyseye == 1 ))
     then
+       echo rm test*.inf >> $log
        rm test*.inf
     fi
 		
@@ -563,6 +575,7 @@ do
 	if (( $all == 1 )) && (( $flyseye == 0 ))
 	then 
 	#     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n $all_num -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf &
+	     echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n $all_num -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf >> $log
 	     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n $all_num -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf &
 	fi
 	
@@ -599,6 +612,7 @@ do
 	#Split the bf2presto results within the beams into RSP in Fly's Eye Mode
 	if (( $flyseye == 1 ))
 	then	
+	    echo cd ${location}/${STOKES} >> $log
 	    cd ${location}/${STOKES}
 		for ii in `ls -d beam_?`
 		do
@@ -607,10 +621,13 @@ do
 			for iii in $num_dir
 			do
 				#mkdir -p ${ii}/RSP${iii}
+				echo mv `ls $ii/${PULSAR}_${OBSID}.sub???? | head -1` ${ii}/RSP${iii}/${PULSAR}_${OBSID}.sub0000 >> $log
 				mv `ls $ii/${PULSAR}_${OBSID}.sub???? | head -1` ${ii}/RSP${iii}/${PULSAR}_${OBSID}.sub0000
+				echo mv `ls $ii/${PULSAR}_${OBSID}.sub???? | head -$B` ${ii}/RSP${iii} >> $log
 				mv `ls $ii/${PULSAR}_${OBSID}.sub???? | head -$B` ${ii}/RSP${iii}
 			done
 		done
+	    echo cd ${location} >> $log
 	    cd ${location}
 	
 	fi # end if (( $flyseye == 1 ))
@@ -620,6 +637,7 @@ do
 	then
 	if [ $all -eq 1 ]
 	then 
+	     echo cd ${STOKES}/"RSPA" >> $log
 	     cd ${STOKES}/"RSPA"
 	     #master_counter=0
 	     echo "#!/bin/sh" > run.sh
@@ -639,6 +657,7 @@ do
 	
 	     echo "Performing subband linking for all RPSs in one location"
 	     echo "Performing subband linking for all RPSs in one location" >> $log
+	     echo chmod 777 run.sh >> $log
 	     chmod 777 run.sh
 	     check_number=`wc -l run.sh | awk '{print $1}'`
 	     total=$(( $all_num * $CHAN + 1 ))
@@ -648,10 +667,12 @@ do
 	        echo "Warning - possible problem running on ALL subbands;  master list is too short (is $check_number but should be $total rows)"
 	        echo "Warning - possible problem running on ALL subbands;  master list is too short (is $check_number but should be $total rows)" >> $log
 	      else
+	        echo ./run.sh >> $log
 	        ./run.sh &
 	        echo "Done subband linking for all RPSs in one location"
 	        echo "Done subband linking for all RPSs in one location" >> $log
 	      fi
+	      echo cd $location >> $log
 	      cd $location
 	fi
     fi # end if (( $flyseye == 0 ))
@@ -692,6 +713,7 @@ do
 	    done
 	fi # end if (( $flyseye == 0 ))
 	
+	echo cd ${location} >> $log
 	cd ${location}
 	
 	#Check when all DONE files are available, then all processes have exited
@@ -758,6 +780,7 @@ do
 		python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8new.py >> $log 2>&1
 		echo convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf >> $log
 		convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf
+		echo rm profiles.ps >> $log
 		rm profiles.ps
 	else
 	    for jjj in $beams
@@ -771,9 +794,11 @@ do
 			python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8new.py >> $log 2>&1
 			echo convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf >> $log
 			convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf
+			echo rm profiles.ps >> $log
 			rm profiles.ps
 		done	
 	fi
+    echo cd ${location} >> $log
     cd ${location}
 	
 	#Make a .pdf version of the plots
@@ -808,9 +833,8 @@ do
 		N=`echo $jj | awk -F "_" '{print $2}'`
 		N=`echo "$N+1" | bc`
 		NAME=`cat $PARSET| grep "OLAP.storageStationNames" | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F "," '{print $'$N'}'`
+		echo "mv $jj $NAME" >> $log
 		mv $jj $NAME
-		echo "Moved $jj to $NAME"
-		echo "Moved $jj to $NAME" >> $log
 	done
 	cd ${location}	
 	
@@ -830,6 +854,7 @@ do
 	      set subdyn_pid_$ii=$!
 	   done
 	
+	   echo cd ${location} >> $log
 	   cd ${location}
 	
 	   #Check when all 8 DONE files are available, then all processes have exited
@@ -872,17 +897,25 @@ do
 	date >> $log
 	if (( $flyseye == 0 ))
     then
+	   echo tar cvf ${PULSAR}_${OBSID}_plots.tar ${STOKES}/*profiles.pdf ${STOKES}/RSP*/*pfd.ps ${STOKES}/RSP*/*pfd.pdf ${STOKES}/RSP*/*pfd.bestprof ${STOKES}/RSP*/*.sub.inf >> $log
 	   tar cvf ${PULSAR}_${OBSID}_plots.tar ${STOKES}/*profiles.pdf ${STOKES}/RSP*/*pfd.ps ${STOKES}/RSP*/*pfd.pdf ${STOKES}/RSP*/*pfd.bestprof ${STOKES}/RSP*/*.sub.inf 
 	else
+	   echo tar cvf ${PULSAR}_${OBSID}_plots.tar ${STOKES}/*profiles.pdf ${STOKES}/*/RSP*/*pfd.ps ${STOKES}/*/RSP*/*pfd.pdf ${STOKES}/*/RSP*/*pfd.bestprof ${STOKES}/*/RSP*/*.sub.inf >> $log
 	   tar cvf ${PULSAR}_${OBSID}_plots.tar ${STOKES}/*profiles.pdf ${STOKES}/*/RSP*/*pfd.ps ${STOKES}/*/RSP*/*pfd.pdf ${STOKES}/*/RSP*/*pfd.bestprof ${STOKES}/*/RSP*/*.sub.inf
 	fi
+	echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
 	gzip ${PULSAR}_${OBSID}_plots.tar
 	
 	#Change permissions and move files
 	echo "Changing permissions of files"
+	echo "Changing permissions of files" >> $log
 	date
+	date >> $log
+	echo chmod -R 774 . * >> $log
 	chmod -R 774 . * 
+	echo chgrp -R pulsar . * >> $log
 	chgrp -R pulsar . * 
+	echo mv *.tar.gz ${STOKES} >> $log
 	mv *.tar.gz ${STOKES}
 	
 done # for loop over modes in $mode_str 
@@ -893,4 +926,5 @@ echo "Start Time: " $date_start >> $log
 echo "End Time: " $date_end
 echo "End Time: $date_end" >> $log
 
+echo "Results output location:" $location
 exit 0
