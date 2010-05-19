@@ -139,11 +139,28 @@ class LOFARrecipe(WSRTrecipe):
 
         self.config = ConfigParser({
             "job_name": self.inputs["job_name"],
-            "runtime_directory": self.inputs["runtime_directory"],
             "start_time": self.inputs["start_time"],
             "cwd": os.getcwd()
         })
         self.config.read(self.inputs["config"])
+
+        if not self.inputs['runtime_directory']:
+            self.inputs["runtime_directory"] = self.config.get(
+                "DEFAULT", "runtime_directory"
+            )
+        else:
+            self.config.set('DEFAULT', 'runtime_directory', self.inputs['runtime_directory'])
+
+        if not os.access(self.inputs['runtime_directory'], os.F_OK):
+            raise IOError, "Runtime directory doesn't exist"
+
+
+        if not self.inputs['default_working_directory']:
+            self.inputs["runtime_directory"] = self.config.get(
+                "DEFAULT", "default_working_directory"
+            )
+        else:
+            self.config.set('DEFAULT', 'default_working_directory', self.inputs['default_working_directory'])
 
         if not self.inputs["task_files"]:
             try:
@@ -161,13 +178,6 @@ class LOFARrecipe(WSRTrecipe):
                 self.config.get('DEFAULT', "recipe_directories")
             )
         ]
-
-        if not self.inputs['runtime_directory']:
-            self.inputs["runtime_directory"] = self.config.get(
-                "DEFAULT", "runtime_directory"
-            )
-            if not os.access(self.inputs['runtime_directory'], os.F_OK):
-                raise IOError, "Runtime directory doesn't exist"
 
         if isinstance(self.logger.parent, logging.RootLogger):
             # Only configure handlers if our parent is the root logger.
