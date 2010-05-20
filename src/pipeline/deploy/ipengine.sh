@@ -28,8 +28,17 @@ case "$2" in
                        --pidfile $PIDFILE                                \
                        --exec /opt/pipeline/dependencies/bin/ipengine -- \
                        --furl-file=$FURLFILE --logfile=$PIDPATH/log
-                     sleep 5
-                     ps -p `cat $PIDFILE` > /dev/null || echo "ipengine failed to start on `hostname`"
+                     i=0
+                     while :
+                        do
+                            sleep 0.1
+                            PID=`cat $PIDFILE 2> /dev/null`
+                            grep "engine registration succeeded" $PIDPATH/log$PID.log > /dev/null 2>&1
+                            if [ $? -eq 0 ]; then
+                                break
+                            fi
+                        done
+#                     ps -p `cat $PIDFILE` > /dev/null || echo "ipengine failed to start on `hostname`"
                 else
                     echo "ipengine already running on `hostname`"
                 fi
