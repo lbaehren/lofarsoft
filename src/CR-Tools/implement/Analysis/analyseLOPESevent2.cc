@@ -284,8 +284,8 @@ namespace CR { // Namespace CR -- begin
       // check if time of CC beam is within fit range
       if ( (erg.asDouble("CCcenter") < fitStart()) || (erg.asDouble("CCcenter") > fitStop()) ) {
         cout << "\nBad reconstruction: Time of CC beam is outside of fit range!\n" << endl;
-        erg.define("CCconverged", false);
-        erg.define("Xconverged", false);
+        fiterg.define("CCconverged", false);
+        fiterg.define("Xconverged", false);
       }    
 
       // Generate plots
@@ -318,10 +318,12 @@ namespace CR { // Namespace CR -- begin
         // calculate the maxima (only if CC-beam was reconstructed successfully and its time is ok):
         // calculate noise as mean of local maxima of the envelope in time range of -10.5 to -0.5 µs before CC center)      
         if (fiterg.asBool("CCconverged")) {
-          if (CalculateMaxima)
+          if (CalculateMaxima) {
             calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
                                                             false, fiterg.asDouble("CCcenter"),
                                                             4, fiterg.asDouble("CCcenter") - 10.5e-6, fiterg.asDouble("CCcenter") - 0.5e-6);
+            caculateNoiseInfluence();
+          }                                                
           // user friendly list of calculated maxima
           if (listCalcMaxima)
             CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
@@ -1073,58 +1075,113 @@ namespace CR { // Namespace CR -- begin
  }
 
 
- void analyseLOPESevent2::calculateSign (map <int,PulseProperties> & eventPulses,
-                                         double& ratioDiffSign,
-                                         double& ratioDiffSignEnv,
-                                         double& weightedTotSign,
-                                         double& weightedTotSignEnv)
+  void analyseLOPESevent2::calculateSign (map <int,PulseProperties> & eventPulses,
+                                          double& ratioDiffSign,
+                                          double& ratioDiffSignEnv,
+                                          double& weightedTotSign,
+                                          double& weightedTotSignEnv)
 
- {
+  {
     try {
+      int sign=0, signAtEnvTime=0;
+      double antP=0., antN=0.; 
+      double antPEnv=0., antNEnv=0.; 
+      double envMax=0.,noise=0.,snr=0.,nume=0.,numeEnv=0.,denom=0.;
+      double total_minMaxSign=0., total_envSign=0.;
 
-	int sign=0, signAtEnvTime=0;
-     double antP=0., antN=0.; 
-     double antPEnv=0., antNEnv=0.; 
-     double envMax=0.,noise=0.,snr=0.,nume=0.,numeEnv=0.,denom=0.;
-     double total_minMaxSign=0., total_envSign=0.;
 
+      for(map<int,PulseProperties>::iterator iter=eventPulses.begin(); iter !=eventPulses.end(); ++iter) { 
+        sign=iter->second.minMaxSign;
+        signAtEnvTime=iter->second.envSign;
+        envMax=iter->second.envelopeMaximum;
+        noise=iter->second.noise;
 
-     for(map<int,PulseProperties>::iterator iter=eventPulses.begin(); iter !=eventPulses.end(); ++iter)
-	{ 
-     	sign=iter->second.minMaxSign;
-          signAtEnvTime=iter->second.envSign;
-		envMax=iter->second.envelopeMaximum;
-		noise=iter->second.noise;
+        snr=(envMax/noise);
+        nume += (sign*snr);
+        numeEnv += (signAtEnvTime*snr);
+        denom += snr;
 
-		snr=(envMax/noise);
-		nume += (sign*snr);
-		numeEnv += (signAtEnvTime*snr);
-		denom += snr;
+        if(sign>0)
+          antP++;
+        if(sign<0)
+          antN++;
+        if(signAtEnvTime>0)
+          antPEnv++;
+        if(signAtEnvTime<0)
+          antNEnv++;
+      }//for map
 
-		if(sign>0)
-            antP++;
-          if(sign<0)
-            antN++;
-          if(signAtEnvTime>0)
-		  antPEnv++;
-          if(signAtEnvTime<0)
-		  antNEnv++;
+      total_minMaxSign = (antP-antN);
+      total_envSign = (antPEnv-antNEnv);
+      // cout<<"Positive:  "<<antP<<"   Negative:  "<<antN<<"   Tot  :"<<(antP+antN)<<endl;
+      // cout<<"@ envelope Positive: "<<antPEnv<<" Negative:  "<<antNEnv<<" Tot  :"<<(antPEnv+antNEnv)<<endl;
 
-	}//for map
+      ratioDiffSign=(antP-antN)/(antP+antN);
+      ratioDiffSignEnv=(antPEnv-antNEnv)/(antPEnv+antNEnv);
 
-	total_minMaxSign = (antP-antN);
-     total_envSign = (antPEnv-antNEnv);
-//     cout<<"Positive:  "<<antP<<"   Negative:  "<<antN<<"   Tot  :"<<(antP+antN)<<endl;
-//     cout<<"@ envelope Positive: "<<antPEnv<<" Negative:  "<<antNEnv<<" Tot  :"<<(antPEnv+antNEnv)<<endl;
-
-	ratioDiffSign=(antP-antN)/(antP+antN);
-     ratioDiffSignEnv=(antPEnv-antNEnv)/(antPEnv+antNEnv);
-
-	weightedTotSign= nume/denom;
-	weightedTotSignEnv= numeEnv/denom;
-
+      weightedTotSign= nume/denom;
+      weightedTotSignEnv= numeEnv/denom;
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::calculateSign: " << x.getMesg() << endl;
+    }
+  }
+
+
+  void analyseLOPESevent2::caculateNoiseInfluence ()
+  {
+    try {
+      cout << "\nCorrecting amplitudes for noise influence, and calculating errorbars.\n" << endl;
+      
+      // Apply correction formulas from noise study (see PhD thesis of Frank Schröder, in preperation)
+      for(map<int,PulseProperties>::iterator it=calibPulses.begin(); it !=calibPulses.end(); ++it) { 
+        // calculate SNR, as all formulas depend on signal-to-noise ratio
+        double noise = it->second.noise;
+        double snr = it->second.envelopeMaximum / noise;
+        
+        // amplitude correction (all formulas are normalized to height of noise)
+        if (snr < 2)       
+          it->second.height = (0.4628 + 0.2491*snr) * noise;
+        else
+          it->second.height = sqrt(snr*snr - 1) * noise;
+          
+        // amplitude error bar
+        if (snr < 1.67634)
+          it->second.heightError = (0.3103 + 0.0647*exp(+snr)) * noise;
+        else  
+          it->second.heightError = (0.6162 + 0.213*exp(-snr)) * noise;
+          
+        // add calibration uncertainty of 5% in square
+        it->second.heightError = sqrt( pow(it->second.heightError,2) + pow(0.05 * it->second.height, 2));
+          
+        // time
+        it->second.time = it->second.envelopeTime;
+        // time error bar
+        if (snr < 1.83889)
+          it->second.timeError = 16.6 - pow (2*snr - 1.3, 2);
+        else  
+          it->second.timeError = 20.5 * pow (snr, -1.03);
+          
+        // add calibration uncertainty of 2 ns in square
+        it->second.timeError = sqrt( pow(it->second.timeError,2) + 4);
+        
+        cout << "For antenna " << it->second.antenna << ":\n";
+        cout << "Env. height = " << it->second.envelopeMaximum 
+             << " +/- " << noise
+             << "\t time = " << it->second.envelopeTime
+             << " +/- " << 2            
+             << endl;
+        cout << "Cor. height = " << it->second.height
+             << " +/- " << it->second.heightError
+             << "\t time = " << it->second.envelopeTime
+             << " +/- " << it->second.timeError
+             << endl;
+          
+//     double heightError;
+//     double time;
+//     double timeError;
+      }  
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent2::caculateNoiseInfluence: " << x.getMesg() << endl;
     }
   }
 

@@ -368,7 +368,7 @@ bool fromString(T &t, const string &s, std::ios_base& (*f)(ios_base&))
 class AnyType
 {
 public:
-    virtual bool         setValue(string value)       { return false; }
+    virtual bool         setValue(string)       { return false; }
     virtual string       errorSetVal()                { return ""; }
     virtual bool         bValue()
     {
@@ -487,7 +487,7 @@ public:
     {
         if(value[0] == '-')
             return false;
-        bool result = fromString<unsigned int>(this->value, value, std::dec) && (this->value >= 0);
+        bool result = fromString<unsigned int>(this->value, value, std::dec); // && (this->value >= 0);
         this->value = result ? this->value : this->defaultValue;
         return result;
     }
@@ -769,6 +769,8 @@ private:
     }
     bool checkName(string name)
     {
+        if (name!="")
+          return true;
         // Names should have form: letter(letter|digit)*
         // if(!isalpha(name[0]))
         //    return false;
@@ -1946,6 +1948,7 @@ int main (int argc, char *argv[])
             // create a special file for the lateral distribution output
             if (config["lateralOutputFile"]->bValue())
               eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+              
 
             // get the pulse properties
             rawPulsesMap = eventPipeline.getRawPulseProperties();
@@ -1988,9 +1991,8 @@ int main (int argc, char *argv[])
             }
 
             //taking the sign of the signal, looping on all the antennas
-            if (config["CalculateMaxima"]->bValue()) {
-			eventPipeline.calculateSign(calibPulsesMap,ratioDiffSign,ratioDiffSignEnv,weightedTotSign,weightedTotSignEnv);
-            }
+            if (config["CalculateMaxima"]->bValue())
+              eventPipeline.calculateSign(calibPulsesMap,ratioDiffSign,ratioDiffSignEnv,weightedTotSign,weightedTotSignEnv);
           } else {
             cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
                  << config["polarization"]->sValue() << "' polarization, skipping..." << endl;
@@ -2128,10 +2130,8 @@ int main (int argc, char *argv[])
             }
 
             //taking the sign of the signal, looping on all the antennas
-            if (config["CalculateMaxima"]->bValue()) {
-			eventPipeline.calculateSign(calibPulsesMap,ratioDiffSign,ratioDiffSignEnv,weightedTotSign,weightedTotSignEnv);
-
-            }// if
+            if (config["CalculateMaxima"]->bValue())
+              eventPipeline.calculateSign(calibPulsesMap,ratioDiffSign,ratioDiffSignEnv,weightedTotSign,weightedTotSignEnv);
           } else {
             cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
                  << config["polarization"]->sValue() << "' polarization, skipping..." << endl;
@@ -2269,9 +2269,8 @@ int main (int argc, char *argv[])
             }
 
             //taking the sign of the signal, looping on all the antennas
-            if (config["CalculateMaxima"]->bValue()) {
-			eventPipeline.calculateSign(calibPulsesMap,ratioDiffSign,ratioDiffSignEnv,weightedTotSign,weightedTotSignEnv);
-            }// if
+            if (config["CalculateMaxima"]->bValue())
+              eventPipeline.calculateSign(calibPulsesMap,ratioDiffSign,ratioDiffSignEnv,weightedTotSign,weightedTotSignEnv);
           } else {
             cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
                  << config["polarization"]->sValue() << "' polarization, skipping..." << endl;

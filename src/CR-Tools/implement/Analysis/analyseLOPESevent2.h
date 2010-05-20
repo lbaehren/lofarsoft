@@ -532,7 +532,7 @@ namespace CR { // Namespace CR -- begin
       \param erg        - results of the pipeline (e.g. Azimuth, Elevation)
       \param XC         - x-position of the shower center [in m]
       \param YC         - y-position of the shower center [in m]
-   */
+    */
     void createLateralOutput (const string& filePrefix,
                               const Record& erg,
                               const double& Xc,
@@ -572,12 +572,28 @@ namespace CR { // Namespace CR -- begin
                        const string& beamtype="CC",
                        const double& hanning=0);
 
+    /*!
+      \brief Calculates the sign of the event
 
- void calculateSign (map <int,PulseProperties> & eventPulses,
-                                         double& ratioDiffSign,
-                                         double& ratioDiffSignEnv,
-                                         double& weightedTotSign,
-                                         double& weightedTotSignEnv);
+      \param eventPulses        - map with properties of the pulse measured at all antennas
+      \param ratioDiffSign      - reference to return the ratio of the sign difference (trace method)
+      \param ratioDiffSignEnv   - reference to return the ratio of the sign difference (envelope method)
+      \param weightedTotSign    - reference to return the weighted toal sign (trace method)
+      \param weightedTotSignEnv - reference to return the weighted toal sign (envelope method)
+    */
+
+    void calculateSign (map <int,PulseProperties> & eventPulses,
+                        double& ratioDiffSign,
+                        double& ratioDiffSignEnv,
+                        double& weightedTotSign,
+                        double& weightedTotSignEnv);
+
+
+    /*!
+      \brief Incorporates noise influence to measured, calibrated pulses: amplitude correction + error calculation
+    */
+
+    void caculateNoiseInfluence ();
 
   };
 
