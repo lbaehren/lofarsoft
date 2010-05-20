@@ -3,6 +3,7 @@ import utilities
 from lofarpipe.support.lofarexceptions import PipelineException, ClusterError
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
 from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
+from lofarpipe.support.clusterhandler import ClusterHandler
 from IPython.kernel import client as IPclient
 from ConfigParser import NoOptionError, NoSectionError
 from ConfigParser import SafeConfigParser as ConfigParser
@@ -196,3 +197,8 @@ class LOFARrecipe(WSRTrecipe):
             self.logger.error("Unable to initialise cluster")
             raise ClusterError
         return tc, mec
+
+    def start_cluster(self, nproc=''):
+        cluster_handler = ClusterHandler(self.config)
+        cluster_handler.start_cluster(nproc)
+        atexit.register(cluster_handler.stop_cluster)
