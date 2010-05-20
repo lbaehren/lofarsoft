@@ -197,8 +197,3 @@ class LOFARrecipe(WSRTrecipe):
             self.logger.error("Unable to initialise cluster")
             raise ClusterError
         return tc, mec
-
-    def start_cluster(self, nproc=''):
-        cluster_handler = ClusterHandler(self.config)
-        cluster_handler.start_cluster(nproc)
-        atexit.register(cluster_handler.stop_cluster)
