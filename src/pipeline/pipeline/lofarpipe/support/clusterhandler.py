@@ -45,7 +45,15 @@ class ClusterHandler(object):
         self.logger.info("Starting controller:")
         controlpath = self.config.get('DEFAULT', 'runtime_directory')
         controller_ppath = self.config.get('deploy', 'controller_ppath')
+        # Before starting, ensure that the old engine.furl isn't lying about
+        # to cause confusion
+        try:
+            os.unlink(os.path.join(controlpath, 'engine.furl'))
+        except OSError:
+            pass
         self.__execute_ssh(self.head_node, "bash %s/ipcontroller.sh %s start %s" % (self.script_path, controlpath, controller_ppath))
+        # Wait until an engine.furl file has been created before moving on to
+        # start engines etc.
         while not os.path.isfile(os.path.join(controlpath, 'engine.furl')):
             time.sleep(1)
         self.logger.info("done.")
