@@ -71,8 +71,8 @@ class ClusterHandler(object):
         self.logger.info("done.")
 
 @contextmanager
-def ipython_cluster(config, nproc=""):
-    cluster_handler = ClusterHandler(config)
+def ipython_cluster(config, logger, nproc=""):
+    cluster_handler = ClusterHandler(config, logger)
     cluster_handler.start_cluster(nproc)
     yield
     cluster_handler.stop_cluster()
