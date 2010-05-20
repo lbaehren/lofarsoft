@@ -1,4 +1,5 @@
-import shlex, subprocess, threading, logging
+from __future__ import with_statement
+import shlex, subprocess, threading, logging, os, time
 from contextlib import contextmanager
 from lofarpipe.support.clusterdesc import ClusterDesc
 from lofarpipe.support.clusterdesc import get_compute_nodes, get_head_node
@@ -45,6 +46,8 @@ class ClusterHandler(object):
         controlpath = self.config.get('DEFAULT', 'runtime_directory')
         controller_ppath = self.config.get('deploy', 'controller_ppath')
         self.__execute_ssh(self.head_node, "bash %s/ipcontroller.sh %s start %s" % (self.script_path, controlpath, controller_ppath))
+        while not os.path.isfile(os.path.join(controlpath, 'engine.furl')):
+            time.sleep(1)
         self.logger.info("done.")
 
     def __stop_controller(self):
@@ -52,6 +55,7 @@ class ClusterHandler(object):
         controlpath = self.config.get('DEFAULT', 'runtime_directory')
         controller_ppath = self.config.get('deploy', 'controller_ppath')
         self.__execute_ssh(self.head_node, "bash %s/ipcontroller.sh %s stop %s" % (self.script_path, controlpath, controller_ppath))
+        os.unlink(os.path.join(controlpath, 'engine.furl'))
         self.logger.info("done.")
 
     def __start_engines(self, nproc):
@@ -59,7 +63,9 @@ class ClusterHandler(object):
         controlpath = self.config.get('DEFAULT', 'runtime_directory')
         engine_ppath = self.config.get('deploy', 'engine_ppath')
         engine_lpath = self.config.get('deploy', 'engine_lpath')
-        command = "bash %s/ipengine.sh %s start %s %s %s" % (self.script_path, controlpath, engine_ppath, engine_lpath, str(nproc))
+        with open(os.path.join(controlpath, 'engine.furl')) as furlfile:
+            furl = furlfile.readline().strip()
+        command = "bash %s/ipengine.sh %s start %s %s %s %s" % (self.script_path, controlpath, engine_ppath, engine_lpath, furl, str(nproc))
         self.__multinode_ssh(self.compute_nodes, command)
         self.logger.info("done.")
 
