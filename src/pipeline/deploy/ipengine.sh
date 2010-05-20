@@ -22,7 +22,6 @@ case "$2" in
          fi
          for PROC in `seq 1 $NPROC`
             do
-                 cat $FURLFILE
                  PIDFILE=$PIDPATH/ipengine$PROC.pid
                  if [ ! -f $PIDFILE ]; then
                      /sbin/start-stop-daemon --start -b -m               \
