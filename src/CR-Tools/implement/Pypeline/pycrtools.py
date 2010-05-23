@@ -16,7 +16,15 @@ import numpy as np
 LOFARSOFT=os.environ["LOFARSOFT"]
 pydocpyfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.py"
 pydoctxtfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.tex"
-DEFAULTDATAFILE=LOFARSOFT+"/data/lopes/example.event"
+
+filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecond.h5"
+filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecondtbb1.h5"
+filename_lopes_test=LOFARSOFT+"/data/lopes/test.event"
+filename_lofar=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+filename_lopes=LOFARSOFT+"/data/lopes/example.event"
+
+DEFAULTDATAFILE=filename_lopes
+
 
 #Read in the doc strings for the functions in hftools
 execfile(pydocpyfilename)
@@ -134,12 +142,17 @@ def hArrayToPrintString(self,maxlen=5):
     if name=="": name="hArray";
     return name+"("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
 
-def hArray_repr(self,maxlen=8):
+def hArray_repr(self,maxlen=8,long=True):
     loops=""
     if self.loopingMode(): loops="*"
-    name=self.getKey("name");
+    name=self.getKey("name")
     if not name=="": name=', name="'+name+'"'
-    return "hArray("+hTypeNamesDictionary[basetype(self)]+","+str(list(self.getDim()))+name+") # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+    s="hArray("+hTypeNamesDictionary[basetype(self)]
+    if long:
+        s+=","+str(list(self.getDim()))+name+") # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+    else:
+        s+=")"
+    return s
 
 #========================================================================
 # Adding multi-dimensional array capabilities to vector class
@@ -964,7 +977,7 @@ for v in hAllContainerTypes:
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hStdDev","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hErrorsToWeights","hPolynomial"]:
+    for s in ["hMean","hStdDev","hMeanThreshold","hMeanInverse","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hGetHanningFilterHalf","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hBSplineFitXValues","hBSpline","hBSplineFit","hErrorsToWeights","hPolynomial"]:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
@@ -1021,6 +1034,7 @@ def Vector(Type=float,size=-1,fill=None):
     [4,4].
     """
     vtype=Type
+    if type(size) in hListAndArrayTypes: size=len(size)
     if (type(vtype) in hAllArrayTypes):  # hArrayClass
         vtype=basetype(Type)
         vec=Vector(Type.getVector())
@@ -1130,8 +1144,9 @@ Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues
         ary.stored_vector=vec
         ary.setVector(ary.stored_vector)
     if not hasattr(ary,"par"): setattr(ary,"par",hArray_par())
-    if (type(dimensions) in [list,tuple,IntVec]): ary.setDim(dimensions)
-    if (type(dimensions) in hAllArrayTypes): ary.setDim(dimensions.getDim())
+    if type(dimensions)==int: ary.setDim([dimensions])
+    elif (type(dimensions) in [list,tuple,IntVec]): ary.setDim(dimensions)
+    elif (type(dimensions) in hAllArrayTypes): ary.setDim(dimensions.getDim())
     if type(par) == tuple: setattr(ary.par,par[0],par[1])
     if type(par) == list: map(lambda elem:setattr(ary.par,elem[0],elem[1]),par)
     if not (xvalues == None): ary.par.xvalues=xvalues
@@ -1290,6 +1305,10 @@ class CRWorkSpace():
 #Create a list of all the parameters with default values (and initialization functions)
         if not hasattr(self,"parameters"): self.parameters=[]
         self.parameters+=list(set(map(lambda s:s[l:],filter(lambda s:s.find("default_")==0,dir(self)))).difference(set(self.parameters)))
+        for par in self.parameters:
+            if hasattr(self,"default_"+par):
+                if type(getattr(self,"default_"+par).__doc__)==str: #assign docstring, reusing the one from the initialization function
+                    setattr(self,"__"+par+"__doc__",getattr(self,"default_"+par).__doc__)
         self.auxparameters=[]
         if not hasattr(self,"locals"): self.locals=set()
         self.setParameters(**keywords)
@@ -1302,10 +1321,7 @@ class CRWorkSpace():
         passed as a keyword=value pair in the argumentlist.
         """
         self.setParameters(**keywords)
-        for par in self.parameters:
-            self[par]
-#            if type(getattr(self,"default_"+par).__doc__)==str: #assign docstring, reusing the one from the initialization function
-#                setattr(self,"__"+par+"__doc__",getattr(self,"default_"+par).__doc__)
+        for par in self.parameters: self[par]
         for m in self.modules: #Now, also initialize the modules
             getattr(self,m).initParameters()
         return self
@@ -1365,15 +1381,27 @@ class CRWorkSpace():
         s="#WorkSpace("+self.name+"):\n"
         myname=parentname+self.modulename
         for par in self.parameters+self.auxparameters:
-#            if hasattr(self,par):
-#                if hasattr(self,"__"+par+"__doc__"):
-#                    s+="#"+getattr(self,"__"+par+"__doc__")+"\n"
             s+=myname+'["'+par+'"] = '+str(self[par])
             if self.isLocal(par): s+=" # (local)\n"
             else: s+=" # (parent)\n"
         for m in self.modules:
             s+=getattr(self,m).__repr__(parentname=myname+".")+"\n"
         return s
+    def doc_parameters(self):
+        s=""
+        for par in self.parameters:
+            val=self[par]
+            s+="    "+par
+            if ishArray(val): s+=" = "+val.__repr__(long=False)
+            elif not val==None: s+=" = "+str(val)
+            if hasattr(self,"__"+par+"__doc__"):
+                s+=" - "+getattr(self,"__"+par+"__doc__")
+            s+="\n"
+        return s
+    def help(self):
+        print self.__doc__
+        print "\nAvailable parameters:"
+        print self.doc_parameters()
     def getModule(self,name):
         if self.name==name: return self
         for m in self.modules:
@@ -1387,16 +1415,22 @@ class CRAverageSpectrumWorkSpace(CRWorkSpace):
         self.parameters=["datafile","max_nblocks","nblocks"] # Create those parameters first and in this order
         CRWorkSpace.__init__(self,parent=parent,modulename=modulename,**keywords)
     def default_datafile(self): 
+        """DataReader object to read the data from."""
         return crfile(DEFAULTDATAFILE)
     def default_nblocks(self): 
+        """Number of blocks to average, take all blocks by default."""
         return min(self["datafile"].filesize/self["datafile"].blocksize,self["max_nblocks"])
     def default_max_nblocks(self): 
+        """Absolute maximum number of blocks to average, irrespective of filesize."""
         return 100000
     def default_blocks(self): 
+        """List of blocks to process."""
         return range(self["nblocks"])
-    def default_fx(self): 
+    def default_fx(self):
+        """Array to hold the x-values of the raw time series data. (work vector)"""
         return self["datafile"]["emptyFx"]
     def default_fft(self): 
+        """Array to hold the FFTed x-values (i.e. complex spectrum) of the raw time series data. (work vector)"""
         return self["datafile"]["emptyFFT"]
 
 #Now add the new workspsace to the overall workspace list
@@ -1407,39 +1441,87 @@ CRWorkSpaceList[-1].name="AverageSpectrum"
 class CRFitBaselineWorkSpace(CRWorkSpace):
     """Workspace for hCRFitBaseline. See also CRMainWorkSpace and CRWorkSpace."""
     def __init__(self,parent=None,modulename=None,**keywords):
-        self.parameters=["nbins","maxorder","ncoeffs","nofAntennas","freqs","spectrum"]
-        self.locals=set(["nbins","maxorder","freqs","spectrum","rms","ratio","selected_bins"])
+        self.parameters=["nbins","ncoeffs","polyorder","nofAntennas","freqs","spectrum"]
+        self.locals=set(["nbins","polyorder","freqs","spectrum","rms","ratio","selected_bins"])
         CRWorkSpace.__init__(self,parent=parent,modulename=modulename,**keywords)
     def default_nbins(self): 
+        """The number of bins in the downsampled spectrum used to fit the baseline."""
         return 2**8
-    def default_maxorder(self): 
-        return 17
+    def default_polyorder(self): 
+        """Order of the plyonomial to fit.  (output only)"""
+        return self["ncoeffs"]-1
     def default_rmsfactor(self): 
+        """Factor above and below the RMS in each bin at which a bin is no longer considered."""
         return 2.0
+    def default_logfit(self): 
+        """Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards)."""
+        return True
     def default_nofAntennas(self): 
+        """Number of antennas held in memory."""
         return 1
     def default_ncoeffs(self): 
-        return self.maxorder+1
+        """Number of coefficients for the polynomial."""
+        return 18
+    def default_numin(self):
+        """Minimum frequency of useable bandwidth. Negative if to be ignored."""
+        return -1
+    def default_numax(self):
+        """Maximum frequency of useable bandwidth. Negative if to be ignored."""
+        return -1
+    def default_numin_i(self):
+        """Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored."""
+        return -1
+    def default_numax_i(self):
+        """Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored."""
+        return -1
+    def default_extendfit(self):
+        """Extend the fit by this factor at both ends beyond numax and numin. The factor is relative to the unsued bandwidth."""
+        return 0.1
     def default_freqs(self):
+        """Array of frequency values of the downsampled spectrum. (work vector)"""
         return hArray(float,dimensions=[1,self["nbins"]],name="Frequency",units=("M","Hz"))
     def default_spectrum(self):
+        """Array of power values holding the downsampled spectrum. (work vector)"""
         return hArray(float,[self["nofAntennas"],self["nbins"]],name="Binned Spectrum",units="a.u.",xvalues=self["freqs"],par=("logplot","y"))
     def default_rms(self):
+        """Array of RMS values of the downsampled spectrum. (work vector)"""
         return hArray(properties=self["spectrum"], name="RMS of Spectrum")
+    def default_weights(self):
+        """Array of weight values for the fit. (work vector)"""
+        return hArray(properties=self["spectrum"], name="Fit Weights")
     def default_ratio(self):
-        return hArray(properties=self["spectrum"],name="RMS/Ampltude",par=("logplot",False))
+        """Array holding the ratio between RMS and power of the downsampled spectrum. (work vector)"""
+        return hArray(properties=self["spectrum"],name="RMS/Amplitude",par=("logplot",False))
     def default_powers(self):
+        """Array of integers, containing the powers to fit in the polynomial. (work vector)"""
         return hArray(int,[self["nofAntennas"],self["ncoeffs"]],range(self["ncoeffs"]))
     def default_xpowers(self):
+        """Array holding the x-values and their powers for the fit. (work vector)"""
         return hArray(float,[self["nofAntennas"],self["nbins"],self["ncoeffs"]],name="Powers of Frequency")
     def default_covariance(self):
+        """Array containign the covariance matrix of the fit. (outpur only)"""
         return hArray(float,[self["nofAntennas"],self["ncoeffs"],self["ncoeffs"]])
+    def default_bwipointer(self):
+        """Pointer to the internal BSpline workspace as integer. Don't change! """
+        return 0
     def default_clean_bins_x(self):
+        """Array holding the frequencies of the clean bins. (work vector)"""
         return self["freqs"] #hArray(properties=self["freqs"],name="Clean Frequencies")
     def default_clean_bins_y(self):
+        """Array holding the powers of the clean bins. (work vector)"""
         return self["spectrum"] #hArray(properties=self["spectrum"],xvalues=self["clean"]_bins_x)
+    def default_nselected_bins(self):
+        """Number of clean bins after RFI removal. (output only)"""
+        return 0
     def default_selected_bins(self):
+        """Array of indices pointing to clean bins, i.e. with low RFI. (work vector)"""
         return hArray(int,self["spectrum"],name="Selected bins")
+    def default_coeffs(self): 
+        """Polynomial coeffieients of the baseline fit. (output vector)"""
+        return hArray(float,[self["nofAntennas"],self["ncoeffs"]])
+    def default_meanrms(self): 
+        """Estimate the mean rms in the spectrum per antenna. (output vector)"""
+        return 0
 
 #Now add the new workspsace to the overall workspace list
 CRWorkSpaceList.append(CRFitBaselineWorkSpace)
@@ -1455,54 +1537,117 @@ class CRMainWorkSpace(CRWorkSpace):
     This is a class to hold the variable, vectors, and arrays of all
     parameters used in the analysis. 
 
-    Every parameter is an attribute of this class which one simply
-    set, change, or delete. Every known parameter has an associated
-    function of the format '.global_parameter' to return a default
-    value. The defaults will be set when calling the function
-    ws.initParameters(). E.g. to set the blocksize to 1024, simply set
-    ws.blocksize=1024 prior to calling initParameters.
+    You can access the parameters using ws["parametername"] and set
+    them using ws["parametername"]=val.
 
+    Every known parameter has an associated function of the format
+    '.global_parameter' to return a default value. The defaults will
+    be set when calling the function ws.initParameters() or the first
+    time when you access a parameter. A local copy will be made in an
+    attribute of the class. So, you can access it also with
+    
+    ws.parametername
+
+    Workspaces can be stacked hierarchically in a tree structure, by
+    providing a parent workspace as an argument during creation, e.g. 
+
+    child_ws=CRFitBaselineWorkSpace(ws)
+
+    Parameter can than be local or global. If a parameter is not yet
+    set locally, it will be searched in the parent works space. If it
+    is not found in either workspace, the default value will be
+    calculated and assigned locally. 
+
+    You can assign your own value with ws["parname"]=value before
+    initialization to avoid execution of the defaulting mechanism.
+
+    E.g. to set the blocksize to 1024, simply set ws["blocksize"]=1024
+    prior to calling initParameters.
+    
+    Note that the local copy of a value is only made once
+    initParameters is called or the parameter explicitly with
+    ws["..."]. So, if a global value changes, the change will not be
+    immediately reflected in the ws.parname value - hence use that with
+    care.
 
     ws.initParameters() - set all parameters (i.e. attributes) that do
     not exist yet, and assign a default value.
+
+    ws.help() - get a list of all parameters and their values.
 
     """
     def __init__(self,modulename=None,**keywords):
 # Here list the parameters which have to be initialized in a
 # particular order at the beginning (e.g., if the depend on each
 # other). The attribute will be extended automatically.
-        self.parameters=["filename","datafile","nofAntennas","frequency"]
+        self.parameters=["filename","blocksize","datafile","nofAntennas","fftLength","frequency"]
         CRWorkSpace.__init__(self,modulename=modulename,parent=None,**keywords)
     def default_filename(self): 
-        """Name of the data file to process"""
+        """Name of the data file to process."""
         return LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
     def default_datafile(self): 
-        """Datafile object"""
-        return crfile(self["filename"])
+        """Datafile object. Will be created from the filename and set to the right blocksize, if it does not exist yet."""
+        return crfile(self["filename"]).set("blocksize",self["blocksize"])
     def default_blocksize(self):
-        """Size (number of values) of each block to be read in"""
+        """Size (number of values) of each block to be read in."""
         return 2**16
     def default_nofAntennas(self):
         """Number of antennas in the datafile (output only)"""
         return self["datafile"]["nofAntennas"]
+    def default_fftLength(self):
+        """Size of the FFT or spectrum derived from the datareader object."""
+        return self["datafile"]["fftLength"]
+    def default_numin(self):
+        """Minimum frequency of useable bandwidth. Negative if to be ignored."""
+        return -1
+    def default_numax(self):
+        """Maximum frequency of useable bandwidth. Negative if to be ignored."""
+        return -1
+    def default_numin_i(self):
+        """Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored."""
+        return -1
+    def default_numax_i(self):
+        """Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored."""
+        return -1
     def default_frequency(self):
         """Frequency values (x-axis) corresponding to FFT and spectrum"""
-        return self["datafile"]["Frequency"]
+        return self["datafile"]["Frequency"].setUnit("M","")
     def default_spectrum(self):
         """Power as a function of frequency."""
         return hArray(float,[self["nofAntennas"],self["datafile"].fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=self["frequency"],par=[("logplot","y")])
+    def default_cleanspec(self):
+        """Copy of the spectrum with the gain curve and the spiky channels taken out."""
+        return hArray(properties=self["spectrum"])
+    def default_bad_channels(self):
+        """Indexlist of bad channels containing RFI. (output only)"""
+        return hArray(int,self["spectrum"],name="Bad Channels")
+    def default_nbad_channels(self):
+        """Number of bad channels (output only)"""
+        return 0
+    def default_rfi_nsigma(self):
+        """Threshold for identifying a spike in Frequency as an RFI line to flag, in units of standard deviations of the noise."""
+        return 5
     def default_fx(self): 
         """Raw time series antenna data."""
         return self["datafile"]["emptyFx"]
     def default_fft(self): 
         """FFT of the Raw time series antenna data."""
         return self["datafile"]["emptyFFT"]
+    def default_ncoeffs(self): 
+        """Number of coefficients to describe the baseline."""
+        return 18
+    def default_baseline(self):
+        """Array with a baseline fit to the spectrum."""
+        return hArray(properties=self["spectrum"],xvalues=self["frequency"],name="Baseline")
+    def default_baseline_x(self):
+        """Array holding the x-values and their powers for calculating the baseline fit."""
+        return hArray(float,[self["fftLength"],self["ncoeffs"]],name="Powers of Frequency")
 
 def CRWorkSpace_default_doplot(self):
     """Make plots during processing to inspect data."""
     return False
 def CRWorkSpace_default_t0(self):
-    """The starting time of the processing for benchmarking."""
+    """The cpu starting time of the processingin seconds, used for benchmarking."""
     return time.clock()
 def CRWorkSpace_default_verbose(self):
     """Print progress information during processing."""
@@ -1546,7 +1691,32 @@ def CRsetWorkSpace(ws,modulename,**keywords):
     return ws
 
 
-def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, t0=None,**keywords):
+def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
+    """
+    hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords)
+
+    Function to fit a baseline using a polynomial function to a
+    spectrum while ignoring spikes in the fit (e.g., those coming from
+    RFI = Radio Frequency Interference). The functions returns an
+    array of coefficients of the polynomial. 
+
+    Use baseline.polynomial(frequency,coeffs,powers) to caluclate the
+    baseline from the coefficients.
+
+    Parameters can be provided as additional keywords
+
+    e.g., baseline.polynomial(frequency,coeffs,powers, parameter1=value1, parameter2=value2)
+
+    or in a WorkSpace. 
+
+    e.g., baseline.polynomial(frequency,coeffs,powers, ws=WorkSpace),
+
+    or in a mix of the two. Otherwise default values are used.
+
+    A full list of parameters can be obtained with with:
+
+    CRFitBaselineWorkSpace().help()
+    """
 #Defining the workspace, setting up the arrays, if not existing
     keywords["nofAntennas"]=spectrum.getDim()[0]
     ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
@@ -1555,40 +1725,129 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, t0=None,**keywords):
         if hasattr(ws,"t0"): ws.t0=time.clock()
         print ws.t0,"s: Starting FitBaseline - Downsampling spectrum to ",ws.nbins,"bins."
 #Donwsample spectrum
-    ws.freqs.downsample(frequency[1:])
-    ws.spectrum[...].downsamplespikydata(ws.rms[...],spectrum[...,1:],-0.001)
+    if ws["numin"]>0: ws["numin_i"]=frequency.findlowerbound(ws.numin).val()
+    else: ws["numin_i"]=1
+    if ws["numax"]>0: ws["numax_i"]=frequency.findlowerbound(ws.numax).val()
+    else: ws["numax_i"]=len(frequency)
+    
+    ws["numax_i"]=min(ws["numax_i"]+int((len(frequency)-ws["numax_i"])*ws["extendfit"]),len(frequency))
+    ws["numin_i"]=max(ws["numin_i"]-int(ws["numin_i"]*ws["extendfit"]),0)
+
+    ws.freqs.downsample(frequency[ws["numin_i"]:ws["numax_i"]])
+    ws.spectrum[...].downsamplespikydata(ws.rms[...],spectrum[...,ws["numin_i"]:ws["numax_i"]],1.0)
+    l=ws["numax_i"]-ws["numin_i"]
 #Plotting
     if ws.doplot:
         spectrum[0].plot(title="RFI Downsampling")
-        ws.spectrum[0].plot(clf=False)
+        ws.spectrum[0,0:l].plot(clf=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
 #Calculate RMS/amplitude for each bin
-    ws.ratio.div(ws.spectrum,ws.rms)
-    mratio=hArray(ws.ratio[...].mean())
-    ws.ratio[...] /= mratio[...]
-    ws.ratio.square()
+    ws.ratio[...,0:l].div(ws.rms[...,0:l],ws.spectrum[...,0:l])
+    ws.ratio[...,0:l].square()
+    mratio=ws.ratio[...,0:l].meaninverse()
 #Now select bins where the ratio between RMS and amplitude is within a factor 2 of the mean value
-    nselected_bins=ws.selected_bins[...].findbetween(ws.ratio[...],1.0/ws.rmsfactor,ws.rmsfactor)
+    ws["nselected_bins"]=ws.selected_bins[...].findbetween(ws.ratio[...,0:l],mratio/ws.rmsfactor,mratio*ws.rmsfactor)
 #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
-    ws.clean_bins_x[...].copy(ws.freqs,ws.selected_bins[...],nselected_bins)
-    ws.clean_bins_y[...].copy(ws.spectrum,ws.selected_bins[...],nselected_bins)
-    ws.clean_bins_y[...,[0]:nselected_bins].log()
+    ws.clean_bins_x[...].copy(ws.freqs,ws.selected_bins[...],ws.nselected_bins)
+    ws.clean_bins_y[...].copy(ws.spectrum,ws.selected_bins[...],ws.nselected_bins)
+    ws.weights.copy(ws.clean_bins_y)
+    if ws.logfit: 
+        ws.clean_bins_y[...,[0]:ws.nselected_bins].log()
 #
     if ws.verbose: print time.clock()-ws.t0,"s: Fitting baseline."
 #Create the nth powers of the x value, i.e. the frequency, for the fitting
-    ws.xpowers[...,[0]:nselected_bins].linearfitpolynomialx(ws.clean_bins_x[...,[0]:nselected_bins],ws.powers[...])
+#    ws.xpowers[...,[0]:ws.nselected_bins].bsplinefitxv<alues(ws.ncoeffs)
 #Fit an nth order polynomial to the log data
-    coeffs[...].linearfit(ws.covariance[...],ws.xpowers[...],ws.clean_bins_y[...],nselected_bins)
+    ws["bwipointer"]=coeffs[...].bsplinefit(ws.covariance[...],ws.xpowers[...,[0]:ws.nselected_bins],ws.clean_bins_x[...,[0]:ws.nselected_bins],ws.clean_bins_y[...,[0]:ws.nselected_bins])
 #Calculate an estimate of the average RMS of the clean spectrum after baseline division
-    ws.ratio[...].copy(ws.ratio,ws.selected_bins[...],nselected_bins)
-    meanrms=ws.ratio[...,[0]:nselected_bins].mean()
+    ws.ratio[...].copy(ws.ratio,ws.selected_bins[...],ws.nselected_bins)
+    meanrms=ws.ratio[...,[0]:ws.nselected_bins].meaninverse()
     meanrms.sqrt()
-    meanrms *= 2.0
     if ws.doplot:
-        ws.clean_bins_y[0,[0]:nselected_bins].plot(xvalues=ws.clean_bins_x[0,[0]:nselected_bins],logplot=False)
+        ws.clean_bins_y[0,[0]:ws.nselected_bins].plot(xvalues=ws.clean_bins_x[0,[0]:ws.nselected_bins],logplot=False)
         ws.clean_bins_y.fill(0.0)
-        ws.clean_bins_y[...,[0]:nselected_bins].polynomial(ws.clean_bins_x[...,[0]:nselected_bins],coeffs[...],ws.powers[...])
-        ws.clean_bins_y[0,[0]:nselected_bins].plot(xvalues=ws.clean_bins_x[0,[0]:nselected_bins],clf=False,logplot=False)
+        ws.clean_bins_y[...,[0]:ws.nselected_bins].bspline(ws.xpowers[...,[0]:ws.nselected_bins],coeffs[...])
+        ws.clean_bins_y[0,[0]:ws.nselected_bins].plot(xvalues=ws.clean_bins_x[0,[0]:ws.nselected_bins],clf=False,logplot=False)
+        raw_input("Plotted downsampled spectrum - press Enter to continue...")
+    return meanrms
+
+def hCRFitBaseline2(coeffs, frequency, spectrum, ws=None, **keywords):
+    """
+    hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords)
+
+    Function to fit a baseline using a polynomial function to a
+    spectrum while ignoring spikes in the fit (e.g., those coming from
+    RFI = Radio Frequency Interference). The functions returns an
+    array of coefficients of the polynomial. 
+
+    Use baseline.polynomial(frequency,coeffs,powers) to caluclate the
+    baseline from the coefficients.
+
+    Parameters can be provided as additional keywords
+
+    e.g., baseline.polynomial(frequency,coeffs,powers, parameter1=value1, parameter2=value2)
+
+    or in a WorkSpace. 
+
+    e.g., baseline.polynomial(frequency,coeffs,powers, ws=WorkSpace),
+
+    or in a mix of the two. Otherwise default values are used.
+
+    A full list of parameters can be obtained with with:
+
+    CRFitBaselineWorkSpace().help()
+    """
+#Defining the workspace, setting up the arrays, if not existing
+    keywords["nofAntennas"]=spectrum.getDim()[0]
+    ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
+#
+    if ws.verbose:
+        if hasattr(ws,"t0"): ws.t0=time.clock()
+        print ws.t0,"s: Starting FitBaseline - Downsampling spectrum to ",ws.nbins,"bins."
+#Donwsample spectrum
+    if ws["numin"]>0: ws["numin_i"]=frequency.findlowerbound(ws.numin).val()
+    else: ws["numin_i"]=1
+    if ws["numax"]>0: ws["numax_i"]=frequency.findlowerbound(ws.numax).val()
+    else: ws["numax_i"]=len(frequency)
+    
+    ws["numax_i"]=min(ws["numax_i"]+int((len(frequency)-ws["numax_i"])*ws["extendfit"]),len(frequency))
+    ws["numin_i"]=max(ws["numin_i"]-int(ws["numin_i"]*ws["extendfit"]),0)
+
+    ws.freqs.downsample(frequency[ws["numin_i"]:ws["numax_i"]])
+    ws.spectrum[...].downsamplespikydata(ws.rms[...],spectrum[...,ws["numin_i"]:ws["numax_i"]],1.0)
+    l=ws["numax_i"]-ws["numin_i"]
+#Plotting
+    if ws.doplot:
+        spectrum[0].plot(title="RFI Downsampling")
+        ws.spectrum[0,0:l].plot(clf=False)
+        raw_input("Plotted downsampled spectrum - press Enter to continue...")
+#Calculate RMS/amplitude for each bin
+    ws.ratio[...,0:l].div(ws.rms[...,0:l],ws.spectrum[...,0:l])
+    ws.ratio[...,0:l].square()
+    mratio=ws.ratio[...,0:l].meaninverse()
+#Now select bins where the ratio between RMS and amplitude is within a factor 2 of the mean value
+    ws["nselected_bins"]=ws.selected_bins[...].findbetween(ws.ratio[...,0:l],mratio/ws.rmsfactor,mratio*ws.rmsfactor)
+#Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
+    ws.clean_bins_x[...].copy(ws.freqs,ws.selected_bins[...],ws.nselected_bins)
+    ws.clean_bins_y[...].copy(ws.spectrum,ws.selected_bins[...],ws.nselected_bins)
+    ws.weights.copy(ws.clean_bins_y)
+    if ws.logfit: 
+        ws.clean_bins_y[...,[0]:ws.nselected_bins].log()
+#
+    if ws.verbose: print time.clock()-ws.t0,"s: Fitting baseline."
+#Create the nth powers of the x value, i.e. the frequency, for the fitting
+    ws.xpowers[...,[0]:ws.nselected_bins].linearfitpolynomialx(ws.clean_bins_x[...,[0]:ws.nselected_bins],ws.powers[...])
+#Fit an nth order polynomial to the log data
+    coeffs[...].linearfit(ws.covariance[...],ws.xpowers[...],ws.clean_bins_y[...],ws.weights[...],ws.nselected_bins)
+#Calculate an estimate of the average RMS of the clean spectrum after baseline division
+    ws.ratio[...].copy(ws.ratio,ws.selected_bins[...],ws.nselected_bins)
+    meanrms=ws.ratio[...,[0]:ws.nselected_bins].meaninverse()
+    meanrms.sqrt()
+    if ws.doplot:
+        ws.clean_bins_y[0,[0]:ws.nselected_bins].plot(xvalues=ws.clean_bins_x[0,[0]:ws.nselected_bins],logplot=False)
+        ws.clean_bins_y.fill(0.0)
+        ws.clean_bins_y[...,[0]:ws.nselected_bins].polynomial(ws.clean_bins_x[...,[0]:ws.nselected_bins],coeffs[...],ws.powers[...])
+        ws.clean_bins_y[0,[0]:ws.nselected_bins].plot(xvalues=ws.clean_bins_x[0,[0]:ws.nselected_bins],clf=False,logplot=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
     return meanrms
 
@@ -1629,6 +1888,7 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
         if hasattr(ws,"t0"): ws.t0=time.clock()
         print ws.t0,"s: Calculating",maxcount,"blocks of size",datafile.blocksize
     for block in ws.blocks:
+        ws.datafile["block"]=block
         ws.fx.read(datafile,"Fx")
         ws.fft[...].fftw(ws.fx[...])
         spectrum[...].spectralpower(ws.fft[...])
@@ -1639,6 +1899,7 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
                 t=time.clock()-ws.t0
                 print progress*10,"% -",t,"s (Remaining:",t/count*maxcount-t,"s) - Calculated block #",block
                 lastprogress=progress
+    spectrum /= len(ws.blocks)
 
 
 def CheckParameterConformance(data,keys,limits):

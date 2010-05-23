@@ -2825,6 +2825,31 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+// //$DOCSTRING: Piecewise multiplication of the elements in a vector and summing of the results
+// //$COPY_TO HFILE START --------------------------------------------------
+// #define HFPP_FUNC_NAME hMulSum
+// //-----------------------------------------------------------------------
+// #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE  //Needed due to a bug in hfppnew.h which can't deal with scalar references ....
+// #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+// #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+// #define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+// #define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(sum)()("Output value (sum of product of vectors).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+// //$COPY_TO END --------------------------------------------------
+// /*!
+//   hMulSum(sum,Vector([a,b,c,...]),Vector([x,y,z,...]) -> sum=a*x + b*y + c*z + ....
+//   \brief $DOCSTRING
+//  $PARDOCSTRING
+// */
+// template <class Iter,class T>
+// IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end,T & sum)
+// {
+//   sum=hfnull<T>();
+//   Iter it1=vec1,it2=vec2;
+//   while (it1!=vec1_end && it2!=vec2_end) {sum+=hfcast<T>(*it1 * *it2); ++it1; ++it2;};
+// }
+// //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Multiplies all elements in the vector with each other and return the result
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hProduct
@@ -3089,7 +3114,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, const IterValueType 
 //$ENDITERATE
 
 
-//$DOCSTRING: Calculates the mean of all values which are 'nsigma' standard deviations above or below the mean
+//$DOCSTRING: Calculates the mean of all values which are below or above the mean plus 'nsigma' standard deviations
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMeanThreshold
 //-----------------------------------------------------------------------
@@ -3098,7 +3123,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, const IterValueType 
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(mean)()("The mean of the values in the input vector provided as input.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HNumber)(rms)()("The rms value of the vector - also calculated beforehand.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_3 (HNumber)(nsigma)()("Only consider values that are nsigma above (positive) or below (negative) the mean")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(nsigma)()("Only consider values that are below (positive) or above (negative) mean+nsigma+sigma the mean")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -3110,8 +3135,39 @@ HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, const IterValueType 
 template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, HNumber mean, HNumber rms, HNumber nsigma)
 {
-  if (nsigma>=0) return hMeanGreaterThanThreshold(vec,vec_end,(IterValueType)(mean+nsigma*rms));
-  else return hMeanLessThanThreshold(vec,vec_end,(IterValueType)(mean+nsigma*rms));
+  if (nsigma>=0) return hMeanLessThanThreshold(vec,vec_end,(IterValueType)(mean+nsigma*rms));
+  else return hMeanGreaterThanThreshold(vec,vec_end,(IterValueType)(mean+nsigma*rms));
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates the mean of the inverse of all values and then return the inverse of that value
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMeanInverse
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+  
+  vec.meaninvers() -> N/sum(1/vec_0+1/vec_1+...+1/vec_N)
+
+  This is useful to calculate the mean value of very spiky data. Large
+  spikes will appear as zero and hence will not have a strong effect
+  on the average (or the sum) if only a small number of channels are
+  affected. while a single very large spike could well dominate the
+  normal average.
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
+{
+  typedef IterValueType T;
+  T sum(hfnull<T>());
+  Iter it(vec);
+  while (it!=vec_end) {sum+=1.0/(*it); ++it;};
+  return (vec_end-vec)/sum;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -4472,6 +4528,40 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const HNumber adc2voltag
 
 
 //-----------------------------------------------------------------------
+//$DOCSTRING: Creates one half (i.e. rising or falling part) of a Hanning filter and add an offset
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGetHanningFilterHalf
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Return vector containing Hanning filter")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(height)()("Height of the Hanning function.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HNumber)(offset)()("Offset added to the Hanning function.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (bool)(falling)()("Return first (False) or second half (True).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
+		    const HNumber height,
+		    const HNumber offset,
+		    const bool falling
+		       ) {
+  HInteger width=vec_end-vec;
+  CR::HanningFilter<HNumber> hanning_filter(width*2, (double)0.5, 0, (HInteger)width, (HInteger)width);
+  Iter it_v(vec);
+  CasaVector<HNumber> filter = hanning_filter.weights();
+  HNumber * it_f(filter.cbegin());
+  if (falling) it_f+=width;
+  while (it_v != vec_end) {
+    *it_v = (typename Iter::value_type) (*it_f)*height+offset;
+    it_v++; it_f++;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
 //$DOCSTRING: Create a Hanning filter.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGetHanningFilter
@@ -5136,6 +5226,99 @@ void HFPP_FUNC_NAME(
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Calculate the X-Values matrix vector for the Basis Spline (BSpline) fitting routine, calculating essentially all powers of the input vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBSplineFitXValues
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing rows with all the requested powers of the x vector. Size is Ncoeffs*len(xvec).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with x values for the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(xmin)()("Lower end of the x-range for calculation of break points.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(xmax)()("Upper end of the x-range for calculation of break points.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//#define HFPP_PARDEF_2 (HInteger)(bwipointer)()("Pointer to the BSpline workspace returned as Integer number.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(Ncoeffs)()("Number of coefficients to calculate.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: BSplineFit, hBSpline, hBSplineFitXValues
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(
+		    const Iter vecout, const Iter vecout_end,
+		    const Iter xvec, const Iter xvec_end,
+		    const HNumber xmin,
+		    const HNumber xmax,
+		    //		    const HInteger bwipointer
+		    const HInteger Ncoeffs
+		       )
+{
+  ////gsl_bspline_workspace *bw=(gsl_bspline_workspace*)bwipointer;
+  ////const HInteger Ncoeffs=bw->n;      /* nbreak = ncoeffs + 2 - k = ncoeffs - 2 since k = 4 */
+  Iter itout(vecout), itout_end(vecout_end-Ncoeffs+1), itx(xvec);
+  gsl_bspline_workspace *bw=gsl_bspline_alloc(4, Ncoeffs-2);
+  //  gsl_bspline_knots_uniform(*xvec, *(xvec_end-1), bw);
+  gsl_bspline_knots_uniform(xmin, xmax, bw);
+  //  gsl_vector *B = gsl_vector_alloc(Ncoeffs);
+  gsl_vector *B = STL2GSL(itout, itout+Ncoeffs);
+  //  HInteger i;
+  //HNumber Bj;
+  if (vecout_end<=vecout) return;
+  if (xvec_end<=xvec) return;
+  while ((itout < itout_end) && (itx != xvec_end)) {
+    //    B = STL2GSL(itout, itout+Ncoeffs);
+    gsl_bspline_eval(*itx, B, bw);
+    // for (i=0; i<Ncoeffs; i++) {
+    //   Bj=gsl_vector_get(B, i);
+    //   *(itout+i)=Bj;
+    // };
+    itout+=Ncoeffs; ++itx; B->data=&(*itout);
+    //Bj=gsl_vector_get(B, j)1    delete B;
+  };
+  gsl_bspline_free(bw);
+  //  gsl_vector_free(B);
+  delete B;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBSpline
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the y-values for the input vector x-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector of Ndata*Ncoeffs X-values produced with hBSplineFitXValues. Size is Ncoeffs*len(xvec).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(coeffs)()("Input vector with the coefficients calculated by the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also:  BSplineFit, hBSpline, hBSplineFitXValues
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(
+		    const Iter vecout, const Iter vecout_end,
+		    const Iter xvec, const Iter xvec_end,
+		    const Iter coeffs, const Iter coeffs_end
+		    )
+{
+  HInteger Ncoeffs(coeffs_end-coeffs);      /* nbreak = ncoeffs + 2 - k = ncoeffs - 2 since k = 4 */
+  Iter itout(vecout), itx(xvec), itx_end(itx+Ncoeffs);
+  Iter coeffs2(coeffs),  coeffs_end2(coeffs_end2);
+  if (vecout_end<=vecout) return;
+  if (xvec_end<=xvec) return;
+  while ((itout < vecout_end) && (itx_end < xvec_end)) {
+    *itout=hMulSum(itx,itx_end,coeffs2,coeffs_end2);
+    //    *itout=hMulSum(&(*itx),&(*itx_end),&(*coeffs2),&(*coeffs_end2));
+    //    hMulSum(itx,itx_end,coeffs2,coeffs_end2,*itout);
+    ++itout; itx=itx_end; itx_end+=Ncoeffs;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Calculates a polynomial and adds it to the output vector.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -5206,10 +5389,9 @@ void HFPP_FUNC_NAME(
 #define HFPP_PARDEF_1 (HNumber)(vecin)()("Input vector with errorvalues.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  [x_0,x_1,x_2,...] -> [1/x_0**2,1/x_1**2,...]
-
   \brief $DOCSTRING
   $PARDOCSTRING
+[x_0,x_1,x_2,...] -> [1/x_0**2,1/x_1**2,...]
 
 See also: hLinearFit, hLinearFitPolynomialX, hPolynomial
 */
@@ -5290,6 +5472,12 @@ HNumber HFPP_FUNC_NAME(
   gsl_multifit_linear_free (work);
   if (error!=0) ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": GSL Fitting Routine returned error code " << error);
 
+  //Make sure to delete all GSL vector and matrix structures - this will not 
+  delete X;
+  delete cov;
+  delete y;
+  delete w;
+  delete c; 
   return chisq;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -5305,7 +5493,7 @@ HNumber HFPP_FUNC_NAME(
 #define HFPP_PARDEF_3 (HNumber)(yvec)()("Vector containing the y values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_4 (HInteger)(ndata)()("Number of data points to take into account (ndata=-1 -> take all elements in yvec, if ndata>0 only take the first ndata). ")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
-/*!
+/*! 
   \brief $DOCSTRING
   $PARDOCSTRING
 
@@ -5346,10 +5534,93 @@ HNumber HFPP_FUNC_NAME(
   //If one can find out how much memory is needed, "work" could be provided as a scratch input vector to this function ...
   gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc (Ndata, Ncoeff);
   error=gsl_multifit_linear (X, y, c, cov,&chisq, work);
+
   gsl_multifit_linear_free (work);
+
+  delete X;
+  delete cov;
+  delete y;
+  delete c; 
+
   if (error!=0) ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": GSL Fitting Routine returned error code " << error);
 
   return chisq;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Do a basis spline fit to a data set (without weights) and return the coefficients and covariance matrix in two vectors. Returns the chi-square value of the fit.
+// Returns as function value a pointer to the bspline workspace that is needed by other functions.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBSplineFit
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the bets fit coefficients C_n of the polynomial Sum_n(C_n*x**n). The first element is C_0, i.e. the constant. Its length determines the order of the polynomial.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(veccov)()("Output vector of length n*n containing the covariance matrix of the fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(xmatrix)()("Output vector containing the x values of the data, where each value is actually one row of ncoeff values some power of x. Calculated with hBSplineFitXValues.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(xvec)()("Vector containing the x values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(yvec)()("Vector containing the y values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//#define HFPP_PARDEF_2 (HInteger)(bwipointer)()("Pointer to the BSpline workspace returned as Integer number.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also:  BSplineFit, hBSpline, hBSplineFitXValues
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME(
+		    const Iter vecout, const Iter vecout_end,
+		    const Iter veccov, const Iter veccov_end,
+		    const Iter xmatrix, const Iter xmatrix_end,
+		    const Iter xvec, const Iter xvec_end,
+		    const Iter yvec, const Iter yvec_end
+		    )
+{
+  HInteger Ndata(yvec_end-yvec);  // Number of data points to fit
+  HInteger Ncoeffs(vecout_end-vecout);
+  HInteger Nbreak(Ncoeffs-2);      /* nbreak = ncoeffs + 2 - k = ncoeffs - 2 since k = 4 */
+  HInteger error;
+  double chisq;
+  gsl_matrix *X, *cov;
+  gsl_vector *y, *c;
+
+
+  if ((xmatrix_end-xmatrix)!=(Ndata*Ncoeffs)) {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": X input matrix vector has wrong size! len(xmatrix)=" << (xmatrix_end-xmatrix)  <<  ", should be = " << Ndata*Ncoeffs << ". Ndata=" << Ndata << ", Ncoeffs=" << Ncoeffs);
+    return -1.0;
+  };
+  if ((veccov_end-veccov)!=(Ncoeffs*Ncoeffs)) {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Covariance matrix vector has wrong size! len(veccov)=" << (veccov_end-veccov)  <<  ", should be = " << Ncoeffs*Ncoeffs << ". Ncoeffs=" << Ncoeffs);
+    return -1.0;
+  };
+
+  gsl_bspline_workspace *bw=gsl_bspline_alloc(4, Nbreak);
+
+  X = STL2GSLM(xmatrix, Ndata, Ncoeffs);
+  y = STL2GSL(yvec, yvec+Ndata);
+
+  c = STL2GSL(vecout, vecout_end);
+  cov = STL2GSLM(veccov, Ncoeffs, Ncoeffs);
+
+  //If one can find out how much memory is needed, "work" could be provided as a scratch input vector to this function ...
+  gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc (Ndata, Ncoeffs);
+  gsl_bspline_knots_uniform(*xvec, *(xvec_end-1), bw);
+  //  hBSplineFitXValues(xmatrix,xmatrix_end,xvec,xvec_end,(HInteger)bw);
+  hBSplineFitXValues(xmatrix,xmatrix_end,xvec,xvec_end,*xvec,*(xvec_end-1),Ncoeffs);
+  error=gsl_multifit_linear(X, y, c, cov, &chisq, work);
+  gsl_multifit_linear_free (work);
+
+  gsl_bspline_free(bw);
+
+  delete X;
+  delete cov;
+  delete y;
+  delete c; 
+
+  if (error!=0) ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": GSL Fitting Routine returned error code " << error);
+
+  return chisq;
+  //  return (HInteger) bw;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 //$COPY_TO HFILE: #endif

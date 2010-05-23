@@ -95,6 +95,7 @@
 
 #ifdef HAVE_GSL
 #include <gsl/gsl_multifit.h>
+#include <gsl/gsl_bspline.h>
 #endif
 
 
