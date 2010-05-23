@@ -9,12 +9,12 @@ filename=filename_lofar_onesecond
 #------------------------------------------------------------------------
 
 ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")  
-ws.makeFitBaseline(ws,logfit=False)
+ws.makeFitBaseline(ws,logfit=True)
 ws.makeAverageSpectrum(ws)
 
 ws["blocksize"]=2**16
 ws["max_nblocks"]=30
-ws["ncoeffs"]=34
+ws["ncoeffs"]=66
 if ws["datafile"]["Observatory"]=='LOFAR':
     ws["numin"]=12 #MHz
     ws["numax"]=82 #MHz
@@ -55,8 +55,8 @@ Calculate a smooth baseline for the full (large) spectrum from the polynomial co
 
 #ws.baseline_x[ws["numin_i"]:ws["numax_i"]].bsplinefitxvalues(ws.frequency[ws["numin_i"]:ws["numax_i"]],ws.FitBaseline["bwipointer"])
 #ws.baseline_x[0,ws["numin_i"]:ws["numax_i"]].bsplinefitxvalues(ws.frequency[ws["numin_i"]:ws["numax_i"]],ws.FitBaseline.clean_bins_x[0,0].val(),ws.FitBaseline.clean_bins_x[0,ws.FitBaseline.nselected_bins[0]].val(),ws["ncoeffs"])
-#ws.baseline_x[ws["numin_i"]:ws["numax_i"]].bsplinefitxvalues(ws.frequency[ws["numin_i"]:ws["numax_i"]],ws.FitBaseline.clean_bins_x[0,0].val(),ws.FitBaseline.clean_bins_x[0,-1].val(),ws["ncoeffs"])
-ws.baseline_x[ws["numin_i"]:ws["numax_i"]].bsplinefitxvalues(ws.frequency[ws["numin_i"]:ws["numax_i"]],ws.frequency[ws["numin_i"]].val(),ws.frequency[ws["numax_i"]].val(),ws["ncoeffs"])
+ws.baseline_x[ws["numin_i"]:ws["numax_i"]].bsplinefitxvalues(ws.frequency[ws["numin_i"]:ws["numax_i"]],ws.FitBaseline.clean_bins_x[0,0].val(),ws.FitBaseline.clean_bins_x[0,-1].val(),ws["ncoeffs"])
+#ws.baseline_x[ws["numin_i"]:ws["numax_i"]].bsplinefitxvalues(ws.frequency[ws["numin_i"]:ws["numax_i"]],ws.frequency[ws["numin_i"]].val(),ws.frequency[ws["numax_i"]].val(),ws["ncoeffs"])
 ws.baseline[...,ws["numin_i"]:ws["numax_i"]].bspline(ws.baseline_x[ws["numin_i"]:ws["numax_i"]],ws.FitBaseline.coeffs[...])
 
 #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth

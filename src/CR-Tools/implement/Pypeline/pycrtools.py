@@ -1885,7 +1885,7 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
         count=0; 
         maxcount=len(ws.blocks)
         lastprogress=-1
-        if hasattr(ws,"t0"): ws.t0=time.clock()
+        ws["t0"]=time.clock()
         print ws.t0,"s: Calculating",maxcount,"blocks of size",datafile.blocksize
     for block in ws.blocks:
         ws.datafile["block"]=block
