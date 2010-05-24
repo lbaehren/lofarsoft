@@ -645,7 +645,8 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     iterate=True;
     while (iterate):
         _plot(xvalues.vec(),self.vec())
-        xvalues.next; iterate=self.next().doLoopAgain()
+        xvalues.next()
+        iterate=self.next().doLoopAgain()
     self.plt.ylabel(ylabel+yunit)
     self.plt.xlabel(xlabel+xunit)
     if not xlim==None: self.plt.xlim(*xlim)
@@ -1037,7 +1038,7 @@ def Vector(Type=float,size=-1,fill=None):
     if type(size) in hListAndArrayTypes: size=len(size)
     if (type(vtype) in hAllArrayTypes):  # hArrayClass
         vtype=basetype(Type)
-        vec=Vector(Type.getVector())
+        vec=Vector(Type.vec())
     elif (type(vtype) in hAllListTypes):  #List or Vector
         vtype=type(Type[0])
         vec=type2vector(vtype)
@@ -1453,9 +1454,15 @@ class CRFitBaselineWorkSpace(CRWorkSpace):
     def default_rmsfactor(self): 
         """Factor above and below the RMS in each bin at which a bin is no longer considered."""
         return 2.0
+    def default_fftLength(self): 
+        """Length of unbinned spectrum."""
+        return 0
     def default_logfit(self): 
         """Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards)."""
         return True
+    def default_fittype(self): 
+        """Determine which type of fit to do: fittype="POLY" - do a polynomial fit, else ("BSPLINE") do a basis spline fit (default)."""
+        return "BSPLINE"
     def default_nofAntennas(self): 
         """Number of antennas held in memory."""
         return 1
@@ -1486,6 +1493,9 @@ class CRFitBaselineWorkSpace(CRWorkSpace):
     def default_rms(self):
         """Array of RMS values of the downsampled spectrum. (work vector)"""
         return hArray(properties=self["spectrum"], name="RMS of Spectrum")
+    def default_chisquare(self): 
+        """Returns the chisquare of the baseline fit. (output only)"""
+        return 0
     def default_weights(self):
         """Array of weight values for the fit. (work vector)"""
         return hArray(properties=self["spectrum"], name="Fit Weights")
@@ -1506,10 +1516,16 @@ class CRFitBaselineWorkSpace(CRWorkSpace):
         return 0
     def default_clean_bins_x(self):
         """Array holding the frequencies of the clean bins. (work vector)"""
-        return self["freqs"] #hArray(properties=self["freqs"],name="Clean Frequencies")
+        return hArray(dimensions=[self["nofAntennas"],self["nbins"]],properties=self["freqs"],name="Clean Frequencies")
     def default_clean_bins_y(self):
         """Array holding the powers of the clean bins. (work vector)"""
         return self["spectrum"] #hArray(properties=self["spectrum"],xvalues=self["clean"]_bins_x)
+    def default_baseline_x(self):
+        """Array holding the x-values and their powers for calculating the baseline fit."""
+        return hArray(float,[self["fftLength"],self["ncoeffs"]],name="Powers of Frequency")
+    def default_height_ends(self):
+        """The heights of the baseline at theleft and right endpoints of the usable bandwidth where a hanning function is smoothly added."""
+        return hArray(float,[2,self["nofAntennas"]])
     def default_nselected_bins(self):
         """Number of clean bins after RFI removal. (output only)"""
         return 0
@@ -1580,7 +1596,7 @@ class CRMainWorkSpace(CRWorkSpace):
 # Here list the parameters which have to be initialized in a
 # particular order at the beginning (e.g., if the depend on each
 # other). The attribute will be extended automatically.
-        self.parameters=["filename","blocksize","datafile","nofAntennas","fftLength","frequency"]
+        self.parameters=["filename","blocksize","datafile","nofAntennas","fftLength","frequency","numin","numax","numin_i","numax_i","ncoeffs"]
         CRWorkSpace.__init__(self,modulename=modulename,parent=None,**keywords)
     def default_filename(self): 
         """Name of the data file to process."""
@@ -1604,11 +1620,13 @@ class CRMainWorkSpace(CRWorkSpace):
         """Maximum frequency of useable bandwidth. Negative if to be ignored."""
         return -1
     def default_numin_i(self):
-        """Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored."""
-        return -1
+        """Channel number in spectrum of the minimum frequency of the useable bandwidth. (output only)"""
+        if self["numin"]>0: return self["frequency"].findlowerbound(self["numin"]).val()
+        else: return 1
     def default_numax_i(self):
         """Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored."""
-        return -1
+        if self["numax"]>0: return self["frequency"].findlowerbound(self["numax"]).val()
+        else: return len(self["frequency"])
     def default_frequency(self):
         """Frequency values (x-axis) corresponding to FFT and spectrum"""
         return self["datafile"]["Frequency"].setUnit("M","")
@@ -1636,12 +1654,12 @@ class CRMainWorkSpace(CRWorkSpace):
     def default_ncoeffs(self): 
         """Number of coefficients to describe the baseline."""
         return 18
+    def default_coeffs(self): 
+        """Polynomial coeffieients of the baseline fit. (output vector)"""
+        return hArray(float,[self["nofAntennas"],self["ncoeffs"]])
     def default_baseline(self):
         """Array with a baseline fit to the spectrum."""
         return hArray(properties=self["spectrum"],xvalues=self["frequency"],name="Baseline")
-    def default_baseline_x(self):
-        """Array holding the x-values and their powers for calculating the baseline fit."""
-        return hArray(float,[self["fftLength"],self["ncoeffs"]],name="Powers of Frequency")
 
 def CRWorkSpace_default_doplot(self):
     """Make plots during processing to inspect data."""
@@ -1690,15 +1708,59 @@ def CRsetWorkSpace(ws,modulename,**keywords):
     ws.initParameters(**keywords)
     return ws
 
+def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywords):
+    """
+    hCRCalcBaseline(baseline, coeffs, frequency,ws=None, **keywords):
+    
+    Calculate a smooth baseline from a set of coefficients that
+    determine the baseline (e.g. as calculated by hCRFitBaseline) and
+    an array of frequencies (which need not be equi-spaced).
+    
+    """
+    ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
+    if ws.verbose:
+        print time.clock()-ws["t0"],"s: Starting CalcBaseline."
+    if ws["fittype"]=="POLY":
+        """
+        Calculate a smooth baseline for the full (large) spectrum from the polynomial coefficients
+        """
+        baseline.fill(0.0)
+        baseline[...,numin_i:numax_i].polynomial(frequency[numin_i:numax_i],coeffs[...],ws["powers"][...])
+    else:
+        #Create the correct powers of x
+        #        ws["baseline_x"][numin_i:numax_i].bsplinefitxvalues(frequency[numin_i:numax_i],ws["clean_bins_x"][...,0].val(),ws["clean_bins_x"][...,-1].val(),ws["ncoeffs"])
+        ws["baseline_x"][numin_i:numax_i].bsplinefitxvalues(frequency[numin_i:numax_i],ws["clean_bins_x"][...,0].val(),ws["clean_bins_x"][...,ws["nselected_bins"]-1:ws["nselected_bins"]].val(),ws["ncoeffs"])
+        baseline[...,numin_i:numax_i].bspline(ws.baseline_x[numin_i:numax_i],ws["coeffs"][...])
+    #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth
+    #Left end
+    ws["height_ends"][0,...].copy(baseline[...,numin_i])
+    factor=hArray(float,ws["nofAntennas"],fill=6.9) # Factor 1000 in log
+    if not ws["logfit"]: 
+        factor.copy(ws["height_ends"][0])
+        factor *= 1000.0
+    baseline[...,0:numin_i].gethanningfilterhalf(Vector(factor),Vector(ws["height_ends"][0]),Vector(bool,ws["nofAntennas"],fill=True))
+    #Right end
+    ws["height_ends"][1,...].copy(baseline[...,numax_i-2])
+    if not ws["logfit"]: 
+        factor.copy(ws["height_ends"][1])
+        factor *= 1000.0
+    baseline[...,numax_i-1:].gethanningfilterhalf(Vector(factor),Vector(ws["height_ends"][1]),Vector(bool,ws["nofAntennas"],fill=False))
+    if ws["logfit"]: baseline.exp()
+    if ws.verbose:
+        print time.clock()-ws["t0"],"s: Done CalcBaseline."
+    if ws.doplot:
+        baseline[...].plot(title="Baseline")
+        raw_input("Plotted baseline - press Enter to continue...")
 
 def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
     """
     hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords)
 
-    Function to fit a baseline using a polynomial function to a
-    spectrum while ignoring spikes in the fit (e.g., those coming from
-    RFI = Radio Frequency Interference). The functions returns an
-    array of coefficients of the polynomial. 
+    Function to fit a baseline using a polynomial function
+    (fittype='POLY') or a basis spine fit to a spectrum while ignoring
+    positive spikes in the fit (e.g., those coming from RFI = Radio Frequency
+    Interference). The functions returns an array of coefficients of
+    the polynomial or splines.
 
     Use baseline.polynomial(frequency,coeffs,powers) to caluclate the
     baseline from the coefficients.
@@ -1722,8 +1784,7 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
     ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
 #
     if ws.verbose:
-        if hasattr(ws,"t0"): ws.t0=time.clock()
-        print ws.t0,"s: Starting FitBaseline - Downsampling spectrum to ",ws.nbins,"bins."
+        print time.clock()-ws["t0"],"s: Starting FitBaseline - Downsampling spectrum to ",ws.nbins,"bins."
 #Donwsample spectrum
     if ws["numin"]>0: ws["numin_i"]=frequency.findlowerbound(ws.numin).val()
     else: ws["numin_i"]=1
@@ -1739,117 +1800,53 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
 #Plotting
     if ws.doplot:
         spectrum[0].plot(title="RFI Downsampling")
-        ws.spectrum[0,0:l].plot(clf=False)
+        ws.spectrum[...,0:l].plot(clf=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
 #Calculate RMS/amplitude for each bin
     ws.ratio[...,0:l].div(ws.rms[...,0:l],ws.spectrum[...,0:l])
     ws.ratio[...,0:l].square()
     mratio=ws.ratio[...,0:l].meaninverse()
+    if ws.doplot:
+        ws.ratio[...,0:l].plot(title="RMS/Amplitude")
+        raw_input("Plotted relative RMS of downsampled spectrum - press Enter to continue...")
 #Now select bins where the ratio between RMS and amplitude is within a factor 2 of the mean value
     ws["nselected_bins"]=ws.selected_bins[...].findbetween(ws.ratio[...,0:l],mratio/ws.rmsfactor,mratio*ws.rmsfactor)
 #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
     ws.clean_bins_x[...].copy(ws.freqs,ws.selected_bins[...],ws.nselected_bins)
-    ws.clean_bins_y[...].copy(ws.spectrum,ws.selected_bins[...],ws.nselected_bins)
-    ws.weights.copy(ws.clean_bins_y)
+    ws.clean_bins_y[...].copy(ws.spectrum[...],ws.selected_bins[...],ws.nselected_bins)
+#    ws.weights.copy(ws.clean_bins_y)
     if ws.logfit: 
         ws.clean_bins_y[...,[0]:ws.nselected_bins].log()
 #
-    if ws.verbose: print time.clock()-ws.t0,"s: Fitting baseline."
-#Create the nth powers of the x value, i.e. the frequency, for the fitting
-#    ws.xpowers[...,[0]:ws.nselected_bins].bsplinefitxv<alues(ws.ncoeffs)
-#Fit an nth order polynomial to the log data
-    ws["bwipointer"]=coeffs[...].bsplinefit(ws.covariance[...],ws.xpowers[...,[0]:ws.nselected_bins],ws.clean_bins_x[...,[0]:ws.nselected_bins],ws.clean_bins_y[...,[0]:ws.nselected_bins])
-#Calculate an estimate of the average RMS of the clean spectrum after baseline division
+    if ws.verbose: print time.clock()-ws["t0"],"s: Fitting baseline."
+    if ws["fittype"]=="POLY":
+        if ws.verbose:
+            print "Performing a polynomial fit with ",ws["ncoeffs"],"coefficients."
+        #Create the nth powers of the x value, i.e. the frequency, for the fitting
+        ws.xpowers[...,[0]:ws.nselected_bins].linearfitpolynomialx(ws.clean_bins_x[...,[0]:ws.nselected_bins],ws.powers[...])
+        #Fit an nth order polynomial to the data
+        ws["chisquare"]=coeffs[...].linearfit(ws.covariance[...],ws.xpowers[...],ws.clean_bins_y[...],ws.nselected_bins)  #ws.weights[...],
+    else:
+        if ws.verbose:
+            print "Performing a basis spline fit with ",ws.ncoeffs-2,"break points."
+        #Perform a Basis Spline fit to the data
+        ws["chisquare"]=coeffs[...].bsplinefit(ws.covariance[...],ws.xpowers[...,[0]:ws.nselected_bins],ws.clean_bins_x[...,[0]:ws.nselected_bins],ws.clean_bins_y[...,[0]:ws.nselected_bins])
+    #Calculate an estimate of the average RMS of the clean spectrum after baseline division
     ws.ratio[...].copy(ws.ratio,ws.selected_bins[...],ws.nselected_bins)
     meanrms=ws.ratio[...,[0]:ws.nselected_bins].meaninverse()
     meanrms.sqrt()
+    if ws.verbose: print time.clock()-ws["t0"],"s: Done fitting baseline."
     if ws.doplot:
-        ws.clean_bins_y[0,[0]:ws.nselected_bins].plot(xvalues=ws.clean_bins_x[0,[0]:ws.nselected_bins],logplot=False)
+        ws.clean_bins_y[...,[0]:ws.nselected_bins].plot(xvalues=ws.clean_bins_x[...,[0]:ws.nselected_bins],logplot=False)
         ws.clean_bins_y.fill(0.0)
-        ws.clean_bins_y[...,[0]:ws.nselected_bins].bspline(ws.xpowers[...,[0]:ws.nselected_bins],coeffs[...])
-        ws.clean_bins_y[0,[0]:ws.nselected_bins].plot(xvalues=ws.clean_bins_x[0,[0]:ws.nselected_bins],clf=False,logplot=False)
+        if ws["fittype"]=="POLY":
+            ws.clean_bins_y[...,[0]:ws.nselected_bins].polynomial(ws.clean_bins_x[...,[0]:ws.nselected_bins],coeffs[...],ws["powers"][...])
+        else:
+            ws.clean_bins_y[...,[0]:ws.nselected_bins].bspline(ws.xpowers[...,[0]:(ws.nselected_bins)],coeffs[...])
+        ws.clean_bins_y[...,[0]:ws.nselected_bins-1].plot(xvalues=ws.clean_bins_x[...,[0]:ws.nselected_bins-1],clf=False,logplot=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
     return meanrms
 
-def hCRFitBaseline2(coeffs, frequency, spectrum, ws=None, **keywords):
-    """
-    hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords)
-
-    Function to fit a baseline using a polynomial function to a
-    spectrum while ignoring spikes in the fit (e.g., those coming from
-    RFI = Radio Frequency Interference). The functions returns an
-    array of coefficients of the polynomial. 
-
-    Use baseline.polynomial(frequency,coeffs,powers) to caluclate the
-    baseline from the coefficients.
-
-    Parameters can be provided as additional keywords
-
-    e.g., baseline.polynomial(frequency,coeffs,powers, parameter1=value1, parameter2=value2)
-
-    or in a WorkSpace. 
-
-    e.g., baseline.polynomial(frequency,coeffs,powers, ws=WorkSpace),
-
-    or in a mix of the two. Otherwise default values are used.
-
-    A full list of parameters can be obtained with with:
-
-    CRFitBaselineWorkSpace().help()
-    """
-#Defining the workspace, setting up the arrays, if not existing
-    keywords["nofAntennas"]=spectrum.getDim()[0]
-    ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
-#
-    if ws.verbose:
-        if hasattr(ws,"t0"): ws.t0=time.clock()
-        print ws.t0,"s: Starting FitBaseline - Downsampling spectrum to ",ws.nbins,"bins."
-#Donwsample spectrum
-    if ws["numin"]>0: ws["numin_i"]=frequency.findlowerbound(ws.numin).val()
-    else: ws["numin_i"]=1
-    if ws["numax"]>0: ws["numax_i"]=frequency.findlowerbound(ws.numax).val()
-    else: ws["numax_i"]=len(frequency)
-    
-    ws["numax_i"]=min(ws["numax_i"]+int((len(frequency)-ws["numax_i"])*ws["extendfit"]),len(frequency))
-    ws["numin_i"]=max(ws["numin_i"]-int(ws["numin_i"]*ws["extendfit"]),0)
-
-    ws.freqs.downsample(frequency[ws["numin_i"]:ws["numax_i"]])
-    ws.spectrum[...].downsamplespikydata(ws.rms[...],spectrum[...,ws["numin_i"]:ws["numax_i"]],1.0)
-    l=ws["numax_i"]-ws["numin_i"]
-#Plotting
-    if ws.doplot:
-        spectrum[0].plot(title="RFI Downsampling")
-        ws.spectrum[0,0:l].plot(clf=False)
-        raw_input("Plotted downsampled spectrum - press Enter to continue...")
-#Calculate RMS/amplitude for each bin
-    ws.ratio[...,0:l].div(ws.rms[...,0:l],ws.spectrum[...,0:l])
-    ws.ratio[...,0:l].square()
-    mratio=ws.ratio[...,0:l].meaninverse()
-#Now select bins where the ratio between RMS and amplitude is within a factor 2 of the mean value
-    ws["nselected_bins"]=ws.selected_bins[...].findbetween(ws.ratio[...,0:l],mratio/ws.rmsfactor,mratio*ws.rmsfactor)
-#Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
-    ws.clean_bins_x[...].copy(ws.freqs,ws.selected_bins[...],ws.nselected_bins)
-    ws.clean_bins_y[...].copy(ws.spectrum,ws.selected_bins[...],ws.nselected_bins)
-    ws.weights.copy(ws.clean_bins_y)
-    if ws.logfit: 
-        ws.clean_bins_y[...,[0]:ws.nselected_bins].log()
-#
-    if ws.verbose: print time.clock()-ws.t0,"s: Fitting baseline."
-#Create the nth powers of the x value, i.e. the frequency, for the fitting
-    ws.xpowers[...,[0]:ws.nselected_bins].linearfitpolynomialx(ws.clean_bins_x[...,[0]:ws.nselected_bins],ws.powers[...])
-#Fit an nth order polynomial to the log data
-    coeffs[...].linearfit(ws.covariance[...],ws.xpowers[...],ws.clean_bins_y[...],ws.weights[...],ws.nselected_bins)
-#Calculate an estimate of the average RMS of the clean spectrum after baseline division
-    ws.ratio[...].copy(ws.ratio,ws.selected_bins[...],ws.nselected_bins)
-    meanrms=ws.ratio[...,[0]:ws.nselected_bins].meaninverse()
-    meanrms.sqrt()
-    if ws.doplot:
-        ws.clean_bins_y[0,[0]:ws.nselected_bins].plot(xvalues=ws.clean_bins_x[0,[0]:ws.nselected_bins],logplot=False)
-        ws.clean_bins_y.fill(0.0)
-        ws.clean_bins_y[...,[0]:ws.nselected_bins].polynomial(ws.clean_bins_x[...,[0]:ws.nselected_bins],coeffs[...],ws.powers[...])
-        ws.clean_bins_y[0,[0]:ws.nselected_bins].plot(xvalues=ws.clean_bins_x[0,[0]:ws.nselected_bins],clf=False,logplot=False)
-        raw_input("Plotted downsampled spectrum - press Enter to continue...")
-    return meanrms
 
 def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=None,fft=None, verbose=False)
     """
@@ -1882,11 +1879,11 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
     """
     ws=CRsetWorkSpace(ws,"AverageSpectrum",**keywords)
     if ws.verbose:
-        count=0; 
         maxcount=len(ws.blocks)
+        print time.clock()-ws["t0"],"s: Calculating",maxcount,"blocks of size",datafile.blocksize
+        count=0; 
         lastprogress=-1
         ws["t0"]=time.clock()
-        print ws.t0,"s: Calculating",maxcount,"blocks of size",datafile.blocksize
     for block in ws.blocks:
         ws.datafile["block"]=block
         ws.fx.read(datafile,"Fx")
@@ -2012,6 +2009,6 @@ def CRQualityCheck(limits,datafile=None,dataarray=None,maxblocksize=65536,nsigma
 #CRQualityCheck(datafile,qualitycriteria,maxblocksize=65536,nsigma=5,verbose=True)
 
 for v in hRealContainerTypes:
-    for s in ["hCRAverageSpectrum","hCRFitBaseline"]:
+    for s in ["hCRAverageSpectrum","hCRFitBaseline","hCRCalcBaseline"]:
         setattr(v,s[1:].lower(),eval(s))
 
