@@ -91,5 +91,9 @@ class ClusterHandler(object):
 def ipython_cluster(config, logger, nproc=""):
     cluster_handler = ClusterHandler(config, logger)
     cluster_handler.start_cluster(nproc)
-    yield
-    cluster_handler.stop_cluster()
+    # If an exception is raised during the pipeline run, make sure we catch it
+    # and shut the cluster down cleanly.
+    try:
+        yield
+    finally:
+        cluster_handler.stop_cluster()
