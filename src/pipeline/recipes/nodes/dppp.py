@@ -74,13 +74,24 @@ class dppp(LOFARnode):
                 # its exit status.
                 # What is the '1' for? Required by DP3...
                 cmd = [executable, temp_parset_filename, '1']
-                self.logger.debug("Running: %s" % (' '.join(cmd),))
-                ndppp_process = Popen(cmd, cwd=working_dir, env=env, close_fds=True, stdout=PIPE, stderr=STDOUT)
-                sout, serr = ndppp_process.communicate()
-                self.logger.debug("NDPPP stdout: %s" % (sout,))
-                self.logger.debug("NDPPP stderr: %s" % (serr,))
-                if ndppp_process.returncode != 0:
-                    raise CalledProcessError(ndppp_process.returncode, executable)
+                tries = 0
+                while tries < 2:
+                    # If ndppp segfaults, we get a return value of -11.
+                    # The segfaults seem to be transitory, so try re-running
+                    # if we get one and see if it works on the second attempt
+                    self.logger.debug("Running: %s" % (' '.join(cmd),))
+                    ndppp_process = Popen(cmd, cwd=working_dir, env=env, close_fds=True, stdout=PIPE, stderr=STDOUT)
+                    sout, serr = ndppp_process.communicate()
+                    self.logger.debug("NDPPP stdout: %s" % (sout,))
+                    self.logger.debug("NDPPP stderr: %s" % (serr,))
+                    if ndppp_preocess.returncode == 0:
+                        break
+                    elif ndppp_process.returncode == -11:
+                        self.logger.warn("NDPPP process segfaulted!")
+                        tries += 1
+                        continue
+                    else:
+                        raise CalledProcessError(ndppp_process.returncode, executable)
             except ExecutableMissing, e:
                 self.logger.error("%s not found" % (e.args[0]))
                 raise
