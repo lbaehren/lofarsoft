@@ -734,7 +734,7 @@ the vector were too short it will be filled until the end and then the
 search stops. No error message will be given in this case - this is a
 feature.
 
-To retreive the selected elements we make use of the copy method again
+To retrieve the selected elements we make use of the copy method again
 to create a new array.
 
 """
@@ -904,12 +904,24 @@ a[...,0:2].mean()
 which means that the mean is taken only from the first two elements
 of each top-level slice.
 
+Even more complicated: the elements of the slice can be vectors or lists:
+
+"""
+a[...,[0,1]:[2,3]].mean()
+"""
+
+over which one can loop as well. Hence, in the operation on the first
+row, the subslice 0:2 will be taken, while for the second slice/row
+the sloce 1:3 is used.
+
+(++++) Parameters of looping arrays
+-------------------------------------
+
 Looping can also be done for methods that require multiple arrays as
-inputs (remember a mix of vectors and arrays is not implemented). In this
-case the next() method will be applied to every array in the paramter
-list and looping proceeds until the first array has reached the
-end. Hence, care has to be taken that the same slice looping is
-applied to all arrays in the parameter list.
+inputs. In this case the next() method will be applied to every array
+in the paramter list and looping proceeds until the first array has
+reached the end. Hence, care has to be taken that the same slice
+looping is applied to all arrays in the parameter list.
 
 As an example we create a new array of the dimensions of a
 
@@ -939,6 +951,28 @@ x.fill(0); x[...].mul(a,2)
 
 p_("x")
 """
+
+NOTE: There are currently relatively strict rules on how to change the
+parameters from a vector to an array.
+
+1) When going from a vector to an array, all other vectors in the
+argument list also have to be provided as arrays!
+
+2) Scalar parameters can be provided as single-valued scalars or as
+vectors. In the latter case the algorithm will take one element after
+the other in each loop as input parameter.
+
+3) If one scalar parameter is provided as a vector, all scalar
+parameters have to be provided as Vectors (they can be of different
+length and of length unity, though, which means that always the same
+value is taken.)
+
+4) If an algorithm has a scalar return value, a vector of values will
+be returned by the same algorithm if invoked with arrays.
+
+5) If a slice is specified with vectors as elements
+(i.e. [1,2,3]:[5,6,7]), both start and stop have to be vectors. The
+algorithm will then loop over all elements in the lists.
 
 
 (+++) Units and Scale Factors

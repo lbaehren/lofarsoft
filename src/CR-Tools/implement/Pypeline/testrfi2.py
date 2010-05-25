@@ -5,15 +5,17 @@ filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 filename=filename_lopes_test
 filename=filename_lofar_onesecond
 #------------------------------------------------------------------------
-#Setting Workspace
+#Creating Workspaces
 #------------------------------------------------------------------------
 
 ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")  
 ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256) #fittype="POLY" or "BSPLINE"
 ws.makeAverageSpectrum(ws)
-
+#------------------------------------------------------------------------
+#Setting some additional parameters
+#------------------------------------------------------------------------
 ws["blocksize"]=2**16
-ws["max_nblocks"]=30
+ws["max_nblocks"]=300
 ws["ncoeffs"]=45
 if ws["datafile"]["Observatory"]=='LOFAR':
     ws["numin"]=12 #MHz
@@ -22,10 +24,6 @@ elif ws["datafile"]["Observatory"]=='LOPES':
     ws["numin"]=43 #MHz
     ws["numax"]=73 #MHz
 
-#Rounding off and setting all parameters to its default value
-ws.initParameters()
-
-
 #------------------------------------------------------------------------
 #Begin Calculations
 #------------------------------------------------------------------------
@@ -33,7 +31,7 @@ ws.initParameters()
 """
 Calculate a spectrum averaged over all blocks
 """
-ws["spectrum"].craveragespectrum(ws.datafile,ws)
+ws["spectrum"].craveragespectrum(ws["datafile"],ws)
 
 """
 Fit a polynomial to baseline of the (binned) average spectrum and return the coefficients.
@@ -50,16 +48,16 @@ if ws["verbose"]: print time.clock()-ws["t0"],"s: Applying gain calibration - fl
 """
 Apply the baseline and do a gain calibration on the spectrum
 """
-ws.cleanspec.copy(ws.spectrum)
+ws["cleanspec"].copy(ws.spectrum)
 ws.cleanspec /= ws.baseline
 if ws["doplot"]: ws.cleanspec[0].plot()
 
 """
 Identify spiky channels and replace them by the mean value (which is unity here).
 """
-ws.meanrms *= ws.rfi_nsigma
+ws.meanrms *= ws["rfi_nsigma"]
 
-ws["nbad_channels"]=ws.bad_channels[...].findgreaterthan(ws.cleanspec[...],ws.meanrms+1.0)
+ws["nbad_channels"]=ws["bad_channels"][...].findgreaterthan(ws.cleanspec[...],ws.meanrms+1.0)
 ws.cleanspec[...].set(ws.bad_channels[...,[0]:ws["nbad_channels"]],1.0)
 
 if ws["verbose"]: print time.clock()-ws["t0"],"s: Done."

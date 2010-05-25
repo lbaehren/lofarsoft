@@ -1806,7 +1806,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter vecA, const It
 #define HFPP_FUNC_NAME hNew
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -1829,7 +1829,7 @@ std::vector<T> HFPP_FUNC_NAME(std::vector<T> & vec)
 #define HFPP_FUNC_NAME hResize
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -1851,7 +1851,7 @@ void HFPP_FUNC_NAME (std::vector<T> & vec, HInteger newsize)
 #define HFPP_FUNC_NAME hResize
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -1874,7 +1874,7 @@ void HFPP_FUNC_NAME (std::vector<T> & vec, HInteger newsize, T fill)
 #define HFPP_FUNC_NAME hResize
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec1)()("Input vector to be resized")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -1897,7 +1897,7 @@ void HFPP_FUNC_NAME (std::vector<T> & vec1,std::vector<S> & vec2)
 #define HFPP_FUNC_NAME hResize
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec1)()("Input vector to be resized")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE)
@@ -2056,6 +2056,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hRedistribute
 //-----------------------------------------------------------------------
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(invec)()("Input Vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -3029,7 +3030,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 #define HFPP_FUNC_NAME hMedian
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -3671,7 +3672,7 @@ void HFPP_FUNC_NAME (const Iter vecout,
 #define HFPP_FUNC_NAME hDownsample
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -3774,7 +3775,7 @@ HInteger hFindLowerBound(const HNumber* vec,
 #define HFPP_FUNC_NAME hFlatWeights
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -3797,7 +3798,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 #define HFPP_FUNC_NAME hLinearWeights
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -3831,7 +3832,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 #define HFPP_FUNC_NAME hGaussianWeights
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -3866,7 +3867,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 #define HFPP_FUNC_NAME hWeights
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_1 (hWEIGHTS)(wtype)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -4045,7 +4046,7 @@ void  HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const Iter frequencies,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGeometricDelayFarField
 //-----------------------------------------------------------------------
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(antPosition)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(skyDirection)()("Vector in Cartesian coordinates pointing towards a sky position from the antenna - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
@@ -4073,7 +4074,7 @@ HNumber HFPP_FUNC_NAME (
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGeometricDelayNearField
 //-----------------------------------------------------------------------
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(antPosition)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(skyPosition)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
@@ -6084,7 +6085,7 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_CLASS_hARRAY  // Additional C++ wrapper to generate - STL is not needed, since this is already STL
 #define HFPP_PYTHON_WRAPPER_CLASSES HFPP_CLASS_hARRAY HFPP_CLASS_STL //expose STL and hARRAY classes to python
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNC_KEEP_RETURN_TYPE_FIXED HFPP_TRUE //return a single DataReader object and not a vector thereof for array operations
 #define HFPP_FUNC_MASTER_ARRAY_PARAMETER 2 // Use the third parameter as the master array for looping and history informations
 #define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
@@ -6362,7 +6363,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCoordinateConvert
 //-----------------------------------------------------------------------
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (bool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(source)()("Coordinates of the source to be converted - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (CRCoordinateType)(sourceCoordinate)()("Type of the coordinates for the source")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -6433,7 +6434,7 @@ bool HFPP_FUNC_NAME  (Iter source,
 #define HFPP_FUNC_NAME hReadFileOld
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNC_SLICED HFPP_FALSE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)

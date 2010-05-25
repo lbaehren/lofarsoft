@@ -548,6 +548,36 @@ def hArray_setUnit(self,*arg):
     self.setUnit_(*arg)
     return self
 
+def hTranspose(self,ary):
+    """
+    Usage: aryT.transpose(ary)
+    
+    Transpose a 2-dimensional array into another 2-dimensional array. 
+
+    See also hRedistribute.
+
+    Example:
+
+    >> ary=hArray(int,[3,4],fill=range(12))
+    >> ary[...].pprint(-1)
+
+    [0,1,2,3]
+    [4,5,6,7]
+    [8,9,10,11]
+
+    >> aryT=hArray(int,[4,3])
+    >> hTranspose(aryT,ary)
+    >> aryT[...].pprint(-1)
+
+    [0,4,8]
+    [1,5,9]
+    [2,6,10]
+    [3,7,11]
+    """
+    dim2=ary.getDim()[-2]
+    self.redistribute(ary[...],Vector(range(dim2)),Vector(int,dim2,fill=dim2))
+
+
 #======================================================================
 #  Define Plotting functions for vectors and arrays
 #======================================================================
@@ -949,6 +979,7 @@ for v in hAllArrayTypes:
     setattr(v,"none",hArray_none)
     setattr(v,"read",hArray_read)
     setattr(v,"list",hArray_list)
+    setattr(v,"transpose",hTranspose)
     setattr(v,"plt",plt)
     setattr(v,"plot",hPlot_plot)
     setattr(v,"copy_resize",hArray_copy_resize)
