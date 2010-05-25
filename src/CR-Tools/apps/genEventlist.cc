@@ -194,18 +194,19 @@ int main(int argc, char* argv[])
   ifstream conf(argv[2]);
   string buf;
   stringstream opt;
-  char tmp[1024];
+  char tmp[16000];
 
   // variables to read in
   string cut_str(""), fn2005(""), fn2006(""), fn2007(""), fn2008(""), fn2009(""), namebase="eventlist";
-  Double_t geomag_min=0, geomag_max=90, energy_min=0, energy_max=1e20;
-  Bool_t createInfoFile=false, createCopyScript=false, Grande=false;
+  Double_t geomag_min=0, geomag_max=180, energy_min=0, energy_max=1e20;
+  Bool_t createInfoFile=false, createCopyScript=false, preferGrande=false, useBothReconstructions=false;
+  bool minimumCuts = true; // set to true to make things faster.
   string KRETAversion("");
   char KRETAver[1024];
 
    TCut cut;
 
-  while (conf.getline(tmp,1024)) {
+  while (conf.getline(tmp,16000)) {
     opt.clear();
     opt.str(tmp);
     opt>>buf;
@@ -221,6 +222,14 @@ int main(int argc, char* argv[])
       opt >> geomag_max;
     if(buf.compare("TCut")==0)
       opt>>cut_str;
+    if(buf.compare("noMinimumCuts")==0) {
+      cut = TCut("");
+      minimumCuts = false; 
+    }  
+    if(buf.compare("useBothReconstructions")==0) {
+      useBothReconstructions = true; 
+      cut = TCut("(Fanka<4&&Ze<0.7854&&Age>0.4&&Age<1.4&&sqrt(Yc*Yc+Xc*Xc)<90)||(Fanka<4&&Zeg<0.7854&&Ageg>-0.385&&Ageg<1.485&&Hit7>0&&Xcg<-50&&Xcg>-420&&Ycg<-30&&Ycg>-550&&Sizmg>1111&&Sizeg>11111&&Idmx>0&&Nflg>0&&Ndtg>11&&log10(Nctot/8.5)>(1/4.2*(2.9*log10(Sizeg)-8.4)))");
+    }  
     if(buf.compare("useKASCADE")==0) 
       cut = TCut("Fanka<4&&Ze<0.7854&&Age>0.4&&Age<1.4&&sqrt(Yc*Yc+Xc*Xc)<90");
     if(buf.compare("useGrande")==0) 
@@ -253,31 +262,26 @@ int main(int argc, char* argv[])
   // Decide which reconstruction should be used...
   if(string(cut).find("sqrt(Yc*Yc+Xc*Xc)<")!=string::npos) {
     cout << "\nUsing KASCADE cut..." << endl;
-    Grande = false;
+    preferGrande = false;
   } else if (string(cut).find("Hit7>0")!=string::npos) {
     cout << "\nUsing Grande cut..." << endl;
-    Grande = true;
+    preferGrande = true;
   } else
     cerr << "\n\nWARNING: Either KASCADE or Grande default cuts should be used!" << endl;
 
   if(argc==4)
     cut += argv[3];
 
-  opt.clear();
-  opt.str("");
 
   // Eventually some events get lost with this but the search is a lot of faster...
-  if(!Grande && energy_min>1) {
-     double mumin = (energy_min * 5.0e5/2.5e17);
-     opt<<mumin;
-     opt>>buf;
-     cut+= ( string("Nmu>")+buf ).c_str();
-  }
-  if( Grande && energy_min>1) {
-     double mumin = (energy_min * 6.0e5/2.0e17);
-     opt<<mumin;
-     opt>>buf;
-     cut+= ( string("Sizmg>")+buf ).c_str();
+  opt.clear();
+  opt.str("");
+  if (minimumCuts) {
+     // KASCADE miminum muon number
+     double Kmumin = (energy_min * 6.0e5/2.0e17);
+     double Gmumin = (energy_min * 5.0e5/2.5e17);
+     opt<<"((Sizmg>"<<Kmumin<<")||(Nmu>"<<Gmumin<<"))";
+     cut+= opt.str().c_str();
   }
 
   // Prepare ROOT-Files ******************************************************************************
@@ -322,10 +326,6 @@ int main(int argc, char* argv[])
     strncpy(KRETAver,KRETAversion.c_str(),1023);     
   }
 
-
-  int nentries = t2->GetEntries();
-  cout<<"Number of events that passed the cut conditions: "<<nentries<<endl<<endl;
-
   cout <<"\nScanning for events..."<<endl
        <<"TCut = "<<cut<<endl
        <<"min. geomag. angel = " <<geomag_min <<"    max geomag. angel = "<<geomag_max<<endl
@@ -333,7 +333,8 @@ int main(int argc, char* argv[])
        <<"filename(event) azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n"
        <<"============================================================================================\n";
 
-  int count=0;
+  int listCount=0;
+  int cutCount=0;
   string gtstring;
   char eventname[64];
   bool found=0;
@@ -420,12 +421,36 @@ int main(int argc, char* argv[])
 
   // get seperate strings for day month and year
   string day, month, year;
+  
+  // store GT and MMN of last event to get rid of double events;
+  UInt_t lastGt = 0, lastMmn = 0;
+
+  int nentries = t2->GetEntries();
+  cout<<"Number of events that passed the cut conditions on the ROOT file: "<<nentries<<endl<<endl;
 
   // Loop over ROOT-File ******************************************************************************
   for (int i=0; i<nentries; i++) {
     t2->GetEntry(i);
+    // continue if event is twice in KRETA reconstruction (happens in a few cases)
+    if ((lastGt == Gt)&&(lastMmn==Mmn)) {
+      cout << "Skipping event at GT " << Gt << " which seems to be twice in root file." << endl;
+      continue;
+    }  
+    else {
+      lastGt = Gt;
+      lastMmn = Mmn;
+    }
+    
+    // check for events which have neither KASCADE nor Grande reconstruction available
+    if ((Sizeg<=0||Sizmg<=0) && (Size<=0||Nmu<=0)) {
+      cout << "Skipping event at GT " << Gt << ", as neither KASCADE nor Grande reconstruction is available/complete." << endl;
+      continue;
+    } 
+    
+    // set the reconstruction to the prefered one
+    bool Grande = preferGrande;
+    
     found=0;
-
     time_t tm_s = Gt-1;
     tm * ptm = gmtime ( &tm_s );
     char tstr[32];
@@ -460,6 +485,7 @@ int main(int argc, char* argv[])
     
     fin.clear();
     fin.seekg (0, ios::beg);
+    //cout << "Looking for event: " << gtstring << endl;
 
     while(fin>>buf) {
       if(buf.find(gtstring)!=string::npos) {
@@ -469,8 +495,10 @@ int main(int argc, char* argv[])
       }
     }
     fin.close();
-    if (!found)
+    if (!found) {
+      cout << "Event: " << gtstring << "*.event could not be found in input eventlist." << endl;
       continue;
+    }  
 
     // preparing filename for writing to root tree        
     gtstring.resize(64,char(0));
@@ -499,7 +527,7 @@ int main(int argc, char* argv[])
     log10sizmg = Log10(Sizmg);
 
     ///********** Energy and primary Mass reconstructed by Grande (Wommer's formulas) *****///
-    if(Azg!=0 && Zeg!=0 && Sizeg>0 && Sizmg>0) { // Ze and Az in rad
+    if( !(Azg==0||Zeg==0) && Sizeg>0 && Sizmg>0) { // Ze and Az in rad
       // calculate energy and mass
       lgEg=(0.3069*log10sizeg)+(0.7064*log10sizmg)+(1.2699/TMath::Cos(Zeg))+0.2931;
       lnAg=(-3.5822*log10sizeg)+(4.6829*log10sizmg)+(-6.3948*TMath::Cos(Zeg))+5.3495;
@@ -532,11 +560,13 @@ int main(int argc, char* argv[])
       err_Azg = 0.;
       err_Zeg = 0.;
       geomag_angleg = 0.;
+      if ((!useBothReconstructions) && (Grande))
+        continue;
     }
 
     ///********** Energy and primary Mass reconstructed by KASCADE (Ralph's formulas) ******///
     //NB- here no log---no LgE and LnA
-    if (Az!=0 && Ze!=0 && Size>0 && Nmu>0) {
+    if ( !(Az==0||Ze==0) && Size>0 && Nmu>0) {
       //Energy and Energy error
       lgE = lg_EnergyK(log10Size,log10Nmu,Ze);
       //err_lgE = err_lg_EnergyK(Ze,errlog10Size, errlog10Nmu, errTheta);
@@ -588,22 +618,46 @@ int main(int argc, char* argv[])
       err_Az = 0.;
       err_Ze = 0.;
       geomag_angle = 0.;
+      // if no KASCADE reconstruction is available, continue if KASCADE is wanted
+      if ((!useBothReconstructions) && (!Grande))
+        continue;
     }
 
-  // calculate geomagnetic angle and determine energy for cutting
-  if( Grande  && Azg!=0 && Zeg!= 0 && Sizeg>0 && Sizmg>0 ) {
-    geomag = geomag_angleg*180./Pi();
-    energy = Power(10.,lgEg)*1e9;   // energy in eV, but lgEg in GeV
-  } else if (!Grande && Az!=0 && Ze!=0 && Size>0 && Lmuo>0) {
-    geomag = geomag_angle*180./Pi();
-    energy = Power(10.,lgE)*1e9;   // energy in eV, but lgEg in GeV
-  } else
-    continue;
+    // calculate geomagnetic angle and determine energy for cutting
+    // if both reconstructions should be used, now the one with the higher energy is chosen;
+    if (useBothReconstructions) {
+      if ((lgE<lgEg) && (Power(10.,lgEg)*1e9<energy_max)) {
+        Grande = true;
+        geomag = geomag_angleg*180./Pi();
+        energy = Power(10.,lgEg)*1e9;   // energy in eV, but lgEg in GeV      
+      } else {
+        Grande = false;
+        geomag = geomag_angle*180./Pi();
+        energy = Power(10.,lgE)*1e9;   // energy in eV, but lgEg in GeV      
+      }
+    } else {
+      if( Grande  && Azg!=0 && Zeg!= 0 && Sizeg>0 && Sizmg>0 ) {
+        geomag = geomag_angleg*180./Pi();
+        energy = Power(10.,lgEg)*1e9;   // energy in eV, but lgEg in GeV
+      } else if (!Grande && Az!=0 && Ze!=0 && Size>0 && Lmuo>0) {
+        geomag = geomag_angle*180./Pi();
+        energy = Power(10.,lgE)*1e9;   // energy in eV, but lgEg in GeV
+      } else
+        continue;
+    }       
+    
+    // Apply final cuts for energy and geomagnetic angle
+    if ((energy<energy_min) || (energy>energy_max))
+      continue;
+    if ((geomag <= geomag_min) || (geomag >= geomag_max))
+      continue;
+
+    // increase counter of events which passed all cuts
+    cutCount++;
        
     // Printing KASCADE or GRANDE data **************************************************************
-
-    if( found && (geomag >= geomag_min) && (geomag <= geomag_max) ) { 
-      if( !Grande && Az!=0 && Ze!=0 && Age>=0.4&&Age<=1.4 && Ze<0.7854 && energy>energy_min && energy<energy_max) {
+    if(found) { 
+      if( !Grande && (Az!=0 || Ze!=0) ) {
         if( createInfoFile )
           f2<<eventname<<"    "<< Gt<<"    "<< Mmn <<"    "<< Az*180./Pi()<<"    "<< Ze*180./Pi() <<"    "
             << geomag<<"    "<< Xc <<"    "<< Yc <<"    "<< Size <<"    0    "<< Nmu<<"    "<< Lmuo <<"    "<< energy  <<"    0"<<endl;
@@ -614,10 +668,9 @@ int main(int argc, char* argv[])
         }
         f1<<eventname<<"    "<<Az*180./TMath::Pi()<<"    "<<90.-Ze*180./TMath::Pi()<<"    "<<"2500"<<"    "<<Xc<<"    "<<Yc<<endl;
         cout<<eventname<<"    "<<Az*180./TMath::Pi()<<"    "<<90.-Ze*180./TMath::Pi()<<"    "<<"2500"<<"    "<<Xc<<"    "<<Yc<<endl;
-        count++;
+        listCount++;
         k->Fill();
-      } else if ( Grande && Azg!=0 && Zeg!= 0 && Xcg<-50&&Xcg>-420 &&Ycg<-30&&Ycg>-550 &&Ageg>=-0.385&&Ageg<=1.485 && Zeg<0.7854 &&
-                  energy>energy_min && energy<energy_max) {
+      } else if ( Grande && (Azg!=0 || Zeg!= 0) ) {
         if( createInfoFile )
           f2<<eventname<<"    "<< Gt<<"    "<< Mmn <<"    "<< Azg*180./Pi()<<"    "<< Zeg*180./Pi() 
             <<"    "<< geomag<<"    "<< Xcg <<"    "<<  Ycg <<"    0    "<< Sizeg <<"    "<< Sizmg<<"    0    "<< energy  <<"    1"<<endl;
@@ -628,11 +681,14 @@ int main(int argc, char* argv[])
         }
         f1<<eventname<<"    "<<Azg*180./TMath::Pi()<<"    "<<90.-Zeg*180./TMath::Pi()<<"    "<<"2500"<<"    "<<Xcg<<"    "<<Ycg<<endl;
         cout<<eventname<<"    "<<Azg*180./TMath::Pi()<<"    "<<90.-Zeg*180./TMath::Pi()<<"    "<<"2500"<<"    "<<Xcg<<"    "<<Ycg<<endl;
-        count++;
+        listCount++;
         k->Fill();
       }
     }
   }
+
+  cout << cutCount << " events passed final cuts." << endl;
+  cout << listCount << " events put into eventlist (should be the same)." << endl;
 
   if (createCopyScript) {
     system (string("chmod 733 "+namebase+"-copy.sh").c_str());
