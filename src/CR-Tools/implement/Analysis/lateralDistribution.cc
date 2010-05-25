@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2010                                                    *
- *   Frank Schroeder (<mail>)                                              *
+ *   Frank Schroeder (<mail>)   , Nunzia Palmieri                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -93,9 +93,6 @@ namespace CR { // Namespace CR -- begin
       // if (GT > 1165574694)
       //   greenAnt = 4;
 
-      // get antenna positions and distances in shower coordinates
-      Vector <double> distances = erg.asArrayDouble("distances");
-
       // create arrays for plotting and fitting
       unsigned int Nant = pulses.size();
       Double_t fieldStr[Nant],distance[Nant],distanceClean[Nant],fieldStrClean[Nant];
@@ -133,7 +130,7 @@ namespace CR { // Namespace CR -- begin
       unsigned int CutSmallSignal = 0;
       unsigned int CutBadTiming = 0;
       unsigned int CutSNR = 0;
-      double ccCenter = erg.asDouble("CCcenter");
+      double ccCenter = erg.asDouble("CCcenter"); // not for simulation
       //double xCenter = erg.asDouble("Xcenter");
 
       // calculate errors and count number of clean (good) values
@@ -141,7 +138,8 @@ namespace CR { // Namespace CR -- begin
       cout << "\nApplying quality cuts..." << endl;
       for (unsigned int i = 0; i < Nant; ++i) {
         /* error of field strength = 19% + noise */
-        fieldStrEr[i]=fieldStr[i]*0.19+noiseBgr[i];
+        //fieldStrEr[i]=fieldStr[i]*0.19+noiseBgr[i];
+        fieldStrEr[i]=noiseBgr[i]; // not for simulation
         //distanceEr[i]=15;                // should probably be calculated instead
 
         /* get largest distance and min and max field strength */
@@ -154,7 +152,7 @@ namespace CR { // Namespace CR -- begin
 
         /* New Cuts */
         // pulse time correct? (default: pulse at cc-beam center +/- 25ns)
-        if (abs(timePos[i]*1e-9 - ccCenter) > lateralTimeCut) {
+        if (abs(timePos[i]*1e-9 - ccCenter) > lateralTimeCut) {// not for simulation
           CutBadTiming++;
           cout << "lateralDistribution::fitLateralDistribution: Antenna " << antennaNumber[i] << " cut because of bad timing: "
                << "CCcenter = " << ccCenter*1e9 << " , pulse time = " << timePos[i]
@@ -163,7 +161,7 @@ namespace CR { // Namespace CR -- begin
           continue;
         }
         // SNR >= 1 ?
-        if ( abs(fieldStr[i]/noiseBgr[i]) < lateralSNRcut) {
+        if ( abs(fieldStr[i]/noiseBgr[i]) < lateralSNRcut) {// not for simulation
           CutSNR++;
           cout << "lateralDistribution::fitLateralDistribution: Antenna " << antennaNumber[i] 
                << " cut because SNR lower than " << lateralSNRcut
@@ -308,12 +306,16 @@ namespace CR { // Namespace CR -- begin
         // fit exponential
         TF1 *fitfuncExp;
         fitfuncExp=new TF1("fitfuncExp","[0]*exp(-x/[1])",50,190);
+        //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
         fitfuncExp->SetParName(0,"#epsilon_{0}");
+        //fitfuncExp->SetParName(0,"#epsilon_{100}");
         fitfuncExp->SetParName(1,"R_{0}");
         fitfuncExp->SetParameter(1,200);
+        //fitfuncExp->FixParameter(1,461.8-285.8);
         fitfuncExp->GetXaxis()->SetRange(20,300);
         fitfuncExp->SetFillStyle(0);
         fitfuncExp->SetLineWidth(2);
+
 
         cout << "------------------------------"<<endl;
         latProClean->Fit(fitfuncExp, "");
@@ -322,14 +324,19 @@ namespace CR { // Namespace CR -- begin
         // write fit results to record with other results
         erg.define("eps",fitfuncExp->GetParameter(0));
         erg.define("R_0",fitfuncExp->GetParameter(1));
-        erg.define("sigeps",fitfuncExp->GetParError(0));
+        //erg.define("sigeps",fitfuncExp->GetParError(0));
+        double sigmaEpsilon = sqrt(pow(fitfuncExp->GetParError(0),2)+pow((0.19*fitfuncExp->GetParameter(0)),2));
+        erg.define("sigeps",sigmaEpsilon);
         erg.define("sigR_0",fitfuncExp->GetParError(1));
         erg.define("chi2NDF",fitfuncExp->GetChisquare()/double(fitfuncExp->GetNDF()));
+
         cout << "Result of exponential fit eps * e^(-x/R_0):\n"
              << "eps    = " << fitfuncExp->GetParameter(0) << "\t +/- " << fitfuncExp->GetParError(0) << "\t µV/m/MHz\n"
+             << "total error of eps (including calibration) = " << sigmaEpsilon << "\t µV/m/MHz\n"
              << "R_0    = " << fitfuncExp->GetParameter(1) << "\t +/- " << fitfuncExp->GetParError(1) << "\t m\n"
              << "Chi^2  = " << fitfuncExp->GetChisquare() << "\t NDF " << fitfuncExp->GetNDF() << "\n"
              << endl;
+
 
         // write plot to file
         stringstream plotNameStream;
@@ -426,6 +433,301 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
+  Record lateralDistribution::fitBothLateralDistribution (const string filePrefix,
+                                                    map <int, PulseProperties> pulsesRec,
+                                                    map <int, PulseProperties> pulsesSim,
+                                                    int Gt, double az, double ze)
+  {
+    Record erg;
+    try {
+
+      cout << "\nFitting lateral distribution for simulations and data..." << endl;
+
+      // create arrays for plotting and fitting LOPES data and REAS sim
+      unsigned int Nant = pulsesRec.size();
+      double fieldStr[Nant],distance[Nant],fieldStrSim[Nant];
+      double fieldStrEr[Nant],distanceEr[Nant];
+      double noiseBgr[Nant], timePos[Nant], timePosErr[Nant],noiseBgrSim[Nant];
+      //string polarization[Nant]; 
+      int antennaNumber[Nant];
+      int antID[Nant],antIDSim[Nant];
+
+      unsigned int ant = 0;        // counting antennas with pulse information
+      for (map <int, PulseProperties>::iterator it=pulsesRec.begin(); it != pulsesRec.end(); ++it) {
+	     if ( (*it).second.lateralCut ) //so use again the same cut applied for call_pipeline
+  			continue;
+          distance[ant] = (*it).second.dist;
+          distanceEr[ant] = (*it).second.disterr;
+          fieldStr[ant] = (*it).second.height;
+          noiseBgr[ant] = (*it).second.heightError;
+          timePos[ant] = (*it).second.time;
+          timePosErr[ant] = (*it).second.timeError;
+          antennaNumber[ant] = (*it).second.antenna;
+          //polarization[ant] = (*it).second.polarization;
+          antID[ant] = (*it).first;
+
+		cout<<"rec  "<<fieldStr[ant]<<endl;
+
+	     //for simulation
+	     fieldStrSim[ant] = pulsesSim[antID[ant]].height;
+	     noiseBgrSim[ant] = pulsesSim[antID[ant]].heightError;
+          antIDSim[ant] = pulsesSim[antID[ant]].antennaID;
+		//cout<<"sim  "<<fieldStrSim[ant]<<endl;
+          ++ant; // increase counter  
+       }
+
+      // consistancy check
+      if (ant != Nant)
+        cerr << "lateralDistribution::fitLateralDistribution: Nant != number of antenna values\n" << endl; 
+
+      Double_t fieldMax=0;
+      Double_t fieldMin=0;
+      Double_t maxdist=0;
+
+      // calculate errors and count number of clean (good) values
+      cout << "\nApplying quality cuts..." << endl;
+      for (unsigned int i = 0; i < Nant; ++i) {
+        /* error of field strength = 19% + noise */
+        //fieldStrEr[i]=fieldStr[i]*0.19+noiseBgr[i];
+        fieldStrEr[i]=noiseBgr[i]; // not for simulation
+
+        /* get largest distance and min and max field strength */
+         if ( distance[i] > maxdist){
+           maxdist=distance[i];
+          }
+         if (fieldStrSim[i]>fieldMax){
+           fieldMax=fieldStrSim[i];
+          }
+         if (fieldStr[i]>fieldMax){
+           fieldMax=fieldStr[i];
+          }
+         if (fieldStrSim[i]<fieldMin){
+           fieldMin=fieldStrSim[i];
+          }
+         if (fieldStr[i]<fieldMin){
+           fieldMin=fieldStr[i];
+          }
+
+
+      }
+
+
+      cout << "\nAntennas in the Plot: " << ant << endl;
+//       cout << "Entries for fit: " << clean << endl;
+
+      // calculate mean distance of the remaining antennas
+/*      double latMeanDist = 0;
+      if (clean > 0)
+        latMeanDist = Mean(clean, distanceClean);*/
+//       cout << "Mean distance of antennas surviving the cuts: " << latMeanDist << " m." << endl;
+//       erg.define("latMeanDist",latMeanDist);
+
+      TGraphErrors *latPro = new TGraphErrors (ant, distance,fieldStr,distanceEr,fieldStrEr);
+      //TGraphErrors *latProClean = new TGraphErrors (clean, distanceClean,fieldStrClean,distanceCleanEr,fieldStrCleanEr);
+      latPro->SetFillColor(4);
+      latPro->SetLineColor(4);
+      latPro->SetMarkerColor(4);
+      latPro->SetMarkerStyle(20);
+      latPro->SetMarkerSize(1.1);
+      stringstream label;
+      label << "Lateral distribution - " << Gt;
+      latPro->SetTitle(label.str().c_str());
+      latPro->GetXaxis()->SetTitle("distance R [m]"); 
+      latPro->GetYaxis()->SetTitle("field strength #epsilon [#muV/m/MHz]");
+      latPro->GetXaxis()->SetTitleSize(0.05);
+      latPro->GetYaxis()->SetTitleSize(0.05);
+      latPro->GetYaxis()->SetRange(0,100);
+
+      TGraphErrors *latProSim = new TGraphErrors (ant, distance,fieldStrSim,distanceEr,noiseBgrSim);
+      latProSim->SetFillColor(2);
+      latProSim->SetLineColor(2);
+      latProSim->SetMarkerColor(2);
+      latProSim->SetMarkerStyle(20);
+      latProSim->SetMarkerSize(1.1);
+
+
+
+      /* Canvas and Plotting */
+      TCanvas *c1 = new TCanvas("c1","lateral distribution");
+      c1->Range(-18.4356,-0.31111,195.528,2.19048);
+      c1->SetFillColor(0);
+      c1->SetBorderMode(0);
+      c1->SetBorderSize(2);
+
+      c1->SetLeftMargin(0.127768);
+      c1->SetRightMargin(0.0715503);
+      c1->SetTopMargin(0.0761421);
+      c1->SetBottomMargin(0.124365);
+      c1->SetFrameLineWidth(2);
+      c1->SetFrameBorderMode(0);
+
+      /* lateral plot */
+      c1->SetLogy();
+      latPro->SetMinimum(1);
+      latPro->SetMaximum((fieldMax*3));
+      latPro->SetTitle("");
+      latPro->SetFillColor(0);
+      latPro->GetYaxis()->SetRangeUser(1,fieldMax);
+      latPro->GetXaxis()->SetRangeUser(0,(maxdist*1.10));
+      latPro->Draw("AP");
+      latProSim->Draw("SAME P");
+/*
+      // mark point of one antenna in green (for debugging)
+      if (greenValue > 0) {
+        TGraph *latProGreen = new TGraph(1, &distance[greenValue], &fieldStr[greenValue]);
+        latProGreen->SetMarkerColor(3);
+        latProGreen->SetMarkerStyle(20);
+        latProGreen->SetMarkerSize(1.1);
+        latProGreen->Draw("same p");
+      }  
+*/
+
+      /* statistic box of fit */
+      TPaveStats *ptstats = new TPaveStats(0.62,0.84,0.98,0.99,"brNDC");
+      ptstats->SetName("Data");
+      ptstats->SetBorderSize(2);
+      ptstats->SetTextAlign(12);
+      ptstats->SetFillColor(0);
+      ptstats->SetOptStat(0);
+      ptstats->SetOptFit(111);
+      ptstats->Draw();
+      latPro->GetListOfFunctions()->Add(ptstats);
+      ptstats->SetParent(latPro->GetListOfFunctions());
+
+      /* statistic box of fit SIMULATIONS */
+      TPaveStats *ptstatsS = new TPaveStats(0.62,0.69,0.98,0.84,"brNDC");
+      ptstatsS->SetName("Simulation");
+      ptstatsS->SetBorderSize(2);
+      ptstatsS->SetTextAlign(12);
+      ptstatsS->SetFillColor(0);
+      ptstatsS->SetOptStat(0);
+      ptstatsS->SetOptFit(111);
+      ptstatsS->Draw();
+      latProSim->GetListOfFunctions()->Add(ptstatsS);
+      ptstatsS->SetParent(latProSim->GetListOfFunctions());
+
+      /* statistic box of EAS parameter */
+     // TPaveStats *easstats = new TPaveStats(0.45,0.78,0.62,0.99,"brNDC");
+      TPaveStats *easstats = new TPaveStats(0.45,0.84,0.62,0.99,"brNDC");
+      easstats->SetBorderSize(2);
+      easstats->SetTextAlign(12);
+      easstats->SetFillColor(0);
+      easstats->SetOptStat(0);
+      easstats->SetOptFit(0);
+      easstats->SetName("stats");
+
+      // create labels for the plot
+      label.str("");
+      label << "GT " << Gt;
+      TText *text = easstats->AddText(label.str().c_str());
+      text->SetTextSize(0.04);
+      // label.str("");
+      // label << "E_{g}  = " << energy;
+      // text = easstats->AddText(label.str().c_str());
+      label.str("");
+      label << "#phi   = ";
+      label.setf(ios::showpoint);
+      label.precision(4);
+      label.width(5);
+      label << az << "^{o}";
+      text = easstats->AddText(label.str().c_str());
+      label.str("");
+      label << "#theta = ";
+      label.setf(ios::showpoint);
+      label.precision(4);
+      label.width(5);
+      label << ze << "^{o}";
+      text = easstats->AddText(label.str().c_str());
+      easstats->Draw();
+
+      /* FIT for data */
+      // do fit only if there are at least 3 good antennas left (otherwise set parameters to 0)!
+   //    if (clean >= 3) {
+         // store number of antennas used for fit
+         //erg.define("NlateralAntennas",clean);
+
+        // fit exponential
+        TF1 *fitfuncExp;
+        fitfuncExp=new TF1("fitfuncExp","[0]*exp(-x/[1])",50,190);
+        //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
+        fitfuncExp->SetParName(0,"#epsilon_{0}");
+        //fitfuncExp->SetParName(0,"#epsilon_{100}");
+        fitfuncExp->SetParName(1,"R_{0}");
+        fitfuncExp->SetParameter(1,200);
+        //fitfuncExp->FixParameter(1,461.8-285.8);
+        fitfuncExp->GetXaxis()->SetRange(20,300);
+        fitfuncExp->SetFillStyle(0);
+        fitfuncExp->SetLineWidth(2);
+
+      /* FIT for SIMULATIONS */
+        // fit exponential
+        TF1 *fitfuncExpS;
+        fitfuncExpS=new TF1("fitfuncExpS","[0]*exp(-x/[1])",50,190);
+        //fitfuncExpS=new TF1("fitfuncExpS","[0]*exp(-(x-100)/[1])",50,190);
+        fitfuncExpS->SetParName(0,"#epsilonSim_{0}");
+        //fitfuncExpS->SetParName(0,"#epsilon_{100}");
+        fitfuncExpS->SetParName(1,"RSim_{0}");
+        fitfuncExpS->SetParameter(1,200);
+        //fitfuncExpS->FixParameter(1,461.8-285.8);
+        fitfuncExpS->GetXaxis()->SetRange(20,300);
+        fitfuncExpS->SetFillStyle(0);
+        fitfuncExpS->SetLineWidth(2);
+
+
+        cout << "------------------------------"<<endl;
+        latPro->Fit(fitfuncExp, "");
+        ptstats->Draw();
+
+        // write fit results to record with other results
+        erg.define("eps",fitfuncExp->GetParameter(0));
+        erg.define("R_0",fitfuncExp->GetParameter(1));
+        //erg.define("sigeps",fitfuncExp->GetParError(0));
+        double sigmaEpsilon = sqrt(pow(fitfuncExp->GetParError(0),2)+pow((0.19*fitfuncExp->GetParameter(0)),2));
+        erg.define("sigeps",sigmaEpsilon);
+        erg.define("sigR_0",fitfuncExp->GetParError(1));
+        erg.define("chi2NDF",fitfuncExp->GetChisquare()/double(fitfuncExp->GetNDF()));
+
+        cout << "Result of exponential fit eps * e^(-x/R_0):\n"
+             << "eps    = " << fitfuncExp->GetParameter(0) << "\t +/- " << fitfuncExp->GetParError(0) << "\t µV/m/MHz\n"
+             << "total error of eps (including calibration) = " << sigmaEpsilon << "\t µV/m/MHz\n"
+             << "R_0    = " << fitfuncExp->GetParameter(1) << "\t +/- " << fitfuncExp->GetParError(1) << "\t m\n"
+             << "Chi^2  = " << fitfuncExp->GetChisquare() << "\t NDF " << fitfuncExp->GetNDF() << "\n"
+             << endl;
+
+        cout << "-------- SIMULATIONS ---------"<<endl;
+        latProSim->Fit(fitfuncExpS, "");
+        ptstatsS->Draw();
+
+        // write fit results to record with other results
+        erg.define("eps_sim",fitfuncExpS->GetParameter(0));
+        erg.define("R_0sim",fitfuncExpS->GetParameter(1));
+        //erg.define("sigeps",fitfuncExp->GetParError(0));
+        double sigmaEpsilon_sim = sqrt(pow(fitfuncExpS->GetParError(0),2)+pow((0.19*fitfuncExpS->GetParameter(0)),2)); ///????????????
+        erg.define("sigeps_sim",sigmaEpsilon_sim);
+        erg.define("sigR_0sim",fitfuncExpS->GetParError(1));
+        erg.define("chi2NDF_sim",fitfuncExpS->GetChisquare()/double(fitfuncExpS->GetNDF()));
+
+        cout << "Result of exponential fit eps * e^(-x/R_0):\n"
+             << "eps_sim    = " << fitfuncExpS->GetParameter(0) << "\t +/- " << fitfuncExpS->GetParError(0) << "\t µV/m/MHz\n"
+             << "total error of eps_sim (including calibration) = " << sigmaEpsilon << "\t µV/m/MHz\n"
+             << "R_0sim    = " << fitfuncExpS->GetParameter(1) << "\t +/- " << fitfuncExpS->GetParError(1) << "\t m\n"
+             << "Chi^2_sim  = " << fitfuncExpS->GetChisquare() << "\t NDF " << fitfuncExpS->GetNDF() << "\n"
+             << endl;
+
+
+        // write plot to file
+        stringstream plotNameStream;
+        plotNameStream << filePrefix << Gt << ".eps";
+        cout << "\nCreating plot: " << plotNameStream.str() << endl;
+        c1->Print(plotNameStream.str().c_str());
+
+
+    } catch (AipsError x) {
+      cerr << "lateralDistribution::fitLateralDistribution: " << x.getMesg() << endl;
+    }
+    return erg;
+  }
+
 
   void lateralDistribution::lateralTimeDistribution(const string& filePrefix,
                                                     map <int, PulseProperties>& pulses,
@@ -440,9 +742,6 @@ namespace CR { // Namespace CR -- begin
       double       el       = erg.asDouble("Elevation");
       double       ccCenter = erg.asDouble("CCcenter");
       //double       xCenter  = erg.asDouble("Xcenter");
-
-      // get antenna positions and distances in shower coordinates
-      Vector <double> distances = erg.asArrayDouble("distances");
 
       // create arrays for plotting and fitting
       unsigned int Nant = pulses.size();

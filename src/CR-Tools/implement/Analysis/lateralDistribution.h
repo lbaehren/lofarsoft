@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2010                                                    *
- *   Frank Schroeder (<mail>)                                              *
+ *   Frank Schroeder (<mail>), Nunzia Palmieri                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -190,8 +190,23 @@ namespace CR { // Namespace CR -- begin
     void lateralTimeDistribution (const string& filePrefix,
                                   map <int, PulseProperties>& pulses,
                                   Record& erg);
-  };
 
+    /*!
+      \brief Plots lateral distribution of pulse arrival times
+
+      \param filePrefix - the filename will be prefix+GT+".dat".
+      \param pulsesRec  - map with information about pulses from LOPES data
+      \param pulsesSim  - map with information about pulses from simulated data
+      \param Gt         - gt from the pipeline root file
+      \param az         - azimuth from the pipeline root file
+      \param ze         - zenith from the pipeline root file
+   */
+
+  Record fitBothLateralDistribution (const string filePrefix,
+                                     map <int, PulseProperties> pulsesRec,
+                                     map <int, PulseProperties> pulsesSim,
+                                     int Gt, double az, double ze);
+  };
 } // Namespace CR -- end
 
 #endif /* HAVE_STARTOOLS */
