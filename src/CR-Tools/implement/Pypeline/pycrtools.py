@@ -552,9 +552,11 @@ def hTranspose(self,ary):
     """
     Usage: aryT.transpose(ary)
     
-    Transpose a 2-dimensional array into another 2-dimensional array. 
+    Transpose a 2-dimensional array into another 2-dimensional
+    array. This is a simple interface to the function hRedistribute
+    and is not well suited to deal with slicing and looping.
 
-    See also hRedistribute.
+    See also: hRedistribute.
 
     Example:
 
@@ -1009,7 +1011,7 @@ for v in hAllContainerTypes:
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hStdDev","hMeanThreshold","hMeanInverse","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hGetHanningFilterHalf","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hBSplineFitXValues","hBSpline","hBSplineFit","hErrorsToWeights","hPolynomial"]:
+    for s in ["hMean","hMeanAbs","hMeanSquare","hStdDev","hMeanThreshold","hMeanInverse","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hGetHanningFilterHalf","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hBSplineFitXValues","hBSpline","hBSplineFit","hErrorsToWeights","hPolynomial"]:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
@@ -1027,7 +1029,7 @@ for v in hNumericalContainerTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hLogSave","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
+    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hLogSave","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSumAbs","hSumSquare","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
@@ -1344,19 +1346,6 @@ class CRWorkSpace():
         self.auxparameters=[]
         if not hasattr(self,"locals"): self.locals=set()
         self.setParameters(**keywords)
-    def initParameters(self,**keywords):
-        """
-        This method will create all parameters that are not yet
-        available as attributes or find higher up and assign the
-        default value. Also do the same for all modules. You can
-        explicitly set a parameter and override the default, if it is
-        passed as a keyword=value pair in the argumentlist.
-        """
-        self.setParameters(**keywords)
-        for par in self.parameters: self[par]
-        for m in self.modules: #Now, also initialize the modules
-            getattr(self,m).initParameters()
-        return self
     def __setitem__(self,par,val):
         """Sets the value of a parameter and make it local."""
         if par not in self.parameters+self.auxparameters: self.auxparameters.append(par)
@@ -1736,7 +1725,7 @@ def CRsetWorkSpace(ws,modulename,**keywords):
     if ws==None: ws=func(**keywords)
     ws=ws.getModule(modulename)
     if ws==None: ws=func(**keywords)
-    ws.initParameters(**keywords)
+    ws.setParameters(**keywords)
     return ws
 
 def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywords):
@@ -1749,7 +1738,7 @@ def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywo
     
     """
     ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
-    if ws.verbose:
+    if ws["verbose"]:
         print time.clock()-ws["t0"],"s: Starting CalcBaseline."
     if ws["fittype"]=="POLY":
         """
@@ -1761,7 +1750,7 @@ def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywo
         #Create the correct powers of x
         #        ws["baseline_x"][numin_i:numax_i].bsplinefitxvalues(frequency[numin_i:numax_i],ws["clean_bins_x"][...,0].val(),ws["clean_bins_x"][...,-1].val(),ws["ncoeffs"])
         ws["baseline_x"][numin_i:numax_i].bsplinefitxvalues(frequency[numin_i:numax_i],ws["clean_bins_x"][...,0].val(),ws["clean_bins_x"][...,ws["nselected_bins"]-1:ws["nselected_bins"]].val(),ws["ncoeffs"])
-        baseline[...,numin_i:numax_i].bspline(ws.baseline_x[numin_i:numax_i],ws["coeffs"][...])
+        baseline[...,numin_i:numax_i].bspline(ws["baseline_x"][numin_i:numax_i],ws["coeffs"][...])
     #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth
     #Left end
     ws["height_ends"][0,...].copy(baseline[...,numin_i])
@@ -1777,9 +1766,9 @@ def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywo
         factor *= 1000.0
     baseline[...,numax_i-1:].gethanningfilterhalf(Vector(factor),Vector(ws["height_ends"][1]),Vector(bool,ws["nofAntennas"],fill=False))
     if ws["logfit"]: baseline.exp()
-    if ws.verbose:
+    if ws["verbose"]:
         print time.clock()-ws["t0"],"s: Done CalcBaseline."
-    if ws.doplot:
+    if ws["doplot"]:
         baseline[...].plot(title="Baseline")
         raw_input("Plotted baseline - press Enter to continue...")
 
@@ -1814,67 +1803,67 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
     keywords["nofAntennas"]=spectrum.getDim()[0]
     ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
 #
-    if ws.verbose:
-        print time.clock()-ws["t0"],"s: Starting FitBaseline - Downsampling spectrum to ",ws.nbins,"bins."
+    if ws["verbose"]:
+        print time.clock()-ws["t0"],"s: Starting FitBaseline - Downsampling spectrum to ",ws["nbins"],"bins."
 #Donwsample spectrum
-    if ws["numin"]>0: ws["numin_i"]=frequency.findlowerbound(ws.numin).val()
+    if ws["numin"]>0: ws["numin_i"]=frequency.findlowerbound(ws["numin"]).val()
     else: ws["numin_i"]=1
-    if ws["numax"]>0: ws["numax_i"]=frequency.findlowerbound(ws.numax).val()
+    if ws["numax"]>0: ws["numax_i"]=frequency.findlowerbound(ws["numax"]).val()
     else: ws["numax_i"]=len(frequency)
     
     ws["numax_i"]=min(ws["numax_i"]+int((len(frequency)-ws["numax_i"])*ws["extendfit"]),len(frequency))
     ws["numin_i"]=max(ws["numin_i"]-int(ws["numin_i"]*ws["extendfit"]),0)
 
-    ws.freqs.downsample(frequency[ws["numin_i"]:ws["numax_i"]])
-    ws.spectrum[...].downsamplespikydata(ws.rms[...],spectrum[...,ws["numin_i"]:ws["numax_i"]],1.0)
+    ws["freqs"].downsample(frequency[ws["numin_i"]:ws["numax_i"]])
+    ws["spectrum"][...].downsamplespikydata(ws["rms"][...],spectrum[...,ws["numin_i"]:ws["numax_i"]],1.0)
     l=ws["numax_i"]-ws["numin_i"]
 #Plotting
-    if ws.doplot:
+    if ws["doplot"]:
         spectrum[0].plot(title="RFI Downsampling")
-        ws.spectrum[...,0:l].plot(clf=False)
+        ws["spectrum"][...,0:l].plot(clf=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
 #Calculate RMS/amplitude for each bin
-    ws.ratio[...,0:l].div(ws.rms[...,0:l],ws.spectrum[...,0:l])
-    ws.ratio[...,0:l].square()
-    mratio=ws.ratio[...,0:l].meaninverse()
-    if ws.doplot:
-        ws.ratio[...,0:l].plot(title="RMS/Amplitude")
+    ws["ratio"][...,0:l].div(ws["rms"][...,0:l],ws["spectrum"][...,0:l])
+    ws["ratio"][...,0:l].square()
+    mratio=ws["ratio"][...,0:l].meaninverse()
+    if ws["doplot"]:
+        ws["ratio"][...,0:l].plot(title="RMS/Amplitude")
         raw_input("Plotted relative RMS of downsampled spectrum - press Enter to continue...")
 #Now select bins where the ratio between RMS and amplitude is within a factor 2 of the mean value
-    ws["nselected_bins"]=ws.selected_bins[...].findbetween(ws.ratio[...,0:l],mratio/ws.rmsfactor,mratio*ws.rmsfactor)
+    ws["nselected_bins"]=ws["selected_bins"][...].findbetween(ws["ratio"][...,0:l],mratio/ws["rmsfactor"],mratio*ws["rmsfactor"])
 #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
-    ws.clean_bins_x[...].copy(ws.freqs,ws.selected_bins[...],ws.nselected_bins)
-    ws.clean_bins_y[...].copy(ws.spectrum[...],ws.selected_bins[...],ws.nselected_bins)
-#    ws.weights.copy(ws.clean_bins_y)
-    if ws.logfit: 
-        ws.clean_bins_y[...,[0]:ws.nselected_bins].log()
+    ws["clean_bins_x"][...].copy(ws["freqs"],ws["selected_bins"][...],ws["nselected_bins"])
+    ws["clean_bins_y"][...].copy(ws["spectrum"][...],ws["selected_bins"][...],ws["nselected_bins"])
+#    ws["weights"].copy(ws["clean_bins_y"])
+    if ws["logfit"]: 
+        ws["clean_bins_y"][...,[0]:ws["nselected_bins"]].log()
 #
-    if ws.verbose: print time.clock()-ws["t0"],"s: Fitting baseline."
+    if ws["verbose"]: print time.clock()-ws["t0"],"s: Fitting baseline."
     if ws["fittype"]=="POLY":
-        if ws.verbose:
+        if ws["verbose"]:
             print "Performing a polynomial fit with ",ws["ncoeffs"],"coefficients."
         #Create the nth powers of the x value, i.e. the frequency, for the fitting
-        ws.xpowers[...,[0]:ws.nselected_bins].linearfitpolynomialx(ws.clean_bins_x[...,[0]:ws.nselected_bins],ws.powers[...])
+        ws["xpowers"][...,[0]:ws["nselected_bins"]].linearfitpolynomialx(ws["clean_bins_x"][...,[0]:ws["nselected_bins"]],ws["powers"][...])
         #Fit an nth order polynomial to the data
-        ws["chisquare"]=coeffs[...].linearfit(ws.covariance[...],ws.xpowers[...],ws.clean_bins_y[...],ws.nselected_bins)  #ws.weights[...],
+        ws["chisquare"]=coeffs[...].linearfit(ws["covariance"][...],ws["xpowers"][...],ws["clean_bins_y"][...],ws["nselected_bins"])  #ws["weights"][...],
     else:
-        if ws.verbose:
-            print "Performing a basis spline fit with ",ws.ncoeffs-2,"break points."
+        if ws["verbose"]:
+            print "Performing a basis spline fit with ",ws["ncoeffs"]-2,"break points."
         #Perform a Basis Spline fit to the data
-        ws["chisquare"]=coeffs[...].bsplinefit(ws.covariance[...],ws.xpowers[...,[0]:ws.nselected_bins],ws.clean_bins_x[...,[0]:ws.nselected_bins],ws.clean_bins_y[...,[0]:ws.nselected_bins])
+        ws["chisquare"]=coeffs[...].bsplinefit(ws["covariance"][...],ws["xpowers"][...,[0]:ws["nselected_bins"]],ws["clean_bins_x"][...,[0]:ws["nselected_bins"]],ws["clean_bins_y"][...,[0]:ws["nselected_bins"]])
     #Calculate an estimate of the average RMS of the clean spectrum after baseline division
-    ws.ratio[...].copy(ws.ratio,ws.selected_bins[...],ws.nselected_bins)
-    meanrms=ws.ratio[...,[0]:ws.nselected_bins].meaninverse()
+    ws["ratio"][...].copy(ws["ratio"],ws["selected_bins"][...],ws["nselected_bins"])
+    meanrms=ws["ratio"][...,[0]:ws["nselected_bins"]].meaninverse()
     meanrms.sqrt()
-    if ws.verbose: print time.clock()-ws["t0"],"s: Done fitting baseline."
-    if ws.doplot:
-        ws.clean_bins_y[...,[0]:ws.nselected_bins].plot(xvalues=ws.clean_bins_x[...,[0]:ws.nselected_bins],logplot=False)
-        ws.clean_bins_y.fill(0.0)
+    if ws["verbose"]: print time.clock()-ws["t0"],"s: Done fitting baseline."
+    if ws["doplot"]:
+        ws["clean_bins_y"][...,[0]:ws["nselected_bins"]].plot(xvalues=ws["clean_bins_x"][...,[0]:ws["nselected_bins"]],logplot=False)
+        ws["clean_bins_y"].fill(0.0)
         if ws["fittype"]=="POLY":
-            ws.clean_bins_y[...,[0]:ws.nselected_bins].polynomial(ws.clean_bins_x[...,[0]:ws.nselected_bins],coeffs[...],ws["powers"][...])
+            ws["clean_bins_y"][...,[0]:ws["nselected_bins"]].polynomial(ws["clean_bins_x"][...,[0]:ws["nselected_bins"]],coeffs[...],ws["powers"][...])
         else:
-            ws.clean_bins_y[...,[0]:ws.nselected_bins].bspline(ws.xpowers[...,[0]:(ws.nselected_bins)],coeffs[...])
-        ws.clean_bins_y[...,[0]:ws.nselected_bins-1].plot(xvalues=ws.clean_bins_x[...,[0]:ws.nselected_bins-1],clf=False,logplot=False)
+            ws["clean_bins_y"][...,[0]:ws["nselected_bins"]].bspline(ws["xpowers"][...,[0]:(ws["nselected_bins"])],coeffs[...])
+        ws["clean_bins_y"][...,[0]:ws["nselected_bins"]-1].plot(xvalues=ws["clean_bins_x"][...,[0]:ws["nselected_bins"]-1],clf=False,logplot=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
     return meanrms
 
@@ -1909,25 +1898,25 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
 
     """
     ws=CRsetWorkSpace(ws,"AverageSpectrum",**keywords)
-    if ws.verbose:
-        maxcount=len(ws.blocks)
+    if ws["verbose"]:
+        maxcount=len(ws["blocks"])
         print time.clock()-ws["t0"],"s: Calculating",maxcount,"blocks of size",datafile.blocksize
         count=0; 
         lastprogress=-1
         ws["t0"]=time.clock()
-    for block in ws.blocks:
-        ws.datafile["block"]=block
-        ws.fx.read(datafile,"Fx")
-        ws.fft[...].fftw(ws.fx[...])
-        spectrum[...].spectralpower(ws.fft[...])
-        if ws.verbose:
+    for block in ws["blocks"]:
+        ws["datafile"]["block"]=block
+        ws["fx"].read(datafile,"Fx")
+        ws["fft"][...].fftw(ws["fx"][...])
+        spectrum[...].spectralpower(ws["fft"][...])
+        if ws["verbose"]:
             count +=1
             progress=count*10/maxcount
             if not lastprogress == progress:
-                t=time.clock()-ws.t0
+                t=time.clock()-ws["t0"]
                 print progress*10,"% -",t,"s (Remaining:",t/count*maxcount-t,"s) - Calculated block #",block
                 lastprogress=progress
-    spectrum /= len(ws.blocks)
+    spectrum /= len(ws["blocks"])
 
 
 def CheckParameterConformance(data,keys,limits):
@@ -2010,7 +1999,7 @@ def CRQualityCheck(limits,datafile=None,dataarray=None,maxblocksize=65536,nsigma
 #Calculate probabilities to find certain peaks
     probability=funcGaussian(nsigma,1,0) # what is the probability of a 5 sigma peak
     npeaksexpected=probability*blocksize # what is the probability to see such a peak with the blocksize
-    npeakserror=sqrt(npeaksexpected) # what is the statisitcal error on that expectation
+    npeakserror=sqrt(npeaksexpected) # what is the statistical error on that expectation
 #Start checking
     if verbose:
         if not datafile==None: print "Quality checking of file ",datafile.filename
@@ -2031,7 +2020,10 @@ def CRQualityCheck(limits,datafile=None,dataarray=None,maxblocksize=65536,nsigma
         noncompliancelist=[]
         for prop in iter(dataproperties):
             noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"nonGaussianity":4},limits)
-            if noncompliancelist: qualityflaglist.append([prop[0],Block,prop[1:],noncompliancelist])
+            if noncompliancelist:
+                qualityflaglist.append([prop[0],Block,prop[1:],noncompliancelist])
+                if not verbose:
+                    print "Block= {0:5d}, Antenna {1:3d}: mean={2: 6.2f}, rms={3:6.1f}, npeaks={4:5d}, nonGaussianity={5: 7.2f}".format(*((Block,)+prop))," ",noncompliancelist
             if verbose:
                 print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, nonGaussianity={4: 7.2f}".format(*prop)," ",noncompliancelist
     return qualityflaglist

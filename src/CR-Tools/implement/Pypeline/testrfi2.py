@@ -15,7 +15,7 @@ ws.makeAverageSpectrum(ws)
 #Setting some additional parameters
 #------------------------------------------------------------------------
 ws["blocksize"]=2**16
-ws["max_nblocks"]=300
+ws["max_nblocks"]=30
 ws["ncoeffs"]=45
 if ws["datafile"]["Observatory"]=='LOFAR':
     ws["numin"]=12 #MHz
@@ -60,12 +60,76 @@ ws.meanrms *= ws["rfi_nsigma"]
 ws["nbad_channels"]=ws["bad_channels"][...].findgreaterthan(ws.cleanspec[...],ws.meanrms+1.0)
 ws.cleanspec[...].set(ws.bad_channels[...,[0]:ws["nbad_channels"]],1.0)
 
-if ws["verbose"]: print time.clock()-ws["t0"],"s: Done."
-if ws["doplot"]: ws.cleanspec[0].plot(clf=False)
+if ws["verbose"]: print time.clock()-ws["t0"],"s: Done calculating clean spectrum."
+if ws["doplot"]:
+    ws.cleanspec[0].plot(clf=False)
+    plt.savefig("testrfi2-spectrum.pdf",format="pdf")
+    raw_input("Plotted clean spectrum - press Enter to continue...")
+
+#--------------------------------------------------------------------------------
+# Doing an example cleaning of a times series block
+#--------------------------------------------------------------------------------
+
+print "Now doing RFI suppression and back transformation for a single block"
+ws["baseline"].crcalcbaseline(ws["frequency"],ws["numin_i"],ws["numax_i"],ws["coeffs"],ws,doplot=False)
+ws["baseline"].sqrt()
+ws["datafile"]["block"]=578
+
+if ws["verbose"]: print time.clock()-ws["t0"],"s: Reading in block #578 and invfft dirty spectrum"
+rfitime=ws["datafile"]["Time"]
+rfitime.setUnit("m","")
+ws["fx"].read(ws["datafile"],"Fx")
+ws["fft"][...].fftw(ws["fx"][...])
+ws["fft"] /= ws["baseline"]
+
+#Calculating renormalization factors for the invfft
+meanbaseline=ws["baseline"][...].mean()/pi #The pi is just a fudge factor .... I think
+factor=hArray(meanbaseline/ws["datafile"]["blocksize"])
+
+scrtfft=hArray(copy=ws["fft"]) # Note that invfftw destroy the input vector!! Hence need copy here.
+
+dirty=ws["datafile"]["emptyFx"]
+dirty[...].invfftw(scrtfft[...])
+dirty[...] *= factor[...]
+
+if ws["verbose"]: print time.clock()-ws["t0"],"s: Cleaning spectrum and invfft clean spectrum"
+cleanfft=ws["datafile"]["emptyFFT"]
+cleanfft.copy(ws["fft"])
+cleanfft[...].set(ws["bad_channels"][...,[0]:ws["nbad_channels"]],1.0j)
+
+clean=ws["datafile"]["emptyFx"]
+scrtfft.copy(cleanfft)
+clean[...].invfftw(scrtfft[...])
+clean[...] *= factor[...]
+
+if ws["doplot"]: 
+    dirty[10].plot(xvalues=rfitime)
+    clean[10].plot(xvalues=rfitime,clf=False)
+    plt.savefig("testrfi2-timeseries.pdf",format="pdf")
+
 
 #--------------------------------------------------------------------------------
 #End of Calculations
 #--------------------------------------------------------------------------------
+
+"""
+
+filename=filename_lofar_onesecond
+file=crfile(filename)
+qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-7,7)}
+CRQualityCheck(qualitycriteria,file,dataarray=None,maxblocksize=65536,nsigma=5,verbose=False)
+
+
+
+ws["spectrum"].fill(0)
+ws["spectrum"].spectralpower(ws["fft"])
+ws["spectrum"][0].plot()
+
+cleanspec=hArray(properties=ws.spectrum)
+cleanspec.fill(0)
+cleanspec.spectralpower(cleanfft)
+cleanspec[0].plot(clf=False)
+"""
 
 """
 Input parameters used:

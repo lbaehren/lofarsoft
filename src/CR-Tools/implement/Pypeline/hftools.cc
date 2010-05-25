@@ -2801,6 +2801,50 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Performs a sum over the absolute values in a vector and returns the value.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSumAbs
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
+{
+  typedef IterValueType T;
+  T sum=hfnull<T>();
+  Iter it=vec;
+  while (it!=vec_end) {sum+=abs(*it); ++it;};
+  return sum;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Performs a sum over the square values in a vector and returns the value.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSumSquare
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
+{
+  typedef IterValueType T;
+  T sum=hfnull<T>();
+  Iter it=vec;
+  while (it!=vec_end) {sum+=(*it)*(*it); ++it;};
+  return sum;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Piecewise multiplication of the elements in a vector and summing of the results
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMulSum
@@ -2971,6 +3015,48 @@ template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
   HNumber mean=hSum(vec,vec_end);
+  if (vec_end>vec) mean/=(vec_end-vec);
+  return mean;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Returns the mean value of the absolue values of all elements in a vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMeanAbs
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
+{
+  HNumber mean=hSumAbs(vec,vec_end);
+  if (vec_end>vec) mean/=(vec_end-vec);
+  return mean;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Returns the mean value of the square values of all elements in a vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMeanSquare
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
+{
+  HNumber mean=hSumSquare(vec,vec_end);
   if (vec_end>vec) mean/=(vec_end-vec);
   return mean;
 }
@@ -4782,6 +4868,8 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   $PARDOCSTRING
 
   This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf
+
+  !!!! Note that the input vector will be modified and scrambled !!!!
 
 The DFT results are stored in-order in the array out, with the
 zero-frequency (DC) component in data_out[0]. If data_in != data_out, the transform
