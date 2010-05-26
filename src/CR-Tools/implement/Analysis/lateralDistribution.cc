@@ -199,6 +199,8 @@ namespace CR { // Namespace CR -- begin
       ptstats->SetOptStat(0);
       ptstats->SetOptFit(111);
       ptstats->Draw();
+      latPro->GetListOfFunctions()->Add(ptstats);
+      ptstats->SetParent(latPro->GetListOfFunctions());
 
       /* statistic box of EAS parameter */
       TPaveStats *easstats = new TPaveStats(0.45,0.84,0.62,0.99,"brNDC");
@@ -538,7 +540,7 @@ namespace CR { // Namespace CR -- begin
         erg.define("eps",fitfuncExp->GetParameter(0));
         erg.define("R_0",fitfuncExp->GetParameter(1));
         //erg.define("sigeps",fitfuncExp->GetParError(0));
-        double sigmaEpsilon = sqrt(pow(fitfuncExp->GetParError(0),2)+pow((0.19*fitfuncExp->GetParameter(0)),2));
+        double sigmaEpsilon = sqrt(pow(fitfuncExp->GetParError(0),2)+pow((0.05*fitfuncExp->GetParameter(0)),2));
         erg.define("sigeps",sigmaEpsilon);
         erg.define("sigR_0",fitfuncExp->GetParError(1));
         erg.define("chi2NDF",fitfuncExp->GetChisquare()/double(fitfuncExp->GetNDF()));
@@ -691,6 +693,8 @@ namespace CR { // Namespace CR -- begin
       ptstats->SetOptStat(0);
       ptstats->SetOptFit(111);
       ptstats->Draw();
+      latPro->GetListOfFunctions()->Add(ptstats);
+      ptstats->SetParent(latPro->GetListOfFunctions());
 
       /* statistic box of EAS parameter */
       TPaveStats *easstats = new TPaveStats(0.45,0.84,0.62,0.99,"brNDC");

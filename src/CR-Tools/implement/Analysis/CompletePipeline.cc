@@ -1356,9 +1356,9 @@ namespace CR { // Namespace CR -- begin
         timeRangeNoise = calculateNoiseRange(timeValues, noiseStart, noiseStop);
  
       // print header line of output
-      cout << "Ant   env height   max height   min height   minMax    Sign   noise        SNR     env time   max time   min time   time of half height     FWHM\n"
-           << "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]    (env)      [us]       [us]       [us]           [us]             [ns]\n"
-           <<  "---------------------------------------------------------------------------------------------------------------------------------\n";
+      cout << "Ant   env height   max height   min height     noise      env time   max time   min time   time of half height     FWHM\n"
+           << "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]     [us]       [us]       [us]           [us]              [ns]\n"
+           <<  "----------------------------------------------------------------------------------------------------------------------\n";
 
       // find the maximal y values for all selected antennas
       for (unsigned int i = 0; i < antennaSelection.nelements(); ++i)
@@ -1564,9 +1564,9 @@ namespace CR { // Namespace CR -- begin
              << setw(11)<< maximum*1e6 << "  "
              << setw(11)<< minimum*1e6 << " "
              //<< setw(11)<< minMaxSign << " "
-             << setw(11)<< envSign << " "
+             //<< setw(11)<< envSign << " "
              << setw(11)<< noise*1e6 << "   "
-             << setw(8) << snr << "  "
+             //<< setw(8) << snr << "  "
              << setw(8) << timeRange(envMaxtimevalue)*1e6 << "   "
              << setw(8) << timeRange(maxtimevalue)*1e6 << "   "
              << setw(8) << timeRange(mintimevalue)*1e6 << "       "
@@ -1584,7 +1584,7 @@ namespace CR { // Namespace CR -- begin
              << setw(11)<< min(static_cast< Vector<Double> >(maxima))<< "  "
              << setw(11)<< min(static_cast< Vector<Double> >(minima)) << " "
              << setw(11)<< min(static_cast< Vector<Double> >(noiseValues)) << "   "
-             << setw(8) << min(static_cast< Vector<Double> >(snrValues)) << "  "
+             //<< setw(8) << min(static_cast< Vector<Double> >(snrValues)) << "  "
              << setw(8) << min(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << min(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << min(static_cast< Vector<Double> >(minima_time)) << "       "
@@ -1595,7 +1595,7 @@ namespace CR { // Namespace CR -- begin
              << setw(11)<< max(static_cast< Vector<Double> >(maxima))<< "  "
              << setw(11)<< max(static_cast< Vector<Double> >(minima)) << " "
              << setw(11)<< max(static_cast< Vector<Double> >(noiseValues)) << "   "
-             << setw(8) << max(static_cast< Vector<Double> >(snrValues)) << "  "
+             //<< setw(8) << max(static_cast< Vector<Double> >(snrValues)) << "  "
              << setw(8) << max(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << max(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << max(static_cast< Vector<Double> >(minima_time)) << "       "
@@ -1608,7 +1608,7 @@ namespace CR { // Namespace CR -- begin
              << setw(11)<< mean(static_cast< Vector<Double> >(maxima))<< "  "
              << setw(11)<< mean(static_cast< Vector<Double> >(minima)) << " "
              << setw(11)<< mean(static_cast< Vector<Double> >(noiseValues)) << "   "
-             << setw(8) << mean(static_cast< Vector<Double> >(snrValues)) << "  "
+             //<< setw(8) << mean(static_cast< Vector<Double> >(snrValues)) << "  "
              << setw(8) << mean(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << mean(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << mean(static_cast< Vector<Double> >(minima_time)) << "       "
@@ -1619,7 +1619,7 @@ namespace CR { // Namespace CR -- begin
              << setw(11)<< median(static_cast< Vector<Double> >(maxima))<< "  "
              << setw(11)<< median(static_cast< Vector<Double> >(minima)) << " "
              << setw(11)<< median(static_cast< Vector<Double> >(noiseValues)) << "   "
-             << setw(8) << median(static_cast< Vector<Double> >(snrValues)) << "  "
+             //<< setw(8) << median(static_cast< Vector<Double> >(snrValues)) << "  "
              << setw(8) << median(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << median(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << median(static_cast< Vector<Double> >(minima_time)) << "       "
