@@ -11,6 +11,7 @@ case "$2" in
   start) 
          if [ $FURL ]; then
              FURLFILE=`mktemp`
+             TMPFURL=1
              echo $FURL > $FURLFILE
          else
              FURLFILE=$CONTROLPATH/engine.furl
@@ -43,7 +44,9 @@ case "$2" in
                     echo "ipengine already running on `hostname`"
                 fi
             done
-         rm $FURLFILE
+         if [ $TMPFURL ]; then
+             rm $FURLFILE
+         fi
          ;;
   stop)
          for PIDFILE in $PIDPATH/ipengine*.pid
