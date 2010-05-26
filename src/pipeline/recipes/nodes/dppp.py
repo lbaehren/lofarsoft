@@ -79,6 +79,8 @@ class dppp(LOFARnode):
                     # If ndppp segfaults, we get a return value of -11.
                     # The segfaults seem to be transitory, so try re-running
                     # if we get one and see if it works on the second attempt
+                    if tries > 0:
+                        self.logger.debug("Retrying...")
                     self.logger.debug("Running: %s" % (' '.join(cmd),))
                     ndppp_process = Popen(cmd, cwd=working_dir, env=env, close_fds=True, stdout=PIPE, stderr=STDOUT)
                     sout, serr = ndppp_process.communicate()
