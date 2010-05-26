@@ -1164,21 +1164,20 @@ namespace CR { // Namespace CR -- begin
         // add calibration uncertainty of 2 ns in square
         it->second.timeError = sqrt( pow(it->second.timeError,2) + 4);
         
-        cout << "For antenna " << it->second.antenna << ":\n";
-        cout << "Env. height = " << it->second.envelopeMaximum 
-             << " +/- " << noise
-             << "\t time = " << it->second.envelopeTime
-             << " +/- " << 2            
-             << endl;
-        cout << "Cor. height = " << it->second.height
-             << " +/- " << it->second.heightError
-             << "\t time = " << it->second.envelopeTime
-             << " +/- " << it->second.timeError
-             << endl;
-          
-//     double heightError;
-//     double time;
-//     double timeError;
+        bool debug = false;
+        if (debug) {
+          cout << "For antenna " << it->second.antenna << ":\n";
+          cout << "Env. height = " << it->second.envelopeMaximum 
+               << " +/- " << noise
+               << "\t time = " << it->second.envelopeTime
+               << " +/- " << 2            
+               << endl;
+          cout << "Cor. height = " << it->second.height
+               << " +/- " << it->second.heightError
+               << "\t time = " << it->second.envelopeTime
+               << " +/- " << it->second.timeError
+               << endl;
+        }       
       }  
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::caculateNoiseInfluence: " << x.getMesg() << endl;

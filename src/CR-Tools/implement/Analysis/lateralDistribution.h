@@ -177,8 +177,7 @@ namespace CR { // Namespace CR -- begin
    */
     void fitLateralDistribution (const string& filePrefix,
                                  map <int, PulseProperties>& pulses,
-                                 Record& erg,
-                                 bool fitPowerLaw=false );
+                                 Record& erg);
 
     /*!
       \brief Plots lateral distribution of pulse arrival times

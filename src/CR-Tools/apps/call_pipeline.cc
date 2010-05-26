@@ -140,7 +140,6 @@ using CR::LopesEventIn;
   lateralOutputFile       = false
   lateralSNRcut           = 1.0
   lateralTimeCut          = 15e-9
-  lateralPowerLaw         = false
   calculateMeanValues     = false
   lateralTimeDistribution = false
   \endverbatim
@@ -280,16 +279,13 @@ using CR::LopesEventIn;
                             The applied cuts and the method itself is under test and investigation. Thus,
                             don't use it, if you are not exactly sure, what you are doing. The physics results
                             could be misleading.<br>
-    <li>\b lateralSNRcut    Status: <i>preliminary</i><br>
+    <li>\b lateralSNRcut    Status: <i>switched off</i><br>
                             SNR cut for the lateral distribution.<br>
-                            Caution: This feature is preliminary, not well tested, and might be removed.<br>
-    <li>\b lateralTimeCut   Status: <i>preliminary</i><br>
+                            Caution: This option has no effect at the moment.<br>
+    <li>\b lateralTimeCut   Status: <i>switched off</i><br>
                             Points with a time position more than a certain value away of the CC beam 
                             center will be removed from the lateral distribution.<br>
-                            Caution: This feature is preliminary, not well tested, and might be removed.<br>
-    <li>\b lateralPowerLaw  Status: <i>preliminary</i><br>
-                            Fits a power law in addition to an exponential<br>
-                            Caution: This feature is preliminary, not well tested, and might be removed.<br>
+                            Caution: This option has no effect at the moment.<br>
     <li>\b calculateMeanValues Status: <i>preliminary</i><br>
                             Output of mean values of lateral distribution results.<br>
                             Caution: This feature is preliminary, not well tested, and might be removed.<br>
@@ -904,7 +900,6 @@ void readConfigFile (const string &filename)
    config.addBool("lateralOutputFile", false);      	// no file for the lateral distribution will be created
    config.addDouble("lateralSNRcut", 1.0);            	// SNR cut for removing points from lateral distribution
    config.addDouble("lateralTimeCut", 15e-9);         	// Allowed time window +/- arround CC-beam-center for found peaks
-   config.addBool("lateralPowerLaw", false);            // fits a power law in addition to an exponential
    config.addBool("calculateMeanValues", false);   	// calculate some mean values of all processed events
    config.addBool("lateralTimeDistribution", false);    // the lateral time distribution will not be generated
    config.addDouble("randomDelay", 0.);                 // random delay (in  ns), for timing uncertainty studies
@@ -1271,9 +1266,6 @@ int main (int argc, char *argv[])
   double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;             // R_0 from lateral distribution exponential fit
   double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;             // Epsilon from lateral distribution exponential fit
   double chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;                                // Chi^2/NDF of lateral distribution exponential fit
-  double kPow = 0, sigkPow = 0, kPow_NS = 0, sigkPow_NS = 0, kPow_VE = 0, sigkPow_VE = 0;         // k from lateral distribution power law fit
-  double epsPow = 0, sigepsPow = 0, epsPow_NS = 0, sigepsPow_NS = 0, epsPow_VE = 0, sigepsPow_VE = 0; // Epsilon from lateral distribution power law fit
-  double chi2NDFPow = 0, chi2NDFPow_NS = 0, chi2NDFPow_VE = 0;                          // Chi^2/NDF of lateral distribution power law fit
   map <int,PulseProperties> rawPulsesMap;                // pulse properties of pules in raw data traces
   map <int,PulseProperties> calibPulsesMap;              // pulse properties of pules in calibrated data traces
   bool goodEW = false, goodNS = false, goodVE = false;                // true if reconstruction worked
@@ -1283,21 +1275,16 @@ int main (int argc, char *argv[])
   unsigned int NCCbeamAntennas = 0, NlateralAntennas = 0; // antennas used for CC beam and lateral distribution
   unsigned int NCCbeamAntennas_NS = 0, NlateralAntennas_NS = 0; // antennas used for CC beam and lateral distribution
   unsigned int NCCbeamAntennas_VE = 0, NlateralAntennas_VE = 0; // antennas used for CC beam and lateral distribution
-  int CutCloseToCore, CutCloseToCore_NS, CutCloseToCore_VE;              // # of cut antennas in lateral distribution fit
-  int CutSmallSignal, CutSmallSignal_NS, CutSmallSignal_VE;              // # of cut antennas in lateral distribution fit
-  int CutBadTiming, CutBadTiming_NS, CutBadTiming_VE;                  // # of cut antennas in lateral distribution fit
-  int CutSNR, CutSNR_NS, CutSNR_VE;                              // # of cut antennas in lateral distribution fit
+  //int CutCloseToCore, CutCloseToCore_NS, CutCloseToCore_VE;              // # of cut antennas in lateral distribution fit
+  //int CutSmallSignal, CutSmallSignal_NS, CutSmallSignal_VE;              // # of cut antennas in lateral distribution fit
+  //int CutBadTiming, CutBadTiming_NS, CutBadTiming_VE;                  // # of cut antennas in lateral distribution fit
+  //int CutSNR, CutSNR_NS, CutSNR_VE;                              // # of cut antennas in lateral distribution fit
   double latMeanDist, latMeanDist_NS, latMeanDist_VE;                 // mean distance of the antennas in the lateral distribution
   double latMeanDistCC, latMeanDistCC_NS, latMeanDistCC_VE;             // mean distance of the antennas used for the CC beam
   double ratioDiffSign, ratioDiffSign_NS, ratioDiffSign_VE;
   double ratioDiffSignEnv, ratioDiffSignEnv_NS, ratioDiffSignEnv_VE;
   double weightedTotSign,weightedTotSign_NS,weightedTotSign_VE;
   double weightedTotSignEnv,weightedTotSignEnv_NS,weightedTotSignEnv_VE;
-
-
-
-
-
 
   PulseProperties* rawPulses[MAX_NUM_ANTENNAS];       // use array of pointers to store pulse properties in root tree
   PulseProperties* calibPulses[MAX_NUM_ANTENNAS];     // use array of pointers to store pulse properties in root tree
@@ -1388,7 +1375,6 @@ int main (int argc, char *argv[])
              << "lateralOutputFile = false\n"
              << "lateralSNRcut = 1.0\n"
              << "lateralTimeCut = 25e-9\n"
-             << "lateralPowerLaw = false\n"
              << "calculateMeanValues = false\n"
              << "lateralTimeDistribution = false\n"
              << "randomDelay = 0\n"
@@ -1542,19 +1528,12 @@ int main (int argc, char *argv[])
           roottree->Branch("eps",&eps,"eps/D");
           roottree->Branch("sigeps",&sigeps,"sigeps/D");
           roottree->Branch("chi2NDF",&chi2NDF,"chi2NDF/D");
-          roottree->Branch("CutCloseToCore",&CutCloseToCore,"CutCloseToCore/I");
-          roottree->Branch("CutSmallSignal",&CutSmallSignal,"CutSmallSignal/I");
-          roottree->Branch("CutBadTiming",&CutBadTiming,"CutBadTiming/I");
-          roottree->Branch("CutSNR",&CutSNR,"CutSNR/I");
+          //roottree->Branch("CutCloseToCore",&CutCloseToCore,"CutCloseToCore/I");
+          //roottree->Branch("CutSmallSignal",&CutSmallSignal,"CutSmallSignal/I");
+          //roottree->Branch("CutBadTiming",&CutBadTiming,"CutBadTiming/I");
+          //roottree->Branch("CutSNR",&CutSNR,"CutSNR/I");
           roottree->Branch("latMeanDist",&latMeanDist,"latMeanDist/D");
           roottree->Branch("NlateralAntennas",&NlateralAntennas,"NlateralAntennas/I");
-          if (config["lateralPowerLaw"]->bValue()) {
-            roottree->Branch("kPow",&kPow,"kPow/D");
-            roottree->Branch("sigkPow",&sigkPow,"sigkPow/D");
-            roottree->Branch("epsPow",&epsPow,"epsPow/D");
-            roottree->Branch("sigepsPow",&sigepsPow,"sigepsPow/D");
-            roottree->Branch("chi2NDFPow",&chi2NDFPow,"chi2NDFPow/D");
-          }  
         }
       }
       if ( (config["polarization"]->sValue() == "EW") || (config["polarization"]->sValue() == "BOTH") || (config["polarization"]->sValue() == "THREE") ) {
@@ -1588,19 +1567,12 @@ int main (int argc, char *argv[])
           roottree->Branch("eps_EW",&eps,"eps_EW/D");
           roottree->Branch("sigeps_EW",&sigeps,"sigeps_EW/D");
           roottree->Branch("chi2NDF_EW",&chi2NDF,"chi2NDF_EW/D");
-          roottree->Branch("CutCloseToCore_EW",&CutCloseToCore,"CutCloseToCore_EW/I");
-          roottree->Branch("CutSmallSignal_EW",&CutSmallSignal,"CutSmallSignal_EW/I");
-          roottree->Branch("CutBadTiming_EW",&CutBadTiming,"CutBadTiming_EW/I");
-          roottree->Branch("CutSNR_EW",&CutSNR,"CutSNR_EW/I");
+          //roottree->Branch("CutCloseToCore_EW",&CutCloseToCore,"CutCloseToCore_EW/I");
+          //roottree->Branch("CutSmallSignal_EW",&CutSmallSignal,"CutSmallSignal_EW/I");
+          //roottree->Branch("CutBadTiming_EW",&CutBadTiming,"CutBadTiming_EW/I");
+          //roottree->Branch("CutSNR_EW",&CutSNR,"CutSNR_EW/I");
           roottree->Branch("latMeanDist_EW",&latMeanDist,"latMeanDist_EW/D");
           roottree->Branch("NlateralAntennas_EW",&NlateralAntennas,"NlateralAntennas_EW/I");
-          if (config["lateralPowerLaw"]->bValue()) {
-            roottree->Branch("kPow_EW",&kPow,"kPow_EW/D");
-            roottree->Branch("sigkPow_EW",&sigkPow,"sigkPow_EW/D");
-            roottree->Branch("epsPow_EW",&epsPow,"epsPow_EW/D");
-            roottree->Branch("sigepsPow_EW",&sigepsPow,"sigepsPow_EW/D");
-            roottree->Branch("chi2NDFPow_EW",&chi2NDFPow,"chi2NDFPow_EW/D");
-          }  
         }
       }
       if ( (config["polarization"]->sValue() == "NS") || (config["polarization"]->sValue() == "BOTH") || (config["polarization"]->sValue() == "THREE") ) {
@@ -1633,19 +1605,12 @@ int main (int argc, char *argv[])
           roottree->Branch("eps_NS",&eps_NS,"eps_NS/D");
           roottree->Branch("sigeps_NS",&sigeps_NS,"sigeps_NS/D");
           roottree->Branch("chi2NDF_NS",&chi2NDF_NS,"chi2NDF_NS/D");
-          roottree->Branch("CutCloseToCore_NS",&CutCloseToCore_NS,"CutCloseToCore_NS/I");
-          roottree->Branch("CutSmallSignal_NS",&CutSmallSignal_NS,"CutSmallSignal_NS/I");
-          roottree->Branch("CutBadTiming_NS",&CutBadTiming_NS,"CutBadTiming_NS/I");
-          roottree->Branch("CutSNR_NS",&CutSNR_NS,"CutSNR_NS/I");
+          //roottree->Branch("CutCloseToCore_NS",&CutCloseToCore_NS,"CutCloseToCore_NS/I");
+          //roottree->Branch("CutSmallSignal_NS",&CutSmallSignal_NS,"CutSmallSignal_NS/I");
+          //roottree->Branch("CutBadTiming_NS",&CutBadTiming_NS,"CutBadTiming_NS/I");
+          //roottree->Branch("CutSNR_NS",&CutSNR_NS,"CutSNR_NS/I");
           roottree->Branch("latMeanDist_NS",&latMeanDist_NS,"latMeanDist_NS/D");
           roottree->Branch("NlateralAntennas_NS",&NlateralAntennas_NS,"NlateralAntennas_NS/I");
-          if (config["lateralPowerLaw"]->bValue()) {
-            roottree->Branch("kPow_NS",&kPow_NS,"kPow_NS/D");
-            roottree->Branch("sigkPow_NS",&sigkPow_NS,"sigkPow_NS/D");
-            roottree->Branch("epsPow_NS",&epsPow_NS,"epsPow_NS/D");
-            roottree->Branch("sigepsPow_NS",&sigepsPow_NS,"sigepsPow_NS/D");
-            roottree->Branch("chi2NDFPow_NS",&chi2NDFPow_NS,"chi2NDFPow_NS/D");
-          }   
         }
       }
       if ( (config["polarization"]->sValue() == "VE") || (config["polarization"]->sValue() == "THREE") ) {
@@ -1678,19 +1643,12 @@ int main (int argc, char *argv[])
           roottree->Branch("eps_VE",&eps_NS,"eps_VE/D");
           roottree->Branch("sigeps_VE",&sigeps_NS,"sigeps_VE/D");
           roottree->Branch("chi2NDF_VE",&chi2NDF_NS,"chi2NDF_VE/D");
-          roottree->Branch("CutCloseToCore_VE",&CutCloseToCore_NS,"CutCloseToCore_VE/I");
-          roottree->Branch("CutSmallSignal_VE",&CutSmallSignal_NS,"CutSmallSignal_VE/I");
-          roottree->Branch("CutBadTiming_VE",&CutBadTiming_NS,"CutBadTiming_VE/I");
-          roottree->Branch("CutSNR_VE",&CutSNR_NS,"CutSNR_VE/I");
+          //roottree->Branch("CutCloseToCore_VE",&CutCloseToCore_NS,"CutCloseToCore_VE/I");
+          //roottree->Branch("CutSmallSignal_VE",&CutSmallSignal_NS,"CutSmallSignal_VE/I");
+          //roottree->Branch("CutBadTiming_VE",&CutBadTiming_NS,"CutBadTiming_VE/I");
+          //roottree->Branch("CutSNR_VE",&CutSNR_NS,"CutSNR_VE/I");
           roottree->Branch("latMeanDist_VE",&latMeanDist_NS,"latMeanDist_VE/D");
           roottree->Branch("NlateralAntennas_VE",&NlateralAntennas_NS,"NlateralAntennas_VE/I");
-          if (config["lateralPowerLaw"]->bValue()) {
-            roottree->Branch("kPow_VE",&kPow_NS,"kPow_VE/D");
-            roottree->Branch("sigkPow_VE",&sigkPow_NS,"sigkPow_VE/D");
-            roottree->Branch("epsPow_VE",&epsPow_NS,"epsPow_VE/D");
-            roottree->Branch("sigepsPow_VE",&sigepsPow_NS,"sigepsPow_VE/D");
-            roottree->Branch("chi2NDFPow_VE",&chi2NDFPow_NS,"chi2NDFPow_VE/D");
-          }
         }
       }
     } 
@@ -1780,19 +1738,16 @@ int main (int argc, char *argv[])
       R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;
       chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;
-      kPow = 0, sigkPow = 0, kPow_NS = 0, sigkPow_NS = 0, kPow_VE = 0, sigkPow_VE = 0;
-      epsPow = 0, sigepsPow = 0, epsPow_NS = 0, sigepsPow_NS = 0, epsPow_VE = 0, sigepsPow_VE = 0;
-      chi2NDFPow = 0, chi2NDFPow_NS = 0, chi2NDFPow_VE = 0;
       rmsCCbeam = 0, rmsXbeam = 0, rmsPbeam = 0 ;
       rmsCCbeam_NS = 0, rmsXbeam_NS = 0, rmsPbeam_NS = 0;
       rmsCCbeam_VE = 0, rmsXbeam_VE = 0, rmsPbeam_VE = 0;
       NCCbeamAntennas = 0, NlateralAntennas = 0;
       NCCbeamAntennas_NS = 0, NlateralAntennas_NS = 0;
       NCCbeamAntennas_VE = 0, NlateralAntennas_VE = 0;
-      CutCloseToCore = 0, CutCloseToCore_NS = 0, CutCloseToCore_VE = 0;
-      CutSmallSignal = 0, CutSmallSignal_NS = 0, CutSmallSignal_VE = 0;
-      CutBadTiming = 0, CutBadTiming_NS = 0, CutBadTiming_VE = 0;
-      CutSNR = 0, CutSNR_NS = 0, CutSNR_VE = 0;
+      //CutCloseToCore = 0, CutCloseToCore_NS = 0, CutCloseToCore_VE = 0;
+      //CutSmallSignal = 0, CutSmallSignal_NS = 0, CutSmallSignal_VE = 0;
+      //CutBadTiming = 0, CutBadTiming_NS = 0, CutBadTiming_VE = 0;
+      //CutSNR = 0, CutSNR_NS = 0, CutSNR_VE = 0;
       latMeanDist = 0, latMeanDist_NS = 0, latMeanDist_VE = 0;
       latMeanDistCC = 0, latMeanDistCC_NS = 0, latMeanDistCC_VE = 0;
       rawPulsesMap = map <int,PulseProperties>();
@@ -1959,25 +1914,18 @@ int main (int argc, char *argv[])
             lateralFitter.setLateralSNRcut(config["lateralSNRcut"]->dValue());
             lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
-              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", calibPulsesMap, results, config["lateralPowerLaw"]->bValue());
+              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", calibPulsesMap, results);
               R_0 = results.asDouble("R_0");
               sigR_0 = results.asDouble("sigR_0");
               eps = results.asDouble("eps");
               sigeps = results.asDouble("sigeps");
               chi2NDF = results.asDouble("chi2NDF");
-              CutCloseToCore = results.asInt("CutCloseToCore");
-              CutSmallSignal = results.asInt("CutSmallSignal");
-              CutBadTiming = results.asInt("CutBadTiming");
-              CutSNR = results.asInt("CutSNR");
+              //CutCloseToCore = results.asInt("CutCloseToCore");
+              //CutSmallSignal = results.asInt("CutSmallSignal");
+              //CutBadTiming = results.asInt("CutBadTiming");
+              //CutSNR = results.asInt("CutSNR");
               latMeanDist = results.asDouble("latMeanDist");
               NlateralAntennas = results.asuInt("NlateralAntennas");
-              if (config["lateralPowerLaw"]->bValue()) {
-                kPow = results.asDouble("kPow");
-                sigkPow = results.asDouble("sigkPow");
-                epsPow = results.asDouble("epsPow");
-                sigepsPow = results.asDouble("sigepsPow");
-                chi2NDFPow = results.asDouble("chi2NDFPow");
-              }
             }
 
             // plot lateral distribution of arrival times, if requested
@@ -2095,25 +2043,18 @@ int main (int argc, char *argv[])
             lateralFitter.setLateralSNRcut(config["lateralSNRcut"]->dValue());
             lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
-              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", newPulses, results, config["lateralPowerLaw"]->bValue());
+              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", newPulses, results);
               R_0_NS = results.asDouble("R_0");
               sigR_0_NS = results.asDouble("sigR_0");
               eps_NS = results.asDouble("eps");
               sigeps_NS = results.asDouble("sigeps");
               chi2NDF_NS = results.asDouble("chi2NDF");
-              CutCloseToCore_NS = results.asInt("CutCloseToCore");
-              CutSmallSignal_NS = results.asInt("CutSmallSignal");
-              CutBadTiming_NS = results.asInt("CutBadTiming");
-              CutSNR_NS = results.asInt("CutSNR");
+              //CutCloseToCore_NS = results.asInt("CutCloseToCore");
+              //CutSmallSignal_NS = results.asInt("CutSmallSignal");
+              //CutBadTiming_NS = results.asInt("CutBadTiming");
+              //CutSNR_NS = results.asInt("CutSNR");
               latMeanDist_NS = results.asDouble("latMeanDist");
               NlateralAntennas_NS = results.asuInt("NlateralAntennas");
-              if (config["lateralPowerLaw"]->bValue()) {
-                kPow_NS = results.asDouble("kPow");
-                sigkPow_NS = results.asDouble("sigkPow");
-                epsPow_NS = results.asDouble("epsPow");
-                sigepsPow_NS = results.asDouble("sigepsPow");
-                chi2NDFPow_NS = results.asDouble("chi2NDFPow");
-              }
             }
 
             // plot lateral distribution of arrival times, if requested
@@ -2234,25 +2175,18 @@ int main (int argc, char *argv[])
             lateralFitter.setLateralSNRcut(config["lateralSNRcut"]->dValue());
             lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
-              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", newPulses, results, config["lateralPowerLaw"]->bValue());
+              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", newPulses, results);
               R_0_VE = results.asDouble("R_0");
               sigR_0_VE = results.asDouble("sigR_0");
               eps_VE = results.asDouble("eps");
               sigeps_VE = results.asDouble("sigeps");
               chi2NDF_VE = results.asDouble("chi2NDF");
-              CutCloseToCore_VE = results.asInt("CutCloseToCore");
-              CutSmallSignal_VE = results.asInt("CutSmallSignal");
-              CutBadTiming_VE = results.asInt("CutBadTiming");
-              CutSNR_VE = results.asInt("CutSNR");
+              //CutCloseToCore_VE = results.asInt("CutCloseToCore");
+              //CutSmallSignal_VE = results.asInt("CutSmallSignal");
+              //CutBadTiming_VE = results.asInt("CutBadTiming");
+              //CutSNR_VE = results.asInt("CutSNR");
               latMeanDist_VE = results.asDouble("latMeanDist");
               NlateralAntennas_VE = results.asuInt("NlateralAntennas");
-              if (config["lateralPowerLaw"]->bValue()) {
-                kPow_VE = results.asDouble("kPow");
-                sigkPow_VE = results.asDouble("sigkPow");
-                epsPow_VE = results.asDouble("epsPow");
-                sigepsPow_VE = results.asDouble("sigepsPow");
-                chi2NDFPow_VE = results.asDouble("chi2NDFPow");
-              }
             }
 
             // plot lateral distribution of arrival times, if requested
@@ -2370,10 +2304,6 @@ int main (int argc, char *argv[])
               ++meanResCounter[antenna-1];
               meanCalPulses[antenna-1]->lateralExpHeight = it->second.lateralExpHeight;
               meanCalPulses[antenna-1]->lateralExpDeviation = it->second.lateralExpDeviation;
-              if (config["lateralPowerLaw"]->bValue()) {
-                meanCalPulses[antenna-1]->lateralPowHeight = it->second.lateralPowHeight;
-                meanCalPulses[antenna-1]->lateralPowDeviation = it->second.lateralPowDeviation;
-              }  
             } else {
               ++meanResCounter[antenna-1];
               meanCalPulses[antenna-1]->lateralExpHeight = 
@@ -2382,14 +2312,6 @@ int main (int argc, char *argv[])
               meanCalPulses[antenna-1]->lateralExpDeviation = 
                 ((meanResCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->lateralExpDeviation + it->second.lateralExpDeviation)
                 / meanResCounter[antenna-1];
-              if (config["lateralPowerLaw"]->bValue()) {
-                meanCalPulses[antenna-1]->lateralPowHeight = 
-                  ((meanResCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->lateralPowHeight + it->second.lateralPowHeight)
-                  / meanResCounter[antenna-1];
-                meanCalPulses[antenna-1]->lateralPowDeviation = 
-                  ((meanResCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->lateralPowDeviation + it->second.lateralPowDeviation)
-                  / meanResCounter[antenna-1];
-              }    
             }
           }
 
