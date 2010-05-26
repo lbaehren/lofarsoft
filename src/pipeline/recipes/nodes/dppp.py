@@ -84,7 +84,7 @@ class dppp(LOFARnode):
                     sout, serr = ndppp_process.communicate()
                     self.logger.debug("NDPPP stdout: %s" % (sout,))
                     self.logger.debug("NDPPP stderr: %s" % (serr,))
-                    if ndppp_preocess.returncode == 0:
+                    if ndppp_process.returncode == 0:
                         break
                     elif ndppp_process.returncode == -11:
                         self.logger.warn("NDPPP process segfaulted!")
