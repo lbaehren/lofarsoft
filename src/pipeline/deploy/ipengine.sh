@@ -29,13 +29,18 @@ case "$2" in
                        --pidfile $PIDFILE                                \
                        --exec /opt/pipeline/dependencies/bin/ipengine -- \
                        --furl-file=$FURLFILE --logfile=$PIDPATH/log
-                     i=0
+                     start_time=`date +%s`
                      while :
                         do
                             sleep 0.1
                             PID=`cat $PIDFILE 2> /dev/null`
                             grep "engine registration succeeded" $PIDPATH/log$PID.log > /dev/null 2>&1
                             if [ $? -eq 0 ]; then
+                                break
+                            fi
+                            # Time out after 30 seconds
+                            end_time=`date +%s`
+                            if [ $(($end_time-$start_time)) -ge 30 ]; then
                                 break
                             fi
                         done
