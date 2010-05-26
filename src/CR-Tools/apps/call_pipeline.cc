@@ -1266,6 +1266,13 @@ int main (int argc, char *argv[])
   double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;             // R_0 from lateral distribution exponential fit
   double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;             // Epsilon from lateral distribution exponential fit
   double chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;                                // Chi^2/NDF of lateral distribution exponential fit
+  // values for lateral distribution of arrival times
+  double latTimeRcurv = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
+  double latTimeSigRcurv = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
+  double latTimeOffset = 0, latTimeOffset_NS = 0, latTimeOffset_VE = 0;
+  double latTimeSigOffset = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
+  double latTimeChi2NDF = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
+  
   map <int,PulseProperties> rawPulsesMap;                // pulse properties of pules in raw data traces
   map <int,PulseProperties> calibPulsesMap;              // pulse properties of pules in calibrated data traces
   bool goodEW = false, goodNS = false, goodVE = false;                // true if reconstruction worked
@@ -1535,6 +1542,13 @@ int main (int argc, char *argv[])
           roottree->Branch("latMeanDist",&latMeanDist,"latMeanDist/D");
           roottree->Branch("NlateralAntennas",&NlateralAntennas,"NlateralAntennas/I");
         }
+        if (config["lateralTimeDistribution"]->bValue()) {
+          roottree->Branch("latTimeRcurv",&latTimeRcurv,"latTimeRcurv/D");
+          roottree->Branch("latTimeSigRcurv",&latTimeSigRcurv,"latTimeSigRcurv/D");
+          roottree->Branch("latTimeOffset",&latTimeOffset,"latTimeOffset/D");
+          roottree->Branch("latTimeSigOffset",&latTimeSigOffset,"latTimeSigOffset/D");
+          roottree->Branch("latTimeChi2NDF",&latTimeChi2NDF,"latTimeChi2NDF/D");
+        }
       }
       if ( (config["polarization"]->sValue() == "EW") || (config["polarization"]->sValue() == "BOTH") || (config["polarization"]->sValue() == "THREE") ) {
         roottree->Branch("AzL_EW",&AzL,"AzL_EW/D");
@@ -1574,6 +1588,13 @@ int main (int argc, char *argv[])
           roottree->Branch("latMeanDist_EW",&latMeanDist,"latMeanDist_EW/D");
           roottree->Branch("NlateralAntennas_EW",&NlateralAntennas,"NlateralAntennas_EW/I");
         }
+        if (config["lateralTimeDistribution"]->bValue()) {
+          roottree->Branch("latTimeRcurv_EW",&latTimeRcurv,"latTimeRcurv_EW/D");
+          roottree->Branch("latTimeSigRcurv_EW",&latTimeSigRcurv,"latTimeSigRcurv_EW/D");
+          roottree->Branch("latTimeOffset_EW",&latTimeOffset,"latTimeOffset_EW/D");
+          roottree->Branch("latTimeSigOffset_EW",&latTimeSigOffset,"latTimeSigOffset_EW/D");
+          roottree->Branch("latTimeChi2NDF_EW",&latTimeChi2NDF,"latTimeChi2NDF_EW/D");
+        }
       }
       if ( (config["polarization"]->sValue() == "NS") || (config["polarization"]->sValue() == "BOTH") || (config["polarization"]->sValue() == "THREE") ) {
         roottree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
@@ -1612,6 +1633,13 @@ int main (int argc, char *argv[])
           roottree->Branch("latMeanDist_NS",&latMeanDist_NS,"latMeanDist_NS/D");
           roottree->Branch("NlateralAntennas_NS",&NlateralAntennas_NS,"NlateralAntennas_NS/I");
         }
+        if (config["lateralTimeDistribution"]->bValue()) {
+          roottree->Branch("latTimeRcurv_NS",&latTimeRcurv_NS,"latTimeRcurv_NS/D");
+          roottree->Branch("latTimeSigRcurv_NS",&latTimeSigRcurv_NS,"latTimeSigRcurv_NS/D");
+          roottree->Branch("latTimeOffset_NS",&latTimeOffset_NS,"latTimeOffset_NS/D");
+          roottree->Branch("latTimeSigOffset_NS",&latTimeSigOffset_NS,"latTimeSigOffset_NS/D");
+          roottree->Branch("latTimeChi2NDF_NS",&latTimeChi2NDF_NS,"latTimeChi2NDF_NS/D");
+        }
       }
       if ( (config["polarization"]->sValue() == "VE") || (config["polarization"]->sValue() == "THREE") ) {
         roottree->Branch("AzL_VE",&AzL_NS,"AzL_VE/D");
@@ -1649,6 +1677,13 @@ int main (int argc, char *argv[])
           //roottree->Branch("CutSNR_VE",&CutSNR_NS,"CutSNR_VE/I");
           roottree->Branch("latMeanDist_VE",&latMeanDist_NS,"latMeanDist_VE/D");
           roottree->Branch("NlateralAntennas_VE",&NlateralAntennas_NS,"NlateralAntennas_VE/I");
+        }
+        if (config["lateralTimeDistribution"]->bValue()) {
+          roottree->Branch("latTimeRcurv_VE",&latTimeRcurv_VE,"latTimeRcurv_VE/D");
+          roottree->Branch("latTimeSigRcurv_VE",&latTimeSigRcurv_VE,"latTimeSigRcurv_VE/D");
+          roottree->Branch("latTimeOffset_VE",&latTimeOffset_VE,"latTimeOffset_VE/D");
+          roottree->Branch("latTimeSigOffset_VE",&latTimeSigOffset_VE,"latTimeSigOffset_VE/D");
+          roottree->Branch("latTimeChi2NDF_VE",&latTimeChi2NDF_VE,"latTimeChi2NDF_VE/D");
         }
       }
     } 
@@ -1738,6 +1773,11 @@ int main (int argc, char *argv[])
       R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;
       chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;
+      latTimeRcurv = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
+      latTimeSigRcurv = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
+      latTimeOffset = 0, latTimeOffset_NS = 0, latTimeOffset_VE = 0;
+      latTimeSigOffset = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
+      latTimeChi2NDF = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
       rmsCCbeam = 0, rmsXbeam = 0, rmsPbeam = 0 ;
       rmsCCbeam_NS = 0, rmsXbeam_NS = 0, rmsPbeam_NS = 0;
       rmsCCbeam_VE = 0, rmsXbeam_VE = 0, rmsPbeam_VE = 0;
@@ -1929,8 +1969,14 @@ int main (int argc, char *argv[])
             }
 
             // plot lateral distribution of arrival times, if requested
-            if (config["lateralTimeDistribution"]->bValue())
+            if (config["lateralTimeDistribution"]->bValue()) {
               lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-", calibPulsesMap, results);
+              latTimeRcurv = results.asDouble("latTime_R_curv");
+              latTimeSigRcurv = results.asDouble("latTime_sigR_curv");
+              latTimeOffset = results.asDouble("latTime_offset");
+              latTimeSigOffset = results.asDouble("latTime_sigoffset");
+              latTimeChi2NDF = results.asDouble("latTime_chi2NDF");
+            }  
 
             // getting necessary data to plot [added: mfranc]
             if(config["eventDisplayPlot"]->bValue()) {
@@ -2058,8 +2104,14 @@ int main (int argc, char *argv[])
             }
 
             // plot lateral distribution of arrival times, if requested
-            if (config["lateralTimeDistribution"]->bValue())
+            if (config["lateralTimeDistribution"]->bValue()) {
               lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-", newPulses, results);
+              latTimeRcurv_NS = results.asDouble("latTime_R_curv");
+              latTimeSigRcurv_NS = results.asDouble("latTime_sigR_curv");
+              latTimeOffset_NS = results.asDouble("latTime_offset");
+              latTimeSigOffset_NS = results.asDouble("latTime_sigoffset");
+              latTimeChi2NDF_NS = results.asDouble("latTime_chi2NDF");
+            }  
 
             // insert calibrated pulse properties here, for eventual changes during the lateral distribution
             calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
@@ -2190,8 +2242,14 @@ int main (int argc, char *argv[])
             }
 
             // plot lateral distribution of arrival times, if requested
-            if (config["lateralTimeDistribution"]->bValue())
+            if (config["lateralTimeDistribution"]->bValue()) {
               lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-", newPulses, results);
+              latTimeRcurv_VE = results.asDouble("latTime_R_curv");
+              latTimeSigRcurv_VE = results.asDouble("latTime_sigR_curv");
+              latTimeOffset_VE = results.asDouble("latTime_offset");
+              latTimeSigOffset_VE = results.asDouble("latTime_sigoffset");
+              latTimeChi2NDF_VE = results.asDouble("latTime_chi2NDF");               
+            }  
 
             // insert calibrated pulse properties here, for eventual changes during the lateral distribution
             calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;

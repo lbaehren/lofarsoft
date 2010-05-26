@@ -746,11 +746,11 @@ namespace CR { // Namespace CR -- begin
         ptstats->Draw();
 
         // write fit results to record with other results
-        erg.define("FTD_offset",fitFunc->GetParameter(0));
-        erg.define("FTD_R_curv",fitFunc->GetParameter(2));
-        erg.define("FTD_sigoffset",fitFunc->GetParError(0));
-        erg.define("FTD_sigR_curv",fitFunc->GetParError(2));
-        erg.define("FTD_chi2NDF",fitFunc->GetChisquare()/double(fitFunc->GetNDF()));
+        erg.define("latTime_offset",fitFunc->GetParameter(0));
+        erg.define("latTime_R_curv",fitFunc->GetParameter(2));
+        erg.define("latTime_sigoffset",fitFunc->GetParError(0));
+        erg.define("latTime_sigR_curv",fitFunc->GetParError(2));
+        erg.define("latTime_chi2NDF",fitFunc->GetChisquare()/double(fitFunc->GetNDF()));
         cout << "Results of fit"
              << "offset = " << fitFunc->GetParameter(0) << "\t +/- " << fitFunc->GetParError(0) << "\t ns\n"
              << "R_curv = " << fitFunc->GetParameter(2) << "\t +/- " << fitFunc->GetParError(2) << "\t m\n"
