@@ -1980,7 +1980,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vecin)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  vec1.copy(vec2) -> copy elements of vec1 to vec2
+  vec1.copy(vec2) -> copy elements of vec2 to vec1
 
   If the input vector is shorter than the output vector, it will be
   copied mutliple times until the output vector is filled.  Use
@@ -3238,7 +3238,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, HNumber mean, HNumbe
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
-  
+
   vec.meaninvers() -> N/sum(1/vec_0+1/vec_1+...+1/vec_N)
 
   This is useful to calculate the mean value of very spiky data. Large
@@ -5561,12 +5561,12 @@ HNumber HFPP_FUNC_NAME(
   gsl_multifit_linear_free (work);
   if (error!=0) ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": GSL Fitting Routine returned error code " << error);
 
-  //Make sure to delete all GSL vector and matrix structures - this will not 
+  //Make sure to delete all GSL vector and matrix structures - this will not
   delete X;
   delete cov;
   delete y;
   delete w;
-  delete c; 
+  delete c;
   return chisq;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -5582,7 +5582,7 @@ HNumber HFPP_FUNC_NAME(
 #define HFPP_PARDEF_3 (HNumber)(yvec)()("Vector containing the y values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_4 (HInteger)(ndata)()("Number of data points to take into account (ndata=-1 -> take all elements in yvec, if ndata>0 only take the first ndata). ")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
-/*! 
+/*!
   \brief $DOCSTRING
   $PARDOCSTRING
 
@@ -5629,7 +5629,7 @@ HNumber HFPP_FUNC_NAME(
   delete X;
   delete cov;
   delete y;
-  delete c; 
+  delete c;
 
   if (error!=0) ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": GSL Fitting Routine returned error code " << error);
 
@@ -5704,7 +5704,7 @@ HNumber HFPP_FUNC_NAME(
   delete X;
   delete cov;
   delete y;
-  delete c; 
+  delete c;
 
   if (error!=0) ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": GSL Fitting Routine returned error code " << error);
 
