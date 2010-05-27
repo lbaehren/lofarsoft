@@ -94,7 +94,7 @@ for block in range(nblocks1):
     file_fft[...].fftcasa(file_efield[...],NyquistZone)
 #
     print "t=",time.clock(),"s -","Applying weights"
-    file_fft.copy(shifted_fft)
+    shifted_fft.copy(file_fft)
     shifted_fft *= weights
 #
     print "t=",time.clock(),"s -","Beamforming"
