@@ -304,3 +304,9 @@
   </ol>
 */
 
+//_______________________________________________________________________________
+//                                                                        Pelican
+
+/*!
+  \defgroup Pelican Pelican network package library
+*/
