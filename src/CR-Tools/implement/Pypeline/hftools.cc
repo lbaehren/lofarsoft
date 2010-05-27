@@ -32,6 +32,7 @@
 #include "hftools.h"
 
 #define hfmax(a,b) (((b)<(a))?(a):(b))
+#define hfmin(a,b) (((b)>(a))?(a):(b))
 
 #define hfeven(a)  (a%2==0)
 #define hfodd(a)  (a%2!=0)
@@ -347,11 +348,6 @@ hDownsample(vec1, vec2) - Downsample the input vector to a smaller output
 
 hDownsample(vec, downsample_factor) - Downsample the input vector by a cetain
                          factor and return a new vector.
-
-hFindLowerBound(vec, value) - Finds the location (i.e., returns integer) in a
-                         monotonically increasing vector, where the input
-                         search value is just above or equal to the value in
-                         the vector.
 
 hFlatWeights(wlen)     - Returns vector of weights of length len with
                          constant weights normalized to give a sum of unity.
@@ -1658,7 +1654,7 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
 {
   HString s=("[");
   Iter it(vec), maxit;
-  if (maxlen>=0) maxit=(vec+min(maxlen,vec_end-vec));
+  if (maxlen>=0) maxit=(vec+hfmin(maxlen,vec_end-vec));
   else maxit=vec_end;
   if (vec<vec_end) s+=hf2string(*it);
   ++it;
@@ -3788,73 +3784,6 @@ std::vector<T> HFPP_FUNC_NAME (
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-//$DOCSTRING: Finds the location (i.e., returns integer) in a monotonically increasing vector, where the input search value is just above or equal to the value in the vector.
-//$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hFindLowerBound
-//-----------------------------------------------------------------------
-#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Sorted numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(value)()("value to search for")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-//$COPY_TO END --------------------------------------------------
-/*!
-
-  \brief $DOCSTRING
-  $PARDOCSTRING
-
-Finds -- through a binary search and interpolation -- the location in
-  a monotonically increasing vector, where the search value is just
-  above or equal to the value in the vector.
-
-This requires random access iterators, in order to have an optimal search result.
-
-*/
-template <class Iter>
-HInteger HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
-			 const IterValueType value)
-//iterator_traits<Iter>::value_type value)
-{
-  HNumber value_n=hfcast<HNumber>(value); //This also works for Complex then
-  HInteger niter=0;
-  if (vec==vec_end) return 0;
-  HInteger maxpos=vec_end-vec-1,posguess;
-  Iter it1=vec,it2=vec_end-1,it0;
-  if (value_n<=hfcast<HNumber>(*it1)) return 0;
-  if (value_n>=hfcast<HNumber>(*it2)) return maxpos;
-  posguess=(value_n-hfcast<HNumber>(*it1))/(hfcast<HNumber>(*it2)-hfcast<HNumber>(*it1))*maxpos;
-  it0=vec+posguess;
-  if (it0<it1) return hfcast<HInteger>(it1-vec); //Error, Non monotonic
-  if (it0>=it2) return hfcast<HInteger>(it2-vec); //Error, Non monotonic
-  //  cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
-  while (!((value_n < hfcast<HNumber>(*(it0+1))) && (value_n >= hfcast<HNumber>(*it0)))) {
-    if (value_n > hfcast<HNumber>(*it0)) {
-      it1=it0;
-    } else {
-      it2=it0;
-    };
-    it0=it1+(it2-it1)/2;
-    if (*it0>value_n) it2=it0; //Binary search step
-    else it1=it0;
-    posguess=(value_n-hfcast<HNumber>(*it1))/(hfcast<HNumber>(*it2)-hfcast<HNumber>(*it1))*(it2-it1)+(it1-vec);
-    it0=vec+posguess;
-    ++niter;
-    //cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
-    if (it0<it1) return it1-vec; //Error, Non monotonic
-    if (it0>it2) return it2-vec; //Error, Non monotonic
-  };
-  return posguess;
-}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-/*
-//Wrapper for c-style arrays
-HInteger hFindLowerBound(const HNumber* vec,
-			 const HInteger len,
-			 const HNumber value)
-{
-  return hFindLowerBound(vec,vec+len,value);
-}
-*/
 
 //$DOCSTRING: Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
 //$COPY_TO HFILE START --------------------------------------------------

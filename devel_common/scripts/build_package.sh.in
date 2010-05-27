@@ -100,9 +100,9 @@ build_package ()
 
     # run cmake on the source directory
     if test -z "$buildOptions" ; then
-	${CMAKE_COMMAND} $sourceDir
+	'${CMAKE_COMMAND}' $sourceDir
     else 
-	${CMAKE_COMMAND} $sourceDir $buildOptions
+	'${CMAKE_COMMAND}' $sourceDir $buildOptions
     fi
 
     # build the package

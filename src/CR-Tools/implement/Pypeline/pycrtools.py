@@ -1029,7 +1029,7 @@ for v in hNumericalContainerTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hLogSave","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSumAbs","hSumSquare","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
+    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hLogSave","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSumAbs","hSumSquare","hMulSum","hRandom","hSortMedian","hMedian"]
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 

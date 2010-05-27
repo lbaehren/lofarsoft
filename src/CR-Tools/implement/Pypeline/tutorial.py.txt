@@ -2226,11 +2226,6 @@ data in antenna one (which was our reference antenna).
   hDownsample(vec, downsample_factor) - Downsample the input vector by a cetain 
                            factor and return a new vector.
    
-  hFindLowerBound(vec, value) - Finds the location (i.e., returns integer) in a 
-                           monotonically increasing vector, where the input 
-                           search value is just above or equal to the value in 
-                           the vector.
-   
   hFlatWeights(wlen)     - Returns vector of weights of length len with 
                            constant weights normalized to give a sum of unity. 
                            Can be used by hRunningAverageT.
