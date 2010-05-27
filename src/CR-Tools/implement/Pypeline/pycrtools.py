@@ -1011,14 +1011,15 @@ for v in hAllContainerTypes:
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hMeanAbs","hMeanSquare","hStdDev","hMeanThreshold","hMeanInverse","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hArg","hImag","hNorm","hReal","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hGetHanningFilterHalf","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hBSplineFitXValues","hBSpline","hBSplineFit","hErrorsToWeights","hPolynomial"]:
+    for s in ["hMean","hMeanAbs","hMeanSquare","hStdDev","hMeanThreshold","hMeanInverse","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hGetHanningFilter","hApplyHanningFilter","hGetHanningFilterHalf","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hBSplineFitXValues","hBSpline","hBSplineFit","hErrorsToWeights","hPolynomial"]:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hComplexContainerTypes:
-    for s in ["hConj","hCrossCorrelateComplex","hFFTCasa","hInvFFTw","hFFTw","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex","hRFIDownsampling"]:
+    for s in ["hConj","hCrossCorrelateComplex","hFFTCasa","hInvFFTw","hFFTw","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex","hRFIDownsampling","hSetAmplitude"]:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
+    
 
 for v in hNumericalContainerTypes:
     setattr(v,"__add__",Vec_add)
@@ -1029,7 +1030,8 @@ for v in hNumericalContainerTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hCos","hCosh","hExp","hLog","hLog10","hLogSave","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSumAbs","hSumSquare","hMulSum","hRandom","hSortMedian","hMedian"]:
+    v.phase = hArg
+    for s in ["hFillRange","hAbs","hMax","hMin","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hArg","hImag","hNorm","hReal","hCos","hCosh","hExp","hLog","hLog10","hLogSave","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSumAbs","hSumSquare","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound"]:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 

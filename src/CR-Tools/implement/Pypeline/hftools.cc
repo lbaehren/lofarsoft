@@ -2714,12 +2714,12 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const I
 //$ITERATE MFUNC arg,imag,norm,real
 //========================================================================
 
-//$DOCSTRING: Take the $MFUNC of all the elements in the complex vector and return results in a float vector.
+//$DOCSTRING: Take the $MFUNC of all the elements in the complex vector and return results in a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h{$MFUNC!CAPS}
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Float output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HComplex)(vecin)()("Complex input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -2728,27 +2728,134 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const I
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  If the input vector is shorter than the output vector it will wrap around
+  and start from the beginning until the output vector is fully processed. 
+
+  Input and output vector can be identical.
+
 The following functions are available for getting real values from
 complex numbers:
-  norm - magnitude (length) of a complex number, i.e. Sqrt(c * conj(c))
-  arg - phase angle of a complex number
+  norm - magnitude (length) squared of a complex number, i.e. c * conj(c)
+  abs - amplitude of a complex number, i.e. c * conj(c)
+  arg - phase angle of a complex number (in radians)
   imag - imaginary part of a complex number
   real - real part of a complex number
 */
-template <class IterOut, class IterIn>
-void h{$MFUNC!CAPS}(const IterOut vecout,const IterOut vecout_end, const IterIn vecin, const IterIn vecin_end)
+template <class Iter, class IterIn>
+void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end, const IterIn vecin, const IterIn vecin_end)
 {
   IterIn itin(vecin);
-  IterOut itout(vecout);
-  while ((itin != vecin_end) && (itout != vecout_end)) {
-    *itout=$MFUNC(*itin);
+  Iter itout(vecout);
+  if (itout >= vecout_end) return;
+  if (itin >= vecin_end) return;
+  while (itout != vecout_end) {
+    *itout=(IterValueType)$MFUNC(*itin);
     ++itin; ++itout;
+    if (itin == vecin_end) itin=vecin;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Take the $MFUNC of all the elements in the complex vector and return results in the same vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC!CAPS}
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (Complex)(vecout)()("Complex in and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  vec2.$MFUNC(vec1) -> vec2 = [$MFUNC(vec1_0), $MFUNC(vec1_1), ... , $MFUNC(vec1_n)]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  If the input vector is shorter than the output vector it will wrap around
+  and start from the beginning until the output vector is fully processed. 
+
+  Input and output vector can be identical.
+
+The following functions are available for getting real values from
+complex numbers:
+  norm - magnitude (length) squared of a complex number, i.e. c * conj(c)
+  abs - amplitude of a complex number, i.e. c * conj(c)
+  arg - phase angle of a complex number (in radians)
+  imag - imaginary part of a complex number
+  real - real part of a complex number
+*/
+template <class Iter>
+void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end)
+{
+  Iter itout(vecout);
+  if (itout >= vecout_end) return;
+  while (itout != vecout_end) {
+    *itout=$MFUNC(*itout);
+    ++itout;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$ENDITERATE
 
+//$DOCSTRING: Set the amplitude of complex numbers to the values provided in a second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSetAmplitude
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vecout)()("Complex output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector with amplitudes.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  The function calculates (c.setamplitude(newamplitude)) for each
+  element c -> c/|c|*newamplitude.
+
+  If input vector is shorter than output vector it will wrap around
+  and start from the beginning until the output vector is fully processed.
+*/
+template <class IterOut, class IterIn>
+void HFPP_FUNC_NAME (const IterOut vecout,const IterOut vecout_end, const IterIn vecin, const IterIn vecin_end)
+{
+  IterIn itin(vecin);
+  IterOut itout(vecout);
+  if (itout >= vecout_end) return;
+  if (itin >= vecin_end) return;
+  while (itout != vecout_end) {
+    *itout *= (*itin)/abs(*itout);
+    ++itin; ++itout;
+    if (itin == vecin_end) itin=vecin;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Set the amplitude of complex numbers to a particular value
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSetAmplitude
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vecout)()("Complex output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(amp)()("Amplitude")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  The function calculates (c.setamplitude(amp)) for each
+  element c -> c/|c|*amp.
+*/
+template <class IterOut, class Iter>
+void HFPP_FUNC_NAME (const IterOut vecout,const IterOut vecout_end, Iter amp)
+{
+  IterOut itout(vecout);
+  if (itout >= vecout_end) return;
+  while (itout != vecout_end) {
+    *itout *= amp/abs(*itout);
+    ++itout;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 //$DOCSTRING: Multiplies each element in the vector with -1 in place, i.e. the input vector is also the output vector.
@@ -3782,8 +3889,74 @@ std::vector<T> HFPP_FUNC_NAME (
   hDownsample(newvec,vec);
   return newvec;
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Finds the location (i.e., returns integer) in a monotonically increasing vector, where the input search value is just above or equal to the value in the vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFindLowerBound
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Sorted numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(value)()("value to search for")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Finds -- through a binary search and interpolation -- the location in
+  a monotonically increasing vector, where the search value is just
+  above or equal to the value in the vector.
+
+This requires random access iterators, in order to have an optimal search result.
+
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
+			 const IterValueType value)
+//iterator_traits<Iter>::value_type value)
+{
+  HNumber value_n=hfcast<HNumber>(value); //This also works for Complex then
+  HInteger niter=0;
+  if (vec==vec_end) return 0;
+  HInteger maxpos=vec_end-vec-1,posguess;
+  Iter it1=vec,it2=vec_end-1,it0;
+  if (value_n<=hfcast<HNumber>(*it1)) return 0;
+  if (value_n>=hfcast<HNumber>(*it2)) return maxpos;
+  posguess=(value_n-hfcast<HNumber>(*it1))/(hfcast<HNumber>(*it2)-hfcast<HNumber>(*it1))*maxpos;
+  it0=vec+posguess;
+  if (it0<it1) return hfcast<HInteger>(it1-vec); //Error, Non monotonic
+  if (it0>=it2) return hfcast<HInteger>(it2-vec); //Error, Non monotonic
+  //  cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
+  while (!((value_n < hfcast<HNumber>(*(it0+1))) && (value_n >= hfcast<HNumber>(*it0)))) {
+    if (value_n > hfcast<HNumber>(*it0)) {
+      it1=it0;
+    } else {
+      it2=it0;
+    };
+    it0=it1+(it2-it1)/2;
+    if (*it0>value_n) it2=it0; //Binary search step
+    else it1=it0;
+    posguess=(value_n-hfcast<HNumber>(*it1))/(hfcast<HNumber>(*it2)-hfcast<HNumber>(*it1))*(it2-it1)+(it1-vec);
+    it0=vec+posguess;
+    ++niter;
+    //cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
+    if (it0<it1) return it1-vec; //Error, Non monotonic
+    if (it0>it2) return it2-vec; //Error, Non monotonic
+  };
+  return posguess;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+/*
+//Wrapper for c-style arrays
+HInteger hFindLowerBound(const HNumber* vec,
+			 const HInteger len,
+			 const HNumber value)
+{
+  return hFindLowerBound(vec,vec+len,value);
+}
+*/
 
 //$DOCSTRING: Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
 //$COPY_TO HFILE START --------------------------------------------------

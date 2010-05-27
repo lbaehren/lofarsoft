@@ -15,7 +15,7 @@ ws.makeAverageSpectrum(ws)
 #Setting some additional parameters
 #------------------------------------------------------------------------
 ws["blocksize"]=2**16
-ws["max_nblocks"]=30
+ws["max_nblocks"]=3
 ws["ncoeffs"]=45
 if ws["datafile"]["Observatory"]=='LOFAR':
     ws["numin"]=12 #MHz
@@ -67,7 +67,7 @@ if ws["doplot"]:
     raw_input("Plotted clean spectrum - press Enter to continue...")
 
 #--------------------------------------------------------------------------------
-# Doing an example cleaning of a times series block
+# The following is an example how one can use the above for cleaning of a single times series block
 #--------------------------------------------------------------------------------
 
 print "Now doing RFI suppression and back transformation for a single block"
@@ -102,9 +102,17 @@ scrtfft.copy(cleanfft)
 clean[...].invfftw(scrtfft[...])
 clean[...] *= factor[...]
 
+phaseonly=ws["datafile"]["emptyFx"]
+scrtfft.copy(ws["fft"])
+scrtfft.setamplitude(1)
+phaseonly[...].invfftw(scrtfft[...])
+phaseonly /= sqrt(ws["datafile"]["blocksize"])/2.8165
+
 if ws["doplot"]: 
+    rfitime-=rfitime[0].val()
     dirty[10].plot(xvalues=rfitime)
     clean[10].plot(xvalues=rfitime,clf=False)
+    phaseonly[10].plot(clf=False,xvalues=rfitime)
     plt.savefig("testrfi2-timeseries.pdf",format="pdf")
 
 
