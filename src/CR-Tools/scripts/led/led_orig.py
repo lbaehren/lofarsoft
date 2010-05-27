@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 ############################### BSD License ################################
-# Copyright (c) 2010, Pim Schellart, Arthur Corstanje                      #
+# Copyright (c) 2010, Pim Schellart                                        #
 # All rights reserved.                                                     #
 #                                                                          #
 # Redistribution and use in source and binary forms, with or without       #
@@ -36,7 +36,6 @@
 import sys
 import time
 import numpy as np
-import random
 from optparse import OptionParser
 
 # Gui library imports
@@ -44,16 +43,6 @@ from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg
 from matplotlib.figure import Figure
-  
-# keys for accessing variables in splitted input lines
-lineDescriptorKey = 0
-timeKey = 1
-thetaKey = 2
-phiKey = 3
-varianceKey = 4
-distanceKey = 5
-
-randomizationInDegrees = 1.0
 
 class MplCanvas(FigureCanvasQTAgg):
     """Generic matplotlib figure canvas for embedding in a Qt 4 GUI."""
@@ -80,7 +69,7 @@ class MplCanvas(FigureCanvasQTAgg):
 
 class ApplicationWindow(QtGui.QMainWindow):
     """Main application window."""
-    
+
     def __init__(self, station, buffersize, refresh, fade, rmin, rmax):
         """Create a LOFAR Event Display window.
         
@@ -178,8 +167,8 @@ class ApplicationWindow(QtGui.QMainWindow):
 
         # Data buffers
         self.time = np.zeros(self.buffersize)
-        self.phi = np.zeros(self.buffersize)
         self.theta = np.zeros(self.buffersize)
+        self.r = np.zeros(self.buffersize)
 
         # Color specifications for each data point in buffer
         # each point has a (r,g,b,alpha) color entry which is created
@@ -203,8 +192,7 @@ class ApplicationWindow(QtGui.QMainWindow):
 
         # Forks off a process listening for new data coming in, subsequently
         # each time new data is available a readyRead() signal is emitted
-#        self.process.start('./tails',[str(self.station)])
-        self.process.start('./test/feedToVHECRtest.sh',['/Users/acorstanje/triggering/electricfence/fenceoff/2010-04-13_TRIGGER_mode2_restarted.dat'])
+        self.process.start('./tails',[str(self.station)])
 
     def stopCommand(self):
         """Stop listening for incoming data"""
@@ -231,41 +219,30 @@ class ApplicationWindow(QtGui.QMainWindow):
         """
 
         # Read data from stdout of forked process into Python list
-        thisOutput = self.process.readAllStandardOutput()
-        theseLines = str(thisOutput).splitlines()
-        
-        for line in theseLines:
-            values = str(line).split()
-            print values
-            # Check if list contains the expected number of values
-            # this might not be the case if the input is not line buffered
-            if values[lineDescriptorKey] == 'FitResult:':
-                if len(values) < 5:
-                    print 'Unexpected number of parameters: ', values
-                elif float(values[varianceKey]) < 50.0:
-                    # Check if this is the first event received and if so starts
-                    # the timer controlling updates to the display, also sets the
-                    # reference time
-                    if not self.timer.isActive():
-                        print 'Start the timer'
-                        self.ctime = float(values[timeKey])*5e-6 # All times are in ms
-                        self.timer.start(self.refresh)
+        values = str(self.process.readLine()).split()
 
-                    # Store data (converting time to ms)
-                    #self.time[self.i] = float(values[timeKey])*5e-6 BUGGY for non-matching time flow
-                    self.time[self.i] = self.ctime
-                    #print 'time is: ' + str(self.time[self.i])
-                    self.phi[self.i] = float(values[phiKey]) + random.gauss(0.0, randomizationInDegrees)
-                    #print self.phi[self.i]
-                    self.theta[self.i] = float(values[thetaKey]) + random.gauss(0.0, randomizationInDegrees)
-                    #print self.theta[self.i]
-                    # Reuse data buffer by cycling through it's indices
-                    if self.i>=self.buffersize-1:
-                        self.i=0
-                    else:
-                        self.i+=1
-                else:
-                    print 'Point discarded, variance too high: ' + str(float(values[varianceKey]))
+        # Check if list contains the expected number of values
+        # this might not be the case if the input is not line buffered
+        if len(values)!=3:
+            print 'Unexpected number of parameters: ', values
+        else:
+            # Check if this is the first event received and if so starts
+            # the timer controlling updates to the display, also sets the
+            # reference time
+            if not self.timer.isActive():
+                self.ctime = float(values[0])*5e-6 # All times are in ms
+                self.timer.start(self.refresh)
+
+            # Store data (converting time to ms)
+            self.time[self.i] = float(values[0])*5e-6
+            self.theta[self.i] = float(values[1])
+            self.r[self.i] = float(values[2])
+
+            # Reuse data buffer by cycling through it's indices
+            if self.i>=self.buffersize-1:
+                self.i=0
+            else:
+                self.i+=1
 
     def resetButtons(self):
         """Reset buttons"""
@@ -283,18 +260,8 @@ class ApplicationWindow(QtGui.QMainWindow):
 
         # Calculate the brightness of each point by comparing their
         # timestamps with the reference time
-        self.c[:,3] = 1-(self.ctime-self.time.clip(self.ctime - self.fade))/self.fade
-        #print self.c
-#        self.c[:, 3] = self.c[:,3].clip(0) # equally expensive :(
-#        self.c[self.c[:,3] < 0, 3] = 0 # if it's negative make it zero so we keep plotting it. <- Expensive operation!
-        #print 'After'
-        #print self.c
-        self.c[:,0] = 0.8 + 0.2 * self.c[:, 3]
-        #print self.c[0:100, 0]
-        self.c[:,1] = 0.8 * (1 - self.c[:,3])
-        self.c[:,2] = 0.8 * (1 - self.c[:,3])
-        #print self.c[0:100, 2]
-        #print self.c[0:100,3]
+        self.c[:,3] = 1-(self.ctime-self.time)/self.fade
+
         # Find indices of all points that should be visible
         ind = np.argwhere((self.c[:,3]>=0)&(self.c[:,3]<=1)).ravel()
 
@@ -306,13 +273,10 @@ class ApplicationWindow(QtGui.QMainWindow):
 
         # Add selected data points to plot (if any)
         if len(ind)>0:
-            self.display.ax.scatter(self.phi[ind] * 2*3.1415927 / 360.0, 90.0 - self.theta[ind], c=self.c[ind], lw=0)
-            #print 'Plotting theta = ' + str(self.theta[ind]) + ' phi = ' + str(self.phi[ind])
-        else:
-            print 'No points to plot'
+            self.display.ax.scatter(self.theta[ind], self.r[ind], c=self.c[ind], lw=0)
 #        self.display.ax.set_rscale('log')
         self.display.ax.set_ylim(self.rlim)
-#        self.display.ax.set_xlim(360.0)
+
         # Display time
         self.display.ax.set_title(time.ctime(self.ctime*1e-3)+" UTC")
 
@@ -331,12 +295,12 @@ parser.add_option("-r", "--refresh",
                   type="int", dest="refresh", default=1000,
                   help="refresh time in ms")
 parser.add_option("-f", "--fade",
-                  type="int", dest="fade", default=60000,
+                  type="int", dest="fade", default=10000,
                   help="fade away time in ms")
-parser.add_option("--rmin", default=0,
+parser.add_option("--rmin", default=0.1,
                   type="int", dest="rmin",
                   help="minimum radial distance")
-parser.add_option("--rmax", default=90,
+parser.add_option("--rmax", default=300,
                   type="int", dest="rmax",
                   help="maximum radial distance")
 (options, args)=parser.parse_args()
