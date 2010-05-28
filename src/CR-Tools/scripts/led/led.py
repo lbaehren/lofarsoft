@@ -37,6 +37,7 @@ import sys
 import time
 import numpy as np
 import random
+import datetime
 from optparse import OptionParser
 
 # Gui library imports
@@ -81,7 +82,7 @@ class MplCanvas(FigureCanvasQTAgg):
 class ApplicationWindow(QtGui.QMainWindow):
     """Main application window."""
     
-    def __init__(self, station, buffersize, refresh, fade, rmin, rmax):
+    def __init__(self, station, buffersize, refresh, fade, rmin, rmax, username, distancePlot):
         """Create a LOFAR Event Display window.
         
         It takes the following parameters: 
@@ -99,7 +100,7 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.refresh=refresh
         self.fade=fade
         self.rlim=(rmin, rmax)
-
+        self.username = username
         # Setup widget
         QtGui.QMainWindow.__init__(self)
 
@@ -204,8 +205,10 @@ class ApplicationWindow(QtGui.QMainWindow):
         # Forks off a process listening for new data coming in, subsequently
         # each time new data is available a readyRead() signal is emitted
 #        self.process.start('./tails',[str(self.station)])
-        self.process.start('./test/feedToVHECRtest.sh',['/Users/acorstanje/triggering/electricfence/fenceoff/2010-04-13_TRIGGER_mode2_restarted.dat'])
-
+        #self.process.start('./test/feedToVHECRtest.sh',['/Users/acorstanje/triggering/electricfence/fenceoff/2010-04-13_TRIGGER_mode2_restarted.dat'])
+        thisDate = datetime.datetime.utcnow()
+        thisDateString = str(thisDate.year) + '-' + '%02d' % (thisDate.month) + '-' + str(thisDate.day)
+        self.process.start('./test/liveFeedFromLofarStation.sh', [self.station, thisDateString, self.username])
     def stopCommand(self):
         """Stop listening for incoming data"""
 
@@ -233,10 +236,10 @@ class ApplicationWindow(QtGui.QMainWindow):
         # Read data from stdout of forked process into Python list
         thisOutput = self.process.readAllStandardOutput()
         theseLines = str(thisOutput).splitlines()
-        
+        print thisOutput
         for line in theseLines:
             values = str(line).split()
-            print values
+#            print values
             # Check if list contains the expected number of values
             # this might not be the case if the input is not line buffered
             if values[lineDescriptorKey] == 'FitResult:':
@@ -322,8 +325,8 @@ class ApplicationWindow(QtGui.QMainWindow):
 # Parse command line options
 parser=OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
 parser.add_option("-s", "--station",
-                  type="int", dest="station", default=0,
-                  help="station number")
+                  type="string", dest="station", default='',
+                  help="station name")
 parser.add_option("-b", "--buffer-size",
                   type="int", dest="buffersize", default=1000,
                   help="buffer size for storing events")
@@ -339,11 +342,22 @@ parser.add_option("--rmin", default=0,
 parser.add_option("--rmax", default=90,
                   type="int", dest="rmax",
                   help="maximum radial distance")
+parser.add_option("--user", default='corstanje',
+                  type="string", dest="username",
+                  help="user name for ssh-ing to the LOFAR portal")
+
+parser.add_option("--distance", action="store_true", dest="distancePlot", default=False, 
+                  help="setting this option gives distance plot instead of direction plot")
+
+#parser.add_option("--distance", default=False,
+#                   type="bool", dest="distancePlot",
+#                   help="setting this option gives distance plot instead of direction plot")
+                  
 (options, args)=parser.parse_args()
 
 # Create GUI
 App = QtGui.QApplication(sys.argv)
-aw = ApplicationWindow(options.station, options.buffersize, options.refresh, options.fade, options.rmin, options.rmax)
+aw = ApplicationWindow(options.station, options.buffersize, options.refresh, options.fade, options.rmin, options.rmax, options.username, options.distancePlot)
 aw.show()
 
 # Start application event loop
