@@ -233,6 +233,7 @@ template<class T> inline T hfcast(uint v);
 #if H_OS64BIT
 template<class T> inline T hfcast(int v);
 #endif
+template<class T> inline T hfcast(ptrdiff_t v);
 template<class T> inline T hfcast(HInteger v);
 template<class T> inline T hfcast(HNumber v);
 template<class T> inline T hfcast(HComplex v);

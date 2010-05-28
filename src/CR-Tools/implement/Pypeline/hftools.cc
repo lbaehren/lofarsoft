@@ -479,6 +479,7 @@ template<> inline HComplex hfnull<HComplex>(){return 0.0;}
 template<class T> inline T hfcast(/*const*/ T v){return v;}
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
+template<>  inline HInteger hfcast<HInteger>(ptrdiff_t v){return static_cast<HInteger>(v);}
 template<>  inline HInteger hfcast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v));}
 template<>  inline HInteger hfcast<HInteger>(HComplex v){return static_cast<HInteger>(floor(real(v)));}
 template<>  inline HNumber hfcast<HNumber>(HComplex v){return real(v);}
