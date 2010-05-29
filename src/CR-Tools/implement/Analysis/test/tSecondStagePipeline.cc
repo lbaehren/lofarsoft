@@ -110,7 +110,7 @@ int test_SecondStagePipeline ()
     for (i=0; i< fftlen; i++) {
       fprintf(allout,"\n %f ",Frequencies(i));
       for (j=0; j<nants; j++) {
-	fprintf(allout,"\t %f %f ",absFFT(i,j),phaseFFT(i,j)-phaseFFT(i,0));
+	fprintf(allout,"\t %e %f ",absFFT(i,j),phaseFFT(i,j)-phaseFFT(i,0));
       };
     };
     fprintf(allout,"\n");

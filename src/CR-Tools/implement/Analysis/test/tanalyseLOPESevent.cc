@@ -70,6 +70,13 @@ int test_analyseLOPESevent ()
 				     True,                 // generatePlots
 				     Vector<Int>(),        // FlaggedAntIDs
 				     True);                // verbose
+    if ( (abs(results.asDouble("CCheight")-3.07706e-06) > 1e-9 ) ||
+	 (abs(results.asDouble("Xheight")-2.35266e-06) > 1e-9 ) ) {
+      nofFailedTests++;
+      cout << "**Test 1 failed! Wrong results." << endl;
+    } else {
+      cout << "##Test 1 successfull!" << endl;
+    };
     Vector<Int> flagged(5);
     flagged(0) = 70202; 
     flagged(1) = 80201;
@@ -92,19 +99,27 @@ int test_analyseLOPESevent ()
 				     0.,                    // ExtraDelay
 				     False);                // doTVcal
     
-    std::cout << "  3) Testing on big LOPES30 event with simplex-fit" << std::endl;
-    results = newObject.ProcessEvent("/data/LOPES/cr/LOPES30_sel/2006.02.23.04:02:50.283.event", //evname
-				     273.46,                // Az
- 				     53.32,                 // El
- 				     4000.,                 // distance
- 				     -32.07,                // XC
- 				     46.60,                 // YC
- 				     True,                  // RotatePos
- 				     "tanalyseLOPESevent3", // PlotPrefix
- 				     True,                  // generatePlots
- 				     flagged ,              // FlaggedAntIDs
- 				     True,                  // verbose
- 				     True);                 // simplexFit
+    if ( (abs(results.asDouble("CCheight")-7.13356e-06) > 1e-9 ) ||
+	 (abs(results.asDouble("Xheight")-6.53943e-06) > 1e-9 ) ) {
+      nofFailedTests++;
+      cout << "**Test 2 failed! Wrong results." << endl;
+    } else {
+      cout << "##Test 2 successfull!" << endl;
+    };
+    std::cout << "  3) Skipping test on big LOPES30 event with simplex-fit" << std::endl;
+//     std::cout << "  3) Testing on big LOPES30 event with simplex-fit" << std::endl;
+//     results = newObject.ProcessEvent("/data/LOPES/cr/LOPES30_sel/2006.02.23.04:02:50.283.event", //evname
+// 				     273.46,                // Az
+//  				     53.32,                 // El
+//  				     4000.,                 // distance
+//  				     -32.07,                // XC
+//  				     46.60,                 // YC
+//  				     True,                  // RotatePos
+//  				     "tanalyseLOPESevent3", // PlotPrefix
+//  				     True,                  // generatePlots
+//  				     flagged ,              // FlaggedAntIDs
+//  				     True,                  // verbose
+//  				     True);                 // simplexFit
     std::cout << "  4) Testing on big LOPES30 event with simplex-fit and upsampling" << std::endl;
     results = newObject.ProcessEvent("/data/LOPES/cr/LOPES30_sel/2006.02.23.04:02:50.283.event", //evname
 				     273.46,                // Az
@@ -121,6 +136,13 @@ int test_analyseLOPESevent ()
 				     0.,                    // ExtraDelay
 				     -1,                    // doTVcal
 				     320e6);                // UpSamplingRate
+    if ( (abs(results.asDouble("CCheight")-6.9771e-06) > 1e-9 ) ||
+	 (abs(results.asDouble("Xheight")-6.63552e-06) > 1e-9 ) ) {
+      nofFailedTests++;
+      cout << "**Test 4 failed! Wrong results." << endl;
+    } else {
+      cout << "##Test 4 successfull!" << endl;
+    };
 //     std::cout << "  5) Testing on big LOPES30 event with simplex-fit and upsampling" << std::endl;
 //     results = newObject.ProcessEvent("/data/LOPES/cr/LOPES30_sel/2006.02.23.04:02:50.283.event", //evname
 // 				     273.46,                // Az
