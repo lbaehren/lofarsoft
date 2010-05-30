@@ -48,8 +48,11 @@ Time value arrays.
 
 """
 cr_time=cr["Time"].setUnit("\\mu","s")
-ws["frequency"]=cr["Frequency"]
-ws["frequency"].setUnit("M","")
+
+#ws["frequency"]=cr["Frequency"] 
+# Attention don't do this here when later using it in caluclating
+#phases that require seconds and Hz as units
+
 cr_efield=cr["Fx"].setPar("xvalues",cr_time)
 """
 
@@ -206,7 +209,7 @@ Convert back into time domain
 
 cr_efield_shifted = cr["emptyFx"].setPar("xvalues",cr_time)
 cr_calfft_shifted[...].nyquistswap(cr["nyquistZone"])
-cr_efield_shifted[...].invfftw(cr_calfft_shifted[...])
+cr_efield_shifted[...].invfftw(cr_calfft_shifted[...]) # is being destroyed here ....
 cr_efield_shifted[...].plot(xlim=(-2.2,-1.6),legend=range(8))
 raw_input("Plotted shifted efields - press Enter to continue...")
 cr_efield_shifted[[1,3,4,6],...].plot(xlim=(-1.95,-1.6),legend=[1,3,4,6])
