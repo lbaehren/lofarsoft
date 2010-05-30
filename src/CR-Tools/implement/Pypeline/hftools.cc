@@ -478,6 +478,7 @@ template<> inline HComplex hfnull<HComplex>(){return 0.0;}
 //Identity
 template<class T> inline T hfcast(/*const*/ T v){return v;}
 
+
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
 template<>  inline HInteger hfcast<HInteger>(ptrdiff_t v){return static_cast<HInteger>(v);}
 template<>  inline HInteger hfcast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v));}
@@ -495,6 +496,15 @@ template<> inline HInteger hfcast(/*const*/ HString v){HInteger t=0; std::istrin
 template<> inline HNumber hfcast(/*const*/ HString v){HNumber t=0.0; std::istringstream is(v); is >> t; return t;}
 template<> inline HComplex hfcast(/*const*/ HString v){HComplex t=0.0; std::istringstream is(v); is >> t; return t;}
 
+//Bools 
+template<class T> inline T hfcast(HBool v){return hfcast<T>(hfcast<HInteger>(v));}
+template<>  inline HBool hfcast<HBool>(HInteger v){return (HInteger)v;}
+template<>  inline HBool hfcast<HBool>(HNumber v){return hfcast<HBool>((HInteger)v);}
+template<>  inline HBool hfcast<HBool>(HComplex v){return hfcast<HBool>(hfcast<HInteger>(v));}
+template<>  inline HBool hfcast<HBool>(HString v){return hfcast<HBool>(hfcast<HInteger>(v));}
+template<>  inline HBool hfcast<HBool>(HPointer v){return hfcast<HBool>(hfcast<HInteger>(v));}
+
+
 //Convert to arbitrary class T if not specified otherwise
 template<class T> inline T hfcast(uint v){return static_cast<T>(v);}
 #if H_OS64BIT
@@ -505,6 +515,7 @@ template<class T> inline T hfcast(HNumber v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HComplex v){return static_cast<T>(v);}
 template<class T> inline T hfcast(/*const*/ HPointer v){return hfcast<T>(reinterpret_cast<HInteger>(v));}
 template<class T> inline T hfcast(/*const*/ HString v){T t; std::istringstream is(v); is >> t; return t;}
+
 
 template<class T> inline T hfcast(CR::DataReader v){return hfcast<T>((HInteger)((void*)&v));}
 
@@ -1581,8 +1592,8 @@ void hInit(){
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to fill")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(fill_value)()("Fill value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec)()("Vector to fill")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(fill_value)()("Fill value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   hFill(vec,0) -> [0,0,0,...]
@@ -1593,12 +1604,13 @@ void hInit(){
 
 See also: hSet
 */
-template <class Iter>
-void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType fill_value)
+template <class Iter, class T>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const T fill_value)
 {
   Iter it=vec;
+  IterValueType val_t=hfcast<IterValueType>(fill_value);
   while (it!=vec_end) {
-    *it=fill_value;
+    *it=val_t;
     ++it;
   };
 }
@@ -1612,7 +1624,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType fill_
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Vector of in which to set elements.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HInteger)(indexlist)()("Index list containing the positions of the elements to be set, (e.g. [0,2,4,...] will set every second element).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_1)(val)()("Value to assign to the indexed elements.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(val)()("Value to assign to the indexed elements.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -1620,15 +1632,16 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType fill_
 
 See also: hFill, hCopy
 */
-template <class Iter, class IterI>
-void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const IterValueType val)
+template <class Iter, class IterI, class T>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const T val)
 {
   Iter it;
   IterI itidx(index);
+  IterValueType val_t=hfcast<IterValueType>(val);
   if (index >= index_end) return;
   while (itidx != index_end) {
     it = vec + *itidx;
-    if (it < vec_end && it >= vec) *it=val;
+    if (it < vec_end && it >= vec) *it=val_t;
     ++itidx;
   };
 }
@@ -4354,7 +4367,7 @@ void HFPP_FUNC_NAME (const Iter delays,
   } else {
     while (del < delays_end) {
       distance = hVectorLength(sky,sky+3);
-      *del=hGeometricDelayFarField(ant,sky,distance);
+      *del=hGeometricDelayNearField(ant,sky,distance);
       ++del;
       ant+=3; if (ant>=ant_end) {
 	ant=antPositions;
@@ -4505,7 +4518,7 @@ void HFPP_FUNC_NAME (const CIter weights,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Calculates the power of a complex spectrum and add it to an output vector.
+//$DOCSTRING: Calculates the square root of the power of a complex spectrum and add it to an output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSpectralPower
 //-----------------------------------------------------------------------
@@ -4537,7 +4550,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   Iterin itin(vecin);
   Iter itout(vecout);
   while ((itin != vecin_end) && (itout != vecout_end)) {
-    *itout+=real((*itin)*conj(*itin));
+    *itout+=sqrt(real((*itin)*conj(*itin)));
     ++itin; ++itout;
   };
 }

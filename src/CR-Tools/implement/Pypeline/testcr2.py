@@ -27,10 +27,20 @@ XC=-25.44; YC=8.94; #shower core in KASCADE coordinates
 #	YCn = XC*-0.263031214+YC*0.964787323;
 
 cr_shower_core=[XC*0.964787323 + YC*0.263031214,-XC*0.263031214 + YC*0.964787323,0.0]
-
 FarField=True
 
-cr=crfile(filename_cr)
+ws=CRMainWorkSpace(filename=filename_cr,fittype="POLY",ncoeffs=8,nbins=1024,doplot=True,verbose=True,modulename="ws")  
+ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256) #fittype="POLY" or "BSPLINE"
+
+if ws["datafile"]["Observatory"]=='LOFAR':
+    ws["numin"]=12 #MHz
+    ws["numax"]=82 #MHz
+elif ws["datafile"]["Observatory"]=='LOPES':
+    ws["numin"]=45 #MHz
+    ws["numax"]=73 #MHz
+
+
+cr=ws["datafile"]
 """
 
 Now we read in the raw time series data as well as the Frequencies and
@@ -38,8 +48,8 @@ Time value arrays.
 
 """
 cr_time=cr["Time"].setUnit("\\mu","s")
-cr_frequencies=cr["Frequency"]
-cr_frequencies.setUnit("M","")
+ws["frequency"]=cr["Frequency"]
+ws["frequency"].setUnit("M","")
 cr_efield=cr["Fx"].setPar("xvalues",cr_time)
 """
 
@@ -47,52 +57,40 @@ As a next step we create an empty vector to hold the Fourierspectrum
 of the data
 
 """
-cr_ffto=cr["emptyFFT"].setPar("xvalues",cr_frequencies)
-cr_fft=cr["emptyFFT"].setPar("xvalues",cr_frequencies)
+ws["fft"]=cr["emptyFFT"].setPar("xvalues",ws["frequency"])
 """
 
 and then make the Fourier transform followed by a reordering of the
 output, noting that the data was taken in the second Nyquist domain
 
 """
-cr_fft[...].fftw(cr_efield[...])
-cr_fft[...].nyquistswap(cr["nyquistZone"])
+ws["fft"][...].fftw(cr_efield[...])
+ws["fft"][...].nyquistswap(cr["nyquistZone"])
 """
 Let's create a spectrum that we can plot:
 """
-cr_spectrum=hArray(float,cr_fft,xvalues=cr_frequencies,fill=0,name="Power")
-cr_spectrum.par.logplot="y"
-cr_spectrum.spectralpower(cr_fft)
-cr_spectrum[0].plot()
+ws["spectrum"]=hArray(float,ws["fft"],xvalues=ws["frequency"],fill=0,name="Power")
+ws["spectrum"].par.logplot="y"
+ws["spectrum"].spectralpower(ws["fft"])
 """
 
-The following section on RFI excision is in a TESTING PHASE ....!
+Now we fit a baseline and fight RFI
 """
-cr_logspec=hArray(properties=cr_spectrum)
-cr_logspec.log(cr_spectrum)
+ws["meanrms"]=ws["coeffs"].crfitbaseline(ws["frequency"],ws["spectrum"],ws)
+ws["baseline"].crcalcbaseline(ws["frequency"],ws["numin_i"],ws["numax_i"],ws["coeffs"],ws)
 
-RFIVectorLength=128
-cr_rfi_freqs=hArray(float,dimensions=[1,RFIVectorLength],name="Frequency",units="MHz")
-cr_rfi_freqs.downsample(cr_frequencies[1:])
+ws["spectrum"] /= ws["baseline"]
+ws["fft"] /= ws["baseline"]
+ws["spectrum"][0].plot()
 
-cr_rfi_amplitudes1=hArray(float,[cr.nofAntennas,RFIVectorLength],xvalues=cr_rfi_freqs,par=("logplot","y"))
-cr_rfi_amplitudes2=hArray(float,[cr.nofAntennas,RFIVectorLength],xvalues=cr_rfi_freqs,par=("logplot","y"))
-cr_rfi_amplitudes3=hArray(float,[cr.nofAntennas,RFIVectorLength],xvalues=cr_rfi_freqs,par=("logplot","y"))
-cr_rfi_rms=hArray(properties=cr_rfi_amplitudes1)
+ws["meanspec"]=ws["spectrum"][...,ws["numin_i"]:ws["numax_i"]].meaninverse()
+ws["rfithreshold"] = (ws["meanrms"] * ws["rfi_nsigma"]) + ws["meanspec"]
+ws["nbad_channels"]=ws["bad_channels"][...].findgreaterthan(ws["spectrum"][...],ws["rfithreshold"])
+ws["fft"][...].set(ws["bad_channels"][...,[0]:ws["nbad_channels"]],ws["meanspec"])
+ws["spectrum"][...].set(ws["bad_channels"][...,[0]:ws["nbad_channels"]],ws["meanspec"])
 
-cr_rfi_amplitudes1[...].downsample(cr_rfi_rms[...],cr_spectrum[...,1:])
-cr_rfi_amplitudes2[...].downsamplespikydata(cr_rfi_rms[...],cr_spectrum[...,1:],-0.1)
-cr_rfi_amplitudes3[...].downsamplespikydata(cr_rfi_rms[...],cr_logspec[...,1:],-0.1)
-cr_rfi_amplitudes3.exp()
-
-cr_spectrum[0].plot(title="RFI Downsampling")
-cr_rfi_amplitudes1[0].plot(clf=False)
-cr_rfi_amplitudes2[0].plot(clf=False)
-cr_rfi_amplitudes3[0].plot(clf=False)
-
-cr_rfi_baseline=hArray(properties=cr_spectrum)
-cr_rfi_baseline[...,1:].rfibaselinefitting(cr_rfi_amplitudes2[...],cr_rfi_rms[...],2.)
-cr_rfi_baseline[...].upsample(cr_rfi_amplitudes2[...])
+ws["spectrum"][0].plot(clf=False)
+raw_input("Plotted spectrum - press Enter to continue...")
 
 """
 
@@ -181,24 +179,24 @@ The delays can be converted to phases of coplex weights (to be applied
 in the Fourier domain).
 
 """
-phases=hArray(float,dimensions=cr_fft,name="Phases",xvalues=cr_frequencies)
-phases.delaytophase(cr_frequencies,delays)
+phases=hArray(float,dimensions=ws["fft"],name="Phases",xvalues=ws["frequency"])
+phases.delaytophase(ws["frequency"],delays)
 """
-#hGeometricPhases(phases,cr_frequencies,antenna_positions,cartesian,FarField)
+#hGeometricPhases(phases,ws["frequency"],antenna_positions,cartesian,FarField)
 
 Similarly, the corresponding complex weights are calculated.
 
 """
-weights=hArray(complex,dimensions=cr_fft,name="Complex Weights")
+weights=hArray(complex,dimensions=ws["fft"],name="Complex Weights")
 weights.phasetocomplex(phases)
 """
-#hGeometricWeights(weights,cr_frequencies,antenna_positions,cartesian,FarField)
+#hGeometricWeights(weights,ws["frequency"],antenna_positions,cartesian,FarField)
 
 To shift the time series data (or rather the FFTed time series data)
 we multiply the fft data with the complex weights from above.
 
 """
-cr_calfft_shifted=hArray(copy=cr_fft)
+cr_calfft_shifted=hArray(copy=ws["fft"])
 cr_calfft_shifted *= weights
 """
 
@@ -207,32 +205,23 @@ Convert back into time domain
 """
 
 cr_efield_shifted = cr["emptyFx"].setPar("xvalues",cr_time)
-cr_efield_shifted[...].invfftcasa(cr_calfft_shifted[...],2)
-"""
+cr_calfft_shifted[...].nyquistswap(cr["nyquistZone"])
+cr_efield_shifted[...].invfftw(cr_calfft_shifted[...])
+cr_efield_shifted[...].plot(xlim=(-2.2,-1.6),legend=range(8))
+raw_input("Plotted shifted efields - press Enter to continue...")
+cr_efield_shifted[[1,3,4,6],...].plot(xlim=(-1.95,-1.6),legend=[1,3,4,6])
+raw_input("Plotted not flagged antennas - press Enter to continue...")
 
-To now "form a beam" we just need to add all time series data (or
-their FFTs),
 
-"""
-cr_calfft_shifted_added=hArray(cr_calfft_shifted[0].vec())
-cr_calfft_shifted[1:,...].addto(cr_calfft_shifted_added)
-"""
-
-normalize by the number of antennas
-"""
-cr_calfft_shifted_added /= cr.nofSelectedAntennas
-"""
-and then FFT back into the time domain:
-
-"""
 cr_efield_shifted_added=hArray(float,dimensions=cr_time,name="beamformed E-field",xvalues=cr_time)
-cr_efield_shifted_added.invfftcasa(cr_calfft_shifted_added,2)
+cr_efield_shifted[[1,3,4,6],...].addto(cr_efield_shifted_added)
+
 
 cr_efield_shifted_added_abs=hArray(copy=cr_efield_shifted_added,xvalues=cr_time)
 cr_efield_shifted_added_abs.abs()
 cr_efield_shifted_added_smoothed=hArray(float,dimensions=[cr.blocksize],xvalues=cr_time,name="E-Field")
 cr_efield_shifted_added_smoothed.runningaverage(cr_efield_shifted_added_abs,7,hWEIGHTS.GAUSSIAN)
-cr_efield_shifted_added_smoothed.plot(xlim=(-3,-0.5),title=cr.filename)
+cr_efield_shifted_added_smoothed.plot(xlim=(-2,-0.5),title=cr.filename,clf=False)
 #cr_efield_shifted[...].abs()
 #cr_efield_shifted[...].plot(xlim=(-1.9,-1.7),clf=False)
 

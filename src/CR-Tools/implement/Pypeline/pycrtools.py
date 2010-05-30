@@ -1613,6 +1613,43 @@ class CRMainWorkSpace(CRWorkSpace):
 
     ws.help() - get a list of all parameters and their values.
 
+Available parameters:
+    nbins = 256 - The number of bins in the downsampled spectrum used to fit the baseline.
+    ncoeffs = 45 - Number of coefficients for the polynomial.
+    polyorder = 44 - Order of the plyonomial to fit.  (output only)
+    nofAntennas = 16 - Number of antennas held in memory.
+    freqs = hArray(float) - Array of frequency values of the downsampled spectrum. (work vector)
+    spectrum = hArray(float) - Array of power values holding the downsampled spectrum. (work vector)
+    rms = hArray(float) - Array of RMS values of the downsampled spectrum. (work vector)
+    rmsfactor = 2.0 - Factor above and below the RMS in each bin at which a bin is no longer considered.
+    verbose = True - Print progress information during processing.
+    selected_bins = hArray(int) - Array of indices pointing to clean bins, i.e. with low RFI. (work vector)
+    numax_i = 27459 - Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored.
+    chisquare = Vec(int,16)=[1,1,1,2,1,...] - Returns the chisquare of the baseline fit. (output only)
+    doplot = False - Make plots during processing to inspect data.
+    numin = 12 - Minimum frequency of useable bandwidth. Negative if to be ignored.
+    ratio = hArray(float) - Array holding the ratio between RMS and power of the downsampled spectrum. (work vector)
+    xpowers = hArray(float) - Array holding the x-values and their powers for the fit. (work vector)
+    bwipointer = 0 - Pointer to the internal BSpline workspace as integer. Don't change! 
+    nselected_bins = Vec(int,16)=[236,236,239,239,238,...] - Number of clean bins after RFI removal. (output only)
+    clean_bins_y = hArray(float) - Array holding the powers of the clean bins. (work vector)
+    clean_bins_x = hArray(float) - Array holding the frequencies of the clean bins. (work vector)
+    baseline_x = hArray(float) - Array holding the x-values and their powers for calculating the baseline fit.
+    numin_i = 3539 - Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored.
+    covariance = hArray(float) - Array containign the covariance matrix of the fit. (outpur only)
+    numax = 82 - Maximum frequency of useable bandwidth. Negative if to be ignored.
+    logfit = True - Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards).
+    meanrms = Vec(float,16)=[3.48111317062,3.4784567903,3.47579235899,3.47705921127,3.47188685811,...] - Estimate the mean rms in the spectrum per antenna. (output vector)
+    fftLength = 32769 - Length of unbinned spectrum.
+    height_ends = hArray(float) - The heights of the baseline at theleft and right endpoints of the usable bandwidth where a hanning function is smoothly added.
+    extendfit = 0.1 - Extend the fit by this factor at both ends beyond numax and numin. The factor is relative to the unsued bandwidth.
+    t0 = 2.971779 - The cpu starting time of the processingin seconds, used for benchmarking.
+    weights = hArray(float) - Array of weight values for the fit. (work vector)
+    coeffs = hArray(float) - Polynomial coeffieients of the baseline fit. (output vector)
+    fittype = BSPLINE - Determine which type of fit to do: fittype="POLY" - do a polynomial fit, else ("BSPLINE") do a basis spline fit (default).
+    powers = hArray(int) - Array of integers, containing the powers to fit in the polynomial. (work vector)
+
+
     """
     def __init__(self,modulename=None,**keywords):
 # Here list the parameters which have to be initialized in a
@@ -1682,6 +1719,16 @@ class CRMainWorkSpace(CRWorkSpace):
     def default_baseline(self):
         """Array with a baseline fit to the spectrum."""
         return hArray(properties=self["spectrum"],xvalues=self["frequency"],name="Baseline")
+    def default_qualitycriteria(self):
+        """a Python dict with keywords of parameters and
+        tuples with limits thereof (lower, upper). Keywords currently
+        implemented are mean, rms, spikyness (i.e. spikyness).  
+        Example: qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
+        """
+        return {"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
+    def default_flaglist(self):
+        """A list of bad antennas which failed the qualitycheck. (output only)"""
+        return []
 
 def CRWorkSpace_default_doplot(self):
     """Make plots during processing to inspect data."""
@@ -1812,10 +1859,8 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
     else: ws["numin_i"]=1
     if ws["numax"]>0: ws["numax_i"]=frequency.findlowerbound(ws["numax"]).val()
     else: ws["numax_i"]=len(frequency)
-    
     ws["numax_i"]=min(ws["numax_i"]+int((len(frequency)-ws["numax_i"])*ws["extendfit"]),len(frequency))
     ws["numin_i"]=max(ws["numin_i"]-int(ws["numin_i"]*ws["extendfit"]),0)
-
     ws["freqs"].downsample(frequency[ws["numin_i"]:ws["numax_i"]])
     ws["spectrum"][...].downsamplespikydata(ws["rms"][...],spectrum[...,ws["numin_i"]:ws["numax_i"]],1.0)
     l=ws["numax_i"]-ws["numin_i"]
@@ -1824,15 +1869,18 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
         spectrum[0].plot(title="RFI Downsampling")
         ws["spectrum"][...,0:l].plot(clf=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
+#Normalize the spectrum to unity
+    ws["meanspec"]=ws["spectrum"][...].mean()
+    ws["spectrum"][...] /= ws["meanspec"]
 #Calculate RMS/amplitude for each bin
     ws["ratio"][...,0:l].div(ws["rms"][...,0:l],ws["spectrum"][...,0:l])
-    ws["ratio"][...,0:l].square()
-    mratio=ws["ratio"][...,0:l].meaninverse()
+#    ws["ratio"][...,0:l].square()
+    ws["mratio"]=ws["ratio"][...,0:l].meaninverse()
     if ws["doplot"]:
         ws["ratio"][...,0:l].plot(title="RMS/Amplitude")
         raw_input("Plotted relative RMS of downsampled spectrum - press Enter to continue...")
 #Now select bins where the ratio between RMS and amplitude is within a factor 2 of the mean value
-    ws["nselected_bins"]=ws["selected_bins"][...].findbetween(ws["ratio"][...,0:l],mratio/ws["rmsfactor"],mratio*ws["rmsfactor"])
+    ws["nselected_bins"]=ws["selected_bins"][...].findbetween(ws["ratio"][...,0:l],ws.mratio/ws["rmsfactor"],ws.mratio*ws["rmsfactor"])
 #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
     ws["clean_bins_x"][...].copy(ws["freqs"],ws["selected_bins"][...],ws["nselected_bins"])
     ws["clean_bins_y"][...].copy(ws["spectrum"][...],ws["selected_bins"][...],ws["nselected_bins"])
@@ -1856,7 +1904,7 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
     #Calculate an estimate of the average RMS of the clean spectrum after baseline division
     ws["ratio"][...].copy(ws["ratio"],ws["selected_bins"][...],ws["nselected_bins"])
     meanrms=ws["ratio"][...,[0]:ws["nselected_bins"]].meaninverse()
-    meanrms.sqrt()
+#    meanrms.sqrt()
     if ws["verbose"]: print time.clock()-ws["t0"],"s: Done fitting baseline."
     if ws["doplot"]:
         ws["clean_bins_y"][...,[0]:ws["nselected_bins"]].plot(xvalues=ws["clean_bins_x"][...,[0]:ws["nselected_bins"]],logplot=False)
@@ -1898,6 +1946,17 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
 
     verbose - Provide progress messages
 
+    Available parameters in the Workspace (Example):
+
+    datafile = crfile('/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecondtbb1.h5') - DataReader object to read the data from.
+    max_nblocks = 3 - Absolute maximum number of blocks to average, irrespective of filesize.
+    nblocks = 3 - Number of blocks to average, take all blocks by default.
+    blocks = [0, 1, 2] - List of blocks to process.
+    verbose = True - Print progress information during processing.
+    fx = hArray(float) - Array to hold the x-values of the raw time series data. (work vector)
+    fft = hArray(complex) - Array to hold the FFTed x-values (i.e. complex spectrum) of the raw time series data. (work vector)
+    t0 = 2.971839 - The cpu starting time of the processingin seconds, used for benchmarking.
+    doplot = True - Make plots during processing to inspect data.
     """
     ws=CRsetWorkSpace(ws,"AverageSpectrum",**keywords)
     if ws["verbose"]:
@@ -1925,9 +1984,9 @@ def CheckParameterConformance(data,keys,limits):
     """
     Usage:
 
-    qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
+    qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-3,3)}
 
-    CheckParameterConformance([Antenna,mean,rms,npeaks,nonGaussianity],{"mean":1,"rms":2,"nonGaussianity":4},qualitycriteria)  ->  ["rms",...]
+    CheckParameterConformance([Antenna,mean,rms,npeaks,spikyness],{"mean":1,"rms":2,"spikyness":4},qualitycriteria)  ->  ["rms",...]
 
     Parameters:
 
@@ -1951,30 +2010,55 @@ def CheckParameterConformance(data,keys,limits):
     return result
 
 
-def CRQualityCheck(limits,datafile=None,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True):
+def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,maxblocksize=65536,blocksize=None,nsigma=5,verbose=True):
     """
     Usage:
+    CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True)
 
-    CRQualityCheck(qualitycriteria,datafile,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True) -> list of antennas failing the limits
+    Do a basic quality check of raw time series data, looking for rms,
+    mean and spikes.
 
-    qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
+    If a datafile is provided it will step through all (selected)
+    antennas of a file, assess the data quality (checking first and
+    last quarter of the file), and return a list of antennas which
+    have failed the quality check and their statistical properties.
 
-    Will step through all antennas of a file assess the data quality
-    and return a list with antennas which have failed the quality
-    check and their statistical properties.
+    Instead of providing a datafile one can also provdide a data
+    array, which will be processed in full.
+
+    Example:
+    
+    >> datafile=crfile(filename)
+    >> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
+    >> flaglist=CRQualityCheck(qualitycriteria,datafile,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True) # -> list of antennas failing the limits
+
 
     Parameters:
 
+    qualitycriteria - a Python dict with keywords of parameters and
+    tuples with limits thereof (lower, upper). Keywords currently
+    implemented are mean, rms, spikyness (i.e. spikyness).  
+    Example: qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
 
-    qualitycriteria - a Python dict with keywords of parameters and limits thereof (lower, upper)
+    datafile - Data Reader file object, if None, use values in
+    dataarray and don't read data in again.
 
-    datafile - Data Reader file object, if none, use values in dataarray and don't read in again
+    datarray - an optional data storage array to read in the data if
+    no datafile is specified, this array should contain the data to
+    inspect.  In a pipeline where teh function is called multiple
+    times, it is recommended to always provide this array, since it
+    saves one the creation and destruction of the array.
+    
+    blocksize - The blocksize for reading in the data, will be
+    determined automatically is not provided explicitly here.
 
-    array - an optional data storage array to read in the data
+    maxblocksize - If the blocksize is determined automatically, this
+    is the maximum blocksize to use.
 
-    maxblocksize - The algorithms takes by default the first and last
-    quarter of a file but not more samples than given in this
-    paramter.
+    blocklist - The algorithms takes by default the first and last
+    quarter of a file (and sets the blocksize accordingly). If you
+    want to investigate all or other blocks, you need to provide the
+    list explicitly here and also set the desired blocksize.
 
     nsigma - determines for the peak counting algorithm the threshold
     for peak detection in standard deviations
@@ -1985,11 +2069,14 @@ def CRQualityCheck(limits,datafile=None,dataarray=None,maxblocksize=65536,nsigma
     if not datafile==None:
         nAntennas=datafile.get("nofSelectedAntennas")
         selected_antennas=datafile.get("selectedAntennas")
+        oldblocksize=datafile["blocksize"]
         filesize=datafile.get("filesize")
-        blocksize=min(filesize/4,maxblocksize)
-        datafile.set("blocksize",blocksize)
+        if blocksize==None:
+            blocksize=min(filesize/4,maxblocksize)
+        if not oldblocksize == blocksize: datafile["blocksize"]=blocksize
         nBlocks=filesize/blocksize;
-        blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
+        if blocklist==None:
+            blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
         if dataarray==None: dataarray=hArray(float,[nAntennas,blocksize])
     else:
         nAntennas=dataarray.getDim()[0]
@@ -2021,16 +2108,17 @@ def CRQualityCheck(limits,datafile=None,dataarray=None,maxblocksize=65536,nsigma
         dataproperties=zip(selected_antennas,datamean,datarms,datanpeaks,dataNonGaussianity)
         noncompliancelist=[]
         for prop in iter(dataproperties):
-            noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"nonGaussianity":4},limits)
+            noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"spikyness":4},limits)
             if noncompliancelist:
                 qualityflaglist.append([prop[0],Block,prop[1:],noncompliancelist])
                 if not verbose:
-                    print "Block= {0:5d}, Antenna {1:3d}: mean={2: 6.2f}, rms={3:6.1f}, npeaks={4:5d}, nonGaussianity={5: 7.2f}".format(*((Block,)+prop))," ",noncompliancelist
+                    print "Block= {0:5d}, Antenna {1:3d}: mean={2: 6.2f}, rms={3:6.1f}, npeaks={4:5d}, spikyness={5: 7.2f}".format(*((Block,)+prop))," ",noncompliancelist
             if verbose:
-                print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, nonGaussianity={4: 7.2f}".format(*prop)," ",noncompliancelist
+                print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}".format(*prop)," ",noncompliancelist
+    if not datafile==None: datafile["blocksize"]=blocksize
     return qualityflaglist
 
-#qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
+#qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-3,3)}
 #CRQualityCheck(datafile,qualitycriteria,maxblocksize=65536,nsigma=5,verbose=True)
 
 for v in hRealContainerTypes:

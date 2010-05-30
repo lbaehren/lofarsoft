@@ -1329,6 +1329,11 @@ for block in range(nBlocks):
 generating the tutorial, when an operation returns an array or
 vector.)
 
+Alternatively you can use the method
+
+>> avspectrum.craveragespectrum(datafile)
+
+which does this automatically.
 
 (+) Basic Plotting
 ------------------
@@ -1594,7 +1599,7 @@ which is a rather nasty collection of numbers. So, we print a nice
 table (restricting it to the first 5 antennas).
 
 """
-for prop in dataproperties[0:5]: print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, nonGaussianity={4: 7.2f}".format(*prop)
+for prop in dataproperties[0:5]: print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}".format(*prop)
 """
 
 Clearly this is a spiky dataset, with only one antenna not being
@@ -1606,8 +1611,8 @@ range, we can use a little python helper function, using a python
 "dict" as database for allowed parameters.
 
 """
-qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
-CheckParameterConformance(dataproperties[0],{"mean":1,"rms":2,"nonGaussianity":4},qualitycriteria)
+qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-3,3)}
+CheckParameterConformance(dataproperties[0],{"mean":1,"rms":2,"spikyness":4},qualitycriteria)
 """
 
 The first parameter is just the list of numbers of the mean, rms,
@@ -1629,7 +1634,7 @@ p_("badantennalist[0]")
 """
 
 (first the antenna number, then the block, then a list with the mean,
-rms, npeaks, and nonGaussianity, and finally the failed fields)
+rms, npeaks, and spikyness, and finally the failed fields)
 
 Note, that this function can be called with "file=None". In this case
 the data provided in the datararray will be used.

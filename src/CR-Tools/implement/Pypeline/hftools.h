@@ -259,6 +259,13 @@ template<> inline HInteger hfcast(/*const*/ HString v);
 template<> inline HNumber hfcast(/*const*/ HString v);
 template<> inline HComplex hfcast(/*const*/ HString v);
 
+template<class T> inline T hfcast(HBool v);
+template<>  inline HBool hfcast<HBool>(HInteger v);
+template<>  inline HBool hfcast<HBool>(HNumber v);
+template<>  inline HBool hfcast<HBool>(HComplex v);
+template<>  inline HBool hfcast<HBool>(HString v);
+template<>  inline HBool hfcast<HBool>(HPointer v);
+
 
 template<class T> inline HString hf2string(T v);
 template<> inline HString hf2string(CR::DataReader v);
