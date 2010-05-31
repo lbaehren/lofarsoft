@@ -16,6 +16,7 @@ plt.clf()
 filename_cr=LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event"
 cr_direction=[41.9898208, 64.70544, 1750.]
 XC=-25.44; YC=8.94; #shower core in KASCADE coordinates
+antennalist=[0,1,2,3,4,5,6,7]
 
 #	// Rotation by 15.25 degrees
 #	// (GPS measurement of angle between KASCADE and LOPES coordinate system)
@@ -29,7 +30,7 @@ XC=-25.44; YC=8.94; #shower core in KASCADE coordinates
 cr_shower_core=[XC*0.964787323 + YC*0.263031214,-XC*0.263031214 + YC*0.964787323,0.0]
 FarField=True
 
-ws=CRMainWorkSpace(filename=filename_cr,fittype="POLY",ncoeffs=8,nbins=1024,doplot=True,verbose=True,modulename="ws")  
+ws=CRMainWorkSpace(filename=filename_cr,fittype="POLY",ncoeffs=8,nbins=1024,doplot=False,verbose=False,modulename="ws")  
 ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256) #fittype="POLY" or "BSPLINE"
 
 if ws["datafile"]["Observatory"]=='LOFAR':
@@ -144,17 +145,18 @@ Now we read in instrumental delays for each antenna in a similar way
 and store it for later use.
 
 """
-cal_delays=cr.getCalData("Delay")
+cal_delays_caltable=cr.getCalData("Delay")
 
 """
 However, we actually also need to take care of sample-jumps that
 occured in LOPES, which were calculated using a calibration on a TV
-transmitter signal. Asking Andreas horneffer, we get the following
+transmitter signal. Asking Andreas Horneffer, we get the following
 correct delays:
 """
-horneffer_delays=Vector([0.00,  -1.87,  -0.22,  -0.30,  -2.02,  -2.06,   1.05,  -1.35])
+horneffer_delays=hArray([0.00,  -1.87,  -0.22,  -0.30,  -2.02,  -2.06,   1.05,  -1.35])
 horneffer_delays *= 12.5*10**-9
-cal_delays-=horneffer_delays
+#cal_delays=cal_delays_caltable
+cal_delays=horneffer_delays
 p_("cal_delays")
 """
 
@@ -183,7 +185,9 @@ in the Fourier domain).
 
 """
 phases=hArray(float,dimensions=ws["fft"],name="Phases",xvalues=ws["frequency"])
+ws["frequency"].setUnit("","")
 phases.delaytophase(ws["frequency"],delays)
+ws["frequency"].setUnit("M","")
 """
 #hGeometricPhases(phases,ws["frequency"],antenna_positions,cartesian,FarField)
 
@@ -208,23 +212,54 @@ Convert back into time domain
 """
 
 cr_efield_shifted = cr["emptyFx"].setPar("xvalues",cr_time)
+
+"""
+However, before FFTing we need to swap the FFT back, to take account of possibly different Nyquistzones
+
+"""
 cr_calfft_shifted[...].nyquistswap(cr["nyquistZone"])
 cr_efield_shifted[...].invfftw(cr_calfft_shifted[...]) # is being destroyed here ....
-cr_efield_shifted[...].plot(xlim=(-2.2,-1.6),legend=range(8))
+
+
+"""
+To make plotting quicker, select the time window you want to
+plot. Unfortunately Mathplot plots everything first and then simply
+does not display the things that are outside the plotting window -
+this is very slow with 8x65000 points.
+
+"""
+t1=cr_time.findlowerbound(-2.0)
+t2=cr_time.findlowerbound(-1.0)
+
+cr_efield_shifted[...,t1:t2].plot(xlim=(-1.95,-1.65),xvalues=cr_time[t1:t2],legend=antennalist)
 raw_input("Plotted shifted efields - press Enter to continue...")
-cr_efield_shifted[[1,3,4,6],...].plot(xlim=(-1.95,-1.6),legend=[1,3,4,6])
-raw_input("Plotted not flagged antennas - press Enter to continue...")
+
+#cr_efield_shifted[antennalist,...].plot(xlim=(-1.95,-1.6),legend=antennalist)
+#raw_input("Plotted not flagged antennas - press Enter to continue...")
 
 
+"""
+The beamforming we here do by simply adding the data in the time domain 
+"""
 cr_efield_shifted_added=hArray(float,dimensions=cr_time,name="beamformed E-field",xvalues=cr_time)
-cr_efield_shifted[[1,3,4,6],...].addto(cr_efield_shifted_added)
+cr_efield_shifted[antennalist,...].addto(cr_efield_shifted_added)
+cr_efield_shifted_added /= ws["datafile"]["nofAntennas"] #normalize
 
+"""
+Finally, we produce a nice, smoothed data curve: first taking the abs
+and then using running average.
+"""
 
 cr_efield_shifted_added_abs=hArray(copy=cr_efield_shifted_added,xvalues=cr_time)
 cr_efield_shifted_added_abs.abs()
 cr_efield_shifted_added_smoothed=hArray(float,dimensions=[cr.blocksize],xvalues=cr_time,name="E-Field")
-cr_efield_shifted_added_smoothed.runningaverage(cr_efield_shifted_added_abs,7,hWEIGHTS.GAUSSIAN)
-cr_efield_shifted_added_smoothed.plot(xlim=(-2,-0.5),title=cr.filename,clf=False)
-#cr_efield_shifted[...].abs()
-#cr_efield_shifted[...].plot(xlim=(-1.9,-1.7),clf=False)
+cr_efield_shifted_added_smoothed.runningaverage(cr_efield_shifted_added_abs,3,hWEIGHTS.LINEAR) # or .GAUSSIAN)
+cr_efield_shifted_added_smoothed[t1:t2].plot(xlim=(-2,-1),title=cr.filename,xvalues=cr_time[t1:t2],clf=False)
+raw_input("Overplotted smoothed beamformed pulse - press Enter to continue...")
+
+
+cr_efield_shifted_added_abs[t1:t2].plot(xlim=(-2,-1),xvalues=cr_time[t1:t2],title=cr.filename,clf=True)
+cr_efield_shifted_added_smoothed[t1:t2].plot(xlim=(-2,-1),xvalues=cr_time[t1:t2],title=cr.filename,clf=False)
+
+#Voila ...
 
