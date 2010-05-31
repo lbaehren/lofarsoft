@@ -1,3 +1,8 @@
+#! /usr/bin/env python
+
+from pycrtools import *
+import time
+
 filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecond.h5"
 filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecondtbb1.h5"
 filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"

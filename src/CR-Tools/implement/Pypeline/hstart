@@ -1,4 +1,0 @@
-#
-echo "Note that this assumes a Mac installation - adapt the path to the correct python version accordingly."
-cd $LOFARSOFT/src/CR-Tools/implement/Pypeline
-/sw/bin/python2.6 -i pycrtools.py

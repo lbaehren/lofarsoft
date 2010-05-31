@@ -1,18 +1,18 @@
-#gdb --annotate=3 -quiet -f --args python -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pycrtools.py -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/test.py
+#! /usr/bin/env python
+
+from pycrtools import *
+import time
+import numpy as np
+import matplotlib.pyplot as plt
 
 def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)
     else: print " ",var,"=>",eval(var)
 
-#from pycrtools import *
-
 filename_sun=LOFARSOFT+"/data/lopes/example.event"
 filename_biglofar=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
 figno=0
-
-plt.clf()
-#------------------------------------------------------------------------
 
 print "t=",time.clock(),"s -","Reading in data and setting parameters"
 file=crfile(filename_sun)
@@ -148,3 +148,4 @@ plt.subplot(1,2,2)
 plt.imshow(intimage,cmap=plt.cm.hot)
 print "t=",time.clock()-t0,"s -","Done Method 2"
 plt.savefig("sunimage.pdf")
+

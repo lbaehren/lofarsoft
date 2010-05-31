@@ -1,16 +1,15 @@
-# Import module
-
 import pdb
 #pdb.set_trace()
 #debugon=False
 
-
 from math import *
 from hftools import *
 from pydoc import help as pyhelp
-import os,sys,re
+import os
+import sys
+import re
 import matplotlib.pyplot as plt
-import time as time
+import time
 import numpy as np
 
 LOFARSOFT=os.environ["LOFARSOFT"]
@@ -28,7 +27,9 @@ DEFAULTDATAFILE=filename_lopes
 
 #Read in the doc strings for the functions in hftools
 execfile(pydocpyfilename)
-f=open(pydoctxtfilename);pycralldocstring=f.read();f.close()
+f=open(pydoctxtfilename)
+pycralldocstring=f.read()
+f.close()
 
 #======================================================================
 #  Help Functions
@@ -583,11 +584,6 @@ def hTranspose(self,ary):
 #======================================================================
 #  Define Plotting functions for vectors and arrays
 #======================================================================
-
-#    plt.subplot(1,2,1)
-#%SKIP
-#plt.title("Average Spectrum for Two Antennas")
-
 
 def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None):
     """
