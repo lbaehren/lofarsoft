@@ -2121,3 +2121,4 @@ for v in hRealContainerTypes:
     for s in ["hCRAverageSpectrum","hCRFitBaseline","hCRCalcBaseline"]:
         setattr(v,s[1:].lower(),eval(s))
 
+hInit()

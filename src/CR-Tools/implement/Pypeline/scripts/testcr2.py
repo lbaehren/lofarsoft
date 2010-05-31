@@ -27,8 +27,10 @@ antennalist=[0,1,2,3,4,5,6,7]
 #	XCn = XC*0.964787323+YC*0.263031214;
 #	YCn = XC*-0.263031214+YC*0.964787323;
 
-cr_shower_core=[XC*0.964787323 + YC*0.263031214,-XC*0.263031214 + YC*0.964787323,0.0]
-FarField=True
+cr_shower_core=[XC*0.964787323 + YC*0.263031214,-XC*0.263031214 + YC*0.964787323,0.0] # first version
+#cr_shower_core=[-XC*0.263031214 + YC*0.964787323,XC*0.964787323 + YC*0.263031214,0.0]
+#FarField=True
+FarField=False
 
 ws=CRMainWorkSpace(filename=filename_cr,fittype="POLY",ncoeffs=8,nbins=1024,doplot=False,verbose=False,modulename="ws")  
 ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256) #fittype="POLY" or "BSPLINE"
@@ -99,25 +101,6 @@ raw_input("Plotted spectrum - press Enter to continue...")
 """
 
 
-
-Now let's look at the beam forming:
-
-We first turn the cooridnates into a std vector and create a vector that is
-supposed to hold the Cartesian coordinates. Note that the AzEL vector
-is actually AzElRadius, where we need to set the radius to unity.
-
-"""
-azel=hArray(cr_direction,dimensions=[1,3])
-cartesian=azel.new()
-"""
-
-We then do the conversion, using
-
-"""
-hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],CoordinateTypes.Cartesian,FarField)
-"""
-
-
 (++) Coordinates
 ---------------
 
@@ -160,11 +143,22 @@ cal_delays=horneffer_delays
 p_("cal_delays")
 """
 
+Now let's look at the actual beam forming:
+
+We first turn the coordinates into a std vector and create a vector that is
+supposed to hold the Cartesian coordinates. Note that the AzEL vector
+is actually AzElRadius, where we need to set the radius to unity.
+
+"""
+azel=hArray(cr_direction,dimensions=[1,3])
+cartesian=azel.new()
+"""
+
 We now convert the Azimuth-Elevation position into a vector in
 Cartesian coordinates, which is what is used by the beamformer.
 """
 
-hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,FarField)
+hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],CoordinateTypes.Cartesian,True)
 """
 
 Then calculate geometric delays and add the instrumental delays.
@@ -254,7 +248,7 @@ and then using running average.
 cr_efield_shifted_added_abs=hArray(copy=cr_efield_shifted_added,xvalues=cr_time)
 cr_efield_shifted_added_abs.abs()
 cr_efield_shifted_added_smoothed=hArray(float,dimensions=[cr.blocksize],xvalues=cr_time,name="E-Field")
-cr_efield_shifted_added_smoothed.runningaverage(cr_efield_shifted_added_abs,4,hWEIGHTS.GAUSSIAN) #or .FLAT)# .or LINEAR) # or .GAUSSIAN)
+cr_efield_shifted_added_smoothed.runningaverage(cr_efield_shifted_added_abs,2,hWEIGHTS.GAUSSIAN) #or .FLAT)# .or LINEAR) # or .GAUSSIAN)
 cr_efield_shifted_added_smoothed[t1:t2].plot(xlim=(-2,-1),title=cr.filename,xvalues=cr_time[t1:t2],clf=False)
 raw_input("Overplotted smoothed beamformed pulse - press Enter to continue...")
 
