@@ -232,6 +232,7 @@ t1=cr_time.findlowerbound(-2.0)
 t2=cr_time.findlowerbound(-1.0)
 
 cr_efield_shifted[...,t1:t2].plot(xlim=(-1.95,-1.65),xvalues=cr_time[t1:t2],legend=antennalist)
+plt.savefig("cr_efields.pdf")
 raw_input("Plotted shifted efields - press Enter to continue...")
 
 #cr_efield_shifted[antennalist,...].plot(xlim=(-1.95,-1.6),legend=antennalist)
@@ -253,13 +254,19 @@ and then using running average.
 cr_efield_shifted_added_abs=hArray(copy=cr_efield_shifted_added,xvalues=cr_time)
 cr_efield_shifted_added_abs.abs()
 cr_efield_shifted_added_smoothed=hArray(float,dimensions=[cr.blocksize],xvalues=cr_time,name="E-Field")
-cr_efield_shifted_added_smoothed.runningaverage(cr_efield_shifted_added_abs,3,hWEIGHTS.LINEAR) # or .GAUSSIAN)
+cr_efield_shifted_added_smoothed.runningaverage(cr_efield_shifted_added_abs,4,hWEIGHTS.GAUSSIAN) #or .FLAT)# .or LINEAR) # or .GAUSSIAN)
 cr_efield_shifted_added_smoothed[t1:t2].plot(xlim=(-2,-1),title=cr.filename,xvalues=cr_time[t1:t2],clf=False)
 raw_input("Overplotted smoothed beamformed pulse - press Enter to continue...")
 
 
 cr_efield_shifted_added_abs[t1:t2].plot(xlim=(-2,-1),xvalues=cr_time[t1:t2],title=cr.filename,clf=True)
 cr_efield_shifted_added_smoothed[t1:t2].plot(xlim=(-2,-1),xvalues=cr_time[t1:t2],title=cr.filename,clf=False)
+plt.savefig("cr_pulse_zoom.pdf")
+raw_input("Plotted final pulse - press Enter to continue...")
+
+cr_efield_shifted_added_abs.plot(xlim=(-400,400),title=cr.filename,clf=True)
+cr_efield_shifted_added_smoothed.plot(xlim=(-400,400),title=cr.filename,clf=False)
+plt.savefig("cr_pulse.pdf")
 
 #Voila ...
 
