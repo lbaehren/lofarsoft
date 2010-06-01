@@ -44,8 +44,6 @@ macro (include_find_module _modules)
   list (REVERSE _args)
   list (GET _args 0 _firstArgument)
 
-  message (STATUS "[1] Arguments = ${_args}")
-  
   if (_firstArgument MATCHES ON+|TRUE+|YES+)
     set (_verbose YES)
     list (REMOVE_AT _args 0)
@@ -58,8 +56,6 @@ macro (include_find_module _modules)
 
   ## Once the optional argument has been removed, sort the list of inputs
   list (SORT _args)
-
-  message (STATUS "[2] Arguments = ${_args}")
 
   foreach (_module ${_args})
     

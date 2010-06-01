@@ -48,10 +48,6 @@
 /* DAL header files */
 #include <dal/TBB_Timeseries.h>
 
-using casa::AipsError;
-
-using DAL::TBB_Timeseries;
-
 namespace CR { // Namespace CR -- begin
 
   /*!
@@ -85,6 +81,9 @@ namespace CR { // Namespace CR -- begin
     This class encapsulates the required functionality to connect the DataReader
     framework of the CR-Tools to the lower-level functionality of the Data Access
     Library (DAL), which handles the access to the standard LOFAR data products.
+    In that sense CR::LOFAR_TBB is intended to bridge the gap between the two
+    packages, hiding from an application programmer the differences in internal 
+    handling of e.g. performing selections and book-keeping.
     
     <h3>Example(s)</h3>
     
@@ -104,7 +103,7 @@ namespace CR { // Namespace CR -- begin
     LOFAR_TBB (std::string const &filename,
 	       uint const &blocksize=1);
     //! Argumented constructor
-    LOFAR_TBB (TBB_Timeseries const &timeseries);
+    LOFAR_TBB (DAL::TBB_Timeseries const &timeseries);
     //! Copy constructor
     LOFAR_TBB (LOFAR_TBB const &other);
     
@@ -115,22 +114,22 @@ namespace CR { // Namespace CR -- begin
     
     // === Operators ============================================================
     
-    /*!
-      \brief Overloading of the copy operator
-      
-      \param other -- Another LOFAR_TBB object from which to make a copy.
-    */
+    //! Overloading of the copy operator
     LOFAR_TBB& operator= (LOFAR_TBB const &other); 
     
     // === Parameters access ====================================================
 
+    //! Get list of the channel IDs pointing to the dipole datasets
+    inline std::vector <std::string> dipoleNames () const {
+      return dipoleNames_p;
+    }
     //! Selection of the antennas in the dataset
-    Bool setSelectedAntennas (Vector<uint> const &antennaSelection,
-			      bool const &absolute=true);
-    
+    bool setSelectedAntennas (Vector<uint> const &antennaSelection,
+			      bool const &absolute=false);
     //! Selection of the antennas in the dataset
-    Bool setSelectedAntennas (Vector<Bool> const &antennaSelection);
-    
+    bool setSelectedAntennas (Vector<Bool> const &antennaSelection);
+    //! Selection of the antennas in the dataset
+    bool setSelectedAntennas (std::set<std::string> const &antennaSelection);    
     //! Get the name of the class, "LOFAR_TBB".
     std::string className () const {
       return "LOFAR_TBB";
@@ -144,48 +143,29 @@ namespace CR { // Namespace CR -- begin
     
     //! Get a block of raw time-series data for the available data channels
     void fx (casa::Matrix<double> &data);
-
     //! Get a block of raw time-series data for the available data channels
     casa::Matrix<double> fx ();
-
     //! Set the record with the header information
     bool setHeaderRecord (casa::Record const &rec) {
       return DataReader::setHeaderRecord (rec);
     }
-
     //! Get the number of samples of the embedded dipole datasets
     casa::Vector<uint> dataLength ();
-
     //! Get the sample frequency
     casa::Vector<casa::MFrequency> sampleFrequency ();
-
     //! Retrieve the list of channel IDs. 
     casa::Vector<int> channelID ();
-
     //! Get the number of samples elapsed since the last full second. 
     casa::Vector<uint> sampleNumber ();
-
     //! Time offset between the individual antennas in units of samples
     casa::Vector<int> sampleOffset (uint const &refAntenna=0);
 
   protected:
     
-    /*!
-      \brief Set up the streams for reading in the data
-      
-      \return status -- Status of the operation; returns <tt>false</tt> if an
-              error was encountered.
-    */
+    //! Set up the streams for reading in the data
     bool setStreams ();
-    
-    /*!
-      \brief Fill the header information from the into a header record.
-      
-      \return status -- Status of the operation; returns <i>true</i> if everything
-              went fine.
-    */
+    //! Fill the header information from the into a header record.
     bool setHeaderRecord ();
-
     //! Time in full seconds.
     casa::Vector<uint> time ();
     

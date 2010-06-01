@@ -725,13 +725,25 @@ namespace CR {  //  Namespace CR -- begin
   }
 
   //_____________________________________________________________________________
+  //                                                                   setStreams
+
+  bool DataReader::setStreams ()
+  {
+    return true;
+  }
+
+  //_____________________________________________________________________________
   //                                                              setHeaderRecord
 
+  /*!
+    \return status -- Status of the operation; returns <tt>false</tt> in case an
+            error was encountered.
+  */
   bool DataReader::setHeaderRecord ()
   {
     header_p.define("Observatory","UNDEFINED");
     header_p.define("Filesize",0);
-
+    
     return true;
   }
 
@@ -1550,6 +1562,14 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                             setHanningFilter
   
+  /*!
+    \param alpha -- Slope parameter of the HanningFilter.
+
+    Insert a Hanning filter before the the Fourier transform; the slope
+    parameter \f$ \alpha \f$ can be used to obtain a Hanning- or a
+    Hammingfilter. To disable the HanningFilter call this function with
+    \f$ \alpha = 0 \f$.
+   */
   void DataReader::setHanningFilter (double const &alpha)
   {
     if (alpha == 0.0) {
@@ -1564,6 +1584,10 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                             setHanningFilter
 
+  /*!
+    \param alpha -- Slope parameter of the HanningFilter.
+    \param beta  -- Width of the plateau with w[n]=1.
+  */
   void DataReader::setHanningFilter (double const &alpha,
 				     uint const &beta)
   {
@@ -1581,6 +1605,13 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                             setHanningFilter
 
+  /*!
+    \param alpha     -- Slope parameter of the HanningFilter.
+    \param beta      -- Width of the plateau with w[n]=1.
+    \param betaRise  -- Width before beginning of the plateau
+    \param betaFall  -- Width after end of the plateau. beta + betaRise + betaFall
+           must equal 1.
+  */
   void DataReader::setHanningFilter (double const &alpha,
 				     uint const &beta,
 				     uint const &betaRise, 
@@ -1671,6 +1702,9 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                          setSelectedAntennas
 
+  /*!
+    \param antennaSelection -- Selection of the antennas in the dataset
+  */
   Bool DataReader::setSelectedAntennas (Vector<uint> const &antennaSelection,
 					bool const &absolute)
   {
@@ -1704,6 +1738,9 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                          setSelectedAntennas
 
+  /*!
+    \param antennaSelection -- Selection of the antennas in the dataset
+  */
   Bool DataReader::setSelectedAntennas (Vector<Bool> const &antennaSelection)
   {
     uint nelem (antennaSelection.nelements());
@@ -1737,19 +1774,27 @@ namespace CR {  //  Namespace CR -- begin
       return False;
     }
   }
+
+  //_____________________________________________________________________________
+  //                                                             antennaSelection
   
-  // ------------------------------------------------------------ antennaSelection
-  
+  /*!
+    \return antennaSelection -- Array with the antenna selection flags
+  */
   Vector<bool> DataReader::antennaSelection () const
   {
-    Vector<bool> antennaSelectionVec(nofAntennas(),False);
-    for (uint antenna(0); antenna<nofSelectedAntennas(); antenna++) {
-      antennaSelectionVec(selectedAntennas_p(antenna)) = True;
+    unsigned int nelem = nofSelectedAntennas();
+    Vector<bool> selection(nofAntennas(),false);
+
+    for (unsigned int n(0); n<nelem; n++) {
+      selection(selectedAntennas_p(n)) = true;
     };
-    return antennaSelectionVec;
+
+    return selection;
   }
   
-  // ----------------------------------------------------------------- nofBaselines
+  //_____________________________________________________________________________
+  //                                                                 nofBaselines
   
   uint DataReader::nofBaselines (bool const &allAntennas) const
   {

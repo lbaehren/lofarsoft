@@ -395,7 +395,7 @@ int test_timeValues ()
 */
 int test_headerRecord (std::string const &filename)
 {
-  cout << "\n[test_data]\n" << endl;
+  cout << "\n[tLOFAR_TBB::test_data]\n" << endl;
   
   int nofFailedTests (0);
   bool status (false);
@@ -403,7 +403,6 @@ int test_headerRecord (std::string const &filename)
 
   cout << "[1] Set header record from dataset metadata ..." << endl;
   try {
-    bool status (true);
     // Create LOFAR_TBB object ...
     LOFAR_TBB data (filename,
 		    blocksize);
@@ -575,6 +574,74 @@ int test_data (std::string const &filename)
 }
 
 //_______________________________________________________________________________
+//                                                                 test_selection
+
+/*!
+  \brief Test selection of dipoles
+  
+  \param filename -- Name of the HDF5 dataset to work with
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_selection (std::string const &filename)
+{
+  cout << "\n[tLOFAR_TBB::test_selection]\n" << endl;
+  
+  int nofFailedTests (0);
+  uint blocksize (1024);
+  LOFAR_TBB dr (filename, blocksize);
+
+  //________________________________________________________
+  // Run the tests
+
+  cout << "[1] Read data without any selection ..." << endl;
+  try {
+    casa::Matrix<double> fx = dr.fx();
+    //
+    cout << "-- Blocksize         = " << blocksize             << endl;
+    cout << "-- Dipole names      = " << dr.dipoleNames()      << endl;
+    cout << "-- Antenna selection = " << dr.antennaSelection() << endl;
+    cout << "-- shape(fx)         = " << fx.shape()            << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Test setSelectedAntennas (std::set< std::string >) ..." << endl;
+  try {
+    std::vector<std::string> names = dr.dipoleNames();
+    unsigned int nofDipoles        = names.size();
+    std::set<std::string> selection;
+    std::set<std::string>::iterator it;
+    // Get dipoles names for which to perform the selection
+    for (size_t n(0); n<names.size(); ++n) {
+      selection.insert(names[n]);
+    }
+    // Test selection of dipoles
+    for (unsigned int n(0); n<(nofDipoles-1); ++n) {
+      // remove the first element from the selection
+      it = selection.begin();
+      cout << "-- removing dipole " << *it << " from the selection ..." << endl;
+      selection.erase(it);
+      cout << "-- set new selection ..." << endl << std::flush;
+      dr.setSelectedAntennas(selection);
+      cout << "-- read data for selected dipoles ..." << endl << std::flush;
+      casa::Matrix<double> data = dr.fx();
+      //
+      cout << " --> selection     = " << selection    << endl;
+      cout << "                   = " << dr.antennaSelection() << endl;
+      cout << " --> shape(data)   = " << data.shape() << endl;
+      cout << " --> data [0,]     = " << data.row(0)  << endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
 //                                                                           main
 
 int main (int argc,
@@ -600,10 +667,8 @@ int main (int argc,
   // Perform some basic tests using the HDF5 library directly
 //   nofFailedTests += test_hdf5(filename);
 
-  // Perform some basic tests using the DAL
-
-  nofFailedTests += test_sampleValues ();
-  nofFailedTests += test_timeValues ();
+  // nofFailedTests += test_sampleValues ();
+  // nofFailedTests += test_timeValues ();
   
   if (haveDataset) {
     // Test for the constructor(s)
@@ -612,6 +677,8 @@ int main (int argc,
     nofFailedTests += test_headerRecord (filename);
     // Test reading in the data from a file
     nofFailedTests += test_data (filename);
+    // Test selection of dipoles
+    nofFailedTests += test_selection (filename);
   } else {
     std::cout << "[tLOFAR_TBB] Skipping test needing test dataset." << endl;
   }

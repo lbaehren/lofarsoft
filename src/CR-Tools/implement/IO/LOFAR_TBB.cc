@@ -38,7 +38,7 @@ namespace CR { // Namespace CR -- begin
   //                                                                    LOFAR_TBB
   
   LOFAR_TBB::LOFAR_TBB ()
-    : TBB_Timeseries (),
+    : DAL::TBB_Timeseries (),
       DataReader ()
   {
     init ();
@@ -53,7 +53,7 @@ namespace CR { // Namespace CR -- begin
   */
   LOFAR_TBB::LOFAR_TBB (std::string const &filename,
 			uint const &blocksize)
-    : TBB_Timeseries (filename),
+    : DAL::TBB_Timeseries (filename),
       DataReader (blocksize)
   {
     init ();
@@ -68,7 +68,7 @@ namespace CR { // Namespace CR -- begin
 	   dataset.
   */
   LOFAR_TBB::LOFAR_TBB (TBB_Timeseries const &timeseries)
-    : TBB_Timeseries (timeseries),
+    : DAL::TBB_Timeseries (timeseries),
       DataReader ()
   {
     init();
@@ -82,7 +82,7 @@ namespace CR { // Namespace CR -- begin
            one.
   */
   LOFAR_TBB::LOFAR_TBB (LOFAR_TBB const &other)
-    : TBB_Timeseries (other),
+    : DAL::TBB_Timeseries (other),
       DataReader (other)
   {
     copy (other);
@@ -116,6 +116,9 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------------ operator=
   
+  /*!
+    \param other -- Another LOFAR_TBB object from which to make a copy.
+  */
   LOFAR_TBB& LOFAR_TBB::operator= (LOFAR_TBB const &other)
   {
     if (this != &other) {
@@ -131,7 +134,7 @@ namespace CR { // Namespace CR -- begin
   void LOFAR_TBB::copy (LOFAR_TBB const &other)
   {
     /* Copy operations for the base classes */
-    TBB_Timeseries::operator= (other);
+    DAL::TBB_Timeseries::operator= (other);
     DataReader::operator= (other);
     
   }
@@ -223,7 +226,7 @@ namespace CR { // Namespace CR -- begin
   bool LOFAR_TBB::init ()
   {
     bool status (true);
-    uint nofDipoles (0);
+    unsigned int nofDipoles (0);
 
     /* Check if we are actually connected to a dataset */
     
@@ -231,22 +234,25 @@ namespace CR { // Namespace CR -- begin
       std::cerr << "[LOFAR_TBB::init] Not connected to dataset!" << std::endl;
       return false;
     }
-    
-    /*
-     * Set up the vector collecting the IDs for the individual dipoles
-     */
-    nofDipoles = TBB_Timeseries::nofDipoleDatasets();
+
+    //________________________________________________________________
+    // Set up the vector collecting the IDs for the individual dipoles
+
+    nofDipoles = DAL::TBB_Timeseries::nofDipoleDatasets();
     dipoleNames_p.resize (nofDipoles);
-    
-    /*
-     * Set the correct data for the time and frequency axis
-     * - sample frequency
-     * - nyquist zone
-     */
+    dipoleNames_p = DAL::TBB_Timeseries::dipoleNames();
+
+    casa::Vector<unsigned int> antennas;
+    DAL::convertVector (antennas,DAL::TBB_Timeseries::dipoleNumbers());
+    setAntennas (antennas);
+
+    //________________________________________________________________
+    // Set the correct data for the time and frequency axis
+
 #ifdef HAVE_CASA
     // retrieve the values
-    casa::Vector<uint> nyquistZone            = TBB_Timeseries::nyquist_zone();
-    casa::Vector<casa::MFrequency> sampleFreq = TBB_Timeseries::sample_frequency();
+    casa::Vector<uint> nyquistZone            = DAL::TBB_Timeseries::nyquist_zone();
+    casa::Vector<casa::MFrequency> sampleFreq = DAL::TBB_Timeseries::sample_frequency();
     // adjust internal settings
     if (sampleFreq.nelements() > 0) {
       nyquistZone_p     = nyquistZone(0);
@@ -257,8 +263,8 @@ namespace CR { // Namespace CR -- begin
     }
 #else
     // retrieve the values
-    std::vector<uint> nyquistZone = TBB_Timeseries::nyquist_zone();
-    std::vector<double> sampleFreq = TBB_Timeseries::sample_frequency_value();
+    std::vector<uint> nyquistZone  = DAL::TBB_Timeseries::nyquist_zone();
+    std::vector<double> sampleFreq = DAL::TBB_Timeseries::sample_frequency_value();
     // adjust internal settings
     if (sampleFreq.size() > 0) {
       nyquistZone_p     = nyquistZone[0];
@@ -268,7 +274,7 @@ namespace CR { // Namespace CR -- begin
 		<< std::endl;
     }
 #endif
-    
+
     /*
      * Connect the streams (or at least the pointers normally connected to a
      * stream)
@@ -284,18 +290,16 @@ namespace CR { // Namespace CR -- begin
   //_______________________________________________________________________________
   //                                                                     setStreams
   
+  /*!
+    \return status -- Status of the operation; returns <tt>false</tt> if an
+            error was encountered.
+  */
   bool LOFAR_TBB::setStreams ()
   {
-#ifdef DEBUGGING_MESSAGES
-    std::cout << " [ LOFAR_TBB::setStreams () ] " << std::endl;
-#endif
     bool status (true);
     
-    /*
-     * Set up the iterators to navigate through the data volume and the selection
-     * of data input channels.
-     */
-    std::cout << "-- Setting up DataIterator objects ..." << std::endl;
+    //________________________________________________________________
+    // Set up DataIterator object for navigation through data volume
 
     uint blocksize (blocksize_p);
     nofStreams_p = dipoleNames_p.size();
@@ -313,28 +317,10 @@ namespace CR { // Namespace CR -- begin
       selectedAntennas_p(antenna) = antenna;
     }
     
-    /*
-     * Set up the record with the header information
-     */
-    std::cout << "-- Setting up header record ..." << std::endl;
+    //________________________________________________________________
+    // Set up header record
 
     status = setHeaderRecord ();
-    
-    /*
-      Set the conversion arrays: adc2voltage & fft2calfft
-    */
-    try {
-      // create arrays with default values
-      casa::Vector<double> adc2voltage (nofStreams_p,1.0);
-      casa::Matrix<casa::DComplex> fft2calfft (DataReader::fftLength(),nofStreams_p,1.0);
-      // set values through the init function of the DataReader class
-      DataReader::init (blocksize,
-			adc2voltage,
-			fft2calfft);
-    } catch (std::string message) {
-      std::cerr << "[LOFAR_TBB::setStreams]" << message << endl;
-      status = false;
-    }
     
     return status;
   }
@@ -343,8 +329,6 @@ namespace CR { // Namespace CR -- begin
   //                                                                setHeaderRecord
   
   /*!
-    \param header -- Record containing the header information
-    
     \return status -- Status of the operation; returns <tt>false</tt> in case an
             error was encountered.
   */
@@ -368,7 +352,7 @@ namespace CR { // Namespace CR -- begin
       header_p.define("TIME",LOFAR_TBB::time());
       header_p.define("SAMPLE_NUMBER",sampleNumber());
       header_p.define("SAMPLE_OFFSET",sampleOffset());
-    } catch (AipsError x) {
+    } catch (casa::AipsError x) {
       cerr << "[LOFAR_TBB::setHeaderRecord] " << x.getMesg() << endl;
       status = false;
     }; 
@@ -389,10 +373,31 @@ namespace CR { // Namespace CR -- begin
   //_______________________________________________________________________________
   //                                                            setSelectedAntennas
   
-  Bool LOFAR_TBB::setSelectedAntennas (Vector<uint> const &antennaSelection,
+  /*!
+    \param antennaSelection -- Selection of the antennas in the dataset
+    \param absolute -- Is the number to be considered the absolute number of the
+           dipole? For a LOFAR TBB dataset this option is not supported, as dipole
+	   selection is performed on the name of the dipole.
+
+    \return status -- Status of the operation; returns \e false in case an error 
+            -- such as a mismatch in number of array elements -- is encountered.
+  */
+  bool LOFAR_TBB::setSelectedAntennas (Vector<uint> const &antennaSelection,
 				       bool const &absolute)
   {
-    Bool status (true);
+    bool status (absolute);
+    unsigned int nofDipoles = dipoleNames_p.size();
+    unsigned int nelem      = antennaSelection.nelements();
+    std::set<std::string> selection;
+
+    for (unsigned int n(0); n<nelem; ++n) {
+      if (antennaSelection(n)<nofDipoles) {
+	selection.insert(dipoleNames_p[antennaSelection(n)]);
+      }
+    }
+
+    /* Apply dipole dataset selection */
+    status = setSelectedAntennas (selection);
     
     return status;
   }
@@ -400,9 +405,77 @@ namespace CR { // Namespace CR -- begin
   //_______________________________________________________________________________
   //                                                            setSelectedAntennas
   
-  Bool LOFAR_TBB::setSelectedAntennas (Vector<Bool> const &antennaSelection)
+  /*!
+    \param antennaSelection -- Selection of the antennas in the dataset
+
+    \return status -- Status of the operation; returns \e false in case an error 
+            -- such as a mismatch in number of array elements -- is encountered.
+  */
+  bool LOFAR_TBB::setSelectedAntennas (Vector<Bool> const &antennaSelection)
   {
-    Bool status (true);
+    bool status (true);
+    unsigned int nelem = antennaSelection.nelements();
+
+    if (nelem == dipoleNames_p.size()) {
+      std::set<std::string> selection;
+      /* Determine which dipole to select */
+      for (unsigned int n(0); n<nelem; ++n) {
+	if (antennaSelection(n)==true) {
+	  selection.insert(dipoleNames_p[n]);
+	}
+      }
+      /* Apply dipole dataset selection */
+      status = setSelectedAntennas (selection);
+    } else {
+      /* Error message*/
+      std::cerr << "[LOFAR_TBB::setSelectedAntennas]"
+		<< " Mismatching number of array elements!" << std::endl;
+      std::cerr << "-- size(antennaSelection) = " << nelem << std::endl;
+      std::cerr << "-- size(dipoleNames)      = " << dipoleNames_p.size() << std::endl;
+      /* Adjust status */
+      status = false;
+    }
+    
+    return status;
+  }
+  
+  //_______________________________________________________________________________
+  //                                                            setSelectedAntennas
+  
+  /*!
+    \return selection -- Names of the dipole datasets to be selected.
+
+    \return status -- Status of the operation; returns \e false in case an error
+            was encountered.
+  */
+  bool LOFAR_TBB::setSelectedAntennas (std::set<std::string> const &antennaSelection)
+  {
+    bool status        = true;
+    unsigned int count = 0;
+    unsigned int nelem = dipoleNames_p.size();
+    std::set<std::string> selectedDipoles;
+    unsigned int nofSelectedDipoles;
+
+    /* Forward the method call ... */
+    status             = TBB_Timeseries::selectDipoles (antennaSelection);
+    /* ... before retrieving the actual selection. */
+    selectedDipoles    = TBB_Timeseries::selectedDipoles();
+    nofSelectedDipoles = selectedDipoles.size();
+ 
+    selectedAntennas_p.resize (nofSelectedDipoles);
+    selectedAntennas_p = 0;
+
+    /* Go through the list of dipoles and check which ones are part of the
+     * selection; if a dipole indeed is selected, its position in the list of
+     * dipole names is stored in the selectedAntennas array.  */
+    for (unsigned int n(0); n<nelem; ++n) {
+      if (static_cast<bool>(antennaSelection.count(dipoleNames_p[n]))) {
+	if (count < nofSelectedDipoles) {
+	  selectedAntennas_p(count) = n;
+	  ++count;
+	}
+      }
+    }
     
     return status;
   }
@@ -416,16 +489,17 @@ namespace CR { // Namespace CR -- begin
   */
   casa::Matrix<double> LOFAR_TBB::fx ()
   {
+    unsigned int sizeSelection = selectedAntennas_p.size();
+    casa::Vector<int> start (sizeSelection);
     casa::Matrix<double> data;
-    casa::Vector<int> start (nofStreams_p);
 
-    for (uint n(0); n<nofStreams_p; ++n) {
-      start(n) = iterator_p[n].position(); 
+    for (uint n(0); n<sizeSelection; ++n) {
+      start(n) = iterator_p[selectedAntennas_p(n)].position(); 
     }
     
-    TBB_Timeseries::readData (data,
-			      start,
-			      blocksize_p);
+    DAL::TBB_Timeseries::readData (data,
+				   start,
+				   blocksize_p);
     
     return data;
   }
@@ -445,9 +519,9 @@ namespace CR { // Namespace CR -- begin
       start(n) = iterator_p[n].position(); 
     }
     
-    TBB_Timeseries::readData (data,
-			      start,
-			      blocksize_p);
+    DAL::TBB_Timeseries::readData (data,
+				   start,
+				   blocksize_p);
   }
   
   //_______________________________________________________________________________
@@ -457,7 +531,7 @@ namespace CR { // Namespace CR -- begin
   {
     casa::Vector<uint> val;
 
-    convertVector (val,TBB_Timeseries::data_length ());
+    convertVector (val,DAL::TBB_Timeseries::data_length ());
 
     return val;
   }
@@ -492,7 +566,7 @@ namespace CR { // Namespace CR -- begin
   {
     casa::Vector<uint> val;
 
-    convertVector (val,TBB_Timeseries::time ());
+    convertVector (val,DAL::TBB_Timeseries::time ());
 
     return val;
   }
@@ -516,7 +590,7 @@ namespace CR { // Namespace CR -- begin
   {
     casa::Vector<int> val;
 
-    convertVector (val,TBB_Timeseries::sample_offset (refAntenna));
+    convertVector (val,DAL::TBB_Timeseries::sample_offset (refAntenna));
 
     return val;
   }

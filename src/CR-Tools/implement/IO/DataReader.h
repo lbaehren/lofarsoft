@@ -282,35 +282,18 @@ namespace CR {  //  Namespace CR -- begin
     
     //! Record structure to store the meta data.
     Record header_p;
-        
     //! Number of filestream, from which data are read
     uint nofStreams_p;
-    
     //! File streams connecting to the stored data.
     std::fstream *fileStream_p;
-    
     //! Book-keeping: have the streams been connected?
     bool streamsConnected_p;
-    
     //! Array of DataIterator objects for handling progressing through data volume
     DataIterator *iterator_p;
-    
-    /*!
-      \brief Set up the streams for reading in the data
-      
-      \return status -- Status of the operation; returns <tt>false</tt> if an
-              error was encountered.
-    */
-    virtual bool setStreams () { return true;};
-    
-    /*!
-      \brief Set the record collecting header information.
-
-      \return status -- Status of the operation; returns <tt>false</tt> in case an
-              error was encountered.
-    */
+    //! Set up the streams for reading in the data
+    virtual bool setStreams ();
+    //! Set the record collecting header information.
     virtual bool setHeaderRecord ();
-    
     //! Initialization of internal parameters
     void init (uint const &blocksize,
 	       Vector<Double> const &adc2voltage,
@@ -702,11 +685,7 @@ namespace CR {  //  Namespace CR -- begin
   bool setAntennas (Vector<uint> const &antennas,
 		    Vector<bool> const &antennaSelection);
   
-  /*!
-    \brief Return array with the antenna selection flags
-
-    \return antennaSelection -- Antenna selection flags
-  */
+  //! Return array with the antenna selection flags
   Vector<bool> antennaSelection () const;
 
   /*!
@@ -737,19 +716,11 @@ namespace CR {  //  Namespace CR -- begin
     return selectedAntennas_p;
   }
 
-  /*!
-   \brief Selection of the antennas in the dataset
-   
-   \param antennaSelection -- Selection of the antennas in the dataset
-  */
+  //! Selection of the antennas in the dataset
   virtual Bool setSelectedAntennas (Vector<uint> const &antennaSelection,
 				    bool const &absolute=true);
   
-  /*!
-    \brief Selection of the antennas in the dataset
-    
-    \param antennaSelection -- Selection of the antennas in the dataset
-  */
+  //! Selection of the antennas in the dataset
   virtual Bool setSelectedAntennas (Vector<Bool> const &antennaSelection);
   
   // -------------------------------------------- Selection of frequency channels
@@ -800,36 +771,14 @@ namespace CR {  //  Namespace CR -- begin
    */
   Vector<Double> frequencyValues (Bool const &onlySelected=True);
   
-  // ------------------------------------------------------------- Hanning filter
+  // === Hanning filter =========================================================
   
-  /*!
-    \brief Enable/Disable the Hanning filter
-
-    \param alpha -- Slope parameter of the HanningFilter.
-
-    Insert a Hanning filter before the the Fourier transform; the slope
-    parameter \f$ \alpha \f$ can be used to obtain a Hanning- or a
-    Hammingfilter. To disable the HanningFilter call this function with
-    \f$ \alpha = 0 \f$.
-   */
+  //! Enable/Disable the Hanning filter
   void setHanningFilter (double const &alpha);
-  /*!
-    \brief Enable/Disable the Hanning filter
-
-    \param alpha -- Slope parameter of the HanningFilter.
-    \param beta  -- Width of the plateau with w[n]=1.
-  */
+  //! Enable/Disable the Hanning filter
   void setHanningFilter (double const &alpha,
 			 uint const &beta);
-  
-  /*!
-    \brief Enable/Disable the Hanning filter
-
-    \param alpha     -- Slope parameter of the HanningFilter.
-    \param beta      -- Width of the plateau with w[n]=1.
-    \param betaRise  -- Width before beginning of the plateau
-    \param betaFall  -- Width after end of the plateau. beta + betaRise + betaFall must equal 1.
-  */
+  //! Enable/Disable the Hanning filter
   void setHanningFilter (double const &alpha,
 			 uint const &beta,
                          uint const &betaRise, 
