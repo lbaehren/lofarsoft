@@ -1,4 +1,4 @@
-#gdb --annotate=3 -quiet -f --args python -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pycrtools.py -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/test.py
+print "!!!!OUTDATED!!!!! USE testcr2.ps instead!!!""
 
 def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)

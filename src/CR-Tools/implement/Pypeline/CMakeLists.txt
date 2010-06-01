@@ -21,7 +21,7 @@ set (PYPELINE_SCRIPTS
   testfft.py
   testrfi.py
   testseti2.py
-  testcr.py
+  testcr2.py
   testimage.py
   testrfi2.py
   testcrab.py
