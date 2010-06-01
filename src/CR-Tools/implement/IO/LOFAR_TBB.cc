@@ -321,7 +321,7 @@ namespace CR { // Namespace CR -- begin
     // Set up header record
 
     status = setHeaderRecord ();
-    
+
     return status;
   }
   
@@ -490,7 +490,27 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
 
+    /* Forward the function call */
     status = TBB_Timeseries::selectDipoles (antennaSelection);
+
+    /* Internal book-keeping */
+
+    size_t count (0);
+    std::set<std::string>::iterator it;
+    size_t nofSelectedDipoles = TBB_Timeseries::selectedDipoles().size();
+ 
+    selectedAntennas_p.resize (nofSelectedDipoles);
+
+    /* Go through the list of dipoles and check which ones are part of the selection;
+       if a dipole indeed is selected, its position in the list of dipole names is
+       stored in the selectedAntennas array.  */
+    for (size_t n(0); dipoleNames_p.size(); ++n) {
+      it = antennaSelection.find(dipoleNames_p[n]);
+      if (it!=antennaSelection.end()) {
+	selectedAntennas_p[count] = n;
+	++count;
+      }
+    }
 
     return status;
   }
