@@ -549,14 +549,11 @@ namespace CR { // Namespace CR -- begin
   
   casa::Vector<int> LOFAR_TBB::channelID ()
   {
-    std::vector<int> val;
-    casa::Vector<int> sample (val.size());
+    casa::Vector<int> val;
 
-    for (unsigned int n(0); n<val.size(); ++n) {
-      sample(n) = val[n];
-    }
+    convertVector (val, DAL::TBB_Timeseries::dipoleNumbers());
 
-    return sample;
+    return val;
   }
 
   //_______________________________________________________________________________
@@ -566,7 +563,7 @@ namespace CR { // Namespace CR -- begin
   {
     casa::Vector<uint> val;
 
-    convertVector (val,DAL::TBB_Timeseries::time ());
+    convertVector (val, DAL::TBB_Timeseries::time());
 
     return val;
   }
@@ -578,7 +575,7 @@ namespace CR { // Namespace CR -- begin
   {
     casa::Vector<uint> val;
 
-    convertVector (val,TBB_Timeseries::sample_number ());
+    convertVector (val, TBB_Timeseries::sample_number());
 
     return val;
   }
@@ -590,7 +587,7 @@ namespace CR { // Namespace CR -- begin
   {
     casa::Vector<int> val;
 
-    convertVector (val,DAL::TBB_Timeseries::sample_offset (refAntenna));
+    convertVector (val, DAL::TBB_Timeseries::sample_offset (refAntenna));
 
     return val;
   }
