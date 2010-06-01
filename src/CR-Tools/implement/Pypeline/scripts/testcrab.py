@@ -83,7 +83,7 @@ for i in range(0,int(nrantennas)):
     ant.extend([float(str.split()[0]),float(str.split()[1]),float(str.split()[2])])  #Y polarization
 
 
-antenna_positions=hArray(ant,[int(nrantennas),int(nrdir)])
+antenna_positions=hArray(ant,[2*int(nrantennas),int(nrdir)])
 #maybe this selection can be done later and at the moment it only works if a full TBB board is dumped
 #ant_pos_tbb0=hArray(ant[0:15],[16,3])
 #ant_pos_tbb1=hArray(ant[16:31],[16,3])
