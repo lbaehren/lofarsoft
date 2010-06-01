@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import bestprof
 import Pgplot
 import ppgplot

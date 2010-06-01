@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import glob, os, sys, getopt, re
 import numpy as np
 import matplotlib.pyplot as plt
