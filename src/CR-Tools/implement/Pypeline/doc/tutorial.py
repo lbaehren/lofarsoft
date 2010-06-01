@@ -107,6 +107,59 @@ pycr -i tutorial.py
 from the console prompt.
 
 
+Alternatively use ipython
+
+1. Download and install the latest development release of ipython
+
+tar xvf ipython-0.11.tar.gz
+cd ipython-0.11
+sudo python setup.py install
+
+2. Copy the profile from $LOFARSOFT/src/CR-Tools/implement/Pypeline/extras  to your ~/.ipython directory
+
+cp $LOFARSOFT/src/CR-Tools/implement/Pypeline/extras/ipython_config_pycr.py ~/.ipython/
+
+3. Compile hftools and set the following variables
+
+PYTHONPATH=$PYTHONPATH:$LOFARSOFT/release/lib/python
+PATH=$PATH:$LOFARSOFT/release/bin/python
+
+4. Run the profile
+ipython -p pycr
+
+or set an alias
+
+alias pycr='ipython -ppycr'
+
+5. Use %run (with the full path to the script) to run the scripts from ipython.
+
+The testscripts can be found in a directory that is stored in the variable PYCRBIN, so say
+
+%run $PYCRBIN/testcr2.py
+
+or actually in the scripts directory which is simply:
+
+%run $PYCR/testcr2.py
+
+----------------
+
+To use ipython with pycr  within an emacs shell.
+
+Copy the file
+
+$LOFARSOFT/src/CR-Tools/implement/Pypeline/extras/ipython.el 
+
+to ~/Library/Preferences/Emacs/ipython.el
+
+and then put a line 
+
+(load-file "~/Library/Preferences/Emacs/ipython.el")
+
+into the ~/.emacs file in your home directory
+
+
+
+
 (+) Getting Help
 ================
 
