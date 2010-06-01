@@ -1,3 +1,6 @@
+#! /usr/bin/env python
+
+from pycrtools import *
 
 ws=CRGlobalParameters(modulename="ws")  
 ws.createFitbaseline(nbins=2**8)

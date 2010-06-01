@@ -1,5 +1,6 @@
-#execfile("mgl-pyqt-test.py")
+#! /usr/bin/env python
 
+from pycrtools import *
 from PyQt4 import QtGui,QtCore
 from mathgl import *
 import libhfget

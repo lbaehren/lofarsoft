@@ -1,4 +1,6 @@
-#
+#! /usr/bin/env python
+
+from pycrtools import *
 
 #Bechmnark test to compare the FFTs in the current CASA implementation
 #against a direct FFTW implementation

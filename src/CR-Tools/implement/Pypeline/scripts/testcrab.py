@@ -1,7 +1,5 @@
-#
-#alias pycr='/sw/bin/python2.6 -i /Users/STV/usg2/src/CR-Tools/implement/Pypeline/pycrinit.py'
-#. $LOFARSOFT/devel_common/scripts/init.sh
-#
+#! /usr/bin/env python
+
 #This file does beamforming in a specified direction and then makes a dynamic spectrum in that direction
 #Resolution: Full resolution (no integration yet)
 #Number of files: only 1 at the moment
@@ -9,6 +7,8 @@
 #Calibration: Not yet supported
 #Number of directions: 1
 #Selection of part of the antennas in the file: Not yet supported, only works with full boards at the moment
+
+from pycrtools import *
 
 tStart=time.clock()
 n_pixels=1

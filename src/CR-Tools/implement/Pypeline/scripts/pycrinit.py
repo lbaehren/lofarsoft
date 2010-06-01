@@ -1,8 +1,4 @@
-#A file to load the pycrtools run it with
-#python -i $LOFARSOFT/src/CR-Tools/implement/Pypeline/pycrinit.py
-#or with
-#python -i $LOFARSOFT/src/CR-Tools/implement/Pypeline/pycrinit.py -i myfile.py
-
+#! /usr/bin/env python
 
 from pycrtools import *
 from getopt import *

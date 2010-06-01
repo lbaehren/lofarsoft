@@ -11,9 +11,6 @@ load_subconfig('ipython_config.py')
 
 lines = """
 from pycrtools import *
-import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
 """
 
 # You have to make sure that attributes that are containers already

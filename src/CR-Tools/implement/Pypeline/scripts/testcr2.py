@@ -1,11 +1,10 @@
-#gdb --annotate=3 -quiet -f --args python -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pycrtools.py -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/test.py
+#! /usr/bin/env python
+
+from pycrtools import *
 
 def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)
     else: print " ",var,"=>",eval(var)
-
-from pycrtools import *
-
 
 filename_sun=LOFARSOFT+"/data/lopes/example.event"
 filename_biglofar=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
