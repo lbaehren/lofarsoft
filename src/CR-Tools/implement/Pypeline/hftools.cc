@@ -496,7 +496,7 @@ template<> inline HInteger hfcast(/*const*/ HString v){HInteger t=0; std::istrin
 template<> inline HNumber hfcast(/*const*/ HString v){HNumber t=0.0; std::istringstream is(v); is >> t; return t;}
 template<> inline HComplex hfcast(/*const*/ HString v){HComplex t=0.0; std::istringstream is(v); is >> t; return t;}
 
-//Bools 
+//Bools
 template<class T> inline T hfcast(HBool v){return hfcast<T>(hfcast<HInteger>(v));}
 template<>  inline HBool hfcast<HBool>(HInteger v){return (HInteger)v;}
 template<>  inline HBool hfcast<HBool>(HNumber v){return hfcast<HBool>((HInteger)v);}
@@ -2743,7 +2743,7 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const I
   $PARDOCSTRING
 
   If the input vector is shorter than the output vector it will wrap around
-  and start from the beginning until the output vector is fully processed. 
+  and start from the beginning until the output vector is fully processed.
 
   Input and output vector can be identical.
 
@@ -2784,7 +2784,7 @@ void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end, const IterIn vecin,
   $PARDOCSTRING
 
   If the input vector is shorter than the output vector it will wrap around
-  and start from the beginning until the output vector is fully processed. 
+  and start from the beginning until the output vector is fully processed.
 
   Input and output vector can be identical.
 
@@ -6080,7 +6080,7 @@ void HFPP_FUNC_NAME(CRDataReader & dr) {
 //------------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_0 (HString)(Filename)()("Filename of file to opwn including full directory name")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HString)(Filename)()("Filename of file to open including full directory name")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
@@ -6125,7 +6125,7 @@ CRDataReader & HFPP_FUNC_NAME(HString Filename) {
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (HPyObject)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object openen, e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HString)(keyword)()("Keyword ro be read out from the file metadata")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be read out from the file metadata")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
@@ -6138,7 +6138,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
   key[0]=(unsigned char)tolower((int)key[0]);
   DataReader *drp=&dr;
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key== #KEY) || (key2== #KEY)) {_H_NL_ TYPE result(drp->KEY ()); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
-  HFPP_REPEAT(uint,uint,nofAntennas)
+    HFPP_REPEAT(uint,uint,nofAntennas)
     HFPP_REPEAT(uint,uint,nofSelectedChannels)
     HFPP_REPEAT(uint,uint,nofSelectedAntennas)
     HFPP_REPEAT(uint,uint,blocksize)
@@ -6156,26 +6156,34 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
     HFPP_REPEAT(uint,HInteger,selectedAntennas)
     HFPP_REPEAT(uint,HInteger,selectedChannels)
     HFPP_REPEAT(uint,HInteger,positions)
+    HFPP_REPEAT(int,HInteger,shift)
     HFPP_REPEAT(double,HNumber,increment)
     HFPP_REPEAT(double,HNumber,frequencyValues)
     HFPP_REPEAT(double,HNumber,frequencyRange)
 #undef HFPP_REPEAT
+// --- Reading data from the headerrecord in a scalar---
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key== #KEY) || (key2== #KEY)) {_H_NL_ TYPE result;  _H_NL_ drp->headerRecord().get(#KEY,result); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
-      HFPP_REPEAT(uint,uint,Date)
-	HFPP_REPEAT(casa::String,HString,Observatory)
-	HFPP_REPEAT(int,int,Filesize)
-	//	HFPP_REPEAT(double,double,dDate)
-	HFPP_REPEAT(int,int,presync)
-	HFPP_REPEAT(int,int,TL)
-	HFPP_REPEAT(int,int,LTL)
-	HFPP_REPEAT(int,int,EventClass)
-	HFPP_REPEAT(casa::uChar,uint,SampleFreq)
-	HFPP_REPEAT(uint,uint,StartSample)
+    HFPP_REPEAT(uint,uint,Date)
+    HFPP_REPEAT(casa::String,HString,Observatory)
+    HFPP_REPEAT(int,int,Filesize)
+    //	HFPP_REPEAT(double,double,dDate)
+    HFPP_REPEAT(int,int,presync)
+    HFPP_REPEAT(int,int,TL)
+    HFPP_REPEAT(int,int,LTL)
+    HFPP_REPEAT(int,int,EventClass)
+    HFPP_REPEAT(casa::uChar,uint,SampleFreq)
+    HFPP_REPEAT(uint,uint,StartSample)
 #undef HFPP_REPEAT
-	if ((key== "AntennaIDs") || (key2== "AntennaIDs")) {_H_NL_ CasaVector<int> casavec; _H_NL_ drp->headerRecord().get("AntennaIDs",casavec); _H_NL_ std::vector<HInteger> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
+// --- Reading data from the headerrecord in a vector ---
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key== #KEY) || (key2== #KEY)) {_H_NL_ CasaVector<TYPE> casavec;  _H_NL_ drp->headerRecord().get(#KEY,casavec); _H_NL_ std::vector<TYPE2> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
+    HFPP_REPEAT(int,HInteger,AntennaIDs)
+    HFPP_REPEAT(int,HInteger,SAMPLE_OFFSET)
+    HFPP_REPEAT(uint,HInteger,SAMPLE_NUMBER)
+    HFPP_REPEAT(uint,HInteger,TIME)
     { HString result; result = result
+#undef HFPP_REPEAT
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
-  HFPP_REPEAT(uint,uint,nofAntennas)
+    HFPP_REPEAT(uint,uint,nofAntennas)
     HFPP_REPEAT(uint,uint,nofSelectedChannels)
     HFPP_REPEAT(uint,uint,nofSelectedAntennas)
     HFPP_REPEAT(uint,uint,nofBaselines)
@@ -6187,27 +6195,29 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
     HFPP_REPEAT(double,double,sampleInterval)
     HFPP_REPEAT(double,double,referenceTime)
     HFPP_REPEAT(double,double,sampleFrequency)
-
     HFPP_REPEAT(uint,HInteger,antennas)
     HFPP_REPEAT(uint,HInteger,selectedAntennas)
     HFPP_REPEAT(uint,HInteger,selectedChannels)
     HFPP_REPEAT(uint,HInteger,positions)
+    HFPP_REPEAT(int,HInteger,shift)
     HFPP_REPEAT(double,HNumber,increment)
     HFPP_REPEAT(double,HNumber,frequencyValues)
     HFPP_REPEAT(double,HNumber,frequencyRange)
-
-      HFPP_REPEAT(uint,uint,Date)
-	HFPP_REPEAT(casa::String,HString,Observatory)
-	HFPP_REPEAT(int,int,Filesize)
-			//HFPP_REPEAT(double,double,dDate)
-	HFPP_REPEAT(int,int,presync)
-	HFPP_REPEAT(int,int,TL)
-	HFPP_REPEAT(int,int,LTL)
-	HFPP_REPEAT(int,int,EventClass)
-	HFPP_REPEAT(casa::uChar,uint,SampleFreq)
-	HFPP_REPEAT(uint,uint,StartSample)
+    HFPP_REPEAT(uint,uint,Date)
+    HFPP_REPEAT(casa::String,HString,Observatory)
+    HFPP_REPEAT(int,int,Filesize)
+    // HFPP_REPEAT(double,double,dDate)
+    HFPP_REPEAT(int,int,presync)
+    HFPP_REPEAT(int,int,TL)
+    HFPP_REPEAT(int,int,LTL)
+    HFPP_REPEAT(int,int,EventClass)
+    HFPP_REPEAT(casa::uChar,uint,SampleFreq)
+    HFPP_REPEAT(uint,uint,StartSample)
+    HFPP_REPEAT(int,HInteger,AntennaIDs)
+    HFPP_REPEAT(int,HInteger,SAMPLE_OFFSET)
+    HFPP_REPEAT(uint,HInteger,SAMPLE_NUMBER)
+    HFPP_REPEAT(uint,HInteger,TIME)
 //------------------------------------------------------------------------
-	HFPP_REPEAT(int,int,AntennaIDs)
 #undef HFPP_REPEAT
 		     + "keywords, help";
       if ((key!="help") && (key!="keywords")) cout << "Unknown keyword " << key <<"!"<<endl;
@@ -6227,7 +6237,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 #define HFPP_FUNCDEF  (bool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object openen, e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be set in the file")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HPyObjectPtr)(pyob)()("Input paramter")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HPyObjectPtr)(pyob)()("Input parameter")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 ////$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
@@ -6255,6 +6265,9 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
       casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
       CasaVector<uint> casavec(shape,storage,casa::SHARE);
       drp->setSelectedAntennas(casavec);
+    } else if ((key=="shiftVector") || (key=="ShiftVector")) {
+      vector<int> stlvec(PyList2STLIntVec(pyob));
+      drp->setShift(stlvec);
     } else
 #undef HFPP_REPEAT
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
@@ -6268,6 +6281,7 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(double,PyFloat_AsDouble,ReferenceTime)
     HFPP_REPEAT(double,PyFloat_AsDouble,SampleFrequency)
     HFPP_REPEAT(int,PyInt_AsLong,Shift)
+    HFPP_REPEAT(int,XX,ShiftVector)
     HFPP_REPEAT(uint,XX,SelectedAntennas)
 #undef HFPP_REPEAT
 		     + "help";

@@ -27,26 +27,26 @@ using std::cout;
 using std::endl;
 
 namespace CR { // Namespace CR -- begin
-  
+
   // ============================================================================
   //
   //  Construction
   //
   // ============================================================================
-  
+
   //_____________________________________________________________________________
   //                                                                    LOFAR_TBB
-  
+
   LOFAR_TBB::LOFAR_TBB ()
     : DAL::TBB_Timeseries (),
       DataReader ()
   {
     init ();
   }
-  
+
   //_____________________________________________________________________________
   //                                                                    LOFAR_TBB
-  
+
   /*!
     \param filename -- Name of the file from which to read in the data
     \param blocksize -- Size of a block of data, [samples]
@@ -58,13 +58,13 @@ namespace CR { // Namespace CR -- begin
   {
     init ();
   }
-  
+
   //_____________________________________________________________________________
   //                                                                    LOFAR_TBB
-  
+
   /*!
-    \param timeseries -- TBB_Timeseries object encapsulating the basic 
-           information on how to interact with a LOFAR TBB time-series 
+    \param timeseries -- TBB_Timeseries object encapsulating the basic
+           information on how to interact with a LOFAR TBB time-series
 	   dataset.
   */
   LOFAR_TBB::LOFAR_TBB (TBB_Timeseries const &timeseries)
@@ -73,10 +73,10 @@ namespace CR { // Namespace CR -- begin
   {
     init();
   }
-  
+
   //_____________________________________________________________________________
   //                                                                    LOFAR_TBB
-  
+
   /*!
     \param other -- Another LOFAR_TBB object from which to create this new
            one.
@@ -87,35 +87,35 @@ namespace CR { // Namespace CR -- begin
   {
     copy (other);
   }
-  
+
   // ============================================================================
   //
   //  Destruction
   //
   // ============================================================================
-  
+
   //_____________________________________________________________________________
   //                                                                   ~LOFAR_TBB
-  
+
   LOFAR_TBB::~LOFAR_TBB ()
   {
     destroy();
   }
-  
+
   //_____________________________________________________________________________
   //                                                                      destroy
-  
+
   void LOFAR_TBB::destroy ()
   {;}
-  
+
   // ============================================================================
   //
   //  Operators
   //
   // ============================================================================
-  
+
   // ------------------------------------------------------------------ operator=
-  
+
   /*!
     \param other -- Another LOFAR_TBB object from which to make a copy.
   */
@@ -127,18 +127,18 @@ namespace CR { // Namespace CR -- begin
     }
     return *this;
   }
-  
+
   //_____________________________________________________________________________
   //                                                                         copy
-  
+
   void LOFAR_TBB::copy (LOFAR_TBB const &other)
   {
     /* Copy operations for the base classes */
     DAL::TBB_Timeseries::operator= (other);
     DataReader::operator= (other);
-    
+
   }
-  
+
   // ============================================================================
   //
   //  Parameters
@@ -147,7 +147,7 @@ namespace CR { // Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                                      summary
-  
+
   /*!
     \param os -- Output stream to which the summary is being written.
     \param listStationGroups -- Recursive summary of the embedded
@@ -165,7 +165,7 @@ namespace CR { // Namespace CR -- begin
     std::string observationID ("UNDEFINED");
 
     // Retrieve LOFAR common metadata ______________________
-    
+
     if (H5Iis_valid (location_p)) {
       DAL::CommonAttributes attr = commonAttributes();
       telescope     = attr.telescope();
@@ -175,7 +175,7 @@ namespace CR { // Namespace CR -- begin
       projectPI     = attr.projectPI();
       observationID = attr.observationID();
     }
-    
+
     // Display summary _____________________________________
 
     os << "[LOFAR_TBB] Summary of object properties" << endl;
@@ -196,14 +196,14 @@ namespace CR { // Namespace CR -- begin
     os << "-- Channel IDs            : " << dipoleNames_p                 << endl;
 
     // Summary of underlying structures ____________________
-    
+
     if (H5Iis_valid (location_p)) {
-      
+
       if (listChannelIDs) {
 	/* [1] Retrieve the channel IDs */
 	/* [2] Display the channel IDs  */
       }
-      
+
       if (listStationGroups) {
 	std::map<std::string,DAL::TBB_StationGroup>::iterator it;
 
@@ -212,8 +212,8 @@ namespace CR { // Namespace CR -- begin
 	}
       }
     }
-  }  
-  
+  }
+
   // ============================================================================
   //
   //  Methods
@@ -222,14 +222,14 @@ namespace CR { // Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                                         init
-  
+
   bool LOFAR_TBB::init ()
   {
     bool status (true);
     unsigned int nofDipoles (0);
 
     /* Check if we are actually connected to a dataset */
-    
+
     if (location_p < 0) {
       std::cerr << "[LOFAR_TBB::init] Not connected to dataset!" << std::endl;
       return false;
@@ -243,7 +243,7 @@ namespace CR { // Namespace CR -- begin
     dipoleNames_p = DAL::TBB_Timeseries::dipoleNames();
 
     casa::Vector<unsigned int> antennas;
-    DAL::convertVector (antennas,DAL::TBB_Timeseries::dipoleNumbers());
+    DAL::convertVector (antennas,DAL::TBB_Timeseries::channelID());
     setAntennas (antennas);
 
     //________________________________________________________________
@@ -279,17 +279,17 @@ namespace CR { // Namespace CR -- begin
      * Connect the streams (or at least the pointers normally connected to a
      * stream)
      */
-    
+
     if (status) {
       return setStreams();
     }
-    
+
     return status;
   }
-  
+
   //_______________________________________________________________________________
   //                                                                     setStreams
-  
+
   /*!
     \return status -- Status of the operation; returns <tt>false</tt> if an
             error was encountered.
@@ -297,16 +297,16 @@ namespace CR { // Namespace CR -- begin
   bool LOFAR_TBB::setStreams ()
   {
     bool status (true);
-    
+
     //________________________________________________________________
     // Set up DataIterator object for navigation through data volume
 
     uint blocksize (blocksize_p);
     nofStreams_p = dipoleNames_p.size();
-    
+
     iterator_p = new DataIterator[nofStreams_p];
     selectedAntennas_p.resize(nofStreams_p);
-    
+
     for (uint antenna(0); antenna<nofStreams_p; antenna++) {
       iterator_p[antenna].setDataStart(0);
       iterator_p[antenna].setStride(0);
@@ -316,7 +316,7 @@ namespace CR { // Namespace CR -- begin
       // keep track of the antennas/data channels selected
       selectedAntennas_p(antenna) = antenna;
     }
-    
+
     //________________________________________________________________
     // Set up header record
 
@@ -324,15 +324,15 @@ namespace CR { // Namespace CR -- begin
 
     return status;
   }
-  
+
   //_______________________________________________________________________________
   //                                                                setHeaderRecord
-  
+
   /*!
     \return status -- Status of the operation; returns <tt>false</tt> in case an
             error was encountered.
   */
-  bool LOFAR_TBB::setHeaderRecord () 
+  bool LOFAR_TBB::setHeaderRecord ()
   {
     bool status (true);
     int filesize = min(LOFAR_TBB::dataLength());
@@ -341,7 +341,7 @@ namespace CR { // Namespace CR -- begin
     try {
       // Mandatory fields ________________________
 
-      header_p.define("Date",time); 
+      header_p.define("Date",time);
       header_p.define("AntennaIDs",channelID());
       header_p.define("Observatory","LOFAR");
       header_p.define("SampleFreq",DataReader::sampleFrequency());
@@ -355,31 +355,31 @@ namespace CR { // Namespace CR -- begin
     } catch (casa::AipsError x) {
       cerr << "[LOFAR_TBB::setHeaderRecord] " << x.getMesg() << endl;
       status = false;
-    }; 
-    
+    };
+
     return status;
   };
 
   //_______________________________________________________________________________
   //                                                                 getDipoleNames
-  
+
   bool LOFAR_TBB::getDipoleNames ()
   {
     bool status (true);
 
     return status;
   }
-  
+
   //_______________________________________________________________________________
   //                                                            setSelectedAntennas
-  
+
   /*!
     \param antennaSelection -- Selection of the antennas in the dataset
     \param absolute -- Is the number to be considered the absolute number of the
            dipole? For a LOFAR TBB dataset this option is not supported, as dipole
 	   selection is performed on the name of the dipole.
 
-    \return status -- Status of the operation; returns \e false in case an error 
+    \return status -- Status of the operation; returns \e false in case an error
             -- such as a mismatch in number of array elements -- is encountered.
   */
   bool LOFAR_TBB::setSelectedAntennas (Vector<uint> const &antennaSelection,
@@ -398,17 +398,17 @@ namespace CR { // Namespace CR -- begin
 
     /* Apply dipole dataset selection */
     status = setSelectedAntennas (selection);
-    
+
     return status;
   }
-  
+
   //_______________________________________________________________________________
   //                                                            setSelectedAntennas
-  
+
   /*!
     \param antennaSelection -- Selection of the antennas in the dataset
 
-    \return status -- Status of the operation; returns \e false in case an error 
+    \return status -- Status of the operation; returns \e false in case an error
             -- such as a mismatch in number of array elements -- is encountered.
   */
   bool LOFAR_TBB::setSelectedAntennas (Vector<Bool> const &antennaSelection)
@@ -435,13 +435,13 @@ namespace CR { // Namespace CR -- begin
       /* Adjust status */
       status = false;
     }
-    
+
     return status;
   }
-  
+
   //_______________________________________________________________________________
   //                                                            setSelectedAntennas
-  
+
   /*!
     \return selection -- Names of the dipole datasets to be selected.
 
@@ -461,7 +461,7 @@ namespace CR { // Namespace CR -- begin
     /* ... before retrieving the actual selection. */
     selectedDipoles    = TBB_Timeseries::selectedDipoles();
     nofSelectedDipoles = selectedDipoles.size();
- 
+
     selectedAntennas_p.resize (nofSelectedDipoles);
     selectedAntennas_p = 0;
 
@@ -476,13 +476,13 @@ namespace CR { // Namespace CR -- begin
 	}
       }
     }
-    
+
     return status;
   }
-  
+
   //_______________________________________________________________________________
   //                                                                             fx
-  
+
   /*!
     \return data -- [sample,dipole] 2-dim array with a block of time-series
             values for the selected data channels (dipoles).
@@ -494,19 +494,19 @@ namespace CR { // Namespace CR -- begin
     casa::Matrix<double> data;
 
     for (uint n(0); n<sizeSelection; ++n) {
-      start(n) = iterator_p[selectedAntennas_p(n)].position(); 
+      start(n) = iterator_p[selectedAntennas_p(n)].position();
     }
-    
+
     DAL::TBB_Timeseries::readData (data,
 				   start,
 				   blocksize_p);
-    
+
     return data;
   }
-  
+
   //_______________________________________________________________________________
   //                                                                             fx
-  
+
   /*!
     \retval data -- [sample,dipole] 2-dim array with a block of time-series
             values for the selected data channels (dipoles).
@@ -516,17 +516,17 @@ namespace CR { // Namespace CR -- begin
    casa::Vector<int> start (nofStreams_p);
 
     for (uint n(0); n<nofStreams_p; ++n) {
-      start(n) = iterator_p[n].position(); 
+      start(n) = iterator_p[n].position();
     }
-    
+
     DAL::TBB_Timeseries::readData (data,
 				   start,
 				   blocksize_p);
   }
-  
+
   //_______________________________________________________________________________
   //                                                                     dataLength
-  
+
   casa::Vector<uint> LOFAR_TBB::dataLength ()
   {
     casa::Vector<uint> val;
@@ -538,27 +538,27 @@ namespace CR { // Namespace CR -- begin
 
   //_______________________________________________________________________________
   //                                                                     dataLength
-  
+
   casa::Vector<casa::MFrequency> LOFAR_TBB::sampleFrequency ()
   {
     return TBB_Timeseries::sample_frequency();
   }
-  
+
   //_______________________________________________________________________________
   //                                                                      channelID
-  
+
   casa::Vector<int> LOFAR_TBB::channelID ()
   {
     casa::Vector<int> val;
 
-    convertVector (val, DAL::TBB_Timeseries::dipoleNumbers());
+    convertVector (val, DAL::TBB_Timeseries::channelID());
 
     return val;
   }
 
   //_______________________________________________________________________________
   //                                                                           time
-  
+
   casa::Vector<uint> LOFAR_TBB::time ()
   {
     casa::Vector<uint> val;
@@ -570,7 +570,7 @@ namespace CR { // Namespace CR -- begin
 
   //_______________________________________________________________________________
   //                                                                   sampleNumber
-  
+
   casa::Vector<uint> LOFAR_TBB::sampleNumber ()
   {
     casa::Vector<uint> val;
@@ -582,7 +582,7 @@ namespace CR { // Namespace CR -- begin
 
   //_______________________________________________________________________________
   //                                                                   sampleOffset
-  
+
   casa::Vector<int> LOFAR_TBB::sampleOffset (uint const &refAntenna)
   {
     casa::Vector<int> val;
@@ -591,5 +591,5 @@ namespace CR { // Namespace CR -- begin
 
     return val;
   }
-  
+
 } // Namespace CR -- end
