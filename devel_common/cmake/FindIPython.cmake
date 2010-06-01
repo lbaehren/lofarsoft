@@ -66,7 +66,7 @@ if (ipython_version_test_output)
   ## Extract minor version
   string (REGEX REPLACE "${IPYTHON_MAJOR_VERSION}." "" ipython_version_test_output ${ipython_version_test_output})
   string (REGEX MATCH "[0-9]" IPYTHON_MINOR_VERSION ${ipython_version_test_output})
-else (ipython_version_test_output)
+endif (ipython_version_test_output)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -82,8 +82,6 @@ if (HAVE_IPYTHON)
 else (HAVE_IPYTHON)
   if (IPYTHON_FIND_REQUIRED)
     message (FATAL_ERROR "Could not find IPython!")
-  else (IPYTHON_FIND_REQUIRED)
-    message (MESSAGE "Could not find IPython!")
   endif (IPYTHON_FIND_REQUIRED)
 endif (HAVE_IPYTHON)
 
