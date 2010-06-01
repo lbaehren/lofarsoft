@@ -500,6 +500,11 @@ namespace CR { // Namespace CR -- begin
     size_t nofSelectedDipoles = TBB_Timeseries::selectedDipoles().size();
  
     selectedAntennas_p.resize (nofSelectedDipoles);
+    selectedAntennas_p = 0;
+
+    std::cout << "-1- dipoleNames_p      = " << dipoleNames_p      << std::endl;
+    std::cout << "-1- antennaSelection   = " << antennaSelection   << std::endl;
+    std::cout << "-1- selectedAntennas_p = " << selectedAntennas_p << std::endl;
 
     /* Go through the list of dipoles and check which ones are part of the selection;
        if a dipole indeed is selected, its position in the list of dipole names is
@@ -507,10 +512,14 @@ namespace CR { // Namespace CR -- begin
     for (size_t n(0); dipoleNames_p.size(); ++n) {
       it = antennaSelection.find(dipoleNames_p[n]);
       if (it!=antennaSelection.end()) {
-	selectedAntennas_p[count] = n;
+	selectedAntennas_p(count) = n;
 	++count;
       }
     }
+
+    std::cout << "-2- dipoleNames_p      = " << dipoleNames_p      << std::endl;
+    std::cout << "-2- antennaSelection   = " << antennaSelection   << std::endl;
+    std::cout << "-2- selectedAntennas_p = " << selectedAntennas_p << std::endl;
 
     return status;
   }
