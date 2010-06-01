@@ -249,7 +249,6 @@ namespace CR { // Namespace CR -- begin
     //________________________________________________________________
     // Set the correct data for the time and frequency axis
 
-#ifdef HAVE_CASA
     // retrieve the values
     casa::Vector<uint> nyquistZone            = DAL::TBB_Timeseries::nyquist_zone();
     casa::Vector<casa::MFrequency> sampleFreq = DAL::TBB_Timeseries::sample_frequency();
@@ -480,6 +479,21 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
+  //_______________________________________________________________________________
+  //                                                            setSelectedAntennas
+  
+  /*!
+    \return selection -- Names of the dipole datasets to be selected.
+  */
+  bool LOFAR_TBB::setSelectedAntennas (std::set<std::string> const &antennaSelection)
+  {
+    bool status (true);
+
+    status = TBB_Timeseries::selectDipoles (antennaSelection);
+
+    return status;
+  }
+
   //_______________________________________________________________________________
   //                                                                             fx
   

@@ -130,7 +130,6 @@ namespace CR { // Namespace CR -- begin
     bool setSelectedAntennas (Vector<Bool> const &antennaSelection);
     //! Selection of the antennas in the dataset
     bool setSelectedAntennas (std::set<std::string> const &antennaSelection);    
-    //! Get the name of the class, "LOFAR_TBB".
     std::string className () const {
       return "LOFAR_TBB";
     }
