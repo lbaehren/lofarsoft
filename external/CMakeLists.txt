@@ -15,10 +15,12 @@ set (external_packages
   matplotlib
   numeric
   numpy
+  scipy
   pil
   plplot
   pyqt
   python
+  ipython
   qt
   root
   sip
