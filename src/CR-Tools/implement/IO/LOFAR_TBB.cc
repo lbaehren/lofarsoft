@@ -481,6 +481,21 @@ namespace CR { // Namespace CR -- begin
   }
   
   //_______________________________________________________________________________
+  //                                                            setSelectedAntennas
+  
+  /*!
+    \return selection -- Names of the dipole datasets to be selected.
+  */
+  bool LOFAR_TBB::setSelectedAntennas (std::set<std::string> const &antennaSelection)
+  {
+    bool status (true);
+
+    status = TBB_Timeseries::selectDipoles (antennaSelection);
+
+    return status;
+  }
+
+  //_______________________________________________________________________________
   //                                                                             fx
   
   /*!
