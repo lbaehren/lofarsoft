@@ -171,9 +171,6 @@ namespace CR { // Namespace CR -- begin
     
   private:
 
-    //! Get the names of the dipoles which are included in the dataset
-    bool getDipoleNames ();
-
     //! Initialize the internal settings
     bool init ();
     //! Unconditional copying

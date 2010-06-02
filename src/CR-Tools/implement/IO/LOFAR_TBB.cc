@@ -350,8 +350,8 @@ namespace CR { // Namespace CR -- begin
       // Optional fields _________________________
 
       header_p.define("TIME",LOFAR_TBB::time());
-      header_p.define("SAMPLE_NUMBER",sampleNumber());
-      header_p.define("SAMPLE_OFFSET",sampleOffset());
+      header_p.define("SAMPLE_NUMBER",LOFAR_TBB::sampleNumber());
+      header_p.define("SAMPLE_OFFSET",LOFAR_TBB::sampleOffset());
     } catch (casa::AipsError x) {
       cerr << "[LOFAR_TBB::setHeaderRecord] " << x.getMesg() << endl;
       status = false;
@@ -359,16 +359,6 @@ namespace CR { // Namespace CR -- begin
 
     return status;
   };
-
-  //_______________________________________________________________________________
-  //                                                                 getDipoleNames
-
-  bool LOFAR_TBB::getDipoleNames ()
-  {
-    bool status (true);
-
-    return status;
-  }
 
   //_______________________________________________________________________________
   //                                                            setSelectedAntennas
