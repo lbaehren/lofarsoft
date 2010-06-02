@@ -58,12 +58,20 @@
   \verbatim
   # Option file to generate a LOPES-eventlist from the SEL10 KASCADE file
 
-  # Filenames of eventlists of 2007 and 2008
+  # Filenames of eventlists of 2005 and 2010
   fn2005                  /users/iklx/lopesuser/code/genEventlist/eventlist-2005.txt
   fn2006                  /users/iklx/lopesuser/code/genEventlist/eventlist-2006.txt
   fn2007                  /users/iklx/lopesuser/code/genEventlist/eventlist-2007.txt
   fn2008                  /users/iklx/lopesuser/code/genEventlist/eventlist-2008.txt
   fn2009                  /users/iklx/lopesuser/code/genEventlist/eventlist-2009.txt
+  fn2010                  /users/iklx/lopesuser/code/genEventlist/eventlist-2009.txt
+  
+  # file names for e-field data
+  ef2006                  /users/iklx/lopesuser/efield/CR1000_Tab1sec_2006.GT
+  ef2007                  /users/iklx/lopesuser/efield/CR1000_Tab1sec_2007.GT
+  ef2008                  /users/iklx/lopesuser/efield/CR1000_Tab1sec_2008.GT
+  ef2009                  /users/iklx/lopesuser/efield/CR1000_Tab1sec_2009.GT
+  ef2010                  /users/iklx/lopesuser/efield/CR1000_Tab1sec_2010.GT
 
   # use default kascade cut
   # Fanka<4&&Ze<0.7854&&Age>0.4&&Age<1.4&&sqrt(Yc*Yc+Xc*Xc)<90
@@ -197,7 +205,10 @@ int main(int argc, char* argv[])
   char tmp[16000];
 
   // variables to read in
-  string cut_str(""), fn2005(""), fn2006(""), fn2007(""), fn2008(""), fn2009(""), namebase="eventlist";
+  string cut_str(""), fn2005(""), fn2006(""), fn2007(""), fn2008(""), fn2009(""), fn2010(""), namebase="eventlist";
+  string ef2006(""), ef2007(""), ef2008(""), ef2009(""), ef2010(""); // electric field data
+  int openEfieldFile = 0; // is set to the year of the efield file currently open.
+  ifstream finEfield;
   Double_t geomag_min=0, geomag_max=180, energy_min=0, energy_max=1e20;
   Bool_t createInfoFile=false, createCopyScript=false, preferGrande=false, useBothReconstructions=false;
   bool minimumCuts = true; // set to true to make things faster.
@@ -249,6 +260,18 @@ int main(int argc, char* argv[])
       opt>>fn2008;
     if(buf.compare("fn2009")==0)
       opt>>fn2009;
+    if(buf.compare("fn2010")==0)
+      opt>>fn2010;
+    if(buf.compare("ef2006")==0)
+      opt>>ef2006;
+    if(buf.compare("ef2007")==0)
+      opt>>ef2007;
+    if(buf.compare("ef2008")==0)
+      opt>>ef2008;
+    if(buf.compare("ef2009")==0)
+      opt>>ef2009;
+    if(buf.compare("ef2010")==0)
+      opt>>ef2010;
     if(buf.compare("namebase")==0) 
       opt>>namebase;
     if(buf.compare("KRETAversion")==0) 
@@ -325,6 +348,11 @@ int main(int argc, char* argv[])
          << endl;
     strncpy(KRETAver,KRETAversion.c_str(),1023);     
   }
+  
+  int nentries = t2->GetEntries();
+  cout<<"Number of events that passed the cut conditions on the ROOT file: "<<nentries<<endl<<endl;
+
+
 
   cout <<"\nScanning for events..."<<endl
        <<"TCut = "<<cut<<endl
@@ -346,6 +374,7 @@ int main(int argc, char* argv[])
   Double_t lgE, lgEg, lnA, lnAg, err_lgE, err_lgEg, err_lnA, err_lnAg;
   Double_t err_core, err_coreg, err_Az, err_Azg, err_Ze, err_Zeg;
   Double_t geomag_angle, geomag_angleg;
+  Double_t EfieldMaxAbs, EfieldAvgAbs; // Maximum and average of the absolute of the Efield in +/- 15 minutes arround event [V/m]
   
   k->Branch("Eventname",&eventname,"Eventname/C");
   k->Branch("Size",&Size,"Size/F");
@@ -391,6 +420,9 @@ int main(int argc, char* argv[])
   // KRETA version
   k->Branch("KRETAver",&KRETAver,"KRETAver/C");
   
+  // Efield
+  k->Branch("EfieldMaxAbs",&EfieldMaxAbs,"EfieldMaxAbs/D");
+  k->Branch("EfieldAvgAbs",&EfieldAvgAbs,"EfieldAvgAbs/D");
 
   // Additional eventlist info file *******************************************************************
   ofstream f1, f2, copyScript;
@@ -407,7 +439,7 @@ int main(int argc, char* argv[])
 
   if (createInfoFile) {
        f2.open( (namebase+".info").c_str(), ios::out);
-       f2<<"Filename                Gt        Mmn        Az        Ze        Geomag        Xc        Yc        Size        Sizeg         Sizmg        Nmu        Lmuo        Energy        Grande"<<endl
+       f2<<"Filename                Gt        Mmn        Az        Ze        Geomag        Xc        Yc        Size        Sizeg         Sizmg        Nmu        Lmuo        Energy        Grande  EfieldAvgAbs  EfieldMaxAbs"<<endl
        <<"=================================================================================================================================="<<endl;
    }
    
@@ -425,12 +457,17 @@ int main(int argc, char* argv[])
   // store GT and MMN of last event to get rid of double events;
   UInt_t lastGt = 0, lastMmn = 0;
 
-  int nentries = t2->GetEntries();
-  cout<<"Number of events that passed the cut conditions on the ROOT file: "<<nentries<<endl<<endl;
-
   // Loop over ROOT-File ******************************************************************************
   for (int i=0; i<nentries; i++) {
     t2->GetEntry(i);
+    
+    // check, if events are in chronlogical order
+    if (Gt < lastGt) {
+      cerr << "Error: KRETA reconstruction is not in chronological order: GT " 
+           << Gt << " found after GT " << lastGt <<". Event skipped!" << endl;
+      continue;
+    }
+    
     // continue if event is twice in KRETA reconstruction (happens in a few cases)
     if ((lastGt == Gt)&&(lastMmn==Mmn)) {
       cout << "Skipping event at GT " << Gt << " which seems to be twice in root file." << endl;
@@ -458,7 +495,6 @@ int main(int argc, char* argv[])
     gtstring = tstr;
     
     // Looking for filenames in eventlists **********************************************************
-
     if( Gt >= 1104537600 && Gt < 1136073600 ) //Jahr 2005
       fin.open(fn2005.c_str(), ios::in);
     else if( Gt >= 1136073600 && Gt < 1167609600 ) //Jahr 2006
@@ -469,9 +505,16 @@ int main(int argc, char* argv[])
       fin.open(fn2008.c_str(), ios::in);
     else if ( Gt >= 1230768000  && Gt < 1262390400 ) //Jahr 2009
       fin.open(fn2009.c_str(), ios::in);
+    else if ( Gt >= 1262390400  && Gt <1293926400 ) //Jahr 2010
+      fin.open(fn2010.c_str(), ios::in);
     else {
       cerr<<"Not in timerange of 2005 to 2009. Skipping event...\n";
       continue;
+    }
+
+    if (!fin.is_open()) {
+      cerr<<"Failed to open file with input event list. Please check settings in options.cfg\n";
+      return 1;
     }
 
     // create substrings for day, month and year
@@ -652,6 +695,70 @@ int main(int argc, char* argv[])
     if ((geomag <= geomag_min) || (geomag >= geomag_max))
       continue;
 
+    // find efield
+    EfieldMaxAbs = 0;
+    EfieldAvgAbs = 0;
+    double efield_min = 0, efield_max = 0; // minimum and maximum with sign
+
+    // reliable e-field information starts at GT 1156415575 (Do 24. Aug 10:32:55 UTC 2006)
+    if( Gt > 1156415575 && Gt < 1167609600 ) { //Jahr 2006
+      if (openEfieldFile != 2006) {
+        finEfield.open(ef2006.c_str(), ios::in);
+        openEfieldFile = 2006;
+      }  
+    } else if( Gt >= 1167609600 && Gt < 1199145600 ) { //Jahr 2007
+      if (openEfieldFile != 2007) {
+        finEfield.open(ef2007.c_str(), ios::in);
+        openEfieldFile = 2007;
+      }  
+    } else if ( Gt >= 1199145600 && Gt < 1230768000 ) { //Jahr 2008
+      if (openEfieldFile != 2008) {
+        finEfield.open(ef2008.c_str(), ios::in);
+        openEfieldFile = 2008;
+      }          
+    } else if ( Gt >= 1230768000  && Gt < 1262390400 ) { //Jahr 2009
+      if (openEfieldFile != 2009) {
+        finEfield.open(ef2009.c_str(), ios::in);
+        openEfieldFile = 2009;
+      }  
+    } else if ( Gt >= 1262390400  && Gt <1293926400 ) { //Jahr 2010
+      if (openEfieldFile != 2010) {
+        finEfield.open(ef2010.c_str(), ios::in);
+        openEfieldFile = 2010;
+      }  
+    } else {
+      // if no time range fit, close potentially open file
+      openEfieldFile = 0;
+      if (finEfield.is_open())
+        finEfield.close();
+    }
+
+    char buf[1024];
+    string tmpstr;
+    stringstream tmp;
+    double Efieldtmp=0;
+    unsigned int gtEfield;
+
+    // only add e-field, if file could be open 
+    // otherwise, there is probably no e-field data available for that time
+    if ((Gt > 1156415575) && (finEfield.is_open())) {
+      while(finEfield.getline(buf, 1024)) {
+        tmp.clear();
+        tmp.str(string(buf));
+        tmp>>gtEfield>>Efieldtmp>>EfieldAvgAbs>>efield_min>>efield_max;
+        if((Gt-1)==gtEfield)
+          break;
+        //-1 wegen Unterschied zwischen LOPES und KASCADE GT
+      }  
+    } else if (Gt > 1156415575) {
+      cout << "Failed to open e-field file." << endl;
+    }
+    // calculate maximum of absolute value
+    if ( (-efield_min) > efield_max)
+      EfieldMaxAbs = -efield_min;
+    else  
+      EfieldMaxAbs = efield_max;
+      
     // increase counter of events which passed all cuts
     cutCount++;
        
@@ -660,7 +767,8 @@ int main(int argc, char* argv[])
       if( !Grande && (Az!=0 || Ze!=0) ) {
         if( createInfoFile )
           f2<<eventname<<"    "<< Gt<<"    "<< Mmn <<"    "<< Az*180./Pi()<<"    "<< Ze*180./Pi() <<"    "
-            << geomag<<"    "<< Xc <<"    "<< Yc <<"    "<< Size <<"    0    "<< Nmu<<"    "<< Lmuo <<"    "<< energy  <<"    0"<<endl;
+            << geomag<<"    "<< Xc <<"    "<< Yc <<"    "<< Size <<"    0    "<< Nmu<<"    "<< Lmuo <<"    "<< energy  <<"    0"
+            <<"    "<< EfieldAvgAbs <<"    "<< EfieldMaxAbs<<endl;
         if (createCopyScript) {
           copyScript << "cp /lxdata/lopes/" << year << "/" << month << "/" << day << "/" << eventname << "* ." << endl;
           copyScript << "bunzip2 " << eventname << "*bz2" << endl;
@@ -673,7 +781,8 @@ int main(int argc, char* argv[])
       } else if ( Grande && (Azg!=0 || Zeg!= 0) ) {
         if( createInfoFile )
           f2<<eventname<<"    "<< Gt<<"    "<< Mmn <<"    "<< Azg*180./Pi()<<"    "<< Zeg*180./Pi() 
-            <<"    "<< geomag<<"    "<< Xcg <<"    "<<  Ycg <<"    0    "<< Sizeg <<"    "<< Sizmg<<"    0    "<< energy  <<"    1"<<endl;
+            <<"    "<< geomag<<"    "<< Xcg <<"    "<<  Ycg <<"    0    "<< Sizeg <<"    "<< Sizmg<<"    0    "<< energy  <<"    1"
+            <<"    "<< EfieldAvgAbs <<"    "<< EfieldMaxAbs<<endl;
         if (createCopyScript) {
           copyScript << "cp /lxdata/lopes/" << year << "/" << month << "/" << day << "/" << eventname << "* ." << endl;
           copyScript << "bunzip2 " << eventname << "*bz2" << endl;
