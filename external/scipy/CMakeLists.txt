@@ -18,7 +18,7 @@ cmake_minimum_required (VERSION 2.8)
 ## find script
 
 option (SCIPY_FORCE_BUILD       "Force rebuild and local installation"      NO  )
-option (SCIPY_VERBOSE_CONFIGURE "Be verbose during configuration?"          NO  )
+option (SCIPY_VERBOSE_CONFIGURE "Be verbose during configuration?"          YES )
 option (SCIPY_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
 
 ## ------------------------------------------------------------------------------
@@ -103,9 +103,6 @@ if (NOT HAVE_SCIPY OR SCIPY_FORCE_BUILD)
     get_filename_component (python_libdir ${PYTHON_LIBRARIES} PATH)
   endif (PYTHON_LIBRARIES)
   
-  file (WRITE ${SCIPY_BINARY_DIR}/site.cfg "[DEFAULT] \n")
-  file (APPEND ${SCIPY_BINARY_DIR}/site.cfg "library_dirs = /usr/lib, /usr/local/lib, /usr/lib64, /usr/local/lib64, /sw/lib, ${python_libdir} \n")
-
   ##__________________________________________________________________
   ## Build the project
 
@@ -132,7 +129,7 @@ if (NOT HAVE_SCIPY OR SCIPY_FORCE_BUILD)
   if (SCIPY_VERBOSE_CONFIGURE)
     message ("-------------------------------------------------------------")
     message (STATUS "[SciPy] Summary of configuration status.")
-    message (STATUS "BLAS_LIBRARIES   = ${BLAS_LIBRARIES}")
+    message (STATUS "BLAS_LIBRARIES   = ${LAPACK_BLAS_LIBRARY}")
     message (STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
     message (STATUS "PYTHON_VERSION   = ${PYTHON_VERSION}")
     message (STATUS "NUMPY_VERSION    = ${NUMPY_VERSION}")

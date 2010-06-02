@@ -98,7 +98,7 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   endif (PYTHON_LIBRARIES)
   
   file (WRITE ${NUMPY_BINARY_DIR}/site.cfg "[DEFAULT] \n")
-  file (APPEND ${NUMPY_BINARY_DIR}/site.cfg "library_dirs = /usr/lib, /usr/local/lib, /usr/lib64, /usr/local/lib64, /sw/lib, ${python_libdir} \n")
+  file (APPEND ${NUMPY_BINARY_DIR}/site.cfg "library_dirs = /usr/lib:/usr/local/lib:/usr/lib64:/usr/local/lib64:/sw/lib:${python_libdir} \n")
 
   ##__________________________________________________________________
   ## Build the project
