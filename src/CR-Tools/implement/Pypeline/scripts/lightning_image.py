@@ -8,12 +8,19 @@ import pyfits
 
 # (start) configuration
 # Data information
+# Lightning data can be obtained from (it is 3 GB per file)
+# make sure you have a LOFAR_DATA_DIR variable of the directory you want to store the data
+# mkdir $LOFAR_DATA_DIR
+# scp <username>@helios /mnt/lofar/lightning/lightning* $LOFAR_DATA_DIR/lightning/
+# A peak can be found at:   File 16_48 , block 200260 , position Az=100, El=0-20
+#                           File 17_23 , block 225950 , position Az=44, El=37
+#                           File 17_46 , didn't test yet
 
 
 # Get environment variables
 LOFARSOFT = os.environ["LOFARSOFT"].rstrip('/')+'/'
 LOFAR_DATA_DIR = os.environ['LOFAR_DATA_DIR'].rstrip('/')+'/'
-data_directory = "/Users/STV/Astro/data/lightning/" 
+data_directory = LOFAR_DATA_DIR+"/lightning/" 
 stationname="CS302"
 #filenames=["lightning_16_48.h5"]
 filenames=["lightning_17_23.h5"]
@@ -23,9 +30,9 @@ antennaset="LBA_INNER"
 antennafilename=LOFARSOFT+"data/calibration/AntennaArrays/"+stationname+"-AntennaArrays.conf"
 blocksize=2**10
 nblocks=1 # no loop yet for more blocks
-startblock=200260 #for 16_48
-startblock=225950 #for 17_23
-#startblock=100267 #off pulse for 16_48
+#startblock=200260 #for 16_48
+startblock=225950 #for 17_23 (+1)
+#startblock=1000
 
 # (end) configuration
 
@@ -156,32 +163,35 @@ weights.phasetocomplex(phases)
 # At the moment we don't know how much data there is for each file.
 
 
+t0=time.clock()
 
+#file["block"]=startblock
+for block in range(startblock,startblock+nblocks):
+    file["block"]=block
+    file_efield.read(file,"Fx").none()
+    #file_efield[...].plot()
+    file_fft[...].fftcasa(file_efield[...],NyquistZone)
+    #file_fft[...].plot()
+    #copies the fft to all positions in shifted_fft
+    shifted_fft.copy(file_fft)
+    shifted_fft[...].mul(weights[...])
+    for n in range(n_pixels):
+        beamformed_fft[n] = shifted_fft[n,0]
+        shifted_fft[n,1:,...].addto(beamformed_fft[n])
+    power.spectralpower(beamformed_fft)
+    print "t=",time.clock()-t0,"s -","Processed block",block
 
-file["block"]=startblock
-file_efield.read(file,"Fx").none()
-#file_efield[...].plot()
-file_fft[...].fftcasa(file_efield[...],NyquistZone)
-#file_fft[...].plot()
-#copies the fft to all positions in shifted_fft
-shifted_fft.copy(file_fft)
-shifted_fft[...].mul(weights[...])
-for n in range(n_pixels):
-    beamformed_fft[n] = shifted_fft[n,0]
-    shifted_fft[n,1:,...].addto(beamformed_fft[n])
-
-power.spectralpower(beamformed_fft)
 
 print "t=",time.clock(),"s -","Binning and Normalizing"
 intpower=np.array(power[...].sum())
-maxval=intpower.max()
-intpower /= maxval
+#maxval=intpower.max()
+#intpower /= maxval
 intpower.resize([n_az,n_el])
 
 print "t=",time.clock(),"s -","Plotting"
 plt.clf()
 #plt.subplot(1,2,1)
-plt.imshow(intpower,cmap=plt.cm.hot,extent=(azrange[0],azrange[1],elrange[0],elrange[1]))
+plt.imshow(intpower,cmap=plt.cm.hot,extent=(azrange[0],azrange[1],elrange[1],elrange[0]))
 
 #import pyfits
 #hdu = pyfits.PrimaryHDU(intpower)
