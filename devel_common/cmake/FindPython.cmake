@@ -121,8 +121,8 @@ foreach (python_version ${python_version_list})
     else (PYTHON_PYTHONHOME)
       find_program (PYTHON_EXECUTABLE python${python_version}
 	PATHS 
+    /Library/Frameworks/Python.framework/Versions/${python_version}/bin
 	${python_bin_locations}
-	/Library/Frameworks/Python.framework/Versions/${python_version}/bin
 	ENV PATH
 	NO_DEFAULT_PATH
 	)

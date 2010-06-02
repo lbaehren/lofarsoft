@@ -141,21 +141,7 @@ find_program (F2PY_EXECUTABLE f2py f2py${PYTHON_VERSION} f2py-${PYTHON_VERSION}
 ## -----------------------------------------------------------------------------
 ## Try to determine the API version
 
-## Try to locate numpy/version.py first; if this script is not available, loading
-## the module in order to query its version does not make any sense.
-
-find_file (NUMPY_VERSION_PY version.py
-  PATHS
-  ${numpy_search_path}
-  /usr/lib64
-  /usr/local/lib64
-  PATH_SUFFIXES
-  python/numpy
-  python${PYTHON_VERSION}/site-packages/numpy
-  NO_DEFAULT_PATH
-  )
-
-if (NUMPY_VERSION_PY AND PYTHON_EXECUTABLE)
+if (PYTHON_EXECUTABLE)
   ## some basic feedback
   message (STATUS "Found version.py - running Python to import module numpy.")
   ## Run Python to import module numpy and print the version information
@@ -167,9 +153,9 @@ if (NUMPY_VERSION_PY AND PYTHON_EXECUTABLE)
     ERROR_VARIABLE numpy_version_test_error
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-else (NUMPY_VERSION_PY AND PYTHON_EXECUTABLE)
+else (PYTHON_EXECUTABLE)
   message (STATUS "[NumPy] Unable to process version.py script!")
-endif (NUMPY_VERSION_PY AND PYTHON_EXECUTABLE)
+endif (PYTHON_EXECUTABLE)
 
 if (numpy_version_test_output)
   ## copy the output from the Python prompt

@@ -73,21 +73,7 @@ endif (scipy_path)
 ## -----------------------------------------------------------------------------
 ## Try to determine the API version
 
-## Try to locate scipy/version.py first; if this script is not available, loading
-## the module in order to query its version does not make any sense.
-
-find_file (SCIPY_VERSION_PY version.py
-  PATHS
-  ${scipy_search_path}
-  /usr/lib64
-  /usr/local/lib64
-  PATH_SUFFIXES
-  python/scipy
-  python${PYTHON_VERSION}/site-packages/scipy
-  NO_DEFAULT_PATH
-  )
-
-if (SCIPY_VERSION_PY AND PYTHON_EXECUTABLE)
+if (PYTHON_EXECUTABLE)
   ## some basic feedback
   message (STATUS "Found version.py - running Python to import module scipy.")
   ## Run Python to import module scipy and print the version information
@@ -99,9 +85,9 @@ if (SCIPY_VERSION_PY AND PYTHON_EXECUTABLE)
     ERROR_VARIABLE scipy_version_test_error
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-else (SCIPY_VERSION_PY AND PYTHON_EXECUTABLE)
+else (PYTHON_EXECUTABLE)
   message (STATUS "[SciPy] Unable to process version.py script!")
-endif (SCIPY_VERSION_PY AND PYTHON_EXECUTABLE)
+endif (PYTHON_EXECUTABLE)
 
 if (scipy_version_test_output)
   ## copy the output from the Python prompt
