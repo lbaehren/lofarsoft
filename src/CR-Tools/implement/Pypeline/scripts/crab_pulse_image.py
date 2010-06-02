@@ -9,16 +9,22 @@ import pyfits
 # (start) configuration
 # Data information
 # Data should show the Crab Nebula and a giant pulse in limited unknown bandwidth
-# The position of the Crab Nebula should be Az,El 206.229,57.0392
+# The position of the Crab Nebula should be (pulse3) Az,El 206.229,57.0392
+#                                           (pulse1) Az,El 183.831, 59.0699
 
 # Get environment variables
 LOFARSOFT = os.environ["LOFARSOFT"].rstrip('/')+'/'
 LOFAR_DATA_DIR = os.environ['LOFAR_DATA_DIR'].rstrip('/')+'/'
-data_directory = LOFAR_DATA_DIR+"Crab/pulse3/"
+data_directory3 = LOFAR_DATA_DIR+"Crab/pulse3/"
+data_directory1 = LOFAR_DATA_DIR+"Crab/pulse1/"
 stationname="CS302"
-filenames=["CS302C-B0T6:01:48.h5","CS302C-B1T6:01:48.h5","CS302C-B2T6:01:48.h5","CS302C-B3T6:01:48.h5","CS302C-B4T6:01:48.h5","CS302C-B5T6:01:48.h5"]
+filenames3=["CS302C-B0T6:01:48.h5","CS302C-B1T6:01:48.h5","CS302C-B2T6:01:48.h5","CS302C-B3T6:01:48.h5","CS302C-B4T6:01:48.h5","CS302C-B5T6:01:48.h5"]
+filenames1=["CS302C-B0T5:00:39.h5","CS302C-B1T5:00:39.h5","CS302C-B2T5:00:39.h5","CS302C-B3T5:00:39.h5","CS302C-B4T5:00:39.h5","CS302C-B5T5:00:39.h5"]
+filenames1_ear1=["CS302C-B0T5:00:39.h5","CS302C-B1T5:00:39.h5","CS302C-B2T5:00:39.h5"]
+data_directory=data_directory1
+filenames=filenames1_ear1
 #TBBboards=[0,1,2,3,4,5]
-nrfiles=6
+nrfiles=3
 antennaset="HBA"
 antennafilename=LOFARSOFT+"data/calibration/AntennaArrays/"+stationname+"-AntennaArrays.conf"
 blocksize=2**10
@@ -129,8 +135,8 @@ for i in range(totAntennas):
 # .... image part
 
 FarField=True
-azrange=(0.,360.,8.)
-elrange=(0.,90.,4.)
+azrange=(0.,368.,8)
+elrange=(0.,94.,4)
 n_az=int((azrange[1]-azrange[0])/azrange[2])
 n_el=int((elrange[1]-elrange[0])/elrange[2])
 n_pixels=n_az*n_el
@@ -211,7 +217,7 @@ for block in range(startblock,startblock+nblocks):
 
     #file_efield[...].plot()
     file_fft[...].fftcasa(file_efield[...],NyquistZone)
-#    file_fft.mul(phasecorrweights)
+    file_fft.mul(phasecorrweights)
     for i in range(totAntennas):
         file_fft[i,0:100]=0
         file_fft[i,270:513]=0
