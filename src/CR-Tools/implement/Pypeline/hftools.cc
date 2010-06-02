@@ -599,6 +599,16 @@ vector<HInteger> PyList2STLIntVec(PyObject* pyob){
   return vec;
 }
 
+vector<int> PyList2STLInt32Vec(PyObject* pyob){
+  std::vector<int> vec;
+  if (PyList_Check(pyob)){
+    HInteger i,size=PyList_Size(pyob);
+    vec.reserve(size);
+    for (i=0;i<size;++i) vec.push_back((int)PyInt_AsLong(PyList_GetItem(pyob,i)));
+  }
+  return vec;
+}
+
 vector<uint> PyList2STLuIntVec(PyObject* pyob){
   std::vector<uint> vec;
   if (PyList_Check(pyob)){
@@ -6328,11 +6338,15 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
     HFPP_REPEAT(uint,HInteger,selectedAntennas)
     HFPP_REPEAT(uint,HInteger,selectedChannels)
     HFPP_REPEAT(uint,HInteger,positions)
-    HFPP_REPEAT(int,HInteger,shift)
     HFPP_REPEAT(double,HNumber,increment)
     HFPP_REPEAT(double,HNumber,frequencyValues)
     HFPP_REPEAT(double,HNumber,frequencyRange)
 #undef HFPP_REPEAT
+    if ((key== "shift") || (key2== "shift")) {
+      std::vector<int> result(drp->shift());
+      HPyObject pyob(result);
+      return pyob;
+    } else
 // --- Reading data from the headerrecord in a scalar---
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key== #KEY) || (key2== #KEY)) {_H_NL_ TYPE result;  _H_NL_ drp->headerRecord().get(#KEY,result); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
     HFPP_REPEAT(uint,uint,Date)
@@ -6438,13 +6452,14 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
       CasaVector<uint> casavec(shape,storage,casa::SHARE);
       drp->setSelectedAntennas(casavec);
     } else if ((key=="shiftVector") || (key=="ShiftVector")) {
-      vector<int> stlvec(PyList2STLIntVec(pyob));
+      vector<int> stlvec(PyList2STLInt32Vec(pyob));
       drp->setShift(stlvec);
     } else
 #undef HFPP_REPEAT
+      // -- For documentation purposes --
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
     { HString txt; txt = txt
-  HFPP_REPEAT(uint,PyInt_AsLong,Blocksize)
+    HFPP_REPEAT(uint,PyInt_AsLong,Blocksize)
     HFPP_REPEAT(uint,PyInt_AsLong,StartBlock)
     HFPP_REPEAT(uint,PyInt_AsLong,Block)
     HFPP_REPEAT(uint,PyInt_AsLong,Stride)
