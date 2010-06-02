@@ -115,8 +115,8 @@ for i in range(totAntennas):
 
 NyquistZone=1
 FarField=True
-azrange=(0.,360.,8.)
-elrange=(0.,90.,2.)
+azrange=(0.,368.,8.)
+elrange=(0.,92.,2.)
 n_az=int((azrange[1]-azrange[0])/azrange[2])
 n_el=int((elrange[1]-elrange[0])/elrange[2])
 n_pixels=n_az*n_el
@@ -186,12 +186,12 @@ print "t=",time.clock(),"s -","Binning and Normalizing"
 intpower=np.array(power[...].sum())
 #maxval=intpower.max()
 #intpower /= maxval
-intpower.resize([n_az,n_el])
+intpower.resize([n_el,n_az])
 
 print "t=",time.clock(),"s -","Plotting"
 plt.clf()
 #plt.subplot(1,2,1)
-plt.imshow(intpower,cmap=plt.cm.hot,extent=(azrange[0],azrange[1],elrange[1],elrange[0]))
+plt.imshow(intpower,cmap=plt.cm.hot,extent=(azrange[0],azrange[1]-azrange[2],elrange[1]-elrange[2],elrange[0]))
 
 #import pyfits
 #hdu = pyfits.PrimaryHDU(intpower)
