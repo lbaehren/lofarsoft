@@ -143,7 +143,7 @@ or actually in the scripts directory which is simply:
 
 ----------------
 
-To use ipython with pycr  within an emacs shell.
+To use ipython with pycr within an emacs shell.
 
 Copy the file
 
@@ -1705,7 +1705,10 @@ Nyquist sampling means that one needs, for example, 200 MHz sampling
 rate to digitize a bandwidth of 100 MHz. The first Nyquist zone is
 then 0-100 MHz, and the second is 100-200 MHz.
 
-So, let's do the transform:
+!!!TO BE EDITED: use hFFTw and hNyquistSwap instead for better
+   performance!
+
+So, let's do the transform: 
 
 """
 fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")

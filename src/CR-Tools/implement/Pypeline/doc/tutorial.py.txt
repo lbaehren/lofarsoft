@@ -81,6 +81,59 @@ pycr -i tutorial.py
 from the console prompt.
 
 
+Alternatively use ipython
+
+1. Download and install the latest development release of ipython
+
+tar xvf ipython-0.11.tar.gz
+cd ipython-0.11
+sudo python setup.py install
+
+2. Copy the profile from $LOFARSOFT/src/CR-Tools/implement/Pypeline/extras  to your ~/.ipython directory
+
+cp $LOFARSOFT/src/CR-Tools/implement/Pypeline/extras/ipython_config_pycr.py ~/.ipython/
+
+3. Compile hftools and set the following variables
+
+PYTHONPATH=$PYTHONPATH:$LOFARSOFT/release/lib/python
+PATH=$PATH:$LOFARSOFT/release/bin/python
+
+4. Run the profile
+ipython -p pycr
+
+or set an alias
+
+alias pycr='ipython -ppycr'
+
+5. Use %run (with the full path to the script) to run the scripts from ipython.
+
+The testscripts can be found in a directory that is stored in the variable PYCRBIN, so say
+
+%run $PYCRBIN/testcr2.py
+
+or actually in the scripts directory which is simply:
+
+%run $PYCR/testcr2.py
+
+----------------
+
+To use ipython with pycr  within an emacs shell.
+
+Copy the file
+
+$LOFARSOFT/src/CR-Tools/implement/Pypeline/extras/ipython.el 
+
+to ~/Library/Preferences/Emacs/ipython.el
+
+and then put a line 
+
+(load-file "~/Library/Preferences/Emacs/ipython.el")
+
+into the ~/.emacs file in your home directory
+
+
+
+
 2.  Getting Help
 ================
 
@@ -173,7 +226,6 @@ To creat a vector most efficently, use the original vector constructors:
 e.g.
 
 >>> v=FloatVec(); v
-  Vec(float,0)=[]
 
 will create a floating point vector of size 0.
 
@@ -181,7 +233,6 @@ The vector can be filled with a python list or tuple, by using the extend attrib
 
 >>> v.extend([1,2,3,4])
 
-    v => Vec(float,4)=[1.0,2.0,3.0,4.0]
 
 Note, that python has automatically converted the integers into
 floats, since the STL vector does not allow any automatic typing.
@@ -189,14 +240,11 @@ floats, since the STL vector does not allow any automatic typing.
 The STL vector can be converted back to a python list by using the
 python list creator:
 
-    list(v) => [1.0, 2.0, 3.0, 4.0]
 
 or use the list or val methods of the vector (where the latter has the
 extra twist that it will return a scalar value, if the vector has a
 length of one).
 
-    v.val() => [1.0, 2.0, 3.0, 4.0]
-    v.list() => [1.0, 2.0, 3.0, 4.0]
 
 However, the basic Boost Python STL vector constructor takes no
 arguments and is a bit cumbersome to use in the long run.  Here we
@@ -272,9 +320,7 @@ standard python syntax.
 We can also resize vectors and change their memory allocation:
 
 >>> v1=Vector([0.0,1,2,3,4,5]);v1
-  Vec(float,6)=[0.0,1.0,2.0,3.0,4.0,...]
 >>> v2=Vector(float,len(v1),2.0);v2
-  Vec(float,6)=[2.0,2.0,2.0,2.0,2.0,...]
 
 With the resize attribute you allocate new memory while keeping the
 data. It is not guaranteed that the new memory actually occupies the
@@ -282,31 +328,26 @@ same physical space.
 
 >>> v2.resize(8);
 >>> v2
-  Vec(float,8)=[2.0,2.0,2.0,2.0,2.0,...]
 
 Resize a vector and fill new entries with non-zero values:
 
 >>> v2.resize(10,-1)
 >>> v2
-  Vec(float,10)=[2.0,2.0,2.0,2.0,2.0,...]
 
 Resize a vector to same size as another vector:
 
 >>> v2.resize(v1)
 >>> v2
-  Vec(float,6)=[2.0,2.0,2.0,2.0,2.0,...]
 
 Make a new vector of same size and type as the original one:
 
 >>> v3=v2.new()
 >>> v3
-  Vec(float,6)=[0.0,0.0,0.0,0.0,0.0,...]
 
 Fill a vector with values
 
 >>> v3.fill(-2)
 >>> v3
-  Vec(float,6)=[-2.0,-2.0,-2.0,-2.0,-2.0,...]
 
 3.2.2.  Vector arithmetic
 ........................................................
@@ -315,14 +356,12 @@ The vectors have a number of mathematical functions attached to
 them. A full list can be seen by typing
 
 >>> dir(v1)
-  ['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__isub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd', 'addto', 'append', 'applyhanningfilter', 'arg', 'asin', 'atan', 'bspline', 'bsplinefit', 'bsplinefitxvalues', 'ceil', 'convert', 'convertresize', 'copy', 'cos', 'cosh', 'countgreaterequal', 'countgreaterequalabs', 'countgreaterthan', 'countgreaterthanabs', 'countlessequal', 'countlessequalabs', 'countlessthan', 'countlessthanabs', 'craveragespectrum', 'crcalcbaseline', 'crfitbaseline', 'delaytophase', 'dimension', 'div', 'divadd', 'divto', 'downsample', 'downsamplespikydata', 'elem', 'errorstoweights', 'exp', 'extend', 'extendflat', 'fft', 'fftw', 'fill', 'fillrange', 'findbetween', 'findbetweenorequal', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'findgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findlessthanabs', 'findlowerbound', 'findoutside', 'findoutsideorequal', 'floor', 'getDim', 'gethanningfilter', 'gethanningfilterhalf', 'imag', 'interpolate2p', 'interpolate2psubpiece', 'invfftcasa', 'invfftw', 'linearfit', 'linearfitpolynomialx', 'list', 'log', 'log10', 'logsave', 'max', 'mean', 'meangreaterequalthreshold', 'meangreaterthanthreshold', 'meaninverse', 'meanlessequalthreshold', 'meanlessthanthreshold', 'meanthreshold', 'median', 'min', 'mul', 'muladd', 'mulsum', 'multo', 'ndim', 'negate', 'new', 'norm', 'normalize', 'polynomial', 'pprint', 'prettystring', 'random', 'readdump', 'real', 'redistribute', 'resize', 'rfibaselinefitting', 'rfidownsampling', 'rfiflagging', 'runningaverage', 'set', 'setDim', 'sin', 'sinh', 'sort', 'sortmedian', 'spectralpower', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'subto', 'sum', 'tan', 'tanh', 'type', 'upsample', 'val', 'vec', 'vectorlength', 'writedump', 'zipper']
 
 Some of the basic arithmetic is available in an intuitve way.
 
 You can add a scalar to a vector by
 
 >>> v1+3
-  Vec(float,6)=[3.0,4.0,5.0,6.0,7.0,...]
 
 This will actually create a new vector (and destroy it right away,
 since no reference was kept). The original vector is unchanged.
@@ -334,7 +373,6 @@ has to come as the second argument.
 You can also add two vectors (which is commutative):
 
 >>> v1+v2
-  Vec(float,6)=[2.0,3.0,4.0,5.0,6.0,...]
 
 In order to change the vector, you can use the "in place" operators
 +=, -=, /=, *= :
@@ -342,7 +380,6 @@ In order to change the vector, you can use the "in place" operators
 Adding a vector in place:
 
 >>> v1+=v2
-    v1 => Vec(float,6)=[2.0,3.0,4.0,5.0,6.0,...]
 
 now v1 was actually modified such that v2 was added to the content of
 v1 and the results is stored in v1.
@@ -357,19 +394,15 @@ Here are examples of some basic statistics functions one can use
 
 Mean:
 
-    v1.mean() => 4.5
 
 Median:
 
-    v1.median() => 5.0
 
 Summing all elements in a vector:
 
-    v1.sum() => 27.0
 
 Standard Deviation:
 
-    v1.stddev() => 1.87082869339
 
 3.3.  Working with the hArray class
 ----------------------------------
@@ -415,7 +448,6 @@ type.
 
 >>> a=hArray(v,[3,3])
 
-    a => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,1,2,3,4,5,6,7,...]
 
 One may wonder what the representation of the Array actually
 means.
@@ -434,14 +466,11 @@ The underlying vector of an array can be retrieved with the .vec()
 method. I.e.,
 
 >>> a.vec()
-  Vec(int,9)=[0,1,2,3,4,...]
 
 The arrays have most of the vector methods defined, so you can also
 add, multiply, etc. with scalars or other arrays.
 
-    a*2 => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,2,4,6,8,10,12,14,...]
 
-    a*a => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,1,4,9,16,25,36,49,...]
 
 Underlying these operations are the basic hftools functions, e.g. the
 multiplication is essentially a python method that first creates a new
@@ -450,7 +479,6 @@ array and then calls hMul.
 >>> tmp_array=a.new()
 >>> tmp_array.mul(a,2)
 
-    a => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,1,2,3,4,5,6,7,...]
 
 BTW, this could also be done calling the function hMul(tmp_array,a,2),
 rather than the corresponding method.
@@ -468,13 +496,10 @@ change in the dimensions, the vector will be resized and padded with
 zeros, if necessary.
 
 >>> a.getDim()
-  [3, 3]
 
 >>> a.setDim([3,3,2])
-  hArray(int,[3, 3, 2]) # len=18, slice=[0:18], vec -> [0,1,2,3,4,5,6,7,...]
 
 >>> a.setDim([3,3])
-  hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,1,2,3,4,5,6,7,...]
 
 3.3.3.  Memory sharing
 ......................
@@ -484,8 +509,6 @@ an element in the vector
 
 >>> v[0]=-1
 
-    v => Vec(int,9)=[-1,1,2,3,4,...]
-    a => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [-1,1,2,3,4,5,6,7,...]
 
 will also change the corresponding element in the array. The same is,
 btw, true if one creates an array from an array. Both will share the
@@ -496,13 +519,9 @@ and dimensions.
 
 >>> b[0,0]=-2
 
-    b => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [-2,1,2,3,4,5,6,7,...]
-    a => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [-2,1,2,3,4,5,6,7,...]
-    v => Vec(int,9)=[-2,1,2,3,4,...]
 
 >>> v[0]=0
 
-    a => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,1,2,3,4,5,6,7,...]
 
 To actually make a physically distinct copy, you need to explicitly
 copy the data over.
@@ -527,12 +546,10 @@ of python.
 
 Let us take our two-dimensional array from before:
 
-    a => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 The vector followed by a single number in square brackets
 will "in principle" obtain the first column of the array.
 
-    a[0] => hArray(int,[3, 3]) # len=9, slice=[0:3], vec -> [0,0,0]
 
 It says "in principle", because the only thing which that command does is
 to return a new hArray python object, which will point to the same
@@ -540,7 +557,6 @@ data vector, but contain a different data slice which is then returned
 whenever a method tries to operate on the vector.
 
 >>> a[0].vec()
-  Vec(int,3)=[0,0,0]
 
 This retrieves a copy of the data, since assigning a sub-slice of a
 vector to another vector actually requires copying the data - as
@@ -553,13 +569,11 @@ the underlying vector.
 Similarly,
 
 >>> a[0,1].vec()
-  Vec(int,1)=[0]
 
 will access a slice consisting of a single element (returned as a
 vector). To obtain it as a scalar value, use
 
 >>> a[0,1].val()
-  0
 
 One may wonder, why one has to use the extra methods vec and val to
 access the data. The reason is that slicing on its own will return an
@@ -569,30 +583,25 @@ Slicing can also be done over multiple elements of one dimension,
 using the known python slicing syntax:
 
 >>> a[0,0:2].val()
-  [0, 0]
 
 however, currently this is restricted to the last dimension only, in
 order to point to a contiguous memory slice. Hence:
 
 >>> a[0:2]
-  hArray(int,[3, 3]) # len=9, slice=[0:6], vec -> [0,0,0,0,0,0]
 
 is possible, but not
 
 >>> a[0:2,0:2]
-  hArray(int,[3, 3]) # len=9, slice=[0:2], vec -> [0,0]
 
 where the first slice is simply ignored.
 
 Finally, negative indices count from the end of the slice, i.e.
 
 >>> a[-1]
-  hArray(int,[3, 3]) # len=9, slice=[6:9], vec -> [0,0,0]
 
 gives the last slice of the first index, while
 
 >>> a[0:-1]
-  hArray(int,[3, 3]) # len=9, slice=[0:6], vec -> [0,0,0,0,0,0]
 
 gives all but the last slice of the first index.
 
@@ -603,8 +612,6 @@ gives all but the last slice of the first index.
 It is possible to provide a list of indices as the last index to copy parts of the array. 
 
 >>> a[[0,2,3]] 
-  Error: hArray_getitem - list of indices has to be at the position of the last index.
-  hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 This will return a new array containing the first third and fourth
 element of array a.
@@ -613,7 +620,6 @@ You can do this explicitly, using the copy method:
 
 >>> acopy=a.new()
 >>> acopy.copy(a,hArray([0,2,3]),-1)
-    acopy => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 The last parameter of "copy" (-1) provides the possibility to copy
 only the first nth elements of the index vector (if the last parameter
@@ -635,11 +641,7 @@ on it. Then we need to create an index vector first.
 and fill it with the indices according to our condition
 
 >>> number_of_indices=indices[...].findbetween(a[...],0,8)
-    number_of_indices => Vec(int,3)=[0,0,0]
 >>> indices[...].pprint(-1)
-  [-1,-1,-1]
-  [-1,-1,-1]
-  [-1,-1,-1]
 
 As the result we get a vector with the number of elements in each row
 that have satisfied the condition and in 'indices' we get their
@@ -660,13 +662,11 @@ to create a new array.
 >>> b=a.new(); b.fill(-99)
 >>> b[...].copy(a[...],indices[...,[0]:number_of_indices],number_of_indices)
 >>> b.pprint(-1)
-  [-99,-99,-99,-99,-99,-99,-99,-99,-99]
 
 This (contiguous) with variable length we can use for further looping
 operations (as described below) on the rows of the array. E.g., 
 
 >>> b[...,[0]:number_of_indices].sum()
-  Vec(int,3)=[0,0,0]
 
 will take the sum of the first n elements in each row of our array,
 where n given by the vector number_of_indices that were returned by
@@ -693,15 +693,12 @@ First, of all, we can apply the known vector functions also to
 array slices directly. E.g.,
 
 >>> a[0].sum()
-  Vec(int,1)=[0]
 
 will return the sum over the first row of the array, i.e. the first
 three elements of the underlying vector. While
 
 >>> a[0].negate()
-    a => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 >>> a[0].negate()
-    a => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 returns nothing, but will actually change ths sign of the first three
 elements in the underlying vector.
@@ -709,16 +706,12 @@ elements in the underlying vector.
 In principle one could now loop over all slices using a for loop:
 
 >>> for i in range(a.getDim()[0]): print "Row",i,":",a[i].val(), " => a =", a
-  Row 0 : [0, 0, 0]  => a = hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
-  Row 1 : [0, 0, 0]  => a = hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
-  Row 2 : [0, 0, 0]  => a = hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 However, looping over slices in simple way is aready built into the
 arrays, by appending the Ellipsis symbol "..." to the dimensions. This
 will actually put the array in "looping mode".
 
 >>> l=a[0:3,...]
-    l => hArray(int,[3, 3]) # len=9, slice=[0:3]*, vec -> [0,0,0]
 
 which is indicated in the screen representation of the array by an
 extra asterisk and actually means that one can loop over all the
@@ -728,11 +721,7 @@ elements of the respective dimension.
 >>> while iterate:
 ...     print "Row",l.loop_nslice(),":",l.val(), " => l =", l
 ...     iterate=l.next().doLoopAgain()
-  Row 0 : [0, 0, 0]  => l = hArray(int,[3, 3]) # len=9, slice=[0:3]*, vec -> [0,0,0]
-  Row 1 : [0, 0, 0]  => l = hArray(int,[3, 3]) # len=9, slice=[3:6]*, vec -> [0,0,0]
-  Row 2 : [0, 0, 0]  => l = hArray(int,[3, 3]) # len=9, slice=[6:9]*, vec -> [0,0,0]
 
-    l => hArray(int,[3, 3]) # len=9, slice=[0:3]*, vec -> [0,0,0]
 
 This will do exactly the same as the for-loop above.
 
@@ -749,7 +738,6 @@ We could also explicitly reset the loop in using to its starting
 values, but that should not be necessary most of the time.
 
 >>> l.resetLoop()
-  hArray(int,[3, 3]) # len=9, slice=[0:3]*, vec -> [0,0,0]
 
 Now, since this is still a bit too much work, you can actually apply
 (most of) the available vector methods to multiple slices at once, by
@@ -759,7 +747,6 @@ As an example, let's calculate the mean value of each slice at the to
 level of our example array, which is simply:
 
 >>> l.mean()
-  Vec(float,3)=[0.0,0.0,0.0]
 
 In contrast to the same method applied to vectors, where a single
 value is returned, the return value is now a vector of values, each of
@@ -771,18 +758,15 @@ The looping over slices can be more complex taking start, stop, and
 increment values into account:
 
 >>> a[1:,...].mean()
-  Vec(float,2)=[0.0,0.0]
 
 will loop over all top-level slices starting at the 2nd slice
 (slice #1) until the last.
 
 >>> a[:2,...].mean()
-  Vec(float,2)=[0.0,0.0]
 
 will loop over the first two top-level slices.
 
 >>> a[0:3:2,...].mean()
-  Vec(float,2)=[0.0,0.0]
 
 will loop over the two top-level slices using an increment of 2,
 i.e. here take the first and third only (so, here non contiguous
@@ -792,21 +776,18 @@ To loop over all slices in one dimensions, a short-cut can be used by
 leaving away the slice specification. Hence,
 
 >>> a[...].mean()
-  Vec(float,3)=[0.0,0.0,0.0]
 
 will do the same as a[0:,..].mean().
 
 it is even possible to specify an array of indices for the slicing.
 
 >>> a[[0,2],...].mean()
-  Vec(float,2)=[0.0,0.0]
 
 will loop over slices 0 and 2.
 
 
 It is possible to specify a slice after the ellipse, e.g.,
 >>> a[...,0:2].mean()
-  Vec(float,3)=[0.0,0.0,0.0]
 
 which means that the mean is taken only from the first two elements
 of each top-level slice.
@@ -814,7 +795,6 @@ of each top-level slice.
 Even more complicated: the elements of the slice can be vectors or lists:
 
 >>> a[...,[0,1]:[2,3]].mean()
-  Vec(float,3)=[0.0,0.0,0.0]
 
 over which one can loop as well. Hence, in the operation on the first
 row, the subslice 0:2 will be taken, while for the second slice/row
@@ -837,7 +817,6 @@ and fill it with slices from "a" multiplied by the scalar value 2
 
 >>> x[[0,2],...].mul(a[[0,2],...],2)
 
-    x => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 and indeed now the first and last slice were operated on and filled
 with the results of the operation.
@@ -850,7 +829,6 @@ three elements of x, containing at the end only the results of the
 mutliplication of the last slice in a.
 >>> x.fill(0); x[...].mul(a,2)
 
-    x => hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 NOTE: There are currently relatively strict rules on how to change the
 parameters from a vector to an array.
@@ -884,7 +862,6 @@ the scale factor, which is specified as a string being one of
 "f","p","n","micro","m","c","d","","h","k","M","G","T","P","E","Z".
 
 >>> a.setUnit("M","Hz")
-  hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 will set the unitname to MHz without modifiying the values in the
 array (assuming that the values were deliverd initially in this
@@ -892,13 +869,11 @@ unit). However, the scaling can be changed by calling setUnit again
 (with or without a unit name), e.g.:
 
 >>> a.setUnit("k","")
-  hArray(int,[3, 3]) # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 Which has converted the values to kHz.  The name of the unit can be
 retrieved with
 
 >>> a.getUnit()
-  'kHz'
 
 and cleared with clearUnit().
 
@@ -909,7 +884,6 @@ For documenting the vector further and to store certain values, one
 can store keywords and values in the array. This is done with
 
 >>> a.setKey("name","TestArray")
-  hArray(int,[3, 3], name="TestArray") # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 The keywords can be arbitrary strings ann the values also arbirtrary
 strings. Thus numbers need to be converted to strings and back. The
@@ -920,7 +894,6 @@ method governing array output) to briefly describe the data.
 The keyword values can be retrieved using getKey:
 
 >>> a.getKey("name")
-  'TestArray'
 
 3.3.9.  History Logbook
 ................................
@@ -930,36 +903,10 @@ can be viewed by using the getHistory (retrieves a vector of strings)
 or simply the .history() method, which prints the activity log.
 
 >>> a.history()
-    2010-05-25 20:48:32 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
-    2010-05-25 20:48:32 [delVector]: Vector of typeSt6vectorIiSaIiEE and size=0 deleted.
-    2010-05-25 20:48:32 [initialize_storage]: Vector of type St6vectorIiSaIiEE created.
-    2010-05-25 20:48:32 [setDimension]: Dimensions set to [10]
-    2010-05-25 20:48:32 [setDimension]: Dimensions set to [3,3]
-    2010-05-25 20:48:32 [setDimension]: Dimensions set to [3,3,2]
-    2010-05-25 20:48:32 [setDimension]: Dimensions set to [3,3]
-    2010-05-25 20:48:32 [hFill]:   Par 0: vec = array[T,9] : [-1,1,...]
-    2010-05-25 20:48:32 [hFill]:   Par 1: fill_value = -2
-    2010-05-25 20:48:32 [hCopy]:   Par 0: vecout = array[T,9] : [0,1,...]
-    2010-05-25 20:48:32 [hCopy]:   Par 1: vecin = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hSum]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hNegate]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hNegate]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hMean]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hMean]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hMean]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hMean]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hMean]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hMean]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hMean]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [hMean]:   Par 0: vec = array[T,9] : [0,0,...]
-    2010-05-25 20:48:32 [setUnit]: Unit set to MHz.
-    2010-05-25 20:48:32 [setUnit]: Unit set to kHz.
-    2010-05-25 20:48:32 [setKey]: name = TestArray
 
 You can add a line to the history log yourself with
 
 >>> a.addHistory("TEST","This is a test.")
-  hArray(int,[3, 3], name="TestArray") # len=9, slice=[0:9], vec -> [0,0,0,0,0,0,0,0,...]
 
 and clear the entire log with .clearHistory().
 
@@ -981,9 +928,6 @@ Let's see how we can open a file. First define a filename, e.g.:
 >>> filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecond.h5"
 
 
-    filename_sun => /Users/falcke/LOFAR/usg/data/lopes/example.event
-    filename_lofar_big => /Users/falcke/LOFAR/usg/data/lofar/rw_20080701_162002_0109.h5
-    filename_lofar => /Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5
 
 We can create a new file object, using the "crfile" class, which is an
 interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py.
@@ -995,7 +939,6 @@ The following will open a data file and return a DataReader object:
 The associated filename can be retrieved with
 
 >>> datafile.filename
-  '/Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5'
 
 The file will be automatically closed (and the DataReader object be
 destroyed), whenever the crfile object is deleted, e.g. with "file=0".
@@ -1012,19 +955,16 @@ code.
 Which observatory did we actually use?
 
 >>> obsname=datafile.get("observatory");
-    obsname => LOFAR
 
 There are more keywords, of course. A list of implemented parameters
 we can access is obtained by
 
 >>> keywords=datafile.get("help")
-  hFileGetParameter - available keywords: nofAntennas, nofSelectedChannels, nofSelectedAntennas, nofBaselines, block, blocksize, stride, fftLength, nyquistZone, sampleInterval, referenceTime, sampleFrequency, antennas, selectedAntennas, selectedChannels, positions, increment, frequencyValues, frequencyRange, Date, Observatory, Filesize, presync, TL, LTL, EventClass, SampleFreq, StartSample, AntennaIDs, keywords, help
 
 Note, that the results are returned as PythonObjects. Hence, this
 makes use of the power of python with automatic typing. For, example
 
 >>> datafile.get("frequencyRange")
-  Vec(float,2)=[0.0,100000000.0]
 
 actually returns a vector.
 
@@ -1036,7 +976,6 @@ A second way do retreive data is to use square brackets, since
 datafile[key] is equivalent to datafile.get(key).
 
 >>> datafile["blocksize"]
-  2048
 
 Just for fun let's define a number of variables that contain essential
 parameters (we will later actually use different ones which are
@@ -1055,51 +994,16 @@ automatically stored in the datafile object).
 >>> maxblocksize=min(filesize,1024*1024);
 >>> nBlocks=filesize/blocksize;
 
-    obsdate => 1265926154
-    filesize => 132096
-    blocksize => 2048
-    nAntennas => 16
-    antennas => Vec(int,16)=[0,1,2,3,4,...]
-    antennaIDs => Vec(int,0)=[]
-    selectedAntennas => Vec(int,16)=[0,1,2,3,4,...]
-    nofSelectedAntennas => 16
-    fftlength => 1025
-    sampleFrequency => 200000000.0
-    maxblocksize => 132096
-    nBlocks => 64
 
 To get a readable version of the observing date use the python time module
 
 >>> import time
-    time.asctime(time.localtime(obsdate)) => Thu Feb 11 23:09:14 2010
 
 Luckily, you do not have to do this all the time, since all the
 parameters will be read out at the beginning and will be stored as
 attributes to the file object.
 
 >>> for kw in datafile.keywords: p_("datafile."+kw)
-    datafile.observatory => LOFAR
-    datafile.blocksize => 2048
-    datafile.antennaIDs => Vec(int,0)=[]
-    datafile.nyquistZone => 1
-    datafile.antennas => Vec(int,16)=[0,1,2,3,4,...]
-    datafile.nofBaselines => 120
-    datafile.filesize => 132096
-    datafile.increment => Vec(float,2)=[5e-09,97656.25]
-    datafile.selectedAntennas => Vec(int,16)=[0,1,2,3,4,...]
-    datafile.selectedChannels => Vec(int,1025)=[0,1,2,3,4,...]
-    datafile.nofAntennas => 16
-    datafile.sampleFrequency => 200000000.0
-    datafile.nofSelectedAntennas => 16
-    datafile.referenceTime => 0.0
-    datafile.frequencyValues => Vec(float,1025)=[0.0,97656.25,195312.5,292968.75,390625.0,...]
-    datafile.nofSelectedChannels => 1025
-    datafile.stride => 0
-    datafile.sampleInterval => 5e-09
-    datafile.frequencyRange => Vec(float,2)=[0.0,100000000.0]
-    datafile.fftLength => 1025
-    datafile.date => 1265926154
-    datafile.block => 0
 
 They will be updated whenever you do a file.set(key,value), however,
 assigning a new value to the attribute will NOT automatically change
@@ -1134,13 +1038,11 @@ line, so you need to provide lists of keywords and list of values, like
 >>> datafile["blocksize","selectedAntennas"]=[2048,[0,2]]
 
 >>> datafile["blocksize","selectedAntennas"]
-  [2048, Vec(int,16)=[0,1,2,3,4,...]]
 
 Note, that we have now reduced the number of antennas to two: namely
 antenna 0 and 2 and the number of selected antennas is
 
 >>> datafile["nofSelectedAntennas"]
-  16
 
 However, in the follwing we want to work on all antennas again, so we
 do
@@ -1182,7 +1084,6 @@ in the antenna as digitized by the ADC. This is provided by the
 keyword "Fx" (means f(x) ).
 
 >>> fxdata.read(datafile,"Fx")
-    fxdata => hArray(float,[16, 2048], name="E-Field") # len=32768, slice=[0:32768], vec -> [16.0,17.0,10.0,18.0,17.0,6.0,16.0,17.0,...]
 
 and voila the vector is filled with time series data from the data
 file. Note that we had to use the .vec method for the array, since
@@ -1210,7 +1111,6 @@ units of the data accordingly.
 So, let's have the time axis in microseconds, by using setUnit
 
 >>> times.setUnit("\\mu","")
-  hArray(float,[2048], name="Time") # len=2048, slice=[0:2048], vec -> [0.0,0.005,0.01,0.015,0.02,0.025,0.03,0.035,...]
 
 We do the same now for the frequency axis, which we convert to MHz.
 
@@ -1231,6 +1131,11 @@ memory location.
 generating the tutorial, when an operation returns an array or
 vector.)
 
+Alternatively you can use the method
+
+>> avspectrum.craveragespectrum(datafile)
+
+which does this automatically.
 
 5.  Basic Plotting
 ------------------
@@ -1316,10 +1221,6 @@ and then we plot it
 >>> plt.plot(timeall.vec(),fxall[0].vec())
 >>> plt.ylabel("Electric Field [ADC counts]")
 >>> plt.xlabel("Time [$\mu$s]")
-   
-  - ###################
-  - #### Figure  1 ####
-  - ###################
 
 So, for a linear plot use .plot, for a loglog plot use .loglog and for
 a log-linear plot use .semilogx or .semilogy ...
@@ -1333,10 +1234,6 @@ using the built-in plot method of array.
 >>> avspectrum.par.xvalues=frequencies
 >>> avspectrum.par.title="Average Spectrum"
 >>> avspectrum[0].plot(logplot="y")
-   
-  - ###################
-  - #### Figure  2 ####
-  - ###################
 
 This creates a semilog-plot with appropriate lables and units (if they
 were provided beforehand.)
@@ -1349,10 +1246,6 @@ If the array is in looping mode, multiple curves are plotted in one windows. Hen
 
 >>> avspectrum.par.logplot="y"
 >>> avspectrum[...].plot(legend=datafile.antennas)
-   
-  - ###################
-  - #### Figure  3 ####
-  - ###################
 
 will simply plot all spectra of all antennas (=highest array index) in
 the array.
@@ -1417,27 +1310,22 @@ First we calculate the mean over all samples for each antennas (and
 make use of the looping through the Ellipsis object).
 
 >>> datamean = dataarray[...].mean()
-    datamean => Vec(float,16)=[7.17281371124,-7.79051598837,-1.9765625,-0.283490794574,5.22622940891,...]
 
 Similarly we get the rms (where we spare the algorithm from recalculating the
 mean, by providing it as input - actually a list of means).
 
 >>> datarms = dataarray[...].stddev(datamean)
-    datarms => Vec(float,16)=[10.4218369439,10.3521070448,10.1878041442,11.9229119576,10.0156780471,...]
 
 and finally we get the total number of peaks 5 sigma above the noise.
 
 >>> datanpeaks = dataarray[...].countgreaterthanabs(datarms*5)
-    datanpeaks => Vec(int,16)=[45,3,32,0,53,...]
 
 To see whether we have more peaks than expected, we first calculate
 the expected number of peaks for a Gaussian distribution and our
 blocksize, as well as the error on that number.
 
 >>> npeaksexpected=funcGaussian(5,1,0)*blocksize
-    npeaksexpected => 0.0490974252546
 >>> npeakserror=sqrt(npeaksexpected)
-    npeakserror => 0.221579388154
 
 So, that we can get a normalized quantity
 
@@ -1466,12 +1354,7 @@ To ease the operation we combine all the data into one python array
 which is a rather nasty collection of numbers. So, we print a nice
 table (restricting it to the first 5 antennas).
 
->>> for prop in dataproperties[0:5]: print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, nonGaussianity={4: 7.2f}".format(*prop)
-  Antenna   0: mean=  7.17, rms=  10.4, npeaks=   45, nonGaussianity= 202.87
-  Antenna   1: mean= -7.79, rms=  10.4, npeaks=    3, nonGaussianity=  13.32
-  Antenna   2: mean= -1.98, rms=  10.2, npeaks=   32, nonGaussianity= 144.20
-  Antenna   3: mean= -0.28, rms=  11.9, npeaks=    0, nonGaussianity=  -0.22
-  Antenna   4: mean=  5.23, rms=  10.0, npeaks=   53, nonGaussianity= 238.97
+>>> for prop in dataproperties[0:5]: print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}".format(*prop)
 
 Clearly this is a spiky dataset, with only one antenna not being
 affected by too many peaks (which is in fact not the case for the
@@ -1481,9 +1364,8 @@ To check automatically whether all parameters are in the allowed
 range, we can use a little python helper function, using a python
 "dict" as database for allowed parameters.
 
->>> qualitycriteria={"mean":(-15,15),"rms":(5,15),"nonGaussianity":(-3,3)}
->>> CheckParameterConformance(dataproperties[0],{"mean":1,"rms":2,"nonGaussianity":4},qualitycriteria)
-  ['nonGaussianity']
+>>> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-3,3)}
+>>> CheckParameterConformance(dataproperties[0],{"mean":1,"rms":2,"spikyness":4},qualitycriteria)
 
 The first parameter is just the list of numbers of the mean, rms,
 etc. of one antenna we created above. The second parameter is a dict,
@@ -1499,10 +1381,9 @@ and returns a list with failed antennas and their properties.
 
 >>> badantennalist=CRQualityCheck(qualitycriteria,datafile,dataarray,verbose=False)
 
-    badantennalist[0] => [15, 0, (0.46990067829457366, 214.1564187430852, 463, 2089.3229574834572), ['rms', 'nonGaussianity']]
 
 (first the antenna number, then the block, then a list with the mean,
-rms, npeaks, and nonGaussianity, and finally the failed fields)
+rms, npeaks, and spikyness, and finally the failed fields)
 
 Note, that this function can be called with "file=None". In this case
 the data provided in the datararray will be used.
@@ -1525,7 +1406,6 @@ So, let's do the transform:
 >>> fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
 >>> fftdata[...].fftcasa(fxdata[...],1)
 
-    fftdata => hArray(complex,[16, 1025], name="FFT(E)") # len=16400, slice=[0:16400], vec -> [(14776+0j),(-78.0619954633+23.5840915053j),(49.6800536667+19.8582762045j),(-69.6240335619+15.9113124235j),(2.28131321087-46.0593431603j),(-50.7134694718-6.38083930207j),(-11.8103929808+4.5431205938j),(-52.0847348972+52.0362484443j),...]
 
 Here we have used the fft method of the float array, which is just a
 call to the stand-alone function hFFT defined in hftools.cc.
@@ -1551,20 +1431,6 @@ in 2003), since that is dominated by a single point source and hence
 gives a nice and clear cross correlation.
 
 >>> sun=crfile(filename_sun)
-  Opening LOPES File=/Users/falcke/LOFAR/usg/data/lopes/example.event
-  [DataReader::summary]
-   -- blocksize ............ = 65536
-   -- FFT length ........... = 32769
-   -- file streams connected?  0
-   -- shape(adc2voltage) ... = [65536, 8]
-   -- shape(fft2calfft) .... = [32769, 8]
-   -- nof. antennas ........ = 8
-   -- nof. selected antennas = 8
-   -- nof. selected channels = 32769
-   -- shape(fx) ............ = [65536, 8]
-   -- shape(voltage) ....... = [65536, 8]
-   -- shape(fft) ........... = [32769, 8]
-   -- shape(calfft) ........ = [32769, 8]
 
 Now we read in the raw time series data as well as the Frequencies and
 Time value arrays.
@@ -1608,10 +1474,6 @@ conveniently provided by our cr file object.
 
 >>> crosscorr.par.xlim=(-1,1)
 >>> crosscorr[1].plot()
-   
-  - ###################
-  - #### Figure  4 ####
-  - ###################
 
 Note, plotting crosscorr[0].plot() will give the autocorrelation of
 the first antenna (which we used as reference antenna in this example).
@@ -1637,7 +1499,6 @@ We then do the conversion, using
 
 yielding the following output vector:
 
-    cartesian => hArray(float,[1, 3]) # len=3, slice=[0:3], vec -> [0.0308144266055,-0.882409725042,0.469471562786]
 
 
 6.4.  Coordinates
@@ -1647,7 +1508,6 @@ For doing actual beamforming we need to know the antenna
 positions. For this we will use the method getCalData:
 
 >>> antenna_positions=sun.getCalData("Position")
-    antenna_positions => hArray(float,[8, 3]) # len=24, slice=[0:24], vec -> [-84.5346026,36.1095688,0.0,-52.6146025237,54.4735691204,-0.0619964599609,-34.3396029052,22.5365688458,...]
 
 As a next step we need to put the antenna coordinates on a reference
 frame that is relative to the phase center. Here we will choose the
@@ -1663,7 +1523,6 @@ Now we read in instrumental delays for each antenna in a similar way
 and store it for later use.
 
 >>> cal_delays=sun.getCalData("Delay")
-    cal_delays => hArray(float,[8]) # len=8, slice=[0:8], vec -> [0.0,2.3875e-09,-1.3625e-09,-2.8925e-09,-2.4375e-08,-2.50415e-08,1.42475e-08,9.29625e-09]
 
 We now convert the Azimuth-Elevation position into a vector in
 Cartesian coordinates, which is what is used by the beamformer.
@@ -1705,10 +1564,6 @@ starting point).
 >>> crosscorr_shifted=hArray(float,dimensions=sun_efield,name="Cross Correlation",xvalues=sun_timelags)
 >>> crosscorr_shifted[...].invfftcasa(crosscorr_cmplx_shifted[...],2)
 >>> crosscorr_shifted[...].plot(xlim=(-0.25,0.25),legend=sun.antennaIDs)
-   
-  - ###################
-  - #### Figure  5 ####
-  - ###################
 
 And indeed now most of the antennas show a lag peaking around 0, with
 the exception of two antennas (whick likely experienced an additional
@@ -1720,10 +1575,6 @@ series.
 >>> sun_efield_shifted = sun["emptyFx"].setPar("xvalues",sun_time)
 >>> sun_efield_shifted[...].invfftcasa(sun_calfft_shifted[...],2)
 >>> sun_efield_shifted[0:3,...].plot(xlim=(-2,0),ylim=(-1500,1500),legend=sun.antennaIDs[0:3])
-   
-  - ###################
-  - #### Figure  6 ####
-  - ###################
 
 Obviously the three time series are now tracing each other nicely,
 indicating that the delays were about right. To now "form a beam" we
@@ -1741,10 +1592,6 @@ and then FFT back into the time domain:
 
 >>> sun_efield[0].plot()
 >>> sun_efield_shifted_added.plot(xlim=(-2,0),clf=False,legend=["Reference Antenna","Beam"])
-   
-  - ###################
-  - #### Figure  7 ####
-  - ###################
 
 In the plot one can see how the green line (beamformed) traces the
 data in antenna one (which was our reference antenna).
@@ -1753,700 +1600,4 @@ data in antenna one (which was our reference antenna).
 =======================================
 
 >>> help(all)
-  Class:  <type 'function'>
-  
-  SECTION: Administrative Vector Function
-  --------------------------------------------------
-  hFill(vec, fill_value) - Fills a vector with a constant value.
-   
-  hSet(vec, indexlist, val) - Sets certain elements specified in an indexlist 
-                           to a constant value.
-   
-  hPrettyString(vec, maxlen) - Returns the contents of a vector (up to a 
-                           maximum length) as a pretty string for printing
-   
-  hPPrint(vec, maxlen)   - Prints the contents of a vector (up to a maximum 
-                           length) as a pretty string
-   
-  hFillRange(vec, start, increment) - Fills a vector with a series of values 
-                           starting at a start value and then increasing by an 
-                           increment until it is filled
-   
-  hFill(vec, fill_vec)   - Fills a vector with the content of another vector.
-   
-  hZipper(vec, vecA, vecB) - Combines two vectors into one where the elements 
-                           of the vectors follow each other alternating between 
-                           the input vectors. Equivalent to python 
-   
-  hNew(vec)              - Make and return a new vector of the same size and 
-                           type as the input vector.
-   
-  hResize(vec, newsize)  - Resize a vector to a new length.
-   
-  hResize(vec, newsize, fill) - Resize a vector to a new length and fill new 
-                           elements in vector with a specific value.
-   
-  hResize(vec1, vec2)    - Resize an STL vector to the same length as a second 
-                           vector.
-   
-  hResize(vec1, vec2)    - Resize a casa vector to the same length as a second 
-                           vector.
-   
-  hConvert(vec1, vec2)   - Copies and converts a vector to a vector of another 
-                           type.
-   
-  hConvertResize(vecout, vecin) - Copies and converts a vector to a vector of 
-                           another type and resizes the output vector.
-   
-  hCopy(vecout, vecin)   - Copies a vector to another one without resizing them.
-   
-  hCopy(vecout, vecin, indexlist, number_of_elements) - Copies all elements 
-                           provided in an indexlist from one vector to another 
-                           (no resizing is done!).
-   
-  hRedistribute(vec, invec, offset, stride) - Redistributes the values in one 
-                           vector sequentially into another vector, given an 
-                           offset and stride (interval) - can be used for a 
-                           transpose operation
-   
-  
-  SECTION: Math Function
-  --------------------------------------------------
-  square(val)            - Returns the squared value of the parameter.
-   
-  logSave(val)           - Returns the natural logarithm of the value if the 
-                           value is larger than zero, otherwise return a low 
-                           number.
-   
-  hPhase(frequency, time) - Returns the interferometer phase in radians for a 
-                           given frequency and time.
-   
-  hAmplitudePhaseToComplex(amplitude, phase) - Coverts a real phase and 
-                           amplitude to a complex number
-   
-  hPhaseToComplex(phase) - Coverts a real phase to a complex number (with 
-                           amplitude of unity)
-   
-  funcGaussian(x, sigma, mu) - Implementation of the Gauss function.
-   
-  hMax(vec)              - Return the maximum value in a vector
-   
-  hMin(vec)              - Return the minimum value in a vector
-   
-  hExp(vec)              - Take the exp of all the elements in the vector.
-   
-  hExp(vecout, vecin)    - Take the exp of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hLog(vec)              - Take the log of all the elements in the vector.
-   
-  hLog(vecout, vecin)    - Take the log of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hLog10(vec)            - Take the log10 of all the elements in the vector.
-   
-  hLog10(vecout, vecin)  - Take the log10 of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hLogSave(vec)          - Take the logSave of all the elements in the vector.
-   
-  hLogSave(vecout, vecin) - Take the logSave of all the elements in the vector 
-                           and return results in a second vector.
-   
-  hSin(vec)              - Take the sin of all the elements in the vector.
-   
-  hSin(vecout, vecin)    - Take the sin of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hSinh(vec)             - Take the sinh of all the elements in the vector.
-   
-  hSinh(vecout, vecin)   - Take the sinh of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hSqrt(vec)             - Take the sqrt of all the elements in the vector.
-   
-  hSqrt(vecout, vecin)   - Take the sqrt of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hSquare(vec)           - Take the square of all the elements in the vector.
-   
-  hSquare(vecout, vecin) - Take the square of all the elements in the vector 
-                           and return results in a second vector.
-   
-  hTan(vec)              - Take the tan of all the elements in the vector.
-   
-  hTan(vecout, vecin)    - Take the tan of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hTanh(vec)             - Take the tanh of all the elements in the vector.
-   
-  hTanh(vecout, vecin)   - Take the tanh of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hAbs(vec)              - Take the abs of all the elements in the vector.
-   
-  hAbs(vecout, vecin)    - Take the abs of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hCos(vec)              - Take the cos of all the elements in the vector.
-   
-  hCos(vecout, vecin)    - Take the cos of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hCosh(vec)             - Take the cosh of all the elements in the vector.
-   
-  hCosh(vecout, vecin)   - Take the cosh of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hCeil(vec)             - Take the ceil of all the elements in the vector.
-   
-  hCeil(vecout, vecin)   - Take the ceil of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hFloor(vec)            - Take the floor of all the elements in the vector.
-   
-  hFloor(vecout, vecin)  - Take the floor of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hRound(vec)            - Take the round of all the elements in the vector.
-   
-  hRound(vecout, vecin)  - Take the round of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hAcos(vec)             - Take the acos of all the elements in the vector.
-   
-  hAcos(vecout, vecin)   - Take the acos of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hAsin(vec)             - Take the asin of all the elements in the vector.
-   
-  hAsin(vecout, vecin)   - Take the asin of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hAtan(vec)             - Take the atan of all the elements in the vector.
-   
-  hAtan(vecout, vecin)   - Take the atan of all the elements in the vector and 
-                           return results in a second vector.
-   
-  hSubTo(vec1, vec2)     - Performs a Sub between the two vectors, which is 
-                           returned in the second vector. If the first vector 
-                           is shorter it will be applied multiple times.
-   
-  hSub(vec1, vec2)       - Performs a Sub between the two vectors, which is 
-                           returned in the first vector. If the second vector 
-                           is shorter it will be applied multiple times.
-   
-  hSub(vec1, scalar1)    - Performs a Sub between the vector and a scalar 
-                           (applied to each element), which is returned in the 
-                           first vector.
-   
-  hSub(vec, vec1, vec2)  - Performs a sub between the last two vectors, which 
-                           is returned in the first vector.
-   
-  hSubAdd(vec, vec1, vec2) - Performs a sub between the last two vectors, and 
-                           add the result to the first vector which can be of 
-                           different type.
-   
-  hSub(vec, vec1, scalar1) - Performs a sub between the vector and a scalar, 
-                           where the result is returned in the first vector 
-                           (with automatic casting).
-   
-  hMulTo(vec1, vec2)     - Performs a Mul between the two vectors, which is 
-                           returned in the second vector. If the first vector 
-                           is shorter it will be applied multiple times.
-   
-  hMul(vec1, vec2)       - Performs a Mul between the two vectors, which is 
-                           returned in the first vector. If the second vector 
-                           is shorter it will be applied multiple times.
-   
-  hMul(vec1, scalar1)    - Performs a Mul between the vector and a scalar 
-                           (applied to each element), which is returned in the 
-                           first vector.
-   
-  hMul(vec, vec1, vec2)  - Performs a mul between the last two vectors, which 
-                           is returned in the first vector.
-   
-  hMulAdd(vec, vec1, vec2) - Performs a mul between the last two vectors, and 
-                           add the result to the first vector which can be of 
-                           different type.
-   
-  hMul(vec, vec1, scalar1) - Performs a mul between the vector and a scalar, 
-                           where the result is returned in the first vector 
-                           (with automatic casting).
-   
-  hAddTo(vec1, vec2)     - Performs a Add between the two vectors, which is 
-                           returned in the second vector. If the first vector 
-                           is shorter it will be applied multiple times.
-   
-  hAdd(vec1, vec2)       - Performs a Add between the two vectors, which is 
-                           returned in the first vector. If the second vector 
-                           is shorter it will be applied multiple times.
-   
-  hAdd(vec1, scalar1)    - Performs a Add between the vector and a scalar 
-                           (applied to each element), which is returned in the 
-                           first vector.
-   
-  hAdd(vec, vec1, vec2)  - Performs a add between the last two vectors, which 
-                           is returned in the first vector.
-   
-  hAddAdd(vec, vec1, vec2) - Performs a add between the last two vectors, and 
-                           add the result to the first vector which can be of 
-                           different type.
-   
-  hAdd(vec, vec1, scalar1) - Performs a add between the vector and a scalar, 
-                           where the result is returned in the first vector 
-                           (with automatic casting).
-   
-  hDivTo(vec1, vec2)     - Performs a Div between the two vectors, which is 
-                           returned in the second vector. If the first vector 
-                           is shorter it will be applied multiple times.
-   
-  hDiv(vec1, vec2)       - Performs a Div between the two vectors, which is 
-                           returned in the first vector. If the second vector 
-                           is shorter it will be applied multiple times.
-   
-  hDiv(vec1, scalar1)    - Performs a Div between the vector and a scalar 
-                           (applied to each element), which is returned in the 
-                           first vector.
-   
-  hDiv(vec, vec1, vec2)  - Performs a div between the last two vectors, which 
-                           is returned in the first vector.
-   
-  hDivAdd(vec, vec1, vec2) - Performs a div between the last two vectors, and 
-                           add the result to the first vector which can be of 
-                           different type.
-   
-  hDiv(vec, vec1, scalar1) - Performs a div between the vector and a scalar, 
-                           where the result is returned in the first vector 
-                           (with automatic casting).
-   
-  hPhaseToComplex(vec, phasevec) - Coverts a vector of real phase to a vector 
-                           of corresponding complex numbers (with amplitude of 
-                           unity).
-   
-  hAmplitudePhaseToComplex(vec, ampphase) - Coverts a vector of real phases and 
-                           amplitudes to a vector of corresponding complex 
-                           numbers.
-   
-  hConj(vec)             - Calculate the complex conjugate of all elements in 
-                           the complex vector.
-   
-  hCrossCorrelateComplex(vec1, vec2) - Multiplies the elements of the first 
-                           vector with the complex conjugate of the elements in 
-                           the second and returns the results in the first.
-   
-  hReal(vecout, vecin)   - Take the real of all the elements in the complex 
-                           vector and return results in a float vector.
-   
-  hArg(vecout, vecin)    - Take the arg of all the elements in the complex 
-                           vector and return results in a float vector.
-   
-  hImag(vecout, vecin)   - Take the imag of all the elements in the complex 
-                           vector and return results in a float vector.
-   
-  hNorm(vecout, vecin)   - Take the norm of all the elements in the complex 
-                           vector and return results in a float vector.
-   
-  hNegate(vec)           - Multiplies each element in the vector with -1 in 
-                           place, i.e. the input vector is also the output 
-                           vector.
-   
-  hSum(vec)              - Performs a sum over the values in a vector and 
-                           returns the value.
-   
-  hMulSum(vec1, vec2)    - Piecewise multiplication of the elements in a vector 
-                           and summing of the results
-   
-  hProduct(vec)          - Multiplies all elements in the vector with each 
-                           other and return the result
-   
-  hVectorLength(vec)     - Returns the lengths or norm of a vector (i.e. 
-                           Sqrt(Sum_i(xi*+2))).
-   
-  hNormalize(vec)        - Normalizes a vector to length unity.
-   
-  
-  SECTION: Statistics Functions
-  --------------------------------------------------
-  hRandom(vec, minimum, maximum) - Fills a vector with random values between 
-                           minimum and maximum limits
-   
-  hMean(vec)             - Returns the mean value of all elements in a vector.
-   
-  hSort(vec)             - Sorts a vector in place.
-   
-  hSortMedian(vec)       - Sorts a vector in place and returns the median value 
-                           of the elements.
-   
-  hMedian(vec)           - Returns the median value of the elements.
-   
-  hStdDev(vec, mean)     - Calculates the standard deviation around a mean 
-                           value.
-   
-  hMeanLessEqualThreshold(vec, threshold) - Calculates the mean of all values 
-                           which are LessEqual a certain threshold value
-   
-  hMeanGreaterThanThreshold(vec, threshold) - Calculates the mean of all values 
-                           which are GreaterThan a certain threshold value
-   
-  hMeanGreaterEqualThreshold(vec, threshold) - Calculates the mean of all 
-                           values which are GreaterEqual a certain threshold 
-                           value
-   
-  hMeanLessThanThreshold(vec, threshold) - Calculates the mean of all values 
-                           which are LessThan a certain threshold value
-   
-  hMeanThreshold(vec, mean, rms, nsigma) - Calculates the mean of all values 
-                           which are below or above the mean plus 'nsigma' 
-                           standard deviations
-   
-  hMeanInverse(vec)      - Calculates the mean of the inverse of all values and 
-                           then return the inverse of that value
-   
-  hStdDev(vec)           - Calculates the standard deviation of a vector of 
-                           values.
-   
-  
-  SECTION: Comparison and Selection
-  --------------------------------------------------
-  hFindOutsideOrEqual(vecout, vec, lower_limit, upper_limit) - Find the samples 
-                           that are OutsideOrEqual upper and lower threshold 
-                           values and returns the number of samples found and 
-                           the positions of the samples in a second vector.
-   
-  hFindBetween(vecout, vec, lower_limit, upper_limit) - Find the samples that 
-                           are Between upper and lower threshold values and 
-                           returns the number of samples found and the 
-                           positions of the samples in a second vector.
-   
-  hFindBetweenOrEqual(vecout, vec, lower_limit, upper_limit) - Find the samples 
-                           that are BetweenOrEqual upper and lower threshold 
-                           values and returns the number of samples found and 
-                           the positions of the samples in a second vector.
-   
-  hFindOutside(vecout, vec, lower_limit, upper_limit) - Find the samples that 
-                           are Outside upper and lower threshold values and 
-                           returns the number of samples found and the 
-                           positions of the samples in a second vector.
-   
-  hFindLessEqual(vecout, vec, threshold) - Find the samples that are LessEqual 
-                           a certain threshold value and returns the number of 
-                           samples found and the positions of the samples in a 
-                           second vector.
-   
-  hFindLessEqualAbs(vecout, vecin, threshold) - Find the samples whose absolute 
-                           values are LessEqual a certain threshold value and 
-                           returns the number of samples found and the 
-                           positions of the samples in a second vector.
-   
-  hCountLessEqual(vec, threshold) - Count the samples that are LessEqual a 
-                           certain threshold value and returns the number of 
-                           samples found.
-   
-  hCountLessEqualAbs(vec, threshold) - Find the samples whose absolute values 
-                           are LessEqual a certain threshold value and returns 
-                           the number of samples found.
-   
-  hFindGreaterThan(vecout, vec, threshold) - Find the samples that are 
-                           GreaterThan a certain threshold value and returns 
-                           the number of samples found and the positions of the 
-                           samples in a second vector.
-   
-  hFindGreaterThanAbs(vecout, vecin, threshold) - Find the samples whose 
-                           absolute values are GreaterThan a certain threshold 
-                           value and returns the number of samples found and 
-                           the positions of the samples in a second vector.
-   
-  hCountGreaterThan(vec, threshold) - Count the samples that are GreaterThan a 
-                           certain threshold value and returns the number of 
-                           samples found.
-   
-  hCountGreaterThanAbs(vec, threshold) - Find the samples whose absolute values 
-                           are GreaterThan a certain threshold value and 
-                           returns the number of samples found.
-   
-  hFindGreaterEqual(vecout, vec, threshold) - Find the samples that are 
-                           GreaterEqual a certain threshold value and returns 
-                           the number of samples found and the positions of the 
-                           samples in a second vector.
-   
-  hFindGreaterEqualAbs(vecout, vecin, threshold) - Find the samples whose 
-                           absolute values are GreaterEqual a certain threshold 
-                           value and returns the number of samples found and 
-                           the positions of the samples in a second vector.
-   
-  hCountGreaterEqual(vec, threshold) - Count the samples that are GreaterEqual 
-                           a certain threshold value and returns the number of 
-                           samples found.
-   
-  hCountGreaterEqualAbs(vec, threshold) - Find the samples whose absolute 
-                           values are GreaterEqual a certain threshold value 
-                           and returns the number of samples found.
-   
-  hFindLessThan(vecout, vec, threshold) - Find the samples that are LessThan a 
-                           certain threshold value and returns the number of 
-                           samples found and the positions of the samples in a 
-                           second vector.
-   
-  hFindLessThanAbs(vecout, vecin, threshold) - Find the samples whose absolute 
-                           values are LessThan a certain threshold value and 
-                           returns the number of samples found and the 
-                           positions of the samples in a second vector.
-   
-  hCountLessThan(vec, threshold) - Count the samples that are LessThan a 
-                           certain threshold value and returns the number of 
-                           samples found.
-   
-  hCountLessThanAbs(vec, threshold) - Find the samples whose absolute values 
-                           are LessThan a certain threshold value and returns 
-                           the number of samples found.
-   
-  hDownsample(vecout, vecin) - Downsample the input vector to a smaller output 
-                           vector.
-   
-  hInterpolate2P(vec, startvalue, endvalue) - Interpolate a vector between two 
-                           end points, which are part also start and end points 
-                           of the new vector.
-   
-  hInterpolate2PSubpiece(vec, startvalue, endvalue) - Interpolate a vector 
-                           between two end points, where the 2nd end point 
-                           marks the last element of the output vector plus 
-                           one. Useful for piecing interpolations together.
-   
-  hDownsample(vecout, vecrms, vecin) - Downsample the input vector to a smaller 
-                           output vector.
-   
-  hUpsample(vecout, vecin) - Upsample the input vector to a larger output 
-                           vector by linear interpolation.
-   
-  hDownsampleSpikyData(vecout, vecrms, vecin, nsigma) - Downsample the input 
-                           vector to a smaller output vector trying to exclude 
-                           spikes in the data.
-   
-  hDownsample(vec, downsample_factor) - Downsample the input vector by a cetain 
-                           factor and return a new vector.
-   
-  hFlatWeights(wlen)     - Returns vector of weights of length len with 
-                           constant weights normalized to give a sum of unity. 
-                           Can be used by hRunningAverageT.
-   
-  hLinearWeights(wlen)   - Returns vector of weights of length wlen with 
-                           linearly rising and decreasing weights centered at 
-                           len/2.
-   
-  hGaussianWeights(wlen) - Returns vector of weights of length wlen with 
-                           Gaussian distribution centered at len/2 and 
-                           sigma=len/4 (i.e. the Gaussian extends over 2 sigma 
-                           in both directions).
-   
-  hWeights(wlen, wtype)  - Create a normalized weight vector.
-   
-  hRunningAverage(odata, idata, weights) - Calculate the running average of an 
-                           input vector using a weight vector.
-   
-  hRunningAverage(odata, idata, wlen, wtype) - Overloaded function to 
-                           automatically calculate weights.
-   
-  
-  SECTION: RF (Radio Frequency) Function
-  --------------------------------------------------
-  hDelayToPhase(vec, frequencies, delays) - Coverts a vector of time delays and 
-                           a vector of frequencies to a corresponding vector of 
-                           phases (of a complex number).
-   
-  hGeometricDelayFarField(antPosition, skyDirection, length) - Calculates the 
-                           time delay in seconds for a signal received at an 
-                           antenna position relative to a phase center from a 
-                           source located in a certain direction in farfield 
-                           (based on L. Bahren).
-   
-  hGeometricDelayNearField(antPosition, skyPosition, distance) - Calculates the 
-                           time delay in seconds for a signal received at an 
-                           antenna position relative to a phase center from a 
-                           source located at a certain 3D space coordinate in 
-                           nearfield (based on L. Bahren).
-   
-  hGeometricDelays(delays, antPositions, skyPositions, farfield) - Calculates 
-                           the time delay in seconds for signals received at 
-                           various antenna positions relative to a phase center 
-                           from sources located at certain 3D space coordinates 
-                           in near or far field.
-   
-  hGeometricPhases(phases, frequencies, antPositions, skyPositions, farfield) - 
-                           Calculates the phase gradients for signals received 
-                           at various antenna positions relative to a phase 
-                           center from sources located at certain 3D space 
-                           coordinates in near or far field and for different 
-                           frequencies.
-   
-  hGeometricWeights(weights, frequencies, antPositions, skyPositions, farfield) 
-                           - Calculates the phase gradients as complex weights 
-                           for signals received at various antenna positions 
-                           relative to a phase center from sources located at 
-                           certain 3D space coordinates in near or far field 
-                           and for different frequencies.
-   
-  hSpectralPower(outvec, vecin) - Calculates the power of a complex spectrum 
-                           and add it to an output vector.
-   
-  hCrossCorrelationMatrix(ccm, fftdata, nfreq) - Calculates the upper half of 
-                           the cross-correlation matrix of a number of antenna 
-                           data in the frequency domain and adds it to the 
-                           output vector.
-   
-  hCImageFromCCM(image, ccm, weights, nofAntennas, nfreq) - Calculates a single 
-                           complex pixel or a pixel vector (i.e., an image), 
-                           from an cross correlation matrix and complex 
-                           geometrical weights for each antenna by multiplying 
-                           ccm and weights and summing over all baselines.
-   
-  hADC2Voltage(vec, adc2voltage) - Convert the ADC value to a voltage.
-   
-  hGetHanningFilterHalf(vec, height, offset, falling) - Creates one half (i.e. 
-                           rising or falling part) of a Hanning filter and add 
-                           an offset
-   
-  hGetHanningFilter(vec, Alpha, Beta, BetaRise, BetaFall) - Create a Hanning 
-                           filter.
-   
-  hGetHanningFilter(vec, Alpha, Beta) - Create a Hanning filter.
-   
-  hGetHanningFilter(vec, Alpha) - Create a Hanning filter.
-   
-  hGetHanningFilter(vec) - Create a Hanning filter.
-   
-  hApplyFilter(data, filter) - Apply a predefined filter on a vector.
-   
-  hApplyHanningFilter(data) - Apply a Hanning filter on a vector.
-   
-  hFFTw(data_out, data_in) - Apply a forward FFT on a complex vector and return 
-                           it in a second
-   
-  hInvFFTw(data_out, data_in) - Apply a backward FFT on a complex vector and 
-                           return it in a second
-   
-  hFFTw(data_out, data_in) - Apply a real-to-complex FFT using fftw3
-   
-  hInvFFTw(data_out, data_in) - Apply a complex-to-real (inverse) FFT using 
-                           fftw3
-   
-  hNyquistSwap(vec, nyquistZone) - Reorders the elements in a complex vector 
-                           that was created by a FFT according to its 
-                           Nyquistzone, such that frequencies always increase 
-                           from left to right
-   
-  hFFTCasa(data_out, data_in, nyquistZone) - Apply an FFT on a vector.
-   
-  hInvFFTCasa(data_out, data_in, nyquistZone) - Apply an Inverse FFT on a 
-                           vector.
-   
-  hFFT(data_out, data_in, nyquistZone) - Apply an FFT on a vector.
-   
-  hInvFFT(data_out, data_in, nyquistZone) - Apply an inverse FFT on a vector.
-   
-  
-  SECTION: GSL Fitting
-  --------------------------------------------------
-  hLinearFitPolynomialX(vecout, xvec, powers) - Calculate the XValues matrix 
-                           vector for the polynomial (linear-fitting) routine, 
-                           calculating essentially all powers of the input 
-                           vector.
-   
-  hBSplineFitXValues(vecout, xvec, xmin, xmax, Ncoeffs) - Calculate the 
-                           X-Values matrix vector for the Basis Spline 
-                           (BSpline) fitting routine, calculating essentially 
-                           all powers of the input vector.
-   
-  hBSpline(vecout, xvec, coeffs) - Calculate the y-values of the results of a 
-                           Basis Spline fit
-   
-  hPolynomial(vecout, xvec, coeff, powers) - Calculates a polynomial and adds 
-                           it to the output vector.
-   
-  hErrorsToWeights(vecout, vecin) - Calculates a weight factor from an error 
-                           for a fitting routine, i.e. w=1/Error**2.
-   
-  hLinearFit(vecout, veccov, xvec, yvec, wvec, ndata) - Do a linear fit (e.g. 
-                           to an n-th order polynomial) to a data set provided 
-                           a vector of weights and return the coefficients and 
-                           covariance matrix in two vectors. Returns as 
-                           function value the chi-square value of the fit.
-   
-  hLinearFit(vecout, veccov, xvec, yvec, ndata) - Do a linear fit (e.g. to an 
-                           n-th order polynomial) to a data set (without 
-                           weights) and return the coefficients and covariance 
-                           matrix in two vectors. Returns as function value the 
-                           chi-square value of the fit.
-   
-  hBSplineFit(vecout, veccov, xmatrix, xvec, yvec) - Do a basis spline fit to a 
-                           data set (without weights) and return the 
-                           coefficients and covariance matrix in two vectors. 
-                           Returns the chi-square value of the fit.
-   
-  
-  SECTION: RFI mitigation
-  --------------------------------------------------
-  hRFIDownsampling(amplitudeVec, rmsVec, spectrumVec) - Generate a downsampled 
-                           vector containing the mean and rms values of the 
-                           spectrum amplitudes. This is needed to generate a 
-                           baseline for the RFI mitigation.
-   
-  hRFIBaselineFitting(fitVec, amplitudeVec, rmsVec, rmsThresholdValue) - 
-                           Perform a baseline fitting on the amplitude of the 
-                           spectrum vector and use the fit to create an 
-                           interpolated spectrum.
-   
-  hRFIFlagging(flagVec, flagThresholdValue, spectrumVec, fitVec) - Create a 
-                           flag vector defining the regions that need to be 
-                           mitigated in the spectrum.
-   
-  hRFIMitigation(mitigatedSpectrumVec, spectrumVec, fitVec, flagVec) - Final 
-                           part of the RFI mitigation: remove the flagged 
-                           regions from the spectrum
-   
-  
-  SECTION: I/O Function (DataReader)
-  --------------------------------------------------
-  hFileSummary(dr)       - Print a brief summary of the file contents and 
-                           current settings.
-   
-  hFileOpen(Filename)    - Function to open a file based on a filename and 
-                           returning a datareader object.
-   
-  hFileGetParameter(dr, keyword) - Return information from a data file as a 
-                           Python object.
-   
-  hFileSetParameter(dr, keyword, pyob) - Set parameters in a data file with a 
-                           Python object as input.
-   
-  hFileRead(dr, Datatype, vec) - Read data from a Datareader object (pointer in 
-                           iptr) into a vector, where the size should be 
-                           pre-allocated.
-   
-  hCalTable(filename, keyword, date, pyob) - Return a list of antenna positions 
-                           from the CalTables - this is a test.
-   
-  hCalTableVector(filename, keyword, date, pyob) - Return a list of antenna 
-                           calibration values from the CalTables as a float 
-                           vector.
-   
-  hWriteDump(vec, filename) - Dump a single vector to a file in binary format 
-                           (machine dependent)
-   
-  hReadDump(vec, filename) - Read a single vector from a file which was dumped 
-                           in binary format
-   
-  
-  SECTION: Coordinate Conversion (VectorConversion.cc)
-  --------------------------------------------------
-  hCoordinateConvert(source, sourceCoordinate, target, targetCoordinate, 
-                           anglesInDegrees) - Converts a 3D spatial vector into 
-                           a different Coordinate type (e.g. Spherical to 
-                           Cartesian).
-   
-  hReadFileOld(vec, iptr, Datatype, Antenna, Blocksize, Block, Stride, Shift) - 
-                           Read data from a Datareader object (pointer in iptr) 
-                           into a vector.
-   
-  
 

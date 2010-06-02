@@ -1987,7 +1987,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vecout)()("Vector containing a copy of the input values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vecin)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecin)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   vec1.copy(vec2) -> copy elements of vec2 to vec1
@@ -2009,7 +2009,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   Iterin itin(vecin);
   if (itin >= vecin_end) return;
   while (itout != vecout_end) {
-    *itout=*itin;
+    *itout=hfcast<T>(*itin);
     ++itin; ++itout;
     if (itin==vecin_end) itin=vecin;
   };
@@ -2270,6 +2270,68 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
     ++it;
   };
   return val;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Return the position of the maximum value in a vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMaxPos
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  vec.maxpos() -> i # position of maximum value
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
+{
+  Iter it(vec);
+  IterValueType val=*it;
+  HInteger i(0),ipos(0);
+  while (it!=vec_end) {
+    if (*it > val) {
+      val=*it;
+      ipos=i;
+    };
+    ++it;++i;
+  };
+  return ipos;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Return the position of the minimum value in a vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMinPos
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  vec.maxpos() -> i # position of maximum value
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
+{
+  Iter it(vec);
+  IterValueType val=*it;
+  HInteger i(0),ipos(0);
+  while (it!=vec_end) {
+    if (*it < val) {
+      val=*it;
+      ipos=i;
+    };
+    ++it;++i;
+  };
+  return ipos;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -2702,14 +2764,14 @@ void  HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
  calculation will simply stop.
 
  Relation to Cross Correlation:
- ------------------------------
+
  If the complex input vectors are the Fourier transformed data of two
  (real) vector f1 & f2, then vec1*conj(vec2) will be the Fourier
  transform of the crosscorrelation between f1 and f2.
 
  Hence, in order to calculate a cross correlation between f1 & f2, first do
- f1.fft(vec1) and f2.fft(vec2), then vec1.crosscorrelatecomplex(vec2)
- and FFT back through vec1.invfft(floatvec).
+ vec1.fft(f1) and vec2.fft(f2), then vec1.crosscorrelatecomplex(vec2)
+ and FFT back through floatvec.invfft(vec1).
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec2_end)
@@ -4968,7 +5030,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //-----------------------------------------------------------------------
-//$DOCSTRING: Apply a backward FFT on a complex vector and return it in a second
+//$DOCSTRING: Apply a backward FFT on a complex vector and return it in a second (scrambles input vector)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hInvFFTw
 //-----------------------------------------------------------------------
@@ -5011,6 +5073,116 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   p = fftw_plan_dft_1d(N, (fftw_complex*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_BACKWARD, FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Apply a backward FFT on a complex vector and return it properly scaled and without scrambling the input vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSaveInvFFTw
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(data_out)()("Return vector in which the FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(data_in)()("Complex Input vector to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+
+  outvec.fftw(invec) -> return backward FFT of invec in outvec
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf
+
+  This inverse fft will preserve the input (at the cost of
+  performance, compared to the pure hInvFFTw). It will also swap the
+  data back if it was previously swapped by hNyquistSwap (no swap if
+  NyquistZone=0) and multiply with the correct normalisation factor
+  (1/N).
+
+  The DFT results are stored in-order in the array out, with the
+  zero-frequency (DC) component in data_out[0].
+
+See also: hFFTw, hInvFFTw
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
+		    const Iter data_in,  const Iter data_in_end,
+		    const HInteger nyquistZone)
+{
+  int N(data_in_end - data_in);
+  int Nout(data_out_end - data_out);
+  if (N!=Nout) {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) <<": input and output vector have different sizes! N=" << N << " Nout=" << Nout);
+    return;
+  };
+  fftw_plan p;
+  vector<IterValueType> scratchfft(N);
+  hCopy(scratchfft.begin(),scratchfft.end(), data_in,  data_in_end);
+  hNyquistSwap(scratchfft,nyquistZone);
+  p = fftw_plan_dft_1d(N, (fftw_complex*) &scratchfft[0], (fftw_complex*) &(*data_out), FFTW_BACKWARD, FFTW_ESTIMATE);
+  fftw_execute(p); /* repeat as needed */
+  hDiv2(data_out,data_out_end,(IterValueType)N);
+  fftw_destroy_plan(p);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Apply a complex-to-real (inverse) FFT using fftw3 and return it properly scaled and without scrambling the input vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSaveInvFFTw
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(data_out)()("Return vector of N real elements in which the inverse FFT (DFT) transformed data is stored. ")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(data_in)()("Complex input vector of The length is N/2+1 elements to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+
+  outvec.fftw(invec) -> return backward FFT of invec in outvec
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf
+
+  This inverse fft will preserve the input (at the cost of
+  performance, compared to the pure hInvFFTw). It will also swap the
+  data back if it was previously swapped by hNyquistSwap (no swap if
+  NyquistZone=0) and multiply with the correct normalisation factor
+  (1/N).
+
+  The DFT results are stored in-order in the array out, with the
+  zero-frequency (DC) component in data_out[0].
+
+See also: hFFTw, hInvFFTw
+
+*/
+template <class IterOut,class Iter>
+void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
+		    const Iter  data_in,  const Iter  data_in_end,
+		    const HInteger nyquistZone)
+{
+  int Nin(data_in_end - data_in);
+  int N(data_out_end - data_out);
+  if (Nin != (N/2+1)) {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": input and output vector have wrong sizes! N(out)=" << N  << " N(in)=" << Nin<< " (should be = " << N/2+1 << ")");
+    return;
+  };
+
+  vector<IterValueType> scratchfft(N);
+  hCopy(scratchfft.begin(),scratchfft.end(), data_in,  data_in_end);
+  hNyquistSwap(scratchfft,nyquistZone);
+
+  fftw_plan p;
+  p = fftw_plan_dft_c2r_1d(N, (fftw_complex*) &(scratchfft[0]), (double*) &(*data_out), FFTW_ESTIMATE);
+  fftw_execute(p); /* repeat as needed */
+  fftw_destroy_plan(p);
+  hDiv2(data_out,data_out_end,(HNumber)N);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -5128,7 +5300,7 @@ template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 		    const HInteger nyquistZone)
 {
-  if (hfodd(nyquistZone)) return;
+  if (hfodd(nyquistZone) || (nyquistZone==0)) return;
   Iter it1(vec),it2(vec_end-1);
   HComplex tmp;
   while (it2 >= it1) {
@@ -6177,9 +6349,9 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 // --- Reading data from the headerrecord in a vector ---
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key== #KEY) || (key2== #KEY)) {_H_NL_ CasaVector<TYPE> casavec;  _H_NL_ drp->headerRecord().get(#KEY,casavec); _H_NL_ std::vector<TYPE2> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
     HFPP_REPEAT(int,HInteger,AntennaIDs)
-    HFPP_REPEAT(int,HInteger,SAMPLE_OFFSET)
-    HFPP_REPEAT(uint,HInteger,SAMPLE_NUMBER)
-    HFPP_REPEAT(uint,HInteger,TIME)
+      //    HFPP_REPEAT(int,HInteger,SAMPLE_OFFSET)
+      //    HFPP_REPEAT(uint,HInteger,SAMPLE_NUMBER)
+      //    HFPP_REPEAT(uint,HInteger,TIME)
     { HString result; result = result
 #undef HFPP_REPEAT
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
@@ -6214,9 +6386,9 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
     HFPP_REPEAT(casa::uChar,uint,SampleFreq)
     HFPP_REPEAT(uint,uint,StartSample)
     HFPP_REPEAT(int,HInteger,AntennaIDs)
-    HFPP_REPEAT(int,HInteger,SAMPLE_OFFSET)
-    HFPP_REPEAT(uint,HInteger,SAMPLE_NUMBER)
-    HFPP_REPEAT(uint,HInteger,TIME)
+			//    HFPP_REPEAT(int,HInteger,SAMPLE_OFFSET)
+			//    HFPP_REPEAT(uint,HInteger,SAMPLE_NUMBER)
+			//    HFPP_REPEAT(uint,HInteger,TIME)
 //------------------------------------------------------------------------
 #undef HFPP_REPEAT
 		     + "keywords, help";

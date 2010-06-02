@@ -4,7 +4,7 @@ BEGIN{
     LINE=0;
     SECTION1=0; TOC=""; 
     input = "prettypy.inp"
-    process="/sw/bin/python2.6 -u -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pycrtools.py > prettypy.tmp"
+    process="/sw/bin/python2.6 -u -i $LOFARSOFT/src/CR-Tools/implement/Pypeline/modules/pycrtools.py > prettypy.tmp"
 }
 
 

@@ -53,10 +53,11 @@ Time value arrays.
 cr_time=cr["Time"].setUnit("\\mu","s")
 
 #ws["frequency"]=cr["Frequency"] 
-# Attention don't do this here when later using it in caluclating
+#Attention don't do this here when later using it in caluclating
 #phases that require seconds and Hz as units
 
-cr_efield=cr["Fx"].setPar("xvalues",cr_time)
+ws["efield"]=cr["Fx"].setPar("xvalues",cr_time)
+ws["efield_processed"] = hArray(properties=ws["efield"])
 """
 
 As a next step we create an empty vector to hold the Fourierspectrum
@@ -70,7 +71,7 @@ and then make the Fourier transform followed by a reordering of the
 output, noting that the data was taken in the second Nyquist domain
 
 """
-ws["fft"][...].fftw(cr_efield[...])
+ws["fft"][...].fftw(ws["efield"][...])
 ws["fft"][...].nyquistswap(cr["nyquistZone"])
 """
 Let's create a spectrum that we can plot:
@@ -94,11 +95,56 @@ ws["rfithreshold"] = (ws["meanrms"] * ws["rfi_nsigma"]) + ws["meanspec"]
 ws["nbad_channels"]=ws["bad_channels"][...].findgreaterthan(ws["spectrum"][...],ws["rfithreshold"])
 ws["fft"][...].set(ws["bad_channels"][...,[0]:ws["nbad_channels"]],ws["meanspec"])
 ws["spectrum"][...].set(ws["bad_channels"][...,[0]:ws["nbad_channels"]],ws["meanspec"])
-
 ws["spectrum"][0].plot(clf=False)
 raw_input("Plotted spectrum - press Enter to continue...")
 
+t1=cr_time.findlowerbound(-1.95).val()+3
+t2=t1+32
+
+#scrtfft=hArray(copy=ws["fft"])
+#scrtfft.nyquistswap(ws["datafile"]["nyquistZone"])
+#scrtfft /= ws["blocksize"]
+#ws["efield_processed"][...].invfftw(scrtfft[...])
+
+#ws["efield_processed"][...].saveinvfftw(ws["fft"][...],ws["datafile"]["nyquistZone"])
+ws["efield_processed"][...].invfftcasa(ws["fft"][...],ws["datafile"]["nyquistZone"])
+
+ws["efield_processed"][0:2,...,t1:t2].plot(xvalues=cr_time[t1:t2])
+ws["efield"][0:2,...,t1:t2].plot(xvalues=cr_time[t1:t2],clf=False)
+raw_input("Plotted inverse FFT - press Enter to continue...")
+
+
 """
+Now we do a cross-correlation and calculate a few time delays.
+
+First we calculate indices for intervals
+
+"""
+ws["timelags"]=ws["datafile"]["TimeLag"].setUnit("\\mu","")
+
+
+ws["crosscorr"]=hArray(float,[ws["nofAntennas"],(t2-t1)],name="Cross Correlation")
+ws["crosscorr_smooth"]=hArray(properties=ws["crosscorr"])
+
+ws["crosscorr_cmplx"]=hArray(complex,[ws["nofAntennas"],(t2-t1)/2+1])
+ws["crosscorr_cmplx"][...].fftcasa(ws["efield"][...,t1:t2],2)
+#ws["crosscorr_cmplx"][...].fftw(ws["efield_processed"][...,t1:t2])
+#ws["crosscorr_cmplx"][...].fftw(ws["efield"][...,t1:t2])
+ws["crosscorr_cmplx"][1:,...].crosscorrelatecomplex(ws["crosscorr_cmplx"][[0],...])
+ws["crosscorr_cmplx"][0].crosscorrelatecomplex(ws["crosscorr_cmplx"][0])
+#ws["crosscorr"][...].saveinvfftw(ws["crosscorr_cmplx"][...],1)
+ws["crosscorr"][...].invfftcasa(ws["crosscorr_cmplx"][...],2)
+ws["crosscorr"].abs()
+ws["crosscorr_smooth"].runningaverage(ws["crosscorr"],5,hWEIGHTS.GAUSSIAN) #or .FLAT)# .or LINEAR) # or .GAUSSIAN)
+maxpos=hArray(float,8)
+maxpos.vec().copy(ws["crosscorr_smooth"][...].maxpos())
+maxpos -= (t2-t1)/2
+maxpos *= 12.5/1000.
+
+ws["crosscorr_smooth"][...].plot()
+raw_input("Plotted cross-correlations - press Enter to continue...")
+"""
+
 
 
 (++) Coordinates
@@ -122,7 +168,7 @@ position from the antenna locations so that our phase center lies at
 """
 phase_center=hArray(cr_shower_core)
 antenna_positions -= phase_center
-""""
+"""
 
 Now we read in instrumental delays for each antenna in a similar way
 and store it for later use.
@@ -143,7 +189,7 @@ cal_delays=horneffer_delays
 p_("cal_delays")
 """
 
-Now let's look at the actual beam forming:
+Now let us look at the actual beam forming:
 
 We first turn the coordinates into a std vector and create a vector that is
 supposed to hold the Cartesian coordinates. Note that the AzEL vector
@@ -205,14 +251,14 @@ Convert back into time domain
 
 """
 
-cr_efield_shifted = cr["emptyFx"].setPar("xvalues",cr_time)
+ws["efield_shifted"] = cr["emptyFx"].setPar("xvalues",cr_time)
 
 """
 However, before FFTing we need to swap the FFT back, to take account of possibly different Nyquistzones
 
 """
 cr_calfft_shifted[...].nyquistswap(cr["nyquistZone"])
-cr_efield_shifted[...].invfftw(cr_calfft_shifted[...]) # is being destroyed here ....
+ws["efield_shifted"][...].invfftw(cr_calfft_shifted[...]) # is being destroyed here ....
 
 
 """
@@ -222,44 +268,44 @@ does not display the things that are outside the plotting window -
 this is very slow with 8x65000 points.
 
 """
-t1=cr_time.findlowerbound(-2.0)
-t2=cr_time.findlowerbound(-1.0)
+tb1=cr_time.findlowerbound(-2.0)
+tb2=cr_time.findlowerbound(-1.0)
 
-cr_efield_shifted[...,t1:t2].plot(xlim=(-1.95,-1.65),xvalues=cr_time[t1:t2],legend=antennalist)
+ws["efield_shifted"][...,tb1:tb2].plot(xlim=(-1.95,-1.65),xvalues=cr_time[tb1:tb2],legend=antennalist)
 plt.savefig("cr_efields.pdf")
 raw_input("Plotted shifted efields - press Enter to continue...")
 
-#cr_efield_shifted[antennalist,...].plot(xlim=(-1.95,-1.6),legend=antennalist)
+#ws["efield_shifted"][antennalist,...].plot(xlim=(-1.95,-1.6),legend=antennalist)
 #raw_input("Plotted not flagged antennas - press Enter to continue...")
 
 
 """
 The beamforming we here do by simply adding the data in the time domain 
 """
-cr_efield_shifted_added=hArray(float,dimensions=cr_time,name="beamformed E-field",xvalues=cr_time)
-cr_efield_shifted[antennalist,...].addto(cr_efield_shifted_added)
-cr_efield_shifted_added /= ws["datafile"]["nofAntennas"] #normalize
+ws["efield_shifted_added"]=hArray(float,dimensions=cr_time,name="beamformed E-field",xvalues=cr_time)
+ws["efield_shifted"][antennalist,...].addto(ws["efield_shifted_added"])
+ws["efield_shifted_added"] /= ws["datafile"]["nofAntennas"] #normalize
 
 """
 Finally, we produce a nice, smoothed data curve: first taking the abs
 and then using running average.
 """
 
-cr_efield_shifted_added_abs=hArray(copy=cr_efield_shifted_added,xvalues=cr_time)
-cr_efield_shifted_added_abs.abs()
-cr_efield_shifted_added_smoothed=hArray(float,dimensions=[cr.blocksize],xvalues=cr_time,name="E-Field")
-cr_efield_shifted_added_smoothed.runningaverage(cr_efield_shifted_added_abs,2,hWEIGHTS.GAUSSIAN) #or .FLAT)# .or LINEAR) # or .GAUSSIAN)
-cr_efield_shifted_added_smoothed[t1:t2].plot(xlim=(-2,-1),title=cr.filename,xvalues=cr_time[t1:t2],clf=False)
+ws["efield_shifted_added_abs"]=hArray(copy=ws["efield_shifted_added"],xvalues=cr_time)
+ws["efield_shifted_added_abs"].abs()
+ws["efield_shifted_added_smoothed"]=hArray(float,dimensions=[cr.blocksize],xvalues=cr_time,name="E-Field")
+ws["efield_shifted_added_smoothed"].runningaverage(ws["efield_shifted_added_abs"],2,hWEIGHTS.GAUSSIAN) #or .FLAT)# .or LINEAR) # or .GAUSSIAN)
+ws["efield_shifted_added_smoothed"][tb1:tb2].plot(xlim=(-2,-1),title=cr.filename,xvalues=cr_time[tb1:tb2],clf=False)
 raw_input("Overplotted smoothed beamformed pulse - press Enter to continue...")
 
 
-cr_efield_shifted_added_abs[t1:t2].plot(xlim=(-2,-1),xvalues=cr_time[t1:t2],title=cr.filename,clf=True)
-cr_efield_shifted_added_smoothed[t1:t2].plot(xlim=(-2,-1),xvalues=cr_time[t1:t2],title=cr.filename,clf=False)
+ws["efield_shifted_added_abs"][tb1:tb2].plot(xlim=(-2,-1),xvalues=cr_time[tb1:tb2],title=cr.filename,clf=True)
+ws["efield_shifted_added_smoothed"][tb1:tb2].plot(xlim=(-2,-1),xvalues=cr_time[tb1:tb2],title=cr.filename,clf=False)
 plt.savefig("cr_pulse_zoom.pdf")
 raw_input("Plotted final pulse - press Enter to continue...")
 
-cr_efield_shifted_added_abs.plot(xlim=(-400,400),title=cr.filename,clf=True)
-cr_efield_shifted_added_smoothed.plot(xlim=(-400,400),title=cr.filename,clf=False)
+ws["efield_shifted_added_abs"].plot(xlim=(-400,400),title=cr.filename,clf=True)
+ws["efield_shifted_added_smoothed"].plot(xlim=(-400,400),title=cr.filename,clf=False)
 plt.savefig("cr_pulse.pdf")
 
 #Voila ...

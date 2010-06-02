@@ -1,0 +1,4 @@
+2010-06-01:  
+- added convenience function hInvFFTwSave to do a save fft (hftools.cc, testcr2.py)
+- added hMinPos, hMaxPos - returning position of maxium or minimum (hftools.cc,testcr2.py)
+- added calculation of time delays with cross-correlation from CR data (testcr2.py)
