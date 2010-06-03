@@ -1,6 +1,6 @@
 from pycrtools import *
 import numpy as np
-#import scipy as sp
+import scipy as sp
 import matplotlib.pyplot as plt
 
 def p_(var):
@@ -20,9 +20,12 @@ Set some parameters "by hand", such as:
 
 """
 filename=LOFARSOFT+"/data/lofar/trigger-2010-04-15/triggered-pulse-2010-04-15-RS205.h5"
+#filename="/mnt/lofar/tbb-trigger/2010-04-15/2010-04-15-coinc-test-5.h5"
 stationname="RS205"
 phase_center_in=[0., 0., 0.]
-def_pointing=[245., 12.5, 200.]
+#def_pointing=[245., 12.5, 200.]
+def_pointing=[244.85443557,    5.05774074,  140.21299066]
+#def_pointing=[240., 10., 10000.]
 FarField=False
 
 #------------------------------------------------------------------------
@@ -144,14 +147,16 @@ supposed to hold the Cartesian coordinates. Note that the AzEL vector
 is actually AzElRadius.
 
 """
-azel=hArray(def_pointing,dimensions=[1,3])
+azel=hArray(def_pointing,dimensions=[3])
+#azel=hArray([273.065822226,0.000386116015784,277.445181122],dimensions=[1,3])
+p_("azel")
 cartesian=azel.new()
 """
 
 We then do the conversion, using
 
 """
-hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],CoordinateTypes.Cartesian,True)
+hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
 """
 
 Then calculate geometric delays and add the instrumental delays.
@@ -215,11 +220,11 @@ t2=cr_time.findlowerbound(329.0)
 t1w=cr_time.findlowerbound(328.0-5.)
 t2w=cr_time.findlowerbound(329.0+5.)
 
-cr_efield[1,t1:t2].plot(xvalues=cr_time[t1:t2])
-for ant in range(3,96,2):
-  cr_efield[ant,t1:t2].plot(xvalues=cr_time[t1:t2],clf=False)
-raw_input("Plotted unshifted timeseries - press Enter to continue...")
-
+#cr_efield[1,t1:t2].plot(xvalues=cr_time[t1:t2])
+#for ant in range(3,96,2):
+#  cr_efield[ant,t1:t2].plot(xvalues=cr_time[t1:t2],clf=False)
+#raw_input("Plotted unshifted timeseries - press Enter to continue...")
+#
 cr_efield_shifted[1,t1:t2].plot(xvalues=cr_time[t1:t2])
 for ant in range(3,96,2):
   cr_efield_shifted[ant,t1:t2].plot(xvalues=cr_time[t1:t2],clf=False)
@@ -256,3 +261,66 @@ cr_efield_shifted_added_abs.abs()
 cr_efield_abs_added[t1w:t2w].plot(xvalues=cr_time[t1w:t2w])
 cr_efield_abs_shifted_added[t1w:t2w].plot(xvalues=cr_time[t1w:t2w],clf=False)
 cr_efield_shifted_added_abs[t1w:t2w].plot(xvalues=cr_time[t1w:t2w],clf=False)
+raw_input("Plotted beamformed-array - press Enter to continue...")
+
+
+"""
+(++) Position Fit
+---------------
+"""
+cr_calfft_all=hArray(copy=ws["fft"])
+cr_efield_all = cr["emptyFx"].setPar("xvalues",cr_time)
+cr_efield_all[...].invfftw(cr_calfft_all[...]) # is being destroyed here ....
+cr_efield_all /= cr["blocksize"]
+
+myblocksize=512
+ant_indices = range(1,96,2)
+
+myfftsize = myblocksize/2+1
+cr["blocksize"] = myblocksize
+
+cr_efield_sel=hArray(float,dimensions=[ws["nofAntennas"],myblocksize])
+cr_efield_sel[...] = cr_efield_all[...,(128*512):(128*512+myblocksize)]
+
+cr_fft_sel=hArray(complex,dimensions=[ws["nofAntennas"],myfftsize])
+cr_fft_sel[...].fftw(cr_efield_sel[...])
+
+#azel=hArray(float,dimensions=[3])
+#cartesian=azel.new()
+delays=hArray(float,dimensions=[ws["nofAntennas"]])
+weights=hArray(complex,dimensions=cr_fft_sel)
+phases=hArray(float,dimensions=cr_fft_sel) 
+shifted_fft=hArray(complex,dimensions=[ws["nofAntennas"],myfftsize])
+beamformed_fft=hArray(complex,dimensions=[myfftsize])
+beamformed_efield=hArray(float,dimensions=[myblocksize])
+beamformed_efield_smoothed=hArray(float,dimensions=[myblocksize])
+frequencies = hArray(cr["frequencyValues"])
+
+def beamform_function(azel_in):
+    if ( azel_in[0] > 360. or azel_in[0] < 0. or azel_in[1] > 90. or azel_in[1] < 0.):
+        erg = 0.
+    else:
+        azel[0] = azel_in[0]
+        azel[1] = azel_in[1]
+        azel[2] = azel_in[2]
+        hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
+        hGeometricDelays(delays,antenna_positions,cartesian,False)   
+        hDelayToPhase(phases,frequencies,delays)
+        hPhaseToComplex(weights,phases)
+        shifted_fft=hArray(complex,dimensions=[ws["nofAntennas"],myfftsize])
+        shifted_fft.copy(cr_fft_sel)
+        shifted_fft *= weights
+        beamformed_fft = shifted_fft[ant_indices[0]]
+        for n in ant_indices[1:]:
+            shifted_fft[n].addto(beamformed_fft)
+        hInvFFTw(beamformed_efield,beamformed_fft)
+        beamformed_efield.abs()
+        hRunningAverage(beamformed_efield_smoothed, beamformed_efield, 5, hWEIGHTS.GAUSSIAN)
+        #erg = -(beamformed_efield_smoothed.max()[0])/myblocksize
+        erg = -(beamformed_efield_smoothed.sum()[0])/myblocksize
+        #plt.plot(beamformed_efield_smoothed.vec())
+    print "beamform_function azel:", azel_in, " result:", erg
+    return erg
+
+from scipy.optimize import fmin
+xopt = fmin(beamform_function, def_pointing, xtol=1e-2, ftol=1e-4)
