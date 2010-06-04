@@ -58,7 +58,7 @@ using CR::CalTableReader;
 // date --date='2008-12-19 00:02:00 UTC' +%s
 const unsigned int AERA_test_start=1269561600;
 const unsigned int AERA_test_end=1270857600;
-const unsigned int LOPES_3D_start=1268956800;
+const unsigned int LOPES_3D_start= 1268956800;
 const unsigned int LOPES10_start = 978350400; // Mo Jan  1 12:00:00 UTC 2001
 const unsigned int LOPES30_start = 1104580800; //Sa Jan  1 12:00:00 UTC 2005 
 // Antenna 27, 29 and 30 are moved to NS
@@ -2016,6 +2016,135 @@ void writeElGainCal(void)
 
 
 
+void writeLOPES3DGain(void)
+{
+const string path = "/home/huber/LOPES3DCAL/gain/";
+const string files[] = {"xrichtighor.txt", "xrichtigvert.txt", "xrichtigtot.txt","yrichtighor.txt", "yrichtigvert.txt", "yrichtigtot.txt","zrichtighor.txt", "zrichtigvert.txt", "zrichtigtot.txt"};
+  // construct casacore Vectors with frequency values:
+  // first create array, secondly a stl-vector and then a casacore Vector
+ double freqAxis[] =  {4e+07, 4.2e+07, 4.4e+07, 4.6e+07, 4.8e+07, 5e+07, 5.2e+07, 5.4e+07, 5.6e+07, 5.8e+07, 6e+07, 6.2e+07, 6.4e+07, 6.6e+07, 6.8e+07, 7e+07, 7.2e+07, 7.4e+07, 7.6e+07, 7.8e+07, 8e+07};
+unsigned int Nfreqs = sizeof(freqAxis)/sizeof(freqAxis[0]);
+Vector<double> ElGainCalFreq(vector<double> (freqAxis,freqAxis+Nfreqs));
+
+double ElAxis[] =  {-90 , -85 , -80 , -75 , -70 , -65 , -60 , -55 , -50 , -45 , -40 , -35 , -30 , -25 , -20 , -15 , -10 , -5 , 0 , 5 , 10 , 15 , 20 , 25 , 30 , 35 , 40 , 45 , 50 , 55 , 60 , 65 , 70 , 75 , 80 , 85 , 90 };
+unsigned int NEl = sizeof(ElAxis)/sizeof(ElAxis[0]);
+Vector<double> Elaxis(vector<double> (ElAxis,ElAxis+NEl));
+
+double AzAxis[] =  {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 305, 310, 315, 320, 325, 330, 335, 340, 345, 350, 355, 360 };
+unsigned int NAz = sizeof(AzAxis)/sizeof(AzAxis[0]);
+Vector<double> Azaxis(vector<double> (AzAxis,AzAxis+NAz));
+IPosition Cgain(3,21,73,37);
+Array<double> ElGainCal(Cgain);
+ifstream infile;
+double  gain[21];
+
+    // It is neccessary to write the Delay again, as the other fields
+    // are junior fields an cannot be written alone
+    Double old_delay = 0.;
+    for (int z = MAX_Antennas-1; z >= 0; z--) {
+    if (!reader.GetData(LOPES_3D_start, antennaIDs[z], "Delay", &old_delay)) {
+      cerr << "Error while reading field: Delay" << endl;
+    } else {
+	cout << "Old Delay: "<< old_delay << endl;
+        if (!writer.AddData(old_delay,antennaIDs[z],"Delay",LOPES_3D_start) )
+         cerr << "\nERROR while writing field: Delay" << endl;
+
+        cout << "Writing frequency axes for LOPES 3D 2010: " << antennaIDs[z] << endl;
+                if (!writer.AddData(ElGainCalFreq,antennaIDs[z],"AntennaGainFaktFreq",LOPES_3D_start) )
+                cerr << "\nERROR while writing field: AntennaGainFaktFreq" << endl;
+
+        cout << "Writing Azigain axes for LOPES 3D 2010: " << antennaIDs[z] << endl;
+                if (!writer.AddData(Azaxis,antennaIDs[z],"AntennaGainFaktAz",LOPES_3D_start) )
+                cerr << "\nERROR while writing field: AntennaGainFaktAz" << endl;
+
+        cout << "Writing Elgain axes for LOPES 3D 2010: " << antennaIDs[z] << endl;
+                if (!writer.AddData(Elaxis,antennaIDs[z],"AntennaGainFaktEl",LOPES_3D_start) )
+                cerr << "\nERROR while writing field: AntennaGainFaktEl" << endl;
+
+        }
+      }
+istringstream iss;
+string line;
+iss >> skipws;
+
+ for (int o =0; o<9; o++ ){
+         for (int i = 0; i < MAX_Antennas; i++) {
+
+
+    // Add the value for all antennas
+    infile.open(string(path+files[o]).c_str(), ifstream::in);
+
+    // check if file could be opened
+    if (!(infile.is_open())) {
+      cerr << "Failed to open file \"" << path+files[o] <<"\"." << endl;
+      return;
+    }
+
+   int az = 0;
+   int el = 0;
+        while (getline(infile, line)) {
+        iss.clear();
+        iss.str(line);
+        // read in the simulatetd gain values from external file
+        iss >> gain[0] >> gain[1] >>gain[2] >>gain[3] >>gain[4] >>gain[5] >>gain[6] >>gain[7] >>gain[8] >>gain[9] >>gain[10] >>gain[11] >>gain[12] >>gain[13] >>gain[14] >>gain[15] >>gain[16] >>gain[17] >>gain[18] >>gain[19] >>gain[20] ;
+
+                // writing values in casacore vector 
+                for (  int u =0; u<=20; u++ ){
+                ElGainCal(IPosition(3,u,az,el))=gain[u];
+                }
+                if (az >= 72){ az = -1; el++;}
+                az ++;
+        }
+    infile.close();
+
+// writing in the Caltlable
+//vert gain             
+if ( ( o == 1         /* xldd  */
+  && (i == 0 || i == 2 ||  i == 4 || i == 5 ||  i == 10 ||  i == 12 || i == 15 || i == 20 ||  i == 21 || i == 23 ) )||
+
+    ( o == 4             /* yldd   */
+  && (i == 1 || i == 3 || i == 6 || i == 11 ||  i == 14 ||  i == 16 || i == 18 || i == 22 ||  i == 24 || i == 28) ) ||
+
+   ( o == 7              /* zldd   */
+ && (i == 7 || i == 8 ||  i == 9 ||  i == 13 ||  i == 17 ||  i == 19 || i == 25 ||  i == 26 ||  i == 27 || i == 29) ) ){
+ if (!writer.AddData(ElGainCal,antennaIDs[i],"AntennaAziGain",LOPES_3D_start) )
+      cerr << "\nERROR while writing field: AntennaAziGain"  << endl;
+cout << "File: " << path+files[o]   << " is used for  Antenna: " << i+1 << " with AntennaID: "   << antennaIDs[i] << endl;}
+
+// hor gain
+if( ( o == 0        /* xldd  */
+  && (i == 0 || i == 2 ||  i == 4 || i == 5 ||  i == 10 ||  i == 12 || i == 15 || i == 20 ||  i == 21 || i == 23 ) )||
+
+    ( o == 3         /* yldd   */
+  && (i == 1 || i == 3 || i == 6 || i == 11 ||  i == 14 ||  i == 16 || i == 18 || i == 22 ||  i == 24 || i == 28) ) ||
+
+    ( o == 6           /* zldd   */
+ && (i == 7 || i == 8 ||  i == 9 ||  i == 13 ||  i == 17 ||  i == 19 || i == 25 ||  i == 26 ||  i == 27 || i == 29) ) ){
+if (!writer.AddData(ElGainCal,antennaIDs[i],"AntennaZeniGain",LOPES_3D_start) )
+      cerr << "\nERROR while writing field: AntennaZeniGain" << ElGainCal << endl;
+cout << "File: " << path+files[o]   << " is used for  Antenna: " << i+1 << " with AntennaID: "   << antennaIDs[i] << endl;}
+
+// tot gain
+if ( ( o == 2          /* xldd  */
+  && (i == 0 || i == 2 ||  i == 4 || i == 5 ||  i == 10 ||  i == 12 || i == 15 || i == 20 ||  i == 21 || i == 23 ) )||
+
+     ( o == 5          /* yldd   */
+  && (i == 1 || i == 3 || i == 6 || i == 11 ||  i == 14 ||  i == 16 || i == 18 || i == 22 ||  i == 24 || i == 28) ) ||
+
+     ( o == 8          /* zldd   */
+ && (i == 7 || i == 8 ||  i == 9 ||  i == 13 ||  i == 17 ||  i == 19 || i == 25 ||  i == 26 ||  i == 27 || i == 29) ) ){
+ if (!writer.AddData(ElGainCal,antennaIDs[i],"AntennaGainFaktor",LOPES_3D_start) )
+      cerr << "\nERROR while writing field: AntennaGainFaktor"  << endl;
+cout << "File: " << path+files[o]   << " is used for  Antenna: " << i+1 << " with AntennaID: "   << antennaIDs[i] << endl;}
+
+
+        }
+ }
+cout << "Writing gainpattern  finished  ";
+}
+
+
+
 
 
 void writeLOPES3Drefphsases(void)
@@ -2324,7 +2453,7 @@ int main (int argc, char *argv[])
     // Changes to Delay-Table , allready checked in
     //writeDelays();
 
-    writeElGainCal();
+    //writeElGainCal();
     
     // Rewrite field for variable reference antenna
     //addRefAntField(true); // set to true to also create the field
@@ -2348,13 +2477,13 @@ int main (int argc, char *argv[])
 
     // add field "Active" to store information, when an antenna had problems
     //  addActiveField(true);                // checked in
-    writeBadPeriods();                // checked in
-    Lopes3D_HWSetup();
-    writeLOPES3Drefphsases();
-    write_LOPES_3D_Delays();
+    // writeBadPeriods();                // checked in
+    // Lopes3D_HWSetup();   // checked in
+    // writeLOPES3Drefphsases();   // checked in
+    // write_LOPES_3D_Delays();   // checked in
     // writeTripoleDelays();        // checked in
     // writeTripolePositions();  // checked in
-
+    writeLOPES3DGain();
     // writeSallaplusdipolDelays();
     // writeSallaplusdipolPositions(); 
     
