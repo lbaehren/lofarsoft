@@ -30,6 +30,8 @@ class dppp(LOFARnode):
             # is initialised for DPPP run
             create_directory(log_location)
             env = read_initscript(initscript)
+            # Limit number of threads, per request from GvD
+            env['OMP_NUM_THREADS'] = "1"
 
             # If the input and output filenames are the same, DPPP should not
             # write a new MS, but rather update the existing one in-place.
