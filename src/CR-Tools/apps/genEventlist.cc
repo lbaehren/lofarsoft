@@ -206,6 +206,8 @@ int main(int argc, char* argv[])
 
   // variables to read in
   string cut_str(""), fn2005(""), fn2006(""), fn2007(""), fn2008(""), fn2009(""), fn2010(""), namebase="eventlist";
+  int openInputFile = 0; // is set to the year of the input eventlist file currently open.
+  int lastSuccessfulSeek = 0; // use this seek to jump in file and allow faster reading
   string ef2006(""), ef2007(""), ef2008(""), ef2009(""), ef2010(""); // electric field data
   int openEfieldFile = 0; // is set to the year of the efield file currently open.
   ifstream finEfield;
@@ -495,20 +497,60 @@ int main(int argc, char* argv[])
     gtstring = tstr;
     
     // Looking for filenames in eventlists **********************************************************
-    if( Gt >= 1104537600 && Gt < 1136073600 ) //Jahr 2005
-      fin.open(fn2005.c_str(), ios::in);
-    else if( Gt >= 1136073600 && Gt < 1167609600 ) //Jahr 2006
-      fin.open(fn2006.c_str(), ios::in);
-    else if( Gt >= 1167609600 && Gt < 1199145600 ) //Jahr 2007
-      fin.open(fn2007.c_str(), ios::in);
-    else if ( Gt >= 1199145600 && Gt < 1230768000 ) //Jahr 2008
-      fin.open(fn2008.c_str(), ios::in);
-    else if ( Gt >= 1230768000  && Gt < 1262390400 ) //Jahr 2009
-      fin.open(fn2009.c_str(), ios::in);
-    else if ( Gt >= 1262390400  && Gt <1293926400 ) //Jahr 2010
-      fin.open(fn2010.c_str(), ios::in);
-    else {
-      cerr<<"Not in timerange of 2005 to 2009. Skipping event...\n";
+    if( Gt >= 1104537600 && Gt < 1136073600 ) { //Jahr 2005
+      if (openInputFile != 2005) {
+        if (fin.is_open())
+          fin.close();
+        fin.open(fn2005.c_str(), ios::in);
+        openInputFile = 2005;
+        lastSuccessfulSeek = 0;
+      }  
+    } else if( Gt >= 1136073600 && Gt < 1167609600 ) { //Jahr 2006
+      if (openInputFile != 2006) {
+        if (fin.is_open())
+          fin.close();
+        fin.open(fn2006.c_str(), ios::in);
+        openInputFile = 2006;
+        lastSuccessfulSeek = 0;
+      }  
+    } else if( Gt >= 1167609600 && Gt < 1199145600 ) { //Jahr 2007
+      if (openInputFile != 2007) {
+        if (fin.is_open())
+          fin.close();
+        fin.open(fn2007.c_str(), ios::in);
+        openInputFile = 2007;
+        lastSuccessfulSeek = 0;
+      }  
+    } else if ( Gt >= 1199145600 && Gt < 1230768000 ) { //Jahr 2008
+      if (openInputFile != 2008) {
+        if (fin.is_open())
+          fin.close();
+        fin.open(fn2008.c_str(), ios::in);
+        openInputFile = 2008;
+        lastSuccessfulSeek = 0;
+      }  
+    } else if ( Gt >= 1230768000  && Gt < 1262390400 ) { //Jahr 2009
+      if (openInputFile != 2009) {
+        if (fin.is_open())
+          fin.close();
+        fin.open(fn2009.c_str(), ios::in);
+        openInputFile = 2009;
+        lastSuccessfulSeek = 0;
+      }  
+    } else if ( Gt >= 1262390400  && Gt <1293926400 ) { //Jahr 2010
+      if (openInputFile != 2010) {
+        if (fin.is_open())
+          fin.close();
+        fin.open(fn2010.c_str(), ios::in);
+        openInputFile = 2010;
+        lastSuccessfulSeek = 0;
+      }  
+    } else {
+      cerr<<"Not in timerange of 2005 to 2010. Skipping event...\n";
+      openInputFile = 0;
+      lastSuccessfulSeek = 0;
+      if (fin.is_open())
+        fin.close();
       continue;
     }
 
@@ -526,18 +568,21 @@ int main(int argc, char* argv[])
     temp[0] = tstr[8]; temp[1] = tstr[9];
     day = string(temp);
     
+    // start search at position of last hit
     fin.clear();
-    fin.seekg (0, ios::beg);
+    fin.seekg(lastSuccessfulSeek, ios::beg);
+    
     //cout << "Looking for event: " << gtstring << endl;
 
     while(fin>>buf) {
       if(buf.find(gtstring)!=string::npos) {
         gtstring=buf;
         found=1;
+        lastSuccessfulSeek = fin.tellg();        
         break;
       }
     }
-    fin.close();
+    
     if (!found) {
       cout << "Event: " << gtstring << "*.event could not be found in input eventlist." << endl;
       continue;
@@ -703,26 +748,36 @@ int main(int argc, char* argv[])
     // reliable e-field information starts at GT 1156415575 (Do 24. Aug 10:32:55 UTC 2006)
     if( Gt > 1156415575 && Gt < 1167609600 ) { //Jahr 2006
       if (openEfieldFile != 2006) {
+        if (finEfield.is_open())
+          finEfield.close();
         finEfield.open(ef2006.c_str(), ios::in);
         openEfieldFile = 2006;
       }  
     } else if( Gt >= 1167609600 && Gt < 1199145600 ) { //Jahr 2007
       if (openEfieldFile != 2007) {
+        if (finEfield.is_open())
+          finEfield.close();
         finEfield.open(ef2007.c_str(), ios::in);
         openEfieldFile = 2007;
       }  
     } else if ( Gt >= 1199145600 && Gt < 1230768000 ) { //Jahr 2008
       if (openEfieldFile != 2008) {
+        if (finEfield.is_open())
+          finEfield.close();
         finEfield.open(ef2008.c_str(), ios::in);
         openEfieldFile = 2008;
       }          
     } else if ( Gt >= 1230768000  && Gt < 1262390400 ) { //Jahr 2009
       if (openEfieldFile != 2009) {
+        if (finEfield.is_open())
+          finEfield.close();
         finEfield.open(ef2009.c_str(), ios::in);
         openEfieldFile = 2009;
       }  
     } else if ( Gt >= 1262390400  && Gt <1293926400 ) { //Jahr 2010
       if (openEfieldFile != 2010) {
+        if (finEfield.is_open())
+          finEfield.close();
         finEfield.open(ef2010.c_str(), ios::in);
         openEfieldFile = 2010;
       }  
@@ -748,6 +803,12 @@ int main(int argc, char* argv[])
         tmp>>gtEfield>>Efieldtmp>>EfieldAvgAbs>>efield_min>>efield_max;
         if((Gt-1)==gtEfield)
           break;
+        else if (gtEfield >= Gt) {  // if GT is not contained in file, set efield to zero
+          EfieldAvgAbs = 0;
+          efield_min = 0;
+          efield_max = 0;
+          break;
+        }
         //-1 wegen Unterschied zwischen LOPES und KASCADE GT
       }  
     } else if (Gt > 1156415575) {
@@ -807,6 +868,9 @@ int main(int argc, char* argv[])
 
   k->Write();
   fout->Close();
+  fin.close();
+  if (finEfield.is_open())
+    finEfield.close();
   f1.close();
   f2.close();
 
