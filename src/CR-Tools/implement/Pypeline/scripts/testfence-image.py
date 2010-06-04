@@ -2,6 +2,7 @@ from pycrtools import *
 import numpy as np
 #import scipy as sp
 import matplotlib.pyplot as plt
+import pyfits
 
 def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)
@@ -156,6 +157,7 @@ n_el=int((elRange[1]-elRange[0])/elRange[2])
 
 n_pixels = n_az * n_el;
 pixarray = np.zeros( (n_el,n_az) ) 
+pixarray_time = np.zeros( ((250-100),n_el,n_az ) ) 
 
 azel=hArray(float,dimensions=[3])
 cartesian=azel.new()
@@ -165,9 +167,10 @@ phases=hArray(float,dimensions=ws["fft"],name="Phases",xvalues=ws["frequency"])
 shifted_fft=hArray(complex,dimensions=ws["fft"])
 beamformed_fft=hArray(complex,dimensions=ws["frequency"])
 beamformed_efield=hArray(float,dimensions=cr_time)
+beamformed_efield_smoothed=hArray(float,dimensions=cr_time)
 ws["frequency"].setUnit("","")
 
-el_values = np.arange(elRange[1], elRange[0], -elRange[2])
+el_values = np.arange((elRange[1]-elRange[2]), (elRange[0]-elRange[2]), -elRange[2])
 az_values = np.arange(azRange[0], azRange[1], azRange[2])
 
 ant_indices =  range(1,96,2)
@@ -193,8 +196,39 @@ for el_ind in range(n_el):
         #beamformed_efield.invfftw(beamformed_fft)
         beamformed_efield.abs()
         pixarray[el_ind,az_ind] = beamformed_efield.max()[0]/cr["blocksize"]
+        hRunningAverage(beamformed_efield_smoothed, beamformed_efield, 5, hWEIGHTS.GAUSSIAN)
+        for tindex in range( (250-100) ):
+            pixarray_time[tindex,(n_el-el_ind-1),az_ind] = beamformed_efield_smoothed[100:250].vec()[tindex]/cr["blocksize"]
 
 #pixarray[0,0]=np.max(pixarray)
 plt.imshow(pixarray,cmap=plt.cm.hot,extent=((azRange[0]-azRange[2]/2),(azRange[1]-azRange[2]/2),(elRange[0]-elRange[2]/2),(elRange[1]-elRange[2]/2)))
 plt.xlabel("Azimuth [deg]")
 plt.ylabel("Elevation [deg]")
+
+
+hdu = pyfits.PrimaryHDU(pixarray_time)
+hdulist = pyfits.HDUList([hdu])
+prihdr = hdulist[0].header
+prihdr.update('CTYPE1','??LN-CAR')  #This means "unkown longitude" with CARtesian projection, the 
+#                                   #casaviewer asumes this the be J2000 because it probably can't do AZEL
+prihdr.update('CRVAL1',azRange[0])  #value of the axis at the reference point "CRPIX"
+prihdr.update('CDELT1',azRange[2])  #increment from the reference pixel to the next pixel
+prihdr.update('CROTA1',0.)          #rotation, just leave it at 0.
+prihdr.update('CRPIX1',1.)          #pixel position at which the axis has the "CRVAL" value
+prihdr.update('CUNIT1','deg')       #the unit in which "CRVAL" and "CDELT" are given
+
+prihdr.update('CTYPE2','??LT-CAR')  #This means "unkown latitude" with CARtesian projection, see above
+prihdr.update('CRVAL2',elRange[0]) 
+prihdr.update('CDELT2',elRange[2])
+prihdr.update('CROTA2',0.)
+prihdr.update('CRPIX2',1.)
+prihdr.update('CUNIT2','deg')
+
+prihdr.update('CTYPE3','TIME')       #This means "linear time coordinate"
+prihdr.update('CRVAL3',0.)
+prihdr.update('CDELT3',5e-9)
+prihdr.update('CROTA3',0.)
+prihdr.update('CRPIX3',1.)
+prihdr.update('CUNIT3','s')
+
+hdulist.writeto("testfence-image.fits")
