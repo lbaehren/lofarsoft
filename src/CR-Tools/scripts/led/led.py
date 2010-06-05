@@ -82,7 +82,7 @@ class MplCanvas(FigureCanvasQTAgg):
 class ApplicationWindow(QtGui.QMainWindow):
     """Main application window."""
     
-    def __init__(self, station, buffersize, refresh, fade, rmin, rmax, username, antennaMode, nofChannels, distancePlot):
+    def __init__(self, station, buffersize, refresh, fade, rmin, rmax, username, antennaMode, nofChannels, distancePlot, inputFile, liveMode):
         """Create a LOFAR Event Display window.
         
         It takes the following parameters: 
@@ -104,6 +104,12 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.antennaMode = antennaMode
         self.nofChannels = nofChannels
         self.distancePlot = distancePlot
+        self.inputFile = inputFile
+        self.liveMode = liveMode
+        if (inputFile != '') & (liveMode == True):
+            print 'Either run --live or --file=..., not both.'
+            exit(1)
+            
         # Setup widget
         QtGui.QMainWindow.__init__(self)
 
@@ -209,11 +215,13 @@ class ApplicationWindow(QtGui.QMainWindow):
         # each time new data is available a readyRead() signal is emitted
 #        self.process.start('./tails',[str(self.station)])
         typeOfFit = 1 + (self.distancePlot == True)
-        self.process.start('./test/feedToVHECRtest.sh',['/Users/acorstanje/triggering/electricfence/fenceoff/2010-04-13_TRIGGER_mode2_restarted.dat', 
-                           self.antennaMode, str(self.nofChannels), str(typeOfFit), self.station])
-        thisDate = datetime.datetime.utcnow()
-        thisDateString = str(thisDate.year) + '-' + '%02d' % (thisDate.month) + '-' + str(thisDate.day)
-        #self.process.start('./test/liveFeedFromLofarStation.sh', [self.station, thisDateString, self.username])
+        if self.liveMode:
+            thisDate = datetime.datetime.utcnow()
+            thisDateString = str(thisDate.year) + '-' + '%02d' % (thisDate.month) + '-' + str(thisDate.day)
+            self.process.start('./test/liveFeedFromLofarStation.sh', [self.station, thisDateString, self.username])
+        else:
+            self.process.start('./test/feedToVHECRtest.sh',[self.inputFile, 
+                               self.antennaMode, str(self.nofChannels), str(typeOfFit), self.station])
     def stopCommand(self):
         """Stop listening for incoming data"""
 
@@ -359,16 +367,23 @@ parser.add_option("--channels", default=48,
 
 parser.add_option("--distance", action="store_true", dest="distancePlot", default=False, 
                   help="setting this option gives distance plot instead of direction plot")
-
+parser.add_option("--file", default='/Users/acorstanje/triggering/electricfence/fenceoff/2010-04-13_TRIGGER_mode2_restarted.dat',
+                  type="string", dest="inputFile", help="input trigger file to feed through. Mutually exclusive with --live")
+parser.add_option("--live", action="store_true", dest="liveMode", default=False,
+                  help="set flag to run in Live mode from given station")
+                  
 #parser.add_option("--distance", default=False,
 #                   type="bool", dest="distancePlot",
 #                   help="setting this option gives distance plot instead of direction plot")
                   
 (options, args)=parser.parse_args()
-
+if options.station == '':
+    print 'Station name is required, use --station=...'
+    exit(1)
+    
 # Create GUI
 App = QtGui.QApplication(sys.argv)
-aw = ApplicationWindow(options.station, options.buffersize, options.refresh, options.fade, options.rmin, options.rmax, options.username, options.antennaMode, options.nofChannels, options.distancePlot)
+aw = ApplicationWindow(options.station, options.buffersize, options.refresh, options.fade, options.rmin, options.rmax, options.username, options.antennaMode, options.nofChannels, options.distancePlot, options.inputFile, options.liveMode)
 aw.show()
 
 # Start application event loop
