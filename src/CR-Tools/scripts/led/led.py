@@ -82,7 +82,7 @@ class MplCanvas(FigureCanvasQTAgg):
 class ApplicationWindow(QtGui.QMainWindow):
     """Main application window."""
     
-    def __init__(self, station, buffersize, refresh, fade, rmin, rmax, username, distancePlot):
+    def __init__(self, station, buffersize, refresh, fade, rmin, rmax, username, antennaMode, nofChannels, distancePlot):
         """Create a LOFAR Event Display window.
         
         It takes the following parameters: 
@@ -101,6 +101,9 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.fade=fade
         self.rlim=(rmin, rmax)
         self.username = username
+        self.antennaMode = antennaMode
+        self.nofChannels = nofChannels
+        self.distancePlot = distancePlot
         # Setup widget
         QtGui.QMainWindow.__init__(self)
 
@@ -205,10 +208,12 @@ class ApplicationWindow(QtGui.QMainWindow):
         # Forks off a process listening for new data coming in, subsequently
         # each time new data is available a readyRead() signal is emitted
 #        self.process.start('./tails',[str(self.station)])
-        #self.process.start('./test/feedToVHECRtest.sh',['/Users/acorstanje/triggering/electricfence/fenceoff/2010-04-13_TRIGGER_mode2_restarted.dat'])
+        typeOfFit = 1 + (self.distancePlot == True)
+        self.process.start('./test/feedToVHECRtest.sh',['/Users/acorstanje/triggering/electricfence/fenceoff/2010-04-13_TRIGGER_mode2_restarted.dat', 
+                           self.antennaMode, str(self.nofChannels), str(typeOfFit), self.station])
         thisDate = datetime.datetime.utcnow()
         thisDateString = str(thisDate.year) + '-' + '%02d' % (thisDate.month) + '-' + str(thisDate.day)
-        self.process.start('./test/liveFeedFromLofarStation.sh', [self.station, thisDateString, self.username])
+        #self.process.start('./test/liveFeedFromLofarStation.sh', [self.station, thisDateString, self.username])
     def stopCommand(self):
         """Stop listening for incoming data"""
 
@@ -345,6 +350,12 @@ parser.add_option("--rmax", default=90,
 parser.add_option("--user", default='corstanje',
                   type="string", dest="username",
                   help="user name for ssh-ing to the LOFAR portal")
+parser.add_option("--antennas", default='LBA_OUTER',
+                  type="string", dest="antennaMode", 
+                  help="antenna mode with which the trigger file is (being) produced")
+parser.add_option("--channels", default=48,
+                  type="int", dest="nofChannels", 
+                  help="number of coincident channels required")                
 
 parser.add_option("--distance", action="store_true", dest="distancePlot", default=False, 
                   help="setting this option gives distance plot instead of direction plot")
@@ -357,7 +368,7 @@ parser.add_option("--distance", action="store_true", dest="distancePlot", defaul
 
 # Create GUI
 App = QtGui.QApplication(sys.argv)
-aw = ApplicationWindow(options.station, options.buffersize, options.refresh, options.fade, options.rmin, options.rmax, options.username, options.distancePlot)
+aw = ApplicationWindow(options.station, options.buffersize, options.refresh, options.fade, options.rmin, options.rmax, options.username, options.antennaMode, options.nofChannels, options.distancePlot)
 aw.show()
 
 # Start application event loop
