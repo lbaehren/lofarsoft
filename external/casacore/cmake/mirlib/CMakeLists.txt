@@ -4,7 +4,7 @@
 ## ------------------------------------------------------------------------------
 ## Create the library
 
-add_library (mir
+add_library (casa_mirlib
   bug.c
   dio.c
   headio.c
@@ -18,14 +18,14 @@ add_library (mir
   xyzio.c
   )
 
-target_link_libraries (mir casa_casa)
+target_link_libraries (casa_mirlib casa_casa)
 
 ## ------------------------------------------------------------------------------
 ## Installation
 
 ## installation of libraries
 
-install (TARGETS mir
+install (TARGETS casa_mirlib
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
