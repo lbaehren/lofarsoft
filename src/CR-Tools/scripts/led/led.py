@@ -106,7 +106,10 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.distancePlot = distancePlot
         self.inputFile = inputFile
         self.liveMode = liveMode
-        if (inputFile != '') & (liveMode == True):
+
+        # This is ugly! constructor should always work!
+        # commandline parameter checking should be done in option parser.
+        if inputFile and liveMode:
             print 'Either run --live or --file=..., not both.'
             exit(1)
             
@@ -322,7 +325,7 @@ class ApplicationWindow(QtGui.QMainWindow):
 
         # Add selected data points to plot (if any)
         if len(ind)>0:
-            self.display.ax.scatter(self.phi[ind] * 2*3.1415927 / 360.0, 90.0 - self.theta[ind], c=self.c[ind], lw=0)
+            self.display.ax.scatter(self.phi[ind] * 2*np.pi / 360.0, 90.0 - self.theta[ind], c=self.c[ind], lw=0)
             #print 'Plotting theta = ' + str(self.theta[ind]) + ' phi = ' + str(self.phi[ind])
         else:
             print 'No points to plot'
