@@ -333,7 +333,9 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.display.ax.set_ylim(self.rlim)
 #        self.display.ax.set_xlim(360.0)
         # Display time
-        self.display.ax.set_title(time.ctime(self.ctime*1e-3)+" UTC")
+#        for the time being hacked out 'UTC'
+        #self.display.ax.set_title(time.ctime(self.ctime*1e-3)+" UTC")
+        self.display.ax.set_title(time.ctime(self.ctime*1e-3) )
 
         # Draw plot on display
         self.display.draw()
