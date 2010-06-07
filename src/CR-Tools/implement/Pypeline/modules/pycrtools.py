@@ -1216,8 +1216,8 @@ def DataReader_getHeaderVariables(self):
     put it into attributes of the DataReader object.
     """
     self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample']))
-    #for v in self.keywords:
-    #    setattr(self,v,self.get(v))
+    for v in self.keywords:
+        setattr(self,v,self.get(v))
 
 def DataReader_getitem(self,*keys):
     """
@@ -1650,8 +1650,6 @@ Available parameters:
     coeffs = hArray(float) - Polynomial coeffieients of the baseline fit. (output vector)
     fittype = BSPLINE - Determine which type of fit to do: fittype="POLY" - do a polynomial fit, else ("BSPLINE") do a basis spline fit (default).
     powers = hArray(int) - Array of integers, containing the powers to fit in the polynomial. (work vector)
-
-
     """
     def __init__(self,modulename=None,**keywords):
 # Here list the parameters which have to be initialized in a
@@ -1854,8 +1852,6 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
     keywords["nofAntennas"]=spectrum.getDim()[0]
     ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
 #
-    if ws["verbose"]:
-        print time.clock()-ws["t0"],"s: Starting FitBaseline - Downsampling spectrum to ",ws["nbins"],"bins."
 #Donwsample spectrum
     if ws["numin"]>0: ws["numin_i"]=frequency.findlowerbound(ws["numin"]).val()
     else: ws["numin_i"]=1
@@ -1863,13 +1859,19 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
     else: ws["numax_i"]=len(frequency)
     ws["numax_i"]=min(ws["numax_i"]+int((len(frequency)-ws["numax_i"])*ws["extendfit"]),len(frequency))
     ws["numin_i"]=max(ws["numin_i"]-int(ws["numin_i"]*ws["extendfit"]),0)
+    l=ws["numax_i"]-ws["numin_i"]
+    if l > ws["nbins"]/4:
+        print "Requested number of downsampled bins (",ws["nbins"],") too small for the number of frequency channels (",l,"):"
+        ws["nbins"]=l/4
+        print "Resetting nbins to ",ws["nbins"],"!!!"
+    if ws["verbose"]:
+        print time.clock()-ws["t0"],"s: Starting FitBaseline - Downsampling spectrum to ",ws["nbins"],"bins."
     ws["freqs"].downsample(frequency[ws["numin_i"]:ws["numax_i"]])
     ws["spectrum"][...].downsamplespikydata(ws["rms"][...],spectrum[...,ws["numin_i"]:ws["numax_i"]],1.0)
-    l=ws["numax_i"]-ws["numin_i"]
 #Plotting
     if ws["doplot"]:
         spectrum[0].plot(title="RFI Downsampling")
-        ws["spectrum"][...,0:l].plot(clf=False)
+        ws["spectrum"][...,0:l].plot(xvalues=ws["freqs"][0,0:l],clf=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
 #Normalize the spectrum to unity
     ws["meanspec"]=ws["spectrum"][...].mean()
@@ -1879,7 +1881,7 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
 #    ws["ratio"][...,0:l].square()
     ws["mratio"]=ws["ratio"][...,0:l].meaninverse()
     if ws["doplot"]:
-        ws["ratio"][...,0:l].plot(title="RMS/Amplitude")
+        ws["ratio"][...,0:l].plot(xvalues=ws["freqs"][0,0:l],title="RMS/Amplitude")
         raw_input("Plotted relative RMS of downsampled spectrum - press Enter to continue...")
 #Now select bins where the ratio between RMS and amplitude is within a factor 2 of the mean value
     ws["nselected_bins"]=ws["selected_bins"][...].findbetween(ws["ratio"][...,0:l],ws.mratio/ws["rmsfactor"],ws.mratio*ws["rmsfactor"])

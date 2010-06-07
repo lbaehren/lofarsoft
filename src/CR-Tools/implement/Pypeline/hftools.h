@@ -5,6 +5,7 @@
 // Common with hfget ....
 //=========================================================================================
 
+#include <memory>
 #include <string>
 #include <iostream>
 #include <vector>

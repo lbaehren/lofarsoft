@@ -12,14 +12,15 @@ filename=filename_lofar_onesecond
 #------------------------------------------------------------------------
 
 ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")  
-ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256) #fittype="POLY" or "BSPLINE"
+ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256)#256) #fittype="POLY" or "BSPLINE"
 ws.makeAverageSpectrum(ws)
 #------------------------------------------------------------------------
 #Setting some additional parameters
 #------------------------------------------------------------------------
 ws["blocksize"]=2**16
 ws["max_nblocks"]=3
-ws["ncoeffs"]=45
+#ws["ncoeffs"]=45
+ws["ncoeffs"]=12
 if ws["datafile"]["Observatory"]=='LOFAR':
     ws["numin"]=12 #MHz
     ws["numax"]=82 #MHz
@@ -122,7 +123,7 @@ if ws["doplot"]:
     rfitime-=rfitime[0].val()
     dirty[10].plot(xvalues=rfitime)
     clean[10].plot(xvalues=rfitime,clf=False)
-    phaseonly[10].plot(clf=False,xvalues=rfitime)
+    phaseonly[10].plot(clf=False,xvalues=rfitime,legend=["dirty","full clean","phase = 0"])
     plt.savefig("testrfi2-timeseries.pdf",format="pdf")
 
 
