@@ -251,9 +251,9 @@ namespace CR { // Namespace CR -- begin
              case the coordinate contains a DirectionCoordinate
       \param projection -- Identifier for the spherical map projection, in case
              the coordinate contains a DirectionCoordinate
-      \param refPixel   -- Reference pixel
-      \param refValue   -- Reference value
-      \param increment  -- Coordinate increment
+      \param refPixel   -- Reference pixel (corresponds to CRPIX)
+      \param refValue   -- Reference value (corresponds to CRVAL)
+      \param increment  -- Coordinate increment (corresponds to CDELT)
       \param shape      -- The number of elements along the coordinate axes
     */
     SpatialCoordinate (CoordinateType::Types const &coordType,
