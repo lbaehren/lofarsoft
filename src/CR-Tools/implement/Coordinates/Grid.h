@@ -51,6 +51,29 @@ namespace CR { // Namespace CR -- begin
     </ul>
     
     <h3>Synopsis</h3>
+
+    The following breaks down the internally created casa objects into the
+    required input parameters:
+    \verbatim
+    .
+    |-- casa::CoordinateSystem
+        |-- casa::ObInfo
+        |   |-- telescope           string         = string
+        |   |-- casa::MEpoch
+	|   |   |-- time            double         = double
+	|   |   |-- frame           string         = string
+	|   `-- casa::MPosition
+	|       |-- position        vector<double> = [double,double,double]
+	|       `-- frame           string         = string
+        `-- casa::DirectionCoordinate
+	    |-- casa::Mdirection::Types
+	    |   `-- reference       string         = string
+	    |-- casa::Projection
+	    |   `-- projection      string         = string
+	    |-- crval               vector<double> = [double,double,double]
+	    |-- crpix               vector<double> = [double,double,double]
+	    |-- cdelt               vector<double> = [double,double,double]
+    \endverbatim
     
     <h3>Example(s)</h3>
     
