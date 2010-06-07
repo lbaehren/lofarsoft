@@ -243,10 +243,10 @@ namespace CR { // Namespace CR -- begin
 
         // fit exponential
         TF1 *fitfuncExp;
-        fitfuncExp=new TF1("fitfuncExp","[0]*exp(-x/[1])",50,190);
-        //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
-        fitfuncExp->SetParName(0,"#epsilon_{0}");
-        //fitfuncExp->SetParName(0,"#epsilon_{100}");
+        //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-x/[1])",50,190);
+        fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
+        //fitfuncExp->SetParName(0,"#epsilon_{0}");
+        fitfuncExp->SetParName(0,"#epsilon_{100}");
         fitfuncExp->SetParName(1,"R_{0}");
         fitfuncExp->SetParameter(1,200);
         //fitfuncExp->FixParameter(1,461.8-285.8);
@@ -348,7 +348,9 @@ namespace CR { // Namespace CR -- begin
         //for simulation
         if (pulsesSim[antID[ant]].antennaID != antID[ant]) { // consistency check
           cerr << "\nlateralDistribution::fitLateralDistribution: antenna IDs of data and simulation do not match. Aborting...\n" << endl;
-          return Record();
+          //return Record();
+          ++ant;
+          continue;
         }
         
         fieldStrSim[ant] = pulsesSim[antID[ant]].height;
@@ -510,10 +512,13 @@ namespace CR { // Namespace CR -- begin
         //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
         fitfuncExp->SetParName(0,"#epsilon_{0}");
         //fitfuncExp->SetParName(0,"#epsilon_{100}");
+        fitfuncExp->SetParameter(0,20);
         fitfuncExp->SetParName(1,"R_{0}");
-        fitfuncExp->SetParameter(1,200);
+        fitfuncExp->SetParameter(1,100);
         //fitfuncExp->FixParameter(1,461.8-285.8);
-        fitfuncExp->GetXaxis()->SetRange(20,300);
+        fitfuncExp->GetXaxis()->SetRange(10,120);
+        fitfuncExp->GetXaxis()->SetRangeUser(10,120);
+        fitfuncExp->GetXaxis()->SetLimits(10,120);
         fitfuncExp->SetFillStyle(0);
         fitfuncExp->SetLineWidth(2);
 
@@ -524,16 +529,19 @@ namespace CR { // Namespace CR -- begin
         //fitfuncExpS=new TF1("fitfuncExpS","[0]*exp(-(x-100)/[1])",50,190);
         fitfuncExpS->SetParName(0,"#epsilonSim_{0}");
         //fitfuncExpS->SetParName(0,"#epsilon_{100}");
+        fitfuncExpS->SetParameter(0,20);
         fitfuncExpS->SetParName(1,"RSim_{0}");
-        fitfuncExpS->SetParameter(1,200);
+        fitfuncExpS->SetParameter(1,100);
         //fitfuncExpS->FixParameter(1,461.8-285.8);
-        fitfuncExpS->GetXaxis()->SetRange(20,300);
+        fitfuncExpS->GetXaxis()->SetRange(10,120);
+        fitfuncExpS->GetXaxis()->SetRangeUser(10,120);
+        fitfuncExpS->GetXaxis()->SetLimits(10,120);
         fitfuncExpS->SetFillStyle(0);
         fitfuncExpS->SetLineWidth(2);
 
 
         cout << "------------------------------"<<endl;
-        latPro->Fit(fitfuncExp, "");
+        latPro->Fit(fitfuncExp, "R");
         ptstats->Draw();
 
         // write fit results to record with other results
@@ -553,7 +561,7 @@ namespace CR { // Namespace CR -- begin
              << endl;
 
         cout << "-------- SIMULATIONS ---------"<<endl;
-        latProSim->Fit(fitfuncExpS, "");
+        latProSim->Fit(fitfuncExpS, "R");
         ptstatsS->Draw();
 
         // write fit results to record with other results
