@@ -224,7 +224,7 @@ endif (NOT CASACORE_FIND_QUIETLY)
 foreach (casacore_lib ${casacore_modules})
   ## search for the library
   if (${casacore_lib} MATCHES "mirlib")
-    find_library (CASACORE_lib${casacore_lib} mir
+    find_library (CASACORE_lib${casacore_lib} mir casa_mirlib
       PATHS ${lib_locations}
       NO_DEFAULT_PATH
       )
