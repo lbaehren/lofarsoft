@@ -37,6 +37,13 @@ f=open(pydoctxtfilename)
 pycralldocstring=f.read()
 f.close()
 
+trackHistory.__doc__="""
+Function for PYCRTOOLS module. Globally switch history tracking of
+hArrays on (True) or off (False). This setting is valid for all arrays
+created after the function is called. If history tracking is on, you
+can use array.history() to see a list of actions that were performed
+with the array."""
+
 #======================================================================
 #  Help Functions
 #======================================================================
@@ -1860,8 +1867,8 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
     ws["numax_i"]=min(ws["numax_i"]+int((len(frequency)-ws["numax_i"])*ws["extendfit"]),len(frequency))
     ws["numin_i"]=max(ws["numin_i"]-int(ws["numin_i"]*ws["extendfit"]),0)
     l=ws["numax_i"]-ws["numin_i"]
-    if l > ws["nbins"]/4:
-        print "Requested number of downsampled bins (",ws["nbins"],") too small for the number of frequency channels (",l,"):"
+    if ws["nbins"]>l/4:
+        print "Requested number of downsampled bins (",ws["nbins"],") too large for the number of frequency channels (",l,"):"
         ws["nbins"]=l/4
         print "Resetting nbins to ",ws["nbins"],"!!!"
     if ws["verbose"]:

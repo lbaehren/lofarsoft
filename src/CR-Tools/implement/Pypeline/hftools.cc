@@ -1029,7 +1029,13 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
 //                             Array Class
 //========================================================================
 
-//! Testing a rudimentary Array class, that allows contiguous slicing
+//! Creating a rudimentary Array class, that allows contiguous slicing
+
+HBool hArray_trackHistory_value(True);
+
+void hArray_trackHistory(HBool on){
+  hArray_trackHistory_value = on;
+}
 
 template <class T> void hArray<T>::init(){
   //  cout << "Creating hArray ptr=" << reinterpret_cast<void*>(this) << endl;
@@ -1080,7 +1086,7 @@ template <class T> void hArray<T>::new_storage(){
   storage_p->unit.name="";
   storage_p->unit.prefix="";
   storage_p->unit.scale_factor=1.0;
-  storage_p->trackHistory=True;
+  storage_p->trackHistory=hArray_trackHistory_value;
 }
 
 template <class T> void hArray<T>::initialize_storage(){

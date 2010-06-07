@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 from pycrtools import *
+trackHistory(True)
 
 def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)

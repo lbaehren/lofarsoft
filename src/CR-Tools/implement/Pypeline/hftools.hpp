@@ -79,6 +79,7 @@ BOOST_PYTHON_MODULE(hftools)
     def("hInit",hInit);
     def("hgetFiletype",hgetFiletype);
     def("hgetFileExtension",hgetFileExtension);
+    def("trackHistory",&hArray_trackHistory);
 
     enum_<DATATYPE>("TYPE")
       .value("POINTER",POINTER)

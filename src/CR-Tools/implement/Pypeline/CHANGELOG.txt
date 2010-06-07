@@ -1,5 +1,15 @@
+2010-06-07 - Heino Falcke  - rev 5064:
+- added global function trackHistory(bool) - to switch history
+tracking in arrays on or off
+
+2010-06-07 - Heino Falcke  - rev 5057:
+- changed downsample routines to work with fractional block sizes
+- changed RFI routines to check for too large number of bins (so
+smaller blocksizes will also work)
+ 
 2010-06-01:  
 - added convenience function hInvFFTwSave to do a save fft (hftools.cc, testcr2.py)
 - added hMinPos, hMaxPos - returning position of maxium or minimum (hftools.cc,testcr2.py)
 - added calculation of time delays with cross-correlation from CR data (testcr2.py)
 - remaining: some not-understood behaviour of invfftw
+
