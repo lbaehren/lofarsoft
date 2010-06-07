@@ -127,6 +127,8 @@ int main (int argc, char *argv[])
         if(iss.str().size()>0&&iss.str()[0]!='%'&&iss.str()[0]!='#') {
           iss>>GtDict>>simNameDict>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy;
           m_dict[GtDict]=simNameDict; //fill the map dictionary 
+          cout<<""<<simNameDict<<endl;
+          cout<<""<<GtDict<<endl;
         }
         if (!dictFile.good())
           break;
@@ -156,7 +158,7 @@ int main (int argc, char *argv[])
       recTree->SetBranchAddress("Az", &Az);
       recTree->SetBranchAddress("Ze", &Ze);
 // TODO: use getListOfBranches to check if branch for antenna exists
-
+cout<<""<<Gt<<endl;
       for (int i=0; i < totAntenna; ++i) {
         antPulses[i] = new PulseProperties();
       }
@@ -203,11 +205,13 @@ int main (int argc, char *argv[])
         double gradeg=180./(TMath::Pi());
         double distanceS=0., distanceSerr=0.,showerCoord=0.;
 
-        string reasFileName = argv[3]+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat"; //path correct??
-        ifstream reasFile(reasFileName.c_str());
+        string reasFileName = argv[3]+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
+        //string reasFileName = argv[3]+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
+       ifstream reasFile(reasFileName.c_str());
         if (!reasFile.is_open()) {
-          cout << "ERROR ----- CAN NOT OPEN THE FILE for REAS!" << endl;
-          return 1;     
+          cout << "ERROR ----- CAN NOT OPEN THE FILE for REAS!   skip Gt: " <<Gt<< endl;
+          //return 1;     
+          continue;
         }
         char buffer2[512];
         while (reasFile.is_open()) {
@@ -273,7 +277,7 @@ int main (int argc, char *argv[])
         double Epsilon0S=0.,R0S=0.,err_Epsilon0S=0.,err_R0S=0.,chi2NDFS=0.;
         CR::lateralDistribution lateralFitter;
         if(m_recEW.size()>=4) {
-          Record ergew = lateralFitter.fitBothLateralDistribution("lateral"+m_dict[Gt]+"-",m_recEW,m_simEW,Gt,(Az*gradeg),(Ze*gradeg));
+          Record ergew = lateralFitter.fitBothLateralDistribution("lateral-"+m_dict[Gt]+"-",m_recEW,m_simEW,Gt,(Az*gradeg),(Ze*gradeg));
 
           Epsilon0 = ergew.asDouble("eps");
           R0 = ergew.asDouble("R_0");
