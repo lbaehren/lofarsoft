@@ -176,7 +176,7 @@ cout<<""<<Gt<<endl;
 	
       /* output files*/
       ofstream outputEW("simANDrec_fitvalue_EW.dat");
-      ofstream outputNS("simANDrec_fitvalue_EW.dat");
+      ofstream outputNS("simANDrec_fitvalue_NS.dat");
       outputEW<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
       outputNS<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
 
@@ -234,10 +234,12 @@ cout<<""<<Gt<<endl;
             //TODO calc error
 
             //look if antenna exists at all in data then separe EW and NS
-            if (m_recPulses.find(NantS) != m_recPulses.end()) { ///check thet it works!!!!!
+            if (m_recPulses.find(NantS) != m_recPulses.end()) { 
               if (m_recPulses[NantS].polarization == "EW") {
+	cout<<"   xxxxxx   EW polarization   xxxxxx  "<<endl;
                 //define recEW map
                 m_recEW[NantS] = m_recPulses[NantS];
+	cout<<"rec EW map size   :"<<m_recEW.size()<<endl;
                 //define simEW map
                 PulseProperties simPropEW;
                 simPropEW.antennaID = NantS; //antennaid vs antenna no?
@@ -246,15 +248,17 @@ cout<<""<<Gt<<endl;
                 double distanceR=m_recEW[NantS].dist;
                 if ((distanceS-distanceR)>(distanceS*0.01)) {
                   cout<<"WARNING!"<<endl;
-                  cout<<"distance simulated:  "<<distanceS<<"distance from LOPES  "<<distanceR<<endl;
+                  cout<<"distance simulated:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
                 }
                 simPropEW.dist =distanceR;
                 simPropEW.disterr = distanceSerr;
                 m_simEW[NantS] = simPropEW; //fill the sim map
               }
               if (m_recPulses[NantS].polarization == "NS") {
+	cout<<"   kkkkkk   NS polarization   kkkkkk  "<<endl;
                 //define recNS map
                 m_recNS[NantS] = m_recPulses[NantS];
+	cout<<"rec NS map size   :"<<m_recNS.size()<<endl;
                 //define simEW map
                 PulseProperties simPropNS;
                 simPropNS.antennaID = NantS; //antennaid vs antenna no?
@@ -277,7 +281,7 @@ cout<<""<<Gt<<endl;
         double Epsilon0S=0.,R0S=0.,err_Epsilon0S=0.,err_R0S=0.,chi2NDFS=0.;
         CR::lateralDistribution lateralFitter;
         if(m_recEW.size()>=4) {
-          Record ergew = lateralFitter.fitBothLateralDistribution("lateral-"+m_dict[Gt]+"-",m_recEW,m_simEW,Gt,(Az*gradeg),(Ze*gradeg));
+          Record ergew = lateralFitter.fitBothLateralDistribution("lateral-EW-"+m_dict[Gt]+"-",m_recEW,m_simEW,Gt,(Az*gradeg),(Ze*gradeg));
 
           Epsilon0 = ergew.asDouble("eps");
           R0 = ergew.asDouble("R_0");
@@ -294,7 +298,7 @@ cout<<""<<Gt<<endl;
           outputEW << Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
         }
         if(m_recNS.size()>=4) {
-          Record ergns = lateralFitter.fitBothLateralDistribution("lateral"+m_dict[Gt]+"-",m_recNS,m_simNS,Gt,(Az*gradeg),(Ze*gradeg));
+          Record ergns = lateralFitter.fitBothLateralDistribution("lateral-NS-"+m_dict[Gt]+"-",m_recNS,m_simNS,Gt,(Az*gradeg),(Ze*gradeg));
 
           Epsilon0 = ergns.asDouble("eps");
           R0 = ergns.asDouble("R_0");
