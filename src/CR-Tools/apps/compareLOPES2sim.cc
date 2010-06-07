@@ -177,8 +177,8 @@ cout<<""<<Gt<<endl;
       /* output files*/
       ofstream outputEW("simANDrec_fitvalue_EW.dat");
       ofstream outputNS("simANDrec_fitvalue_NS.dat");
-      outputEW<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
-      outputNS<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
+      outputEW<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2, chi2_sim"<<endl;
+      outputNS<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2, chi2_sim"<<endl;
 
       for(int i=0; i<entries; i++) //lop on the events
       {
@@ -207,9 +207,11 @@ cout<<""<<Gt<<endl;
 
         string reasFileName = argv[3]+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
         //string reasFileName = argv[3]+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
+        //string reasFileName = argv[3]+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
        ifstream reasFile(reasFileName.c_str());
         if (!reasFile.is_open()) {
-          cout << "ERROR ----- CAN NOT OPEN THE FILE for REAS!   skip Gt: " <<Gt<< endl;
+          cout << "ERROR ----- CAN NOT OPEN THE FILE for REAS!" <<endl;
+          cout << "No simulated event for Gt: " <<Gt<< endl;
           //return 1;     
           continue;
         }
@@ -223,7 +225,7 @@ cout<<""<<Gt<<endl;
             //calc distance
             showerCoord=sqrt(1.0 - pow(cos(azS-Az),2)*pow(sin(Ze),2));
             distanceS=0.01*distS*showerCoord;
-            //distanceSerr=15.; //????????
+            //distanceSerr=15.; 
             //calc field strength
             NSfield*=sim2lopesField;
             EWfield*=sim2lopesField;
