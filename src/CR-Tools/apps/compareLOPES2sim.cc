@@ -105,222 +105,222 @@ int main (int argc, char *argv[])
 	cout << "Use: ./compareLOPES2sim --help"
 	     << endl;
 	return 0;       // exit here
-	}
       }
+    }
 
-      // map dic declaration
-      map<int,string> m_dict;
-      /*dictionary file*/
-      int GtDict=0;
-      string simNameDict;
-      double dummy;
-      ifstream dictFile(argv[2]);
-      if (!dictFile.is_open()) {
-        cout << "ERROR ----- CAN NOT OPEN THE DICTIONARY FILE!" << endl;
-        return 1;  
+    // map dic declaration
+    map<int,string> m_dict;
+    /*dictionary file*/
+    int GtDict=0;
+    string simNameDict;
+    double dummy;
+    ifstream dictFile(argv[2]);
+    if (!dictFile.is_open()) {
+      cout << "ERROR ----- CAN NOT OPEN THE DICTIONARY FILE!" << endl;
+      return 1;  
+    }
+    char buffer[1024];
+    
+    while (dictFile.is_open()) {
+      dictFile.getline(buffer,1024);
+      istringstream iss (buffer);
+      if(iss.str().size()>0&&iss.str()[0]!='%'&&iss.str()[0]!='#') {
+        iss>>GtDict>>simNameDict>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy;
+        m_dict[GtDict]=simNameDict; //fill the map dictionary 
+        cout<<""<<simNameDict<<endl;
+        cout<<""<<GtDict<<endl;
       }
-      char buffer[1024];
-      
-      while (dictFile.is_open()) {
-        dictFile.getline(buffer,1024);
-        istringstream iss (buffer);
-        if(iss.str().size()>0&&iss.str()[0]!='%'&&iss.str()[0]!='#') {
-          iss>>GtDict>>simNameDict>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy;
-          m_dict[GtDict]=simNameDict; //fill the map dictionary 
-          cout<<""<<simNameDict<<endl;
-          cout<<""<<GtDict<<endl;
-        }
-        if (!dictFile.good())
-          break;
-      } // while...
-      dictFile.close();
+      if (!dictFile.good())
+        break;
+    } // while...
+    dictFile.close();
 
-      /*root file from call_pipeline*/
-      UInt_t Gt;
-      Float_t Az,Ze;
-      int entries;
-      int totAntenna = 30;
+    /*root file from call_pipeline*/
+    UInt_t Gt;
+    Float_t Az,Ze;
+    int entries;
+    int totAntenna = 30;
 
-      TFile *recRoot = new TFile (argv[1], "READ");
-      if(!recRoot || recRoot->IsZombie()) {
-        cout << "Error, cannot open root file." << endl;
-        return 1;  
-      } 
+    TFile *recRoot = new TFile (argv[1], "READ");
+    if(!recRoot || recRoot->IsZombie()) {
+      cout << "Error, cannot open root file." << endl;
+      return 1;  
+    } 
 
-      //recRoot->ls();
-      TTree *recTree =  (TTree*)recRoot->Get("T;1");
-      //if(!recTree) return;
- 
-      //PulseProperties[totAntenna] antPulses; //each antenna 1 pulseProperties
-      PulseProperties* antPulses[totAntenna];
+    //recRoot->ls();
+    TTree *recTree =  (TTree*)recRoot->Get("T;1");
+    //if(!recTree) return;
 
-      recTree->SetBranchAddress("Gt", &Gt);
-      recTree->SetBranchAddress("Az", &Az);
-      recTree->SetBranchAddress("Ze", &Ze);
+    //PulseProperties[totAntenna] antPulses; //each antenna 1 pulseProperties
+    PulseProperties* antPulses[totAntenna];
+
+    recTree->SetBranchAddress("Gt", &Gt);
+    recTree->SetBranchAddress("Az", &Az);
+    recTree->SetBranchAddress("Ze", &Ze);
 // TODO: use getListOfBranches to check if branch for antenna exists
 cout<<""<<Gt<<endl;
-      for (int i=0; i < totAntenna; ++i) {
-        antPulses[i] = new PulseProperties();
-      }
+    for (int i=0; i < totAntenna; ++i) {
+      antPulses[i] = new PulseProperties();
+    }
 
-      for(int i=0; i< totAntenna; ++i) {
-        stringstream antNumber("");
-        antNumber << (i+1);
-        string antBranchName;
-        antBranchName = "Ant_" + antNumber.str() + "_cal.";
+    for(int i=0; i< totAntenna; ++i) {
+      stringstream antNumber("");
+      antNumber << (i+1);
+      string antBranchName;
+      antBranchName = "Ant_" + antNumber.str() + "_cal.";
 // TODO: if  can find antBranchName in list
-        recTree->SetBranchAddress(antBranchName.c_str(), &antPulses[i]);
+      recTree->SetBranchAddress(antBranchName.c_str(), &antPulses[i]);
+    }
+
+    entries = recTree->GetEntries();
+      
+    /* output files*/
+    ofstream outputEW("simANDrec_fitvalue_EW.dat");
+    ofstream outputNS("simANDrec_fitvalue_NS.dat");
+    outputEW<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2, chi2_sim"<<endl;
+    outputNS<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2, chi2_sim"<<endl;
+
+    for(int i=0; i<entries; i++) //lop on the events
+    {
+      recTree->GetEntry(i);
+
+      map<int,PulseProperties> m_recPulses;
+      map<int,PulseProperties> m_recEW;
+      map<int,PulseProperties> m_recNS;
+      map<int,PulseProperties> m_simEW;
+      map<int,PulseProperties> m_simNS;
+
+      //int NantR[totAntenna]=antPulses[totAntenna].antennaID; 
+
+      //fill the first rec map
+      for(int j=0; j<totAntenna; j++) {
+        m_recPulses[antPulses[j]->antennaID] = *antPulses[j]; //I fill the rec map with pulse properties in the root file
       }
+      
+      /*sim file*/
+      int NantS=0;
+      double EWfield=0.,NSfield=0.,VEfield=0.;
+      double distS=0.,azS=0.;
+      double sim2lopesField=(2.9979246e+10/31.); //muV/m into muV/m/MHz
+      double gradeg=180./(TMath::Pi());
+      double distanceS=0., distanceSerr=0.,showerCoord=0.;
 
-      entries = recTree->GetEntries();
-	
-      /* output files*/
-      ofstream outputEW("simANDrec_fitvalue_EW.dat");
-      ofstream outputNS("simANDrec_fitvalue_NS.dat");
-      outputEW<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2, chi2_sim"<<endl;
-      outputNS<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2, chi2_sim"<<endl;
+      string reasFileName = argv[3]+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
+      //string reasFileName = argv[3]+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
+      //string reasFileName = argv[3]+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
+      ifstream reasFile(reasFileName.c_str());
+      if (!reasFile.is_open()) {
+        cout << "ERROR ----- CAN NOT OPEN THE FILE for REAS!" <<endl;
+        cout << "No simulated event for Gt: " <<Gt<< endl;
+        //return 1;     
+        continue;
+      }
+      char buffer2[512];
+      while (reasFile.is_open()) {
+        reasFile.getline(buffer2,512);
+        istringstream iss2 (buffer2);
+        if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {	//in sim file:az in reas sistem
+          iss2>>NantS>>distS>>azS>>NSfield>>EWfield>>VEfield>>dummy;
 
-      for(int i=0; i<entries; i++) //lop on the events
-      {
-        recTree->GetEntry(i);
+          //calc distance
+          showerCoord=sqrt(1.0 - pow(cos(azS-Az),2)*pow(sin(Ze),2));
+          distanceS=0.01*distS*showerCoord;
+          //distanceSerr=15.; 
+          //calc field strength
+          NSfield*=sim2lopesField;
+          EWfield*=sim2lopesField;
+          if(NSfield<0.1)
+              NSfield=0.1;
+          if(EWfield<0.1)
+              EWfield=0.1;
+          //TODO calc error
 
-        map<int,PulseProperties> m_recPulses;
-        map<int,PulseProperties> m_recEW;
-        map<int,PulseProperties> m_recNS;
-        map<int,PulseProperties> m_simEW;
-        map<int,PulseProperties> m_simNS;
-
-        //int NantR[totAntenna]=antPulses[totAntenna].antennaID; 
-
-        //fill the first rec map
-        for(int j=0; j<totAntenna; j++) {
-          m_recPulses[antPulses[j]->antennaID] = *antPulses[j]; //I fill the rec map with pulse properties in the root file
-        }
-	
-        /*sim file*/
-        int NantS=0;
-        double EWfield=0.,NSfield=0.,VEfield=0.;
-        double distS=0.,azS=0.;
-        double sim2lopesField=(2.9979246e+10/31.); //muV/m into muV/m/MHz
-        double gradeg=180./(TMath::Pi());
-        double distanceS=0., distanceSerr=0.,showerCoord=0.;
-
-        string reasFileName = argv[3]+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
-        //string reasFileName = argv[3]+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
-        //string reasFileName = argv[3]+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
-       ifstream reasFile(reasFileName.c_str());
-        if (!reasFile.is_open()) {
-          cout << "ERROR ----- CAN NOT OPEN THE FILE for REAS!" <<endl;
-          cout << "No simulated event for Gt: " <<Gt<< endl;
-          //return 1;     
-          continue;
-        }
-        char buffer2[512];
-        while (reasFile.is_open()) {
-          reasFile.getline(buffer2,512);
-          istringstream iss2 (buffer2);
-          if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {	//in sim file:az in reas sistem
-            iss2>>NantS>>distS>>azS>>NSfield>>EWfield>>VEfield>>dummy;
-
-            //calc distance
-            showerCoord=sqrt(1.0 - pow(cos(azS-Az),2)*pow(sin(Ze),2));
-            distanceS=0.01*distS*showerCoord;
-            //distanceSerr=15.; 
-            //calc field strength
-            NSfield*=sim2lopesField;
-            EWfield*=sim2lopesField;
-            if(NSfield<0.1)
-               NSfield=0.1;
-            if(EWfield<0.1)
-               EWfield=0.1;
-            //TODO calc error
-
-            //look if antenna exists at all in data then separe EW and NS
-            if (m_recPulses.find(NantS) != m_recPulses.end()) { 
-              if (m_recPulses[NantS].polarization == "EW") {
-	cout<<"   xxxxxx   EW polarization   xxxxxx  "<<endl;
-                //define recEW map
-                m_recEW[NantS] = m_recPulses[NantS];
-	cout<<"rec EW map size   :"<<m_recEW.size()<<endl;
-                //define simEW map
-                PulseProperties simPropEW;
-                simPropEW.antennaID = NantS; //antennaid vs antenna no?
-                simPropEW.height = EWfield;
-               cout<<"EW Field  "<<EWfield<<endl;
-                simPropEW.heightError = 0.;
-                double distanceR=m_recEW[NantS].dist;
-                if ((distanceS-distanceR)>(distanceS*0.01)) {
-                  cout<<"WARNING!"<<endl;
-                  cout<<"distance simulated:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
-                }
-                simPropEW.dist =distanceR;
-                simPropEW.disterr = distanceSerr;
-                m_simEW[NantS] = simPropEW; //fill the sim map
+          //look if antenna exists at all in data then separe EW and NS
+          if (m_recPulses.find(NantS) != m_recPulses.end()) { 
+            if (m_recPulses[NantS].polarization == "EW") {
+      cout<<"   xxxxxx   EW polarization   xxxxxx  "<<endl;
+              //define recEW map
+              m_recEW[NantS] = m_recPulses[NantS];
+      cout<<"rec EW map size   :"<<m_recEW.size()<<endl;
+              //define simEW map
+              PulseProperties simPropEW;
+              simPropEW.antennaID = NantS; //antennaid vs antenna no?
+              simPropEW.height = EWfield;
+              cout<<"EW Field  "<<EWfield<<endl;
+              simPropEW.heightError = 0.;
+              double distanceR=m_recEW[NantS].dist;
+              if ((distanceS-distanceR)>(distanceS*0.01)) {
+                cout<<"WARNING!"<<endl;
+                cout<<"distance simulated:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
               }
-              if (m_recPulses[NantS].polarization == "NS") {
-	cout<<"   kkkkkk   NS polarization   kkkkkk  "<<endl;
-                //define recNS map
-                m_recNS[NantS] = m_recPulses[NantS];
-	cout<<"rec NS map size   :"<<m_recNS.size()<<endl;
-                //define simEW map
-                PulseProperties simPropNS;
-                simPropNS.antennaID = NantS; //antennaid vs antenna no?
-                simPropNS.height = NSfield;
-               cout<<"NS Field  "<<NSfield<<endl;
-                simPropNS.heightError = 0.;
-                double distanceR=m_recEW[NantS].dist;
-                simPropNS.dist =distanceR;
-                simPropNS.disterr = distanceSerr;
-          
-                m_simNS[NantS] = simPropNS;//fill the sim map
-              }
+              simPropEW.dist =distanceR;
+              simPropEW.disterr = distanceSerr;
+              m_simEW[NantS] = simPropEW; //fill the sim map
+            }
+            if (m_recPulses[NantS].polarization == "NS") {
+      cout<<"   kkkkkk   NS polarization   kkkkkk  "<<endl;
+              //define recNS map
+              m_recNS[NantS] = m_recPulses[NantS];
+      cout<<"rec NS map size   :"<<m_recNS.size()<<endl;
+              //define simEW map
+              PulseProperties simPropNS;
+              simPropNS.antennaID = NantS; //antennaid vs antenna no?
+              simPropNS.height = NSfield;
+              cout<<"NS Field  "<<NSfield<<endl;
+              simPropNS.heightError = 0.;
+              double distanceR=m_recEW[NantS].dist;
+              simPropNS.dist =distanceR;
+              simPropNS.disterr = distanceSerr;
+        
+              m_simNS[NantS] = simPropNS;//fill the sim map
             }
           }
-          if (!reasFile.good())
-            break;
-        } // while...
-        reasFile.close();
-	
-        double Epsilon0=0.,R0=0.,err_Epsilon0=0.,err_R0=0.,chi2NDF=0.;
-        double Epsilon0S=0.,R0S=0.,err_Epsilon0S=0.,err_R0S=0.,chi2NDFS=0.;
-        CR::lateralDistribution lateralFitter;
-        if(m_recEW.size()>=4) {
-          Record ergew = lateralFitter.fitBothLateralDistribution("lateral-EW-"+m_dict[Gt]+"-",m_recEW,m_simEW,Gt,(Az*gradeg),(Ze*gradeg));
-
-          Epsilon0 = ergew.asDouble("eps");
-          R0 = ergew.asDouble("R_0");
-          err_Epsilon0 = ergew.asDouble("sigeps");
-          err_R0 = ergew.asDouble("sigR_0");
-          chi2NDF = ergew.asDouble("chi2NDF");
-          Epsilon0S = ergew.asDouble("eps_sim");
-          R0S = ergew.asDouble("R_0sim");
-          err_Epsilon0S = ergew.asDouble("sigeps_sim");
-          err_R0S = ergew.asDouble("sigR_0sim");
-          chi2NDFS = ergew.asDouble("chi2NDF_sim");
-
-          //write info of the fit into file
-          outputEW << Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
         }
-        if(m_recNS.size()>=4) {
-          Record ergns = lateralFitter.fitBothLateralDistribution("lateral-NS-"+m_dict[Gt]+"-",m_recNS,m_simNS,Gt,(Az*gradeg),(Ze*gradeg));
+        if (!reasFile.good())
+          break;
+      } // while...
+      reasFile.close();
+      
+      double Epsilon0=0.,R0=0.,err_Epsilon0=0.,err_R0=0.,chi2NDF=0.;
+      double Epsilon0S=0.,R0S=0.,err_Epsilon0S=0.,err_R0S=0.,chi2NDFS=0.;
+      CR::lateralDistribution lateralFitter;
+      if(m_recEW.size()>=4) {
+        Record ergew = lateralFitter.fitBothLateralDistribution("lateral-EW-"+m_dict[Gt]+"-",m_recEW,m_simEW,Gt,(Az*gradeg),(Ze*gradeg));
 
-          Epsilon0 = ergns.asDouble("eps");
-          R0 = ergns.asDouble("R_0");
-          err_Epsilon0 = ergns.asDouble("sigeps");
-          err_R0 = ergns.asDouble("sigR_0");
-          chi2NDF = ergns.asDouble("chi2NDF");
-          Epsilon0S = ergns.asDouble("eps_sim");
-          R0S = ergns.asDouble("R_0sim");
-          err_Epsilon0S = ergns.asDouble("sigeps_sim");
-          err_R0S = ergns.asDouble("sigR_0sim");
-          chi2NDFS = ergns.asDouble("chi2NDF_sim");
+        Epsilon0 = ergew.asDouble("eps");
+        R0 = ergew.asDouble("R_0");
+        err_Epsilon0 = ergew.asDouble("sigeps");
+        err_R0 = ergew.asDouble("sigR_0");
+        chi2NDF = ergew.asDouble("chi2NDF");
+        Epsilon0S = ergew.asDouble("eps_sim");
+        R0S = ergew.asDouble("R_0sim");
+        err_Epsilon0S = ergew.asDouble("sigeps_sim");
+        err_R0S = ergew.asDouble("sigR_0sim");
+        chi2NDFS = ergew.asDouble("chi2NDF_sim");
 
-          outputNS << Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
-        }
-     }//loop on the rec event 
+        //write info of the fit into file
+        outputEW << Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
+      }
+      if(m_recNS.size()>=4) {
+        Record ergns = lateralFitter.fitBothLateralDistribution("lateral-NS-"+m_dict[Gt]+"-",m_recNS,m_simNS,Gt,(Az*gradeg),(Ze*gradeg));
 
-     outputEW.close();
-     outputNS.close();
+        Epsilon0 = ergns.asDouble("eps");
+        R0 = ergns.asDouble("R_0");
+        err_Epsilon0 = ergns.asDouble("sigeps");
+        err_R0 = ergns.asDouble("sigR_0");
+        chi2NDF = ergns.asDouble("chi2NDF");
+        Epsilon0S = ergns.asDouble("eps_sim");
+        R0S = ergns.asDouble("R_0sim");
+        err_Epsilon0S = ergns.asDouble("sigeps_sim");
+        err_R0S = ergns.asDouble("sigR_0sim");
+        chi2NDFS = ergns.asDouble("chi2NDF_sim");
+
+        outputNS << Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
+      }
+    }//loop on the rec event 
+
+    outputEW.close();
+    outputNS.close();
   } catch (AipsError x) {
     cerr << "compareLOPES2sim: " << x.getMesg() << endl;
   }

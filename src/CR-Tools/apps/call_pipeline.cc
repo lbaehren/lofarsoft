@@ -1954,18 +1954,16 @@ int main (int argc, char *argv[])
             lateralFitter.setLateralSNRcut(config["lateralSNRcut"]->dValue());
             lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
-              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", calibPulsesMap, results);
-              R_0 = results.asDouble("R_0");
-              sigR_0 = results.asDouble("sigR_0");
-              eps = results.asDouble("eps");
-              sigeps = results.asDouble("sigeps");
-              chi2NDF = results.asDouble("chi2NDF");
-              //CutCloseToCore = results.asInt("CutCloseToCore");
-              //CutSmallSignal = results.asInt("CutSmallSignal");
-              //CutBadTiming = results.asInt("CutBadTiming");
-              //CutSNR = results.asInt("CutSNR");
-              latMeanDist = results.asDouble("latMeanDist");
-              NlateralAntennas = results.asuInt("NlateralAntennas");
+              Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
+                                                                       calibPulsesMap, map <int, PulseProperties>(),
+                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"));
+              R_0 = latResults.asDouble("R_0");
+              sigR_0 = latResults.asDouble("sigR_0");
+              eps = latResults.asDouble("eps");
+              sigeps = latResults.asDouble("sigeps");
+              chi2NDF = latResults.asDouble("chi2NDF");
+              latMeanDist = latResults.asDouble("latMeanDist");
+              NlateralAntennas = latResults.asuInt("NlateralAntennas");
             }
 
             // plot lateral distribution of arrival times, if requested
@@ -2089,18 +2087,16 @@ int main (int argc, char *argv[])
             lateralFitter.setLateralSNRcut(config["lateralSNRcut"]->dValue());
             lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
-              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", newPulses, results);
-              R_0_NS = results.asDouble("R_0");
-              sigR_0_NS = results.asDouble("sigR_0");
-              eps_NS = results.asDouble("eps");
-              sigeps_NS = results.asDouble("sigeps");
-              chi2NDF_NS = results.asDouble("chi2NDF");
-              //CutCloseToCore_NS = results.asInt("CutCloseToCore");
-              //CutSmallSignal_NS = results.asInt("CutSmallSignal");
-              //CutBadTiming_NS = results.asInt("CutBadTiming");
-              //CutSNR_NS = results.asInt("CutSNR");
-              latMeanDist_NS = results.asDouble("latMeanDist");
-              NlateralAntennas_NS = results.asuInt("NlateralAntennas");
+              Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
+                                                                       calibPulsesMap, map <int, PulseProperties>(),
+                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"));
+              R_0_NS  = latResults.asDouble("R_0");
+              sigR_0_NS  = latResults.asDouble("sigR_0");
+              eps_NS  = latResults.asDouble("eps");
+              sigeps_NS  = latResults.asDouble("sigeps");
+              chi2NDF_NS  = latResults.asDouble("chi2NDF");
+              latMeanDist_NS  = latResults.asDouble("latMeanDist");
+              NlateralAntennas_NS  = latResults.asuInt("NlateralAntennas");
             }
 
             // plot lateral distribution of arrival times, if requested
@@ -2227,18 +2223,16 @@ int main (int argc, char *argv[])
             lateralFitter.setLateralSNRcut(config["lateralSNRcut"]->dValue());
             lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
-              lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-", newPulses, results);
-              R_0_VE = results.asDouble("R_0");
-              sigR_0_VE = results.asDouble("sigR_0");
-              eps_VE = results.asDouble("eps");
-              sigeps_VE = results.asDouble("sigeps");
-              chi2NDF_VE = results.asDouble("chi2NDF");
-              //CutCloseToCore_VE = results.asInt("CutCloseToCore");
-              //CutSmallSignal_VE = results.asInt("CutSmallSignal");
-              //CutBadTiming_VE = results.asInt("CutBadTiming");
-              //CutSNR_VE = results.asInt("CutSNR");
-              latMeanDist_VE = results.asDouble("latMeanDist");
-              NlateralAntennas_VE = results.asuInt("NlateralAntennas");
+              Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
+                                                                       calibPulsesMap, map <int, PulseProperties>(),
+                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"));
+              R_0_VE = latResults.asDouble("R_0");
+              sigR_0_VE = latResults.asDouble("sigR_0");
+              eps_VE = latResults.asDouble("eps");
+              sigeps_VE = latResults.asDouble("sigeps");
+              chi2NDF_VE = latResults.asDouble("chi2NDF");
+              latMeanDist_VE = latResults.asDouble("latMeanDist");
+              NlateralAntennas_VE = latResults.asuInt("NlateralAntennas");
             }
 
             // plot lateral distribution of arrival times, if requested
