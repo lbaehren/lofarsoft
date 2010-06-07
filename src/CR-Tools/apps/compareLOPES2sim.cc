@@ -246,6 +246,7 @@ cout<<""<<Gt<<endl;
                 PulseProperties simPropEW;
                 simPropEW.antennaID = NantS; //antennaid vs antenna no?
                 simPropEW.height = EWfield;
+               cout<<"EW Field  "<<EWfield<<endl;
                 simPropEW.heightError = 0.;
                 double distanceR=m_recEW[NantS].dist;
                 if ((distanceS-distanceR)>(distanceS*0.01)) {
@@ -265,6 +266,7 @@ cout<<""<<Gt<<endl;
                 PulseProperties simPropNS;
                 simPropNS.antennaID = NantS; //antennaid vs antenna no?
                 simPropNS.height = NSfield;
+               cout<<"NS Field  "<<NSfield<<endl;
                 simPropNS.heightError = 0.;
                 double distanceR=m_recEW[NantS].dist;
                 simPropNS.dist =distanceR;

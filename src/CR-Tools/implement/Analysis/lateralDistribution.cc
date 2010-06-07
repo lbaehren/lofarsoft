@@ -243,10 +243,10 @@ namespace CR { // Namespace CR -- begin
 
         // fit exponential
         TF1 *fitfuncExp;
-        //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-x/[1])",50,190);
-        fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
-        //fitfuncExp->SetParName(0,"#epsilon_{0}");
-        fitfuncExp->SetParName(0,"#epsilon_{100}");
+        fitfuncExp=new TF1("fitfuncExp","[0]*exp(-x/[1])",50,190);
+        //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
+        fitfuncExp->SetParName(0,"#epsilon_{0}");
+        //fitfuncExp->SetParName(0,"#epsilon_{100}");
         fitfuncExp->SetParName(1,"R_{0}");
         fitfuncExp->SetParameter(1,200);
         //fitfuncExp->FixParameter(1,461.8-285.8);
@@ -349,8 +349,7 @@ namespace CR { // Namespace CR -- begin
         if (pulsesSim[antID[ant]].antennaID != antID[ant]) { // consistency check
           cerr << "\nlateralDistribution::fitLateralDistribution: antenna IDs of data and simulation do not match. Aborting...\n" << endl;
           //return Record();
-          ++ant;
-          continue;
+          continue; //this antennas are not counted!
         }
         
         fieldStrSim[ant] = pulsesSim[antID[ant]].height;
@@ -518,7 +517,7 @@ namespace CR { // Namespace CR -- begin
         //fitfuncExp->FixParameter(1,461.8-285.8);
         fitfuncExp->GetXaxis()->SetRange(10,120);
         fitfuncExp->GetXaxis()->SetRangeUser(10,120);
-        fitfuncExp->GetXaxis()->SetLimits(10,120);
+        //fitfuncExp->GetXaxis()->SetLimits(10,120);
         fitfuncExp->SetFillStyle(0);
         fitfuncExp->SetLineWidth(2);
 
@@ -535,7 +534,7 @@ namespace CR { // Namespace CR -- begin
         //fitfuncExpS->FixParameter(1,461.8-285.8);
         fitfuncExpS->GetXaxis()->SetRange(10,120);
         fitfuncExpS->GetXaxis()->SetRangeUser(10,120);
-        fitfuncExpS->GetXaxis()->SetLimits(10,120);
+        //fitfuncExpS->GetXaxis()->SetLimits(10,120);
         fitfuncExpS->SetFillStyle(0);
         fitfuncExpS->SetLineWidth(2);
 
