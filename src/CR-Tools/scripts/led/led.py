@@ -180,7 +180,9 @@ class ApplicationWindow(QtGui.QMainWindow):
 
         # Setup plot axes
         self.display.ax = self.display.fig.add_subplot(111, projection='polar')
-#        self.display.ax.set_rscale('log')
+        if self.distancePlot:
+            self.display.ax.set_rscale('log')
+        
         self.display.ax.set_ylim(self.rlim)
 
     def resetBuffers(self):
@@ -276,7 +278,10 @@ class ApplicationWindow(QtGui.QMainWindow):
                     #print 'time is: ' + str(self.time[self.i])
                     self.phi[self.i] = float(values[phiKey]) + random.gauss(0.0, randomizationInDegrees)
                     #print self.phi[self.i]
-                    self.theta[self.i] = float(values[thetaKey]) + random.gauss(0.0, randomizationInDegrees)
+                    if not self.distancePlot:
+                        self.theta[self.i] = float(values[thetaKey]) + random.gauss(0.0, randomizationInDegrees)
+                    else:
+                        self.theta[self.i] = float(values[distanceKey])
                     #print self.theta[self.i]
                     # Reuse data buffer by cycling through it's indices
                     if self.i>=self.buffersize-1:
@@ -325,12 +330,18 @@ class ApplicationWindow(QtGui.QMainWindow):
 
         # Add selected data points to plot (if any)
         if len(ind)>0:
-            self.display.ax.scatter(self.phi[ind] * 2*np.pi / 360.0, 90.0 - self.theta[ind], c=self.c[ind], lw=0)
+            if not self.distancePlot:
+                self.display.ax.scatter(self.phi[ind] * 2*np.pi / 360.0, 90.0 - self.theta[ind], c=self.c[ind], lw=0, s=80)
+            else:
+                self.display.ax.scatter(self.phi[ind] * 2*np.pi / 360.0, self.theta[ind], c=self.c[ind], lw=0, s=80)
+
             #print 'Plotting theta = ' + str(self.theta[ind]) + ' phi = ' + str(self.phi[ind])
         else:
             print 'No points to plot'
-#        self.display.ax.set_rscale('log')
+        if self.distancePlot:
+            self.display.ax.set_rscale('log')
         self.display.ax.set_ylim(self.rlim)
+  
 #        self.display.ax.set_xlim(360.0)
         # Display time
 #        for the time being hacked out 'UTC'
