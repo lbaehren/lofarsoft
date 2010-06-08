@@ -157,7 +157,7 @@ class LOFARrecipe(WSRTrecipe):
 
 
         if not self.inputs['default_working_directory']:
-            self.inputs["runtime_directory"] = self.config.get(
+            self.inputs["default_working_directory"] = self.config.get(
                 "DEFAULT", "default_working_directory"
             )
         else:
