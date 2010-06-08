@@ -52,7 +52,8 @@ namespace CR { // Namespace CR -- begin
       calibPulses( map<int,PulseProperties>() ),
       coreError(0.),
       zenithError(0.),
-      azimuthError(0.)
+      azimuthError(0.),
+      noiseMethod(4)
   {;}
 
   // ============================================================================
@@ -320,8 +321,8 @@ namespace CR { // Namespace CR -- begin
         if (fiterg.asBool("CCconverged")) {
           if (CalculateMaxima) {
             calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
-                                                            false, fiterg.asDouble("CCcenter"),
-                                                            4, fiterg.asDouble("CCcenter") - 10.5e-6, fiterg.asDouble("CCcenter") - 0.5e-6);
+                                                            false, fiterg.asDouble("CCcenter"), noiseMethod,
+                                                            fiterg.asDouble("CCcenter") - 10.5e-6, fiterg.asDouble("CCcenter") - 0.5e-6);
             caculateNoiseInfluence();
           }                                                
           // user friendly list of calculated maxima
@@ -1127,9 +1128,19 @@ namespace CR { // Namespace CR -- begin
   }
 
 
-  void analyseLOPESevent2::caculateNoiseInfluence ()
+  void analyseLOPESevent2::caculateNoiseInfluence (bool correctInfluence)
   {
     try {
+      if (!correctInfluence) {
+        cout << "\nCorrecting amplitudes for noise influence is turned OFF!\n" << endl;
+        for(map<int,PulseProperties>::iterator it=calibPulses.begin(); it !=calibPulses.end(); ++it) { 
+          it->second.height = it->second.envelopeMaximum;          
+          it->second.heightError = it->second.noise;
+          it->second.time = it->second.envelopeTime;
+          it->second.timeError = 2;
+        }
+      }
+    
       cout << "\nCorrecting amplitudes for noise influence, and calculating errorbars.\n" << endl;
       
       // Apply correction formulas from noise study (see PhD thesis of Frank Schröder, in preperation)

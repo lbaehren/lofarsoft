@@ -108,6 +108,9 @@ namespace CR { // Namespace CR -- begin
 
     //! Selection of all antennas with the correct polarization
     Vector<Bool> PolarizationAntennaSelection;
+    
+    //! Method for noise calculation (default: 4, Steffen's method: 0)
+    int noiseMethod;
 
     /*!
       \brief clear the object (make it ready for the next event)
@@ -591,9 +594,11 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Incorporates noise influence to measured, calibrated pulses: amplitude correction + error calculation
+      
+      \param correctInfluence   - if false, the noise influence is not corrected!
     */
 
-    void caculateNoiseInfluence ();
+    void caculateNoiseInfluence (bool correctInfluence = true);
 
   };
 

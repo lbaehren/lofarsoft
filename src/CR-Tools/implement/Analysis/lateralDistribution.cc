@@ -75,7 +75,9 @@ namespace CR { // Namespace CR -- begin
   Record lateralDistribution::fitLateralDistribution (const string filePrefix,
                                                       map <int, PulseProperties> pulsesRec,
                                                       map <int, PulseProperties> pulsesSim,
-                                                      int Gt, double az, double ze)
+                                                      int Gt, double az, double ze,
+                                                      const string& index1,
+                                                      const string& index2)
   {
     Record erg;
     try {
@@ -279,15 +281,25 @@ namespace CR { // Namespace CR -- begin
 
       /* Fit exponential decrease */
       // do fit only if there are at least 3 antennas (otherwise set parameters to 0)!
+      string epsName;
+      string R0Name;
       if (ant >= 3) {
+        // define names for statistics
+        if (index1 != "") {
+          epsName = "#epsilon_{0}- " + index1;
+          R0Name = "R_{0}- " + index1;
+        } else {
+          epsName = "#epsilon_{0}";
+          R0Name = "R_{0}";
+        }
+      
         // fit exponential
         TF1 *fitfuncExp;
         fitfuncExp=new TF1("fitfuncExp","[0]*exp(-x/[1])",0.,maxdist*1.1);
         //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
-        fitfuncExp->SetParName(0,"#epsilon_{0}");
-        //fitfuncExp->SetParName(0,"#epsilon_{100}");
+        fitfuncExp->SetParName(0,epsName.c_str());
         fitfuncExp->SetParameter(0,20);
-        fitfuncExp->SetParName(1,"R_{0}");
+        fitfuncExp->SetParName(1,R0Name.c_str());
         fitfuncExp->SetParameter(1,100);
         fitfuncExp->SetFillStyle(0);
         fitfuncExp->SetLineWidth(2);
@@ -314,13 +326,20 @@ namespace CR { // Namespace CR -- begin
 
         if (fitSim) {        
           cout << "-------- SIMULATIONS ---------"<<endl;
+          // define names for statistics
+          if (index2 != "") {
+            epsName = "#epsilon_{0}- " + index2;
+            R0Name = "R_{0}- " + index2;
+          } else {
+            epsName = "#epsilon_{0}";
+            R0Name = "R_{0}";
+          }
           TF1 *fitfuncExpS;
           fitfuncExpS=new TF1("fitfuncExpS","[0]*exp(-x/[1])",0.,maxdist*1.1);
           //fitfuncExpS=new TF1("fitfuncExpS","[0]*exp(-(x-100)/[1])",50,190);
-          fitfuncExpS->SetParName(0,"#epsilonSim_{0}");
-          //fitfuncExpS->SetParName(0,"#epsilon_{100}");
+          fitfuncExpS->SetParName(0,epsName.c_str());
           fitfuncExpS->SetParameter(0,20);
-          fitfuncExpS->SetParName(1,"RSim_{0}");
+          fitfuncExpS->SetParName(1,R0Name.c_str());
           fitfuncExpS->SetParameter(1,100);
           fitfuncExpS->SetFillStyle(0);
           fitfuncExpS->SetLineWidth(2);
@@ -330,11 +349,11 @@ namespace CR { // Namespace CR -- begin
 
           // write fit results to record with other results
           erg.define("eps_sim",fitfuncExpS->GetParameter(0));
-          erg.define("R_0sim",fitfuncExpS->GetParameter(1));
+          erg.define("R_0_sim",fitfuncExpS->GetParameter(1));
           // error of epsilon = error of fit + 10 % energy uncertainty
           double sigmaEpsilon_sim = sqrt(pow(fitfuncExpS->GetParError(0),2)+pow((0.10*fitfuncExpS->GetParameter(0)),2));
           erg.define("sigeps_sim",sigmaEpsilon_sim);
-          erg.define("sigR_0sim",fitfuncExpS->GetParError(1));
+          erg.define("sigR_0_sim",fitfuncExpS->GetParError(1));
           erg.define("chi2NDF_sim",fitfuncExpS->GetChisquare()/double(fitfuncExpS->GetNDF()));
 
           cout << "Result of exponential fit eps * e^(-x/R_0):\n"

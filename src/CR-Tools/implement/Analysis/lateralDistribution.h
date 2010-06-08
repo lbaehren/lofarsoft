@@ -169,32 +169,36 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
 
  
-    /*!
-      \brief Plots lateral distribution of pulse arrival times
+     /*!
+       \brief Plots lateral distribution of pulse arrival times
+ 
+       \param filePrefix - the filename will be prefix+GT+".dat".
+       \param pulsesRec  - map with information about pulses from LOPES data
+       \param pulsesSim  - map with information about pulses from simulated data (leave it empty if there is no simulation)
+       \param Gt         - gt from the pipeline root file
+       \param az         - azimuth from the pipeline root file
+       \param ze         - zenith from the pipeline root file
+       \param index1     - index for statistics box
+       \param index2     - index for statistics box
+    */
 
-      \param filePrefix - the filename will be prefix+GT+".dat".
-      \param pulsesRec  - map with information about pulses from LOPES data
-      \param pulsesSim  - map with information about pulses from simulated data (leave it empty if there is no simulation)
-      \param Gt         - gt from the pipeline root file
-      \param az         - azimuth from the pipeline root file
-      \param ze         - zenith from the pipeline root file
-   */
-
-  Record fitLateralDistribution (const string filePrefix,
-                                 map <int, PulseProperties> pulsesRec,
-                                 map <int, PulseProperties> pulsesSim,
-                                 int Gt, double az, double ze);
+    Record fitLateralDistribution (const string filePrefix,
+                                   map <int, PulseProperties> pulsesRec,
+                                   map <int, PulseProperties> pulsesSim,
+                                   int Gt, double az, double ze,
+                                   const string& index1 = "",
+                                   const string& index2 = "2");
                                      
-   /*!
-      \brief Plots lateral distribution of pulse arrival times
+    /*!
+       \brief Plots lateral distribution of pulse arrival times
 
-      \param filePrefix - the filename will be prefix+GT+".dat".
-      \param pulses     - map with information about pulses
-      \param erg        - results of the pipeline (results from the fit will be added)
-   */
-   void lateralTimeDistribution (const string& filePrefix,
-                                 map <int, PulseProperties>& pulses,
-                                 Record& erg);
+       \param filePrefix - the filename will be prefix+GT+".dat".
+       \param pulses     - map with information about pulses
+       \param erg        - results of the pipeline (results from the fit will be added)
+    */
+    void lateralTimeDistribution (const string& filePrefix,
+                                  map <int, PulseProperties>& pulses,
+                                  Record& erg);
                                    
   };
 } // Namespace CR -- end
