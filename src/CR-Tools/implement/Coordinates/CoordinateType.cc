@@ -322,17 +322,19 @@ namespace CR { // Namespace CR -- begin
 					double const &increment,
 					double const &refPixel)
   {
-    Vector<casa::String> names (nofAxes,name);
-    Vector<casa::String> units (nofAxes,unit);
-    Vector<double> crval (nofAxes,refValue);
-    Vector<double> cdelt (nofAxes,increment);
-    Vector<double> crpix (nofAxes,refPixel);
+    LinearCoordinate coord;
+
+#ifdef HAVE_CASA
+    DAL::CoordinateGenerator::makeCoordinate (coord,
+					      nofAxes,
+					      name,
+					      unit,
+					      refValue,
+					      increment,
+					      refPixel);
+#endif
     
-    return makeLinearCoordinate (names,
-				 units,
-				 crval,
-				 cdelt,
-				 crpix);
+    return coord;
   }
   
   //_____________________________________________________________________________
@@ -343,33 +345,16 @@ namespace CR { // Namespace CR -- begin
 					Vector<casa::String> const &names,
 					Vector<casa::String> const &units)
   {
-    Vector<casa::Double> crpix(nofAxes,0.0);
-    Vector<casa::Double> crval(nofAxes,0.0);
-    Vector<casa::Double> cdelt(nofAxes,1.0);
-    Matrix<casa::Double> pc(nofAxes,nofAxes,0.0);
+    LinearCoordinate coord;
     
-    pc.diagonal() = 1.0;
+#ifdef HAVE_CASA
+    DAL::CoordinateGenerator::makeCoordinate (coord,
+					      nofAxes,
+					      names,
+					      units);
+#endif
     
-    if (nofAxes == names.nelements() && nofAxes == units.nelements()) {
-      return LinearCoordinate (names,
-			       units,
-			       crval,
-			       cdelt,
-			       pc,
-			       crpix);
-    } else {
-      std::cerr << "[CoordinateType::makeLinearCoordinate] " 
-		<< "Mismatch in rank of parameter vectors!" << std::endl;
-      std::cerr << "-- nofAxes = " << nofAxes << std::endl;
-      std::cerr << "-- names   = " << names   << std::endl;
-      std::cerr << "-- units   = " << units   << std::endl;
-      return LinearCoordinate (Vector<casa::String>(nofAxes,names(0)),
-			       Vector<casa::String>(nofAxes,units(0)),
-			       crval,
-			       cdelt,
-			       pc,
-			       crpix);
-    }
+    return coord;
   }
   
   //_____________________________________________________________________________
@@ -382,19 +367,16 @@ namespace CR { // Namespace CR -- begin
 					Vector<double> const &increment,
 					Vector<double> const &refPixel)
   {
-    uint rank = refValue.nelements();
-    casa::Matrix<double> pc (rank,rank,0.0);
-    
-    for (uint n(0); n<rank; ++n) {
-      pc(n,n) = 1.0;
-    }
-    
-    LinearCoordinate coord (names,
-			    units,
-			    refValue,
-			    increment,
-			    pc,
-			    refPixel);
+    LinearCoordinate coord;
+
+#ifdef HAVE_CASA
+    DAL::CoordinateGenerator::makeCoordinate (coord,
+					      names,
+					      units,
+					      refValue,
+					      increment,
+					      refPixel);
+#endif
     
     return coord;
   }

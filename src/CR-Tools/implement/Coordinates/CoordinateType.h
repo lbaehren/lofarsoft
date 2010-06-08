@@ -40,9 +40,12 @@
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/TabularCoordinate.h>
 
-// CR-Tools
+/* CR-Tools header files */
 #include <crtools.h>
 #include <Coordinates/MConversions.h>
+
+/* DAL header files */
+#include <CoordinateGenerator.h>
 
 using casa::Coordinate;
 using casa::LinearCoordinate;
