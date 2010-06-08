@@ -109,7 +109,7 @@ class vdsmaker(LOFARrecipe):
         # Combine VDS files to produce GDS
         self.logger.info("Combining VDS files")
         executable = self.inputs['combinevds']
-        gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gvds'])
+        gvds_out = self.inputs['gvds']
         try:
             command = [executable, gvds_out] + vdsnames
             combineproc = subprocess.Popen(

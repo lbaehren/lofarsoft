@@ -25,11 +25,6 @@ class bbs(LOFARrecipe):
             help="Initscript to source (ie, lofarinit.sh)"
         )
         self.optionparser.add_option(
-            '-g', '--g(v)ds-file',
-            dest="gvds",
-            help="G(V)DS file describing data to be processed"
-        )
-        self.optionparser.add_option(
             '-p', '--parset', 
             dest="parset",
             help="BBS configuration parset"
@@ -140,9 +135,10 @@ class bbs(LOFARrecipe):
             # Now set up a vdsmaker recipe to build a GDS file describing the
             # processed data
             self.logger.info("Calling vdsmaker")
+            bbs_gvds = tempfile.mkstemp()[1]
             inputs = LOFARinput(self.inputs)
             inputs['directory'] = self.config.get('layout', 'vds_directory')
-            inputs['gvds'] = self.inputs['gvds']
+            inputs['gvds'] = bbs_gvds
             inputs['args'] = data_group
             inputs['makevds'] = self.inputs['makevds_exec']
             inputs['combinevds'] = self.inputs['combinevds_exec']
@@ -151,10 +147,6 @@ class bbs(LOFARrecipe):
                 self.logger.warn("vdsmaker reports failure")
                 return 1
 
-            bbs_gvds = os.path.join(
-                self.config.get("layout", "vds_directory"),
-                self.inputs['gvds']
-            )
             self.logger.info("Using %s for %s gvds" %
                 (bbs_gvds, "BBS")
             )
