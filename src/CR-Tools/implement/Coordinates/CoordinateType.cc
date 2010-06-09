@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <Coordinates/CoordinateType.h>
+#include <dal/CoordinateGenerator.h>
 
 namespace CR { // Namespace CR -- begin
 
@@ -74,6 +75,9 @@ namespace CR { // Namespace CR -- begin
 
   //________________________________________________________________________ name
 
+  /*!
+    \return name -- The name of the coordinate type
+  */
   std::string CoordinateType::name ()
   {
     return getName (type_p);
@@ -81,6 +85,10 @@ namespace CR { // Namespace CR -- begin
   
   //_____________________________________________________________________ getName
 
+  /*!
+    \param type  -- 
+    \return name -- The name of the coordinate type
+  */
   std::string CoordinateType::getName (CoordinateType::Types const &type)
   {
     std::string name;
@@ -126,6 +134,13 @@ namespace CR { // Namespace CR -- begin
   
   //_______________________________________________________________ hasProjection
   
+  /*!
+    \param coord -- Coordinate type to check
+    
+    \return hasProjection -- <tt>true</tt> if the coordinate type contains a
+            spherical map projection; this is the case if the coordinate is
+	    composed of at least one object of type casa::DirectionCoordinate.
+  */
   bool CoordinateType::hasProjection (CoordinateType::Types const &coord)
   {
     switch (coord) {
@@ -248,179 +263,33 @@ namespace CR { // Namespace CR -- begin
   CoordinateType::makeDirectionCoordinate (casa::MDirection::Types const &directionType,
 					   casa::Projection::Type const &projectionType)
   {
+    casa::DirectionCoordinate coord;
     unsigned int nofAxes (2);
-    Vector<Quantum<double> > refValue (nofAxes);
-    Vector<Quantum<double> > increment (nofAxes);
+    Vector<casa::Quantum<double> > refValue (nofAxes);
+    Vector<casa::Quantum<double> > increment (nofAxes);
     Vector<double> refPixel (nofAxes);
 
-    refValue(0)  = Quantum<double> (0,"deg");
-    refValue(1)  = Quantum<double> (90,"deg");
-    increment(0) = Quantum<double> (-1,"deg");
-    increment(1) = Quantum<double> (1,"deg");
+    refValue(0)  = casa::Quantum<double> (0,"deg");
+    refValue(1)  = casa::Quantum<double> (90,"deg");
+    increment(0) = casa::Quantum<double> (-1,"deg");
+    increment(1) = casa::Quantum<double> (1,"deg");
     refPixel(0)  = 0;
     refPixel(1)  = 0;
     
-    return makeDirectionCoordinate (directionType,
-				    projectionType,
-				    refValue,
-				    increment,
-				    refPixel);
-  }
-  
-  // ---------------------------------------------------- makeDirectionCoordinate
-  
-  casa::DirectionCoordinate
-  CoordinateType::makeDirectionCoordinate (casa::MDirection::Types const &directionType,
-					   casa::Projection::Type const &projectionType,
-					   Vector<Quantum<double> > const &refValue,
-					   Vector<Quantum<double> > const &increment,
-					   Vector<double> const &refPixel)
-  {
-    unsigned int nofAxes (2);
-    casa::Matrix<casa::Double> xform(nofAxes,nofAxes);
-
-    try {
-      xform            = 0.0;
-      xform.diagonal() = 1.0;
-    } catch (casa::AipsError x) {
-      std::cerr << "[CoordinateType::makeDirectionCoordinate] " << x.getMesg()
-		<< std::endl;
-    }
-
-    /* Check the dimensions of the vectors with the input parameters */
-    
-    if (refValue.nelements() == nofAxes
-	&& increment.nelements() == nofAxes
-	&& refPixel.nelements() == nofAxes) {
-      return casa::DirectionCoordinate (directionType,
-					casa::Projection(projectionType),
-					refValue(0),
-					refValue(1),
-					increment(0),
-					increment(1),
-					xform,
-					refPixel(0),
-					refPixel(1));
-    } else {
-      /* Cast error message*/
-      std::cerr << "[CoordinateType::makeDirectionCoordinate]" << std::endl;
-      std::cerr << "" << std::endl;
-      /* Make direction coordinate with minimal consistent set of parameters */
-      return makeDirectionCoordinate (directionType,
-				      projectionType);
-    }
-  }
-  
-  //_____________________________________________________________________________
-  //                                                         makeLinearCoordinate
-  
-  LinearCoordinate
-  CoordinateType::makeLinearCoordinate (unsigned int const &nofAxes,
-					casa::String const &name,
-					casa::String const &unit,
-					double const &refValue,
-					double const &increment,
-					double const &refPixel)
-  {
-    LinearCoordinate coord;
-
-#ifdef HAVE_CASA
     DAL::CoordinateGenerator::makeCoordinate (coord,
-					      nofAxes,
-					      name,
-					      unit,
+					      directionType,
+					      projectionType,
 					      refValue,
 					      increment,
 					      refPixel);
-#endif
     
     return coord;
-  }
-  
-  //_____________________________________________________________________________
-  //                                                         makeLinearCoordinate
-  
-  LinearCoordinate
-  CoordinateType::makeLinearCoordinate (unsigned int const &nofAxes,
-					Vector<casa::String> const &names,
-					Vector<casa::String> const &units)
-  {
-    LinearCoordinate coord;
-    
-#ifdef HAVE_CASA
-    DAL::CoordinateGenerator::makeCoordinate (coord,
-					      nofAxes,
-					      names,
-					      units);
-#endif
-    
-    return coord;
-  }
-  
-  //_____________________________________________________________________________
-  //                                                         makeLinearCoordinate
-  
-  LinearCoordinate
-  CoordinateType::makeLinearCoordinate (Vector<casa::String> const &names,
-					Vector<casa::String> const &units,
-					Vector<double> const &refValue,
-					Vector<double> const &increment,
-					Vector<double> const &refPixel)
-  {
-    LinearCoordinate coord;
-
-#ifdef HAVE_CASA
-    DAL::CoordinateGenerator::makeCoordinate (coord,
-					      names,
-					      units,
-					      refValue,
-					      increment,
-					      refPixel);
-#endif
-    
-    return coord;
-  }
-  
-  
-  //_____________________________________________________________________________
-  //                                                       makeSpectralCoordinate
-  
-  SpectralCoordinate
-  CoordinateType::makeSpectralCoordinate (double const &refValue,
-					  double const &increment,
-					  double const &refPixel)
-  {
-    Vector<String> names (1,"Frequency");
-    
-    casa::SpectralCoordinate coord (casa::MFrequency::TOPO,
-				    refValue,
-				    increment,
-				    refPixel);
-    
-    coord.setWorldAxisNames(names);
-    
-    return coord;
-  }
-
-  //_____________________________________________________________________________
-  //                                                         makeStokesCoordinate
-  
-  casa::StokesCoordinate CoordinateType::makeStokesCoordinate ()
-  {
-    Vector<casa::Int> iquv(4);
-    
-    iquv(0) = casa::Stokes::I;
-    iquv(1) = casa::Stokes::Q;
-    iquv(2) = casa::Stokes::U;
-    iquv(3) = casa::Stokes::V;
-    
-    return casa::StokesCoordinate (iquv);
   }
   
   //_____________________________________________________________________________
   //                                                           makeTimeCoordinate
   
-  LinearCoordinate
+  casa::LinearCoordinate
   CoordinateType::makeTimeCoordinate (double const &refValue,
 				      double const &increment,
 				      double const &refPixel)
@@ -432,17 +301,17 @@ namespace CR { // Namespace CR -- begin
     Matrix<double> pc    (1,1,1.0);
     Vector<double> crpix (1,refPixel);
     
-    return LinearCoordinate (names,
-			     units,
-			     crval,
-			     inc,
-			     pc,
-			     crpix);
+    return casa::LinearCoordinate (names,
+				   units,
+				   crval,
+				   inc,
+				   pc,
+				   crpix);
   }
   
   // ------------------------------------------------------------------------------
   
-  LinearCoordinate
+  casa::LinearCoordinate
   CoordinateType::makeFaradayCoordinate (double const &refValue,
 					 double const &increment,
 					 double const &refPixel)

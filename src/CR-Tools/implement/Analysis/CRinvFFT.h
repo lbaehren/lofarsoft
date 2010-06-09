@@ -44,6 +44,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class CRinvFFT
     
+    \ingroup CR
     \ingroup Analysis
     
     \brief Calculate (shifted) inverse FFT and beams for the CR pipeline
@@ -73,16 +74,18 @@ namespace CR { // Namespace CR -- begin
   */  
   class CRinvFFT : public SecondStagePipeline {
 
+    // === Protected Methods ====================================================
+
   protected:
 
     //! Record to store direction parameters
-    Record DirParams_p;
+    casa::Record DirParams_p;
     
     //! Unmodified antenna positions, i.e. relative to coordinate system and not shower core.
-    Matrix<Double> AntPositions_p;
+    casa::Matrix<casa::Double> AntPositions_p;
 
     //! Are the antenna positions valid?
-    Bool AntPosValid_p;
+    casa::Bool AntPosValid_p;
 
     //! For which event (observation time) was the antenna position data cached
     uInt posCachedDate_p;   
@@ -91,20 +94,18 @@ namespace CR { // Namespace CR -- begin
     CalTableInterpolater<casa::Double> *InterAntGain_p;
 
     //! Value of the extra delay
-    Double ExtraDelay_p;
+    casa::Double ExtraDelay_p;
 
     //! Geometrical delays from the beam forming in GetShiftedFFT
-    Matrix<double> GeomDelays_p;
+    casa::Matrix<double> GeomDelays_p;
 
     //@{
     //! Data for the polarization selection cache
-    Bool ploAntSelValid_p;
-    uInt ploAntSelDate_p;
-    String ploAntSelPol_p;
-    Vector<Bool> ploAntSel_p;
+    casa::Bool ploAntSelValid_p;
+    casa::uInt ploAntSelDate_p;
+    casa::String ploAntSelPol_p;
+    casa::Vector<casa::Bool> ploAntSel_p;
     //@}
-
-    // ---------------------------------------------------------- Private Methods
 
     /*!
       \brief Initialize the CalTableInterpolater for the antenna gain
@@ -118,19 +119,15 @@ namespace CR { // Namespace CR -- begin
     
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     CRinvFFT ();
     
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~CRinvFFT ();
     
-    // --------------------------------------------------------------- Parameters
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class
@@ -206,8 +203,7 @@ namespace CR { // Namespace CR -- begin
     */
     Matrix<Double> GetAntPositions(DataReader *dr=NULL, bool substractReference = true);
 
-    // ------------------------------------------------------------------ Methods
-    
+    // === Methods ==============================================================
 
     /*!
       \brief Get the "shifted" and calibrated frequency domain data
@@ -240,9 +236,10 @@ namespace CR { // Namespace CR -- begin
       \brief Get the CCBeam
       
       \param dr - Pointer to the (initialized) DataReader
-      \param antennaSelection - (Optional) Vector of bool to select only part of the antennas.
-      \param Polarization - (Optional) Polarization type to select only part of the antennas
-                            ("ANY" ignore antenna polarization)
+      \param antennaSelection - (Optional) Vector of bool to select only part of
+             the antennas.
+      \param Polarization - (Optional) Polarization type to select only part of
+             the antennas ("ANY" ignore antenna polarization)
 
       \return The formed cc-beam
     */

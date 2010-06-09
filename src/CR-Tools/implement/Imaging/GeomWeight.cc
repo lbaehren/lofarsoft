@@ -134,6 +134,7 @@ namespace CR { // Namespace CR -- begin
   //                                                                   GeomWeight
 
   GeomWeight::GeomWeight (GeomWeight const &other)
+    : GeomPhase(other)
   {
     copy (other);
   }

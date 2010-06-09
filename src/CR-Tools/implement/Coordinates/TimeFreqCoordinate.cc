@@ -549,19 +549,22 @@ namespace CR { // Namespace CR -- begin
     // Set up the internal coordinate objects
     
     if (timeAxisLast_p) {
-      coordFrequency_p = CoordinateType::makeSpectralCoordinate (crval(1),
-								 cdelt(1));
+      DAL::CoordinateGenerator::makeCoordinate (coordFrequency_p,
+						crval(1),
+						cdelt(1));
       coordTime_p      = CoordinateType::makeTimeCoordinate(crval(0),
 							    cdelt(0));
     } else {
       coordTime_p      = CoordinateType::makeTimeCoordinate(crval(0),
 							    cdelt(0));
-      coordFrequency_p = CoordinateType::makeSpectralCoordinate (crval(1),
-								 cdelt(1));
+      DAL::CoordinateGenerator::makeCoordinate (coordFrequency_p,
+						crval(1),
+						cdelt(1));
     }
   }
-
-  // ------------------------------------------------------------------ increment
+  
+  //_____________________________________________________________________________
+  //                                                                    increment
   
   Vector<double> TimeFreqCoordinate::increment ()
   {
@@ -578,7 +581,8 @@ namespace CR { // Namespace CR -- begin
     return cdelt;
   }
 
-  // ------------------------------------------------------------- worldAxisNames
+  //_____________________________________________________________________________
+  //                                                               worldAxisNames
   
   Vector<casa::String> TimeFreqCoordinate::worldAxisNames ()
   {
@@ -595,7 +599,8 @@ namespace CR { // Namespace CR -- begin
     return names;
   }
 
-  // ------------------------------------------------------------- worldAxisUnits
+  //_____________________________________________________________________________
+  //                                                               worldAxisUnits
   
   Vector<casa::String> TimeFreqCoordinate::worldAxisUnits ()
   {

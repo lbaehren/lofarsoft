@@ -24,15 +24,14 @@
 #ifndef CR_TIMEFREQSKYMAP_H
 #define CR_TIMEFREQSKYMAP_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <iostream>
 #include <string>
 
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/LinearCoordinate.h>
-#include <coordinates/Coordinates/SpectralCoordinate.h>
+#include <dal/CoordinateGenerator.h>
 
-#include <crtools.h>
 #include <Coordinates/CoordinateBase.h>
 #include <Coordinates/CoordinateType.h>
 #include <Coordinates/TimeFreq.h>
@@ -44,6 +43,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class TimeFreqCoordinate
     
+    \ingroup CR
     \ingroup CR_Coordinates
     
     \brief Container for the time-frequency domain parameters of a skymap
@@ -225,7 +225,7 @@ namespace CR { // Namespace CR -- begin
     
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
     /*!
       \brief Default constructor
@@ -307,11 +307,9 @@ namespace CR { // Namespace CR -- begin
     */
     TimeFreqCoordinate (TimeFreqCoordinate const &other);
     
-    // -------------------------------------------------------------- Destruction
+    // === Destruction ==========================================================
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~TimeFreqCoordinate ();
     
     // ---------------------------------------------------------------- Operators

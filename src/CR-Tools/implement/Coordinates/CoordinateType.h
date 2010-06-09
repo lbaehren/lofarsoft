@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
- *   Lars B"ahren (lbaehren@gmail.com)                                     *
+ *   Lars B"ahren <bahren@astron.nl>                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,32 +28,17 @@
 #include <iostream>
 #include <string>
 
-/* casacore header files */
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/BasicSL/String.h>
-#include <casa/Quanta/Quantum.h>
-#include <coordinates/Coordinates/Coordinate.h>
+/* casacore header files*/
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
-#include <coordinates/Coordinates/StokesCoordinate.h>
-#include <coordinates/Coordinates/SpectralCoordinate.h>
-#include <coordinates/Coordinates/TabularCoordinate.h>
 
 /* CR-Tools header files */
 #include <crtools.h>
 #include <Coordinates/MConversions.h>
 
-/* DAL header files */
-#include <CoordinateGenerator.h>
-
-using casa::Coordinate;
-using casa::LinearCoordinate;
-using casa::SpectralCoordinate;
 using casa::Matrix;
 using casa::MDirection;
 using casa::Projection;
-using casa::Quantum;
 using casa::Vector;
 
 namespace CR { // Namespace CR -- begin
@@ -61,6 +46,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class CoordinateType
     
+    \ingroup CR
     \ingroup CR_Coordinates
     
     \brief Definition of the various coordinate types we are dealing with
@@ -79,45 +65,12 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Synopsis</h3>
     
-    <h3>Examples</h3>
-
-    Usage of the static functions to support the creation of various
-    casa::Coordinate objects:
-    <ol>
-      <li>Create a linear coordinate for a single axis:
-      \code
-      casa::LinearCoordinate = CoordinateType::makeLinearCoordinate (1);
-      \endcode
-      <li>Create a linear coordinate for a 3-dim  cartesian coordinate:
-      \code
-      unsigned int nofAxes (3);
-      casa::Vector<casa::String> names (nofAxes,"Length")
-      casa::Vector<casa::String> units (nofAxes,"m")
-
-      casa::LinearCoordinate = CoordinateType::makeLinearCoordinate (nofAxes,
-                                                                     names,
-								     units);
-      \endcode
-      <li>Create a direction coordinate for AZEL celestial coordinates in STG
-      projection, using the default creation settings
-      \code
-      casa::DirectionCoordinate = CoordinateType::makeDirectionCoordinate();
-      \endcode
-      or by explicit definition:
-      \code
-      casa::DirectionCoordinate = CoordinateType::makeDirectionCoordinate("AZEL",
-                                                                          "STG");
-      \endcode
-    </ol>
-
   */  
   class CoordinateType {
 
   public:
 
-    /*!
-      \brief Types of (spatial) coordinates
-    */
+    //! Types of (spatial) coordinates
     enum Types {
       //! Azimuth-Elevation-Height, \f$ \vec x = (Az,El,H) \f$
       AzElHeight,
@@ -143,11 +96,9 @@ namespace CR { // Namespace CR -- begin
       Time
     };
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
 
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     CoordinateType () {
       type_p = CoordinateType::DirectionRadius;
     }
@@ -169,7 +120,7 @@ namespace CR { // Namespace CR -- begin
     */
     CoordinateType (CoordinateType const &other);
     
-    // --------------------------------------------------------------- Parameters
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class
@@ -180,9 +131,7 @@ namespace CR { // Namespace CR -- begin
       return "CoordinateType";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }
@@ -194,7 +143,7 @@ namespace CR { // Namespace CR -- begin
     */
     void summary (std::ostream &os);
 
-    // ------------------------------------------------------------------ Methods
+    // === Methods ==============================================================
 
     /*!
       \brief Get the coordinate type
@@ -205,18 +154,10 @@ namespace CR { // Namespace CR -- begin
       return type_p;
     }
 
-    /*!
-      \brief Get the name of the coordinate type
-
-      \return name -- The name of the coordinate type
-    */
+    //! Get the name of the coordinate type
     std::string name ();
 
-    /*!
-      \brief Get the name of the coordinate type
-
-      \return name -- The name of the coordinate type
-    */
+    //! Get the name of the coordinate type
     static std::string getName (CoordinateType::Types const &type);
 
     /*!
@@ -239,15 +180,7 @@ namespace CR { // Namespace CR -- begin
       return hasProjection (type_p);
     }
     
-    /*!
-      \brief Does this coordinate type contain a spherical map projection?
-      
-      \param coord -- Coordinate type to check
-      
-      \return hasProjection -- <tt>true</tt> if the coordinate type contains a
-              spherical map projection; this is the case if the coordinate is
-	      composed of at least one object of type casa::DirectionCoordinate.
-    */
+    //! Does this coordinate type contain a spherical map projection?
     static bool hasProjection (CoordinateType::Types const &coord);
     
     /*!
@@ -405,94 +338,6 @@ namespace CR { // Namespace CR -- begin
 			       Projection::Type const &projectionType);
     
     /*!
-      \brief Create a DirectionCoordinate object
-      
-      \param directionType  -- Reference code for the celestial coordinate frame
-      \param projectionType -- Reference code for the sphercial map projection
-      \param refValue       -- Reference value, CRVAL
-      \param increment      -- Coordinate increment, CDELT
-      \param refPixel       -- Reference pixel, CRPIX
-      
-      \return coord -- DirectionCoordinate object for the selected celestial
-              coordinate frame and map projection, using the provided WCS
-	      parameters for the pixel to world conversion.
-    */
-    static
-      casa::DirectionCoordinate
-      makeDirectionCoordinate (MDirection::Types const &directionType,
-			       Projection::Type const &projectionType,
-			       Vector<Quantum<double> > const &refValue,
-			       Vector<Quantum<double> > const &increment,
-			       Vector<double> const &refPixel);
-    
-    /*!
-      \brief Create a LinearCoordinate object
-      
-      \param nofAxes -- The number of axes for which to create the coordinate
-      \param names     -- World axis names of the coordinate.
-      \param units     -- World axis units of the coordinate.
-      \param refValue  -- Reference value, CRVAL.
-      \param increment -- Coordinate increment, CDELT.
-      \param refPixel  -- Reference pixel, CRPIX.
-      
-      \return coord -- 
-    */
-    static LinearCoordinate makeLinearCoordinate (unsigned int const &nofAxes=1,
-						  casa::String const &name="Length",
-						  casa::String const &unit="m",
-						  double const &refValue=0.0,
-						  double const &increment=0.0,
-						  double const &refPixel=1.0);
-    
-    /*!
-      \brief Create a LinearCoordinate object
-
-      \param nofAxes -- The number of axes for which to create the coordinate
-      \param names   -- World axis names of the coordinate.
-      \param units   -- World axis units of the coordinate.
-      
-      \return coord -- 
-    */
-    static LinearCoordinate makeLinearCoordinate (unsigned int const &nofAxes,
-						  Vector<casa::String> const &names,
-						  Vector<casa::String> const &units);
-    
-    /*!
-      \brief Create a LinearCoordinate object
-      
-      \param names     -- World axis names of the coordinate.
-      \param units     -- World axis units of the coordinate.
-      \param refValue  -- Reference value, CRVAL.
-      \param increment -- Coordinate increment, CDELT.
-      \param refPixel  -- Reference pixel, CRPIX.
-      
-      \return coord -- 
-    */
-    static casa::LinearCoordinate makeLinearCoordinate (Vector<casa::String> const &names,
-							Vector<casa::String> const &units,
-							Vector<double> const &refValue,
-							Vector<double> const &increment,
-							Vector<double> const &refPixel);
-    
-    /*!
-      \brief Create a SpectralCoordinate object to hold a frequency axis
-      
-      \param refValue   -- Reference value, CRVAL, [s]
-      \param increment  -- Coordinate increment, CDELT, [s]
-      \param refPixel   -- Reference pixel, CRPIX
-
-      \return coord -- 
-    */
-    static SpectralCoordinate makeSpectralCoordinate (double const &refValue=0,
-						      double const &increment=0,
-						      double const &refPixel=0);
-
-    /*!
-      \brief Create a StokesCoordinate object
-    */
-    static casa::StokesCoordinate makeStokesCoordinate ();
-    
-    /*!
       \brief Create a LinearCoordinate object to hold a time coordinate
 
       \param refValue   -- Reference value, CRVAL, [s]
@@ -501,9 +346,9 @@ namespace CR { // Namespace CR -- begin
 
       \return coord --
     */
-    static LinearCoordinate makeTimeCoordinate (double const &refValue=0,
-						double const &increment=0,
-						double const &refPixel=0);
+    static casa::LinearCoordinate makeTimeCoordinate (double const &refValue=0,
+						      double const &increment=0,
+						      double const &refPixel=0);
     
     /*!
       \brief Create a LinearCoordinate object to hold a Faraday coordinate
@@ -515,10 +360,10 @@ namespace CR { // Namespace CR -- begin
       \return coord --LinearCoordinate object with
       <tt>worldAxisName="Faraday rotation"</tt> and <tt>worldAxisUnits="rad/(m)2"</tt>
     */
-    static LinearCoordinate makeFaradayCoordinate (double const &refValue=.0,
-						   double const &increment=.0,
-						   double const &refPixel=.0);
-
+    static casa::LinearCoordinate makeFaradayCoordinate (double const &refValue=.0,
+							 double const &increment=.0,
+							 double const &refPixel=.0);
+    
     /*!
       \brief Provide a summary of the internal status
       

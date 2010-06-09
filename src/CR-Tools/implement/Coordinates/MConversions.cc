@@ -41,25 +41,6 @@ namespace CR { // Namespace CR -- begin
     return tp;
   }
 
-  //_____________________________________________________________________________
-  //                                                              ProjectionNames
-  
-  std::vector<std::string> ProjectionNames ()
-  {
-    std::vector<std::string> projection;
-    
-    projection.push_back("AIR");    /* Airy                     */
-    projection.push_back("AIT");    /* Hammer-Aitoff            */
-    projection.push_back("CAR");    /* Cartesian                */
-    projection.push_back("MER");    /* Mercator                 */
-    projection.push_back("MOL");    /* Molweide                 */
-    projection.push_back("SIN");    /* Orthographics/synthesis  */
-    projection.push_back("STG");    /* Stereographic            */
-    projection.push_back("TAN");    /* Gnomonic                 */
-    
-    return projection;
-  }
-  
   // ============================================================================
   //
   //  Directions

@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Frank Schroeder (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Frank Schroeder (<mail>)                                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -51,6 +51,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class CompletePipeline
     
+    \ingroup CR
     \ingroup Analysis
     
     \brief Brief description for class CompletePipeline
@@ -111,23 +112,17 @@ namespace CR { // Namespace CR -- begin
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     CompletePipeline ();
     
     // ------------------------------------------------------------- Intialize
     
-    /*!
-      \brief Reset variables
-    */
+    //! Reset variables
     void init (void);
     
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~CompletePipeline ();
     
     // --------------------------------------------------------------- Parameters
@@ -208,8 +203,6 @@ namespace CR { // Namespace CR -- begin
     inline void setCCWindowWidth (double const &ccWindowWidth) {
       ccWindowWidth_p = ccWindowWidth;
     }
-
-
 
     /*!
       \brief Get the start frequency for the plot of the spectrum

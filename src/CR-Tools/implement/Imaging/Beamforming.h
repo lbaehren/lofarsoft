@@ -24,6 +24,8 @@
 #ifndef BEAMFORMING_H
 #define BEAMFORMING_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <string>
 
@@ -48,6 +50,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \file Beamforming.h
     
+    \ingroup CR
     \ingroup CR_Imaging
     
     \brief A collection of functions for beamforming

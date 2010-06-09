@@ -112,11 +112,13 @@ int test_SpatialCoordinate ()
   try {
     casa::Vector<casa::String> units (1,"m");
     casa::Vector<casa::String> names (1,"Length");
+    casa::LinearCoordinate linear;
     // create the coordinate objects required for the construction
     casa::DirectionCoordinate direction = CoordinateType::makeDirectionCoordinate();
-    casa::LinearCoordinate linear       = CoordinateType::makeLinearCoordinate(1,
-									       names,
-									       units);
+    DAL::CoordinateGenerator::makeCoordinate (linear,
+					      1,
+					      names,
+					      units);
     //
     SpatialCoordinate coord (direction,linear);
     //
@@ -131,10 +133,12 @@ int test_SpatialCoordinate ()
     unsigned int nofAxes (3);
     casa::Vector<casa::String> units (nofAxes,"m");
     casa::Vector<casa::String> names (nofAxes,"Length");
+    casa::LinearCoordinate linear;
     //
-    casa::LinearCoordinate linear = CoordinateType::makeLinearCoordinate(nofAxes,
-									 names,
-									 units);
+    DAL::CoordinateGenerator::makeCoordinate (linear,
+					      nofAxes,
+					      names,
+					      units);
     //
     SpatialCoordinate coord (linear,CoordinateType::Cartesian);
     coord.summary();

@@ -101,6 +101,9 @@ namespace CR { // Namespace CR -- begin
 	  bufferPhases);
   }
   
+  //_____________________________________________________________________________
+  //                                                                    GeomPhase
+
   GeomPhase::GeomPhase (Vector<MVPosition> const &antPositions,
 			Vector<MVPosition> const &skyPositions,
 			bool const &farField,
@@ -120,6 +123,7 @@ namespace CR { // Namespace CR -- begin
   //                                                                    GeomPhase
   
   GeomPhase::GeomPhase (GeomPhase const &other)
+    : GeomDelay (other)
   {
     copy (other);
   }

@@ -582,8 +582,8 @@ int test_coordinateAxes ()
 
   cout << "[1] Coordinates axes using the default methods" << endl;
   try {
-    LinearCoordinate timeAxis   = data.timeAxis();
-    SpectralCoordinate freqAxis = data.frequencyAxis();
+    casa::LinearCoordinate timeAxis   = data.timeAxis();
+    casa::SpectralCoordinate freqAxis = data.frequencyAxis();
     /* Show properties of the time axis */
     cout << "Time axis" << endl;
     CR::CoordinateType::summary(std::cout,timeAxis);
@@ -601,16 +601,16 @@ int test_coordinateAxes ()
     double increment (0.1);
     double refPixel (1);
 
-    LinearCoordinate timeAxis   = data.timeAxis(refValue,
-						increment,
-						refPixel);
-
+    casa::LinearCoordinate timeAxis   = data.timeAxis(refValue,
+						      increment,
+						      refPixel);
+    
     cout << "Time axis" << endl;
     CR::CoordinateType::summary(std::cout,timeAxis);
-
-    SpectralCoordinate freqAxis = data.frequencyAxis(refValue,
-						     increment,
-						     refPixel);
+    
+    casa::SpectralCoordinate freqAxis = data.frequencyAxis(refValue,
+							   increment,
+							   refPixel);
     
     cout << "Frequency axis" << endl;
     CR::CoordinateType::summary(std::cout,freqAxis);

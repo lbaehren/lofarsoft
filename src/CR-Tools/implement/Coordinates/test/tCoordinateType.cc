@@ -167,59 +167,6 @@ int test_CoordinateType ()
 
 // -----------------------------------------------------------------------------
 
-/*!
-  \brief Test generation of casa::Coordinate objects
-
-  \return nofFailedTests -- The number of failed tests within this function.
-*/
-int test_makeCoordinate ()
-{
-  std::cout << "\n[tCoordinateType::test_makeCoordinate]\n" << std::endl;
-
-  int nofFailedTests (0);
-
-  std::cout << "[1] Create linear coordinate with single axis ..." << std::endl;
-  try {
-    casa::LinearCoordinate coord (CoordinateType::makeLinearCoordinate());
-    // summary of the coordinate
-    CoordinateType::summary (std::cout,coord);
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  std::cout << "[2] Create linear coordinate with 3 axes ..." << std::endl;
-  try {
-    unsigned int nofAxes (3);
-    casa::LinearCoordinate coord (CoordinateType::makeLinearCoordinate(nofAxes));
-    // summary of the coordinate
-    CoordinateType::summary (std::cout,coord);
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  std::cout << "[3] Create linear coordinate with 3 axes ..." << std::endl;
-  try {
-    unsigned int nofAxes (3);
-    Vector<casa::String> names (nofAxes,"Length");
-    Vector<casa::String> units (nofAxes,"m");
-    // create Coordinate object
-    casa::LinearCoordinate coord (CoordinateType::makeLinearCoordinate(nofAxes,
-								       names,
-								       units));
-    // summary of the coordinate
-    CoordinateType::summary (std::cout,coord);
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  return nofFailedTests;
-}
-
-// -----------------------------------------------------------------------------
-
 int main ()
 {
   int nofFailedTests (0);
@@ -228,8 +175,6 @@ int main ()
   nofFailedTests += test_Coordinate();
   // Test for the constructor(s)
   nofFailedTests += test_CoordinateType ();
-  // Test generation of casa::Coordinate objects
-  nofFailedTests += test_makeCoordinate ();
   
   return nofFailedTests;
 }
