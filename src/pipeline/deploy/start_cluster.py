@@ -14,7 +14,7 @@ parser.add_option(
     "--config", help="Pipeline configuration file", default="~/.pipeline.cfg"
 )
 parser.add_option(
-    "--num_engines", help="Number of engines per node", default=8
+    "--num-engines", help="Number of engines per node", default=8
 )
 options, args = parser.parse_args()
 
