@@ -216,7 +216,7 @@ namespace CR { // Namespace CR -- begin
     
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
     //! Default constructor
     Beamformer ();
@@ -447,7 +447,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the shape of the array holding the Beamformer weights
 
-      \return shape --
+      \return shape -- Shape of the array holding the Beamformer weights
     */
     inline IPosition shapeWeights () const {
       return bfWeights_p.shape();
@@ -512,14 +512,7 @@ namespace CR { // Namespace CR -- begin
     //! Compute and set the values of the geometrical phases
     void setPhases ();
     
-    /*!
-      \brief Compute and set the values of the geometrical weights
-
-      Due to the way the Beamformer class is derived on the underlying
-      base-classes, the most memory efficient manner to compute the weights is to
-      not store the underlying quantities but do directly compute everything from
-      ground up.
-    */
+    //! Compute and set the values of the geometrical weights
     void setWeights ();
     
     /*!
@@ -539,17 +532,7 @@ namespace CR { // Namespace CR -- begin
     bool freq_field (casa::Matrix<DComplex> &beam,
 		     const casa::Array<DComplex> &data);
     
-    /*!
-      \brief Form a cross-correlation beam
-      
-      \retval beam -- [frequency,position] Beam formed from the provided input data.
-      \param  data -- [frequency,antenna] Input data which will be processed to
-              form a given type of beam; array containing the input data is
-	      organized according to what is provided by the DataReader framework
-
-      \return status   -- Status of the operation; returns <i>false</i> if an
-                          an error was encountered
-    */
+    //! Form a cross-correlation beam
     bool time_cc (casa::Matrix<double> &beam,
 		  const casa::Array<DComplex> &data);
     
@@ -583,14 +566,10 @@ namespace CR { // Namespace CR -- begin
     
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy (Beamformer const &other);
     
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
 
     //! Initialize internal settings of the Beamformer
@@ -652,58 +631,21 @@ namespace CR { // Namespace CR -- begin
 		    uint const &direction,
 		    bool const &normalize=true);
     
-    /*!
-      \brief Compute single beam in the time domain
-
-      \f[
-      S (\vec\rho,t)
-      = \mathcal{F}^{-1} \Bigl\{ \widetilde S (\vec\rho,\nu) \Bigr\}
-      \f]
-      
-      \retval beamTime -- [sample] Vector with the time-series samples for a
-              single beam towards the sky position \f$ \vec\rho \f$.
-      \param data      -- 
-      \param direction -- 
-      \param normalize -- Normalize the values by the number of combined data
-             channels? If set to <tt>true</tt> an additional factor of \f$1/N\f$
-	     will be applied to the beamformed data.
-    */
+    //! Compute single beam in the time domain
     void beam_time (casa::Vector<double> &beamTime,
 		    casa::Array<DComplex> const &data,
 		    uint const &direction,
 		    bool const &normalize=true);
     
-    /*!
-      \brief Directed spectral power, \f$ \widetilde P (\vec\rho,\nu) \f$
-
-      \retval beam -- [frequency,position] Beam formed from the provided input data.
-      \param  data -- [frequency,antenna] Input data which will be processed to
-              form a given type of beam; array containing the input data is
-	      organized according to what is provided by the DataReader framework
-
-      \return status   -- Status of the operation; returns <i>false</i> if an
-                          an error was encountered
-    */
+    //! Directed spectral power, \f$ \widetilde P (\vec\rho,\nu) \f$
     bool freq_power (casa::Matrix<double> &beam,
 		     const casa::Array<DComplex> &data);
 
-    /*!
-      \brief Directed field strength time-series, \f$ S (\vec\rho,t) \f$
-    */
+    //! Directed field strength time-series, \f$ S (\vec\rho,t) \f$
     bool time_field (casa::Matrix<double> &beam,
 		     const casa::Array<DComplex> &data);
     
-    /*!
-      \brief Directed power time series, \f$ S (\vec\rho,t) \f$
-
-      \retval beam -- [frequency,position] Beam formed from the provided input data.
-      \param  data -- [frequency,antenna] Input data which will be processed to
-              form a given type of beam; array containing the input data is
-	      organized according to what is provided by the DataReader framework
-
-      \return status   -- Status of the operation; returns <i>false</i> if an
-                          an error was encountered
-    */
+    //! Directed power time series, \f$ S (\vec\rho,t) \f$
     bool time_power (casa::Matrix<double> &beam,
 		     const casa::Array<DComplex> &data);
     

@@ -147,6 +147,7 @@ namespace CR { // Namespace CR -- begin
   //                                                                   Beamformer
   
   Beamformer::Beamformer (Beamformer const &other)
+    : GeomWeight (other)
   {
     copy (other);
   }
@@ -329,6 +330,12 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                   setWeights
 
+  /*!
+    Due to the way the Beamformer class is derived on the underlying
+    base-classes, the most memory efficient manner to compute the weights is to
+    not store the underlying quantities but do directly compute everything from
+    ground up.
+  */
   void Beamformer::setWeights ()
   {
     /*
@@ -445,6 +452,7 @@ namespace CR { // Namespace CR -- begin
 			      casa::Array<DComplex> const &data)
   {
     uint nofFailedChecks (0);
+    IPosition shapeBeam    = beam.shape();
     IPosition shapeData    = data.shape();
     IPosition shapeWeights = bfWeights_p.shape();
     
@@ -488,8 +496,9 @@ namespace CR { // Namespace CR -- begin
     }
   }
   
-  // ------------------------------------------------------------------ beam_freq
-  
+  //_____________________________________________________________________________
+  //                                                                    beam_freq
+
   void Beamformer::beam_freq (casa::Vector<DComplex> &beamFreq,
 			      casa::Array<DComplex> const &data,
 			      uint const &direction,
@@ -514,8 +523,22 @@ namespace CR { // Namespace CR -- begin
     }
   }
   
-  // ------------------------------------------------------------------ beam_time
-  
+  //_____________________________________________________________________________
+  //                                                                    beam_time
+
+  /*!
+    \f[ S (\vec\rho,t)
+        = \mathcal{F}^{-1} \Bigl\{ \widetilde S (\vec\rho,\nu) \Bigr\}
+    \f]
+    
+    \retval beamTime -- [sample] Vector with the time-series samples for a
+            single beam towards the sky position \f$ \vec\rho \f$.
+    \param data      -- 
+    \param direction -- 
+    \param normalize -- Normalize the values by the number of combined data
+           channels? If set to <tt>true</tt> an additional factor of \f$1/N\f$
+	   will be applied to the beamformed data.
+  */
   void Beamformer::beam_time (casa::Vector<double> &beamTime,
 			      casa::Array<DComplex> const &data,
 			      uint const &direction,
@@ -537,8 +560,9 @@ namespace CR { // Namespace CR -- begin
     server.fft (beamTime,beamFreq);
   }
   
-  // ----------------------------------------------------------------- freq_field
-  
+  //_____________________________________________________________________________
+  //                                                                   freq_field
+
   bool Beamformer::freq_field (casa::Matrix<DComplex> &beam,
 			       const casa::Array<DComplex> &data)
   {
@@ -577,8 +601,18 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
-  // ----------------------------------------------------------------- freq_power
+  //_____________________________________________________________________________
+  //                                                                   freq_power
 
+  /*!
+    \retval beam -- [frequency,position] Beam formed from the provided input data.
+    \param  data -- [frequency,antenna] Input data which will be processed to
+            form a given type of beam; array containing the input data is
+	    organized according to what is provided by the DataReader framework
+    
+    \return status   -- Status of the operation; returns <i>false</i> if an
+            an error was encountered
+  */
   bool Beamformer::freq_power (casa::Matrix<double> &beam,
 			       const casa::Array<DComplex> &data)
   {
@@ -631,27 +665,34 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
-  // ----------------------------------------------------------------- time_field
+  //_____________________________________________________________________________
+  //                                                                   time_field
 
   bool Beamformer::time_field (casa::Matrix<double> &beam,
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
 
-#ifdef DEBUGGING_MESSAGES
-    std::cout << "[Beamformer::time_field]" << std::endl;
-    std::cout << "-- shape(data) = " << data.shape() << std::endl;
-    std::cout << "-- shape(beam) = " << beam.shape() << std::endl;
-#endif
-
     std::cerr << "[Beamformer::time_field] Method not yet implemented!"
 	      << std::endl;
+    std::cout << "-- shape(data) = " << data.shape() << std::endl;
+    std::cout << "-- shape(beam) = " << beam.shape() << std::endl;
     
     return status;
   }
   
-  // ----------------------------------------------------------------- time_power
+  //_____________________________________________________________________________
+  //                                                                   time_power
 
+  /*!
+    \retval beam -- [frequency,position] Beam formed from the provided input data.
+    \param  data -- [frequency,antenna] Input data which will be processed to
+            form a given type of beam; array containing the input data is
+	    organized according to what is provided by the DataReader framework
+    
+    \return status   -- Status of the operation; returns <i>false</i> if an
+            an error was encountered
+  */
   bool Beamformer::time_power (casa::Matrix<double> &beam,
 			       const casa::Array<DComplex> &data)
   {
@@ -659,12 +700,24 @@ namespace CR { // Namespace CR -- begin
 
     std::cerr << "[Beamformer::time_power] Method not yet implemented!"
 	      << std::endl;
+    std::cout << "-- shape(data) = " << data.shape() << std::endl;
+    std::cout << "-- shape(beam) = " << beam.shape() << std::endl;
     
     return status;
   }
 
-  // -------------------------------------------------------------------- time_cc
+  //_____________________________________________________________________________
+  //                                                                      time_cc
 
+  /*!
+    \retval beam -- [frequency,position] Beam formed from the provided input data.
+    \param  data -- [frequency,antenna] Input data which will be processed to
+            form a given type of beam; array containing the input data is
+	    organized according to what is provided by the DataReader framework
+    
+    \return status   -- Status of the operation; returns <i>false</i> if an
+            an error was encountered
+  */
   bool Beamformer::time_cc (casa::Matrix<double> &beam,
 			    const casa::Array<DComplex> &data)
   {
@@ -724,8 +777,9 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
-  // --------------------------------------------------------------------- time_p
-  
+  //_____________________________________________________________________________
+  //                                                                       time_p
+
   bool Beamformer::time_p (casa::Matrix<double> &beam,
 			   const casa::Array<DComplex> &data)
   {
@@ -776,14 +830,17 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
-  // --------------------------------------------------------------------- time_x
-  
+  //_____________________________________________________________________________
+  //                                                                       time_x
+
   bool Beamformer::time_x (casa::Matrix<double> &beam,
 			   const casa::Array<DComplex> &data)
   {
     bool status (true);
 
     std::cerr << "[Beamformer::time_x] Method not yet implemented!" << std::endl;
+    std::cout << "-- shape(data) = " << data.shape() << std::endl;
+    std::cout << "-- shape(beam) = " << beam.shape() << std::endl;
     
     return status;
   }
