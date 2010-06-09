@@ -109,9 +109,13 @@ class ApplicationWindow(QtGui.QMainWindow):
 
         # This is ugly! constructor should always work!
         # commandline parameter checking should be done in option parser.
-        if inputFile and liveMode:
-            print 'Either run --live or --file=..., not both.'
-            exit(1)
+        
+        # OK, I agree. And of course this code doesn't even work. For now kick it out
+        # and don't care about monkey users.
+        
+#        if inputFile and liveMode:
+#            print 'Either run --live or --file=..., not both.'
+#            exit(1)
             
         # Setup widget
         QtGui.QMainWindow.__init__(self)
@@ -222,8 +226,8 @@ class ApplicationWindow(QtGui.QMainWindow):
         typeOfFit = 1 + (self.distancePlot == True)
         if self.liveMode:
             thisDate = datetime.datetime.utcnow()
-            thisDateString = str(thisDate.year) + '-' + '%02d' % (thisDate.month) + '-' + str(thisDate.day)
-            self.process.start('./test/liveFeedFromLofarStation.sh', [self.station, thisDateString, self.username])
+            thisDateString = str(thisDate.year) + '-' + '%02d' % (thisDate.month) + '-' + '%02d' % (thisDate.day)
+            self.process.start('./test/liveFeedFromLofarStation.sh', [self.station, thisDateString, self.username, self.antennaMode, str(self.nofChannels), str(typeOfFit)])
         else:
             self.process.start('./test/feedToVHECRtest.sh',[self.inputFile, 
                                self.antennaMode, str(self.nofChannels), str(typeOfFit), self.station])
