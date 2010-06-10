@@ -59,7 +59,7 @@
   <h3>Usage</h3>
 
   \verbatim
-  ./compareLOPES2sim results.root  dictionary.txt  ../reas3simulations/lopeseventsR3i/
+  ./compareLOPES2sim --data results.root  --dict dictionary.txt  --path ../reas3simulations/lopeseventsR3i/
   \endverbatim
 
   <ul>
@@ -249,6 +249,7 @@ int main (int argc, char *argv[])
     }
 
     int entries = recTree->GetEntries();
+      cout<<"---------- >  Root file entries :   "<<entries<<endl;
     if (resultsName2 != "") {    
       if (entries > recTree2->GetEntries()) {
         cerr << "Error: The bigger root file must be the last one.\n" << endl;
@@ -259,10 +260,13 @@ int main (int argc, char *argv[])
     /* output files*/
     ofstream outputEW("simANDrec_fitvalue_EW.dat");
     ofstream outputNS("simANDrec_fitvalue_NS.dat");
-    outputEW<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2, chi2_sim"<<endl;
-    outputNS<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2, chi2_sim"<<endl;
+    outputEW<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
+    outputNS<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
 
     for(int i=0; i<entries; ++i) { //loop on the events
+      for (int k=0; k < totAntenna; ++k) {
+          *antPulses[k] = PulseProperties();
+        }
       recTree->GetEntry(i);
       if (resultsName2 != "") {
         while (Gt2 < Gt) {
@@ -315,9 +319,10 @@ int main (int argc, char *argv[])
         int NantS=0;
         double EWfield=0.,NSfield=0.,VEfield=0.;
         double distS=0.,azS=0.;
-        double sim2lopesField=(2.9979246e+10/31.); //muV/m into muV/m/MHz
+        double sim2lopesField=(2.9979246e+10/31.); //convert to muV/m/MHz and divide by the band-width
         double distanceS=0., distanceSerr=0.,showerCoord=0.;
         double dummy;
+        double distanceR=0.;
 
         string reasFileName = simPath+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
         //string reasFileName = simPath+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
@@ -335,7 +340,7 @@ int main (int argc, char *argv[])
           istringstream iss2 (buffer2);
           if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {	//in sim file:az in reas sistem
             iss2>>NantS>>distS>>azS>>NSfield>>EWfield>>VEfield>>dummy;
-
+            cout<<"az sim : "<< azS << " az data LOPES : " << Az<<" ze LOPES "<<Ze<<endl;
             //calc distance
             showerCoord=sqrt(1.0 - pow(cos(azS-Az),2)*pow(sin(Ze),2));
             distanceS=0.01*distS*showerCoord;
@@ -362,10 +367,10 @@ int main (int argc, char *argv[])
                 simPropEW.height = EWfield;
                 cout<<"EW Field  "<<EWfield<<endl;
                 simPropEW.heightError = 0.;
-                double distanceR=m_recEW[NantS].dist;
+                distanceR=m_recEW[NantS].dist;
                 if ((distanceS-distanceR)>(distanceS*0.01)) {
                   cout<<"WARNING!"<<endl;
-                  cout<<"distance simulated:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
+                  cout<<"distance simulated EW channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
                 }
                 simPropEW.dist =distanceR;
                 simPropEW.disterr = distanceSerr;
@@ -382,7 +387,11 @@ int main (int argc, char *argv[])
                 simPropNS.height = NSfield;
                 cout<<"NS Field  "<<NSfield<<endl;
                 simPropNS.heightError = 0.;
-                double distanceR=m_recEW[NantS].dist;
+                distanceR=m_recNS[NantS].dist;
+                if ((distanceS-distanceR)>(distanceS*0.01)) {
+                  cout<<"WARNING!"<<endl;
+                  cout<<"distance simulated NS channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
+                }
                 simPropNS.dist =distanceR;
                 simPropNS.disterr = distanceSerr;
           
