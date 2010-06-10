@@ -96,18 +96,3 @@ two file tyes:
 The information contained in this files is used by both the task distribution
 systems to schedule jobs on the appropriate compute nodes.
 
-.. _fabric-blurb:
-
-Fabric
-======
-`Fabric <http://docs.fabfile.org/>`_ is "a Python library and command-line
-tool designed to streamline deploying applications or performing system
-administration tasks via the SSH protocol", to quote the website. In the
-pipeline system, it is used to easily start-up and shut-down processes on the
-various cluster nodes; this is particularly useful when deploying the IPython
-compute engine processes.
-
-It should be noted that Fabric is still at a fairly early stage of
-development, and is not completely stable. It is very convenient for getting
-things running quickly, but potentially a production environment may simply
-fall back on shell scripts running SSH or similar.

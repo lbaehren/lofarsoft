@@ -127,52 +127,25 @@ Setting up the IPython cluster
 The IPython system consists of a controller, which runs on the head node, and
 engines, which run on the compute nodes. See the sections on :ref:`IPython
 <ipython-blurb>` and the :ref:`cluster layout <cluster-layout>` for details.
-:ref:`fabric-blurb` is used to start up and shut down the IPython components;
-you are encouraged to have at least a passing acquaintance with the Fabric
-system to understand how this works.
+Simple Python scripts make it easy to start and stop the cluster. This can be
+done independently of an individual pipeline run: one can start the engines
+once, run multiple piplines using the same engines, and then shut it down.
 
-Fabric (available in ``/opt/pipeline/dependencies``) is configured by means of
-a so-called "fabfile". An example is at ``/opt/pipeline/fabfile.py``. This
-fabfile defines four commands: ``start_controller``, ``stop_controller``,
-``start_engine`` and ``stop_engine``. It can also parse your pipeline
-configuration file, read the clusterdesc file, and hence select the
-appropriate machines for ``head_node`` and ``compute_nodes``. 
+The relevant scripts are available in ``/opt/pipeline/framework/bin``, named
+``start_cluster.py`` and ``stop_cluster.py``. Each accepts the name of a
+pipeline configuration file as an optional argument: if one is not provided,
+it defaults to ``~/.pipeline.cfg``.
 
-.. code-block:: bash
-
-   $ cd /opt/pipeline # must be run from directory containing fabfile
-   $ fab head_node start_controller  # starts the IPython controller on the head node
-   $ fab compute_nodes start_engines # starts engines on the compute nodes
-
-By default, it uses ``~/.pipeline.cfg`` to locate the correct clusterdesc, but
-you can specify this in the fab invocation. Note that each part of the Fabric
-command line needs this specifying independently [1]_:
+Usage is very straightforward:
 
 .. code-block:: bash
 
-  $ fab head_node:/path/to/pipeline.cfg start_controller:/path/to/pipeline.cfg
+  $ /opt/pipeline/framework/bin/start_cluster.py --config /path/to/pipeline.cfg
 
-Once the controller and engines have been deployed, they can be re-used for
-many pipeline runs. However, when you're done, you should shut them down:
+After the script has finished executing, you can continue to set up and run
+your pipeline. When finished, shut down the cluster:
 
 .. code-block:: bash
 
-  $ cd /opt/pipeline
-  $ fab compute_nodes stop_engine
-  $ fab head_node stop_controller
+  $ /opt/pipeline/framework/bin/stop_cluster.py --config /path/to/pipeline.cfg
 
-.. rubric:: Footnotes
-
-.. [1] This is cumbersome & can be simplified with a shell alias. In tcsh:
-
-   .. code-block:: tcsh
-
-      alias start_head "fab head_node:\!:1 start_controller:\!:1"
-      alias start_compute "fab compute_nodes:\!:1 start_engine:\!:1"
-      alias stop_compute "fab compute_nodes:\!:1 stop_engine:\!:1"
-      alias stop_head "fab head_node:\!:1 stop_controller:\!:1"
-    
-      alias start_all "fab head_node:\!:1 start_controller:\!:1 && fab  compute_nodes:\!:1 start_engine:\!:1"
-      alias stop_all "fab compute_nodes:\!:1 stop_engine:\!:1 && fab  head_node:\!:1 stop_controller:\!:1"
-
-  Thanks to Anastasia Alexov for this suggestion.
