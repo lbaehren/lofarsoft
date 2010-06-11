@@ -838,11 +838,14 @@ double_t lgE = 0, err_lgE = 0;				// estimated energy (KASCADE)
 double_t lgEg = 0, err_lgEg = 0;			// estimated energy (Grande)
 double_t lnA = 0, err_lnA = 0;		        	// estimated mass A (KASCADE)
 double_t lnAg = 0, err_lnAg = 0;	        	// estimated mass A (Grande)
+double_t kappaMario = 0, lgEMario = 0;                  // mass and energy by Mario's formula
 double_t err_core = 0, err_coreg = 0;                   // error of core position (KASCADE + Grande)
 double_t err_Az = 0, err_Azg = 0;                       // error of azimuth (KASCADE + Grande)
 double_t err_Ze = 0, err_Zeg = 0;                       // error of zenith (KASCADE + Grande)
 double_t geomag_angle = 0, geomag_angleg = 0;           // geomagnetic angle (KASCADE + Grande)
 char KRETAver[1024] = "unknown";
+double_t EfieldMaxAbs = 0;                              // maximum of the absolute e-field strength around +/- 15 min
+double_t EfieldAvgAbs = 0;                              // average of the absolute e-field strength around +/- 15 min
  
 char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande reconstruction taken
 
@@ -1145,6 +1148,10 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->SetBranchAddress("geomag_angleg",&geomag_angleg);
       inputTree->SetBranchAddress("Eventname",&Eventname);
       inputTree->SetBranchAddress("KRETAver",&KRETAver);
+      inputTree->SetBranchAddress("EfieldMaxAbs",&EfieldMaxAbs);
+      inputTree->SetBranchAddress("EfieldAvgAbs",&EfieldAvgAbs);
+      inputTree->SetBranchAddress("kappaMario",&kappaMario);
+      inputTree->SetBranchAddress("lgEMario",&lgEMario);
 
       // as there is no radius of curvature in the file, set ignoreDistance to true
       if (!config["ignoreDistance"]->bValue()) {
@@ -1488,6 +1495,8 @@ int main (int argc, char *argv[])
         roottree->Branch("lgEg",&lgEg,"lgEg/D");
         roottree->Branch("lnA",&lnA,"lnA/D");
         roottree->Branch("lnAg",&lnAg,"lnAg/D");
+        roottree->Branch("kappaMario",&kappaMario,"kappaMario/D");
+        roottree->Branch("lgEMario",&lgEMario,"lgEMario/D");
         roottree->Branch("err_lgE",&err_lgE,"err_lgE/D");
         roottree->Branch("err_lgEg",&err_lgEg,"err_lgEg/D");
         roottree->Branch("err_lnA",&err_lnA,"err_lnA/D");
@@ -1502,6 +1511,8 @@ int main (int argc, char *argv[])
         roottree->Branch("geomag_angleg",&geomag_angleg,"geomag_angleg/D");
         roottree->Branch("reconstruction",&reconstruction,"reconstruction/B");
         roottree->Branch("KRETAver",&KRETAver,"KRETAver/C");
+        roottree->Branch("EfieldMaxAbs",&EfieldMaxAbs,"EfieldMaxAbs/D");
+        roottree->Branch("EfieldAvgAbs",&EfieldAvgAbs,"EfieldAvgAbs/D");
       }
 
       // one result, if polarization = ANY

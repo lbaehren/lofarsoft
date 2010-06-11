@@ -108,6 +108,9 @@
 
   # Name of the different files that should be created ( .txt, .info and .root )
   namebase                eventlist
+
+  # muon correction table for Mario's function
+  muonCorrectionTable     /users/iklx/lopesuser/code/genEventlist/cerca_mucorr310809.out 
   \endverbatim
 
 */
@@ -180,7 +183,110 @@ using namespace TMath;
       errlnM=sqrt(varNe + varNmu + varTheta);
       return errlnM;
     }*/
+    
+  // Mario's formula for Grande energy and mass
+  // returns valuse by reference
+  float correction_array_mario[51][29][16];  // global variable: myon correction table from mario
+  
+  int readMuonCorrectionTable(const string& filename) 
+  {
+    FILE *fp;
+    if( (fp=fopen(filename.c_str(),"r"))==NULL){
+      cerr <<"\nError: Cannot open muon correction table: " << filename
+           <<"Please start again! Mass and energy estimation will not work!\n" << endl;
+      return -1;
+    }
 
+    float xbin,ybin;
+    for(int i=0;i<51;i++)
+      for(int j=0;j<29;j++) {
+        fscanf(fp,"%f %f ",&xbin,&ybin);
+        for(int k=0;k<16;k++)
+          fscanf(fp,"%f",&correction_array_mario[i][j][k]);
+      }
+      
+    fclose(fp);
+    return 0;
+  }
+  
+  // Mario's formula returns values mass kappa and energy by reference
+  void mariosFormula(const float& Sizeg,
+                     const float& Sizmg,
+                     const float& Xcg,
+                     const float& Ycg,
+                     const float& Zeg,
+                     const float& Azg,
+                     double& energy,
+                     double& kappa)
+  {
+    // set return values to -99, in case that something does not work
+    energy = -99; kappa = -99;
+  
+    // consistency check
+    double lgSizeg=log10(Sizeg);
+    if (lgSizeg<5.5) {
+      cout << "Mario's formula not applicable: log10(Sizeg) should be >5.5!" << endl;
+      return;
+    }
+
+    // Azg is the KRETA ntuple entry AZG (azimut angle), Zeg is ZEG (zenith angle)
+    // double azg_new = Azg-15.*0.017453293;     not used ???
+    double elg=-sin(Zeg)*sin(Azg);
+    double emg=-sin(Zeg)*cos(Azg);
+    double eng=-cos(Zeg);
+    // Transformation to shower coord:
+    double ak=elg*0.+emg*0.+eng*1.5;
+    double xd=elg*ak+(1.-elg*elg)*Xcg-elg*emg*Ycg;
+    double yd=emg*ak-emg*elg*Xcg+(1.-emg*emg)*Ycg;
+    double zd=eng*ak-eng*elg*Xcg-eng*emg*Ycg;
+    double diska=sqrt(pow((0.-xd),2) + pow((0.-yd),2) + pow((1.5-zd),2));
+    // Divide the event into a bin:
+    int idist= int(floor(diska/25.));
+    int ith=int(floor((1./cos(Zeg)-1.)*50));
+    int imu=int(floor((log10(Sizmg)-4.)*10));
+    if(imu<0)
+      imu=0;
+    if(imu>50)
+      imu=50;
+    if(idist>28)
+      idist=28;
+    if(ith>15)
+      ith=15;
+
+    double Sizmgc=(log10(Sizmg) + correction_array_mario[imu][idist][ith]);  
+
+    double ang=Zeg*180./3.141592654;
+
+    if(ang < 16.71) {
+      kappa=(-(lgSizeg-Sizmgc)+(0.96029+0.08176*lgSizeg))/((0.96029+0.08176*lgSizeg)-(0.01115+0.15504*lgSizeg));
+      energy=(0.93960-0.05839*kappa)*lgSizeg+1.1017+0.6625*kappa;
+      energy=pow(10,energy);
+      //printf("BIN 1: Energy (GeV): %f, kappa: %f \n",energy,kappa);
+    } else if(ang >= 16.71 && ang < 23.99) {
+      kappa=(-(lgSizeg-Sizmgc)+(1.11510+0.05376*lgSizeg))/((1.11510+0.05376*lgSizeg)-(-0.13512+0.16555*lgSizeg));
+      energy=(0.94488-0.07806*kappa)*lgSizeg+1.1319+0.8264*kappa;
+      energy=pow(10,energy);
+      //printf("BIN 2: Energy (GeV): %f, kappa: %f \n",energy,kappa);
+    } else if(ang >= 23.99 && ang < 29.86) {
+      kappa=(-(lgSizeg-Sizmgc)+(1.03040+0.05980*lgSizeg))/((1.03040+0.05980*lgSizeg)-(-0.14095+0.15450*lgSizeg));
+      energy=(0.94332-0.08154*kappa)*lgSizeg+1.1961+0.9089*kappa;
+      energy=pow(10,energy);
+      //printf("BIN 3: Energy (GeV): %f, kappa: %f \n",energy,kappa);
+    } else if(ang >= 29.86 && ang < 35.09) {
+      kappa=(-(lgSizeg-Sizmgc)+(0.81923+0.06755*lgSizeg))/((0.81923+0.06755*lgSizeg)-(-0.31778+0.16913*lgSizeg));
+      energy=(0.93774-0.05491*kappa)*lgSizeg+1.4258+0.6609*kappa;
+      energy=pow(10,energy);
+      //printf("BIN 4: Energy (GeV): %f, kappa: %f \n",energy,kappa);
+    } else if(ang >= 35.09 && ang <= 40.00) {
+      kappa=(-(lgSizeg-Sizmgc)+(0.69480+0.07953*lgSizeg))/((0.69480+0.07953*lgSizeg)-(-0.24169+0.14337*lgSizeg));
+      energy=(0.9506-0.0706*kappa)*lgSizeg+1.4779+0.7656*kappa;
+      energy=pow(10,energy);
+      //printf("BIN 5: Energy (GeV): %f, kappa: %f \n",energy,kappa);
+    } else {
+      kappa = -99; energy = -99;
+      cout << "Mario's formula is not valid for an zenith angle of " << ang << " degree." << endl;
+    }
+  }
 
 int main(int argc, char* argv[])
 {
@@ -211,13 +317,14 @@ int main(int argc, char* argv[])
   string ef2006(""), ef2007(""), ef2008(""), ef2009(""), ef2010(""); // electric field data
   int openEfieldFile = 0; // is set to the year of the efield file currently open.
   ifstream finEfield;
+  string muonCorrectionTable("");
   Double_t geomag_min=0, geomag_max=180, energy_min=0, energy_max=1e20;
   Bool_t createInfoFile=false, createCopyScript=false, preferGrande=false, useBothReconstructions=false;
   bool minimumCuts = true; // set to true to make things faster.
   string KRETAversion("");
   char KRETAver[1024];
 
-   TCut cut;
+  TCut cut;
 
   while (conf.getline(tmp,16000)) {
     opt.clear();
@@ -276,11 +383,19 @@ int main(int argc, char* argv[])
       opt>>ef2010;
     if(buf.compare("namebase")==0) 
       opt>>namebase;
+    if(buf.compare("muonCorrectionTable")==0) 
+      opt>>muonCorrectionTable;
     if(buf.compare("KRETAversion")==0) 
       opt>>KRETAversion;
    
     buf="";
   }
+  
+  // if provided, read in of Mario's muon correction table for Grande energy and mass estimation
+  if (muonCorrectionTable != "")
+    if (readMuonCorrectionTable(muonCorrectionTable) < 0)  // in case of error, -1 is returned
+      return -1;
+  
   // add cut_string to cut
   cut += cut_str.c_str();
   
@@ -376,6 +491,7 @@ int main(int argc, char* argv[])
   Double_t lgE, lgEg, lnA, lnAg, err_lgE, err_lgEg, err_lnA, err_lnAg;
   Double_t err_core, err_coreg, err_Az, err_Azg, err_Ze, err_Zeg;
   Double_t geomag_angle, geomag_angleg;
+  Double_t kappaMario, energyMario, lgEMario;
   Double_t EfieldMaxAbs, EfieldAvgAbs; // Maximum and average of the absolute of the Efield in +/- 15 minutes arround event [V/m]
   
   k->Branch("Eventname",&eventname,"Eventname/C");
@@ -406,6 +522,9 @@ int main(int argc, char* argv[])
   k->Branch("err_lnA",&err_lnA,"err_lnA/D");
   k->Branch("lnAg",&lnAg,"lnAg/D");
   k->Branch("err_lnAg",&err_lnAg,"err_lnAg/D");
+  
+  k->Branch("kappaMario",&kappaMario,"kappaMario/D");
+  k->Branch("lgEMario",&lgEMario,"lgEMario/D");
 
   // add error estimation for some KASCADE(-Grande) parameters
   k->Branch("err_core",&err_core,"err_core/D");
@@ -596,6 +715,9 @@ int main(int argc, char* argv[])
     cos_geomag=-1.;
     geomag=0;
     energy=0;
+    energyMario = -99;
+    lgEMario = 0;
+    kappaMario = -99;
 
     //double errNe, errNmu, errTheta, errlog10Size,errlog10Lmuo,;
     double log10Size, log10Lmuo, log10Nmu, log10sizeg,log10sizmg;
@@ -627,7 +749,7 @@ int main(int argc, char* argv[])
         err_lgEg=0.0922;
         err_lnAg=( ((1.17 - 1.26) / (60.-2.))*exp(lnAg) + 1.263); //from Michael's plots, linear dependence
       }  
-
+      
       // use fixed error for core and angular uncertainties
       // (approximation for E > 10^17 eV)
       err_coreg = 7.;
@@ -639,6 +761,16 @@ int main(int argc, char* argv[])
                    + TMath::Sin(Azg) * TMath::Sin(Zeg) * TMath::Sin(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25)
                    + TMath::Cos(Zeg) * TMath::Cos(TMath::Pi()/180.0 * 25);
       geomag_angleg = ACos(cos_geomag);
+
+      // in addition, use Mario's formula
+      if (muonCorrectionTable != "") {
+        mariosFormula(Sizeg, Sizmg, Xcg, Ycg, Zeg, Azg, energyMario, kappaMario);
+        if (energyMario > 0)
+          lgEMario = log10(energyMario);
+        else
+          lgEMario = 0;
+        //cout << "lgEg = " << lgEg << " \tlgEm = " << lgEMario << " \tlnAg = " << lnAg << " \tkappa = " << kappaMario << endl;
+      }  
     } else {
       lgEg=0.;
       lnAg=0.;
