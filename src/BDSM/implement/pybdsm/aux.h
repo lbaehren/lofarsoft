@@ -4,7 +4,7 @@
 /*!
 	\file aux.h
 	
-	\ingroup pybdsm
+  \ingroup BDSM
 
 	\brief Miscellaneous usefull routines
 */

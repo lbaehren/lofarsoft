@@ -245,7 +245,7 @@ endif (HAVE_ROOT)
 
 build_package (bdsm src/BDSM)
 
-add_dependencies (bdsm cfitsio wcslib)
+add_dependencies (bdsm wcslib cfitsio boost num_util)
 
 ##____________________________________________________________________
 ##                                           Data Access Library (DAL)
@@ -300,13 +300,6 @@ build_package (lasa src/LASA)
 build_package (pulsar src/Pulsar)
 
 add_dependencies (pulsar cfitsio)
-
-##____________________________________________________________________
-##                                                              pybdsm
-
-build_package (pybdsm src/pybdsm)
-
-add_dependencies (pybdsm boost num_util wcslib)
 
 ##____________________________________________________________________
 ##                                                                  RM

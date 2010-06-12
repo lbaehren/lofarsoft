@@ -6,7 +6,7 @@
 /*!
   \file stat.h
   
-  \ingroup pybdsm
+  \ingroup BDSM
   
   \author Oleksandr Usov
 

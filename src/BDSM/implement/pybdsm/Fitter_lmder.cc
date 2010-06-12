@@ -1,11 +1,18 @@
 /*!
   \file Fitter_lmder.cc
   
+  \ingroup BDSM
   \ingroup pybdsm
   
   \author Oleksandr Usov
   
   \date 30/10/2007
+
+  This fitter uses slightly modified version of the Levenberg-Marquardt
+  algorithm lmder from netlib's MINPACK-1 (www.netlib.org/minpack).
+  
+  The modification of the original lmder.f was needed to pass extra
+  arguments into user function.
 */
 
 #include "Fitters.h"
@@ -13,15 +20,6 @@
 #include <iostream>
 
 using namespace std;
-
-/**
-   This fitter uses slightly modified version of the Levenberg-Marquardt
-   algorithm lmder from netlib's MINPACK-1 (www.netlib.org/minpack).
-
-   The modification of the original lmder.f was needed to pass extra
-   arguments into user function.
-**/
-
 
 // this is prototype for a fortran minimization routine
 extern "C" 
@@ -39,8 +37,12 @@ void lmder_fcn(int &m, int &n, double *x, double *F, double *J, int &ldfjac,
 	       int &iflag, void *userpar);
 
 
-// lmder driver
-bool lmder_fit(MGFunction &fcn, bool final, int verbose)
+/*!
+  \brief lmder driver
+*/
+bool lmder_fit (MGFunction &fcn,
+		bool final, 
+		int verbose)
 {
   int dsize = fcn.data_size();
   int npar = fcn.parameters_size();
@@ -92,9 +94,26 @@ bool lmder_fit(MGFunction &fcn, bool final, int verbose)
   return converged;
 }
 
-// user-supplied function
-static void lmder_fcn(int &m, int &n, double *x, double *F, double *J, int &ldfjac, 
-		       int &iflag, void *userpar)
+/*!
+  \brief User-supplied function
+
+  \param m       -- 
+  \param n       -- 
+  \param x       -- 
+  \param F       -- 
+  \param J       -- 
+  \param ldfjac  -- 
+  \param iflag   -- 
+  \param userpar -- 
+*/
+static void lmder_fcn (int &m,
+		       int &n,
+		       double *x,
+		       double *F,
+		       double *J,
+		       int &ldfjac, 
+		       int &iflag,
+		       void *userpar)
 {
   MGFunction *fcn = (MGFunction *)userpar;
 

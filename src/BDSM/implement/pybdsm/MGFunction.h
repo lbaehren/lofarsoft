@@ -10,7 +10,7 @@ using namespace boost::python;
 /*!
   \class MGFunction
   
-  \ingroup pybdsm
+  \ingroup BDSM
   
   \brief Multi-Gaussian function.
 

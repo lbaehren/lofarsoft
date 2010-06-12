@@ -3,7 +3,7 @@
 ## Project description
 
 ## Name of the project
-PROJECT (BDSM Fortran)
+project (BDSM Fortran C)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
@@ -38,28 +38,55 @@ endif (USG_ROOT)
 option (BDSM_BUILD_TESTS       "Build the test programs?"             YES )
 option (BDSM_ENABLE_TESTING    "Build the test programs?"             YES )
 option (BDSM_VERBOSE_CONFIGURE "Verbose output during configuration?" NO  )
+option (BDSM_WITH_PYBDSM       "Build pybdsm Python bindings?"        YES )
 
-## ------------------------------------------------------------------------------
-## Find external libraries
+## ==============================================================================
+##
+##  External dependencies
+##
+## ==============================================================================
 
-if (NOT BDSM_VERBOSE_CONFIGURE)
-  set (CFITSIO_FIND_QUIETLY 1)
-  set (PGPLOT_FIND_QUIETLY 1)
-  set (WCSLIB_FIND_QUIETLY 1)
-endif (NOT BDSM_VERBOSE_CONFIGURE)
+include (IncludeFindModule)
 
-## --- CFITSIO ---------------------------------
+set (bdsm_cmake_modules
+  Boost
+  CFITSIO
+  NumPy
+  NumUtil
+  GFortran
+  PGPLOT
+  Python
+  WCSLIB
+  )
 
-if (NOT HAVE_CFITSIO)
-  include (FindCFITSIO)
-endif (NOT HAVE_CFITSIO)
+include_find_module (${bdsm_cmake_modules} ${BDSM_VERBOSE_CONFIGURE})
 
-## --- PGPLOT ----------------------------------
-if (NOT HAVE_PGPLOT)
-  include (FindPGPLOT)
-endif (NOT HAVE_PGPLOT)
+## ==============================================================================
+##
+##  Handle options and external dependencies
+##
+## ==============================================================================
 
-## ------------------------------------------------------------------------------
-## Subdirectories of the project
+if (NOT HAVE_BOOST OR NOT BOOST_PYTHON_LIBRARY)
+  message (STATUS "[BDSM] Unable to build pybdsm - missing Boost!")
+  set (BDSM_WITH_PYBDSM FALSE)
+endif (NOT HAVE_BOOST OR NOT BOOST_PYTHON_LIBRARY)
 
-SUBDIRS (implement)
+if (NOT HAVE_NUMPY)
+  message (STATUS "[BDSM] Unable to build pybdsm - missing NumPy!")
+  set (BDSM_WITH_PYBDSM FALSE)
+endif (NOT HAVE_NUMPY)
+
+if (NOT HAVE_PYTHON)
+  message (STATUS "[BDSM] Unable to build pybdsm - missing Python!")
+  set (BDSM_WITH_PYBDSM FALSE)
+endif (NOT HAVE_PYTHON)
+
+## ==============================================================================
+##
+##  Project subdirectories
+##
+## ==============================================================================
+
+add_subdirectory (implement)
+add_subdirectory (scripts)

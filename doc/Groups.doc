@@ -1,9 +1,12 @@
 
 //_______________________________________________________________________________
-//                                                                         pyBDSM
+//                                                                    BDSM/pybdsm
 
 /*!
-  \defgroup pybdsm pyBDSM : Python version of the BDSM software
+  \defgroup BDSM Blob Detection and Source Measurement
+
+  The current version of BDSM is in fortran77, and is primarily in use for LOFAR
+  CS1 data. It is currently maintained and developed at Sterrewacht Leiden.
 
   \verbatim
   lofarsoft
@@ -17,7 +20,14 @@
       |-- contrib
       |-- CR-Tools
       |-- DAL
-      `-- pybdsm      <-- you are here
+      `-- BDSM                 <-- you are here
+          |-- implement
+          |   |-- bdsm
+	  |   |-- fits
+	  |   |-- minpack
+	  |   |-- port3
+	  |   `-- pybdsm
+          `-- scripts
   \endverbatim
 */
 
@@ -42,7 +52,7 @@
       |   `-- utilities
       |-- CR-Tools
       |-- DAL
-      `-- pybdsm
+      `-- BDSM
   \endverbatim
 */
 
@@ -70,7 +80,7 @@
       |   `-- recipes
       |-- CR-Tools
       |-- DAL
-      `-- pybdsm
+      `-- BDSM
   \endverbatim	
   
   The framework aims to make it possible to manage a variety of different
