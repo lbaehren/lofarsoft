@@ -8,12 +8,14 @@
   \file Fitters.h
   
   \ingroup BDSM
+  \ingroup pybdsm
   
   \author Oleksandr Usov
-  
+
   \date 30/10/2007
 */
 
+//! lmder driver
 bool lmder_fit (MGFunction &fcn, bool final, int verbose);
 bool dn2g_fit (MGFunction &fcn, bool final, int verbose);
 bool dnsg_fit (MGFunction &fcn, bool final, int verbose);

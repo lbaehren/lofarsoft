@@ -13,7 +13,12 @@ Check out islands.py rev. 1362 from repository for it.
 
 import numpy as N
 import scipy.ndimage as nd
-from image import Op
+from image import *
+import mylogger
+import pyfits
+import output_fbdsm_files as opf
+
+nisl = Int(doc="Total number of islands detected")
 
 class Op_islands(Op):
     """Detect islands of emission in the image
@@ -25,18 +30,23 @@ class Op_islands(Op):
     Prerequisites: module rmsimage should be run first.
     """
     def __call__(self, img):
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Islands   ")
         opts = img.opts
 
-        img.islands = self.ndimage_alg(img.image, img.mask,
-                                       img.mean, img.rms,
-                                       opts.isl_clip,
-                                       opts.isl_peak_clip,
-                                       opts.isl_min_size)
+        img.islands = self.ndimage_alg(img, opts)
 
-        print "Islands found: " + str(len(img.islands))
+        img.nisl = len(img.islands)
+
+        mylog.info('%s %i' % ("Number of islands found : ", len(img.islands)))
+
+        for i, isl in enumerate(img.islands):
+            isl.island_id = i
+
+        if opts.output_fbdsm: opf.write_fbdsm_islands(img)
+
         return img
 
-    def ndimage_alg(self, img, mask, mean, rms, thresh1, thresh2, minsize):
+    def ndimage_alg(self, img, opts):
         """Island detection using scipy.ndimage
 
         Use scipy.ndimage.label to detect islands of emission in the image.
@@ -44,41 +54,64 @@ class Op_islands(Op):
         for 2D images) pixels with emission.
 
         The following cuts are applied:
-         - pixel is considered to have emission if it is 'thresh1' times 
+         - pixel is considered to have emission if it is 'thresh_isl' times 
            higher than RMS.
          - Island should have at least 'minsize' active pixels
-         - There should be at lease 1 pixel in the island which is 'thresh2'
+         - There should be at lease 1 pixel in the island which is 'thresh_pix'
            times higher than noise (peak clip).
 
         Parameters:
-        img, mask: arrays with image data and mask
+        image, mask: arrays with image data and mask
         mean, rms: arrays with mean & rms maps
-        thresh1: threshold for 'active pixels'
-        thresh2: threshold for peak
+        thresh_isl: threshold for 'active pixels'
+        thresh_pix: threshold for peak
         minsize: minimal acceptable island size
 
         Function returns a list of Island objects.
         """
         ### islands detection
-        act_pixels = (img-mean)/thresh1 > rms
+
+        image = img.ch0 
+        mask = img.mask
+        rms = img.rms
+        mean = img.mean
+        thresh_isl = opts.thresh_isl
+        thresh_pix = opts.thresh_pix
+        minsize = opts.minpix_isl
+        clipped_mean = img.clipped_mean
+        saverank = opts.savefits_rankim
+        hdr = img.header
+
+                        # act_pixels is true if significant emission
+        act_pixels = (image-mean)/thresh_isl >= rms
         if isinstance(mask, N.ndarray):
             act_pixels[mask] = False
 
-        rank = len(img.shape)
+                        # dimension of image
+        rank = len(image.shape)
+                        # generates matrix for connectivity, in this case, 8-conn
         connectivity = nd.generate_binary_structure(rank, rank)
+                        # labels = matrix with value = (initial) island number
         labels, count = nd.label(act_pixels, connectivity)
+                        # slices has limits of bounding box of each such island
         slices = nd.find_objects(labels)
 
         ### apply cuts on island size and peak value
+        pyrank = N.zeros(image.shape)
         res = []
         for idx, s in enumerate(slices):
             idx += 1 # nd.labels indices are counted from 1
+                        # number of pixels inside bounding box which are in island
             isl_size = (labels[s] == idx).sum()
-            isl_peak = nd.maximum(img[s], labels[s], idx)
+            isl_peak = nd.maximum(image[s], labels[s], idx)
+            isl_maxposn = tuple(N.array(N.unravel_index(N.argmax(image[s]), image[s].shape))+\
+                          N.array((s[0].start, s[1].start)))
+            if (isl_size >= minsize) and (isl_peak - mean[isl_maxposn])/thresh_pix > rms[isl_maxposn]:
+              isl = Island(image, mask, mean, rms, labels, s, idx)
+              pyrank[isl.bbox] += N.invert(isl.mask_active)*idx / idx
+              res.append(isl)
 
-            if (isl_size >= minsize) and \
-                    (isl_peak - mean[s].mean())/thresh2 > rms[s].mean():
-                res.append(Island(img, mask, mean, rms, labels, s, idx))
+        if saverank: pyfits.writeto(img.imagename + '.pyrank.fits', N.transpose(pyrank), clobber=True)
 
         return res
 
@@ -100,6 +133,9 @@ class Island(object):
     size_active = Int(doc="Number of active pixels in the island")
     mean        = Float(doc="Average mean value")
     rms         = Float(doc="Average rms")
+    island_id   = Int(doc="Island id, starting from 0")
+    resid_rms   = Float(doc="Rms of residual image of island")
+    resid_mean  = Float(doc="Mean of residual image of island")
 
     def __init__(self, img, mask, mean, rms, labels, bbox, idx):
         """Create Island instance.
@@ -113,7 +149,7 @@ class Island(object):
         
         ### we make bbox slightly bigger
         bbox = self.__expand_bbox(bbox, img.shape)
-        origin = [b.start for b in bbox]
+        origin = [b.start for b in bbox]   # easier in case ndim > 2
         data = img[bbox]
 
         ### create (inverted) masks
@@ -137,16 +173,22 @@ class Island(object):
         self.mask_noisy = noise_mask
         self.shape = data.shape
         self.size_active = isl_size
-        self.mean = mean[bbox].mean()
-        self.rms  = rms[bbox].mean()
+        bbox_rms_im = rms[bbox]
+        in_bbox_and_unmasked = N.where(~N.isnan(bbox_rms_im))
+        self.rms  = bbox_rms_im[in_bbox_and_unmasked].mean()
+        bbox_mean_im = mean[bbox]
+        in_bbox_and_unmasked = N.where(~N.isnan(bbox_mean_im))
+        self.mean  = bbox_mean_im[in_bbox_and_unmasked].mean()
 
+    ### do map etc in case of ndim image
     def __expand_bbox(self, bbox, shape):
         """Expand bbox of the image by 1 pixel"""
         def __expand(bbox, shape):
             return slice(max(0, bbox.start - 1), min(shape, bbox.stop + 1))
-
         return map(__expand, bbox, shape) 
 
 
 ### Insert attribute for island list into Image class
 Image.islands = List(tInstance(Island), doc="List of islands")
+
+

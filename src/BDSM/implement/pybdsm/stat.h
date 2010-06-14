@@ -7,6 +7,7 @@
   \file stat.h
   
   \ingroup BDSM
+  \ingroup pybdsm
   
   \author Oleksandr Usov
 

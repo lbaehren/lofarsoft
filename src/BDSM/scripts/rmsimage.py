@@ -8,18 +8,23 @@ value.
 The current implementation will handle both 2D and 3D images,
 where for 3D case it will calculate maps for each plane.
 
-Masked images aren't hadled properly yet.
+Masked images aren't handled properly yet.
 """
 
 import numpy as N
 import scipy.ndimage as nd
 import _cbdsm
-from image import Op, Image, NArray
+from image import Op, Image, NArray, List
+import const
+import mylogger
+import pyfits
+
 
 ### insert into Image tc-variables for mean & rms maps
-Image.mean = NArray(doc="Mean map")
-Image.rms  = NArray(doc="RMS map")
-
+Image.mean = NArray(doc="Mean map, Stokes I")
+Image.rms  = NArray(doc="RMS map, Stokes I")
+Image.mean_QUV = List(NArray(), doc="Mean map, Stokes Q")
+Image.rms_QUV  = List(NArray(), doc="RMS map, Stokes Q")
 
 class Op_rmsimage(Op):
     """Calculate rms & noise maps
@@ -27,32 +32,114 @@ class Op_rmsimage(Op):
     Prerequisites: Module preprocess should be run first.
     """
     def __call__(self, img):
-        opts = img.opts
-        data = img.image
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"RMSimage  ")
+        if img.opts.polarisation_do:
+            pols = ['I', 'Q', 'U', 'V']
+        else:
+            pols = ['I'] # assume I is always present
+
         mask = img.mask
+        opts = img.opts
+        map_opts = (opts.kappa_clip, opts.rms_box, opts.spline_rank)
+        ch0_images = [img.ch0, img.ch0_Q, img.ch0_U, img.ch0_V]
+        cmeans = [img.clipped_mean] + [img.clipped_mean_QUV]
+        crmss = [img.clipped_rms] + [img.clipped_rms_QUV]
+        for ipol, pol in enumerate(pols):
+          data = ch0_images[ipol]
+          mean = N.zeros(data.shape, dtype=N.float32)
+          rms  = N.zeros(data.shape, dtype=N.float32)
 
-        map_opts = (opts.rms_clip, opts.rms_box, opts.spline_rank)
-
-        mean = N.zeros(data.shape, dtype=N.float32)
-        rms  = N.zeros(data.shape, dtype=N.float32)
-
-        if opts.rms_noise_map: ## calculate maps
+          ## calculate rms/mean maps if needed
+          if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
             if len(data.shape) == 2:   ## 2d case
-                self.map_2d(data, mean, rms, mask, *map_opts)
+              self.map_2d(data, mean, rms, mask, *map_opts)
             elif len(data.shape) == 3: ## 3d case
-                if not isinstance(mask, N.ndarray):
-                    mask = N.zeros(data.shape[0], dtype=bool)
-                for i in range(data.shape[0]):
-                    ## iterate each plane
-                    self.map_2d(data[i], mean[i], rms[i], mask[i], *map_opts)
+              if not isinstance(mask, N.ndarray):
+                mask = N.zeros(data.shape[0], dtype=bool)
+              for i in range(data.shape[0]):
+                  ## iterate each plane
+                  self.map_2d(data[i], mean[i], rms[i], mask[i], *map_opts)
             else:
-                raise RuntimeError("Can't hadnle array of this shape")
-        else:     ## no map - just fill in constant value
-            mean[:] = img.clipped_mean
-            rms[:]  = img.clipped_rms
+              mylog.critical('Image shape not handleable')
+              raise RuntimeError("Can't handle array of this shape")
+            mylog.info('Background rms and mean images computed.')
 
-        img.mean = mean
-        img.rms  = rms
+          ## check if variation of rms/mean maps is significant enough
+          if pol == 'I' and opts.rms_map is None: self.check_rmsmap(img, rms)
+          if pol == 'I' and opts.mean_map == 'default': self.check_meanmap(img, rms)
+
+          ## if rms map is insignificant, or rms_map==False use const value
+          if opts.rms_map is False:
+            mylog.info('Background rms, mean images are constant, equals clipped values.')
+            rms[:]  = crmss[ipol]
+          if opts.mean_map != 'map':
+            val = 0.0
+            if opts.mean_map == 'const': val = img.clipped_mean
+            mean[:] = val
+
+          if pol == 'I': 
+            img.mean = mean; img.rms  = rms
+            if opts.savefits_rmsim: 
+              pyfits.writeto(img.imagename + '.rmsd_I.fits', N.transpose(rms), img.header, clobber=True)
+              mylog.info('%s %s' % ('Wrote ', img.imagename+'.rmsd_I.fits'))
+            if opts.savefits_meanim: 
+              pyfits.writeto(img.imagename + '.mean_I.fits', N.transpose(mean), img.header, clobber=True)
+              mylog.info('%s %s' % ('Wrote ', img.imagename+'.mean_I.fits'))
+          else:
+            img.mean_QUV.append(mean); img.rms_QUV.append(rms)
+
+        return img
+
+    def check_rmsmap(self, img, rms):
+        """Calculates the statistics of the rms map and decides, when 
+        rms_map=None, whether to take the map (if variance 
+        is significant) or a constant value
+        """
+	from math import sqrt
+
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Rmsimage.Checkrms  ")
+        cdelt = (img.header['cdelt1'], img.header['cdelt2'])
+	bm = (img.opts.beam[0], img.opts.beam[1])
+	fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
+	stdsub = N.std(rms)
+
+	rms_expect = img.clipped_rms/sqrt(2)/img.opts.rms_box[0]*fw_pix
+        mylog.debug('%s %10.6f %s' % ('Standard deviation of rms image = ', stdsub*1000.0, 'mJy'))
+        mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
+	if stdsub > 1.1*rms_expect:
+            img.opts.rms_map = True
+            mylog.info('Variation in rms image significant, using this image.')
+        else:
+            img.opts.rms_map = False
+            mylog.info('Variation in rms image not significant.')
+
+        return img
+
+    def check_meanmap(self, img, mean):
+        """Calculates the statistics of the mean map and decides, when 
+        mean_map=None, whether to take the map (if variance 
+        is significant) or a constant value
+        """
+	from math import sqrt
+
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Rmsimage.Checkmean ")
+        cdelt = (img.header['cdelt1'], img.header['cdelt2'])
+	bm = (img.opts.beam[0], img.opts.beam[1])
+	fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
+	stdsub = N.std(mean)
+
+	rms_expect = img.clipped_rms/img.opts.rms_box[0]*fw_pix
+        mylog.debug('%s %10.6f %s' % ('Standard deviation of mean image = ', stdsub*1000.0, 'mJy'))
+        mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
+	if stdsub > 1.1*rms_expect:
+          img.opts.mean_map = 'map'
+          mylog.info('Variation in mean image significant, using this image.')
+        else:
+          if img.opts.confused:
+            img.opts.mean_map = 'zero'
+          else:
+            img.opts.mean_map = 'const'
+          mylog.info('Variation in mean image not significant.')
 
         return img
 
@@ -74,6 +161,12 @@ class Op_rmsimage(Op):
         ax = N.meshgrid(*ax[-1::-1])
         nd.map_coordinates(mean_map, ax[-1::-1], order=interp, output=out_mean)
         nd.map_coordinates(rms_map,  ax[-1::-1], order=interp, output=out_rms)
+      
+        # Apply mask to mean_map and rms_map by setting masked values to NaN
+        if isinstance(mask, N.ndarray):
+            pix_masked = N.where(mask == True)
+            out_mean[pix_masked] = N.nan
+            out_rms[pix_masked] = N.nan
 
     def rms_mean_map(self, arr, mask=False, kappa=3, box=None):
         """Calculate map of the mean/rms values
@@ -81,7 +174,7 @@ class Op_rmsimage(Op):
         Parameters:
         arr:  2D array with data
         mask: mask
-        kappa: clipping for calculationg rms/mean within each box
+        kappa: clipping for calculating rms/mean within each box
         box: box parameters (box_size, box_step)
 
         Returns:
@@ -121,9 +214,6 @@ class Op_rmsimage(Op):
         if box is None:
             box = (50, 25)
 
-        if isinstance(mask, N.ndarray):
-            raise NotImplementedError, "non-trivial masks are not supported yet"
-
         ## some math first. 
         ##   boxcount is number of boxes alongsize each axis
         ##   bounds is non-zero for axes which have extra pixels beyond last box
@@ -138,27 +228,30 @@ class Op_rmsimage(Op):
         rms_map  = N.zeros(mapshape, dtype=float)
         axes     = [N.zeros(len, dtype=float) for len in mapshape]
 
-        ## pull out bstat routine from _cbdsm
-        bstat = _cbdsm.bstat
-
         ### step 1: internal area of the image
         for i in range(boxcount[0]):
             for j in range(boxcount[1]):
-                m, r, cm, cr = bstat(arr[i*SS:i*SS+BS, j*SS:j*SS+BS], mask, kappa)
-                mean_map[i+1, j+1], rms_map[i+1, j+1] = cm, cr
-
+                ind = [i*SS, i*SS+BS, j*SS, j*SS+BS]
+                self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [i+1, j+1])
+                        
+        # Check if all regions have too few unmasked pixels
+        if mask != None and N.size(N.where(mean_map != N.inf)) == 0:
+            raise RuntimeError("No unmasked regions from which to determine mean and rms maps.")
+                        
         ### step 2: borders of the image
         if bounds[0]:
             for j in range(boxcount[1]):
-                m, r, cm, cr = bstat(arr[-BS:, j*SS:j*SS+BS], mask, kappa)
-                mean_map[-2, j+1], rms_map[-2, j+1] = cm, cr
+                ind = [-BS, arr.shape[0], j*SS,j*SS+BS]
+                self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [-2, j+1])
+
         if bounds[1]:
             for i in range(boxcount[0]):
-                m, r, cm, cr = bstat(arr[i*SS:i*SS+BS, -BS:], mask, kappa)
-                mean_map[i+1, -2], rms_map[i+1, -2] = cm, cr
+                ind = [i*SS,i*SS+BS, -BS,arr.shape[1]]
+                self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [i+1, -2])
+
         if bounds.all():
-                m, r, cm, cr = bstat(arr[-BS:, -BS:], mask, kappa)
-                mean_map[-2,-2], rms_map[-2,-2] = cm, cr
+                ind = [-BS,arr.shape[0], -BS,arr.shape[1]]
+                self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [-2, -2])
 
         ### step 3: correct(extrapolate) borders of the image
         def correct_borders(map):
@@ -182,8 +275,63 @@ class Op_rmsimage(Op):
                 axes[i][-2] = imgshape[i] - BS/2. - .5
             axes[i][-1] = imgshape[i] - 1
 
+        ### step 5: fill in boxes with < 5 unmasked pixels (set to values of N.inf)
+        unmasked_boxes = N.where(mean_map != N.inf) # grid of unmasked regions (pos. irregular)
+        if N.size(unmasked_boxes,1) < mapshape[0]*mapshape[1]:
+            mean_map = self.fill_masked_regions(mean_map)
+            rms_map = self.fill_masked_regions(rms_map)
+
         return axes, mean_map, rms_map
 
+    def fill_masked_regions(self, themap, magic=N.inf):
+        """Fill masked regions (defined where values == magic) in themap.
+        """
+        masked_boxes = N.where(themap == magic) # locations of masked regions
+        for i in range(N.size(masked_boxes,1)):
+            num_unmasked = 0
+            x, y = masked_boxes[0][i], masked_boxes[1][i]
+            delx = dely = 1
+            while num_unmasked == 0:
+                x1 = x - delx
+                if x1 < 0: x1 = 0
+                x2 = x + 1 + delx
+                if x2 > themap.shape[0]: x2 = themap.shape[0]
+                y1 = y - dely
+                if y1 < 0: y1 = 0
+                y2 = y + 1 + dely
+                if y2 > themap.shape[1]: y2 = themap.shape[1]
+         
+                cutout = themap[x1:x2, y1:y2].ravel()
+                goodcutout = cutout[cutout != magic]
+                num_unmasked = N.alen(goodcutout)
+                if num_unmasked > 0:
+                    themap[x, y] = N.mean(goodcutout)
+                delx += 1
+        return themap
+
+    def for_masked(self, mean_map, rms_map, mask, arr, ind, kappa, co):
+
+        bstat = _cbdsm.bstat
+        a, b, c, d = ind; i, j = co
+        if mask == None:
+          m, r, cm, cr = bstat(arr[a:b, c:d], mask, kappa)
+          mean_map[i, j], rms_map[i, j] = cm, cr
+        else:                  
+          pix_unmasked = N.where(mask[a:b, c:d] == False)
+          npix_unmasked = N.size(pix_unmasked,1)
+          if npix_unmasked > 20: # find clipped mean/rms
+            m, r, cm, cr = bstat(arr[a:b, c:d], mask[a:b, c:d], kappa)
+            mean_map[i, j], rms_map[i, j] = cm, cr
+          else:
+            if npix_unmasked > 5: # just find simple mean/rms
+              cm = N.mean(arr[pix_unmasked])
+              cr = N.std(arr[pix_unmasked])
+              mean_map[i, j], rms_map[i, j] = cm, cr
+            else: # too few unmasked pixels --> set mean/rms to inf
+              mean_map[i, j], rms_map[i, j] = N.inf, N.inf
+
+          #return mean_map, rms_map
+                
     def remap_axis(self, size, arr):
         """Invert axis mapping done by rms_mean_map
 

@@ -108,13 +108,16 @@ ADD_LIBRARY (bdsm_call
 ##
 ## ==============================================================================
 
-add_executable (srccomp1
-  srccomp1.f
-  makelists1.f
-  sub_prog.f
-  sourcelistheaders.f
-  readhead_srclist.f
-  )
+#add_executable (srccomp1
+#  srccomp1.f
+#  makelists1.f
+#  sub_prog.f
+#  sourcelistheaders.f
+#  readhead_srclist.f
+#  )
+
+##____________________________________________________________________
+##                                                          simulation
 
 add_executable (simulation
   arrstat.f
@@ -145,11 +148,14 @@ add_executable (simulation
   writearray.f
   writefits3D.f
   )
-TARGET_LINK_LIBRARIES (simulation
+target_link_libraries (simulation
   ${CFITSIO_LIBRARIES}
   bdsm_nr
   bdsm_cr8
   )
+
+##____________________________________________________________________
+##                                                     simulation_ilse
 
 add_executable (simulation_ilse
   arrstat.f
@@ -184,7 +190,13 @@ add_executable (simulation_ilse
   writearray.f
   writefits3D.f
   )
-TARGET_LINK_LIBRARIES (simulation_ilse ${CFITSIO_LIBRARIES} bdsm_nr)
+TARGET_LINK_LIBRARIES (simulation_ilse
+  ${CFITSIO_LIBRARIES}
+  bdsm_nr
+  )
+
+##____________________________________________________________________
+##                                                               noise
 
 add_executable (noise
   acf.f
@@ -302,6 +314,9 @@ TARGET_LINK_LIBRARIES (noise
   bdsm_experiment
   bdsm_call
   )
+
+##____________________________________________________________________
+##                                                            bdsm-awe
 
 add_executable (bdsm-awe
   bdsm-awe.f

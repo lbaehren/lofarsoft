@@ -4,9 +4,11 @@
 
 ## List of source files
 
-file (GLOB cbdsm_wrapper_sources *.cc)
+file (GLOB cbdsm_sources *.cc)
 
-add_library (_cbdsm MODULE ${cbdsm_wrapper_sources})
+add_library (_cbdsm MODULE
+  ${cbdsm_sources}
+  )
 
 target_link_libraries (_cbdsm 
   minpack

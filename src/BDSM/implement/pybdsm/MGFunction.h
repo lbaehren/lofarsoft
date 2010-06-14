@@ -11,6 +11,7 @@ using namespace boost::python;
   \class MGFunction
   
   \ingroup BDSM
+  \ingroup pybdsm
   
   \brief Multi-Gaussian function.
 

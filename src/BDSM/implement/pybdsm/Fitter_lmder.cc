@@ -7,12 +7,6 @@
   \author Oleksandr Usov
   
   \date 30/10/2007
-
-  This fitter uses slightly modified version of the Levenberg-Marquardt
-  algorithm lmder from netlib's MINPACK-1 (www.netlib.org/minpack).
-  
-  The modification of the original lmder.f was needed to pass extra
-  arguments into user function.
 */
 
 #include "Fitters.h"
@@ -20,6 +14,15 @@
 #include <iostream>
 
 using namespace std;
+
+/**
+   This fitter uses slightly modified version of the Levenberg-Marquardt
+   algorithm lmder from netlib's MINPACK-1 (www.netlib.org/minpack).
+
+   The modification of the original lmder.f was needed to pass extra
+   arguments into user function.
+**/
+
 
 // this is prototype for a fortran minimization routine
 extern "C" 
@@ -30,22 +33,47 @@ void lmder_(void *fcn, int &m, int &n, double *x, double *F, double *J, int &ldf
 	    int *ipvt, double *qtf, double *wa1, double *wa2, double *wa3, double *wa4,
 	    void *userpar);
 
-// user function
-// FIXME: these should have been declared "extern "C" static ...", but gcc 4.2.2 rejects such declarations
-static
-void lmder_fcn(int &m, int &n, double *x, double *F, double *J, int &ldfjac, 
-	       int &iflag, void *userpar);
-
+//_______________________________________________________________________________
+//                                                                      lmder_fcn
 
 /*!
-  \brief lmder driver
+  \brief User function
+
+  \param m       -- 
+  \param n       -- 
+  \param x       -- 
+  \param F       -- 
+  \param J       -- 
+  \param ldfjac  -- 
+  \param iflag   -- 
+  \param userpar -- 
+  
+  \todo These should have been declared "extern "C" static ...", but gcc 4.2.2
+  rejects such declarations
 */
+static void lmder_fcn (int &m,
+		       int &n,
+		       double *x,
+		       double *F,
+		       double *J,
+		       int &ldfjac, 
+		       int &iflag,
+		       void *userpar);
+
+//_______________________________________________________________________________
+//                                                                      lmder_fcn
+
+/*!
+  \param fcn
+  \param final
+  \param verbose
+ */
 bool lmder_fit (MGFunction &fcn,
-		bool final, 
+		bool final,
 		int verbose)
 {
   int dsize = fcn.data_size();
-  int npar = fcn.parameters_size();
+  int npar  = fcn.parameters_size();
 
   // working variables
   int m = dsize, n = npar, ldfjac = m, maxfev = 200,
@@ -94,12 +122,15 @@ bool lmder_fit (MGFunction &fcn,
   return converged;
 }
 
+//_______________________________________________________________________________
+//                                                                      lmder_fcn
+
 /*!
   \brief User-supplied function
 
   \param m       -- 
   \param n       -- 
-  \param x       -- 
+  \param c       -- 
   \param F       -- 
   \param J       -- 
   \param ldfjac  -- 

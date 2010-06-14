@@ -1,6 +1,7 @@
 /*!
   \file stat.cc
   
+  \ingroup BDSM
   \ingroup pybdsm
   
   \author Oleksandr Usov

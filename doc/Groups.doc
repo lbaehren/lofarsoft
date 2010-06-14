@@ -3,7 +3,7 @@
 //                                                                    BDSM/pybdsm
 
 /*!
-  \defgroup BDSM Blob Detection and Source Measurement
+  \defgroup BDSM BDSM - Blob Detection and Source Measurement
 
   The current version of BDSM is in fortran77, and is primarily in use for LOFAR
   CS1 data. It is currently maintained and developed at Sterrewacht Leiden.

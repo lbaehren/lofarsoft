@@ -28,7 +28,11 @@ class Image(object):
     """
     opts   = Instance(Opts, doc="User options")
 
-    image  = NArray(doc="Image data")
+    image  = NArray(doc="Image data, Stokes I")
+    ch0    = NArray(doc="Channel-collapsed image data, Stokes I")
+    ch0_Q  = NArray(doc="Channel-collapsed image data, Stokes Q")
+    ch0_U  = NArray(doc="Channel-collapsed image data, Stokes U")
+    ch0_V  = NArray(doc="Channel-collapsed image data, Stokes V")
     header = Any(doc="Image header")
     mask   = NArray(doc="Image mask (if present and attribute masked is set)")
     masked = Bool(False, doc="Flag if mask is present")
@@ -46,4 +50,4 @@ class Op(object):
     classes.
     """
     def __call__(self, img):
-        raise NotImplementedError("This method should be redifined")
+        raise NotImplementedError("This method should be redefined")

@@ -13,7 +13,13 @@ include_directories (
 ##
 ## ==============================================================================
 
-add_subdirectory (bdsm)
+## Fortran-based version
+
+if (BDSM_WITH_FBDSM)
+  add_subdirectory (bdsm)
+endif (BDSM_WITH_FBDSM)
+
+## Python-based version
 
 if (BDSM_WITH_PYBDSM)
   add_subdirectory (minpack)

@@ -1,6 +1,7 @@
 /*!
   \file Fitter_dn2g.cc
   
+  \ingroup BDSM
   \ingroup pybdsm
   
   \author Oleksandr Usov

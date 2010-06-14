@@ -5,6 +5,7 @@
 	\file aux.h
 	
   \ingroup BDSM
+  \ingroup pybdsm
 
 	\brief Miscellaneous usefull routines
 */

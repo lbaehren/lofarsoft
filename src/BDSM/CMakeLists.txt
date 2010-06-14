@@ -35,10 +35,11 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
-option (BDSM_BUILD_TESTS       "Build the test programs?"             YES )
-option (BDSM_ENABLE_TESTING    "Build the test programs?"             YES )
-option (BDSM_VERBOSE_CONFIGURE "Verbose output during configuration?" NO  )
-option (BDSM_WITH_PYBDSM       "Build pybdsm Python bindings?"        YES )
+option (BDSM_BUILD_TESTS       "Build the test programs?"              YES )
+option (BDSM_ENABLE_TESTING    "Build the test programs?"              YES )
+option (BDSM_VERBOSE_CONFIGURE "Verbose output during configuration?"  NO  )
+option (BDSM_WITH_FBDSM        "Build Fortran-based version of BDSM?"  NO  )
+option (BDSM_WITH_PYBDSM       "Build Python-enabled version of BDSM?" YES )
 
 ## ==============================================================================
 ##

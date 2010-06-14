@@ -1,6 +1,7 @@
 /*!
   \file cbdsm_main.cc
   
+  \ingroup BDSM
   \ingroup pybdsm
   
   \author Oleksandr Usov

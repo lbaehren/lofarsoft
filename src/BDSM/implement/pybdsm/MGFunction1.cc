@@ -1,6 +1,7 @@
 /*!
   \file MGFunction.cc
   
+  \ingroup BDSM
   \ingroup pybdsm
   
   \author Oleksandr Usov
