@@ -78,6 +78,15 @@ namespace CR {  // Namespace CR -- begin
   // --------------------------------------------------------------------- cleanup
 
   Bool CalTableReader::cleanup() {
+    if (masterTable_p != NULL) {
+      masterTable_p->closeSubTables();
+      masterTable_p->keywordSet().closeTables();
+      delete masterTable_p; 
+    }  
+    if (AntIDIndex_p != NULL)
+      delete AntIDIndex_p;
+    if (indexedAnt_p != NULL)
+      delete indexedAnt_p;
     return True;
   }
   
@@ -420,7 +429,7 @@ namespace CR {  // Namespace CR -- begin
 	cerr << "CalTableReader::isIdentical " << "Failed to get the ColumnTable" << endl;
 	return False;
       };
-      uInt row1,row2;
+      Int row1,row2;
       if (isJunior) {
 	row1 = GetJuniorDateRow(AntID, subtab, date1, (FieldName+"-mask"), False);
 	row2 = GetJuniorDateRow(AntID, subtab, date2, (FieldName+"-mask"), False);
@@ -428,7 +437,8 @@ namespace CR {  // Namespace CR -- begin
 	row1 = GetDateRow(AntID, subtab, date1, False);
 	row2 = GetDateRow(AntID, subtab, date2, False);
       };
-      if ( row1==row2 && row1>=0) return True;
+      if ( row1==row2 && row1>=0)
+        return True;
     } catch (AipsError x) {
       cerr << "CalTableReader::isIdentical: " << x.getMesg() << endl;
       return False;
@@ -447,7 +457,7 @@ namespace CR {  // Namespace CR -- begin
       ROTableColumn col(*masterTable_p,FieldName);
       return col.keywordSet().asString("DataType");
     } catch (AipsError x) {
-      cerr << "CalTableReader::GetColumnTable: " << x.getMesg() << endl;
+      cerr << "CalTableReader::GetFieldType: " << x.getMesg() << endl;
       return "";
     }; 
     return "";
