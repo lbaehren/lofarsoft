@@ -2305,8 +2305,8 @@ int main (int argc, char *argv[])
             if(loc != antIDsSTL.end()) {
               double xPos  = antPos.row(loc - antIDsSTL.begin())(0);
               double yPos  = antPos.row(loc - antIDsSTL.begin())(1);
-              double magn  = it->second.envelopeMaximum;
-              double time  = it->second.geomDelay + it->second.envelopeTime;	// TODO: check time information
+              double magn  = it->second.height;
+              double time  = it->second.geomDelay + it->second.time;	// TODO: check time information
               int    polar = it->second.polarization.compare("NS") ? (int)ad.NS : (int)ad.EW;
               ad.addNewAntenna(yPos, xPos, magn, time, polar); // Attention: the position are reversed !!!
             }

@@ -169,6 +169,7 @@ namespace CR { // Namespace CR -- begin
       setStreams();
       setHeaderRecord();
       free(tmppoint);
+      fclose(fd);
     } catch (AipsError x) {
       cerr << "LOPESEventIn:attachFile: " << x.getMesg() << endl;
       return False;

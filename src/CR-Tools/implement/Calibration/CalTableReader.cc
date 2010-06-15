@@ -78,11 +78,8 @@ namespace CR {  // Namespace CR -- begin
   // --------------------------------------------------------------------- cleanup
 
   Bool CalTableReader::cleanup() {
-    if (masterTable_p != NULL) {
-      masterTable_p->closeSubTables();
-      masterTable_p->keywordSet().closeTables();
+    if (masterTable_p != NULL)
       delete masterTable_p; 
-    }  
     if (AntIDIndex_p != NULL)
       delete AntIDIndex_p;
     if (indexedAnt_p != NULL)
