@@ -28,10 +28,22 @@
   \brief Python bindings
 */
 
+
+//#### because of abug in the DAL this needs to be ####
+//#########   done before #include "pycr.h    #########
+#define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
+#include <num_util.h>
+
 #include "pycr.h"
+
+
+#include "pycr_IO.h"
 
 BOOST_PYTHON_MODULE (pycr)
 {
+  import_array();
+  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+
   
   //__________________________________________________________________
   //                                                implement/Analysis
@@ -53,7 +65,7 @@ BOOST_PYTHON_MODULE (pycr)
   //__________________________________________________________________
   //                                                    implement/Data
 
-  export_LOFAR_TBB ();
+  CR::PYCR::export_DataReader ();
   
   //__________________________________________________________________
   //                                                      implement/IO
@@ -99,41 +111,41 @@ BOOST_PYTHON_MODULE (pycr)
   //__________________________________________________________________
   //                                                        DataReader
   
-  void (DataReader::*setBlocksize1)(uint const &) = &DataReader::setBlocksize;
-  void (DataReader::*setBlocksize2)(uint const &,
-				    casa::Matrix<double> const &) = &DataReader::setBlocksize;
-  void (DataReader::*setBlocksize3)(uint const &,
-				    casa::Matrix<double> const &,
-				    casa::Matrix<casa::DComplex> const &) = &DataReader::setBlocksize;
-  int (DataReader::*shift1)(unsigned int const &) = &DataReader::shift;
-  void (DataReader::*setShift1)(int const &) = &DataReader::setShift;
-  void (DataReader::*setShift2)(int const &,
-				unsigned int const &) = &DataReader::setShift;
+//   void (DataReader::*setBlocksize1)(uint const &) = &DataReader::setBlocksize;
+//   void (DataReader::*setBlocksize2)(uint const &,
+// 				    casa::Matrix<double> const &) = &DataReader::setBlocksize;
+//   void (DataReader::*setBlocksize3)(uint const &,
+// 				    casa::Matrix<double> const &,
+// 				    casa::Matrix<casa::DComplex> const &) = &DataReader::setBlocksize;
+//   int (DataReader::*shift1)(unsigned int const &) = &DataReader::shift;
+//   void (DataReader::*setShift1)(int const &) = &DataReader::setShift;
+//   void (DataReader::*setShift2)(int const &,
+// 				unsigned int const &) = &DataReader::setShift;
   
-  bpl::class_<DataReader>("DataReader")
-    .def(bpl::init<>())
-    .def(bpl::init<unsigned int>())
-    .def(bpl::init<unsigned int,unsigned int,double>())
-    .def(bpl::init<unsigned int,casa::Vector<double>,casa::Matrix<casa::DComplex> >())
-    .def(bpl::init<unsigned int,casa::Matrix<double>,casa::Matrix<casa::DComplex> >())
-    .def("setBlocksize", setBlocksize1)
-    .def("setBlocksize", setBlocksize2)
-    .def("setBlocksize", setBlocksize3)
-    .def("nofStreams", &DataReader::nofStreams)
-    .def("fftLength", &DataReader::fftLength)
-    .def("nofAntennas", &DataReader::nofAntennas)
-    .def("nofSelectedAntennas", &DataReader::nofSelectedAntennas)
-    .def("block", &DataReader::block)
-    .def("setBlock", &DataReader::setBlock)
-    .def("setStartBlock", &DataReader::setStartBlock)
-    .def("stride", &DataReader::stride)
-    .def("setStride", &DataReader::setStride)
-    .def("shift", shift1)
-    .def("setShift", setShift1)
-    .def("setShift", setShift2)
-    .def("nextBlock", &DataReader::nextBlock)
-    .def("toStartBlock", &DataReader::toStartBlock)
-    ;
+//   bpl::class_<DataReader>("DataReader")
+//     .def(bpl::init<>())
+//     .def(bpl::init<unsigned int>())
+//     .def(bpl::init<unsigned int,unsigned int,double>())
+//     .def(bpl::init<unsigned int,casa::Vector<double>,casa::Matrix<casa::DComplex> >())
+//     .def(bpl::init<unsigned int,casa::Matrix<double>,casa::Matrix<casa::DComplex> >())
+//     .def("setBlocksize", setBlocksize1)
+//     .def("setBlocksize", setBlocksize2)
+//     .def("setBlocksize", setBlocksize3)
+//     .def("nofStreams", &DataReader::nofStreams)
+//     .def("fftLength", &DataReader::fftLength)
+//     .def("nofAntennas", &DataReader::nofAntennas)
+//     .def("nofSelectedAntennas", &DataReader::nofSelectedAntennas)
+//     .def("block", &DataReader::block)
+//     .def("setBlock", &DataReader::setBlock)
+//     .def("setStartBlock", &DataReader::setStartBlock)
+//     .def("stride", &DataReader::stride)
+//     .def("setStride", &DataReader::setStride)
+//     .def("shift", shift1)
+//     .def("setShift", setShift1)
+//     .def("setShift", setShift2)
+//     .def("nextBlock", &DataReader::nextBlock)
+//     .def("toStartBlock", &DataReader::toStartBlock)
+//     ;
 
   //__________________________________________________________________
   //                                               implement/Utilities

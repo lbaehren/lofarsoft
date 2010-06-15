@@ -70,10 +70,11 @@ int test_analyseLOPESevent ()
 				     True,                 // generatePlots
 				     Vector<Int>(),        // FlaggedAntIDs
 				     True);                // verbose
-    if ( (abs(results.asDouble("CCheight")-3.07706e-06) > 1e-9 ) ||
+    if ( !results.isDefined("CCheight") || !results.isDefined("Xheight") ||
+	 (abs(results.asDouble("CCheight")-3.07706e-06) > 1e-9 ) ||
 	 (abs(results.asDouble("Xheight")-2.35266e-06) > 1e-9 ) ) {
       nofFailedTests++;
-      cout << "**Test 1 failed! Wrong results." << endl;
+      cout << "**Test 1 failed! Wrong results?" << endl;
     } else {
       cout << "##Test 1 successfull!" << endl;
     };
@@ -99,10 +100,11 @@ int test_analyseLOPESevent ()
 				     0.,                    // ExtraDelay
 				     False);                // doTVcal
     
-    if ( (abs(results.asDouble("CCheight")-7.13356e-06) > 1e-9 ) ||
+    if ( !results.isDefined("CCheight") || !results.isDefined("Xheight") ||
+	 (abs(results.asDouble("CCheight")-7.13356e-06) > 1e-9 ) ||
 	 (abs(results.asDouble("Xheight")-6.53943e-06) > 1e-9 ) ) {
       nofFailedTests++;
-      cout << "**Test 2 failed! Wrong results." << endl;
+      cout << "**Test 2 failed! Wrong results?" << endl;
     } else {
       cout << "##Test 2 successfull!" << endl;
     };
@@ -136,10 +138,11 @@ int test_analyseLOPESevent ()
 				     0.,                    // ExtraDelay
 				     -1,                    // doTVcal
 				     320e6);                // UpSamplingRate
-    if ( (abs(results.asDouble("CCheight")-6.9771e-06) > 1e-9 ) ||
+    if ( !results.isDefined("CCheight") || !results.isDefined("Xheight") ||
+	 (abs(results.asDouble("CCheight")-6.9771e-06) > 1e-9 ) ||
 	 (abs(results.asDouble("Xheight")-6.63552e-06) > 1e-9 ) ) {
       nofFailedTests++;
-      cout << "**Test 4 failed! Wrong results." << endl;
+      cout << "**Test 4 failed! Wrong results?" << endl;
     } else {
       cout << "##Test 4 successfull!" << endl;
     };

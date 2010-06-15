@@ -37,6 +37,11 @@
 //
 // ==============================================================================
 
+//#### fix to work around a bug in the DAL ####
+//#### needs to be done before DAL includes! ####
+#define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
+#define NO_IMPORT_ARRAY
+
 // CR-Tools header files
 #include <crtools.h>
 #include <Analysis/DynamicSpectrum.h>

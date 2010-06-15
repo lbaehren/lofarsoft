@@ -45,15 +45,16 @@ if (CR_WITH_PYCR)
 
   ## compiler instructions
   add_library (pycr MODULE
-    ../Analysis/DynamicSpectrum.cc
-    ../Coordinates/CoordinateType.cc
-    ../Coordinates/TimeFreq.cc
-    ../IO/DataIterator.cc
-    ../IO/DataReader.cc
-    ../IO/LOFAR_TBB.cc
-    ../Filters/BasicFilter.cc
-    ../Filters/HanningFilter.cc
-    ../Coordinates/MConversions.cc
+# They aren't actually needed, as this is in the cr library! 
+#   ../Analysis/DynamicSpectrum.cc
+#   ../Coordinates/CoordinateType.cc
+#   ../Coordinates/TimeFreq.cc
+#   ../IO/DataIterator.cc
+#   ../IO/DataReader.cc
+#   ../IO/LOFAR_TBB.cc
+#   ../Filters/BasicFilter.cc
+#   ../Filters/HanningFilter.cc
+#   ../Coordinates/MConversions.cc
     ${pycr_sources}
     )
   ## linker instructions
@@ -65,6 +66,7 @@ if (CR_WITH_PYCR)
     ${PYTHON_LIBRARIES}
     ${BOOST_LIBRARIES}
     ${HAVE_LIBZ}
+    ${NUM_UTIL_LIBRARIES}
     )
   ## additional target properties
   if (APPLE)
