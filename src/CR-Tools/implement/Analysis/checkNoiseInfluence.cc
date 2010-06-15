@@ -218,7 +218,8 @@ namespace CR { // Namespace CR -- begin
   
   void checkNoiseInfluence::addPulseToNoise(const double& lowerSNR,
                                             const double& upperSNR,
-                                            const string& resultsFileName)                          
+                                            const string& resultsFileName,
+                                            const string& probabiltyDistribution)                          
   {
     try {   
       // Generate the antenna selection (all antennas)
@@ -244,7 +245,10 @@ namespace CR { // Namespace CR -- begin
         //cout << "Interval samples" << interval << ": " << startsample << " to " << startsample+pulsePattern.nelements() << endl;
         // loop through all antennas and add pulse
         for (unsigned int i=0; i < upsampledNoise.ncolumn(); ++i) {
-          truePulseHeight[interval][i] = randomGenerator.Uniform(lowerSNR,upperSNR);
+          if (probabiltyDistribution == "exponential")
+            truePulseHeight[interval][i] = randomGenerator.Exp(upperSNR);
+          else
+            truePulseHeight[interval][i] = randomGenerator.Uniform(lowerSNR,upperSNR);
           for (unsigned int j=0; j < pulsePattern.nelements(); ++j) {
             noiseAndPulse(j+startsample,i) += truePulseHeight[interval][i]*noiseHeight[interval][i]/pulseHeight*pulsePattern(j); 
           } 

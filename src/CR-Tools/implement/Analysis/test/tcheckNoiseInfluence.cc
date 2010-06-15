@@ -147,7 +147,7 @@ int main (int argc, char *argv[])
     
       noisetest.loadPulsePattern(pulseEvent, pulseAnt, pulseStart);
       noisetest.loadNoiseEvent(noiseEvent);
-      noisetest.addPulseToNoise(0, 6);
+      noisetest.addPulseToNoise(0, 6, "", "exponential");
     }  
 
     cout << "\nEnd of program.\n" << endl;

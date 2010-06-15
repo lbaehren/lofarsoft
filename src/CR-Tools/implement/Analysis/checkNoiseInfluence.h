@@ -172,13 +172,15 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Adds pulse to the noise 
       
-      \param lowerSNR          - upper bound of SNR values used for generating the random SNR of the pulse
-      \param upperSNR          - lower bound of SNR values used for generating the random SNR of the pulse
-      \param resultsFileName   - name of file for ASCII results
+      \param lowerSNR               - upper bound of SNR values used for generating the random SNR of the pulse
+      \param upperSNR               - lower bound of SNR values used for generating the random SNR of the pulse
+      \param resultsFileName        - name of file for ASCII results
+      \param probabiltyDistribution - probability density function used for scaling the amplitude
     */
     void addPulseToNoise(const double& lowerSNR,
                          const double& upperSNR,
-                         const string& resultsFileName = "");                          
+                         const string& resultsFileName = "",
+                         const string& probabiltyDistribution = "uniform");                          
  
     /*!
       \brief Loads noise event, and studies SNR of pure noise with different noise defintions
