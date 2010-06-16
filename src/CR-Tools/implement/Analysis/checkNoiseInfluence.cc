@@ -43,7 +43,7 @@ namespace CR { // Namespace CR -- begin
     pulseTime(0.),
     startTime(-150e-6),
     noiseMethod(4),
-    noiseIntervalLength(3e-6),
+    noiseIntervalLength(10e-6),
     noiseIntervalGap(5e-6),
     NnoiseIntervals(20),
     upsampledNoise( Matrix<Double>() ),
