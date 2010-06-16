@@ -260,8 +260,8 @@ int main (int argc, char *argv[])
     /* output files*/
     ofstream outputEW("simANDrec_fitvalue_EW.dat");
     ofstream outputNS("simANDrec_fitvalue_NS.dat");
-    outputEW<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
-    outputNS<<"# eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
+    outputEW<<"#sim id , eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
+    outputNS<<"#sim id , eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
 
     for(int i=0; i<entries; ++i) { //loop on the events
       for (int k=0; k < totAntenna; ++k) {
@@ -428,7 +428,7 @@ int main (int argc, char *argv[])
         chi2NDFS = ergew.asDouble("chi2NDF_sim");
 
         //write info of the fit into file
-        outputEW << Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
+        outputEW <<m_dict[Gt]<<"\t"<<Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
       }
       if(m_recNS.size()>=4) {
         if (simDictName!="") 
@@ -450,7 +450,7 @@ int main (int argc, char *argv[])
         err_R0S = ergns.asDouble("sigR_0_sim");
         chi2NDFS = ergns.asDouble("chi2NDF_sim");
 
-        outputNS << Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
+        outputNS <<m_dict[Gt]<<"\t"<<Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
       }
     }//loop on the rec event 
 
