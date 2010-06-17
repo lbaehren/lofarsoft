@@ -245,7 +245,7 @@ endif (HAVE_ROOT)
 
 build_package (bdsm src/BDSM)
 
-add_dependencies (bdsm wcslib cfitsio boost num_util)
+add_dependencies (bdsm wcslib cfitsio boost num_util pyfits)
 
 ##____________________________________________________________________
 ##                                           Data Access Library (DAL)
