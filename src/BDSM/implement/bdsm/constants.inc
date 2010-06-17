@@ -1,3 +1,4 @@
+c! physical constants
 
         real*8 c,pi,rad,fwsig,bolt,sq2
 
