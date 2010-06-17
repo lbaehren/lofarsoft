@@ -18,6 +18,7 @@ set (external_packages
   scipy
   pil
   plplot
+  pyfits
   pyqt
   python
   ipython
