@@ -54,6 +54,7 @@ class Op_shapelets(Op):
 	     is an updated set of values of (beta, centre, nmax). If fixed is 1 and the value is not
 	     specified as an argument, then fixed is taken as 0."""
 	 from math import sqrt, log, floor
+         import functions as func
 
 	 if fixed[0]==1 and beta==None: fixed[0]=0
 	 if fixed[1]==1 and cen==None: fixed[1]=0

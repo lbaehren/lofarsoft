@@ -19,6 +19,7 @@ from gaul2srl import Op_gaul2srl
 from spectralindex import Op_spectralindex
 from polarisation import Op_polarisation
 from wavelet_atrous import Op_wavelet_atrous
+from psf_vary import Op_psf_vary
 import mylogger 
 
 fits_chain = [Op_loadFITS(), Op_collapse(), Op_preprocess(),
@@ -31,6 +32,7 @@ fits_chain = [Op_loadFITS(), Op_collapse(), Op_preprocess(),
               Op_spectralindex(),
               Op_polarisation(),
               Op_wavelet_atrous(),
+              Op_psf_vary(),
               Op_outlist()
               ]
 

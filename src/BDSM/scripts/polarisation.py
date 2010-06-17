@@ -12,7 +12,7 @@ from islands import *
 from gaul2srl import *
 import mylogger
 import numpy as N
-import compute
+import functions as func
 
 ### Insert attributes into Source class
 Source.total_flux_Q        = Float(doc="Total flux(Jy), Stokes Q")
@@ -81,7 +81,7 @@ class Op_polarisation(Op):
                   s_im = N.zeros((nsrc_in_island,isl.shape[0],isl.shape[1]), dtype=float)
                   for j, src_in_isl in enumerate(isl.source):
                     for g in src_in_isl.gaussians:
-                      s_im[j,:,:] = s_im[j,:,:] + compute.gaussian_fcn(g, x1, x2)
+                      s_im[j,:,:] = s_im[j,:,:] + func.gaussian_fcn(g, x1, x2)
 
                 # Now, compare each source image (s_im) pixel by pixel in the bbox, 
                 # and only sum those that are max for current source and unmasked.

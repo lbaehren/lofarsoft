@@ -86,7 +86,7 @@ class Opts(object):
                                 "while creating fittedimage")
     check_outsideuniv = Bool(False, doc="Check for pixels outside the universe (takes time)")
 
-    shapelet_do    = Bool(False, doc="Decompose island into shapelets (True/False)")
+    shapelet_do    = Bool(True, doc="Decompose island into shapelets (True/False)")
     shapelet_basis = Enum("cartesian", "polar", 
                           doc="basis set for shapelet decomposition.")
     shapelet_fitmode = Enum("fit", None,
@@ -126,8 +126,22 @@ class Opts(object):
     atrous_lpf      = String('b3', doc = 'Low pass filter, either b3 or tr for B3 spline or Triangle')
     atrous_bdsm_do  = Bool(True, doc = "Perform source extraction on each wvavelet scale")
 
+    psf_generators = String('calibrators', doc = "calibrator/field; default=calibrator")
+    psf_nsig = Float(3.0, doc = "Kappa for clipping within each bin; default=3.0")
+    psf_over = Int(2, doc = "Factor of nyquist sample for binning bmaj etc vs snr; default=2")
+    psf_kappa2 = Float(2.0, doc = "Kappa for clipping for analytic fit; default=2.0")
+    psf_snrcut = Float(10.0, doc = "Minimum snr for statistics; default=10.0")
+    psf_snrtop = Float(0.15, doc = "Fraction of SNR>snrcut as primary generators; default=0.10")
+    psf_snrbot = Float(0.20, doc = "Fraction of SNR>snrcut as all generators; default=0.30")
+    psf_snrcutstack = Float(15.0, doc = "Unresolved sources with higher SNR taken for stacked psfs; default=15.0")
+    psf_gencode = String('list', doc = "List/file, default=list, primary gens from gaussian list or file")
+    psf_primarygen = String('', doc = "Filename for primary gens if gencode=file, x,y,snr")
+    psf_itess_method = Int(0, doc = "0=normal, 1=0+round, 2=LogSNR, 3=SqrtLogSNR ; default=0")
+    psf_tess_sc = String('s', doc = "(s)imple/(c)omplicated - normal or approximate (fuzzy); default=s")
+    psf_tess_fuzzy = Float(0.05, doc = "Fraction of overlap for fuzzy tesselation; default=0.05")
+
     print_timing   = Bool(True, doc="print basic timing information")
-    verbose_fitting= Bool(False, doc="print out extra information " \
+    verbose_fitting= Bool(True, doc="print out extra information " \
                               "during fitting")
     debug_figs_1   = Bool(False, doc='Plot gaussian fit images for each source for each channel for spectralindex')
     debug_figs_2   = Bool(False, doc='Plot gaussian fit parameter plots for each source as a fn of channel')
@@ -135,6 +149,7 @@ class Opts(object):
     debug_figs_4   = Bool(False, doc='Plot figs for Case I')
     debug_figs_5   = Bool(False, doc='Plot for spectral index for M-sources')
     debug_figs_6   = Bool(False, doc='Plot images for inigaus_nobeam')
+    debug_figs_7   = Bool(False, doc='Plot images for psf_vary')
 
     output_fbdsm   = Bool(False, doc="write out fBDSM format output files or not, for use in Anaamika")
     fbdsm_scratch  = String('/Users/mohan/anaamika/image/', doc="scratch directory for storing fBDSM files")

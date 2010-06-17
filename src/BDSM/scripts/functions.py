@@ -323,6 +323,7 @@ def moment(x,mask=None):
     for which mask is False are used, if mask is given. Works for any 
     dimension of x. 
     """
+    import numpy as N
 
     if mask == None:
         mask=N.zeros(x.shape, dtype=bool)
@@ -346,6 +347,7 @@ def fit_mask_1d(x, y, sig, mask, funct, do_err, order=0, p0 = None):
     from scipy.optimize import leastsq
     import functions as func
     from math import sqrt, pow
+    import numpy as N
     #import pylab as pl
 
     ind=N.where(~N.array(mask))[0]
@@ -403,16 +405,16 @@ def dist_2pt(p1, p2):
 def std(y):
     """ Returns unbiased standard deviation. """
     from math import sqrt
+    import numpy as N
 
     l=len(y)
     s=N.std(y)
     return s*sqrt(float(l)/(l-1))
 
-
-
 def imageshift(image, shift):
     """ Shifts a 2d-image by the tuple (shift). Positive shift is to the right and upwards. 
     This is done by fourier shifting. """
+    import scipy
     from scipy import ndimage
 
     shape=image.shape
@@ -605,7 +607,7 @@ def get_errors(img, p, stdav):
     return errors
 
 def fit_chisq(x, p, ep, mask, funct, order):
-    import functions as func
+    import numpy as N
 
     ind = N.where(N.array(mask)==False)[0]
 
@@ -622,7 +624,7 @@ def fit_chisq(x, p, ep, mask, funct, order):
     return csq
 
 def calc_chisq(x, y, ey, p, mask, funct, order):
-    import functions as func
+    import numpy as N
 
     if order == 0: 
       fit = [funct(y)]*len(y)
@@ -637,6 +639,7 @@ def calc_chisq(x, y, ey, p, mask, funct, order):
     return csq
 
 def get_windowsize_av(S_i, rms_i, chanmask, K, minchan):
+    import numpy as N
 
     av_window = N.arange(2, int(len(S_i)/minchan)+1)
     win_size = 0
@@ -651,6 +654,7 @@ def get_windowsize_av(S_i, rms_i, chanmask, K, minchan):
 
 def variance_of_wted_windowedmean(S_i, rms_i, chanmask, window_size):
     from math import sqrt
+    import numpy as N
 
     nchan = len(S_i)
     nwin = nchan/window_size
@@ -678,7 +682,7 @@ def variance_of_wted_windowedmean(S_i, rms_i, chanmask, window_size):
 def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None):
     """ fitcode : 0=fit all; 1=fit amp; 2=fit amp, posn; 3=fit amp, size """
     from scipy.optimize import leastsq
-    import functions as func
+    import numpy as N
    
     if mask != None and mask.shape != image.shape:
         print 'Data and mask array dont have the same shape, ignoring mask'

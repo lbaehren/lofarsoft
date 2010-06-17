@@ -323,7 +323,8 @@ def shape_varybeta(image, mask, basis, betainit, cen, nmax, betarange, plot):
         cf = decompose_shapelets(image, mask, basis, beta_arr[i], cen, nmax, mode='')
 	im_r=reconstruct_shapelets(image.shape, mask, basis, beta_arr[i], cen, nmax, cf)
 	im_res = image - im_r
-        dum, res_rms[i], dum, dum = _cbdsm.bstat(im_res, mask, 10.0)
+        ind = N.where(~mask)
+        res_rms[i] = N.std(im_res[ind])
     minind = N.argmin(res_rms)
     if minind > 1 and minind < nbin:
         beta = beta_arr[minind]
