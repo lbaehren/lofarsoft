@@ -12,7 +12,7 @@ import pyfits
 # Data should show the Crab Nebula and a giant pulse in limited unknown bandwidth
 # The position of the Crab Nebula should be (pulse3) Az,El 206.229,57.0392
 #                                           (pulse1) Az,El 183.831, 59.0699
-#					    (pulse5) Az,El 224.908, 52.6475
+#					                        (pulse5) Az,El 224.908, 52.6475
 # Data can be obtained from: 
 # mkdir $LOFAR_DATA_DIR/Crab
 # scp -r <username>@helios:/mnt/lofar/CS1_tbb/CrabFirstTrigger/pulse1 $LOFAR_DATA_DIR/Crab/
@@ -52,7 +52,7 @@ caltablefilename=LOFARSOFT+"src/CR-Tools/data/calibrationCS302.dat" #(Not avaiab
 # Set what part of the data you want to make an image from
 blocksize=2**10
 startblock=5155
-nblocks=100
+nblocks=25
 #selected_frequencies=range(268,292,1)
 #selected_frequencies=range(357,358,1)
 selected_frequencies=[80,110,155,230]
@@ -208,12 +208,12 @@ file_fft=hArray(complex,[totAntennas,files[0]["fftLength"]]).setPar("xvalues",fi
 selected_fft=hArray(complex,[totAntennas,len(file_frequencies)])
 summed_fft=hArray(float,[totAntennas,len(file_frequencies)])
 phasecorr=hArray(float,[totAntennas,files[0]["fftLength"]])
-phasecorr.copy(file_frequencies)
 hanning=hArray(float,files[0]["blocksize"])
 hanning.gethanningfilter()
 
 
 #Calculate calibration phase corrections
+phasecorr.copy(file_frequencies)
 for i in range(totAntennas):
     phasecorr[i].mul(float(caltable[rcuIDs[i].val(),1].val()))
     phasecorr[i].add(float(caltable[rcuIDs[i].val(),0].val()))
@@ -389,4 +389,3 @@ hdulist2 = pyfits.HDUList([hdu2])
 hdulist2.writeto(data_directory+SeparatedFitsFilename)
 
 
-d
