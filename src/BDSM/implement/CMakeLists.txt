@@ -15,10 +15,17 @@ include_directories (
 
 configure_file (${BDSM_SOURCE_DIR}/implement/create.in ${BDSM_BINARY_DIR}/implement/bdsm/create)
 
+add_custom_target (create
+  COMMAND ./create
+  WORKING_DIRECTORY ${BDSM_BINARY_DIR}/implement/bdsm
+  )
+
 ## Fortran-based version
 
 if (BDSM_WITH_FBDSM)
   add_subdirectory (bdsm)
+  ## run create script before creating library
+  add_dependencies (bdsm_nr create)
 endif (BDSM_WITH_FBDSM)
 
 ## Python-based version

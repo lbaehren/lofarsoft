@@ -30,6 +30,7 @@ if [ $(pwd) != $work ] ; then
 
   for m in *.f
   do
+   echo '-- Processing ${m} ...'
    sed '/call pg/s/^/c/g' ${m} > a; mv -f a ${m}
    sed '/pgopen(/s/^/c/g' ${m} > a; mv -f a ${m}
   done
