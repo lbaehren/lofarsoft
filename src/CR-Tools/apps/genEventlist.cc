@@ -739,8 +739,8 @@ int main(int argc, char* argv[])
     ///********** Energy and primary Mass reconstructed by Grande (Wommer's formulas) *****///
     if( !(Azg==0||Zeg==0) && Sizeg>0 && Sizmg>0) { // Ze and Az in rad
       // calculate energy and mass
-      lgEg=(0.3069*log10sizeg)+(0.7064*log10sizmg)+(1.2699/TMath::Cos(Zeg))+0.2931;
-      lnAg=(-3.5822*log10sizeg)+(4.6829*log10sizmg)+(-6.3948*TMath::Cos(Zeg))+5.3495;
+      lgEg = 0.3069*log10sizeg + 0.7064*log10sizmg + 1.2699/TMath::Cos(Zeg) + 0.2931;
+      lnAg = -8.2485*log10sizeg + 10.7833*log10sizmg - 14.7251/TMath::Cos(Zeg) + 12.3177;
       // calculate energy and mass error
       if (exp(lnAg)<=1.5) {
         err_lgEg=0.1588;  //from Michael's plots
