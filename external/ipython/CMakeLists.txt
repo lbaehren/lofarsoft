@@ -52,7 +52,7 @@ include (FindIPython)
 
 ## Check version number of IPython installation
 set (IPYTHON_REQUIRED_MAJOR_VERSION   0)
-set (IPYTHON_REQUIRED_MINOR_VERSION   11)
+set (IPYTHON_REQUIRED_MINOR_VERSION   10)
 
 if (IPYTHON_API_VERSION)
   if (IPYTHON_MAJOR_VERSION LESS ${IPYTHON_REQUIRED_MAJOR_VERSION})
@@ -73,7 +73,7 @@ if (NOT HAVE_IPYTHON OR IPYTHON_FORCE_BUILD)
   
   include (ExternalProject)
 
-  set (IPYTHON_VERSION     "0.11")
+  set (IPYTHON_VERSION     "0.10")
   set (IPYTHON_DIRECTORY   "ipython-${IPYTHON_VERSION}")
   set (IPYTHON_TAR_ARCHIVE "${IPYTHON_DIRECTORY}.tar.gz")
   

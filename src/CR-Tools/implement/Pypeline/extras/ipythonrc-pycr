@@ -1,0 +1,29 @@
+# -*- Mode: Shell-Script -*-  Not really, but shows comments correctly
+#***************************************************************************
+#
+# Configuration file for ipython -- ipythonrc format
+#
+# The format of this file is one of 'key value' lines.
+# Lines containing only whitespace at the beginning and then a # are ignored
+# as comments. But comments can NOT be put on lines with data.
+#***************************************************************************
+
+# This is a 'profile' file.
+
+# If this file is found in the user's ~/.ipython directory as ipythonrc-pycr,
+# it can be loaded by calling passing the '-profile pycr' (or '-p pycr')
+# option to IPython.
+
+# include base config and only add some extras
+include ipythonrc
+
+# from ... import *
+# load all of pycrtools
+import_all pycrtools
+
+# from ... import ...
+import_some
+
+# code to execute
+execute print "*** pycrtools functions available globally"
+
