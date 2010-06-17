@@ -2,11 +2,14 @@ c! to calculate structure function. useful to look at iono effects later
 
         subroutine structfn(f1,f2,order)
         implicit none
-        integer n,m,order
-        character f1*(*),f2*(*),extn*10
+        integer n,m,order,l
+        character f1*(*),f2*(*),extn*20
+
+cf2py   intent(in) f1,f2,order
 
         extn='.img'
-        call readarraysize(f1,extn,n,m)
+        call readarraysize(f1,extn,n,m,l)
+        if (l.gt.1) write (*,*) '  Using 2d array for 3d image !!!'
         call sub_structfn(f1,f2,order,n,m)
 
         return
@@ -16,8 +19,8 @@ c!
         subroutine sub_structfn(f1,f2,order,n,m)
         implicit none
         integer n,m,nchar,i,j,i1,j1,two,n0,order
-        character f1*(*),f2*(*),lab*500,strdev*5,str3*3,extn*10
-        real*8 image1(n,m),dumr,image2(n,m)   ! image1 is main array and image2 is ac
+        character f1*(*),f2*(*),lab*500,strdev*5,str3*3,extn*20
+        real*8 image1(n,m),dumr,image2(2*n-1,2*m-1)   ! image1 is main array and image2 is ac
         real*8 ac,std,av
 
         extn='.img'
@@ -43,6 +46,7 @@ c!
 820     continue
 
 c! code for order=0,1,2 seperately to save time
+        write (*,'(a,$)') '   '
         if (order.eq.0) then                       ! order = 0
          do 100 i=-(n-1),(n-1)
           do 110 j=-(m-1),(m-1)
@@ -130,10 +134,10 @@ c! code for order=0,1,2 seperately to save time
 
         i1=2*n-1
         j1=2*m-1
-c        call pgnumb(order,0,1,str3,i)
+        call pgnumb(order,0,1,str3,i)
         lab='Structure function of image; order='//str3
-        call writearray_bin(image2,n,m,i1,j1,f2,'mv')
-        call greyandslice(image2,n,m,i1,j1,lab)
+        call writearray_bin2D(image2,i1,j1,i1,j1,f2,'mv')
+        call greyandslice(image2,i1,j1,i1,j1,lab)
 
 333     continue
 

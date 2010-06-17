@@ -1,7 +1,7 @@
 c! to test sigma clipping
 
         implicit none
-        character filen*500,extn*10
+        character filen*500,extn*20,srldir*500
         integer n,m,seed,nchar,i,nm,x,y
         parameter (n=100)
         real*8 sigma,rand,arr(100,100),std,av   
@@ -10,8 +10,9 @@ c! to test sigma clipping
         m=100
         nm=10000
         filen='image'
+        srldir=''
         sigma=100.d0
-        call cr8noisemap(filen,n,m,sigma)
+        call cr8noisemap(filen,n,m,sigma,srldir)
         extn='.img'
         call readarray_bin(n,m,arr,n,m,21,filen,extn)
 
@@ -30,7 +31,7 @@ c! to test sigma clipping
         call arrstat(arr,n,m,1,1,n,m,std,av)
         write (*,*) 'Before clipping ',av,std
 
-        call sigclip(arr,n,m,1,1,n,m,std,av,5)
+        call sigclip(arr,n,m,1,1,n,m,std,av,5.d0)
         write (*,*) 'After  clipping ',av,std
         
         return

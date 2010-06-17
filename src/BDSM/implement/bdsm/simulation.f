@@ -36,7 +36,7 @@ c! survey para is sky area, int time, bw. calc above which flux to store srclist
 
 c! calc other para
         synbeam=c/freq/bl    ! in rad
-        cdelt1=synbeam*rad*3600.d0/bmsampl ! in asec, 4 pix per fwhm
+        cdelt1=synbeam*rad*3600.d0/bmsampl ! in asec, pix per fwhm
         cdelt2=cdelt1
         pribeam=c/freq/dia      ! in rad
         imsize=int(sqrt(area)*rad*3600.d0/cdelt1)
@@ -61,14 +61,15 @@ c! fit n power laws to numb cts
 c! spatial variation of beam. 
 c! First simple model is sinusoidal+plane variation in sigma (above sigma_0) with cons DF
 c! f's are f1,f2,delta_sig/si_o, n_x, n_y (look at notes)
-        call set_varypsf(beamvary,bmvaryf,bmvaryn,seed,imsize,imsize)
+        call set_varypsf(fn,beamvary,bmvaryf,bmvaryn,seed,imsize,
+     /       imsize,bmsampl,cdelt1,cdelt2)
 
 c! now obtain flux, x, y, populate into image, prepare source list 
         call cr8sky(freq,bw,synbeam,cdelt1,imsize,bmsampl,
      /       min(50*int(bmsampl),imsize),nchan,sens,cn1,sarr,
      /       gam1,100,seed,fn,std,scratch,beamvary,bmvaryf,bmvaryn)
 
-c! create noise map seperately, convolve with gaussian using FFT. add src+noi later
+c! create noise map seperately, convolve with gaussian. add src+noi later.
         call sim_cr8noise(fn,sens,nchan,imsize,bmsampl,seed)
 
 c! fix coordinate system and other keywords
@@ -77,7 +78,8 @@ c! fix coordinate system and other keywords
 c! fix pointing centres
         call get_mosaicpara(fn,imsize,scratch)
 
-c! now de-mosaic the image and add src and noise to create subcubes, write fits directly
+c! now de-mosaic the image and add src and noise to create subcubes, write fits directly.
+c! also do total image as .img.
         call sim_addnoisrc(fn,imsize,nchan,freq,synbeam,crval1,crval2,
      /               crpix1,crpix2,cdelt1,cdelt2,bw,scratch,fitsdir)
 

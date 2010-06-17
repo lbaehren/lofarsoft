@@ -273,7 +273,7 @@ c! plot stuff with SAD peak flux to see if there is a corr in differences
         close(21)
 	call rearrange(indexlistall,lmn,order,el,em,en)
 
-c        call pgbegin(0,'?',3,3)
+        call pgbegin(0,'?',3,3)
         do 610 i=1,9000
          unity(i)=1.d0
 610     continue
@@ -315,9 +315,9 @@ c! next row is relative distance
      /    1.d0,1,1,2,3,'Peak SAD            ','Dist SAD-SEX        ')
         call callplot(indexlistall,el,em,en,1,peakD,1.d0,distBX,unity,
      /    1.d0,1,1,3,3,'Peak SAD            ','Dist BDSM-SEX      ')
-c        call pgend
+        call pgend
 
-c        call pgbegin(0,'?',3,3)
+        call pgbegin(0,'?',3,3)
 c! ############  PLOT NUMBER 2 ##############################
 c! first row is 
         call callplot(indexlistall,el,el,em,0,peakD,1.d3,integD,integB,
@@ -343,9 +343,9 @@ c! third row is for error/quantity
         call callplot(indexlistall,en,en,en,0,peakX,1.d0,dpeakX,unity
      /   ,1.d0,1,1,3,3,'Peak SEX            ','err_peak SEX        ')
 
-c        call pgend
+        call pgend
 
-c        call pgbegin(0,'?',3,3)
+        call pgbegin(0,'?',3,3)
 c! ############  PLOT NUMBER 3 ##############################
 c! first row is 
         call callplot(indexlistall,el,el,em,0,peakD,1.d3,residrmsD,
@@ -369,13 +369,13 @@ c! first row is
         call callplot(indexlistall,el,em,em,0,peakD,1.d3,ddecB,decB,
      /    dg,1,1,3,2,'Peak SAD            ','err_Dec/Dec SAD      ')
 
-c        call pgend
+        call pgend
 
 	
-c        call pgbegin(0,'?',1,1)
+        call pgbegin(0,'?',1,1)
         call callplot(indexlistall,el,el,em,1,peakD,1.d0,distDB,unity,
      /    1.d0,1,1,1,3,'Peak SAD            ','Dist SAD-BDSM        ')
-c        call pgend
+        call pgend
 
 
 
@@ -750,7 +750,7 @@ c! is cindex=0, then xv,ynum,yden is (cN(i)) and if=1, then of (np)
           end if
          end if
 420     continue
-c        call pgplott(x4,y4,np,l1,l2,p1,p2,xl,yl) ! x,y,log,log,win(1,1)
+        call pgplott(x4,y4,np,l1,l2,p1,p2,xl,yl) ! x,y,log,log,win(1,1)
 
         return
         end
@@ -764,28 +764,28 @@ c ------------------------------------------------------------------------------
         integer np,l1,l2,n,m,nchar,i
         character xlab*20,ylab*21,xb*6,yb*6
 
-c        call pgpanl(n,m)
-c	call pgslw(3)
-c	call pgsch(2.1)
-c        call pgvport(0.15,0.9,0.15,0.9)
+        call pgpanl(n,m)
+	call pgslw(3)
+	call pgsch(2.1)
+        call pgvport(0.15,0.9,0.15,0.9)
         call range2(x,9000,np,mnx,mxx)
         call range2(y,9000,np,mny,mxy)
-c        call pgwindow(mnx,mxx,mny,mxy)
-cc	call pglabel(xlab(1:nchar(xlab)),ylab(1:nchar(ylab)),' ')
-c	call pglabel(xlab,ylab,' ')
-cc        if (m.eq.1) call pgwindow(mnx,mxx,0.7,1.3)
-cc        if (m.eq.2) call pgwindow(mnx,mxx,0.0,2.0)
-cc	if (m.eq.1) call pglabel(' ',ylab(1:nchar(ylab)),' ')
-cc	if (m.eq.2) call pglabel(xlab(1:nchar(xlab)),ylab(1:nchar(ylab)),' ')
-cc        if (m.eq.1) call pgtext(0.6,1.35,
- 
+        call pgwindow(mnx,mxx,mny,mxy)
+c	call pglabel(xlab(1:nchar(xlab)),ylab(1:nchar(ylab)),' ')
+	call pglabel(xlab,ylab,' ')
+c        if (m.eq.1) call pgwindow(mnx,mxx,0.7,1.3)
+c        if (m.eq.2) call pgwindow(mnx,mxx,0.0,2.0)
+c	if (m.eq.1) call pglabel(' ',ylab(1:nchar(ylab)),' ')
+c	if (m.eq.2) call pglabel(xlab(1:nchar(xlab)),ylab(1:nchar(ylab)),' ')
+c        if (m.eq.1) call pgtext(0.6,1.35,
+c     /     'Ratio of fitted peak fluxes ')
         xb='BCNST'
         yb='BCNST'
         if (l1.eq.1) xb='BCNSTL' 
         if (l2.eq.1) yb='BCNSTL' 
-c        call pgbox(xb(1:nchar(xb)),0.0,0,yb(1:nchar(yb)),0.0,0)
-c        call pgsch(1.0)
-c        call pgpoint(np,x,y,3)
+        call pgbox(xb(1:nchar(xb)),0.0,0,yb(1:nchar(yb)),0.0,0)
+        call pgsch(1.0)
+        call pgpoint(np,x,y,3)
 
         return
         end

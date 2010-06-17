@@ -1,39 +1,125 @@
-c! this is to do basic quality checks, and set up input parameters for
+c! this is to do basic quality checks, and set up input parameters for 
 c! an automated running of bdsm.
 c! num of bm/src is approx n*m/(num pix > 5 sigma)/(1-alpha), alpha is diff src ct, +ve
 
-        subroutine preprocess(f1,runcode,scratch)
+        subroutine preprocess(f1,fname,imagename,runcode,scratch,
+     /             n,m,l0,l)
         implicit none
-        character f1*500,fn*500,ctype(3)*8,extn*10,ch1*1,scratch*500
-        integer nchar,n,m
-        logical exists
+        integer nchar,n,m,error,l,l0,dumi
         real*8 crpix(3),cdelt(3),crval(3),crota(3),bm_pix(3),keyvalue
-        character runcode*2,f2*500
+        character f1*500,fn*500,ctype(3)*8,extn*20,ch1*1,scratch*500
+        character runcode*2,f2*500,keystrng*500,fg*500,dir*500,fname*500
+        real*8 bmpersrc_th,boxsize,stepsize,fitfreely
+        real*8 minpix_isl,maxsize_beam,snrclip,dumr
+        character comment*500,keyword*500,imagename*500
+        character gausshap*500,iniguess*500,flagsmallsrc*500
+        logical exists
         
         if (runcode(2:2).eq.'q') write (*,*) '  Preprocessing image'
 
         extn='.header'
-        fn=scratch(1:nchar(scratch))//f1(1:nchar(f1))//
+        fn=scratch(1:nchar(scratch))//fname(1:nchar(fname))//
      /     extn(1:nchar(extn))
         inquire(file=fn,exist=exists)
         call read_dum_head(3,ctype,crpix,cdelt,crval,crota,bm_pix)
         if (exists) then 
-         f2=f1(1:nchar(f1))//extn(1:nchar(extn))
+         f2=fname(1:nchar(fname))//extn(1:nchar(extn))
          call read_head_coord(f2(1:nchar(f2)),3,
-     /        ctype,crpix,cdelt,crval,crota,bm_pix)
+     /        ctype,crpix,cdelt,crval,crota,bm_pix,scratch)
         else
-         call writefitshead(f1,3,ctype,crpix,cdelt,crval,crota,
-     /        bm_pix,scratch)
+         call writefitshead(fname,3,crpix,ctype(1),ctype(2),ctype(3),
+     /       cdelt,crval,crota,bm_pix,scratch)
         end if
+        if (l.gt.1) write (*,*) '  Using 2d array for 3d image !!!'
 
-        extn='.img'
-        call readarraysize(f1,extn,n,m)
-        call pp_basicstats(f1,n,m)              ! writes in 'f1.bstat'
+c! get other keys from paradefine
+        fg="paradefine"
+        extn=""
+        dir="./"
+        keyword="bmpersrc_th"
+        call get_keyword(fg,extn,keyword,keystrng,bmpersrc_th,
+     /    comment,"r",dir,error)
+
+        keyword="boxsize_th"
+        call get_keyword(fg,extn,keyword,keystrng,boxsize,
+     /    comment,"r",dir,error)
+        if (boxsize.lt.2.d0) boxsize=0.d0
+        if (boxsize.gt.max(n,m)*1.d0) boxsize=max(n,m)*1.d0
+
+        keyword="stepsize_th"
+        call get_keyword(fg,extn,keyword,keystrng,stepsize,
+     /    comment,"r",dir,error)
+        if (stepsize.lt.1.d0) stepsize=0.d0
+        if (stepsize.gt.min(n,m)*1.d0) stepsize=0.d0
+
+        keyword="minpix_isl"
+        call get_keyword(fg,extn,keyword,keystrng,minpix_isl,
+     /    comment,"r",dir,error)
         
-        call pp_bmpersrc(f1,n,m)                ! approx formula in notebook
-        call pp_imrms_para(f1,n,m)
-        call pp_thresholds(f1,n,m)
+        keyword="maxsize_beam"
+        call get_keyword(fg,extn,keyword,keystrng,maxsize_beam,
+     /    comment,"r",dir,error)
 
+        keyword="fitfreely"
+        call get_keyword(fg,extn,keyword,keystrng,fitfreely,
+     /    comment,"r",dir,error)
+        if (fitfreely.ne.0) fitfreely=1.d0
+
+        keyword="iniguess"
+        call get_keyword(fg,extn,keyword,iniguess,keyvalue,
+     /    comment,"s",dir,error)
+        if (iniguess(1:nchar(iniguess)).ne.'all') iniguess='default'
+
+        keyword="flagsmallsrc"
+        call get_keyword(fg,extn,keyword,flagsmallsrc,keyvalue,
+     /    comment,"s",dir,error)
+        if (flagsmallsrc(1:nchar(flagsmallsrc)).ne.'true'.and.
+     /      flagsmallsrc(1:nchar(flagsmallsrc)).ne.'false') 
+     /      flagsmallsrc='true'
+
+        extn=''
+        keyword="gausshap"
+        call get_keyword(fg,extn,keyword,gausshap,dumr,
+     /    comment,"s",dir,error)
+
+        call pp_basicstats(f1,fname,n,m,scratch,imagename,snrclip,  ! writes in 'f1.bstat'
+     /       ctype,crpix,cdelt,crval,crota)
+        
+        call pp_bmpersrc(f1,fname,n,m,scratch,bmpersrc_th,imagename,
+     /       snrclip,gausshap)    ! approx formula in notebook
+        call pp_imrms_para(f1,fname,n,m,scratch,int(boxsize),
+     /       int(stepsize))
+        call pp_linearcoords(f1,fname,n,m,scratch,imagename,3,ctype,
+     /        crpix,cdelt,crval,crota,bm_pix)
+
+        extn='.bparms'
+        if (minpix_isl.le.0.d0) minpix_isl=4.d0
+        keyword='minpix_isl'
+        comment=" 'Minimum number of pixels in an island'"
+        call put_keyword(fname,extn,keyword,keyword,minpix_isl,
+     /       comment,'R',scratch)
+        if (maxsize_beam.le.0.d0) maxsize_beam=10.d0
+        keyword='maxsize_beam'
+        comment=" 'Maximum size of fitted gaussian in beams'"
+        call put_keyword(fname,extn,keyword,keyword,maxsize_beam,
+     /       comment,'R',scratch)
+
+        extn='.bparms'
+        keyword='fitfreely'
+        comment=" ';1 = fit all gaus para.s (default) "//
+     /          "0 = fix size=beam'"
+        call put_keyword(fname,extn,keyword,keyword,fitfreely,
+     /       comment,'R',scratch)
+        keyword='iniguess'
+        comment=" 'all: take all initial gaussians as guess, "//
+     /          "else default'"
+        call put_keyword(fname,extn,keyword,iniguess,dumr,
+     /       comment,'S',scratch)
+        keyword='flagsmallsrc'
+        comment=" 'true: flag gaus < 1/2beam, false: keep '"
+        call put_keyword(fname,extn,keyword,flagsmallsrc,dumr,
+     /       comment,'S',scratch)
+        
 c! next step
         if (runcode(1:1).eq.'m') then 
          write (*,*) 
@@ -49,35 +135,49 @@ c! next step
 c!
 c!  ------------------------  SUBROUTINES  -----------------------------------
 c!
-        subroutine pp_basicstats(f1,n,m)              ! writes in 'f1.bstat'
+        subroutine pp_basicstats(f1,fname,n,m,scratch,imagename,
+     /             snrclip,ctype,crpix,cdelt,crval,crota)
         implicit none
         include "constants.inc"
-        integer n,m,mx(2),mn(2),nchar
-        character f1*500,extn*10,fn*500,keyword*500,fg*500,scratch*500
-        character comment*500,code*1,keystrng*500,dir*500
-        real*8 std,av,stdclip,avclip,mxv,mnv,kappa,cdelt(2),keyvalue
+        include "wcs_bdsm.inc"
+        integer n,m,mx(2),mn(2),nchar,error,blankn,error1
+        character f1*500,extn*20,fn*500,keyword*500,fg*500,scratch*500
+        character comment*500,code*1,keystrng*500,dir*500,fname*500
+        character imagename*500,f2*500,ctype(3)*8
+        real*8 std,av,stdclip,avclip,mxv,mnv,kappa,keyvalue
+        real*8 blankv,dumr,val,datamax,datamin,snrclip
+        logical blanky,isgoodpix
+        integer wcslen,xmax,ymax,outsideuniv,i,j
+        parameter (wcslen=450)
+        integer wcs(wcslen)
+        real*8 crpix(3),cdelt(3),crval(3),crota(3)
         
+c        keyword='BLANK'                        !!  NO. doesnt mean anything. 
+c        call get_keyword(fname,extn,keyword,keystrng,blankv,
+c     /       comment,'r',scratch,error)        !!  See eric greisens email.
+c        if (error.eq.0) then
+c         blanky=.true.
+
+        extn='.img'
+        blankv=-999.d0                         ! BDSM value for magic blanking.
+        call get_numpix_val(imagename,extn,n,m,blankv,'eq',blankn)
+        if (blankn.gt.0) then  
+         blanky=.true.
+        else
+         blanky=.false.
+         blankn=0
+        end if
+
         kappa=3.d0
-        call get_imagestats(f1,kappa,n,m,std,av,stdclip,avclip,
-     /       mx,mn,mxv,mnv)
+        call get_imagestats2D(imagename,kappa,n,m,std,av,stdclip,avclip,
+     /       mx,mn,mxv,mnv,blanky,blankv)
 
-        fg="paradefine"
-        extn=""
-        keyword="scratch"
-        dir="./"
-        call get_keyword(fg,extn,keyword,scratch,keyvalue,
-     /    comment,"s",dir)
-
-        extn='.header'
-        keyword='CDELT1'
-        call get_keyword(f1,extn,keyword,keystrng,cdelt(1),
-     /       comment,'r',scratch)
-        keyword='CDELT2'
-        call get_keyword(f1,extn,keyword,keystrng,cdelt(2),
-     /       comment,'r',scratch)
-        fn=scratch(1:nchar(scratch))//f1(1:nchar(f1))//'.bstat'
+c! create .bparms here as well
+        fn=scratch(1:nchar(scratch))//fname(1:nchar(fname))//'.bstat'
         open(unit=21,file=fn,status='unknown')
-         write (21,*) 'image_name = ',f1(1:nchar(f1))," 'Name of image'"
+         f2='image_name = '//imagename(1:nchar(imagename))//
+     /                    " 'Name of image'"
+         write (21,*) f2(1:nchar(f2))
          write (21,*) 'size_x = ',n," '# pixels on x axis'"
          write (21,*) 'size_y = ',m," '# pixels on y axis'"
          write (21,*) 'mean = ',av," 'Mean over image (BUNIT)'"
@@ -95,209 +195,321 @@ c!
          write (21,*) 'omega = ',n*m*abs(cdelt(1))*abs(cdelt(2))/
      /          rad/rad," 'Solid angle of image (str)'"
         close(21)
+        snrclip=abs(avclip)/stdclip
+
+        fn=scratch(1:nchar(scratch))//fname(1:nchar(fname))//'.bparms'
+        open(unit=21,file=fn,status='unknown')
+         f2='image_name = '//imagename(1:nchar(imagename))//
+     /                    " 'Name of image'"
+         write (21,*) f2(1:nchar(f2))
+        close(21)
+
+        extn='.bstat'
+        keyword='blank_num'
+        comment=" 'Number of blanked pixels'"
+        dumr=blankn*1.d0
+        call put_keyword(fname,extn,keyword,keyword,dumr,
+     /      comment,'R',scratch)
+        keyword='blank_val'
+        comment=" 'Blanking value'"
+        call put_keyword(fname,extn,keyword,keyword,blankv,
+     /      comment,'R',scratch)
+
+c! now for pixels outside the universe
+        call wcs_struct(3,ctype,crpix,cdelt,crval,crota,wcs,wcslen)
+        outsideuniv=0
+        do j=1,m
+         do i=1,n
+          call wcs_isgoodpix(i*1.d0,j*1.d0,wcs,wcslen,isgoodpix)
+          if (.not.isgoodpix) outsideuniv=outsideuniv+1
+         end do
+        end do
+c        call freewcs(wcs,wcslen)
+        extn='.bstat'
+        keyword='outsideuniv_num'
+        comment=" 'Number of pixels outside universe'"
+        dumr=outsideuniv*1.d0
+        call put_keyword(fname,extn,keyword,keyword,dumr,
+     /      comment,'R',scratch)
         
         return
         end
 c!
 c!      ----------
 c!
-        subroutine pp_bmpersrc(f1,n,m)                ! approx formula in notebook
+        subroutine pp_bmpersrc(f1,fname,n,m,scratch,bmpersrc_th,
+     /             imagename,snrclip,gausshap)  ! approx formula in notebook
         implicit none
-        integer n,m,numpix,nchar
-        character f1*500,extn*10,fn*500,keyword*500,fg*500
+        integer n,m,numpix,nchar,error
+        character f1*500,extn*20,fn*500,keyword*500,fg*500,fname*500
         character comment*500,code*1,keystrng*500,dir*500,scratch*500
-        real*8 alpha,rmsclip,bmpersrc,keyvalue
+        character imagename*500,mean_map*500,gausshap*500,confused*500
+        real*8 alpha,rmsclip,bmpersrc_th,keyvalue,blankn
+        real*8 blankv,snrclip,dumr
+        logical blanky
 
-        alpha=2.5d0    ! power law of diff src count
+        if (bmpersrc_th.eq.0.d0) then
+         alpha=2.5d0    ! power law of diff src count
+         extn='.bstat'
+         keyword='rms_clip'
+         call get_keyword(fname,extn,keyword,keystrng,rmsclip,
+     /        comment,'r',scratch,error)
+         keyword='blank_num'
+         call get_keyword(fname,extn,keyword,keystrng,blankn,
+     /        comment,'r',scratch,error)
+ 
+         extn='.img'
+         call get_numpix_val(imagename,extn,n,m,5.d0*rmsclip,'ge',
+     /        numpix)
+         if (blankn.gt.0.d0) then
+          extn='.bstat'
+          keyword='blank_val'
+          call get_keyword(fname,extn,keyword,keystrng,blankv,
+     /         comment,'r',scratch,error)
+          if (error.eq.1) write (*,*) 'BLANK error'
+          if (blankv.ge.5.d0*rmsclip) numpix=numpix-blankn
+         end if
+ 
+         if (numpix.lt.0) write (*,*) ' ERROR ##'
+         if (numpix.eq.0) numpix=1
+         bmpersrc_th=n*m/((alpha-1.d0)*numpix)
+        end if
 
-        fg="paradefine"
-        extn=""
-        keyword="scratch"
-        dir="./"
-        call get_keyword(fg,extn,keyword,scratch,keyvalue,
-     /    comment,"s",dir)
-
-        extn='.bstat'
-        keyword='rms_clip'
-        call get_keyword(f1,extn,keyword,keystrng,rmsclip,
-     /       comment,'r',scratch)
-
-        extn='.img'
-        call get_numpix_val(f1,extn,n,m,5.d0*rmsclip,'ge',numpix)
-        if (numpix.eq.0) numpix=1
-        bmpersrc=n*m/((alpha-1.d0)*numpix)
-
-        extn='.bstat'
+        extn='.bparms'
         keyword='bmpersrc_th'
         comment=" 'Estimated # beams per source'"
-        call put_keyword(f1,extn,keyword,keyword,bmpersrc,
+        call put_keyword(fname,extn,keyword,keyword,bmpersrc_th,
      /       comment,'R',scratch)
+
+c! check if av_clip/std_clip is too large or if beam/src is too small, then put av_clip=0
+        fg="paradefine"
+        extn=""
+        dir="./"
+        keyword="mean_map"
+        call get_keyword(fg,extn,keyword,mean_map,dumr,
+     /    comment,"S",dir,error)
+        if (mean_map.eq.'default') then
+         if (bmpersrc_th.le.25.d0.or.snrclip.ge.0.1d0) then
+          confused='true'
+         else
+          confused='false'
+         end if
+        else
+         confused=' '
+        end if
+
+        extn='.bparms'
+        dumr=0.d0
+        keyword='confused'
+        comment=" 'Is the image confused '"
+        call put_keyword(fname,extn,keyword,confused,dumr,
+     /       comment,'S',scratch)
+
+        keyword='gausshap'
+        comment=" "
+        call put_keyword(fname,extn,keyword,gausshap,dumr,
+     /       comment,'S',scratch)
         
         return
         end
 c!
 c!      ----------
 c!
-        subroutine pp_imrms_para(f1,n,m)
+        subroutine pp_imrms_para(f1,fname,n,m,scratch,boxsize,stepsize)
         implicit none
         include "constants.inc"
         integer n,m,nchar,boxsize,stepsize,conv_filt,round
-        character f1*500,extn*10,fn*500,keyword*500,fg*500
+        character f1*500,extn*20,fn*500,keyword*500,fg*500,fname*500
         character comment*500,code*1,keystrng*500,dir*500,scratch*500
-        real*8 maxv,cdelt(2),bmaj,kappa,rmsclip,bmpersrc,keyvalue 
-        integer brightsize,largesize,intersrcsep
+        real*8 maxv,cdelt(3),bmaj,kappa,rmsclip,bmpersrc,keyvalue 
+        integer brightsize,largesize,intersrcsep,error
 
-        fg="paradefine"
-        extn=""
-        keyword="scratch"
-        dir="./"
-        call get_keyword(fg,extn,keyword,scratch,keyvalue,
-     /    comment,"s",dir)
-
-        extn='.bstat'
-        keyword='max_value'
-        call get_keyword(f1,extn,keyword,keystrng,maxv,comment,
-     /       'r',scratch)
-        keyword='rms_clip'
-        call get_keyword(f1,extn,keyword,keystrng,rmsclip,
-     /       comment,'r',scratch)
-        keyword='bmpersrc_th'
-        call get_keyword(f1,extn,keyword,keystrng,bmpersrc,
-     /       comment,'r',scratch)
-        extn='.header'
-        keyword='CDELT1'
-        call get_keyword(f1,extn,keyword,keystrng,cdelt(1),
-     /       comment,'r',scratch)
-        keyword='BMAJ'
-        call get_keyword(f1,extn,keyword,keystrng,bmaj,
-     /       comment,'r',scratch)
-        kappa=3.d0
-        brightsize=round(2.d0*bmaj/abs(cdelt(1))/fwsig*sqrt(2.d0*dlog
-     /             (maxv/(kappa*rmsclip))))   ! 'size' of brightest source
-        largesize=round(min(n,m)/4.d0)        ! atleast 4 boxes on each side
-        intersrcsep=round(sqrt(bmpersrc)*2.d0*bmaj/abs(cdelt(1)))
-c!      scales in noise part of map
-c!      wavelet decomp
-c!      scales in dirty beam
-
-        boxsize=round(sqrt(brightsize*largesize*1.d0))
-        if (intersrcsep.gt.brightsize.and.intersrcsep.lt.largesize)
-     /   boxsize=round(sqrt(intersrcsep*largesize*1.d0))
-        if (boxsize.lt.40) then
-         boxsize=min(40,min(n,m))
-        end if
+        if (boxsize.eq.0) then
+         extn='.bstat'
+         keyword='max_value'
+         call get_keyword(fname,extn,keyword,keystrng,maxv,comment,
+     /        'r',scratch,error)
+         keyword='rms_clip'
+         call get_keyword(fname,extn,keyword,keystrng,rmsclip,
+     /        comment,'r',scratch,error)
+         extn='.bparms'
+         keyword='bmpersrc_th'
+         call get_keyword(fname,extn,keyword,keystrng,bmpersrc,
+     /        comment,'r',scratch,error)
+         extn='.header'
+         keyword='CDELT1'
+         call get_keyword(fname,extn,keyword,keystrng,cdelt(1),
+     /        comment,'r',scratch,error)
+         keyword='BMAJ'
+         call get_keyword(fname,extn,keyword,keystrng,bmaj,
+     /        comment,'r',scratch,error)
+         kappa=3.d0
+         brightsize=round(2.d0*bmaj/abs(cdelt(1))/fwsig*sqrt(2.d0*dlog
+     /              (maxv/(kappa*rmsclip))))   ! 'size' of brightest source
+         largesize=round(min(n,m)/4.d0)        ! atleast 4 boxes on each side
+         intersrcsep=round(sqrt(bmpersrc)*2.d0*bmaj/abs(cdelt(1)))
+c!       scales in noise part of map
+c!       wavelet decomp
+c!       scales in dirty beam
+ 
+         boxsize=round(sqrt(brightsize*largesize*1.d0))
+         if (intersrcsep.gt.brightsize.and.intersrcsep.lt.largesize)
+     /    boxsize=round(sqrt(intersrcsep*largesize*1.d0))
+         if (boxsize.lt.40) then
+          boxsize=min(40,min(n,m))
+         end if
+         boxsize=boxsize-1 ! horrible hack fro WN40305HB, check later 
+         if (mod(boxsize,10).eq.0) boxsize=boxsize+1
+        end if ! if boxsize=0 in paradefine
 c! and so on for each estimate commented above.
 
-        stepsize=round(min(boxsize/3.d0,min(n,m)/10.d0))
-        
-        extn='.bstat'
+        if (stepsize.eq.0) 
+     /   stepsize=round(min(boxsize/3.d0,min(n,m)/10.d0))
+
+        extn='.bparms'
         keyword='boxsize_th'
         comment=" 'Boxsize for rms map'"
-        call put_keyword(f1,extn,keyword,keyword,boxsize*1.d0,
+        call put_keyword(fname,extn,keyword,keyword,boxsize*1.d0,
      /       comment,'R',scratch)
         keyword='stepsize_th'
         comment=" 'Stepsize for rms map'"
-        call put_keyword(f1,extn,keyword,keyword,stepsize*1.d0,
+        call put_keyword(fname,extn,keyword,keyword,stepsize*1.d0,
      /       comment,'R',scratch)
 
         return
         end
 c!
-c!      ----------
-c!
-        subroutine pp_thresholds(f1,n,m)
+c! if RA and dec values of top and bottom and left and right resp
+c! of vert and hori lines arent the same to within a pixel->arcsec then
+c! nonlinear else linear
+        subroutine pp_linearcoords(f1,fname,n,m,scratch,imagename,
+     /    nn,ctype,crpix,cdelt,crval,crota,bm_pix)
         implicit none
+        include "wcs_bdsm.inc"
         include "constants.inc"
-        integer n,m,round,nbin,i,ind,nchar
-        real*8 false_p,source_p
-        character f1*500,extn*10,filen*500,keyword*500,thresh*500,fn*500
-        character comment*500,code*1,keystrng*500,dir*500
-        character fg*500,scratch*500
-        real*8 erf,ss(500),nn(500),smin_L,cutoff,std,freq,omega
-        real*8 spin,n1,n2,s1,s2,alpha,A,bmaj,bmin,cdelt(2),keyvalue
+        integer nn,n,m,i
+        real*8 crpix(nn),cdelt(nn),crval(nn),crota(nn),bm_pix(nn)
+        real*8 image(n,m),blankn,blankv
+        real*8 blcra,blcdec,tlcdec,tlcra,brcdec,brcra
+        character f1*500,ctype(nn)*8,extn*20,scratch*500
+        character fname*500,imagename*500
+        character keyword*500,fg*500,comment*500,keystrng*500
+        integer wcslen,iaxis(2)
+        parameter (wcslen=450)
+        integer wcs(wcslen),blcx,tlcy,brcx,error,error1
+        logical isgoodpix
+        character linear*500
 
-        cutoff=5.d0
-        false_p=0.5d0*(1.d0-erf(5.d0/1.4142d0))*n*m
+c! read in image and blank value and get wcs
+        extn='.img'
+        call readarray_bin(n,m,image,n,m,imagename,extn)
+        call wcs_struct(nn,ctype,crpix,cdelt,crval,crota,wcs,wcslen)
 
-        fg="paradefine"
-        extn=""
-        keyword="scratch"
-        dir="./"
-        call get_keyword(fg,extn,keyword,scratch,keyvalue,
-     /    comment,"s",dir)
-
-        spin=-0.8d0
-        filen='data'
-        call getline(filen,dir,nbin)
         extn='.bstat'
-        keyword='rms_clip'
-        call get_keyword(f1,extn,keyword,keystrng,std,
-     /       comment,'r',scratch)
-        extn='.bstat'
-        keyword='omega'
-        call get_keyword(f1,extn,keyword,keystrng,omega,
-     /       comment,'r',scratch)
-        extn='.header'
-        keyword='CRVAL3'
-        call get_keyword(f1,extn,keyword,keystrng,freq,
-     /       comment,'r',scratch)
-        smin_L=std*cutoff*((1.4d9/freq)**spin)            ! n sig at 1.4 GHz
-        open(unit=21,file=filen,status='old')
-        do 100 i=1,nbin
-         read (21,*) ss(i),nn(i)       !  mJy and N(>S)/str
-         ss(i)=ss(i)*1.0d-3            !   Jy
-         if (ss(i).lt.smin_L) ind=i
-100     continue
-        close(21)
-        n1=nn(ind)
-        n2=nn(nbin)
-        s1=ss(ind)
-        s2=ss(nbin)
-        alpha=1.d0-dlog(n1/n2)/dlog(s1/s2)  ! dN =A omega S^-alpha dS
-        A=(alpha-1.d0)*n1/(s1**(1.d0-alpha))
-
-        extn='.header'
-        keyword='BMAJ'
-        call get_keyword(f1,extn,keyword,keystrng,bmaj,
-     /       comment,'r',scratch)
-        keyword='BMIN'
-        call get_keyword(f1,extn,keyword,keystrng,bmin,
-     /       comment,'r',scratch)
-        keyword='CDELT1'
-        call get_keyword(f1,extn,keyword,keystrng,cdelt(1),
-     /       comment,'r',scratch)
-        keyword='CDELT2'
-        call get_keyword(f1,extn,keyword,keystrng,cdelt(2),
-     /       comment,'r',scratch)
-        source_p=2.d0*pi*A*bmaj*bmin/fwsig/fwsig/abs(cdelt(1))
-     /           /abs(cdelt(2))*omega*((cutoff*std)**(1.d0-alpha))/
-     /           ((1.d0-alpha)*(1.d0-alpha))
-
-        if (false_p.lt.0.1d0*source_p) then
-         thresh='hard'
-        else
-         thresh='fdr '
-c         call fdr
+        keyword='blank_num'
+        call get_keyword(fname,extn,keyword,keystrng,blankn,
+     /       comment,'r',scratch,error)
+        if (blankn.gt.0.d0) then
+         extn='.bstat'
+         keyword='blank_val'
+         call get_keyword(fname,extn,keyword,keystrng,blankv,
+     /        comment,'r',scratch,error)
         end if
-        extn='.bstat'
-        keyword='thresh'
-        comment=" 'Source pixel threshold - hard or fdr'"
-        call put_keyword(f1,extn,keyword,thresh,0.d0,
-     /       comment,'S',scratch)
 
-        keyword='thresh_pix'
-        comment=" 'Value in sigma for hard threshold'"
-        call put_keyword(f1,extn,keyword,keyword,4.d0,
-     /       comment,'R',scratch)
-
-        keyword='thresh_isl'
-        comment=" 'Threshold in sigma for island boundary'"
-        if (thresh.eq.'hard') call put_keyword(f1,extn,keyword,keyword,
-     /      3.d0,comment,'R',scratch)
-        if (thresh.eq.'fdr ') call put_keyword(f1,extn,keyword,keyword,
-     /      3.d0,comment,'R',scratch)
-        close(21)
+c! first find nonblank lines inside the universe.
+c! ignore if linear but rotated. too difficult to take care of now
+        error=0
+        do i=1,min(n,m)  ! go diagonally to find them
+         call sub_lincoord_gpix(i,i,isgoodpix,wcs,wcslen,
+     /        blankn,blankv,image(i,i))
+         if (isgoodpix) then
+          blcx=i
+          goto 443
+         end if
+        end do
+443     continue
+        if (blcx.eq.min(n,m)) error=1
+        do i=m,blcx,-1
+         call sub_lincoord_gpix(blcx,i,isgoodpix,wcs,wcslen,
+     /        blankn,blankv,image(blcx,i))
+         if (isgoodpix) then
+          tlcy=i
+          goto 444
+         end if
+         if (i.eq.blcx) error=error+2
+        end do
+444     continue
+        do i=n,blcx,-1
+         call sub_lincoord_gpix(i,blcx,isgoodpix,wcs,wcslen,
+     /        blankn,blankv,image(i,blcx))
+         if (isgoodpix) then
+          brcx=i
+          goto 445
+         end if
+         if (i.eq.blcx) error=error+4
+        end do
+445     continue
         
+c! get coordinates
+        if (error.gt.0) then
+         write (*,*) ' !!! Cant get proper coords, error ',error
+        else
+         call wcs_xy2radec(blcx*1.d0,blcx*1.d0,blcra,blcdec,
+     /        error1,wcs,wcslen)
+         call wcs_xy2radec(blcx*1.d0,tlcy*1.d0,tlcra,tlcdec,
+     /        error1,wcs,wcslen)
+         call wcs_xy2radec(brcx*1.d0,blcx*1.d0,brcra,brcdec,
+     /        error1,wcs,wcslen)  ! coords in radians, cdelt in deg
+        end if
+
+c! check if linear
+        linear='true'
+        iaxis(1)=0
+        iaxis(2)=0
+        do i=1,nn
+         if (ctype(i)(1:2).eq.'RA') iaxis(1)=i
+         if (ctype(i)(1:3).eq.'DEC') iaxis(2)=i
+        end do
+        if (iaxis(1).eq.0.or.iaxis(2).eq.0) then
+         write (*,*) ' WRONG AXES !!'
+         linear='true'
+        else
+         if (abs(blcra-tlcra).gt.abs(cdelt(iaxis(1)))/rad) 
+     /       linear='false'
+         if (abs(blcdec-brcdec).gt.abs(cdelt(iaxis(2)))/rad) 
+     /       linear='false'
+        end if
+
+        extn='.bparms'
+        keyword='linearcoords'
+        comment=" 'Assume dirn of north is same for all pixels'"
+        call put_keyword(fname,extn,keyword,linear,0.d0,
+     /       comment,'S',scratch)
+c        call freewcs(wcs,wcslen)
+
         return
         end
 c!
+c!
+c!
+        subroutine sub_lincoord_gpix(i,j,isgoodpix,wcs,
+     /             wcslen,blank_num,blankv,imval)
+        implicit none
+        integer i,j,wcslen,wcs(wcslen)
+        logical isgoodpix,isgood1
+        real*8 blank_num,blankv,imval
+
+        isgoodpix=.true.
+        if (blank_num.gt.0.d0.and.imval.eq.blankv) 
+     /   isgoodpix=.false.
+        if (isgoodpix) then
+         call wcs_isgoodpix(i*1.d0,i*1.d0,wcs,wcslen,isgood1)
+         isgoodpix=isgoodpix.and.isgood1
+        end if
+        
+        return  
+        end
+
+
+
+

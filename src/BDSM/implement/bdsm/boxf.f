@@ -24,8 +24,8 @@ c! boxcar smoothing. preserves rms anyway since wt is uniform flat unity
         siz=wid(1)*wid(2)
 
 c! area under convolved figure is preserved
-        do 140 i=1,n
-         do 150 j=1,m
+        do 140 j=1,m
+         do 150 i=1,n
           av=0.d0
           do 160 i1=1,wid(1)
            do 170 j1=1,wid(2)

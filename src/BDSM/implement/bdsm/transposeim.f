@@ -2,11 +2,14 @@ c! transpose image
 
         subroutine transposeim(f1,f2)
         implicit none
-        character f1*(*),f2*(*),extn*10
-        integer nchar,n,m
+        character f1*(*),f2*(*),extn*20
+        integer nchar,n,m,l
+
+cf2py   intent(in) f1,f2
 
         extn='.img'
-        call readarraysize(f1,extn,n,m)
+        call readarraysize(f1,extn,n,m,l)
+        if (l.gt.1) write (*,*) '  Using 2d array for 3d image !!!'
         call sub_transposeim(f1,f2,n,m)
         
         return
@@ -15,7 +18,7 @@ c!
 c!
         subroutine sub_transposeim(f1,f2,n,m)
         implicit none
-        character f1*(*),f2*(*),extn*10
+        character f1*(*),f2*(*),extn*20
         integer nchar,n,m,i,j
         real*8 image1(n,m),image2(n,m)
 
@@ -28,7 +31,7 @@ c!
 110      continue
 100     continue
         
-        call writearray_bin(image2,n,m,n,m,f2,'mv')
+        call writearray_bin2D(image2,n,m,n,m,f2,'mv')
         
         return  
         end

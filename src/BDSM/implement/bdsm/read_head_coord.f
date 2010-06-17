@@ -1,20 +1,13 @@
 c! read coord fits keywords from file
         
         subroutine read_head_coord(hdrfile,n,ctype,crpix,cdelt,
-     /                             crval,crota,bm_pix)
+     /                             crval,crota,bm_pix,scratch)
         implicit none
-        integer n,num,i,ind,nchar
+        integer n,num,i,ind,nchar,error
         real*8 crpix(n),cdelt(n),crval(n),crota(n),dumr
         real*8 bm_pix(3),keyvalue
         character ctype(n)*8,hdrfile*500,dums*8,dumh*6,scratch*500,equal
-        character f1*500,extn*10,keyword*500,comment*500,dir*500,fg*500
-
-        fg="paradefine"
-        extn=""
-        keyword="scratch"
-        dir="./"
-        call get_keyword(fg,extn,keyword,scratch,keyvalue,
-     /    comment,"s",dir)
+        character f1*500,extn*20,keyword*500,comment*500,dir*500,fg*500
 
         cdelt(1)=2.d0
         cdelt(2)=2.d0   !  for converting beam_asec to beam_pix

@@ -2,11 +2,14 @@ c! to detect simple discontinuities using 3X3 masks (gonzalez and woods chap 10)
 
         subroutine detectdiscont(f1,f2)        
         implicit none
-        character f1*(*),f2*(*),extn*10
-        integer nchar,n,m
+        character f1*(*),f2*(*),extn*20
+        integer nchar,n,m,l
+
+cf2py   intent(in) f1,f2
 
         extn='.img'
-        call readarraysize(f1,extn,n,m)
+        call readarraysize(f1,extn,n,m,l)
+        if (l.gt.1) write (*,*) '  Using 2d array for 3d image !!!'
         call sub_detectdiscont(f1,f2,n,m)
 
         return
@@ -14,7 +17,7 @@ c! to detect simple discontinuities using 3X3 masks (gonzalez and woods chap 10)
 
         subroutine sub_detectdiscont(f1,f2,n,m)
         implicit none
-        character f1*(*),f2*(*),extn*10
+        character f1*(*),f2*(*),extn*20
         integer nchar,n,m,i,j,i1,j1
         real*8 image(n,m),mat(3,3),image1(n,m),dumr,keyvalue
 
@@ -23,8 +26,8 @@ c! to detect simple discontinuities using 3X3 masks (gonzalez and woods chap 10)
 
         call getmatrix(mat)
         
-        do i=1,n
-         do j=1,m
+        do j=1,m
+         do i=1,n
 
           dumr=0.d0
           do i1=-1,1
@@ -38,7 +41,7 @@ c! to detect simple discontinuities using 3X3 masks (gonzalez and woods chap 10)
          end do
         end do
 
-        call writearray_bin(image1,n,m,n,m,f2,'mv')
+        call writearray_bin2D(image1,n,m,n,m,f2,'mv')
 
         return
         end

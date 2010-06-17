@@ -34,15 +34,25 @@ c! get high, low and nsrc in each of the (500/nbin) bins
 
         write (*,'(a51,$)') 
      /       '   Creating sources, convolve, adding to image ... '
+
         do 100 i=1,500/nbin     !  the bins
          do 110 j=1,int(nsrc(i))     ! put in each source in that bin
 c! get random flux, position and size
           call getrandflux(low(i),high(i),cn1(i),gam1(i),rand,flux,seed)! is correct
-          call getrandposn(imsize,imsize,xposn,yposn,seed)
-          call getrandsize(flux,freq,sizeas,seed)   ! size in asec
+          call getrandposn(imsize,imsize,xposn,yposn,seed)   ! get random centre
+          call getrandsize(flux,freq,sizeas,seed)   ! size in asec from empirical reln.
           sizepix=sizeas/cdelt1
+
+c        do 100 i=5,imsize,40
+c         do 110 j=5,imsize,40
+c         flux=0.2d0
+c        xposn=i*1.d0
+c        yposn=j*1.d0
+c        sizepix=3.d0
+c        sizeas=sizepix*cdelt1
+
           bmin=bmsampl*cdelt1
-          bmaj=sqrt((bmsampl*cdelt1)**2.d0+sizeas*sizeas)  ! hack
+          bmaj=sqrt(bmsampl*cdelt1*bmsampl*cdelt1+sizeas*sizeas)  ! hack
           bmajpix=bmaj/cdelt1
           if (sizepix.gt.0.2*bmsampl.and.flux.ge.3.d0*sens) then
            call ran1(seed,rand)
@@ -60,20 +70,20 @@ c! simsize is int(size convl subim)
 
 c! get the image, of pt src of flux, convled with fw=bmsampl gauss at x,y of size simsize
 c! round(xposn,yposn) == (xc,yc)
-         if (flux.le.2.d0*sens.or.bmaj/bmin.le.1.1d0) then
+c@@@@@         if (flux.le.2.d0*sens.or.bmaj/bmin.le.1.1d0) then
           call get_subim_ptsrc(fluxim,xsize,simsize,bmsampl,
      /         flux,xposn,yposn,xc,yc,bmvaryn,bmvaryf,beamvary,imsize)
 
-        else
+c####        else
 c! Do like above for point source, but this time for proper extended source distribution
 c          call get_subim_xsrc(fluxim,xsize,simsize,bmajpix,
 c     /                       bmsampl,flux,bpa,xposn,yposn,xc,yc)
 
 c! Or assume is a double source with seperation=size and each component as pt src.
-          call get_subim_dubsrc(fluxim,xsize,simsize,sizepix,bmsampl,
-     /         flux,bpa,xposn,yposn,xc,yc,seed,xc1,yc1,xc2,yc2,rand)
+c####          call get_subim_dubsrc(fluxim,xsize,simsize,sizepix,bmsampl,
+c####     /         flux,bpa,xposn,yposn,xc,yc,seed,xc1,yc1,xc2,yc2,rand)
 
-         end if
+c####         end if
 
 c! now add the subimage to the full image
           xca=round(xposn)-xc
@@ -98,8 +108,8 @@ c! write source list
            end if
           end if
  
-          if (nsrc(i).gt.5.d5.and.mod(j,1000000).eq.0) 
-     /       write (*,'(a1,$)') '.'
+c          if (nsrc(i).gt.5.d5.and.mod(j,1000000).eq.0) 
+c     /       write (*,'(a1,$)') '.'
 
 110      continue
 100     continue
@@ -107,10 +117,10 @@ c! write source list
         write (*,*)
 
 c! calculate 3-sigma clipped noise and send back
-        call sigclip(image,imsize,imsize,1,1,imsize,imsize,std,av,3)
+        call sigclip(image,imsize,imsize,1,1,imsize,imsize,std,av,3.d0)
 
         filen=fn(1:nchar(fn))//'.src'
-        call writearray_bin(image,imsize,imsize,imsize,imsize,
+        call writearray_bin2D(image,imsize,imsize,imsize,imsize,
      /       filen,'mv')
 
 c! Use spectral index to make a source cube.

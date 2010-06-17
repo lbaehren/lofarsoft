@@ -5,8 +5,11 @@ c! too large. if u define so many arrays of 2048^2 OS sends SIGENV !!!
 
         subroutine boxnoiseimage(f1,f2,f3,f4)
         implicit none
-        character f1*(*),f2*(*),f3*(*),f4*(*),extn*10
-        integer n,m,bsize,stepsize,nsig
+        character f1*(*),f2*(*),f3*(*),f4*(*),extn*20
+        integer n,m,bsize,stepsize,l
+        real*8 nsig
+
+cf2py   intent(in) f1,f2,f3,f4
 
         write (*,'(a23,$)') '   Boxsize, stepsize : '
         read (*,*) bsize,stepsize
@@ -16,7 +19,8 @@ c! too large. if u define so many arrays of 2048^2 OS sends SIGENV !!!
         end if
 
         extn='.img'
-        call readarraysize(f1,extn,n,m)
+        call readarraysize(f1,extn,n,m,l)
+        if (l.gt.1) write (*,*) '  Using 2d array for 3d image !!!'
         if (bsize+stepsize.gt.min(n,m)) then
          write (*,*) '======================'
          write (*,*) '== Decrease Boxsize =='
@@ -36,12 +40,12 @@ c! too large. if u define so many arrays of 2048^2 OS sends SIGENV !!!
         subroutine sub_boxnoise(f1,f2,f3,f4,bsize,stepsize,n,m,nsig)
         implicit none
         character f1*(*),f2*(*),f3*(*),f4*(*),strdev*5,lab*500
-        character lab2*500,extn*10
+        character lab2*500,extn*20
         integer n,m,bsize,stepsize,nstep1,nstep2,i,j,nchar
         integer cen(n,m,2),cen1,cen2,trc1,trc2
-        integer mask(n,m),ft,i1,j1,nsig
+        integer mask(n,m),ft,i1,j1
         real*8 image1(n,m),image2(n,m)  ! image1 is arr and image2 is av
-        real*8 std(n,m),mean,rms,rms0,med,median(n,m)
+        real*8 std(n,m),mean,rms,rms0,med,median(n,m),nsig
         integer ipblc(2),iptrc(2),di1,di2
 
 c!
@@ -49,8 +53,8 @@ c! read in the array
 c! mask is 1/0 if pt is center of a box or not. tb updated later
         extn='.img'
         call readarray_bin(n,m,image1,n,m,f1,extn)
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           mask(i,j)=0
           image2(i,j)=0.d0
           std(i,j)=0.d0
@@ -147,6 +151,7 @@ c! now fill up the boundaries
         call filledges(std,n,m,n,m,bsize,mask)
         call filledges(median,n,m,n,m,bsize,mask)
 
+        strdev='/xs'
         write (*,'(a27,$)') '   Image of mean ... <Ret> '
         read (*,*) 
         lab='Image of mean'
@@ -164,9 +169,9 @@ c! now fill up the boundaries
         call grey2(median,image1,n,m,n,m,strdev,lab,lab2,1,0)
 
 
-        call writearray_bin(image2,n,m,n,m,f2,'mv')
-        call writearray_bin(std,n,m,n,m,f3,'mv')
-        call writearray_bin(median,n,m,n,m,f4,'mv')
+        call writearray_bin2D(image2,n,m,n,m,f2,'mv')
+        call writearray_bin2D(std,n,m,n,m,f3,'mv')
+        call writearray_bin2D(median,n,m,n,m,f4,'mv')
 
         return
         end
@@ -174,20 +179,22 @@ c! now fill up the boundaries
 
         subroutine getstat(arr,n,m,cen1,cen2,bsize,mean,rms,med,nsig)
         implicit none
-        integer n,m,bsize,i1,j1,cen1,cen2,nsig
-        real*8 arr(n,m),mean,rms,tarr(bsize,bsize),med
+        integer n,m,bsize,i1,j1,cen1,cen2
+        real*8 arr(n,m),mean,rms,tarr(bsize,bsize),med,tvec(bsize*bsize)
+        real*8 nsig
 
         do 130 i1=1,bsize
          do 140 j1=1,bsize
           tarr(i1,j1)=arr(cen1-(bsize+1)/2+i1,cen2-(bsize+1)/2+j1)
 140      continue
 130     continue
-        if (nsig.eq.0) then
+        if (nsig.eq.0.d0) then
          call arrstat(tarr,bsize,bsize,1,1,bsize,bsize,rms,mean)
         else
          call sigclip(tarr,bsize,bsize,1,1,bsize,bsize,rms,mean,nsig)
         end if
-        call calcmedian(tarr,bsize,bsize,med)
+        call arr8tovec8(tarr,bsize,bsize,bsize,bsize,tvec,bsize*bsize)
+        call calcmedian(tvec,bsize*bsize,1,bsize*bsize,med)
 
         return
         end
@@ -198,18 +205,18 @@ c! now fill up the boundaries
         integer n,m,mask(n,m),nchar,i,j
         character str*5
         
-c        call pgbegin(0,str(1:nchar(str)),1,1)
-c        call pgwindow(0.5,n*1.0+0.5,0.5,m*1.0+0.5)
-c        call pgbox('BCNST',0.0,0,'BCNST',0.0,0)
+        call pgbegin(0,str(1:nchar(str)),1,1)
+        call pgwindow(0.5,n*1.0+0.5,0.5,m*1.0+0.5)
+        call pgbox('BCNST',0.0,0,'BCNST',0.0,0)
 
-        do 100 i=1,n
-         do 110 j=1,m
-c          call pgsfs(2-mask(i,j))
-c          call pgrect(i*1.0-0.5,i*1.0+0.5,j*1.0-0.5,j*1.0+0.5)
+        do 100 j=1,m
+         do 110 i=1,n
+          call pgsfs(2-mask(i,j))
+          call pgrect(i*1.0-0.5,i*1.0+0.5,j*1.0-0.5,j*1.0+0.5)
 110      continue
 100     continue
 
-c        call pgend
+        call pgend
 
         return
         end
@@ -346,7 +353,7 @@ c! now calculate 2nd derivative at each of these points for every *row*
         end do
 
 c! now do a splint again with correct x value for each row to get value
-        do j=x2a(1),x2a(sm1)
+        do j=int(x2a(1)),int(x2a(sm1))
          do i=1,sn1-1
           low=i
           hi=i+1

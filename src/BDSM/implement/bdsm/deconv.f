@@ -1,11 +1,12 @@
 c! deconvolves gaus_r from gaus_o to give gaus_d. stolen shamelessly from aips DECONV.FOR
 
-        subroutine deconv(gaus_o,gaus_r,gaus_d,error)
+        subroutine deconv(gaus_o,gaus_r,gaus_d,e_1,e_2,e_3,
+     /             ed_1,ed_2,ed_3,error)
         implicit none
         include "constants.inc"
-        real*8 gaus_o(3),gaus_r(3),gaus_d(3)
+        real*8 gaus_o(3),gaus_r(3),gaus_d(3),e1,e2,e3
         real*8 phi_o,phi_r,maj2_r,min2_r,maj2_o,min2_o,theta,cost,sint
-        real*8 rhoc,sigic,rhoa,dumr
+        real*8 rhoc,sigic,rhoa,dumr,e_1,e_2,e_3,ed_1,ed_2,ed_3
         integer error
 
         phi_o=mod(gaus_o(3)+900.d0,180.d0)
@@ -57,6 +58,25 @@ c! deconvolves gaus_r from gaus_o to give gaus_d. stolen shamelessly from aips D
           end if
          end if
         end if
+
+c! error
+c        write (*,*) ' incomplete'
+c        if (rhoc.eq.0.d0) then
+         if (gaus_d(1).ne.0.d0) then
+          ed_1=gaus_o(1)/gaus_d(1)*e_1
+         else
+          ed_1=sqrt(2.d0*e_1*gaus_o(1))
+         end if
+         if (gaus_d(2).ne.0.d0) then
+          ed_2=gaus_o(2)/gaus_d(2)*e_2
+         else
+          ed_2=sqrt(2.d0*e_2*gaus_o(2))
+         end if
+         ed_3=e_3
+c        else
+c         
+c        end if
+        
 
         return
         end

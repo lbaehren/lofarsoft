@@ -7,8 +7,8 @@ c to see if i can write a decent convolution program (the answer is yes)
 
         n=128
         m=128
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           arr(i,j)=0.0d0
 110      continue
 100     continue

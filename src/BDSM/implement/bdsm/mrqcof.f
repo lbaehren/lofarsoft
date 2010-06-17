@@ -25,6 +25,9 @@ c! fnum : 1 ==> gaussian; 2 ==> 1st order poly; 3 ==> 4th order poly
         if (fnum.eq.2)  call poly2(x(i),a,ymod,dyda,ma)
         if (fnum.eq.3)  call func2(x(i),a,ymod,dyda,ma)
         if (fnum.eq.4)  call poly3(x(i),a,ymod,dyda,ma)
+        if (fnum.eq.5)  call func3(x(i),a,ymod,dyda,ma)
+        if (fnum.eq.6)  call spinfunc0(x(i),a,ymod,dyda,ma)
+        if (fnum.eq.7)  call spinfunc1(x(i),a,ymod,dyda,ma)
         sig2i=1.d0/(sig(i)*sig(i))
         dy=y(i)-ymod
         j=0

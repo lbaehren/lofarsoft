@@ -16,8 +16,8 @@ c! create elliptical gaussians
         sx=bmaj/2.35482d0
         sy=bmin/2.35482d0
 
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           im(i,j)=pk*dexp(-0.5d0*(
      /    (((i-xc)*dcos(bpa)+(j-yc)*dsin(bpa))/sx)**2.d0+
      /    (((j-yc)*dcos(bpa)-(i-xc)*dsin(bpa))/sy)**2.d0))
@@ -26,7 +26,7 @@ c          if (im(i,j).le.pk*1.d-3) im(i,j)=0.d0
 110      continue
 100     continue
 
-        call writearray_bin(im,32,32,n,m,f1,'mv')
+        call writearray_bin2D(im,32,32,n,m,f1,'mv')
         
         end
 

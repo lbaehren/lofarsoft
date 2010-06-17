@@ -1,13 +1,14 @@
 c! cut pasted from boxnoiseimage.f without std i/o stuff.
 
-        subroutine bdsm_boxnoise(f1,bsize,stepsize,n,m,runcode)
+        subroutine bdsm_boxnoise(f1,f2,bsize,stepsize,n,m,runcode,
+     /             outsideuniv_num)
         implicit none
         character f1*500,strdev*5,lab*500,f2*500,f3*500
-        character lab2*500,extn*10,runcode*2
+        character lab2*500,extn*20,runcode*2
         integer n,m,bsize,stepsize,nstep1,nstep2,i,j,nchar
         integer cen(n,m,2),cen1,cen2,trc1,trc2
         integer mask(n,m),ft,i1,j1,round
-        real*8 image(n,m),av(n,m),nsig
+        real*8 image(n,m),av(n,m),nsig,outsideuniv_num
         real*8 std(n,m),mean,rms,rms0,keyvalue
         integer ipblc(2),iptrc(2),di1,di2
 
@@ -57,13 +58,13 @@ c! calculate rms and mean in each of the boxes
 c! arrstat calculates mean and standard dev.
 c! sigclip does proper n-sigma clipping for rms
         nsig=3.d0
-        call arrstat(image,n,m,1,1,n,m,rms0,mean)  ! to calc rms of whole image
+c        call arrstat(image,n,m,1,1,n,m,rms0,mean)  ! to calc rms of whole image
         do 120 i=1,nstep1
          do 130 j=1,nstep2
           cen1=cen(i,j,1)
           cen2=cen(i,j,2)
           call bdsm_getstat(image,n,m,cen1,cen2,bsize,mean,rms,
-     /         round(nsig))
+     /         nsig)
           mask(cen1,cen2)=1
           av(cen1,cen2)=mean
           std(cen1,cen2)=rms
@@ -92,25 +93,25 @@ c! now fill up the boundaries
         call filledges(av,n,m,n,m,bsize,mask)
         call filledges(std,n,m,n,m,bsize,mask)
 
-        f2=f1(1:nchar(f1))//'.mean'
-        f3=f1(1:nchar(f1))//'.rmsd'
-        call writearray_bin(av,n,m,n,m,f2,runcode)
-        call writearray_bin(std,n,m,n,m,f3,runcode)
+        f3=f2(1:nchar(f2))//'.mean'
+        call writearray_bin2D(av,n,m,n,m,f3,runcode)
+        f3=f2(1:nchar(f2))//'.rmsd'
+        call writearray_bin2D(std,n,m,n,m,f3,runcode)
 
         return
         end
 
         subroutine bdsm_getstat(arr,n,m,cen1,cen2,bsize,mean,rms,nsig)
         implicit none
-        integer n,m,bsize,i1,j1,cen1,cen2,nsig
-        real*8 arr(n,m),mean,rms,tarr(bsize,bsize)
+        integer n,m,bsize,i1,j1,cen1,cen2
+        real*8 arr(n,m),mean,rms,tarr(bsize,bsize),nsig
 
         do 130 i1=1,bsize
          do 140 j1=1,bsize
           tarr(i1,j1)=arr(cen1-(bsize+1)/2+i1,cen2-(bsize+1)/2+j1)
 140      continue
 130     continue
-        if (nsig.eq.0) then
+        if (nsig.eq.0.d0) then
          call arrstat(tarr,bsize,bsize,1,1,bsize,bsize,rms,mean)
         else
          call sigclip(tarr,bsize,bsize,1,1,bsize,bsize,rms,mean,nsig)
@@ -238,7 +239,7 @@ c! now calculate 2nd derivative at each of these points for every *row*
         end do
 
 c! now do a splint again with correct x value for each row to get value
-        do j=x2a(1),x2a(sm1)
+        do j=int(x2a(1)),int(x2a(sm1))
          do i=1,sn1-1
           low=i
           hi=i+1

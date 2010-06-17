@@ -1,38 +1,25 @@
 c! (re)write rudimentary header info
 
-        subroutine copyheader(f1,f2,scratch)
+        subroutine copyheader(extn,f1,f2,scratch)
         implicit none
-        integer n,m,nchar
+        integer n,m,nchar,n1,m1,l1
         real*8 freq,bw,intsec,cdelt
-        character f1*(*),f2*(*),head*500,scop*7,fn*500,scratch*500
-        
-        write (*,*) ' ##### WRONG !! FIX FOR BINARY FILES !!!'
-        write (*,*) ' ##### WRONG !! FIX FOR BINARY FILES !!!'
-        write (*,*) ' ##### WRONG !! FIX FOR BINARY FILES !!!'
+        character f1*500,f2*500,scop*7
+        character fn*500,scratch*500,extn*20
 
-        fn=scratch(1:nchar(scratch))//f1(1:nchar(f1))
-        fn=fn(1:nchar(fn))
-        open(unit=21,file=fn,status='old',
+cf2py   intent(in) f1,f2,scratch,extn
+        
+        fn=scratch(1:nchar(scratch))//f1(1:nchar(f1))//
+     /     extn(1:nchar(extn))
+        open(unit=21,file=fn(1:nchar(fn)),status='old',
      /       form='unformatted')
         read (21) n,m,scop,freq,bw,intsec,cdelt
         close(21)
         
-        fn=scratch(1:nchar(scratch))//f2(1:nchar(f2))
-        fn=fn(1:nchar(fn))
-        open(unit=21,file=fn,status='old',
-     /       form='unformatted')
-        read (21) n,m
-        close(21)
-
-        write (head,777) n,m,scop,freq,bw,intsec,cdelt
-        head="sed -e '1c\\"//head(1:nchar(head))//"' "//
-     /       fn//" > a "
-        call system(head)
-        head="mv -f a "//fn
-        call system(head)
-        
-777     format(i4,1x,i4,1x,a7,1x,1Pe12.5,1x,1Pe12.5,1x,
-     /         1Pe12.5,1x,0Pf7.3)
+        call readarraysize(f2,extn,n1,m1,l1)
+        if (l1.gt.1) write (*,*) '  Using 2d array for 3d image !!!'
+        call sub_puthead(f2,scratch,extn,n1,m1,scop,freq,bw,
+     /       intsec,cdelt)
 
         return
         end

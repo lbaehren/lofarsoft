@@ -3,17 +3,19 @@ c! take each panthi, find all attached kothis, then append kothis without panthi
 c! then connect kothis with multiple panthis. 
 c! format is first double deckers and then single kothis. see notebook for format.
         
-        subroutine make_associatelist1(nsrcm,ram,decm,nsrcs,
-     /     ras,decs,tol,scrat,master,sec,dsum,scratch)
+        subroutine make_associatelist1(nsrcm,ram,decm,nsrcs,ras,decs,
+     /   tol,scrat,master,sec,dsum,scratch,flagm,flags,codem,codes,
+     /   rcode,fac)
         implicit none
         include "constants.inc"
-        integer nsrcm,nsrcs,nchar,i,j
+        integer nsrcm,nsrcs,nchar,i,j,fac
         character scrat*500,str1*1,fn*500,fmti*2,ffmt1*100,ffmt2*100
-        character master*(*),sec*(*),scratch*500
+        character master*500,sec*500,scratch*500,rcode*2
         real*8 ram(nsrcm),decm(nsrcm),ras(nsrcs),decs(nsrcs),tol,dist
-        integer n_assocsrc(nsrcm),assocsrc_m2s(nsrcm,nsrcs/10)  
-        integer assocsrc_s2m(nsrcs,nsrcm/10),i1
-        integer flag_s2m(nsrcs),dsum(5)
+        integer n_assocsrc(nsrcm),assocsrc_m2s(nsrcm,nsrcs/fac)  
+        integer assocsrc_s2m(nsrcs,nsrcm/fac),i1
+        integer flag_s2m(nsrcs),dsum(5),flagm(nsrcm),flags(nsrcs)
+        character codem(nsrcm)*4,codes(nsrcs)*4
 
         call initialise_int_vec(flag_s2m,nsrcs,0) 
         do 100 i=1,nsrcm
@@ -21,11 +23,17 @@ c! format is first double deckers and then single kothis. see notebook for forma
          do 110 j=1,nsrcs
           if (abs(decm(i)-decs(j))*3600.d0.le.tol*5.d0) then  
            call justdist(ram(i),ras(j),decm(i),decs(j),dist)
-           if (dist.le.tol) then
-            n_assocsrc(i)=n_assocsrc(i)+1     ! number of kothis for panthi i
-            assocsrc_m2s(i,n_assocsrc(i))=j   ! the associated kothis for panthi i
-            flag_s2m(j)=flag_s2m(j)+1         ! number of panthis for kothi j
-            assocsrc_s2m(j,flag_s2m(j))=i     ! panthis with kothi j
+
+           if ((codem(i).eq.'S'.or.codem(i).eq.'C').and.
+     /          (codes(j).eq.'S'.or.codes(j).eq.'C')) then
+            if (flagm(i).eq.0.and.flags(j).eq.0) then 
+             if (dist.le.tol) then 
+              n_assocsrc(i)=n_assocsrc(i)+1     ! number of kothis for panthi i
+              assocsrc_m2s(i,n_assocsrc(i))=j   ! the associated kothis for panthi i
+              flag_s2m(j)=flag_s2m(j)+1         ! number of panthis for kothi j
+              assocsrc_s2m(j,flag_s2m(j))=i     ! panthis with kothi j
+             end if
+            end if
            end if
           end if
 110      continue
@@ -35,8 +43,8 @@ c! format is first double deckers and then single kothis. see notebook for forma
         ffmt1="(1x,"//fmti//",1x,a1,1x,"//fmti//",$)"
         ffmt2="(1x,"//fmti//",$)"
         fn=scratch(1:nchar(scratch))//scrat(1:nchar(scrat))//'.asrl'
-        write (*,*) '  Writing out '//fn(1:nchar(fn))
-        write (*,*) 
+        if (rcode(1:1).ne.'q') 
+     /   write (*,*) '  Writing out '//fn(1:nchar(fn))
         open(unit=24,file=fn(1:nchar(fn)),status='unknown')
         write (24,*) 99999999
         do i=1,nsrcm
@@ -68,16 +76,18 @@ c! format is first double deckers and then single kothis. see notebook for forma
         call vec_int_num_range(n_assocsrc,nsrcm,nsrcm,2,99999,dsum(4))
         call vec_int_num_range(flag_s2m,nsrcs,nsrcs,2,99999,dsum(5))
 
-        write (*,*) '  Found ',dsum(1),' associations with ',
-     /       master(1:nchar(master))
-        write (*,*)  '  Sources in ',master(1:nchar(master)),
-     /       ' with no associations is ',dsum(2)
-        write (*,*)  '  Sources in ',sec(1:nchar(sec)),
-     /       ' with no associations is ',dsum(3)
-        write (*,*)  '  Sources in ',master(1:nchar(master)),
-     /       ' with multiple associations is ',dsum(4)
-        write (*,*)  '  Sources in ',sec(1:nchar(sec)),
-     /       ' with multiple associations is ',dsum(5)
+        !if (rcode(1:1).ne.'q') then
+         write (*,*) '  Found ',dsum(1),' associations with ',
+     /        master(1:nchar(master))
+         write (*,*)  '  Sources in ',master(1:nchar(master)),
+     /        ' with no associations is ',dsum(2)
+         write (*,*)  '  Sources in ',sec(1:nchar(sec)),
+     /        ' with no associations is ',dsum(3)
+         write (*,*)  '  Sources in ',master(1:nchar(master)),
+     /        ' with multiple associations is ',dsum(4)
+         write (*,*)  '  Sources in ',sec(1:nchar(sec)),
+     /        ' with multiple associations is ',dsum(5)
+        !end if
 
         return
         end

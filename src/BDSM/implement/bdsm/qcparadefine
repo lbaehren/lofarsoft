@@ -1,0 +1,10 @@
+fitsdir = '/data/anaamika/fits/' fits directory
+scratch = '/data/anaamika/image/' scratch directory
+srldir = '/data/anaamika/image/' source list directory
+plotdir = '/data/anaamika/plots/' plots directory
+fitsname = 'default.fits' name of fits file
+solnname = 'vliet' id name for bdsm_sourcelist
+qcsolnname = 'trial' id name for qc_sourcelist
+runcode = 'aq' (a)uto/(m)anual and (q)uiet/(v)erbose
+overlay_colour = 'grey' Colourscheme for overlay, default => 'grey'
+overlay_code = 'B8D' Menu numbers for overlay, default => 'B8D'

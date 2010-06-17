@@ -2,14 +2,15 @@ c! callgaul2srl identifies a group of gaussians to be made into a source and her
 c! construct the source.
 c! We go back to islandlist file, identify each pixel with a gaussian upto fwhm and the rest 
 c! depending on which (set of) gaussian(s) gives it higher value. stored in mask.
-c! then calc source properties by moment as well as shapelet. 
+c! then calc source properties by moment (as well as shapelet ?). 
 
-        subroutine gaul_to_source(islct,mask,subn,subm,subim,
-     /   bmar_p,mompara,k,speak,sra,sdec,delx,dely,ctype,crpix,cdelt,
-     /   crval,crota,bm_pix,gaus_d,rms_isl,maxpeak,mpx,mpy,mra,mdec)
+        subroutine gaul_to_source(islct,mask,subn,subm,subim,bmar_p,
+     /   mompara,k,speak,sra,sdec,delx,dely,ctype,crpix,cdelt,crval,
+     /   crota,bm_pix,gaus_d,rms_isl,maxpeak,mpx,mpy,mra,mdec,sisl,
+     /   wcs,wcslen)
         implicit none
         include "constants.inc"
-        integer islct,subn,subm,k,mask(subn,subm),error1
+        integer islct,subn,subm,k,mask(subn,subm),error1,sisl
         integer hix,lowx,lowy,hiy,delx,dely,round,ssubimsize
         integer maxx,maxy,i,j,blc(2),trc(2),ssubimsizex,ssubimsizey
         real*8 subim(subn,subm),mom1(2),mom2(2),xpix,ypix,m11
@@ -17,7 +18,9 @@ c! then calc source properties by moment as well as shapelet.
         real*8 crpix(3),cdelt(3),crval(3),crota(3),bm_pix(3)
         real*8 gaus_o(3),gaus_r(3),gaus_d(3),error,maxv,rms_isl
         real*8 maxpeak,mpx,mpy,mra,mdec
+        real*8 e1,e2,e3,ed1,ed2,ed3
         character ctype(3)*8
+        integer wcslen,wcs(wcslen)
 
 c! do very basic moment analysis now. sort out later.
         call momanalmask(subim,subn,subm,mask,mompara,k,bmar_p)
@@ -52,22 +55,29 @@ c! calculate peak by bilinear interpolation around centroid.
         hix=int(mompara(2))+1
         lowy=int(mompara(3))
         hiy=int(mompara(3))+1
+c         write (*,*) sisl,mompara(2),mompara(3),k,lowx+delx,hix+delx,
+c     /     lowy+dely,hiy+dely
+c        do i=1,subn
+c         do j=1,subm
+c         if (mask(i,j).eq.k) write (*,*) i+delx,j+dely
+c         end do
+c        end do
+
         if (mask(lowx,lowy).ne.k.or.mask(lowx,hiy).ne.k.or.
      /      mask(hix,lowy).ne.k.or.mask(hix,hiy).ne.k) 
-     /      write (*,*) ' !!! ERRORR !!!'
+     /    write (*,*) ' !!! ERRORR !!! ',k,lowx,hix,lowy,hiy
         t=(mompara(2)-lowx)/(hix-lowx)
         u=(mompara(3)-lowy)/(hiy-lowy)
         speak=(1.d0-t)*(1.d0-u)*subim(lowx,lowy)+t*(1.d0-u)*
      /    subim(hix,lowy)+t*u*subim(hix,hiy)+(1.d0-t)*u*subim(lowx,hiy)
 
 c! convert x0,y0 to ra,dec
-         call xy2radec(mompara(2)+delx,mompara(3)+dely,sra,sdec,error1,
-     /        ctype,crpix,cdelt,crval,crota)
+         call wcs_xy2radec(mompara(2)+delx,mompara(3)+dely,sra,sdec,
+     /        error1,wcs,wcslen)
          if (error1.ne.0) write (*,*) '  ### ERROR1 ###'
          sra=sra*rad
          sdec=sdec*rad
-         call xy2radec(mpx,mpy,mra,mdec,error1,
-     /        ctype,crpix,cdelt,crval,crota)
+         call wcs_xy2radec(mpx,mpy,mra,mdec,error1,wcs,wcslen)
          if (error1.ne.0) write (*,*) '  ### ERROR1 ###'
          mra=mra*rad
          mdec=mdec*rad
@@ -79,7 +89,7 @@ c! 'deconvolve'
          gaus_r(1)=bm_pix(1)/fwsig     ! in sig_pix, sig_pix, deg
          gaus_r(2)=bm_pix(2)/fwsig
          gaus_r(3)=bm_pix(3)
-         call deconv(gaus_o,gaus_r,gaus_d,error)
+         call deconv(gaus_o,gaus_r,gaus_d,e1,e2,e3,ed1,ed2,ed3,error)
                 
         return
         end
@@ -145,18 +155,26 @@ c!
         real*8 ssig(ssubimsizex,ssubimsizey)
         real*8 ssubim(ssubimsizex,ssubimsizey),bm_pix(3)
         integer ia(6),k,smask(ssubimsizex,ssubimsizey),blc(2),trc(2)
+        integer rmask(ssubimsizex,ssubimsizey)
         real*8 a(6),rms_isl,covar(6,6),alpha(6,6),alamda
         real*8 chisq,chisqold,dumr1,dumr2
         
         data ia/1,1,1,1,1,1/
 
 c! subim(maxx,y) is ssubim(round(ssubimsize/2),ditto)
+c! mask isnt regular mask but has pixel values = src id. so need to
+c! create a proper mask
         maxpeak=-9.d9
         do i=1,ssubimsizex
          do j=1,ssubimsizey
           ssubim(i,j)=subim(i-1+blc(1),j-1+blc(2))
           smask(i,j)=mask(i-1+blc(1),j-1+blc(2))
           ssig(i,j)=maxv/20.d0
+          if (smask(i,j).eq.k) then
+           rmask(i,j)=1
+          else
+           rmask(i,j)=0
+          end if
 
           if (ssubim(i,j).gt.maxpeak) then
            maxpeak=ssubim(i,j)
@@ -166,6 +184,7 @@ c! subim(maxx,y) is ssubim(round(ssubimsize/2),ditto)
 
          end do
         end do
+
         dumi1=(0.5d0*(ssubimsizex+ssubimsizey)-1)/2.d0
         a(1)=maxv*0.5
         a(2)=dumi1*1.5d0
@@ -176,11 +195,11 @@ c! subim(maxx,y) is ssubim(round(ssubimsize/2),ditto)
 
         dumi2=1
         alamda=-1.d0
-        call mrqmin2dm(ssubim,smask,ssig,ssubimsizex,ssubimsizey,a,ia,
+        call mrqmin2dm(ssubim,rmask,ssig,ssubimsizex,ssubimsizey,a,ia,
      /       6,covar,alpha,6,chisq,alamda,1)
         chisqold=chisq
 
-334     call mrqmin2dm(ssubim,smask,ssig,ssubimsizex,ssubimsizey,a,ia,
+334     call mrqmin2dm(ssubim,rmask,ssig,ssubimsizex,ssubimsizey,a,ia,
      /       6,covar,alpha,6,chisq,alamda,1)
         if (dumi2.le.35.or.abs(chisqold-chisq)/chisqold.gt.0.01d0) then
          chisqold=chisq
@@ -189,7 +208,7 @@ c! subim(maxx,y) is ssubim(round(ssubimsize/2),ditto)
         end if
 
         alamda=0.d0
-        call mrqmin2dm(ssubim,smask,ssig,ssubimsizex,ssubimsizey,a,ia,
+        call mrqmin2dm(ssubim,rmask,ssig,ssubimsizex,ssubimsizey,a,ia,
      /       6,covar,alpha,6,chisq,alamda,1)
 
         if (a(2).gt.1.d0.and.a(2).lt.ssubimsizex.and.

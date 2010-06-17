@@ -8,13 +8,13 @@ c! put in effect of primary beam.
         integer xc(maxpt),yc(maxpt),ipt
         real*8 image(imsizex,imsizey,nchan),freq,dia
         real*8 cdelt1,sig,dumr,s1
-        character f1*500,f2*500,extn*10,fn*500,scratch*500
+        character f1*500,f2*500,extn*20,fn*500,scratch*500
 
         sig=c/freq/dia*rad*3600.d0/cdelt1/fwsig   ! pribeam sigma in pixels
 
         extn='.img'
         f2=f1(1:nchar(f1))//'.src3D'
-        call readarraysize3D(f2,extn,n,m,z)
+        call readarraysize(f2,extn,n,m,z)
         fn=scratch(1:nchar(scratch))//f2(1:nchar(f2))//
      /     extn(1:nchar(extn))
         open(unit=21,file=fn(1:nchar(fn)),

@@ -4,14 +4,14 @@ c! which source each pixel belongs to.
 
         subroutine make_mask_gausid(cisl,subn,subm,mask,gpi,peakfl,
      /        xpix,ypix,bmaj,bmin,bpa,xpixs,ypixs,maxmem,npix_isl,
-     /        cdelt,delx,dely,islct,islnum,subim)
+     /        cdelt,delx,dely,islct,islnum,subim,flag,sisl)
         implicit none
         include "constants.inc"
         integer maxmem,npix_isl,xpixs(maxmem),ypixs(maxmem)
         integer subn,subm,blc(2),trc(2),mask(subn,subm),cisl
-        integer origmask(subn,subm)
+        integer origmask(subn,subm),sisl
         integer i,j,k,gpi,delx,dely,k1
-        integer islct,islnum(gpi)
+        integer islct,islnum(gpi),flag(gpi)
         real*8 xpix(gpi),ypix(gpi),bmaj(gpi),bmin(gpi),bpa(gpi)
         real*8 dr1,dr2,ang,cdelt(2),rmask(subn,subm),dist
         real*8 g_image(subn,subm,cisl),a4,a5,sang,cang
@@ -26,7 +26,7 @@ c! set original mask first
         end do
 
 c! first construct images of each gaussian in full.
-        do k=1,cisl
+        do k=1,cisl   ! each gaussian
          a4=bmaj(k)/fwsig/abs(cdelt(1)*3600.d0)
          a5=bmin(k)/fwsig/abs(cdelt(2)*3600.d0)
          ang=(bpa(k)+90.d0)/rad
@@ -34,9 +34,13 @@ c! first construct images of each gaussian in full.
          cang=dcos(ang)
          do i=1,subn
           do j=1,subm
-           dr1=peakfl(k)*dexp(-0.5d0*((((i-(xpix(k)-delx))*cang+
+           if (flag(k).eq.0) then
+            dr1=peakfl(k)*dexp(-0.5d0*((((i-(xpix(k)-delx))*cang+
      /          (j-(ypix(k)-dely))*sang)/a4)**2.d0+(((j-(ypix(k)-dely))
      /          *cang-(i-(xpix(k)-delx))*sang)/a5)**2.d0))
+           else
+            dr1=0.d0
+           end if
            g_image(i,j,k)=dr1
           end do
          end do
@@ -45,9 +49,9 @@ c! first construct images of each gaussian in full.
 c! now construct same thing per source
         do i=1,subn
          do j=1,subm
-          do k=1,islct
+          do k=1,islct   ! each source
            s_image(i,j,k)=0.d0
-           do k1=1,cisl
+           do k1=1,cisl  ! each gaussian
             if (islnum(k1).eq.k) 
      /          s_image(i,j,k)=s_image(i,j,k)+g_image(i,j,k1)
            end do
@@ -84,7 +88,7 @@ c! now add s_image for use in moments
 
 c        filen='masking'
 c        call imageint2r(mask,subn,subm,subn,subm,rmask)
-c        call writearray_bin(rmask,subn,subm,subn,subm,filen,'av')
+c        call writearray_bin2D(rmask,subn,subm,subn,subm,filen,'av')
        
         return
         end

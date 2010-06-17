@@ -10,16 +10,16 @@ c! testsigclip shows it does converge.
 
         subroutine sigclip(arr,x,y,n1,m1,n,m,std,av,nsig)
         implicit none
-        integer n,m,i,j,nsig,num,x,y,ind,ind1(6),n1,m1
-        real*8 arr(x,y),av,s1,std,a(3),selectnr,ssq
+        integer n,m,i,j,num,x,y,ind,ind1(6),n1,m1
+        real*8 arr(x,y),av,s1,std,a(3),ssq,nsig
         real*8 summ,avold,stdold,ind2(2)
        
         call arrstat(arr,x,y,n1,m1,n,m,std,av)
         call calcssq(arr,x,y,n1,m1,n,m,ssq)
         std=sqrt(ssq/((n-n1+1)*(m-m1+1))-av*av)
         summ=0.d0
-        do 100 i=n1,n
-         do 110 j=m1,m
+        do 100 j=m1,m
+         do 110 i=n1,n
           summ=summ+arr(i,j)
 110      continue
 100     continue
@@ -29,10 +29,10 @@ c! testsigclip shows it does converge.
         stdold=std*1.d10
         ind=0
 333     continue
-        do 210 i=n1,n
-         do 220 j=m1,m
-          if (abs(arr(i,j)-av)/std.gt.nsig.and.
-     /        abs(arr(i,j)-avold)/stdold.lt.nsig) then
+        do 210 j=m1,m
+         do 220 i=n1,n
+          if (abs(arr(i,j)-av)*1.d0/std.gt.nsig.and.
+     /        abs(arr(i,j)-avold)*1.d0/stdold.lt.nsig) then
            summ=summ-arr(i,j)
            num=num-1 
            ssq=ssq-arr(i,j)*arr(i,j)
@@ -64,8 +64,8 @@ c! calculates the sum of squares of array arr
         real*8 arr(x,y),std,s1
 
         s1=0.d0
-        do 200 i=n1,n
-         do 210 j=m1,m
+        do 200 j=m1,m
+         do 210 i=n1,n
           s1=s1+arr(i,j)*arr(i,j)
 210      continue
 200     continue

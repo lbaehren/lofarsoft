@@ -352,134 +352,134 @@ c!
 
 
 c! plot q vs slim for each freq and also 1/20beam thingy
-cc        call pgbegin(0,'pgplot1.ps/VPS',1,2)
-c        call pgbegin(0,'pgplot1.ps/VPS',2,2)
-c        call pgslw(3)
+c        call pgbegin(0,'pgplot1.ps/VPS',1,2)
+        call pgbegin(0,'pgplot1.ps/VPS',2,2)
+        call pgslw(3)
 
         call range3(fluxf,1000,5,nbin,4,mnx,mxx,1,0)      ! 1st fig in pgplot.ps
         call range3(que,1000,5,nbin,4,mny,mxy,1,1)
-c        call pgpanl(1,1)
-c        call pgvport(0.15,0.9,0.15,0.9)
-c        call pgsch(1.5)
+        call pgpanl(1,1)
+        call pgvport(0.15,0.9,0.15,0.9)
+        call pgsch(1.5)
         mnx=mnx+3.0
         mxx=mxx+3.0
-c        call pgwindow(mnx,mxx,mny,mxy)
-c        call pgbox('BCNLST',0.0,0,'BCNLST',0.0,0)
-c        call pglabel('S\\d limit \\u (mJy)','q',' ')
+        call pgwindow(mnx,mxx,mny,mxy)
+        call pgbox('BCNLST',0.0,0,'BCNLST',0.0,0)
+        call pglabel('S\\d limit \\u (mJy)','q',' ')
         do 800 i=1,4
          do 810 j=dcmin,dcmax
           x4(j-dcmin+1)=dlog10(fluxf(j,i)*1.d3)
           y4(j-dcmin+1)=dlog10(que(j,i))
           if (fluxf(j,i).eq.slimbeam(i)) then
-c           call pgsch(2.5)
-c           call pgpoint(1,x4(j-dcmin+1),y4(j-dcmin+1),16)
-c           call pgsch(1.5)
+           call pgsch(2.5)
+           call pgpoint(1,x4(j-dcmin+1),y4(j-dcmin+1),16)
+           call pgsch(1.5)
           end if
 810      continue
-c         call pgsls(i)
-c         call pgline(dcmax-dcmin+1,x4,y4)
+         call pgsls(i)
+         call pgline(dcmax-dcmin+1,x4,y4)
          x41(i)=dlog10(ssdc(i)*1.d3)
          y41(i)=dlog10(qsdc(i))
 800     continue
-c        call pgsch(2.5)
-cc!        call pgpoint(4,x41,y41,8)
-c        call pgsch(1.5)
+        call pgsch(2.5)
+c!        call pgpoint(4,x41,y41,8)
+        call pgsch(1.5)
         call plotfundae(mnx,mxx,mny,mxy,4)
 
 	write (*,*) ' Conf NOISE for 20 bm/src criterion '
         call range3(fluxf,1000,5,nbin,4,mnx,mxx,1,0)      ! 2nd fig in pgplot.ps
         call range3(sigma,1000,5,nbin,4,mny,mxy,1,1)
-c        call pgpanl(1,2)
-c        call pgvport(0.15,0.9,0.15,0.9)
-c        call pgsch(1.5)
+        call pgpanl(1,2)
+        call pgvport(0.15,0.9,0.15,0.9)
+        call pgsch(1.5)
         mny=mny+3.0
         mxy=mxy+3.0
         mnx=mnx+3.0
         mxx=mxx+3.0
-c        call pgwindow(mnx,mxx,mny,mxy)
-c        call pgbox('BCNLST',0.0,0,'BCNLST',0.0,0)
-c        call pglabel('S\\d limit \\u (mJy)','\\gs (mJy)',' ')
-c        call pgsch(1.0)
+        call pgwindow(mnx,mxx,mny,mxy)
+        call pgbox('BCNLST',0.0,0,'BCNLST',0.0,0)
+        call pglabel('S\\d limit \\u (mJy)','\\gs (mJy)',' ')
+        call pgsch(1.0)
         do 820 i=1,4
          do 830 j=dcmin,dcmax
           x4(j-dcmin+1)=dlog10(fluxf(j,i)*1.d3)
           y4(j-dcmin+1)=dlog10(sigma(j,i)*1.d3)
           if (fluxf(j,i).eq.slimbeam(i)) then
-c           call pgsch(2.5)
-c           call pgpoint(1,x4(j-dcmin+1),y4(j-dcmin+1),16)
+           call pgsch(2.5)
+           call pgpoint(1,x4(j-dcmin+1),y4(j-dcmin+1),16)
 	   write (*,*) freq(i),sigma(j,i)*1.d6,' uJy',fluxf(j,i)/5.d-6
-c           call pgsch(1.0)
+           call pgsch(1.0)
           end if
 830      continue
-c         call pgsls(i)
-c         call pgline(dcmax-dcmin+1,x4,y4)
+         call pgsls(i)
+         call pgline(dcmax-dcmin+1,x4,y4)
          x41(i)=dlog10(ssdc(i)*1.d3)
          y41(i)=dlog10(sigmasdc(i)*1.d3)
 820     continue
-c        call pgsch(2.5)
-cc!        call pgpoint(4,x41,y41,8)
-c        call pgsch(1.0)
+        call pgsch(2.5)
+c!        call pgpoint(4,x41,y41,8)
+        call pgsch(1.0)
 c!        call plotfundae(mnx,mxx,mny,mxy,4)
 
-c        call pgpanl(2,1)                                  ! 3rd fig in pgplot.ps
-c        call pgsls(1)
-c        call pgvport(0.15,0.9,0.15,0.9)
+        call pgpanl(2,1)                                  ! 3rd fig in pgplot.ps
+        call pgsls(1)
+        call pgvport(0.15,0.9,0.15,0.9)
         call range3(fluxf,1000,5,nbin,4,mnx,mxx,1,0)
         call range3(R,1000,5,nbin,4,mny,mxy,1,1)
-c        call pgsch(1.5)
+        call pgsch(1.5)
         mny=-1.0
         mnx=mnx+3.0
         mxx=mxx+3.0
-c        call pgwindow(mnx,mxx,mny,mxy)
-c        call pgbox('BCNLST',0.0,0,'BCNLST',0.0,0)
-c        call pglabel('S\\d limit \\u (mJy)','R',' ')
-c        call pgsch(1.0)
+        call pgwindow(mnx,mxx,mny,mxy)
+        call pgbox('BCNLST',0.0,0,'BCNLST',0.0,0)
+        call pglabel('S\\d limit \\u (mJy)','R',' ')
+        call pgsch(1.0)
         do 850 i=1,4
          do 860 j=1,nbin
          x4(j)=dlog10(fluxf(j,i)*1.d3)
           y4(j)=dlog10(R(j,i))
 860      continue
-c          call pgsls(5-i)
-c          call pgline(nbin,x4,y4)
+          call pgsls(5-i)
+          call pgline(nbin,x4,y4)
 850     continue
         call plotfundae(mnx,mxx,mny,mxy,4)
 
-c        call pgpanl(2,2)                                 ! 4th fig in pgplot.ps
-c        call pgvport(0.15,0.9,0.15,0.9)
-c        call pgsch(1.5)
+        call pgpanl(2,2)                                 ! 4th fig in pgplot.ps
+        call pgvport(0.15,0.9,0.15,0.9)
+        call pgsch(1.5)
         call range3(fluxf,1000,5,nbin,4,mnx,mxx,1,0)
         mny=-1.0
         mxy=2.5
         mnx=mnx+3.0
         mxx=mxx+3.0
         mxx=2.0
-c        call pgwindow(mnx,mxx,mny,mxy)
-c        call pgbox('BCNLST',0.0,0,'BCNLST',0.0,0)
-c        call pglabel('S\\d limit \\u (mJy)','Num beams/src',' ')
-c        call pgsch(1.0)
+        call pgwindow(mnx,mxx,mny,mxy)
+        call pgbox('BCNLST',0.0,0,'BCNLST',0.0,0)
+        call pglabel('S\\d limit \\u (mJy)','Num beams/src',' ')
+        call pgsch(1.0)
         do 880 i=1,4
          do 890 j=1,nbin
          x4(j)=dlog10(fluxf(j,i)*1.d3)
          y4(j)=dlog10(1.d0/(nss(j)*synbeama(i)))
 890      continue
-c         call pgsls(5-i)
-c         call pgline(nbin,x4,y4)
+         call pgsls(5-i)
+         call pgline(nbin,x4,y4)
 880     continue
         call plotfundae(mnx,mxx,mny,mxy,4)
 
-c        call pgend
+        call pgend
 c!
 c!
 c!
-c        call pgbegin(0,'pgplot2.ps/VPS',1,1)
-c        call pgslw(3)
-c        call pgsch(1.5)
-c        call pgvport(0.15,0.9,0.15,0.9)
-c        call pgwindow(-0.2,2.1,0.8,3.5)
-c        call pgbox('BCLNST',0.0,0,'BCLNST',0.0,0)
-c        call pglabel('Integration time (hrs)',
- 
-c        call pgtext(0.2,3.6,'For LOFAR; Bandwidth=4 MHz')
+        call pgbegin(0,'pgplot2.ps/VPS',1,1)
+        call pgslw(3)
+        call pgsch(1.5)
+        call pgvport(0.15,0.9,0.15,0.9)
+        call pgwindow(-0.2,2.1,0.8,3.5)
+        call pgbox('BCLNST',0.0,0,'BCLNST',0.0,0)
+        call pglabel('Integration time (hrs)',
+     /       'Num beams/source at 5\\gs',' ')
+        call pgtext(0.2,3.6,'For LOFAR; Bandwidth=4 MHz')
 	alpha=0.8d0
         do 230 j=1,4                     ! freq
          do 220 i=1,100
@@ -494,31 +494,31 @@ c        call pgtext(0.2,3.6,'For LOFAR; Bandwidth=4 MHz')
      /    write (*,*) freq(j),(1.d0/(10.d0**y4(i)))/synbeama(j),i
      /       ,sig5
 220      continue
-c         call pgsls(j)
-c         call pgline(100,x4,y4)
+         call pgsls(j)
+         call pgline(100,x4,y4)
 230     continue
         do 313 i=1,4
-c         call pgsls(i)
-c         call pgmove(-0.1,1.4-(i-1)*0.15)
-c         call pgdraw(0.2,1.4-(i-1)*0.15)
+         call pgsls(i)
+         call pgmove(-0.1,1.4-(i-1)*0.15)
+         call pgdraw(0.2,1.4-(i-1)*0.15)
 313     continue
-c        call pgsch(1.0)
-c        call pgtext(0.3,1.40,' 30 MHz')
-c        call pgtext(0.3,1.25,' 75 MHz')
-c        call pgtext(0.3,1.10,'120 MHz')
-c        call pgtext(0.3,0.95,'200 MHz')
-c        call pgsls(1)
+        call pgsch(1.0)
+        call pgtext(0.3,1.40,' 30 MHz')
+        call pgtext(0.3,1.25,' 75 MHz')
+        call pgtext(0.3,1.10,'120 MHz')
+        call pgtext(0.3,0.95,'200 MHz')
+        call pgsls(1)
 
-c        call pgend
+        call pgend
 c!
 c!
 c!
-c        call pgbegin(0,'pgplot3.ps/VPS',1,1)
-c        call pgwindow(2.5,6.5,-1.0,6.0)
-c        call pgbox('BCNST',0.0,0,'BCNLST',0.0,0)
-c        call pglabel('Sigma','Source pixels/False pixels number',' ')
-c        call pgtext(2.6,6.2,
- 
+        call pgbegin(0,'pgplot3.ps/VPS',1,1)
+        call pgwindow(2.5,6.5,-1.0,6.0)
+        call pgbox('BCNST',0.0,0,'BCNLST',0.0,0)
+        call pglabel('Sigma','Source pixels/False pixels number',' ')
+        call pgtext(2.6,6.2,
+     /       'Src has #pix > n\\gs : White=1, Red=5, Green=9')
         call plotfundae(2.5,6.5,-1.0,6.0,4)
 
         naxis1=16000
@@ -546,16 +546,16 @@ c        call pgtext(2.6,6.2,
           y41(j)=dlog10(npix_src(2)/fpix_false(2)/(naxis1*naxis1))
           y42(j)=dlog10(npix_src(3)/fpix_false(3)/(naxis1*naxis1))
 930      continue
-c         call pgsls(i)
-c         call pgsci(1)
-c         call pgline(7,x4,y4)
-c         call pgsci(2)
-c         call pgline(7,x4,y41)
-c         call pgsci(3)
-c         call pgline(7,x4,y42)
+         call pgsls(i)
+         call pgsci(1)
+         call pgline(7,x4,y4)
+         call pgsci(2)
+         call pgline(7,x4,y41)
+         call pgsci(3)
+         call pgline(7,x4,y42)
 920     continue
 
-c        call pgend
+        call pgend
 c
 c  NOW calculate ANGULAR SIZE DISTR FOR HIGHER THAN 5sigma for 1 hr and plot
 c
@@ -572,31 +572,31 @@ c
         maxi(1)=10.d0
         maxi(2)=1.d4
 
-cc        call pgbegin(0,'?',2,1)
+c        call pgbegin(0,'?',2,1)
 
         do 283 i2=1,2         ! pgpanl
-c         call pgbegin(0,'pgplot4.ps/VPS',1,1)  ! new
-cc         call pgpanl(i2,1)
-c         call pgpanl(1,1)
-c         call pgslw(1)
-c         call pgsch(1.5)
-c         call pgvport(0.15,0.9,0.15,0.9)
-c         call pgwindow(0.0,62.0,-1.0,5.0-i2)
-c         call pgbox('BCNST',0.0,0,'BCLNST',0.0,0)
-c         call pgmove(0.0,0.0)
-c         call pgdraw(62.0,0.0)
-c         call pgnumb(int(dumr*10),-1,1,str2,nc)
+         call pgbegin(0,'pgplot4.ps/VPS',1,1)  ! new
+c         call pgpanl(i2,1)
+         call pgpanl(1,1)
+         call pgslw(1)
+         call pgsch(1.5)
+         call pgvport(0.15,0.9,0.15,0.9)
+         call pgwindow(0.0,62.0,-1.0,5.0-i2)
+         call pgbox('BCNST',0.0,0,'BCLNST',0.0,0)
+         call pgmove(0.0,0.0)
+         call pgdraw(62.0,0.0)
+         call pgnumb(int(dumr*10),-1,1,str2,nc)
          str1='For > 5\\gs; BW=4 MHz; T\\dint\\u='//str2//' hrs'
-c	 call pglabel('Angular size (")','Differential counts',str1)
-cc         if (i2.eq.2) call pglabel('Angular size (")',
- 
+	 call pglabel('Angular size (")','Differential counts',str1)
+c         if (i2.eq.2) call pglabel('Angular size (")',
+c     /               'Differential counts',' ')
          if (i2.eq.1) then 
-cc          call pglabel(' ','Differential counts',str1)
+c          call pglabel(' ','Differential counts',str1)
           call plotfundae(0.0,62.0,-1.0,5.0-i2,4)
          end if
          call getlab1(i2,mini,maxi,str1)
-c         call pgsch(1.5)
-c         call pgtext(10.0,4.5-i2,str1)
+         call pgsch(1.5)
+         call pgtext(10.0,4.5-i2,str1)
 
         do 250 i=1,4                          ! for freq
          sig5=sens(i)/sqrt(dumr)         ! rms in Jy for 4 MHz BW
@@ -624,80 +624,80 @@ c         call pgtext(10.0,4.5-i2,str1)
           x4(i1-sizecut(i)+1)=(sizeas(i1)+sizeas(i1+1))/2.d0
           y4(i1-sizecut(i)+1)=hpsi(i1)
 270      continue
-c         call pgsls(i)
-c         call pgline(59-sizecut(i)+1,x4,y4)
+         call pgsls(i)
+         call pgline(59-sizecut(i)+1,x4,y4)
 250     continue
-c        call pgsls(1)
+        call pgsls(1)
 283     continue     ! pgpanl
 
-c        call pgend
+        call pgend
 c!
 c!
 c! Now to plot for detecting spectral index at 5 sigma 
 c!
 c!
-c        call pgbegin(0,'pgplot5.ps/VPS',1,2)
+        call pgbegin(0,'pgplot5.ps/VPS',1,2)
 
-c        call pgpanl(1,1)
-c        call pgslw(3)
-c        call pgsch(1.3)
-c        call pgvport(0.15,0.9,0.15,0.9)
-c        call pgwindow(-0.2,2.1,-1.0,2.0)
-c        call pgbox('BCLNST',0.0,0,'BCLNST',0.0,0)
-c        call pglabel('Integration time (hrs)','Minimum flux (mJy)',
- 
+        call pgpanl(1,1)
+        call pgslw(3)
+        call pgsch(1.3)
+        call pgvport(0.15,0.9,0.15,0.9)
+        call pgwindow(-0.2,2.1,-1.0,2.0)
+        call pgbox('BCLNST',0.0,0,'BCLNST',0.0,0)
+        call pglabel('Integration time (hrs)','Minimum flux (mJy)',
+     /   'To detect (\\ga +/- 0.1), 10 hrs, BW=32 MHz, 16 chan')
         do 315 i=2,4
-c         call pgsls(i-1)
-c         call pgmove(1.4,1.8-(i-2)*0.2)
-c         call pgdraw(1.65,1.8-(i-2)*0.2)
+         call pgsls(i-1)
+         call pgmove(1.4,1.8-(i-2)*0.2)
+         call pgdraw(1.65,1.8-(i-2)*0.2)
 315     continue
-c        call pgsch(1.0)
-c        call pgtext(1.7,1.8,' 75 MHz')
-c        call pgtext(1.7,1.6,'120 MHz')
-c        call pgtext(1.7,1.4,'200 MHz')
-c        call pgsls(1)
+        call pgsch(1.0)
+        call pgtext(1.7,1.8,' 75 MHz')
+        call pgtext(1.7,1.6,'120 MHz')
+        call pgtext(1.7,1.4,'200 MHz')
+        call pgsls(1)
 
         do 305 i=2,4  ! freq
          do 310 j=1,100  ! integ time
           x4(j)=dlog10(j*1.d0)
           y4(j)=dlog10(flux0(j,i)*1.d3)
 310      continue
-c         call pgsls(i-1)
-c         call pgline(100,x4,y4)
-c         call pgsls(1)
+         call pgsls(i-1)
+         call pgline(100,x4,y4)
+         call pgsls(1)
 305     continue
 
-c        call pgpanl(1,2)
-c        call pgslw(3)
-c        call pgsch(1.3)
-c        call pgvport(0.15,0.9,0.15,0.9)
-c        call pgwindow(-0.2,2.1,-1.5,0.5)
-c        call pgbox('BCLNST',0.0,0,'BCLNST',0.0,0)
-c        call pglabel('Integration time (hrs)','Minimum flux (mJy)',
- 
+        call pgpanl(1,2)
+        call pgslw(3)
+        call pgsch(1.3)
+        call pgvport(0.15,0.9,0.15,0.9)
+        call pgwindow(-0.2,2.1,-1.5,0.5)
+        call pgbox('BCLNST',0.0,0,'BCLNST',0.0,0)
+        call pglabel('Integration time (hrs)','Minimum flux (mJy)',
+     /   'To detect \\ga(120-200 MHz) +/- 0.1, 10 hrs, BW=32 MHz')
         do 330 i=1,4
          do 335 j=1,100  ! integ time
           x4(j)=dlog10(j*1.d0)
           y4(j)=dlog10(flux1(j,i)*1.d3)
 335      continue
-c         call pgsls(i)
-c         call pgline(100,x4,y4)
-c         call pgsls(1)
+         call pgsls(i)
+         call pgline(100,x4,y4)
+         call pgsls(1)
 330     continue
         do 331 i=1,4
-c         call pgsls(i)
-c         call pgmove(1.5,0.6-i*0.2)
-c         call pgdraw(1.7,0.6-i*0.2)
-c         call pgsls(1)
+         call pgsls(i)
+         call pgmove(1.5,0.6-i*0.2)
+         call pgdraw(1.7,0.6-i*0.2)
+         call pgsls(1)
 331     continue
-c        call pgsch(1.0)
-c        call pgtext(1.8,0.4,'\\ga=-0.6')
-c        call pgtext(1.8,0.2,'\\ga=-0.8')
-c        call pgtext(1.8,0.0,'\\ga=-1.0')
-c        call pgtext(1.8,-0.2,'\\ga=-1.2')
-c        call pgsls(1)
+        call pgsch(1.0)
+        call pgtext(1.8,0.4,'\\ga=-0.6')
+        call pgtext(1.8,0.2,'\\ga=-0.8')
+        call pgtext(1.8,0.0,'\\ga=-1.0')
+        call pgtext(1.8,-0.2,'\\ga=-1.2')
+        call pgsls(1)
 
-c        call pgend
+        call pgend
 
 
 
@@ -828,9 +828,9 @@ c to calculate nsrc/str * area of image, into an integer
         real*8 mn(2),mx(2)
         integer n,nc1,nc2
 
-c        call pgnumb(int(mn(n)*10),-1,1,st1,nc1)
+        call pgnumb(int(mn(n)*10),-1,1,st1,nc1)
         st1=st1(1:nc1)//'\\gs to '
-c        call pgnumb(int(mx(n)*10),-1,1,st2,nc2)
+        call pgnumb(int(mx(n)*10),-1,1,st2,nc2)
         st=st1//st2(1:nc2)//'\\gs'
 
         return
@@ -845,15 +845,15 @@ c        call pgnumb(int(mx(n)*10),-1,1,st2,nc2)
 
 	dum=0.06
 	do 100 i=1,n
-c         call pgmove(mnx+0.05*(mxx-mnx),mxy-i*dum*(mxy-mny))
-c	 call pgsls(i)
-c         call pgdraw(mnx+0.20*(mxx-mnx),mxy-i*dum*(mxy-mny))
+         call pgmove(mnx+0.05*(mxx-mnx),mxy-i*dum*(mxy-mny))
+	 call pgsls(i)
+         call pgdraw(mnx+0.20*(mxx-mnx),mxy-i*dum*(mxy-mny))
 100     continue
-c        call pgsls(1)
-c	call pgtext(mnx+0.22*(mxx-mnx),mxy-dum*1*(mxy-mny),' 30 MHz')
-c	call pgtext(mnx+0.22*(mxx-mnx),mxy-dum*2*(mxy-mny),' 75 MHz')
-c	call pgtext(mnx+0.22*(mxx-mnx),mxy-dum*3*(mxy-mny),'120 MHz')
-c	call pgtext(mnx+0.22*(mxx-mnx),mxy-dum*4*(mxy-mny),'200 MHz')
+        call pgsls(1)
+	call pgtext(mnx+0.22*(mxx-mnx),mxy-dum*1*(mxy-mny),' 30 MHz')
+	call pgtext(mnx+0.22*(mxx-mnx),mxy-dum*2*(mxy-mny),' 75 MHz')
+	call pgtext(mnx+0.22*(mxx-mnx),mxy-dum*3*(mxy-mny),'120 MHz')
+	call pgtext(mnx+0.22*(mxx-mnx),mxy-dum*4*(mxy-mny),'200 MHz')
 
         return
         end
@@ -951,7 +951,7 @@ c!
         numb=s1
 	if (-0.8.ge.log10(fl)) write (*,*) '  ### ERROR ###'
 
-c 	call pgend
+ 	call pgend
 
 
         return

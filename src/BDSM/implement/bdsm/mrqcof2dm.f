@@ -5,7 +5,7 @@ c! modified for 2d arrays
       INTEGER ma,nalp,ndata,ia(ma),MMAX,fnum,mdata
       REAL*8 chisq,a(ma),alpha(nalp,nalp),beta(ma),sig(ndata,mdata),
      /  y(ndata,mdata)
-      PARAMETER (MMAX=600)
+      PARAMETER (MMAX=800)
       INTEGER mfit,i,j,k,l,m,i1,mask(ndata,mdata)
       REAL*8 dy,sig2i,wt,ymod,dyda(MMAX)
 
@@ -25,6 +25,7 @@ c! modified for 2d arrays
         if (mask(i,i1).eq.1) then
          if (fnum.eq.1) call fgauss2de(i,i1,a,ymod,dyda,ma)   ! single 2d gaus
          if (fnum.eq.2) call fgauss2dne(i,i1,a,ymod,dyda,ma)  ! multiple 2d gaus
+         if (fnum.eq.3) call plane3d(i,i1,a,ymod,dyda,ma)  !  3d plane
          sig2i=1.d0/(sig(i,i1)*sig(i,i1))
          dy=y(i,i1)-ymod
          j=0

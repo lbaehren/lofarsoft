@@ -18,12 +18,12 @@
 100     continue 
         
         call array8to4(image1,n,m,arr4,n,m)
-c        call pgbegin(0,'/xs',1,1)
-c        call pgwindow(0.5,n*1.0+0.5,0.5,m*1.0+0.5)
-c        call pgbox('BCINGST',0.0,0,'BCIGNST',0.0,0)
-c        call pggray(arr4,n,m,1,n,1,m,1.0,0.0,tr)
-c        call pgbox('BCINGST',0.0,0,'BCIGNST',0.0,0)
-c        call pgend
+        call pgbegin(0,'/xs',1,1)
+        call pgwindow(0.5,n*1.0+0.5,0.5,m*1.0+0.5)
+        call pgbox('BCINGST',0.0,0,'BCIGNST',0.0,0)
+        call pggray(arr4,n,m,1,n,1,m,1.0,0.0,tr)
+        call pgbox('BCINGST',0.0,0,'BCIGNST',0.0,0)
+        call pgend
 
 
         return

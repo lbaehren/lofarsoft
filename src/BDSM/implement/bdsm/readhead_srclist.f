@@ -2,7 +2,7 @@
         subroutine readhead_srclist(nn,nch,str,headstr,headint,
      /             headreal,taip)
         implicit none
-        integer nn,nch,headint
+        integer nn,nch,headint,nchar
         character str*500,head*500,headstr*500,taip
         real*8 headreal
 

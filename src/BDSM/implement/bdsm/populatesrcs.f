@@ -2,15 +2,19 @@ c! to populate srcs in an image
 c! dont calc cn,gam for every point. cos its difficult a high flux where number << 1
 c! split into 5 parts, fit power law, is within 5-7 %, use those.
 
-        subroutine populatesrcs(f1,seed)
+        subroutine populatesrcs(f1,seed,scratch,srldir)
         implicit none
-        character f1*(*),str1,tscope(5)*7
+        character f1*(*),str1,tscope(5)*7,extn*20,scratch*500
+        character srldir*500
         integer scope,nband(5),bandn,i,n,m,band(5,5),seed
         real*8 freq,intsec,bw,bmax(5),dia(5),sens(5,5)
         real*8 cdelt,c,area,clnbm,sarr(500),cdfarr(500)
         real*8 cn(500),gam(500),sigma1,cn1(500),gam1(500)
         real*8 pixsc
         
+cf2py   intent(in) f1,scratch,srldir
+cf2py   intent(in,out) seed
+
         c=3.d8
         data tscope/'LOFAR','LOFARVC','GMRT','WSRT','VLA'/
         data nband/4,4,5,5,3/
@@ -79,8 +83,10 @@ c! split into 5 parts, fit power law, is within 5-7 %, use those.
         end if
         
         call populateinparts(sarr,cdfarr,100,cn1,gam1,n,m,f1,freq,
-     /                       pixsc,seed)
-        call writeheader(f1,n,m,tscope(scope),freq,bw,intsec,pixsc)
+     /                       pixsc,seed,srldir)
+        extn='.img'
+        call sub_puthead(f1,scratch,extn,n,m,tscope(scope),freq,bw,
+     /             intsec,pixsc)
 
 334     continue
         return

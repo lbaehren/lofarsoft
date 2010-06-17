@@ -1,23 +1,7 @@
 
-
-        implicit none
-        integer i
-        integer*2 j
-        integer*4 k
-        integer*8 l
-        real*4 a
-
-        
-        i=int(1.d15)
-        j=int(1.d15)
-        k=int(1.d15)
-        l=int(1.d15)
-
-        write (*,*) i
-        write (*,*) j
-        write (*,*) k
-        write (*,*) l
+        real*8 a
+        a= (50.d0/38)**0.7d0
+        write (*,*) a, 0.8/0.6
 
         end
-
-
+ 

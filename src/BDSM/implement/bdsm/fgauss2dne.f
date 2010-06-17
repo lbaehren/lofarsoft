@@ -2,9 +2,9 @@ c! 2d gaussian, for now y is major axis
 c! rotates axes anticlockwise so point is rotated clockwise from +ve x axis
 
         subroutine fgauss2dne(i,j,a,y,dyda,na)
+        integer na,i,j,nmul,isrc
         real*8 y,a(na),dyda(na),arg1,arg2,ex(na/6),why(na/6)
         real*8 fac,ct(na/6),st(na/6),f1(na/6),f2(na/6),rad
-        integer na,i,j,nmul,isrc
         rad=180.d0/3.14159d0
 
         nmul=na/6  ! number of multiple srcs

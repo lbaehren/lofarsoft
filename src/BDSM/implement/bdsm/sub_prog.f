@@ -62,8 +62,8 @@ c! HELP 	Exact max min of real*4 matrix upto n,m
 
         mx=array(1,1)
         mn=array(1,1)
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           if (mx.lt.array(i,j)) mx=array(i,j)
           if (mn.gt.array(i,j)) mn=array(i,j)
 110      continue
@@ -105,21 +105,65 @@ c! HELP 	(Increased) max min of real*4 vector upto num1
         return
         end
 
-c! HELP1 subroutine range2xakt(array,num,num1,mn,mx)
+c! HELP1 subroutine range_vec4mxmn_mask(vec,mask,num,num1,mn,mx)
+c! HELP 	(Increased) max min of real*4 vector upto num1, with mask
+        subroutine range_vec4mxmn_mask(vec,mask,num,num1,mn,mx)
+        implicit none
+        integer num,num1,i,mask(num),dumi
+        real*4 vec(num),mx,mn,dum
+
+        do i=1,num1
+         if (mask(i).eq.1) then
+          dumi=i
+          goto 333 
+         end if
+        end do
+333     continue
+
+        mx=vec(dumi)
+        mn=vec(dumi)
+        do 100 i=2,num1
+         if (mask(i).eq.1) then
+          if (mx.lt.vec(i)) then
+           mx=vec(i)
+          end if
+          if (mn.gt.vec(i)) then
+           mn=vec(i)
+          end if
+         end if
+100     continue
+        dum=abs(mx-mn)
+        mx=mx+0.1*dum
+        mn=mn-0.1*dum
+        if (dum.eq.0.0) then
+         if (mx.eq.0) then
+          mx=1.0
+          mn=-1.0 
+         else
+          mx=mx*1.5
+          mn=mn/1.5
+         end if
+        end if
+
+        return
+        end
+
+c! HELP1 subroutine range2xakt(vec,num,num1,mn,mx)
+c! HELP1 subroutine range2xakt(vec,num,num1,mn,mx)
 c! HELP 	Exact max min of real*4 vector upto num1
-        subroutine range2xakt(array,num,num1,mn,mx)
+        subroutine range2xakt(vec,num,num1,mn,mx)
         implicit none
         integer num,num1,i
-        real*4 array(num),mx,mn
+        real*4 vec(num),mx,mn
 
-        mx=array(1)
-        mn=array(1)
+        mx=vec(1)
+        mn=vec(1)
         do 100 i=2,num1
-         if (mx.lt.array(i)) then
-          mx=array(i)
+         if (mx.lt.vec(i)) then
+          mx=vec(i)
          end if
-         if (mn.gt.array(i)) then
-          mn=array(i)
+         if (mn.gt.vec(i)) then
+          mn=vec(i)
          end if
 100     continue
 
@@ -127,7 +171,7 @@ c! HELP 	Exact max min of real*4 vector upto num1
         end
 
 c! HELP1 subroutine range2(array,num,num1,mn,mx)
-c! HELP 	(Increased) max min of real*8 vector upto num1
+c! HELP 	(Increased) max min of real*4 vector upto num1
         subroutine range2(array,num,num1,mn,mx)
         implicit none
         integer num,num1,i
@@ -159,9 +203,10 @@ c! HELP 	(Increased) real*4 max min of real*8 matrix excluding zero, and in log 
         real*8 iarr(n1,n2),arr(n1,n2),nzelem
         real*4 mx,mn,dum
 
+        nzelem=-999.d0
         if (nzero.eq.1) then   ! dont take zero
-         do 250 i=1,nm1
-          do 260 j=1,nm2
+         do 250 j=1,nm2
+          do 260 i=1,nm1
            if (iarr(i,j).ne.0.d0) then
             nzelem=iarr(i,j)     ! first nonzero element
             goto 333
@@ -170,11 +215,11 @@ c! HELP 	(Increased) real*4 max min of real*8 matrix excluding zero, and in log 
 250      continue
         end if
 333     continue
-
+        if (nzelem.eq.-999.d0) write (*,*) ' NO nonzero elements!!!!! '
 
         if (lg.eq.1) then
-         do 200 i=1,nm1
-          do 210 j=1,nm2
+         do 200 j=1,nm2
+          do 210 i=1,nm1
            if (nzero.eq.1.and.iarr(i,j).eq.0.d0) then
             arr(i,j)=dlog10(nzelem)
            else
@@ -183,8 +228,8 @@ c! HELP 	(Increased) real*4 max min of real*8 matrix excluding zero, and in log 
 210       continue
 200      continue
         else
-         do 300 i=1,nm1
-          do 310 j=1,nm2
+         do 300 j=1,nm2
+          do 310 i=1,nm1
            if (nzero.eq.1.and.iarr(i,j).eq.0.d0) then
             arr(i,j)=nzelem
            else
@@ -196,8 +241,8 @@ c! HELP 	(Increased) real*4 max min of real*8 matrix excluding zero, and in log 
 
         mx=arr(1,1)
         mn=arr(1,1)
-        do 100 i=1,nm1
-         do 110 j=1,nm2
+        do 100 j=1,nm2
+         do 110 i=1,nm1
           if (mx.lt.arr(i,j)) then
            mx=arr(i,j)
           end if
@@ -221,9 +266,9 @@ c! HELP 	Read an integer from file f1
         character f1*500
         integer n,nchar
 
-        open(unit=31,file=f1(1:nchar(f1)),status='old')
-        read(31,*) n
-        close(31)
+        open(unit=41,file=f1(1:nchar(f1)),status='old')
+        read(41,*) n
+        close(41)
         
         return
         end
@@ -235,15 +280,14 @@ c! HELP 	Compute number of lines in file
         character filen*500,dir*500
         integer n,nchar
 
-        call system('rm -f '//dir(1:nchar(dir))//'aa')
-        call system('wc -l '//dir(1:nchar(dir))//
-     /       filen(1:nchar(filen))//' > '//
-     /       dir(1:nchar(dir))//'aa')
-        open(unit=31,file=dir(1:nchar(dir))//'aa',status='old')
-        read(31,*) n
-        close(31)
-        call system('rm -f '//dir(1:nchar(dir))//'aa')
-        
+        n=0
+        open(unit=41,file=dir(1:nchar(dir))//filen(1:nchar(filen)))
+200      read (41,*,END=100) 
+         n=n+1
+         goto 200
+100     continue
+        close(41)
+
         return
         end
 
@@ -276,6 +320,32 @@ c        data blank,tab,null/' ',9,0/
         end do
 
         NCHAR = ipos
+        return
+        end
+
+        Integer function bnchar(string)
+C
+C  modify nchar to get index of first nonblank etc character
+C
+        Implicit none
+        integer*4 i,ipos
+        character*(*)  string
+        character blank,tab,null,c
+
+c        data blank,tab,null/' ',9,0/
+        data blank/' '/
+        tab=char(9)
+        null=char(0)
+
+        ipos = 0
+        i    = 1 
+        do while (i.le.len(string).and.ipos.eq.0)
+         c = string(i:i)
+         if (c.ne.blank.and.c.ne.tab.and.c.ne.null) ipos = i
+         i = i + 1
+        end do
+
+        bnchar = ipos
         return
         end
 
@@ -327,11 +397,34 @@ c! HELP 	Converts 'dd ma sa' to dec in degrees
         integer dd,ma
         real*8 sa,dec
 
-        dec=abs(dd) + ma/60.d0 + sa/3600.d0
-        if (dd.lt.0.d0) then
+        dec=abs(dd) + abs(ma)/60.d0 + abs(sa)/3600.d0
+        if (dd.lt.0.or.ma.lt.0.or.sa.lt.0.d0) then
          dec=-dec
         end if
 
+        return
+        end
+c!
+c!
+c!
+        subroutine dec_rmsign(s,dd,ma,sa)
+        implicit none
+        integer dd,ma
+        real*8 sa
+        character s*1
+        
+        if (s.eq.'-') then
+         if (dd.ne.0) then
+          dd=-dd
+         else
+          if (ma.ne.0) then
+           ma=-ma
+          else
+           sa=-sa
+          end if
+         end if
+        end if
+        
         return
         end
 
@@ -368,6 +461,9 @@ c! HELP 	Computes distance in arcsec between (ra1,dec1) and (ra2,dec2) in degree
         real*8 ra1,ra2,dec1,dec2,dist,rad
         real*8 r1,r2,d1,d2
 
+cf2py   intent(in) ra1, ra2, dec1, dec2
+cf2py   intent(out) dist
+
         rad=3.14159d0/180.d0
 
         r1=(ra1-180.d0)*rad
@@ -377,6 +473,28 @@ c! HELP 	Computes distance in arcsec between (ra1,dec1) and (ra2,dec2) in degree
 
         dist=acos(dsin(d1)*dsin(d2)+dcos(d1)*dcos(d2)*dcos(r1-r2))
         dist=dist*3600.d0/rad  ! in arcsec
+
+        return
+        end
+ 
+c! HELP1 subroutine gdist_pa(i,j,gpi,xpix,ypix,bmaj,bmin,bpa,fwhm)
+c! HELP 	Computes distance in arcsec in direction of PA
+        subroutine gdist_pa(i,j,gpi,xpix,ypix,bmaj,bmin,bpa,fwhm)
+        implicit none
+        include "constants.inc"
+        integer i,j,gpi
+        real*8 xpix(gpi),ypix(gpi),bmaj(gpi),bmin(gpi),bpa(gpi)
+        real*8 dumr1,dumr2,dumr3,fwhm,psi
+
+        dumr1=atan(abs((ypix(j)-ypix(i))/(xpix(j)-xpix(i))))  ! rad, 1st quadrant
+        call atanproper(dumr1,ypix(j)-ypix(i),xpix(j)-xpix(i))
+        
+        psi=dumr1-(bpa(i)+90.d0)/rad
+c!                       convert angle to eccentric anomaly
+        psi=atan(bmaj(i)/bmin(i)*tan(psi))  
+        dumr2=bmaj(i)*dcos(psi)/2.d0
+        dumr3=bmin(i)*dsin(psi)/2.d0
+        fwhm=sqrt(dumr2*dumr2+dumr3*dumr3)
 
         return
         end
@@ -425,14 +543,27 @@ c! HELP 	Computes seed for ran1 from current time
         return
         end
 
+        subroutine vec4to8(vec4,n1,vec8,n)
+        implicit none
+        integer n,i,n1
+        real*4 vec4(n1)
+        real*8 vec8(n)
+
+        do 100 i=1,n
+         vec8(i)=vec4(i)
+100     continue
+
+        return
+        end
+
         subroutine array8to4(arr8,n1,m1,arr4,n,m)
         implicit none
         integer n,m,i,j,n1,m1
         real*8 arr8(n1,m1)
         real*4 arr4(n,m)
 
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           arr4(i,j)=arr8(i,j)
 110      continue
 100     continue
@@ -440,6 +571,20 @@ c! HELP 	Computes seed for ran1 from current time
         return
         end
 
+        subroutine array4to8(arr4,n1,m1,arr8,n,m)
+        implicit none
+        integer n,m,i,j,n1,m1
+        real*4 arr4(n1,m1)
+        real*8 arr8(n,m)
+
+        do 100 j=1,m
+         do 110 i=1,n
+          arr8(i,j)=arr4(i,j)
+110      continue
+100     continue
+
+        return
+        end
         
         subroutine minmaxarr8(arr8,n1,m1,nb,mb,n,m,mn,mx)
         implicit none
@@ -448,8 +593,8 @@ c! HELP 	Computes seed for ran1 from current time
 
         mx=arr8(nb,mb)
         mn=arr8(nb,mb)
-        do 100 i=nb,n
-         do 110 j=mb,m
+        do 100 j=mb,m
+         do 110 i=nb,n
           if (mx.lt.arr8(i,j)) mx=arr8(i,j)
           if (mn.gt.arr8(i,j)) mn=arr8(i,j)
 110      continue
@@ -466,8 +611,8 @@ c! HELP 	Computes seed for ran1 from current time
 
         mx=arr4(nb,mb)
         mn=arr4(nb,mb)
-        do 100 i=nb,n
-         do 110 j=mb,m
+        do 100 j=mb,m
+         do 110 i=nb,n
           if (mx.lt.arr4(i,j)) mx=arr4(i,j)
           if (mn.gt.arr4(i,j)) mn=arr4(i,j)
 110      continue
@@ -482,8 +627,9 @@ c! HELP 	Computes seed for ran1 from current time
         integer n,m,k,i,j
         real*4 arr(n,m),nzero,mn,mx
         
-        do 100 i=1,n
-         do 110 j=1,m
+        nzero=-999.0
+        do 100 j=1,m
+         do 110 i=1,n
           if (arr(i,j).ne.0.0) then
            nzero=arr(i,j)
            goto 333
@@ -491,11 +637,12 @@ c! HELP 	Computes seed for ran1 from current time
 110      continue
 100     continue
 333     continue
+        if (nzero.eq.-999.0) write (*,*) ' ALL zero !!!'
 
         mn=nzero
         mx=nzero
-        do 200 i=1,n
-         do 210 j=1,m
+        do 200 j=1,m
+         do 210 i=1,n
           if (arr(i,j).ne.0.0) then
            if (mn.gt.arr(i,j)) mn=arr(i,j)
            if (mx.lt.arr(i,j)) mx=arr(i,j)
@@ -512,8 +659,9 @@ c! HELP 	Computes seed for ran1 from current time
         real*8 arr(x,y),nzero
         real*4 mn,mx
         
-        do 100 i=1,n
-         do 110 j=1,m
+        nzero=-999.d0
+        do 100 j=1,m
+         do 110 i=1,n
           if (arr(i,j).ne.0.d0) then
            nzero=arr(i,j)
            goto 333
@@ -521,11 +669,12 @@ c! HELP 	Computes seed for ran1 from current time
 110      continue
 100     continue
 333     continue
+        if (nzero.eq.-999.0) write (*,*) ' ALL zero !!!'
 
         mn=nzero
         mx=nzero
-        do 200 i=1,n
-         do 210 j=1,m
+        do 200 j=1,m
+         do 210 i=1,n
           if (arr(i,j).ne.0.d0) then
            if (mn.gt.arr(i,j)) mn=arr(i,j)
            if (mx.lt.arr(i,j)) mx=arr(i,j)
@@ -536,7 +685,7 @@ c! HELP 	Computes seed for ran1 from current time
         return
         end
 
-        subroutine converttolog(arr4,i,j,low,up)
+        subroutine converttolog(arr4,i,j,low,up,low1)
         implicit none
         integer i,j,i1,i2
         real*4 arr4(i,j),low1,low,up
@@ -548,8 +697,8 @@ c! HELP 	Computes seed for ran1 from current time
         end if
         low=log10(low+low1)
         up=log10(up+low1)
-        do 400 i1=1,i
-         do 410 i2=1,j
+        do 400 i2=1,j
+         do 410 i1=1,i
           if (arr4(i1,i2).ne.0.0) then
            arr4(i1,i2)=log10(arr4(i1,i2)+low1)
           else
@@ -561,7 +710,24 @@ c! HELP 	Computes seed for ran1 from current time
         return
         end
 
+        subroutine arr8tovec8_bl(arr,x,y,n,m,vec,nm,blv)
+        implicit none
+        integer x,y,n,m,i,j,k,nm
+        real*8 arr(x,y),vec(nm),blv
+        
+        k=0
+        do 100 j=1,m
+         do 110 i=1,n
+          if (arr(i,j).ne.blv) then
+           k=k+1
+           vec(k)=arr(i,j)
+          end if
+110      continue
+100     continue
+        if (k.ne.nm) write (*,*) ' ### arr8->vec8_bl wrong !!!'
 
+        return
+        end
 
         subroutine arr8tovec8(arr,x,y,n,m,vec,nm)
         implicit none
@@ -569,8 +735,8 @@ c! HELP 	Computes seed for ran1 from current time
         real*8 arr(x,y),vec(nm)
         
         k=0
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           k=k+1
           vec(k)=arr(i,j)
 110      continue
@@ -586,8 +752,8 @@ c! HELP 	Computes seed for ran1 from current time
         real*4 arr(x,y),vec(nm)
         
         k=0
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           k=k+1
           vec(k)=arr(i,j)
 110      continue
@@ -641,6 +807,20 @@ c! HELP 	Computes seed for ran1 from current time
         return
         end
 
+        function rfact(n)
+        implicit none
+        real*8 rfact
+        integer i,n
+
+        rfact=1.d0
+        if (n.gt.1) then
+         do i=1,n
+          rfact=rfact*i
+         end do
+        end if
+        
+        return
+        end
 
         function fact(n)
         implicit none
@@ -648,10 +828,14 @@ c! HELP 	Computes seed for ran1 from current time
         integer n,i
 
         fact=1
-        if (n.gt.1) then
-         do 100 i=1,n
-          fact=fact*i
-100      continue
+        if (n.gt.12) then
+         write (*,*) ' N too large !! Use rfact instead !! '
+        else
+         if (n.gt.1) then
+          do 100 i=1,n
+           fact=fact*i
+100       continue
+         end if
         end if
         
         return
@@ -662,8 +846,8 @@ c! HELP 	Computes seed for ran1 from current time
         integer n,m,i,j,x,y
         integer array(x,y),val
 
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           array(i,j)=val
 110      continue
 100     continue
@@ -671,17 +855,32 @@ c! HELP 	Computes seed for ran1 from current time
         return
         end
 
-
         subroutine initialiseimage(array,x,y,n,m,val)
         implicit none
         integer n,m,i,j,x,y
         real*8 array(x,y),val
 
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           array(i,j)=val
 110      continue
 100     continue
+
+        return
+        end
+
+        subroutine initialiseimage3d(array,x,y,z,n,m,l,val)
+        implicit none
+        integer n,m,i,j,x,y,z,l,k
+        real*8 array(x,y,z),val
+
+        do 120 k=1,l
+         do 100 j=1,m
+          do 110 i=1,n
+           array(i,j,k)=val
+110       continue
+100      continue
+120     continue
 
         return
         end
@@ -689,6 +888,18 @@ c! HELP 	Computes seed for ran1 from current time
         subroutine initialise_int_vec(vec,n,val)
         implicit none
         integer n,vec(n),val,i
+
+        do 100 i=1,n
+         vec(i)=val
+100     continue
+
+        return
+        end
+
+        subroutine initialise_vec(vec,n,val)
+        implicit none
+        integer n,i
+        real*8 vec(n),val
 
         do 100 i=1,n
          vec(i)=val
@@ -753,16 +964,80 @@ c! HELP 	Computes seed for ran1 from current time
         end
 
 
-        subroutine mean(vec,x,n,av)
+        subroutine vec_mean(vec,x,n1,n,av)
         implicit none
-        integer x,n,i
+        integer x,n,i,n1
         real*8 vec(x),av
 
         av=0.d0
-        do 100 i=1,n
+        do 100 i=n1,n
          av=av+vec(i)
 100     continue
-        av=av/n
+        av=av/(n-n1+1)
+        
+        return
+        end
+
+        subroutine vec_std4(vec,x,n1,n,av,std)
+        implicit none
+        integer x,n,i,n1
+        real*4 vec(x),av,std
+
+        av=0.0
+        std=0.0
+        if (n-n1+1.gt.0) then
+         do 100 i=n1,n
+          av=av+vec(i)
+100      continue
+         av=av/(n-n1+1)
+
+         do 200 i=n1,n
+          std=std+(vec(i)-av)*(vec(i)-av)
+200      continue
+         std=sqrt(std/(n-n1+1-1))
+        end if
+
+        return
+        end
+
+        subroutine vec_std(vec,x,n1,n,av,std)
+        implicit none
+        integer x,n,i,n1
+        real*8 vec(x),av,std
+
+        av=0.d0
+        std=0.d0
+        if (n-n1+1.gt.0) then
+         do 100 i=n1,n
+          av=av+vec(i)
+100      continue
+         av=av/(n-n1+1)
+
+         do 200 i=n1,n
+          std=std+(vec(i)-av)*(vec(i)-av)
+200      continue
+         std=sqrt(std/(n-n1+1-1))
+        end if
+
+        return
+        end
+
+        subroutine matavmask(image,mask,x,y,n,m,av)
+        implicit none
+        integer x,y,m,n,i,j,mask(x,y),num
+        real*8 image(x,y),av
+
+        av=0.d0
+        num=0
+        do 100 j=1,m
+         do 110 i=1,n
+          if (mask(i,j).eq.1) then
+           av=av+image(i,j)
+           num=num+1
+          end if
+110      continue
+100     continue
+        av=av/num
         
         return
         end
@@ -783,17 +1058,16 @@ c! HELP 	Computes seed for ran1 from current time
         return
         end
 
-        subroutine intmatav(image,x,y,n,m,av)
+        subroutine intmatsum(image,x,y,n,m,av)
         implicit none
         integer x,y,m,n,i,j,image(x,y),av
 
         av=0
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           av=av+image(i,j)
 110      continue
 100     continue
-        av=av/(n*m)
         
         return
         end
@@ -834,8 +1108,8 @@ c        end
         xmax=1
         ymax=1
         maxv=image(xmax,ymax)
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           if (image(i,j).gt.maxv) then
            xmax=i
            ymax=j
@@ -852,8 +1126,8 @@ c        end
         integer n,m,i,j,xmax,ymax,mask(n,m)
         real*8 image(n,m),maxv
 
-        do i=1,n
-         do j=1,m
+        do j=1,m
+         do i=1,n
           if (mask(i,j).eq.1) then
            xmax=i
            ymax=j
@@ -862,13 +1136,27 @@ c        end
          end do
         end do
 
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           if (mask(i,j).eq.1.and.image(i,j).gt.maxv) then
            xmax=i
            ymax=j
            maxv=image(i,j)
           end if
+110      continue
+100     continue
+
+        return
+        end
+
+        subroutine imager2int(image,n,m,mask)
+        implicit none
+        integer n,m,i,j,mask(n,m)
+        real*8 image(n,m)
+        
+        do 100 j=1,m
+         do 110 i=1,n
+          mask(i,j)=int(image(i,j))
 110      continue
 100     continue
 
@@ -881,8 +1169,8 @@ c        end
         integer x,y,n,m,i,j,mask(x,y)
         real*8 image(x,y)
         
-        do 100 i=1,n
-         do 110 j=1,m
+        do 100 j=1,m
+         do 110 i=1,n
           image(i,j)=mask(i,j)*1.d0
 110      continue
 100     continue
@@ -896,8 +1184,8 @@ c        end
         integer x,y,n,m,i,j,x1,y1,n1,m1
         real*8 im1(x,y),im2(x1,y1)
         
-        do 100 i=n1,n
-         do 110 j=m1,m
+        do 100 j=m1,m
+         do 110 i=n1,n
           im2(i-(n1-1),j-(m1-1))=im1(i,j)
 110      continue
 100     continue
@@ -910,8 +1198,8 @@ c        end
         integer x,y,n,m,i,j,x1,y1,n1,m1
         real*4 im1(x,y),im2(x1,y1)
         
-        do 100 i=n1,n
-         do 110 j=m1,m
+        do 100 j=m1,m
+         do 110 i=n1,n
           im2(i-(n1-1),j-(m1-1))=im1(i,j)
 110      continue
 100     continue
@@ -924,8 +1212,8 @@ c        end
         integer x,y,n,m,i,j,x1,y1,n1,m1
         integer im1(x,y),im2(x1,y1)
         
-        do 100 i=n1,n
-         do 110 j=m1,m
+        do 100 j=m1,m
+         do 110 i=n1,n
           im2(i-(n1-1),j-(m1-1))=im1(i,j)
 110      continue
 100     continue
@@ -933,20 +1221,6 @@ c        end
         return
         end
 
-
-        function getchar(i)
-        implicit none
-        character getchar*1,nums(10)*1
-        integer i,j
-
-        data nums/'0','1','2','3','4','5','6','7','8','9'/
-
-        do 100 j=1,10
-         if (i.eq.(j-1)) getchar=nums(j)
-100     continue
-
-        return
-        end
 
         subroutine int2str(nisl,str)
         implicit none
@@ -979,20 +1253,6 @@ c        end
         return
         end
 
-        function arg(why,ex)  ! arg in rad
-        implicit none
-        include "constants.inc"
-        real*8 ex,why,arg,dumr
-
-        dumr=atan(abs(why/ex)) 
-        if (ex.gt.0.d0.and.why.gt.0.d0) arg=dumr
-        if (ex.lt.0.d0.and.why.gt.0.d0) arg=-dumr+180.d0/rad
-        if (ex.lt.0.d0.and.why.lt.0.d0) arg=dumr+180.d0/rad
-        if (ex.gt.0.d0.and.why.lt.0.d0) arg=-dumr+360.d0/rad
-
-        return
-        end
-
         subroutine convertchar(cha,num)
         implicit none
         character cha*1,nums(10)*1
@@ -1007,7 +1267,6 @@ c        end
         return
         end
 
-
         subroutine get_fmt_int(n,fmti)
         implicit none
         integer n,ndigit
@@ -1021,12 +1280,26 @@ c        end
         return
         end
 
+        function existsq(filen,dir,extn)   
+        implicit none
+        logical existsq,ex
+        character filen*500,extn*20,fn*500,dir*500
+        integer nchar
+        
+        fn=dir(1:nchar(dir))//filen(1:nchar(filen))//extn(1:nchar(extn))
+        inquire(file=fn,exist=ex)
+        existsq=ex
+        
+        return
+        end
+
         function exists(filen,dir,extn)
         implicit none
         logical exists,ex
-        character filen*(*),extn*(*),fn*500,dir*500
+        character filen*500,extn*20,fn*500,dir*500
         integer nchar
         
+        fn=''
         fn=dir(1:nchar(dir))//filen(1:nchar(filen))//extn(1:nchar(extn))
         inquire(file=fn,exist=ex)
         exists=ex
@@ -1056,8 +1329,8 @@ c        end
         integer x,y,n,m,tot,mask(x,y),i,j
         
         tot=0
-        do i=1,n
-         do j=1,m
+        do j=1,m
+         do i=1,n
           tot=tot+mask(i,j)
          end do
         end do
@@ -1070,8 +1343,8 @@ c        end
         integer x,y,n,m,tot,mask(x,y),i,j,k
         
         tot=0
-        do i=1,n
-         do j=1,m
+        do j=1,m
+         do i=1,n
           if (mask(i,j).eq.k) tot=tot+1
          end do
         end do
@@ -1093,5 +1366,337 @@ c        end
 
         return
         end
+
+
+c! precession from B1950.0 to J2000.0 from http://www.stargazing.net/kepler/b1950.html
+c! mistake mentioned there is real.
+c! also from smith c.a. et al 1989.
+c!       !!!   is wrong -- within few " ! use Aoki !!!
+
+        subroutine B1950toJ2000(ra,dec,raj,decj)
+        implicit none
+        include "constants.inc"
+        real*8 ra,dec,raj,decj,ra1,dec1,deltac,deltad
+        real*8 x,y,z,x1,y1,z1,dumr
+        character s*1
+
+        write (*,*) '  Dont use Smith et al, use Aoki et al instead !!'
+        deltac=-(0.065838/3600.d0)  ! deg
+        deltad=0.335299/3600.d0  ! deg 
+        ra1=ra-(deltac*dcos(ra/rad)+deltad*dsin(ra/rad))/dcos(dec/rad)
+        dec1=dec-(deltad*dcos(ra/rad)-deltac*dsin(ra/rad))
+     /       *dsin(dec/rad)+0.028553/3600.d0*dcos(dec/rad)
+
+        x=dcos(ra1/rad)*dcos(dec1/rad)
+        y=dsin(ra1/rad)*dcos(dec1/rad)
+        z=dsin(dec1/rad)
+        
+        x1=0.999926d0*x-0.011179d0*y-0.004859d0*z  
+        y1=0.011179d0*x+0.999938d0*y-0.000027d0*z 
+        z1=0.004859d0*x-0.000027d0*y+0.999988d0*z  
+
+        raj=atan(y1/x1)*rad
+        if (x1.lt.0.d0) raj=raj+180.d0
+        if (y1.lt.0.d0.and.x1.gt.0.d0) raj=raj+360.d0
+        decj=asin(z1)*rad
+                
+        return
+        end
+
+c! precess from smith ea in sub_prog.f seems to be wrong by few " so
+c! do Aoki  ea 83 instead. all ra,dec in deg
+c! seems to be same as NED to ~0.2".
+
+        subroutine Aoki_B1950toJ2000(ra,dec,raj,decj)
+        implicit none
+        include "constants.inc"
+        real*8 ra,dec,raj,decj,A(3),r0(3),r1(3),r0A,M(3,3)
+        real*8 r(3),rscal,d1,d2
+        integer i
+
+        data A/-1.62557d-6,-0.31919d-6,-0.13843d-6/
+        data M/0.9999256782d0,0.0111820609d0,0.0048579479d0,  ! 11 21 31
+     /         -0.0111820610,0.9999374784,-0.0000271474,      ! 12 22 32
+     /         -0.0048579477,-0.0000271765,0.9999881997/      ! 13 23 33
+
+        r0(1)=dcos(dec/rad)*dcos(ra/rad)
+        r0(2)=dcos(dec/rad)*dsin(ra/rad)
+        r0(3)=dsin(dec/rad)
+
+        r0A=r0(1)*A(1)+r0(2)*A(2)+r0(3)*A(3)
+
+        do i=1,3
+         r1(i)=r0(i)-A(i)+r0A*r0(i)
+        end do
+
+        do i=1,3
+         r(i)=M(i,1)*r1(1)+M(i,2)*r1(2)+M(i,3)*r1(3)
+        end do
+
+        rscal=sqrt(r(1)*r(1)+r(2)*r(2)+r(3)*r(3))
+        decj=asin(r(3)/rscal)*rad   ! in deg
+
+        d1=r(1)/rscal/dcos(decj/rad)   ! acos
+        d2=r(2)/rscal/dcos(decj/rad)   ! asin
+        raj=acos(d1)*rad ! in deg
+        if (d2.lt.0.d0) raj=360.d0-raj
+
+        return  
+        end
+
+        subroutine correctrarad(ra)
+        implicit none
+        include "constants.inc"
+        real*8 ra
+
+        if (ra*rad.gt.360.d0) ra=ra-360.d0/rad
+        if (ra*rad.lt.0.d0) ra=ra+360.d0/rad
+
+        return
+        end
+
+        function cartdist(x1,y1,x2,y2)
+        implicit none
+        real*4 x1,y1,x2,y2,cartdist
+        
+        cartdist=abs(sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1)))
+        
+        return
+        end
+
+c! HELP1 subroutine num_num(str,num)
+c! HELP 	number of numbers (or strings) in string str 
+        subroutine num_num(str,num)
+        implicit none
+        character str*500
+        integer num,nchar,i,nstr,n1
+
+        n1=500 ! for compiler
+        nstr=nchar(str)
+        do i=1,nstr
+         if (str(i:i).ne.' ') then
+          n1=i
+          goto 333
+         end if
+        end do
+333     continue  !  n1 is first non-space character in str
+        num=0
+        do i=n1,nstr-1
+         if (str(i:i).eq.' '.and.str(i+1:i+1).ne.' ') then
+          num=num+1
+         end if
+        end do
+        num=num+1
+
+        return
+        end
+c!
+c!
+c!
+        subroutine calcmedianstd(vec,x,n,med,medstd)
+        implicit none
+        integer n,x,i
+        real*8 vec(x),med,medstd,s1
+
+        s1=0.d0
+        do i=1,n
+         s1=s1+(vec(i)-med)*(vec(i)-med)
+        end do
+        medstd=sqrt(s1/n)
+        
+        return
+        end
+c!
+c!
+c!
+        subroutine calcmedianstd4(vec,x,n,med,medstd)
+        implicit none
+        integer n,x,i
+        real*4 vec(x),med,medstd,s1
+
+        s1=0.0
+        do i=1,n
+         s1=s1+(vec(i)-med)*(vec(i)-med)
+        end do
+        medstd=sqrt(s1/n)
+        
+        return
+        end
+
+
+        subroutine getcoeffarr(hc,x,num,i,hca)
+        implicit none   
+        integer x,num,i,j
+        real*8 hc(x,x),hca(x)
+
+        do 100 j=1,x!num
+         hca(j)=hc(i,j)
+100     continue 
+
+        return
+        end
+
+        subroutine numE2str(n,str)
+        implicit none
+        real*8 n
+        character str*10
+        
+        if (n.lt.0.d0) then
+         write (str,'(1Pe9.2)') n
+        else
+         write (str,'(1Pe8.2)') n
+        end if
+
+        return
+        end
+
+        subroutine num2str_fn(n,x,str1)
+        implicit none
+        integer n,x,nd0,nd,j,nchar,bnchar
+        character str*500,dumc*10,str1*10
+        
+        nd0=int(log10(x*1.0))+1
+        write (str,*) n
+        nd=int(log10(n*1.0))+1
+        dumc=''
+        do j=1,nd0-nd
+         dumc=dumc(1:nchar(dumc))//'0'
+        end do
+        str1=dumc(1:nchar(dumc))//str(bnchar(str):nchar(str))
+
+        return
+        end
+
+
+        subroutine int_vec_vec_std(vec1,vec2,n,std)
+        implicit none
+        integer n,vec1(n),vec2(n),i,round
+        real*8 std
+         
+        std=0.d0
+        do i=1,n
+         std=std+1.d0*(vec1(i)-vec2(i))*(vec1(i)-vec2(i))
+        end do
+        std=sqrt(std)
+        
+        return
+        end
+
+        subroutine imageop(im,n,m,oim,code,val)
+        implicit none
+        integer n,m,i,j
+        real*8 im(n,m),oim(n,m),val
+        character code*3
+
+        if (code.eq.'add') then
+         do j=1,m
+          do i=1,n
+           oim(i,j)=im(i,j)+val
+          end do
+         end do 
+        end if
+
+        if (code.eq.'mul') then
+         do j=1,m
+          do i=1,n
+           oim(i,j)=im(i,j)*val
+          end do
+         end do 
+        end if
+
+        return
+        end
+
+        subroutine blank2mask(image,n,m,blankv,mask)
+        implicit none
+        integer n,m,mask(n,m),i,j
+        real*8 image(n,m),blankv
+
+        do j=1,m
+         do i=1,n
+          if (image(i,j).eq.blankv) then
+           mask(i,j)=0
+          else
+           mask(i,j)=1
+          end if
+         end do
+        end do
+
+        return
+        end
+
+        subroutine invert_sortindex(iwksp,n,ind)
+        implicit none
+        integer n,i,iwksp(n),ind(n)
+
+        do i=1,n
+         ind(iwksp(i))=i
+         if (i.eq.7) write (*,*) ' ####### ',i,iwksp(i)
+        end do
+
+        return
+        end
+
+        subroutine cart2polar(x,y,xcen,ycen,r,th)
+        implicit none
+        real*8 x,y,xcen,ycen,r,th
+ 
+        r=sqrt((x-xcen)*(x-xcen)+(y-ycen)*(y-ycen))
+        th=atan2(y-ycen,x-xcen)
+        
+        return
+        end
+
+        subroutine argmax(x,n,ind)
+        implicit none
+        integer n,ind,i
+        real*8 x(n),dum
+
+        ind=1
+        dum = x(1)
+        do i=1,n
+         if (x(i).gt.dum) then
+          dum=x(i)
+          ind=i
+         end if
+        end do
+
+        return
+        end
+
+        function getchar(i)
+        implicit none
+        character getchar*1,nums(10)*1
+        integer i,j
+
+        data nums/'0','1','2','3','4','5','6','7','8','9'/
+
+        do 100 j=1,10
+         if (i.eq.(j-1)) getchar=nums(j)
+100     continue
+
+        return
+        end
+
+        subroutine argmin(x,n,ind)
+        implicit none
+        integer n,ind,i
+        real*8 x(n),dum
+
+        ind=1
+        dum = x(1)
+        do i=1,n
+         if (x(i).lt.dum) then
+          dum=x(i)
+          ind=i
+         end if
+        end do
+
+        return
+        end
+
+
+
+
 
 

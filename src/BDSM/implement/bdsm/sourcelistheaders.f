@@ -1,13 +1,16 @@
 c! reads the source list (*.gaul) headers
 c! CHANGE GAUL FORMAT
 
-        subroutine sourcelistheaders(f2,f1,n,m,nisl,nsrc,gpi,nffmt,
+        subroutine sourcelistheaders(f2,f1,n,m,nisl,ngau,gpi,nffmt,
      /             ffmt,srldir)
         implicit none
-        integer n,m,nchar,nsrc,nffmt,headint,dumi,nisl,isrc,gpi
-        character f1*500,fn*500,extn*10,f2*500,ffmt*500,head*500
+        integer n,m,nchar,ngau,nffmt,headint,dumi,nisl,isrc,gpi
+        character f1*500,fn*500,extn*20,f2*500,ffmt*500,head*500
         character dumc*500,srldir*500
         real*8 dumr
+
+Cf2py   intent(in) f2,srldir
+Cf2py   intent(out) nisl,ngau,f1,n,m,gpi,ffmt,nffmt
         
         fn=srldir(1:nchar(srldir))//f2(1:nchar(f2))//'.gaul'   
         open(unit=22,file=fn(1:nchar(fn)),form='formatted') 
@@ -16,7 +19,7 @@ c! CHANGE GAUL FORMAT
         call readhead_srclist(22,12,'Image_size_y',dumc,m,dumr,'i')
         call readhead_srclist(22,17,'Number_of_islands',dumc,nisl,
      /       dumr,'i')
-        call readhead_srclist(22,19,'Number_of_gaussians',dumc,nsrc,
+        call readhead_srclist(22,19,'Number_of_gaussians',dumc,ngau,
      /       dumr,'i')
         call readhead_srclist(22,24,'Max_gaussians_per_island',dumc,
      /       gpi,dumr,'i')

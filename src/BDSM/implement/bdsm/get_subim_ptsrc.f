@@ -17,6 +17,7 @@ c! this is convolution with constant intensity. need that so source peak fluxes 
         inty=int(n/2)
         xc=xposn-round(xposn)+intx
         yc=yposn-round(yposn)+inty
+
 c! const psf        
         if (beamvary.eq.'n') then
          do i=1,n
@@ -29,22 +30,19 @@ c! const psf
         end if
 c! psf width has sinusoid and a slope, not very physical.
         if (beamvary.eq.'1') then
+         widthx=bmvaryf(3)*bmpix+bmvaryf(1)*bmvaryf(3)*
+     /          (1.d0+sin(2.d0*pi*bmvaryf(4)*xposn/
+     /          imsize))+bmvaryf(2)*bmvaryf(3)*xposn
+         widthy=bmpix+bmvaryf(1)*(1.d0+sin(2.d0*pi*bmvaryf(5)*yposn/
+     /          imsize))+bmvaryf(2)*yposn
          do i=1,n
           do j=1,n
-           widthx=bmpix+bmvaryf(1)*(1.d0+sin(2.d0*pi*bmvaryf(4)*i/
-     /            imsize))+bmvaryf(2)*imsize
-           widthy=bmpix+bmvaryf(1)*(1.d0+sin(2.d0*pi*bmvaryf(5)*j/
-     /            imsize))+bmvaryf(2)*imsize
-           dumr=((i-xc)*(i-xc)+(j-yc)*(j-yc))/
-     /           (2.d0*widthx*widthy/fwsig/fwsig)
+           dumr=(i-xc)*(i-xc)/(2.d0*widthx*widthx/fwsig/fwsig)+
+     /          (j-yc)*(j-yc)/(2.d0*widthy*widthy/fwsig/fwsig)
            image(i,j)=flux*dexp(-dumr)
-           write (*,*) i,j,bmpix,widthx,n,imsize,
-     /            bmvaryf(1)*(1.d0+sin(2.d0*pi*bmvaryf(4)*i/
-     /            imsize)),bmvaryf(2)*imsize
           end do
          end do
         end if
-        pause
 
         return
         end

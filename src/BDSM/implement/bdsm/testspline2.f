@@ -2,7 +2,7 @@
 
         implicit none
         integer n,m
-        character f1*500,extn*10
+        character f1*500,extn*20
         real*8 image(21,21),image1(11,11)
         real*8 x1a(11),x2a(11),y2a(11,11),dumr
         real*8 images(21,21),imagep(21,21)
@@ -41,11 +41,11 @@
         end do 
 
         f1='oppspline'
-        call writearray_bin(images,21,21,21,21,f1,'mv')
+        call writearray_bin2D(images,21,21,21,21,f1,'mv')
         f1='opppolin'
-        call writearray_bin(imagep,21,21,21,21,f1,'mv')
+        call writearray_bin2D(imagep,21,21,21,21,f1,'mv')
         f1='oppalter'
-        call writearray_bin(image1,11,11,11,11,f1,'mv')
+        call writearray_bin2D(image1,11,11,11,11,f1,'mv')
 
         return
         end

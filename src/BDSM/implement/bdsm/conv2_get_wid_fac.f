@@ -10,6 +10,7 @@ c! u can get constant intensity or constant flux density convolution.
 
         wid=min(int(11*max(sigma(1),sigma(2))),min(n,m))
         if (int(wid/2.d0)/(wid/2.d0).eq.1.d0) wid=wid+1
+        if (wid.gt.n.or.wid.gt.m) wid=wid-2
         if (wid.lt.7) wid=7
 
 c! gaussian has unit peak. sigma is in pixel width. wid is pixel extent of gaussian.

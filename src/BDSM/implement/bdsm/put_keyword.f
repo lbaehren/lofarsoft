@@ -5,7 +5,7 @@ c! put keyword in parameter file
         implicit none
         integer nchar
         real*8 keyvalue
-        character f1*500,extn*10,keyword*500,keystring*500,code*1
+        character f1*500,extn*20,keyword*500,keystring*500,code*1
         character comment*500,dir*500,fn*500
 
         fn=dir(1:nchar(dir))//f1(1:nchar(f1))//extn(1:nchar(extn))

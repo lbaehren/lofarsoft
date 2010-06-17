@@ -1,12 +1,11 @@
 c! From NRP. Converted to real*8
-
+c! deleted NMAX and made it n
 
       subroutine gaussj(a,n,np,b,m,mp)
       implicit none
-      integer m,mp,n,np,NMAX
+      integer m,mp,n,np
       real*8 a(np,np),b(np,mp)
-      parameter (NMAX=500)
-      integer i,icol,irow,j,k,l,ll,indxc(NMAX),indxr(NMAX),ipiv(NMAX)
+      integer i,icol,irow,j,k,l,ll,indxc(n),indxr(n),ipiv(n)
       real*8 big,dum,pivinv
 
       do 11 j=1,n
@@ -23,8 +22,6 @@ c! From NRP. Converted to real*8
                   irow=j
                   icol=k
                 endif
-              else if (ipiv(k).gt.1) then
-c                pause 'singular matrix in gaussj'
               endif
 12          continue
           endif

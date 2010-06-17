@@ -1,12 +1,16 @@
 c! to compute autocorrelation of image. surely this is wrong
+c! no it isnt.
 
         subroutine acf(f1,f2)
         implicit none
-        integer n,m
-        character f1*(*),f2*(*),extn*10
+        integer n,m,l
+        character f1*(*),f2*(*),extn*20
+
+cf2py   intent(in) f1,f2
 
         extn='.img'
-        call readarraysize(f1,extn,n,m)
+        call readarraysize(f1,extn,n,m,l)
+        if (l.gt.1) write (*,*) '  Using 2d array for 3d image !!!'
         call sub_acf(f1,f2,n,m)
         
         return
@@ -16,8 +20,8 @@ c!
         subroutine sub_acf(f1,f2,n,m)
         implicit none
         integer n,m,nchar,i,j,i1,j1,two
-        character f1*(*),f2*(*),lab*500,strdev*5,str1*1,extn*10
-        real*8 image1(n,m),dumr,image2(n,m)   ! image1 is main array and image2 is ac
+        character f1*(*),f2*(*),lab*500,strdev*5,str1*1,extn*20
+        real*8 image1(n,m),dumr,image2(2*n-1,2*m-1)   ! image1 is main array and image2 is ac
         real*8 s1,ac
 
         extn='.img'
@@ -35,8 +39,8 @@ c!
         end if
 
         s1=0.d0
-        do 300 i=1,n
-         do 310 j=1,m
+        do 300 j=1,m
+         do 310 i=1,n
           s1=s1+image1(i,j)*image1(i,j)
 310      continue
 300     continue
@@ -47,6 +51,7 @@ c!
 311      continue
 320     continue
 
+        write (*,'(a,$)') '   '
         do 100 i=-(n-1),(n-1)
          do 110 j=-(m-1),(m-1)
           
@@ -68,8 +73,8 @@ c!
         i1=2*n-1
         j1=2*m-1
         lab='Auto-correlation of image'
-        call writearray_bin(image2,n,m,i1,j1,f2,'mv')
-        call greyandslice(image2,n,m,i1,j1,lab)
+        call writearray_bin2D(image2,i1,j1,i1,j1,f2,'mv')
+        call greyandslice(image2,i1,j1,i1,j1,lab)
 
         write (*,'(a39,$)') '   Want to fit gaussian to ACF (y)/n ? '
         read (*,*) str1
@@ -94,12 +99,12 @@ c!
 
         call array8to4(arr,x,y,arr4,n,m)
         call range2d(arr4,n,m,n,m,mn,mx)
-c        call pgbegin(0,'/xs',1,1)
-c        call pgvport(0.1,0.9,0.3,0.9)
-c        call pgwindow(0.5,n*1.0+0.5,0.5,m*1.0+0.5)
-c        call pgbox('BCINST',0.0,0,'BCINST',0.0,0)
-c        call pggray(arr4,n,m,1,n,1,m,mx,mn,tr)
-c        call pglabel(' ',' ',lab)
+        call pgbegin(0,'/xs',1,1)
+        call pgvport(0.1,0.9,0.3,0.9)
+        call pgwindow(0.5,n*1.0+0.5,0.5,m*1.0+0.5)
+        call pgbox('BCINST',0.0,0,'BCINST',0.0,0)
+        call pggray(arr4,n,m,1,n,1,m,mx,mn,tr)
+        call pglabel(' ',' ',lab)
                 
         n1=(n+1)/2
         m1=(m+1)/2
@@ -117,14 +122,14 @@ c! now azimuthal plot, badly done
 135     continue
         call sort2_4(n*n,k,ex,why)
 
-c        call pgvport(0.1,0.9,0.1,0.3)
-c        call pgwindow(-0.5,cross*1.0,mn*0.9,mx*1.1)
-c        call pgmove(-0.5,0.0)
-c        call pgdraw(j*1.0,0.0)
-c        call pgbox('BNST',0.0,0,'BCNVST',0.0,0)
-c        call pgpoint(k,ex,why,17)
-c        call pgtext(0.4*j,mx-0.3*(mx-mn),'Diagonal slice plot')
-c        call pgend
+        call pgvport(0.1,0.9,0.1,0.3)
+        call pgwindow(-0.5,cross*1.0,mn*0.9,mx*1.1)
+        call pgmove(-0.5,0.0)
+        call pgdraw(j*1.0,0.0)
+        call pgbox('BNST',0.0,0,'BCNVST',0.0,0)
+        call pgpoint(k,ex,why,17)
+        call pgtext(0.4*j,mx-0.3*(mx-mn),'Diagonal slice plot')
+        call pgend
         
 
         return

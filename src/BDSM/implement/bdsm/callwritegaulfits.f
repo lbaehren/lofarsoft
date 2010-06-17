@@ -1,33 +1,34 @@
 c! write .gaul as binary FITS table (for AWE).
 c! have to edit this file for CHANGE GAUL FORMAT.
-c! HARDCODED 34 columns !!!
+c! HARDCODED 44 columns !!!
 
         subroutine callwritegaulfits(srldir,fitsname,f2,
-     /             extname,fitsdir)
+     /             imagename,extname,fitsdir,version)
         implicit none
         character srldir*500,fitsname*500,extname*16
         integer n,m,nsrc,nffmt,nisl,nchar,gpi
         character f1*500,f2*500,ffmt*500,writeout*500
-        character fitsdir*500
+        character fitsdir*500,imagename*500,version*68
         
         write (*,*) '  Writing FITS gaussian catalogue '
         call sourcelistheaders(f2,f1,n,m,nisl,nsrc,gpi,nffmt,
      /       ffmt,srldir)
-        call writegaulfits(f2,nsrc,34,srldir,fitsname,extname,fitsdir)
+        call writegaulfits(f2,nsrc,44,srldir,fitsname,extname,
+     /       fitsdir,version)
 
         return
         end
 
 
         subroutine writegaulfits(f2,nrows,tfields,srldir,fitsname,
-     /             extname,fitsdir)
+     /             extname,fitsdir,version)
         implicit none
         integer status,unit,readwrite,hdutype,tfields,nrows,bitpix
         integer varidat,colnum,frow,felem,blocksize,i
         integer naxis,naxes(3)  
         logical simple,extend
         character srldir*500,filename*500,extname*16,f2*500,fitsname*500
-        character*16 ttype(34),tform(34),tunit(34)
+        character*16 ttype(44),tform(44),tunit(44),version*68
         real*8 totfl(nrows),etotfl(nrows),peakfl(nrows),epeakfl(nrows)
         real*8 ss(nrows),sa(nrows),ess(nrows),esa(nrows),xpix(nrows)
         real*8 expix(nrows),ypix(nrows),eypix(nrows),bmaj(nrows)
@@ -36,7 +37,10 @@ c! HARDCODED 34 columns !!!
         real*8 edbmin(nrows),dbpa(nrows),edbpa(nrows),rmssrc(nrows)
         real*8 avsrc(nrows),rmsisl(nrows),avisl(nrows),chisq(nrows)
         real*8 q(nrows),ra(nrows),dec(nrows),era(nrows),edec(nrows)
+        real*8 dumr1(nrows),dumr2(nrows),dumr3(nrows),dumr4(nrows)
+        real*8 dumr5(nrows),dumr6(nrows)
         integer iisl(nrows),isrc(nrows),flag(nrows),nchar,srcnum(nrows)
+        integer blc1(nrows),blc2(nrows),trc1(nrows),trc2(nrows)
         integer funit,nkeys,nspace
         character record*80,fitsdir*500,f1*500,head*30
 
@@ -46,15 +50,19 @@ c! HARDCODED 34 columns !!!
      /    'Err_bmaj','Bmin_fw','Err_bmin','Bpa','Err_bpa',
      /    'Deconv_bmaj_fw','Err_decon_bmaj','Deconv_bmin',
      /    'Err_decon_bmin','Deconv_bpa','Err_decon_bpa','src_rms',
-     /    'src_av','isl_rms','isl_av','chisq','q','srcnum'/
+     /    'src_av','isl_rms','isl_av','sp_in','e_sp_in','srcnum','blc1',
+     /    'blc2','trc1','trc2','im_rms','dummy2','dummy3','dummy4',
+     /    'dummy5','dummy6'/
         data tform/'1J','1J','1J','1D','1D','1D','1D','1D','1D','1D',
      /    '1D','1D','1D','1D','1D','1D','1D','1D',
      /    '1D','1D','1D','1D','1D','1D','1D','1D','1D','1D','1D','1D',
-     /    '1D','1D','1D','1J'/
+     /    '1D','1D','1D','1J','1J','1J','1J','1J','1D','1D','1D','1D',
+     /    '1D','1D'/
         data tunit/' ',' ',' ','Jy','Jy','Jy','Jy','deg','deg','deg',
      /    'deg','pix','pix','pix','pix','arcsec','arcsec','arcsec',
      /    'arcsec','deg','deg','arcsec','arcsec','arcsec','arcsec',
-     /    'deg','deg','Jy','Jy','Jy','Jy',' ',' ',' '/
+     /    'deg','deg','Jy','Jy','Jy','Jy',' ',' ',' ',' ',' ',' ',' ',
+     /    ' ',' ',' ',' ',' ',' '/
 
 c! first write empty image. close it. then write BINTABLE.
         status=0
@@ -82,10 +90,12 @@ c! try write astrometry keywords in header, for AWE
         call ftghsp(funit,nkeys,nspace,status)  ! nkeys keywords present
         do i = 1, nkeys
          call ftgrec(funit,i,record,status)
-         read (record,*) head
-         if (head.ne.'SIMPLE'.and.head.ne.'BITPIX'.and.
-     /       head(1:5).ne.'NAXIS'.and.head.ne.'EXTEND')
-     /    call ftprec(unit,record,status)
+         if (record.ne.'') then
+          read (record,*) head
+          if (head.ne.'SIMPLE'.and.head.ne.'BITPIX'.and.
+     /        head(1:5).ne.'NAXIS'.and.head.ne.'EXTEND')
+     /     call ftprec(unit,record,status)
+         end if
         end do
 
         call ftclos(unit, status)
@@ -104,10 +114,10 @@ c!
      /    xpix(i),expix(i),ypix(i),eypix(i),bmaj(i),ebmaj(i),bmin(i),
      /    ebmin(i),bpa(i),ebpa(i),dbmaj(i),edbmaj(i),dbmin(i),edbmin(i)
      /    ,dbpa(i),edbpa(i),rmssrc(i),avsrc(i),rmsisl(i),avisl(i),
-     /    chisq(i),q(i),srcnum(i)
+     /    chisq(i),q(i),srcnum(i),blc1(i),blc2(i),trc1(i),trc2(i),
+     /    dumr1(i),dumr2(i),dumr3(i),dumr4(i),dumr5(i),dumr6(i)
         end do
         close(21)
-
 
 c!
 c! Now open it again and write the BINTABLE extension.
@@ -122,6 +132,8 @@ c!
         varidat=0
         call ftphbn(unit,nrows,tfields,ttype,tform,tunit,
      /            extname,varidat,status)
+        call ftpkys(unit,'VERSION',version(1:nchar(version)),
+     /       'Version of BDSM',status)
        
         frow=1
         felem=1
@@ -160,6 +172,16 @@ c!
         call ftpcld(unit,32,frow,felem,nrows,chisq,status)
         call ftpcld(unit,33,frow,felem,nrows,q,status)
         call ftpclj(unit,34,frow,felem,nrows,srcnum,status)  
+        call ftpclj(unit,35,frow,felem,nrows,blc1,status)  
+        call ftpclj(unit,36,frow,felem,nrows,blc2,status)  
+        call ftpclj(unit,37,frow,felem,nrows,trc1,status)  
+        call ftpclj(unit,38,frow,felem,nrows,trc2,status)  
+        call ftpcld(unit,39,frow,felem,nrows,dumr1,status)
+        call ftpcld(unit,40,frow,felem,nrows,dumr2,status)
+        call ftpcld(unit,41,frow,felem,nrows,dumr3,status)
+        call ftpcld(unit,42,frow,felem,nrows,dumr4,status)
+        call ftpcld(unit,43,frow,felem,nrows,dumr5,status)
+        call ftpcld(unit,44,frow,felem,nrows,dumr6,status)
   
         call ftclos(unit, status)
         call ftfiou(unit, status)

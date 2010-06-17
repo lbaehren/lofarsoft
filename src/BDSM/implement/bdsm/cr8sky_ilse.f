@@ -11,7 +11,7 @@ c! which means all sources will be at centres of pixels of course.
         implicit none
         include "constants.inc"
         integer xsize
-        integer nbin,i,j,imsize,seed,simsize,xc,yc
+        integer nbin,i,j,imsize,seed,xc,yc
         integer xca,yca,round,i1,j1,nchar,nchan,ich
         real*8 xc1,yc1,xc2,yc2
         real*8 cn1(500),sarr(500),gam1(500),dumr1,dumr2
@@ -54,13 +54,6 @@ c! get random flux, position and size
            bpa=0.d0
           end if
 
-c! get convolved subimage of source to add to image
-c! simsize is int(size convl subim)
-          call get_subim_imsize(max(bmaj/cdelt1,bmin/cdelt1),flux,   ! bmaj/cdelt is in pix
-     /         sens,simsize,bmvaryn,bmvaryf,beamvary,imsize) 
-          if (simsize.gt.xsize) 
-     /              write (*,*) '  ### ERROR : Image too big'
-
 c! get the image, of pt src of flux, convled with fw=bmsampl gauss at x,y of size simsize
 c! round(xposn,yposn) == (xc,yc)
          if (flux.le.2.d0*sens.or.bmaj/bmin.le.1.1d0) then
@@ -83,10 +76,13 @@ c! round(xposn,yposn) == (xc,yc)
 c! write source list
           if (flux.ge.5.d0*sens) then
            if (flux.le.2.d0*sens.or.bmaj/bmin.le.1.1d0) then
-            call writesrclist(21,round(xposn),round(yposn),flux,0,0,0)
+            call writesrclist(21,round(xposn),round(yposn),flux,
+     /           0.d0,0.d0,0.d0)
            else
-            call writesrclist(21,round(xc1),round(yc1),rand*flux,0,0,0)
-            call writesrclist(21,round(xc2),round(yc2),rand*flux,0,0,0)
+            call writesrclist(21,round(xc1),round(yc1),rand*flux,
+     /           0.d0,0.d0,0.d0)
+            call writesrclist(21,round(xc2),round(yc2),rand*flux,
+     /           0.d0,0.d0,0.d0)
            end if
           end if
  
@@ -99,10 +95,10 @@ c! write source list
         write (*,*)
 
 c! calculate 3-sigma clipped noise and send back
-        call sigclip(image,imsize,imsize,1,1,imsize,imsize,std,av,3)
+        call sigclip(image,imsize,imsize,1,1,imsize,imsize,std,av,3.d0)
 
         filen=fn(1:nchar(fn))//'.src'
-        call writearray_bin(image,imsize,imsize,imsize,imsize,
+        call writearray_bin2D(image,imsize,imsize,imsize,imsize,
      /       filen,'mv')
 
 c! Use spectral index to make a source cube.

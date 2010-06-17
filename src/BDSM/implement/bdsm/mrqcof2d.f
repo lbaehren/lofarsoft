@@ -23,7 +23,8 @@ c! modified for 2d arrays
       do 16 i=1,ndata
        do 33 i1=1,ndata
         if (y(i,i1).ge.cutoff) then
-         call fgauss2de(i,i1,a,ymod,dyda,ma)
+         if (fnum.eq.1) call fgauss2de(i,i1,a,ymod,dyda,ma)
+         if (fnum.eq.2) call fgauss2dse(i,i1,a,ymod,dyda,ma)
          sig2i=1.d0/(sig(i,i1)*sig(i,i1))
          dy=y(i,i1)-ymod
          j=0

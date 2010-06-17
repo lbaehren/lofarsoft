@@ -33,8 +33,8 @@ c! is done in arrstat.f. There is also sigclip.f
 140     continue
 
         a(1)=0
-        do 120 i=1,n
-         do 130 j=1,m
+        do 120 j=1,m
+         do 130 i=1,n
           i1=int((img(i,j)-mn)/delta)+1
           histo(i1)=histo(i1)+1
           if (a(1).lt.histo(i1)) then
@@ -57,20 +57,20 @@ c! is done in arrstat.f. There is also sigclip.f
          write (*,'(a21,$)') '   Plot of fit <Ret> '
          read (*,*)
          i=n*m
-c         call pgbegin(0,'/NULL',1,1)
-c         call pghist(i,image,mn4,mx4,nbin,0)
-c         call pgqwin(mn41,mx41,mn42,mx42)
-c         call pgend
+         call pgbegin(0,'/NULL',1,1)
+         call pghist(i,image,mn4,mx4,nbin,0)
+         call pgqwin(mn41,mx41,mn42,mx42)
+         call pgend
 
-c         call pgbegin(0,'/xs',1,1)
-c         call pgvport(0.1,0.9,0.3,0.9)
+         call pgbegin(0,'/xs',1,1)
+         call pgvport(0.1,0.9,0.3,0.9)
          dum4=a(1)*1.1
-c         call pgwindow(mn41,mx41,mn42,dum4)
-c         call pgbox('BCNST',0.0,0,'BCNST',0.0,0)
-c         call pghist(i,image,mn4,mx4,nbin,1)
-c         call pgsls(2)
-c         call pgline(nbin,x4,y4)
-c         call pgsls(1)
+         call pgwindow(mn41,mx41,mn42,dum4)
+         call pgbox('BCNST',0.0,0,'BCNST',0.0,0)
+         call pghist(i,image,mn4,mx4,nbin,1)
+         call pgsls(2)
+         call pgline(nbin,x4,y4)
+         call pgsls(1)
         end if
 
         alamda=-1.d0
@@ -97,18 +97,18 @@ c         call pgsls(1)
 777     format(1x,a9,e14.6,a20,e14.6,a10,e14.6)
 
         if (chr1(2:2).eq.'y') then
-c         call pgline(nbin,x4,y41)
+         call pgline(nbin,x4,y41)
 
          do 400 i=1,nbin
           y4(i)=histo(i)-y41(i)
 400      continue
-c         call pgvport(0.1,0.9,0.1,0.3)
+         call pgvport(0.1,0.9,0.1,0.3)
          call range2(y4,100,nbin,mn41,mx41)
-c	 call pgwindow(mn4,mx4,mn41,mx41)
-c	 call pgbox('BCNST',0.0,0,'BCVNST',0.0,0)
-c         call pgline(nbin,x4,y4)
+	 call pgwindow(mn4,mx4,mn41,mx41)
+	 call pgbox('BCNST',0.0,0,'BCVNST',0.0,0)
+         call pgline(nbin,x4,y4)
  
-c         call pgend
+         call pgend
         end if
 
         return

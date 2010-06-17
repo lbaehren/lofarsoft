@@ -5,9 +5,10 @@ c! modified for extra mask instead of cutoff.
      /       covar,alpha,nca,chisq,alamda,fnum)
         implicit none
         INTEGER ma,nca,ndata,ia(ma),MMAX,fnum,mdata
-        REAL*8 alamda,chisq,a(ma),alpha(nca,nca),covar(nca,nca),
-     *  sig(ndata,mdata),y(ndata,mdata)
-        PARAMETER (MMAX=600)
+        real*8 a(ma),alpha(nca,nca),covar(nca,nca)
+        REAL*8 alamda,chisq
+        real*8  sig(ndata,mdata),y(ndata,mdata)
+        PARAMETER (MMAX=800)
 CU      USES covsrt,gaussj,mrqcof
         INTEGER j,k,l,mfit,mask(ndata,mdata)
         REAL*8 ochisq,atry(MMAX),beta(MMAX),da(MMAX)

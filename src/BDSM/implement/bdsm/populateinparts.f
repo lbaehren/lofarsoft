@@ -3,7 +3,7 @@ c! sections of length nbin
 c! cn1 and gam1 are for each section. 
 
         subroutine populateinparts(sarr,cdfarr,nbin,cn1,gam1,
-     /             n,m,f1,freq,pixsc,seed)
+     /             n,m,f1,freq,pixsc,seed,srldir)
         implicit none
         integer n,m,nbin,i,j,seed,x,y,iareapix,xpix(100),ypix(100)
         real*8 array(n,m),sarr(500),cdfarr(500),cn1(500),gam1(500)
@@ -11,6 +11,7 @@ c! cn1 and gam1 are for each section.
         real*8 rand,dumr1,dumr2,nsrc,flux,std,av,arr5sig(n,m)
         real*8 pixsc,freq,medsize,sizeas,areapix,confn
         character strdev*5,lab*500,f1*(*),lab2*500,filen*500,dir*500
+        character srldir*500
         real*4 dfl
 
         call getconfn4nu(freq,confn)
@@ -30,7 +31,8 @@ c! cn1 and gam1 are for each section.
         dumr1=cn1(1)*(sarr(1)**gam1(1))
         dumr2=cn1(500/nbin)*(sarr(500)**gam1(500/nbin))
         write (*,*) '  Putting in ',dumr1-dumr2,' sources ... '
-      open(unit=21,file='/data/niruj_pers/srclist',form='unformatted')
+        open(unit=21,file=srldir(1:nchar(srldir))//'srclist',
+     /       form='unformatted')
         do 100 i=1,500/nbin 
         
          dumr1=cn1(i)*(sarr((i-1)*nbin+1)**gam1(i))
@@ -46,8 +48,8 @@ c         if (sarr(i*nbin+1).lt.confn*0.01d0) goto 555
           write (*,*) '  ### ',dumr2,' sources remaining in bin ',i
           write (*,*) '  ### Fix It !!!'
          end if
-         write (*,*) nsrc,' sources bet ',sarr((i-1)*nbin+1)/4.6d-5,
-     /      ' & ',sarr(i*nbin+1)/4.6d-5
+         if ((i*nbin+1).le.500) write (*,*) ' ',nsrc,' srcs bet ',
+     /    sarr((i-1)*nbin+1)/4.6d-5,' & ',sarr(i*nbin+1)/4.6d-5
 
 c!  ERROR -- putting all sources at pixel centres ! modify later to either oversample
 c!  or have multiple components of both signs. 
@@ -66,7 +68,6 @@ c!  ERROR -- for extended sources, put total flux/num pix over int(num pixels)
           if (iareapix.eq.0) iareapix=1
 c          call badputsource(array,x,y,iareapix,flux,npixl,xpix,ypix)
           array(x,y)=array(x,y)+flux
-          if (flux.ge.0.011d0) write (*,*) flux
           dfl=dlog10(flux)
           write (21) dfl
           if (nsrc.gt.5.d6.and.mod(j,1000000).eq.0) 
@@ -84,12 +85,12 @@ c          call badputsource(array,x,y,iareapix,flux,npixl,xpix,ypix)
         write (*,'(1x,a14,1Pe9.2,a14,1Pe9.2,a4)') 
      /     '  Image std = ',std*1.d3,' mJy ; mean = ',av*1.d3,' mJy'
         i=n*m
-        call sigclip(array,n,m,1,1,n,m,std,av,5)
+        call sigclip(array,n,m,1,1,n,m,std,av,5.d0)
         write (*,'(1x,a19,1Pe9.2,a14,1Pe9.2,a4)') 
      /   '  5-sig clip std = ',std*1.d3,' mJy ; mean = ',av*1.d3,' mJy'
 
-        do 200 i=1,n
-         do 210 j=1,m
+        do 200 j=1,m
+         do 210 i=1,n
           if (array(i,j)-av.lt.5.d0*std) then
            arr5sig(i,j)=0.d0  
           else
@@ -100,7 +101,7 @@ c          call badputsource(array,x,y,iareapix,flux,npixl,xpix,ypix)
         
         call grey2(array,arr5sig,n,m,n,m,strdev,lab,lab2,0,1)
 
-        call writearray_bin(array,n,m,n,m,f1,'mv')
+        call writearray_bin2D(array,n,m,n,m,f1,'mv')
 
         return
         end

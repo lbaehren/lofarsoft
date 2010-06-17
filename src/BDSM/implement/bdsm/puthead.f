@@ -1,10 +1,12 @@
 c! puts header info in
 
-        subroutine puthead(f1,scratch)
+        subroutine puthead(extn,f1,scratch)
         implicit none
-        character scope*7,head*500,f1*(*),scratch*500
+        character scope*7,f1*500,scratch*500,extn*20
         real*8 freq,bw,intsec,cdelt
-        integer nchar,n,m
+        integer nchar,n,m,l
+
+cf2py   intent(in) f1,scratch,extn
 
         write (*,*) 
 
@@ -29,21 +31,35 @@ c! puts header info in
         write (*,'(a25,$)') '  Pixel scale (arcsec) : '
         read (*,*) cdelt
 
-        f1=scratch(1:nchar(scratch))//f1(1:nchar(f1))
-        f1=f1(1:nchar(f1))
-        open(unit=21,file=f1,status='old',
-     /       form='unformatted')
-        read (21) n,m
-        close(21)
-        write (head,777) n,m,scope,freq,bw,intsec,cdelt
-777     format(i4,1x,i4,1x,a7,1x,1Pe12.5,1x,1Pe12.5,1x,
-     /         1Pe12.5,1x,0Pf7.3)
+        call readarraysize(f1,extn,n,m,l)
+        if (l.gt.1) write (*,*) '  Using 2d array for 3d image !!!'
+        call sub_puthead(f1,scratch,extn,n,m,scope,freq,bw,intsec,cdelt)
 
-        head="sed -e '1c\\"//head(1:nchar(head))//"' "//
-     /       f1//" > a "
-        call system(head)
-        head="mv -f a "//f1
-        call system(head)
+        return
+        end
+c!
+c!
+c!
+        subroutine sub_puthead(f1,scratch,extn,n,m,scope,freq,bw,
+     /             intsec,cdelt)
+        implicit none
+        character scope*7,f1*500,scratch*500,extn*20
+        integer nchar,n,m,i,j
+        real*8 freq,bw,intsec,cdelt,image(n,m),dumr(m)
+
+        call readarray_bin(n,m,image,n,m,f1,extn)
+        call system('rm -fr '//scratch(1:nchar(scratch))//
+     /       f1(1:nchar(f1))//extn(1:nchar(extn)))
+        open(unit=22,file=scratch(1:nchar(scratch))//f1(1:nchar(f1))//
+     /       extn(1:nchar(extn)),form='unformatted')
+        write (22) n,m,scope,freq,bw,intsec,cdelt
+        do 200 i=1,n
+         do 210 j=1,m
+          dumr(j)=image(i,j)
+210      continue
+         write (22) dumr
+200     continue
+        close(22)
 
         return
         end

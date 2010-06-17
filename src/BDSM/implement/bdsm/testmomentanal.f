@@ -113,7 +113,7 @@ c         write (*,*) ' add src and noi '
           end do
           
          filename='dum.add'
-c         call writearray_bin(image,imsize,imsize,imsize,imsize,
+c         call writearray_bin2D(image,imsize,imsize,imsize,imsize,
 c     /       filename,'mv')
 
 c! Now estimate parameters
@@ -151,7 +151,7 @@ c!
         end do
 
 c! prepare mask
-        call sigclip(image,n,m,1,1,n,m,std,av,3)
+        call sigclip(image,n,m,1,1,n,m,std,av,3.d0)
         ndigit=int(log10(max(n,m)*1.0))+1      ! number of digits in max(n,m)
         fac=int(10**ndigit)                    ! for compressing coords
         call initialisemask(mask,n,m,n,m,0)
@@ -192,7 +192,7 @@ c! prepare mask
          end do
         end do
         filename='dum.mask'
-c         call writearray_bin(iimage,n,m,n,m,filename,'mv')
+c         call writearray_bin2D(iimage,n,m,n,m,filename,'mv')
 
         call momanal(image,n,m,mask,mompara,bmar_p)
          

@@ -7,11 +7,11 @@ c! subim for 3d
         integer ptsizex
         real*8 sub_(ptsizex,ptsizey,nchan)
         real*8 array(nax1,nax2,nax3)
-        character f1*500,extn*10
+        character f1*500,extn*20
         integer nchar,i,j,k,n,m,z
 
         extn='.img'
-        call readarraysize3D(f1,extn,n,m,z)
+        call readarraysize(f1,extn,n,m,z)
         if (n.ne.nax1.or.m.ne.nax2.or.z.ne.nax3) then
          write (*,*) '  ### Sizes dont match. Problem'
         write (*,*) n,m,z,nax1,nax2,nax3

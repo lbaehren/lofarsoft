@@ -3,11 +3,14 @@ c! for now only hori and vert
 
         subroutine slice(f1)
         implicit none
-        character f1*(*),extn*10
-        integer nchar,n,m
+        character f1*(*),extn*20
+        integer nchar,n,m,l
+
+cf2py   intent(in) f1
 
         extn='.img'
-        call readarraysize(f1,extn,n,m)
+        call readarraysize(f1,extn,n,m,l)
+        if (l.gt.1) write (*,*) '  Using 2d array for 3d image !!!'
         call sub_slice(f1,n,m)
 
         return
@@ -16,7 +19,7 @@ c!
 c!
         subroutine sub_slice(f1,n,m)
         implicit none
-        character f1*(*),extn*10
+        character f1*(*),extn*20
         integer nchar,n,m
         real*8 image(n,m)
 
@@ -32,8 +35,9 @@ c!
         implicit none
         character str1*1,lab*500,strdev*5,str12*1
         integer n,m,i,xc,yc,x,y,round4,yr
-        real*8 image(x,y)
+        real*8 image(x,y),nsig
         real*4 arr4(n,m),xcur,ycur,x4(2*n),y4(2*n),mn,mx
+        real*4 low,low1,up,std,av
         
 333     continue
         write (*,'(a38,$)') '   (v)ertical or (h)orizontal slice ? '
@@ -42,21 +46,27 @@ c!
 
         call array8to4(image,x,y,arr4,n,m)
         strdev='/xs'
-c        call pgbegin(0,strdev,1,1)
+        call pgbegin(0,strdev,1,1)
         lab=' '
 
+        call arr2dnz4(arr4,n,m,low,up)
+        if (abs(up/low).gt.50.0) then   ! then convert to LG else keep LN
+         call converttolog(arr4,n,m,low,up,low1)
+        end if
+        nsig=5.d0
+        call sigclip4(arr4,n,m,1,1,n,m,std,av,nsig)
 444     continue
-c        call pgvport(0.1,1.0,0.3,1.0)
-        call basicgrey(arr4,n,m,str1,lab)
+        call pgvport(0.1,1.0,0.3,1.0)
+        call sub_basicgrey(n,m,av,std,low,up,arr4,lab)
 
-c        call pgvport(0.1,1.0,0.1,1.0)
-c        call pgwindow(0.0,1.0,0.0,1.0)
-c        call pgtext(0.1,0.97,'Click on pixel or '//
- 
+        call pgvport(0.1,1.0,0.1,1.0)
+        call pgwindow(0.0,1.0,0.0,1.0)
+        call pgtext(0.1,0.97,'Click on pixel or '//
+     /       ' anywhere else to quit')
 
-c        call pgvport(0.1,1.0,0.3,1.0)
-c        call pgwindow(0.5,n+0.5,0.5,m+0.5)
-c        call pgcurs(xcur,ycur,str12)
+        call pgvport(0.1,1.0,0.3,1.0)
+        call pgwindow(0.5,n+0.5,0.5,m+0.5)
+        call pgcurs(xcur,ycur,str12)
 
         if (xcur.ge.0.0.and.xcur.le.n*1.0+0.5.and.
      /      ycur.ge.0.0.and.ycur.le.m*1.0+0.5) then
@@ -79,10 +89,11 @@ c        call pgcurs(xcur,ycur,str12)
           call range2xakt(y4,2*n,n,mn,mx)
          end if   
 
-c         call pgvport(0.1,1.0,0.1,0.3)
-c         call pgwindow(0.0,yr*1.0,mn,mx)
-c         call pgbox('BCNST',0.0,0,'BCNST',0.0,0)
-c         call pgline(yr,x4,y4)
+         call pgeras
+         call pgvport(0.1,1.0,0.1,0.3)
+         call pgwindow(0.0,yr*1.0,mn,mx)
+         call pgbox('BCNST',0.0,0,'BCNST',0.0,0)
+         call pgline(yr,x4,y4)
 
         else
          goto 555
@@ -90,7 +101,7 @@ c         call pgline(yr,x4,y4)
         goto 444
         
 555     continue
-c        call pgend
+        call pgend
 
         return
         end

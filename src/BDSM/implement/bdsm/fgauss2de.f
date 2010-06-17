@@ -3,9 +3,9 @@ c! a4, a5 are like sigma.
 c! note that angle is clockwise for rot matrix used. will correct outside.
 
         subroutine fgauss2de(i,j,a,y,dyda,na)
-        real*8 y,a(na),dyda(na)
         real*8 arg1,arg2,ex,fac,ct,st,f1,f2,rad
         integer na,i,j
+        real*8 y,a(na),dyda(na)
         rad=180.d0/3.14159d0
 
         arg1=(i-a(2))

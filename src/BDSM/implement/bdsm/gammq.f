@@ -1,4 +1,6 @@
+
       FUNCTION gammq(a,x)
+      implicit none
       REAL*8 a,gammq,x
 CU    USES gcf,gser
       REAL*8 gammcf,gamser,gln

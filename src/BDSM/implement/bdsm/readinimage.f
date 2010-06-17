@@ -5,6 +5,8 @@ c! read in image instead
         integer n,m,i,j,nchar
         character ifl*(*),ofl*(*),scratch*500
 
+cf2py   intent(in) ifl,ofl,n,m,scratch
+
         ifl=scratch(1:nchar(scratch))//ifl
         ofl=scratch(1:nchar(scratch))//ofl
         open(unit=21,file=ifl(1:nchar(ifl)),status='old',

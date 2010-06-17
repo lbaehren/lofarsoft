@@ -1,20 +1,34 @@
 
-        subroutine calcmedian(filt,f1,f2,arr)
+        subroutine calcmedian(wvec,x,n1,n,med)
         implicit none
-        integer f1,f2,i,j,k
-        real*8 filt(f1,f2),arr,array(f1*f2)
-        real*4 arr4(f1*f2),selectnr
+        integer n,i,x,n1
+        real*8 wvec(x),med
+        real*8 vec(n-n1+1)
 
-        k=0
-        do 100 i=1,f1
-         do 110 j=1,f2
-          k=k+1
-          array(k)=filt(i,j)
-          arr4(k)=array(k)
-110      continue
-100     continue
-        arr=selectnr((f1*f2+1)/2,f1*f2,arr4)
-c        arr=1.0
+        do i=n1,n
+         vec(i-n1+1)=wvec(i)
+        end do
+        call c_calcmedian(vec,n-n1+1,med)
+
+        return
+        end
+
+        subroutine c_calcmedian(vec,n,med)
+        implicit none
+        integer n,i
+        real*8 med,selectnr,dumr,dvec(n),vec(n)
+
+        do i=1,n
+         dvec(i)=vec(i)
+        end do
+
+        if (mod(n,2).eq.1) then
+         med=selectnr((n+1)/2,n,dvec)
+        else
+         med=selectnr(n/2,n,dvec)
+         dumr=selectnr(n/2+1,n,dvec)
+         med=0.5d0*(med+dumr)
+        end if
 
         return
         end

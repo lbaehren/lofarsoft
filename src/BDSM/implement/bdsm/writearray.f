@@ -7,29 +7,30 @@ c! .asc is ascii real*8 image
 c! .nmg is binary integer image
 c! .nsc is ascii integer image
 
-        subroutine writearray_bin(arr,x,y,n,m,filen,runcode)
+        subroutine writearray_bin2d(arr,x,y,n,m,filen,runcode)
         implicit none
-        integer n,m,i,j,x,y,nchar
+        integer n,m,i,j,x,y,nchar,error
         real*8 arr(x,y),dumr(m),keyvalue
         character filen*500,lab*500,f1*500,scratch*500,runcode*2
-        character fg*500,extn*10,keyword*500,comment*500,dir*500
+        character fg*500,extn*20,keyword*500,comment*500,dir*500
+
+cf2py   intent(in) arr,x,y,n,m,filen,runcode
 
         fg="paradefine"
         extn=""
         keyword="scratch"
         dir="./"
         call get_keyword(fg,extn,keyword,scratch,keyvalue,
-     /    comment,"s",dir)
+     /    comment,"s",dir,error)
 
-        call check(n,m,14)
         f1=scratch(1:nchar(scratch))//filen(1:nchar(filen))//'.img'
         lab='rm -f '//f1
         call system(lab)
         if (runcode(2:2).eq.'v')
      /      write (*,*) '  Writing out ',f1(1:nchar(f1))
-        open(unit=22,file=f1(1:nchar(f1)),status='unknown'
-     /       ,form='unformatted')
-        write (22) n,m
+        open(unit=22,file=f1(1:nchar(f1)),status='unknown',
+     /       form='unformatted')
+        write (22) n,m,1
         do 200 i=1,n
          do 210 j=1,m
           dumr(j)=arr(i,j)
@@ -44,18 +45,20 @@ c! .nsc is ascii integer image
         subroutine writearray_bin_int(arr,x,y,n,m,filen,str,runcode)
         implicit none
         integer n,m,i,j,x,y,nchar
-        integer arr(x,y),dumr(m)
-        character filen*(*),lab*500,f1*500,str*10,runcode*2
-        character fg*500,extn*10,keyword*500,comment*500,dir*500
+        integer arr(x,y),dumr(m),error
+        character filen*(*),lab*500,f1*500,str*20,runcode*2
+        character fg*500,extn*20,keyword*500,comment*500,dir*500
         character scratch*500
         real*8 keyvalue
+
+cf2py   intent(in) arr,x,y,n,m,filen,str,runcode
 
         fg="paradefine"
         extn=""
         keyword="scratch"
         dir="./"
         call get_keyword(fg,extn,keyword,scratch,keyvalue,
-     /    comment,"s",dir)
+     /    comment,"s",dir,error)
 
         call check(n,m,14)
         f1=scratch(1:nchar(scratch))//filen(1:nchar(filen))//'.nmg'
@@ -80,9 +83,9 @@ c! .nsc is ascii integer image
         subroutine writearray_asc_int(arr,x,y,n,m,filen,str,runcode)
         implicit none
         integer n,m,i,j,x,y,nchar
-        integer arr(x,y)
-        character filen*(*),lab*500,f1*500,str*10,scratch*500,runcode*2
-        character fg*500,extn*10,keyword*500,comment*500,dir*500
+        integer arr(x,y),error
+        character filen*(*),lab*500,f1*500,str*20,scratch*500,runcode*2
+        character fg*500,extn*20,keyword*500,comment*500,dir*500
         real*8 keyvalue
 
         fg="paradefine"
@@ -90,7 +93,7 @@ c! .nsc is ascii integer image
         keyword="scratch"
         dir="./"
         call get_keyword(fg,extn,keyword,scratch,keyvalue,
-     /    comment,"s",dir)
+     /    comment,"s",dir,error)
 
         call check(n,m,14)
         f1=scratch(1:nchar(scratch))//filen(1:nchar(filen))//'.nsc'
@@ -113,10 +116,10 @@ c! .nsc is ascii integer image
 
         subroutine writearray_asc(arr,x,y,n,m,filen,runcode)
         implicit none
-        integer n,m,i,j,x,y,nchar
+        integer n,m,i,j,x,y,nchar,error
         real*8 arr(x,y)
-        character filen*(*),lab*500,f1*100,scratch*500,runcode*2
-        character fg*500,extn*10,keyword*500,comment*500,dir*500
+        character filen*500,lab*500,f1*100,scratch*500,runcode*2
+        character fg*500,extn*20,keyword*500,comment*500,dir*500
         real*8 keyvalue
 
         fg="paradefine"
@@ -124,7 +127,7 @@ c! .nsc is ascii integer image
         keyword="scratch"
         dir="./"
         call get_keyword(fg,extn,keyword,scratch,keyvalue,
-     /    comment,"s",dir)
+     /    comment,"s",dir,error)
 
         call check(n,m,14)
         f1=scratch(1:nchar(scratch))//filen(1:nchar(filen))//'.asc'
@@ -133,7 +136,7 @@ c! .nsc is ascii integer image
         if (runcode(2:2).eq.'v')
      /      write (*,*) '  Writing out ',f1(1:nchar(f1))
         open(unit=22,file=f1(1:nchar(f1)),status='unknown')
-        write (22,*) n,m
+        write (22,*) n,m,0.d0,0.d0,0.d0,0.d0,0.d0
         do 200 i=1,n
          do 210 j=1,m
           if (j.ne.m) write (22,'(1pe14.6,a1,$)') arr(i,j),' '
@@ -145,12 +148,12 @@ c! .nsc is ascii integer image
         return
         end
 
-        subroutine writearray_bin3D(arr,x,y,z,filen,runcode)
+        subroutine writearray_bin3d(arr,x,y,z,filen,runcode)
         implicit none
-        integer x,y,z,i,j,k,nchar
+        integer x,y,z,i,j,k,nchar,error
         real*8 arr(x,y,z),dumr(y)
         character filen*(*),lab*500,f1*500,scratch*500,runcode*2
-        character fg*500,extn*10,keyword*500,comment*500,dir*500
+        character fg*500,extn*20,keyword*500,comment*500,dir*500
         real*8 keyvalue
 
         fg="paradefine"
@@ -158,14 +161,15 @@ c! .nsc is ascii integer image
         keyword="scratch"
         dir="./"
         call get_keyword(fg,extn,keyword,scratch,keyvalue,
-     /    comment,"s",dir)
+     /    comment,"s",dir,error)
 
         f1=scratch(1:nchar(scratch))//filen(1:nchar(filen))//'.img'
         lab='rm -f '//f1
         call system(lab)
         if (runcode(2:2).eq.'v')
      /      write (*,*) '  Writing out ',f1(1:nchar(f1))
-        open(unit=26,file=f1(1:nchar(f1)),form='unformatted')
+        open(unit=26,file=f1(1:nchar(f1)),status='unknown',
+     /       form='unformatted')
         write (26) x,y,z
         do 300 k=1,z
          do 200 i=1,x
