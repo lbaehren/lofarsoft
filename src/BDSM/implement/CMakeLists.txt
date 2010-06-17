@@ -13,6 +13,8 @@ include_directories (
 ##
 ## ==============================================================================
 
+configure_file (${BDSM_SOURCE_DIR}/implement/create.in ${BDSM_BINARY_DIR}/implement/bdsm/create)
+
 ## Fortran-based version
 
 if (BDSM_WITH_FBDSM)
