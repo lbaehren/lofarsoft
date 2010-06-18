@@ -357,8 +357,10 @@ do
 	       modulo_files=`echo $all_num $ii | awk '{print ($1 % $2)}'`
 	       if (( $modulo_files == 0 ))
 	       then
+	          echo "Success: $ii cores divides into $all_num subbands"
 	          break
 	       else
+	          echo "Tried $ii cores, but still not divisble into $all_num" >> $log
 	          echo "Tried $ii cores, but still not divisble into $all_num"
 	       fi
 	       ii=`expr $ii - 1`
