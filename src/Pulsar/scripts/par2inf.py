@@ -25,7 +25,7 @@ class pardata:
             if line.startswith("Observation.bandFilter"):
                 self.bandFilter = line.split("=")[-1].strip()
                 continue
-            if line.startswith("Observation.subbandList"):
+            if line.startswith("Observation.Beam[0].subbandList"):
                 #self.subbandFirst = float(line.split("=")[-1].strip()[1:4])
                 #self.subbandLast = float(line[-5:-2])
                 self.subbandFirst = float(line.split("=")[-1].strip().split("..")[0][1:])
