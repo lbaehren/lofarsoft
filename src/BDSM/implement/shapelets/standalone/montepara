@@ -1,0 +1,5 @@
+5 300                    snr min and max
+2 10                     fw of convolving gaussian in pixels min and max
+0.1 0.2                 fraction of fw to distribute rest of flux in
+0.01 0.02                 fraction of snr to distribute in above
+1 2                     number of pixels to put this extra flux in

@@ -67,9 +67,9 @@ set (OBJAI
 
 set (OBJSH
   fit_shapelets.f
-#  get_beta_cen_cart.f
+  ../shapelets/get_beta_cen_cart.f
 #  findcen_cart.f
-#  getcartim.f
+  ../shapelets/getcartim.f
 #  decomp_cart.f
 #  fitstr8line.f
 #  getroot.f
