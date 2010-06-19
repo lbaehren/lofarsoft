@@ -3,7 +3,7 @@ c! takes an image, does shapelet decomp using values of beta, recons, plots nois
         subroutine varybeta_cart(subim,mask,subn,subm,xcen,ycen,
      /        nmax,beta_init,beta,betamin,betamax,nbin)
         implicit none
-        include "trhermcoef.inc"
+        include "../fbdsm/includes/trhermcoef.inc"
         integer subn,subm,mask(subn,subm),nbin,ibeta,minind,nmax
         integer i,j
         real*8 subim(subn,subm),beta,cf(nmax,nmax)

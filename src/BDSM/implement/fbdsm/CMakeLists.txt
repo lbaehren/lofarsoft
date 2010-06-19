@@ -17,6 +17,19 @@
 #
 #  grep "call pg" * | tr ":" "\n" | grep "\.f" | uniq
 
+file (GLOB fbdsm_sources *.f)
+
+foreach (_src ${fbdsm_sources})
+  ## Check file for usage of PGPlot
+  file (READ ${_src} _code)
+  if (_code)
+    string (REGEX MATCH "call pg" _match ${_code})
+    if (_match) 
+      message (STATUS "Found match in file ${_src}")
+    endif (_match)
+  endif (_code)
+endforeach (_src)
+
 set (pgplot_required
   acf.f
   basicgrey.f
@@ -59,10 +72,10 @@ set (OBJAI
   deletefile.f
   read_dum_head.f
   readheader4fits.f
-#  displayshap.f
+  ../shapelets/displayshap.f
   readhead_srclist.f
-#  readin_shapcoef.f
-#  writefitsshapcoef.f
+  ../shapelets/readin_shapcoef.f
+  writefitsshapcoef.f
   )
 
 set (OBJSH
@@ -70,12 +83,12 @@ set (OBJSH
   ../shapelets/get_beta_cen_cart.f
 #  findcen_cart.f
   ../shapelets/getcartim.f
-#  decomp_cart.f
+  ../shapelets/decomp_cart.f
 #  fitstr8line.f
 #  getroot.f
   get_centroid_mask.f
-#  recons_cart.f
-#  varybeta_cart.f
+  ../shapelets/recons_cart.f
+  ../shapelets/varybeta_cart.f
 #  decomp_cart_mask.f
   )
 
@@ -215,7 +228,9 @@ add_executable (analyse_island
   ${OBJAI}
   )
 
-target_link_libraries (analyse_island ${CFITSIO_LIBRARIES})
+target_link_libraries (analyse_island
+  ${CFITSIO_LIBRARIES}
+  )
 
 ##____________________________________________________________________
 ##                                                          simulation
@@ -310,6 +325,7 @@ add_executable (noise
   )
 TARGET_LINK_LIBRARIES (noise
   ${CFITSIO_LIBRARIES}
+  ${WCSLIB_LIBRARIES}
   bdsm_nr
   bdsm_cr8
   bdsm_experiment
