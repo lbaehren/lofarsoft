@@ -102,7 +102,7 @@ c! calculate the mask so each pixel is identified with a gaussian.
      /    delx,dely,xpixs,ypixs,bmar_p,bm_pix,wcs,wcslen,iisl,blc1,
      /    blc2,trc1,trc2,imrms)
         implicit none
-        include "includes/constants.inc"
+        include "constants.inc"
         integer cisl,sisl,gpi,n1,n2,h,ntimes
         integer flag(gpi),numsrc,n,m,maxmem,nisl,delx,dely,sflag
         integer islct,islnum(gpi),i,j,xpixs(maxmem),ypixs(maxmem)

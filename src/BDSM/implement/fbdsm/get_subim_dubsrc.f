@@ -12,7 +12,7 @@ c! modify. if source size is x, that means put double clean beam gaussian at dis
         subroutine get_subim_dubsrc(image,x,n,sizepix,beampix,flux,a6,
      /             xposn,yposn,intx,inty,seed,xc1,yc1,xc2,yc2,rand)
         implicit none
-        include "includes/constants.inc"
+        include "constants.inc"
         integer x,n,i,j,round,intx,inty,seed
         real*8 image(x,x),beampix,flux,xposn,yposn,dumr1,dumr2
         real*8 xc1,yc1,xc2,yc2,sizepix,a6,rand,gasdev

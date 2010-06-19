@@ -1,7 +1,7 @@
 c! the fdr routine, at last !
 
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         real*8 x(2000),erfc,y(2000),dumr,dumr1,erf,cons
         integer i
 

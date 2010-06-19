@@ -1,7 +1,7 @@
 c! convert coord to pix and back again
 
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer i,j,error
         real*8 ra,dec,ra1,dec1,x,y,x1,y1,hh,mm,ss,dd,ma,sa
         real*8 crpix(3),cdelt(3),crval(3),crota(3),bm_pix(3)

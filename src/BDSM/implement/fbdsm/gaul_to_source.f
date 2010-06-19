@@ -9,11 +9,7 @@ c! then calc source properties by moment (as well as shapelet ?).
      /   crota,bm_pix,gaus_d,rms_isl,maxpeak,mpx,mpy,mra,mdec,sisl,
      /   wcs,wcslen)
         implicit none
-<<<<<<< HEAD
         include "constants.inc"
-=======
-        include "includes/constants.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer islct,subn,subm,k,mask(subn,subm),error1,sisl
         integer hix,lowx,lowy,hiy,delx,dely,round,ssubimsize
         integer maxx,maxy,i,j,blc(2),trc(2),ssubimsizex,ssubimsizey
@@ -102,7 +98,7 @@ c!      ==========
 c!
         subroutine momanalmask(subim,subn,subm,mask,mompara,k,bmar_p)
         implicit none
-        include "includes/constants.inc"
+        include "constants.inc"
         integer subn,subm,k,mask(subn,subm),i,j
         real*8 subim(subn,subm),tot,mom1(2),mom2(2),xpix,ypix,m11
         real*8 mompara(6),bmar_p,dumr
@@ -152,7 +148,7 @@ c!
      /         maxy,maxpeak,blc,trc,ssubimsizex,ssubimsizey,bm_pix,
      /         rms_isl,k,delx,dely,dumr1,dumr2)
         implicit none
-        include "includes/constants.inc"
+        include "constants.inc"
         integer maxx,maxy,ssubimsizex,ssubimsizey,subn,subm,i,j
         integer dumi1,dumi2,mask(subn,subm),delx,dely
         real*8 maxv,maxpeak,subim(subn,subm)

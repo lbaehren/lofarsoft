@@ -19,11 +19,7 @@ c! -----------------------------  SUBROUTINES  -------------------------------
 c!
         subroutine sub_plot_associatelist1(scrat,npairs,scratch)
         implicit none
-<<<<<<< HEAD
         include "constants.inc"
-=======
-        include "includes/constants.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         character scrat*500,fn*500,extn*20,label(100)*30,scratch*500
         character chr1*1,xl*6,yl*6,str*500,rcode*2,headfile*500,cp*1
         character clip*1
@@ -152,17 +148,10 @@ c!
         character label1*30,label2*30,chr1*1,chrid*40,xl*6,yl*6
         character rcode*2,fname*500,dev*500,scrat*500,str1*500,clip*1
         logical mark
-<<<<<<< HEAD
 
 cf2py   intent(in) xplot, yplot, label1, label2, chr1, xl, yl
 cf2py   intent(in) fname, rcode, scrat
 
-=======
-
-cf2py   intent(in) xplot, yplot, label1, label2, chr1, xl, yl
-cf2py   intent(in) fname, rcode, scrat
-
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         call sub_pasl_clip(clip,xplot,yplot,n,mask)
 
         call range_vec4mxmn_mask(xplot,mask,n,n,mnx,mxx)
@@ -318,13 +307,8 @@ c! take header file for wcs, convert to pixels and then do dR, dtheta
         subroutine sub_pasl_polar(var,n,npairs,headfile,cra,cdec,
      /             scratch)
         implicit none
-<<<<<<< HEAD
         include "wcs_bdsm.inc"
         include "constants.inc"
-=======
-        include "includes/wcs_bdsm.inc"
-        include "includes/constants.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer n,npairs,wcslen,i
         real*8 var(n,npairs),cra,cdec,x1,y1,x2,y2,xcen,ycen
         real*8 r1,r2,th1,th2,ra1,ra2,dec1,dec2
@@ -364,13 +348,8 @@ c! calc radial distance and azimuth around refx, refy
         subroutine sub_pasl_radazi(var,n,npairs,headfile,
      /       scratch,refx,refy)
         implicit none
-<<<<<<< HEAD
         include "wcs_bdsm.inc"
         include "constants.inc"
-=======
-        include "includes/wcs_bdsm.inc"
-        include "includes/constants.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer n,npairs,wcslen,i
         real*8 var(n,npairs),refx,refy,ra1,dec1,x1,y1,r1,th1
         character headfile*500
@@ -406,13 +385,8 @@ c! calc posn diff as mag and ang in pixel space
         subroutine sub_pasl_posndiff_magang(var,n,npairs,headfile,
      /             scratch)
         implicit none
-<<<<<<< HEAD
         include "wcs_bdsm.inc"
         include "constants.inc"
-=======
-        include "includes/wcs_bdsm.inc"
-        include "includes/constants.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer n,npairs,wcslen,i
         real*8 var(n,npairs),refx,refy,ra1,dec1,x1,y1,r,th
         character headfile*500

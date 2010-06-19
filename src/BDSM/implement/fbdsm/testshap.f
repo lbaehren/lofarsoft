@@ -1,6 +1,6 @@
 
       implicit none
-      include "trhermcoef.inc"
+      include "includes/trhermcoef.inc"
       integer n,m,nmax,nx,ny
       parameter (n=32)
       parameter (m=32)

@@ -10,7 +10,7 @@ c!              Writes out FITS file.
 
 
         implicit none
-        include "includes/constants.inc"
+        include "constants.inc"
         integer seed,imsize,nchan,simsize,nchar
         real*8 area,time,bw,freq,bmsampl,dia
         real*8 sens,bl,synbeam,pribeam

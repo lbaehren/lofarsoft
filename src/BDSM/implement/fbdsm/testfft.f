@@ -15,7 +15,7 @@
 
         subroutine call_testfft(f1,n,m)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,m,i,j,err,nwav,ix,nchar,l,indx,indy
         real*8 image1(n,m),image(n,m),cimage(n,m)
         real*8 realim(n,m),imagim(n,m),absim(n,m)

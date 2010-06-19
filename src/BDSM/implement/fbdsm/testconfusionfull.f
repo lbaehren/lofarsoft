@@ -16,7 +16,7 @@ c!
 c! Not doing confusion noise image due to primary beam.
 
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         real*8 k1,gam,smin,smax,freq,nyqfac,maxdia,k2
         real*8 minavgspp,g1,dumr,fl,fu,minper
         integer n,m,i,writea,seed,nf,id1,id2,pgopen,j,nchar
@@ -130,7 +130,7 @@ c        nyqfac=2.d0 ! factor times 2 pixels per fwhm of beam
      /     n,m,nyqfac,writea,seed,maxdia,x1,y1,x2,y2,ifreq,
      /     krms,calcq,n1,n2)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,m,totsrc,i,seed,j,ind1,ind2,nchar
         integer writea,q,x,y,ii,jj,subsize,round,ifreq,n1,n2
         real*8 k1,gam,smin,smax,freq,image(n,m),nums(n,m),nyqfac

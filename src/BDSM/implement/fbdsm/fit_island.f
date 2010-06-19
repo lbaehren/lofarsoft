@@ -11,11 +11,7 @@ c! CHANGE GAUL FORMAT
      /     linear,bmaj,bmin,bpa,xmax,ymax,runcode,gaus,shap,maxnmax,
      /     fitfreely,iniguess,flagsmallsrc)
         implicit none
-<<<<<<< HEAD
         include "constants.inc"
-=======
-        include "includes/constants.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer max_msrc,max_msrc6,nn,ii,nnb,nnc,nmulsrc1,xmax,ymax
         integer n,m,npix_isl,maxmem,blc(2),trc(2),gauperisl,error1,nng
         integer xpix(maxmem),ypix(maxmem),i,j,subn,subm,nnd,nne,nnf
@@ -365,7 +361,7 @@ c! had got PA convention wrong here. cant believe i didnt find out till
 c! now (may 08)
         subroutine clean_sub(im,subn,subm,rx,ry,maxv,bm_pix)
         implicit none
-        include "includes/constants.inc"
+        include "constants.inc"
         integer subn,subm,i,j
         real*8 im(subn,subm),maxv,bm_pix(3),bmaj,bmin,bpa
         real*8 dumr1,dumr2,amp,rx,ry
@@ -390,11 +386,7 @@ c!
         subroutine put_iniparm_mulgaus(nmulsrc,max_msrc,max6,a,pkv,xpk,
      /             ypk,bm_pix,nnc)
         implicit none
-<<<<<<< HEAD
         include "constants.inc"
-=======
-        include "includes/constants.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer nmulsrc,max_msrc,max6,xpk(max_msrc),ypk(max_msrc)
         integer i,nnc
         real*8 a(max6),pkv(max_msrc),bm_pix(3)

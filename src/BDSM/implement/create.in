@@ -5,18 +5,22 @@
 export work='${BDSM_SOURCE_DIR}/implement/bdsm'
 
 if [ $(pwd) != $work ] ; then
-
- \rm -fr *.f Makefile a data
- cp -R $work/*.f $work/Makefile $work/makeparadefine* $work/shapelets $work/includes $work/batchprocess $work/batchbdsm .
- 
- sed 's/$(PGLIB)/ /g' Makefile > a; mv -f a Makefile
- sed 's/\/usr\/bin\///g' Makefile > a; mv -f a Makefile
- 
+    
+  ## Pre-processing cleanup
+    
+  \rm -fr *.f Makefile a data
+  cp -R $work/*.f $work/Makefile $work/makeparadefine* $work/shapelets $work/includes $work/batchprocess $work/batchbdsm .
+    
+  ## Adjustments for Makefile
+    
+  sed 's/$(PGLIB)/ /g' Makefile > a; mv -f a Makefile
+  sed 's/\/usr\/bin\///g' Makefile > a; mv -f a Makefile
+    
 # This is for sterrewacht machines
- case $HOSTNAME in
-  "para"*) 
-    sed 's/\/disks\/strw1\/mohan/\/paras\/para11\/niruj/' Makefile > a ; mv -f a Makefile
-    ;;
+    case $HOSTNAME in
+	"para"*) 
+	    sed 's/\/disks\/strw1\/mohan/\/paras\/para11\/niruj/' Makefile > a ; mv -f a Makefile
+	    ;;
  esac
  
  for i in 1 2 3

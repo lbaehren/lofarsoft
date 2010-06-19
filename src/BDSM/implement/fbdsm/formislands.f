@@ -33,11 +33,7 @@ c! first identify each island. then run thro them to check overlaps and hence me
 c! useful to check merging if we decide later to extend islands by one pixel outward e.g.
         subroutine sub_formisland(f1,n,m,nn,f3,runcode,imagename)
         implicit none
-<<<<<<< HEAD
         include "wcs_bdsm.inc"
-=======
-        include "includes/wcs_bdsm.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer n,m,nn
         character f1*500,fn*500,extn*20,cmd*10,history*20,str*7,f2*500
         character comment*500,keystrng*500,keyword*500,dir*500,fg*500

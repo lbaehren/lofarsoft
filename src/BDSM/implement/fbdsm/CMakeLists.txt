@@ -1,41 +1,6 @@
 
 ## ==============================================================================
 ##
-##  Preprocessing
-##
-## ==============================================================================
-
-#  As Fortran does not know precompiler statements, encapsulation of code is not
-#  posible in the straight-forward manner a this can be done in C/C++. As a
-#  consequence of this, the fBDSM source code contains quite a few instructions 
-#  which only can be compiled successfully, if the required external packages
-#  are available.
-#
-#  Running the following sequence of command line instructions from within the
-#  current directory, will produce a list of source files which make use of
-#  functionality from the PGPlot library:
-#
-#  rep "call pg" * | tr ":" "\n" | grep "\.f" | grep -v "call pg" | uniq
-
-## Check file for usage of PGPlot ________________
-
-file (GLOB fbdsm_sources *.f)
-
-foreach (_src ${fbdsm_sources})
-  ## read in file contents ...
-  file (READ ${_src} _code)
-  ## ... and check it for usage of PGPlot
-  if (_code)
-    string (REGEX MATCH "call pg" _match ${_code})
-    if (_match) 
-      get_filename_component(_filename ${_src} NAME)
-      list (APPEND pgplot_required ${_filename})
-    endif (_match)
-  endif (_code)
-endforeach (_src)
-
-## ==============================================================================
-##
 ##  Groups of source files
 ##
 ## ==============================================================================
@@ -52,6 +17,18 @@ set (OBJ8
 #  makeim_strongsrc.f
 #  get_totrms_proper.f
 )
+
+if (NOT HAVE_PGPLOT)
+  ## initialize new list
+  set (OBJ8_NO_PGPLOT "")
+  ## fill new list of source files
+  foreach (_src ${OBJ8})
+    list (APPEND OBJ8_NO_PGPLOT "${CMAKE_CURRENT_BINARY_DIR}/${_src}")
+  endforeach (_src)
+endif (NOT HAVE_PGPLOT)
+
+##__________________________________________________________
+##                                                     OBJAI
 
 set (OBJAI
   read_aiparadefine.f
@@ -72,6 +49,19 @@ set (OBJAI
   writefitsshapcoef.f
   )
 
+if (NOT HAVE_PGPLOT)
+  ## initialize new list
+  set (OBJAI_NO_PGPLOT "")
+  ## fill new list of source files
+  foreach (_src ${OBJAI})
+    list (APPEND OBJAI_NO_PGPLOT "${CMAKE_CURRENT_BINARY_DIR}/${_src}")
+  endforeach (_src)
+endif (NOT HAVE_PGPLOT)
+
+
+##__________________________________________________________
+##                                                    OBJCON
+
 set (OBJSH
   fit_shapelets.f
   ../shapelets/get_beta_cen_cart.f
@@ -85,6 +75,9 @@ set (OBJSH
   ../shapelets/varybeta_cart.f
 #  decomp_cart_mask.f
   )
+
+##__________________________________________________________
+##                                                    OBJCON
 
 set (OBJAT
   sub_prog.f
@@ -107,6 +100,9 @@ set (OBJAT
   calc_atrous_cj_mask.f
 )
 
+##__________________________________________________________
+##                                                    OBJCON
+
 set (OBJCON
   sub_prog.f
   ran1.f
@@ -120,6 +116,16 @@ set (OBJCON
   check.f
   conv2_get_gaus.f
  )
+
+if (NOT HAVE_PGPLOT)
+  ## initialize new list
+  set (OBJCON_NO_PGPLOT "")
+  ## fill new list of source files
+  foreach (_src ${OBJCON})
+    list (APPEND OBJCON_NO_PGPLOT "${CMAKE_CURRENT_BINARY_DIR}/${_src}")
+  endforeach (_src)
+endif (NOT HAVE_PGPLOT)
+
 
 ## ==============================================================================
 ##
@@ -239,14 +245,28 @@ ADD_LIBRARY (bdsm_call
 #analyse_island : analyse_island.f $(OBJAI) 
 #	$(FC) analyse_island.f $(OBJAI) $(CFITS) $(PGLIB) -o analyse_island
 
-add_executable (analyse_island
-  analyse_island.f
-  ${OBJAI}
-  )
-
-target_link_libraries (analyse_island
-  ${CFITSIO_LIBRARIES}
-  )
+if (HAVE_PGPLOT)
+  ## compiler instructions
+  add_executable (analyse_island
+    analyse_island.f
+    ${OBJAI}
+    )
+  ## linker instructions
+  target_link_libraries (analyse_island
+    ${CFITSIO_LIBRARIES}
+    )
+else (HAVE_PGPLOT)
+  message (STATUS "Configuring analyse_island to build w/o PGPlot.")
+  ## compiler instructions
+  add_executable (analyse_island
+    ${CMAKE_CURRENT_BINARY_DIR}/analyse_island.f
+    ${OBJAI_NO_PGPLOT}
+    )
+  ## linker instructions
+  target_link_libraries (analyse_island
+    ${CFITSIO_LIBRARIES}
+    )
+endif (HAVE_PGPLOT)
 
 ##____________________________________________________________________
 ##                                                          simulation
@@ -479,7 +499,29 @@ target_link_libraries (bdsm-awe
 #testconfusionnoise : testconfusionnoise.f $(OBJCON)
 #	$(FC) testconfusionnoise.f $(OBJCON) $(PGLIB) -o testconfusionnoise
 
-add_executable (testconfusionnoise
-  testconfusionnoise.f
-  ${OBJCON}
-  )
+if (HAVE_PGPLOT)
+  add_executable (testconfusionnoise
+    testconfusionnoise.f
+    ${OBJCON}
+    )
+else (HAVE_PGPLOT)
+  add_executable (testconfusionnoise
+    ${CMAKE_CURRENT_BINARY_DIR}/testconfusionnoise.f
+    ${OBJCON_NO_PGPLOT}
+    )
+endif (HAVE_PGPLOT)
+
+##____________________________________________________________________
+##                                             confusion_lofar_synbeam
+
+# confusion_lofar_synbeam : confusion_lofar_synbeam.f $(OBJCON)
+#	$(FC) confusion_lofar_synbeam.f $(OBJCON) -o confusion_lofar_synbeam
+
+
+## ==============================================================================
+##
+##  Sub-directories
+##
+## ==============================================================================
+
+add_subdirectory (includes)

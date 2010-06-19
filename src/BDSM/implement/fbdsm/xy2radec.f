@@ -4,11 +4,7 @@ c! all angles in radians
         subroutine xy2radec(x,y,ra,dec,error,ctype,crpix,cdelt,
      /             crval,crota)
         implicit none
-<<<<<<< HEAD
         include "constants.inc"
-=======
-        include "includes/constants.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer nchar,error,i
         real*8 x,y,ra,dec,uarg,xintmd,yintmd,phi,theta
         real*8 crpix(3),cdelt(3),crval(3),crota(3),s

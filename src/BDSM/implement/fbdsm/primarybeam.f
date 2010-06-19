@@ -18,11 +18,7 @@ c!
 c!
         subroutine sub_primarybeam(f1,f2,n,m)
         implicit none
-<<<<<<< HEAD
         include "constants.inc"
-=======
-        include "includes/constants.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         character f1*(*),f2*(*),scop*7,tscope(6)*7,fn*500,extn*20
         character muldiv*1,defalt*1,ch1*1
         integer nchar,n,m,i,j,nfw,nfv,nfg,frnear

@@ -176,9 +176,6 @@ OBJ_pyasso = associatesrl.o sourcelistheaders.o get_freq_cube.o readgaul.o make_
  plotisland.o readarray.o displaytwoim.o setup_grey.o getsurr_8pix.o basicgrey.o sigclip4.o \
  read_head_coord.o calcmedian.o
 
-OBJ_py2fbdsm = iland_mat2list.o writearray.o gaul2gaulbin.o writefitshead.o sub_prog.o readarray.o get_keyword.o check.o
-OBJ_py2fbdsmf = iland_mat2list.f writearray.f gaul2gaulbin.f writefitshead.f 
-
 SRC_pyasso = associatesrl.f readin_pasl.f call_wcs_c2p.f call_wcs_p2c.f plot_associatelist1.f sub_prog.f \
  setup_pasl.f
 
@@ -207,18 +204,6 @@ _fbdsm_sub1.pyf :
 
 _fbdsm_sub1.so: _fbdsm_sub1.pyf $(OBJ) $(OBJ8) $(OBJSH) 
 	f2py --fcompiler=gnu95 -c _fbdsm_sub1.pyf $(OBJ_pysub1) dummy.f
-
-_py2fbdsm.pyf : 
-	f2py $(OBJ_py2fbdsmf) -m _py2fbdsm -h _py2fbdsm.pyf
-
-_py2fbdsm.so: _py2fbdsm.pyf $(OBJ_py2fbdsm)
-	f2py --fcompiler=gnu95 -c _py2fbdsm.pyf $(OBJ_py2fbdsm) dummy.f
-
-_pytesselate.pyf : 
-	f2py pytess_simple.f pytess_roundness.f -m _pytesselate -h _pytesselate.pyf
-
-_pytesselate.so: _pytesselate.pyf pytess_simple.o pytess_roundness.o
-	f2py --fcompiler=gnu95 -c _pytesselate.pyf pytess_simple.o pytess_roundness.o dummy.f 
 
 _pyasso.pyf : 
 	f2py -include'constants.inc' $(SRC_pyasso) -m _pyasso -h _pyasso.pyf
@@ -258,9 +243,6 @@ testconfusionnoise : testconfusionnoise.f $(OBJCON)
 
 testconfusionfull : testconfusionfull.f $(OBJCON)
 	$(FC) testconfusionfull.f $(OBJCON) $(PGLIB) -o testconfusionfull
-
-confusion_lofar_synbeam : confusion_lofar_synbeam.f $(OBJCON)
-	$(FC) confusion_lofar_synbeam.f $(OBJCON) -o confusion_lofar_synbeam
 
 model : model.f 
 	$(FC) model.f -o model

@@ -30,7 +30,7 @@ c! calculate noise as a fn of wavelet transform order.
 
         subroutine sub_test_atrous_noise(n,nfw,fwmin,fwmax,jmax,
      /             plotdir)
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,nfw,seed,jmax,meds,ii,jj,mm,pp,nc
         real*8 fwmin,fwmax,im(n,n),s1,sigp(3),fac,wid,c_im(n,n)
         real*8 val,std0,av0,atrous_tr(3,3),atrous_b3(5,5),nsig

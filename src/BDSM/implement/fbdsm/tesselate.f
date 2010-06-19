@@ -312,7 +312,7 @@ c! define huge 3d arrays which crash.
         subroutine tile_roundness(volrank,n,m,ngens,ngensmod,xgens,
      /             ygens,roundfac,roundpix,x,y)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,m,i,j,ngens,ngensmod,ind,npix(ngens),k
         real*8 volrank(n,m),area(ngens),sumrad(ngens),dist
         real*8 xgens(ngens),ygens(ngens),roundfac(ngens)

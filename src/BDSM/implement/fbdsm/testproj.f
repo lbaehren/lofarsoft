@@ -41,7 +41,7 @@ c! test if wjv and my code for xy2radec is same
         subroutine wjv(x,y,ra1,dec1,error,ctype,crpix,cdelt,
      /             crval,crota)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         real*8 x,y,ra1,dec1,x1,y1,l,m,t,da,cosd0,sind0
         real*8 crpix(3),cdelt(3),crval(3),crota(3),s
         character ctype(3)*8
@@ -76,7 +76,7 @@ c! test if wjv and my code for xy2radec is same
         subroutine mine(x,y,ra1,dec1,error,ctype,crpix,cdelt,
      /             crval,crota)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         real*8 x,y,ra1,dec1,xintmd,yintmd,uarg
         real*8 crpix(3),cdelt(3),crval(3),crota(3),phi,theta
         character ctype(3)*8

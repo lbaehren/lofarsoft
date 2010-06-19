@@ -93,11 +93,7 @@ c!
         subroutine sub_sub_sourcemeasure(f1,f2,n,m,nisl,maxmem,subsize,
      /             imagename,scratch,srldir,runcode,gaus,shap)
         implicit none
-<<<<<<< HEAD
         include "wcs_bdsm.inc"
-=======
-        include "includes/wcs_bdsm.inc"
->>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer maxs,maxs6
         parameter (maxs=400)
         parameter (maxs6=400*6)

@@ -9,7 +9,7 @@ c! assume its gaussian of beam X size in a random pos.ang.
         subroutine get_subim_xsrc(image,x,n,bmaj,bmin,flux,a6,
      /             xposn,yposn,intx,inty)
         implicit none
-        include "includes/constants.inc"
+        include "constants.inc"
         integer x,n,i,j,round,intx,inty
         real*8 image(x,x),flux,xposn,yposn,dumr,bmin,bmaj
         real*8 a2,a3,a4,a5,a6,arg1,arg2,ct,st,f1,f2

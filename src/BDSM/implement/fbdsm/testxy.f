@@ -1,6 +1,6 @@
 
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer i,j,error,hh,mm,dd,ma
         real*8 ra,dec,ss,sa,dra,ddec
         character fn*80,s

@@ -14,7 +14,7 @@ c! hey, it works well. and fast. right now only detects island around the peak p
         integer xsurr(8),ysurr(8),co_next(n*m),now,next,i8
 
         call maxarray(image,x,y,n,m,xmax,ymax,maxv)
-        call sigclip(image,x,y,1,1,n,m,std,av,3)
+        call sigclip(image,x,y,1,1,n,m,std,av,3.d0)
         call initialisemask(mask,n,m,n,m,0)
         call initialisemask(rank,n,m,n,m,0)
         ndigit=int(log10(max(n,m)*1.0))+1      ! number of digits in max(n,m)
@@ -46,8 +46,8 @@ c! hey, it works well. and fast. right now only detects island around the peak p
 120     continue
         if (nrank(now).gt.0) goto 333
 
-        do 200 i=1,n     ! now set mask properly
-         do 210 j=1,m
+        do 200 j=1,m
+         do 210 i=1,n     ! now set mask properly
           if (rank(i,j).gt.0) mask(i,j)=1
 210      continue
 200     continue
@@ -55,10 +55,17 @@ c! hey, it works well. and fast. right now only detects island around the peak p
         if (sav.eq.'y') then
          fn=fname(1:nchar(fname))//'.rank'
          call imageint2r(rank,n,m,n,m,image1)
+<<<<<<< HEAD:src/BDSM/implement/bdsm/formisland_rank.f
+         call writearray_bin2D(image1,n,m,n,m,fn,'mv')
+         fn=fname(1:nchar(fname))//'.mask'
+         call imageint2r(mask,n,m,n,m,image1)
+         call writearray_bin2D(image1,n,m,n,m,fn,'mv')
+=======
          call writearray_bin(image1,n,m,n,m,fn)
          fn=fname(1:nchar(fname))//'.mask'
          call imageint2r(mask,n,m,n,m,image1)
          call writearray_bin(image1,n,m,n,m,fn)
+>>>>>>> anaamika:src/BDSM/implement/shapelets/standalone/formisland_rank.f
         end if
         
         return
