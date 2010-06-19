@@ -1,0 +1,20 @@
+#! /bin/bash
+# start
+
+i=0
+while read line
+do
+ f1=$(echo $line | awk '{ print $1 }')
+ f2=$(echo $line | awk '{ print $2 }')
+ sed "/^fitsname/c\fitsname = '$f1' name of fits file " paradefine > paradefine_temp
+ mv paradefine_temp paradefine
+ sed "/^BMAJ/c\BMAJ = $f2 name of fits file " paradefine > paradefine_temp
+ mv paradefine_temp paradefine
+ sed "/^BMIN/c\BMIN = $f2 name of fits file " paradefine > paradefine_temp
+ mv paradefine_temp paradefine
+ let 'i+=1'; echo "Processing file $i"; echo; date; 
+ ./bdsm; 
+ date; echo; 
+done < "$1"
+
+

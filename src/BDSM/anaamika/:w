@@ -1,0 +1,29 @@
+
+from matplotlib import pylab as pl
+import scipy
+import numpy as N
+
+xp1=N.random.random(40)*100
+yp1=N.random.random(40)*100
+
+x,y=scipy.mgrid[0:100:10,0:100:10]
+xp1=N.ravel(x)
+yp1=N.ravel(y)
+
+xp1=xp1+N.random.random(len(xp1))*0.001
+yp1=yp1+N.random.random(len(yp1))*0.001
+
+bm=0.3*N.sin(x*2.3)+0.3*N.cos(y*2.5)
+bm1=0.3*N.sin(xp1*2.3)+0.3*N.cos(yp1*2.5)
+
+xnew,ynew = scipy.mgrid[0:100,0:100]
+
+aa=scipy.interpolate.interp(xp1,yp1,bm1,kind='cubic')
+
+tck = scipy.interpolate.bisplrep(xp1,yp1,bm1,s=0)
+znew = scipy.interpolate.bisplev(xnew[:,0],ynew[0,:],tck)
+znew1 = scipy.interpolate.bisplev(xnew[:,0],ynew[0,:],aa.tck)
+pl.figure(1)
+pl.clf()
+pl.pcolor(xnew,ynew,znew1)
+

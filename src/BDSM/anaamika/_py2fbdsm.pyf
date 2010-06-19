@@ -1,0 +1,112 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _py2fbdsm ! in 
+    interface  ! in :_py2fbdsm
+        subroutine iland_mat2list(f1,f2,imagename,runcode,scratch,n,m,l0,l) ! in :_py2fbdsm:iland_mat2list.f
+            character*500 :: f1
+            character*500 :: f2
+            character*500 :: imagename
+            character*2 :: runcode
+            character*500 :: scratch
+            integer :: n
+            integer :: m
+            integer :: l0
+            integer :: l
+        end subroutine iland_mat2list
+        subroutine sub_iland_mat2list1(f1,f2,n,m,nisl,maxmem,runcode,scratch,imagename) ! in :_py2fbdsm:iland_mat2list.f
+            character*500 :: f1
+            character*500 :: f2
+            integer :: n
+            integer :: m
+            integer :: nisl
+            integer :: maxmem
+            character*2 :: runcode
+            character*500 :: scratch
+            character*500 :: imagename
+        end subroutine sub_iland_mat2list1
+        subroutine sub_iland_mat2list(f2,n,m,nisl,maxmem,runcode,scratch,island,arr) ! in :_py2fbdsm:iland_mat2list.f
+            character*500 intent(in) :: f2
+            integer optional,check(shape(island,0)==n),depend(island) :: n=shape(island,0)
+            integer optional,check(shape(island,1)==m),depend(island) :: m=shape(island,1)
+            integer intent(in) :: nisl
+            integer intent(in) :: maxmem
+            character*2 intent(in) :: runcode
+            character*500 intent(in) :: scratch
+            integer dimension(n,m),intent(in) :: island
+            real*8 dimension(n,m),intent(in),depend(n,m) :: arr
+        end subroutine sub_iland_mat2list
+        subroutine sub_iland_rytcoords(npix,nn,xpix,ypix,mm) ! in :_py2fbdsm:iland_mat2list.f
+            integer :: npix
+            integer :: nn
+            integer dimension(mm) :: xpix
+            integer dimension(mm),depend(mm) :: ypix
+            integer optional,check(len(xpix)>=mm),depend(xpix) :: mm=len(xpix)
+        end subroutine sub_iland_rytcoords
+        subroutine writearray_bin2d(arr,x,y,n,m,filen,runcode) ! in :_py2fbdsm:writearray.f
+            real*8 dimension(x,y),intent(in) :: arr
+            integer optional,intent(in),check(shape(arr,0)==x),depend(arr) :: x=shape(arr,0)
+            integer optional,intent(in),check(shape(arr,1)==y),depend(arr) :: y=shape(arr,1)
+            integer intent(in) :: n
+            integer intent(in) :: m
+            character*500 intent(in) :: filen
+            character*2 intent(in) :: runcode
+        end subroutine writearray_bin2d
+        subroutine writearray_bin_int(arr,x,y,n,m,filen,str,runcode) ! in :_py2fbdsm:writearray.f
+            integer dimension(x,y),intent(in) :: arr
+            integer optional,intent(in),check(shape(arr,0)==x),depend(arr) :: x=shape(arr,0)
+            integer optional,intent(in),check(shape(arr,1)==y),depend(arr) :: y=shape(arr,1)
+            integer intent(in) :: n
+            integer intent(in) :: m
+            character*(*) intent(in) :: filen
+            character*20 intent(in) :: str
+            character*2 intent(in) :: runcode
+        end subroutine writearray_bin_int
+        subroutine writearray_asc_int(arr,x,y,n,m,filen,str,runcode) ! in :_py2fbdsm:writearray.f
+            integer dimension(x,y) :: arr
+            integer optional,check(shape(arr,0)==x),depend(arr) :: x=shape(arr,0)
+            integer optional,check(shape(arr,1)==y),depend(arr) :: y=shape(arr,1)
+            integer :: n
+            integer :: m
+            character*(*) :: filen
+            character*20 :: str
+            character*2 :: runcode
+        end subroutine writearray_asc_int
+        subroutine writearray_asc(arr,x,y,n,m,filen,runcode) ! in :_py2fbdsm:writearray.f
+            real*8 dimension(x,y) :: arr
+            integer optional,check(shape(arr,0)==x),depend(arr) :: x=shape(arr,0)
+            integer optional,check(shape(arr,1)==y),depend(arr) :: y=shape(arr,1)
+            integer :: n
+            integer :: m
+            character*500 :: filen
+            character*2 :: runcode
+        end subroutine writearray_asc
+        subroutine writearray_bin3d(arr,x,y,z,filen,runcode) ! in :_py2fbdsm:writearray.f
+            real*8 dimension(x,y,z) :: arr
+            integer optional,check(shape(arr,0)==x),depend(arr) :: x=shape(arr,0)
+            integer optional,check(shape(arr,1)==y),depend(arr) :: y=shape(arr,1)
+            integer optional,check(shape(arr,2)==z),depend(arr) :: z=shape(arr,2)
+            character*(*) :: filen
+            character*2 :: runcode
+        end subroutine writearray_bin3d
+        subroutine gaul2gaulbin(fname) ! in :_py2fbdsm:gaul2gaulbin.f
+            character*500 :: fname
+        end subroutine gaul2gaulbin
+        subroutine writefitshead(fn,n,crpix,ctype1,ctype2,ctype3,cdelt,crval,crota,bm_pix,scratch) ! in :_py2fbdsm:writefitshead.f
+            character*500 intent(in) :: fn
+            integer optional,intent(in),check(len(crpix)>=n),depend(crpix) :: n=len(crpix)
+            real*8 dimension(n),intent(in) :: crpix
+            character*8 intent(in) :: ctype1
+            character*8 intent(in) :: ctype2
+            character*8 intent(in) :: ctype3
+            real*8 dimension(n),depend(n) :: cdelt
+            real*8 dimension(n),depend(n) :: crval
+            real*8 dimension(n),depend(n) :: crota
+            real*8 dimension(3) :: bm_pix
+            character*500 :: scratch
+        end subroutine writefitshead
+    end interface 
+end python module _py2fbdsm
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

@@ -1,0 +1,753 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _pyasso ! in 
+    interface  ! in :_pyasso
+        subroutine associatesrl(master,sec,scratch,srldir,rcode,tol) ! in :_pyasso:associatesrl.f
+            character*500 :: master
+            character*500 :: sec
+            character*500 :: scratch
+            character*500 :: srldir
+            character*2 :: rcode
+            real*8 :: tol
+        end subroutine associatesrl
+        subroutine sub_associatesrl(master,sec,nsrcm,nsrcs,scratch,srldir,rcode,tol) ! in :_pyasso:associatesrl.f
+            character*500 intent(in) :: master
+            character*500 intent(in) :: sec
+            integer intent(in) :: nsrcm
+            integer intent(in) :: nsrcs
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+            character*2 intent(in) :: rcode
+            real*8 intent(in) :: tol
+        end subroutine sub_associatesrl
+        subroutine call_getsrcsize(bmajm,bminm,nn,meds) ! in :_pyasso:associatesrl.f
+            real*8 dimension(nn) :: bmajm
+            real*8 dimension(nn),depend(nn) :: bminm
+            integer optional,check(len(bmajm)>=nn),depend(bmajm) :: nn=len(bmajm)
+            real*8 :: meds
+        end subroutine call_getsrcsize
+        subroutine readin_pasl(fn,scrat,scratch,npairs,var,num) ! in :_pyasso:readin_pasl.f
+            character*500 intent(in) :: fn
+            character*500 intent(in) :: scrat
+            character*500 intent(in) :: scratch
+            integer intent(in) :: npairs
+            real*8 dimension(num,npairs),intent(out),depend(num,npairs) :: var
+            integer intent(in) :: num
+        end subroutine readin_pasl
+        subroutine call_wcs_c2p(ra,dec,crpix,cdelt,crval,crota,ctype1,ctype2,ctype3,x,y) ! in :_pyasso:call_wcs_c2p.f
+            real*8 intent(in) :: ra
+            real*8 intent(in) :: dec
+            real*8 dimension(3),intent(in) :: crpix
+            real*8 dimension(3),intent(in) :: cdelt
+            real*8 dimension(3),intent(in) :: crval
+            real*8 dimension(3),intent(in) :: crota
+            character :: ctype1
+            character :: ctype2
+            character :: ctype3
+            real*8 intent(out) :: x
+            real*8 intent(out) :: y
+        end subroutine call_wcs_c2p
+        subroutine call_wcs_p2c(x,y,crpix,cdelt,crval,crota,ctype1,ctype2,ctype3,ra,dec) ! in :_pyasso:call_wcs_p2c.f
+            real*8 intent(in) :: x
+            real*8 intent(in) :: y
+            real*8 dimension(3),intent(in) :: crpix
+            real*8 dimension(3),intent(in) :: cdelt
+            real*8 dimension(3),intent(in) :: crval
+            real*8 dimension(3),intent(in) :: crota
+            character :: ctype1
+            character :: ctype2
+            character :: ctype3
+            real*8 intent(out) :: ra
+            real*8 intent(out) :: dec
+        end subroutine call_wcs_p2c
+        subroutine plot_associatelist1(scrat,scratch) ! in :_pyasso:plot_associatelist1.f
+            character*500 :: scrat
+            character*500 :: scratch
+        end subroutine plot_associatelist1
+        subroutine sub_plot_associatelist1(scrat,npairs,scratch) ! in :_pyasso:plot_associatelist1.f
+            character*500 :: scrat
+            integer :: npairs
+            character*500 :: scratch
+        end subroutine sub_plot_associatelist1
+        subroutine plot_menu(xplot,yplot,n,label1,label2,chr1,xl,yl,fname,rcode,scrat,clip) ! in :_pyasso:plot_associatelist1.f
+            real*4 dimension(n),intent(in) :: xplot
+            real*4 dimension(n),intent(in),depend(n) :: yplot
+            integer optional,check(len(xplot)>=n),depend(xplot) :: n=len(xplot)
+            character*30 intent(in) :: label1
+            character*30 intent(in) :: label2
+            character*1 intent(in) :: chr1
+            character*6 intent(in) :: xl
+            character*6 intent(in) :: yl
+            character*500 intent(in) :: fname
+            character*2 intent(in) :: rcode
+            character*500 intent(in) :: scrat
+            character*1 :: clip
+        end subroutine plot_menu
+        subroutine sub_pasl_polar(var,n,npairs,headfile,cra,cdec,scratch) ! in :_pyasso:plot_associatelist1.f
+            real*8 dimension(n,npairs),intent(out,in) :: var
+            integer optional,intent(in),check(shape(var,0)==n),depend(var) :: n=shape(var,0)
+            integer optional,intent(in),check(shape(var,1)==npairs),depend(var) :: npairs=shape(var,1)
+            character*500 intent(in) :: headfile
+            real*8 intent(in) :: cra
+            real*8 intent(in) :: cdec
+            character*500 intent(in) :: scratch
+        end subroutine sub_pasl_polar
+        subroutine sub_pasl_radazi(var,n,npairs,headfile,scratch,refx,refy) ! in :_pyasso:plot_associatelist1.f
+            real*8 dimension(n,npairs),intent(out,in) :: var
+            integer optional,intent(in),check(shape(var,0)==n),depend(var) :: n=shape(var,0)
+            integer optional,intent(in),check(shape(var,1)==npairs),depend(var) :: npairs=shape(var,1)
+            character*500 intent(in) :: headfile
+            character*500 intent(in) :: scratch
+            real*8 intent(in) :: refx
+            real*8 intent(in) :: refy
+        end subroutine sub_pasl_radazi
+        subroutine sub_pasl_posndiff_magang(var,n,npairs,headfile,scratch) ! in :_pyasso:plot_associatelist1.f
+            real*8 dimension(n,npairs),intent(out,in) :: var
+            integer optional,intent(in),check(shape(var,0)==n),depend(var) :: n=shape(var,0)
+            integer optional,intent(in),check(shape(var,1)==npairs),depend(var) :: npairs=shape(var,1)
+            character*500 intent(in) :: headfile
+            character*500 intent(in) :: scratch
+        end subroutine sub_pasl_posndiff_magang
+        subroutine sub_pasl_clip(clip,xplot,yplot,n,mask) ! in :_pyasso:plot_associatelist1.f
+            character :: clip
+            real*4 dimension(n) :: xplot
+            real*4 dimension(n),depend(n) :: yplot
+            integer optional,check(len(xplot)>=n),depend(xplot) :: n=len(xplot)
+            integer dimension(n),depend(n) :: mask
+        end subroutine sub_pasl_clip
+        subroutine range1(array,num,num1,mx) ! in :_pyasso:sub_prog.f
+            real*8 dimension(num) :: array
+            integer optional,check(len(array)>=num),depend(array) :: num=len(array)
+            integer :: num1
+            real*4 :: mx
+        end subroutine range1
+        subroutine rangeint(vec,x,n,mn,mx) ! in :_pyasso:sub_prog.f
+            integer dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n
+            integer :: mn
+            integer :: mx
+        end subroutine rangeint
+        subroutine rangevec8(vec,x,n,mn,mx) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n
+            real*8 :: mn
+            real*8 :: mx
+        end subroutine rangevec8
+        subroutine range2d(array,x,y,n,m,mn,mx) ! in :_pyasso:sub_prog.f
+            real*4 dimension(x,y) :: array
+            integer optional,check(shape(array,0)==x),depend(array) :: x=shape(array,0)
+            integer optional,check(shape(array,1)==y),depend(array) :: y=shape(array,1)
+            integer :: n
+            integer :: m
+            real*4 :: mn
+            real*4 :: mx
+        end subroutine range2d
+        subroutine range_vec4mxmn(vec,num,num1,mn,mx) ! in :_pyasso:sub_prog.f
+            real*4 dimension(num) :: vec
+            integer optional,check(len(vec)>=num),depend(vec) :: num=len(vec)
+            integer :: num1
+            real*4 :: mn
+            real*4 :: mx
+        end subroutine range_vec4mxmn
+        subroutine range_vec4mxmn_mask(vec,mask,num,num1,mn,mx) ! in :_pyasso:sub_prog.f
+            real*4 dimension(num) :: vec
+            integer dimension(num),depend(num) :: mask
+            integer optional,check(len(vec)>=num),depend(vec) :: num=len(vec)
+            integer :: num1
+            real*4 :: mn
+            real*4 :: mx
+        end subroutine range_vec4mxmn_mask
+        subroutine range2xakt(vec,num,num1,mn,mx) ! in :_pyasso:sub_prog.f
+            real*4 dimension(num) :: vec
+            integer optional,check(len(vec)>=num),depend(vec) :: num=len(vec)
+            integer :: num1
+            real*4 :: mn
+            real*4 :: mx
+        end subroutine range2xakt
+        subroutine range2(array,num,num1,mn,mx) ! in :_pyasso:sub_prog.f
+            real*4 dimension(num) :: array
+            integer optional,check(len(array)>=num),depend(array) :: num=len(array)
+            integer :: num1
+            real*4 :: mn
+            real*4 :: mx
+        end subroutine range2
+        subroutine range3(iarr,n1,n2,nm1,nm2,mn,mx,lg,nzero) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n1,n2) :: iarr
+            integer optional,check(shape(iarr,0)==n1),depend(iarr) :: n1=shape(iarr,0)
+            integer optional,check(shape(iarr,1)==n2),depend(iarr) :: n2=shape(iarr,1)
+            integer :: nm1
+            integer :: nm2
+            real*4 :: mn
+            real*4 :: mx
+            integer :: lg
+            integer :: nzero
+        end subroutine range3
+        subroutine readnum(f1,n) ! in :_pyasso:sub_prog.f
+            character*500 :: f1
+            integer :: n
+        end subroutine readnum
+        subroutine getline(filen,dir,n) ! in :_pyasso:sub_prog.f
+            character*500 :: filen
+            character*500 :: dir
+            integer :: n
+        end subroutine getline
+        function nchar(string_bn) ! in :_pyasso:sub_prog.f
+            character*(*) :: string_bn
+            integer :: nchar
+        end function nchar
+        function bnchar(string_bn) ! in :_pyasso:sub_prog.f
+            character*(*) :: string_bn
+            integer :: bnchar
+        end function bnchar
+        subroutine convertra(ra,hh,mm,ss) ! in :_pyasso:sub_prog.f
+            real*8 :: ra
+            integer :: hh
+            integer :: mm
+            real*8 :: ss
+        end subroutine convertra
+        subroutine convertdec(dec,s,dd,ma,sa) ! in :_pyasso:sub_prog.f
+            real*8 :: dec
+            character*1 :: s
+            integer :: dd
+            integer :: ma
+            real*8 :: sa
+        end subroutine convertdec
+        subroutine convertdecinv(dd,ma,sa,dec) ! in :_pyasso:sub_prog.f
+            integer :: dd
+            integer :: ma
+            real*8 :: sa
+            real*8 :: dec
+        end subroutine convertdecinv
+        subroutine dec_rmsign(s,dd,ma,sa) ! in :_pyasso:sub_prog.f
+            character*1 :: s
+            integer :: dd
+            integer :: ma
+            real*8 :: sa
+        end subroutine dec_rmsign
+        subroutine xchangi(i,j) ! in :_pyasso:sub_prog.f
+            integer :: i
+            integer :: j
+        end subroutine xchangi
+        subroutine xchangr8(i,j) ! in :_pyasso:sub_prog.f
+            real*8 :: i
+            real*8 :: j
+        end subroutine xchangr8
+        subroutine justdist(ra1,ra2,dec1,dec2,dist) ! in :_pyasso:sub_prog.f
+            real*8 intent(in) :: ra1
+            real*8 intent(in) :: ra2
+            real*8 intent(in) :: dec1
+            real*8 intent(in) :: dec2
+            real*8 intent(out) :: dist
+        end subroutine justdist
+        subroutine gdist_pa(i,j,gpi,xpix,ypix,bmaj,bmin,bpa,fwhm) ! in :_pyasso:sub_prog.f
+            integer :: i
+            integer :: j
+            integer optional,check(len(xpix)>=gpi),depend(xpix) :: gpi=len(xpix)
+            real*8 dimension(gpi) :: xpix
+            real*8 dimension(gpi),depend(gpi) :: ypix
+            real*8 dimension(gpi),depend(gpi) :: bmaj
+            real*8 dimension(gpi),depend(gpi) :: bmin
+            real*8 dimension(gpi),depend(gpi) :: bpa
+            real*8 :: fwhm
+        end subroutine gdist_pa
+        subroutine justangle(ra2,ra1,dec2,dec1,ang) ! in :_pyasso:sub_prog.f
+            real*8 :: ra2
+            real*8 :: ra1
+            real*8 :: dec2
+            real*8 :: dec1
+            real*8 :: ang
+        end subroutine justangle
+        subroutine getseed(seed) ! in :_pyasso:sub_prog.f
+            integer :: seed
+        end subroutine getseed
+        subroutine vec8to4(vec8,n1,vec4,n) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n1) :: vec8
+            integer optional,check(len(vec8)>=n1),depend(vec8) :: n1=len(vec8)
+            real*4 dimension(n) :: vec4
+            integer optional,check(len(vec4)>=n),depend(vec4) :: n=len(vec4)
+        end subroutine vec8to4
+        subroutine vec4to8(vec4,n1,vec8,n) ! in :_pyasso:sub_prog.f
+            real*4 dimension(n1) :: vec4
+            integer optional,check(len(vec4)>=n1),depend(vec4) :: n1=len(vec4)
+            real*8 dimension(n) :: vec8
+            integer optional,check(len(vec8)>=n),depend(vec8) :: n=len(vec8)
+        end subroutine vec4to8
+        subroutine array8to4(arr8,n1,m1,arr4,n,m) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n1,m1) :: arr8
+            integer optional,check(shape(arr8,0)==n1),depend(arr8) :: n1=shape(arr8,0)
+            integer optional,check(shape(arr8,1)==m1),depend(arr8) :: m1=shape(arr8,1)
+            real*4 dimension(n,m) :: arr4
+            integer optional,check(shape(arr4,0)==n),depend(arr4) :: n=shape(arr4,0)
+            integer optional,check(shape(arr4,1)==m),depend(arr4) :: m=shape(arr4,1)
+        end subroutine array8to4
+        subroutine array4to8(arr4,n1,m1,arr8,n,m) ! in :_pyasso:sub_prog.f
+            real*4 dimension(n1,m1) :: arr4
+            integer optional,check(shape(arr4,0)==n1),depend(arr4) :: n1=shape(arr4,0)
+            integer optional,check(shape(arr4,1)==m1),depend(arr4) :: m1=shape(arr4,1)
+            real*8 dimension(n,m) :: arr8
+            integer optional,check(shape(arr8,0)==n),depend(arr8) :: n=shape(arr8,0)
+            integer optional,check(shape(arr8,1)==m),depend(arr8) :: m=shape(arr8,1)
+        end subroutine array4to8
+        subroutine minmaxarr8(arr8,n1,m1,nb,mb,n,m,mn,mx) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n1,m1) :: arr8
+            integer optional,check(shape(arr8,0)==n1),depend(arr8) :: n1=shape(arr8,0)
+            integer optional,check(shape(arr8,1)==m1),depend(arr8) :: m1=shape(arr8,1)
+            integer :: nb
+            integer :: mb
+            integer :: n
+            integer :: m
+            real*8 :: mn
+            real*8 :: mx
+        end subroutine minmaxarr8
+        subroutine minmaxarr4(arr4,n1,m1,nb,mb,n,m,mn,mx) ! in :_pyasso:sub_prog.f
+            real*4 dimension(n1,m1) :: arr4
+            integer optional,check(shape(arr4,0)==n1),depend(arr4) :: n1=shape(arr4,0)
+            integer optional,check(shape(arr4,1)==m1),depend(arr4) :: m1=shape(arr4,1)
+            integer :: nb
+            integer :: mb
+            integer :: n
+            integer :: m
+            real*4 :: mn
+            real*4 :: mx
+        end subroutine minmaxarr4
+        subroutine arr2dnz4(arr,n,m,mn,mx) ! in :_pyasso:sub_prog.f
+            real*4 dimension(n,m) :: arr
+            integer optional,check(shape(arr,0)==n),depend(arr) :: n=shape(arr,0)
+            integer optional,check(shape(arr,1)==m),depend(arr) :: m=shape(arr,1)
+            real*4 :: mn
+            real*4 :: mx
+        end subroutine arr2dnz4
+        subroutine arr2dnz(arr,x,y,n,m,mn,mx) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x,y) :: arr
+            integer optional,check(shape(arr,0)==x),depend(arr) :: x=shape(arr,0)
+            integer optional,check(shape(arr,1)==y),depend(arr) :: y=shape(arr,1)
+            integer :: n
+            integer :: m
+            real*4 :: mn
+            real*4 :: mx
+        end subroutine arr2dnz
+        subroutine converttolog(arr4,i,j,low,up,low1) ! in :_pyasso:sub_prog.f
+            real*4 dimension(i,j) :: arr4
+            integer optional,check(shape(arr4,0)==i),depend(arr4) :: i=shape(arr4,0)
+            integer optional,check(shape(arr4,1)==j),depend(arr4) :: j=shape(arr4,1)
+            real*4 :: low
+            real*4 :: up
+            real*4 :: low1
+        end subroutine converttolog
+        subroutine arr8tovec8_bl(arr,x,y,n,m,vec,nm,blv) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x,y) :: arr
+            integer optional,check(shape(arr,0)==x),depend(arr) :: x=shape(arr,0)
+            integer optional,check(shape(arr,1)==y),depend(arr) :: y=shape(arr,1)
+            integer :: n
+            integer :: m
+            real*8 dimension(nm) :: vec
+            integer optional,check(len(vec)>=nm),depend(vec) :: nm=len(vec)
+            real*8 :: blv
+        end subroutine arr8tovec8_bl
+        subroutine arr8tovec8(arr,x,y,n,m,vec,nm) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x,y) :: arr
+            integer optional,check(shape(arr,0)==x),depend(arr) :: x=shape(arr,0)
+            integer optional,check(shape(arr,1)==y),depend(arr) :: y=shape(arr,1)
+            integer :: n
+            integer :: m
+            real*8 dimension(nm) :: vec
+            integer optional,check(len(vec)>=nm),depend(vec) :: nm=len(vec)
+        end subroutine arr8tovec8
+        subroutine arr4tovec4(arr,x,y,n,m,vec,nm) ! in :_pyasso:sub_prog.f
+            real*4 dimension(x,y) :: arr
+            integer optional,check(shape(arr,0)==x),depend(arr) :: x=shape(arr,0)
+            integer optional,check(shape(arr,1)==y),depend(arr) :: y=shape(arr,1)
+            integer :: n
+            integer :: m
+            real*4 dimension(nm) :: vec
+            integer optional,check(len(vec)>=nm),depend(vec) :: nm=len(vec)
+        end subroutine arr4tovec4
+        subroutine setzoom(xcur,ycur,xcur1,ycur1,blc,trc,n,m) ! in :_pyasso:sub_prog.f
+            real*4 :: xcur
+            real*4 :: ycur
+            real*4 :: xcur1
+            real*4 :: ycur1
+            real*4 dimension(2) :: blc
+            real*4 dimension(2) :: trc
+            integer :: n
+            integer :: m
+        end subroutine setzoom
+        function round(i) ! in :_pyasso:sub_prog.f
+            real*8 :: i
+            integer :: round
+        end function round
+        function round4(i) ! in :_pyasso:sub_prog.f
+            real*4 :: i
+            integer :: round4
+        end function round4
+        function rfact(n) ! in :_pyasso:sub_prog.f
+            integer :: n
+            real*8 :: rfact
+        end function rfact
+        function fact(n) ! in :_pyasso:sub_prog.f
+            integer :: n
+            integer :: fact
+        end function fact
+        subroutine initialisemask(array,x,y,n,m,val) ! in :_pyasso:sub_prog.f
+            integer dimension(x,y) :: array
+            integer optional,check(shape(array,0)==x),depend(array) :: x=shape(array,0)
+            integer optional,check(shape(array,1)==y),depend(array) :: y=shape(array,1)
+            integer :: n
+            integer :: m
+            integer :: val
+        end subroutine initialisemask
+        subroutine initialiseimage(array,x,y,n,m,val) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x,y) :: array
+            integer optional,check(shape(array,0)==x),depend(array) :: x=shape(array,0)
+            integer optional,check(shape(array,1)==y),depend(array) :: y=shape(array,1)
+            integer :: n
+            integer :: m
+            real*8 :: val
+        end subroutine initialiseimage
+        subroutine initialiseimage3d(array,x,y,z,n,m,l,val) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x,y,z) :: array
+            integer optional,check(shape(array,0)==x),depend(array) :: x=shape(array,0)
+            integer optional,check(shape(array,1)==y),depend(array) :: y=shape(array,1)
+            integer optional,check(shape(array,2)==z),depend(array) :: z=shape(array,2)
+            integer :: n
+            integer :: m
+            integer :: l
+            real*8 :: val
+        end subroutine initialiseimage3d
+        subroutine initialise_int_vec(vec,n,val) ! in :_pyasso:sub_prog.f
+            integer dimension(n) :: vec
+            integer optional,check(len(vec)>=n),depend(vec) :: n=len(vec)
+            integer :: val
+        end subroutine initialise_int_vec
+        subroutine initialise_vec(vec,n,val) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n) :: vec
+            integer optional,check(len(vec)>=n),depend(vec) :: n=len(vec)
+            real*8 :: val
+        end subroutine initialise_vec
+        subroutine getmax(vec,x,n,dumi) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n
+            integer :: dumi
+        end subroutine getmax
+        subroutine vec_int_num_range(vec,x,n,low,hi,s1) ! in :_pyasso:sub_prog.f
+            integer dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n
+            integer :: low
+            integer :: hi
+            integer :: s1
+        end subroutine vec_int_num_range
+        subroutine vec_int_nzero(vec,x,n,s1) ! in :_pyasso:sub_prog.f
+            integer dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n
+            integer :: s1
+        end subroutine vec_int_nzero
+        subroutine vec_int_sum(vec,x,n,vsum) ! in :_pyasso:sub_prog.f
+            integer dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n
+            integer :: vsum
+        end subroutine vec_int_sum
+        subroutine vec_mean(vec,x,n1,n,av) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n1
+            integer :: n
+            real*8 :: av
+        end subroutine vec_mean
+        subroutine vec_std4(vec,x,n1,n,av,std) ! in :_pyasso:sub_prog.f
+            real*4 dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n1
+            integer :: n
+            real*4 :: av
+            real*4 :: std
+        end subroutine vec_std4
+        subroutine vec_std(vec,x,n1,n,av,std) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n1
+            integer :: n
+            real*8 :: av
+            real*8 :: std
+        end subroutine vec_std
+        subroutine matavmask(image,mask,x,y,n,m,av) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x,y) :: image
+            integer dimension(x,y),depend(x,y) :: mask
+            integer optional,check(shape(image,0)==x),depend(image) :: x=shape(image,0)
+            integer optional,check(shape(image,1)==y),depend(image) :: y=shape(image,1)
+            integer :: n
+            integer :: m
+            real*8 :: av
+        end subroutine matavmask
+        subroutine matav(image,x,y,n,m,av) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x,y) :: image
+            integer optional,check(shape(image,0)==x),depend(image) :: x=shape(image,0)
+            integer optional,check(shape(image,1)==y),depend(image) :: y=shape(image,1)
+            integer :: n
+            integer :: m
+            real*8 :: av
+        end subroutine matav
+        subroutine intmatsum(image,x,y,n,m,av) ! in :_pyasso:sub_prog.f
+            integer dimension(x,y) :: image
+            integer optional,check(shape(image,0)==x),depend(image) :: x=shape(image,0)
+            integer optional,check(shape(image,1)==y),depend(image) :: y=shape(image,1)
+            integer :: n
+            integer :: m
+            integer :: av
+        end subroutine intmatsum
+        subroutine maxarray(image,x,y,n,m,xmax,ymax,maxv) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x,y) :: image
+            integer optional,check(shape(image,0)==x),depend(image) :: x=shape(image,0)
+            integer optional,check(shape(image,1)==y),depend(image) :: y=shape(image,1)
+            integer :: n
+            integer :: m
+            integer :: xmax
+            integer :: ymax
+            real*8 :: maxv
+        end subroutine maxarray
+        subroutine maxarraymask(image,mask,n,m,xmax,ymax,maxv) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n,m) :: image
+            integer dimension(n,m),depend(n,m) :: mask
+            integer optional,check(shape(image,0)==n),depend(image) :: n=shape(image,0)
+            integer optional,check(shape(image,1)==m),depend(image) :: m=shape(image,1)
+            integer :: xmax
+            integer :: ymax
+            real*8 :: maxv
+        end subroutine maxarraymask
+        subroutine imager2int(image,n,m,mask) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n,m) :: image
+            integer optional,check(shape(image,0)==n),depend(image) :: n=shape(image,0)
+            integer optional,check(shape(image,1)==m),depend(image) :: m=shape(image,1)
+            integer dimension(n,m),depend(n,m) :: mask
+        end subroutine imager2int
+        subroutine imageint2r(mask,x,y,n,m,image) ! in :_pyasso:sub_prog.f
+            integer dimension(x,y) :: mask
+            integer optional,check(shape(mask,0)==x),depend(mask) :: x=shape(mask,0)
+            integer optional,check(shape(mask,1)==y),depend(mask) :: y=shape(mask,1)
+            integer :: n
+            integer :: m
+            real*8 dimension(x,y),depend(x,y) :: image
+        end subroutine imageint2r
+        subroutine copyarray(im1,x,y,x1,y1,n1,m1,n,m,im2) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x,y) :: im1
+            integer optional,check(shape(im1,0)==x),depend(im1) :: x=shape(im1,0)
+            integer optional,check(shape(im1,1)==y),depend(im1) :: y=shape(im1,1)
+            integer optional,check(shape(im2,0)==x1),depend(im2) :: x1=shape(im2,0)
+            integer optional,check(shape(im2,1)==y1),depend(im2) :: y1=shape(im2,1)
+            integer :: n1
+            integer :: m1
+            integer :: n
+            integer :: m
+            real*8 dimension(x1,y1) :: im2
+        end subroutine copyarray
+        subroutine copyarray4(im1,x,y,x1,y1,n1,m1,n,m,im2) ! in :_pyasso:sub_prog.f
+            real*4 dimension(x,y) :: im1
+            integer optional,check(shape(im1,0)==x),depend(im1) :: x=shape(im1,0)
+            integer optional,check(shape(im1,1)==y),depend(im1) :: y=shape(im1,1)
+            integer optional,check(shape(im2,0)==x1),depend(im2) :: x1=shape(im2,0)
+            integer optional,check(shape(im2,1)==y1),depend(im2) :: y1=shape(im2,1)
+            integer :: n1
+            integer :: m1
+            integer :: n
+            integer :: m
+            real*4 dimension(x1,y1) :: im2
+        end subroutine copyarray4
+        subroutine copyarrayint(im1,x,y,x1,y1,n1,m1,n,m,im2) ! in :_pyasso:sub_prog.f
+            integer dimension(x,y) :: im1
+            integer optional,check(shape(im1,0)==x),depend(im1) :: x=shape(im1,0)
+            integer optional,check(shape(im1,1)==y),depend(im1) :: y=shape(im1,1)
+            integer optional,check(shape(im2,0)==x1),depend(im2) :: x1=shape(im2,0)
+            integer optional,check(shape(im2,1)==y1),depend(im2) :: y1=shape(im2,1)
+            integer :: n1
+            integer :: m1
+            integer :: n
+            integer :: m
+            integer dimension(x1,y1) :: im2
+        end subroutine copyarrayint
+        subroutine int2str(nisl,str) ! in :_pyasso:sub_prog.f
+            integer :: nisl
+            character*10 :: str
+        end subroutine int2str
+        function pixinimage(x,y,n1,n2,m1,m2) ! in :_pyasso:sub_prog.f
+            integer :: x
+            integer :: y
+            integer :: n1
+            integer :: n2
+            integer :: m1
+            integer :: m2
+            logical :: pixinimage
+        end function pixinimage
+        subroutine convertchar(cha,num) ! in :_pyasso:sub_prog.f
+            character*1 :: cha
+            integer :: num
+        end subroutine convertchar
+        subroutine get_fmt_int(n,fmti) ! in :_pyasso:sub_prog.f
+            integer :: n
+            character*2 :: fmti
+        end subroutine get_fmt_int
+        function existsq(filen,dir,extn) ! in :_pyasso:sub_prog.f
+            character*500 :: filen
+            character*500 :: dir
+            character*20 :: extn
+            logical :: existsq
+        end function existsq
+        function exists(filen,dir,extn) ! in :_pyasso:sub_prog.f
+            character*500 :: filen
+            character*500 :: dir
+            character*20 :: extn
+            logical :: exists
+        end function exists
+        subroutine callisint(arr,x,n,i,isint) ! in :_pyasso:sub_prog.f
+            integer dimension(x) :: arr
+            integer optional,check(len(arr)>=x),depend(arr) :: x=len(arr)
+            integer :: n
+            integer :: i
+            logical :: isint
+        end subroutine callisint
+        subroutine masksum(mask,x,y,n,m,tot) ! in :_pyasso:sub_prog.f
+            integer dimension(x,y) :: mask
+            integer optional,check(shape(mask,0)==x),depend(mask) :: x=shape(mask,0)
+            integer optional,check(shape(mask,1)==y),depend(mask) :: y=shape(mask,1)
+            integer :: n
+            integer :: m
+            integer :: tot
+        end subroutine masksum
+        subroutine multimasksum(mask,x,y,n,m,k,tot) ! in :_pyasso:sub_prog.f
+            integer dimension(x,y) :: mask
+            integer optional,check(shape(mask,0)==x),depend(mask) :: x=shape(mask,0)
+            integer optional,check(shape(mask,1)==y),depend(mask) :: y=shape(mask,1)
+            integer :: n
+            integer :: m
+            integer :: k
+            integer :: tot
+        end subroutine multimasksum
+        subroutine atanproper(dumr1,dy,dx) ! in :_pyasso:sub_prog.f
+            real*8 :: dumr1
+            real*8 :: dy
+            real*8 :: dx
+        end subroutine atanproper
+        subroutine b1950toj2000(ra,dec,raj,decj) ! in :_pyasso:sub_prog.f
+            real*8 :: ra
+            real*8 :: dec
+            real*8 :: raj
+            real*8 :: decj
+        end subroutine b1950toj2000
+        subroutine aoki_b1950toj2000(ra,dec,raj,decj) ! in :_pyasso:sub_prog.f
+            real*8 :: ra
+            real*8 :: dec
+            real*8 :: raj
+            real*8 :: decj
+        end subroutine aoki_b1950toj2000
+        subroutine correctrarad(ra) ! in :_pyasso:sub_prog.f
+            real*8 :: ra
+        end subroutine correctrarad
+        function cartdist(x1,y1,x2,y2) ! in :_pyasso:sub_prog.f
+            real*4 :: x1
+            real*4 :: y1
+            real*4 :: x2
+            real*4 :: y2
+            real*4 :: cartdist
+        end function cartdist
+        subroutine num_num(str,num) ! in :_pyasso:sub_prog.f
+            character*500 :: str
+            integer :: num
+        end subroutine num_num
+        subroutine calcmedianstd(vec,x,n,med,medstd) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n
+            real*8 :: med
+            real*8 :: medstd
+        end subroutine calcmedianstd
+        subroutine calcmedianstd4(vec,x,n,med,medstd) ! in :_pyasso:sub_prog.f
+            real*4 dimension(x) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer :: n
+            real*4 :: med
+            real*4 :: medstd
+        end subroutine calcmedianstd4
+        subroutine getcoeffarr(hc,x,num,i,hca) ! in :_pyasso:sub_prog.f
+            real*8 dimension(x,x) :: hc
+            integer optional,check(shape(hc,0)==x),depend(hc) :: x=shape(hc,0)
+            integer :: num
+            integer :: i
+            real*8 dimension(x),depend(x) :: hca
+        end subroutine getcoeffarr
+        subroutine nume2str(n,str) ! in :_pyasso:sub_prog.f
+            real*8 :: n
+            character*10 :: str
+        end subroutine nume2str
+        subroutine num2str_fn(n,x,str1) ! in :_pyasso:sub_prog.f
+            integer :: n
+            integer :: x
+            character*10 :: str1
+        end subroutine num2str_fn
+        subroutine int_vec_vec_std(vec1,vec2,n,std) ! in :_pyasso:sub_prog.f
+            integer dimension(n) :: vec1
+            integer dimension(n),depend(n) :: vec2
+            integer optional,check(len(vec1)>=n),depend(vec1) :: n=len(vec1)
+            real*8 :: std
+        end subroutine int_vec_vec_std
+        subroutine imageop(im,n,m,oim,code,val) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n,m) :: im
+            integer optional,check(shape(im,0)==n),depend(im) :: n=shape(im,0)
+            integer optional,check(shape(im,1)==m),depend(im) :: m=shape(im,1)
+            real*8 dimension(n,m),depend(n,m) :: oim
+            character*3 :: code
+            real*8 :: val
+        end subroutine imageop
+        subroutine blank2mask(image,n,m,blankv,mask) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n,m) :: image
+            integer optional,check(shape(image,0)==n),depend(image) :: n=shape(image,0)
+            integer optional,check(shape(image,1)==m),depend(image) :: m=shape(image,1)
+            real*8 :: blankv
+            integer dimension(n,m),depend(n,m) :: mask
+        end subroutine blank2mask
+        subroutine invert_sortindex(iwksp,n,ind) ! in :_pyasso:sub_prog.f
+            integer dimension(n) :: iwksp
+            integer optional,check(len(iwksp)>=n),depend(iwksp) :: n=len(iwksp)
+            integer dimension(n),depend(n) :: ind
+        end subroutine invert_sortindex
+        subroutine cart2polar(x,y,xcen,ycen,r,th) ! in :_pyasso:sub_prog.f
+            real*8 :: x
+            real*8 :: y
+            real*8 :: xcen
+            real*8 :: ycen
+            real*8 :: r
+            real*8 :: th
+        end subroutine cart2polar
+        subroutine argmax(x,n,ind) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n) :: x
+            integer optional,check(len(x)>=n),depend(x) :: n=len(x)
+            integer :: ind
+        end subroutine argmax
+        function getchar(i) ! in :_pyasso:sub_prog.f
+            integer :: i
+            character*1 :: getchar
+        end function getchar
+        subroutine argmin(x,n,ind) ! in :_pyasso:sub_prog.f
+            real*8 dimension(n) :: x
+            integer optional,check(len(x)>=n),depend(x) :: n=len(x)
+            integer :: ind
+        end subroutine argmin
+        subroutine setup_pasl(xl,yl,npairs,var,num,xplot,yplot,id) ! in :_pyasso:setup_pasl.f
+            character*6 intent(out) :: xl
+            character*6 intent(out) :: yl
+            integer optional,check(shape(var,1)==npairs),depend(var) :: npairs=shape(var,1)
+            real*8 dimension(num,npairs),intent(in) :: var
+            integer optional,check(shape(var,0)==num),depend(var) :: num=shape(var,0)
+            real*4 dimension(npairs),intent(out),depend(npairs) :: xplot
+            real*4 dimension(npairs),intent(out),depend(npairs) :: yplot
+            integer dimension(2),intent(in) :: id
+        end subroutine setup_pasl
+    end interface 
+end python module _pyasso
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

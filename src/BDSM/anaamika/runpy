@@ -1,0 +1,4 @@
+rm -f pytess*.o _pytess*
+make _pytesselate.pyf
+make _pytesselate.so
+ipython -pylab psf_vary.py

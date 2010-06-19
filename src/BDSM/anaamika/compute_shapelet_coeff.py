@@ -1,0 +1,1 @@
+/data/lofarsoft/src/pybdsm/implement/bdsm/compute_shapelet_coeff.py

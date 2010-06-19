@@ -1,0 +1,30 @@
+#! /bin/bash
+
+rm -fr $1
+echo '1 7' >> $1
+echo '29 30 ' >> $1
+echo '2 14 ' >> $1
+echo '3 14 ' >> $1
+echo '33 14 2 0 0.0 60 0 0.0' >> $1
+echo 'END' >> $1
+echo ' ' >> $1
+echo 'List of (x,y) above should end with END on the last row.' >> $1
+echo 'Choose the (x,y) codes from below ... ' >> $1
+echo '(If 33 is chosen, (x,y) followed by hh mm ss.s (s)dd (s)ma sa.s, else Cas A)' >> $1
+echo ' ' >> $1
+echo ' (M)  --->  Master ;  (S)  --->  Slave ' >> $1
+echo '  1 : Peak (M)             2 : R.A. (M)           3 : Dec (M)     ' >> $1
+echo '  4 : B_major (M)          5 : B_minor (M)        6 : B_P.A. (M)  ' >> $1
+echo '  7 : Peak (S)             8 : R.A. (S)           9 : Dec (S)     ' >> $1
+echo ' 10 : B_major (S)         11 : B_minor (S)       12 : BPA (S)  '    >> $1
+echo ' 13 : Distance            14 : Peak ratio (M/S)  15 : BPA diff (M-S)' >> $1
+echo ' 16 : B_major ratio (M/S) 17 : B_min ratio (M/S) 18 : Src id (S)  ' >> $1
+echo ' 19 : Src id (S)          20 : Src residrms      21 : Isl residrms' >> $1
+echo ' 22 : Total (M)           23 : Err total (M)     24 : Err peak (M)' >> $1
+echo ' 25 : Total (S)           26 : Err total (S)     27 : Err peak (S)' >> $1
+echo ' 28 : Total ratio (M/S)   29 : R.A. diff (M-S)   30 : Dec diff (M-S)' >> $1
+echo ' 31 : Peak diff (M-S)     32 : Experimental      33 : Dist to src   ' >> $1
+echo ' 34 : index               35 : Quit                                 ' >> $1
+
+exit 0
+

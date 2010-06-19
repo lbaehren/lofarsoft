@@ -1,0 +1,68 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _pytesselate ! in 
+    interface  ! in :_pytesselate
+        subroutine pytess_simple(n,m,ngens,xgens,ygens,snrgens,wts,eps,code,volrank) ! in :_pytesselate:pytess_simple.f
+            integer intent(in) :: n
+            integer intent(in) :: m
+            integer optional,intent(in),check(len(xgens)>=ngens),depend(xgens) :: ngens=len(xgens)
+            real*8 dimension(ngens),intent(in) :: xgens
+            real*8 dimension(ngens),intent(in),depend(ngens) :: ygens
+            real*8 dimension(ngens),intent(in),depend(ngens) :: snrgens
+            real*8 dimension(ngens),intent(in),depend(ngens) :: wts
+            real*8 intent(in) :: eps
+            character*1 intent(in) :: code
+            real*8 dimension(n,m),intent(out),depend(n,m) :: volrank
+        end subroutine pytess_simple
+        subroutine pytess_roundness(n,m,ngens,xgens,ygens,snrgens,wts,eps,code,volrank) ! in :_pytesselate:pytess_roundness.f
+            integer intent(in) :: n
+            integer intent(in) :: m
+            integer optional,intent(in),check(len(xgens)>=ngens),depend(xgens) :: ngens=len(xgens)
+            real*8 dimension(ngens),intent(in) :: xgens
+            real*8 dimension(ngens),intent(in),depend(ngens) :: ygens
+            real*8 dimension(ngens),intent(in),depend(ngens) :: snrgens
+            real*8 dimension(ngens),intent(in),depend(ngens) :: wts
+            real*8 intent(in) :: eps
+            character*1 intent(in) :: code
+            real*8 dimension(n,m),intent(out),depend(n,m) :: volrank
+        end subroutine pytess_roundness
+        subroutine tess_bin_complicated(n,m,ngens,xgens,ygens,snrgens,volrank,roundpix,x,y,niter,code,eps) ! in :_pytesselate:pytess_roundness.f
+            integer optional,check(shape(volrank,0)==n),depend(volrank) :: n=shape(volrank,0)
+            integer optional,check(shape(volrank,1)==m),depend(volrank) :: m=shape(volrank,1)
+            integer optional,check(len(xgens)>=ngens),depend(xgens) :: ngens=len(xgens)
+            real*8 dimension(ngens) :: xgens
+            real*8 dimension(ngens),depend(ngens) :: ygens
+            real*8 dimension(ngens),depend(ngens) :: snrgens
+            real*8 dimension(n,m) :: volrank
+            real*8 dimension(ngens),depend(ngens) :: roundpix
+            real*8 dimension(ngens),depend(ngens) :: x
+            real*8 dimension(ngens),depend(ngens) :: y
+            integer :: niter
+            character*1 :: code
+            real*8 :: eps
+        end subroutine tess_bin_complicated
+        subroutine calc_area_tess(volrank,n,m,x,areavec) ! in :_pytesselate:pytess_roundness.f
+            real*8 dimension(n,m) :: volrank
+            integer optional,check(shape(volrank,0)==n),depend(volrank) :: n=shape(volrank,0)
+            integer optional,check(shape(volrank,1)==m),depend(volrank) :: m=shape(volrank,1)
+            integer optional,check(len(areavec)>=x),depend(areavec) :: x=len(areavec)
+            integer dimension(x) :: areavec
+        end subroutine calc_area_tess
+        subroutine tile_roundness(volrank,n,m,ngens,xgens,ygens,roundfac,roundpix,x,y) ! in :_pytesselate:pytess_roundness.f
+            real*8 dimension(n,m) :: volrank
+            integer optional,check(shape(volrank,0)==n),depend(volrank) :: n=shape(volrank,0)
+            integer optional,check(shape(volrank,1)==m),depend(volrank) :: m=shape(volrank,1)
+            integer optional,check(len(xgens)>=ngens),depend(xgens) :: ngens=len(xgens)
+            real*8 dimension(ngens) :: xgens
+            real*8 dimension(ngens),depend(ngens) :: ygens
+            real*8 dimension(ngens),depend(ngens) :: roundfac
+            real*8 dimension(ngens),depend(ngens) :: roundpix
+            real*8 dimension(ngens),depend(ngens) :: x
+            real*8 dimension(ngens),depend(ngens) :: y
+        end subroutine tile_roundness
+    end interface 
+end python module _pytesselate
+
+! This file was auto-generated with f2py (version:2_3979).
+! See http://cens.ioc.ee/projects/f2py2e/

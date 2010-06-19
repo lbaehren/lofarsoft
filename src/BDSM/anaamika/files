@@ -1,0 +1,5 @@
+#! /bin/bash
+# start
+
+grep $1 *.f | awk '{print $1}' | sed 's/://' | sort -u | grep -v "c!" > a
+

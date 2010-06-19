@@ -1,0 +1,36 @@
+
+   This is the package "noise"
+   All output images are saved
+   Enter inputs in single line 
+                   ---- R.N.M.
+
+   Option ---> 
+   You are now inside the package "BDSM"
+   Blob Detection and Source Measurement
+   Quitting will take you back to  noise
+                             ---- R.N.M.
+
+   BDSM_Option --->      mastersourcelist  secondsourcelist
+        Input images are different (wenss_3c196 & L3ML_I)
+   Want to continue (y)/n :    Median sizes :    55.000 &    72.497
+   Tolerance :    Associating sourcelists  wenss_3c196.c2g ( 3434 srcs) & L3ML_I.vliet ( 172 srcs).
+  129.878208  50.4053333  129.874023  50.4038185  11.0442155  80.
+     S   M    0 0
+  129.878208  50.4053333  129.890314  50.4183545  54.4849634  80.
+     S   M    0 0
+   Writing out /data/anaamika/image/wenss_3c196.c2g__L3ML_I.vliet.asrl
+   Found  70 associations with wenss_3c196.c2g
+   Sources in wenss_3c196.c2g with no associations is  3367
+   Sources in L3ML_I.vliet with no associations is  105
+   Sources in wenss_3c196.c2g with multiple associations is  3
+   Sources in L3ML_I.vliet with multiple associations is  3
+
+   Writing out /data/anaamika/image/wenss_3c196.c2g__L3ML_I.vliet.assf
+   Writing out /data/anaamika/image/wenss_3c196.c2g__L3ML_I.vliet.pasf
+   Writing out /data/anaamika/image/wenss_3c196.c2g__L3ML_I.vliet.gasl
+
+   BDSM_Option ---> 
+   Hope you enjoyed your BDSM session
+   Going back to "noise" now    ..... 
+
+   Option ---> 

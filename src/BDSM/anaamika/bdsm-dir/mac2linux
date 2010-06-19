@@ -1,0 +1,18 @@
+#! /bin/bash
+# start
+
+sed 's/ps \-ax/ps \-ef/' noise.f > a; mv -f a noise.f
+sed 's/ps \-ax/ps \-ef/' sm.f > a; mv -f a sm.f
+sed 's/ps \-ax/ps \-ef/' calltest.f > a; mv -f a calltest.f
+sed 's/ps \-ax/ps \-ef/' shapelets.f > a; mv -f a shapelets.f
+
+sed 's/$9/$8/' noise.f > a; mv -f a noise.f
+sed 's/$1/$2/' noise.f > a; mv -f a noise.f
+sed 's/$1/$2/' sm.f > a; mv -f a sm.f
+sed 's/$1/$2/' shapelets.f > a; mv -f a shapelets.f
+sed 's/$1/$2/' calltest.f > a; mv -f a calltest.f
+
+sed 's/DIR=\/Users/DIR=\/home/' Makefile > a; mv -f a Makefile
+sed "s/export work=.*/export work='\/home\/mohan\/anaamika\/'/" create > a; mv -f a create
+cp create bdsm-dir/
+

@@ -1,0 +1,3 @@
+
+f2py cr8noisemap.f sm.f shapelets.f readinimage.f callputpixel.f callgetpixel.f cr8constantim.f nbit.f fileformat.f detectdiscont.f calltest.f callmwt.f fn_radius.f fftshift2.f makeshapes.f convolveimage.f clip.f cr8sources.f experiment.f cr8modulationimage.f callfitgaussian.f modulate.f medianfilter.f boxnoiseimage.f callmoment.f transposeim.f displaytwoim.f displayim.f acf.f structfn.f populatesrcs.f addimages.f combineimage.f operateimage.f subim.f imagestats.f nsigmacut.f primarybeam.f readheader.f copyheader.f puthead.f slice.f callremag.f callfft.f call_getcoords.f callreadfits.f -m _anaamika -h _anaamika.pyf
+

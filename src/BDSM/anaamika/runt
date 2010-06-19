@@ -1,0 +1,1 @@
+g77 testsigclip.f sigclip.f sub_prog.f readarray.f ran1.f createnoisemap.f writearray.f gasdev.f arrstat.f check.f -o testsigclip -L/usr/lib -L/usr/X11R6/lib -lpng -lX11 -L$PGPLOT_DIR -lpgplot

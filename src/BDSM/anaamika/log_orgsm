@@ -1,0 +1,12 @@
+Script started on Thu 17 Sep 2009 11:25:12 MEST
+
+   Starting OR_GSM (ver f1.1.8)
+   Creating GSM with  3 files
+   Checking for 2-list associations
+ 1 2
+ 1 3
+Subscript out of range on file line 18, procedure selectnr.f/selectnr.
+Attempt to access the 0-th element of variable arr.
+Abort
+
+Script done on Thu 17 Sep 2009 11:25:20 MEST

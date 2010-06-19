@@ -1,0 +1,11 @@
+fitsdir = '/data/anaamika/fits/' fits directory
+scratch = '/data/anaamika/image/' scratch directory
+srldir = '/data/anaamika/image/' source list directory
+plotdir = '/data/anaamika/plots/' plots directory
+gsmsolnname = 'del' id name for GSM
+plotspectra = 'false' plots spectra of all associated sources if true 
+makepdf = 'false' makes pdf files of all the plots. takes time. 
+spindef = -0.8 default spectral index for flux estimate with one point, 0 => -0.7
+spinflux = 'total' spectral index with 'peak' or 'total'. else total.
+plotpairs = 'true' plots parameters for every pair of catalogues if True 
+runcode = 'aq' (a)uto/(m)anual and (q)uiet/(v)erbose

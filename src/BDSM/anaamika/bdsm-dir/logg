@@ -1,0 +1,149 @@
+Script started on Tue 01 Jun 2010 16:26:56 MEST
+
+   Starting BDSM (ver f2.0)
+   Reading /data/anaamika/fits/SST1cont.image.restored.fits
+   Size of FITS image is   4096 X   4096 X      1 X      1
+   Quality control and cross-check
+   Preprocessing image
+ Keyword takemeanclip not found in paradefine
+   Calculating rms image
+   Calculating thresholds
+   Forming islands
+   Detected  4586 islands
+   Converting formats
+   Fitting islands with gaussians
+ island            1
+ island            2
+ island            3
+ island            4
+ island            5
+ island            6
+ island            7
+ island            8
+ island            9
+ island           10
+ island           11
+ island           12
+ island           13
+ island           14
+ island           15
+ island           16
+ island           17
+ island           18
+ island           19
+ island           20
+ island           21
+ island           22
+ island           23
+ island           24
+ island           25
+ island           26
+ island           27
+ island           28
+ island           29
+ island           30
+ island           31
+ island           32
+ island           33
+ island           34
+ island           35
+ island           36
+ island           37
+ island           38
+ island           39
+ island           40
+ island           41
+ island           42
+ island           43
+ island           44
+ island           45
+ island           46
+ island           47
+ island           48
+ island           49
+ island           50
+ island           51
+ island           52
+ island           53
+ island           54
+ island           55
+ island           56
+ island           57
+ island           58
+ island           59
+ island           60
+ island           61
+ island           62
+ island           63
+ island           64
+ island           65
+ island           66
+ island           67
+ island           68
+ island           69
+ island           70
+ island           71
+ island           72
+ island           73
+ island           74
+ island           75
+
+
+*** glibc detected *** ./bdsm: double free or corruption (out): 0x0000000001370090 ***
+======= Backtrace: =========
+/lib64/libc.so.6(+0x74a56)[0x7f214ed96a56]
+./bdsm[0x408286]
+./bdsm[0x417ffa]
+./bdsm[0x416e91]
+./bdsm[0x4130df]
+./bdsm[0x412a5b]
+./bdsm[0x405ad5]
+./bdsm[0x63c5ca]
+/lib64/libc.so.6(__libc_start_main+0xfd)[0x7f214ed40b1d]
+./bdsm[0x404ec9]
+======= Memory map: ========
+00400000-00678000 r-xp 00000000 00:16 181338891                          /home/mohan/anaamika/bdsm-dir/bdsm
+00877000-00893000 rw-p 00277000 00:16 181338891                          /home/mohan/anaamika/bdsm-dir/bdsm
+00893000-00920000 rw-p 00000000 00:00 0 
+01011000-01638000 rw-p 00000000 00:00 0                                  [heap]
+7f213eb04000-7f214eb06000 rw-p 00000000 00:00 0 
+7f214eb06000-7f214eb1d000 r-xp 00000000 08:01 1848                       /lib64/libpthread-2.11.1.so
+7f214eb1d000-7f214ed1c000 ---p 00017000 08:01 1848                       /lib64/libpthread-2.11.1.so
+7f214ed1c000-7f214ed1d000 r--p 00016000 08:01 1848                       /lib64/libpthread-2.11.1.so
+7f214ed1d000-7f214ed1e000 rw-p 00017000 08:01 1848                       /lib64/libpthread-2.11.1.so
+7f214ed1e000-7f214ed22000 rw-p 00000000 00:00 0 
+7f214ed22000-7f214ee91000 r-xp 00000000 08:01 1821                       /lib64/libc-2.11.1.so
+7f214ee91000-7f214f091000 ---p 0016f000 08:01 1821                       /lib64/libc-2.11.1.so
+7f214f091000-7f214f095000 r--p 0016f000 08:01 1821                       /lib64/libc-2.11.1.so
+7f214f095000-7f214f096000 rw-p 00173000 08:01 1821                       /lib64/libc-2.11.1.so
+7f214f096000-7f214f09b000 rw-p 00000000 00:00 0 
+7f214f09b000-7f214f0b1000 r-xp 00000000 08:01 14984                      /lib64/libgcc_s-4.4.3-20100127.so.1
+7f214f0b1000-7f214f2b0000 ---p 00016000 08:01 14984                      /lib64/libgcc_s-4.4.3-20100127.so.1
+7f214f2b0000-7f214f2b1000 rw-p 00015000 08:01 14984                      /lib64/libgcc_s-4.4.3-20100127.so.1
+7f214f2b1000-7f214f334000 r-xp 00000000 08:01 19273                      /lib64/libm-2.11.1.so
+7f214f334000-7f214f533000 ---p 00083000 08:01 19273                      /lib64/libm-2.11.1.so
+7f214f533000-7f214f534000 r--p 00082000 08:01 19273                      /lib64/libm-2.11.1.so
+7f214f534000-7f214f535000 rw-p 00083000 08:01 19273                      /lib64/libm-2.11.1.so
+7f214f535000-7f214f626000 r-xp 00000000 08:02 11266                      /usr/lib64/libgfortran.so.3.0.0
+7f214f626000-7f214f825000 ---p 000f1000 08:02 11266                      /usr/lib64/libgfortran.so.3.0.0
+7f214f825000-7f214f827000 rw-p 000f0000 08:02 11266                      /usr/lib64/libgfortran.so.3.0.0
+7f214f827000-7f214f828000 rw-p 00000000 00:00 0 
+7f214f828000-7f214f920000 r-xp 00000000 08:02 12023                      /usr/lib64/libfftw3.so.3.2.4
+7f214f920000-7f214fb1f000 ---p 000f8000 08:02 12023                      /usr/lib64/libfftw3.so.3.2.4
+7f214fb1f000-7f214fb26000 rw-p 000f7000 08:02 12023                      /usr/lib64/libfftw3.so.3.2.4
+7f214fb26000-7f214fc1e000 r-xp 00000000 08:05 21930048                   /data1/lib64/wcslib/wcslibgfort_pic/lib/libwcs.so.4.4
+7f214fc1e000-7f214fe1e000 ---p 000f8000 08:05 21930048                   /data1/lib64/wcslib/wcslibgfort_pic/lib/libwcs.so.4.4
+7f214fe1e000-7f214fe20000 rw-p 000f8000 08:05 21930048                   /data1/lib64/wcslib/wcslibgfort_pic/lib/libwcs.so.4.4
+7f214fe20000-7f214fe3e000 r-xp 00000000 08:01 5072                       /lib64/ld-2.11.1.so
+7f215000b000-7f2150010000 rw-p 00000000 00:00 0 
+7f215003c000-7f215003d000 rw-p 00000000 00:00 0 
+7f215003d000-7f215003e000 r--p 0001d000 08:01 5072                       /lib64/ld-2.11.1.so
+7f215003e000-7f215003f000 rw-p 0001e000 08:01 5072                       /lib64/ld-2.11.1.so
+7f215003f000-7f2150040000 rw-p 00000000 00:00 0 
+7fff96d22000-7fff96d38000 rw-p 00000000 00:00 0                          [stack]
+7fff96dff000-7fff96e00000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+Abort (core dumped)
+Elapsed:5:09:23.20,User=18546.595,System=10.708,CPU=99.9%.
+
+Script done on Tue 01 Jun 2010 21:36:19 MEST

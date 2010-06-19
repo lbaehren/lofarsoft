@@ -1,0 +1,2 @@
+g77 model.f sub_prog.f fit.f mrqmin.f mrqcof.f covsrt.f fgauss.f gaussj.f poly2.f func2.f gammq.f gser.f gcf.f poly3.f arrstat.f gammln.f ran1.f -o model -L/usr/lib -L/usr/X11R6/lib -lpng -lX11 -L$PGPLOT_DIR -lpgplot
+model < runm.1

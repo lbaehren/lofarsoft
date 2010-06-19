@@ -1,0 +1,17 @@
+
+the sigma level for formisland_rank shud depend on peak snr and fw. for decent snr, low nsig
+adds too much noise pixels and hence increases chisq. 3 seems ok. for small fw for eg
+u need more pixels so 2 sigma seems ok.
+
+fitgauss dowsnt work for very small not very strong sources as moment2 is wrong. 
+becos it takes huge area
+to compute. becoz my island algo isnt there and i just take 3 sigma out to entire image. need
+a prelim island algo !!
+
+shapelet can have diff beta in diff directions ???
+
+elliptical gaussians ?????  rotate and then apply previous ??? 
+
+shapelet fits noise. so ignore components which have power like noise rms ?
+
+

@@ -1,0 +1,10 @@
+fitsdir = '/paras/para11/niruj/image/fits/' fits directory
+scratch = '/paras/para11/niruj/image/' scratch directory
+srldir = '/paras/para11/niruj/image/' source list directory
+plotdir = '/paras/para11/niruj/image/plots/' plots directory
+gsmsolnname = 'full8VWN-N' id name for GSM
+plotspectra = 'true' ; plots spectra of all associated sources if true 
+makepdf = 'false' ; makes pdf files of all the plots. takes time. 
+spindef = -0.7 default spectral index for flux estimate with one point, 0 => -0.7
+spinflux = 'total' spectral index with 'peak' or 'total'. else total.
+runcode = 'aq' (a)uto/(m)anual and (q)uiet/(v)erbose

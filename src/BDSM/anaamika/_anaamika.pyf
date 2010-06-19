@@ -1,0 +1,285 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _anaamika ! in 
+    interface  ! in :_anaamika
+        subroutine readarraysize(f1,extn,n,m,l) ! in :_anaamika:readarray.f
+            character*500 intent(in) :: f1
+            character*20 intent(in) :: extn
+            integer intent(out) :: n
+            integer intent(out) :: m
+            integer intent(out) :: l
+        end subroutine readarraysize
+        subroutine readarray_bin(n,m,arr,x,y,f1,extn) ! in :_anaamika:readarray.f
+            integer intent(in) :: n
+            integer intent(in) :: m
+            real*8 dimension(x,y),intent(out),depend(x,y) :: arr
+            integer intent(in) :: x
+            integer intent(in) :: y
+            character*500 intent(in) :: f1
+            character*20 intent(in) :: extn
+        end subroutine readarray_bin
+	subroutine writearray_bin2d(arr,x,y,n,m,filen,runcode) ! in :_anaamika:writearray.f
+            real*8 dimension(x,y),intent(in) :: arr
+            integer optional,intent(in),check(shape(arr,0)==x),depend(arr) :: x=shape(arr,0)
+            integer optional,intent(in),check(shape(arr,1)==y),depend(arr) :: y=shape(arr,1)
+            integer optional,intent(in),check(shape(arr,0)==n),depend(arr) :: n=shape(arr,0)
+            integer optional,intent(in),check(shape(arr,1)==m),depend(arr) :: m=shape(arr,1)
+            character*500 intent(in) :: filen
+            character*2 intent(in) :: runcode
+        end subroutine writearray_bin2d
+        subroutine cr8noisemap(filen,n,m,sigmajy,seed,scratch,srldir) ! in :_anaamika:cr8noisemap.f
+            character*500 intent(in) :: filen
+            integer intent(in) :: n
+            integer intent(in) :: m
+            real*8 intent(in) :: sigmajy
+            integer intent(in,out) :: seed
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+        end subroutine cr8noisemap
+        subroutine sm(scratch,srldir,runcode) ! in :_anaamika:sm.f
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+            character*2 intent(in) :: runcode
+        end subroutine sm
+        subroutine shapelets(scratch,srldir,runcode) ! in :_anaamika:shapelets.f
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+            character*2 intent(in) :: runcode
+        end subroutine shapelets
+        subroutine boxnoiseimage(f1,f2,f3,f4) ! in :_aa:boxnoiseimage.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+            character*500 intent(in) :: f3
+            character*500 intent(in) :: f4
+        end subroutine boxnoiseimage
+        subroutine readinimage(ifl,ofl,n,m,scratch) ! in :_anaamika:readinimage.f
+            character*500 intent(in) :: ifl
+            character*500 intent(in) :: ofl
+            integer intent(in) :: n
+            integer intent(in) :: m
+            character*500 intent(in) :: scratch
+        end subroutine readinimage
+        subroutine callputpixel(f1,f2,code) ! in :_anaamika:callputpixel.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+            character*3 intent(in) :: code
+        end subroutine callputpixel
+        subroutine callgetpixel(f1,code) ! in :_anaamika:callgetpixel.f
+            character*500 intent(in) :: f1
+            character*2 intent(in) :: code
+        end subroutine callgetpixel
+        subroutine cr8constantim(filen,n,m,val) ! in :_anaamika:cr8constantim.f
+            character*500 intent(in) :: filen
+            integer intent(in) :: n
+            integer intent(in) :: m
+            real*8 intent(in) :: val
+        end subroutine cr8constantim
+        subroutine nbit(f1,scratch,srldir) ! in :_anaamika:nbit.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+        end subroutine nbit
+        subroutine fileformat(f1,scratch,fitsdir) ! in :_anaamika:fileformat.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: scratch
+            character*500 :: fitsdir
+        end subroutine fileformat
+        subroutine detectdiscont(f1,f2) ! in :_anaamika:detectdiscont.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+        end subroutine detectdiscont
+        subroutine calltest(seed,scratch,srldir) ! in :_anaamika:calltest.f
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+            integer intent(in,out) :: seed
+        end subroutine calltest
+        subroutine callmwt(f1,scratch,runcode,fitsdir) ! in :_anaamika:callmwt.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: scratch
+            character*2 intent(in) :: runcode
+            character*500 intent(in) :: fitsdir
+        end subroutine callmwt
+        subroutine fn_radius(scratch,fn) ! in :_anaamika:fn_radius.f
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: fn
+        end subroutine fn_radius
+        subroutine fftshift2(f1,scratch) ! in :_anaamika:fftshift2.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: scratch
+        end subroutine fftshift2
+        subroutine makeshapes(f1,n,m,scratch) ! in :_anaamika:makeshapes.f
+            character*500 intent(in) :: f1
+            integer intent(in) :: n
+            integer intent(in) :: m
+            character*500 intent(in) :: scratch
+        end subroutine makeshapes
+!        subroutine callfftw(f1,f2,n,m,scratch,op,runcode) ! in :_anaamika:callfftw.f
+!            character*500 intent(in) :: f1
+!            character*500 intent(in) :: f2
+!            integer intent(in) :: n
+!            integer intent(in) :: m
+!            character*500 intent(in) :: scratch
+!            character*500 intent(in) :: op
+!            character*2 intent(in) :: runcode
+!        end subroutine callfftw
+        subroutine convolveimage(filen1,filen2,filter,scratch,srldir) ! in :_anaamika:convolveimage.f
+            character*500 intent(in) :: filen1
+            character*500 intent(in) :: filen2
+            character*4 intent(in) :: filter
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+        end subroutine convolveimage
+        subroutine clip(f1,f2) ! in :_anaamika:clip.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+        end subroutine clip
+        subroutine cr8sources(filename,seed,scratch,srldir,fitsdir) ! in :_anaamika:cr8sources.f
+            character*500 intent(in) :: filename
+            integer intent(in,out) :: seed
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+            character*500 intent(in) :: fitsdir
+        end subroutine cr8sources
+        subroutine experiment(f1,scratch,srldir) ! in :_anaamika:experiment.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+        end subroutine experiment
+        subroutine cr8modulationimage(filen,n,m,seed,scratch,srldir) ! in :_anaamika:cr8modulationimage.f
+            character*500 intent(in) :: filen
+            integer intent(in) :: n
+            integer intent(in) :: m
+            integer intent(in,out) :: seed
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+        end subroutine cr8modulationimage
+        subroutine callfitgaussian(f1) ! in :_anaamika:callfitgaussian.f
+            character*500 intent(in) :: f1
+        end subroutine callfitgaussian
+        subroutine modulate(f1,f2,f3,scratch,srldir) ! in :_anaamika:modulate.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+            character*500 intent(in) :: f3
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+        end subroutine modulate
+        subroutine medianfilter(ft,f1,f2) ! in :_anaamika:medianfilter.f
+            integer intent(in) :: ft
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+        end subroutine medianfilter
+        subroutine callmoment(f1) ! in :_anaamika:callmoment.f
+            character*500 intent(in) :: f1
+        end subroutine callmoment
+        subroutine transposeim(f1,f2) ! in :_anaamika:transposeim.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+        end subroutine transposeim
+        subroutine displaytwoim(fn1,fn2) ! in :_anaamika:displaytwoim.f
+            character*500 intent(in) :: fn1
+            character*500 intent(in) :: fn2
+        end subroutine displaytwoim
+        subroutine displayim(f1,scratch,srldir) ! in :_anaamika:displayim.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+        end subroutine displayim
+        subroutine acf(f1,f2) ! in :_anaamika:acf.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+        end subroutine acf
+        subroutine structfn(f1,f2,order) ! in :_anaamika:structfn.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+            integer intent(in) :: order
+        end subroutine structfn
+        subroutine populatesrcs(f1,seed,scratch,srldir) ! in :_anaamika:populatesrcs.f
+            character*500 intent(in) :: f1
+            integer intent(in,out) :: seed
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+        end subroutine populatesrcs
+        subroutine addimages(scratch,of,runcode) ! in :_anaamika:addimages.f
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: of
+            character*2 intent(in) :: runcode
+        end subroutine addimages
+        subroutine combineimage(f1,f2,f3,str1) ! in :_anaamika:combineimage.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+            character*500 intent(in) :: f3
+            character*3 intent(in) :: str1
+        end subroutine combineimage
+        subroutine operateimage(f1,f2) ! in :_anaamika:operateimage.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+        end subroutine operateimage
+        subroutine subim(f1,f2,code) ! in :_anaamika:subim.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+            character*2 intent(in) :: code
+        end subroutine subim
+        subroutine imagestats(f1,kappa,scratch) ! in :_anaamika:imagestats.f
+            character*500 intent(in) :: f1
+            real*8 intent(in) :: kappa
+            character*500 intent(in) :: scratch
+        end subroutine imagestats
+        subroutine nsigmacut(f1,f2,nsig) ! in :_anaamika:nsigmacut.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+            real*8 intent(in) :: nsig
+        end subroutine nsigmacut
+        subroutine primarybeam(f1,f2) ! in :_anaamika:primarybeam.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+        end subroutine primarybeam
+        subroutine readheader(f1,scratch,extn) ! in :_anaamika:readheader.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: scratch
+            character*20 intent(in) :: extn
+        end subroutine readheader
+        subroutine copyheader(f1,f2,scratch,extn) ! in :_anaamika:copyheader.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+            character*500 intent(in) :: scratch
+            character*20 intent(in) :: extn
+        end subroutine copyheader
+        subroutine puthead(f1,scratch,extn) ! in :_anaamika:puthead.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: scratch
+            character*20 intent(in) :: extn
+        end subroutine puthead
+        subroutine slice(f1) ! in :_anaamika:slice.f
+            character*500 intent(in) :: f1
+        end subroutine slice
+        subroutine callremag(f1,f2,scratch,runcode) ! in :_anaamika:callremag.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+            character*500 intent(in) :: scratch
+            character*2 intent(in) :: runcode
+        end subroutine callremag
+        subroutine callfft(f1,scratch,runcode) ! in :_anaamika:callfft.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: scratch
+            character*2 intent(in) :: runcode
+        end subroutine callfft
+        subroutine call_getcoords(fitsdir,scratch,fitsname,runcode) ! in :_anaamika:call_getcoords.f
+            character*500 intent(in) :: fitsdir
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: fitsname
+            character*2 intent(in) :: runcode
+        end subroutine call_getcoords
+        subroutine callreadfits(fitsdir,fitsname,filename,f2,scratch,runcode) ! in :_anaamika:callreadfits.f
+            character*500 intent(in) :: fitsdir
+            character*500 intent(in) :: fitsname
+            character*500 intent(in) :: filename
+            character*500 intent(in) :: f2
+            character*500 intent(in) :: scratch
+            character*2 intent(in) :: runcode
+        end subroutine callreadfits
+    end interface 
+end python module _anaamika
+
+! This file was auto-generated with f2py (version:2_3979).
+! See http://cens.ioc.ee/projects/f2py2e/

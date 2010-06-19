@@ -1,0 +1,114 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _fbdsm_sub1 ! in 
+    interface  ! in :_fbdsm_sub1
+        subroutine get_keyword(f1,extn,keyword,keystrng,keyvalue,comment,code,scratch,error) ! in :_fbdsm_sub1:get_keyword.f
+            character*500 intent(in) :: f1
+            character*20 intent(in) :: extn
+            character*500 intent(in) :: keyword
+            character*500 intent(out) :: keystrng
+            real*8 intent(out) :: keyvalue
+            character*500 intent(out) :: comment
+            character*1 intent(in) :: code
+            character*500 intent(in) :: scratch
+            integer intent(out) :: error
+        end subroutine get_keyword
+        subroutine readgaul(f1,x,nsrc,srldir,gaulid,islid,flag,tot,dtot,peak,epeak,ra,era,dec,edec,xpix,expix,ypix,eypix,bmaj,ebmaj,bmin,ebmin,bpa,ebpa,dbmaj,edbmaj,dbmin,edbmin,dbpa,edbpa,sstd,sav,rstd,rav,chisq,q,code,names,blc1,blc2,trc1,trc2,dumr1,dumr2,dumr3,dumr4,dumr5,dumr6) ! in :_fbdsm_sub1:readgaul.f
+            character*500 intent(in) :: f1
+            integer intent(in) :: x
+            integer intent(in) :: nsrc
+            character*500 intent(in) :: srldir
+            integer dimension(x),intent(out),depend(x) :: gaulid
+            integer dimension(x),intent(out),depend(x) :: islid
+            integer dimension(x),intent(out),depend(x) :: flag
+            real*8 dimension(x),intent(out),depend(x) :: tot
+            real*8 dimension(x),intent(out),depend(x) :: dtot
+            real*8 dimension(x),intent(out),depend(x) :: peak
+            real*8 dimension(x),intent(out),depend(x) :: epeak
+            real*8 dimension(x),intent(out),depend(x) :: ra
+            real*8 dimension(x),intent(out),depend(x) :: era
+            real*8 dimension(x),intent(out),depend(x) :: dec
+            real*8 dimension(x),intent(out),depend(x) :: edec
+            real*8 dimension(x),intent(out),depend(x) :: xpix
+            real*8 dimension(x),intent(out),depend(x) :: expix
+            real*8 dimension(x),intent(out),depend(x) :: ypix
+            real*8 dimension(x),intent(out),depend(x) :: eypix
+            real*8 dimension(x),intent(out),depend(x) :: bmaj
+            real*8 dimension(x),intent(out),depend(x) :: ebmaj
+            real*8 dimension(x),intent(out),depend(x) :: bmin
+            real*8 dimension(x),intent(out),depend(x) :: ebmin
+            real*8 dimension(x),intent(out),depend(x) :: bpa
+            real*8 dimension(x),intent(out),depend(x) :: ebpa
+            real*8 dimension(x),intent(out),depend(x) :: dbmaj
+            real*8 dimension(x),intent(out),depend(x) :: edbmaj
+            real*8 dimension(x),intent(out),depend(x) :: dbmin
+            real*8 dimension(x),intent(out),depend(x) :: edbmin
+            real*8 dimension(x),intent(out),depend(x) :: dbpa
+            real*8 dimension(x),intent(out),depend(x) :: edbpa
+            real*8 dimension(x),intent(out),depend(x) :: sstd
+            real*8 dimension(x),intent(out),depend(x) :: sav
+            real*8 dimension(x),intent(out),depend(x) :: rstd
+            real*8 dimension(x),intent(out),depend(x) :: rav
+            real*8 dimension(x),intent(out),depend(x) :: chisq
+            real*8 dimension(x),intent(out),depend(x) :: q
+            character dimension(x,4),intent(out,c),depend(x) :: code
+            character dimension(x,30),intent(out,c),depend(x) :: names
+            integer dimension(x),intent(out),depend(x) :: blc1
+            integer dimension(x),intent(out),depend(x) :: blc2
+            integer dimension(x),intent(out),depend(x) :: trc1
+            integer dimension(x),intent(out),depend(x) :: trc2
+            real*8 dimension(x),intent(out),depend(x) :: dumr1
+            real*8 dimension(x),intent(out),depend(x) :: dumr2
+            real*8 dimension(x),intent(out),depend(x) :: dumr3
+            real*8 dimension(x),intent(out),depend(x) :: dumr4
+            real*8 dimension(x),intent(out),depend(x) :: dumr5
+            real*8 dimension(x),intent(out),depend(x) :: dumr6
+        end subroutine readgaul
+        subroutine vec_stats(vec,x,n1,n,med,cmed,rms,av,crms,cav,nsig) ! in :_fbdsm_sub1:vec_stats.f
+            real*8 dimension(x),intent(in) :: vec
+            integer optional,check(len(vec)>=x),depend(vec) :: x=len(vec)
+            integer intent(in) :: n1
+            integer intent(in) :: n
+            real*8 intent(out) :: med
+            real*8 intent(out) :: cmed
+            real*8 intent(out) :: rms
+            real*8 intent(out) :: av
+            real*8 intent(out) :: crms
+            real*8 intent(out) :: cav
+            real*8 intent(in) :: nsig
+        end subroutine vec_stats
+        subroutine read_psfparadefine(generators,nsig,over,kappa2,snrcut,snrtop,snrbot,snrcutstack,error,error1,gencode,primarygen,tess_method,tess_sc,tess_fuzzy) ! in :_fbdsm_sub1:read_psfparadefine.f
+            character*500 intent(out) :: generators
+            real*8 intent(out) :: nsig
+            integer intent(out) :: over
+            real*8 intent(out) :: kappa2
+            real*8 intent(out) :: snrcut
+            real*8 intent(out) :: snrtop
+            real*8 intent(out) :: snrbot
+            real*8 intent(out) :: snrcutstack
+            integer intent(out) :: error
+            integer intent(out) :: error1
+            character*4 intent(out) :: gencode
+            character*500 intent(out) :: primarygen
+            integer intent(out) :: tess_method
+            character*1 intent(out) :: tess_sc
+            real*8 intent(out) :: tess_fuzzy
+        end subroutine read_psfparadefine
+        subroutine sourcelistheaders(f2,f1,n,m,nisl,ngau,gpi,nffmt,ffmt,srldir) ! in :_fbdsm_sub1:sourcelistheaders.f
+            character*500 intent(in) :: f2
+            character*500 intent(out) :: f1
+            integer intent(out) :: n
+            integer intent(out) :: m
+            integer intent(out) :: nisl
+            integer intent(out) :: ngau
+            integer intent(out) :: gpi
+            integer intent(out) :: nffmt
+            character*500 intent(out) :: ffmt
+            character*500 intent(in) :: srldir
+        end subroutine sourcelistheaders
+    end interface 
+end python module _fbdsm_sub1
+
+! This file was auto-generated with f2py (version:2_5865).
+! See http://cens.ioc.ee/projects/f2py2e/

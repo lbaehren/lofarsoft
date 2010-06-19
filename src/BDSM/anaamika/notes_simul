@@ -1,0 +1,44 @@
+
+read and write fits files
+create image with position and freq info and out in ascii header
+get this header and write to fits file
+
+create noise for integ time. and src statistics - check if right.
+
+then simulate srcs on it 
+  -- not in centre of pixels
+  -- extended emission properly
+  -- rms variation done by modulation
+  -- convolve with fft
+  -- convolve with psf which is varying --- shapelets ?
+  -- create spectral data
+  -- pointings etc
+  -- store source catalogue someplace
+  
+##########################################################################
+
+1. Populate sources. 
+     populatesrc.f is correct in basics.
+     FIX object sizes
+     FIX large objects like haloes, 3C etc
+     FIX posn of object not in pixel centre
+
+   Convolve with gaussian in constant INTENSITY mode
+   Store pixel scale in header
+
+  actually, first create source list. full, from smin, very big. then 
+  ask for pointing centre, put primary beam on image. conf noise is therefore
+  fn of radius. no, will be too big.
+  ask for noise, then store only srcs above 1 sigma and rest u dont store and
+  generate each time. 
+
+
+   
+2. Calculate noise level, do correct noise map with correct pixel scale
+   Add these two.
+
+3. writefits should take header info and write it out.
+
+
+
+

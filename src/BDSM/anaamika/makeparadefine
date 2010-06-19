@@ -1,0 +1,135 @@
+#!/bin/bash
+
+echo ' Setting up paradefine files ... '
+
+if [ -z $HOSTNAME ]; then
+  export solnname='trial'
+else
+ export solnname=$HOSTNAME
+fi
+
+export fitsname='default.fits'
+export runcode='aq'
+export airuncode='mq'
+export gausshap='11'
+export bmpersrc_th=0
+export boxsize_th=0
+export stepsize_th=0
+export boxsize_th=0
+export boxsize_th=0
+export thresh='default'
+export fdralpha=0.05
+export thresh_pix=0
+export thresh_isl=0
+export minpix_isl=0
+export maxsize_beam=0
+export rms_map='default'
+export ch0plane=0
+export overlay_colour='grey'
+export overlay_code='B8D'
+export qcsolnname='trial'
+export takemeanclip='default'
+export plotspectra='false'
+export plotpairs='false'
+export makepdf='false'
+export spindef=-0.7
+export spinflux='total'
+export bmaj=0.0
+export bmin=0.0
+export bpa=0.0
+export saveplots='n'
+export generators='calibrators'
+export gencode='list'
+export primarygen='file.name'
+export over=2.0
+export nsig=3.0
+export kappa2=3.0
+export snrcut=10.0
+export snrtop=0.10
+export snrbot=0.30
+export tess_method=0
+export tess_sc='s'
+export tess_fuzzy=0.05
+export editor='gvim'
+
+
+rm -fr paradefine 
+echo "fitsdir = '$fitsdir' fits directory" > paradefine
+echo "scratch = '$scratch' scratch directory" >> paradefine
+echo "srldir = '$srldir' source list directory" >> paradefine
+echo "plotdir = '$plotdir' plots directory" >> paradefine
+echo "fitsname = '$fitsname' name of fits file" >> paradefine
+echo "solnname = '$solnname' id name for sourcelist" >> paradefine
+echo "runcode = '$runcode' (a)uto/(m)anual and (q)uiet/(v)erbose" >> paradefine
+echo "gausshap = '$gausshap' fit gaussian, shapelets (1=fit; 0=dont fit); default=11=both" >> paradefine
+echo "bmpersrc_th = $bmpersrc_th beams per source, 0 => calculate in prog" >> paradefine
+echo "boxsize_th = $boxsize_th boxsize for rms image, 0 => calculate in prog" >> paradefine
+echo "stepsize_th = $stepsize_th stepsize for rms image, 0 => calculate in prog" >> paradefine
+echo "thresh = '$thresh' hard or fdr pixel threshold, default => calculate from prog" >> paradefine
+echo "fdr_alpha = $fdralpha alpha value for FDR; 0  => set to 0.05 inside prog" >> paradefine
+echo "thresh_pix = $thresh_pix pixel threshold in sigma, 0 => set to 5 inside prog " >> paradefine
+echo "thresh_isl = $thresh_isl island threshold in sigma, 0 => set to 3 inside prog " >> paradefine
+echo "minpix_isl = $minpix_isl minimum num of pixels per island, 0 => set to 4 inside prog" >> paradefine
+echo "maxsize_beam = $maxsize_beam maximum size of fitted gaussian in beam area, 0 => set to 10 inside prog" >> paradefine
+echo "rms_map = '$rms_map' take 'const' rms or rms 'map' or 'existing' map, default => calculate in prog" >> paradefine
+echo "ch0plane = $ch0plane plane of 3d image to extract from, 0 & invalid => collapsed image" >> paradefine
+echo "takemeanclip = '$takemeanclip' take calculated mean_clip or 0, not true/false => calculate in prog" >> paradefine
+echo "BMAJ = $bmaj BMAJ (fwhm deg). If not in fits header, take this, and if bmaj=0, ask user" >> paradefine
+echo "BMIN = $bmin BMIN (fwhm deg). If not in fits header, take this, and if bmin=0, ask user" >> paradefine
+echo "BPA = $bpa BPA (deg). If not in fits header, take this, and if bpa=0, ask user" >> paradefine
+echo "editor = '$editor' editor" >> paradefine
+
+
+rm -fr qcparadefine 
+echo "fitsdir = '$fitsdir' fits directory" > qcparadefine
+echo "scratch = '$scratch' scratch directory" >> qcparadefine
+echo "srldir = '$srldir' source list directory" >> qcparadefine
+echo "plotdir = '$plotdir' plots directory" >> qcparadefine
+echo "fitsname = '$fitsname' name of fits file" >> qcparadefine
+echo "solnname = '$solnname' id name for bdsm_sourcelist" >> qcparadefine
+echo "qcsolnname = '$qcsolnname' id name for qc_sourcelist" >> qcparadefine
+echo "runcode = '$runcode' (a)uto/(m)anual and (q)uiet/(v)erbose" >> qcparadefine
+echo "overlay_colour = '$overlay_colour' Colourscheme for overlay, default => 'grey'" >> qcparadefine
+echo "overlay_code = '$overlay_code' Menu numbers for overlay, default => 'B8D'" >> qcparadefine
+
+rm -fr gsmparadefine 
+echo "fitsdir = '$fitsdir' fits directory" > gsmparadefine
+echo "scratch = '$scratch' scratch directory" >> gsmparadefine
+echo "srldir = '$srldir' source list directory" >> gsmparadefine
+echo "plotdir = '$plotdir' plots directory" >> gsmparadefine
+echo "gsmsolnname = '$solnname' id name for GSM" >> gsmparadefine
+echo "plotspectra = '$plotspectra' plots spectra of all associated sources if true " >> gsmparadefine
+echo "makepdf = '$makepdf' makes pdf files of all the plots. takes time. " >> gsmparadefine
+echo "spindef = $spindef default spectral index for flux estimate with one point, 0 => -0.7" >> gsmparadefine
+echo "spinflux = '$spinflux' spectral index with 'peak' or 'total'. else total." >> gsmparadefine
+echo "runcode = '$runcode' (a)uto/(m)anual and (q)uiet/(v)erbose" >> gsmparadefine
+echo "plotpairs = '$plotpairs' plots parameters for every pair of catalogues if True " >> gsmparadefine
+
+rm -fr aiparadefine 
+echo "fitsdir = '$fitsdir' fits directory" > aiparadefine
+echo "scratch = '$scratch' scratch directory" >> aiparadefine
+echo "srldir = '$srldir' source list directory" >> aiparadefine
+echo "plotdir = '$plotdir' plots directory" >> aiparadefine
+echo "fitsname = '$fitsname' name of fits file" >> aiparadefine
+echo "solnname = '$solnname' id name for sourcelist" >> aiparadefine
+echo "airuncode = '$airuncode' (a)uto/(m)anual and (q)uiet/(v)erbose" >> aiparadefine
+echo "gausshap = '$gausshap' analyse gaussian, shapelets (1=y; 0=n); default=11=both" >> aiparadefine
+echo "saveplots = '$saveplots' (y)es/(n) - save plots or not; else (n)o. " >> aiparadefine
+
+
+rm -fr psfparadefine 
+echo "generators = '$generators' calibrator/field; default=calibrator " > psfparadefine
+echo "gencode = '$gencode' list/file, default=list, primary gens from gaussian list or file " >> psfparadefine
+echo "primarygen = '$primarygen' filename for primary gens if gencode=file, x,y,snr " >> psfparadefine
+echo "over-ny = $over factor of nyquist sample for binning bmaj etc vs snr; default=2" >> psfparadefine
+echo "kappa-bin = $nsig kappa for clipping within each bin; default=3.0" >> psfparadefine
+echo "kappa-all = $kappa2 kappa for clipping for analytic fit; default=3.0" >> psfparadefine
+echo "snrcut = $snrcut minimum snr for statistics; default=10.0" >> psfparadefine
+echo "snrtop = $snrtop fraction of SNR>snrcut as primary generators; default=0.10" >> psfparadefine
+echo "snrbot = $snrbot fraction of SNR>snrcut as all generators; default=0.30" >> psfparadefine
+echo "tess_method = $tess_method 0=normal, 1=0+round, 2=LogSNR, 3=SqrtLogSNR ; default=0" >> psfparadefine
+echo "tess_sc = '$tess_sc' (s)imple/(c)omplicated - normal or approximate (fuzzy); default=s " >> psfparadefine
+echo "tess_fuzzy = $tess_fuzzy fraction of overlap for fuzzy tesselation; default=0.05" >> psfparadefine
+
+
+

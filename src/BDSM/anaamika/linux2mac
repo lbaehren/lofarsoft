@@ -1,0 +1,13 @@
+#!/bin/bash
+
+sed 's/ps \-ef/ps \-ax/' noise.f > a; mv -f a noise.f
+sed 's/ps \-ef/ps \-ax/' sm.f > a; mv -f a sm.f
+sed 's/ps \-ef/ps \-ax/' calltest.f > a; mv -f a calltest.f
+sed 's/ps \-ef/ps \-ax/' shapelets.f > a; mv -f a shapelets.f
+
+sed 's/$8/$9/' noise.f > a; mv -f a noise.f
+sed 's/$8/$9/' addimages.f > a; mv -f a addimages.f
+sed 's/$2/$1/' noise.f > a; mv -f a noise.f
+sed 's/$2/$1/' sm.f > a; mv -f a sm.f
+sed 's/\-P//' readfitshead.f > a; mv -f a readfitshead.f
+cp create bdsm-dir/

@@ -1,0 +1,108 @@
+#!/usr/bin/perl
+##########################################
+# This (somewhat) modernized version of the skvbatch command can
+# be used on top of WGET or other more modern executables
+# rather than the venerable WEBQUERY script.
+# It is used to return images directly from SkyView.
+#
+# Calling sequence and parameter information
+# can be found on the SkyView web site:
+#     http://skyview.gsfc.nasa.gov/batchpage.html
+#
+# Examples:
+#  skvbatch_wget file=example1.fits position='+12 34,-10 23' Survey='Digitized Sky Survey'
+#  skvbatch_wget file=example1.gif position='cen a' Survey='DSS' return=gif grid
+#
+#
+# This software is in the public domain and may be used
+# for any purposes without restriction.
+#
+#   Tom McGlynn: October 7, 2008
+
+##########################################
+
+# Assume WGET is in the path.
+# If you replace WGET with another command you may need to update the
+# arguments. Remove the -q for verbose mode
+my $cmd = "wget -q ";  
+
+my $host     =  "skyview.gsfc.nasa.gov";
+my $url      =  "/cgi-bin/pskcall?";
+my $filename =  "-";   # This means STDOUT for WGET
+
+# Loop over the argument list  to see
+# if file has been defined 
+my $i=0;
+foreach (@ARGV) {
+  if (/^file=/i) {
+      $filename= splice(@ARGV, $i, 1);
+      my $key;
+      ($key, $filename) = split("=", $filename, 2);
+      last;
+  }
+  $i += 1;
+}
+
+# if host has been defined 
+$i=0;
+foreach (@ARGV) {
+  if (/^host=/i) {
+      my $hostname = splice(@ARGV,$i,1);
+      my $key;
+      ($key,$host) = split('=',$hostname, 2);
+      last;
+  }
+  $i += 1;
+}
+
+# Loop over the argument list  to see
+# if url has been defined 
+$i=0;
+foreach (@ARGV) {
+  if (/^url=/i) {
+      my $urlstring = splice(@ARGV, $i, 1);
+      my $key;
+      ($key, $url) = split("=", $urlstring, 2);
+      last;
+  }
+  $i += 1;
+}
+
+my $fullUrl = "http://$host/$url";
+my $sep = "";
+
+foreach (@ARGV) {
+   my ($key, $val) = split("=", $_, 2);
+   $fullUrl .= $sep . webcode($key) . "=" . webcode($val);
+   $sep = "&";
+}
+
+# Specify the output file.  This may need to be modified is you use
+# something other than WGET.
+
+if ($filename) {
+   $cmd .= " -O $filename ";
+}
+#$cmd .= $fullUrl;
+$cmd .= "\"".$fullUrl."\"";
+#print STDERR "Cmd is: $cmd\n";
+
+# Now run the command
+`$cmd`;
+
+# And that's all there is
+sub webcode {
+
+   my  ($string) = @_;
+
+   # First convert special characters to to %xx notation.
+   $string =~ s/[^ a-zA-Z0-9]/sprintf("%%%02x", ord($&))/eg ;
+
+   # Now convert the spaces to +'s.
+  # We do this last since otherwise +'s would be translated by above.
+   $string =~ tr/ /+/;
+
+   # Perl doesn't require (or even like) putting in the return value,
+   # but I find it clearer.
+   return $string;
+}

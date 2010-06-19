@@ -1,0 +1,33 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _star2gaul ! in 
+    interface  ! in :_star2gaul
+        subroutine star2gaulsrl(f1,f2,runcode,scratch,srldir,rcode) ! in :_star2gaul:star2gaulsrl.f
+            character*500 :: f1
+            character*500 :: f2
+            character*2 :: runcode
+            character*500 :: scratch
+            character*500 :: srldir
+            character*1 :: rcode
+        end subroutine star2gaulsrl
+        subroutine sub_star2gaulsrl(f1,f2,runcode,scratch,srldir,nstar,nn,rcode,ch1,rms,freq,calctot,wcsimp) ! in :_star2gaul:star2gaulsrl.f
+            character*500 intent(in) :: f1
+            character*500 intent(in) :: f2
+            character*2 intent(in) :: runcode
+            character*500 intent(in) :: scratch
+            character*500 intent(in) :: srldir
+            integer intent(in) :: nstar
+            integer intent(in) :: nn
+            character*1 intent(in) :: rcode
+            character*1 intent(in) :: ch1
+            real*8 intent(in) :: rms
+            real*8 intent(in) :: freq
+            character*1 intent(in) :: calctot
+            character*1 intent(in) :: wcsimp
+        end subroutine sub_star2gaulsrl
+    end interface 
+end python module _star2gaul
+
+! This file was auto-generated with f2py (version:2_5865).
+! See http://cens.ioc.ee/projects/f2py2e/
