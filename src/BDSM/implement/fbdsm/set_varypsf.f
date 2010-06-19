@@ -5,7 +5,7 @@ c! beamvary=1  =>  simplest -- const + sine wave + slope.
         subroutine set_varypsf(fn,beamvary,bmvaryf,bmvaryn,seed,
      /             n,m,bmpix,cdelt1,cdelt2)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer bmvaryn,seed,n,m,i,j,nchar
         real*8 bmvaryf(bmvaryn),rand,bmpix,widx(n,m),widy(n,m)
         real*8 cdelt1,cdelt2,sigx(n,m),sigy(n,m),dumr

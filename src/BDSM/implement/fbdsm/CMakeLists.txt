@@ -264,6 +264,7 @@ add_executable (simulation
   get_subim_ptsrc.f
   get_subim_xsrc.f
   set_varypsf.f
+  func3.f
   getcdf.f
   getsurr_8pix.f
   primarybeam3D_many.f
@@ -277,6 +278,8 @@ add_executable (simulation
   sub_prog.f
   subim3D.f
   sim_addnoisrc.f
+  spinfunc0.f
+  spinfunc1.f
   writearray.f
   writefits3D.f
   )

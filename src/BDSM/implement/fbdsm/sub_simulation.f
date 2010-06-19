@@ -3,7 +3,7 @@ c! subroutines for simulation.f
         subroutine getsurveypara(area,time,bw,nchan,freq,bl,fn,
      /             dia,beamvary)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         real*8 area,time,bw,freq,bl,prbm,dia
         integer nchan,dumi
         character fn*500,beamvary,getchar

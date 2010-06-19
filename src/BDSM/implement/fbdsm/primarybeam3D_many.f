@@ -3,7 +3,7 @@ c! put in effect of primary beam.
         subroutine primarybeam3D_many(f1,imsizex,imsizey,nchan,cdelt1,
      /        freq,dia,npoint,xc,yc,maxpt,scratch)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer imsizex,imsizey,nchan,i,j,k,maxpt,npoint,n,m,z,nchar
         integer xc(maxpt),yc(maxpt),ipt
         real*8 image(imsizex,imsizey,nchan),freq,dia

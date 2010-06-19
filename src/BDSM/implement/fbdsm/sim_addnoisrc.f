@@ -50,7 +50,7 @@ c! do primary beam for src image, add to noise, write to fits.
      /             ptsizey,ipt,npt,freq,cdelt1,cdelt2,synbeam,crval1,
      /             crval2,crpix1a,crpix2a,bw,fitsdir)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         character fn*500,f1*500
         integer nchar,ptsizex,ptsizey,nchan,ipt
         integer blc(3),trc(3),i,j,k,imsize,xc,yc,npt

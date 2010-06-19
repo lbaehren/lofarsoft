@@ -7,7 +7,7 @@ c! this is convolution with constant intensity. need that so source peak fluxes 
         subroutine get_subim_ptsrc(image,x,n,bmpix,flux,
      /       xposn,yposn,intx,inty,bmvaryn,bmvaryf,beamvary,imsize)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer x,n,i,j,round,intx,inty,imsize,bmvaryn
         real*8 image(x,x),bmpix,flux,xposn,yposn,dumr,xc,yc
         real*8 bmvaryf(bmvaryn),widthx,widthy
