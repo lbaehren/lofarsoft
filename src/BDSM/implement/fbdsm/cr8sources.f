@@ -3,7 +3,11 @@ c! source list. To test BDSM with, exactly. copy most stuff from simulation.f
 
         subroutine cr8sources(filename,seed,scratch,srldir,fitsdir)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
+=======
+        include "includes/constants.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         character filename*500,scratch*500,srldir*500,fitsdir*500
         real*8 fwhm,beampersrc,snrmin,snrmax,bmareamin,bmareamax
         real*8 dumr1,dumr2,ratmin,ratmax,dumr,bmarea
@@ -40,8 +44,13 @@ c!      --------------------------------   SUBROUTINES   -----------------------
      /     snrmax,bmareamin,bmareamax,ratmin,ratmax,seed,msize,
      /     scratch,srldir,fitsdir,nsrc,bmarea)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
         include "wcs_bdsm.inc"
+=======
+        include "includes/constants.inc"
+        include "includes/wcs_bdsm.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer n,m,nsrc,round,seed,msize,xc,yc,xca,yca
         integer nchar,isrc,i,j,dumi,wid,flag(1),sqrtn
         real*8 fwhm,beampersrc,snrmin,snrmax,bmareamin,bmareamax
@@ -279,7 +288,7 @@ c!
         subroutine sub_cr8sources_rand_a(seed,a,snrmin,snrmax,n,m,
      /        bmareamin,bmareamax,ratmin,ratmax,bmarea)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,m,seed
         real*8 fwhm,beampersrc,snrmin,snrmax,bmareamin,bmareamax
         real*8 a(6),rand,ratio,area,ratmin,ratmax,bmarea,low,hi

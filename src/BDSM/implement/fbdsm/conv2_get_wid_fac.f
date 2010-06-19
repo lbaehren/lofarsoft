@@ -4,7 +4,7 @@ c! u can get constant intensity or constant flux density convolution.
         
         subroutine conv2_get_wid_fac(sigma,n,m,s1,fac,wid)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,m,wid,i,j,i1
         real*8 sigma(3),s1,fac,s2,g,arg1,arg2,ct,st,f1,f2
 

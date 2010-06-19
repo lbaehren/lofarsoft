@@ -138,8 +138,13 @@ c!
         subroutine pp_basicstats(f1,fname,n,m,scratch,imagename,
      /             snrclip,ctype,crpix,cdelt,crval,crota)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
         include "wcs_bdsm.inc"
+=======
+        include "includes/constants.inc"
+        include "includes/wcs_bdsm.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer n,m,mx(2),mn(2),nchar,error,blankn,error1
         character f1*500,extn*20,fn*500,keyword*500,fg*500,scratch*500
         character comment*500,code*1,keystrng*500,dir*500,fname*500
@@ -317,7 +322,7 @@ c!      ----------
 c!
         subroutine pp_imrms_para(f1,fname,n,m,scratch,boxsize,stepsize)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,m,nchar,boxsize,stepsize,conv_filt,round
         character f1*500,extn*20,fn*500,keyword*500,fg*500,fname*500
         character comment*500,code*1,keystrng*500,dir*500,scratch*500
@@ -385,8 +390,13 @@ c! nonlinear else linear
         subroutine pp_linearcoords(f1,fname,n,m,scratch,imagename,
      /    nn,ctype,crpix,cdelt,crval,crota,bm_pix)
         implicit none
+<<<<<<< HEAD
         include "wcs_bdsm.inc"
         include "constants.inc"
+=======
+        include "includes/wcs_bdsm.inc"
+        include "includes/constants.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer nn,n,m,i
         real*8 crpix(nn),cdelt(nn),crval(nn),crota(nn),bm_pix(nn)
         real*8 image(n,m),blankn,blankv

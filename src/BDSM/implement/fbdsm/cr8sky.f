@@ -6,7 +6,7 @@ c! Break up source counts into 5 bins, fit power law to each, invert, calc analy
      /    nchan,sens,cn1,sarr,gam1,nbin,seed,fn,std,srldir,
      /    beamvary,bmvaryf,bmvaryn)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer xsize
         integer nbin,i,j,imsize,seed,simsize,xc,yc
         integer xca,yca,round,i1,j1,nchar,nchan,ich

@@ -7,7 +7,11 @@ c! format is first double deckers and then single kothis. see notebook for forma
      /   tol,scrat,master,sec,dsum,scratch,flagm,flags,codem,codes,
      /   rcode,fac)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
+=======
+        include "includes/constants.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer nsrcm,nsrcs,nchar,i,j,fac
         character scrat*500,str1*1,fn*500,fmti*2,ffmt1*100,ffmt2*100
         character master*500,sec*500,scratch*500,rcode*2

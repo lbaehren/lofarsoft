@@ -9,7 +9,7 @@ c! which means all sources will be at centres of pixels of course.
      /    bmsampl,xsize,nchan,sens,cn1,sarr,gam1,nbin,seed,fn,
      /    std,srldir,beamvary,bmvaryf,bmvaryn)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer xsize
         integer nbin,i,j,imsize,seed,xc,yc
         integer xca,yca,round,i1,j1,nchar,nchan,ich

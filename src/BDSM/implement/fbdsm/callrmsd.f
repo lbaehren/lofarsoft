@@ -28,7 +28,11 @@ c! -------------------------------- SUBROUTINES ----------------------------
 c!
         subroutine rmsd(f1,f2,n,m,runcode,scratch,imagename)
         implicit none
+<<<<<<< HEAD
         include "wcs_bdsm.inc"
+=======
+        include "includes/wcs_bdsm.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         character f1*500,extn*20,keyword*500,keystrng*500,f2*500
         character comment*500,dir*500,fg*500,scratch*500,runcode*2
         character imagename*500,fn*500,ctype(3)*8,rmsmap*500

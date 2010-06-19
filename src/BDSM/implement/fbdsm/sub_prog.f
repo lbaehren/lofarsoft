@@ -481,7 +481,11 @@ c! HELP1 subroutine gdist_pa(i,j,gpi,xpix,ypix,bmaj,bmin,bpa,fwhm)
 c! HELP 	Computes distance in arcsec in direction of PA
         subroutine gdist_pa(i,j,gpi,xpix,ypix,bmaj,bmin,bpa,fwhm)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
+=======
+        include "includes/constants.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer i,j,gpi
         real*8 xpix(gpi),ypix(gpi),bmaj(gpi),bmin(gpi),bpa(gpi)
         real*8 dumr1,dumr2,dumr3,fwhm,psi
@@ -1354,7 +1358,7 @@ c        end
 
         subroutine atanproper(dumr1,dy,dx)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         real*8 dumr1,dy,dx
         logical ysign,xsign
 
@@ -1375,7 +1379,11 @@ c!       !!!   is wrong -- within few " ! use Aoki !!!
 
         subroutine B1950toJ2000(ra,dec,raj,decj)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
+=======
+        include "includes/constants.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         real*8 ra,dec,raj,decj,ra1,dec1,deltac,deltad
         real*8 x,y,z,x1,y1,z1,dumr
         character s*1
@@ -1409,7 +1417,11 @@ c! seems to be same as NED to ~0.2".
 
         subroutine Aoki_B1950toJ2000(ra,dec,raj,decj)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
+=======
+        include "includes/constants.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         real*8 ra,dec,raj,decj,A(3),r0(3),r1(3),r0A,M(3,3)
         real*8 r(3),rscal,d1,d2
         integer i
@@ -1446,7 +1458,11 @@ c! seems to be same as NED to ~0.2".
 
         subroutine correctrarad(ra)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
+=======
+        include "includes/constants.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         real*8 ra
 
         if (ra*rad.gt.360.d0) ra=ra-360.d0/rad

@@ -146,10 +146,6 @@ OBJPG =  pgsub.o pgsub_opts.o setup_grey.o sourcelistheaders.o plotisland.o set_
  readhead_srclist.o drawcoords.o overplotpasf.o basicgrey.o wcs_isgoodpix.o  wcs_radec2xy.o  wcs_struct.o \
  freewcs.o getsurr_8pix.o read_head_coord.o getroot.o
 
-OBJAI = read_aiparadefine.o sub_prog.o ranbdsm1.o get_keyword.o call_analyse_isl.o readarray.o show_shap.o \
- writefits.o printerror.o deletefile.o read_dum_head.o readheader4fits.o displayshap.o readhead_srclist.o \
- readin_shapcoef.o writefitsshapcoef.o
-
 OBJAT = sub_prog.f xcr8noisemap.f conv2_get_wid_fac.f conv2.f writearray.f get_keyword.f gasdev.f \
  check.f conv2_get_gaus.f ran1.f sigclip.o get_atrous_h.o calc_atrous_cj.o calcmedian.o selectnr.o \
  arrstat.o get_pgnumb.o calc_atrous_cj_mask.o

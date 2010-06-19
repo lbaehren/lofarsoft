@@ -25,8 +25,13 @@ c!      ----------
 c!
         subroutine gaul2srl(fn,srldir,scratch,f2,nisl,ngau,gpi)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
         include "wcs_bdsm.inc"
+=======
+        include "includes/constants.inc"
+        include "includes/wcs_bdsm.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         character srldir*500,f2*500,scratch*500,f1*500,ffmt*500
         character fname*500,sname*500,snameb*500,comment*500
         character fn*500,extn*500,keyword*500,keystrng*500,f3*500
@@ -448,7 +453,7 @@ c!
         subroutine get_rpixval(x,y,cisl,gpi,peakfl,xpix,ypix,bmaj,bmin,
      /         bpa,cdelt,rpixval)   
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer i,j,gpi,cisl,round
         logical same_island
         real*8 peakfl(gpi),xpix(gpi),ypix(gpi),bmaj(gpi),cdelt(3)

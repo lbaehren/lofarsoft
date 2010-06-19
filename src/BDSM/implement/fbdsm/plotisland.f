@@ -28,7 +28,7 @@ c! CHANGE GAUL FORMAT
 
         subroutine sub_plotisland(f1,f2,n,m,nisl,nsrc,nffmt,ffmt)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,m,nchar,nsrc,nffmt,nisl,isrc,mask(n,m),i,j
         integer xic(nisl),yic(nisl),nc,iisl,flag(nsrc),error
         character f1*500,fn*500,extn*20,f2*500,ffmt*500,str1*1,fg*500

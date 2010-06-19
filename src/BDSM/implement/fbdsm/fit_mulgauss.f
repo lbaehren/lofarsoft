@@ -6,7 +6,7 @@ c! fits multiple gaussians. modified from ../shapelets/program
      /      error,thresh_pix,avclip,flag,flag_s,e_amp,e_x0,e_y0,
      /      e_maj,e_min,e_pa,e_tot)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer subn,subm,mask(subn,subm),nmulsrc,max_msrc,dof
         integer max6,nmul6,delx,dely,dumi,smask(subn,subm)
         integer nmul_o,nmul6_o,ind,dumi1,dumi2,flag(max_msrc),d

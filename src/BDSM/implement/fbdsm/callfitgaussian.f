@@ -20,7 +20,11 @@ cf2py   intent(in) f1
 c! actual subroutine. done this way so i know what n,m is
         subroutine fitgaussian(f1,n,m)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
+=======
+        include "includes/constants.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         integer n,m,nchar,ia(6),i,j,dof,fnum,nnum,ia4(4)
         real*8 image1(n,m),sig(n,m) 
         real*8 im1(n,m),im2(n,m)

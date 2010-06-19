@@ -17,7 +17,7 @@ c! in f77.
      /      max_msrc,thresh_pix,std,maxv,bm_pix,avclip,flag_s,
      /      wcs,wcslen,delx,dely,maxsize_beam,flagsmallsrc)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer nmulsrc,nmul6,quality(nmulsrc),i,d,npix,subn,subm
         integer max_msrc,wcslen,wcs(wcslen),delx,dely
         real*8 a(nmul6),thresh_pix,std,maxv,bm_pix(3),avclip

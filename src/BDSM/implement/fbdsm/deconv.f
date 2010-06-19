@@ -3,7 +3,11 @@ c! deconvolves gaus_r from gaus_o to give gaus_d. stolen shamelessly from aips D
         subroutine deconv(gaus_o,gaus_r,gaus_d,e_1,e_2,e_3,
      /             ed_1,ed_2,ed_3,error)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
+=======
+        include "includes/constants.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         real*8 gaus_o(3),gaus_r(3),gaus_d(3),e1,e2,e3
         real*8 phi_o,phi_r,maj2_r,min2_r,maj2_o,min2_o,theta,cost,sint
         real*8 rhoc,sigic,rhoa,dumr,e_1,e_2,e_3,ed_1,ed_2,ed_3

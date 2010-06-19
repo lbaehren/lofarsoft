@@ -1,7 +1,7 @@
 
       subroutine readfitshead(fitsdir,fitsname,f2,scratch)
       implicit none
-      include "constants.inc" 
+      include "includes/constants.inc"
       integer status,funit,readwrite,blocksize,nkeys,nspace,hdutype,i
       integer nchar,dumi,err,dumi1,error
       character fitsname*500,record*80,fn*500,cmd*500,fn40*500

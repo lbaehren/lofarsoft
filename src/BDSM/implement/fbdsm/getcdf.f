@@ -3,7 +3,11 @@ c! cdf is cumulative distr fn.
 
         subroutine getcdf(area,freq,sarr,cdfarr)
         implicit none
+<<<<<<< HEAD
         include "sourcecounts.inc"
+=======
+        include "includes/sourcecounts.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         real*8 area,freq,sarr(nbin),cdfarr(nbin),alpha
         character filen*500,dir*500
         integer i

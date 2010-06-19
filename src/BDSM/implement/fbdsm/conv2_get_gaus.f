@@ -2,7 +2,7 @@
 
         subroutine conv2_get_gaus(sigma,n,m,wid,g)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,m,i,j,wid,i1
         real*8 g(n,m),sigma(3),arg1,arg2,ct,st,f1,f2
 

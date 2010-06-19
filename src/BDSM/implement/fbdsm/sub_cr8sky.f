@@ -119,7 +119,7 @@ c! get size for convolved subimage of each source here. is an arbit hack, no fun
         subroutine get_subim_imsize(beam,flux,sens,simsize,bmvaryn,
      /             bmvaryf,beamvary,imsize)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         real*8 beam,flux,sens,dx,largest
         integer simsize,round
         integer bmvaryn,imsize

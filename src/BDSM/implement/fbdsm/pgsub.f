@@ -423,7 +423,11 @@ c! plots curves
 
         subroutine pgdrawellipse(x,y,bmaj,bmin,bpa,starc,linec,blacki)
         implicit none
+<<<<<<< HEAD
         include "constants.inc"
+=======
+        include "includes/constants.inc"
+>>>>>>> Updating source file list for noise; cleanining up include statements, as we no longer allow for symbolic links inside the source directory.
         real*4 x,y,bmaj,bmin,bpa,x1,x2(38),y1,y2(38),a,b,ang,d1,d2,d3
         integer i,s,starc,linec,blacki
 

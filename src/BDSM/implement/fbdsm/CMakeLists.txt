@@ -46,31 +46,50 @@ set (pgplot_required
 ##
 ## ==============================================================================
 
+set (OBJAI
+  read_aiparadefine.f
+  sub_prog.f
+  ranbdsm1.f
+  get_keyword.f
+  call_analyse_isl.f
+  readarray.f
+  show_shap.f
+  writefits.f
+  printerror.f
+  deletefile.f
+  read_dum_head.f
+  readheader4fits.f
+#  displayshap.f
+  readhead_srclist.f
+#  readin_shapcoef.f
+#  writefitsshapcoef.f
+  )
+
 set (OBJSH
   fit_shapelets.f
-  get_beta_cen_cart.f
-  findcen_cart.f
-  getcartim.f
-  decomp_cart.f
-  fitstr8line.f
-  getroot.f
+#  get_beta_cen_cart.f
+#  findcen_cart.f
+#  getcartim.f
+#  decomp_cart.f
+#  fitstr8line.f
+#  getroot.f
   get_centroid_mask.f
-  recons_cart.f
-  varybeta_cart.f
-  decomp_cart_mask.f
+#  recons_cart.f
+#  varybeta_cart.f
+#  decomp_cart_mask.f
   )
 
 set (OBJ8
   shapelets.f
-  coeffpower.f
-  locsub.f
-  s_displayshap.f
-  s_findcen.f
+#  coeffpower.f
+#  locsub.f
+#  s_displayshap.f
+#  s_findcen.f
   varybeta.f
   simul_shapelets.f
   main_shapelets.f
-  makeim_strongsrc.f
-  get_totrms_proper.f
+#  makeim_strongsrc.f
+#  get_totrms_proper.f
 )
 
 ## ==============================================================================
@@ -182,13 +201,21 @@ ADD_LIBRARY (bdsm_call
 ##
 ## ==============================================================================
 
-#add_executable (srccomp1
-#  srccomp1.f
-#  makelists1.f
-#  sub_prog.f
-#  sourcelistheaders.f
-#  readhead_srclist.f
-#  )
+#or_gsm : or_gsm.f $(OBJ5)
+#	$(FC) or_gsm.f $(OBJ5) $(WCSLIB) $(PGLIB) $(CFITS) -o or_gsm
+
+##____________________________________________________________________
+##                                                          simulation
+
+#analyse_island : analyse_island.f $(OBJAI) 
+#	$(FC) analyse_island.f $(OBJAI) $(CFITS) $(PGLIB) -o analyse_island
+
+add_executable (analyse_island
+  analyse_island.f
+  ${OBJAI}
+  )
+
+target_link_libraries (analyse_island ${CFITSIO_LIBRARIES})
 
 ##____________________________________________________________________
 ##                                                          simulation
@@ -272,115 +299,15 @@ TARGET_LINK_LIBRARIES (simulation_ilse
 ##____________________________________________________________________
 ##                                                               noise
 
+#noise : noise.f $(OBJ) $(OBJ8) $(OBJSH)
+#	$(FC) noise.f $(OBJ) $(OBJ8) $(CFLAGS) $(OBJSH) $(PGLIB) $(WCSLIB) $(CFITS)
+
 add_executable (noise
-  acf.f
-  arrstat.f
-  arrstatmask.f
-  associatesrl.f
-  basicgrey.f
-  bdsm.f
-  bdsm_boxnoiseimage.f
-  boxf.f
-  boxnoiseimage.f
-  calcmedian.f
-  check.f
-  clip.f
-  combineimage.f
-  conv2.f
-  conv2_get_gaus.f
-  conv2_get_wid_fac.f
-  convolveimage.f
-  copyheader.f
-  covsrt.f
-  deconv.f
-  deletefile.f
-  detectdiscont.f
-  displayim.f
-  displaytwoim.f
-  fgauss2de.f
-  fgauss2dne.f
-  fit_island.f
-  fit_mulgauss.f
-  fitinparts.f
-  formisland_rank.f
-  formislands.f
-  fourn.f
-  gaussj.f
-  fileformat.f
-  filling.f
-  fitcdf.f
-  gaul_to_source.f
-  get_gaus1_iniparm.f
-  get_keyword.f
-  get_numpix_val.f
-  get_rmsmap.f
-  get_subim_xsrc.f
-  getcdf.f
-  getco_ringwidth.f
-  getininp.f
-  getlistnsigpt.f
-  getsurr_8pix.f
-  iland_mat2list.f
-  imagestats.f
-  imstat.f
-  islandedit.f
-  make_associatelist1.f
-  make_mask_gausid.f
-  make_src_residim.f
-  medianfilter.f
-  modulate.f
-  mulsrc.f
-  nbit.f
-  noise.f
-  nsigmacut.f
-  operateimage.f
-  plot_associatelist1.f
-  plotisland.f
-  pgsub.f
-  populateinparts.f
-  populatesrcs.f
-  preprocess.f
-  primarybeam.f
-  printerror.f
-  put_keyword.f
-  puthead.f
-  putpixel.f
-  read_head_coord.f
-  read_paradefine.f
-  readarray.f
-  readfitshead.f
-  readgaul.f
-  readhead_srclist.f
-  readheader.f
-  readinimage.f
-  readininp.f
-  selectnr.f
-  sigclip.f
-  slice.f
-  soln_quality.f
-  sort2_4.f
-  sourcelistheaders.f
-  sourcemeasure.f
-  splintmod.f
-  structfn.f
-  sub_calc_para_source.f
-  sub_prog.f
-  sub_readislpix.f
-  sub_sourcemeasure_getblctrc.f
-  subim.f
-  testmomentanal.f
-  transposeim.f
-  write_associatelist1.f
-  writeaipsfiles.f
-  writearray.f
-  writefits.f
-  writefitshead.f
-  writeheader.f
-  xy2radec.f
-  # -- for some reason these files need to be included here; check "bdsm_nr"
-  gasdev.f
-  mrqmin2d.f
-)
+  noise.f 
+#  ${OBJ}
+  ${OBJ8}
+  ${OBJSH}
+  )
 TARGET_LINK_LIBRARIES (noise
   ${CFITSIO_LIBRARIES}
   bdsm_nr
@@ -511,12 +438,3 @@ target_link_libraries (bdsm-awe
   bdsm_call
   )
 
-#ADD_EXECUTABLE (a
-#	a.f
-#	combineimage.f
-#	readarray.f
-#	writearray.f
-#	check.f
-#	get_keyword.f
-#	sub_prog.f
-#)

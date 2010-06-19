@@ -3,7 +3,7 @@ c! and convolves and puts in a file.
 
         subroutine sim_cr8noise(fn,sens,nchan,imsize,bmsampl,seed)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         character fn*500
         integer imsize,seed,i,j,wid,nchan
         real*8 sens,bmsampl
@@ -27,7 +27,7 @@ c! do the actual work
         subroutine do_simcr8noise(fn,sens,nchan,imsize,bmsampl,seed,
      /             fac,s1,wid)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         character fn*500,filen*500
         integer imsize,seed,i,j,wid,i1,j1,i2,j2
         integer nchar,nchan,ich

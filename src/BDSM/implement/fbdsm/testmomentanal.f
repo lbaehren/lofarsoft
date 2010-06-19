@@ -45,7 +45,7 @@ c!
         subroutine sub_testmomentanal(armin,armax,snrmin,snrmax,
      /       arnum,snrnum,seed,imsize)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer arnum,snrnum,seed,imsize,i,isnr,iar,round,i1,j1
         real*8 snrmin,snrmax,dumr,armin,armax,rand
         real*8 snr(snrnum),ar(arnum),bmaj,bmin,bpa,a4,a5,a6
@@ -203,7 +203,7 @@ c!      ==========
 c!
         subroutine momanal(image,n,m,mask,mompara,bmar_p)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,m,mask(n,m),i,j
         real*8 image(n,m),mompara(6),mom1(2),mom2(2),m11,tot,bmar_p
         real*8 dumr

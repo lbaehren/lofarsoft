@@ -6,7 +6,7 @@ c! which source each pixel belongs to.
      /        xpix,ypix,bmaj,bmin,bpa,xpixs,ypixs,maxmem,npix_isl,
      /        cdelt,delx,dely,islct,islnum,subim,flag,sisl)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer maxmem,npix_isl,xpixs(maxmem),ypixs(maxmem)
         integer subn,subm,blc(2),trc(2),mask(subn,subm),cisl
         integer origmask(subn,subm),sisl
