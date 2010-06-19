@@ -23,9 +23,7 @@ add_custom_target (create
 ## Fortran-based version
 
 if (BDSM_WITH_FBDSM)
-  add_subdirectory (bdsm)
-  ## run create script before creating library
-  add_dependencies (bdsm_nr create)
+  add_subdirectory (fbdsm)
 endif (BDSM_WITH_FBDSM)
 
 ## Python-based version
