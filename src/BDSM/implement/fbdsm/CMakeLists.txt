@@ -1,6 +1,80 @@
 
 ## ==============================================================================
 ##
+##  Preprocessing
+##
+## ==============================================================================
+
+#  As Fortran does not know precompiler statements, encapsulation of code is not
+#  posible in the straight-forward manner a this can be done in C/C++. As a
+#  consequence of this, the fBDSM source code contains quite a few instructions 
+#  which only can be compiled successfully, if the required external packages
+#  are available.
+#
+#  Running the following sequence of command line instructions from within the
+#  current directory, will produce a list of source files which make use of
+#  functionality from the PGPlot library:
+#
+#  grep "call pg" * | tr ":" "\n" | grep "\.f" | uniq
+
+set (pgplot_required
+  acf.f
+  basicgrey.f
+  boxnoiseimage.f
+  callfitgaussian.f
+  callgetpixel.f
+  displaytwoim.f
+  imagestats.f
+  imstat.f
+  model.f
+  mulsrc.f
+  pgsub.f
+  plot_associatelist1.f
+  plotisland.f
+  putpixel.f
+  slice.f
+  srccomp1.f
+  srccomp2.f
+  structfn.f
+  subim.f
+  test_getco_ringwidth.f
+  )
+
+## ==============================================================================
+##
+##  Groups of source files
+##
+## ==============================================================================
+
+set (OBJSH
+  fit_shapelets.f
+  get_beta_cen_cart.f
+  findcen_cart.f
+  getcartim.f
+  decomp_cart.f
+  fitstr8line.f
+  getroot.f
+  get_centroid_mask.f
+  recons_cart.f
+  varybeta_cart.f
+  decomp_cart_mask.f
+  )
+
+set (OBJ8
+  shapelets.f
+  coeffpower.f
+  locsub.f
+  s_displayshap.f
+  s_findcen.f
+  varybeta.f
+  simul_shapelets.f
+  main_shapelets.f
+  makeim_strongsrc.f
+  get_totrms_proper.f
+)
+
+## ==============================================================================
+##
 ##  Libraries 
 ##
 ## ==============================================================================
