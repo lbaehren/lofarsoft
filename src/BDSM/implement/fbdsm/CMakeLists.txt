@@ -15,49 +15,43 @@
 #  current directory, will produce a list of source files which make use of
 #  functionality from the PGPlot library:
 #
-#  grep "call pg" * | tr ":" "\n" | grep "\.f" | uniq
+#  rep "call pg" * | tr ":" "\n" | grep "\.f" | grep -v "call pg" | uniq
+
+## Check file for usage of PGPlot ________________
 
 file (GLOB fbdsm_sources *.f)
 
 foreach (_src ${fbdsm_sources})
-  ## Check file for usage of PGPlot
+  ## read in file contents ...
   file (READ ${_src} _code)
+  ## ... and check it for usage of PGPlot
   if (_code)
     string (REGEX MATCH "call pg" _match ${_code})
     if (_match) 
-      message (STATUS "Found match in file ${_src}")
+      get_filename_component(_filename ${_src} NAME)
+      list (APPEND pgplot_required ${_filename})
     endif (_match)
   endif (_code)
 endforeach (_src)
-
-set (pgplot_required
-  acf.f
-  basicgrey.f
-  boxnoiseimage.f
-  callfitgaussian.f
-  callgetpixel.f
-  displaytwoim.f
-  imagestats.f
-  imstat.f
-  model.f
-  mulsrc.f
-  pgsub.f
-  plot_associatelist1.f
-  plotisland.f
-  putpixel.f
-  slice.f
-  srccomp1.f
-  srccomp2.f
-  structfn.f
-  subim.f
-  test_getco_ringwidth.f
-  )
 
 ## ==============================================================================
 ##
 ##  Groups of source files
 ##
 ## ==============================================================================
+
+set (OBJ8
+  shapelets.f
+#  coeffpower.f
+#  locsub.f
+#  s_displayshap.f
+#  s_findcen.f
+  varybeta.f
+  simul_shapelets.f
+  main_shapelets.f
+#  makeim_strongsrc.f
+#  get_totrms_proper.f
+)
 
 set (OBJAI
   read_aiparadefine.f
@@ -92,18 +86,40 @@ set (OBJSH
 #  decomp_cart_mask.f
   )
 
-set (OBJ8
-  shapelets.f
-#  coeffpower.f
-#  locsub.f
-#  s_displayshap.f
-#  s_findcen.f
-  varybeta.f
-  simul_shapelets.f
-  main_shapelets.f
-#  makeim_strongsrc.f
-#  get_totrms_proper.f
+set (OBJAT
+  sub_prog.f
+  xcr8noisemap.f
+  conv2_get_wid_fac.f
+  conv2.f
+  writearray.f
+  get_keyword.f
+  gasdev.f
+  check.f
+  conv2_get_gaus.f
+  ran1.f
+  sigclip.f
+  get_atrous_h.f
+  calc_atrous_cj.f
+  calcmedian.f
+  selectnr.f
+  arrstat.f
+  get_pgnumb.f
+  calc_atrous_cj_mask.f
 )
+
+set (OBJCON
+  sub_prog.f
+  ran1.f
+  sigclip.f
+  arrstat.f
+  writearray.f
+  conv2_get_wid_fac.f
+  conv2.f
+  readarray.f
+  get_keyword.f
+  check.f
+  conv2_get_gaus.f
+ )
 
 ## ==============================================================================
 ##
@@ -454,3 +470,13 @@ target_link_libraries (bdsm-awe
   bdsm_call
   )
 
+##____________________________________________________________________
+##                                                  testconfusionnoise
+
+#testconfusionnoise : testconfusionnoise.f $(OBJCON)
+#	$(FC) testconfusionnoise.f $(OBJCON) $(PGLIB) -o testconfusionnoise
+
+add_executable (testconfusionnoise
+  testconfusionnoise.f
+  ${OBJCON}
+  )

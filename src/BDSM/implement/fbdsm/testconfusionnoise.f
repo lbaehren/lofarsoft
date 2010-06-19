@@ -7,7 +7,7 @@ c! after talking to condon, rewriting this. see his notes and my notes. also res
 c! sensibly now than creating larger image first !
 
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         real*8 k1,gam,smin,smax,freq,nyqfac,s(10),k2,g1
         real*8 fl,fu,dumr,minper
         integer n,m,nbin,i,writea,seed,id1,id2,pgopen,nf
@@ -97,7 +97,7 @@ c        read (*,*) nyqfac
         subroutine sub_testconfusionnoise(k1,gam,freq,smin,smax,
      /    n,m,nyqfac,nbin,s,writea,seed,id1,x1,x2,y1,y2,id)
         implicit none
-        include "constants.inc"
+        include "includes/constants.inc"
         integer n,m,totsrc,i,seed,x,y,j,ind1,ind2,nbin,ii,nchar
         integer writea,id1,id
         real*8 k1,gam,smin,smax,freq,image(n,m),nums(n,m),nyqfac
