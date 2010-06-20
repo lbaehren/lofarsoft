@@ -55,17 +55,10 @@ c! hey, it works well. and fast. right now only detects island around the peak p
         if (sav.eq.'y') then
          fn=fname(1:nchar(fname))//'.rank'
          call imageint2r(rank,n,m,n,m,image1)
-<<<<<<< HEAD:src/BDSM/implement/bdsm/formisland_rank.f
-         call writearray_bin2D(image1,n,m,n,m,fn,'mv')
-         fn=fname(1:nchar(fname))//'.mask'
-         call imageint2r(mask,n,m,n,m,image1)
-         call writearray_bin2D(image1,n,m,n,m,fn,'mv')
-=======
          call writearray_bin(image1,n,m,n,m,fn)
          fn=fname(1:nchar(fname))//'.mask'
          call imageint2r(mask,n,m,n,m,image1)
          call writearray_bin(image1,n,m,n,m,fn)
->>>>>>> anaamika:src/BDSM/implement/shapelets/standalone/formisland_rank.f
         end if
         
         return

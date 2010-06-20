@@ -33,6 +33,9 @@ include_directories (
 
 if (BDSM_WITH_FBDSM AND NOT HAVE_PGPLOT)
 
+  ## Report on activity
+  message (STATUS "Processing source files to remove PGPlot function calls ...")
+
   foreach (_module fbdsm shapelets)
     
     file (GLOB _sources ${_module}/*.f)
