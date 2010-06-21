@@ -97,6 +97,7 @@ int main (int argc, char *argv[])
     // check arguments
     string resultsName1(""), resultsName2(""), simDictName(""), simPath("");
     string index1(""), index2("");  // name indices for lateral distribution
+    string outPrefix("simANDrec_fitvalue");  // prefix for output filename
     for (int i=1; i < argc; ++i) {
       // get option and argument
       string option(argv[i]);
@@ -138,6 +139,11 @@ int main (int argc, char *argv[])
 
       if ( (option == "--path") || (option == "-path")) {
         simPath = argument;
+        continue;
+      }
+
+      if ( (option == "--out") || (option == "-out")) {
+        outPrefix = argument;
         continue;
       }
 
@@ -191,21 +197,32 @@ int main (int argc, char *argv[])
     /*root file from call_pipeline*/
     int totAntenna = 30;
 
+    // open root file for input
     TFile *recRoot = new TFile (resultsName1.c_str(), "READ");
     if(!recRoot || recRoot->IsZombie()) {
       cerr << "Error, cannot open root file: "<< resultsName1 << endl;
       return 1;  
-    } 
-       
-    //recRoot->ls();
+    }       
+    
     TTree *recTree =  (TTree*)recRoot->Get("T;1");
     //if(!recTree) return;
+
+    // open root file for output
+    TFile *rootOutfile=NULL;
+    string outputRootFileName = outPrefix + ".root";
+    rootOutfile = new TFile(outputRootFileName.c_str(),"RECREATE","Comparison of Lateral Distribution");
+    if (rootOutfile->IsZombie()) {
+      cerr << "\nError: Could not create file: " << outputRootFileName << "\n" << endl;
+      return 1;               // exit program
+    }
+    TTree *outtree;
+    outtree = new TTree("T","LateralComparison");
 
     //PulseProperties[totAntenna] antPulses; //each antenna 1 pulseProperties
     PulseProperties* antPulses[totAntenna];
     PulseProperties* antPulses2[totAntenna];  // for eventual second root file
 
-    unsigned int Gt;
+    unsigned int Gt = 0;
     float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;                 // KASCADE direction and core
     float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;             // Grande direction and core
     float_t Size = 0, Sizeg = 0;                            // Electron numbers (KASCADE + Grande)
@@ -230,12 +247,12 @@ int main (int argc, char *argv[])
     double CCwidth, CCwidth_NS, CCwidth_VE;
     double CCcenter, CCcenter_NS, CCcenter_VE;                    // time of CC beam
     double CCheight_error, CCheight_error_NS, CCheight_error_VE;
-    bool CCconverged, CCconvergedNS, CCconvergedVE;                       // is true if the Gaussian fit to the CCbeam converged
+    //bool CCconverged, CCconverged_NS, CCconverged_VE;                       // is true if the Gaussian fit to the CCbeam converged
     double Xheight, Xheight_NS, Xheight_VE;                            // CCheight will be used for EW polarization or ANY polarization
     double Xheight_error, Xheight_error_NS, Xheight_error_VE;
-    bool Xconverged, XconvergedNS, XconvergedVE;                         // is true if the Gaussian fit to the CCbeam converged
+    //bool Xconverged, Xconverged_NS, Xconverged_VE;                         // is true if the Gaussian fit to the CCbeam converged
     double AzL, ElL, AzL_NS, ElL_NS, AzL_VE, ElL_VE;                       // Azimuth and Elevation
-    double distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;       // distance = radius of curvature
+    double distanceResult = 0, distanceResult_NS = 0, distanceResult_VE = 0;       // distance = radius of curvature
     // values for lateral distribution of arrival times
     double latTimeRcurv = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
     double latTimeSigRcurv = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
@@ -243,20 +260,27 @@ int main (int argc, char *argv[])
     double latTimeSigOffset = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
     double latTimeChi2NDF = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
   
-    bool goodEW = false, goodNS = false, goodVE = false;                // true if reconstruction worked
+    //bool goodEW = false, goodNS = false, goodVE = false;                // true if reconstruction worked
     double rmsCCbeam, rmsCCbeam_NS, rmsCCbeam_VE;                        // rms values of the beams in remote region
     double rmsXbeam, rmsXbeam_NS, rmsXbeam_VE;
     double rmsPbeam, rmsPbeam_NS, rmsPbeam_VE;
-    unsigned int NCCbeamAntennas = 0, NlateralAntennas = 0; // antennas used for CC beam and lateral distribution
-    unsigned int NCCbeamAntennas_NS = 0, NlateralAntennas_NS = 0; // antennas used for CC beam and lateral distribution
-    unsigned int NCCbeamAntennas_VE = 0, NlateralAntennas_VE = 0; // antennas used for CC beam and lateral distribution
+    int NCCbeamAntennas = 0, NlateralAntennas = 0; // antennas used for CC beam and lateral distribution
+    int NCCbeamAntennas_NS = 0, NlateralAntennas_NS = 0; // antennas used for CC beam and lateral distribution
+    int NCCbeamAntennas_VE = 0, NlateralAntennas_VE = 0; // antennas used for CC beam and lateral distribution
     double latMeanDist, latMeanDist_NS, latMeanDist_VE;                 // mean distance of the antennas in the lateral distribution
     double latMeanDistCC, latMeanDistCC_NS, latMeanDistCC_VE;             // mean distance of the antennas used for the CC beam
     double ratioDiffSign, ratioDiffSign_NS, ratioDiffSign_VE;
     double ratioDiffSignEnv, ratioDiffSignEnv_NS, ratioDiffSignEnv_VE;
     double weightedTotSign,weightedTotSign_NS,weightedTotSign_VE;
     double weightedTotSignEnv,weightedTotSignEnv_NS,weightedTotSignEnv_VE;
-
+    
+    // results of lateral distribution fit
+    double R_0_EW = 0, sigR_0_EW = 0, eps_EW = 0, sigeps_EW = 0, chi2NDF_EW = 0; 
+    double R_0_sim_EW = 0, sigR_0_sim_EW = 0, eps_sim_EW = 0, sigeps_sim_EW = 0, chi2NDF_sim_EW = 0; 
+    double R_0_NS = 0, sigR_0_NS = 0, eps_NS = 0, sigeps_NS = 0, chi2NDF_NS = 0; 
+    double R_0_sim_NS = 0, sigR_0_sim_NS = 0, eps_sim_NS = 0, sigeps_sim_NS = 0, chi2NDF_sim_NS = 0; 
+    double R_0_VE = 0, sigR_0_VE = 0, eps_VE = 0, sigeps_VE = 0, chi2NDF_VE = 0; 
+    double R_0_sim_VE = 0, sigR_0_sim_VE = 0, eps_sim_VE = 0, sigeps_sim_VE = 0, chi2NDF_sim_VE = 0; 
     
     recTree->SetBranchAddress("Gt", &Gt);
     recTree->SetBranchAddress("Xc",&Xc);
@@ -296,7 +320,47 @@ int main (int argc, char *argv[])
     recTree->SetBranchAddress("KRETAver",&KRETAver);
     recTree->SetBranchAddress("EfieldMaxAbs",&EfieldMaxAbs);
     recTree->SetBranchAddress("EfieldAvgAbs",&EfieldAvgAbs);
-    
+
+    outtree->Branch("Gt",&Gt,"Gt/i");
+    outtree->Branch("Xc",&Xc,"Xc/F");
+    outtree->Branch("Xcg",&Xcg,"Xcg/F");
+    outtree->Branch("Yc",&Yc,"Yc/F");
+    outtree->Branch("Ycg",&Ycg,"Ycg/F");
+    outtree->Branch("Az",&Az,"Az/F");
+    outtree->Branch("Azg",&Azg,"Azg/F");
+    outtree->Branch("Ze",&Ze,"Ze/F");
+    outtree->Branch("Zeg",&Zeg,"Zeg/F");
+    outtree->Branch("Size",&Size,"Size/F");
+    outtree->Branch("Sizeg",&Sizeg,"Sizeg/F");
+    outtree->Branch("Age",&Age,"Age/F");
+    outtree->Branch("Ageg",&Ageg,"Ageg/F");
+    outtree->Branch("Nmu",&Nmu,"Nmu/F");
+    outtree->Branch("Lmuo",&Lmuo,"Lmuo/F");
+    outtree->Branch("Sizmg",&Sizmg,"Sizmg/F");
+    outtree->Branch("lgE",&lgE,"lgE/D");
+    outtree->Branch("lgEg",&lgEg,"lgEg/D");
+    outtree->Branch("lnA",&lnA,"lnA/D");
+    outtree->Branch("lnAg",&lnAg,"lnAg/D");
+    outtree->Branch("kappaMario",&kappaMario,"kappaMario/D");
+    outtree->Branch("lgEMario",&lgEMario,"lgEMario/D");
+    outtree->Branch("err_lgE",&err_lgE,"err_lgE/D");
+    outtree->Branch("err_lgEg",&err_lgEg,"err_lgEg/D");
+    outtree->Branch("err_lnA",&err_lnA,"err_lnA/D");
+    outtree->Branch("err_lnAg",&err_lnAg,"err_lnAg/D");
+    outtree->Branch("err_core",&err_core,"err_core/D");
+    outtree->Branch("err_coreg",&err_coreg,"err_coreg/D");
+    outtree->Branch("err_Az",&err_Az,"err_Az/D");
+    outtree->Branch("err_Azg",&err_Azg,"err_Azg/D");
+    outtree->Branch("err_Ze",&err_Ze,"err_Ze/D");
+    outtree->Branch("err_Zeg",&err_Zeg,"err_Zeg/D");
+    outtree->Branch("geomag_angle",&geomag_angle,"geomag_angle/D");
+    outtree->Branch("geomag_angleg",&geomag_angleg,"geomag_angleg/D");
+    outtree->Branch("reconstruction",&reconstruction,"reconstruction/B");
+    outtree->Branch("KRETAver",&KRETAver,"KRETAver/C");
+    outtree->Branch("EfieldMaxAbs",&EfieldMaxAbs,"EfieldMaxAbs/D");
+    outtree->Branch("EfieldAvgAbs",&EfieldAvgAbs,"EfieldAvgAbs/D");
+
+
     // look for existing EW branches
     TObjArray* existingBranches = recTree->GetListOfBranches();
     if (existingBranches->FindObject("AzL_EW")==0) {
@@ -310,11 +374,11 @@ int main (int argc, char *argv[])
       recTree->SetBranchAddress("CCwidth_EW",&CCwidth);
       recTree->SetBranchAddress("CCcenter_EW",&CCcenter);
       recTree->SetBranchAddress("CCheight_error_EW",&CCheight_error);
-      recTree->SetBranchAddress("CCconverged_EW",&CCconverged);
+      //recTree->SetBranchAddress("CCconverged_EW",&CCconverged);
       recTree->SetBranchAddress("Xheight_EW",&Xheight);
       recTree->SetBranchAddress("Xheight_error_EW",&Xheight_error);
-      recTree->SetBranchAddress("Xconverged_EW",&Xconverged);
-      recTree->SetBranchAddress("goodReconstructed_EW",&goodEW);
+      //recTree->SetBranchAddress("Xconverged_EW",&Xconverged);
+      //recTree->SetBranchAddress("goodReconstructed_EW",&goodEW);
       recTree->SetBranchAddress("rmsCCbeam_EW",&rmsCCbeam);
       recTree->SetBranchAddress("rmsXbeam_EW",&rmsXbeam);
       recTree->SetBranchAddress("rmsPbeam_EW",&rmsPbeam);
@@ -331,16 +395,195 @@ int main (int argc, char *argv[])
       recTree->SetBranchAddress("latTimeOffset_EW",&latTimeOffset);
       recTree->SetBranchAddress("latTimeSigOffset_EW",&latTimeSigOffset);
       recTree->SetBranchAddress("latTimeChi2NDF_EW",&latTimeChi2NDF);
+      
+      outtree->Branch("AzL_EW",&AzL,"AzL_EW/D");
+      outtree->Branch("ElL_EW",&ElL,"ElL_EW/D");
+      outtree->Branch("Distance_EW",&distanceResult,"Distance_EW/D");        // radius of curvature
+      outtree->Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
+      outtree->Branch("CCwidth_EW",&CCwidth,"CCwidth_EW/D");
+      outtree->Branch("CCcenter_EW",&CCcenter,"CCcenter_EW/D");
+      outtree->Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
+      //outtree->Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
+      outtree->Branch("Xheight_EW",&Xheight,"Xheight_EW/D");
+      outtree->Branch("Xheight_error_EW",&Xheight_error,"Xheight_error_EW/D");
+      //outtree->Branch("Xconverged_EW",&Xconverged,"Xconverged_EW/B");
+      //outtree->Branch("goodReconstructed_EW",&goodEW,"goodReconstructed_EW/B");
+      outtree->Branch("rmsCCbeam_EW",&rmsCCbeam,"rmsCCbeam_EW/D");
+      outtree->Branch("rmsXbeam_EW",&rmsXbeam,"rmsXbeam_EW/D");
+      outtree->Branch("rmsPbeam_EW",&rmsPbeam,"rmsPbeam_EW/D");
+      outtree->Branch("latMeanDistCC_EW",&latMeanDistCC,"latMeanDistCC_EW/D");
+      outtree->Branch("NCCbeamAntennas_EW",&NCCbeamAntennas,"NCCbeamAntennas_EW/I");
+      outtree->Branch("ratioDiffSign_EW",&ratioDiffSign,"ratioDiffSign_EW/D");
+      outtree->Branch("ratioDiffSignEnv_EW",&ratioDiffSignEnv,"ratioDiffSignEnv_EW/D");
+      outtree->Branch("weightedTotSign_EW",&weightedTotSign,"weightedTotSign_EW/D");
+      outtree->Branch("weightedTotSignEnv_EW",&weightedTotSignEnv,"weightedTotSignEnv_EW/D");
+      outtree->Branch("latMeanDist_EW",&latMeanDist,"latMeanDist_EW/D");
+      //outtree->Branch("NlateralAntennas_EW",&NlateralAntennas,"NlateralAntennas_EW/I");
+      outtree->Branch("latTimeRcurv_EW",&latTimeRcurv,"latTimeRcurv_EW/D");
+      outtree->Branch("latTimeSigRcurv_EW",&latTimeSigRcurv,"latTimeSigRcurv_EW/D");
+      outtree->Branch("latTimeOffset_EW",&latTimeOffset,"latTimeOffset_EW/D");
+      outtree->Branch("latTimeSigOffset_EW",&latTimeSigOffset,"latTimeSigOffset_EW/D");
+      outtree->Branch("latTimeChi2NDF_EW",&latTimeChi2NDF,"latTimeChi2NDF_EW/D");
+      outtree->Branch("R_0_EW",&R_0_EW,"R_0_EW/D");
+      outtree->Branch("sigR_0_EW",&sigR_0_EW,"sigR_0_EW/D");
+      outtree->Branch("eps_EW",&eps_EW,"eps_EW/D");
+      outtree->Branch("sigeps_EW",&sigeps_EW,"sigeps_EW/D");
+      outtree->Branch("chi2NDF_EW",&chi2NDF_EW,"chi2NDF_EW/D");
+      outtree->Branch("R_0_sim_EW",&R_0_sim_EW,"R_0_sim_EW/D");
+      outtree->Branch("sigR_0_sim_EW",&sigR_0_sim_EW,"sigR_0_sim_EW/D");
+      outtree->Branch("eps_sim_EW",&eps_sim_EW,"eps_sim_EW/D");
+      outtree->Branch("sigeps_sim_EW",&sigeps_sim_EW,"sigeps_sim_EW/D");
+      outtree->Branch("chi2NDF_sim_EW",&chi2NDF_sim_EW,"chi2NDF_sim_EW/D");
     }
     if (existingBranches->FindObject("AzL_NS")==0) {
-      cerr << "Warning: No NS polarization data found in root file." << endl;
+      cerr << "Warning: No NS polarization data found in root file.\n" << endl;
       hasNS = false;
     } else {
       hasNS = true;
+      recTree->SetBranchAddress("AzL_NS",&AzL_NS);
+      recTree->SetBranchAddress("ElL_NS",&ElL_NS);
+      recTree->SetBranchAddress("Distance_NS",&distanceResult_NS);        // radius of curvature
+      recTree->SetBranchAddress("CCheight_NS",&CCheight_NS);
+      recTree->SetBranchAddress("CCwidth_NS",&CCwidth_NS);
+      recTree->SetBranchAddress("CCcenter_NS",&CCcenter_NS);
+      recTree->SetBranchAddress("CCheight_error_NS",&CCheight_error_NS);
+      //recTree->SetBranchAddress("CCconverged_NS",&CCconverged_NS);
+      recTree->SetBranchAddress("Xheight_NS",&Xheight_NS);
+      recTree->SetBranchAddress("Xheight_error_NS",&Xheight_error_NS);
+      //recTree->SetBranchAddress("Xconverged_NS",&Xconverged_NS);
+      //recTree->SetBranchAddress("goodReconstructed_NS",&goodNS);
+      recTree->SetBranchAddress("rmsCCbeam_NS",&rmsCCbeam_NS);
+      recTree->SetBranchAddress("rmsXbeam_NS",&rmsXbeam_NS);
+      recTree->SetBranchAddress("rmsPbeam_NS",&rmsPbeam_NS);
+      recTree->SetBranchAddress("latMeanDistCC_NS",&latMeanDistCC_NS);
+      recTree->SetBranchAddress("NCCbeamAntennas_NS",&NCCbeamAntennas_NS);
+      recTree->SetBranchAddress("ratioDiffSign_NS",&ratioDiffSign_NS);
+      recTree->SetBranchAddress("ratioDiffSignEnv_NS",&ratioDiffSignEnv_NS);
+      recTree->SetBranchAddress("weightedTotSign_NS",&weightedTotSign_NS);
+      recTree->SetBranchAddress("weightedTotSignEnv_NS",&weightedTotSignEnv_NS);
+      recTree->SetBranchAddress("latMeanDist_NS",&latMeanDist_NS);
+      recTree->SetBranchAddress("NlateralAntennas_NS",&NlateralAntennas_NS);
+      recTree->SetBranchAddress("latTimeRcurv_NS",&latTimeRcurv_NS);
+      recTree->SetBranchAddress("latTimeSigRcurv_NS",&latTimeSigRcurv_NS);
+      recTree->SetBranchAddress("latTimeOffset_NS",&latTimeOffset_NS);
+      recTree->SetBranchAddress("latTimeSigOffset_NS",&latTimeSigOffset_NS);
+      recTree->SetBranchAddress("latTimeChi2NDF_NS",&latTimeChi2NDF_NS);
+      
+      outtree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
+      outtree->Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
+      outtree->Branch("Distance_NS",&distanceResult_NS,"Distance_NS/D");        // radius of curvature
+      outtree->Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
+      outtree->Branch("CCwidth_NS",&CCwidth_NS,"CCwidth_NS/D");
+      outtree->Branch("CCcenter_NS",&CCcenter_NS,"CCcenter_NS/D");
+      outtree->Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
+      //outtree->Branch("CCconverged_NS",&CCconverged_NS,"CCconverged_NS/B");
+      outtree->Branch("Xheight_NS",&Xheight_NS,"Xheight_NS/D");
+      outtree->Branch("Xheight_error_NS",&Xheight_error_NS,"Xheight_error_NS/D");
+      //outtree->Branch("Xconverged_NS",&Xconverged_NS,"Xconverged_NS/B");
+      //outtree->Branch("goodReconstructed_NS",&goodNS,"goodReconstructed_NS/B");
+      outtree->Branch("rmsCCbeam_NS",&rmsCCbeam_NS,"rmsCCbeam_NS/D");
+      outtree->Branch("rmsXbeam_NS",&rmsXbeam_NS,"rmsXbeam_NS/D");
+      outtree->Branch("rmsPbeam_NS",&rmsPbeam_NS,"rmsPbeam_NS/D");
+      outtree->Branch("latMeanDistCC_NS",&latMeanDistCC_NS,"latMeanDistCC_NS/D");
+      outtree->Branch("NCCbeamAntennas_NS",&NCCbeamAntennas_NS,"NCCbeamAntennas_NS/I");
+      outtree->Branch("ratioDiffSign_NS",&ratioDiffSign_NS,"ratioDiffSign_NS/D");
+      outtree->Branch("ratioDiffSignEnv_NS",&ratioDiffSignEnv_NS,"ratioDiffSignEnv_NS/D");
+      outtree->Branch("weightedTotSign_NS",&weightedTotSign_NS,"weightedTotSign_NS/D");
+      outtree->Branch("weightedTotSignEnv_NS",&weightedTotSignEnv_NS,"weightedTotSignEnv_NS/D");
+      outtree->Branch("latMeanDist_NS",&latMeanDist_NS,"latMeanDist_NS/D");
+      //outtree->Branch("NlateralAntennas_NS",&NlateralAntennas_NS,"NlateralAntennas_NS/I");
+      outtree->Branch("latTimeRcurv_NS",&latTimeRcurv_NS,"latTimeRcurv_NS/D");
+      outtree->Branch("latTimeSigRcurv_NS",&latTimeSigRcurv_NS,"latTimeSigRcurv_NS/D");
+      outtree->Branch("latTimeOffset_NS",&latTimeOffset_NS,"latTimeOffset_NS/D");
+      outtree->Branch("latTimeSigOffset_NS",&latTimeSigOffset_NS,"latTimeSigOffset_NS/D");
+      outtree->Branch("latTimeChi2NDF_NS",&latTimeChi2NDF_NS,"latTimeChi2NDF_NS/D");
+      outtree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
+      outtree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
+      outtree->Branch("eps_NS",&eps_NS,"eps_NS/D");
+      outtree->Branch("sigeps_NS",&sigeps_NS,"sigeps_NS/D");
+      outtree->Branch("chi2NDF_NS",&chi2NDF_NS,"chi2NDF_NS/D");
+      outtree->Branch("R_0_sim_NS",&R_0_sim_NS,"R_0_sim_NS/D");
+      outtree->Branch("sigR_0_sim_NS",&sigR_0_sim_NS,"sigR_0_sim_NS/D");
+      outtree->Branch("eps_sim_NS",&eps_sim_NS,"eps_sim_NS/D");
+      outtree->Branch("sigeps_sim_NS",&sigeps_sim_NS,"sigeps_sim_NS/D");
+      outtree->Branch("chi2NDF_sim_NS",&chi2NDF_sim_NS,"chi2NDF_sim_NS/D");
+    }
+   if (existingBranches->FindObject("AzL_VE")==0) {
+      cerr << "Warning: No VE polarization data found in root file.\n" << endl;
+      hasVE = false;
+    } else {
+      hasVE = true;
+      recTree->SetBranchAddress("AzL_VE",&AzL_VE);
+      recTree->SetBranchAddress("ElL_VE",&ElL_VE);
+      recTree->SetBranchAddress("Distance_VE",&distanceResult_VE);        // radius of curvature
+      recTree->SetBranchAddress("CCheight_VE",&CCheight_VE);
+      recTree->SetBranchAddress("CCwidth_VE",&CCwidth_VE);
+      recTree->SetBranchAddress("CCcenter_VE",&CCcenter_VE);
+      recTree->SetBranchAddress("CCheight_error_VE",&CCheight_error_VE);
+      //recTree->SetBranchAddress("CCconverged_VE",&CCconverged_VE);
+      recTree->SetBranchAddress("Xheight_VE",&Xheight_VE);
+      recTree->SetBranchAddress("Xheight_error_VE",&Xheight_error_VE);
+      //recTree->SetBranchAddress("Xconverged_VE",&Xconverged_VE);
+      //recTree->SetBranchAddress("goodReconstructed_VE",&goodVE);
+      recTree->SetBranchAddress("rmsCCbeam_VE",&rmsCCbeam_VE);
+      recTree->SetBranchAddress("rmsXbeam_VE",&rmsXbeam_VE);
+      recTree->SetBranchAddress("rmsPbeam_VE",&rmsPbeam_VE);
+      recTree->SetBranchAddress("latMeanDistCC_VE",&latMeanDistCC_VE);
+      recTree->SetBranchAddress("NCCbeamAntennas_VE",&NCCbeamAntennas_VE);
+      recTree->SetBranchAddress("ratioDiffSign_VE",&ratioDiffSign_VE);
+      recTree->SetBranchAddress("ratioDiffSignEnv_VE",&ratioDiffSignEnv_VE);
+      recTree->SetBranchAddress("weightedTotSign_VE",&weightedTotSign_VE);
+      recTree->SetBranchAddress("weightedTotSignEnv_VE",&weightedTotSignEnv_VE);
+      recTree->SetBranchAddress("latMeanDist_VE",&latMeanDist_VE);
+      recTree->SetBranchAddress("NlateralAntennas_VE",&NlateralAntennas_VE);
+      recTree->SetBranchAddress("latTimeRcurv_VE",&latTimeRcurv_VE);
+      recTree->SetBranchAddress("latTimeSigRcurv_VE",&latTimeSigRcurv_VE);
+      recTree->SetBranchAddress("latTimeOffset_VE",&latTimeOffset_VE);
+      recTree->SetBranchAddress("latTimeSigOffset_VE",&latTimeSigOffset_VE);
+      recTree->SetBranchAddress("latTimeChi2NDF_VE",&latTimeChi2NDF_VE);
+      
+      outtree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
+      outtree->Branch("ElL_VE",&ElL_VE,"ElL_VE/D");
+      outtree->Branch("Distance_VE",&distanceResult_VE,"Distance_VE/D");        // radius of curvature
+      outtree->Branch("CCheight_VE",&CCheight_VE,"CCheight_VE/D");
+      outtree->Branch("CCwidth_VE",&CCwidth_VE,"CCwidth_VE/D");
+      outtree->Branch("CCcenter_VE",&CCcenter_VE,"CCcenter_VE/D");
+      outtree->Branch("CCheight_error_VE",&CCheight_error_VE,"CCheight_error_VE/D");
+      //outtree->Branch("CCconverged_VE",&CCconverged_VE,"CCconverged_VE/B");
+      outtree->Branch("Xheight_VE",&Xheight_VE,"Xheight_VE/D");
+      outtree->Branch("Xheight_error_VE",&Xheight_error_VE,"Xheight_error_VE/D");
+      //outtree->Branch("Xconverged_VE",&Xconverged_VE,"Xconverged_VE/B");
+      //outtree->Branch("goodReconstructed_VE",&goodVE,"goodReconstructed_VE/B");
+      outtree->Branch("rmsCCbeam_VE",&rmsCCbeam_VE,"rmsCCbeam_VE/D");
+      outtree->Branch("rmsXbeam_VE",&rmsXbeam_VE,"rmsXbeam_VE/D");
+      outtree->Branch("rmsPbeam_VE",&rmsPbeam_VE,"rmsPbeam_VE/D");
+      outtree->Branch("latMeanDistCC_VE",&latMeanDistCC_VE,"latMeanDistCC_VE/D");
+      outtree->Branch("NCCbeamAntennas_VE",&NCCbeamAntennas_VE,"NCCbeamAntennas_VE/I");
+      outtree->Branch("ratioDiffSign_VE",&ratioDiffSign_VE,"ratioDiffSign_VE/D");
+      outtree->Branch("ratioDiffSignEnv_VE",&ratioDiffSignEnv_VE,"ratioDiffSignEnv_VE/D");
+      outtree->Branch("weightedTotSign_VE",&weightedTotSign_VE,"weightedTotSign_VE/D");
+      outtree->Branch("weightedTotSignEnv_VE",&weightedTotSignEnv_VE,"weightedTotSignEnv_VE/D");
+      outtree->Branch("latMeanDist_VE",&latMeanDist_VE,"latMeanDist_VE/D");
+      //outtree->Branch("NlateralAntennas_VE",&NlateralAntennas_VE,"NlateralAntennas_VE/I");
+      outtree->Branch("latTimeRcurv_VE",&latTimeRcurv_VE,"latTimeRcurv_VE/D");
+      outtree->Branch("latTimeSigRcurv_VE",&latTimeSigRcurv_VE,"latTimeSigRcurv_VE/D");
+      outtree->Branch("latTimeOffset_VE",&latTimeOffset_VE,"latTimeOffset_VE/D");
+      outtree->Branch("latTimeSigOffset_VE",&latTimeSigOffset_VE,"latTimeSigOffset_VE/D");
+      outtree->Branch("latTimeChi2NDF_VE",&latTimeChi2NDF_VE,"latTimeChi2NDF_VE/D");
+      outtree->Branch("R_0_VE",&R_0_VE,"R_0_VE/D");
+      outtree->Branch("sigR_0_VE",&sigR_0_VE,"sigR_0_VE/D");
+      outtree->Branch("eps_VE",&eps_VE,"eps_VE/D");
+      outtree->Branch("sigeps_VE",&sigeps_VE,"sigeps_VE/D");
+      outtree->Branch("chi2NDF_VE",&chi2NDF_VE,"chi2NDF_VE/D");
+      outtree->Branch("R_0_sim_VE",&R_0_sim_VE,"R_0_sim_VE/D");
+      outtree->Branch("sigR_0_sim_VE",&sigR_0_sim_VE,"sigR_0_sim_VE/D");
+      outtree->Branch("eps_sim_VE",&eps_sim_VE,"eps_sim_VE/D");
+      outtree->Branch("sigeps_sim_VE",&sigeps_sim_VE,"sigeps_sim_VE/D");
+      outtree->Branch("chi2NDF_sim_VE",&chi2NDF_sim_VE,"chi2NDF_sim_VE/D");
     }
     
     // open second data file, if requested
-    UInt_t Gt2;
+    unsigned int Gt2 = 0;
     TFile *recRoot2;
     TTree *recTree2;   
     if (resultsName2 != "") {
@@ -388,8 +631,10 @@ int main (int argc, char *argv[])
     }
       
     /* output files*/
-    ofstream outputEW("simANDrec_fitvalue_EW.dat");
-    ofstream outputNS("simANDrec_fitvalue_NS.dat");
+    string filename = outPrefix + "-EW.dat";
+    ofstream outputEW(filename.c_str());
+    filename = outPrefix + "-NS.dat";
+    ofstream outputNS(filename.c_str());
     outputEW<<"#sim id , eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
     outputNS<<"#sim id , eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
 
@@ -401,9 +646,11 @@ int main (int argc, char *argv[])
       if (resultsName2 != "") {
         while (Gt2 < Gt) {
           recTree2->GetEntry(i);
+          cout << "Reading in event GT " << Gt2 << " from second root file." << endl;
         }
         if (Gt2 != Gt) {
-          cerr << "Error: Event at GT " << Gt << " seems to be missing in second root file.\n" << endl;
+          cerr << "Error: Event at GT " << Gt << " seems to be missing in second root file.\n" 
+               << "GT of second root file is: " << Gt2 << endl;
           return 1;       
         }
       }
@@ -533,8 +780,13 @@ int main (int argc, char *argv[])
         reasFile.close();
       } 
       
-      double Epsilon0=0.,R0=0.,err_Epsilon0=0.,err_R0=0.,chi2NDF=0.;
-      double Epsilon0S=0.,R0S=0.,err_Epsilon0S=0.,err_R0S=0.,chi2NDFS=0.;
+      R_0_EW = 0, sigR_0_EW = 0, eps_EW = 0, sigeps_EW = 0, chi2NDF_EW = 0; 
+      R_0_sim_EW = 0, sigR_0_sim_EW = 0, eps_sim_EW = 0, sigeps_sim_EW = 0, chi2NDF_sim_EW = 0; 
+      R_0_NS = 0, sigR_0_NS = 0, eps_NS = 0, sigeps_NS = 0, chi2NDF_NS = 0; 
+      R_0_sim_NS = 0, sigR_0_sim_NS = 0, eps_sim_NS = 0, sigeps_sim_NS = 0, chi2NDF_sim_NS = 0; 
+      R_0_VE = 0, sigR_0_VE = 0, eps_VE = 0, sigeps_VE = 0, chi2NDF_VE = 0; 
+      R_0_sim_VE = 0, sigR_0_sim_VE = 0, eps_sim_VE = 0, sigeps_sim_VE = 0, chi2NDF_sim_VE = 0; 
+
       CR::lateralDistribution lateralFitter;
       string plotPrefix = "";
       if(m_recEW.size()>=4) {        
@@ -546,19 +798,19 @@ int main (int argc, char *argv[])
                                                             m_recEW,m_simEW,
                                                             Gt,(Az*gradeg),(Ze*gradeg),
                                                             index1, index2);
-        Epsilon0 = ergew.asDouble("eps");
-        R0 = ergew.asDouble("R_0");
-        err_Epsilon0 = ergew.asDouble("sigeps");
-        err_R0 = ergew.asDouble("sigR_0");
-        chi2NDF = ergew.asDouble("chi2NDF");
-        Epsilon0S = ergew.asDouble("eps_sim");
-        R0S = ergew.asDouble("R_0_sim");
-        err_Epsilon0S = ergew.asDouble("sigeps_sim");
-        err_R0S = ergew.asDouble("sigR_0_sim");
-        chi2NDFS = ergew.asDouble("chi2NDF_sim");
+        eps_EW = ergew.asDouble("eps");
+        R_0_EW = ergew.asDouble("R_0");
+        sigeps_EW = ergew.asDouble("sigeps");
+        sigR_0_EW = ergew.asDouble("sigR_0");
+        chi2NDF_EW = ergew.asDouble("chi2NDF");
+        eps_sim_EW = ergew.asDouble("eps_sim");
+        R_0_sim_EW = ergew.asDouble("R_0_sim");
+        sigeps_sim_EW = ergew.asDouble("sigeps_sim");
+        sigR_0_sim_EW = ergew.asDouble("sigR_0_sim");
+        chi2NDF_sim_EW = ergew.asDouble("chi2NDF_sim");
 
         //write info of the fit into file
-        outputEW <<m_dict[Gt]<<"\t"<<Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
+        outputEW <<m_dict[Gt]<<"\t"<<eps_EW<<"\t"<<sigeps_EW<<"\t"<<R_0_EW<<"\t"<<sigR_0_EW<<"\t"<<chi2NDF_EW<<"\t"<<eps_sim_EW<<"\t"<<sigeps_sim_EW<<"\t"<<R_0_sim_EW<<"\t"<<sigR_0_sim_EW<<"\t"<<chi2NDF_sim_EW<<endl;			
       }
       if ((hasNS) && (m_recNS.size()>=4)) {
         if (simDictName!="") 
@@ -569,23 +821,30 @@ int main (int argc, char *argv[])
                                                             m_recNS,m_simNS,
                                                             Gt,(Az*gradeg),(Ze*gradeg),
                                                             index1, index2);
-        Epsilon0 = ergns.asDouble("eps");
-        R0 = ergns.asDouble("R_0");
-        err_Epsilon0 = ergns.asDouble("sigeps");
-        err_R0 = ergns.asDouble("sigR_0");
-        chi2NDF = ergns.asDouble("chi2NDF");
-        Epsilon0S = ergns.asDouble("eps_sim");
-        R0S = ergns.asDouble("R_0_sim");
-        err_Epsilon0S = ergns.asDouble("sigeps_sim");
-        err_R0S = ergns.asDouble("sigR_0_sim");
-        chi2NDFS = ergns.asDouble("chi2NDF_sim");
+        eps_NS = ergns.asDouble("eps");
+        R_0_NS = ergns.asDouble("R_0");
+        sigeps_NS = ergns.asDouble("sigeps");
+        sigR_0_NS = ergns.asDouble("sigR_0");
+        chi2NDF_NS = ergns.asDouble("chi2NDF");
+        eps_sim_NS = ergns.asDouble("eps_sim");
+        R_0_sim_NS = ergns.asDouble("R_0_sim");
+        sigeps_sim_NS = ergns.asDouble("sigeps_sim");
+        sigR_0_sim_NS = ergns.asDouble("sigR_0_sim");
+        chi2NDF_sim_NS = ergns.asDouble("chi2NDF_sim");
 
-        outputNS <<m_dict[Gt]<<"\t"<<Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
+        //write info of the fit into file
+        outputEW <<m_dict[Gt]<<"\t"<<eps_NS<<"\t"<<sigeps_NS<<"\t"<<R_0_NS<<"\t"<<sigR_0_NS<<"\t"<<chi2NDF_NS<<"\t"<<eps_sim_NS<<"\t"<<sigeps_sim_NS<<"\t"<<R_0_sim_NS<<"\t"<<sigR_0_sim_NS<<"\t"<<chi2NDF_sim_NS<<endl;                        
       }
+      
+      // Fill information in root file
+      outtree->Fill();
+      rootOutfile->Write("",TObject::kOverwrite);
     }//loop on the rec event 
 
     outputEW.close();
     outputNS.close();
+    recRoot->Close();
+    rootOutfile->Close();
   } catch (AipsError x) {
     cerr << "compareLOPES2sim: " << x.getMesg() << endl;
   }
