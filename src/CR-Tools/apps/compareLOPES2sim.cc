@@ -189,8 +189,6 @@ int main (int argc, char *argv[])
     }  
 
     /*root file from call_pipeline*/
-    UInt_t Gt;
-    Float_t Az,Ze;
     int totAntenna = 30;
 
     TFile *recRoot = new TFile (resultsName1.c_str(), "READ");
@@ -207,9 +205,139 @@ int main (int argc, char *argv[])
     PulseProperties* antPulses[totAntenna];
     PulseProperties* antPulses2[totAntenna];  // for eventual second root file
 
+    unsigned int Gt;
+    float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;                 // KASCADE direction and core
+    float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;             // Grande direction and core
+    float_t Size = 0, Sizeg = 0;                            // Electron numbers (KASCADE + Grande)
+    float_t Age = 0, Ageg = 0;                              // Age parameter
+    float_t Nmu = 0, Lmuo = 0, Sizmg = 0;                   // Muon number, trucated muon number (KASCADE), Muon number (Grande)
+    double_t lgE = 0, err_lgE = 0;                          // estimated energy (KASCADE)
+    double_t lgEg = 0, err_lgEg = 0;                        // estimated energy (Grande)
+    double_t lnA = 0, err_lnA = 0;                          // estimated mass A (KASCADE)
+    double_t lnAg = 0, err_lnAg = 0;                        // estimated mass A (Grande)
+    double_t kappaMario = 0, lgEMario = 0;                  // mass and energy by Mario's formula
+    double_t err_core = 0, err_coreg = 0;                   // error of core position (KASCADE + Grande)
+    double_t err_Az = 0, err_Azg = 0;                       // error of azimuth (KASCADE + Grande)
+    double_t err_Ze = 0, err_Zeg = 0;                       // error of zenith (KASCADE + Grande)
+    double_t geomag_angle = 0, geomag_angleg = 0;           // geomagnetic angle (KASCADE + Grande)
+    char KRETAver[1024] = "unknown";
+    double_t EfieldMaxAbs = 0;                              // maximum of the absolute e-field strength around +/- 15 min
+    double_t EfieldAvgAbs = 0;                              // average of the absolute e-field strength around +/- 15 min    
+    char reconstruction = 0;                                // A = KASCADE reconstruction taken, G = Grande reconstruction taken
+    bool hasNS = false;                                     // is set to true, if root file contains NS information
+    bool hasVE = false;                                     // is set to true, if root file contains VE information
+    double CCheight, CCheight_NS, CCheight_VE;                          // CCheight will be used for EW polarization or ANY polarization
+    double CCwidth, CCwidth_NS, CCwidth_VE;
+    double CCcenter, CCcenter_NS, CCcenter_VE;                    // time of CC beam
+    double CCheight_error, CCheight_error_NS, CCheight_error_VE;
+    bool CCconverged, CCconvergedNS, CCconvergedVE;                       // is true if the Gaussian fit to the CCbeam converged
+    double Xheight, Xheight_NS, Xheight_VE;                            // CCheight will be used for EW polarization or ANY polarization
+    double Xheight_error, Xheight_error_NS, Xheight_error_VE;
+    bool Xconverged, XconvergedNS, XconvergedVE;                         // is true if the Gaussian fit to the CCbeam converged
+    double AzL, ElL, AzL_NS, ElL_NS, AzL_VE, ElL_VE;                       // Azimuth and Elevation
+    double distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;       // distance = radius of curvature
+    // values for lateral distribution of arrival times
+    double latTimeRcurv = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
+    double latTimeSigRcurv = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
+    double latTimeOffset = 0, latTimeOffset_NS = 0, latTimeOffset_VE = 0;
+    double latTimeSigOffset = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
+    double latTimeChi2NDF = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
+  
+    bool goodEW = false, goodNS = false, goodVE = false;                // true if reconstruction worked
+    double rmsCCbeam, rmsCCbeam_NS, rmsCCbeam_VE;                        // rms values of the beams in remote region
+    double rmsXbeam, rmsXbeam_NS, rmsXbeam_VE;
+    double rmsPbeam, rmsPbeam_NS, rmsPbeam_VE;
+    unsigned int NCCbeamAntennas = 0, NlateralAntennas = 0; // antennas used for CC beam and lateral distribution
+    unsigned int NCCbeamAntennas_NS = 0, NlateralAntennas_NS = 0; // antennas used for CC beam and lateral distribution
+    unsigned int NCCbeamAntennas_VE = 0, NlateralAntennas_VE = 0; // antennas used for CC beam and lateral distribution
+    double latMeanDist, latMeanDist_NS, latMeanDist_VE;                 // mean distance of the antennas in the lateral distribution
+    double latMeanDistCC, latMeanDistCC_NS, latMeanDistCC_VE;             // mean distance of the antennas used for the CC beam
+    double ratioDiffSign, ratioDiffSign_NS, ratioDiffSign_VE;
+    double ratioDiffSignEnv, ratioDiffSignEnv_NS, ratioDiffSignEnv_VE;
+    double weightedTotSign,weightedTotSign_NS,weightedTotSign_VE;
+    double weightedTotSignEnv,weightedTotSignEnv_NS,weightedTotSignEnv_VE;
+
+    
     recTree->SetBranchAddress("Gt", &Gt);
-    recTree->SetBranchAddress("Az", &Az);
-    recTree->SetBranchAddress("Ze", &Ze);
+    recTree->SetBranchAddress("Xc",&Xc);
+    recTree->SetBranchAddress("Xcg",&Xcg);
+    recTree->SetBranchAddress("Yc",&Yc);
+    recTree->SetBranchAddress("Ycg",&Ycg);
+    recTree->SetBranchAddress("Az",&Az);
+    recTree->SetBranchAddress("Azg",&Azg);
+    recTree->SetBranchAddress("Ze",&Ze);
+    recTree->SetBranchAddress("Zeg",&Zeg);
+    recTree->SetBranchAddress("Size",&Size);
+    recTree->SetBranchAddress("Sizeg",&Sizeg);
+    recTree->SetBranchAddress("Age",&Age);
+    recTree->SetBranchAddress("Ageg",&Ageg);
+    recTree->SetBranchAddress("Nmu",&Nmu);
+    recTree->SetBranchAddress("Lmuo",&Lmuo);
+    recTree->SetBranchAddress("Sizmg",&Sizmg);
+    recTree->SetBranchAddress("lgE",&lgE);
+    recTree->SetBranchAddress("lgEg",&lgEg);
+    recTree->SetBranchAddress("lnA",&lnA);
+    recTree->SetBranchAddress("lnAg",&lnAg);
+    recTree->SetBranchAddress("kappaMario",&kappaMario);
+    recTree->SetBranchAddress("lgEMario",&lgEMario);
+    recTree->SetBranchAddress("err_lgE",&err_lgE);
+    recTree->SetBranchAddress("err_lgEg",&err_lgEg);
+    recTree->SetBranchAddress("err_lnA",&err_lnA);
+    recTree->SetBranchAddress("err_lnAg",&err_lnAg);
+    recTree->SetBranchAddress("err_core",&err_core);
+    recTree->SetBranchAddress("err_coreg",&err_coreg);
+    recTree->SetBranchAddress("err_Az",&err_Az);
+    recTree->SetBranchAddress("err_Azg",&err_Azg);
+    recTree->SetBranchAddress("err_Ze",&err_Ze);
+    recTree->SetBranchAddress("err_Zeg",&err_Zeg);
+    recTree->SetBranchAddress("geomag_angle",&geomag_angle);
+    recTree->SetBranchAddress("geomag_angleg",&geomag_angleg);
+    recTree->SetBranchAddress("reconstruction",&reconstruction);
+    recTree->SetBranchAddress("KRETAver",&KRETAver);
+    recTree->SetBranchAddress("EfieldMaxAbs",&EfieldMaxAbs);
+    recTree->SetBranchAddress("EfieldAvgAbs",&EfieldAvgAbs);
+    
+    // look for existing EW branches
+    TObjArray* existingBranches = recTree->GetListOfBranches();
+    if (existingBranches->FindObject("AzL_EW")==0) {
+      cerr << "Error: No EW polarization data found in root file." << endl;
+      return 1;
+    } else {
+      recTree->SetBranchAddress("AzL_EW",&AzL);
+      recTree->SetBranchAddress("ElL_EW",&ElL);
+      recTree->SetBranchAddress("Distance_EW",&distanceResult);        // radius of curvature
+      recTree->SetBranchAddress("CCheight_EW",&CCheight);
+      recTree->SetBranchAddress("CCwidth_EW",&CCwidth);
+      recTree->SetBranchAddress("CCcenter_EW",&CCcenter);
+      recTree->SetBranchAddress("CCheight_error_EW",&CCheight_error);
+      recTree->SetBranchAddress("CCconverged_EW",&CCconverged);
+      recTree->SetBranchAddress("Xheight_EW",&Xheight);
+      recTree->SetBranchAddress("Xheight_error_EW",&Xheight_error);
+      recTree->SetBranchAddress("Xconverged_EW",&Xconverged);
+      recTree->SetBranchAddress("goodReconstructed_EW",&goodEW);
+      recTree->SetBranchAddress("rmsCCbeam_EW",&rmsCCbeam);
+      recTree->SetBranchAddress("rmsXbeam_EW",&rmsXbeam);
+      recTree->SetBranchAddress("rmsPbeam_EW",&rmsPbeam);
+      recTree->SetBranchAddress("latMeanDistCC_EW",&latMeanDistCC);
+      recTree->SetBranchAddress("NCCbeamAntennas_EW",&NCCbeamAntennas);
+      recTree->SetBranchAddress("ratioDiffSign_EW",&ratioDiffSign);
+      recTree->SetBranchAddress("ratioDiffSignEnv_EW",&ratioDiffSignEnv);
+      recTree->SetBranchAddress("weightedTotSign_EW",&weightedTotSign);
+      recTree->SetBranchAddress("weightedTotSignEnv_EW",&weightedTotSignEnv);
+      recTree->SetBranchAddress("latMeanDist_EW",&latMeanDist);
+      recTree->SetBranchAddress("NlateralAntennas_EW",&NlateralAntennas);
+      recTree->SetBranchAddress("latTimeRcurv_EW",&latTimeRcurv);
+      recTree->SetBranchAddress("latTimeSigRcurv_EW",&latTimeSigRcurv);
+      recTree->SetBranchAddress("latTimeOffset_EW",&latTimeOffset);
+      recTree->SetBranchAddress("latTimeSigOffset_EW",&latTimeSigOffset);
+      recTree->SetBranchAddress("latTimeChi2NDF_EW",&latTimeChi2NDF);
+    }
+    if (existingBranches->FindObject("AzL_NS")==0) {
+      cerr << "Warning: No NS polarization data found in root file." << endl;
+      hasNS = false;
+    } else {
+      hasNS = true;
+    }
     
     // open second data file, if requested
     UInt_t Gt2;
@@ -231,7 +359,6 @@ int main (int argc, char *argv[])
       cout << "Comparing files: " << resultsName1 << " and " << resultsName2 <<endl;
     }
         
-    // TODO: use getListOfBranches to check if branch for antenna exists
     for (int i=0; i < totAntenna; ++i) {
       antPulses[i] = new PulseProperties();
       antPulses2[i] = new PulseProperties();
@@ -242,7 +369,10 @@ int main (int argc, char *argv[])
       antNumber << (i+1);
       string antBranchName;
       antBranchName = "Ant_" + antNumber.str() + "_cal.";
-      // TODO: if  can find antBranchName in list
+      if (existingBranches->FindObject(antBranchName.c_str())==0) {
+        cerr << "Branch \"" << antBranchName << "\" does not exist." << endl;
+        return 1;
+      }
       recTree->SetBranchAddress(antBranchName.c_str(), &antPulses[i]);
       if (resultsName2 != "") 
         recTree2->SetBranchAddress(antBranchName.c_str(), &antPulses2[i]);
@@ -430,7 +560,7 @@ int main (int argc, char *argv[])
         //write info of the fit into file
         outputEW <<m_dict[Gt]<<"\t"<<Epsilon0<<"\t"<<err_Epsilon0<<"\t"<<R0<<"\t"<<err_R0<<"\t"<<chi2NDF<<"\t"<<Epsilon0S<<"\t"<<err_Epsilon0S<<"\t"<<R0S<<"\t"<<err_R0S<<"\t"<<chi2NDF<<"\t"<<chi2NDFS<<endl;			
       }
-      if(m_recNS.size()>=4) {
+      if ((hasNS) && (m_recNS.size()>=4)) {
         if (simDictName!="") 
           plotPrefix = "lateral-NS-"+m_dict[Gt]+"-";
         else 
