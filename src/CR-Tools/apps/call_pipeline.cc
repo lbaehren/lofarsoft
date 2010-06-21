@@ -1264,10 +1264,10 @@ int main (int argc, char *argv[])
   double CCwidth, CCwidth_NS, CCwidth_VE;
   double CCcenter, CCcenter_NS, CCcenter_VE;                    // time of CC beam
   double CCheight_error, CCheight_error_NS, CCheight_error_VE;
-  bool CCconverged, CCconvergedNS, CCconvergedVE;                       // is true if the Gaussian fit to the CCbeam converged
+  bool CCconverged, CCconverged_NS, CCconverged_VE;                       // is true if the Gaussian fit to the CCbeam converged
   double Xheight, Xheight_NS, Xheight_VE;                            // CCheight will be used for EW polarization or ANY polarization
   double Xheight_error, Xheight_error_NS, Xheight_error_VE;
-  bool Xconverged, XconvergedNS, XconvergedVE;                         // is true if the Gaussian fit to the CCbeam converged
+  bool Xconverged, Xconverged_NS, Xconverged_VE;                         // is true if the Gaussian fit to the CCbeam converged
   double AzL, ElL, AzL_NS, ElL_NS, AzL_VE, ElL_VE;                       // Azimuth and Elevation
   double distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;       // distance = radius of curvature
   double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;             // R_0 from lateral distribution exponential fit
@@ -1615,10 +1615,10 @@ int main (int argc, char *argv[])
         roottree->Branch("CCwidth_NS",&CCwidth_NS,"CCwidth_NS/D");
         roottree->Branch("CCcenter_NS",&CCcenter_NS,"CCcenter_NS/D");
         roottree->Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
-        roottree->Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
+        roottree->Branch("CCconverged_NS",&CCconverged_NS,"CCconverged_NS/B");
         roottree->Branch("Xheight_NS",&Xheight_NS,"Xheight_NS/D");
         roottree->Branch("Xheight_error_NS",&Xheight_error_NS,"Xheight_error_NS/D");
-        roottree->Branch("Xconverged_NS",&Xconverged,"Xconverged_NS/B");
+        roottree->Branch("Xconverged_NS",&Xconverged_NS,"Xconverged_NS/B");
         roottree->Branch("goodReconstructed_NS",&goodNS,"goodReconstructed_NS/B");
         roottree->Branch("rmsCCbeam_NS",&rmsCCbeam_NS,"rmsCCbeam_NS/D");
         roottree->Branch("rmsXbeam_NS",&rmsXbeam_NS,"rmsXbeam_NS/D");
@@ -1628,8 +1628,8 @@ int main (int argc, char *argv[])
         if(config["CalculateMaxima"]->bValue()) {
           roottree->Branch("ratioDiffSign_NS",&ratioDiffSign_NS,"ratioDiffSign_NS/D");
           roottree->Branch("ratioDiffSignEnv_NS",&ratioDiffSignEnv_NS,"ratioDiffSignEnv_NS/D");
-          roottree->Branch("weightedTotSign_NS",&weightedTotSign,"weightedTotSign_NS/D");
-          roottree->Branch("weightedTotSignEnv_NS",&weightedTotSignEnv,"weightedTotSignEnv_NS/D");
+          roottree->Branch("weightedTotSign_NS",&weightedTotSign_NS,"weightedTotSign_NS/D");
+          roottree->Branch("weightedTotSignEnv_NS",&weightedTotSignEnv_NS,"weightedTotSignEnv_NS/D");
         }
         if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
@@ -1653,41 +1653,41 @@ int main (int argc, char *argv[])
         }
       }
       if ( (config["polarization"]->sValue() == "VE") || (config["polarization"]->sValue() == "THREE") ) {
-        roottree->Branch("AzL_VE",&AzL_NS,"AzL_VE/D");
-        roottree->Branch("ElL_VE",&ElL_NS,"ElL_VE/D");
-        roottree->Branch("Distance_VE",&distanceResultNS,"Distance_VE/D");      // radius of curvature
-        roottree->Branch("CCheight_VE",&CCheight_NS,"CCheight_VE/D");
-        roottree->Branch("CCwidth_VE",&CCwidth_NS,"CCwidth_VE/D");
+        roottree->Branch("AzL_VE",&AzL_VE,"AzL_VE/D");
+        roottree->Branch("ElL_VE",&ElL_VE,"ElL_VE/D");
+        roottree->Branch("Distance_VE",&distanceResultVE,"Distance_VE/D");      // radius of curvature
+        roottree->Branch("CCheight_VE",&CCheight_VE,"CCheight_VE/D");
+        roottree->Branch("CCwidth_VE",&CCwidth_VE,"CCwidth_VE/D");
         roottree->Branch("CCcenter_VE",&CCcenter_VE,"CCcenter_VE/D");       
-        roottree->Branch("CCheight_error_VE",&CCheight_error_NS,"CCheight_error_VE/D");
-        roottree->Branch("CCconverged_VE",&CCconverged,"CCconverged_VE/B");
-        roottree->Branch("Xheight_VE",&Xheight_NS,"Xheight_VE/D");
-        roottree->Branch("Xheight_error_VE",&Xheight_error_NS,"Xheight_error_VE/D");
-        roottree->Branch("Xconverged_VE",&Xconverged,"Xconverged_VE/B");
-        roottree->Branch("goodReconstructed_VE",&goodNS,"goodReconstructed_VE/B");
-        roottree->Branch("rmsCCbeam_VE",&rmsCCbeam_NS,"rmsCCbeam_VE/D");
-        roottree->Branch("rmsXbeam_VE",&rmsXbeam_NS,"rmsXbeam_VE/D");
-        roottree->Branch("rmsPbeam_VE",&rmsPbeam_NS,"rmsPbeam_Ve/D");
-        roottree->Branch("latMeanDistCC_VE",&latMeanDistCC_NS,"latMeanDistCC_VE/D");
-        roottree->Branch("NCCbeamAntennas_VE",&NCCbeamAntennas_NS,"NCCbeamAntennas_VE/I");
+        roottree->Branch("CCheight_error_VE",&CCheight_error_VE,"CCheight_error_VE/D");
+        roottree->Branch("CCconverged_VE",&CCconverged_VE,"CCconverged_VE/B");
+        roottree->Branch("Xheight_VE",&Xheight_VE,"Xheight_VE/D");
+        roottree->Branch("Xheight_error_VE",&Xheight_error_VE,"Xheight_error_VE/D");
+        roottree->Branch("Xconverged_VE",&Xconverged_VE,"Xconverged_VE/B");
+        roottree->Branch("goodReconstructed_VE",&goodVE,"goodReconstructed_VE/B");
+        roottree->Branch("rmsCCbeam_VE",&rmsCCbeam_VE,"rmsCCbeam_VE/D");
+        roottree->Branch("rmsXbeam_VE",&rmsXbeam_VE,"rmsXbeam_VE/D");
+        roottree->Branch("rmsPbeam_VE",&rmsPbeam_VE,"rmsPbeam_Ve/D");
+        roottree->Branch("latMeanDistCC_VE",&latMeanDistCC_VE,"latMeanDistCC_VE/D");
+        roottree->Branch("NCCbeamAntennas_VE",&NCCbeamAntennas_VE,"NCCbeamAntennas_VE/I");
         if(config["CalculateMaxima"]->bValue()) {
           roottree->Branch("ratioDiffSign_VE",&ratioDiffSign_VE,"ratioDiffSign_VE/D");
           roottree->Branch("ratioDiffSignEnv_VE",&ratioDiffSignEnv_VE,"ratioDiffSignEnv_VE/D");
-          roottree->Branch("weightedTotSign_VE",&weightedTotSign,"weightedTotSign_VE/D");
-          roottree->Branch("weightedTotSignEnv_VE",&weightedTotSignEnv,"weightedTotSignEnv_VE/D");
+          roottree->Branch("weightedTotSign_VE",&weightedTotSign_VE,"weightedTotSign_VE/D");
+          roottree->Branch("weightedTotSignEnv_VE",&weightedTotSignEnv_VE,"weightedTotSignEnv_VE/D");
         }
         if (config["lateralDistribution"]->bValue()) {
-          roottree->Branch("R_0_VE",&R_0_NS,"R_0_VE/D");
-          roottree->Branch("sigR_0_VE",&sigR_0_NS,"sigR_0_VE/D");
-          roottree->Branch("eps_VE",&eps_NS,"eps_VE/D");
-          roottree->Branch("sigeps_VE",&sigeps_NS,"sigeps_VE/D");
-          roottree->Branch("chi2NDF_VE",&chi2NDF_NS,"chi2NDF_VE/D");
-          //roottree->Branch("CutCloseToCore_VE",&CutCloseToCore_NS,"CutCloseToCore_VE/I");
-          //roottree->Branch("CutSmallSignal_VE",&CutSmallSignal_NS,"CutSmallSignal_VE/I");
-          //roottree->Branch("CutBadTiming_VE",&CutBadTiming_NS,"CutBadTiming_VE/I");
-          //roottree->Branch("CutSNR_VE",&CutSNR_NS,"CutSNR_VE/I");
-          roottree->Branch("latMeanDist_VE",&latMeanDist_NS,"latMeanDist_VE/D");
-          roottree->Branch("NlateralAntennas_VE",&NlateralAntennas_NS,"NlateralAntennas_VE/I");
+          roottree->Branch("R_0_VE",&R_0_VE,"R_0_VE/D");
+          roottree->Branch("sigR_0_VE",&sigR_0_VE,"sigR_0_VE/D");
+          roottree->Branch("eps_VE",&eps_VE,"eps_VE/D");
+          roottree->Branch("sigeps_VE",&sigeps_VE,"sigeps_VE/D");
+          roottree->Branch("chi2NDF_VE",&chi2NDF_VE,"chi2NDF_VE/D");
+          //roottree->Branch("CutCloseToCore_VE",&CutCloseToCore_VE,"CutCloseToCore_VE/I");
+          //roottree->Branch("CutSmallSignal_VE",&CutSmallSignal_VE,"CutSmallSignal_VE/I");
+          //roottree->Branch("CutBadTiming_VE",&CutBadTiming_VE,"CutBadTiming_VE/I");
+          //roottree->Branch("CutSNR_VE",&CutSNR_VE,"CutSNR_VE/I");
+          roottree->Branch("latMeanDist_VE",&latMeanDist_VE,"latMeanDist_VE/D");
+          roottree->Branch("NlateralAntennas_VE",&NlateralAntennas_VE,"NlateralAntennas_VE/I");
         }
         if (config["lateralTimeDistribution"]->bValue()) {
           roottree->Branch("latTimeRcurv_VE",&latTimeRcurv_VE,"latTimeRcurv_VE/D");
@@ -1775,10 +1775,10 @@ int main (int argc, char *argv[])
       CCwidth = 0, CCwidth_NS = 0, CCwidth_VE = 0;
       CCcenter = 0, CCcenter_NS = 0, CCcenter_VE = 0;
       CCheight_error = 0, CCheight_error_NS = 0, CCheight_error_VE = 0;
-      CCconverged = 0, CCconvergedNS = 0, CCconvergedVE = 0;
+      CCconverged = 0, CCconverged_NS = 0, CCconverged_VE = 0;
       Xheight = 0, Xheight_NS = 0, Xheight_VE = 0;
       Xheight_error = 0, Xheight_error_NS = 0, Xheight_error_VE = 0;
-      Xconverged = 0, XconvergedNS = 0, XconvergedVE = 0;
+      Xconverged = 0, Xconverged_NS = 0, Xconverged_VE = 0;
       AzL = 0, ElL = 0, AzL_NS = 0, ElL_NS = 0, AzL_VE = 0, ElL_VE = 0;
       distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;
       R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;
@@ -2068,10 +2068,10 @@ int main (int argc, char *argv[])
             CCwidth_NS = results.asDouble("CCwidth");
             CCcenter_NS = results.asDouble("CCcenter");
             CCheight_error_NS = results.asDouble("CCheight_error");
-            CCconvergedNS = results.asBool("CCconverged");
+            CCconverged_NS = results.asBool("CCconverged");
             Xheight_NS = results.asDouble("Xheight");
             Xheight_error_NS = results.asDouble("Xheight_error");
-            XconvergedNS = results.asBool("Xconverged");
+            Xconverged_NS = results.asBool("Xconverged");
             rmsCCbeam_NS = results.asDouble("rmsCCbeam");
             rmsXbeam_NS = results.asDouble("rmsXbeam");
             rmsPbeam_NS = results.asDouble("rmsPbeam");
@@ -2204,10 +2204,10 @@ int main (int argc, char *argv[])
             CCwidth_VE = results.asDouble("CCwidth");
             CCcenter_VE = results.asDouble("CCcenter");
             CCheight_error_VE = results.asDouble("CCheight_error");
-            CCconvergedVE = results.asBool("CCconverged");
+            CCconverged_VE = results.asBool("CCconverged");
             Xheight_VE = results.asDouble("Xheight");
             Xheight_error_VE = results.asDouble("Xheight_error");
-            XconvergedVE = results.asBool("Xconverged");
+            Xconverged_VE = results.asBool("Xconverged");
             rmsCCbeam_VE = results.asDouble("rmsCCbeam");
             rmsXbeam_VE = results.asDouble("rmsXbeam");
             rmsPbeam_VE = results.asDouble("rmsPbeam");
