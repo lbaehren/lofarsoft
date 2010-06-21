@@ -1,7 +1,7 @@
 # +-----------------------------------------------------------------------------+
 # | $Id::                                                                     $ |
 # +-----------------------------------------------------------------------------+
-# |   Copyright (C) 2007                                                        |
+# |   Copyright (C) 2010                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
 # |   This program is free software; you can redistribute it and/or modify      |
@@ -20,70 +20,79 @@
 # |   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                 |
 # +-----------------------------------------------------------------------------+
 
-# - Check for the presence of <PACKAGE>
+# - Check for the presence of CRTOOLS
 #
-# The following variables are set when <PACKAGE> is found:
-#  HAVE_<PACKAGE>       = Set to true, if all components of <PACKAGE>
-#                          have been found.
-#  <PACKAGE>_INCLUDES   = Include path for the header files of <PACKAGE>
-#  <PACKAGE>_LIBRARIES  = Link these to use <PACKAGE>
-#  <PACKAGE>_LFLAGS     = Linker flags (optional)
+# The following variables are set when CRTOOLS is found:
+#  HAVE_CRTOOLS       = Set to true, if all components of CRTOOLS have been found.
+#  CRTOOLS_INCLUDES   = Include path for the header files of CRTOOLS
+#  CRTOOLS_LIBRARIES  = Link these to use CRTOOLS
+#  CRTOOLS_LFLAGS     = Linker flags (optional)
 
-## -----------------------------------------------------------------------------
-## Search locations
+if (NOT FIND_CRTOOLS_CMAKE)
+  
+  set (FIND_CRTOOLS_CMAKE TRUE)
+  
+  ##_____________________________________________________________________________
+  ## Search locations
+  
+  include (CMakeSettings)
+  
+  ##_____________________________________________________________________________
+  ## Check for the header files
+  
+  find_path (CRTOOLS_INCLUDES Analysis/CompletePipeline.h IO/LOFAR_TBB.h
+    PATHS ${include_locations}
+    PATH_SUFFIXES cr crtools
+    NO_DEFAULT_PATH
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the library
+  
+  find_library (CRTOOLS_CR_LIBRARY cr
+    PATHS ${lib_locations}
+    NO_DEFAULT_PATH
+    )
 
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-find_path (<PACKAGE>_INCLUDES <header file(s)>
-  PATHS ${include_locations}
-  PATH_SUFFIXES <optional path extension>
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-find_library (<PACKAGE>_LIBRARIES <package name>
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-if (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
-  set (HAVE_<PACKAGE> TRUE)
-else (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
-  set (HAVE_<PACKAGE> FALSE)
-  if (NOT <PACKAGE>_FIND_QUIETLY)
-    if (NOT <PACKAGE>_INCLUDES)
-      message (STATUS "Unable to find <PACKAGE> header files!")
-    endif (NOT <PACKAGE>_INCLUDES)
-    if (NOT <PACKAGE>_LIBRARIES)
-      message (STATUS "Unable to find <PACKAGE> library files!")
-    endif (NOT <PACKAGE>_LIBRARIES)
-  endif (NOT <PACKAGE>_FIND_QUIETLY)
-endif (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
-
-if (HAVE_<PACKAGE>)
-  if (NOT <PACKAGE>_FIND_QUIETLY)
-    message (STATUS "Found components for <PACKAGE>")
-    message (STATUS "<PACKAGE>_INCLUDES  = ${<PACKAGE>_INCLUDES}")
-    message (STATUS "<PACKAGE>_LIBRARIES = ${<PACKAGE>_LIBRARIES}")
-  endif (NOT <PACKAGE>_FIND_QUIETLY)
-else (HAVE_<PACKAGE>)
-  if (<PACKAGE>_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find <PACKAGE>!")
-  endif (<PACKAGE>_FIND_REQUIRED)
-endif (HAVE_<PACKAGE>)
-
-## -----------------------------------------------------------------------------
-## Mark advanced variables
-
-mark_as_advanced (
-  <PACKAGE>_INCLUDES
-  <PACKAGE>_LIBRARIES
-  )
+  if (CRTOOLS_CR_LIBRARY)
+    list (APPEND CRTOOLS_LIBRARIES ${CRTOOLS_CR_LIBRARY})
+  endif (CRTOOLS_CR_LIBRARY)
+  
+  ##_____________________________________________________________________________
+  ## Actions taken when all components have been found
+  
+  if (CRTOOLS_INCLUDES AND CRTOOLS_LIBRARIES)
+    set (HAVE_CRTOOLS TRUE)
+  else (CRTOOLS_INCLUDES AND CRTOOLS_LIBRARIES)
+    set (HAVE_CRTOOLS FALSE)
+    if (NOT CRTOOLS_FIND_QUIETLY)
+      if (NOT CRTOOLS_INCLUDES)
+	message (STATUS "Unable to find CRTOOLS header files!")
+      endif (NOT CRTOOLS_INCLUDES)
+      if (NOT CRTOOLS_LIBRARIES)
+	message (STATUS "Unable to find CRTOOLS library files!")
+      endif (NOT CRTOOLS_LIBRARIES)
+    endif (NOT CRTOOLS_FIND_QUIETLY)
+  endif (CRTOOLS_INCLUDES AND CRTOOLS_LIBRARIES)
+  
+  if (HAVE_CRTOOLS)
+    if (NOT CRTOOLS_FIND_QUIETLY)
+      message (STATUS "Found components for CRTOOLS")
+      message (STATUS "CRTOOLS_INCLUDES  = ${CRTOOLS_INCLUDES}")
+      message (STATUS "CRTOOLS_LIBRARIES = ${CRTOOLS_LIBRARIES}")
+    endif (NOT CRTOOLS_FIND_QUIETLY)
+  else (HAVE_CRTOOLS)
+    if (CRTOOLS_FIND_REQUIRED)
+      message (FATAL_ERROR "Could not find CRTOOLS!")
+    endif (CRTOOLS_FIND_REQUIRED)
+  endif (HAVE_CRTOOLS)
+  
+  ##_____________________________________________________________________________
+  ## Mark advanced variables
+  
+  mark_as_advanced (
+    CRTOOLS_INCLUDES
+    CRTOOLS_LIBRARIES
+    )
+  
+endif (NOT FIND_CRTOOLS_CMAKE)
