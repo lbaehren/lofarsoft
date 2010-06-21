@@ -34,7 +34,7 @@ namespace CR { // Namespace CR -- begin
     \class Grid
     
     \ingroup CR
-    \ingroup Coordinates
+    \ingroup CR_Coordinates
     
     \brief Brief description for class Grid
     
@@ -74,6 +74,25 @@ namespace CR { // Namespace CR -- begin
 	    |-- crpix               vector<double> = [double,double,double]
 	    |-- cdelt               vector<double> = [double,double,double]
     \endverbatim
+
+    \code
+    // Create observation info object storing telescope position and epoch
+    casa::ObsInfo info (...);
+
+    // Create direction coordinate storing WCS parameters (system, projection, etc.)
+    casa::DirectionCoordinate dir (...);
+
+    // Create empty coordinate system object ...
+    casa::CoordinateSystem cs;
+    // ... and add the previously created objects
+    cs.setObsInfo (info);
+    cs.addCoordinate (dir);
+
+    casa::Vector<double> pixel;
+    casa::Vector<double> world;
+
+    cs.toWorld (world,pixel);
+    \endcode
     
     <h3>Example(s)</h3>
     
