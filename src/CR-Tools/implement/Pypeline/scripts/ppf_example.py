@@ -13,7 +13,7 @@ file["blocksize"]=1024
 weights=hArray(float,[16,1024])
 weights.readdump(LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat')
 
-if weights[0,0].val==0.0
+if weights[0,0].val==0.0:
     print "Reading in new data"
     # Reading of weights failed
     f=open('/home/veen/usg/src/CR-Tools/data/Coeffs16384Kaiser-quant.dat')
@@ -22,7 +22,7 @@ if weights[0,0].val==0.0
     for i in range(0,16*1024):
         weights[i]=float(f.readline())
     weights.setDim([16,1024])
-    weights.writedump(LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat')
+    #weights.writedump(LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat')
 
     
 buffer=hArray(float,[16,1024])
