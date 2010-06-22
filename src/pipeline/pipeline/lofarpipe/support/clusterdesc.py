@@ -1,6 +1,7 @@
 from __future__ import with_statement
 import os.path
 import lofar.parameterset
+from lofarpipe.support.lofarexceptions import ClusterError
 
 class ClusterDesc(object):
     def __init__(self, filename):
@@ -43,8 +44,14 @@ class ClusterDesc(object):
         return "ClusterDesc: " + self.name
 
 def get_compute_nodes(clusterdesc):
-    return clusterdesc.get('Compute.Nodes')
+    try:
+        return clusterdesc.get('Compute.Nodes')
+    except:
+        raise ClusterError("Unable to find compute nodes in clusterdesc.")
 
 def get_head_node(clusterdesc):
     # Always return the first head node, even if there are several defined
-    return [clusterdesc.get('Head.Nodes')[0]]
+    try:
+        return [clusterdesc.get('Head.Nodes')[0]]
+    except:
+        raise ClusterError("Unable to find head node in clusterdesc.")
