@@ -12,6 +12,19 @@ file["blocksize"]=1024
 # Initialize arrays and values
 weights=hArray(float,[16,1024])
 weights.readdump(LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat')
+
+if weights[0,0].val==0.0
+    print "Reading in new data"
+    # Reading of weights failed
+    f=open('/home/veen/usg/src/CR-Tools/data/Coeffs16384Kaiser-quant.dat')
+    weights.setDim([16*1024])
+    f.seek(0)
+    for i in range(0,16*1024):
+        weights[i]=float(f.readline())
+    weights.setDim([16,1024])
+    weights.writedump(LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat')
+
+    
 buffer=hArray(float,[16,1024])
 input=hArray(float,1024)
 avg_spectrum=hArray(float,513)
@@ -25,8 +38,9 @@ for block in range(0,516):
     file["block"]=block
     
     # Read in a block of data
-    input.copy(file["Fx"][0])
-    
+    input.copy(file["Fx"][antnr])
+    #input.read(file,"Fx")
+
     # Copy the data to the buffer
     buffer[startrow].copy(input)
     
@@ -51,9 +65,8 @@ for block in range(0,516):
     #print "startrow=",startrow
     
     # If the startrow becomes negative start at the end of the buffer again.
-    if(startrow)==-1:
-        startrow=15
-    
+    startrow=startrow%16
+        
     # Take an fft of the filtered data
     fftdata.fftw(input)
     
@@ -77,7 +90,7 @@ freq=np.array(file["frequencyValues"].vec())
 freq/=1e6
 
 # Normalize the two spectra
-avg_spec+=(avg_spec_ppf[0]-avg_spec[0])
+avg_spec+=(avg_spec_ppf[3]-avg_spec[3])
 
 # Plot the data
 plt.clf()
