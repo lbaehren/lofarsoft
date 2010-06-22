@@ -9,13 +9,13 @@ antnr=0
 file=crfile(filename_lofar)
 file["blocksize"]=1024
 
-weights_filename=LOFARSOFT+'/src/CR-tools/data/ppfWeights16384_64bit.dat'
+weights_filename=LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat'
 # Initialize arrays and values
 weights=hArray(float,[16,1024])
 weights.readdump(weights_filename)
 
 if weights[0,0].val()==0.0:
-    print "Reading in new data"
+    print "Obtaining Kaiser coefficient from file"
     # Reading of weights failed
     f=open(LOFARSOFT+'/src/CR-Tools/data/Coeffs16384Kaiser-quant.dat')
     weights.setDim([16*1024])
@@ -23,7 +23,7 @@ if weights[0,0].val()==0.0:
     for i in range(0,16*1024):
         weights[i]=float(f.readline())
     weights.setDim([16,1024])
-    weights.writedump(weights_filename)
+    #weights.writedump(weights_filename)
 
     
 buffer=hArray(float,[16,1024])
@@ -34,6 +34,7 @@ fftdata=hArray(complex,513)
 startrow=15
 
 # 
+print "Calculating average spectrum for 500 blocks with and without PPF"
 for block in range(0,516):
     # Set the block to be read
     file["block"]=block
@@ -93,7 +94,9 @@ freq/=1e6
 # Normalize the two spectra
 avg_spec+=(avg_spec_ppf[3]-avg_spec[3])
 
+
 # Plot the data
+print "Plotting the data"
 plt.clf()
 plt.plot(freq,avg_spec,freq,avg_spec_ppf,label="Average spectrum over 500 blocks, no filter")
 
