@@ -22,16 +22,25 @@ filenames3=["CS302C-B0T6:01:48.h5","CS302C-B1T6:01:48.h5","CS302C-B2T6:01:48.h5"
 filenames1=["CS302C-B0T5:00:39.h5","CS302C-B1T5:00:39.h5","CS302C-B2T5:00:39.h5","CS302C-B3T5:00:39.h5","CS302C-B4T5:00:39.h5","CS302C-B5T5:00:39.h5"]
 filenames1_ear1=["CS302C-B0T5:00:39.h5","CS302C-B1T5:00:39.h5","CS302C-B2T5:00:39.h5"]
 data_directory=data_directory1
-filenames=filenames1_ear1
+filenames=filenames1
 #TBBboards=[0,1,2,3,4,5]
 nrfiles=3
 antennaset="HBA"
 antennafilename=LOFARSOFT+"data/calibration/AntennaArrays/"+stationname+"-AntennaArrays.conf"
 blocksize=2**10
-nblocks=10
-startblock=1000
+nblocks=1
+startblock=2000
 NyquistZone=2
 caltablefilename=LOFARSOFT+"src/CR-Tools/data/calibrationCS302.dat"
+selected_frequencies=range(100,200,1)
+FarField=True
+Xpol=True
+Ypol=True
+#azrange=(0.,361.5,1.5)
+#elrange=(0.,91.5,1.5)
+azrange=(183.831-30,183.831+30,1.5)
+elrange=(59.0699-30,59.0699+30,1.5)
+
 #muting channel 0:100 and 270:513 in the code now. Should make these variables
 # (end) configuration
 
@@ -134,9 +143,7 @@ for i in range(totAntennas):
 
 # .... image part
 
-FarField=True
-azrange=(0.,368.,8)
-elrange=(0.,94.,4)
+
 n_az=int((azrange[1]-azrange[0])/azrange[2])
 n_el=int((elrange[1]-elrange[0])/elrange[2])
 n_pixels=n_az*n_el
@@ -144,20 +151,22 @@ n_pixels=n_az*n_el
 
 
 file_time=files[0]["Time"].setUnit("\\mu","s")
-file_frequencies=files[0]["Frequency"]
+file_frequencies=files[0]["Frequency"][selected_frequencies]
+file_allfrequencies=files[0]["Frequency"]
 file_efield=hArray(float,[totAntennas,files[0]["blocksize"]]).setPar("xvalues",file_time)
 file_efieldtemp=[]
 for i in range(nrfiles):
     file_efieldtemp.append(files[i]["emptyFx"].setPar("xvalues",file_time))
-file_fft=hArray(complex,[totAntennas,files[0]["fftLength"]]).setPar("xvalues",file_frequencies)
-
+file_fft=hArray(complex,[totAntennas,files[0]["fftLength"]]).setPar("xvalues",file_allfrequencies)
+selected_fft=hArray(complex,[totAntennas,len(file_frequencies)])
+summed_fft=hArray(float,[totAntennas,len(file_frequencies)])
 phasecorr=hArray(float,[totAntennas,files[0]["fftLength"]])
 phasecorr.copy(file_frequencies)
 
 for i in range(totAntennas):
     phasecorr[i].mul(float(caltable[i,1].val()))
     phasecorr[i].add(float(caltable[i,0].val()))
-    phasecorr[i].negate()
+    #phasecorr[i].negate()
 
 phasecorrweights=hArray(complex,[totAntennas,files[0]["fftLength"]])
 phasecorrweights.phasetocomplex(phasecorr)
@@ -167,11 +176,11 @@ phasecorrweights.phasetocomplex(phasecorr)
 delays=hArray(float,dimensions=[n_pixels,totAntennas])
 
 print "t=",time.clock(),"s -","Initializing results arrays"
-phases=hArray(float,dimensions=[n_pixels,totAntennas,files[0]["fftLength"]],name="Phases")
-weights=hArray(complex,dimensions=[n_pixels,totAntennas,files[0]["fftLength"]],name="Complex Weights")
+phases=hArray(float,dimensions=[n_pixels,totAntennas,len(file_frequencies)],name="Phases")
+weights=hArray(complex,dimensions=[n_pixels,totAntennas,len(file_frequencies)],name="Complex Weights")
 
 shifted_fft=hArray(complex,dimensions=weights,name="FFT times Weights")
-beamformed_fft=hArray(complex,dimensions=[n_pixels,files[0]["fftLength"]],name="Beamformed FFT")
+beamformed_fft=hArray(complex,dimensions=[n_pixels,len(file_frequencies)],name="Beamformed FFT")
 power=hArray(float,dimensions=beamformed_fft,name="Spectral Power",xvalues=file_frequencies,fill=0.0)
 
 #phase_center=hArray(antenna_positions[0].vec())
@@ -200,6 +209,18 @@ weights.phasetocomplex(phases)
 # At the moment we don't know how much data there is for each file.
 
 
+#shut down history tracking for the arrays as it's a big "memory leak"
+for i in range(nrfiles):
+    file_efieldtemp[i].setHistory(False)
+
+    
+file_efield.setHistory(False)
+file_fft.setHistory(False)
+shifted_fft.setHistory(False)
+beamformed_fft.setHistory(False)
+power.setHistory(False)
+selected_fft.setHistory(False)
+
 
 t0=time.clock()
 #file["block"]=startblock
@@ -217,26 +238,43 @@ for block in range(startblock,startblock+nblocks):
 
     #file_efield[...].plot()
     file_fft[...].fftcasa(file_efield[...],NyquistZone)
-    file_fft.mul(phasecorrweights)
-    for i in range(totAntennas):
-        file_fft[i,0:100]=0
-        file_fft[i,270:513]=0
+    #file_fft.mul(phasecorrweights)
 
     #file_fft[...].plot()
     #copies the fft to all positions in shifted_fft
-    shifted_fft.copy(file_fft)
+    for i in range(totAntennas):
+        selected_fft[i].copy(file_fft[i,selected_frequencies])
+    summed_fft.spectralpower(selected_fft)
+    shifted_fft.copy(selected_fft)
     shifted_fft[...].mul(weights[...])
     for n in range(n_pixels):
-        beamformed_fft[n] = shifted_fft[n,0]
-        shifted_fft[n,1:,...].addto(beamformed_fft[n])
-    power.spectralpower(beamformed_fft)
+        if Xpol:
+            beamformed_fft[n] = shifted_fft[n,0]
+            for ant in range(2,totAntennas,2):
+                shifted_fft[n,ant,...].addto(beamformed_fft[n,...])
+            power.spectralpower(beamformed_fft)
+        if Ypol:
+            beamformed_fft[n] = shifted_fft[n,1]
+            for ant in range(3,totAntennas,2):
+                shifted_fft[n,ant,...].addto(beamformed_fft[n,...])
+            power.spectralpower(beamformed_fft)
     print "t=",time.clock()-t0,"s -","Processed block",block
 
 print "t=",time.clock(),"s -","Binning and Normalizing"
+
+#weight the frequency channels of power
+for j in range(len(selected_frequencies)):
+    sum2=0
+    for k in range(totAntennas):
+        sum2+=summed_fft[k,j].val()
+    power[...,j].div(sum2)
+
+
+
 intpower=np.array(power[...].sum())
 #maxval=intpower.max()
 #intpower /= maxval
-intpower.resize([n_az,n_el])
+intpower.resize([n_el,n_az])
 
 print "t=",time.clock(),"s -","Plotting"
 plt.clf()
@@ -246,10 +284,25 @@ plt.imshow(intpower,cmap=plt.cm.hot,extent=(azrange[0],azrange[1],elrange[1],elr
 #np.save(LOFAR_DATA_DIR+"/Crab/pulse3/datadumpCal2,intpower)
 
 
+
+freqpower=np.array(power.vec())
+freqpower.resize([n_el,n_az,4])
+for i in range(1,5):
+    plt.subplot(2,2,i)
+    plt.imshow(freqpower[:,:,i-1],cmap=plt.cm.hot,extent=(azrange[0],azrange[1],elrange[1],elrange[0]))
+
+
+
 #import pyfits
 #hdu = pyfits.PrimaryHDU(intpower)
 #hdulist = pyfits.HDUList([hdu])
-#hdulist.writeto(data_directory+"/image15.fits")
+#hdulist.writeto(data_directory+"/image17.fits")
+
+import pyfits
+hdu = pyfits.PrimaryHDU(freqpower)
+hdulist = pyfits.HDUList([hdu])
+hdulist.writeto(data_directory+"/image32.fits")
+
 
 
 # RFI mitigation and baseline calculation
