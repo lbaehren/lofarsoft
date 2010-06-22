@@ -9,20 +9,21 @@ antnr=0
 file=crfile(filename_lofar)
 file["blocksize"]=1024
 
+weights_filename=LOFARSOFT+'/src/CR-tools/data/ppfWeights16384_64bit.dat'
 # Initialize arrays and values
 weights=hArray(float,[16,1024])
-weights.readdump(LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat')
+weights.readdump(weights_filename)
 
-if weights[0,0].val==0.0:
+if weights[0,0].val()==0.0:
     print "Reading in new data"
     # Reading of weights failed
-    f=open('/home/veen/usg/src/CR-Tools/data/Coeffs16384Kaiser-quant.dat')
+    f=open(LOFARSOFT+'/src/CR-Tools/data/Coeffs16384Kaiser-quant.dat')
     weights.setDim([16*1024])
     f.seek(0)
     for i in range(0,16*1024):
         weights[i]=float(f.readline())
     weights.setDim([16,1024])
-    #weights.writedump(LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat')
+    weights.writedump(weights_filename)
 
     
 buffer=hArray(float,[16,1024])
