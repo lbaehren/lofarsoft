@@ -49,7 +49,7 @@
 
   \brief Compares lateral distribution of LOPES events to REAS simulation
 
-  \author Frank Schr&ouml;der
+  \author Frank Schr&ouml;der Nunzia Palmieri
 
   \date 2008/20/05
 
@@ -716,7 +716,7 @@ int main (int argc, char *argv[])
         while (reasFile.good()) {
           reasFile.getline(buffer2,1024);
           istringstream iss2 (buffer2);
-          if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {	//in sim file:az in reas sistem
+          if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {//in sim file:az in reas sistem
             iss2>>NantS>>distS>>azS>>NSfield>>EWfield>>VEfield>>dummy;
             //look if antenna exists at all in data then separe EW and NS
             if (m_recPulses.find(NantS) != m_recPulses.end()) {
