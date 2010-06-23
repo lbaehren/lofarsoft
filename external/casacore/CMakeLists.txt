@@ -117,7 +117,7 @@ endif (tar_executable)
 ## Download and install Measures database ________
 
 if (wget_executable AND bunzip2_executable AND tar_executable)
-  add_custom_target (casacore_update_data
+  add_custom_target (casacore_measures
     COMMAND ${wget_executable} ftp://ftp.atnf.csiro.au/pub/software/asap/data/asap_data.tar.bz2
     COMMAND ${bunzip2_executable} asap_data.tar.bz2
     COMMAND ${tar_executable} -xvf asap_data.tar
