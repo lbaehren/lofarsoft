@@ -142,7 +142,8 @@ int main (int argc, char *argv[])
         continue;
       }
 
-      if ( (option == "--out") || (option == "-out")) {
+      if ( (option == "--out") || (option == "-out")
+        || (option == "--name") || (option == "-name")) {
         outPrefix = argument;
         continue;
       }
@@ -185,8 +186,7 @@ int main (int argc, char *argv[])
         if(iss.str().size()>0&&iss.str()[0]!='%'&&iss.str()[0]!='#') {
           iss>>GtDict>>simNameDict>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy;
           m_dict[GtDict]=simNameDict; //fill the map dictionary 
-          cout<<""<<simNameDict<<endl;
-          cout<<""<<GtDict<<endl;
+          cout<<""<<simNameDict <<" - GT " <<GtDict<<endl;
         }
         if (!dictFile.good())
           break;
@@ -701,12 +701,13 @@ int main (int argc, char *argv[])
         double dummy;
         double distanceR=0.;
 
-        string reasFileName = simPath+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
-        //string reasFileName = simPath+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
-        //string reasFileName = simPath+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
+        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat";
+        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
+        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
+        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
         ifstream reasFile(reasFileName.c_str());
         if (!reasFile.is_open()) {
-          cerr << "ERROR ----- CAN NOT OPEN THE FILE for REAS!" <<endl;
+          cerr << "Error canot open REAS file: " << reasFileName << endl;
           cerr << "No simulated event for Gt: " <<Gt<< endl;
           //return 1;     
           continue;
@@ -717,57 +718,67 @@ int main (int argc, char *argv[])
           istringstream iss2 (buffer2);
           if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {	//in sim file:az in reas sistem
             iss2>>NantS>>distS>>azS>>NSfield>>EWfield>>VEfield>>dummy;
-            cout<<"az sim : "<< azS << " az data LOPES : " << Az<<" ze LOPES "<<Ze<<endl;
-            //calc distance
-            showerCoord=sqrt(1.0 - pow(cos(azS-Az),2)*pow(sin(Ze),2));
-            distanceS=0.01*distS*showerCoord;
-            //distanceSerr=15.; 
-            //calc field strength
-            NSfield*=sim2lopesField;
-            EWfield*=sim2lopesField;
-            if(NSfield<0.1)
-                NSfield=0.1;
-            if(EWfield<0.1)
-                EWfield=0.1;
-            //TODO calc error
-
             //look if antenna exists at all in data then separe EW and NS
-            if (m_recPulses.find(NantS) != m_recPulses.end()) { 
+            if (m_recPulses.find(NantS) != m_recPulses.end()) {
+              // convert e-field to LOPES units
+              NSfield*=sim2lopesField;
+              EWfield*=sim2lopesField;
+              
+              if(NSfield<0.1) {
+                cout<<"WARNING: Low field strength in NS simulation (< 0.1)." << endl;
+                // NSfield=0.1;  // Steffen used 0.1 as minimum value for simulations
+              }
+              if(EWfield<0.1) {
+                cout<<"WARNING: Low field strength in EW simulation (< 0.1)." << endl;
+                // EWfield=0.1;  // Steffen used 0.1 as minimum value for simulations
+              }
+            
               if (m_recPulses[NantS].polarization == "EW") {
-                cout<<"   xxxxxx   EW polarization   xxxxxx  "<<endl;
+                //cout<<"   xxxxxx   EW polarization   xxxxxx  "<<endl;
                 //define recEW map
                 m_recEW[NantS] = m_recPulses[NantS];
-                cout<<"rec EW map size   :"<<m_recEW.size()<<endl;
+                //cout<<"rec EW map size   :"<<m_recEW.size()<<endl;
                 //define simEW map
                 PulseProperties simPropEW;
                 simPropEW.antennaID = NantS; //antennaid vs antenna no?
                 simPropEW.height = EWfield;
-                cout<<"EW Field  "<<EWfield<<endl;
+                //cout<<"EW Field  "<<EWfield<<endl;
                 simPropEW.heightError = 0.;
                 distanceR=m_recEW[NantS].dist;
-                if ((distanceS-distanceR)>(distanceS*0.01)) {
-                  cout<<"WARNING!"<<endl;
-                  cout<<"distance simulated EW channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
+                // calculate simulation distance for consistency check
+                double azimuth = AzL/gradeg;  // EW
+                double zenith = (90.-ElL)/gradeg;
+                //cout<<"az sim : "<< azS << " az data LOPES : " << azimuth <<" ze LOPES "<< zenith <<endl;
+                showerCoord=sqrt(1.0 - pow(cos(azS-azimuth),2)*pow(sin(zenith),2));
+                distanceS=0.01*distS*showerCoord;                
+                if ((distanceS-distanceR)>(distanceS*0.05)) {
+                  cout<<"WARNING: distance simulated EW channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
                 }
+                
                 simPropEW.dist =distanceR;
                 simPropEW.disterr = distanceSerr;
                 m_simEW[NantS] = simPropEW; //fill the sim map
               }
               if (m_recPulses[NantS].polarization == "NS") {
-                cout<<"   kkkkkk   NS polarization   kkkkkk  "<<endl;
+                //cout<<"   kkkkkk   NS polarization   kkkkkk  "<<endl;
                 //define recNS map
                 m_recNS[NantS] = m_recPulses[NantS];
-                cout<<"rec NS map size   :"<<m_recNS.size()<<endl;
+                //cout<<"rec NS map size   :"<<m_recNS.size()<<endl;
                 //define simEW map
                 PulseProperties simPropNS;
                 simPropNS.antennaID = NantS; //antennaid vs antenna no?
                 simPropNS.height = NSfield;
-                cout<<"NS Field  "<<NSfield<<endl;
+                //cout<<"NS Field  "<<NSfield<<endl;
                 simPropNS.heightError = 0.;
                 distanceR=m_recNS[NantS].dist;
-                if ((distanceS-distanceR)>(distanceS*0.01)) {
-                  cout<<"WARNING!"<<endl;
-                  cout<<"distance simulated NS channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
+                // calculate simulation distance for consistency check
+                double azimuth = AzL_NS/gradeg;
+                double zenith = (90.-ElL_NS)/gradeg;
+                //cout<<"az sim : "<< azS << " az data LOPES : " << azimuth <<" ze LOPES "<< zenith <<endl;
+                showerCoord=sqrt(1.0 - pow(cos(azS-azimuth),2)*pow(sin(zenith),2));
+                distanceS=0.01*distS*showerCoord;                
+                if ((distanceS-distanceR)>(distanceS*0.05)) {
+                  cout<<"WARNING: distance simulated NS channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
                 }
                 simPropNS.dist =distanceR;
                 simPropNS.disterr = distanceSerr;
