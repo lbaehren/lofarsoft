@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) <year>                                                  *
- *   <author> (<mail>)                                                     *
+ *   Copyright (C) 2010                                                    *
+ *   Lars B"ahren <bahren@astron.nl>                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,9 +21,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <<newModule>/<newClass>.h>
+#include <HDF5Property.h>
 
-namespace <newNamespace> { // Namespace <newNamespace> -- begin
+namespace DAL { // Namespace DAL -- begin
   
   // ============================================================================
   //
@@ -31,14 +31,14 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //
   // ============================================================================
   
-  <newClass>::<newClass> ()
+  HDF5Property::HDF5Property ()
   {;}
   
   /*!
     \param other -- Another HDF5Property object from which to create this new
            one.
   */
-  <newClass>::<newClass> (<newClass> const &other)
+  HDF5Property::HDF5Property (HDF5Property const &other)
   {
     copy (other);
   }
@@ -49,12 +49,12 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //
   // ============================================================================
   
-  <newClass>::~<newClass> ()
+  HDF5Property::~HDF5Property ()
   {
     destroy();
   }
   
-  void <newClass>::destroy ()
+  void HDF5Property::destroy ()
   {;}
   
   // ============================================================================
@@ -66,7 +66,7 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //_____________________________________________________________________________
   //                                                                    operator=
   
-  <newClass>& <newClass>::operator= (<newClass> const &other)
+  HDF5Property& HDF5Property::operator= (HDF5Property const &other)
   {
     if (this != &other) {
       destroy ();
@@ -78,7 +78,7 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //_____________________________________________________________________________
   //                                                                         copy
   
-  void <newClass>::copy (<newClass> const &other)
+  void HDF5Property::copy (HDF5Property const &other)
   {;}
 
   // ============================================================================
@@ -93,9 +93,9 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   /*!
     \param os -- Output stream to which the summary is written.
   */
-  void <newClass>::summary (std::ostream &os)
+  void HDF5Property::summary (std::ostream &os)
   {
-    os << "[<newClass>] Summary of internal parameters." << std::endl;
+    os << "[HDF5Property] Summary of internal parameters." << std::endl;
   }
   
   // ============================================================================
@@ -106,4 +106,4 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   
   
 
-} // Namespace <newNamespace> -- end
+} // Namespace DAL -- end

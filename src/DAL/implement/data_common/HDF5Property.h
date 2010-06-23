@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) <year>                                                  *
- *   <author> <<mail>>                                                     *
+ *   Copyright (C) 2010                                                    *
+ *   Lars B"ahren <bahren@astron.nl>                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,27 +21,31 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef <NEWCLASS>_H
-#define <NEWCLASS>_H
+#ifndef HDF5PROPERTY_H
+#define HDF5PROPERTY_H
 
 // Standard library header files
 #include <iostream>
+#include <map>
 #include <string>
 
-namespace <newNamespace> { // Namespace <newNamespace> -- begin
+#include <dalCommon.h>
+
+namespace DAL { // Namespace DAL -- begin
   
   /*!
-    \class <newClass>
+    \class HDF5Property
     
-    \ingroup <newModule>
+    \ingroup DAL
+    \ingroup data_common
     
-    \brief Brief description for class <newClass>
+    \brief Brief description for class HDF5Property
     
-    \author <author>
+    \author Lars B&auml;hren
 
-    \date <date>
+    \date 2010/06/21
 
-    \test t<newClass>.cc
+    \test tHDF5Property.cc
     
     <h3>Prerequisite</h3>
     
@@ -54,41 +58,44 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     <h3>Example(s)</h3>
     
   */  
-  class <newClass> {
+  class HDF5Property {
+
+    //! Link traversal file access flag
+    std::map<hid_t,std::string> fileAccessFlag_p;
     
   public:
     
     // === Construction =========================================================
     
     //! Default constructor
-    <newClass> ();
+    HDF5Property ();
     
     //! Copy constructor
-    <newClass> (<newClass> const &other);
+    HDF5Property (HDF5Property const &other);
     
     // === Destruction ==========================================================
 
     //! Destructor
-    ~<newClass> ();
+    ~HDF5Property ();
     
     // === Operators ============================================================
     
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another <newClass> object from which to make a copy.
+      \param other -- Another HDF5Property object from which to make a copy.
     */
-    <newClass>& operator= (<newClass> const &other); 
+    HDF5Property& operator= (HDF5Property const &other); 
     
     // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, <newClass>.
+      \return className -- The name of the class, HDF5Property.
     */
     inline std::string className () const {
-      return "<newClass>";
+      return "HDF5Property";
     }
 
     //! Provide a summary of the object's internal parameters and status
@@ -104,16 +111,19 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     
     
   private:
+
+    //! Initialize the object's internal parameters
+    void init ();
     
     //! Unconditional copying
-    void copy (<newClass> const &other);
+    void copy (HDF5Property const &other);
     
     //! Unconditional deletion 
     void destroy(void);
     
-  }; // Class <newClass> -- end
+  }; // Class HDF5Property -- end
   
-} // Namespace <newNamespace> -- end
+} // Namespace DAL -- end
 
-#endif /* <NEWCLASS>_H */
+#endif /* HDF5PROPERTY_H */
   
