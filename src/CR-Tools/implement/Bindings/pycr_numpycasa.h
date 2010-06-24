@@ -72,6 +72,43 @@ namespace CR { // Namespace CR -- begin
     
     */  
 
+    // === num_util replacement functions ========================================
+
+    /** 
+     *Function template creates a one-dimensional numpy array of length n containing
+     *a copy of data at data*.  See num_util.cpp::getEnum<T>() for list of specializations
+     *@param T  C type of data
+     *@param T* data pointer to start of data
+     *@param n an integer indicates the size of the array.
+     *@return a numpy array of size n with elements initialized to data.
+     */
+    
+    template <typename T> boost::python::numeric::array makeNum(const T* data, int n = 0){
+      boost::python::object obj(boost::python::handle<>(PyArray_FromDims(1, &n,  num_util::getEnum<T>())));
+      void *arr_data = PyArray_DATA((PyArrayObject*) obj.ptr());
+      memcpy(arr_data, data, PyArray_ITEMSIZE((PyArrayObject*) obj.ptr()) * n); // copies the input data to 
+      return boost::python::extract<boost::python::numeric::array>(obj);
+    }
+    
+    /** 
+     *Function template creates an n-dimensional numpy array with dimensions dimens containing
+     *a copy of values starting at data.  See num_util.cpp::getEnum<T>() for list of specializations
+     *@param T  C type of data
+     *@param T*  data pointer to start of data
+     *@param n an integer indicates the size of the array.
+     *@return a numpy array of size n with elements initialized to data.
+     */
+    
+    
+    template <typename T> boost::python::numeric::array makeNum(const T * data, std::vector<int> dims){
+      int total = std::accumulate(dims.begin(),dims.end(),1,std::multiplies<int>());
+      boost::python::object obj(boost::python::handle<>(PyArray_FromDims(dims.size(),&dims[0],  num_util::getEnum<T>())));
+      void *arr_data = PyArray_DATA((PyArrayObject*) obj.ptr());
+      memcpy(arr_data, data, PyArray_ITEMSIZE((PyArrayObject*) obj.ptr()) * total);
+      return boost::python::extract<boost::python::numeric::array>(obj);
+    }
+    
+
     // === Functions =============================================================
   
     /*!
@@ -170,7 +207,7 @@ namespace CR { // Namespace CR -- begin
       };
       Bool  deleteIt;
       const T * datapointer(casarray.getStorage(deleteIt));
-      bpl::numeric::array result(num_util::makeNum(datapointer,outshape));
+      bpl::numeric::array result(CR::PYCR::makeNum(datapointer,outshape));
       casarray.freeStorage(datapointer, deleteIt);
       return result;
     };
