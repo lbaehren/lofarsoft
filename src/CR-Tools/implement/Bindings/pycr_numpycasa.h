@@ -195,7 +195,39 @@ namespace CR { // Namespace CR -- begin
     };
   
     /*!
-      \brief Return the pointer to the begin of the storage of a numpy array
+      \brief Create a casa vector with the size and (copied) values of a python list of integers
+    
+      \param pylist -- python object that is a list of integers
+    
+      \return casa vector
+    */
+    template <class T> casa::Vector<T> casaFromIntList(PyObject * pylist){
+      int i,size=PyList_Size(pylist);
+      casa::Vector<T> outvec(size);
+      for (i=0; i<size; i++) {
+	outvec[i] = static_cast<T>( PyInt_AsLong(PyList_GetItem(pylist,i)) );
+      };
+      return outvec;
+    }
+
+    /*!
+      \brief Create a casa vector with the size and (copied) values of a python list of floats
+    
+      \param pylist -- python object that is a list of floats
+    
+      \return casa vector
+    */
+    template <class T> casa::Vector<T> casaFromFloatList(PyObject * pylist){
+      int i,size=PyList_Size(pylist);
+      casa::Vector<T> outvec(size);
+      for (i=0; i<size; i++) {
+	outvec[i] = static_cast<T>( PyFloat_AsDouble(PyList_GetItem(pylist,i)) );
+      };
+      return outvec;
+    }
+
+    /*!
+      \Brief Return the pointer to the begin of the storage of a numpy array
     
       \param pydata   -- boost-style "wrapped" numpy array
     

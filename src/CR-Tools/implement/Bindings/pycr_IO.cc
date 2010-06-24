@@ -79,38 +79,47 @@ namespace CR { // Namespace CR -- begin
     
     // --------------------------------------------------------------- CRFileRead
     bool CRFileRead(DataReader &dr, std::string Datatype, bpl::numeric::array &pydata ){
-      if (Datatype == "Time"){
+      for (int i=0; Datatype[i]; i++) {
+	Datatype[i]= tolower(Datatype[i]);
+      };
+      if (Datatype == "time"){
 	casa::Vector<double> data;
  	casa::IPosition outshape(1,dr.blocksize());
  	casaFromNumpyResize(pydata, data, outshape);
  	dr.timeValues(data);
-      } else if (Datatype == "Frequency"){
+      } else if (Datatype == "frequency"){
 	casa::Vector<double> data;
 	casa::IPosition outshape(1,dr.fftLength());
 	casaFromNumpyResize(pydata, data, outshape);
 	data = dr.frequencyValues(); //this should do a copy...
-      } else if (Datatype == "Fx"){
+      } else if (Datatype == "fx"){
 	casa::Matrix<double> data;
 	casa::IPosition outshape(2,dr.blocksize(),dr.nofSelectedAntennas());
 	casaFromNumpyResize(pydata, data, outshape);
 	dr.fx(data);
-      } else if (Datatype == "Voltage"){
+      } else if (Datatype == "voltage"){
 	casa::Matrix<double> data;
 	casa::IPosition outshape(2,dr.blocksize(),dr.nofSelectedAntennas());
 	casaFromNumpyResize(pydata, data, outshape);
 	dr.voltage(data);
-      } else if (Datatype == "FFT"){
+      } else if (Datatype == "fft"){
 	casa::Matrix< std::complex<double> > data;
 	casa::IPosition outshape(2,dr.fftLength(),dr.nofSelectedAntennas());
 	casaFromNumpyResize(pydata, data, outshape);
 	dr.fft(data);
-      } else if (Datatype == "CalFFT"){
+      } else if (Datatype == "calfft"){
 	casa::Matrix< std::complex<double> > data;
 	casa::IPosition outshape(2,dr.fftLength(),dr.nofSelectedAntennas());
 	casaFromNumpyResize(pydata, data, outshape);
 	dr.calfft(data);
       } else {
+	std::string fields;
+	fields = fields + "help" 
+	  + ", " + "Time" + ", " + "Frequency"
+	  + ", " + "Fx" + ", " + "Voltage"
+	  + ", " + "FFT" + ", " + "CalFFT";
 	std::cout << "CR::PYCR::CRFileRead: Datatype=" << Datatype << " is unknown or not yet implemented!" << std::endl;
+	std::cout << "    Available Datatypes are: " << fields << std::endl;
       };
       
       return true;
@@ -166,10 +175,12 @@ namespace CR { // Namespace CR -- begin
        	return numpyFromSTL(dr.shift());
       // scalar values from the header record
       } else if (key== "date") {
+	cout << "CRFileGetParameter: date " << dr.headerRecord().asDouble("Date") << endl;
 	return bpl::object(dr.headerRecord().asuInt("Date"));
       } else if (key== "observatory") {
 	return bpl::object(dr.headerRecord().asString("Observatory"));
       } else if (key== "filesize") {
+	cout << "CRFileGetParameter: filesize " << dr.headerRecord().asDouble("Filesize") << endl;
 	return bpl::object(dr.headerRecord().asInt("Filesize"));
       } else if (key== "ddate") {
 	return bpl::object(dr.headerRecord().asDouble("dDate"));
@@ -234,23 +245,80 @@ namespace CR { // Namespace CR -- begin
 
 
     // -------------------------------------------------------- CRFileSetParameter
-    bool CRFileSetParameter(DataReader &dr, std::string key, bpl::object pyob) {
+      // copied here from hftools.cc, needs to be removed as soon as there
+      // is a real include file for hftools.
+      std::vector<int> PyList2STLInt32Vec(PyObject* pyob){
+	std::vector<int> vec;
+	if (PyList_Check(pyob)){
+	  int i,size=PyList_Size(pyob);
+	  vec.reserve(size);
+	  for (i=0;i<size;++i) vec.push_back((int)PyInt_AsLong(PyList_GetItem(pyob,i)));
+	}
+	return vec;
+      }
+    bool CRFileSetParameter(DataReader &dr, std::string key, PyObject * pyob) {
       for (int i=0; key[i]; i++) {
 	key[i]= tolower(key[i]);
       };
-      if ((key== "block")) {
-	//dr.setBlock( PyInt_AsLong(&pyob) );
-      };  
-
+      // scalar values from methods
+      if (key == "block") {
+	dr.setBlock( PyInt_AsLong(pyob) );
+      } else if (key == "blocksize") {
+	dr.setBlocksize( PyInt_AsLong(pyob) );
+      } else if (key == "startblock") {
+	dr.setStartBlock( PyInt_AsLong(pyob) );
+      } else if (key == "stride") {
+	dr.setStride( PyInt_AsLong(pyob) );
+      } else if (key == "sampleoffset") {
+	dr.setSampleOffset( PyInt_AsLong(pyob) );
+      } else if (key == "nyquistzone") {
+	dr.setNyquistZone( PyInt_AsLong(pyob) );
+      } else if (key == "shift") {
+	dr.setShift( PyInt_AsLong(pyob) );
+      } else if (key == "referencetime") {
+	dr.setReferenceTime( PyFloat_AsDouble(pyob) );
+      } else if (key == "samplefrequency") {
+	dr.setSampleFrequency( PyFloat_AsDouble(pyob) );
+      } else if (key=="shiftvector") {
+	if (PyList_Check(pyob)){
+	  dr.setShift(PyList2STLInt32Vec(pyob));
+	} else {
+	  cout << "CRFileSetParameter, ShiftVector: Illegal parameter!" << endl;
+	};
+	cout << "CRFileSetParameter: keyword  shiftvector not implemented yet!" << endl;
+      } else if (key=="selectedantennas") {
+	if (PyList_Check(pyob)){
+	  dr.setSelectedAntennas(casaFromIntList<uint>(pyob));
+	} else {
+	  cout << "CRFileSetParameter, SelectedAntennas: Illegal parameter!" << endl;
+	};
+      } else {
+	std::string fields;
+	fields = fields + "help" 
+	  + ", " + "Block" + ", " + "Blocksize"
+	  + ", " + "StartBlock" + ", " + "Stride"
+	  + ", " + "SampleOffset" + ", " + "NyquistZone"
+	  + ", " + "Shift" + ", " + "ReferenceTime"
+	  + ", " + "SampleFrequency" + ", " + "ShiftVector"
+	  + ", " + "SelectedAntennas" + ", " + "";	
+	if (key== "help") {
+	  cout << "CRFileSetParameter" << " - available keywords: "<< fields <<endl;
+	} else {
+	  // Default for unknown keyword:
+	  cout << "CRFileSetParameter" << " Unknown keyword: " << key << endl;
+	  cout << " -- available keywords: "<< fields <<endl;
+	};
+      };
       return true;
     }
-
+  
     // -------------------------------------------------------- export_DataReader
     void export_DataReader() {  
       bpl::class_<CR::DataReader>("DataReader")
 	.def("summary",&CR::PYCR::CRsummary)
 	.def("crRead",&CR::PYCR::CRFileRead)
 	.def("crFileGetParameter",&CR::PYCR::CRFileGetParameter)
+	.def("crFileSetParameter",&CR::PYCR::CRFileSetParameter)
 	;   
       def("crFileOpen", &CR::PYCR::CRFileOpen,bpl::return_internal_reference<>());
       def("crFileOpen", &CR::PYCR::CRFileOpenType,bpl::return_internal_reference<>());

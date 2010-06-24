@@ -21,8 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PYCR_IO_H
-#define PYCR_IO_H
+#ifndef PYCR_RFI_H
+#define PYCR_RFI_H
 
 // Standard library header files
 #include <iostream>
@@ -36,7 +36,6 @@
 #include <boost/python/extract.hpp>
 
 #include <crtools.h>
-#include "IO/DataReader.h"
 
 namespace bpl = boost::python;
 
@@ -47,11 +46,11 @@ namespace CR { // Namespace CR -- begin
       \ingroup CR
       \ingroup pycr
       
-      \brief Python bindings for the Datareader classes
+      \brief Python bindings for the RFI-mitigation class
       
       \author Andreas Horneffer
       
-      \date 2010/06/13
+      \date 2010/06/21
       
       <h3>Prerequisite</h3>
       
@@ -67,70 +66,26 @@ namespace CR { // Namespace CR -- begin
     
     // === "Public" functions used in the bindings =========================================
     /*!
-      \brief boost-python style export of the DataReader
+      \brief export for the RFIMitigation class
 
       Call this function from a main boost-python "export block" to add the
-      wrappers for the DataReader to the libraray.
+      wrappers for the RFIMitigation class to the libraray.
     */
-    void export_DataReader();
+    void export_RFIMitigation();
     
     // === "Private" functions only used internally ========================================
     /*!
-      \brief Open a file and return the corresponding DataReader object
+      \brief Apply the RFI-mitigation to a block of data
       
-      \param Filename -- name (path) of the file to be opened
-      
-      \return the newly created DataReader object
-
-      This version tries to guess the filetype from the filename.
-    */
-    DataReader & CRFileOpen(std::string Filename); 
-
-    /*!
-      \brief Open a file and return the corresponding DataReader object
-      
-      \param Filename -- name (path) of the file to be opened
-      \param filetype -- the type of the file, currently supported are "LOPESEvent" and "LOFAR_TBB"
-      
-      \return the newly created DataReader object
-    */
-    DataReader & CRFileOpenType(std::string Filename, std::string filetype);
-
-    /*!
-      \brief Read data from a file and return it in the given numpy array
-      
-      \param dr       -- an existing DataReader Object
-      \param Datatype -- name of the field that is to be read out
-      \param pydata   -- the array in which the data is returned
+      \param pyFFTdata -- numpy array with frequency-domain data, gets modified
       
       \return True on success
     */
-    bool CRFileRead(DataReader &dr, std::string Datatype, bpl::numeric::array &pydata );
-    
-    /*!
-      \brief Read a parameter from a DataReader object
-      
-      \param dr  -- an existing DataReader Object
-      \param key -- name of the field that is to be read out
-      
-      \return a newly created object with the data
-    */
-    bpl::object CRFileGetParameter(DataReader &dr, std::string key);
-    
-    /*!
-      \brief Set a parameter in a DataReader object
-      
-      \param dr   -- an existing DataReader Object
-      \param key  -- name of the field that is to be set
-      \param pyob -- Python object with the data
-      
-      \return True on success
-    */
-    bool CRFileSetParameter(DataReader &dr, std::string key, PyObject * pyob);
+    bool applyRFIMitigation(bpl::numeric::array &pyFFTdata); 
    
   } // Namespace PYCR -- end
   
 } // Namespace CR -- end
 
-#endif /* PYCR_IO_H */
+#endif /* PYCR_RFI_H */
   

@@ -38,6 +38,7 @@
 
 
 #include "pycr_IO.h"
+#include "pycr_RFI.h"
 
 BOOST_PYTHON_MODULE (pycr)
 {
@@ -66,6 +67,10 @@ BOOST_PYTHON_MODULE (pycr)
   //                                                    implement/Data
 
   CR::PYCR::export_DataReader ();
+
+  //__________________________________________________________________
+  //                                                    implement/RFI
+  CR::PYCR::export_RFIMitigation ();
   
   //__________________________________________________________________
   //                                                      implement/IO
