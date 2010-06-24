@@ -133,6 +133,8 @@ if (CR_WITH_GUI)
   add_subdirectory (GUI)
 endif (CR_WITH_GUI)
 
+add_subdirectory (ttl)
+
 ## =============================================================================
 ##
 ##  Test programs
