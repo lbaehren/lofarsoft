@@ -11,7 +11,14 @@ int main()
 {
   const int NX=5;
   const int NY=5;
+  const double refLong=1.0;
+  const double refLat=1.0;
+  const double incLong=1.0;
+  const double incLat=1.0;
+  const double refX=1.0;
+  const double refY=1.0;
   const std::string telescope = "LOFAR";
+  const double dateObs = 50237.29;
 
   std::vector<double> ox(NX*NY);
   std::vector<double> oy(NX*NY);
@@ -38,7 +45,11 @@ int main()
       oy.begin(), oy.end(),
       ix.begin(), ix.end(),
       iy.begin(), iy.end(),
-      telescope);
+      telescope,
+      dateObs,
+      refLong, refLat,
+      incLong, incLat,
+      refX, refY);
 
   // Display output grid
   for (int i=0; i<NX*NY; i++)

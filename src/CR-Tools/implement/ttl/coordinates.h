@@ -21,10 +21,13 @@
 
 // SYSTEM INCLUDES
 #include <string>
+#include <iostream> // NOTE remove this
 
 // PROJECT INCLUDES
 #include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/ObsInfo.h>
+#include <coordinates/Coordinates/Projection.h>
+#include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <measures/Measures/MEpoch.h>
 
 // LOCAL INCLUDES
@@ -43,7 +46,12 @@ namespace ttl
                  const Iter oy_begin, const Iter oy_end,
                  const Iter ix_begin, const Iter ix_end,
                  const Iter iy_begin, const Iter iy_end,
-                 const std::string telescope)
+                 const std::string telescope,
+                 const double obsDate,
+                 const double refLong, const double refLat,
+                 const double incLong, const double incLat,
+                 const double refX, const double refY
+                 )
     {
       // Set up the internal coordinate system
       casa::CoordinateSystem cs;
@@ -51,8 +59,9 @@ namespace ttl
       // Set observation information
       casa::ObsInfo obsinfo;
 
-      // Observation time
-      casa::MEpoch epoch;
+      // Observation date and time
+      casa::MEpoch epoch(casa::MVEpoch(casa::Quantity(static_cast<casa::Double>(obsDate), "d")), casa::MEpoch::Ref(casa::MEpoch::UTC));
+
       obsinfo.setObsDate(epoch);
 
       // Observation telescope
@@ -60,7 +69,30 @@ namespace ttl
 
       // Add observation information to coordinate system
       cs.setObsInfo(obsinfo);
-//      cs.addCoordinate (dir);
+
+      // Add spatial direction information to coordinate system
+      casa::Matrix<casa::Double> xform(2,2);
+      xform = 0.0; xform.diagonal() = 1.0;
+
+      casa::DirectionCoordinate dir(casa::MDirection::AZEL,
+                                    casa::Projection(casa::Projection::STG),
+                                    static_cast<casa::Double>(refLong),
+                                    static_cast<casa::Double>(refLat),
+                                    static_cast<casa::Double>(incLong),
+                                    static_cast<casa::Double>(incLat),
+                                    xform,
+                                    static_cast<casa::Double>(refX),
+                                    static_cast<casa::Double>(refY));
+      
+      cs.addCoordinate(dir);
+
+      std::cout<<"-- World axis names        = "<<cs.worldAxisNames()<<std::endl;
+      std::cout<<"-- World axis units        = " <<cs.worldAxisUnits()<<std::endl;
+      std::cout<<"-- Reference pixel (CRPIX) = " <<cs.referencePixel()<<std::endl;
+      std::cout<<"-- Increment       (CDELT) = " <<cs.increment()<<std::endl;
+      std::cout<<"-- Reference value (CRVAL) = " <<cs.referenceValue()<<std::endl;
+      std::cout<<"-- Telescope name          = " <<obsinfo.telescope()<<std::endl;
+      std::cout<<"-- Observing date          = "<<obsinfo.obsDate()<<std::endl;
 
       // Generate grid
       Iter ix_it=ix_begin;
@@ -68,11 +100,24 @@ namespace ttl
       Iter ox_it=ox_begin;
       Iter oy_it=oy_begin;
 
-      while (ix_it!=ix_end)
-      {
-        *ox_it=*ix_it;
-        *oy_it=*iy_it;
+      // Placeholders for conversion
+      casa::Vector<casa::Double> world(2), pixel(2); 
 
+      // Loop over all pixels
+      while (ix_it!=ix_end && iy_it!=iy_end && ox_it!=ox_end && oy_it!=oy_end)
+      {
+        // Get pixel coordinates into casa vector for conversion
+        pixel[0]=static_cast<casa::Double>(*ix_it);
+        pixel[1]=static_cast<casa::Double>(*iy_it);
+
+        // Convert pixel to world coordinates
+        cs.toWorld(world, pixel);
+
+        // Retrieve world coordinates
+        *ox_it=static_cast<double>(world[0]);
+        *oy_it=static_cast<double>(world[1]);
+
+        // Next pixel
         ++ix_it;
         ++iy_it;
         ++ox_it;
