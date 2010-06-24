@@ -78,7 +78,7 @@
   \endverbatim
 */
 
-
+const static bool simulationDistances = true;  // decide wether to use the lateral distances of simulation or of data
 const static double gradeg=180./(TMath::Pi());
 
 int main (int argc, char *argv[])
@@ -163,6 +163,9 @@ int main (int argc, char *argv[])
     
     // map dic declaration
     map<int,string> m_dict;
+    map<int,double> m_dictAz;
+    map<int,double> m_dictZe;
+    double AzS = 0, ZeS = 0;
     
     // open dictionary with simulations, if it is provided
     if (simDictName!="") {
@@ -184,8 +187,12 @@ int main (int argc, char *argv[])
         dictFile.getline(buffer,1024);
         istringstream iss (buffer);
         if(iss.str().size()>0&&iss.str()[0]!='%'&&iss.str()[0]!='#') {
-          iss>>GtDict>>simNameDict>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy;
+          iss>>GtDict>>simNameDict>>dummy>>AzS>>ZeS>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy;
+          // convert elevation to zenith
+          ZeS = 90.-ZeS;
           m_dict[GtDict]=simNameDict; //fill the map dictionary 
+          m_dictAz[GtDict]=AzS;
+          m_dictZe[GtDict]=ZeS;
           cout<<""<<simNameDict <<" - GT " <<GtDict<<endl;
         }
         if (!dictFile.good())
@@ -359,7 +366,8 @@ int main (int argc, char *argv[])
     outtree->Branch("KRETAver",&KRETAver,"KRETAver/C");
     outtree->Branch("EfieldMaxAbs",&EfieldMaxAbs,"EfieldMaxAbs/D");
     outtree->Branch("EfieldAvgAbs",&EfieldAvgAbs,"EfieldAvgAbs/D");
-
+    outtree->Branch("AzS",&AzS,"AzS/D");  // azimuth and zenith used for simulation
+    outtree->Branch("ZeS",&ZeS,"ZeS/D");
 
     // look for existing EW branches
     TObjArray* existingBranches = recTree->GetListOfBranches();
@@ -712,6 +720,9 @@ int main (int argc, char *argv[])
           //return 1;     
           continue;
         }
+        // get simulation azimuth and zenith form dictionary
+        AzS = m_dictAz[Gt];
+        ZeS = m_dictZe[Gt];
         char buffer2[1024];
         while (reasFile.good()) {
           reasFile.getline(buffer2,1024);
@@ -732,6 +743,10 @@ int main (int argc, char *argv[])
                 cout<<"WARNING: Low field strength in EW simulation (< 0.1)." << endl;
                 // EWfield=0.1;  // Steffen used 0.1 as minimum value for simulations
               }
+              
+              // direction used for lateral distance calculation
+              double azimuth = AzS/gradeg;
+              double zenith = ZeS/gradeg;
             
               if (m_recPulses[NantS].polarization == "EW") {
                 //cout<<"   xxxxxx   EW polarization   xxxxxx  "<<endl;
@@ -746,8 +761,10 @@ int main (int argc, char *argv[])
                 simPropEW.heightError = 0.;
                 distanceR=m_recEW[NantS].dist;
                 // calculate simulation distance for consistency check
-                double azimuth = AzL/gradeg;  // EW
-                double zenith = (90.-ElL)/gradeg;
+                if (!simulationDistances) { // overwrite direction with values of LOPES reconstruction
+                  azimuth = AzL/gradeg;  // EW
+                  zenith = (90.-ElL)/gradeg;
+                }  
                 //cout<<"az sim : "<< azS << " az data LOPES : " << azimuth <<" ze LOPES "<< zenith <<endl;
                 showerCoord=sqrt(1.0 - pow(cos(azS-azimuth),2)*pow(sin(zenith),2));
                 distanceS=0.01*distS*showerCoord;                
@@ -755,7 +772,10 @@ int main (int argc, char *argv[])
                   cout<<"WARNING: distance simulated EW channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
                 }
                 
-                simPropEW.dist =distanceR;
+                if (simulationDistances) 
+                  simPropEW.dist =distanceS;
+                else  
+                  simPropEW.dist =distanceR;
                 simPropEW.disterr = distanceSerr;
                 m_simEW[NantS] = simPropEW; //fill the sim map
               }
@@ -772,15 +792,20 @@ int main (int argc, char *argv[])
                 simPropNS.heightError = 0.;
                 distanceR=m_recNS[NantS].dist;
                 // calculate simulation distance for consistency check
-                double azimuth = AzL_NS/gradeg;
-                double zenith = (90.-ElL_NS)/gradeg;
+                if (!simulationDistances) { // overwrite direction with values of LOPES reconstruction
+                  azimuth = AzL_NS/gradeg;  // EW
+                  zenith = (90.-ElL_NS)/gradeg;
+                }  
                 //cout<<"az sim : "<< azS << " az data LOPES : " << azimuth <<" ze LOPES "<< zenith <<endl;
                 showerCoord=sqrt(1.0 - pow(cos(azS-azimuth),2)*pow(sin(zenith),2));
                 distanceS=0.01*distS*showerCoord;                
                 if ((distanceS-distanceR)>(distanceS*0.05)) {
                   cout<<"WARNING: distance simulated NS channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
                 }
-                simPropNS.dist =distanceR;
+                if (simulationDistances) 
+                  simPropNS.dist =distanceS;
+                else  
+                  simPropNS.dist =distanceR;
                 simPropNS.disterr = distanceSerr;
           
                 m_simNS[NantS] = simPropNS;//fill the sim map

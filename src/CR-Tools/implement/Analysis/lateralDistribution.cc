@@ -95,7 +95,7 @@ namespace CR { // Namespace CR -- begin
       
       // create arrays for plotting and fitting LOPES data and REAS sim
       unsigned int Nant = pulsesRec.size();
-      double fieldStr[Nant],distance[Nant],fieldStrSim[Nant];
+      double fieldStr[Nant],distance[Nant],fieldStrSim[Nant],distanceSim[Nant];
       double fieldStrEr[Nant],distanceEr[Nant],fieldStrErSim[Nant],distanceErSim[Nant];
       int antennaNumber[Nant];
       int antID[Nant];
@@ -124,6 +124,7 @@ namespace CR { // Namespace CR -- begin
           }         
           fieldStrSim[ant] = pulsesSim[antID[ant]].height;
           fieldStrErSim[ant] = pulsesSim[antID[ant]].heightError;
+          distanceSim[ant] = pulsesSim[antID[ant]].dist;
           distanceErSim[ant] = pulsesSim[antID[ant]].disterr;
         }
 
@@ -141,7 +142,7 @@ namespace CR { // Namespace CR -- begin
       // looking for extreme values for axes
       for (unsigned int i = 0; i < Nant; ++i) {
         /* get largest distance and min and max field strength */
-        if ( distance[i] > maxdist) {
+        if (distance[i] > maxdist) {
           maxdist=distance[i];
         }
         if (fieldStrSim[i]>fieldMax) {
@@ -151,6 +152,9 @@ namespace CR { // Namespace CR -- begin
           fieldMax=fieldStr[i];
         }
         if (fitSim) {
+          if (distanceSim[i] > maxdist) {
+            maxdist=distanceSim[i];
+          }
           if (fieldStrSim[i]<fieldMin) {
             fieldMin=fieldStrSim[i];
           }
@@ -167,7 +171,7 @@ namespace CR { // Namespace CR -- begin
       double latMeanDist = 0;
       if (ant > 0)
         latMeanDist = Mean(ant, distance);
-      cout << "Mean distance: " << latMeanDist << " m." << endl;
+      cout << "Mean distance (data): " << latMeanDist << " m." << endl;
       erg.define("latMeanDist",latMeanDist);
 
       TGraphErrors *latPro = new TGraphErrors (ant, distance,fieldStr,distanceEr,fieldStrEr);
@@ -186,7 +190,7 @@ namespace CR { // Namespace CR -- begin
       latPro->GetYaxis()->SetTitleSize(0.05);
       latPro->GetYaxis()->SetRange(0,fieldMax*3);
 
-      TGraphErrors *latProSim = new TGraphErrors (ant, distance,fieldStrSim,distanceErSim,fieldStrErSim);
+      TGraphErrors *latProSim = new TGraphErrors (ant, distanceSim,fieldStrSim,distanceErSim,fieldStrErSim);
       latProSim->SetFillColor(2);
       latProSim->SetLineColor(2);
       latProSim->SetMarkerColor(2);
