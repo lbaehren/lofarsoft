@@ -42,19 +42,18 @@ namespace RM {
   rmFITS::rmFITS()
   {
     // initialise critical pointers
-    fptr				= NULL;
-    fitsstatus		= 0;
-	 nulval			= 0;
-	 anynul			= 0;
-	 iomode		   = 0;								// default READONLY mode
-
-	 memset(this->fits_error_message, 0, MAX_MESSAGE_LENGTH); 	  
-	  
-	 #ifdef HAVE_CASA	   
-	 lattice_p    = NULL;    // initialise casa lattice
-	 #endif	  
+    fptr       = NULL;
+    fitsstatus = 0;
+    nulval     = 0;
+    anynul     = 0;
+    iomode     = 0;   /* default READONLY mode */
+    
+    memset(this->fits_error_message, 0, MAX_MESSAGE_LENGTH); 	  
+    
+#ifdef HAVE_CASA	   
+    lattice_p    = NULL;    // initialise casa lattice
+#endif	  
   }
-  
   
   //_____________________________________________________________________________
   //                                                                       rmFITS
@@ -65,53 +64,53 @@ namespace RM {
 	 \param extension - FITS extension to open (optional)
   */
   rmFITS::rmFITS (const string &filename,
-						int iomode,
-						int extension)
+		  int iomode,
+		  int extension)
   {
     fptr				= NULL;    // initialise FITS filepointer
     fitsstatus		= 0;       // initialise FITS status
-	 nulval			= 0.0;
-	 anynul			= 0;
-	  
-	 memset(this->fits_error_message, 0, MAX_MESSAGE_LENGTH);  
-	  
-	 #ifdef HAVE_CASA	   
-	 lattice_p    = NULL;    // initialise casa lattice
-	 #endif
-	  
+    nulval			= 0.0;
+    anynul			= 0;
+    
+    memset(this->fits_error_message, 0, MAX_MESSAGE_LENGTH);  
+    
+#ifdef HAVE_CASA	   
+    lattice_p    = NULL;    // initialise casa lattice
+#endif
+    
     // Check if file exists: if it exists open in iomode
     if (fileExists(filename))
-    {
+      {
         // Depending on iomode: OPEN for READING,WRITING, RW or CREATE a FITS file
         if (fits_open_file(&fptr, filename.c_str(), iomode, &fitsstatus))
-        {
-	    		if(fitsstatus)
-	    		{
-	      		fits_get_errstatus(fitsstatus, fits_error_message);
-	      		cout << fits_error_message << endl;
-	      		throw "rmFITS::rmFITS could not open file";	// get fits error from fitsstatus property later
-	    		}
-	 		}
-	 }
+	  {
+	    if(fitsstatus)
+	      {
+		fits_get_errstatus(fitsstatus, fits_error_message);
+		cout << fits_error_message << endl;
+		throw "rmFITS::rmFITS could not open file";	// get fits error from fitsstatus property later
+	      }
+	  }
+      }
     else
-    {
+      {
         // if file didnt exist, create a new one ...
         if (fits_create_file(&fptr, const_cast<char *>(filename.c_str()), &fitsstatus))
-        {
-	      	fits_get_errstatus(fitsstatus, fits_error_message);
-	      	cout << fits_error_message << endl;	
+	  {
+	    fits_get_errstatus(fitsstatus, fits_error_message);
+	    cout << fits_error_message << endl;	
             throw "rmFITS::open could not create file";
-        }
+	  }
 	
     	/*    // ... and open it
-        if (fits_open_file(&fptr, filename.c_str(), iomode, &fitsstatus))
-        {
-            throw "rmFITS::open";	// get fits error from fitsstatus property later
-        }
-      */
-
-		}
-		
+	      if (fits_open_file(&fptr, filename.c_str(), iomode, &fitsstatus))
+	      {
+	      throw "rmFITS::open";	// get fits error from fitsstatus property later
+	      }
+	*/
+	
+      }
+    
   }
   
   //_____________________________________________________________________________
@@ -125,9 +124,9 @@ namespace RM {
   rmFITS::rmFITS (rmFITS const &other)
   {
     if (fits_copy_file(fptr, other.fptr, 1, 1, 1, &fitsstatus))
-	 {
+      {
         throw "rmFITS::rmFITS copy constructor";
-    }
+      }
   }
   
   //_____________________________________________________________________________
@@ -142,7 +141,7 @@ namespace RM {
     \param following - copy following (after CHDU) HDUs to other rmFITS object
   */
   rmFITS::rmFITS (rmFITS const &other,
-						bool previous,
+		  bool previous,
                   bool current,
                   bool following)
   {
@@ -178,34 +177,34 @@ namespace RM {
     int morekeys=0;	// Don't reserve space for more keys
     
     if (fits_copy_hdu(fptr, other.fptr, morekeys, &fitsstatus))
-	 {
+      {
         throw "rmFITS::rmFITS copy constructor";
-    }
+      }
   }
-
-
+  
+  
   /*!
     \brief Destructor
   */
   rmFITS::~rmFITS()
   {
-	 if(fptr!=NULL)				// only try to close the FITS file if it hasn't been closed before...
-	 {
-//		cout << "closing FITS file" << endl;		// debug
-		this->close();				// ...close the FITS file
-	 }
-	 else
-	 {
-//		cout << "Destroying without closing." << endl;
-
-
-    /*
-     *  Deallocate memory: not necessary at the moment, since no memory allocated
-     *  in constructor
-     */
-	  }
+    if(fptr!=NULL)				// only try to close the FITS file if it hasn't been closed before...
+      {
+	//		cout << "closing FITS file" << endl;		// debug
+	this->close();				// ...close the FITS file
+      }
+    else
+      {
+	//		cout << "Destroying without closing." << endl;
+	
+	
+	/*
+	 *  Deallocate memory: not necessary at the moment, since no memory allocated
+	 *  in constructor
+	 */
+      }
   }
-
+  
   // ============================================================================
   //
   //  Methods
@@ -214,29 +213,29 @@ namespace RM {
   
   //_____________________________________________________________________________
   //                                                                     	 open
-
+  
   /*!
-  	 \brief Open an existing file with READONLY or READWRITE access
- 
-	 \param filename - name of file to open
-	 \param iomode - I/O mode to open the file READONLY / READWRITE
+    \brief Open an existing file with READONLY or READWRITE access
+    
+    \param filename - name of file to open
+    \param iomode - I/O mode to open the file READONLY / READWRITE
   */
   void rmFITS::open(const string &filename, int iomode, int extension)
   {
-  		if(fits_open_file(&fptr, const_cast<char *>(filename.c_str()), iomode, &fitsstatus))
-		{
-			throw "rmFITS::open failed to open file";
-		}
+    if(fits_open_file(&fptr, const_cast<char *>(filename.c_str()), iomode, &fitsstatus))
+      {
+	throw "rmFITS::open failed to open file";
+      }
   }
-
-
+  
+  
   /*!
-	 \brief Open the first data HDU in the FITS object
-
+    \brief Open the first data HDU in the FITS object
+    
     \param iomode - I/O-mode: READONLY, READWRITE
   */
   void rmFITS::openData (const std::string &filename,
-								 int iomode)
+			 int iomode)
   {
     if (fits_open_data(&fptr, const_cast<char *>(filename.c_str()), iomode , &fitsstatus))
       {
@@ -257,7 +256,7 @@ namespace RM {
     \param iomode - I/O-mode: R, RW
   */
   void rmFITS::openImage (const std::string &filename,
-                           int iomode)
+			  int iomode)
   {
     if (fits_open_image(&fptr, const_cast<char *>(filename.c_str()), iomode, &fitsstatus))
       {
@@ -277,7 +276,7 @@ namespace RM {
     \param iomode - I/O-mode: R, RW
   */
   void rmFITS::openTable (const std::string &filename,
-                           int iomode)
+			  int iomode)
   {
     if (fits_open_table(&fptr, const_cast<char *>(filename.c_str()), iomode, &fitsstatus))
       {
@@ -292,9 +291,9 @@ namespace RM {
   /*!
     \brief Get a (casa) Lattice<Float> to access the fits file
   */
-	/*
-  void rmFITS::getLattice()
-  {
+  /*
+    void rmFITS::getLattice()
+    {
     // Generic lattice variable for casa lattice
     casa::LatticeBase *latticeBase;
     // Local string to hold filename 
@@ -308,13 +307,13 @@ namespace RM {
     latticeBase=casa::ImageOpener::openImage (filename);
     
     if (lattice_p==NULL) {
-      throw "rmFITS::getLattice ";
+    throw "rmFITS::getLattice ";
     }
     
     // Currently only support double lattices:
     lattice_p=dynamic_cast<casa::ImageInterface<casa::Float>*>(latticeBase);
-   
- 	// determine data type of lattice
+    
+    // determine data type of lattice
     switch(lattice->dataType()){
     case TpFloat:
     lattice_float=dynamic_cast<ImageInterface<Float>*>(lattice_Q);
@@ -334,30 +333,30 @@ namespace RM {
     }
     
     // check if data type is in accordance with FITS header entry
-  }
+    }
   */
-
+  
   //_____________________________________________________________________________
   //                                                                        close
-
+  
   /*  
-	\brief Close the FITS file of this object		
+      \brief Close the FITS file of this object		
   */
   void rmFITS::close()
   {
-	 	fits_close_file(this->fptr, &fitsstatus);
-    	if(fitsstatus)
-	 	{
-			cerr << getError();
-    		throw "rmFITS::close error while closing";
-    	}
-	 	else
-	 	{
-			this->fptr=NULL;		// after successful closing set the fitsfile pointer to NULL
-		}
+    fits_close_file(this->fptr, &fitsstatus);
+    if(fitsstatus)
+      {
+	cerr << getError();
+	throw "rmFITS::close error while closing";
+      }
+    else
+      {
+	this->fptr=NULL;		// after successful closing set the fitsfile pointer to NULL
+      }
   }
-
-
+  
+  
   //_____________________________________________________________________________
   //                                                                     filename
   
@@ -366,17 +365,17 @@ namespace RM {
   */  
   string rmFITS::filename()
   {
-		string filename;			// string to contain FITS filename
-	
-		if(fits_file_name(fptr, const_cast<char*>(filename.c_str()), &fitsstatus))
-		{
-			throw "rmFITS::filename could not get filename of object";
-		}
-		
-		return filename;
+    string filename;			// string to contain FITS filename
+    
+    if(fits_file_name(fptr, const_cast<char*>(filename.c_str()), &fitsstatus))
+      {
+	throw "rmFITS::filename could not get filename of object";
+      }
+    
+    return filename;
   }
-
-
+  
+  
   //_____________________________________________________________________________
   //                                                                     getError
   
@@ -389,100 +388,109 @@ namespace RM {
   {
     char fits_error_message[81];
     //std::string error_message;
-
-	  
+    
+    
     fits_get_errstatus(fitsstatus, fits_error_message);	// returns descriptive text string (30 char max.) corresponding to a CFITSIO error status code
-
-	 if(strncmp(fits_error_message, "", 80)!=0)				// if the is an FITS error (correct?)
-	 {
-	    return(static_cast<string>(fits_error_message));
-	 }
-	 else 
-	 {
-	    return("");	// return empty string if there is no FITS error
-	 }
-
-	  
+    
+    if(strncmp(fits_error_message, "", 80)!=0)				// if the is an FITS error (correct?)
+      {
+	return(static_cast<string>(fits_error_message));
+      }
+    else 
+      {
+	return("");	// return empty string if there is no FITS error
+      }
+    
+    
     /*
-	 while (fits_read_errmsg(fits_error_message)!=0)
-    {
-    	cerr << fits_error_message << endl;		// print further messages
+      while (fits_read_errmsg(fits_error_message)!=0)
+      {
+      cerr << fits_error_message << endl;		// print further messages
       complete_error_message += fits_error_message;	// concat complete error msg
-    }
-	 */
-	  
+      }
+    */
+    
     /* Martin's code
-    void fitshandle::check_errors() const
-    {
-    if (status==0) return;
-    char msg[81];
-    fits_get_errstatus (status, msg);
-    cerr << msg << endl;
-    while (firead_errmsg(msg)) cerr << msg << endl;
-    planck_fail("FITS error");
-    }
+       void fitshandle::check_errors() const
+       {
+       if (status==0) return;
+       char msg[81];
+       fits_get_errstatus (status, msg);
+       cerr << msg << endl;
+       while (firead_errmsg(msg)) cerr << msg << endl;
+       planck_fail("FITS error");
+       }
     */
   }
 
-	
   //_____________________________________________________________________________
   //                                                                 getAllErrors	
-	
+  
   /*!
     \brief Get all FITS error messages on the stack
-	
-	 \return errors - vector of strings of error messages on the FITS stack
+    
+    \return errors - vector of strings of error messages on the FITS stack
   */
   std::vector<std::string> rmFITS::getAllErrors ()
   {
-	  char message[MAX_MESSAGE_LENGTH];
-	  std::vector<std::string> errors;
-	  
-	  // Since the newest FITS error is on top of the stack, push_back will give us the same order in the vector
-     fits_get_errstatus(fitsstatus, message);
-	  while(fitsstatus)
-	  {
-		  fits_read_errmsg(message);
-		  errors.push_back(static_cast<string>(message));	
-	  }
-
-	  return errors;
+    char message[MAX_MESSAGE_LENGTH];
+    std::vector<std::string> errors;
+    
+    // Since the newest FITS error is on top of the stack, push_back will give us the same order in the vector
+    fits_get_errstatus(fitsstatus, message);
+    while(fitsstatus)
+      {
+	fits_read_errmsg(message);
+	errors.push_back(static_cast<string>(message));	
+      }
+    
+    return errors;
   }
-
+  
+  //_____________________________________________________________________________
+  //                                                               writeErrorMark	
+  
   /*!
-     \brief Write error mark on the FITS error stack
-	
-  	  The fits write errmark routine puts an invisible marker on the CFITSIO error stack. The fits clear errmark routine can then be used to delete any more recent error messages on the stack, back to the position of the marker. This preserves any older error messages on the stack. The fits clear errmsg routine simply clears all the messages (and marks) from the stack. These routines are called without any arguments.
+    \brief Write error mark on the FITS error stack
+    
+    The fits write errmark routine puts an invisible marker on the CFITSIO error
+    stack. The fits clear errmark routine can then be used to delete any more
+    recent error messages on the stack, back to the position of the marker. This
+    preserves any older error messages on the stack. The fits clear errmsg
+    routine simply clears all the messages (and marks) from the stack. These
+    routines are called without any arguments.
   */
   void rmFITS::writeErrorMark(void)
   {
-     fits_write_errmark();		// this routine does not set the fitsstatus, nor does it return success/failure
+    /* This routine does not set the fitsstatus, nor does it return 
+       success/failure */
+    fits_write_errmark();
   }
-
-	
+  
+  
   //_____________________________________________________________________________
   //                                                               clearErrorMark	
-	  
+  
   /*!
     \brief Clear error mark on the FITS error stack	
   */
   void rmFITS::clearErrorMark(void)
   {	
-	  fits_clear_errmark();		// this routine does not set the fitsstatus, nor does it return success/failure
+    fits_clear_errmark();		// this routine does not set the fitsstatus, nor does it return success/failure
   }	  
-	  
+  
   /*!
-     \brief Clear all FITS error messages (and marks) on the stack
+    \brief Clear all FITS error messages (and marks) on the stack
   */
   void rmFITS::clearErrorMessages() 
   {  
-	  fits_clear_errmsg();
+    fits_clear_errmsg();
   }
-	
-	
+  
+  
   //_____________________________________________________________________________
   //                                                               printAllErrors	
-
+  
   /*!
     \brief Get the corresponding cfits error message to the current fitsstatus
     
@@ -516,7 +524,6 @@ namespace RM {
     */
   }
 
-
   //_____________________________________________________________________________
   //                                                                   getNumHDUs
 
@@ -526,49 +533,47 @@ namespace RM {
   int rmFITS::getNumHDUs ()
   {
     int nofHDUs=0;	// number of hdus in FITS file
-
+    
     if (fits_get_num_hdus(fptr, &nofHDUs ,&fitsstatus))
       {
         throw "rmFITS::getNumHDUs";
       }
-
+    
     return nofHDUs;
   }
-
+  
   //_____________________________________________________________________________
   //                                                              moveAbsoluteHDU
-
+  
   /*!
     \param hdu - move to HDU number
-
+    
     \return hdutype - type of HDU moved to
   */
   void rmFITS::moveAbsoluteHDU(int hdu)
   {
-    if (fits_movabs_hdu(fptr, hdu, NULL, &fitsstatus))
-	 {
-        throw "rmFITS::moveAbsoluteHDU";
+    if (fits_movabs_hdu(fptr, hdu, NULL, &fitsstatus)) {
+      throw "rmFITS::moveAbsoluteHDU";
     }
-
-    if (getHDUType()==IMAGE_HDU)	 // if it is an image extension
-    {
-        updateImageDimensions();		// Update dimensions-vector,
-	 }
+    
+    /* If it is an image extension, update dimensions-vector. */
+    if (getHDUType()==IMAGE_HDU) {
+        updateImageDimensions();
+      }
   }
-
-	
+  
   //_____________________________________________________________________________
   //                                                              moveRelativeHDU	
-
+  
   /*!
     \brief Move relative by hdu units
-
+    
     \param hdu - move relative number of HDUs
   */
   void rmFITS::moveRelativeHDU(int nhdu)
   {
     if (fits_movrel_hdu(fptr, nhdu, NULL, &fitsstatus))	// try to move nhdu
-    {
+      {
         throw "rmFITS::moveRelativeHDU";
     }
 
@@ -621,94 +626,90 @@ namespace RM {
 
     return hdutype;
   }
-
-   //_____________________________________________________________________________
-	//                                                                  moveNameHDU
-	
-	/*!
-	   \brief Write the current HDU to the output stream outstream
-	 
-	   \param outstream - file output stream to write to
-	*/
-	void rmFITS::writeHDU(ostream &outstream)
-	{
-		//TODO
-		if(!outstream.good())
-		   throw "rmFITS::writeHDU outstream is not ready for I/O";
-		else
-		{
-			
-		}
-	}
-	
-	
+  
   //_____________________________________________________________________________
-  // 																								  getX	
-	
-	/*!
-		\brief Get the X dimension of the FITS image
-	
-		\return X - X dimension of an image
-	*/
-	int64_t rmFITS::getX()
-	{
-		if(dimensions.size()==0)
-			throw "rmFITS::X dimensions not set";
-		else
-			return this->dimensions[0];
-	}
-
-	//_____________________________________________________________________________
-	// 																								getY	
-	
-	/*!
-		\brief Get the Y dimension of the FITS image
-	
-		\return Y - Y dimension of an image
-	*/	
-	int64_t rmFITS::getY()
-	{
-		if(dimensions.size()==0)
-			throw "rmFITS::Y dimensions not set";
-		else		
-			return this->dimensions[1];
-	}
-
-	//_____________________________________________________________________________
-	// 																								getZ	
-	
-	/*!
-		\brief Get the Z dimension of the FITS image
-
-		\return Z - Z dimension of an image
-	*/	
-	int64_t rmFITS::getZ()
-	{
-		if(dimensions.size()==0)
-			throw "rmFITS::Y dimensions not set";
-		else
-			return this->dimensions[2];
-	}
-
-	
-  //_____________________________________________________________________________
-  // 																				getImageDimensions	
-	
+  //                                                                  moveNameHDU
+  
   /*!
-  		\brief Get image dimensions
-	
-		\return dim - vector of length equal the number of axes and in each entry length of that axis
+    \brief Write the current HDU to the output stream outstream
+    
+    \param outstream - file output stream to write to
+  */
+  void rmFITS::writeHDU(ostream &outstream)
+  {
+    //TODO
+    if(!outstream.good()) {
+      throw "rmFITS::writeHDU outstream is not ready for I/O";
+    }
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                         getX	
+  
+  /*!
+    \brief Get the X dimension of the FITS image
+    
+    \return X - X dimension of an image
+  */
+  int64_t rmFITS::getX()
+  {
+    if(dimensions.size()==0)
+      throw "rmFITS::X dimensions not set";
+    else
+      return this->dimensions[0];
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                         getY	
+  
+  /*!
+    \brief Get the Y dimension of the FITS image
+    
+    \return Y - Y dimension of an image
+  */	
+  int64_t rmFITS::getY()
+  {
+    if(dimensions.size()==0)
+      throw "rmFITS::Y dimensions not set";
+    else		
+      return this->dimensions[1];
+  }
+  
+  //_____________________________________________________________________________
+  // 		                                                             getZ	
+  
+  /*!
+    \brief Get the Z dimension of the FITS image
+    
+    \return Z - Z dimension of an image
+  */	
+  int64_t rmFITS::getZ()
+  {
+    if(dimensions.size()==0)
+      throw "rmFITS::Y dimensions not set";
+    else
+      return this->dimensions[2];
+  }
+  
+  
+  //_____________________________________________________________________________
+  // 							       getImageDimensions	
+  
+  /*!
+    \brief Get image dimensions
+    
+    \return dim - vector of length equal the number of axes and in each entry length of that axis
   */
   vector<int64_t> rmFITS::getImageDimensions()
   {
-	  updateImageDimensions();
-	  return this->dimensions;
+    updateImageDimensions();
+    return this->dimensions;
   }
-
-	
+  
+  
   //_____________________________________________________________________________
   //                                                        updateImageDimensions	
-
+  
   /*!
     \brief Update the information contained in the dimensions-vector of the rmFITS object
   */
@@ -717,29 +718,27 @@ namespace RM {
     int i=0;
     int naxis=0;
     long *naxes=0;
-
-    if (getHDUType()==IMAGE_HDU)
-	 {
-        naxis=getImgDim();			// get number of axis
-        naxes=(long*) calloc(sizeof(long), naxis);// allocate memory for axis dimensions
-
-        dimensions.resize(naxis);		// resize dimensions vector
-        getImgSize(naxis, naxes);		// get the size of each axis
-
-        for (i=0; i<naxis; i++)
-        {
-           dimensions[i]=naxes[i];
-		  }
-	 }
+    
+    if (getHDUType()==IMAGE_HDU) {
+      naxis=getImgDim();			// get number of axis
+      naxes=(long*) calloc(sizeof(long), naxis);// allocate memory for axis dimensions
+      
+      dimensions.resize(naxis);		// resize dimensions vector
+      getImgSize(naxis, naxes);		// get the size of each axis
+      
+      for (i=0; i<naxis; i++)
+	{
+	  dimensions[i]=naxes[i];
+	}
+    }
   }
-
-	
+  
   //_____________________________________________________________________________
   //                                                        updateImageDimensions	
-
+  
   /*!
     \brief Read type of HDU (IMAGE_HDU, ASCII_TBL, or BINARY_TBL)
-
+    
     \return hduype - Type of current HDU
   */
   int rmFITS::getHDUType()
@@ -1082,48 +1081,49 @@ namespace RM {
     }
   }
 
-	
+  
   //___________________________________________________________________________
   //                                                                  createImg	
   /*!
-	   \brief Create an image extension
-	 
-	   \param bitpix - Bits per pixel
-	   \param dimensions - Image dimension vector
-	*/
-	void rmFITS::createImg(int bitpix,
-								  std::vector<int64_t> &dimensions)
-	{
-		long naxis=0, *naxes=NULL;
-
-		if(bitpix != -32)		// we currently only support TDOUBLE FITS images
-		{
-			throw "rmFITS::createImg bitpix is not TDOUBLE_IMG";
-		}
-		if(dimensions.size()==0)
-			throw "rmFITS::createImg dimensions is 0";
-
-		naxis=dimensions.size();
-		naxes=static_cast<long *>(calloc(naxis, sizeof(long)));
-		
-		for(unsigned int i=0; i < naxis; i++)
-			naxes[i]=dimensions[i];
-			
-		if (fits_create_img(fptr, bitpix, naxis , naxes, &fitsstatus))
-		{
-			throw "rmFITS::createImg";
-		}
-		
-		free(naxes);
-	}
-	
-	
+    \brief Create an image extension
+    
+    \param bitpix - Bits per pixel
+    \param dimensions - Image dimension vector
+  */
+  void rmFITS::createImg(int bitpix,
+			 std::vector<int64_t> &dimensions)
+  {
+    long naxis=0;
+    long *naxes=NULL;
+    
+    if(bitpix != -32)		// we currently only support TDOUBLE FITS images
+      {
+	throw "rmFITS::createImg bitpix is not TDOUBLE_IMG";
+      }
+    if(dimensions.size()==0)
+      throw "rmFITS::createImg dimensions is 0";
+    
+    naxis=dimensions.size();
+    naxes=static_cast<long *>(calloc(naxis, sizeof(long)));
+    
+    for(long i=0; i < naxis; i++)
+      naxes[i]=dimensions[i];
+    
+    if (fits_create_img(fptr, bitpix, naxis , naxes, &fitsstatus))
+      {
+	throw "rmFITS::createImg";
+      }
+    
+    free(naxes);
+  }
+  
+  
   //___________________________________________________________________________
   //                                                                   writePix
   
   /*!
     \brief Write nelements pixels to FITS image extension
-
+    
     \param datatype - Datatype of elements in array
     \param *fpixel - Starting pixel location
     \param nelements - Number of elements to write
@@ -1132,12 +1132,12 @@ namespace RM {
   void rmFITS::writePix(int datatype, long *fpixel, long nelements, void *array)
   {
     if (fits_write_pix(fptr, datatype, fpixel, nelements, array, &fitsstatus))
-	 {
+      {
         throw "rmFITS::writePix";
-    }
+      }
   }
-
-	
+  
+  
   //___________________________________________________________________________
   //                                                                   writePix	
 
@@ -1610,22 +1610,22 @@ void rmFITS::readZLine (double *line,
 		}
   }
 
-	
-   //_____________________________________________________________________________
-   //                                                                     readCube
-	
-	/*!
-	 \brief Read a cube from a FITS image
-	 
-	 \param cube - pointer to memory to hold data
-	 \param nulval - NULL value used (optional)
-	*/
-	void rmFITS::readCube (double *cube,
-								  void *nulval)
-	{
-		long naxis=0;				// number of axis
-		long *fpixel=NULL;		// first pixel to read
-		long *lpixel=NULL;		// last pixel to read
+
+//_____________________________________________________________________________
+//                                                                     readCube
+
+/*!
+  \brief Read a cube from a FITS image
+  
+  \param cube - pointer to memory to hold data
+  \param nulval - NULL value used (optional)
+*/
+void rmFITS::readCube (double *cube,
+		       void *nulval)
+{
+  long naxis=0;				// number of axis
+  long *fpixel=NULL;		// first pixel to read
+  long *lpixel=NULL;		// last pixel to read
 		long *inc=NULL;			// increment
 		
 		//-------------------------------------------------------		
@@ -1639,7 +1639,7 @@ void rmFITS::readZLine (double *line,
 			inc=static_cast<long *>(calloc(naxis, sizeof(long)));
 		}
 		
-		for(unsigned int i=0; i<naxis; i++)
+		for(long i=0; i<naxis; i++)
 		{
 			fpixel[i]=1;
 			lpixel[i]=dimensions[i];
