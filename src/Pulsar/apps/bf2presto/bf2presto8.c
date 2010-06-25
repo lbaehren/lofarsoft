@@ -116,7 +116,7 @@ void write_filterbank_header ( int n_infiles, char *parsetfile, int writefloats)
   send_int("ibeam",   1);
   send_int("nbits",   obits);
   send_double("tstart", idata.mjd_i+idata.mjd_f);
-  send_double("tsamp",  SAMPLEDURATION);
+  send_double("tsamp",  idata.dt);
   send_int("nifs", 1);
   send_string("HEADER_END");
 
