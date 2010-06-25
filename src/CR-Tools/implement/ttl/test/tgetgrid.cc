@@ -22,10 +22,13 @@ int main()
   const double refX=1.0;
   const double refY=1.0;
 
+  double status=true;
+
 //  const std::string telescope = "LOFAR";
 //  const double dateObs = 50237.29;
 
   std::vector<double> pixel(2*NX*NY);
+  std::vector<double> opixel(2*NX*NY);
   std::vector<double> world(2*NX*NY);
 
   // Set grid
@@ -36,6 +39,8 @@ int main()
     {
       world[2*k] = 0.0;
       world[2*k+1] = 0.0;
+      opixel[2*k] = 0.0;
+      opixel[2*k+1] = 0.0;
       pixel[2*k] = static_cast<double>(i+1);
       pixel[2*k+1] = static_cast<double>(j+1);
       k++;
@@ -50,12 +55,24 @@ int main()
                  incLong, incLat,
                  refX, refY);
 
-  if (status==false) return;
+  status=toPixel(opixel.begin(), opixel.end(),
+                 world.begin(), world.end(),
+                 refcode, projection,
+                 refLong, refLat,
+                 incLong, incLat,
+                 refX, refY);
 
-  // Display output grid
-  for (int i=0; i<2*NX*NY; i++)
+  if (status)
   {
-    std::cout<<pixel[i]<<"\t"<<world[i]<<std::endl;
+    // Display output grid
+    for (int i=0; i<2*NX*NY; i++)
+    {
+      std::cout<<pixel[i]<<"\t"<<world[i]<<"\t"<<opixel[i]<<std::endl;
+    }
+  }
+  else
+  {
+    std::cerr<<"Conversion failed."<<std::endl;
   }
 }
 

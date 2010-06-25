@@ -39,94 +39,20 @@
 namespace ttl
 {
   /*!
-    \brief Generate coordinate grid
-   */
-  template <class Iter>
-    void getGrid(const Iter ox_begin, const Iter ox_end,
-                 const Iter oy_begin, const Iter oy_end,
-                 const Iter ix_begin, const Iter ix_end,
-                 const Iter iy_begin, const Iter iy_end,
-                 const std::string telescope,
-                 const double obsDate,
-                 const double refLong, const double refLat,
-                 const double incLong, const double incLat,
-                 const double refX, const double refY
-                 )
-    {
-      // Set up the internal coordinate system
-      casa::CoordinateSystem cs;
-
-      // Set observation information
-      casa::ObsInfo obsinfo;
-
-      // Observation date and time
-      casa::MEpoch epoch(casa::MVEpoch(casa::Quantity(static_cast<casa::Double>(obsDate), "d")), casa::MEpoch::Ref(casa::MEpoch::UTC));
-
-      obsinfo.setObsDate(epoch);
-
-      // Observation telescope
-      obsinfo.setTelescope(static_cast<casa::String>(telescope));
-
-      // Add observation information to coordinate system
-      cs.setObsInfo(obsinfo);
-
-      // Add spatial direction information to coordinate system
-      casa::Matrix<casa::Double> xform(2,2);
-      xform = 0.0; xform.diagonal() = 1.0;
-
-      casa::DirectionCoordinate dir(casa::MDirection::AZEL,
-                                    casa::Projection(casa::Projection::STG),
-                                    static_cast<casa::Double>(refLong),
-                                    static_cast<casa::Double>(refLat),
-                                    static_cast<casa::Double>(incLong),
-                                    static_cast<casa::Double>(incLat),
-                                    xform,
-                                    static_cast<casa::Double>(refX),
-                                    static_cast<casa::Double>(refY));
-      
-      cs.addCoordinate(dir);
-
-      std::cout<<"-- World axis names        = "<<cs.worldAxisNames()<<std::endl;
-      std::cout<<"-- World axis units        = " <<cs.worldAxisUnits()<<std::endl;
-      std::cout<<"-- Reference pixel (CRPIX) = " <<cs.referencePixel()<<std::endl;
-      std::cout<<"-- Increment       (CDELT) = " <<cs.increment()<<std::endl;
-      std::cout<<"-- Reference value (CRVAL) = " <<cs.referenceValue()<<std::endl;
-      std::cout<<"-- Telescope name          = " <<obsinfo.telescope()<<std::endl;
-      std::cout<<"-- Observing date          = "<<obsinfo.obsDate()<<std::endl;
-
-      // Generate grid
-      Iter ix_it=ix_begin;
-      Iter iy_it=iy_begin;
-      Iter ox_it=ox_begin;
-      Iter oy_it=oy_begin;
-
-      // Placeholders for conversion
-      casa::Vector<casa::Double> world(2), pixel(2); 
-
-      // Loop over all pixels
-      while (ix_it!=ix_end && iy_it!=iy_end && ox_it!=ox_end && oy_it!=oy_end)
-      {
-        // Get pixel coordinates into casa vector for conversion
-        pixel[0]=static_cast<casa::Double>(*ix_it);
-        pixel[1]=static_cast<casa::Double>(*iy_it);
-
-        // Convert pixel to world coordinates
-        cs.toWorld(world, pixel);
-
-        // Retrieve world coordinates
-        *ox_it=static_cast<double>(world[0]);
-        *oy_it=static_cast<double>(world[1]);
-
-        // Next pixel
-        ++ix_it;
-        ++iy_it;
-        ++ox_it;
-        ++oy_it;
-      }
-    }
-
-  /*!
     \brief Get world coordinates for given vector of pixel coordinates
+
+    @param world begin itterator for world coordinate array
+    @param world_end end itterator for world coordinate array
+    @param pixel begin itterator for pixel coordinate array
+    @param pixel_end end itterator for pixel coordinate array
+    @param refcode reference code for coordinate system e.g. AZEL,J2000,...
+    @param projection the projection used e.g. SIN,STG,...
+    @param refLong reference value for longtitude (CRVAL)
+    @param refLat reference value for latitude (CRVAL)
+    @param incLon increment value for longtitude (CDELT)
+    @param incLat increment value for latitude (CDELT)
+    @param refX reference x pixel (CRPIX)
+    @param refY reference y pixel (CRPIX)
    */
   template <class Iter>
     bool toWorld(const Iter world, const Iter world_end,
@@ -151,15 +77,19 @@ namespace ttl
         return false;
       }
 
-      // Set up the internal coordinate system
-      casa::CoordinateSystem cs;
+      casa::Projection::Type proj;
+      proj=casa::Projection::type(static_cast<casa::String>(projection));
+      if (proj==casa::Projection::N_PROJ)
+      {
+        std::cerr<<"Error, in toWorld(): input projection type invalid."<<std::endl;
+      }
 
-      // Add spatial direction information to coordinate system
+      // Get spatial direction coordinate system
       casa::Matrix<casa::Double> xform(2,2);
       xform = 0.0; xform.diagonal() = 1.0;
 
-      casa::DirectionCoordinate dir(casa::MDirection::AZEL,
-                                    casa::Projection(casa::Projection::STG),
+      casa::DirectionCoordinate dir(type,
+                                    proj,
                                     static_cast<casa::Double>(refLong),
                                     static_cast<casa::Double>(refLat),
                                     static_cast<casa::Double>(incLong),
@@ -167,9 +97,9 @@ namespace ttl
                                     xform,
                                     static_cast<casa::Double>(refX),
                                     static_cast<casa::Double>(refY));
-      
-      cs.addCoordinate(dir);
 
+//      std::cout<<casa::MDirection::showType(dir.directionType())<<"\t"<<dir.projection().name()<<std::endl;
+      
       // Get itterators
       Iter world_it=world;
       Iter pixel_it=pixel;
@@ -186,12 +116,106 @@ namespace ttl
         cpixel[1]=static_cast<casa::Double>(*pixel_it);
 
         // Convert pixel to world coordinates
-        cs.toWorld(cworld, cpixel);
+        dir.toWorld(cworld, cpixel);
 
         // Retrieve world coordinates
         *world_it=static_cast<double>(cworld[0]);
         ++world_it;
         *world_it=static_cast<double>(cworld[1]);
+
+        // Next pixel
+        ++pixel_it;
+        ++world_it;
+      }
+
+      // Conversion successfull
+      return true;
+    }
+
+  /*!
+    \brief Get pixel coordinates for given vector of world coordinates
+
+    @param pixel begin itterator for pixel coordinate array
+    @param pixel_end end itterator for pixel coordinate array
+    @param world begin itterator for world coordinate array
+    @param world_end end itterator for world coordinate array
+    @param refcode reference code for coordinate system e.g. AZEL,J2000,...
+    @param projection the projection used e.g. SIN,STG,...
+    @param refLong reference value for longtitude (CRVAL)
+    @param refLat reference value for latitude (CRVAL)
+    @param incLon increment value for longtitude (CDELT)
+    @param incLat increment value for latitude (CDELT)
+    @param refX reference x pixel (CRPIX)
+    @param refY reference y pixel (CRPIX)
+   */
+  template <class Iter>
+    bool toPixel(const Iter pixel, const Iter pixel_end,
+                 const Iter world, const Iter world_end,
+                 const std::string refcode, const std::string projection,
+                 const double refLong, const double refLat,
+                 const double incLong, const double incLat,
+                 const double refX, const double refY
+                 )
+    {
+      // Check input
+      if (world_end-world != pixel_end-pixel)
+      {
+        std::cerr<<"Error, in toPixel(): input and output vector not of same length."<<std::endl;
+        return false;
+      }
+
+      casa::MDirection::Types type;
+      if (casa::MDirection::getType(type, refcode) != true)
+      {
+        std::cerr<<"Error, in toPixel(): input reference type invalid."<<std::endl;
+        return false;
+      }
+
+      casa::Projection::Type proj;
+      proj=casa::Projection::type(static_cast<casa::String>(projection));
+      if (proj==casa::Projection::N_PROJ)
+      {
+        std::cerr<<"Error, in toPixel(): input projection type invalid."<<std::endl;
+      }
+
+      // Get spatial direction coordinate system
+      casa::Matrix<casa::Double> xform(2,2);
+      xform = 0.0; xform.diagonal() = 1.0;
+
+      casa::DirectionCoordinate dir(type,
+                                    proj,
+                                    static_cast<casa::Double>(refLong),
+                                    static_cast<casa::Double>(refLat),
+                                    static_cast<casa::Double>(incLong),
+                                    static_cast<casa::Double>(incLat),
+                                    xform,
+                                    static_cast<casa::Double>(refX),
+                                    static_cast<casa::Double>(refY));
+      
+//      std::cout<<casa::MDirection::showType(dir.directionType())<<"\t"<<dir.projection().name()<<std::endl;
+
+      // Get itterators
+      Iter world_it=world;
+      Iter pixel_it=pixel;
+
+      // Placeholders for conversion
+      casa::Vector<casa::Double> cworld(2), cpixel(2); 
+
+      // Loop over all world coordinates 
+      while (world_it!=world_end && pixel_it!=pixel_end)
+      {
+        // Get world coordinates into casa vector for conversion
+        cworld[0]=static_cast<casa::Double>(*world_it);
+        ++world_it;
+        cworld[1]=static_cast<casa::Double>(*world_it);
+
+        // Convert world to pixel coordinates
+        dir.toPixel(cpixel, cworld);
+
+        // Retrieve pixel coordinates
+        *pixel_it=static_cast<double>(cpixel[0]);
+        ++pixel_it;
+        *pixel_it=static_cast<double>(cpixel[1]);
 
         // Next pixel
         ++pixel_it;
