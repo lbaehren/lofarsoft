@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+# include <sys/types.h> 
 // IT++ header files
 #ifdef HAVE_ITPP
 #include <itpp/itbase.h>
@@ -19,94 +20,110 @@ using namespace std;
 #define LOSLIMIT 100
 
 namespace RM {  //  namespace RM
-
-void calcMeanVarDist(vector<double> &freqs, vector<double> &result) ;
-void findGaps(vector<double> &freqs, vector<uint> &result) ;
-
+  
+  void calcMeanVarDist(vector<double> &freqs, vector<double> &result) ;
+  void findGaps(vector<double> &freqs, vector<uint> &result) ;
+  
+  // Forward declaration
   class mat ;
+
+  /*!
+    \class permEntry
+    \ingroup RM
+    \brief Permanent entry
+  */
   class permEntry {
-     public:
-     uint pos1;
-     uint pos2;     
-     permEntry(uint w1,uint w2) {
-	 pos1 = w1 ;
-	 pos2 = w2 ;
-     }
+  public:
+    uint pos1;
+    uint pos2;     
+    permEntry(uint w1,uint w2) {
+      pos1 = w1 ;
+      pos2 = w2 ;
+    }
   } ;
-  /*! class for a complex vector */
+
+  /*! 
+    \class cvec
+    \ingroup RM
+    \brief Class for a complex vector */
   class cvec {
-    public :
-      vector<complex<double> > data ;  // the actual data
-      cvec(void ) {
-      } ;
-      /*! constructor which reservese the memory for size elements */
-      cvec(uint size) {
-	 data.resize(size) ;
-      };
-      /*! constructor makes a cvec from a stl vector */
-      cvec(vector<complex<double> > &vek) {
-        data=vek ;
-      } ;
-      /*! resizes the dimension of the current vector */
-      void set_size(uint size) {
-	 data.resize(size);
-      } ;
-      /*! set the value of the element index ind to value val */
-      void set(uint ind, complex<double> val) {
-	data[ind] = val ;
+  public :
+    vector<complex<double> > data ;  // the actual data
+    cvec(void ) {
+    } ;
+    /*! constructor which reservese the memory for size elements */
+    cvec(uint size) {
+      data.resize(size) ;
+    };
+    /*! constructor makes a cvec from a stl vector */
+    cvec(vector<complex<double> > &vek) {
+      data=vek ;
+    } ;
+    /*! resizes the dimension of the current vector */
+    void set_size(uint size) {
+      data.resize(size);
+    } ;
+    /*! set the value of the element index ind to value val */
+    void set(uint ind, complex<double> val) {
+      data[ind] = val ;
+    }
+    /*! returns the size of the vector */
+    uint size() {
+      return data.size() ;
+    } ;
+    /*! returns the size of the vector */
+    uint length() {
+      return data.size() ;
+    } ;
+    /*! returns a stl vector of the same data as the current vector */
+    vector<complex<double> > getData() {
+      return data ;
+    }
+    /*! returns the n-th element of the vector */
+    complex<double> &operator[](uint n) { 
+      return data[n] ;
+    }
+    /*! returns the n-th element of the vector */
+    complex<double> operator()(uint n) {
+      return data[n] ;
+    }
+    /*! scalar multiplication of two vectors */
+    const complex<double> operator* (const cvec &vec) const {
+      return vec*data ;
+    } ;
+    /*! scalat multiplication of a cvec whith a stl complex vector */
+    const complex<double> operator* (const vector<complex<double> > &vec) const {
+      complex<double> erg = 0 ;
+      if (data.size() != vec.size()) {
+	throw "imcomplatible dimensions \n"; 
       }
-      /*! returns the size of the vector */
-      uint size() {
-	return data.size() ;
-      } ;
-      /*! returns the size of the vector */
-      uint length() {
-	return data.size() ;
-      } ;
-      /*! returns a stl vector of the same data as the current vector */
-      vector<complex<double> > getData() {
-        return data ;
+      else {
+	for (uint i=0; i<data.size(); i++) {
+	  erg = erg + data[i]*vec[i] ;
+	}
       }
-      /*! returns the n-th element of the vector */
-      complex<double> &operator[](uint n) { 
-	  return data[n] ;
+      return erg ;
+    };   
+    /*! scalat multiplication of a cvec whith a stl double vector */
+    const complex<double> operator* (const vector<double> &vec) const {
+      complex<double> erg = 0 ;
+      if (data.size() != vec.size()) {
+	throw "imcomplatible dimensions \n"; 
       }
-      /*! returns the n-th element of the vector */
-      complex<double> operator()(uint n) {
-	  return data[n] ;
+      else {
+	for (uint i=0; i<data.size(); i++) {
+	  erg = erg + data[i]*vec[i] ;
+	}
       }
-      /*! scalar multiplication of two vectors */
-      const complex<double> operator* (const cvec &vec) const {
-	  return vec*data ;
-      } ;
-      /*! scalat multiplication of a cvec whith a stl complex vector */
-      const complex<double> operator* (const vector<complex<double> > &vec) const {
-	 complex<double> erg = 0 ;
-	 if (data.size() != vec.size()) {
-	   throw "imcomplatible dimensions \n"; 
-	 }
-	 else {
-	   for (uint i=0; i<data.size(); i++) {
-		erg = erg + data[i]*vec[i] ;
-	   }
-	 }
-	 return erg ;
-      };   
-	/*! scalat multiplication of a cvec whith a stl double vector */
-      const complex<double> operator* (const vector<double> &vec) const {
-	 complex<double> erg = 0 ;
-	 if (data.size() != vec.size()) {
-	   throw "imcomplatible dimensions \n"; 
-	 }
-	 else {
-	   for (uint i=0; i<data.size(); i++) {
-		erg = erg + data[i]*vec[i] ;
-	   }
-	 }
-	 return erg ;
-      };    
+      return erg ;
+    };    
   } ;
-  /*! class for handling a complex matrix */
+
+  /*!
+    \class cmat
+    \ingroup RM
+    \brief class for handling a complex matrix
+  */
   class cmat {     
      public:
         bool inverted ;
@@ -210,7 +227,7 @@ void findGaps(vector<double> &freqs, vector<uint> &result) ;
 	  for (uint i=0; i<nrows; i++) {
 	    vector<complex<double> > zw = data[i] ;
  	    complex<double> res(0,0) ;
-	    for (int j=0; j<ncols;j++) {
+	    for (uint j=0; j<ncols;j++) {
 		res += zw[j]*vec[j] ;
 	    }
 	    erg[i]=res;

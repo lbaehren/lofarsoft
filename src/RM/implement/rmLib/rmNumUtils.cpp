@@ -99,9 +99,9 @@ cmat cmat::operator* (mat &matr) {
 void cmat::write(string fileName) {
   ofstream outfile (fileName.c_str());
   /* loop over all rows of the current signal covariance matrix */
-  for (int i=0; i<rows(); i++) {
+  for (uint i=0; i<rows(); i++) {
     vector<complex<double> > aus = data[i] ;
-    for (int j=0; j<aus.size() ; j++) {
+    for (uint j=0; j<aus.size() ; j++) {
       outfile << aus[j] << " " ;
     }
     outfile << endl ;
@@ -115,9 +115,9 @@ void cmat::write(string fileName) {
 void cmat::absOut(string fileName) {
   ofstream outfile (fileName.c_str());
   /* loop over all rows of the current signal covariance matrix */
-  for (int i=0; i<rows(); i++) {
+  for (uint i=0; i<rows(); i++) {
     vector<complex<double> > aus = data[i] ;
-    for (int j=0; j<aus.size() ; j++) {
+    for (uint j=0; j<aus.size() ; j++) {
       outfile << i << "\t" << j << "\t" << abs(aus[j]) << endl  ;
     }
     outfile << endl ;
@@ -251,9 +251,9 @@ void mat::swapCols(uint ind1, uint ind2) {
 void mat::absOut(string fileName) {
   ofstream outfile (fileName.c_str());
   /* loop over all rows of the current signal covariance matrix */
-  for (int i=0; i<rows(); i++) {
+  for (uint i=0; i<rows(); i++) {
     vector<double> aus = data[i] ;
-    for (int j=0; j<aus.size() ; j++) {
+    for (uint j=0; j<aus.size() ; j++) {
       outfile << i << "\t" << j << "\t" << fabs(aus[j]) << endl  ;
     }
     outfile << endl ;
@@ -386,9 +386,9 @@ mat mat::GaussEle() {
 void mat::write(string fileName) {
   ofstream outfile (fileName.c_str());
   /* loop over all rows of the current signal covariance matrix */
-  for (int i=0; i<rows(); i++) {
+  for (uint i=0; i<rows(); i++) {
     vector<double> aus = data[i] ;
-    for (int j=0; j<aus.size() ; j++) {
+    for (uint j=0; j<aus.size() ; j++) {
       outfile << aus[j] << " " ;
     }
     outfile << endl ;
