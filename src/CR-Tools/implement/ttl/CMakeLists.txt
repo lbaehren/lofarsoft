@@ -3,6 +3,11 @@
 ##------------------------------------------------------------------------------
 
 ##__________________________________________________________
+## Options
+
+option (TTL_BUILD_TESTS "Build TTL tests" NO)
+
+##__________________________________________________________
 ## Lists of header files
 
 file (GLOB ttl_headers *.h)
@@ -14,5 +19,10 @@ install (FILES ${dal_headers}
   DESTINATION include/ttl
   )
 
-add_subdirectory (test)
+## ------------------------------------------------------------------------------
+## Tests
+
+if (TTL_BUILD_TESTS)
+  add_subdirectory (test)
+endif (TTL_BUILD_TESTS)
 
