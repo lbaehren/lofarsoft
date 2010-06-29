@@ -52,15 +52,15 @@ include (FindNumPy)
 include (FindLAPACK)
 
 if (NOT HAVE_PYTHON)
-  message (SEND_ERROR "[NumPy] Unable to build project - missing Python!")
+  message (WARNING "[NumPy] Unable to build project - missing Python!")
 endif (NOT HAVE_PYTHON)
 
 if (NOT LAPACK_BLAS_LIBRARY)
-  message (SEND_ERROR "[NumPy] Unable to build project - missing BLAS library!")
+  message (WARNING "[NumPy] Unable to build project - missing BLAS library!")
 endif (NOT LAPACK_BLAS_LIBRARY)
 
 if (NOT LAPACK_LAPACK_LIBRARY)
-  message (SEND_ERROR "[NumPy] Unable to build project - missing LAPACK library!")
+  message (WARNING "[NumPy] Unable to build project - missing LAPACK library!")
 endif (NOT LAPACK_LAPACK_LIBRARY)
 
 ## Check version number of NumPy installation
