@@ -245,53 +245,33 @@ namespace CR { // Namespace CR -- begin
 
 
     // -------------------------------------------------------- CRFileSetParameter
-      // copied here from hftools.cc, needs to be removed as soon as there
-      // is a real include file for hftools.
-      std::vector<int> PyList2STLInt32Vec(PyObject* pyob){
-	std::vector<int> vec;
-	if (PyList_Check(pyob)){
-	  int i,size=PyList_Size(pyob);
-	  vec.reserve(size);
-	  for (i=0;i<size;++i) vec.push_back((int)PyInt_AsLong(PyList_GetItem(pyob,i)));
-	}
-	return vec;
-      }
-    bool CRFileSetParameter(DataReader &dr, std::string key, PyObject * pyob) {
+    bool CRFileSetParameter(DataReader &dr, std::string key, bpl::object &pyob) {
       for (int i=0; key[i]; i++) {
 	key[i]= tolower(key[i]);
       };
       // scalar values from methods
       if (key == "block") {
-	dr.setBlock( PyInt_AsLong(pyob) );
+	dr.setBlock( bpl::extract<int>(pyob) );
       } else if (key == "blocksize") {
-	dr.setBlocksize( PyInt_AsLong(pyob) );
+	dr.setBlocksize( bpl::extract<int>(pyob) );
       } else if (key == "startblock") {
-	dr.setStartBlock( PyInt_AsLong(pyob) );
+	dr.setStartBlock( bpl::extract<int>(pyob) );
       } else if (key == "stride") {
-	dr.setStride( PyInt_AsLong(pyob) );
+	dr.setStride( bpl::extract<int>(pyob) );
       } else if (key == "sampleoffset") {
-	dr.setSampleOffset( PyInt_AsLong(pyob) );
+	dr.setSampleOffset( bpl::extract<int>(pyob) );
       } else if (key == "nyquistzone") {
-	dr.setNyquistZone( PyInt_AsLong(pyob) );
+	dr.setNyquistZone( bpl::extract<int>(pyob) );
       } else if (key == "shift") {
-	dr.setShift( PyInt_AsLong(pyob) );
+	dr.setShift( bpl::extract<int>(pyob) );
       } else if (key == "referencetime") {
-	dr.setReferenceTime( PyFloat_AsDouble(pyob) );
+	dr.setReferenceTime( bpl::extract<double>(pyob) );
       } else if (key == "samplefrequency") {
-	dr.setSampleFrequency( PyFloat_AsDouble(pyob) );
-      } else if (key=="shiftvector") {
-	if (PyList_Check(pyob)){
-	  dr.setShift(PyList2STLInt32Vec(pyob));
-	} else {
-	  cout << "CRFileSetParameter, ShiftVector: Illegal parameter!" << endl;
-	};
-	cout << "CRFileSetParameter: keyword  shiftvector not implemented yet!" << endl;
+	dr.setSampleFrequency( bpl::extract<double>(pyob) );
+      } else if (key=="shiftvector") {	
+	dr.setShift(STLVecFromPyob<int>(pyob));
       } else if (key=="selectedantennas") {
-	if (PyList_Check(pyob)){
-	  dr.setSelectedAntennas(casaFromIntList<uint>(pyob));
-	} else {
-	  cout << "CRFileSetParameter, SelectedAntennas: Illegal parameter!" << endl;
-	};
+	dr.setSelectedAntennas(casaFromPyob<uint>(pyob));
       } else {
 	std::string fields;
 	fields = fields + "help" 

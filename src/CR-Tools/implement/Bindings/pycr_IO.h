@@ -126,7 +126,7 @@ namespace CR { // Namespace CR -- begin
       
       \return True on success
     */
-    bool CRFileSetParameter(DataReader &dr, std::string key, PyObject * pyob);
+    bool CRFileSetParameter(DataReader &dr, std::string key, bpl::object &pyob);
    
   } // Namespace PYCR -- end
   

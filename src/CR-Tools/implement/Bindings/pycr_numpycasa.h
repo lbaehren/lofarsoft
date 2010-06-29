@@ -70,7 +70,11 @@ namespace CR { // Namespace CR -- begin
     
       <h3>Example(s)</h3>
     
-    */  
+    */
+  
+    // ===========================================================================
+    //  Functions 
+    // ===========================================================================
 
     // === num_util replacement functions ========================================
 
@@ -109,7 +113,7 @@ namespace CR { // Namespace CR -- begin
     }
     
 
-    // === Functions =============================================================
+    // === Convert/map numpy to casa (no copy) ===================================
   
     /*!
       \brief Get a casa-array that has its storage mapped to a numpy array
@@ -138,8 +142,7 @@ namespace CR { // Namespace CR -- begin
     
       return true;
     };
-  
-  
+    
     /*!
       \brief Get a casa-array with the storage of a resized numpy array
     
@@ -190,6 +193,8 @@ namespace CR { // Namespace CR -- begin
     
       return true;
     };
+
+    // === Copy casa/stl to numpy =================================================
   
     /*!
       \brief Create a numpy array with the shape and (copied) values of a casa array
@@ -230,38 +235,100 @@ namespace CR { // Namespace CR -- begin
       }
       return result;
     };
+
+
+    // === Copy numpy/list to casa =================================================
   
     /*!
-      \brief Create a casa vector with the size and (copied) values of a python list of integers
+      \brief Create a casa vector with the size and (copied) values of a python list
     
-      \param pylist -- python object that is a list of integers
+      \param pylist -- boost-style wrapped Python list
     
       \return casa vector
     */
-    template <class T> casa::Vector<T> casaFromIntList(PyObject * pylist){
-      int i,size=PyList_Size(pylist);
-      casa::Vector<T> outvec(size);
-      for (i=0; i<size; i++) {
-	outvec[i] = static_cast<T>( PyInt_AsLong(PyList_GetItem(pylist,i)) );
-      };
+    template <class T> casa::Vector<T> casaFromList(bpl::list pylist){
+      int i,size=PyList_Size(pylist.ptr());
+      std::vector<T> outvec(size);
+      for (i=0;i<size;++i) outvec[i] = bpl::extract<T>(pylist[i]);
       return outvec;
     }
 
     /*!
-      \brief Create a casa vector with the size and (copied) values of a python list of floats
+      \brief Create a casa vector with the size and (copied) values of a python object
     
-      \param pylist -- python object that is a list of floats
+      \param pyob -- boost-style wrapped python object. Must be a list or a numpy object
     
       \return casa vector
     */
-    template <class T> casa::Vector<T> casaFromFloatList(PyObject * pylist){
-      int i,size=PyList_Size(pylist);
-      casa::Vector<T> outvec(size);
-      for (i=0; i<size; i++) {
-	outvec[i] = static_cast<T>( PyFloat_AsDouble(PyList_GetItem(pylist,i)) );
+    template <class T> casa::Vector<T> casaFromPyob(bpl::object &pyob){
+      bpl::extract<bpl::numeric::array> nparray(pyob);
+      if (nparray.check()) {
+	casa::Vector<T> outvec;
+	casaFromNumpy<T>(nparray,outvec);
+	return outvec;
       };
-      return outvec;
+      bpl::extract<bpl::list> listobj(pyob);
+      if (listobj.check()) {
+	return casaFromList<T>(listobj());
+      };
+      cout << "casaFromPyob: Unknown type of python object, not np-array or list.!" << endl;
+      return casa::Vector<T>();
     }
+    
+    // === Copy numpy/list to STL-vector =================================================
+    
+    /*!
+      \brief Create a STL vector with the size and (copied) values of a python list
+      
+      \param pylist -- boost-style wrapped Python list
+    
+      \return STL vector
+    */
+    template <class T> std::vector<T> STLVecFromNumpy(bpl::numeric::array nparray){
+      std::vector<T> vec;
+      int i,size=num_util::size(nparray); 
+      vec.reserve(size);
+      for (i=0;i<size;++i) vec[i] = bpl::extract<T>(nparray[i]);
+      return vec;
+    }
+
+    /*!
+      \brief Create a STL vector with the size and (copied) values of a python list
+      
+      \param pylist -- boost-style wrapped Python list
+    
+      \return STL vector
+    */
+    template <class T> std::vector<T> STLVecFromList(bpl::list pylist){
+      std::vector<T> vec;
+      int i,size=PyList_Size(pylist.ptr());
+      vec.reserve(size);
+      for (i=0;i<size;++i) vec[i] = bpl::extract<T>(pylist[i]);
+      return vec;
+    }
+
+    /*!
+      \brief Create a STL vector with the size and (copied) values of a python list
+      
+      \param pylist -- boost-style wrapped Python list
+    
+      \return STL vector
+    */
+    template <class T> std::vector<T> STLVecFromPyob(bpl::object &pyob){
+      bpl::extract<bpl::numeric::array> nparray(pyob);
+      if (nparray.check()) {
+	return STLVecFromNumpy<T>(nparray());
+      };
+      bpl::extract<bpl::list> listobj(pyob);
+      if (listobj.check()) {
+	cout << "STLVecFromPyob: calling STLVecFromList" << endl;
+	return STLVecFromList<T>(listobj());
+      };
+      cout << "STLVecFromPyob: Unknown type of python object, not np-array or list.!" << endl;
+      return std::vector<T>();
+    }
+
+    // === Get pointers from numpy  =================================================
 
     /*!
       \Brief Return the pointer to the begin of the storage of a numpy array
