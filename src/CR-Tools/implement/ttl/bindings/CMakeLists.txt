@@ -9,7 +9,7 @@
 
 include (FindPython)
 include (FindBoost)
-include (FindNumpy)
+include (FindNumPy)
 include (FindNumUtil)
 
 ## Required external package: Python
