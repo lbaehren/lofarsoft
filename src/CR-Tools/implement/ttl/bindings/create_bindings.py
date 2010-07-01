@@ -38,44 +38,57 @@ def parse_file(f):
                 # Create new module element
                 element=dom.createElement('module')
 
+                # Get name of namespace and add as attribute
                 name=line.split()[1]
 
                 element.setAttribute('name', name)
 
+                # Add module to dom
                 current_node = current_node.appendChild(element)
 
             elif re.match('template', line):
+                # Next line is a function definition
                 next = True
 
             elif re.search(r'\\brief', line):
-
+                # We are now reading a Doxygen formatted comment block
                 comment = ""
                 arg_comment = {}
 
+                # Read until end of comment block
                 while not re.search(r'\*\/', line):
                     if re.search(r'\\param', line):
+                        # Read a function argument docstring
                         temp = line.split()
 
+                        # Strip '\param ' from argument docstring
                         c = line[line.find(temp[1])+len(temp[1]):]
                         arg_comment[temp[1]]=c.strip()
                     else:
+                        # Add line to docstring of function itself
                         if re.search(r'\\brief', line):
+                            # Strip '\brief ' from function docstring
                             comment += line[line.find('\brief')+7:].strip()+'\n'
                         else:
                             comment += line.rstrip()+'\n'
 
+                    # To next line in file
                     line=lines.pop(0)
 
             elif next:
-                # Create new function element
+                # Next line is a function so create a new function element
                 element=dom.createElement('function')
 
+                # Get name of function (e.g. first word before '(')
                 fname=line.split('(')[0].split()[-1]
 
+                # Add function name to dom element as attribute
                 element.setAttribute('name', fname)
 
+                # Get function type (e.g. everything before fname)
                 ftype=line[:line.find(fname)].strip()
 
+                # Add function type to dom element as attribute
                 element.setAttribute('type', ftype)
 
                 # Add docstring if found
@@ -84,8 +97,10 @@ def parse_file(f):
                 else:
                     print 'Warning: function '+fname+' has no docstring'
 
+                # Add function element to dom
                 function = current_node.appendChild(element)
 
+                # Next line is no longer part of the function definition
                 next = False
 
                 # Get function arguments
@@ -99,8 +114,10 @@ def parse_file(f):
                     else:
                         line = lines.pop(0).strip()
 
+                # Get all arguments between '()' separated by ',' in a list
                 arguments = arguments[arguments.find('(')+1:arguments.find(')')].split(',')
 
+                # Loop over arguments in list and create argument dom nodes
                 for arg in arguments:
                     arg=arg.strip()
 
@@ -108,21 +125,26 @@ def parse_file(f):
                         # Create new argument element
                         element=dom.createElement('argument')
 
+                        # Get argument name e.g. 'a' from 'int a'
                         name = arg[arg.rfind(' '):].strip()
                         element.setAttribute('name', name)
 
+                        # Get argument type e.g. 'int' from 'int a'
                         type = arg[:arg.rfind(' ')].strip()
                         element.setAttribute('type', type)
 
+                        # If argument has a doctring add it to the node
                         if name in arg_comment:
                             docstring = arg_comment[name]
                             element.setAttribute('docstring', docstring)
                         else:
                             print 'Warning: argument '+name+' of function '+fname+' has no docstring.'
 
+                        # Add argument node to dom as child of function node
                         function.appendChild(element)
 
         except IndexError:
+            # Last line of file reached so break out of while loop
             break
 
     return dom
