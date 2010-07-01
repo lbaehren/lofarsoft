@@ -5,7 +5,7 @@
 
 #include <ttl/coordinates.h>
 
-using namespace ttl;
+using namespace ttl::coordinates;
 
 int main()
 {

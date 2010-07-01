@@ -33,9 +33,12 @@
 
 namespace ttl
 {
-  const double LOW_NUMBER=1.0e-32;
+  namespace constants
+  {
+    const double LOW_NUMBER=1.0e-32;
 
-  const double LIGHT_SPEED = 299792458.0;
+    const double LIGHT_SPEED = 299792458.0;
+  } // End constants
 } // End ttl
 
 #endif // TTL_CONSTANTS_H

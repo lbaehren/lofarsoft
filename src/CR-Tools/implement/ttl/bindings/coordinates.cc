@@ -1,0 +1,60 @@
+/**************************************************************************
+ *  This file is part of the Transient Template Library.                  *
+ *  Copyright (C) 2010 Pim Schellart <P.Schellart@astro.ru.nl>            *
+ *                                                                        *
+ *  This library is free software: you can redistribute it and/or modify  *
+ *  it under the terms of the GNU General Public License as published by  *
+ *  the Free Software Foundation, either version 3 of the License, or     *
+ *  (at your option) any later version.                                   *
+ *                                                                        * 
+ *  This library is distributed in the hope that it will be useful,       *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *  GNU General Public License for more details.                          *
+ *                                                                        *
+ *  You should have received a copy of the GNU General Public License     *
+ *  along with this library. If not, see <http://www.gnu.org/licenses/>.  *
+ **************************************************************************/
+
+// SYSTEM INCLUDES
+//
+
+// PROJECT INCLUDES
+#include <ttl/coordinates.h>
+
+// LOCAL INCLUDES
+#define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
+#include "num_util.h"
+#include "numpy_ptr.h"
+
+// FORWARD REFERENCES
+//
+
+namespace ttl
+{
+  namespace bindings
+  {
+
+  bool toWorld(boost::python::numeric::array pydata0, boost::python::numeric::array pydata1, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
+  {
+    return ttl::coordinates::toWorld(ttl::numpyBeginPtr<double>(pydata0), ttl::numpyEndPtr<double>(pydata0), ttl::numpyBeginPtr<double>(pydata1), ttl::numpyEndPtr<double>(pydata1), refcode, projection, refLong, refLat, incLong, incLat, refX, refY);
+  }
+
+  bool toPixel(boost::python::numeric::array pydata0, boost::python::numeric::array pydata1, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
+  {
+    return ttl::coordinates::toPixel(ttl::numpyBeginPtr<double>(pydata0), ttl::numpyEndPtr<double>(pydata0), ttl::numpyBeginPtr<double>(pydata1), ttl::numpyEndPtr<double>(pydata1), refcode, projection, refLong, refLat, incLong, incLat, refX, refY);
+  }
+
+  }// End bindings
+} // End ttl
+
+BOOST_PYTHON_MODULE(coordinates)
+{
+  import_array();
+  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+
+  using namespace boost::python;
+
+  def("toWorld", ttl::bindings::toWorld, "Get world coordinates for given vector of pixel coordinates\n\n      @param world begin itterator for world coordinate array\n      @param world_end end itterator for world coordinate array\n      @param pixel begin itterator for pixel coordinate array\n      @param pixel_end end itterator for pixel coordinate array\n      @param refcode reference code for coordinate system e.g. AZEL,J2000,...\n      @param projection the projection used e.g. SIN,STG,...\n      @param refLong reference value for longtitude (CRVAL)\n      @param refLat reference value for latitude (CRVAL)\n      @param incLon increment value for longtitude (CDELT)\n      @param incLat increment value for latitude (CDELT)\n      @param refX reference x pixel (CRPIX)\n      @param refY reference y pixel (CRPIX)\n\n  *world* \n  *world_end* \n  *pixel* \n  *pixel_end* \n  *refcode* \n  *projection* \n  *refLong* \n  *refLat* \n  *incLong* \n  *incLat* \n  *refX* \n  *refY* \n");
+  def("toPixel", ttl::bindings::toPixel, "Get pixel coordinates for given vector of world coordinates\n\n      @param pixel begin itterator for pixel coordinate array\n      @param pixel_end end itterator for pixel coordinate array\n      @param world begin itterator for world coordinate array\n      @param world_end end itterator for world coordinate array\n      @param refcode reference code for coordinate system e.g. AZEL,J2000,...\n      @param projection the projection used e.g. SIN,STG,...\n      @param refLong reference value for longtitude (CRVAL)\n      @param refLat reference value for latitude (CRVAL)\n      @param incLon increment value for longtitude (CDELT)\n      @param incLat increment value for latitude (CDELT)\n      @param refX reference x pixel (CRPIX)\n      @param refY reference y pixel (CRPIX)\n\n  *pixel* \n  *pixel_end* \n  *world* \n  *world_end* \n  *refcode* \n  *projection* \n  *refLong* \n  *refLat* \n  *incLong* \n  *incLat* \n  *refX* \n  *refY* \n");
+}
