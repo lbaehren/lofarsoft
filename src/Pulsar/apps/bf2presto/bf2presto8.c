@@ -11,7 +11,7 @@
  so "pad" needs to be ignored (line 82) and also the data does not need to 
 be "floatswapped" (line 119). Same applies for convert_collapse() too.*/
 
-char OUTNAME[99] = "PULSAR_OBS";
+char OUTNAME[248] = "PULSAR_OBS";
 int BASESUBBAND = 0;
 int BEAMS = 1;
 int CHANNELS = 1;
@@ -20,6 +20,7 @@ int STOKES_SWITCH = 0;
 int collapse = 0;
 int writefloats = 0;
 int writefb     = 0;
+int eightBit = 0;
 char parsetfile[1000]; // for reading header info for filterbank file
 int SAMPLESPERSTOKESINTEGRATION = 1;
 int SAMPLES = 768;
@@ -38,7 +39,8 @@ float N_sigma = 7;
 #define MAXNOINPUTFILES                 256
 
 void usage(){
-  puts("Syntax: bf2presto [options] SB*.MS");
+  puts("Syntax: bf2presto8 [options] SB*.MS");
+  puts("-8\tOutput 8bit subbands");
   puts("-A\tNumber of blocks to average over when rescaling (Default = 600)");
   puts("-b\tNumber of Beams (Default = 1)");
   puts("-B\tNumber of BlockGroups to convert (Default = All)");
@@ -176,10 +178,11 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 
  input = inputfiles[current_file];
  current_file++;
+ // printf("current_file (input) = %d\n",  current_file);
  fseek( input, 0, SEEK_SET );
 
- // while( !feof( input ) ) {
- while( !feof( inputfiles[0] ) ) {
+ while( !feof( input ) ) {
+   //   while( !feof( inputfiles[0] ) ) { // not sure why I put this in -- jvl
    if (x == NUM_BLOCKGROUPS) break;
    x++;
    unsigned num = 0;
@@ -251,6 +254,8 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
      unsigned validsamples = 0;
      float prev = WRITEFUNC( stokesdata[0].samples[beamnr][c][0]);
 
+     //     printf("c=%d\n", c ); fflush(stdout);
+
      /* compute average */
      for( i = 0; i < num; i++ ) {
        for( time = 0; time < SAMPLES; time++ ) {
@@ -272,8 +277,11 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 
      if (writefloats == 0){
        /* select a scale factor */
-       scale = 128/(N_sigma*2*rms); //8-bit dynamic
-       //scale = (128*256)/(N_sigma*2*rms); //16-bit dynamic
+       if (eightBit ==1 || writefb ==1 ){
+	 scale = 128/(N_sigma*2*rms); //8-bit dynamic
+       } else {
+	 scale = (128*256)/(N_sigma*2*rms); //16-bit dynamic
+       }
        offset = average - (N_sigma*rms);
        //scale = 1.0/(65536); //16-bit static
        //scale = 1.0/(256*256*128); //8-bit static (sketchy)
@@ -294,17 +302,22 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 	   if (writefb==0) { /* writing presto subbands directly to disk */
 	     if (writefloats==1){
 	       float sum = 0;
-	       fwrite( &sum, sizeof sum, 1, outputfile[c] );
+	       fwrite( &sum, sizeof sum, 1, outputfile[c] ); // c+ index*CHANNELS --- TBD jvl
 	     }else{
-	       int8_t shsum = 0; // 8-bit
-	       //short shsum = 0; // 16-bit
-	       fwrite( &shsum, sizeof shsum, 1, outputfile[c] );
+	       int8_t isum = 0; // 8-bit
+	       short shsum = 0; // 16-bit
+	       if (eightBit == 1) {
+		 fwrite( &isum, sizeof isum, 1, outputfile[c] );
+	       } else {
+		 fwrite( &shsum, sizeof shsum, 1, outputfile[c] );
+	       }
 	     }
 	   } else { /* filterbank file need in memory transpose, difficult for gaps */
 	     printf("A gap here -- not doing anything about it in filterbank mode ..\n");
 	     /* gap zeroes get written to the single filterbank file */
 	     /* this is wrong -- need to go into buffer, keep track of variable buffer lenghth .. */
 	     //	       fwrite( &shsum, sizeof shsum, 1, outputfile[0] ); 
+	     //z
 	   }
 	 }
          output_samples += SAMPLES;
@@ -320,8 +333,8 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
        for( time = 0; time < SAMPLES; time++ ) {
          float sum;
          float avr;
-         int8_t shsum; //8-bit
-	 //signed short shsum; //16-bit
+         int8_t isum; //8-bit
+	 signed short shsum; //16-bit
          sum = WRITEFUNC( stokesdata[i].samples[beamnr][c][time] );
 
 	 if(writefloats==1){
@@ -329,6 +342,8 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 	   sum = isnan(sum) || sum <= 0.01f && sum >= -0.01f ? average : sum;
 
 	   if (writefb==0) {
+	     //	     if (time==0) printf("** Writing to file %d", c+(current_file-1)*CHANNELS); fflush(stdout);
+	     //	     fwrite( &sum, sizeof sum, 1, outputfile[c+(current_file-1)*CHANNELS] ); /* single sample written to channel file*/
 	     fwrite( &sum, sizeof sum, 1, outputfile[c] ); /* single sample written to channel file*/
 	   } else {
 	     fb_pos = // Assumed beamnr = 0 && stokes = 0 here! XXX
@@ -344,30 +359,33 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 	   if( sum == 0 ) nul_samples++;
 
 	 }else{
-	   	   
-	   /*convert to 16-bit */
-//	   sum = isnan(sum) || sum <= 0.01f && sum >= -0.01f ? 0 : floor((sum-offset)*scale - 128*256);
-//	   if( sum >= 256*128 ) {
-//	     sum = 256*128 - 1;
-//	     toobig++;
-//	   }	  
-//	   if( sum < -256*128 ) {
-//	     sum = -256*128;
-//	     toosmall++;
-//	   }	   
-
+	   
+	   if (eightBit==0 && writefb==0){
+	     /*convert to 16-bit */
+	     sum = isnan(sum) || sum <= 0.01f && sum >= -0.01f ? 0 : floor((sum-offset)*scale - 128*256);
+	     if( sum >= 256*128 ) {
+	       sum = 256*128 - 1;
+	       toobig++;
+	     }	  
+	     if( sum < -256*128 ) {
+	       sum = -256*128;
+	       toosmall++;
+	     }
+	   
+	   } else {
 	   /*8-bit*/
 	   /* sigproc uses unsigned char i.e. in 0-255 range */
-	   sum = isnan(sum) ? 0 : floor((sum-offset)*scale); 
+	     sum = isnan(sum) ? 0 : floor((sum-offset)*scale); 
 	   //	   sum = isnan(sum) ? 0 : floor((sum-offset)*scale - 128);
-	   if( sum >= 256 ) {
-	     sum = 255;
-	     toobig++;
-	   }	  
-	   if( sum < 0    ) {
-	     sum = 0 ;
-	     toosmall++;
-	   }	
+	     if( sum >= 256 ) {
+	       sum = 255;
+	       toobig++;
+	     }	  
+	     if( sum < 0    ) {
+	       sum = 0 ;
+	       toosmall++;
+	     }	
+	   }
 //	   sum = isnan(sum) ? 0 : floor((sum-offset)*scale)-128;
 //	   if( sum >= 128 ) {
 //	     sum = 127;
@@ -379,10 +397,19 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 //	   }	
 	   /*******/
 
-	   shsum = sum;
-	   //printf("%d\n",shsum );
+	   if (eightBit==0){
+	     shsum = sum;
+	   }else{
+	     isum = sum;
+	   }
+
 	   if (writefb==0) {
-	     fwrite( &shsum, sizeof shsum, 1, outputfile[c] ); /* a single sample written channel file*/
+	     if (eightBit==0){
+	       fwrite( &shsum, sizeof shsum, 1, outputfile[c] ); /* a single sample written channel file*/
+	     } else {
+	       fwrite( &isum, sizeof isum, 1, outputfile[c] ); /* a single sample written channel file*/
+	     }
+
 	   } else {
 	     fb_pos = // Assumed beamnr = 0 && stokes = 0 here! XXX
 	       (i*SAMPLES+time+1) * (CHANNELS*n_infiles) - (f*CHANNELS+c+1);
@@ -418,7 +445,7 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 
  } //  while( !feof( input ) ) {
 
- /*add zeros to make subbands an equal length*/
+ /*add zeros to make subbands an equal length
  if (NUM_BLOCKGROUPS > 0) {
    unsigned c,t,a;
    t=NUM_BLOCKGROUPS*SAMPLES*AVERAGE_OVER - output_samples/CHANNELS;
@@ -427,15 +454,17 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
        int8_t shsum = 0; //8 bit
        //signed short shsum = 0; //16 bit
        if (writefb==0) {
-	 fwrite( &shsum, sizeof shsum, 1, outputfile[c] ); /* samples per channel file */
+	 //	 fwrite( &shsum, sizeof shsum, 1, outputfile[c+(current_file-1)*CHANNELS] ); /* samples per channel file 
+	 fwrite( &shsum, sizeof shsum, 1, outputfile[c] ); /* samples per channel file 
        } else {
-	 fwrite( &shsum, sizeof shsum, 1, outputfile[0] ); /* all samples to single file */
+	 fwrite( &shsum, sizeof shsum, 1, outputfile[0] ); /* all samples to single file 
        }
 
        output_samples++;
      }
    }
  }
+
  /**********************************************/
 
  fprintf(stderr,"%u samples in output, %.2f%% null values, %.2f%% too big, %.2f%% too small\n",output_samples,100.0*nul_samples/output_samples,100.0*toobig/output_samples,100.0*toosmall/output_samples);
@@ -444,7 +473,16 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 
  /* free input and output data */
  free(stokesdata);
- (writefloats == 1) ?  free(filterbank_float_buffer) : free(filterbank_char_buffer); 
+// if( filterbank_float_buffer != NULL ) 
+//   free( (float *)filterbank_float_buffer )
+// if( filterbank_char_buffer != NULL ) 
+//   free( (unsigned char *)filterbank_char_buffer )
+
+//if (writefloats == 1) {
+//   free(filterbank_float_buffer);
+// } else {
+//   free(filterbank_char_buffer); 
+// }
 
 } // void convert_nocollapse()
 
@@ -633,7 +671,7 @@ int main( int argc, char **argv ) {
  //}
  //printf("\n");
  int i=0;
- while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:hCF")) != -1)
+ while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:hCF8")) != -1)
     {
       i++;
       switch (c)
@@ -705,7 +743,12 @@ int main( int argc, char **argv ) {
 	    printf("ERROR: Could not set parsetfile = %s\n", optarg);
 	    exit(-1);
 	  }
-
+	  break;
+	
+	case '8':
+	  eightBit = 1;
+	  break;
+	  
 	case 'o':
 	  if (sscanf(optarg, "%99s", &OUTNAME) != 1) {
 	    printf("ERROR: Output Name = %s\n", optarg);
@@ -757,8 +800,8 @@ int main( int argc, char **argv ) {
 	}
     }
  
- 
- FILE *input[MAXNOINPUTFILES], *outputfile[CHANNELS]; /* I renamed **output to **outputfile because *output is reserved in sigproc.h -- jvl*/
+ /* I renamed **output to **outputfile because *output is reserved in sigproc.h -- jvl*/
+ FILE *input[MAXNOINPUTFILES], *outputfile[CHANNELS]; 
  c=0;
  
  /* command line verification */
@@ -810,11 +853,11 @@ int main( int argc, char **argv ) {
    /* open output file(s), do conversion */
    if ( writefb==0 ) {
      for( f = 0; f < n_infiles; f++ ) { /* loop over input files */
-       for ( c = 0; c < n_outfiles; c++ ) { /* make channel output files */
+       for ( c = 0; c < n_outfiles; c++ ) { /* make CHANNEL output files */
 	 /* create names */
 	 sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
 	 if ( BEAMS > 1  ) sprintf( buf, "beam_%d/%s", b, buf ); /* prepend beam name */
-	 fprintf(stderr,"%s -> %s\n", argv[optind+f], buf);
+	 fprintf(stderr,"%s -> %s\n", argv[optind+f], buf); 
 	 /* open file */
 	 index++;
 	 outputfile[c] = fopen( buf, "wb" );
@@ -822,13 +865,19 @@ int main( int argc, char **argv ) {
 	   perror( buf );
 	   exit(1);
 	 }
-	 /* convert */
-	 if (collapse==0) { /* default, write all channels */
-	   convert_nocollapse( input, outputfile, b, writefb, n_infiles ); // takes file **input; writefb==0
-	 } else {
-	   convert_collapse( input[f], outputfile, b );	// takes file *input for input
-	 }   
        }
+
+       /* convert */
+       if (collapse==0) { /* default, write all channels */
+	 convert_nocollapse( input, outputfile, b, writefb, n_infiles ); // takes file **input; writefb==0
+       } else {
+	 convert_collapse( input[f], outputfile, b );	// takes file *input for input
+       }
+
+       for ( c = 0; c < n_outfiles; c++ ) { /* close CHANNEL output files */
+	 fclose( outputfile[c] );
+       }
+
      }
    } else { /* create single filterbank file, convert */
      /* filename */
@@ -842,13 +891,13 @@ int main( int argc, char **argv ) {
      }
      /* do the conversion */     
      convert_nocollapse( input, outputfile, b, writefb, n_infiles ); // where writefb==1
+
+     /* close outfile */
+     fclose( outputfile[0] );
    }
    
    
-   /* close input and output file(s) */
-   for( c = 0; c < n_outfiles; c++ ) {
-     fclose( outputfile[c] );
-   }
+   /* close input file(s) */
    for( f = 0; f < n_infiles; f++ ) {
      fclose( input[f] );
 
