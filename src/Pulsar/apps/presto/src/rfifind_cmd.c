@@ -1121,7 +1121,7 @@ usage(void)
   fprintf(stderr,"%s","          -mask: File containing masking information to use\n");
   fprintf(stderr,"%s","                 1 char* value\n");
   fprintf(stderr,"%s","         infile: Input data file name(s).\n");
-  fprintf(stderr,"%s","                 1...1024 values\n");
+  fprintf(stderr,"%s","                 1...oo values\n");
   fprintf(stderr,"%s","  version: 03Apr09\n");
   fprintf(stderr,"%s","  ");
   exit(EXIT_FAILURE);
@@ -1348,7 +1348,7 @@ parseCmdline(int argc, char **argv)
             Program);
     exit(EXIT_FAILURE);
   }
-  /* Removing this constraint, Vlad, we use more than 1024 files to process LOFAR data */
+//  //  /* For LOFAR, more than 1024 files are used as input */
 //  if( 1024<cmd.argc ) {
 //    fprintf(stderr, "%s: there should be at most 1024 non-option argument(s)\n",
 //            Program);
