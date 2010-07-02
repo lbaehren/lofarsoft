@@ -1,5 +1,23 @@
 #! /usr/bin/env python
 
+##########################################################################
+#  This file is part of the Transient Template Library.                  #
+#  Copyright (C) 2010 Pim Schellart <P.Schellart@astro.ru.nl>            #
+#                                                                        #
+#  This library is free software: you can redistribute it and/or modify  #
+#  it under the terms of the GNU General Public License as published by  #
+#  the Free Software Foundation, either version 3 of the License, or     #
+#  (at your option) any later version.                                   #
+#                                                                        # 
+#  This library is distributed in the hope that it will be useful,       #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+#  GNU General Public License for more details.                          #
+#                                                                        #
+#  You should have received a copy of the GNU General Public License     #
+#  along with this library. If not, see <http://www.gnu.org/licenses/>.  #
+##########################################################################
+
 import re
 import xml.dom.minidom
 from optparse import OptionParser
@@ -165,37 +183,39 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
         # Correct for template type T
         ftype=re.sub('T', 'double', ftype)
 
+        # Add start of function definition (e.g. '  void f(')
         code+=indent+ftype+' '+fname+'('
         
         # Add function arguments
         if node.hasChildNodes():
+            # Make copy of list to prevent removing elements from the DOM
             arguments = node.childNodes[:]
 
-            skip = False
-            iter_param = 0
             while True:
                 try:
+                    # Get next argument
                     arg = arguments.pop(0)
 
                 # Go out of loop if there are no more arguments
                 except IndexError:
                     break
 
+                # Get argument name and type
                 type=arg.getAttribute('type')
                 name=arg.getAttribute('name')
 
+                # Check the next argument in the list if it exists
                 nextarg=arg.nextSibling
 
-                # First check if we have a begin/end itterator pair
+                # First check if we have a begin/end iterator pair
                 if nextarg and re.search(name,nextarg.getAttribute('name')) and re.search('Iter',nextarg.getAttribute('type')):
-                    code+='boost::python::numeric::array pydata'+str(iter_param)
-                    iter_param+=1
+                    code+='boost::python::numeric::array '+name.strip()
 
                     # Add ',' between parameters
                     if len(arguments)>1:
                         code+=', '
 
-                    # Go to end itterator
+                    # Go to end iterator
                     try:
                         arg = arguments.pop(0)
 
@@ -203,10 +223,9 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
                     except IndexError:
                         break
 
-                # Then check if we have a single begin itterator
+                # Then check if we have a single begin iterator
                 elif re.search('Iter', type):
-                    code+='boost::python::numeric::array pydata'+str(iter_param)
-                    iter_param+=1
+                    code+='boost::python::numeric::array '+name.strip()
 
                     # Add ',' between parameters
                     if len(arguments)>=1:
@@ -234,33 +253,36 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
 
         # Add TTL function call arguments
         if node.hasChildNodes():
+            # Make copy of list to prevent removing elements from the DOM
             arguments = node.childNodes[:]
 
-            skip = False
-            iter_param = 0
             while True:
                 try:
+                    # Get next argument in list
                     arg = arguments.pop(0)
 
                 # Go out of loop if there are no more arguments
                 except IndexError:
                     break
 
+                # Get argument name and type
                 type=arg.getAttribute('type')
                 name=arg.getAttribute('name')
 
+                # Check next argument if it exists
                 nextarg=arg.nextSibling
 
-                # First check if we have a begin/end itterator pair
+                # First check if we have a begin/end iterator pair
                 if nextarg and re.search(name,nextarg.getAttribute('name')) and re.search('Iter',nextarg.getAttribute('type')):
-                    code+='ttl::numpyBeginPtr<double>(pydata'+str(iter_param)+'), ttl::numpyEndPtr<double>(pydata'+str(iter_param)+')'
-                    iter_param+=1
+                    # Wrap input numpy ndarray with functions to get
+                    # the begin and end iterators
+                    code+='ttl::numpyBeginPtr<double>('+name.strip()+'), ttl::numpyEndPtr<double>('+name.strip()+')'
 
                     # Add ',' between parameters
                     if len(arguments)>1:
                         code+=', '
 
-                    # Go to end itterator
+                    # Go to end iterator
                     try:
                         arg = arguments.pop(0)
 
@@ -268,10 +290,11 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
                     except IndexError:
                         break
 
-                # Then check if we have a single begin itterator
+                # Then check if we have a single begin iterator
                 elif re.search('Iter', type):
-                    code+='ttl::numpyBeginPtr<double>(pydata'+str(iter_param)+')'
-                    iter_param+=1
+                    # Wrap input numpy ndarray with functions to get
+                    # the begin iterator
+                    code+='ttl::numpyBeginPtr<double>('+name.strip()+')'
 
                     # Add ',' between parameters
                     if len(arguments)>=1:
@@ -282,6 +305,7 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
                     # Correct for reference
                     name=re.sub('\&', '', name)
 
+                    # Add function name
                     code+=name
 
                     # Add ',' between parameters
@@ -321,7 +345,7 @@ def elementToBoostWrapper(node, module=''):
         wrap += indent+'using namespace boost::python;\n\n'
   
     elif node.nodeName == 'function':
-        # Add function name
+        # Add function wrapper with correct namespace
         fname = node.getAttribute('name')
 
         wrap+=indent+'def("'+fname+'", ttl::bindings::'+fname
@@ -331,16 +355,20 @@ def elementToBoostWrapper(node, module=''):
 
         # Get argument docstrings
         if node.hasChildNodes():
+            # Make copy of list to prevent removing elements from the DOM
             arguments = node.childNodes[:]
 
             for arg in arguments:
+                # Construct docstring for argument
                 docstring+=indent+'*'+arg.getAttribute('name')+'* '+arg.getAttribute('docstring').strip()+'\n'
 
-        # Replace newline by litteral '\n' in code
+        # Replace newline by literal '\n' in code
         docstring = re.sub('\n',r'\\n', docstring)
 
+        # Add docstring to wrapper function
         wrap+=', "'+docstring+'"'
         
+        # Add closing
         wrap+=');\n'
     
     # Recursively move through the list

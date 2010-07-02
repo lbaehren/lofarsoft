@@ -38,14 +38,14 @@ namespace ttl
     /*!
       \brief Take the sin of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void sin(const Iter begin, const Iter end)
+      void sin(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::sin(*it);
           ++it;
@@ -55,14 +55,14 @@ namespace ttl
     /*!
       \brief Take the cos of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void cos(const Iter begin, const Iter end)
+      void cos(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::cos(*it);
           ++it;
@@ -72,14 +72,14 @@ namespace ttl
     /*!
       \brief Take the tan of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void tan(const Iter begin, const Iter end)
+      void tan(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::tan(*it);
           ++it;
@@ -89,14 +89,14 @@ namespace ttl
     /*!
       \brief Take the sinh of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void sinh(const Iter begin, const Iter end)
+      void sinh(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::sinh(*it);
           ++it;
@@ -106,14 +106,14 @@ namespace ttl
     /*!
       \brief Take the cosh of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void cosh(const Iter begin, const Iter end)
+      void cosh(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::cosh(*it);
           ++it;
@@ -123,14 +123,14 @@ namespace ttl
     /*!
       \brief Take the tanh of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void tanh(const Iter begin, const Iter end)
+      void tanh(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::tanh(*it);
           ++it;
@@ -140,14 +140,14 @@ namespace ttl
     /*!
       \brief Take the asin of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void asin(const Iter begin, const Iter end)
+      void asin(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::asin(*it);
           ++it;
@@ -157,14 +157,14 @@ namespace ttl
     /*!
       \brief Take the acos of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void acos(const Iter begin, const Iter end)
+      void acos(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::acos(*it);
           ++it;
@@ -174,14 +174,14 @@ namespace ttl
     /*!
       \brief Take the atan of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void atan(const Iter begin, const Iter end)
+      void atan(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::atan(*it);
           ++it;
@@ -191,14 +191,14 @@ namespace ttl
     /*!
       \brief Take the log of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void log(const Iter begin, const Iter end)
+      void log(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::log(*it);
           ++it;
@@ -208,14 +208,14 @@ namespace ttl
     /*!
       \brief Take the log10 of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void log10(const Iter begin, const Iter end)
+      void log10(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::log10(*it);
           ++it;
@@ -225,14 +225,14 @@ namespace ttl
     /*!
       \brief Take the log of all elements in the itterable but return LOW_NUMBER if element is zero
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void logSave(const Iter begin, const Iter end)
+      void logSave(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           if (*it>0)
           {
@@ -249,14 +249,14 @@ namespace ttl
     /*!
       \brief Take the abs of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void abs(const Iter begin, const Iter end)
+      void abs(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::abs(*it);
           ++it;
@@ -266,14 +266,14 @@ namespace ttl
     /*!
       \brief Take the exp of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void exp(const Iter begin, const Iter end)
+      void exp(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::exp(*it);
           ++it;
@@ -283,14 +283,14 @@ namespace ttl
     /*!
       \brief Take the sqrt of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void sqrt(const Iter begin, const Iter end)
+      void sqrt(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::sqrt(*it);
           ++it;
@@ -300,14 +300,14 @@ namespace ttl
     /*!
       \brief Take the fabs of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void fabs(const Iter begin, const Iter end)
+      void fabs(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::fabs(*it);
           ++it;
@@ -317,14 +317,14 @@ namespace ttl
     /*!
       \brief Take the floor of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void floor(const Iter begin, const Iter end)
+      void floor(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::floor(*it);
           ++it;
@@ -334,14 +334,14 @@ namespace ttl
     /*!
       \brief Take the ceil of all elements in the itterable
 
-      \param begin begin itterator
-      \param end end itterator
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
-      void ceil(const Iter begin, const Iter end)
+      void ceil(const Iter vec, const Iter vec_end)
       {
-        Iter it=begin;
-        while (it!=end)
+        Iter it=vec;
+        while (it!=vec_end)
         {
           *it=std::ceil(*it);
           ++it;
@@ -352,6 +352,9 @@ namespace ttl
       \brief Returns the norm (or length) of a vector
 
       \\sqrt(\\sum_{i}(x_{i}^2)).
+
+      \param vec begin iterator
+      \param vec_end end iterator
      */
     template <class Iter>
       double norm(const Iter vec, const Iter vec_end)

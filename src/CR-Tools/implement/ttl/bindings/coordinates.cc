@@ -35,14 +35,14 @@ namespace ttl
   namespace bindings
   {
 
-  bool toWorld(boost::python::numeric::array pydata0, boost::python::numeric::array pydata1, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
+  bool toWorld(boost::python::numeric::array world, boost::python::numeric::array pixel, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
   {
-    return ttl::coordinates::toWorld(ttl::numpyBeginPtr<double>(pydata0), ttl::numpyEndPtr<double>(pydata0), ttl::numpyBeginPtr<double>(pydata1), ttl::numpyEndPtr<double>(pydata1), refcode, projection, refLong, refLat, incLong, incLat, refX, refY);
+    return ttl::coordinates::toWorld(ttl::numpyBeginPtr<double>(world), ttl::numpyEndPtr<double>(world), ttl::numpyBeginPtr<double>(pixel), ttl::numpyEndPtr<double>(pixel), refcode, projection, refLong, refLat, incLong, incLat, refX, refY);
   }
 
-  bool toPixel(boost::python::numeric::array pydata0, boost::python::numeric::array pydata1, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
+  bool toPixel(boost::python::numeric::array pixel, boost::python::numeric::array world, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
   {
-    return ttl::coordinates::toPixel(ttl::numpyBeginPtr<double>(pydata0), ttl::numpyEndPtr<double>(pydata0), ttl::numpyBeginPtr<double>(pydata1), ttl::numpyEndPtr<double>(pydata1), refcode, projection, refLong, refLat, incLong, incLat, refX, refY);
+    return ttl::coordinates::toPixel(ttl::numpyBeginPtr<double>(pixel), ttl::numpyEndPtr<double>(pixel), ttl::numpyBeginPtr<double>(world), ttl::numpyEndPtr<double>(world), refcode, projection, refLong, refLat, incLong, incLat, refX, refY);
   }
 
   }// End bindings

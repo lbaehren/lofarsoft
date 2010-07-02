@@ -40,24 +40,24 @@ namespace ttl
     return ttl::beamforming::phase(frequency, time);
   }
 
-  double geometricDelayFarField(boost::python::numeric::array pydata0, boost::python::numeric::array pydata1, const double length)
+  double geometricDelayFarField(boost::python::numeric::array antPosition, boost::python::numeric::array skyDirection, const double length)
   {
-    return ttl::beamforming::geometricDelayFarField(ttl::numpyBeginPtr<double>(pydata0), ttl::numpyBeginPtr<double>(pydata1), length);
+    return ttl::beamforming::geometricDelayFarField(ttl::numpyBeginPtr<double>(antPosition), ttl::numpyBeginPtr<double>(skyDirection), length);
   }
 
-  double geometricDelayNearField(boost::python::numeric::array pydata0, boost::python::numeric::array pydata1, const double distance)
+  double geometricDelayNearField(boost::python::numeric::array antPosition, boost::python::numeric::array skyPosition, const double distance)
   {
-    return ttl::beamforming::geometricDelayNearField(ttl::numpyBeginPtr<double>(pydata0), ttl::numpyBeginPtr<double>(pydata1), distance);
+    return ttl::beamforming::geometricDelayNearField(ttl::numpyBeginPtr<double>(antPosition), ttl::numpyBeginPtr<double>(skyPosition), distance);
   }
 
-  void geometricDelays(boost::python::numeric::array pydata0, boost::python::numeric::array pydata1, boost::python::numeric::array pydata2, const bool farfield)
+  void geometricDelays(boost::python::numeric::array delays, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
   {
-    ttl::beamforming::geometricDelays(ttl::numpyBeginPtr<double>(pydata0), ttl::numpyEndPtr<double>(pydata0), ttl::numpyBeginPtr<double>(pydata1), ttl::numpyEndPtr<double>(pydata1), ttl::numpyBeginPtr<double>(pydata2), ttl::numpyEndPtr<double>(pydata2), farfield);
+    ttl::beamforming::geometricDelays(ttl::numpyBeginPtr<double>(delays), ttl::numpyEndPtr<double>(delays), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
   }
 
-  void geometricPhases(boost::python::numeric::array pydata0, boost::python::numeric::array pydata1, boost::python::numeric::array pydata2, boost::python::numeric::array pydata3, const bool farfield)
+  void geometricPhases(boost::python::numeric::array phases, boost::python::numeric::array frequencies, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
   {
-    ttl::beamforming::geometricPhases(ttl::numpyBeginPtr<double>(pydata0), ttl::numpyEndPtr<double>(pydata0), ttl::numpyBeginPtr<double>(pydata1), ttl::numpyEndPtr<double>(pydata1), ttl::numpyBeginPtr<double>(pydata2), ttl::numpyEndPtr<double>(pydata2), ttl::numpyBeginPtr<double>(pydata3), ttl::numpyEndPtr<double>(pydata3), farfield);
+    ttl::beamforming::geometricPhases(ttl::numpyBeginPtr<double>(phases), ttl::numpyEndPtr<double>(phases), ttl::numpyBeginPtr<double>(frequencies), ttl::numpyEndPtr<double>(frequencies), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
   }
 
   }// End bindings
