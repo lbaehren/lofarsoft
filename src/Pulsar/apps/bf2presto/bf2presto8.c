@@ -280,7 +280,7 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
        if (eightBit ==1 || writefb ==1 ){
 	 scale = 128/(N_sigma*2*rms); //8-bit dynamic
        } else {
-	 scale = (128*256)/(N_sigma*2*rms); //16-bit dynamic
+	 scale = (256*256)/(N_sigma*2*rms); //16-bit dynamic
        }
        offset = average - (N_sigma*rms);
        //scale = 1.0/(65536); //16-bit static
