@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.11
+VERSION=1.12
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-rfi] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo]\n\n"\
@@ -567,8 +567,8 @@ do
 		for ii in $num_dir
 		do
 		  echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
-		  echo bf2presto ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
-		  bf2presto ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
+		  echo bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
+		  bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
 		  set bf2presto_pid_$ii=$!  
 		done
 	else
@@ -578,8 +578,8 @@ do
 		    cd ${location}/${STOKES}/"RSP"${ii}
 
 	 	    echo 'Converting subbands: '`cat RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 
-		    echo bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
-		    bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+		    echo bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+		    bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
 		    set bf2presto_pid_$ii=$!  
 		    
 #			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
@@ -590,7 +590,7 @@ do
 		cd ${location}
     fi
 
-	echo "Running bf2presto in the background for RSP-splits..." 
+	echo "Running bf2presto8 in the background for RSP-splits..." 
 	
 	#Create .sub.inf files with par2inf.py
 	echo cp $PARSET ./${OBSID}.parset >> $log
@@ -676,7 +676,7 @@ do
 #	then
 		for ii in $num_dir
 		do
-		   echo "Waiting for loop $ii bf2presto to finish"
+		   echo "Waiting for loop $ii bf2presto8 to finish"
 		   wait $bf2presto_pid_$ii
 		done
 #    else
@@ -684,8 +684,8 @@ do
 #		wait $bf2presto_pid
 #    fi
 	
-	echo "Done bf2presto (splits)" 
-	echo "Done bf2presto (splits)" >> $log
+	echo "Done bf2presto8 (splits)" 
+	echo "Done bf2presto8 (splits)" >> $log
 	date
 	date >> $log
 	
@@ -1090,37 +1090,35 @@ do
 		done
 		cd ${location}	
     fi
-	
-	#Make a tarball of all the plots
-	echo "Creating tar file of plots"
-	echo "Creating tar file of plots" >> $log
-	date
-	date >> $log
-	if (( $flyseye == 0 ))
-    then
-	   echo tar cvf ${PULSAR}_${OBSID}_plots.tar ${STOKES}/*profiles.pdf ${STOKES}/RSP*/*pfd.ps ${STOKES}/RSP*/*pfd.pdf ${STOKES}/RSP*/*pfd.bestprof ${STOKES}/RSP*/*.sub.inf >> $log
-	   tar cvf ${PULSAR}_${OBSID}_plots.tar ${STOKES}/*profiles.pdf ${STOKES}/RSP*/*pfd.ps ${STOKES}/RSP*/*pfd.pdf ${STOKES}/RSP*/*pfd.bestprof ${STOKES}/RSP*/*.sub.inf 
-	else
-	   echo tar cvf ${PULSAR}_${OBSID}_plots.tar ${STOKES}/*/*profiles.pdf ${STOKES}/*/RSP*/*pfd.ps ${STOKES}/*/RSP*/*pfd.pdf ${STOKES}/*/RSP*/*pfd.bestprof ${STOKES}/*/RSP*/*.sub.inf >> $log
-	   tar cvf ${PULSAR}_${OBSID}_plots.tar ${STOKES}/*/*profiles.pdf ${STOKES}/*/RSP*/*pfd.ps ${STOKES}/*/RSP*/*pfd.pdf ${STOKES}/*/RSP*/*pfd.bestprof ${STOKES}/*/RSP*/*.sub.inf
-	fi
-	echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
-	gzip ${PULSAR}_${OBSID}_plots.tar
-	
-	#Change permissions and move files
-	echo "Changing permissions of files"
-	echo "Changing permissions of files" >> $log
-	date
-	date >> $log
-	echo chmod -R 774 . * >> $log
-	chmod -R 774 . * 
-	echo chgrp -R pulsar . * >> $log
-	chgrp -R pulsar . * 
-	echo mv *.tar.gz ${STOKES} >> $log
-	mv *.tar.gz ${STOKES}
-	
-done # for loop over modes in $mode_str 
 
+done # for loop over modes in $mode_str 
+	
+#Make a tarball of all the plots
+echo "Creating tar file of plots"
+echo "Creating tar file of plots" >> $log
+date
+date >> $log
+if (( $flyseye == 0 ))
+   then
+   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.bestprof */RSP*/*.sub.inf >> $log
+   tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.bestprof */RSP*/*.sub.inf 
+else
+   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf >> $log
+   tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf
+fi
+echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
+gzip ${PULSAR}_${OBSID}_plots.tar
+
+#Change permissions and move files
+echo "Changing permissions of files"
+echo "Changing permissions of files" >> $log
+date
+date >> $log
+echo chmod -R 774 . * >> $log
+chmod -R 774 . * 
+echo chgrp -R pulsar . * >> $log
+chgrp -R pulsar . * 
+	
 date_end=`date`
 echo "Start Time: " $date_start
 echo "Start Time: " $date_start >> $log
