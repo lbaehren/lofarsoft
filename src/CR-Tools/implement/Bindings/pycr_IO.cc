@@ -269,8 +269,10 @@ namespace CR { // Namespace CR -- begin
       } else if (key == "samplefrequency") {
 	dr.setSampleFrequency( bpl::extract<double>(pyob) );
       } else if (key=="shiftvector") {	
+	//cout << "CRFileSetParameter:shiftvector: data:" <<STLVecFromPyob<int>(pyob) << endl; 
 	dr.setShift(STLVecFromPyob<int>(pyob));
       } else if (key=="selectedantennas") {
+	//cout << "CRFileSetParameter:selectedantennas: data:" << casaFromPyob<uint>(pyob) << endl; 
 	dr.setSelectedAntennas(casaFromPyob<uint>(pyob));
       } else {
 	std::string fields;

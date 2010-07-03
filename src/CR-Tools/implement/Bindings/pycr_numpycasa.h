@@ -79,6 +79,17 @@ namespace CR { // Namespace CR -- begin
     // === num_util replacement functions ========================================
 
     /** 
+     *Function template returns PyArray_Type for C++ type
+     *See num_util.cpp for specializations
+     *@param T C++ type
+     *@return numpy type enum
+     */
+    
+    template<typename T> PyArray_TYPES getEnum(void) {
+      return num_util::getEnum<T>();
+    }
+    
+    /** 
      *Function template creates a one-dimensional numpy array of length n containing
      *a copy of data at data*.  See num_util.cpp::getEnum<T>() for list of specializations
      *@param T  C type of data
@@ -88,7 +99,7 @@ namespace CR { // Namespace CR -- begin
      */
     
     template <typename T> boost::python::numeric::array makeNum(const T* data, int n = 0){
-      boost::python::object obj(boost::python::handle<>(PyArray_FromDims(1, &n,  num_util::getEnum<T>())));
+      boost::python::object obj(boost::python::handle<>(PyArray_FromDims(1, &n,  CR::PYCR::getEnum<T>())));
       void *arr_data = PyArray_DATA((PyArrayObject*) obj.ptr());
       memcpy(arr_data, data, PyArray_ITEMSIZE((PyArrayObject*) obj.ptr()) * n); // copies the input data to 
       return boost::python::extract<boost::python::numeric::array>(obj);
@@ -106,12 +117,49 @@ namespace CR { // Namespace CR -- begin
     
     template <typename T> boost::python::numeric::array makeNum(const T * data, std::vector<int> dims){
       int total = std::accumulate(dims.begin(),dims.end(),1,std::multiplies<int>());
-      boost::python::object obj(boost::python::handle<>(PyArray_FromDims(dims.size(),&dims[0],  num_util::getEnum<T>())));
+      boost::python::object obj(boost::python::handle<>(PyArray_FromDims(dims.size(),&dims[0],  CR::PYCR::getEnum<T>())));
       void *arr_data = PyArray_DATA((PyArrayObject*) obj.ptr());
       memcpy(arr_data, data, PyArray_ITEMSIZE((PyArrayObject*) obj.ptr()) * total);
       return boost::python::extract<boost::python::numeric::array>(obj);
     }
     
+    // === Get pointers from numpy  =================================================
+
+    /*!
+      \Brief Return the pointer to the begin of the storage of a numpy array
+    
+      \param pydata   -- boost-style "wrapped" numpy array
+    
+      \return the pointer of the desired type
+    
+    */
+    template <class T> T* numpyBeginPtr(bpl::numeric::array pydata){
+      // test if the numpy-array has the preperties we need
+      // (they throw exceptions if not)
+      num_util::check_type(pydata, CR::PYCR::getEnum<T>() );
+      num_util::check_contiguous(pydata);
+    
+      return (T *)num_util::data(pydata);
+    }
+						    
+    /*!
+      \brief Return the pointer to the end of the storage of a numpy array
+    
+      \param pydata   -- boost-style "wrapped" numpy array
+    
+      \return the pointer of the desired type
+    
+    */
+    template <class T> T* numpyEndPtr(bpl::numeric::array pydata){
+      // test if the numpy-array has the preperties we need
+      // (they throw exceptions if not)
+      num_util::check_type(pydata, CR::PYCR::getEnum<T>() );
+      num_util::check_contiguous(pydata);
+
+      int size = num_util::size(pydata);
+
+      return (T *)num_util::data(pydata) + size;
+    }
 
     // === Convert/map numpy to casa (no copy) ===================================
   
@@ -119,15 +167,15 @@ namespace CR { // Namespace CR -- begin
       \brief Get a casa-array that has its storage mapped to a numpy array
     
       \param pydata -- boost-style "wrapped" numpy array
-      \param casarray -- casa array that is to be mapped onthe the storage of the numpy array
+      \param casaarray -- casa array that is to be mapped onthe the storage of the numpy array
     
       \return true if everyting worked
     */
     template <class T> bool casaFromNumpy(bpl::numeric::array pydata, 
-					  casa::Array<T> &casarray ) {
+					  casa::Array<T> &casaarray ) {
       // test if the numpy-array has the preperties we need
       // (they throw exceptions if not)
-      num_util::check_type(pydata, num_util::getEnum<T>() );
+      num_util::check_type(pydata, CR::PYCR::getEnum<T>() );
       num_util::check_contiguous(pydata);
     
       // get the shape of the numpy-array
@@ -138,7 +186,7 @@ namespace CR { // Namespace CR -- begin
       };
     
       //now map the data
-      casarray.takeStorage(shape, (T *)num_util::data(pydata), casa::SHARE);
+      casaarray.takeStorage(shape, (T *)num_util::data(pydata), casa::SHARE);
     
       return true;
     };
@@ -147,7 +195,7 @@ namespace CR { // Namespace CR -- begin
       \brief Get a casa-array with the storage of a resized numpy array
     
       \param pydata   -- boost-style "wrapped" numpy array
-      \param casarray -- casa array that is to be mapped onthe the storage of the numpy array
+      \param casaarray -- casa array that is to be mapped onthe the storage of the numpy array
       \param shape    -- resize the numpy array so that the remapped casa array has this shape
     
       \return true if everyting worked
@@ -156,11 +204,11 @@ namespace CR { // Namespace CR -- begin
       storage is mapped by the casa array.
     */
     template <class T> bool casaFromNumpyResize(bpl::numeric::array &pydata, 
-						casa::Array<T> &casarray,
+						casa::Array<T> &casaarray,
 						casa::IPosition &shape){
       // test if the numpy-array has the preperties we need
       // (they throw exceptions if not)
-      num_util::check_type(pydata, num_util::getEnum<T>() );
+      num_util::check_type(pydata, CR::PYCR::getEnum<T>() );
       num_util::check_contiguous(pydata);
 
       /* This doesn't work for the time being...
@@ -189,8 +237,131 @@ namespace CR { // Namespace CR -- begin
       };
 
       //now map the data
-      casarray.takeStorage(shape, (T *)num_util::data(pydata), casa::SHARE);
+      casaarray.takeStorage(shape, (T *)num_util::data(pydata), casa::SHARE);
     
+      return true;
+    };
+
+    // === Copy numpy to casa with type cast =======================================
+
+    /*!
+      \brief Copy a numpy array to a casa array and convert the type
+    
+      \param pydata -- boost-style "wrapped" numpy array
+      \param casaarray -- casa array as output
+    
+      \return true if everyting worked
+    */
+    template <class T> bool casaFromNumpyCast(bpl::numeric::array pydata, 
+					      casa::Array<T> &casaarray ) {
+      // test if the numpy-array has the preperties we need
+      // (they throw exceptions if not)
+      num_util::check_contiguous(pydata);
+    
+      // get the shape of the numpy-array
+      int i,rank = num_util::rank(pydata);
+      int size=num_util::size(pydata);
+      casa::IPosition shape(rank);
+      for (i=0; i<rank; i++){
+	shape[(rank-i-1)] = num_util::get_dim(pydata, i);
+      };
+      
+      //reshape the output array and get pointer to it
+      casaarray.resize(shape);
+      Bool  deleteIt;
+      T * datapointer = casaarray.getStorage(deleteIt);
+      
+      switch (num_util::type(pydata)){
+      case PyArray_BYTE: 
+	{
+	  char *charptr = numpyBeginPtr<char>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(charptr[i]);
+	}
+	break;
+      case PyArray_UBYTE:
+	{
+	  unsigned char *ucharptr = numpyBeginPtr<unsigned char>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(ucharptr[i]);
+	}
+	break;
+      case PyArray_SHORT:
+	{
+	  short *shortptr = numpyBeginPtr<short>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(shortptr[i]);
+	}
+      	break;
+      case PyArray_USHORT:
+	{
+	  unsigned short *ushortptr = numpyBeginPtr<unsigned short>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(ushortptr[i]);
+	}
+      	break;
+      case PyArray_INT:
+	{
+	  int *intptr = numpyBeginPtr<int>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(intptr[i]);
+	}
+      	break;
+      case PyArray_UINT:
+	{
+	  unsigned int *uintptr = numpyBeginPtr<unsigned int>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(uintptr[i]);
+	}
+      	break;
+      case PyArray_LONG:
+	{
+	  long *longptr = numpyBeginPtr<long>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(longptr[i]);
+	}
+      	break;
+      case PyArray_ULONG:
+	{
+	  unsigned long *ulongptr = numpyBeginPtr<unsigned long>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(ulongptr[i]);
+	}
+      	break;
+      case PyArray_LONGLONG:
+	{
+	  long long *llptr = numpyBeginPtr<long long>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(llptr[i]);
+	}
+      	break;
+      case PyArray_ULONGLONG:
+	{
+	  unsigned long long *ullptr = numpyBeginPtr<unsigned long long>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(ullptr[i]);
+	}
+      	break;
+      case PyArray_FLOAT:
+	{
+	  float *flptr = numpyBeginPtr<float>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(flptr[i]);
+	}
+      	break;
+      case PyArray_DOUBLE:
+	{
+	  double *doubleptr = numpyBeginPtr<double>(pydata);
+	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(doubleptr[i]);
+	}
+      	break;
+      // case PyArray_CFLOAT:
+      // 	{
+      // 	  std::complex<float>  *complexptr = numpyBeginPtr< std::complex<float> >(pydata);
+      // 	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(complexptr[i]);
+      // 	}
+      // 	break;
+      // case PyArray_CDOUBLE:
+      // 	{
+      // 	  std::complex<double>  *dcomplexptr = numpyBeginPtr< std::complex<double> >(pydata);
+      // 	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(dcomplexptr[i]);
+      // 	}
+      // 	break;
+      default:
+	cout << "casaFromNumpyCast: Type of numpy-array not implemented!" << endl;
+	break;
+      };
+      casaarray.putStorage(datapointer, deleteIt);
+  
       return true;
     };
 
@@ -199,21 +370,21 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Create a numpy array with the shape and (copied) values of a casa array
     
-      \param casarray -- casa array that is to be copied into the new array
+      \param casaarray -- casa array that is to be copied into the new array
     
       \return boost-style "wrapped" numpy array
     */
-    template <class T> bpl::numeric::array numpyFromCasa(const casa::Array<T> &casarray){
-      casa::IPosition shape(casarray.shape());
+    template <class T> bpl::numeric::array numpyFromCasa(const casa::Array<T> &casaarray){
+      casa::IPosition shape(casaarray.shape());
       std::vector< int > outshape;
       int i,rank = shape.size();
       for (i=0; i<rank; i++){
 	outshape.push_back(shape[rank-i-1]);
       };
       Bool  deleteIt;
-      const T * datapointer(casarray.getStorage(deleteIt));
+      const T * datapointer(casaarray.getStorage(deleteIt));
       bpl::numeric::array result(CR::PYCR::makeNum(datapointer,outshape));
-      casarray.freeStorage(datapointer, deleteIt);
+      casaarray.freeStorage(datapointer, deleteIt);
       return result;
     };
 
@@ -229,7 +400,7 @@ namespace CR { // Namespace CR -- begin
       int size(invec.size());
       std::vector< int > outshape;
       outshape.push_back(size);
-      bpl::numeric::array result(num_util::makeNum(outshape,num_util::getEnum<T>()));
+      bpl::numeric::array result(num_util::makeNum(outshape,CR::PYCR::getEnum<T>()));
       for (int i=0; i<size; i++){
 	result[i] = invec[i];
       }
@@ -249,7 +420,7 @@ namespace CR { // Namespace CR -- begin
     template <class T> casa::Vector<T> casaFromList(bpl::list pylist){
       int i,size=PyList_Size(pylist.ptr());
       std::vector<T> outvec(size);
-      for (i=0;i<size;++i) outvec[i] = bpl::extract<T>(pylist[i]);
+      for (i=0; i<size; i++) outvec[i] = bpl::extract<T>(pylist[i]);
       return outvec;
     }
 
@@ -264,7 +435,7 @@ namespace CR { // Namespace CR -- begin
       bpl::extract<bpl::numeric::array> nparray(pyob);
       if (nparray.check()) {
 	casa::Vector<T> outvec;
-	casaFromNumpy<T>(nparray,outvec);
+	casaFromNumpyCast<T>(nparray,outvec);
 	return outvec;
       };
       bpl::extract<bpl::list> listobj(pyob);
@@ -286,9 +457,10 @@ namespace CR { // Namespace CR -- begin
     */
     template <class T> std::vector<T> STLVecFromNumpy(bpl::numeric::array nparray){
       std::vector<T> vec;
+      T * arrayptr=numpyBeginPtr<T>(nparray);
       int i,size=num_util::size(nparray); 
       vec.reserve(size);
-      for (i=0;i<size;++i) vec[i] = bpl::extract<T>(nparray[i]);
+      for (i=0;i<size;++i) vec.push_back(arrayptr[i]);
       return vec;
     }
 
@@ -303,7 +475,9 @@ namespace CR { // Namespace CR -- begin
       std::vector<T> vec;
       int i,size=PyList_Size(pylist.ptr());
       vec.reserve(size);
-      for (i=0;i<size;++i) vec[i] = bpl::extract<T>(pylist[i]);
+      for (i=0; i<size; i++) {
+	vec.push_back(bpl::extract<T>(pylist[i]));
+      };
       return vec;
     }
 
@@ -321,51 +495,11 @@ namespace CR { // Namespace CR -- begin
       };
       bpl::extract<bpl::list> listobj(pyob);
       if (listobj.check()) {
-	cout << "STLVecFromPyob: calling STLVecFromList" << endl;
 	return STLVecFromList<T>(listobj());
       };
       cout << "STLVecFromPyob: Unknown type of python object, not np-array or list.!" << endl;
       return std::vector<T>();
-    }
-
-    // === Get pointers from numpy  =================================================
-
-    /*!
-      \Brief Return the pointer to the begin of the storage of a numpy array
-    
-      \param pydata   -- boost-style "wrapped" numpy array
-    
-      \return the pointer of the desired type
-    
-    */
-    template <class T> T* numpyBeginPtr(bpl::numeric::array pydata){
-      // test if the numpy-array has the preperties we need
-      // (they throw exceptions if not)
-      num_util::check_type(pydata, num_util::getEnum<T>() );
-      num_util::check_contiguous(pydata);
-    
-      return (T *)num_util::data(pydata);
-    }
-						    
-    /*!
-      \brief Return the pointer to the end of the storage of a numpy array
-    
-      \param pydata   -- boost-style "wrapped" numpy array
-    
-      \return the pointer of the desired type
-    
-    */
-    template <class T> T* numpyEndPtr(bpl::numeric::array pydata){
-      // test if the numpy-array has the preperties we need
-      // (they throw exceptions if not)
-      num_util::check_type(pydata, num_util::getEnum<T>() );
-      num_util::check_contiguous(pydata);
-
-      int size = num_util::size(pydata);
-
-      return (T *)num_util::data(pydata) + size;
-    }
-						    
+    }						    
 
   
   } // Namespace PYCR -- end
