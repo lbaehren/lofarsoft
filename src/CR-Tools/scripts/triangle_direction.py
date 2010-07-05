@@ -34,8 +34,9 @@ def directionFromThreeAntennas(positions, times):
     # Now do a coordinate rotation such that z-coordinates z2, z3 are 0, and p2 is on the x-axis (i.e. y2 = 0).
     xx = p2 / np.linalg.norm(p2) # make x-axis by normalizing p2
     yy = p3 - p2 * (np.dot(p2, p3) / np.dot(p2, p2)) # make y-axis by taking the part of p3 that is perpendicular to p2
+    yy = yy / np.linalg.norm(yy)
     zz = np.cross(xx, yy); zz /= np.linalg.norm(zz)   # and make z-axis by the vector perpendicular to both p2 and p3.
-    # We preserve lengths and angles in the new coord. system, so it is a rotation.
+    # We use the fact that we preserve lengths and angles in the new coord. system.
     
     # We now have to solve for A and B in:
     # t2 = A x2
@@ -56,13 +57,21 @@ def directionFromThreeAntennas(positions, times):
     else:
         return (-1, -1) # calculation fails, arrival times out of bounds!
     
+    print A
+    print B
+    print C
+    
     # Now we have to transform this vector back to normal x-y-z coordinates, and then to (az, el) to get our direction.
     # This is where the above xx, yy, zz vectors come in (normal notation: x', y', z')
     
     T = np.matrix([xx, yy, zz]) # transformation matrix of xx, yy, zz in terms of x, y, z
+    print T
+    print ' '
     signal_rotated = np.array([A, B, C])
-    signal = np.inner(T, signal_rotated) # Matrix-vector multiply T * signal_rotated.
     
+    signal = np.inner(T.I, signal_rotated) # Matrix-vector multiply T * signal_rotated.
+    print signal
+    print ' '
     # Now get az, el from x, y, z...
     x = signal[0]; y = signal[1]; z = signal[2]
     
@@ -71,8 +80,7 @@ def directionFromThreeAntennas(positions, times):
     print x
     print y
     print z
-    
-    
+        
     return (phi, theta)
     
 
