@@ -93,59 +93,6 @@ set (lib_locations
   )
 
 ##__________________________________________________________
-##                                                   CFITSIO
-
-FIND_PATH (CFITSIO_INCLUDES fitsio.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES cfitsio include include/cfitsio
-  )
-
-FIND_LIBRARY (CFITSIO_LIBRARIES
-  NAMES cfitsio
-  PATHS ${lib_locations}
-  PATH_SUFFIXES cfitsio
-  )
-
-if (CFITSIO_INCLUDES) 
-  include_directories (${CFITSIO_INCLUDES})
-endif (CFITSIO_INCLUDES)
-
-##__________________________________________________________
-##                                                  GFORTRAN
-
-set (GFORTRAN_LIBRARIES "")
-
-find_program (GFORTRAN_EXECUTABLE gfortran gfortran-4.3 gfortran-4.2  gfortran-4.1
-  PATHS ${bin_locations}
-  )
-
-## libgfortran
-
-find_library (GFORTRAN_LIBRARY gfortran
-  PATHS ${lib_locations}
-  /opt/local
-  $ENV{LD_LIBRARY_PATH}
-  PATH_SUFFIXES
-  gfortran/lib  
-  gfortran/lib/x86_64
-  lib/gcc43
-  )
-
-if (GFORTRAN_LIBRARY)
-  list (APPEND GFORTRAN_LIBRARIES ${GFORTRAN_LIBRARY})
-endif (GFORTRAN_LIBRARY)
-
-## libg2c
-
-find_library (G2C_LIBRARY g2c
-  PATHS ${lib_locations}
-  )
-
-if (G2C_LIBRARY)
-  list (APPEND GFORTRAN_LIBRARIES ${G2C_LIBRARY})
-endif (G2C_LIBRARY)
-
-##__________________________________________________________
 ##                                                      HDF5
 
 if (CASACORE_ENABLE_HDF5) 
@@ -244,6 +191,59 @@ if (CASACORE_ENABLE_HDF5)
   endif (HAVE_HDF5)
   
 endif (CASACORE_ENABLE_HDF5) 
+
+##__________________________________________________________
+##                                                   CFITSIO
+
+FIND_PATH (CFITSIO_INCLUDES fitsio.h
+  PATHS ${include_locations}
+  PATH_SUFFIXES cfitsio include include/cfitsio
+  )
+
+FIND_LIBRARY (CFITSIO_LIBRARIES
+  NAMES cfitsio
+  PATHS ${lib_locations}
+  PATH_SUFFIXES cfitsio
+  )
+
+if (CFITSIO_INCLUDES) 
+  include_directories (${CFITSIO_INCLUDES})
+endif (CFITSIO_INCLUDES)
+
+##__________________________________________________________
+##                                                  GFORTRAN
+
+set (GFORTRAN_LIBRARIES "")
+
+find_program (GFORTRAN_EXECUTABLE gfortran gfortran-4.3 gfortran-4.2  gfortran-4.1
+  PATHS ${bin_locations}
+  )
+
+## libgfortran
+
+find_library (GFORTRAN_LIBRARY gfortran
+  PATHS ${lib_locations}
+  /opt/local
+  $ENV{LD_LIBRARY_PATH}
+  PATH_SUFFIXES
+  gfortran/lib  
+  gfortran/lib/x86_64
+  lib/gcc43
+  )
+
+if (GFORTRAN_LIBRARY)
+  list (APPEND GFORTRAN_LIBRARIES ${GFORTRAN_LIBRARY})
+endif (GFORTRAN_LIBRARY)
+
+## libg2c
+
+find_library (G2C_LIBRARY g2c
+  PATHS ${lib_locations}
+  )
+
+if (G2C_LIBRARY)
+  list (APPEND GFORTRAN_LIBRARIES ${G2C_LIBRARY})
+endif (G2C_LIBRARY)
 
 ##__________________________________________________________
 ##                                                    LAPACK
