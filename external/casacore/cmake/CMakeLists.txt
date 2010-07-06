@@ -196,30 +196,6 @@ if (CASACORE_ENABLE_HDF5)
   
   if (HAVE_HDF5)
     add_definitions (-DHAVE_HDF5)
-    add_definitions (
-      -DH5Acreate_vers=2
-      -DH5Adelete_vers=2
-      -DH5Aiterate_vers=2
-      -DH5Arename_vers=2
-      -DH5Dcreate_vers=2
-      -DH5Dopen_vers=2
-      -DH5Eclear_vers=2
-      -DH5Eprint_vers=2
-      -DH5Epush_vers=2
-      -DH5Eset_auto_vers=2
-      -DH5Eget_auto_vers=2
-      -DH5Ewalk_vers=2
-      -DH5Gcreate_vers=2
-      -DH5Gopen_vers=2
-      -DH5Pget_filter_vers=2
-      -DH5Pinsert_vers=2
-      -DH5Pregister_vers=2
-      -DH5Rget_obj_type_vers=2
-      -DH5Tarray_create_vers=2
-      -DH5Tcommit_vers=2
-      -DH5Tget_array_dims_vers=2
-      -DH5Topen_vers=2
-    )
     include_directories (${HDF5_INCLUDES})
   endif (HAVE_HDF5)
   
