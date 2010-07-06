@@ -42,7 +42,7 @@ include (FindROOT)
 
 ## <-- begin build condition --------------------------------------------------->
 
-if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
+if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD OR svn_executable)
   
   include (ExternalProject)
   
@@ -68,9 +68,9 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   
   ## <-- end build condition ----------------------------------------------------->
   
-else (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
+else (NOT HAVE_ROOT OR ROOT_FORCE_BUILD OR svn_executable)
   add_custom_target (root
     WORKING_DIRECTORY ${ROOT_BINARY_DIR}
     COMMENT "[ROOT] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
+endif (NOT HAVE_ROOT OR ROOT_FORCE_BUILD OR svn_executable)
