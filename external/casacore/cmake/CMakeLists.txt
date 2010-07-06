@@ -113,7 +113,10 @@ if (CASACORE_ENABLE_HDF5)
   endif (NOT HDF5_INCLUDES)
   
   find_file (HAVE_H5PUBLIC_H H5public.h
-    PATHS ${include_locations}
+    PATHS 
+    ${CASACORE_SOURCE_DIR}/../../release/include
+    ${CASACORE_SOURCE_DIR}/../../../release/include
+    ${include_locations}
     PATH_SUFFIXES hdf5 include include/hdf5
     )
   
@@ -121,7 +124,10 @@ if (CASACORE_ENABLE_HDF5)
   
   find_library (HDF5_HDF5_LIBRARY
     NAMES hdf5
-    PATHS ${lib_locations}
+    PATHS
+    ${CASACORE_SOURCE_DIR}/../../../release/lib
+    ${CASACORE_BINARY_DIR}/../../../release/lib
+    ${lib_locations}
     PATH_SUFFIXES hdf5 include include/hdf5
     )
   
@@ -131,7 +137,10 @@ if (CASACORE_ENABLE_HDF5)
     
   FIND_LIBRARY (HDF5_HDF5_HL_LIBRARY
     NAMES hdf5_hl
-    PATHS ${lib_locations}
+    PATHS
+    ${CASACORE_SOURCE_DIR}/../../../release/lib
+    ${CASACORE_BINARY_DIR}/../../../release/lib
+    ${lib_locations}
     PATH_SUFFIXES hdf5
     )
   
@@ -521,6 +530,7 @@ set (CASACORE_PACKAGES
 ## casacore module directories
 
 include_directories (
+  ${CASACORE_SOURCE_DIR}/../../../release/include
   ## source tree
   ${CASACORE_SOURCE_DIR}
   ${CASACORE_SOURCE_DIR}/mirlib
