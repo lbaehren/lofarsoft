@@ -40,9 +40,6 @@ endif (CASACORE_ENABLE_TESTING)
 ##
 ## =============================================================================
 
-set (CMAKE_INCLUDE_PATH "/Users/lars/Code/lofar/usg/release/include")
-set (CMAKE_LIBRARY_PATH "/Users/lars/Code/lofar/usg/release/lib")
-
 ##__________________________________________________________
 ## Load required CMake modules
 
@@ -55,6 +52,8 @@ include (CheckTypeSize)
 ## Set search locations for header files and libraries
 
 set (include_locations
+  ${CASACORE_SOURCE_DIR}/../../../release/include
+  ${CASACORE_BINARY_DIR}/../../../release/include
   /opt/include
   /opt/local/include
   /sw/include
@@ -74,6 +73,8 @@ set (include_locations
 ## Locations to search for libraries
 
 set (lib_locations
+  ${CASACORE_SOURCE_DIR}/../../../release/lib
+  ${CASACORE_BINARY_DIR}/../../../release/lib
   /opt/lib
   /opt/local/lib
   /sw/lib
