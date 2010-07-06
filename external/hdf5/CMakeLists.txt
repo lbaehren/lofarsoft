@@ -78,6 +78,10 @@ else (HDF5_MAJOR_VERSION LESS 1)
   endif (HDF5_MINOR_VERSION LESS 8)
 endif (HDF5_MAJOR_VERSION LESS 1)
 
+## Run an additional check to see whether we are on a Debian system
+
+## [...]
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)

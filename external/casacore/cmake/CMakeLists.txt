@@ -155,7 +155,10 @@ if (CASACORE_ENABLE_HDF5)
   ## Header files
   
   find_path (HDF5_INCLUDES hdf5.h hdf5_hl.h
-    PATHS ${include_locations}
+    PATHS 
+    ${CASACORE_SOURCE_DIR}/../../release/include
+    ${CASACORE_SOURCE_DIR}/../../../release/include
+    ${include_locations}
     PATH_SUFFIXES hdf5 include include/hdf5
     )
   if (NOT HDF5_INCLUDES) 
