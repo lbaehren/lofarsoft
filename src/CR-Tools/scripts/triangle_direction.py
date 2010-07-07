@@ -7,7 +7,7 @@
 #
 
 import numpy as np
-from numpy import sin, cos, pi
+from numpy import sin, cos, pi 
 import sys
 import math
 #import time
@@ -34,22 +34,28 @@ def directionFromThreeAntennas(positions, times):
     t1 = 0; p1 = np.array(np.zeros(3))
     t2 *= c; t3 *= c; # t -> ct
     
+    p2 = p2.astype(float)
+    p3 = p3.astype(float) # !!! There's nothing that stops you from throwing ints at it, which destroys e.g. the inner product ratio below!
+       
     # Now do a coordinate rotation such that z-coordinates z2, z3 are 0, and p2 is on the x-axis (i.e. y2 = 0).
     xx = p2 / np.linalg.norm(p2) # make x-axis by normalizing p2
-    yy = p3 - p2 * (np.dot(p2, p3) / np.dot(p2, p2)) # make y-axis by taking the part of p3 that is perpendicular to p2
+    yy = p3 - p2 * (np.dot(p2, p3) / np.dot(p2, p2)) # make y-axis by taking the part of p3 that is perpendicular to p2 (cf. Gram-Schmidt)
     yy = yy / np.linalg.norm(yy)
     zz = np.cross(xx, yy); zz = zz / np.linalg.norm(zz)   # and make z-axis by the vector perpendicular to both p2 and p3.
     # We use the fact that we preserve lengths and angles in the new coord. system.
-    
+        
     # We now have to solve for A and B in:
     # t2 = A x2
     # t3 = A x3 + B y3
+    # from the general t_i = A x_i + B y_i + C z_i and using our rotated coordinates.
     
-    a = np.dot(p2, p3) / np.linalg.norm(p2) 
-    b = np.sqrt(np.dot(p3, p3) - a*a)      # a and b are x3 and y3 resp.
-    
-    A = - t2 / np.linalg.norm(p2)
-    B = (1/b) * (- t3 - A * a)
+    a = np.dot(p3, xx)
+#    b = np.sqrt(np.dot(p3, p3) - a*a)      # a and b are x3 and y3 resp. in rotated coordinates. 
+#    NB ! This square root is wrong as it should be +/- sqrt(...) and you don't know the sign. Rewrite and make it easier:
+    b = np.dot(p3, yy)
+       
+    A = -t2 / np.linalg.norm(p2)
+    B = (1/b) * (-t3 - A * a)
     
     # Which gives the incoming-signal vector in the rotated coord. frame as (A, B, C). 
     # C is free in this coord. system, but follows from imposing length 1 on the signal vector, 
@@ -57,72 +63,71 @@ def directionFromThreeAntennas(positions, times):
     
     square = A*A + B*B
     if square < 1:
-        C = np.sqrt(1 - square)
+        C = np.sqrt(1 - square) # Note! TWO solutions, +/- sqrt(...). No constraints apart from elevation > 0 in the end result - otherwise both can apply.
     elif (square - 1) < 1e-15: # this does happen because of floating point errors, when time delays 'exactly' match elevation = 0
         C = 0 # so this correction is needed to ensure this function correctly inverts timeDelaysFromDirection(...)
     else:
         return (-1, -1) # calculation fails, arrival times out of bounds!
-    
-#    print A
-#    print B
-#    print C
-    
+       
     # Now we have to transform this vector back to normal x-y-z coordinates, and then to (az, el) to get our direction.
     # This is where the above xx, yy, zz vectors come in (normal notation: x', y', z')
     
-    #T = np.matrix([xx, yy, zz]) # transformation matrix of xx, yy, zz in terms of x, y, z
-    #print T
-    #print ' '
-    #signal_rotated = np.array([A, B, C])
-    
-#    signal = np.inner(T.I, signal_rotated) # Matrix-vector multiply T * signal_rotated.
-    signal = A * xx + B * yy + C * zz
-    #signal = - signal
-#    print signal
-#    print ' '
+    signal  =  A * xx + B * yy + C * zz
+    signal2 =  A * xx + B * yy - C * zz
+
     # Now get az, el from x, y, z...
-    x = signal[0]; y = signal[1]; z = signal[2]
+    x =  signal[0]; y =  signal[1]; z =  signal[2]
     
     theta = np.arccos(z) # in fact, z/R with R = 1
     phi = np.arctan2(y, x) # gets result in [-pi..pi] interval: add pi when needed to go to [0..2 pi]
     if phi < 0:
         phi += twopi
-#    print x
-#    print y
-#    print z
-        
-    return (phi, halfpi - theta)
     
+    az1 = phi
+    el1 = halfpi - theta
+
+    x =  signal2[0]; y =  signal2[1]; z =  signal2[2]
+    
+    theta = np.arccos(z) # in fact, z/R with R = 1
+    phi = np.arctan2(y, x) # gets result in [-pi..pi] interval: add pi when needed to go to [0..2 pi]
+    if phi < 0:
+        phi += twopi
+    
+    az2 = phi
+    el2 = halfpi - theta
+
+    return (az1, el1, az2, el2) 
 
 def timeDelaysFromDirection(positions, direction):
     # assuming directions in (az, el), in radians
     n = len(positions) / 3
-    phi = direction[0] # warning, 90 degree
+    phi = direction[0] # warning, 90 degree?
     theta = halfpi - direction[1] # theta as in standard spherical coords, while el=90 means zenith...
     
     cartesianDirection = np.array([sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)])
-    print cartesianDirection
     timeDelays = np.zeros(n)
     for i in range(n):
         thisPosition = np.array(positions[3*i:3*(i+1)])
-        print thisPosition
         timeDelays[i] = - (1/c) * np.dot(cartesianDirection, thisPosition) # note the minus sign! Signal vector points down from the sky.
-#        print timeDelays[i]
         
     return timeDelays
     
     
 def testDirectionCalculationForThreeAntennas(positions):
-    azSteps = 360; elSteps = 90
+    # Given antenna positions, calculate time delays for 'every' signal vector on the sky.
+    # Then, invert and calculate the signal vector from the given time delays. One out of the 2 possible solutions has to match 
+    # within some floating point roundoff interval. 
     
+    azSteps = 360; elSteps = 90
+        
     for i in range(azSteps):
         for j in range(elSteps):
             az = twopi * float(i) / azSteps
             el = halfpi * float(j) / elSteps
             tdelays = timeDelaysFromDirection(positions, [az, el])
-            (calc_az, calc_el) = directionFromThreeAntennas(positions, tdelays)
-            if abs(calc_az - az) > 1e-12 or abs(calc_el - el) > 1e-7:
-                print 'Wrong value for az: ' + str(az*rad2deg) + ' calculated: ' +str(calc_az * rad2deg)
-                print 'el: ' + str(el*rad2deg) + ' calculated: ' + str(calc_el * rad2deg)
+            (calc_az, calc_el, calc_az2, calc_el2) = directionFromThreeAntennas(positions, tdelays)
+            if (abs(calc_az - az) > 1e-12 or abs(calc_el - el) > 1e-7) and (abs(calc_az2 - az) > 1e-12 or abs(calc_el2 - el) > 1e-7):
+                print 'Wrong value for az: ' + str(az*rad2deg) + ' calculated: ' +str(calc_az * rad2deg) + ' or: ' + str(calc_az2 * rad2deg)
+                print 'el: ' + str(el*rad2deg) + ' calculated: ' + str(calc_el * rad2deg) + ' or: ' + str(calc_el2 * rad2deg)
 
     
