@@ -41,6 +41,7 @@
 // using CR::analyseLOPESevent2;
 // using CR::LopesEventIn;
 
+/// all the formula are developed considering angles into the LOPES coordinates system!
 
 /*!
   \file compareLOPES2sim.cc
@@ -49,7 +50,7 @@
 
   \brief Compares lateral distribution of LOPES events to REAS simulation
 
-  \author Frank Schr&ouml;der Nunzia Palmieri
+  \author Frank Schröder, Nunzia Palmieri
 
   \date 2008/20/05
 
@@ -78,7 +79,7 @@
   \endverbatim
 */
 
-const static bool simulationDistances = true;  // decide wether to use the lateral distances of simulation or of data
+const static bool simulationDistances = true; //false;  // decide wether to use the lateral distances of simulation or of data
 const static double gradeg=180./(TMath::Pi());
 
 int main (int argc, char *argv[])
@@ -163,9 +164,7 @@ int main (int argc, char *argv[])
     
     // map dic declaration
     map<int,string> m_dict;
-    map<int,double> m_dictAz;
-    map<int,double> m_dictZe;
-    double AzS = 0, ZeS = 0;
+    //in the dict file now are dummy values for Ze and Az; anyway, for the REAS sim, directy the value of Az and Ze from KASCADE have been taken!and converted into REAS system only in the REAS tool!
     
     // open dictionary with simulations, if it is provided
     if (simDictName!="") {
@@ -187,12 +186,8 @@ int main (int argc, char *argv[])
         dictFile.getline(buffer,1024);
         istringstream iss (buffer);
         if(iss.str().size()>0&&iss.str()[0]!='%'&&iss.str()[0]!='#') {
-          iss>>GtDict>>simNameDict>>dummy>>AzS>>ZeS>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy;
-          // convert elevation to zenith
-          ZeS = 90.-ZeS;
+          iss>>GtDict>>simNameDict>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy;
           m_dict[GtDict]=simNameDict; //fill the map dictionary 
-          m_dictAz[GtDict]=AzS;
-          m_dictZe[GtDict]=ZeS;
           cout<<""<<simNameDict <<" - GT " <<GtDict<<endl;
         }
         if (!dictFile.good())
@@ -366,8 +361,7 @@ int main (int argc, char *argv[])
     outtree->Branch("KRETAver",&KRETAver,"KRETAver/C");
     outtree->Branch("EfieldMaxAbs",&EfieldMaxAbs,"EfieldMaxAbs/D");
     outtree->Branch("EfieldAvgAbs",&EfieldAvgAbs,"EfieldAvgAbs/D");
-    outtree->Branch("AzS",&AzS,"AzS/D");  // azimuth and zenith used for simulation
-    outtree->Branch("ZeS",&ZeS,"ZeS/D");
+
 
     // look for existing EW branches
     TObjArray* existingBranches = recTree->GetListOfBranches();
@@ -646,6 +640,11 @@ int main (int argc, char *argv[])
     outputEW<<"#sim id , eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
     outputNS<<"#sim id , eps0 , sigeps0,  R0 ,  sigR0 , chi2 , eps0_sim , sigeps0_sim , R0_sim , sigR0_sim , chi2_sim"<<endl;
 
+    ofstream checkDistanceEW("checkDistance_EW.dat");
+    ofstream checkDistanceNS("checkDistance_NS.dat");
+    checkDistanceEW<<"# id      Ant    dist sim    dist lopes  "<<endl;
+    checkDistanceNS<<"# id      Ant    dist sim    dist lopes  "<<endl;
+
     for(int i=0; i<entries; ++i) { //loop on the events
       for (int k=0; k < totAntenna; ++k) {
           *antPulses[k] = PulseProperties();
@@ -703,14 +702,14 @@ int main (int argc, char *argv[])
       if (simDictName!="") {
         int NantS=0;
         double EWfield=0.,NSfield=0.,VEfield=0.;
-        double distS=0.,azS=0.;
+        double distS=0.,azSREAS=0.,azS=0.,azimuth=0.,zenith=0.;
         double sim2lopesField=(2.9979246e+10/31.); //convert to muV/m/MHz and divide by the band-width
         double distanceS=0., distanceSerr=0.,showerCoord=0.;
         double dummy;
         double distanceR=0.;
 
-        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat";
-        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
+        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat";
+        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
         ifstream reasFile(reasFileName.c_str());
@@ -721,14 +720,17 @@ int main (int argc, char *argv[])
           continue;
         }
         // get simulation azimuth and zenith form dictionary
-        AzS = m_dictAz[Gt];
-        ZeS = m_dictZe[Gt];
         char buffer2[1024];
         while (reasFile.good()) {
           reasFile.getline(buffer2,1024);
           istringstream iss2 (buffer2);
           if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {//in sim file:az in reas sistem
-            iss2>>NantS>>distS>>azS>>NSfield>>EWfield>>VEfield>>dummy;
+            iss2>>NantS>>distS>>azSREAS>>NSfield>>EWfield>>VEfield>>dummy;
+            azS=(180./gradeg)-azSREAS; //convert to LOPES coordinates
+            while(azS<0.){
+            azS =+(360./gradeg);
+             }
+
             //look if antenna exists at all in data then separe EW and NS
             if (m_recPulses.find(NantS) != m_recPulses.end()) {
               // convert e-field to LOPES units
@@ -745,8 +747,10 @@ int main (int argc, char *argv[])
               }
               
               // direction used for lateral distance calculation
-              double azimuth = AzS/gradeg;
-              double zenith = ZeS/gradeg;
+              //values from KASCADE rec (same values given for the simulations!!!!)
+              //(Az=0 in the north! same as LOPES!)
+              azimuth = Az/gradeg; 
+              zenith = Ze/gradeg;
             
               if (m_recPulses[NantS].polarization == "EW") {
                 //cout<<"   xxxxxx   EW polarization   xxxxxx  "<<endl;
@@ -765,11 +769,12 @@ int main (int argc, char *argv[])
                   azimuth = AzL/gradeg;  // EW
                   zenith = (90.-ElL)/gradeg;
                 }  
-                //cout<<"az sim : "<< azS << " az data LOPES : " << azimuth <<" ze LOPES "<< zenith <<endl;
+                cout<<"az sim : "<< azS*gradeg << " az data LOPES : " << azimuth*gradeg <<" ze LOPES "<< zenith*gradeg <<endl;
                 showerCoord=sqrt(1.0 - pow(cos(azS-azimuth),2)*pow(sin(zenith),2));
                 distanceS=0.01*distS*showerCoord;                
                 if ((distanceS-distanceR)>(distanceS*0.05)) {
                   cout<<"WARNING: distance simulated EW channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
+                  checkDistanceEW<<m_dict[Gt]<<"\t"<<NantS<<"\t"<<distanceS<<"\t"<<distanceR<<endl;
                 }
                 
                 if (simulationDistances) 
@@ -793,14 +798,15 @@ int main (int argc, char *argv[])
                 distanceR=m_recNS[NantS].dist;
                 // calculate simulation distance for consistency check
                 if (!simulationDistances) { // overwrite direction with values of LOPES reconstruction
-                  azimuth = AzL_NS/gradeg;  // EW
+                  azimuth = AzL_NS/gradeg;  // NS
                   zenith = (90.-ElL_NS)/gradeg;
                 }  
-                //cout<<"az sim : "<< azS << " az data LOPES : " << azimuth <<" ze LOPES "<< zenith <<endl;
+                cout<<"az sim : "<< azS*gradeg<< " az data LOPES : " << azimuth*gradeg <<" ze LOPES "<< zenith*gradeg <<endl;
                 showerCoord=sqrt(1.0 - pow(cos(azS-azimuth),2)*pow(sin(zenith),2));
                 distanceS=0.01*distS*showerCoord;                
                 if ((distanceS-distanceR)>(distanceS*0.05)) {
                   cout<<"WARNING: distance simulated NS channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
+                  checkDistanceNS<<m_dict[Gt]<<"\t"<<NantS<<"\t"<<distanceS<<"\t"<<distanceR<<endl;
                 }
                 if (simulationDistances) 
                   simPropNS.dist =distanceS;
