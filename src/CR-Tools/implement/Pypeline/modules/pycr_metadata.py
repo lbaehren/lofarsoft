@@ -2,22 +2,12 @@
 """
 
 ## Imports
-#  Only import modules that are actually needed and avoid
-#  "from module import *" as much as possible to prevent name clashes.
 import pycrtools as hf
 import numpy as np
 import struct
 import os
 
-## Examples
-class ExampleClass():
-    """Class documentation"""
-
-    def __init__(self):
-        """Constructor"""
-        pass
-
-def station_phase_calibration_factors(station, antennaset):
+def stationPhaseCalibrationFactors(station, antennaset):
     """Read phase calibration data for a station.
 
     *station* station name or ID.
@@ -64,7 +54,6 @@ def station_phase_calibration_factors(station, antennaset):
     filename=LOFARSOFT+'/data/calibration/PhaseCalibration/CalTable_'+stationname+'_mode'+modenr+'.dat'
     file=open(filename)
 
-
     # reading in 96 * 512 * 2 doubles
     fmt='98304d'
     
@@ -87,21 +76,12 @@ def station_phase_calibration_factors(station, antennaset):
         
     return complexdata.transpose()
 
-## Executing a module should run doctests.
-#  This examines the docstrings of a module and runs the examples
-#  as a selftest for the module.
-#  See http://docs.python.org/library/doctest.html for more information.
-if __name__=='__main__':
-    import doctest
-    doctest.testmod()
+def getCableDelays(station,antennaset):
+    """ Get cable delays in s"""
 
-
-def get_cabledelays(station,antennaset):
-    """ Get cabledelays in s"""
     # LBA_OUTER = LBL
     # LBA_INNER = LBH
     # HBA = HBA
-
     if "LBA_OUTER" in antennaset:
         rcu_connection="LBL"
     elif "LBA_INNER" in antennaset:
@@ -116,13 +96,11 @@ def get_cabledelays(station,antennaset):
     cabfilename=LOFARSOFT+'/data/calibration/CableDelays/'+station+'-CableDelays.conf'
     cabfile=open(cabfilename)
    
-    
     cable_delays=np.zeros(96)
 
     str_line='' 
     while "RCUnr" not in str_line:
         str_line = cabfile.readline()
-
 
     str_line = cabfile.readline()
     for i in range(96):
@@ -137,8 +115,7 @@ def get_cabledelays(station,antennaset):
 
     return cable_delays
 
-
-def id_to_stationname(station_id):
+def idToStationName(station_id):
     """Returns the station name from a station_id
     The station_id is crfile["antennaIDs"]/1000000
     The station name is more commonly used to identify the station
@@ -173,11 +150,11 @@ def id_to_stationname(station_id):
 
     return station_name
 
-def get_antenna_positions(station,antennaset,return_as_hArray=False):
+def getAntennaPositions(station,antennaset,return_as_hArray=False):
     """Returns the antenna positions of all the antennas in the station
     relative to the station center for the specified antennaset. 
-    station can be the name or id of the station. Default returns as hArray. 
-    Option to return as numpy array.
+    station can be the name or id of the station. Default returns as numpy
+    array, option to return as hArray.
 
     *station*      Name or id of the station. e.g. "CS302" or 142
     *antennaset*   Antennaset used for this station. Options:
@@ -190,18 +167,17 @@ def get_antenna_positions(station,antennaset,return_as_hArray=False):
                    HBA_0
                    HBA_1
                    HBA
-    *return_as_numpy_array*  Return as numpy array. Default false, returns 
-    hArray
+    *return_as_hArray*  Return as hArray.
 
     Examples:
     >>> import pycr_metadata as md
     >>>
-    >>> ant_pos=md.get_antenna_positions(142,"LBA_INNER")
+    >>> ant_pos=md.get_antenna_positions(142,"LBA_INNER",True)
     >>> ant_pos
     hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
     
     
-    >>> ant_pos=md.get_antenna_positions("CS005","HBA",True)
+    >>> ant_pos=md.get_antenna_positions("CS005","HBA",False)
     >>> ant_pos 
     array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
            [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
@@ -214,7 +190,7 @@ def get_antenna_positions(station,antennaset,return_as_hArray=False):
     142
     >>> rcu_ids=np.mod(antenna_ids,1000)
     array([5, 8, 80])
-    >>> all_antenna_pos=md.get_antenna_positions(station_id,"LBA_INNER",True)
+    >>> all_antenna_pos=md.get_antenna_positions(station_id,"LBA_INNER",False)
     >>> used_antenna_pos=all_antenna_pos[rcu_ids]
     array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
            [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
@@ -222,57 +198,61 @@ def get_antenna_positions(station,antennaset,return_as_hArray=False):
     
     """
 
+    # Known antennasets
+    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE0', 'LBA_SPARSE1', 'HBA_0', 'HBA_1', 'HBA']
+
+    # Check if requested antennaset is known
+    assert antennaset in names
+
+    # Check station id type
+    assert isinstance(station, int): 
+
     # Convert a station id to a station name
-    if type(station)==type(1): # name is a station_id number
-        station=id_to_stationname(station)
+    station=id_to_stationname(station)
 
     # Obtain filename of antenna positions
     LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
-    antennafilename=LOFARSOFT+"data/calibration/AntennaArrays/"+station+"-AntennaArrays.conf"
+    filename=LOFARSOFT+"data/calibration/AntennaArrays/"+station+"-AntennaArrays.conf"
     
     # Open file
-    antfile = open(antennafilename,'r') 
-    antfile.seek(0)
-    str_line = ''
-   
-    # Check if antennaset equals HBA as else it will read out positions
-    # for HBA_0
-    onlyHBA=antennaset in "HBA"
-    # read lines in the file until the antenna set it found.
-    while antennaset not in str_line:
-        str_line = antfile.readline()
-        # Check if the HBA_0 and HBA_1 line should be skipped for the HBA mode
-        if onlyHBA:
-            if "HBA_0" in str_line:
-                str_line=""
-            elif "HBA_1" in str_line:
-                str_line=""
+    antfile = open(filename, 'r') 
 
-    str_line = antfile.readline()
-    str_line = antfile.readline()
-    nrantennas = str_line.split()[0]
-    nrdir = str_line.split()[4]
-    ant = []
-    for i in range(0,int(nrantennas)):
-        str_line=antfile.readline()
-        ant.extend([float(str_line.split()[0]),float(str_line.split()[1]),float(str_line.split()[2])])  #X polarization
-        ant.extend([float(str_line.split()[3]),float(str_line.split()[4]),float(str_line.split()[5])])  #Y polarization
-
-
+    # Find position of antennaset in file
+    str = ''
+    while antennaset != str.strip():
+        str = f.readline()
     
-    if return_as_hArray:
-        antenna_positions=hf.hArray(ant,[2*int(nrantennas),int(nrdir)])
-    else:
-        antenna_positions=np.array(ant)
-        antenna_positions.resize(2*int(nrantennas),int(nrdir))
-   
-    return antenna_positions
+    # Skip name and station reference position
+    str = f.readline()
+    str = f.readline()
 
-def get_clock_correction(station,time=1278480000):
+    # Get number of antennas and the number of directions
+    nrantennas = int(str.split()[0])
+    nrdir = int(str.split()[4])
+
+    antpos = []
+    for i in range(nrantennas):
+        line = f.readline().split()
+
+        # Odd numbered antennas
+        antpos.append([float(line[0]),float(line[1]),float(line[2])])
+
+        # Even numbered antennas
+        antpos.append([float(line[3]),float(line[4]),float(line[5])])
+   
+    # Return requested type
+    if return_as_hArray:
+        antpos=hf.hArray(antpos,[2*int(nrantennas),int(nrdir)])
+    else:
+        antpos=np.asrray(antpos).reshape(2*int(nrantennas),int(nrdir))
+   
+    return antpos
+
+def getClockCorrection(station,time=1278480000):
     """Get clock correction for superterp stations in seconds. Currently static values.
     
-    *station*  Station name or number for which to get the correction.
-    *time   *  Optional. Linux time of observation. As clocks drift the value from the correct time should be given. Not yet implemented.
+    *station* Station name or number for which to get the correction.
+    *time* Optional. Linux time of observation. As clocks drift the value from the correct time should be given. Not yet implemented.
     """
     # Convert a station id to a station name
     if type(station)==type(1): # name is a station_id number
@@ -291,3 +271,12 @@ def get_clock_correction(station,time=1278480000):
     else:
         print "NO VALUE FOUND IN THE DATABASE"
         return 0
+
+## Executing a module should run doctests.
+#  This examines the docstrings of a module and runs the examples
+#  as a selftest for the module.
+#  See http://docs.python.org/library/doctest.html for more information.
+if __name__=='__main__':
+    import doctest
+    doctest.testmod()
+
