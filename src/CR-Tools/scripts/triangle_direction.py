@@ -130,4 +130,14 @@ def testDirectionCalculationForThreeAntennas(positions):
                 print 'Wrong value for az: ' + str(az*rad2deg) + ' calculated: ' +str(calc_az * rad2deg) + ' or: ' + str(calc_az2 * rad2deg)
                 print 'el: ' + str(el*rad2deg) + ' calculated: ' + str(calc_el * rad2deg) + ' or: ' + str(calc_el2 * rad2deg)
 
+print 'Calculate arrival direction from time delays in 3 points in space'
+print 'Usage: give positions in a list or array of 9 numbers x,y,z,x,y,z,x,y,z.'
+print 'A direction in [az, el] (radians) can be given, then time delays follow from:'
+print '    timeDelaysFromDirection(positions, direction)'
+print 'Given a set of time delays, the direction can be calculated using: '
+print '    directionFromThreeAntennas(positions, times) '
+print 'A full-sky test can be run using: '
+print '    testDirectionCalculationForThreeAntennas(positions)'
+print 'which does these two steps for many (grid)points on the sky, and checks if the results match.'
+print 'Some errors may come up in this, because of floating point roundoff and mod-2pi issues. '
     
