@@ -43,18 +43,18 @@ namespace ttl
     /*!
       \brief Get world coordinates for given vector of pixel coordinates
 
-      @param world begin itterator for world coordinate array
-      @param world_end end itterator for world coordinate array
-      @param pixel begin itterator for pixel coordinate array
-      @param pixel_end end itterator for pixel coordinate array
-      @param refcode reference code for coordinate system e.g. AZEL,J2000,...
-      @param projection the projection used e.g. SIN,STG,...
-      @param refLong reference value for longtitude (CRVAL)
-      @param refLat reference value for latitude (CRVAL)
-      @param incLon increment value for longtitude (CDELT)
-      @param incLat increment value for latitude (CDELT)
-      @param refX reference x pixel (CRPIX)
-      @param refY reference y pixel (CRPIX)
+      \param world begin itterator for world coordinate array
+      \param world_end end itterator for world coordinate array
+      \param pixel begin itterator for pixel coordinate array
+      \param pixel_end end itterator for pixel coordinate array
+      \param refcode reference code for coordinate system e.g. AZEL,J2000,...
+      \param projection the projection used e.g. SIN,STG,...
+      \param refLong reference value for longtitude (CRVAL)
+      \param refLat reference value for latitude (CRVAL)
+      \param incLon increment value for longtitude (CDELT)
+      \param incLat increment value for latitude (CDELT)
+      \param refX reference x pixel (CRPIX)
+      \param refY reference y pixel (CRPIX)
      */
     template <class Iter>
       bool toWorld(const Iter world, const Iter world_end,
@@ -137,18 +137,18 @@ namespace ttl
     /*!
       \brief Get pixel coordinates for given vector of world coordinates
 
-      @param pixel begin itterator for pixel coordinate array
-      @param pixel_end end itterator for pixel coordinate array
-      @param world begin itterator for world coordinate array
-      @param world_end end itterator for world coordinate array
-      @param refcode reference code for coordinate system e.g. AZEL,J2000,...
-      @param projection the projection used e.g. SIN,STG,...
-      @param refLong reference value for longtitude (CRVAL)
-      @param refLat reference value for latitude (CRVAL)
-      @param incLon increment value for longtitude (CDELT)
-      @param incLat increment value for latitude (CDELT)
-      @param refX reference x pixel (CRPIX)
-      @param refY reference y pixel (CRPIX)
+      \param pixel begin itterator for pixel coordinate array
+      \param pixel_end end itterator for pixel coordinate array
+      \param world begin itterator for world coordinate array
+      \param world_end end itterator for world coordinate array
+      \param refcode reference code for coordinate system e.g. AZEL,J2000,...
+      \param projection the projection used e.g. SIN,STG,...
+      \param refLong reference value for longtitude (CRVAL)
+      \param refLat reference value for latitude (CRVAL)
+      \param incLon increment value for longtitude (CDELT)
+      \param incLat increment value for latitude (CDELT)
+      \param refX reference x pixel (CRPIX)
+      \param refY reference y pixel (CRPIX)
      */
     template <class Iter>
       bool toPixel(const Iter pixel, const Iter pixel_end,
@@ -226,6 +226,31 @@ namespace ttl
 
         // Conversion successfull
         return true;
+      }
+
+    /*!
+      \brief Given an array of (az, el, r, az, el, r, ...) coordinates
+      return an array of (x, y, z, x, y, z, ...) coordinates.
+     */
+    template <class Iter>
+      void azElRadius2Cartesian(Iter out, Iter out_end,
+                                Iter in, Iter in_end,
+                                bool anglesInDegrees)
+      {
+        // Get iterators
+        Iter out_it=out;
+        Iter in_it=in;
+
+        // Loop over coordinates
+        while (out_it!=out_end && in_it!=in_end)
+        {
+          *out_it     = *(in_it+2)*cos(*(in_it+1))*sin(*in_it);
+          *(out_it+1) = *(in_it+2)*cos(*(in_it+1))*cos(*in_it);
+          *(out_it+2) = *(in_it+2)*sin(*(in_it+1));
+
+          in_it=in_it+3;
+          out_it=out_it+3;
+        }
       }
   } // End coordinates
 } // End ttl

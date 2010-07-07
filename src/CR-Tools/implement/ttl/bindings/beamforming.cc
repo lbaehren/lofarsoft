@@ -35,32 +35,37 @@ namespace ttl
   namespace bindings
   {
 
-  double phase(const double &frequency, const double &time)
-  {
-    return ttl::beamforming::phase(frequency, time);
-  }
+    double phase(const double &frequency, const double &time)
+    {
+      return ttl::beamforming::phase(frequency, time);
+    }
 
-  double geometricDelayFarField(boost::python::numeric::array antPosition, boost::python::numeric::array skyDirection, const double length)
-  {
-    return ttl::beamforming::geometricDelayFarField(ttl::numpyBeginPtr<double>(antPosition), ttl::numpyBeginPtr<double>(skyDirection), length);
-  }
+    double geometricDelayFarField(boost::python::numeric::array antPosition, boost::python::numeric::array skyDirection, const double length)
+    {
+      return ttl::beamforming::geometricDelayFarField(ttl::numpyBeginPtr<double>(antPosition), ttl::numpyBeginPtr<double>(skyDirection), length);
+    }
 
-  double geometricDelayNearField(boost::python::numeric::array antPosition, boost::python::numeric::array skyPosition, const double distance)
-  {
-    return ttl::beamforming::geometricDelayNearField(ttl::numpyBeginPtr<double>(antPosition), ttl::numpyBeginPtr<double>(skyPosition), distance);
-  }
+    double geometricDelayNearField(boost::python::numeric::array antPosition, boost::python::numeric::array skyPosition, const double distance)
+    {
+      return ttl::beamforming::geometricDelayNearField(ttl::numpyBeginPtr<double>(antPosition), ttl::numpyBeginPtr<double>(skyPosition), distance);
+    }
 
-  void geometricDelays(boost::python::numeric::array delays, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
-  {
-    ttl::beamforming::geometricDelays(ttl::numpyBeginPtr<double>(delays), ttl::numpyEndPtr<double>(delays), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
-  }
+    void geometricDelays(boost::python::numeric::array delays, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
+    {
+      ttl::beamforming::geometricDelays(ttl::numpyBeginPtr<double>(delays), ttl::numpyEndPtr<double>(delays), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
+    }
 
-  void geometricPhases(boost::python::numeric::array phases, boost::python::numeric::array frequencies, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
-  {
-    ttl::beamforming::geometricPhases(ttl::numpyBeginPtr<double>(phases), ttl::numpyEndPtr<double>(phases), ttl::numpyBeginPtr<double>(frequencies), ttl::numpyEndPtr<double>(frequencies), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
-  }
+    void geometricPhases(boost::python::numeric::array phases, boost::python::numeric::array frequencies, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
+    {
+      ttl::beamforming::geometricPhases(ttl::numpyBeginPtr<double>(phases), ttl::numpyEndPtr<double>(phases), ttl::numpyBeginPtr<double>(frequencies), ttl::numpyEndPtr<double>(frequencies), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
+    }
 
-  }// End bindings
+    void geometricWeights(boost::python::numeric::array weights, boost::python::numeric::array frequencies, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
+    {
+      ttl::beamforming::geometricWeights(ttl::numpyBeginPtr< std::complex<double> >(weights), ttl::numpyEndPtr< std::complex<double> >(weights), ttl::numpyBeginPtr<double>(frequencies), ttl::numpyEndPtr<double>(frequencies), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
+    }
+
+  } // End bindings
 } // End ttl
 
 BOOST_PYTHON_MODULE(beamforming)
@@ -70,9 +75,11 @@ BOOST_PYTHON_MODULE(beamforming)
 
   using namespace boost::python;
 
-  def("phase", ttl::bindings::phase, "Returns the interferometer phase in radians for a given\n      frequency and time.\n\n  *&frequency* \n  *&time* \n");
-  def("geometricDelayFarField", ttl::bindings::geometricDelayFarField, "Calculates the time delay in seconds for a signal received at\n      an antenna position relative to a phase center from a source located\n      in a certain direction in farfield.\n\n  *antPosition* \n  *skyDirection* \n  *length* \n");
-  def("geometricDelayNearField", ttl::bindings::geometricDelayNearField, "Calculates the time delay in seconds for a signal received at\n      an antenna position relative to a phase center from a source located\n      at a certain 3D space coordinate in nearfield.\n\n  *antPosition* \n  *skyPosition* \n  *distance* \n");
-  def("geometricDelays", ttl::bindings::geometricDelays, "Calculates the time delay in seconds for signals received at\n      various antenna positions relative to a phase center from sources\n      located at certain 3D space coordinates in near or far field.\n\n  *delays* \n  *delays_end* \n  *antPositions* \n  *antPositions_end* \n  *skyPositions* \n  *skyPositions_end* \n  *farfield* \n");
-  def("geometricPhases", ttl::bindings::geometricPhases, "Calculates the phase gradients for signals received at various\n      antenna positions relative to a phase center from sources located at\n      certain 3D space coordinates in near or far field and for differentfrequencies.\n\n  *phases* \n  *phases_end* \n  *frequencies* \n  *frequencies_end* \n  *antPositions* \n  *antPositions_end* \n  *skyPositions* \n  *skyPositions_end* \n  *farfield* \n");
+  def("phase", ttl::bindings::phase, "Returns the interferometer phase in radians for a given\n      frequency and time.\n\n*&frequency* \n*&time* \n");
+  def("geometricDelayFarField", ttl::bindings::geometricDelayFarField, "Calculates the time delay in seconds for a signal received at\n      an antenna position relative to a phase center from a source located\n      in a certain direction in farfield.\n\n*antPosition* \n*skyDirection* \n*length* \n");
+  def("geometricDelayNearField", ttl::bindings::geometricDelayNearField, "Calculates the time delay in seconds for a signal received at\n      an antenna position relative to a phase center from a source located\n      at a certain 3D space coordinate in nearfield.\n\n*antPosition* \n*skyPosition* \n*distance* \n");
+  def("geometricDelays", ttl::bindings::geometricDelays, "Calculates the time delay in seconds for signals received at\n      various antenna positions relative to a phase center from sources\n      located at certain 3D space coordinates in near or far field.\n\n*delays* \n*delays_end* \n*antPositions* \n*antPositions_end* \n*skyPositions* \n*skyPositions_end* \n*farfield* \n");
+  def("geometricPhases", ttl::bindings::geometricPhases, "Calculates the phase gradients for signals received at various\n      antenna positions relative to a phase center from sources located at\n      certain 3D space coordinates in near or far field and for differentfrequencies.\n\n*phases* \n*phases_end* \n*frequencies* \n*frequencies_end* \n*antPositions* \n*antPositions_end* \n*skyPositions* \n*skyPositions_end* \n*farfield* \n");
+  def("geometricWeights", ttl::bindings::geometricWeights, "Calculates the phase gradients as complex weights for signals\n      received at various antenna positions relative to a phase center from\n      sources located at certain 3D space coordinates in near or far field\n      and for different frequencies.\n\n*weights* \n*weights_end* \n*frequencies* \n*frequencies_end* \n*antPositions* \n*antPositions_end* \n*skyPositions* \n*skyPositions_end* \n*farfield* \n");
 }
+

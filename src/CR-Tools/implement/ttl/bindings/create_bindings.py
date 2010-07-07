@@ -22,6 +22,26 @@ import re
 import xml.dom.minidom
 from optparse import OptionParser
 
+def indent(incode, indent='', addindent='  '):
+    """Indent code (default 2 spaces)."""
+
+    outcode=""
+
+    level = 0
+    for line in code.split('\n'):
+        if line.strip()=='':
+            outcode+='\n'
+        elif line.lstrip()[0]=='{':
+            outcode+=indent+level*addindent+line+'\n'
+            level+=1
+        elif level>0 and line.lstrip()[0]=='}':
+            level-=1
+            outcode+=indent+level*addindent+line+'\n'
+        else:
+            outcode+=indent+level*addindent+line+'\n'
+
+    return outcode
+
 def parse_file(f):
     """Parse header file with template functions to XML DOM.
     """
@@ -167,7 +187,7 @@ def parse_file(f):
 
     return dom
 
-def elementToCode(node, namespace='', indent='  ', addindent='  '):
+def elementToCode(node, namespace=''):
     """Recursively move through all child elements of *node* and output C++ wrapper code."""
 
     code = ""
@@ -184,7 +204,7 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
         ftype=re.sub('T', 'double', ftype)
 
         # Add start of function definition (e.g. '  void f(')
-        code+=indent+ftype+' '+fname+'('
+        code+=ftype+' '+fname+'('
         
         # Add function arguments
         if node.hasChildNodes():
@@ -243,13 +263,13 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
                         code+=', '
 
         # Add function opening
-        code+=')'+'\n'+indent+'{\n'
+        code+=')'+'\n'+'{\n'
 
         # Add TTL function call
         if ftype == 'void':
-            code+=indent+addindent+namespace+fname+'('
+            code+=namespace+fname+'('
         else:
-            code+=indent+addindent+'return '+namespace+fname+'('
+            code+='return '+namespace+fname+'('
 
         # Add TTL function call arguments
         if node.hasChildNodes():
@@ -276,7 +296,10 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
                 if nextarg and re.search(name,nextarg.getAttribute('name')) and re.search('Iter',nextarg.getAttribute('type')):
                     # Wrap input numpy ndarray with functions to get
                     # the begin and end iterators
-                    code+='ttl::numpyBeginPtr<double>('+name.strip()+'), ttl::numpyEndPtr<double>('+name.strip()+')'
+                    if re.search('CIter', type):
+                        code+='ttl::numpyBeginPtr< std::complex<double> >('+name.strip()+'), ttl::numpyEndPtr< std::complex<double> >('+name.strip()+')'
+                    else:
+                        code+='ttl::numpyBeginPtr<double>('+name.strip()+'), ttl::numpyEndPtr<double>('+name.strip()+')'
 
                     # Add ',' between parameters
                     if len(arguments)>1:
@@ -294,7 +317,10 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
                 elif re.search('Iter', type):
                     # Wrap input numpy ndarray with functions to get
                     # the begin iterator
-                    code+='ttl::numpyBeginPtr<double>('+name.strip()+')'
+                    if re.search('CIter', type):
+                        code+='ttl::numpyBeginPtr< std::complex<double> >('+name.strip()+')'
+                    else:
+                        code+='ttl::numpyBeginPtr<double>('+name.strip()+')'
 
                     # Add ',' between parameters
                     if len(arguments)>=1:
@@ -316,7 +342,7 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
         code+=')'+';\n'
 
         # Add function closing
-        code+=indent+'}\n\n'
+        code+='}\n\n'
 
     # Recursively move through the list
     if node.hasChildNodes():
@@ -329,7 +355,6 @@ def elementToCode(node, namespace='', indent='  ', addindent='  '):
 def elementToBoostWrapper(node, module=''):
     """Recursively move through all child elements of *node* and output Boost Python wrapper wrap."""
 
-    indent = '  '
     wrap = ""
 
     # Check for namespace
@@ -338,17 +363,17 @@ def elementToBoostWrapper(node, module=''):
         wrap += 'BOOST_PYTHON_MODULE('+node.getAttribute('name')+')\n{\n'
     
         # Add num_util directives
-        wrap += indent+'import_array();\n'
-        wrap += indent+'boost::python::numeric::array::set_module_and_type("numpy", "ndarray");\n\n'
+        wrap += 'import_array();\n'
+        wrap += 'boost::python::numeric::array::set_module_and_type("numpy", "ndarray");\n\n'
     
         # Add Boost python namespace
-        wrap += indent+'using namespace boost::python;\n\n'
+        wrap += 'using namespace boost::python;\n\n'
   
     elif node.nodeName == 'function':
         # Add function wrapper with correct namespace
         fname = node.getAttribute('name')
 
-        wrap+=indent+'def("'+fname+'", ttl::bindings::'+fname
+        wrap+='def("'+fname+'", ttl::bindings::'+fname
 
         # Get function docstring
         docstring = node.getAttribute('docstring').strip()+'\n\n'
@@ -360,7 +385,7 @@ def elementToBoostWrapper(node, module=''):
 
             for arg in arguments:
                 # Construct docstring for argument
-                docstring+=indent+'*'+arg.getAttribute('name')+'* '+arg.getAttribute('docstring').strip()+'\n'
+                docstring+='*'+arg.getAttribute('name')+'* '+arg.getAttribute('docstring').strip()+'\n'
 
         # Replace newline by literal '\n' in code
         docstring = re.sub('\n',r'\\n', docstring)
@@ -471,15 +496,21 @@ if options.xml:
     xml = open(options.outdir+'/'+args[0].split('/')[-1].rstrip('h')+'xml', 'w')
     dom.writexml(xml, indent="  ", addindent="  ", newl="\n")
 
+# Add code
+code=""
+
 # Open namespace
-out.write("namespace ttl\n{\n  namespace bindings\n  {\n\n")
+code+='namespace ttl\n{\n'+'namespace bindings\n{\n\n'
 
 # Write code
-out.write(elementToCode(dom, indent='    ')[0])
+code+=elementToCode(dom)[0]
 
 # Close namespace
-out.write("  }// End bindings\n} // End ttl\n\n")
+code+='} // End bindings\n} // End ttl\n\n'
 
 # Write wrappers
-out.write(elementToBoostWrapper(dom)[0])
+code+=elementToBoostWrapper(dom)[0]
+
+# Indent code and write to file
+out.write(indent(code))
 

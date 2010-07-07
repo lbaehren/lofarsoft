@@ -207,72 +207,72 @@ namespace ttl
         };
       }
 
-//    /*!
-//      \brief Calculates the phase gradients as complex weights for signals
-//      received at various antenna positions relative to a phase center from
-//      sources located at certain 3D space coordinates in near or far field
-//      and for different frequencies.
-//    */
-//    template <class CIter, class Iter>
-//      void geometricWeights(const CIter weights,
-//                            const CIter weights_end,
-//                            const Iter frequencies,
-//                            const Iter frequencies_end,
-//                            const Iter antPositions,
-//                            const Iter antPositions_end,
-//                            const Iter skyPositions,
-//                            const Iter skyPositions_end,
-//                            const bool farfield
-//                            )
-//      {
-//        double distance;
-//        Iter
-//          ant,
-//          freq,
-//          sky=skyPositions,
-//          ant_end=antPositions_end-2,
-//          sky_end=skyPositions_end-2;
-//        CIter weight=weights;
-//
-//        if (farfield)
-//        {
-//          while (sky < sky_end && weight < weights_end)
-//          {
-//            distance = math::norm(sky,sky+3);
-//            ant=antPositions;
-//            while (ant < ant_end && weight < weights_end)
-//            {
-//              freq=frequencies;
-//              while (freq < frequencies_end && weight < weights_end)
-//              {
-//                *weight=exp(std::complex<double>(0.0,phase(*freq,geometricDelayFarField(ant,antPositions_end,sky,skyPositions_end,distance))));
-//                ++weight; ++freq;
-//              };
-//              ant+=3;
-//            };
-//            sky+=3;
-//          };
-//        }
-//        else
-//        {
-//          while (sky < sky_end && weight < weights_end)
-//          {
-//            distance = math::norm(sky,sky+3);
-//            ant=antPositions;
-//            while (ant < ant_end && weight < weights_end)
-//            {
-//              freq=frequencies;
-//              while (freq < frequencies_end && weight < weights_end)
-//              {
-//                *weight=exp(std::complex<double>(0.0,phase(*freq,geometricDelayNearField(ant,antPositions_end,sky,skyPositions_end,distance))));
-//                ++weight; ++freq;
-//              };
-//              ant+=3;
-//            };
-//            sky+=3;
-//          };
-//        };
-//      }
+    /*!
+      \brief Calculates the phase gradients as complex weights for signals
+      received at various antenna positions relative to a phase center from
+      sources located at certain 3D space coordinates in near or far field
+      and for different frequencies.
+    */
+    template <class CIter, class Iter>
+      void geometricWeights(const CIter weights,
+                            const CIter weights_end,
+                            const Iter frequencies,
+                            const Iter frequencies_end,
+                            const Iter antPositions,
+                            const Iter antPositions_end,
+                            const Iter skyPositions,
+                            const Iter skyPositions_end,
+                            const bool farfield
+                            )
+      {
+        double distance;
+        Iter
+          ant,
+          freq,
+          sky=skyPositions,
+          ant_end=antPositions_end-2,
+          sky_end=skyPositions_end-2;
+        CIter weight=weights;
+
+        if (farfield)
+        {
+          while (sky < sky_end && weight < weights_end)
+          {
+            distance = math::norm(sky,sky+3);
+            ant=antPositions;
+            while (ant < ant_end && weight < weights_end)
+            {
+              freq=frequencies;
+              while (freq < frequencies_end && weight < weights_end)
+              {
+                *weight=exp(std::complex<double>(0.0,phase(*freq,geometricDelayFarField(ant,sky,distance))));
+                ++weight; ++freq;
+              };
+              ant+=3;
+            };
+            sky+=3;
+          };
+        }
+        else
+        {
+          while (sky < sky_end && weight < weights_end)
+          {
+            distance = math::norm(sky,sky+3);
+            ant=antPositions;
+            while (ant < ant_end && weight < weights_end)
+            {
+              freq=frequencies;
+              while (freq < frequencies_end && weight < weights_end)
+              {
+                *weight=exp(std::complex<double>(0.0,phase(*freq,geometricDelayNearField(ant,sky,distance))));
+                ++weight; ++freq;
+              };
+              ant+=3;
+            };
+            sky+=3;
+          };
+        };
+      }
   } // End beamforming
 } // End ttl
 

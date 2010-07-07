@@ -35,17 +35,22 @@ namespace ttl
   namespace bindings
   {
 
-  bool toWorld(boost::python::numeric::array world, boost::python::numeric::array pixel, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
-  {
-    return ttl::coordinates::toWorld(ttl::numpyBeginPtr<double>(world), ttl::numpyEndPtr<double>(world), ttl::numpyBeginPtr<double>(pixel), ttl::numpyEndPtr<double>(pixel), refcode, projection, refLong, refLat, incLong, incLat, refX, refY);
-  }
+    bool toWorld(boost::python::numeric::array world, boost::python::numeric::array pixel, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
+    {
+      return ttl::coordinates::toWorld(ttl::numpyBeginPtr<double>(world), ttl::numpyEndPtr<double>(world), ttl::numpyBeginPtr<double>(pixel), ttl::numpyEndPtr<double>(pixel), refcode, projection, refLong, refLat, incLong, incLat, refX, refY);
+    }
 
-  bool toPixel(boost::python::numeric::array pixel, boost::python::numeric::array world, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
-  {
-    return ttl::coordinates::toPixel(ttl::numpyBeginPtr<double>(pixel), ttl::numpyEndPtr<double>(pixel), ttl::numpyBeginPtr<double>(world), ttl::numpyEndPtr<double>(world), refcode, projection, refLong, refLat, incLong, incLat, refX, refY);
-  }
+    bool toPixel(boost::python::numeric::array pixel, boost::python::numeric::array world, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
+    {
+      return ttl::coordinates::toPixel(ttl::numpyBeginPtr<double>(pixel), ttl::numpyEndPtr<double>(pixel), ttl::numpyBeginPtr<double>(world), ttl::numpyEndPtr<double>(world), refcode, projection, refLong, refLat, incLong, incLat, refX, refY);
+    }
 
-  }// End bindings
+    void azElRadius2Cartesian(boost::python::numeric::array out, boost::python::numeric::array in, bool anglesInDegrees)
+    {
+      ttl::coordinates::azElRadius2Cartesian(ttl::numpyBeginPtr<double>(out), ttl::numpyEndPtr<double>(out), ttl::numpyBeginPtr<double>(in), ttl::numpyEndPtr<double>(in), anglesInDegrees);
+    }
+
+  } // End bindings
 } // End ttl
 
 BOOST_PYTHON_MODULE(coordinates)
@@ -55,6 +60,8 @@ BOOST_PYTHON_MODULE(coordinates)
 
   using namespace boost::python;
 
-  def("toWorld", ttl::bindings::toWorld, "Get world coordinates for given vector of pixel coordinates\n\n      @param world begin itterator for world coordinate array\n      @param world_end end itterator for world coordinate array\n      @param pixel begin itterator for pixel coordinate array\n      @param pixel_end end itterator for pixel coordinate array\n      @param refcode reference code for coordinate system e.g. AZEL,J2000,...\n      @param projection the projection used e.g. SIN,STG,...\n      @param refLong reference value for longtitude (CRVAL)\n      @param refLat reference value for latitude (CRVAL)\n      @param incLon increment value for longtitude (CDELT)\n      @param incLat increment value for latitude (CDELT)\n      @param refX reference x pixel (CRPIX)\n      @param refY reference y pixel (CRPIX)\n\n  *world* \n  *world_end* \n  *pixel* \n  *pixel_end* \n  *refcode* \n  *projection* \n  *refLong* \n  *refLat* \n  *incLong* \n  *incLat* \n  *refX* \n  *refY* \n");
-  def("toPixel", ttl::bindings::toPixel, "Get pixel coordinates for given vector of world coordinates\n\n      @param pixel begin itterator for pixel coordinate array\n      @param pixel_end end itterator for pixel coordinate array\n      @param world begin itterator for world coordinate array\n      @param world_end end itterator for world coordinate array\n      @param refcode reference code for coordinate system e.g. AZEL,J2000,...\n      @param projection the projection used e.g. SIN,STG,...\n      @param refLong reference value for longtitude (CRVAL)\n      @param refLat reference value for latitude (CRVAL)\n      @param incLon increment value for longtitude (CDELT)\n      @param incLat increment value for latitude (CDELT)\n      @param refX reference x pixel (CRPIX)\n      @param refY reference y pixel (CRPIX)\n\n  *pixel* \n  *pixel_end* \n  *world* \n  *world_end* \n  *refcode* \n  *projection* \n  *refLong* \n  *refLat* \n  *incLong* \n  *incLat* \n  *refX* \n  *refY* \n");
+  def("toWorld", ttl::bindings::toWorld, "Get world coordinates for given vector of pixel coordinates\n\n*world* begin itterator for world coordinate array\n*world_end* end itterator for world coordinate array\n*pixel* begin itterator for pixel coordinate array\n*pixel_end* end itterator for pixel coordinate array\n*refcode* reference code for coordinate system e.g. AZEL,J2000,...\n*projection* the projection used e.g. SIN,STG,...\n*refLong* reference value for longtitude (CRVAL)\n*refLat* reference value for latitude (CRVAL)\n*incLong* \n*incLat* increment value for latitude (CDELT)\n*refX* reference x pixel (CRPIX)\n*refY* reference y pixel (CRPIX)\n");
+  def("toPixel", ttl::bindings::toPixel, "Get pixel coordinates for given vector of world coordinates\n\n*pixel* begin itterator for pixel coordinate array\n*pixel_end* end itterator for pixel coordinate array\n*world* begin itterator for world coordinate array\n*world_end* end itterator for world coordinate array\n*refcode* reference code for coordinate system e.g. AZEL,J2000,...\n*projection* the projection used e.g. SIN,STG,...\n*refLong* reference value for longtitude (CRVAL)\n*refLat* reference value for latitude (CRVAL)\n*incLong* \n*incLat* increment value for latitude (CDELT)\n*refX* reference x pixel (CRPIX)\n*refY* reference y pixel (CRPIX)\n");
+  def("azElRadius2Cartesian", ttl::bindings::azElRadius2Cartesian, "Given an array of (az, el, r, az, el, r, ...) coordinates\n      return an array of (x, y, z, x, y, z, ...) coordinates.\n\n*out* \n*out_end* \n*in* \n*in_end* \n*anglesInDegrees* \n");
 }
+
