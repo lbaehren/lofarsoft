@@ -150,7 +150,7 @@ def idToStationName(station_id):
 
     return station_name
 
-def getAntennaPositions(station,antennaset,return_as_hArray=False):
+def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
     """Returns the antenna positions of all the antennas in the station
     relative to the station center for the specified antennaset. 
     station can be the name or id of the station. Default returns as numpy
