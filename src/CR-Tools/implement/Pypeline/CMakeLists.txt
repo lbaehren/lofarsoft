@@ -28,6 +28,7 @@ set (PYPELINE_SCRIPTS
   testcrab.py
   testimageCrab2.py
   testseti.py
+  testimager.py
   crab_pulse_image.py
   hfplot.py
   pycrinit.py
