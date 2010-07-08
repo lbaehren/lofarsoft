@@ -1,7 +1,14 @@
 ## ------------------------------------------------------------------------------
 ## Tests
 
-add_executable (tgetgrid tgetgrid.cc)
+set (TESTS
+    tgetgrid
+    tconvert
+    )
 
-target_link_libraries (tgetgrid ${cr_link_libraries}) 
+foreach (TEST ${TESTS})
+    add_executable (${TEST} ${TEST}.cc)
+    
+    target_link_libraries (${TEST} ${cr_link_libraries}) 
+endforeach (TEST)
 

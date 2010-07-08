@@ -32,8 +32,8 @@
 
 namespace ttl
 {
-  namespace bindings
-  {
+    namespace bindings
+    {
 
     double phase(const double &frequency, const double &time)
     {
@@ -47,30 +47,30 @@ namespace ttl
 
     double geometricDelayFarField(boost::python::numeric::array antPosition, boost::python::numeric::array skyDirection, const double length)
     {
-      return ttl::beamforming::geometricDelayFarField(ttl::numpyBeginPtr<double>(antPosition), ttl::numpyBeginPtr<double>(skyDirection), length);
+      return ttl::beamforming::geometricDelayFarField(ttl::numpyBeginPtr<TYPE0>(antPosition), ttl::numpyBeginPtr<TYPE1>(skyDirection), length);
     }
 
     double geometricDelayNearField(boost::python::numeric::array antPosition, boost::python::numeric::array skyPosition, const double distance)
     {
-      return ttl::beamforming::geometricDelayNearField(ttl::numpyBeginPtr<double>(antPosition), ttl::numpyBeginPtr<double>(skyPosition), distance);
+      return ttl::beamforming::geometricDelayNearField(ttl::numpyBeginPtr<TYPE0>(antPosition), ttl::numpyBeginPtr<TYPE1>(skyPosition), distance);
     }
 
     void geometricDelays(boost::python::numeric::array delays, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
     {
-      ttl::beamforming::geometricDelays(ttl::numpyBeginPtr<double>(delays), ttl::numpyEndPtr<double>(delays), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
+      ttl::beamforming::geometricDelays(ttl::numpyBeginPtr<TYPE0>(delays), ttl::numpyEndPtr<TYPE0>(delays), ttl::numpyBeginPtr<TYPE1>(antPositions), ttl::numpyEndPtr<TYPE1>(antPositions), ttl::numpyBeginPtr<TYPE2>(skyPositions), ttl::numpyEndPtr<TYPE2>(skyPositions), farfield);
     }
 
     void geometricPhases(boost::python::numeric::array phases, boost::python::numeric::array frequencies, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
     {
-      ttl::beamforming::geometricPhases(ttl::numpyBeginPtr<double>(phases), ttl::numpyEndPtr<double>(phases), ttl::numpyBeginPtr<double>(frequencies), ttl::numpyEndPtr<double>(frequencies), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
+      ttl::beamforming::geometricPhases(ttl::numpyBeginPtr<TYPE0>(phases), ttl::numpyEndPtr<TYPE0>(phases), ttl::numpyBeginPtr<TYPE1>(frequencies), ttl::numpyEndPtr<TYPE1>(frequencies), ttl::numpyBeginPtr<TYPE2>(antPositions), ttl::numpyEndPtr<TYPE2>(antPositions), ttl::numpyBeginPtr<TYPE3>(skyPositions), ttl::numpyEndPtr<TYPE3>(skyPositions), farfield);
     }
 
     void geometricWeights(boost::python::numeric::array weights, boost::python::numeric::array frequencies, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
     {
-      ttl::beamforming::geometricWeights(ttl::numpyBeginPtr< std::complex<double> >(weights), ttl::numpyEndPtr< std::complex<double> >(weights), ttl::numpyBeginPtr<double>(frequencies), ttl::numpyEndPtr<double>(frequencies), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
+      ttl::beamforming::geometricWeights(ttl::numpyBeginPtr<TYPE0>(weights), ttl::numpyEndPtr<TYPE0>(weights), ttl::numpyBeginPtr<TYPE1>(frequencies), ttl::numpyEndPtr<TYPE1>(frequencies), ttl::numpyBeginPtr<TYPE2>(antPositions), ttl::numpyEndPtr<TYPE2>(antPositions), ttl::numpyBeginPtr<TYPE3>(skyPositions), ttl::numpyEndPtr<TYPE3>(skyPositions), farfield);
     }
 
-  } // End bindings
+    } // End bindings
 } // End ttl
 
 BOOST_PYTHON_MODULE(beamforming)

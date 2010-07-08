@@ -42,6 +42,14 @@ def indent(incode, indent='', addindent='  '):
 
     return outcode
 
+def insertTypes(template, argtypes, block=""):
+    """Insert types into function call template."""
+
+    if len(argtypes)==1:
+
+    else:
+        return insertTypes(template, argtypes, block)
+
 def parse_file(f):
     """Parse header file with template functions to XML DOM.
     """
@@ -265,11 +273,16 @@ def elementToCode(node, namespace=''):
         # Add function opening
         code+=')'+'\n'+'{\n'
 
+        # Store function call placeholder to loop over types
+        placeholder=""
+        argtypes=[]
+        iarg=0
+
         # Add TTL function call
         if ftype == 'void':
-            code+=namespace+fname+'('
+            placeholder+=namespace+fname+'('
         else:
-            code+='return '+namespace+fname+'('
+            placeholder+='return '+namespace+fname+'('
 
         # Add TTL function call arguments
         if node.hasChildNodes():
@@ -294,16 +307,23 @@ def elementToCode(node, namespace=''):
 
                 # First check if we have a begin/end iterator pair
                 if nextarg and re.search(name,nextarg.getAttribute('name')) and re.search('Iter',nextarg.getAttribute('type')):
+
                     # Wrap input numpy ndarray with functions to get
                     # the begin and end iterators
                     if re.search('CIter', type):
-                        code+='ttl::numpyBeginPtr< std::complex<double> >('+name.strip()+'), ttl::numpyEndPtr< std::complex<double> >('+name.strip()+')'
+                        argtypes.append([' std::complex<double> '])
+
                     else:
-                        code+='ttl::numpyBeginPtr<double>('+name.strip()+'), ttl::numpyEndPtr<double>('+name.strip()+')'
+                        argtypes.append(['int', 'long', 'float', 'double'])
+
+                    placeholder+='ttl::numpyBeginPtr<'+'TYPE'+str(iarg)+'>('+name.strip()+'), ttl::numpyEndPtr<'+'TYPE'+str(iarg)+'>('+name.strip()+')'
 
                     # Add ',' between parameters
                     if len(arguments)>1:
-                        code+=', '
+                        placeholder+=', '
+
+                    # Found iterator argument
+                    iarg+=1
 
                     # Go to end iterator
                     try:
@@ -315,16 +335,22 @@ def elementToCode(node, namespace=''):
 
                 # Then check if we have a single begin iterator
                 elif re.search('Iter', type):
+
                     # Wrap input numpy ndarray with functions to get
                     # the begin iterator
                     if re.search('CIter', type):
-                        code+='ttl::numpyBeginPtr< std::complex<double> >('+name.strip()+')'
+                        argtypes.append([' std::complex<double> '])
                     else:
-                        code+='ttl::numpyBeginPtr<double>('+name.strip()+')'
+                        argtypes.append(['int', 'long', 'float', 'double'])
+
+                    placeholder+='ttl::numpyBeginPtr<'+'TYPE'+str(iarg)+'>('+name.strip()+')'
 
                     # Add ',' between parameters
                     if len(arguments)>=1:
-                        code+=', '
+                        placeholder+=', '
+
+                    # Found iterator argument
+                    iarg+=1
 
                 # Otherwise it is a normal parameter (may be templated)
                 else:
@@ -332,14 +358,16 @@ def elementToCode(node, namespace=''):
                     name=re.sub('\&', '', name)
 
                     # Add function name
-                    code+=name
+                    placeholder+=name
 
                     # Add ',' between parameters
                     if len(arguments)>=1:
-                        code+=', '
+                        placeholder+=', '
         
         # Add TTL function closing
-        code+=')'+';\n'
+        placeholder+=')'+';\n'
+
+        code+=insertTypes(placeholder, argtypes)
 
         # Add function closing
         code+='}\n\n'
@@ -496,19 +524,19 @@ if options.xml:
     xml = open(options.outdir+'/'+args[0].split('/')[-1].rstrip('h')+'xml', 'w')
     dom.writexml(xml, indent="  ", addindent="  ", newl="\n")
 
-# Add code
-code=""
+# Create code
+code = ""
 
 # Open namespace
-code+='namespace ttl\n{\n'+'namespace bindings\n{\n\n'
+code+="namespace ttl\n{\n  namespace bindings\n  {\n\n"
 
 # Write code
 code+=elementToCode(dom)[0]
 
 # Close namespace
-code+='} // End bindings\n} // End ttl\n\n'
+code+="  } // End bindings\n} // End ttl\n\n"
 
-# Write wrappers
+# Wrappers
 code+=elementToBoostWrapper(dom)[0]
 
 # Indent code and write to file

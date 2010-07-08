@@ -37,7 +37,33 @@ namespace ttl
 
   void sin(boost::python::numeric::array vec)
   {
-    ttl::math::sin(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+    switch (num_util::type(vec))
+    {
+      case PyArray_INT:
+      {
+        ttl::math::sin(ttl::numpyBeginPtr<int>(vec), ttl::numpyEndPtr<int>(vec));
+        break;
+      }
+      case PyArray_LONG:
+      {
+        ttl::math::sin(ttl::numpyBeginPtr<long>(vec), ttl::numpyEndPtr<long>(vec));
+        break;
+      }
+      case PyArray_FLOAT:
+      {
+        ttl::math::sin(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        break;
+      }
+      case PyArray_DOUBLE:
+      {
+        ttl::math::sin(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        break;
+      }
+      default:
+      {
+        break;
+      }
+    }
   }
 
   void cos(boost::python::numeric::array vec)
