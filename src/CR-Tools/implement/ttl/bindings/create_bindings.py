@@ -46,15 +46,19 @@ def insertTypes(template, argnames, argtypes):
     """Insert types into function call template."""
 
     if len(argnames)>=1:
+        # Get last argument name and type and remove from list
         name = argnames.pop()
         type = argtypes.pop()
 
         block = ""
+        # If only one type is present don't put in switch statement
         if len(type)==1:
             if type[0]=='complex':
                 block += re.sub('TYPE_'+name, ' std::complex<double> ', template)
             else:
                 block += re.sub('TYPE_'+name, type[0], template)
+
+        # Otherwise loop over argument types and add case for each
         else:
             block += 'switch (num_util::type('+name+'))\n{\n'
 
@@ -91,8 +95,10 @@ def insertTypes(template, argnames, argtypes):
             block += 'break;\n'
             block += '}\n'
 
+        # Block with replaced types becomes the new template
         template = block
 
+        # Recurse through the remaining types
         template = insertTypes(template, argnames, argtypes)
 
     return template
