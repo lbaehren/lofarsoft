@@ -14,7 +14,9 @@ set (PYPELINE_CPP_FILES
 
 set (PYPELINE_MODULES
   pycrtools.py
-  pycr_metadata.py
+  metadata.py
+  bfdata.py
+  imager.py
   )
 
 set (PYPELINE_SCRIPTS
