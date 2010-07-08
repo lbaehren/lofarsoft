@@ -44,8 +44,8 @@ namespace ttl
       \param frequency Frequency in Hz
       \param time Time in seconds
      */
-    template <class T>
-      double phase(const T &frequency, const T &time)
+    template <class T0, class T1>
+      double phase(const T0 &frequency, const T1 &time)
       {
         return 2*M_PI*frequency*time;
       }
@@ -57,14 +57,14 @@ namespace ttl
       \param delays delays in seconds
       \param frequencies frequencies in Hz
      */
-    template <class CIter, class Iter>
+    template <class CIter, class DIter>
       bool complexWeights(CIter weights, CIter weights_end,
-                          Iter delays, Iter delays_end,
-                          Iter frequencies, Iter frequencies_end)
+                          DIter delays, DIter delays_end,
+                          DIter frequencies, DIter frequencies_end)
       {
         CIter w=weights;
-        Iter d=delays;
-        Iter f=frequencies;
+        DIter d=delays;
+        DIter f=frequencies;
 
         while (w!=weights_end && d!=delays_end)
         {
@@ -96,9 +96,9 @@ namespace ttl
       an antenna position relative to a phase center from a source located
       in a certain direction in farfield.
      */
-    template <class Iter, class T>
-      double geometricDelayFarField(const Iter antPosition,
-                                    const Iter skyDirection,
+    template <class DIter, class T>
+      double geometricDelayFarField(const DIter antPosition,
+                                    const DIter skyDirection,
                                     const T length)
       {
         return - (*skyDirection * *antPosition
@@ -111,9 +111,9 @@ namespace ttl
       an antenna position relative to a phase center from a source located
       at a certain 3D space coordinate in nearfield.
      */
-    template <class Iter, class T>
-      double geometricDelayNearField(const Iter antPosition,
-                                     const Iter skyPosition,
+    template <class DIter, class T>
+      double geometricDelayNearField(const DIter antPosition,
+                                     const DIter skyPosition,
                                      const T distance)
       {
         return (std::sqrt(
@@ -142,17 +142,17 @@ namespace ttl
       \param farfield Calculate in farfield approximation if true, otherwise
       do near field calculation.
     */
-    template <class Iter>
-      void geometricDelays(const Iter delays,
-                           const Iter delays_end,
-                           const Iter antPositions,
-                           const Iter antPositions_end,
-                           const Iter skyPositions,
-                           const Iter skyPositions_end,
+    template <class DIter>
+      void geometricDelays(const DIter delays,
+                           const DIter delays_end,
+                           const DIter antPositions,
+                           const DIter antPositions_end,
+                           const DIter skyPositions,
+                           const DIter skyPositions_end,
                            const bool farfield)
       {
         double distance;
-        Iter
+        DIter
           ant=antPositions,
           sky=skyPositions,
           del=delays,
@@ -200,20 +200,20 @@ namespace ttl
       antenna positions relative to a phase center from sources located at
       certain 3D space coordinates in near or far field and for differentfrequencies.
     */
-    template <class Iter>
-      void geometricPhases(const Iter phases,
-                           const Iter phases_end,
-                           const Iter frequencies,
-                           const Iter frequencies_end,
-                           const Iter antPositions,
-                           const Iter antPositions_end,
-                           const Iter skyPositions,
-                           const Iter skyPositions_end,
+    template <class DIter>
+      void geometricPhases(const DIter phases,
+                           const DIter phases_end,
+                           const DIter frequencies,
+                           const DIter frequencies_end,
+                           const DIter antPositions,
+                           const DIter antPositions_end,
+                           const DIter skyPositions,
+                           const DIter skyPositions_end,
                            const bool farfield
                            )
       {
         double distance;
-        Iter
+        DIter
           ant,
           freq,
           sky=skyPositions,
@@ -267,20 +267,20 @@ namespace ttl
       sources located at certain 3D space coordinates in near or far field
       and for different frequencies.
     */
-    template <class CIter, class Iter>
+    template <class CIter, class DIter>
       void geometricWeights(const CIter weights,
                             const CIter weights_end,
-                            const Iter frequencies,
-                            const Iter frequencies_end,
-                            const Iter antPositions,
-                            const Iter antPositions_end,
-                            const Iter skyPositions,
-                            const Iter skyPositions_end,
+                            const DIter frequencies,
+                            const DIter frequencies_end,
+                            const DIter antPositions,
+                            const DIter antPositions_end,
+                            const DIter skyPositions,
+                            const DIter skyPositions_end,
                             const bool farfield
                             )
       {
         double distance;
-        Iter
+        DIter
           ant,
           freq,
           sky=skyPositions,

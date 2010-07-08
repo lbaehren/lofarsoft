@@ -20,7 +20,7 @@
 #define TTL_NUMPY_PTR_H
 
 // SYSTEM INCLUDES
-//
+#include <string>
 
 // PROJECT INCLUDES
 #include <boost/python/numeric.hpp>
@@ -42,6 +42,35 @@
 
 namespace ttl
 {
+  /*!
+    \brief Exception for type errors.
+   */
+  class TypeError
+  {
+  public:
+      TypeError()
+      {
+        message = "Argument type not implemented.";
+      };
+
+      TypeError(std::string m)
+      {
+        message = m;
+      };
+
+      ~TypeError(){};
+
+      std::string message;
+  };
+  
+  /*!
+    \brief Exception translator for type errors.
+   */
+  void exceptionTranslator(TypeError const& e)
+  {
+    PyErr_SetString(PyExc_UserWarning, e.message.c_str());
+  }
+  
   /*!
     \Brief Return the pointer to the begin of the storage of a numpy array
   

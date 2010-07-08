@@ -43,7 +43,7 @@ endif (HAVE_NUM_UTIL)
 set (MODULES
     math
     beamforming
-    coordinates
+    fft
     )
 
 foreach (MODULE ${MODULES})

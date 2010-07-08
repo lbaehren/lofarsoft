@@ -32,131 +32,428 @@
 
 namespace ttl
 {
-  namespace bindings
-  {
-
-  void sin(boost::python::numeric::array vec)
-  {
-    switch (num_util::type(vec))
+    namespace bindings
     {
-      case PyArray_INT:
+
+    void sin(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
       {
-        ttl::math::sin(ttl::numpyBeginPtr<int>(vec), ttl::numpyEndPtr<int>(vec));
+        case PyArray_FLOAT:
+        {
+          ttl::math::sin(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
         break;
-      }
-      case PyArray_LONG:
-      {
-        ttl::math::sin(ttl::numpyBeginPtr<long>(vec), ttl::numpyEndPtr<long>(vec));
+        case PyArray_DOUBLE:
+        {
+          ttl::math::sin(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
         break;
-      }
-      case PyArray_FLOAT:
-      {
-        ttl::math::sin(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
-        break;
-      }
-      case PyArray_DOUBLE:
-      {
-        ttl::math::sin(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-        break;
-      }
-      default:
-      {
+        default:
+        {
+          throw ttl::TypeError();
+        }
         break;
       }
     }
-  }
 
-  void cos(boost::python::numeric::array vec)
-  {
-    ttl::math::cos(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void cos(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::cos(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::cos(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void tan(boost::python::numeric::array vec)
-  {
-    ttl::math::tan(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void tan(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::tan(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::tan(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void sinh(boost::python::numeric::array vec)
-  {
-    ttl::math::sinh(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void sinh(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::sinh(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::sinh(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void cosh(boost::python::numeric::array vec)
-  {
-    ttl::math::cosh(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void cosh(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::cosh(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::cosh(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void tanh(boost::python::numeric::array vec)
-  {
-    ttl::math::tanh(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void tanh(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::tanh(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::tanh(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void asin(boost::python::numeric::array vec)
-  {
-    ttl::math::asin(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void asin(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::asin(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::asin(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void acos(boost::python::numeric::array vec)
-  {
-    ttl::math::acos(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void acos(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::acos(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::acos(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void atan(boost::python::numeric::array vec)
-  {
-    ttl::math::atan(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void atan(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::atan(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::atan(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void log(boost::python::numeric::array vec)
-  {
-    ttl::math::log(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void log(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::log(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::log(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void log10(boost::python::numeric::array vec)
-  {
-    ttl::math::log10(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void log10(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::log10(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::log10(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void logSave(boost::python::numeric::array vec)
-  {
-    ttl::math::logSave(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void logSave(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::logSave(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::logSave(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void abs(boost::python::numeric::array vec)
-  {
-    ttl::math::abs(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void abs(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::abs(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::abs(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void exp(boost::python::numeric::array vec)
-  {
-    ttl::math::exp(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void exp(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::exp(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::exp(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void sqrt(boost::python::numeric::array vec)
-  {
-    ttl::math::sqrt(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void sqrt(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::sqrt(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::sqrt(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void fabs(boost::python::numeric::array vec)
-  {
-    ttl::math::fabs(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void fabs(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::fabs(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::fabs(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void floor(boost::python::numeric::array vec)
-  {
-    ttl::math::floor(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void floor(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::floor(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::floor(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  void ceil(boost::python::numeric::array vec)
-  {
-    ttl::math::ceil(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    void ceil(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          ttl::math::ceil(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          ttl::math::ceil(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  double norm(boost::python::numeric::array vec)
-  {
-    return ttl::math::norm(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
-  }
+    double norm(boost::python::numeric::array vec)
+    {
+      switch (num_util::type(vec))
+      {
+        case PyArray_FLOAT:
+        {
+          return ttl::math::norm(ttl::numpyBeginPtr<float>(vec), ttl::numpyEndPtr<float>(vec));
+        }
+        break;
+        case PyArray_DOUBLE:
+        {
+          return ttl::math::norm(ttl::numpyBeginPtr<double>(vec), ttl::numpyEndPtr<double>(vec));
+        }
+        break;
+        default:
+        {
+          throw ttl::TypeError();
+        }
+        break;
+      }
+    }
 
-  }// End bindings
+    } // End bindings
 } // End ttl
 
 BOOST_PYTHON_MODULE(math)
@@ -166,23 +463,26 @@ BOOST_PYTHON_MODULE(math)
 
   using namespace boost::python;
 
-  def("sin", ttl::bindings::sin, "Take the sin of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("cos", ttl::bindings::cos, "Take the cos of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("tan", ttl::bindings::tan, "Take the tan of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("sinh", ttl::bindings::sinh, "Take the sinh of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("cosh", ttl::bindings::cosh, "Take the cosh of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("tanh", ttl::bindings::tanh, "Take the tanh of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("asin", ttl::bindings::asin, "Take the asin of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("acos", ttl::bindings::acos, "Take the acos of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("atan", ttl::bindings::atan, "Take the atan of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("log", ttl::bindings::log, "Take the log of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("log10", ttl::bindings::log10, "Take the log10 of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("logSave", ttl::bindings::logSave, "Take the log of all elements in the itterable but return LOW_NUMBER if element is zero\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("abs", ttl::bindings::abs, "Take the abs of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("exp", ttl::bindings::exp, "Take the exp of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("sqrt", ttl::bindings::sqrt, "Take the sqrt of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("fabs", ttl::bindings::fabs, "Take the fabs of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("floor", ttl::bindings::floor, "Take the floor of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("ceil", ttl::bindings::ceil, "Take the ceil of all elements in the itterable\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
-  def("norm", ttl::bindings::norm, "Returns the norm (or length) of a vector\n\n      \\sqrt(\\sum_{i}(x_{i}^2)).\n\n  *vec* begin iterator\n  *vec_end* end iterator\n");
+  boost::python::register_exception_translator<ttl::TypeError>(ttl::exceptionTranslator);
+
+  def("sin", ttl::bindings::sin, "Take the sin of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("cos", ttl::bindings::cos, "Take the cos of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("tan", ttl::bindings::tan, "Take the tan of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("sinh", ttl::bindings::sinh, "Take the sinh of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("cosh", ttl::bindings::cosh, "Take the cosh of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("tanh", ttl::bindings::tanh, "Take the tanh of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("asin", ttl::bindings::asin, "Take the asin of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("acos", ttl::bindings::acos, "Take the acos of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("atan", ttl::bindings::atan, "Take the atan of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("log", ttl::bindings::log, "Take the log of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("log10", ttl::bindings::log10, "Take the log10 of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("logSave", ttl::bindings::logSave, "Take the log of all elements in the itterable but return LOW_NUMBER if element is zero\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("abs", ttl::bindings::abs, "Take the abs of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("exp", ttl::bindings::exp, "Take the exp of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("sqrt", ttl::bindings::sqrt, "Take the sqrt of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("fabs", ttl::bindings::fabs, "Take the fabs of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("floor", ttl::bindings::floor, "Take the floor of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("ceil", ttl::bindings::ceil, "Take the ceil of all elements in the itterable\n\n*vec* begin iterator\n*vec_end* end iterator\n");
+  def("norm", ttl::bindings::norm, "Returns the norm (or length) of a vector\n\n      \\sqrt(\\sum_{i}(x_{i}^2)).\n\n*vec* begin iterator\n*vec_end* end iterator\n");
 }
+

@@ -41,10 +41,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void sin(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void sin(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::sin(*it);
@@ -58,10 +58,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void cos(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void cos(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::cos(*it);
@@ -75,10 +75,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void tan(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void tan(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::tan(*it);
@@ -92,10 +92,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void sinh(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void sinh(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::sinh(*it);
@@ -109,10 +109,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void cosh(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void cosh(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::cosh(*it);
@@ -126,10 +126,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void tanh(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void tanh(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::tanh(*it);
@@ -143,10 +143,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void asin(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void asin(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::asin(*it);
@@ -160,10 +160,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void acos(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void acos(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::acos(*it);
@@ -177,10 +177,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void atan(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void atan(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::atan(*it);
@@ -194,10 +194,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void log(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void log(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::log(*it);
@@ -211,10 +211,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void log10(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void log10(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::log10(*it);
@@ -228,10 +228,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void logSave(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void logSave(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           if (*it>0)
@@ -252,10 +252,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void abs(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void abs(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::abs(*it);
@@ -269,10 +269,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void exp(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void exp(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::exp(*it);
@@ -286,10 +286,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void sqrt(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void sqrt(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::sqrt(*it);
@@ -303,10 +303,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void fabs(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void fabs(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::fabs(*it);
@@ -320,10 +320,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void floor(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void floor(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::floor(*it);
@@ -337,10 +337,10 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      void ceil(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      void ceil(const RIter vec, const RIter vec_end)
       {
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           *it=std::ceil(*it);
@@ -356,11 +356,11 @@ namespace ttl
       \param vec begin iterator
       \param vec_end end iterator
      */
-    template <class Iter>
-      double norm(const Iter vec, const Iter vec_end)
+    template <class RIter>
+      double norm(const RIter vec, const RIter vec_end)
       {
         double sum=0;
-        Iter it=vec;
+        RIter it=vec;
         while (it!=vec_end)
         {
           sum += (*it) * (*it); ++it;

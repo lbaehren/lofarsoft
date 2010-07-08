@@ -42,13 +42,58 @@ def indent(incode, indent='', addindent='  '):
 
     return outcode
 
-def insertTypes(template, argnames, argtypes, block=""):
+def insertTypes(template, argnames, argtypes):
     """Insert types into function call template."""
 
-    nitargs = len(argtypes)
+    if len(argnames)>=1:
+        name = argnames.pop()
+        type = argtypes.pop()
 
-    print argnames
-    print argtypes
+        block = ""
+        if len(type)==1:
+            if type[0]=='complex':
+                block += re.sub('TYPE_'+name, ' std::complex<double> ', template)
+            else:
+                block += re.sub('TYPE_'+name, type[0], template)
+        else:
+            block += 'switch (num_util::type('+name+'))\n{\n'
+
+            for t in type:
+                if t.strip()=='int':
+                    block += 'case PyArray_INT:\n{\n'
+                    block += re.sub('TYPE_'+name, 'int', template)
+                    block += '}\n'
+                    block += 'break;\n'
+                elif t.strip()=='long':
+                    block += 'case PyArray_LONG:\n{\n'
+                    block += re.sub('TYPE_'+name, 'long', template)
+                    block += '}\n'
+                    block += 'break;\n'
+                elif t.strip()=='float':
+                    block += 'case PyArray_FLOAT:\n{\n'
+                    block += re.sub('TYPE_'+name, 'float', template)
+                    block += '}\n'
+                    block += 'break;\n'
+                elif t.strip()=='double':
+                    block += 'case PyArray_DOUBLE:\n{\n'
+                    block += re.sub('TYPE_'+name, 'double', template)
+                    block += '}\n'
+                    block += 'break;\n'
+                elif t.strip()=='complex':
+                    block += 'case PyArray_CDOUBLE:\n{\n'
+                    block += re.sub('TYPE_'+name, ' std::complex<double> ', template)
+                    block += '}\n'
+                    block += 'break;\n'
+
+            block += 'default:\n{\n'
+            block += 'throw ttl::TypeError();\n'
+            block += '}\n'
+            block += 'break;\n'
+            block += '}\n'
+
+        template = block
+
+        template = insertTypes(template, argnames, argtypes)
 
     return template
 
@@ -215,7 +260,7 @@ def elementToCode(node, namespace=''):
         ftype = node.getAttribute('type')
 
         # Correct for template type T
-        ftype=re.sub('T', 'double', ftype)
+        ftype=re.sub(r'T[0-9]*', 'double', ftype)
 
         # Add start of function definition (e.g. '  void f(')
         code+=ftype+' '+fname+'('
@@ -268,7 +313,7 @@ def elementToCode(node, namespace=''):
                 # Otherwise it is a normal parameter (may be templated)
                 else:
                     # Correct for template type T
-                    type=re.sub('T', 'double', type)
+                    type=re.sub('T[0-9]*', 'double', type)
 
                     code+=type+' '+name
 
@@ -323,11 +368,17 @@ def elementToCode(node, namespace=''):
                     elif re.search('DIter', type):
                         argnames.append(name)
                         argtypes.append(['double'])
+                    elif re.search('NIter', type):
+                        argnames.append(name)
+                        argtypes.append(['int', 'long'])
+                    elif re.search('RIter', type):
+                        argnames.append(name)
+                        argtypes.append(['float', 'double'])
                     else:
                         argnames.append(name)
                         argtypes.append(['int', 'long', 'float', 'double'])
 
-                    placeholder+='ttl::numpyBeginPtr<'+'TYPE'+str(iarg)+'>('+name.strip()+'), ttl::numpyEndPtr<'+'TYPE'+str(iarg)+'>('+name.strip()+')'
+                    placeholder+='ttl::numpyBeginPtr<'+'TYPE_'+name+'>('+name.strip()+'), ttl::numpyEndPtr<'+'TYPE_'+name+'>('+name.strip()+')'
 
                     # Add ',' between parameters
                     if len(arguments)>1:
@@ -359,7 +410,7 @@ def elementToCode(node, namespace=''):
                         argnames.append(name)
                         argtypes.append(['int', 'long', 'float', 'double'])
 
-                    placeholder+='ttl::numpyBeginPtr<'+'TYPE'+str(iarg)+'>('+name.strip()+')'
+                    placeholder+='ttl::numpyBeginPtr<'+'TYPE_'+name+'>('+name.strip()+')'
 
                     # Add ',' between parameters
                     if len(arguments)>=1:
@@ -405,7 +456,7 @@ def elementToBoostWrapper(node, module=''):
     if node.nodeName == 'module' and node.getAttribute('name') != 'ttl':
         # Add module name
         wrap += 'BOOST_PYTHON_MODULE('+node.getAttribute('name')+')\n{\n'
-    
+
         # Add num_util directives
         wrap += 'import_array();\n'
         wrap += 'boost::python::numeric::array::set_module_and_type("numpy", "ndarray");\n\n'
@@ -413,6 +464,9 @@ def elementToBoostWrapper(node, module=''):
         # Add Boost python namespace
         wrap += 'using namespace boost::python;\n\n'
   
+        # Register exception translator for TypeError
+        wrap += 'boost::python::register_exception_translator<ttl::TypeError>(ttl::exceptionTranslator);\n\n'
+    
     elif node.nodeName == 'function':
         # Add function wrapper with correct namespace
         fname = node.getAttribute('name')

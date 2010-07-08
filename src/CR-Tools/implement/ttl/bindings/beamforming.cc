@@ -47,27 +47,27 @@ namespace ttl
 
     double geometricDelayFarField(boost::python::numeric::array antPosition, boost::python::numeric::array skyDirection, const double length)
     {
-      return ttl::beamforming::geometricDelayFarField(ttl::numpyBeginPtr<TYPE0>(antPosition), ttl::numpyBeginPtr<TYPE1>(skyDirection), length);
+      return ttl::beamforming::geometricDelayFarField(ttl::numpyBeginPtr<double>(antPosition), ttl::numpyBeginPtr<double>(skyDirection), length);
     }
 
     double geometricDelayNearField(boost::python::numeric::array antPosition, boost::python::numeric::array skyPosition, const double distance)
     {
-      return ttl::beamforming::geometricDelayNearField(ttl::numpyBeginPtr<TYPE0>(antPosition), ttl::numpyBeginPtr<TYPE1>(skyPosition), distance);
+      return ttl::beamforming::geometricDelayNearField(ttl::numpyBeginPtr<double>(antPosition), ttl::numpyBeginPtr<double>(skyPosition), distance);
     }
 
     void geometricDelays(boost::python::numeric::array delays, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
     {
-      ttl::beamforming::geometricDelays(ttl::numpyBeginPtr<TYPE0>(delays), ttl::numpyEndPtr<TYPE0>(delays), ttl::numpyBeginPtr<TYPE1>(antPositions), ttl::numpyEndPtr<TYPE1>(antPositions), ttl::numpyBeginPtr<TYPE2>(skyPositions), ttl::numpyEndPtr<TYPE2>(skyPositions), farfield);
+      ttl::beamforming::geometricDelays(ttl::numpyBeginPtr<double>(delays), ttl::numpyEndPtr<double>(delays), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
     }
 
     void geometricPhases(boost::python::numeric::array phases, boost::python::numeric::array frequencies, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
     {
-      ttl::beamforming::geometricPhases(ttl::numpyBeginPtr<TYPE0>(phases), ttl::numpyEndPtr<TYPE0>(phases), ttl::numpyBeginPtr<TYPE1>(frequencies), ttl::numpyEndPtr<TYPE1>(frequencies), ttl::numpyBeginPtr<TYPE2>(antPositions), ttl::numpyEndPtr<TYPE2>(antPositions), ttl::numpyBeginPtr<TYPE3>(skyPositions), ttl::numpyEndPtr<TYPE3>(skyPositions), farfield);
+      ttl::beamforming::geometricPhases(ttl::numpyBeginPtr<double>(phases), ttl::numpyEndPtr<double>(phases), ttl::numpyBeginPtr<double>(frequencies), ttl::numpyEndPtr<double>(frequencies), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
     }
 
     void geometricWeights(boost::python::numeric::array weights, boost::python::numeric::array frequencies, boost::python::numeric::array antPositions, boost::python::numeric::array skyPositions, const bool farfield)
     {
-      ttl::beamforming::geometricWeights(ttl::numpyBeginPtr<TYPE0>(weights), ttl::numpyEndPtr<TYPE0>(weights), ttl::numpyBeginPtr<TYPE1>(frequencies), ttl::numpyEndPtr<TYPE1>(frequencies), ttl::numpyBeginPtr<TYPE2>(antPositions), ttl::numpyEndPtr<TYPE2>(antPositions), ttl::numpyBeginPtr<TYPE3>(skyPositions), ttl::numpyEndPtr<TYPE3>(skyPositions), farfield);
+      ttl::beamforming::geometricWeights(ttl::numpyBeginPtr< std::complex<double> >(weights), ttl::numpyEndPtr< std::complex<double> >(weights), ttl::numpyBeginPtr<double>(frequencies), ttl::numpyEndPtr<double>(frequencies), ttl::numpyBeginPtr<double>(antPositions), ttl::numpyEndPtr<double>(antPositions), ttl::numpyBeginPtr<double>(skyPositions), ttl::numpyEndPtr<double>(skyPositions), farfield);
     }
 
     } // End bindings
@@ -79,6 +79,8 @@ BOOST_PYTHON_MODULE(beamforming)
   boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
 
   using namespace boost::python;
+
+  boost::python::register_exception_translator<ttl::TypeError>(ttl::exceptionTranslator);
 
   def("phase", ttl::bindings::phase, "Returns the interferometer phase in radians for a given\n      frequency and time.\n\n*&frequency* \n*&time* \n");
   def("complexWeights", ttl::bindings::complexWeights, "Calculates the complex weights for given delays and frequencies\n\n*weights* array of complex with length (delays * frequencies)\n*weights_end* \n*delays* delays in seconds\n*delays_end* \n*frequencies* frequencies in Hz\n*frequencies_end* \n");
