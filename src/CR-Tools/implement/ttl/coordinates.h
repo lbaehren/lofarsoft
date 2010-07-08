@@ -28,9 +28,7 @@
 #include <coordinates/Coordinates/ObsInfo.h>
 #include <coordinates/Coordinates/Projection.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
-#include <measures/Measures.h>
 #include <measures/Measures/MEpoch.h>
-#include <casa/Quanta/MVTime.h>
 
 // LOCAL INCLUDES
 //
@@ -58,9 +56,9 @@ namespace ttl
       \param refX reference x pixel (CRPIX)
       \param refY reference y pixel (CRPIX)
      */
-    template <class Iter>
-      bool toWorld(const Iter world, const Iter world_end,
-                   const Iter pixel, const Iter pixel_end,
+    template <class DIter>
+      bool toWorld(const DIter world, const DIter world_end,
+                   const DIter pixel, const DIter pixel_end,
                    const std::string refcode, const std::string projection,
                    const double refLong, const double refLat,
                    const double incLong, const double incLat,
@@ -105,8 +103,8 @@ namespace ttl
 //        std::cout<<casa::MDirection::showType(dir.directionType())<<"\t"<<dir.projection().name()<<std::endl;
         
         // Get itterators
-        Iter world_it=world;
-        Iter pixel_it=pixel;
+        DIter world_it=world;
+        DIter pixel_it=pixel;
 
         // Placeholders for conversion
         casa::Vector<casa::Double> cworld(2), cpixel(2); 
@@ -152,9 +150,9 @@ namespace ttl
       \param refX reference x pixel (CRPIX)
       \param refY reference y pixel (CRPIX)
      */
-    template <class Iter>
-      bool toPixel(const Iter pixel, const Iter pixel_end,
-                   const Iter world, const Iter world_end,
+    template <class DIter>
+      bool toPixel(const DIter pixel, const DIter pixel_end,
+                   const DIter world, const DIter world_end,
                    const std::string refcode, const std::string projection,
                    const double refLong, const double refLat,
                    const double incLong, const double incLat,
@@ -199,8 +197,8 @@ namespace ttl
 //        std::cout<<casa::MDirection::showType(dir.directionType())<<"\t"<<dir.projection().name()<<std::endl;
 
         // Get itterators
-        Iter world_it=world;
-        Iter pixel_it=pixel;
+        DIter world_it=world;
+        DIter pixel_it=pixel;
 
         // Placeholders for conversion
         casa::Vector<casa::Double> cworld(2), cpixel(2); 
@@ -231,47 +229,28 @@ namespace ttl
       }
 
     /*!
-      \brief Convert given vector of world coordinates
+      \brief Given an array of (az, el, r, az, el, r, ...) coordinates
+      return an array of (x, y, z, x, y, z, ...) coordinates.
      */
-    template <class Iter>
-      bool worldToWorld(const Iter world_out, const Iter world_out_end,
-                        const Iter world_in, const Iter world_in_end)
+    template <class DIter>
+      void azElRadius2Cartesian(DIter out, DIter out_end,
+                                DIter in, DIter in_end,
+                                bool anglesInDegrees)
       {
-        // The observatory position.
-        // Note that the reference is geodetic position 
-        casa::MPosition obspos(casa::MVPosition(casa::Quantity(1, "km"),
-                                                casa::Quantity(150, "deg"),
-                                                casa::Quantity(20, "deg")),
-                                                casa::MPosition::WGS84);
-        // The observation time
-        casa::MEpoch obstime(casa::MVEpoch(casa::MVTime(1996, 5, 17, (8+18./60.)/24.)),
-                                           casa::MEpoch::UTC);
+        // Get iterators
+        DIter out_it=out;
+        DIter in_it=in;
 
-        // The frame specification for when and where to observe
-        casa::MeasFrame frame(obspos, obstime);
+        // Loop over coordinates
+        while (out_it!=out_end && in_it!=in_end)
+        {
+          *out_it     = *(in_it+2)*cos(*(in_it+1))*sin(*in_it);
+          *(out_it+1) = *(in_it+2)*cos(*(in_it+1))*cos(*in_it);
+          *(out_it+2) = *(in_it+2)*sin(*(in_it+1));
 
-        casa::MDirection model(casa::Quantity(20, "deg"),
-                         casa::Quantity(-10, "deg"),
-                         casa::MDirection::Ref(casa::MDirection::B1950));
-
-        casa::MDirection::Ref out(casa::MDirection::J2000, frame);
-
-        // Setup conversion engine
-//        casa::MDirection::Convert conv();
-//
-//        casa::MDirection::Convert(casa::MDirection(casa::Quantum(11,"deg"),
-//                                                  casa::Quantum(-30, "deg")),
-//                                      casa::MDirection::Ref(casa::MDirection::APP,
-//                                                       frame))()
-        
-//            casa::MDirection(),
-////                casa::Quantity(20, "deg"),
-////                casa::Quantity(-10, "deg"),
-////                casa::MDirection::Ref(casa::MDirection::B1950)),
-//            casa::MDirection::Ref(casa::MDirection::J2000, frame));
-        
-        // Conversion successfull
-        return true;
+          in_it=in_it+3;
+          out_it=out_it+3;
+        }
       }
   } // End coordinates
 } // End ttl

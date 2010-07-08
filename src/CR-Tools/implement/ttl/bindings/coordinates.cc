@@ -32,8 +32,8 @@
 
 namespace ttl
 {
-  namespace bindings
-  {
+    namespace bindings
+    {
 
     bool toWorld(boost::python::numeric::array world, boost::python::numeric::array pixel, const std::string refcode, const std::string projection, const double refLong, const double refLat, const double incLong, const double incLat, const double refX, const double refY)
     {
@@ -50,7 +50,7 @@ namespace ttl
       ttl::coordinates::azElRadius2Cartesian(ttl::numpyBeginPtr<double>(out), ttl::numpyEndPtr<double>(out), ttl::numpyBeginPtr<double>(in), ttl::numpyEndPtr<double>(in), anglesInDegrees);
     }
 
-  } // End bindings
+    } // End bindings
 } // End ttl
 
 BOOST_PYTHON_MODULE(coordinates)
@@ -59,6 +59,8 @@ BOOST_PYTHON_MODULE(coordinates)
   boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
 
   using namespace boost::python;
+
+  boost::python::register_exception_translator<ttl::TypeError>(ttl::exceptionTranslator);
 
   def("toWorld", ttl::bindings::toWorld, "Get world coordinates for given vector of pixel coordinates\n\n*world* begin itterator for world coordinate array\n*world_end* end itterator for world coordinate array\n*pixel* begin itterator for pixel coordinate array\n*pixel_end* end itterator for pixel coordinate array\n*refcode* reference code for coordinate system e.g. AZEL,J2000,...\n*projection* the projection used e.g. SIN,STG,...\n*refLong* reference value for longtitude (CRVAL)\n*refLat* reference value for latitude (CRVAL)\n*incLong* \n*incLat* increment value for latitude (CDELT)\n*refX* reference x pixel (CRPIX)\n*refY* reference y pixel (CRPIX)\n");
   def("toPixel", ttl::bindings::toPixel, "Get pixel coordinates for given vector of world coordinates\n\n*pixel* begin itterator for pixel coordinate array\n*pixel_end* end itterator for pixel coordinate array\n*world* begin itterator for world coordinate array\n*world_end* end itterator for world coordinate array\n*refcode* reference code for coordinate system e.g. AZEL,J2000,...\n*projection* the projection used e.g. SIN,STG,...\n*refLong* reference value for longtitude (CRVAL)\n*refLat* reference value for latitude (CRVAL)\n*incLong* \n*incLat* increment value for latitude (CDELT)\n*refX* reference x pixel (CRPIX)\n*refY* reference y pixel (CRPIX)\n");

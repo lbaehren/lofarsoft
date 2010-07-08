@@ -56,8 +56,8 @@ int main()
                  refX, refY);
 
   // Convert world coordinates
-  status=worldToWorld(oworld.begin(), oworld.end(),
-                      world.begin(), world.end());
+  //status=worldToWorld(oworld.begin(), oworld.end(),
+  //                    world.begin(), world.end());
 
   if (status)
   {
