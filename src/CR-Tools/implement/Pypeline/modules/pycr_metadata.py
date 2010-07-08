@@ -7,22 +7,25 @@ import numpy as np
 import struct
 import os
 
-def stationPhaseCalibrationFactors(station, antennaset):
+def getStationPhaseCalibration(station, antennaset):
     """Read phase calibration data for a station.
 
     *station* station name or ID.
     *mode* observation mode. Currently supported: "LBA_OUTER"
+
+    returns weights for 512 subbands.
 
     Examples (also for doctests):
 
     >>> pycr_metadata.station_phase_calibration_factors("CS302","LBA_OUTER")
     
     >>> pycr_metadata.station_phase_calibration_factors(122,"LBA_OUTER")
-    
+     
     """
 
+    
     # Return mode nr depending on observation mode 
-    if mode in [ "LBA_OUTER" , 1, "1" ]:
+    if antennaset in [ "LBA_OUTER" , 1, "1" ]:
         modenr="1"
     else:
         print "Calibration data not yet available. Returning 1"
@@ -77,8 +80,18 @@ def stationPhaseCalibrationFactors(station, antennaset):
     return complexdata.transpose()
 
 def getCableDelays(station,antennaset):
-    """ Get cable delays in s"""
+    """ Get cable delays in s. 
+    
+    *station*  Station name or ID e.g. "CS302", 142
+    *antennaset*   Set of antennas e.g. LBA_OUTER, HBA
+    
+    returns "numpy array of (rcus * cable delays ) for all dipoles in a station"
+    """
 
+    # Check station id type
+    if isinstance(station, int): 
+        # Convert a station id to a station name
+        station=idToStationName(station)
     # LBA_OUTER = LBL
     # LBA_INNER = LBH
     # HBA = HBA
@@ -205,17 +218,16 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
     assert antennaset in names
 
     # Check station id type
-    assert isinstance(station, int): 
-
-    # Convert a station id to a station name
-    station=id_to_stationname(station)
+    if isinstance(station, int): 
+        # Convert a station id to a station name
+        station=idToStationName(station)
 
     # Obtain filename of antenna positions
     LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
     filename=LOFARSOFT+"data/calibration/AntennaArrays/"+station+"-AntennaArrays.conf"
     
     # Open file
-    antfile = open(filename, 'r') 
+    f = open(filename, 'r') 
 
     # Find position of antennaset in file
     str = ''
@@ -244,7 +256,7 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
     if return_as_hArray:
         antpos=hf.hArray(antpos,[2*int(nrantennas),int(nrdir)])
     else:
-        antpos=np.asrray(antpos).reshape(2*int(nrantennas),int(nrdir))
+        antpos=np.asarray(antpos).reshape(2*int(nrantennas),int(nrdir))
    
     return antpos
 
@@ -256,7 +268,7 @@ def getClockCorrection(station,time=1278480000):
     """
     # Convert a station id to a station name
     if type(station)==type(1): # name is a station_id number
-        station=id_to_stationname(station)
+        station=idToStationName(station)
 
     clockcorrection={}
     clockcorrection["CS002"]=8.2724449975934222e-06
