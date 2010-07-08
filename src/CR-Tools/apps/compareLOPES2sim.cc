@@ -79,7 +79,7 @@
   \endverbatim
 */
 
-const static bool simulationDistances = true; //false;  // decide wether to use the lateral distances of simulation or of data
+const static bool simulationDistances = false; //true;  // decide wether to use the lateral distances of simulation or of data
 const static double gradeg=180./(TMath::Pi());
 
 int main (int argc, char *argv[])
@@ -709,8 +709,8 @@ int main (int argc, char *argv[])
         double distanceR=0.;
 
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat";
-        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
-        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
+        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
+        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
         ifstream reasFile(reasFileName.c_str());
         if (!reasFile.is_open()) {
@@ -726,11 +726,11 @@ int main (int argc, char *argv[])
           istringstream iss2 (buffer2);
           if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {//in sim file:az in reas sistem
             iss2>>NantS>>distS>>azSREAS>>NSfield>>EWfield>>VEfield>>dummy;
-            azS=(180./gradeg)-azSREAS; //convert to LOPES coordinates
-            while(azS<0.){
-            azS =+(360./gradeg);
+            azS=180.-(azSREAS*gradeg); //convert to LOPES coordinates
+            if(azS<0.){
+            azS = azS+360.; //azS in grad
              }
-
+            //cout<<Gt<<"azim from REAS: "<<azSREAS*gradeg<<" and converted to LOPES: "<<azS<<endl;
             //look if antenna exists at all in data then separe EW and NS
             if (m_recPulses.find(NantS) != m_recPulses.end()) {
               // convert e-field to LOPES units
@@ -769,9 +769,12 @@ int main (int argc, char *argv[])
                   azimuth = AzL/gradeg;  // EW
                   zenith = (90.-ElL)/gradeg;
                 }  
-                cout<<"az sim : "<< azS*gradeg << " az data LOPES : " << azimuth*gradeg <<" ze LOPES "<< zenith*gradeg <<endl;
-                showerCoord=sqrt(1.0 - pow(cos(azS-azimuth),2)*pow(sin(zenith),2));
-                distanceS=0.01*distS*showerCoord;                
+                //cout<<"az sim converted : "<< azS << " az data LOPES antennas : " << azimuth*gradeg <<" ze LOPES "<< zenith*gradeg <<endl;
+                showerCoord=sqrt(1.0 - pow(cos((azS/gradeg)-azimuth),2)*pow(sin(zenith),2));
+                //showerCoord=sqrt(1.0 - pow(cos(azS-(AzL/gradeg)),2)*pow(sin((90.-ElL)/gradeg),2));
+                distanceS=0.01*distS*showerCoord;
+                //cout<<"shower coord system: "<<showerCoord<<endl;
+                //cout<<"sim       distance : "<<distanceS<<endl; 
                 if ((distanceS-distanceR)>(distanceS*0.05)) {
                   cout<<"WARNING: distance simulated EW channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
                   checkDistanceEW<<m_dict[Gt]<<"\t"<<NantS<<"\t"<<distanceS<<"\t"<<distanceR<<endl;
@@ -801,9 +804,12 @@ int main (int argc, char *argv[])
                   azimuth = AzL_NS/gradeg;  // NS
                   zenith = (90.-ElL_NS)/gradeg;
                 }  
-                cout<<"az sim : "<< azS*gradeg<< " az data LOPES : " << azimuth*gradeg <<" ze LOPES "<< zenith*gradeg <<endl;
-                showerCoord=sqrt(1.0 - pow(cos(azS-azimuth),2)*pow(sin(zenith),2));
-                distanceS=0.01*distS*showerCoord;                
+                //cout<<"az sim converted : "<< azS << " az data LOPES antennas : " << azimuth*gradeg <<" ze LOPES "<< zenith*gradeg <<endl;
+                showerCoord=sqrt(1.0 - pow(cos((azS/gradeg)-azimuth),2)*pow(sin(zenith),2));
+                //showerCoord=sqrt(1.0 - pow(cos(azS-(AzL/gradeg)),2)*pow(sin((90.-ElL)/gradeg),2));
+                distanceS=0.01*distS*showerCoord;
+                //cout<<"shower coord system: "<<showerCoord<<endl;
+                //cout<<"sim       distance : "<<distanceS<<endl; 
                 if ((distanceS-distanceR)>(distanceS*0.05)) {
                   cout<<"WARNING: distance simulated NS channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
                   checkDistanceNS<<m_dict[Gt]<<"\t"<<NantS<<"\t"<<distanceS<<"\t"<<distanceR<<endl;
