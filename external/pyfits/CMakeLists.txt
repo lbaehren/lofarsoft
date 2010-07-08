@@ -52,11 +52,11 @@ include (FindNumPy)
 include (FindLAPACK)
 
 if (NOT HAVE_PYTHON)
-  message (SEND_ERROR "[PyFITS] Unable to build project - missing Python!")
+  message (WARNING "[PyFITS] Unable to build project - missing Python!")
 endif (NOT HAVE_PYTHON)
 
 if (NOT LAPACK_BLAS_LIBRARY)
-  message (SEND_ERROR "[PyFITS] Unable to build project - missing BLAS library!")
+  message (WARNING "[PyFITS] Unable to build project - missing BLAS library!")
 endif (NOT LAPACK_BLAS_LIBRARY)
 
 ## <-- begin build condition --------------------------------------------------->

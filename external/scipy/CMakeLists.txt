@@ -54,19 +54,19 @@ include (FindSciPy)
 include (FindLAPACK)
 
 if (NOT HAVE_PYTHON)
-  message (SEND_ERROR "[SciPy] Unable to build project - missing Python!")
+  message (WARNING "[SciPy] Unable to build project - missing Python!")
 endif (NOT HAVE_PYTHON)
 
 if (NOT LAPACK_BLAS_LIBRARY)
-  message (SEND_ERROR "[SciPy] Unable to build project - missing BLAS library!")
+  message (WARNING "[SciPy] Unable to build project - missing BLAS library!")
 endif (NOT LAPACK_BLAS_LIBRARY)
 
 if (NOT LAPACK_LAPACK_LIBRARY)
-  message (SEND_ERROR "[SciPy] Unable to build project - missing LAPACK library!")
+  message (WARNING "[SciPy] Unable to build project - missing LAPACK library!")
 endif (NOT LAPACK_LAPACK_LIBRARY)
 
 if (NOT HAVE_NUMPY)
-  message (SEND_ERROR "[SciPy] Unable to build project - missing NumPy!")
+  message (WANRING "[SciPy] Unable to build project - missing NumPy!")
 endif (NOT HAVE_NUMPY)
 
 ## Check version number of SciPy installation
