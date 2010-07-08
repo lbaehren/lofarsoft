@@ -4,6 +4,7 @@ from optparse import OptionParser
 import numpy as np
 import sys
 import pyfits
+import metadata
 import imager
 
 ## Parse commandline arguments
@@ -17,20 +18,22 @@ if not args:
     parser.print_help()
     sys.exit(0)
 
-## Read in data
+# Read in data
 data = np.load('input_imager.npy')
-antpos = np.load('CS302_antpos.npy')
+
+# Read in antenna positions
+antpos = metadata.getRelativeAntennaPositions('CS302', 'HBA')
+
+# Create array with frequencies
 frequencies = np.linspace(100, 200, data.shape[1])
 
-## Set up imager
-im = imager.Imager(frequencies)
+# Set up imager
+im = imager.Imager(frequencies, antpos)
 
-## Process datablocks
-datablock = np.zeros(1)
+# Process data
+image = im.process(data.transpose())
 
-image = im.process(datablock)
-
-## Save image as FITS
+# Save image as FITS
 hdu = pyfits.PrimaryHDU(image)
 
 try:

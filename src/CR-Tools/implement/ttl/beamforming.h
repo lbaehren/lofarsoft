@@ -51,6 +51,47 @@ namespace ttl
       }
 
     /*!
+      \brief Calculates the complex weights for given delays and frequencies
+
+      \param weights array of complex with length (delays * frequencies)
+      \param delays delays in seconds
+      \param frequencies frequencies in Hz
+     */
+    template <class CIter, class Iter>
+      bool complexWeights(CIter weights, CIter weights_end,
+                          Iter delays, Iter delays_end,
+                          Iter frequencies, Iter frequencies_end)
+      {
+        CIter w=weights;
+        Iter d=delays;
+        Iter f=frequencies;
+
+        while (w!=weights_end && d!=delays_end)
+        {
+          // Repeat frequencies until weights array is full
+          f=frequencies;
+          while (f!=frequencies_end && w!=weights_end)
+          {
+            *w=std::exp(std::complex<double>(0.0, static_cast<double>(phase(*f, *d))));
+
+            ++f;
+            ++w;
+          }
+          ++d;
+        }
+
+        // Check if all arrays have been processed correctly
+        if (w==weights_end && d==delays_end && f==frequencies_end)
+        {
+          return true;
+        }
+        else
+        {
+          return false;
+        }
+      }
+
+    /*!
       \brief Calculates the time delay in seconds for a signal received at
       an antenna position relative to a phase center from a source located
       in a certain direction in farfield.
@@ -87,6 +128,19 @@ namespace ttl
       \brief Calculates the time delay in seconds for signals received at
       various antenna positions relative to a phase center from sources
       located at certain 3D space coordinates in near or far field.
+
+      \param delays Output vector containing the delays in seconds for all
+      antennas and positions [antenna index runs fastest:
+      (ant1,pos1),(ant2,pos1),...] - length of vector has to be number of
+      antennas times positions.
+      \param antPositions Cartesian antenna positions (Meters) relative to
+      a reference location (phase center) - vector of length number of
+      antennas times three.
+      \param skyPositions Vector in Cartesian coordinates (Meters) pointing
+      towards a sky location, relative to phase center - vector of length
+      number of skypositions times three.
+      \param farfield Calculate in farfield approximation if true, otherwise
+      do near field calculation.
     */
     template <class Iter>
       void geometricDelays(const Iter delays,
