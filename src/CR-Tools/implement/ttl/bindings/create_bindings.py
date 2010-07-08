@@ -42,15 +42,17 @@ def indent(incode, indent='', addindent='  '):
 
     return outcode
 
-def insertTypes(template, argtypes, block=""):
+def insertTypes(template, argnames, argtypes, block=""):
     """Insert types into function call template."""
 
-    if len(argtypes)==1:
+    nitargs = len(argtypes)
 
-    else:
-        return insertTypes(template, argtypes, block)
+    print argnames
+    print argtypes
 
-def parse_file(f):
+    return template
+
+def parse_file(f, warnings=False):
     """Parse header file with template functions to XML DOM.
     """
 
@@ -140,8 +142,10 @@ def parse_file(f):
                 # Add docstring if found
                 if comment:
                     element.setAttribute('docstring', comment)
-                else:
+                elif warnings:
                     print 'Warning: function '+fname+' has no docstring'
+                else:
+                    pass
 
                 # Add function element to dom
                 function = current_node.appendChild(element)
@@ -183,8 +187,10 @@ def parse_file(f):
                         if name in arg_comment:
                             docstring = arg_comment[name]
                             element.setAttribute('docstring', docstring)
-                        else:
+                        elif warnings:
                             print 'Warning: argument '+name+' of function '+fname+' has no docstring.'
+                        else:
+                            pass
 
                         # Add argument node to dom as child of function node
                         function.appendChild(element)
@@ -275,6 +281,7 @@ def elementToCode(node, namespace=''):
 
         # Store function call placeholder to loop over types
         placeholder=""
+        argnames=[]
         argtypes=[]
         iarg=0
 
@@ -311,9 +318,13 @@ def elementToCode(node, namespace=''):
                     # Wrap input numpy ndarray with functions to get
                     # the begin and end iterators
                     if re.search('CIter', type):
-                        argtypes.append([' std::complex<double> '])
-
+                        argnames.append(name)
+                        argtypes.append(['complex'])
+                    elif re.search('DIter', type):
+                        argnames.append(name)
+                        argtypes.append(['double'])
                     else:
+                        argnames.append(name)
                         argtypes.append(['int', 'long', 'float', 'double'])
 
                     placeholder+='ttl::numpyBeginPtr<'+'TYPE'+str(iarg)+'>('+name.strip()+'), ttl::numpyEndPtr<'+'TYPE'+str(iarg)+'>('+name.strip()+')'
@@ -339,8 +350,13 @@ def elementToCode(node, namespace=''):
                     # Wrap input numpy ndarray with functions to get
                     # the begin iterator
                     if re.search('CIter', type):
-                        argtypes.append([' std::complex<double> '])
+                        argnames.append(name)
+                        argtypes.append(['complex'])
+                    elif re.search('DIter', type):
+                        argnames.append(name)
+                        argtypes.append(['double'])
                     else:
+                        argnames.append(name)
                         argtypes.append(['int', 'long', 'float', 'double'])
 
                     placeholder+='ttl::numpyBeginPtr<'+'TYPE'+str(iarg)+'>('+name.strip()+')'
@@ -367,7 +383,7 @@ def elementToCode(node, namespace=''):
         # Add TTL function closing
         placeholder+=')'+';\n'
 
-        code+=insertTypes(placeholder, argtypes)
+        code+=insertTypes(placeholder, argnames, argtypes)
 
         # Add function closing
         code+='}\n\n'
@@ -471,7 +487,7 @@ if not args:
 f = open(args[0])
 
 # Parse input file into DOM tree
-dom = parse_file(f)
+dom = parse_file(f, options.verbose)
 
 # Write output file
 out = open(options.outdir+'/'+args[0].split('/')[-1].rstrip('h')+'cc', 'w')
