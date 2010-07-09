@@ -44,21 +44,11 @@ if (CR_WITH_PYCR)
   file (GLOB pycr_sources *.cc)
 
   ## compiler instructions
-  add_library (pycr MODULE
-# They aren't actually needed, as this is in the cr library! 
-#   ../Analysis/DynamicSpectrum.cc
-#   ../Coordinates/CoordinateType.cc
-#   ../Coordinates/TimeFreq.cc
-#   ../IO/DataIterator.cc
-#   ../IO/DataReader.cc
-#   ../IO/LOFAR_TBB.cc
-#   ../Filters/BasicFilter.cc
-#   ../Filters/HanningFilter.cc
-#   ../Coordinates/MConversions.cc
+  add_library (_pycr MODULE
     ${pycr_sources}
     )
   ## linker instructions
-  target_link_libraries(pycr
+  target_link_libraries(_pycr
     cr
     ${DAL_LIBRARIES}
     ${HDF5_LIBRARIES}
@@ -70,7 +60,7 @@ if (CR_WITH_PYCR)
     )
   ## additional target properties
   if (APPLE)
-    set_target_properties (pycr
+    set_target_properties (_pycr
       PROPERTIES
       PREFIX ""
       SUFFIX .so
@@ -78,7 +68,7 @@ if (CR_WITH_PYCR)
       LINK_FLAGS "-fPIC -flat_namespace"
       )
   else (APPLE)
-    set_target_properties (pycr
+    set_target_properties (_pycr
       PROPERTIES
       PREFIX ""
       SUFFIX .so
@@ -86,12 +76,20 @@ if (CR_WITH_PYCR)
       LINK_FLAGS "-fPIC -shared -Wl"
       )
   endif (APPLE)
-  ## installation
-  install (
-    TARGETS pycr
-    LIBRARY DESTINATION lib/python
-    )
+
+##__________________________________________________________
+## Installation
+
+# Install _pycr C++ module
+install (TARGETS _pycr
+        LIBRARY DESTINATION lib/python
+        )
   
+# Install pycr Python module
+install (PROGRAMS pycr.py
+        DESTINATION lib/python
+        )
+
 endif (CR_WITH_PYCR)
 
 ## =============================================================================
