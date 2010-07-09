@@ -1,6 +1,6 @@
+import pycrtools #import this first, so that pycr overwrites the DatxaReader
 import pycr as cr
 import ttl
-##from pycrtools import *
 import numpy as np
 #import scipy as sp
 import matplotlib.pyplot as plt
