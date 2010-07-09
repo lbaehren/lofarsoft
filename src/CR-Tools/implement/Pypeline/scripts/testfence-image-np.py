@@ -50,13 +50,13 @@ blocksize = dr.crFileGetParameter("Blocksize")
 fftlength = dr.crFileGetParameter("fftlength")
 
 cr_time = np.empty( (blocksize) )
-dr.crRead("Time",cr_time)
+dr.read("Time",cr_time)
 
 cr_freqs = np.empty( (fftlength) )
-dr.crRead("Frequency",cr_freqs)
+dr.read("Frequency",cr_freqs)
 
 cr_efield = np.empty( (ants, blocksize) )
-dr.crRead("Fx",cr_efield)
+dr.read("Fx",cr_efield)
 
 """
 
