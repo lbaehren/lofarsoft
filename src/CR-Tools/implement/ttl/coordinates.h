@@ -237,20 +237,34 @@ namespace ttl
                                 DIter in, DIter in_end,
                                 bool anglesInDegrees)
       {
+	double deg2rad = (3.14159265359/180.);
+	  
         // Get iterators
         DIter out_it=out;
         DIter in_it=in;
-
+	
         // Loop over coordinates
-        while (out_it!=out_end && in_it!=in_end)
-        {
-          *out_it     = *(in_it+2)*cos(*(in_it+1))*sin(*in_it);
-          *(out_it+1) = *(in_it+2)*cos(*(in_it+1))*cos(*in_it);
-          *(out_it+2) = *(in_it+2)*sin(*(in_it+1));
-
-          in_it=in_it+3;
-          out_it=out_it+3;
-        }
+	if (anglesInDegrees) {
+	  while (out_it!=out_end && in_it!=in_end)
+	    {
+	      *out_it     = *(in_it+2)*cos(*(in_it+1) * deg2rad)*sin(*in_it * deg2rad);
+	      *(out_it+1) = *(in_it+2)*cos(*(in_it+1) * deg2rad)*cos(*in_it * deg2rad);
+	      *(out_it+2) = *(in_it+2)*sin(*(in_it+1) * deg2rad);
+	      
+	      in_it=in_it+3;
+	      out_it=out_it+3;
+	    }
+	} else {
+	  while (out_it!=out_end && in_it!=in_end)
+	    {
+	      *out_it     = *(in_it+2)*cos(*(in_it+1))*sin(*in_it);
+	      *(out_it+1) = *(in_it+2)*cos(*(in_it+1))*cos(*in_it);
+	      *(out_it+2) = *(in_it+2)*sin(*(in_it+1));
+	      
+	      in_it=in_it+3;
+	      out_it=out_it+3;
+	    }
+	};
       }
   } // End coordinates
 } // End ttl

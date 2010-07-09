@@ -37,7 +37,12 @@ namespace ttl
 
     bool forwardFFTW(boost::python::numeric::array out, boost::python::numeric::array in)
     {
-      return ttl::fft::forwardFFTW(ttl::numpyBeginPtr< std::complex<double> >(out), ttl::numpyBeginPtr<double>(in));
+      return ttl::fft::forwardFFTW(ttl::numpyBeginPtr< std::complex<double> >(out), ttl::numpyEndPtr< std::complex<double> >(out), ttl::numpyBeginPtr<double>(in), ttl::numpyEndPtr<double>(in));
+    }
+
+    bool backwardFFTW(boost::python::numeric::array out, boost::python::numeric::array in)
+    {
+      return ttl::fft::backwardFFTW(ttl::numpyBeginPtr<double>(out), ttl::numpyEndPtr<double>(out), ttl::numpyBeginPtr< std::complex<double> >(in), ttl::numpyEndPtr< std::complex<double> >(in));
     }
 
     } // End bindings
@@ -52,6 +57,7 @@ BOOST_PYTHON_MODULE(fft)
 
   boost::python::register_exception_translator<ttl::TypeError>(ttl::exceptionTranslator);
 
-  def("forwardFFTW", ttl::bindings::forwardFFTW, "Calculates the forward FFT\n\n*out* output array\n*in* input array\n");
+  def("forwardFFTW", ttl::bindings::forwardFFTW, "Calculates the forward FFT real -> complex\n\n\n      This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf\n\n      The DFT results are stored in-order in the array out, with the\n      zero-frequency (DC) component in data_out[0].\n\n      Users should note that FFTW computes an unnormalized DFT. Thus,\n      computing a forward followed by a backward transform (or vice versa)\n      results in the original array scaled by N.\n\n      The size N can be any positive integer, but sizes that are products of\n      small factors are transformed most efficiently (although prime sizes\n      still use an O(N log N) algorithm).\n\n*out* output array\n*out_end* \n*in* input array\n*in_end* \n");
+  def("backwardFFTW", ttl::bindings::backwardFFTW, "Calculates the backward FFT complex -> real\n\n\n      Users should note that FFTW computes an unnormalized DFT. Thus,\n      computing a forward followed by a backward transform (or vice versa)\n      results in the original array scaled by N.\n\n*out* output array\n*out_end* \n*in* input array\n*in_end* \n");
 }
 

@@ -245,6 +245,161 @@ namespace CR { // Namespace CR -- begin
     // === Copy numpy to casa with type cast =======================================
 
     /*!
+      \brief Copy data from a numpy array and convert its type
+
+      \param pydata      -- boost-style "wrapped" numpy array
+      \param outdata     -- start iterator for the output data
+      \param outdata_end -- end iterator for the output data
+    
+      \return true if everyting worked
+    */    
+    template <class Iter> bool copyCastFromNumpy(bpl::numeric::array pydata,
+					      Iter outdata, Iter outdata_end) {
+      typedef typename iterator_traits<Iter>::value_type T;
+      // test if the numpy-array has the preperties we need
+      // (they throw exceptions if not)
+      num_util::check_contiguous(pydata);
+      
+      int i=0, size=num_util::size(pydata);
+      Iter currdata=outdata;
+
+      switch (num_util::type(pydata)){
+      case PyArray_BYTE: 
+	{
+	  char *charptr = numpyBeginPtr<char>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  { 
+	    *currdata = static_cast<T>(charptr[i]);
+	    currdata++; i++;
+	  }
+	}
+	break;
+      case PyArray_UBYTE:
+	{
+	  unsigned char *ucharptr = numpyBeginPtr<unsigned char>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  { 
+	    *currdata = static_cast<T>(ucharptr[i]);
+	    currdata++; i++;
+	  }
+	}
+	break;
+      case PyArray_SHORT:
+	{
+	  short *shortptr = numpyBeginPtr<short>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  {  
+	    *currdata = static_cast<T>(shortptr[i]);
+	    currdata++; i++;
+	  }
+	}
+      	break;
+      case PyArray_USHORT:
+	{
+	  unsigned short *ushortptr = numpyBeginPtr<unsigned short>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  {  
+	    *currdata = static_cast<T>(ushortptr[i]);
+	    currdata++; i++;
+	  }
+	}
+      	break;
+      case PyArray_INT:
+	{
+	  int *intptr = numpyBeginPtr<int>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  {   
+	    *currdata = static_cast<T>(intptr[i]);
+	    currdata++; i++;
+	  }
+	}
+      	break;
+      case PyArray_UINT:
+	{
+	  unsigned int *uintptr = numpyBeginPtr<unsigned int>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  {   
+	    *currdata = static_cast<T>(uintptr[i]);
+	    currdata++; i++;
+	  }
+	}
+      	break;
+      case PyArray_LONG:
+	{
+	  long *longptr = numpyBeginPtr<long>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  {   
+	    *currdata = static_cast<T>(longptr[i]);
+	    currdata++; i++;
+	  }
+	}
+      	break;
+      case PyArray_ULONG:
+	{
+	  unsigned long *ulongptr = numpyBeginPtr<unsigned long>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  {   
+	    *currdata = static_cast<T>(ulongptr[i]);
+	    currdata++; i++;
+	  }
+	}
+      	break;
+      case PyArray_LONGLONG:
+	{
+	  long long *llptr = numpyBeginPtr<long long>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  {   
+	    *currdata = static_cast<T>(llptr[i]);
+	    currdata++; i++;
+	  }
+	}
+      	break;
+      case PyArray_ULONGLONG:
+	{
+	  unsigned long long *ullptr = numpyBeginPtr<unsigned long long>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  {   
+	    *currdata = static_cast<T>(ullptr[i]);
+	    currdata++; i++;
+	  }
+	}
+      	break;
+      case PyArray_FLOAT:
+	{
+	  float *flptr = numpyBeginPtr<float>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  {   
+	    *currdata = static_cast<T>(flptr[i]);
+	    currdata++; i++;
+	  }
+	}
+      	break;
+      case PyArray_DOUBLE:
+	{
+	  double *doubleptr = numpyBeginPtr<double>(pydata);
+	  while ( (i<size) && (currdata != outdata_end))  {   
+	    *currdata = static_cast<T>(doubleptr[i]);
+	    currdata++; i++;
+	  }
+	}
+      	break;
+      default:
+	cout << "copyCastFromNumpy: Type of numpy-array not implemented!" << endl;
+	break;
+      };
+      
+      if (i != size){
+	cerr << "copyCastFromNumpy: Supplied ierators and numpy array have different sitze!" << endl;
+	return false;
+      }
+ 
+      return true;
+    };
+
+    
+    /*!
+      \brief Copy data from a numpy array and convert its type, also for complex values
+      
+      \param pydata      -- boost-style "wrapped" numpy array
+      \param outdata     -- start iterator for the complex-valued output data 
+      \param outdata_end -- end iterator for the complex-valued output data
+      
+      \return true if everyting worked
+    */    
+    template <class Iter> bool copyCastFromNumpyComplex(bpl::numeric::array pydata,
+							Iter outdata, Iter outdata_end);
+      
+
+    /*!
       \brief Copy a numpy array to a casa array and convert the type
     
       \param pydata -- boost-style "wrapped" numpy array
@@ -254,13 +409,9 @@ namespace CR { // Namespace CR -- begin
     */
     template <class T> bool casaFromNumpyCast(bpl::numeric::array pydata, 
 					      casa::Array<T> &casaarray ) {
-      // test if the numpy-array has the preperties we need
-      // (they throw exceptions if not)
-      num_util::check_contiguous(pydata);
     
       // get the shape of the numpy-array
       int i,rank = num_util::rank(pydata);
-      int size=num_util::size(pydata);
       casa::IPosition shape(rank);
       for (i=0; i<rank; i++){
 	shape[(rank-i-1)] = num_util::get_dim(pydata, i);
@@ -268,100 +419,9 @@ namespace CR { // Namespace CR -- begin
       
       //reshape the output array and get pointer to it
       casaarray.resize(shape);
-      Bool  deleteIt;
-      T * datapointer = casaarray.getStorage(deleteIt);
-      
-      switch (num_util::type(pydata)){
-      case PyArray_BYTE: 
-	{
-	  char *charptr = numpyBeginPtr<char>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(charptr[i]);
-	}
-	break;
-      case PyArray_UBYTE:
-	{
-	  unsigned char *ucharptr = numpyBeginPtr<unsigned char>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(ucharptr[i]);
-	}
-	break;
-      case PyArray_SHORT:
-	{
-	  short *shortptr = numpyBeginPtr<short>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(shortptr[i]);
-	}
-      	break;
-      case PyArray_USHORT:
-	{
-	  unsigned short *ushortptr = numpyBeginPtr<unsigned short>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(ushortptr[i]);
-	}
-      	break;
-      case PyArray_INT:
-	{
-	  int *intptr = numpyBeginPtr<int>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(intptr[i]);
-	}
-      	break;
-      case PyArray_UINT:
-	{
-	  unsigned int *uintptr = numpyBeginPtr<unsigned int>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(uintptr[i]);
-	}
-      	break;
-      case PyArray_LONG:
-	{
-	  long *longptr = numpyBeginPtr<long>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(longptr[i]);
-	}
-      	break;
-      case PyArray_ULONG:
-	{
-	  unsigned long *ulongptr = numpyBeginPtr<unsigned long>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(ulongptr[i]);
-	}
-      	break;
-      case PyArray_LONGLONG:
-	{
-	  long long *llptr = numpyBeginPtr<long long>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(llptr[i]);
-	}
-      	break;
-      case PyArray_ULONGLONG:
-	{
-	  unsigned long long *ullptr = numpyBeginPtr<unsigned long long>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(ullptr[i]);
-	}
-      	break;
-      case PyArray_FLOAT:
-	{
-	  float *flptr = numpyBeginPtr<float>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(flptr[i]);
-	}
-      	break;
-      case PyArray_DOUBLE:
-	{
-	  double *doubleptr = numpyBeginPtr<double>(pydata);
-	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(doubleptr[i]);
-	}
-      	break;
-      // case PyArray_CFLOAT:
-      // 	{
-      // 	  std::complex<float>  *complexptr = numpyBeginPtr< std::complex<float> >(pydata);
-      // 	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(complexptr[i]);
-      // 	}
-      // 	break;
-      // case PyArray_CDOUBLE:
-      // 	{
-      // 	  std::complex<double>  *dcomplexptr = numpyBeginPtr< std::complex<double> >(pydata);
-      // 	  for (i=0; i<size; i++) datapointer[i] = static_cast<T>(dcomplexptr[i]);
-      // 	}
-      // 	break;
-      default:
-	cout << "casaFromNumpyCast: Type of numpy-array not implemented!" << endl;
-	break;
-      };
-      casaarray.putStorage(datapointer, deleteIt);
-  
+
+      copyCastFromNumpy(pydata, casaarray.begin(), casaarray.end() );
+ 
       return true;
     };
 
@@ -419,7 +479,7 @@ namespace CR { // Namespace CR -- begin
     */
     template <class T> casa::Vector<T> casaFromList(bpl::list pylist){
       int i,size=PyList_Size(pylist.ptr());
-      std::vector<T> outvec(size);
+      casa::Vector<T> outvec(size);
       for (i=0; i<size; i++) outvec[i] = bpl::extract<T>(pylist[i]);
       return outvec;
     }
@@ -456,11 +516,8 @@ namespace CR { // Namespace CR -- begin
       \return STL vector
     */
     template <class T> std::vector<T> STLVecFromNumpy(bpl::numeric::array nparray){
-      std::vector<T> vec;
-      T * arrayptr=numpyBeginPtr<T>(nparray);
-      int i,size=num_util::size(nparray); 
-      vec.reserve(size);
-      for (i=0;i<size;++i) vec.push_back(arrayptr[i]);
+      std::vector<T> vec(num_util::size(nparray));
+      copyCastFromNumpy(nparray, vec.begin(), vec.end() );
       return vec;
     }
 

@@ -26,6 +26,7 @@
 #include <Bindings/pycr_numpycasa.h>
 #include <IO/LopesEventIn.h>
 #include <IO/LOFAR_TBB.h>
+#include <Data/tbbctlIn.h>
 
 namespace CR { // Namespace CR -- begin
   namespace PYCR { // Namespace PYCR -- begin
@@ -43,6 +44,8 @@ namespace CR { // Namespace CR -- begin
 	filetype = "LOPESEvent";
       } else if (ext=="h5") {
 	filetype = "LOFAR_TBB";
+      } else if (ext=="dat") {
+	filetype = "tbbctl";
       }
       return CRFileOpenType(filename, filetype);
     };
@@ -60,6 +63,11 @@ namespace CR { // Namespace CR -- begin
 	drp = new CR::LOFAR_TBB(Filename,1024);
 	opened= drp != NULL;
 	cout << "Opening LOFAR File="<<Filename<<endl; drp->summary();
+      } else if (filetype == "tbbctl") {
+	CR::tbbctlIn* tbbp = new CR::tbbctlIn;
+	opened= tbbp->attachFile(casa::Vector<casa::String>(1,casa::String(Filename)));
+	drp = tbbp;
+	cout << "Opening tbbctl-dump File="<<Filename<<endl; drp->summary();
       } else {
 	cout << "CR::PYCR::CRFileOpen: Error: Unknown Filetype = " << filetype  << ", Filename=" << Filename << endl;
 	opened=false;
