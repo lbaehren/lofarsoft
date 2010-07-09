@@ -8,6 +8,7 @@ from _pycr import *
 
 # Try to import everything from the TTL
 try:
+    import ttl
     from ttl import *
 except ImportError:
     warnings.warn('Could not import ttl module, algorithms from ttl will not be available.')
