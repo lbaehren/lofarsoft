@@ -1,16 +1,11 @@
-import pycrtools #import this first, so that pycr overwrites the DatxaReader
+#! /usr/bin/env python
+
 import pycr as cr
 import ttl
 import numpy as np
-#import scipy as sp
 import matplotlib.pyplot as plt
-#import pyfits
 import os
 import metadata
-
-def p_(var):
-    if (type(var)==list): map(lambda x:p_(x),var)
-    else: print " ",var,"=>",eval(var)
 
 #------------------------------------------------------------------------
 """
@@ -40,22 +35,22 @@ FarField=True
 """
   Open the file, set the parameters in the DataReader, and get the data
 """
-dr = cr.crFileOpen(filename)
+dr = cr.open(filename)
 
-dr.crFileSetParameter("Blocksize", 512)
-dr.crFileSetParameter("Block", 128)
+dr.blocksize = 512
+dr.block = 128
 
-ants = dr.crFileGetParameter("nofantennas")
-blocksize = dr.crFileGetParameter("Blocksize")
-fftlength = dr.crFileGetParameter("fftlength")
+ants = dr["nofantennas"]
+blocksize = dr["blocksize"]
+fftlength = dr["fftlength"]
 
-cr_time = np.empty( (blocksize) )
+cr_time = np.empty(blocksize)
 dr.read("Time",cr_time)
 
-cr_freqs = np.empty( (fftlength) )
+cr_freqs = np.empty(fftlength)
 dr.read("Frequency",cr_freqs)
 
-cr_efield = np.empty( (ants, blocksize) )
+cr_efield = np.empty((ants, blocksize))
 dr.read("Fx",cr_efield)
 
 """
@@ -141,11 +136,11 @@ for el_ind in range(n_el):
         for tindex in range( (250-100) ):
             pixarray_time[tindex,(n_el-el_ind-1),az_ind] = beamformed_efield_smoothed[100:250].vec()[tindex]/cr["blocksize"]
 """
-#pixarray[0,0]=np.max(pixarray)
+
 plt.imshow(pixarray,cmap=plt.cm.hot,extent=((azRange[0]-azRange[2]/2),(azRange[1]-azRange[2]/2),(elRange[0]-elRange[2]/2),(elRange[1]-elRange[2]/2)))
 plt.xlabel("Azimuth [deg]")
 plt.ylabel("Elevation [deg]")
-
+plt.show()
 
 """
 hdu = pyfits.PrimaryHDU(pixarray_time)

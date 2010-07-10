@@ -48,3 +48,11 @@ f.read("fx", efield)
 print 'Fx:'
 print efield
 
+# Get some metadata from an external source
+f.station = 'CS302'
+f.antennaset = 'HBA'
+
+print 'Antenna positions:'
+antpos = f['antpos']
+print antpos
+

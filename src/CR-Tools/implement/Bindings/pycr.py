@@ -6,6 +6,9 @@ import warnings
 # Import everything from the C++ module
 from _pycr import *
 
+# Import module for temporary access to metadata
+import metadata
+
 # Try to import everything from the TTL
 try:
     import ttl
@@ -73,8 +76,13 @@ class __extended_DataReader(__injector, DataReader):
 
     """
 
-    __antennas = None
+    # Local variables
     __keys = None
+
+    # Temporary metadata
+    __metadata = ['antpos']
+    __station = None
+    __antennaset = None
 
     def keys(self):
         """Returns list of parameters in datafile.
@@ -82,13 +90,20 @@ class __extended_DataReader(__injector, DataReader):
         if not self.__keys:
             self.__keys = [k.strip().lower() for k in self.crFileGetParameter('keywords').split(',')]
 
+            # Add metadata
+            self.__keys.extend(self.__metadata)
+
         return self.__keys
 
     def __getitem__(self, key):
         """Operator [], for f['parameter'] returning parameter from
         datafile."""
         if isinstance(key, str) and key in self.keys():
-            return self.crFileGetParameter(key)
+            # Metadata is currently obtained from external sources
+            if key in self.__metadata:
+                return self.__getExternalMetadata(key)
+            else:
+                return self.crFileGetParameter(key)
         else:
             raise KeyError(key)
 
@@ -147,6 +162,32 @@ class __extended_DataReader(__injector, DataReader):
         self.crFileSetParameter('selectedantennas', value)
 
     selectedantennas = property(__getSelectedAntennas, __setSelectedAntennas)
+
+    ## ---------------------------------------------------------------------
+    #  Metadata from external sources
+    def __getExternalMetadata(self, key):
+        if key == 'antpos':
+            return metadata.getRelativeAntennaPositions(self.__station, self.__antennaset)
+        else:
+            raise KeyError('Requested metadata key not recognised.')
+
+    # station
+    def __getStation(self):
+        return self.__station
+
+    def __setStation(self, value):
+        self.__station = value
+
+    station = property(__getStation, __setStation)
+
+    # antennaset
+    def __getAntennaset(self):
+        return self.__antennaset
+
+    def __setAntennaset(self, value):
+        self.__antennaset = value
+
+    antennaset = property(__getAntennaset, __setAntennaset)
 
 def open(filename, filetype=None):
     """Open a HDF5 file, returns a DataReader object. This is the

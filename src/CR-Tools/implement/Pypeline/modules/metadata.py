@@ -2,7 +2,6 @@
 """
 
 ## Imports
-import pycrtools as hf
 import numpy as np
 import struct
 import os
@@ -254,6 +253,7 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
    
     # Return requested type
     if return_as_hArray:
+        import pycrtools as hf
         antpos=hf.hArray(antpos,[2*int(nrantennas),int(nrdir)])
     else:
         antpos=np.asarray(antpos).reshape(2*int(nrantennas),int(nrdir))
