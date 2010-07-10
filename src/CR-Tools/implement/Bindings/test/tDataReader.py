@@ -31,19 +31,19 @@ fftlength = f['fftlength']
 
 # Read some data
 time = np.empty(blocksize)
-f.read("Time", time)
+f.read("time", time)
 
 print 'Time:'
 print time
 
 freqs = np.empty(fftlength)
-f.read("Frequency", freqs)
+f.read("frequency", freqs)
 
 print 'Frequency:'
 print freqs
 
 efield = np.empty((ants, blocksize))
-f.read("Fx", efield)
+f.read("fx", efield)
 
 print 'Fx:'
 print efield
