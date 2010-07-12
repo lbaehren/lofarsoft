@@ -2099,7 +2099,7 @@ int main (int argc, char *argv[])
             lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
               Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
-                                                                       calibPulsesMap, map <int, PulseProperties>(),
+                                                                       newPulses, map <int, PulseProperties>(),
                                                                        gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"));
               R_0_NS  = latResults.asDouble("R_0");
               sigR_0_NS  = latResults.asDouble("sigR_0");
@@ -2131,7 +2131,7 @@ int main (int argc, char *argv[])
 
             //taking the sign of the signal, looping on all the antennas
             if (config["CalculateMaxima"]->bValue())
-              eventPipeline.calculateSign(calibPulsesMap,ratioDiffSign,ratioDiffSignEnv,weightedTotSign,weightedTotSignEnv);
+              eventPipeline.calculateSign(newPulses,ratioDiffSign,ratioDiffSignEnv,weightedTotSign,weightedTotSignEnv);
           } else {
             cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
                  << config["polarization"]->sValue() << "' polarization, skipping..." << endl;
@@ -2235,7 +2235,7 @@ int main (int argc, char *argv[])
             lateralFitter.setLateralTimeCut(config["lateralTimeCut"]->dValue());
             if (config["lateralDistribution"]->bValue()) {
               Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
-                                                                       calibPulsesMap, map <int, PulseProperties>(),
+                                                                       newPulses, map <int, PulseProperties>(),
                                                                        gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"));
               R_0_VE = latResults.asDouble("R_0");
               sigR_0_VE = latResults.asDouble("sigR_0");
@@ -2267,7 +2267,7 @@ int main (int argc, char *argv[])
 
             //taking the sign of the signal, looping on all the antennas
             if (config["CalculateMaxima"]->bValue())
-              eventPipeline.calculateSign(calibPulsesMap,ratioDiffSign,ratioDiffSignEnv,weightedTotSign,weightedTotSignEnv);
+              eventPipeline.calculateSign(newPulses,ratioDiffSign,ratioDiffSignEnv,weightedTotSign,weightedTotSignEnv);
           } else {
             cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
                  << config["polarization"]->sValue() << "' polarization, skipping..." << endl;
