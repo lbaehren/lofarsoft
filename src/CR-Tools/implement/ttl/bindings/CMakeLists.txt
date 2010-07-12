@@ -37,24 +37,27 @@ else (HAVE_NUM_UTIL)
   set (TTL_WITH_BINDINGS OFF)
 endif (HAVE_NUM_UTIL)
 
-##__________________________________________________________
-## Build the library
+if (TTL_WITH_BINDINGS)
 
-set (MODULES
+  ##__________________________________________________________
+  ## Build the library
+
+
+  set (MODULES
     math
     beamforming
     coordinates
     fft
     )
 
-foreach (MODULE ${MODULES})
+  foreach (MODULE ${MODULES})
     file (GLOB module_sources ${MODULE}*.cc)
-    
+
     ## compiler instructions
     add_library (${MODULE} MODULE
       ${module_sources}
       )
-    
+
     ## linker instructions
     target_link_libraries(${MODULE}
       cr
@@ -62,7 +65,7 @@ foreach (MODULE ${MODULES})
       ${BOOST_LIBRARIES}
       ${NUM_UTIL_LIBRARIES}
       )
-    
+
     ## additional target properties
     if (APPLE)
       set_target_properties (${MODULE}
@@ -81,31 +84,32 @@ foreach (MODULE ${MODULES})
         LINK_FLAGS "-fPIC -shared -Wl"
         )
     endif (APPLE)
-endforeach (MODULE)
+  endforeach (MODULE)
 
-##__________________________________________________________
-## Installation
+  ##__________________________________________________________
+  ## Installation
 
-# Install package init script
-install (PROGRAMS __init__.py
-        DESTINATION lib/python/ttl
-        )
+  # Install package init script
+  install (PROGRAMS __init__.py
+    DESTINATION lib/python/ttl
+    )
 
-# Install modules
-foreach (MODULE ${MODULES})
+  # Install modules
+  foreach (MODULE ${MODULES})
     install (
       TARGETS ${MODULE}
       LIBRARY DESTINATION lib/python/ttl
       )
-endforeach (MODULE)
+  endforeach (MODULE)
 
-## =============================================================================
-##
-##  Test scripts
-##
-## =============================================================================
+  ## =============================================================================
+  ##
+  ##  Test scripts
+  ##
+  ## =============================================================================
 
-if (TTL_BUILD_TESTS)
-  add_subdirectory (test)
-endif (TTL_BUILD_TESTS)
+  if (TTL_BUILD_TESTS)
+    add_subdirectory (test)
+  endif (TTL_BUILD_TESTS)
 
+endif (TTL_WITH_BINDINGS)
