@@ -77,10 +77,13 @@
   \verbatim
   ./compareLOPES2sim --help
   \endverbatim
+
+  <h3>Usage of the dictionary file</h3>
+ #LOPES-GT,simName,source,KRETA_ver,az_in(deg),errAz_in(deg),ze_in(deg),errZe_in(deg),coreN_in(m),coreE_in(m),errCore(m),Ne_in,Nmu_in,Nmu^tr_in,E_in(eV),errlgE
 */
 
 const static bool simulationDistances = false; //true;  // decide wether to use the lateral distances of simulation or of data
-const static double gradeg=180./(TMath::Pi());
+const static double gradeg=(180./TMath::Pi());
 
 int main (int argc, char *argv[])
 {
@@ -161,10 +164,14 @@ int main (int argc, char *argv[])
       cerr << "Use --help for more information." << endl;
       return 1;                 
     }
-    
+    double AzDictS=0.,ZeDictS=0.;  //from the dict file, azimuth and zenith used for the simulations (so or from KA or from Grande)
+    string source, kreta;
+
     // map dic declaration
     map<int,string> m_dict;
-    //in the dict file now are dummy values for Ze and Az; anyway, for the REAS sim, directy the value of Az and Ze from KASCADE have been taken!and converted into REAS system only in the REAS tool!
+    map<int,double> m_dictAz;
+    map<int,double> m_dictZe;
+
     
     // open dictionary with simulations, if it is provided
     if (simDictName!="") {
@@ -186,9 +193,14 @@ int main (int argc, char *argv[])
         dictFile.getline(buffer,1024);
         istringstream iss (buffer);
         if(iss.str().size()>0&&iss.str()[0]!='%'&&iss.str()[0]!='#') {
-          iss>>GtDict>>simNameDict>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy;
+
+          //#LOPES-GT,simName,source,KRETA_ver,az_in(deg),errAz_in(deg),ze_in(deg),errZe_in(deg),coreN_in(m),coreE_in(m),errCore(m),Ne_in,Nmu_in,Nmu^tr_in,E_in(eV),errlgE
+          iss>> GtDict>>simNameDict>>source>>kreta>>AzDictS>>dummy>>ZeDictS>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy>>dummy;
           m_dict[GtDict]=simNameDict; //fill the map dictionary 
+          m_dictAz[GtDict]=AzDictS;
+          m_dictZe[GtDict]=ZeDictS;
           cout<<""<<simNameDict <<" - GT " <<GtDict<<endl;
+          cout<<"from dict file Az: "<<AzDictS<<"deg ; zeS: " <<ZeDictS<<"deg "<<endl;
         }
         if (!dictFile.good())
           break;
@@ -720,6 +732,11 @@ int main (int argc, char *argv[])
           continue;
         }
         // get simulation azimuth and zenith form dictionary
+        AzDictS = m_dictAz[Gt]; //in deg!
+        ZeDictS = m_dictZe[Gt];
+        //check that are the same!
+        //cout<<"from dict file Az: "<<AzDictS<<"   ; zeS: " <<ZeDictS<<endl;
+        //cout<<"from KA        Az: "<<Az*gradeg<<" ; zeS: " <<Ze*gradeg<<endl;
         char buffer2[1024];
         while (reasFile.good()) {
           reasFile.getline(buffer2,1024);
@@ -730,7 +747,7 @@ int main (int argc, char *argv[])
             if(azS<0.){
             azS = azS+360.; //azS in grad
              }
-            //cout<<Gt<<"azim from REAS: "<<azSREAS*gradeg<<" and converted to LOPES: "<<azS<<endl;
+            //cout<<Gt<<"-"<<m_dict[Gt]<<": summaryfile.dat az: "<<azSREAS*gradeg<<" and converted to LOPES: "<<azS<<endl;
             //look if antenna exists at all in data then separe EW and NS
             if (m_recPulses.find(NantS) != m_recPulses.end()) {
               // convert e-field to LOPES units
@@ -747,10 +764,9 @@ int main (int argc, char *argv[])
               }
               
               // direction used for lateral distance calculation
-              //values from KASCADE rec (same values given for the simulations!!!!)
-              //(Az=0 in the north! same as LOPES!)
-              azimuth = Az/gradeg; 
-              zenith = Ze/gradeg;
+              //values from KASCADE or Grande, so taken from the dict file //(Az=0 in the north! same as LOPES!)
+              azimuth = AzDictS/gradeg; 
+              zenith = ZeDictS/gradeg;
             
               if (m_recPulses[NantS].polarization == "EW") {
                 //cout<<"   xxxxxx   EW polarization   xxxxxx  "<<endl;
@@ -888,7 +904,8 @@ int main (int argc, char *argv[])
       outtree->Fill();
       rootOutfile->Write("",TObject::kOverwrite);
     }//loop on the rec event 
-
+    checkDistanceEW.close();
+    checkDistanceNS.close();
     outputEW.close();
     outputNS.close();
     recRoot->Close();
