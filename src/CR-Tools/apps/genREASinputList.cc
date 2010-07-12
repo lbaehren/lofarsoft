@@ -44,7 +44,7 @@
 
   \brief Creates ASCII list from results of call_pipeline, for input to REAS
 
-  \author Frank Schr&ouml;der, Nunzia Palmieri
+  \author Frank Schröder, Nunzia Palmieri
 
   \date 2010/Apr/06
 
@@ -369,7 +369,7 @@ int main(int argc, char* argv[])
         <<"TCut = "<<cut<<endl
        // <<"Nant_lopes30_min required for lat. distr. = " <<Nant_lopes30_min <<endl
        // <<"Nant_lopesPol_min required for lat. distr.= " <<Nant_lopesPol_min <<endl
-        <<"LOPES-GT	Source	KRETA_ver	az_in(deg)	errAz_in(deg)	ze_in(deg)	errZe_in(deg)	coreN_in(	coreE_in(m)	errCore(m)	Ne_in	Nmu_in	Nmu^tr_in	E_in(eV)	errlgE_in	Age_in\n"
+        <<"LOPES-GT	Source	KRETA_ver	az_in(deg)	errAz_in(deg)	ze_in(deg)	errZe_in(deg)	coreN_in(	coreE_in(m)	errCore(m)	Ne_in	Nmu_in	Nmu^tr_in	E_in(eV)	errlgE_in(GeV)	Age_in\n"
         <<"======================================================================================================================================================================================================================================================================\n";
 
   //some variables declaration
@@ -381,22 +381,32 @@ int main(int argc, char* argv[])
     t2->GetEntry(i);
 
     //calculate LOPES coordinate system
-    Xlopes=Xc*cos(alpha)+Yc*sin(alpha); //East
+    Xlopes=Xc*TMath::Cos(alfa)+Yc*TMath::Sin(alfa);     //East
     //cout<<"Xlopes    "<<Xlopes<<endl;
-    Ylopes=-Xc*sin(alpha)+Xc*cos(alpha); //North
-    Xlopesg=Xcg*cos(alpha)+Ycg*sin(alpha); //East
-    Ylopesg=-Xcg*sin(alpha)+Xcg*cos(alpha); //North
+    Ylopes=-Xc*TMath::Sin(alfa)+Yc*TMath::Cos(alfa);    //North
+    Xlopesg=Xcg*TMath::Cos(alfa)+Ycg*TMath::Sin(alfa);    //East
+    Ylopesg=-Xcg*TMath::Sin(alfa)+Ycg*TMath::Cos(alfa); //North
+
+  Easting=Xc*TMath::Cos(alfa)+Yc*TMath::Sin(alfa);//da x
 
     //energy (eV)
     E=pow(10,lgE);
     Eg=pow(10,lgEg); 
+    Az=Az*(180./TMath::Pi());
+    Ze=Ze*(180./TMath::Pi());
+    err_Az=err_Az*(180./TMath::Pi());
+    err_Ze=err_Ze*(180./TMath::Pi());
+    Azg=Azg*(180./TMath::Pi());
+    Zeg=Zeg*(180./TMath::Pi());
+    err_Azg=err_Azg*(180./TMath::Pi());
+    err_Zeg=err_Zeg*(180./TMath::Pi());
 
     if( reconstruction=='A' ) {// KASCADE reconstruction!!!!
       if(string(cut).find("(Xheight_EW/CCheight_EW)")!=string::npos) {
         cout << "\nUsing EW cut..." << endl;
         if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min) ) {
           if((CCheight_EW/rmsCCbeam_EW)>CCcutA) {
-            f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
+            f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az<<"\t"<<err_Az<<"\t"<<Ze<<"\t"<<err_Ze<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E*pow(10,9)<<"\t"<<err_lgE<<"\t"<<Age<<endl;
             count++;
             k->Fill();
           }
@@ -405,7 +415,7 @@ int main(int argc, char* argv[])
         cout << "\nUsing NS cut..." << endl;
         if((Gt <= 1165389469 && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_NS>Nant_lopesPol_min) ) {
           if((CCheight_EW/rmsCCbeam_EW)>CCcutA) {
-            f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
+             f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az<<"\t"<<err_Az<<"\t"<<Ze<<"\t"<<err_Ze<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E*pow(10,9)<<"\t"<<err_lgE<<"\t"<<Age<<endl;
             count++;
             k->Fill();
           }
@@ -415,7 +425,7 @@ int main(int argc, char* argv[])
         if(   (Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min && NlateralAntennas_NS>Nant_lopes30_min) 
             || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min && NlateralAntennas_NS>Nant_lopesPol_min) ) {
           if(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)+pow(CCheight_NS/rmsCCbeam_NS,2))>CCcutA) {
-              f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az*(180./TMath::Pi())<<"\t"<<err_Az*(180./TMath::Pi())<<"\t"<<Ze*(180./TMath::Pi())<<"\t"<<err_Ze*(180./TMath::Pi())<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E<<"\t"<<err_lgE<<"\t"<<Age<<endl;
+              f1<<Gt<<"\t"<<"A"<<"\t"<<"KRETAver"<<"\t"<<Az<<"\t"<<err_Az<<"\t"<<Ze<<"\t"<<err_Ze<<"\t"<<Ylopes<<"\t"<<Xlopes<<"\t"<<err_core<<"\t"<<Size<<"\t"<<Nmu<<"\t"<<Lmuo<<"\t"<<E*pow(10,9)<<"\t"<<err_lgE<<"\t"<<Age<<endl;
               count++;
               k->Fill();
           }
@@ -427,7 +437,7 @@ int main(int argc, char* argv[])
         cout << "\nUsing EW cut..." << endl;
         if((Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min) ) {
           if((CCheight_EW/rmsCCbeam_EW)>CCcutG) {
-            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
+            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg<<"\t"<<err_Azg<<"\t"<<Zeg<<"\t"<<err_Zeg<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg*pow(10,9)<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
             count++;
             k->Fill();
           }
@@ -436,7 +446,7 @@ int main(int argc, char* argv[])
         cout << "\nUsing NS cut..." << endl;
         if((Gt <= 1165389469 && NlateralAntennas_NS>Nant_lopes30_min) || (Gt >= 1165738743 && NlateralAntennas_NS>Nant_lopesPol_min) ) {
           if((CCheight_EW/rmsCCbeam_EW)>CCcutG) {
-            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
+            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg<<"\t"<<err_Azg<<"\t"<<Zeg<<"\t"<<err_Zeg<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg*pow(10,9)<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
             count++;
             k->Fill();
           }
@@ -446,7 +456,7 @@ int main(int argc, char* argv[])
         if(   (Gt <= 1165389469 && NlateralAntennas_EW>Nant_lopes30_min && NlateralAntennas_NS>Nant_lopes30_min) 
             || (Gt >= 1165738743 && NlateralAntennas_EW>Nant_lopesPol_min && NlateralAntennas_NS>Nant_lopesPol_min) ) {
           if(sqrt(pow(CCheight_EW/rmsCCbeam_EW,2)+pow(CCheight_NS/rmsCCbeam_NS,2))>CCcutG) {
-            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg*(180./TMath::Pi())<<"\t"<<err_Azg*(180./TMath::Pi())<<"\t"<<Zeg*(180./TMath::Pi())<<"\t"<<err_Zeg*(180./TMath::Pi())<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
+            f1<<Gt<<"\t"<<"G"<<"\t"<<"KRETAver"<<"\t"<<Azg<<"\t"<<err_Azg<<"\t"<<Zeg<<"\t"<<err_Zeg<<"\t"<<Ylopesg<<"\t"<<Xlopesg<<"\t"<<err_coreg<<"\t"<<Sizeg<<"\t"<<Sizmg<<"\t"<<0.<<"\t"<<Eg*pow(10,9)<<"\t"<<err_lgEg<<"\t"<<Ageg<<endl;
             count++;
             k->Fill();
           }
