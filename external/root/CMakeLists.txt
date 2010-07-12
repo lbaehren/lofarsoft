@@ -44,8 +44,6 @@ include (FindROOT)
 
 if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD OR svn_executable)
   
-  include (ExternalProject)
-  
   if (UNIX)
     if (APPLE)
       set (root_architecture "macosx")

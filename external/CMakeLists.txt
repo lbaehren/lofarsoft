@@ -1,9 +1,14 @@
 
+## Load CMake modules ____________________________
+
+include (ExternalProject)
+
 ## List of external packages _____________________
 
 set (external_packages
   armadillo
   bison
+  blas
   boost
   casacore
   cfitsio

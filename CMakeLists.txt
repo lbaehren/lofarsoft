@@ -188,7 +188,6 @@ configure_file (
   )
 
 set (packages_external
-  blas
   num_util
   wcslib
   wcstools
@@ -219,7 +218,7 @@ add_dependencies (hdf5 szip)
 
 add_dependencies (mathgl hdf5 swig num_util gsl)
 
-add_dependencies (numpy python blas)
+add_dependencies (numpy python cblas)
 
 add_dependencies (matplotlib numpy)
 
