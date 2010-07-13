@@ -193,3 +193,66 @@ add_custom_target (psrchive_install
   COMMENT "Install project psrchive into ${CMAKE_INSTALL_PREFIX}..."
   )
 add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_bootstrap psrchive_unpack)
+
+## ==============================================================================
+##
+##  Handle configuration and build of SSPS (Single Pulse Library code, Thijs Coenen)
+##
+## ==============================================================================
+
+#set (ssps_cmake_build TRUE)
+
+#if (ssps_cmake_build)
+  
+#  add_subdirectory (ssps0.0)
+  
+#else (ssps_cmake_build)
+  
+  set (ssps_version "0-1")
+  set (ssps_name "ssps-release-${ssps_version}")
+  set (ssps_directory "ssps/ssps-release-${ssps_version}")
+  set (ssps_archive "${ssps_directory}.tar.gz")
+  
+  add_custom_target (ssps_unpack
+    COMMAND rm -rf ${ssps_name}
+    COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${ssps_archive}
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+    COMMENT "Unpacking tar archive of SSPS from ${PULSAR_SOURCE_DIR}/external/${ssps_archive} to ${PULSAR_BINARY_DIR}/apps/${ssps_name}..."
+    )
+  
+add_custom_target (ssps_build
+  COMMAND python setup.py build
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ssps_name}
+  COMMENT "Building project SSPS in ${PULSAR_BINARY_DIR}/apps/${ssps_name}..."
+  COMMENT "Building project SSPS with command: python ${PULSAR_BINARY_DIR}/apps/${ssps_name}/setup.py build"
+  )
+add_dependencies (ssps_build ssps_unpack)
+
+add_custom_target (ssps_build_docs
+  COMMAND make html
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ssps_name}/docs
+  COMMENT "Building docs from project SSPS in ${PULSAR_BINARY_DIR}/apps/${ssps_name}/docs..."
+  COMMENT "Building docs from project SSPS with command: make html"
+  )
+add_dependencies (ssps_build_docs ssps_build ssps_unpack)
+
+add_custom_target (ssps_install_docs
+  COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/doc/ssps
+  COMMAND mkdir ${CMAKE_INSTALL_PREFIX}/doc/ssps
+  COMMAND cp -r docs/_build/html/* ${CMAKE_INSTALL_PREFIX}/doc/ssps/
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ssps_name}
+  COMMENT "Install docs for SSPS ${PULSAR_BINARY_DIR}/apps/${ssps_name}/docs/_build/html into ${CMAKE_INSTALL_PREFIX}/doc/ssps..."
+  )
+add_dependencies (ssps_install_docs ssps_build_docs ssps_build ssps_unpack)
+
+add_custom_target (ssps_install
+  COMMAND cp -r build/lib/ssps ${CMAKE_INSTALL_PREFIX}/lib/python/
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ssps_name}
+  COMMENT "Install project SSPS library ${PULSAR_BINARY_DIR}/apps/${ssps_name}/build/lib/ssps into ${CMAKE_INSTALL_PREFIX}/lib/python/ssps..."
+  )
+add_dependencies (ssps_install ssps_install_docs ssps_build ssps_unpack)
+#add_dependencies (ssps_install ssps_build ssps_unpack)
+
+#endif (ssps_cmake_build)
+
+
