@@ -141,6 +141,7 @@ add_dependencies (presto
   presto_pylibscripts_install
   presto_clig_install
   presto_cat_install
+  ssps_install
   )
 
 ##__________________________________________________________
