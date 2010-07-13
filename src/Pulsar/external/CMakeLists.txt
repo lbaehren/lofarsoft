@@ -246,6 +246,7 @@ add_custom_target (ssps_install_docs
 add_dependencies (ssps_install_docs ssps_build_docs ssps_build ssps_unpack)
 
 add_custom_target (ssps_install
+  COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/python/ssps
   COMMAND cp -r build/lib/ssps ${CMAKE_INSTALL_PREFIX}/lib/python/
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ssps_name}
   COMMENT "Install project SSPS library ${PULSAR_BINARY_DIR}/apps/${ssps_name}/build/lib/ssps into ${CMAKE_INSTALL_PREFIX}/lib/python/ssps..."
