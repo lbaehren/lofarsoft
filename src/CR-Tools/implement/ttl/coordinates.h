@@ -36,6 +36,13 @@
 // FORWARD REFERENCES
 //
 
+// DOXYGEN TAGS
+/*!
+  \file coordinates.h
+  \ingroup CR
+  \ingroup CR_TTL
+ */
+
 namespace ttl
 {
   namespace coordinates

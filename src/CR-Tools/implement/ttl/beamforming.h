@@ -33,6 +33,13 @@
 // FORWARD REFERENCES
 //
 
+// DOXYGEN TAGS
+/*!
+  \file beamforming.h
+  \ingroup CR
+  \ingroup CR_TTL
+ */
+
 namespace ttl
 {
   namespace beamforming

@@ -31,6 +31,13 @@
 // FORWARD REFERENCES
 //
 
+// DOXYGEN TAGS
+/*!
+  \file constants.h
+  \ingroup CR
+  \ingroup CR_TTL
+ */
+
 namespace ttl
 {
   namespace constants

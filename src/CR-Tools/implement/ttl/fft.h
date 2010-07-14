@@ -33,6 +33,13 @@
 // FORWARD REFERENCES
 //
 
+// DOXYGEN TAGS
+/*!
+  \file fft.h
+  \ingroup CR
+  \ingroup CR_TTL
+ */
+
 namespace ttl
 {
   namespace fft

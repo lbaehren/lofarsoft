@@ -31,6 +31,13 @@
 // FORWARD REFERENCES
 //
 
+// DOXYGEN TAGS
+/*!
+  \file math.h
+  \ingroup CR
+  \ingroup CR_TTL
+ */
+
 namespace ttl
 {
   namespace math
