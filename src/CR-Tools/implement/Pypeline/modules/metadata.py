@@ -284,10 +284,104 @@ def getClockCorrection(station,time=1278480000):
         print "NO VALUE FOUND IN THE DATABASE"
         return 0
 
+def getStationPositions(station,antennaset,coordinatesystem="WGS84",return_as_hArray=False):
+    """Returns the antenna positions of all the antennas in the station
+    relative to the station center for the specified antennaset. 
+    station can be the name or id of the station. Default returns as numpy
+    array, option to return as hArray.
+
+    *station*      Name or id of the station. e.g. "CS302" or 142
+    *antennaset*   Antennaset used for this station. Options:
+                   LBA_INNER
+                   LBA_OUTER
+                   LBA_X
+                   LBA_Y
+                   LBA_SPARSE0
+                   LBA_SPARSE1
+                   HBA_0
+                   HBA_1
+                   HBA
+    *coordinatesystem*  Currently only WGS84. in the future also ITRF
+    *return_as_hArray*  Return as hArray.
+
+    Examples:
+    >>> import pycr_metadata as md
+    >>>
+    >>> ant_pos=md.get_antenna_positions(142,"LBA_INNER",True)
+    >>> ant_pos
+    hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
+    
+    
+    >>> ant_pos=md.get_antenna_positions("CS005","HBA",False)
+    >>> ant_pos 
+    array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
+           [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
+            [  1.28090000e+01,   2.88400000e+00,   1.00000000e-03],....
+    
+    
+    >>> antenna_ids=file["antennaIDs"]
+    [1420000005,142000008,142000080]
+    >>> station_id=antenna_ids[0]/1000000
+    142
+    >>> rcu_ids=np.mod(antenna_ids,1000)
+    array([5, 8, 80])
+    >>> all_antenna_pos=md.get_antenna_positions(station_id,"LBA_INNER",False)
+    >>> used_antenna_pos=all_antenna_pos[rcu_ids]
+    array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
+           [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
+           [  8.53000000e-01,   1.37240000e+01,  -3.00000000e-03]])
+    
+    """
+    
+    # Known antennasets
+    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE0', 'LBA_SPARSE1', 'HBA_0', 'HBA_1', 'HBA']
+    
+    # Check if requested antennaset is known
+    assert antennaset in names
+    assert coordinatesystem in ["WGS84"] 
+    # Check station id type
+    if isinstance(station, int): 
+        # Convert a station id to a station name
+        station=idToStationName(station)
+    
+    # Obtain filename of antenna positions
+    LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
+    filename=LOFARSOFT+"data/calibration/AntennaArrays/"+station+"-AntennaArrays.conf"
+    
+    # Open file
+    f = open(filename, 'r') 
+    
+    # Find position of antennaset in file
+    str = ''
+    while antennaset != str.strip():
+        str = f.readline()
+    
+    # Skip name and station reference position
+    str = f.readline()
+    
+    # Get number of antennas and the number of directions
+    lon=float(str.split()[2])
+    lat=float(str.split()[3])
+    height=float(str.split()[4])
+    
+    stationpos = [lon, lat, height]
+    # Return requested type
+    if return_as_hArray:
+        import pycrtools as hf
+        stationpos=hf.hArray(stationpos,3)
+    else:
+        stationpos=np.asarray(stationpos)
+    
+    return stationpos
+
+def getClockCorrection(station,time=1278480000):
+    """Get clock correction for superterp stations in seconds. Currently static values.
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
 #  as a selftest for the module.
 #  See http://docs.python.org/library/doctest.html for more information.
+"""
+
 if __name__=='__main__':
     import doctest
     doctest.testmod()
