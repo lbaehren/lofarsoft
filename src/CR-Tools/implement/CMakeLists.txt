@@ -123,7 +123,7 @@ install (
 ##
 ## =============================================================================
 
-add_subdirectory (Bindings)
+add_subdirectory (PyCR)
 
 if (CR_WITH_PYPELINE AND HAVE_FFTW3)
   add_subdirectory (Pypeline)
@@ -132,8 +132,6 @@ endif (CR_WITH_PYPELINE AND HAVE_FFTW3)
 if (CR_WITH_GUI)
   add_subdirectory (GUI)
 endif (CR_WITH_GUI)
-
-add_subdirectory (ttl)
 
 ## =============================================================================
 ##
