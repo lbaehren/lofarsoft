@@ -14,6 +14,7 @@ set (external_packages
   cfitsio
   fftw3
   flex
+  git
   gsl
   hdf5
   itpp
