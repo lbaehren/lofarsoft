@@ -2,18 +2,73 @@
 #The script prints a list of bright radio sources and their positions
 #above the LOFAR radio telescope in CASA!!
 #------------------------------------------------------------------------
-lofarpos=me.position(rf="WGS84",v0=qa.quantity("+06.52.08.18"),v1=qa.quantity("+52.54.31.55"),v2=qa.quantity("5m")) #Check position!!!
+lofarpos=me.position(rf="WGS84",v0=qa.quantity("+06.52.11.415"),v1=qa.quantity("+52.54.54.44098"),v2=qa.quantity("49.344m"))
 me.doframe(lofarpos)
 me.framenow()  # select current date and time
 
 #uncomment the following lines if you want to set a specific date
-#date="2010/07/08"  
-#utctime="15:08:00" 
+date="2012/09/26"  
+utctime="12:00:00" 
 #me.doframe(me.epoch("UTC",date+"/"+utctime))
 #------------------------------------------------------------------------
 #me.doframe(me.observatory('WSRT'))
 #me.doframe(me.observatory('LOFAR'))
 #------------------------------------------------------------------------
+#You can run the following in order to add LOFAR to the data repository
+#This needs to be done only once.
+#You can then say
+#
+#me.doframe(me.observatory("LOFAR"))
+#
+execfile("/Applications/CASA.app/Contents/Resources/python/simutil.py")
+
+def addobservatory(name,coordinate):
+    """Add a new observatory to the aips data repository, or change the coordinates of an existing one
+    Example:
+
+    execfile("/Applications/CASA.app/Contents/Resources/python/simutil.py")
+    lmtpos=me.position(rf="WGS84",v0=qa.quantity("-97.18.53"),v1=qa.quantity("+18.59.06"),v2=qa.quantity("4600m"))
+    addobservatory("LMT",lmtpos)
+    """
+    obstable = os.getenv("CASAPATH").split(' ')[0]+"/data/geodetic/Observatories"
+    tb.open(obstable,nomodify=False)
+    pos=me.measure(coordinate,'WGS84')
+    coor=simutil().long2xyz(pos["m0"]["value"],pos["m1"]["value"],pos["m2"]["value"],"WGS84")
+    names=list(tb.getcol("Name"))
+    if name in names:
+        n=names.index(name)
+    else:
+        tb.addrows()
+        n=tb.nrows()-1
+        tb.putcell("Name",n,name)
+    tb.putcell("MJD",n,int(qa.time(qa.quantity("today"),form=["MJD","no_time"])))
+    tb.putcell("Type",n,"WGS84")
+    tb.putcell("Long",n,qa.convert(pos["m0"],"deg")["value"])
+    tb.putcell("Lat",n,qa.convert(pos["m1"],"deg")["value"])
+    tb.putcell("Height",n,qa.convert(pos["m2"],"m")["value"])
+    tb.putcell("X",n,coor[0])
+    tb.putcell("Y",n,coor[1])
+    tb.putcell("Z",n,coor[2])
+    tb.putcell("Source",n,"Heino Falcke")
+    tb.putcell("Comment",n,"automatically put in by script")
+    tb.close()
+
+#addobservatory("LMT",me.position(rf="WGS84",v0=qa.quantity("-97.18.53"),v1=qa.quantity("+18.59.06"),v2=qa.quantity("4600m")))
+#addobservatory("LOFAR",me.position(rf="WGS84",v0=qa.quantity("+06.52.11.415"),v1=qa.quantity("+52.54.54.44098"),v2=qa.quantity("49.344m")))
+#addobservatory("HESS",me.position(rf="WGS84",v0=qa.quantity("16.500270deg"),v1=qa.quantity("-23.271180deg"),v2=qa.quantity("1813m")))
+
+
+#addobservatory("LLAMA1",me.position(rf="WGS84",v0=qa.quantity("-67.336290deg"),v1=qa.quantity("-24.657967deg"),v2=qa.quantity("3664m")))
+#addobservatory("LLAMA2",me.position(rf="WGS84",v0=qa.quantity("-66.452405deg"),v1=qa.quantity("-24.222499deg"),v2=qa.quantity("4755m")))
+#addobservatory("LLAMA3",me.position(rf="WGS84",v0=qa.quantity("-65.729295deg"),v1=qa.quantity("-23.205519deg"),v2=qa.quantity("4900m")))
+#addobservatory("SOUTHPOLE",me.position(rf="WGS84",v0=qa.quantity("0deg"),v1=qa.quantity("-90deg"),v2=qa.quantity("2800m")))
+#------------------------------------------------------------------------
+
+
+def meframedate():
+    """Return a quantity with the date of the current frame"""
+    x=me.showframe()
+    return qa.quantity(str(float(x[14:19])+(float(x[21:23])+float(x[24:26])/60+float(x[27:34])/3600)/24)+"d")
 
 def meprettydms(q):
     """ Returns a quanta in a pretty dms form, i.e.: DDd MM' SS.dd"  "  """
@@ -75,6 +130,7 @@ def meriseset(dir):
 def listsources(planets=["Sun","Moon","Jupiter","Saturn"]):
     print "LOCATION, RISE & SET TIMES for current frame"
     print "----------------------------------"
+    print "OBSERVING DATE:",qa.time(meframedate(),form=["dmy","local"]),"\n"
     print me.showframe()
     print "\n Rise and set times in local time."
     for p in planets:
@@ -83,6 +139,65 @@ def listsources(planets=["Sun","Moon","Jupiter","Saturn"]):
     l.sort()
     for s in l:
         print sourceinfostr(s,hfradiosources[s]["direction"])
+
+def uptime(sources,observatory=None,utcdate=None,step=1,coords="J2000",verbose=True,plot=False):
+    """
+    Prints or plots the position (elevation) of a list of astronomical
+    sources at various observatories.
+    
+    sources: list of sources or a single source, the source can be
+    specified by its name (e.g."SUN", "MOON", or "Sgr A*", see the planetlist in CASA, "me.sourcelist()" or "hfradiosources") or simply by its
+    J2000 coordinates in the format "23:30:25.0 +70.23.10" or "23H30M25.0S +70D23M10S" (some casa convention separated by space) - the coordinate system can
+ be changed with the keyword 'coords'
+
+    observatory: list or single observatory, the observatory can be
+    specified by its name (e.g., observatory=["ALMA","LOFAR"]) or by a position measure, e.g. observatory=me.position(rf="WGS84",v0=qa.quantity("+06.52.11.415"),v1=qa.quantity("+52.54.54.44098"),v2=qa.quantity("49.344m"))
+    if none is specified the current frame is used.
+    
+    utcdate: the date (UTC) for which to calculate the uptimes.
+
+    step: the stepsize to calculate elevations values in hours
+
+    coords: The coordinate system to be used for interpreting source
+    coordinates (could be e.g., "B1950", "GALACTIC").
+    
+    """
+    if not utcdate==None: me.doframe(me.epoch("UTC",utcdate))
+    if not type(observatory)==list: observatory=[observatory]
+    if not type(sources)==list: sources=[sources]
+    result={}
+    for obs in observatory:
+        if type(obs)==str: me.doframe(me.observatory(obs)); obs+=" "
+        elif type(obs)==dict: me.doframe(obs); obs=meprettystring(obs); obs+=" "
+        else: obs=""
+        startday=floor(meframedate()["value"])
+        for source in sources:
+            if source in list(me.listcodes(me.direction())["extra"]): direction=me.direction(source)
+            elif source in hfradiosources.keys(): direction=hfradiosources[source]["direction"]
+            elif me.sourcelist().find(source): direction=me.source(source)
+            else:
+                s=source.split()
+                direction=me.direction(coords,s[0],s[1])
+            el=[];az=[];time=[]
+            for i in range(24/step):
+                day=startday+i*step/24.
+                time.append(i*step)
+                me.doframe(me.epoch("UTC",qa.quantity(str(day)+"d")))
+                el.append(qa.convert(me.measure(direction,"AZEL")["m1"],"deg")["value"])
+                az.append(qa.convert(me.measure(direction,"AZEL")["m0"],"deg")["value"])
+                if verbose: print obs,qa.time(qa.quantity(str(day)+"d"),form=["ymd","local"]),sourceinfostr(source,direction)
+                result[obs+source]={"time":time,"az":az,"el":el}
+    if plot:
+        pl.clf()
+        pl.title("Observation Start:"+qa.time(qa.quantity(str(startday)+"d"),form=["ymd"]))
+        pl.xlabel("Time of day [h]")
+        pl.ylabel("Elevation [degree]")
+        for k in result.keys():
+            pl.plot(result[k]["time"],result[k]["el"],label=k)
+        pl.legend()
+        pl.xlim(0,24)
+        pl.ylim(0,90)
+    return result
         
 sourceliststringall="""TYCHO SNR,                      00h25m14.0s +64d08m39s 
 87GB[BWE91] 0022+6351,          00h25m21.0s +64d08m24s 
@@ -152,4 +267,4 @@ for s in sourceliststring.split("\n"):
     hfradiosources[name]=info
 
 print "Type listsources() to get a list of the brightest radio sources and planets."
-listsources()
+#listsources()
