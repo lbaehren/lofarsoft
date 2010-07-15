@@ -12,6 +12,7 @@ set (external_packages
   boost
   casacore
   cfitsio
+  cppunit
   fftw3
   flex
   git
