@@ -22,7 +22,7 @@ class control(LOFARrecipe):
         super(control, self).go()
 
         self.logger.info(
-            "Standard Imaging Pipeline (%s) starting." %
+            "LOFAR Pipeline (%s) starting." %
             (self.name,)
         )
 
