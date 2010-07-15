@@ -369,9 +369,10 @@ hSumSquare(vec)        - Performs a sum over the square values in a vector
 hMulSum(vec1, vec2)    - Piecewise multiplication of the elements in a vector
                          and summing of the results
 
-hDotProduct(vec1, vec2) - Dot product of two vectors.
+hDotProduct(vecin1, vecin2) - Dot product of two vectors.
 
-hCrossProduct(vec0, vec1, vec2) - Cross product of two 3-dimensional vectors
+hCrossProduct(vecout, vecin1, vecin2) - Cross product of two
+                         3-dimensional vectors
 
 hProduct(vec)          - Multiplies all elements in the vector with each
                          other and return the result
@@ -3419,8 +3420,8 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 #define HFPP_FUNC_NAME hDotProduct
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector 1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector 2")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecin1)()("Numeric input vector 1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin2)()("Numeric input vector 2")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   hDotProduct(Vector([a,b,c]), Vector([x,y,z])) -> a*x + b*y + c*z
@@ -3429,11 +3430,12 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
  $PARDOCSTRING
 */
 template <class Iter>
-IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+IterValueType HFPP_FUNC_NAME (const Iter vecin1, const Iter vecin1_end,
+			      const Iter vecin2, const Iter vecin2_end)
 {
   IterValueType dotProduct(0.);
-  if ( (vec1_end-vec1) == (vec2_end-vec2)) {
-    dotProduct = hMulSum(vec1, vec1_end, vec2, vec2_end);
+  if ( (vecin1_end-vecin1) == (vecin2_end-vecin2)) {
+    dotProduct = hMulSum(vecin1, vecin1_end, vecin2, vecin2_end);
   } else {
     printf("ERROR: Input vectors are not of equal length.");
   }
@@ -3448,28 +3450,30 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 #define HFPP_FUNC_NAME hCrossProduct
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec0)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector 1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector 2")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin1)()("Numeric input vector 1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vecin2)()("Numeric input vector 2")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   hCrossProduct(Vector([a,b,c]), Vector([r,s,t]), Vector([x,y,z]))
   -> [s*z - t*y, t*x - r*z, r*y - s*z]
 
   \brief $DOCSTRING
- $PARDOCSTRING
+  $PARDOCSTRING
 */
 template <class Iter>
-void HFPP_FUNC_NAME (const Iter vec0, const Iter vec0_end, const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
+		     const Iter vecin1, const Iter vecin1_end,
+		     const Iter vecin2, const Iter vecin2_end)
 {
-  uint dim0 = vec0_end - vec0;
-  uint dim1 = vec1_end - vec1;
-  uint dim2 = vec2_end - vec2;
-  Iter it0(vec0), it1(vec1), it2(vec2);
-  if ((dim0==3) && (dim1==3) && (dim2==3)) {
-    *(it0)   = *(it1+1) * *(it2+2) - *(it1+2) * *(it2+1);
-    *(it0+1) = *(it1+2) * *(it2)   - *(it1)   * *(it2+2);
-    *(it0+2) = *(it1)   * *(it2+1) - *(it1+1) * *(it2);
+  uint dimout = vecout_end - vecout;
+  uint dimin1 = vecin1_end - vecin1;
+  uint dimin2 = vecin2_end - vecin2;
+  Iter itout(vecout), itin1(vecin1), itin2(vecin2);
+  if ((dimout==3) && (dimin1==3) && (dimin2==3)) {
+    *(itout)   = *(itin1+1) * *(itin2+2) - *(itin1+2) * *(itin2+1);
+    *(itout+1) = *(itin1+2) * *(itin2)   - *(itin1)   * *(itin2+2);
+    *(itout+2) = *(itin1)   * *(itin2+1) - *(itin1+1) * *(itin2);
   } else {
     printf("ERROR: At least one of the input and/or output vectors is not 3-dimensional.");
   }
