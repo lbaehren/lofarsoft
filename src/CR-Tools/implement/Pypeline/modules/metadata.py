@@ -113,6 +113,9 @@ def getCableDelays(station,antennaset):
     str_line='' 
     while "RCUnr" not in str_line:
         str_line = cabfile.readline()
+        if len(str_line) == 0:
+            #end of file reached, no data available
+            assert False 
 
     str_line = cabfile.readline()
     for i in range(96):
@@ -228,18 +231,25 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
     # Open file
     f = open(filename, 'r') 
 
+    if station[0:2] != "CS":
+        if antennaset is "HBA_0" or antennaset is "HBA_1":
+            antennaset = "HBA"
+    
     # Find position of antennaset in file
-    str = ''
-    while antennaset != str.strip():
-        str = f.readline()
+    str_line = ''
+    while antennaset != str_line.strip():
+        str_line = f.readline()
+        if len(str_line) == 0:
+            #end of file reached, no data available
+            assert False 
     
     # Skip name and station reference position
-    str = f.readline()
-    str = f.readline()
+    str_line = f.readline()
+    str_line = f.readline()
 
     # Get number of antennas and the number of directions
-    nrantennas = int(str.split()[0])
-    nrdir = int(str.split()[4])
+    nrantennas = int(str_line.split()[0])
+    nrdir = int(str_line.split()[4])
 
     antpos = []
     for i in range(nrantennas):
@@ -351,18 +361,26 @@ def getStationPositions(station,antennaset,coordinatesystem="WGS84",return_as_hA
     # Open file
     f = open(filename, 'r') 
     
+    if station[0:2] != "CS":
+        if antennaset is "HBA_0" or antennaset is "HBA_1":
+            antennaset = "HBA"
+     
     # Find position of antennaset in file
-    str = ''
-    while antennaset != str.strip():
-        str = f.readline()
+    str_line = ''
+    while antennaset != str_line.strip():
+        str_line = f.readline()
+        if len(str_line) == 0:
+            #end of file reached, no data available
+            print "Antenna set not found in calibration file",filename
+            return "None"
     
     # Skip name and station reference position
-    str = f.readline()
+    str_line = f.readline()
     
     # Get number of antennas and the number of directions
-    lon=float(str.split()[2])
-    lat=float(str.split()[3])
-    height=float(str.split()[4])
+    lon=float(str_line.split()[2])
+    lat=float(str_line.split()[3])
+    height=float(str_line.split()[4])
     
     stationpos = [lon, lat, height]
     # Return requested type
@@ -374,13 +392,6 @@ def getStationPositions(station,antennaset,coordinatesystem="WGS84",return_as_hA
     
     return stationpos
 
-def getClockCorrection(station,time=1278480000):
-    """Get clock correction for superterp stations in seconds. Currently static values.
-## Executing a module should run doctests.
-#  This examines the docstrings of a module and runs the examples
-#  as a selftest for the module.
-#  See http://docs.python.org/library/doctest.html for more information.
-"""
 
 if __name__=='__main__':
     import doctest
