@@ -19,7 +19,12 @@ class PipelineCook(WSRTCook):
     def __init__(self, task, inputs, outputs, logger, recipe_path):
         super(PipelineCook, self).__init__(task, inputs, outputs, logger)
         try:
-            module = imp.load_module(task, *imp.find_module(task, recipe_path))
+            try:
+                module_details = imp.find_module(task, recipe_path)
+            except ImportError:
+                # ...also support lower-cased file names.
+                module_details = imp.find_module(task.lower(), recipe_path)
+            module = imp.load_module(task, *module_details)
             self.recipe = getattr(module, task)()
             self.recipe.logger = logging.getLogger("%s.%s" % (self.logger.name, task))
             self.recipe.logger.setLevel(self.logger.level)
