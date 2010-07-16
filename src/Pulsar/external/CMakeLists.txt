@@ -208,7 +208,7 @@ add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_bo
   
 #else (ssps_cmake_build)
   
-  set (ssps_version "0-1")
+  set (ssps_version "0.1")
   set (ssps_name "ssps-release-${ssps_version}")
   set (ssps_directory "ssps/ssps-release-${ssps_version}")
   set (ssps_archive "${ssps_directory}.tar.gz")
