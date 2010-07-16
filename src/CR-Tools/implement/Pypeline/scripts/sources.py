@@ -140,6 +140,132 @@ def listsources(planets=["Sun","Moon","Jupiter","Saturn"]):
     for s in l:
         print sourceinfostr(s,hfradiosources[s]["direction"])
 
+class KML_File:
+    """For creating KML files used for Google Earth.
+    _author__ = "Jon Goodall <jon.goodall@gmail.com> - http://www.duke.edu/~jgl34 - modified by H.Falcke"
+    __version__ = "0.0.2"
+    __license__ = ""
+    __copyright__ =""
+    """
+    def __init__(self, filepath,scale=1.0,iconcolor="ff00f00f",linecolor="73ffffff"):
+        self.filepath = filepath
+        "adds the kml header to a file (includes a default style)"
+        file = open(filepath,"w")
+        file.write(
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"\
+        "<kml xmlns=\"http://earth.google.com/kml/2.0\">\n"\
+        "<Document>\n"\
+        "<Style id='normalPlaceMarker'>\n"\
+"""<IconStyle>
+<color>"""+iconcolor+"""</color>
+<scale>"""+str(scale)+"""</scale>
+<Icon>
+<href>icons/low.png</href>
+</Icon>
+</IconStyle>
+<LineStyle>
+<color>"""+linecolor+"""</color>
+<width>3.5</width>
+</LineStyle>
+<LabelStyle>
+<scale>"""+str(scale)+"""</scale>
+</LabelStyle>
+"""\
+        "</Style>\n")
+        file.close()
+
+    def close(self):
+        file = open(self.filepath,"a")
+        file.write(
+        "</Document>\n"\
+        "</kml>")
+        file.close()
+        
+    def open_folder(self, name):
+        file = open(self.filepath,"a")
+        file.write(
+        "<Folder>\n"\
+        "  <name>" + name + "</name>\n")
+        file.close()
+
+    def close_folder(self):
+        file = open(self.filepath,"a")
+        file.write(
+        "</Folder>\n")
+        file.close()
+        
+    def add_placemarker(self, latitude, longitude, altitude = 0.0, description = " ", name = " ", range = 6000, tilt = 45, heading = 0):
+        "adds the point to a kml file"
+        file = open(self.filepath,"a")
+        file.write(
+        "<Placemark>\n"\
+        "  <description>" + description + "</description>\n"\
+        "  <name>" + name + "</name>\n"\
+        "  <styleUrl>#normalPlaceMarker</styleUrl>" + 
+        "  <LookAt>\n"\
+        "    <longitude>" + str(longitude) + "</longitude>\n"\
+        "    <latitude>" + str(latitude) + "</latitude>\n"\
+        "    <range>" + str(range) + "</range>\n"\
+        "    <tilt>" + str(tilt) + "</tilt>\n"\
+        "    <heading>" + str(heading) + "</heading>\n"\
+        "  </LookAt>\n"\
+        "  <visibility>0</visibility>\n"\
+        "   <Point>\n"\
+        "    <extrude>1</extrude>\n"\
+        "    <altitudeMode>relativeToGround</altitudeMode>\n"\
+        "    <coordinates>" + str(longitude) + "," + str(latitude) +", " +  str(altitude) + "</coordinates>\n"\
+        "   </Point>\n"\
+        " </Placemark>\n")
+        file.close()
+
+
+def makeobservatorylist(filename,observatories,size=1):
+    """
+    Creates a .cfg file that casa uses for simulated observations (simdata2).
+
+    Example:
+    observatories=[("ALMA", 12), ("CARMA",12), ("SMT",10), ("EHT1",12), ("VLT",12), ("NTT",12),  ("LLAMA1",12), ("LLAMA2",12), ("LLAMA3",12), ("LMT",12)]
+    makeobservatorylist("eht.cfg",observatories,size=1)
+    """
+    f=open(filename,"w")
+    f.write("# observatory=ALMA\n# coordsys=XYZ\n")
+    util=simutil()
+    for i in observatories:
+        obs=me.measure(me.observatory(i[0]),'WGS84')
+        coor=util.long2xyz(obs["m0"]["value"],obs["m1"]["value"],obs["m2"]["value"],"WGS84")
+        f.write(str(coor[0]) +" "+str(coor[1])+" "+str(coor[2])+" "+str(i[1]*size)+" "+str(i[0])+"\n")
+        print str(coor[0]) +" "+str(coor[1])+" "+str(coor[2])+" "+str(i[1]*size)+" "+str(i[0])
+    f.close()
+    print "Wrote observatories to ",filename
+
+
+def megoogleearth(filename,position,scale=1.0,iconcolor="ff00f00f",linecolor="73ffffff"):
+    """
+    The scripts takes a list of positions (as measures) or observatory
+    names defined in casa and writes them inot a .kml file that you
+    can import into Google Earth and see the placemarks. A single
+    position can also be given without a list.
+
+    Named parameters:
+    scale=1.0  - scale the size of text and icon
+    iconcolor="ff00f00f", linecolor="73ffffff" - colors of icons and lines
+    
+    Example:
+    
+    megoogleearth("eht.kml",['ALMA', 'CARMA', 'SMT', 'JCMT', 'EHT1', 'LLAMA1', 'LLAMA3', 'LMT', 'SOUTHPOLE'],scale=3.5)
+    """
+    if not type(position) in [list,set,tuple]: position=[position]
+    f=KML_File(filename,scale=scale,iconcolor=iconcolor,linecolor=linecolor)
+    #f.open_folder("eht")
+    for pos in position:
+        if type(pos)==str: p=me.measure(me.observatory(pos),"WGS84")
+        elif type(pos)==dict: p=me.measure(pos,"WGS84"); pos=meprettystring(pos)
+        else: print "ERROR: unknown position type - either a measure (me.position) or observatory name."; return
+        f.add_placemarker(qa.convert(p["m1"],"deg")["value"],qa.convert(p["m0"],"deg")["value"],altitude=1,name=pos)
+    #f.close_folder()
+    f.close()
+
+
 def uptime(sources,observatory=None,utcdate=None,step=1,coords="J2000",verbose=True,plot=False):
     """
     Prints or plots the position (elevation) of a list of astronomical
@@ -186,7 +312,9 @@ def uptime(sources,observatory=None,utcdate=None,step=1,coords="J2000",verbose=T
                 el.append(qa.convert(me.measure(direction,"AZEL")["m1"],"deg")["value"])
                 az.append(qa.convert(me.measure(direction,"AZEL")["m0"],"deg")["value"])
                 if verbose: print obs,qa.time(qa.quantity(str(day)+"d"),form=["ymd","local"]),sourceinfostr(source,direction)
-                result[obs+source]={"time":time,"az":az,"el":el}
+                if (len(sources)==1) and (len(observatory)>1): key=obs
+                else: key=obs+source
+                result[key]={"time":time,"az":az,"el":el}
     if plot:
         pl.clf()
         pl.title("Observation Start:"+qa.time(qa.quantity(str(startday)+"d"),form=["ymd"]))
@@ -195,7 +323,7 @@ def uptime(sources,observatory=None,utcdate=None,step=1,coords="J2000",verbose=T
         for k in result.keys():
             pl.plot(result[k]["time"],result[k]["el"],label=k)
         pl.legend()
-        pl.xlim(0,24)
+        pl.xlim(0,30)
         pl.ylim(0,90)
     return result
         
