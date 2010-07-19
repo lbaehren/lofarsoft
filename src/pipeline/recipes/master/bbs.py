@@ -198,7 +198,7 @@ class bbs(LOFARrecipe):
                             )
                 else:
                     self.logger.info("Dry run: execution skipped")
-                    result = 0
+                result = 0
             except CalledProcessError, e:
                 self.logger.exception("Call to BBS failed")
                 result = 1
