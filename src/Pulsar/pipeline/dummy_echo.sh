@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This is a dummy shell script which accepts a list as input and 
 # echo's that input to STDOUT;  if a list of input is not given
