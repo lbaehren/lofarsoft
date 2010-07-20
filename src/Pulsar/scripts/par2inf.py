@@ -191,7 +191,10 @@ parser.add_option("-r", "--repeat",action="store",type="int",dest="repeat",
 (options, args) = parser.parse_args()
 
 filename = args[len(args)-1]
-id = infodata("default.inf")
+defaultfile="%s/release/share/pulsar/data/lofar_default.inf"%os.environ['LOFARSOFT']
+id = infodata(defaultfile)
+print "  Taking template from .inf file: %s."%defaultfile
+#id = infodata("default.inf")
 par = pardata(filename)
 
 

@@ -595,8 +595,8 @@ do
 	#Create .sub.inf files with par2inf.py
 	echo cp $PARSET ./${OBSID}.parset >> $log
 	cp $PARSET ./${OBSID}.parset
-	echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
-	cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
+#	echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
+#	cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
 	#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
 	echo "Running par2inf" 
 	echo "Running par2inf" >> $log
