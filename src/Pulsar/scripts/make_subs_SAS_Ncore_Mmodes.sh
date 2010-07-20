@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.12
+VERSION=1.13
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-rfi] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo]\n\n"\
@@ -569,7 +569,7 @@ do
 		  echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
 		  echo bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
 		  bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
-		  set bf2presto_pid_$ii=$!  
+		  bf2presto_pid[$ii]=$!  
 		done
 	else
 		for ii in $num_dir
@@ -580,7 +580,7 @@ do
 	 	    echo 'Converting subbands: '`cat RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 
 		    echo bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
 		    bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
-		    set bf2presto_pid_$ii=$!  
+		    bf2presto_pid[$ii]=$!  
 		    
 #			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
 #		    echo bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID} `cat SB_master.list` >> $log
@@ -677,7 +677,7 @@ do
 		for ii in $num_dir
 		do
 		   echo "Waiting for loop $ii bf2presto8 to finish"
-		   wait $bf2presto_pid_$ii
+		   wait ${bf2presto_pid[ii]}
 		done
 #    else
 #		echo "Waiting for bf2presto to finish"
@@ -824,7 +824,7 @@ do
 		   echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 
 #		   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
 		   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
-		   set prepfold_pid_$ii=$!  
+		   prepfold_pid[$ii]=$!  
 		   echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
 		   sleep 5
 	    done
@@ -838,7 +838,7 @@ do
 			   echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 
 #			   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
 			   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
-		       set prepfold_pid_$ii$jjj=$!  
+		       prepfold_pid[$ii][$jjj]=$!  
 			   echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
 			   sleep 5
 		    done
@@ -854,7 +854,7 @@ do
 	   for ii in $num_dir
 	   do
 	      echo "Waiting for loop $ii prepfold to finish"
-	      wait $prepfold_pid_$ii
+	      wait ${prepfold_pid[ii]}
 	   done
 	else
 	    for jjj in $beams
@@ -862,7 +862,7 @@ do
 			for ii in $num_dir
 		    do
 	           echo "Waiting for loop $ii $jjj beam prepfold to finish"
-	           wait $prepfold_pid_$ii$jjj
+	           wait ${prepfold_pid[ii][jjj]}
             done	
 	    done
 	fi
@@ -883,7 +883,7 @@ do
 	         echo cd ${location}/${STOKES}/RSPA >> $log
 	         echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${PULSAR}_${OBSID}_RSPA.prepout 
 	         prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${PULSAR}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSPA.prepout 2>&1 &
-		     set prepfold_pid_all=$!  
+		     prepfold_pid_all=$!  
 	         echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> $log
 	         cd ${location}
 	      else
@@ -893,7 +893,7 @@ do
 		         echo cd ${location}/${STOKES}/${jjj}/RSPA >> $log
 		         echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${PULSAR}_${OBSID}_RSPA.prepout 
 		         prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${PULSAR}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSPA.prepout 2>&1 &
-			     set prepfold_pid_all_$jjj=$!  
+			     prepfold_pid_all[$jjj]=$!  
 		         echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> $log
 		         cd ${location}
 		     done
@@ -993,7 +993,7 @@ do
 	         cd ${location}/${STOKES}/RSP${ii}
 	         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  >> $log
 	         python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  && touch DONE &
-	         set subdyn_pid_$ii=$!
+	         subdyn_pid[$ii]=$!
 	      else
 			 for jjj in $beams
 			 do
@@ -1001,7 +1001,7 @@ do
 		         cd ${location}/${STOKES}/${jjj}/RSP${ii}
 		         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  >> $log
 		         python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  && touch DONE &
-		         set subdyn_pid_${ii}_${jjj}=$!	
+		         subdyn_pid[$ii][$jjj]=$!	
 	         done      
           fi
 	   done
@@ -1015,7 +1015,7 @@ do
 	      for ii in $num_dir
 	      do
 	         echo "Waiting for loop $ii subdyn to finish"
-	         wait $subdyn_pid_$ii
+	         wait ${subdyn_pid[ii]}
 	      done
 	   else
 	      for ii in $num_dir
@@ -1023,7 +1023,7 @@ do
 			 for jjj in $beams
 			 do
 		         echo "Waiting for loop $ii and $jjj subdyn to finish"
-	             wait $subdyn_pid_${ii}_${jjj}
+	             wait ${subdyn_pid_[ii][jjj]}
 	         done
 	      done
        fi	   
