@@ -63,11 +63,11 @@ class dppp(LOFARrecipe):
                 clear_available_list=utilities.clear_available_list
             )
         )
-        self.logger.info("Pushed functions to cluster")
+        self.logger.debug("Pushed functions to cluster")
 
         # Use build_available_list() to determine which SBs are available
         # on each engine; we use this for dependency resolution later.
-        self.logger.info("Building list of data available on engines")
+        self.logger.debug("Building list of data available on engines")
         available_list = "%s%s" % (
             self.inputs['job_name'], self.__class__.__name__
         )
@@ -75,6 +75,7 @@ class dppp(LOFARrecipe):
         mec.execute(
             "build_available_list(\"%s\")" % (available_list,)
         )
+        self.logger.debug("Data lists available. Starting processing loop.")
 
         # clusterlogger context manager accepts networked logging
         # from compute nodes.
@@ -127,7 +128,7 @@ class dppp(LOFARrecipe):
                         self.logger.info("Dry run: scheduling skipped")
 
                 # Wait for all jobs to finish
-                self.logger.info("Waiting for all DPPP tasks to complete")
+                self.logger.debug("Waiting for all DPPP tasks to complete")
                 tc.barrier([task for task, subband in tasks])
 
         failure = False
