@@ -25,11 +25,19 @@ class pardata:
             if line.startswith("Observation.bandFilter"):
                 self.bandFilter = line.split("=")[-1].strip()
                 continue
-            if line.startswith("Observation.Beam[0].subbandList"):
-                #self.subbandFirst = float(line.split("=")[-1].strip()[1:4])
-                #self.subbandLast = float(line[-5:-2])
-                self.subbandFirst = float(line.split("=")[-1].strip().split("..")[0][1:])
-                self.subbandLast = float(line.split("=")[-1].strip().split("..")[1][:-1])
+            if line.startswith("Observation.Beam[0].subbandList") or \
+                    line.startswith("Observation.subbandList"):
+                # for either ".." ranges, or comma separated
+                try:
+                    self.subbandFirst = float(line.split("=")[-1].strip().split("..")[0][1:])
+                except: 
+                    self.subbandFirst = float(line.split("=")[-1].strip()[1:4])               
+
+                try:
+                    self.subbandLast = float(line.split("=")[-1].strip().split("..")[1][:-1])
+                except:
+                    self.subbandLast = float(line[-5:-2])
+
                 print self.subbandFirst, self.subbandLast
                 continue
             if line.startswith("Observation.channelsPerSubband"):
