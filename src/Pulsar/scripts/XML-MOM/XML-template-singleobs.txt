@@ -1,0 +1,91 @@
+<item index="0">
+<lofar:observation>
+    <name>FILL IN OBSERVATION NAME</name>
+    <description>FILL IN DESCRIPTION</description>
+    <currentStatus>
+        <mom2:openedStatus/>
+    </currentStatus>
+    <lofar:observationAttributes>
+        <observationId></observationId>
+        <name>FILL IN OBSERVATION NAME</name>
+        <projectName>Pulsars</projectName>
+        <instrument>Beam Observation</instrument>
+        <userSpecification>
+            <correlatedData>false</correlatedData>
+            <filteredData>false</filteredData>
+            <beamformedData>false</beamformedData>
+            <coherentStokesData>false</coherentStokesData>
+            <incoherentStokesData>true</incoherentStokesData>
+            <antenna>HBA Zero</antenna>
+            <clock mode="200 MHz"/>
+            <instrumentFilter>110-190 MHz</instrumentFilter>
+            <integrationInterval>1</integrationInterval>
+            <channelsPerSubband>16</channelsPerSubband>
+            <cnIntegrationSteps>12208</cnIntegrationSteps>
+            <pencilBeams>
+                <flyseye>false</flyseye>
+                <nrPencilRings>0</nrPencilRings>
+                <pencilRingSize>0</pencilRingSize>
+                <pencilBeamList>
+                    <pencilBeam>
+                        <angle1>RA</angle1>
+                        <angle2>DEC</angle2>
+                    </pencilBeam>
+                </pencilBeamList>
+            </pencilBeams>
+            <stokes>
+                <stokesSelection>I</stokesSelection>
+                <integrateChannels>false</integrateChannels>
+                <integrationSteps>16</integrationSteps>
+            </stokes>
+            <stationSet>Custom</stationSet>
+            <stations>
+                STATION_LIST
+            </stations>
+			<duration>LENGTH</duration>
+			<timeFrame>UT</timeFrame>
+            <startTime>STARTTIME</startTime>
+            <endTime>ENDTIME</endTime>
+        </userSpecification>
+    </lofar:observationAttributes>
+
+    <children>
+        <item index="0">
+            <lofar:measurement xsi:type="lofar:UVMeasurementType">
+                <name>FILL IN OBSERVATION NAME</name>
+                <description>FILL IN DESCRIPTION</description>
+
+                <currentStatus>
+                    <mom2:openedStatus/>
+                </currentStatus>
+                <lofar:uvMeasurementAttributes>
+                    <ra>RDEG</ra>
+                    <dec>DDEG</dec>
+                    <equinox>J2000</equinox>
+                    <duration>LENGTH</duration>
+                    <startTime>STARTTIME</startTime>
+                    <endTime>ENDTIME</endTime>
+                    <centralFrequency unit="MHz">140.13671875</centralFrequency>
+                    <bandWidth unit="MHz">48.2421875</bandWidth>
+                    <subbands>SUBBANDS</subbands>
+                    <measurementType>Target</measurementType>
+                    <specification>
+                        <targetName>PULSAR</targetName>
+                        <ra>RDEG</ra>
+                        <dec>DDEG</dec>
+                        <equinox>J2000</equinox>
+                        <duration>LENGTH</duration>
+                        <subbandsSpecification>
+                            <bandWidth unit="MHz">48</bandWidth>
+                            <centralFrequency unit="MHz">140</centralFrequency>
+                            <contiguous>true</contiguous>
+                            <subbands>SUBBANDS</subbands>
+                        </subbandsSpecification>
+                    </specification>
+                </lofar:uvMeasurementAttributes>
+            </lofar:measurement>
+        </item>
+   </children>
+   
+</lofar:observation>
+</item>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lofar:project 
+    xmlns:lofar="http://www.astron.nl/MoM2-Lofar"
+    xmlns:mom2="http://www.astron.nl/MoM2"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.astron.nl/MoM2-Lofar http://lofar.astron.nl:8080/mom3/schemas/LofarMoM2.xsd http://www.astron.nl/MoM2 http://lofar.astron.nl:8080/mom3/schemas/MoM2.xsd ">
+	
+	<name>Pulsars</name>
+	<description>Pulsars</description>
+	<children>
