@@ -3,9 +3,9 @@
 # take a list of observations, and create multiple templates for MOM upload
 # required input: list of observations
 # Example run:
-# prompt> multi-template.sh -in obs.lis -out out.xml
+# prompt> multi-templates.sh -in obs.lis -out out.xml
 
-USAGE="\nusage : multi-template.sh -in observation_list_file -out template_output_file\n\n"\
+USAGE="\nusage : multi-templates.sh -in observation_list_file -out template_output_file\n\n"\
 "      -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
 "      -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) \n"
 
