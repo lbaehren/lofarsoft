@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.13
+VERSION=1.14
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-rfi] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo]\n\n"\
@@ -294,9 +294,11 @@ fi
 
 #Non-Flys Eye (flyseye=0);  Flys Eye (flyseye=1)
 flyseye=0
+flyseye_tar=0
 if [[ $FLYSEYE == 'true' ]]
 then
    flyseye=1
+   flyseye_tar=1
 fi
 
 ###############################################################################
@@ -329,8 +331,10 @@ do
     # Get the list of input files; and check if divisible by N cores
 	master_list=${STOKES}/SB_master.list
 	#Create subband lists
-	all_list=`ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
-	ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
+#XXX	all_list=`ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
+	all_list=`ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
+#XXX	ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
+	ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
 	all_num=`wc -l $master_list | awk '{print $1}'`
 	
 	echo "Found a total of $all_num SB MS ${STOKES} input datafiles to process" 
@@ -504,10 +508,11 @@ do
 	else
        for ii in $num_dir
 	   do
-	       for jjj in $beams
-	       do
-	          mkdir -p ${STOKES}/RSP$ii/${jjj}
-	       done
+#	       for jjj in $beams
+#	       do
+#	          mkdir -p ${STOKES}/RSP$ii/${jjj}
+	          mkdir -p ${STOKES}/RSP$ii
+#	       done
 	   done
 	fi
 	
@@ -521,19 +526,6 @@ do
 	chmod -R 774 . * 
 	chgrp -R pulsar . *
 
-    # Create the RSPA (all) directory when the all option is requested
-	if [ $all -eq 1 ]
-	then 
-	  if (( $flyseye == 0 ))
-	  then
-		  mkdir ${STOKES}/"RSPA"
-	  else
-         for jjj in $beams
-         do
-            mkdir -p ${STOKES}/${jjj}/RSPA
-         done
-	  fi
-    fi
 	  	
     #Move the split lists to the appropriate directories
 #	if (( $flyseye == 0 ))
@@ -557,8 +549,8 @@ do
 #    fi	
 	
 	#Convert the subbands with bf2presto
-	echo "Starting bf2presto conversion for RSP-splits"
-	echo "Starting bf2presto conversion for RSP-splits" >> $log
+	echo "Starting bf2presto8 conversion for RSP-splits"
+	echo "Starting bf2presto8 conversion for RSP-splits" >> $log
 	date
 	date >> $log
 	
@@ -578,8 +570,8 @@ do
 		    cd ${location}/${STOKES}/"RSP"${ii}
 
 	 	    echo 'Converting subbands: '`cat RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 
-		    echo bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
-		    bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+		    echo bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+		    bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
 		    bf2presto_pid[$ii]=$!  
 		    
 #			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
@@ -595,8 +587,8 @@ do
 	#Create .sub.inf files with par2inf.py
 	echo cp $PARSET ./${OBSID}.parset >> $log
 	cp $PARSET ./${OBSID}.parset
-#	echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
-#	cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
+	echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
+	cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
 	#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
 	echo "Running par2inf" 
 	echo "Running par2inf" >> $log
@@ -640,6 +632,21 @@ do
        echo rm test*.inf >> $log
        rm test*.inf
     fi
+
+    # Create the RSPA (all) directory when the all option is requested
+	if [ $all -eq 1 ]
+	then 
+	  if (( $flyseye == 0 ))
+	  then
+		  mkdir ${STOKES}/"RSPA"
+	  else
+         for jjj in $beams
+         do
+            mkdir -p ${STOKES}/${jjj}/RSPA
+#            mkdir -p ${STOKES}/RSPA
+         done
+	  fi
+    fi
 		
 	#Create the .sub.inf file for the entire set (in background, as there is plenty of time to finish before file is needed
 	if (( $all == 1 )) && (( $flyseye == 0 ))
@@ -676,7 +683,7 @@ do
 #	then
 		for ii in $num_dir
 		do
-		   echo "Waiting for loop $ii bf2presto8 to finish"
+		   echo "Waiting for loop $ii bf2presto to finish"
 		   wait ${bf2presto_pid[ii]}
 		done
 #    else
@@ -838,7 +845,8 @@ do
 			   echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 
 #			   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
 			   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
-		       prepfold_pid[$ii][$jjj]=$!  
+			   kk=`echo "$ii * $jjj" | bc`
+		       prepfold_pid[$kk]=$!  
 			   echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
 			   sleep 5
 		    done
@@ -861,12 +869,13 @@ do
 	    do
 			for ii in $num_dir
 		    do
+			   kk=`echo "$ii * $jjj" | bc`
 	           echo "Waiting for loop $ii $jjj beam prepfold to finish"
-	           wait ${prepfold_pid[ii][jjj]}
+	           wait ${prepfold_pid[kk]}
             done	
 	    done
 	fi
-
+    
 #    if (( $flyseye == 0 ))
 #    then
 	   #When the first folding task finishes, start the folding for the "all" directory
@@ -1098,7 +1107,7 @@ echo "Creating tar file of plots"
 echo "Creating tar file of plots" >> $log
 date
 date >> $log
-if (( $flyseye == 0 ))
+if (( $flyseye_tar == 0 ))
    then
    echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.bestprof */RSP*/*.sub.inf >> $log
    tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.bestprof */RSP*/*.sub.inf 
