@@ -66,6 +66,8 @@
     distZerr(0.),
     dist(-1.),
     disterr(0.),
+    angleToCore(-99.),
+    angleToCoreerr(-99.),
     noise(0.),
     lateralExpHeight(0.),
     lateralExpDeviation(0.),

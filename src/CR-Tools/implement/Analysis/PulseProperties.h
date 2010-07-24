@@ -130,6 +130,10 @@
     double dist;
     //! error of distance of antenna position from shower axis (gaussian error propagation)
     double disterr;
+    //! angle between antenna and core position
+    double angleToCore;
+    //! error of angle between antenna and core position
+    double angleToCoreerr;
     //! mean noise of a certain part of the trace (for lateral distribution analysis)
     double noise;
     //! calculated pulse height for exponential lateral distribution
