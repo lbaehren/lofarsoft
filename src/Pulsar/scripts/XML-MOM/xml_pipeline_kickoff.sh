@@ -1,4 +1,4 @@
-#!/bin/ksh -x
+#!/bin/ksh 
 
 USAGE="\nusage : multi-xml_pipeline_kickoff.sh obs_finished.xml pipeline_output_processing_location\n\n"\
 
@@ -32,7 +32,7 @@ fi
 # strip the actual ObsID and the Pulsar name from this line
 # create the run script for the shell script pipeline
 
-egrep "observationId|\(HBA\) " $infile | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/\<.*Obs / /g' | sed 's/(HBA.*//g' | awk -v location=$out_location '{printf("pulp.sh -id L2010_0%s -p %s -o %s/L2010_0%s_red -all -rfi\n", $1, $2, location, $1)}' > $outfile
+egrep "observationId|\(HBA\) " $infile | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/<.*Obs / /g' | sed 's/(HBA.*//g' | awk -v location=$out_location '{printf("pulp.sh -id L2010_0%s -p %s -o %s/L2010_0%s_red -all -rfi\n", $1, $2, location, $1)}' > $outfile
 
 chmod 777 $outfile
 
