@@ -193,6 +193,8 @@ parser.add_option("-u", "--upper_subband",action="store",type="int",dest="upper_
                   help="The lowest subband number to use if don't want them all")
 parser.add_option("-n", "--nsubbands", action="store", type="int",
 		  dest="nsubbands", help="The number of subbands to be included in the inf file")
+parser.add_option("-N", "--nsamples", action="store", type="int",
+		  dest="nsamples", help="The number of samples to be included in the inf file")
 parser.add_option("-r", "--repeat",action="store",type="int",dest="repeat",
                   help="If producing multiple inf files how many times to repeat\n the number of subbands requested with -n option")
 
@@ -234,6 +236,10 @@ if (options.source):
 # Change the name of the person analysing the data.
 if (options.user):
     id.analyzer = options.user
+
+# Checking if number of samples is given
+if (options.nsamples):
+    id.N = options.nsamples
 
 #  Calculate the RA and Dec of the source
 rad = float(par.rar) * 180.0 / math.pi
