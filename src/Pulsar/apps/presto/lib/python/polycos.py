@@ -37,6 +37,7 @@ class polyco:
                 self.coeffs[linenum*3+0] = float(sl[0].replace('D', 'E'))
                 self.coeffs[linenum*3+1] = float(sl[1].replace('D', 'E'))
                 self.coeffs[linenum*3+2] = float(sl[2].replace('D', 'E'))
+            # Vlad, Jul 25, 2010 - added the line below for proper reading of the polyco file
             line = fileptr.readline()
 
     def phase(self, mjdi, mjdf):
