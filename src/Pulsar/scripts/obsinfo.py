@@ -79,7 +79,7 @@ if __name__ == "__main__":
 	# loop over the storage nodes and directories to get the list of all IDs
 	for s in storage_nodes:
 		for d in data_dirs:
-			mask = storage_prefix + s + d + "/L20??_?????"
+			mask = storage_prefix + s + d + "/?20??_?????"
 			indlist=glob.glob(mask)			
 			indlist = np.append(indlist, glob.glob(mask + "?"))
 			indlist = np.append(indlist, glob.glob(mask + "??"))
@@ -121,7 +121,8 @@ for i in np.arange(Nnodes-1):
 storage_nodes_string=storage_nodes_string+storage_nodes[-1]
 
 if is_html == True:
-	print
+	print "\n<table align=center border=1>"
+	print "\n<th align=center>\n </th>\n" % (storage_nodes_string,)
 else:
 	print "#======================================================================================================================================================================="
 	print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
@@ -403,4 +404,4 @@ if tosort == True:
 		print "%d	%s" % (i, obstable[sorted_indices[i]])
 
 if is_html == True:
-	print "\n</body>\n</html>"
+	print "\n</table>\n\n</body>\n</html>"
