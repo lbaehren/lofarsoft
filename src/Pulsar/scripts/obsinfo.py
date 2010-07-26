@@ -13,6 +13,7 @@ fromdate=""
 # if True then make a list in html format
 is_html=False
 htmlfile=""  # name of the html file in case is_html == True
+htmlptr=100  # html  file descriptor
 
 # storage nodes to collect info about Pulsar Observations
 # we assume that even for the case of long observations when data were spreaded out
@@ -78,7 +79,7 @@ if __name__ == "__main__":
 # writing the html code if chosen
 if is_html == True:
 	htmlptr = open(htmlfile, 'w')
-	htmlptr.write ("<html>\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n  <meta name=\"Classification\" content=\"public HTML\">\n  <title>LOFAR pulsar observations</title>\n</head>\n<body><h1 align=left>LOFAR pulsar observations</h1>")
+	htmlptr.write ("<html>\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n  <meta name=\"Classification\" content=\"public HTML\">\n  <title>LOFAR pulsar observations</title>\n</head>\n<body>\n<h2 align=left>LOFAR pulsar observations</h2>\n")
 
 # loop over the storage nodes and directories to get the list of all IDs
 for s in storage_nodes:
@@ -98,13 +99,13 @@ Nnodes=np.size(storage_nodes)
 # more recent obs is the obs with higher ID (as it should be)
 obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 if is_html == True:
-	htmlptr.write("  <p align=left>Number of observations in Sub5: %d</p>" % (np.size(obsids), ))
+	htmlptr.write("Number of observations in Sub5: %d<br>\n" % (np.size(obsids), ))
 
 print "Number of observations in Sub5: %d" % (np.size(obsids), )
 
 if is_from == True:
 	if is_html == True:
-		htmlptr.write ("  <p align=left>List only observations since %s</p>" % (fromdate, ))
+		htmlptr.write ("List only observations since %s<br>\n" % (fromdate, ))
 
 	print "List only observations since %s" % (fromdate, )
 	fromyear = fromdate.split("-")[0]
@@ -126,8 +127,8 @@ for i in np.arange(Nnodes-1):
 storage_nodes_string=storage_nodes_string+storage_nodes[-1]
 
 if is_html == True:
-	htmlptr.write ("\n<table align=center border=0>")
-	htmlptr.write ("\n<tr align=center>\n <td>No.</td><td>ObsID</td><td>MMDD</td><td>Dur</td><td>NodesList (lse)</td><td>Datadir</td><td>%s</td><td>Total(GB)</td><td>BF FD IM IS CS FE</td><td>Reduced</td><td>Pointing</td><td>Source</td>\n</tr>" % (storage_nodes_string,))
+	htmlptr.write ("\n<p align=left>\n<table align=center border=0>\n")
+	htmlptr.write ("\n<tr align=center>\n <td>No.</td><td>ObsID</td><td>MMDD</td><td>Dur</td><td>NodesList (lse)</td><td>Datadir</td><td>%s</td><td>Total(GB)</td><td>BF FD IM IS CS FE</td><td>Reduced</td><td>Pointing</td><td>Source</td>\n</tr>\n" % (storage_nodes_string,))
 
 print "#======================================================================================================================================================================="
 print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
