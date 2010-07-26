@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
 	# writing the html code if chosen
 	if is_html == True:
-		print "<html>\n<head>\n  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">\n  <meta name="Classification" content="public HTML">\n  <title>LOFAR pulsar observations</title>\n</head>\n<body><h1 align=left>LOFAR pulsar observations</h1>"
+		print "<html>\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n  <meta name=\"Classification\" content=\"public HTML\">\n  <title>LOFAR pulsar observations</title>\n</head>\n<body><h1 align=left>LOFAR pulsar observations</h1>"
 
 	# loop over the storage nodes and directories to get the list of all IDs
 	for s in storage_nodes:
