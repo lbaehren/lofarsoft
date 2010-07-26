@@ -72,23 +72,23 @@ def parsecmd(prg, argv):
 
 if __name__ == "__main__":
 
-	# parsing command line
-	parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
+# parsing command line
+parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
 
-	# writing the html code if chosen
-	if is_html == True:
-		htmlptr = open(htmlfile, 'w')
-		htmlptr.write ("<html>\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n  <meta name=\"Classification\" content=\"public HTML\">\n  <title>LOFAR pulsar observations</title>\n</head>\n<body><h1 align=left>LOFAR pulsar observations</h1>")
+# writing the html code if chosen
+if is_html == True:
+	htmlptr = open(htmlfile, 'w')
+	htmlptr.write ("<html>\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n  <meta name=\"Classification\" content=\"public HTML\">\n  <title>LOFAR pulsar observations</title>\n</head>\n<body><h1 align=left>LOFAR pulsar observations</h1>")
 
-	# loop over the storage nodes and directories to get the list of all IDs
-	for s in storage_nodes:
-		for d in data_dirs:
-			mask = storage_prefix + s + d + "/?20??_?????"
-			indlist=glob.glob(mask)			
-			indlist = np.append(indlist, glob.glob(mask + "?"))
-			indlist = np.append(indlist, glob.glob(mask + "??"))
-			indlist = np.append(indlist, glob.glob(mask + "???"))
-			obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
+# loop over the storage nodes and directories to get the list of all IDs
+for s in storage_nodes:
+	for d in data_dirs:
+		mask = storage_prefix + s + d + "/?20??_?????"
+		indlist=glob.glob(mask)			
+		indlist = np.append(indlist, glob.glob(mask + "?"))
+		indlist = np.append(indlist, glob.glob(mask + "??"))
+		indlist = np.append(indlist, glob.glob(mask + "???"))
+		obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
 
 # number of storage nodes
 Nnodes=np.size(storage_nodes)
