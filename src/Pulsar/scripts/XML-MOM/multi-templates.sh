@@ -191,6 +191,12 @@ PULSAR=""
 RA=0.0
 DEC=0.0
 
+
+#The 'date' command is highly dependant on the OS;  
+#BSD 'date' has more functionality than Linux/Ubuntu date;
+#therefore, need to make to cases for the date-oriented calculations
+system_typ=`uname -s | awk '{print $1}'`
+
 #for each source, create an observation
 while read line
 do
@@ -258,11 +264,18 @@ do
 			then
 			   START=$previous_start
 			   tot_time=`echo "1 + $GAP" | bc"`
-			   previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+			   
+				if [[ $system_typ == "Darwin" ]]
+				then
+			       previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+				else
+				   new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
+			       previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+				fi
 			fi
 
 		   # change decimal minutes into seconds
-		   TIME=`echo $TIME | awk '{print $1 * 60}`
+		   TIME=`echo $TIME | awk '{print ($1 * 60)}'`
 		   if (( $TIME > 0 )) && (( $TIME <= 10 )) 
 		   then
 		      DURATION=`echo "PT0"$TIME"S"`	
@@ -276,8 +289,16 @@ do
 			if (( $user_start == 1 ))
 			then
 			   START=$previous_start
-			   tot_time=`echo "$TIME + $GAP" | bc"`
-			   previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+			   tot_time=`echo "$TIME + $GAP" | bc`
+			   			   
+				if [[ $system_typ == "Darwin" ]]
+				then
+			       previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+				else
+				   new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
+			       previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+				fi
+
 			fi
 
 			if (( $TIME > 0 )) && (( $TIME <= 10 ))
@@ -294,10 +315,15 @@ do
 			   echo "ERROR: duration value ($TIME) is not understood"
 			   continue
 	    fi
-		
-		#END=`date -v +$TIME"M" "+%Y-%m-%dT%H:%M:%S"`
-		END=`date -j -v +$TIME"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 
+		if [[ $system_typ == "Darwin" ]]
+		then
+		   END=`date -j -v +$TIME"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+		else
+		   new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $TIME * 60" | bc` 
+	       END=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+		fi
+		
 		# Print the basic information about input parameters to STDOUT at start 
 		echo "Running multi_template.sh with the following input arguments:"
 		echo "PULSAR NAME = $PULSAR"
