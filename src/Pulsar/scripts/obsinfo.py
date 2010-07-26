@@ -72,8 +72,8 @@ def parsecmd(prg, argv):
 
 if __name__ == "__main__":
 
-# parsing command line
-parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
+	# parsing command line
+	parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
 
 # writing the html code if chosen
 if is_html == True:
