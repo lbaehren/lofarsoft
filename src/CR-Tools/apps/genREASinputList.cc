@@ -381,13 +381,13 @@ int main(int argc, char* argv[])
     t2->GetEntry(i);
 
     //calculate LOPES coordinate system
-    Xlopes=Xc*TMath::Cos(alfa)+Yc*TMath::Sin(alfa);     //East
+    Xlopes=Xc*TMath::Cos(alpha)+Yc*TMath::Sin(alpha);     //East
     //cout<<"Xlopes    "<<Xlopes<<endl;
-    Ylopes=-Xc*TMath::Sin(alfa)+Yc*TMath::Cos(alfa);    //North
-    Xlopesg=Xcg*TMath::Cos(alfa)+Ycg*TMath::Sin(alfa);    //East
-    Ylopesg=-Xcg*TMath::Sin(alfa)+Ycg*TMath::Cos(alfa); //North
+    Ylopes=-Xc*TMath::Sin(alpha)+Yc*TMath::Cos(alpha);    //North
+    Xlopesg=Xcg*TMath::Cos(alpha)+Ycg*TMath::Sin(alpha);    //East
+    Ylopesg=-Xcg*TMath::Sin(alpha)+Ycg*TMath::Cos(alpha); //North
 
-  Easting=Xc*TMath::Cos(alfa)+Yc*TMath::Sin(alfa);//da x
+
 
     //energy (eV)
     E=pow(10,lgE);
