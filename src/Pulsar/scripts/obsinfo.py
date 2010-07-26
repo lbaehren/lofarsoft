@@ -97,8 +97,8 @@ if tosort == True:
 	obstable=[]
 
 # printing out the header of the table
-# The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed FilteredData Imaging IncohStokes CohStokes Fly'sEye	Reduced Pointing
-print "#========================================================================================================================================================="
+# The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed FilteredData Imaging IncohStokes CohStokes Fly'sEye	Reduced Pointing Source
+print "#=================================================================================================================================================================="
 storage_nodes_string=""
 for i in np.arange(Nnodes-1):
 	storage_nodes_string=storage_nodes_string+storage_nodes[i]+"\t"
@@ -337,6 +337,15 @@ for counter in np.arange(np.size(obsids)):
 		decstring="_????"
 	pointing="%s%s" % (rastring, decstring)
 
+	# getting info about Source name (new addition to the Parset files)
+	cmd="grep 'Observation.Beam\[0\].target' %s" % (log,)
+	source=os.popen(cmd).readlines()
+	if np.size(source)>0:
+		# Source name exists in parset file
+        	source=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+	else:
+		source=""
+
 	# Getting the Duration
 	cmd="grep Observation.stopTime %s | tr -d \\'" % (log,)
 	datestring2=os.popen(cmd).readlines()
@@ -353,8 +362,8 @@ for counter in np.arange(np.size(obsids)):
 		duration="?"
 
 	# combining info
-	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Filtered Imaging IncohStokes Reduced Pointing
-	info="%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing)
+	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Filtered Imaging IncohStokes Reduced Pointing Source
+	info="%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source)
 
 	# Printing out the report (if we want unsorted list)
 	if tosort == False:

@@ -583,18 +583,43 @@ do
     fi
 
 	echo "Running bf2presto8 in the background for RSP-splits..." 
+
+#	if (( $flyseye == 0 ))
+#	then
+		for ii in $num_dir
+		do
+		   echo "Waiting for loop $ii bf2presto to finish"
+		   wait ${bf2presto_pid[ii]}
+		done
+#    else
+#		echo "Waiting for bf2presto to finish"
+#		wait $bf2presto_pid
+#    fi
+	
+	echo "Done bf2presto8 (splits)" 
+	echo "Done bf2presto8 (splits)" >> $log
+	date
+	date >> $log
+
+	# Calculating the number of samples to be passed to inf-file
+	if (( $flyseye == 0 ))
+	then
+		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/${PULSAR}_${OBSID}_RSP0.sub0000 | awk '{print $5}' -`
+	else
+		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR}_${OBSID}_RSP0.sub0000 | awk '{print $5 / 2}' -`
+	fi
 	
 	#Create .sub.inf files with par2inf.py
 	echo cp $PARSET ./${OBSID}.parset >> $log
 	cp $PARSET ./${OBSID}.parset
 	echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
 	cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
-	#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+	#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
 	echo "Running par2inf" 
 	echo "Running par2inf" >> $log
 	
-    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset >> $log
-    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset >> $log
+    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
     status=$?
 
 	if [ $status -ne 0 ]
@@ -651,15 +676,15 @@ do
 	#Create the .sub.inf file for the entire set (in background, as there is plenty of time to finish before file is needed
 	if (( $all == 1 )) && (( $flyseye == 0 ))
 	then 
-	     echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n $all_num -r 1 ./${OBSID}.parset >> $log
+	     echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset >> $log
 	     echo mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf >> $log
-	     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n $all_num -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf
+	     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf
 	elif (( $all == 1 )) && (( $flyseye == 1 ))
     then
     	for jjj in $beams
 	    do
-	       echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n $all_num -r 1 ./${OBSID}.parset >> $log
-	       python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -n $all_num -r 1 ./${OBSID}.parset  
+	       echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset >> $log
+	       python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset  
 	       echo mv `ls test*.inf` ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf >> $log
 	       mv `ls test*.inf` ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf
         done
@@ -679,23 +704,6 @@ do
 	#  sleep 10
 	#done
 
-#	if (( $flyseye == 0 ))
-#	then
-		for ii in $num_dir
-		do
-		   echo "Waiting for loop $ii bf2presto to finish"
-		   wait ${bf2presto_pid[ii]}
-		done
-#    else
-#		echo "Waiting for bf2presto to finish"
-#		wait $bf2presto_pid
-#    fi
-	
-	echo "Done bf2presto8 (splits)" 
-	echo "Done bf2presto8 (splits)" >> $log
-	date
-	date >> $log
-	
 	#Split the bf2presto results within the beams into RSP in Fly's Eye Mode
 #	if (( $flyseye == 1 ))
 #	then	
@@ -963,9 +971,9 @@ do
     echo cd ${location} >> $log
     cd ${location}
 	
-	#Make a .pdf version of the plots
-	echo "Running convert on ps to pdf of the plots"
-	echo "Running convert on ps to pdf of the plots" >> $log
+	#Make a .pdf and .png version of the plots
+	echo "Running convert on ps to pdf and png of the plots"
+	echo "Running convert on ps to pdf and png of the plots" >> $log
 	date
 	date >> $log
 
@@ -975,6 +983,8 @@ do
 		do
 		   echo convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf >> $log
 		   convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
+		   echo convert -rotate 90 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png >> $log
+		   convert -rotate 90 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png
 		done
 	else
 	    for jjj in $beams
@@ -983,6 +993,8 @@ do
 			do
 			   echo convert ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf >> $log
 			   convert ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
+			   echo convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png >> $log
+			   convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png
 			done
 		done
 	fi
@@ -1043,8 +1055,8 @@ do
 	then
 	   ii=1
 	   yy=0
-	   echo "Wiating for prepfold on entire subband list to complete..." 
-	   echo "Wiating for prepfold on entire subband list to complete..." >> $log
+	   echo "Waiting for prepfold on entire subband list to complete..." 
+	   echo "Waiting for prepfold on entire subband list to complete..." >> $log
 	   date 
 	   date >> $log
 	   if (( $flyseye == 0 ))
@@ -1063,6 +1075,8 @@ do
 		   done
 		   echo convert ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf >> $log
 		   convert ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf
+		   echo convert -rotate 90 ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png >> $log
+		   convert -rotate 90 ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png
 	   else
 		   while [ $ii -ne $yy ]
 		   do
@@ -1080,6 +1094,8 @@ do
 		   do
 			   echo convert ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf >> $log
 			   convert ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf
+			   echo convert -rotate 90 ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png >> $log
+			   convert -rotate 90 ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png
            done
        fi # end if (( $flyseye == 0 ))
        
@@ -1109,11 +1125,11 @@ date
 date >> $log
 if (( $flyseye_tar == 0 ))
    then
-   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.bestprof */RSP*/*.sub.inf >> $log
-   tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.bestprof */RSP*/*.sub.inf 
+   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf >> $log
+   tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf 
 else
-   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf >> $log
-   tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf
+   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf >> $log
+   tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf
 fi
 echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
 gzip ${PULSAR}_${OBSID}_plots.tar
