@@ -99,13 +99,14 @@ Nnodes=np.size(storage_nodes)
 obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 if is_html == True:
 	htmlptr.write("  <p align=left>Number of observations in Sub5: %d</p>" % (np.size(obsids), ))
-else:
-	print "Number of observations in Sub5: %d" % (np.size(obsids), )
+
+asciiptr.write ("Number of observations in Sub5: %d" % (np.size(obsids), ))
+
 if is_from == True:
 	if is_html == True:
 		htmlptr.write ("  <p align=left>List only observations since %s</p>" % (fromdate, ))
-	else:
-		print "List only observations since %s" % (fromdate, )
+
+	print "List only observations since %s" % (fromdate, )
 	fromyear = fromdate.split("-")[0]
 	fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
 print
@@ -127,10 +128,10 @@ storage_nodes_string=storage_nodes_string+storage_nodes[-1]
 if is_html == True:
 	htmlptr.write ("\n<table align=center border=0>")
 	htmlptr.write ("\n<tr align=center>\n <td>No.</td><td>ObsID</td><td>MMDD</td><td>Dur</td><td>NodesList (lse)</td><td>Datadir</td><td>%s</td><td>Total(GB)</td><td>BF FD IM IS CS FE</td><td>Reduced</td><td>Pointing</td><td>Source</td>\n</tr>" % (storage_nodes_string,))
-else:
-	print "#======================================================================================================================================================================="
-	print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
-	print "#======================================================================================================================================================================="
+
+print "#======================================================================================================================================================================="
+print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
+print "#======================================================================================================================================================================="
 
 j=0 # extra index to follow only printed lines
 # loop for every observation
@@ -390,16 +391,15 @@ for counter in np.arange(np.size(obsids)):
 	# combining info
 	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Filtered Imaging IncohStokes Reduced Pointing Source
 	if is_html == True:
-		info="<td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%-16s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%c  %c  %c  %c  %c  %c</td>\n <td>%-11s</td>\n <td>%s</td>\n <td>%s</td>\n</tr>" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source)
-	else:
-		info="%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source)
+		infohtml="<td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%-16s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%c  %c  %c  %c  %c  %c</td>\n <td>%-11s</td>\n <td>%s</td>\n <td>%s</td>\n</tr>" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source)
+
+	info="%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source)
 
 	# Printing out the report (if we want unsorted list)
 	if tosort == False:
 		if is_html == True:
-			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (j, info))
-		else:
-			print "%d	%s" % (j, info)
+			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (j, infohtml))
+		print "%d	%s" % (j, info)
 	else:
 		obstable=np.append(obstable, info)
 
@@ -410,12 +410,11 @@ Nrecs=j
 # printing the sorted list
 if tosort == True:
 	sorted_indices=np.flipud(np.argsort(totsz[:Nrecs], kind='mergesort'))
+	for i in np.arange(Nrecs):
+		print "%d	%s" % (i, obstable[sorted_indices[i]])
 	if is_html == True:
 		for i in np.arange(Nrecs):
 			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (i, obstable[sorted_indices[i]]))
-	else:
-		for i in np.arange(Nrecs):
-			print "%d	%s" % (i, obstable[sorted_indices[i]])
 
 if is_html == True:
 	# getting date & time of last update
