@@ -100,7 +100,7 @@ obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 if is_html == True:
 	htmlptr.write("  <p align=left>Number of observations in Sub5: %d</p>" % (np.size(obsids), ))
 
-asciiptr.write ("Number of observations in Sub5: %d" % (np.size(obsids), ))
+print "Number of observations in Sub5: %d" % (np.size(obsids), )
 
 if is_from == True:
 	if is_html == True:
