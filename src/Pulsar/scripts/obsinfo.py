@@ -418,5 +418,9 @@ if tosort == True:
 			print "%d	%s" % (i, obstable[sorted_indices[i]])
 
 if is_html == True:
+	# getting date & time of last update
+	cmd="date +'%b %d, %Y %H:%N:%S'"
+	lupd=os.popen(cmd).readlines()[0][:-1]
+	htmlptr.write ("\n<hr width=100%>\n<address>\nLast Updated: %s\n</address>\n" % (lupd, ))
 	htmlptr.write ("\n</table>\n\n</body>\n</html>")
 	htmlptr.close()
