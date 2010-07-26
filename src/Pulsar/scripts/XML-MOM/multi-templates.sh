@@ -5,16 +5,17 @@
 # Example run:
 # prompt> multi-templates.sh -in obs.lis -out out.xml
 
-USAGE="\nusage : multi-templates.sh -in observation_list_file -out template_output_file [-start obs_start] [-time duration] [-st stations_list] [[-subs subband_range]] [[-gap duration]] \n\n"\
+USAGE="\nusage : multi-templates.sh -in observation_list_file -out template_output_file [-start obs_start] [-time duration] [-st stations_list] [[-subs subband_range]] [[-gap duration]] [[-antenna LBA_or_HBA]] \n\n"\
 "      This script is run using two different methodologies: \n"\
 "         \n"\
 "      1) The input file contains all the information: pulsar-name  obs-start  duration  station-list \n"\
-"         In this case, you only need to specify the input and output file names:\n"\
+"         In this case, you only need to specify the input file and output file names:\n"\
 "         \n"\
 "         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
 "         -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) \n"\
 "         \n"\
-"         Optionally you can also change the subband list:\n"\
+"         Optionally you can also change the antenna (HBA is the default) and subband list:\n"\
+"         [[-antenna LBA_or_HBA]] ==> Specify the the antenna, either 'HBA' or 'LBA'. (i.e. HBA) \n"\
 "         [[-subs subband_range]] ==> The subband range (default '200..447') \n"\
 "         \n"\
 "         Example input file:\n"\
@@ -30,6 +31,7 @@ USAGE="\nusage : multi-templates.sh -in observation_list_file -out template_outp
 "         Example runs:\n"\
 "         > multi-templates.sh -in obs_list_July22_b.txt -out output.xml \n"\
 "         > multi-templates.sh -in obs_list_July22_b.txt -out output.xml -subs 10..45 \n"\
+"         > multi-templates.sh -in obs_list_July22_b.txt -out output.xml -antenna LBA -subs 10..45 \n"\
 "         \n"\
 "      2) The input file contains just one columns with the pulsar name. \n"\
 "         You must specify the input file name and output file name. \n"\
@@ -41,7 +43,8 @@ USAGE="\nusage : multi-templates.sh -in observation_list_file -out template_outp
 "         [-time duration] ==> The duration of ALL observations in the list, in minutes; supercede's infile values (i.e. 60) \n"\
 "         [-stations stations_list] ==> The list of LOFAR stations, supercede's infile values and used for all obs (i.e. 'CS001,CS002') \n"\
 "         \n"\
-"         Optionally you can also change the subband list and the gap between observations:\n"\
+"         Optionally you can also change the antenna (HBA is the default), subband list and the gap between observations::\n"\
+"         [[-antenna LBA_or_HBA]] ==> Specify the the antenna, either 'HBA' or 'LBA'. (i.e. HBA) \n"\
 "         [[-subs subband_range]] ==> The subband range (default '200..447') \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default 3) \n"\
 "         \n"\
@@ -55,6 +58,8 @@ USAGE="\nusage : multi-templates.sh -in observation_list_file -out template_outp
 "         > multi-templates.sh -in obs_single_col.txt -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004\n"\
 "         > multi-templates.sh -in obs_single_col.txt -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6\n"\
 "         > multi-templates.sh -in obs_single_col.txt -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subs 10..45 \n"\
+"         > multi-templates.sh -in obs_single_col.txt -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subs 10..45 -antenna LBA \n"\
+"         > multi-templates.sh -in obs_single_col.txt -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA \n"\
 "         \n"
 
 
@@ -67,7 +72,8 @@ fi
 
 infile=""
 outfile=""
-SUBBANDS="200..447"
+SUBBANDS=""
+user_subbands=0
 START=""
 user_start=0
 previous_start=""
@@ -77,6 +83,7 @@ STATIONS=""
 user_stations=0
 GAP=3
 user_gap=0
+ANTENNA=HBA
 
 while [ $# -gt 0 ]
 do
@@ -86,7 +93,8 @@ do
      -start)  START=$2; previous_start=$2; user_start=1; shift;;
      -time)   TIME=$2; user_duration=1; shift;;
      -gap)    GAP=$2; user_gap=1; shift;;
-     -subs)   SUBBANDS=$2; shift;;
+     -subs)   SUBBANDS=$2; user_subbands=1; shift;;
+     -antenna)   ANTENNA=$2; shift;;
      -stations)     STATIONS=$2; user_stations=1; shift;;
        -*)
             echo >&2 \
@@ -126,6 +134,17 @@ else
    fi   
 fi
 
+if (( $user_subbands == 0 ))
+then
+   if [[ $ANTENNA == "HBA" ]]
+   then
+      SUBBANDS="200..447"
+   elif [[ $ANTENNA == "LBA" ]]
+   then
+      SUBBANDS="154..401"
+   fi   
+fi
+
 num_lines=`grep -v "#" $infile | wc -l | awk '{print $1}'`
 catalog=$LOFARSOFT/release/share/pulsar/data/PSR_catalog.txt
 echo "Wokring on $infile with $num_lines sources"
@@ -143,7 +162,18 @@ fi
 
 cat $header > $outfile
 
-middle=$LOFARSOFT/release/share/pulsar/data/XML-template-singleobs.txt
+if [[ $ANTENNA == "HBA" ]] 
+then 
+   echo "ANTENNA set to: $ANTENNA"
+elif [[ $ANTENNA == "LBA" ]]
+then
+   echo "ANTENNA set to: $ANTENNA"
+else
+   echo "ERROR: ANTENNA setting $ANTENNA is unrecognized (must be 'HBA' or 'LBA')."
+   exit 1
+fi
+
+middle=$LOFARSOFT/release/share/pulsar/data/XML-template-singleobs_$ANTENNA.txt
 if [ ! -f $middle ]
 then
    echo "ERROR: missing USG installation of files \$LOFARSOFT/release/share/pulsar/data/XML-template-*.txt"
@@ -283,7 +313,7 @@ do
 
 		#write the observation section per pulsar in the list
 #        sed -e "s/\<name\>FILL IN OBSERVATION NAME\<\/name\>/\<name\>Observation $PULSAR PID=$PID\<\/name\>/" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/\<description\>FILL IN DESCRIPTION\<\/description\>/\<description\>Observation $PULSAR at $START for $TIME min\<\/description\>/" -e "s/RA_DEG/$RA_DEG/g" -e "s/DEC_DEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/DURATION/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/STATION_LIST/$STATION_LIST/g" $middle >> $outfile
-        sed -e "s/\<name\>FILL IN OBSERVATION NAME\<\/name\>/\<name\>Obs $PULSAR (HBA)\<\/name\>/" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/\<description\>FILL IN DESCRIPTION\<\/description\>/\<description\>Obs $PULSAR (HBA) at $START for $TIME min\<\/description\>/" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" $middle >> $outfile
+        sed -e "s/\<name\>FILL IN OBSERVATION NAME\<\/name\>/\<name\>Obs $PULSAR ($ANTENNA)\<\/name\>/" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/\<description\>FILL IN DESCRIPTION\<\/description\>/\<description\>Obs $PULSAR ($ANTENNA) at $START for $TIME min\<\/description\>/" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" $middle >> $outfile
    fi   
 done < $infile
 
