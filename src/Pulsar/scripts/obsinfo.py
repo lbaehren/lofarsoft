@@ -103,7 +103,7 @@ else:
 	print "Number of observations in Sub5: %d" % (np.size(obsids), )
 if is_from == True:
 	if is_html == True:
-		print "  <p align=left>List only observations since %s</p>" % (fromdate, )
+		htmlptr.write ("  <p align=left>List only observations since %s</p>" % (fromdate, ))
 	else:
 		print "List only observations since %s" % (fromdate, )
 	fromyear = fromdate.split("-")[0]
@@ -125,8 +125,8 @@ for i in np.arange(Nnodes-1):
 storage_nodes_string=storage_nodes_string+storage_nodes[-1]
 
 if is_html == True:
-	htmlptr.write ("\n<table align=center border=1>")
-	htmlptr.write ("\n<th align=center>\n <td>No.</td><td>ObsID</td><td>MMDD</td><td>Dur</td><td>NodesList (lse)</td><td>Datadir</td><td>%s</td><td>Total(GB)</td><td>BF FD IM IS CS FE</td><td>Reduced</td><td>Pointing</td><td>Source</td>\n</th>" % (storage_nodes_string,))
+	htmlptr.write ("\n<table align=center border=0>")
+	htmlptr.write ("\n<tr align=center>\n <td>No.</td><td>ObsID</td><td>MMDD</td><td>Dur</td><td>NodesList (lse)</td><td>Datadir</td><td>%s</td><td>Total(GB)</td><td>BF FD IM IS CS FE</td><td>Reduced</td><td>Pointing</td><td>Source</td>\n</tr>" % (storage_nodes_string,))
 else:
 	print "#======================================================================================================================================================================="
 	print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
