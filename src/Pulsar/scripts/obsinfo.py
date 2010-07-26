@@ -12,6 +12,7 @@ is_from=False
 fromdate=""
 # if True then make a list in html format
 is_html=False
+htmlfile=""  # name of the html file in case is_html == True
 
 # storage nodes to collect info about Pulsar Observations
 # we assume that even for the case of long observations when data were spreaded out
@@ -38,14 +39,14 @@ def usage (prg):
         """
         print "Program %s lists info about sub5 observations" % (prg, )
 	print "Usage: %s [-s, --sorted] [-f, --from <YYYY-MM-DD>]\n\
-                  [--html] [-h, --help]\n" % (prg, )
+                  [--html <html-file>] [-h, --help]\n" % (prg, )
 
 # Parse the command line
 def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hsf:", ["help", "sorted", "from=", "html"])
+		opts, args = getopt.getopt (argv, "hsf:", ["help", "sorted", "from=", "html="])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -56,6 +57,8 @@ def parsecmd(prg, argv):
 			if opt in ("--html"):
 				global is_html
 				is_html = True
+				global htmlfile
+				htmlfile = arg
 			if opt in ("-f", "--from"):
 				global is_from
 				is_from = True
@@ -74,7 +77,8 @@ if __name__ == "__main__":
 
 	# writing the html code if chosen
 	if is_html == True:
-		print "<html>\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n  <meta name=\"Classification\" content=\"public HTML\">\n  <title>LOFAR pulsar observations</title>\n</head>\n<body><h1 align=left>LOFAR pulsar observations</h1>"
+		htmlptr = open(htmlfile, 'w')
+		htmlptr.write ("<html>\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n  <meta name=\"Classification\" content=\"public HTML\">\n  <title>LOFAR pulsar observations</title>\n</head>\n<body><h1 align=left>LOFAR pulsar observations</h1>")
 
 	# loop over the storage nodes and directories to get the list of all IDs
 	for s in storage_nodes:
@@ -94,7 +98,7 @@ Nnodes=np.size(storage_nodes)
 # more recent obs is the obs with higher ID (as it should be)
 obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 if is_html == True:
-	print "  <p align=left>Number of observations in Sub5: %d</p>" % (np.size(obsids), )
+	htmlptr.write("  <p align=left>Number of observations in Sub5: %d</p>" % (np.size(obsids), ))
 else:
 	print "Number of observations in Sub5: %d" % (np.size(obsids), )
 if is_from == True:
@@ -121,8 +125,8 @@ for i in np.arange(Nnodes-1):
 storage_nodes_string=storage_nodes_string+storage_nodes[-1]
 
 if is_html == True:
-	print "\n<table align=center border=1>"
-	print "\n<th align=center>\n <td>No.</td><td>ObsID</td><td>MMDD</td><td>Dur</td><td>NodesList (lse)</td><td>Datadir</td><td>%s</td><td>Total(GB)</td><td>BF FD IM IS CS FE</td><td>Reduced</td><td>Pointing</td><td>Source</td>\n</th>" % (storage_nodes_string,)
+	htmlptr.write ("\n<table align=center border=1>")
+	htmlptr.write ("\n<th align=center>\n <td>No.</td><td>ObsID</td><td>MMDD</td><td>Dur</td><td>NodesList (lse)</td><td>Datadir</td><td>%s</td><td>Total(GB)</td><td>BF FD IM IS CS FE</td><td>Reduced</td><td>Pointing</td><td>Source</td>\n</th>" % (storage_nodes_string,))
 else:
 	print "#======================================================================================================================================================================="
 	print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
@@ -393,7 +397,7 @@ for counter in np.arange(np.size(obsids)):
 	# Printing out the report (if we want unsorted list)
 	if tosort == False:
 		if is_html == True:
-			print "\n<tr align=center>\n <td>%d</td>\n %s" % (j, info)
+			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (j, info))
 		else:
 			print "%d	%s" % (j, info)
 	else:
@@ -408,10 +412,11 @@ if tosort == True:
 	sorted_indices=np.flipud(np.argsort(totsz[:Nrecs], kind='mergesort'))
 	if is_html == True:
 		for i in np.arange(Nrecs):
-			print "\n<tr align=center>\n <td>%d</td>\n %s" % (i, obstable[sorted_indices[i]])
+			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (i, obstable[sorted_indices[i]]))
 	else:
 		for i in np.arange(Nrecs):
 			print "%d	%s" % (i, obstable[sorted_indices[i]])
 
 if is_html == True:
-	print "\n</table>\n\n</body>\n</html>"
+	htmlptr.write ("\n</table>\n\n</body>\n</html>")
+	htmlptr.close()
