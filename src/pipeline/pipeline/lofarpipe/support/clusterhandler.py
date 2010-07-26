@@ -1,6 +1,7 @@
 from __future__ import with_statement
 import shlex, subprocess, threading, logging, os, time
 from contextlib import contextmanager
+from lofarpipe.support.lofarexceptions import ClusterError
 from lofarpipe.support.clusterdesc import ClusterDesc
 from lofarpipe.support.clusterdesc import get_compute_nodes, get_head_node
 
@@ -47,7 +48,7 @@ class ClusterHandler(object):
         controller_ppath = self.config.get('deploy', 'controller_ppath')
         # Check that there isn't an existing pidfile
         if os.path.isfile(os.path.join(controlpath, "ipc.pid")):
-            raise "Controller already running"
+            raise ClusterError("Controller already running")
         # Before starting, ensure that the old engine.furl isn't lying about
         # to cause confusion
         try:

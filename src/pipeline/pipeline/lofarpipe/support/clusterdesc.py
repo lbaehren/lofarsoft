@@ -23,7 +23,7 @@ class ClusterDesc(object):
             ]
         except RuntimeError:
             self.subclusters = []
-        
+
     def get(self, key, recursive=True):
         values = []
         if key in self.keylist:
