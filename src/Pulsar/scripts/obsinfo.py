@@ -47,6 +47,8 @@ class obsinfo:
         	if np.size(self.starttime) > 0:
                 	# it means that this keyword exist and we can extract the info
                 	self.starttime=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+			# Getting the number of seconds from 1970. Can use this to sort obs out by date/time
+			self.seconds=time.mktime(time.strptime(self.starttime, "%Y-%m-%d %H:%M:%S"))
                 	smonth=self.starttime.split("-")[1]
                 	sday=self.starttime.split("-")[2].split(" ")[0]
                 	self.datestring=smonth+sday
@@ -210,12 +212,17 @@ class obsinfo:
 class outputInfo:
 	def __init__(self, id):
 		self.id = id
-		self.comment = ""
 	
-	def setcomment (self, comment):
+	def setcomment (self, id, cs, comment):
+		self.id = id
 		self.comment = comment
+		self.colspan = 15 + cs - 1
 
-	def Init(self, id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source):
+		if self.comment != "":
+			self.info = self.comment
+			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
+
+	def Init(self, id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source, comment):
 		self.id = id
 		self.datestring = datestring
 		self.duration = duration
@@ -232,13 +239,17 @@ class outputInfo:
 		self.statusline = statusline
 		self.pointing = pointing
 		self.source = source
+		self.comment = comment
+		self.colspan = 15 + len(self.dirsize_string.split("\t")) - 1
+
+		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t"))
 		
 		if self.comment == "":
 			self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (self.id, self.datestring, self.duration, self.nodeslist, self.datadir, self.dirsize_string, self.totsize, self.bftype, self.fdtype, self.imtype, self.istype, self.cstype, self.fetype, self.statusline, self.pointing, self.source)
-			self.infohtml="<td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%-16s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%c  %c  %c  %c  %c  %c</td>\n <td>%-11s</td>\n <td>%s</td>\n <td>%s</td>\n</tr>" % (self.id, self.datestring, self.duration, self.nodeslist, self.datadir, self.dirsize_string, self.totsize, self.bftype, self.fdtype, self.imtype, self.istype, self.cstype, self.fetype, self.statusline, self.pointing, self.source)
+			self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.datestring, self.duration, self.nodeslist, self.datadir, self.dirsize_string_html, self.totsize, self.bftype == "-" and "&#8211;" or self.bftype, self.fdtype == "-" and "&#8211;" or self.fdtype, self.imtype == "-" and "&#8211;" or self.imtype, self.istype == "-" and "&#8211;" or self.istype, self.cstype == "-" and "&#8211;" or self.cstype, self.fetype == "-" and "&#8211;" or self.fetype, self.statusline, self.pointing, self.source)
 		else:
 			self.info = self.comment
-			self.infohtml = "<td colspan=11>%s</td>" % (self.comment, )
+			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
 
 
 # help
@@ -291,7 +302,20 @@ if __name__ == "__main__":
 # writing the html code if chosen
 if is_html == True:
 	htmlptr = open(htmlfile, 'w')
-	htmlptr.write ("<html>\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n  <meta name=\"Classification\" content=\"public HTML\">\n  <title>LOFAR pulsar observations</title>\n</head>\n<body>\n<h2 align=left>LOFAR pulsar observations</h2>\n")
+	htmlptr.write ("<html>\n\
+                         <head>\n\
+                          <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
+                          <meta name=\"Classification\" content=\"public HTML\">\n\
+                          <title>LOFAR pulsar observations</title>\n\
+                         </head>\n\n\
+                         <style type='text/css'>\n\
+                          tr.d0 td { background-color: #ccffff; color: black; font-size: 80% }\n\
+                          tr.d1 td { background-color: #99cccc; color: black; font-size: 80% }\n\
+                          tr.d th { background-color: #99cccc; color: black;}\n\
+                         </style>\n\n\
+                         <body bgcolor='white'>\n\
+                          <h2 align=left>LOFAR pulsar observations</h2>\n\
+                        \n")
 
 # loop over the storage nodes and directories to get the list of all IDs
 for s in storage_nodes:
@@ -312,8 +336,8 @@ Nnodes=np.size(storage_nodes)
 obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 
 if is_html == True:
-	htmlptr.write("Number of observations in Sub5: %d<br>\n" % (np.size(obsids), ))
-print "Number of observations in Sub5: %d" % (np.size(obsids), )
+	htmlptr.write("Number of observations in %s: <b>%d</b><br>\n" % (", ".join(storage_nodes), np.size(obsids), ))
+print "Number of observations in %s: %d" % (", ".join(storage_nodes), np.size(obsids), )
 
 if is_from == True and is_to == True:
 	if is_html == True:
@@ -356,10 +380,11 @@ storage_nodes_string=""
 for i in np.arange(Nnodes-1):
 	storage_nodes_string=storage_nodes_string+storage_nodes[i]+"\t"
 storage_nodes_string=storage_nodes_string+storage_nodes[-1]
+storage_nodes_string_html="</th>\n <th align=center>".join(storage_nodes_string.split("\t"))
 
 if is_html == True:
-	htmlptr.write ("\n<p align=left>\n<table align=center border=0>\n")
-	htmlptr.write ("\n<tr align=center>\n <td>No.</td><td>ObsID</td><td>MMDD</td><td>Dur</td><td>NodesList (lse)</td><td>Datadir</td><td>%s</td><td>Total(GB)</td><td>BF FD IM IS CS FE</td><td>Reduced</td><td>Pointing</td><td>Source</td>\n</tr>\n" % (storage_nodes_string,))
+	htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
+	htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th>NodesList (lse)</th>\n <th align=center>Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Reduced</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
 
 print "#======================================================================================================================================================================="
 print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
@@ -404,11 +429,11 @@ for counter in np.arange(np.size(obsids)):
 				logdir=os.popen(cmd).readlines()[0][:-1].split("RTCP-%s.parset" % (id_suffix,))[0]
 			else:
 				# no directory found
-				comment = "%s	Oops!.. The log directory or parset file in new naming convention does not exist!" % (id, )
-				out.setcomment(comment)
+				comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
+				out.setcomment(id, len(storage_nodes), comment)
 				totsz[j] = 0.
 				if tosort == False:
-					print "%d	%s" % (j, comment)
+					print "%d	%s %s" % (j, id, comment)
 				else:
 					obstable=np.append(obstable, out)
 				j=j+1
@@ -423,11 +448,11 @@ for counter in np.arange(np.size(obsids)):
 			# also checking that maybe the name of parset file has new naming convention, like "RTCP-<id_suffix>.parset"
 			log=logdir + "RTCP-" + id_suffix + ".parset"
 			if not os.path.exists(log):
-				comment = "%s	Oops!.. The parset file '%s' does not exist in any possible location!" % (id, parset)
-				out.setcomment(comment)
+				comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
+				out.setcomment(id, len(storage_nodes), comment)
 				totsz[j] = 0.
 				if tosort == False:
-					print "%d	%s" % (j, comment)
+					print "%d	%s %s" % (j, id, comment)
 				else:
 					obstable=np.append(obstable, out)
 				j=j+1
@@ -456,6 +481,7 @@ for counter in np.arange(np.size(obsids)):
 			dirsize=os.popen("du -sh %s | cut -f 1" % (ddir,)).readlines()[0][:-1]
 			totsize=totsize + float(os.popen("du -s -B 1 %s | cut -f 1" % (ddir,)).readlines()[0][:-1])
 		dirsize_string=dirsize_string+dirsize+"\t"
+	dirsize_string=dirsize_string[:-2]
 
 	# converting total size to GB
 	totsz[j] = totsize / 1024. / 1024. / 1024.
@@ -478,12 +504,16 @@ for counter in np.arange(np.size(obsids)):
 			break
 
 	# combining info
-	out.Init(id, oi.datestring, oi.duration, oi.nodeslist, oi.datadir, dirsize_string, totsize, oi.bftype, oi.fdtype, oi.imtype, oi.istype, oi.cstype, oi.fetype, statusline, oi.pointing, oi.source)
+	out.Init(id, oi.datestring, oi.duration, oi.nodeslist, oi.datadir, dirsize_string, totsize, oi.bftype, oi.fdtype, oi.imtype, oi.istype, oi.cstype, oi.fetype, statusline, oi.pointing, oi.source, "")
 
 	# Printing out the report (if we want unsorted list)
 	if tosort == False:
 		if is_html == True:
-			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (j, out.infohtml))
+			# making alternating colors in the table
+			if j%2 == 0:
+				htmlptr.write ("\n<tr class='d0' align=left>\n <td>%d</td>\n %s\n</tr>" % (j, out.infohtml))
+			else:
+				htmlptr.write ("\n<tr class='d1' align=left>\n <td>%d</td>\n %s\n</tr>" % (j, out.infohtml))
 		print "%d	%s" % (j, out.info)
 	else:
 		obstable=np.append(obstable, out)
@@ -499,7 +529,10 @@ if tosort == True:
 		print "%d	%s" % (i, obstable[sorted_indices[i]].info)
 	if is_html == True:
 		for i in np.arange(Nrecs):
-			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (i, obstable[sorted_indices[i]].infohtml))
+			if i%2 == 0:
+				htmlptr.write ("\n<tr class='d0' align=left>\n <td>%d</td>\n %s\n</tr>" % (i, obstable[sorted_indices[i]].infohtml))
+			else:
+				htmlptr.write ("\n<tr class='d1' align=left>\n <td>%d</td>\n %s\n</tr>" % (i, obstable[sorted_indices[i]].infohtml))
 
 if is_html == True:
 	# getting date & time of last update
