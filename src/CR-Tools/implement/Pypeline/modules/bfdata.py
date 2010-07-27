@@ -1,10 +1,174 @@
 import struct
 import numpy as np
 
+
+def get_stokes_data(file, block, channels, samples, nrstations=1, type="StokesI"):
+    """Get a lofar datablock from stokesI raw data format. 
+    Returns a tuple of sequence number and data(channels,samples).
+    Note that the internal data format is data(channels,samples|2).
+    
+    *file* opened data file
+    *block* which block to read, negative numbers means just the first block
+    *channels* nr of channels per subband
+    *samples* nr of samples per subband
+    *type* StokesI or StokesIQUV
+    """
+    
+    # 
+    if type is "StokesI":
+        nrStokes=1
+    elif type is "StokesIQUV":
+        nrStokes=4
+    
+    # Calculate how large the datablock is.
+    n=nrstations*channels*(samples|2)*nrStokes
+    
+    # Format string for sequence number, padding and data (Big endian)
+    fmt='>I508x'+str(n)+'f'
+    
+    # Size represented by format string in bytes
+    sz=struct.calcsize(fmt)
+    
+    # read data from file
+    if block < 0:
+        x=file.read(sz)
+        # unpack struct into intermediate data
+        t=struct.unpack(fmt,x)
+    else:
+        file.seek(sz*block)
+        x=file.read(sz)
+        # unpack struct into intermediate data
+        t=struct.unpack(fmt,x)
+        if t[0] != block:
+            file.seek(0)
+            x=file.read(sz)
+            t=struct.unpack(fmt,x)
+            startblock=t[0]
+            file.seek((block-startblock)*sz)
+            x=file.read(sz)
+            t=struct.unpack(fmt,x)
+            if t[0] != block:
+                print "Discontinuous data is not supported yet"
+                assert False
+                 
+    # unpack struct into intermediate data
+    #t=struct.unpack(fmt,x)
+    
+    
+    # return sequence number as uint, and data as nparray
+    return np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrStokes)
+
+def check_data_parameters(file, channels, samples, nrstations=1, type="StokesI"):
+    """Checks if the first two blocks have a continuous sequence number.
+        
+    *file* opened data file
+    *channels* nr of channels per subband
+    *samples* nr of samples per subband
+    *type* StokesI or StokesIQUV
+    """
+    
+    # 
+    if type is "StokesI" or type is "I":
+        nrStokes=1
+    elif type is "StokesIQUV" or type is "IQUV":
+        nrStokes=4
+    
+    # Calculate how large the datablock is.
+    n=nrstations*channels*(samples|2)*nrStokes
+    
+    # Format string for sequence number, padding and data (Big endian)
+    fmt='>I508x'+str(n)+'f'
+    
+    # Size represented by format string in bytes
+    sz=struct.calcsize(fmt)
+    
+    file.seek(0)
+    
+    for i in range(5):
+        x=file.read(sz)
+        t0=struct.unpack(fmt,x)
+    
+        x=file.read(sz)
+        t1=struct.unpack(fmt,x)
+        if t1[0]-t0[0] == 1:
+            break
+    
+    
+    file.seek(0)
+    
+     
+    return t1[0]-t0[0] == 1
+
+def get_stokes_data_size(channels, samples, nrstations=1, type="StokesI"):
+    """Get the size in bytes of a lofar data block. 
+    
+    *channels* nr of channels per subband
+    *samples* nr of samples per subband
+    *type* StokesI or StokesIQUV
+    """
+    
+    # 
+    if type is "StokesI":
+        nrStokes=1
+    elif type is "StokesIQUV":
+        nrStokes=4
+    
+    # Calculate how large the datablock is.
+    n=nrstations*channels*(samples|2)*nrStokes
+    
+    # Format string for sequence number, padding and data (Big endian)
+    fmt='>I508x'+str(n)+'f'
+    
+    # Size represented by format string in bytes
+    sz=struct.calcsize(fmt)
+    
+    return sz
+
+def get_sequence_number(file, block, channels, samples, nrstations=1, type="StokesI"):
+    """Get a lofar datablock from stokesI raw data format. 
+    Returns a tuple of sequence number and data(channels,samples).
+    Note that the internal data format is data(channels,samples|2).
+    
+    *file* opened data file
+    *block* which block to read, negative numbers means just the first block
+    *channels* nr of channels per subband
+    *samples* nr of samples per subband
+    *type* StokesI or StokesIQUV
+    """
+    
+    
+    # Calculate the size of one datablock
+    seeksize=get_stokes_data_size(channels,samples,nrstations,type)
+    
+    # Go to the start of one datablock
+    file.seek(block*seeksize)
+    
+    # Format string for sequence number, padding and data (Big endian)
+    fmt='>I'
+    
+    # Size represented by format string in bytes
+    sz=struct.calcsize(fmt)
+    
+    # read data from file
+    x=file.read(sz)
+    
+    # unpack struct into intermediate data
+    t=struct.unpack(fmt,x)
+    
+    # return sequence number as uint, and data as nparray
+    return t 
+
+
+
 def get_block(file, channels=64, samples=3056):
     """Get a lofar datablock from stokesI raw data format. 
     Returns a tuple of sequence number and data(channels,samples).
-    Note that the internal data format is data(channels,samples|2)."""
+    Note that the internal data format is data(channels,samples|2).
+    
+    *file* opened data file
+    *channels* nr of channels per subband
+    *samples* nr of samples per subband
+    """
     
     # Calculate how large the datablock is.
     n=channels*(samples|2)
