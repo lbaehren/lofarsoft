@@ -154,7 +154,7 @@ class obsinfo:
         	if np.size(self.rarad)>0:
                 	# RA info exists in parset file
                 	self.rarad=float(os.popen(cmd).readlines()[0][:-1].split(" = ")[-1])
-                	rahours=rarad*12./3.1415926
+                	rahours=self.rarad*12./3.1415926
                 	rah=int(rahours)
                 	ram=int((rahours-rah)*60.)
                 	self.rastring="%02d%02d" % (rah, ram)
@@ -166,7 +166,7 @@ class obsinfo:
         	if np.size(self.decrad)>0:
                 	# DEC info exists in parset file
                 	self.decrad=float(os.popen(cmd).readlines()[0][:-1].split(" = ")[-1])
-                	decdeg=decrad*180./3.1415926
+                	decdeg=self.decrad*180./3.1415926
                 	if decdeg>0:
                         	decsign="+"
                 	else:
