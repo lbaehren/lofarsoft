@@ -233,12 +233,12 @@ class outputInfo:
 		self.pointing = pointing
 		self.source = source
 		
-		if comment == "":
+		if self.comment == "":
 			self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (self.id, self.datestring, self.duration, self.nodeslist, self.datadir, self.dirsize_string, self.totsize, self.bftype, self.fdtype, self.imtype, self.istype, self.cstype, self.fetype, self.statusline, self.pointing, self.source)
 			self.infohtml="<td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%-16s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%c  %c  %c  %c  %c  %c</td>\n <td>%-11s</td>\n <td>%s</td>\n <td>%s</td>\n</tr>" % (self.id, self.datestring, self.duration, self.nodeslist, self.datadir, self.dirsize_string, self.totsize, self.bftype, self.fdtype, self.imtype, self.istype, self.cstype, self.fetype, self.statusline, self.pointing, self.source)
 		else:
-			self.info = comment
-			self.infohtml = "<td colspan=11>%s</td>" % (comment, )
+			self.info = self.comment
+			self.infohtml = "<td colspan=11>%s</td>" % (self.comment, )
 
 
 # help
