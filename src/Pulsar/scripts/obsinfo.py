@@ -10,10 +10,12 @@ tosort=False
 # if True then will show only those observations newer than some date
 is_from=False
 fromdate=""
+# if True then will show only those observations older than some date
+is_to=False
+todate=""
 # if True then make a list in html format
 is_html=False
 htmlfile=""  # name of the html file in case is_html == True
-htmlptr=100  # html  file descriptor
 
 # storage nodes to collect info about Pulsar Observations
 # we assume that even for the case of long observations when data were spreaded out
@@ -34,12 +36,217 @@ parset="RTCP.parset.0"
 # list of obs ids
 obsids=[]
 
+
+# Class obsinfo with info from the parset file
+class obsinfo:
+	def __init__(self, log):
+		self.parset = log	
+		# Getting the Date of observation
+	        cmd="grep Observation.startTime %s | tr -d \\'" % (self.parset,)
+        	self.starttime=os.popen(cmd).readlines()
+        	if np.size(self.starttime) > 0:
+                	# it means that this keyword exist and we can extract the info
+                	self.starttime=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+                	smonth=self.starttime.split("-")[1]
+                	sday=self.starttime.split("-")[2].split(" ")[0]
+                	self.datestring=smonth+sday
+        	else:
+                	self.datestring="????"
+
+	        # reading the parset file
+	        # getting the info about StorageNodes. Note! For old parsets there seems to be no such a keyword Virtual...
+        	# However, the old keyword OLAP.storageNodeList has "non-friendly" format, so I just ignore this by now
+        	cmd="grep Observation.VirtualInstrument.storageNodeList %s | sed -e 's/lse//g'" % (self.parset,)
+        	self.nodeslist=os.popen(cmd).readlines()
+        	if np.size(self.nodeslist) > 0:
+                	# it means that this keyword exist and we can extract the info
+                	self.nodeslist=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+        	# cut the string of nodes if it is too long
+        	if len(self.nodeslist)>13:
+                	self.nodeslist=self.nodeslist[:13] + "..."
+
+	        # getting the name of /data? where the data are stored
+        	cmd="grep Observation.MSNameMask %s" % (self.parset,)
+        	self.datadir="/" + os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("/")[1]
+
+	        # getting info about the Type of the data (BF, Imaging, etc.)
+        	# check first if data are beamformed
+        	cmd="grep outputBeamFormedData %s" % (self.parset,)
+        	self.bftype=os.popen(cmd).readlines()
+        	if np.size(self.bftype) > 0:
+                	# this info exists in parset file
+                	self.bftype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.bftype == 'f':
+                        	self.bftype = "-"
+                	else:
+                        	self.bftype = "+"
+        	else:
+                	self.bftype = "?"
+
+        	# check first if data are filtered
+        	cmd="grep outputFilteredData %s" % (self.parset,)
+        	self.fdtype=os.popen(cmd).readlines()
+        	if np.size(self.fdtype) > 0:
+                	# this info exists in parset file
+                	self.fdtype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.fdtype == 'f':
+                        	self.fdtype = "-"
+                	else:
+                        	self.fdtype = "+"
+        	else:
+                	self.fdtype = "?"
+
+	        # check if data are imaging
+        	cmd="grep outputCorrelatedData %s" % (self.parset,)
+        	self.imtype=os.popen(cmd).readlines()
+        	if np.size(self.imtype) > 0:
+                	# this info exists in parset file
+                	self.imtype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.imtype == 'f':
+                        	self.imtype = "-"
+                	else:
+                        	self.imtype = "+"
+        	else:
+                	self.imtype = "?"
+
+	        # check if data are incoherent stokes data
+        	cmd="grep outputIncoherentStokes %s" % (self.parset,)
+        	self.istype=os.popen(cmd).readlines()
+        	if np.size(self.istype) > 0:
+                	# this info exists in parset file
+                	self.istype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.istype == 'f':
+                        	self.istype = "-"
+                	else:
+                        	self.istype = "+"
+        	else:
+                	self.istype = "?"
+
+	        # check if data are coherent stokes data
+        	cmd="grep outputCoherentStokes %s" % (self.parset,)
+        	self.cstype=os.popen(cmd).readlines()
+        	if np.size(self.cstype) > 0:
+                	# this info exists in parset file
+                	self.cstype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.cstype == 'f':
+                        	self.cstype = "-"
+                	else:
+                        	self.cstype = "+"
+        	else:
+                	self.cstype = "?"
+
+	        # check if data are fly's eye mode data
+        	cmd="grep PencilInfo.flysEye %s" % (self.parset,)
+        	self.fetype=os.popen(cmd).readlines()
+        	if np.size(self.fetype) > 0:
+                	# this info exists in parset file
+                	self.fetype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.fetype == 'f':
+                        	self.fetype = "-"
+                	else:
+                        	self.fetype = "+"
+        	else:
+                	self.fetype = "?"
+
+	        # getting info about the pointing
+        	cmd="grep 'Beam\[0\].angle1' %s" % (self.parset,)
+        	self.rarad=os.popen(cmd).readlines()
+        	if np.size(self.rarad)>0:
+                	# RA info exists in parset file
+                	self.rarad=float(os.popen(cmd).readlines()[0][:-1].split(" = ")[-1])
+                	rahours=rarad*12./3.1415926
+                	rah=int(rahours)
+                	ram=int((rahours-rah)*60.)
+                	self.rastring="%02d%02d" % (rah, ram)
+        	else:
+                	self.rastring="????"
+
+        	cmd="grep 'Beam\[0\].angle2' %s" % (self.parset,)
+        	self.decrad=os.popen(cmd).readlines()
+        	if np.size(self.decrad)>0:
+                	# DEC info exists in parset file
+                	self.decrad=float(os.popen(cmd).readlines()[0][:-1].split(" = ")[-1])
+                	decdeg=decrad*180./3.1415926
+                	if decdeg>0:
+                        	decsign="+"
+                	else:
+                        	decsign="-"
+                	decdeg=abs(decdeg)
+                	decd=int(decdeg)
+                	decm=int((decdeg-decd)*60.)
+                	self.decstring="%c%02d%02d" % (decsign, decd, decm)
+        	else:
+                	self.decstring="_????"
+        	self.pointing="%s%s" % (self.rastring, self.decstring)
+
+	        # getting info about Source name (new addition to the Parset files)
+        	cmd="grep 'Observation.Beam\[0\].target' %s" % (self.parset,)
+        	self.source=os.popen(cmd).readlines()
+        	if np.size(self.source)>0:
+                	# Source name exists in parset file
+                	self.source=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+        	else:
+                	self.source=""
+
+        	# Getting the Duration
+        	cmd="grep Observation.stopTime %s | tr -d \\'" % (self.parset,)
+        	self.stoptime=os.popen(cmd).readlines()
+        	if np.size(self.starttime) > 0 and np.size(self.stoptime) > 0:
+                	# it means that both start and stop Times exist in parset file
+                	self.stoptime=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+                	c1 = time.strptime(self.starttime, "%Y-%m-%d %H:%M:%S")
+                	c2 = time.strptime(self.stoptime, "%Y-%m-%d %H:%M:%S")
+                	self.dur=time.mktime(c2)-time.mktime(c1)  # difference in seconds
+                	if float(self.dur/3600.0) > 1.:
+                        	self.duration="%.1fh" % (self.dur/3600.)
+                	else:
+                        	self.duration="%.1fm" % (self.dur/60.)
+        	else:
+                	self.duration="?"
+
+
+
+# Class (structure) with all fields to output
+class outputInfo:
+	def __init__(self, id):
+		self.id = id
+		self.comment = ""
+	
+	def setcomment (self, comment):
+		self.comment = comment
+
+	def Init(self, id, datestring, duration, nodelist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source):
+		self.id = id
+		self.datestring = datestring
+		self.duration = duration
+		self.nodelist = nodelist
+		self.datadir = datadir
+		self.dirsize_string = dirsize_string
+		self.totsize = totsize
+		self.bftype = bftype
+		self.fdtype = fdtype
+		self.imtype = imtype
+		self.istype = istype
+		self.cstype = cstype
+		self.fetype = fetype
+		self.statusline = statusline
+		self.pointing = pointing
+		self.source = source
+		
+		if comment == "":
+			self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (self.id, self.datestring, self.duration, self.nodeslist, self.datadir, self.dirsize_string, self.totsize, self.bftype, self.fdtype, self.imtype, self.istype, self.cstype, self.fetype, self.statusline, self.pointing, self.source)
+			self.infohtml="<td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%-16s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%c  %c  %c  %c  %c  %c</td>\n <td>%-11s</td>\n <td>%s</td>\n <td>%s</td>\n</tr>" % (self.id, self.datestring, self.duration, self.nodeslist, self.datadir, self.dirsize_string, self.totsize, self.bftype, self.fdtype, self.imtype, self.istype, self.cstype, self.fetype, self.statusline, self.pointing, self.source)
+		else:
+			self.info = comment
+			self.infohtml = "<td colspan=11>%s</td>" % (comment, )
+
+
 # help
 def usage (prg):
         """ Prints info how to use the script.
         """
         print "Program %s lists info about sub5 observations" % (prg, )
-	print "Usage: %s [-s, --sorted] [-f, --from <YYYY-MM-DD>]\n\
+	print "Usage: %s [-s, --sorted] [-f, --from <YYYY-MM-DD>] [-t, --to <YYYY-MM-DD>]\n\
                   [--html <html-file>] [-h, --help]\n" % (prg, )
 
 # Parse the command line
@@ -47,7 +254,7 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hsf:", ["help", "sorted", "from=", "html="])
+		opts, args = getopt.getopt (argv, "hsf:t:", ["help", "sorted", "from=", "html=", "to="])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -65,6 +272,11 @@ def parsecmd(prg, argv):
 				is_from = True
 				global fromdate
 				fromdate = arg
+			if opt in ("-t", "--to"):
+				global is_to
+				is_to = True
+				global todate
+				todate = arg
 
 	except getopt.GetoptError:
 		print "Wrong option!"
@@ -98,18 +310,37 @@ Nnodes=np.size(storage_nodes)
 # and sort in reverse order (most recent obs go first)
 # more recent obs is the obs with higher ID (as it should be)
 obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
+
 if is_html == True:
 	htmlptr.write("Number of observations in Sub5: %d<br>\n" % (np.size(obsids), ))
-
 print "Number of observations in Sub5: %d" % (np.size(obsids), )
 
-if is_from == True:
+if is_from == True and is_to == True:
+	if is_html == True:
+		htmlptr.write ("List only observations since %s till %s<br>\n" % (fromdate, todate))
+
+	print "List only observations since %s till %s" % (fromdate, todate)
+	fromyear = fromdate.split("-")[0]
+	fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+	toyear = todate.split("-")[0]
+	todate = time.mktime(time.strptime(todate, "%Y-%m-%d"))
+
+if is_from == True and is_to == False:
 	if is_html == True:
 		htmlptr.write ("List only observations since %s<br>\n" % (fromdate, ))
 
 	print "List only observations since %s" % (fromdate, )
 	fromyear = fromdate.split("-")[0]
 	fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+
+if is_from == False and is_to == True:
+	if is_html == True:
+		htmlptr.write ("List only observations till %s<br>\n" % (todate, ))
+
+	print "List only observations till %s" % (todate, )
+	toyear = todate.split("-")[0]
+	todate = time.mktime(time.strptime(todate, "%Y-%m-%d"))
+
 print
 
 # array of total sizes for every ObsID
@@ -139,6 +370,8 @@ j=0 # extra index to follow only printed lines
 for counter in np.arange(np.size(obsids)):
 	
 	id=obsids[counter]
+	# class instance with output Info
+	out=outputInfo(id)	
 
 	# prefix of ID, like L2010 or L2009
         id_prefix=id.split("_")[0]   
@@ -150,6 +383,10 @@ for counter in np.arange(np.size(obsids)):
 	if is_from == True:
 		obsyear=id_prefix[1:]
 		if fromyear > obsyear:
+			continue
+	if is_to == True:
+		obsyear=id_prefix[1:]
+		if toyear < obsyear:
 			continue
 
 	# checking first if the directory with the parset file exists
@@ -168,11 +405,12 @@ for counter in np.arange(np.size(obsids)):
 			else:
 				# no directory found
 				comment = "%s	Oops!.. The log directory or parset file in new naming convention does not exist!" % (id, )
+				out.setcomment(comment)
 				totsz[j] = 0.
 				if tosort == False:
 					print "%d	%s" % (j, comment)
 				else:
-					obstable=np.append(obstable, comment)
+					obstable=np.append(obstable, out)
 				j=j+1
 				continue
 
@@ -186,54 +424,33 @@ for counter in np.arange(np.size(obsids)):
 			log=logdir + "RTCP-" + id_suffix + ".parset"
 			if not os.path.exists(log):
 				comment = "%s	Oops!.. The parset file '%s' does not exist in any possible location!" % (id, parset)
+				out.setcomment(comment)
 				totsz[j] = 0.
 				if tosort == False:
 					print "%d	%s" % (j, comment)
 				else:
-					obstable=np.append(obstable, comment)
+					obstable=np.append(obstable, out)
 				j=j+1
 				continue
 
-	# Getting the Date of observation
-	cmd="grep Observation.startTime %s | tr -d \\'" % (log,)
-	datestring1=os.popen(cmd).readlines()
-	if np.size(datestring1) > 0:
-		# it means that this keyword exist and we can extract the info
-		datestring1=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
-		c1 = time.strptime(datestring1, "%Y-%m-%d %H:%M:%S")
-		smonth=datestring1.split("-")[1]
-		sday=datestring1.split("-")[2].split(" ")[0]
-		datestring=smonth+sday
-	else:
-		datestring="????"
+	# initializing the obsinfo class
+	oi=obsinfo(log)
 
 	# check if we want to show only newer data and check if the current obs is newer than specified date
-	if is_from == True and np.size(datestring1) > 0:
-		to_show=time.mktime(c1)-fromdate
+	if is_from == True and np.size(oi.starttime) > 0:
+		to_show=time.mktime(time.strptime(oi.starttime, "%Y-%m-%d %H:%M:%S"))-fromdate
 		if to_show < 0:   # continue with the next ObsID
 			continue
-
-        # reading the parset file
-	# getting the info about StorageNodes. Note! For old parsets there seems to be no such a keyword Virtual...
-	# However, the old keyword OLAP.storageNodeList has "non-friendly" format, so I just ignore this by now
-	cmd="grep Observation.VirtualInstrument.storageNodeList %s | sed -e 's/lse//g'" % (log,)
-	nodeslist=os.popen(cmd).readlines()
-	if np.size(nodeslist) > 0:
-		# it means that this keyword exist and we can extract the info
-		nodeslist=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
-	# cut the string of nodes if it is too long
-	if len(nodeslist)>13:
-		nodeslist=nodeslist[:13] + "..."
-
-	# getting the name of /data? where the data are stored
-	cmd="grep Observation.MSNameMask %s" % (log,)
-	datadir="/" + os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("/")[1]
+	if is_to == True and np.size(oi.starttime) > 0:
+		to_show=time.mktime(time.strptime(oi.starttime, "%Y-%m-%d %H:%M:%S"))-todate
+		if to_show > 0:   # continue with the next ObsID
+			continue
 
 	# checking if the datadir exists in all sub5 lse nodes and if it does, gets the size of directory
 	totsize=0
 	dirsize_string=""
 	for lse in storage_nodes:
-		ddir=storage_prefix + lse + datadir + "/" + id
+		ddir=storage_prefix + lse + oi.datadir + "/" + id
 		dirsize="x"
 		if os.path.exists(ddir):
 			dirsize=os.popen("du -sh %s | cut -f 1" % (ddir,)).readlines()[0][:-1]
@@ -243,80 +460,6 @@ for counter in np.arange(np.size(obsids)):
 	# converting total size to GB
 	totsz[j] = totsize / 1024. / 1024. / 1024.
 	totsize = "%.1f" % (totsz[j],)
-
-	# getting info about the Type of the data (BF, Imaging, etc.)
-	# check first if data are beamformed
-	cmd="grep outputBeamFormedData %s" % (log,)
-	bftype=os.popen(cmd).readlines()
-	if np.size(bftype) > 0:
-		# this info exists in parset file
-		bftype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
-		if bftype == 'f':
-			bftype = "-"
-		else:
-			bftype = "+"
-	else:
-		bftype = "?"
-	# check first if data are filtered
-	cmd="grep outputFilteredData %s" % (log,)
-	fdtype=os.popen(cmd).readlines()
-	if np.size(fdtype) > 0:
-		# this info exists in parset file
-		fdtype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
-		if fdtype == 'f':
-			fdtype = "-"
-		else:
-			fdtype = "+"
-	else:
-		fdtype = "?"
-	# check if data are imaging
-	cmd="grep outputCorrelatedData %s" % (log,)
-	imtype=os.popen(cmd).readlines()
-	if np.size(imtype) > 0:
-		# this info exists in parset file
-		imtype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
-		if imtype == 'f':
-			imtype = "-"
-		else:
-			imtype = "+"
-	else:
-		imtype = "?"
-	# check if data are incoherent stokes data
-	cmd="grep outputIncoherentStokes %s" % (log,)
-	istype=os.popen(cmd).readlines()
-	if np.size(istype) > 0:
-		# this info exists in parset file
-		istype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
-		if istype == 'f':
-			istype = "-"
-		else:
-			istype = "+"
-	else:
-		istype = "?"
-	# check if data are coherent stokes data
-	cmd="grep outputCoherentStokes %s" % (log,)
-	cstype=os.popen(cmd).readlines()
-	if np.size(cstype) > 0:
-		# this info exists in parset file
-		cstype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
-		if cstype == 'f':
-			cstype = "-"
-		else:
-			cstype = "+"
-	else:
-		cstype = "?"
-	# check if data are fly's eye mode data
-	cmd="grep PencilInfo.flysEye %s" % (log,)
-	fetype=os.popen(cmd).readlines()
-	if np.size(fetype) > 0:
-		# this info exists in parset file
-		fetype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
-		if fetype == 'f':
-			fetype = "-"
-		else:
-			fetype = "+"
-	else:
-		fetype = "?"
 
 	# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
 	# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file in ./incoherentstokes/ directory
@@ -334,75 +477,16 @@ for counter in np.arange(np.size(obsids)):
 				statusline=statusline+" x"
 			break
 
-	# getting info about the pointing
-	cmd="grep 'Beam\[0\].angle1' %s" % (log,)
-	rarad=os.popen(cmd).readlines()
-	if np.size(rarad)>0:
-		# RA info exists in parset file
-        	rarad=float(os.popen(cmd).readlines()[0][:-1].split(" = ")[-1])
-		rahours=rarad*12./3.1415926
-		rah=int(rahours)
-		ram=int((rahours-rah)*60.)
-		rastring="%02d%02d" % (rah, ram)
-	else:
-		rastring="????"
-
-	cmd="grep 'Beam\[0\].angle2' %s" % (log,)
-	decrad=os.popen(cmd).readlines()
-	if np.size(decrad)>0:
-		# DEC info exists in parset file
-	        decrad=float(os.popen(cmd).readlines()[0][:-1].split(" = ")[-1])
-		decdeg=decrad*180./3.1415926
-		if decdeg>0:
-			decsign="+"
-		else:
-			decsign="-"
-		decdeg=abs(decdeg)
-		decd=int(decdeg)
-		decm=int((decdeg-decd)*60.)
-		decstring="%c%02d%02d" % (decsign, decd, decm)
-	else:
-		decstring="_????"
-	pointing="%s%s" % (rastring, decstring)
-
-	# getting info about Source name (new addition to the Parset files)
-	cmd="grep 'Observation.Beam\[0\].target' %s" % (log,)
-	source=os.popen(cmd).readlines()
-	if np.size(source)>0:
-		# Source name exists in parset file
-        	source=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
-	else:
-		source=""
-
-	# Getting the Duration
-	cmd="grep Observation.stopTime %s | tr -d \\'" % (log,)
-	datestring2=os.popen(cmd).readlines()
-	if np.size(datestring1) > 0 and np.size(datestring2) > 0:
-		# it means that both start and stop Times exist in parset file
-		datestring2=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
-		c2 = time.strptime(datestring2, "%Y-%m-%d %H:%M:%S")
-		diff=time.mktime(c2)-time.mktime(c1)  # difference in seconds
-		if float(diff/3600.0) > 1.:
-			duration="%.1fh" % (diff/3600.)
-		else:
-			duration="%.1fm" % (diff/60.)
-	else:
-		duration="?"
-
 	# combining info
-	# The columns are ObsID   MMDD NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed Filtered Imaging IncohStokes Reduced Pointing Source
-	if is_html == True:
-		infohtml="<td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%-16s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%s</td>\n <td>%c  %c  %c  %c  %c  %c</td>\n <td>%-11s</td>\n <td>%s</td>\n <td>%s</td>\n</tr>" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source)
-
-	info="%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source)
+	out.Init(id, oi.datestring, oi.duration, oi.nodelist, oi.datadir, dirsize_string, totsize, oi.bftype, oi.fdtype, oi.imtype, oi.istype, oi.cstype, oi.fetype, statusline, oi.pointing, oi.source)
 
 	# Printing out the report (if we want unsorted list)
 	if tosort == False:
 		if is_html == True:
-			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (j, infohtml))
-		print "%d	%s" % (j, info)
+			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (j, out.infohtml))
+		print "%d	%s" % (j, out.info)
 	else:
-		obstable=np.append(obstable, info)
+		obstable=np.append(obstable, out)
 
 	# increase counter
 	j=j+1
@@ -412,15 +496,15 @@ Nrecs=j
 if tosort == True:
 	sorted_indices=np.flipud(np.argsort(totsz[:Nrecs], kind='mergesort'))
 	for i in np.arange(Nrecs):
-		print "%d	%s" % (i, obstable[sorted_indices[i]])
+		print "%d	%s" % (i, obstable[sorted_indices[i]].info)
 	if is_html == True:
 		for i in np.arange(Nrecs):
-			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (i, obstable[sorted_indices[i]]))
+			htmlptr.write ("\n<tr align=center>\n <td>%d</td>\n %s" % (i, obstable[sorted_indices[i]].infohtml))
 
 if is_html == True:
 	# getting date & time of last update
-	cmd="date +'%b %d, %Y %H:%N:%S'"
+	cmd="date +'%b %d, %Y %H:%M:%S'"
 	lupd=os.popen(cmd).readlines()[0][:-1]
-	htmlptr.write ("\n<hr width=100\%>\n<address>\nLast Updated: %s\n</address>\n" % (lupd, ))
+	htmlptr.write ("\n<hr width=100%%>\n<address>\nLast Updated: %s\n</address>\n" % (lupd, ))
 	htmlptr.write ("\n</table>\n\n</body>\n</html>")
 	htmlptr.close()
