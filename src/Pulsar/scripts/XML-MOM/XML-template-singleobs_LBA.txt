@@ -1,5 +1,5 @@
 <item index="0">
-<lofar:observation>
+<lofar:observation mom2Id="MOM_ID">
     <name>FILL IN OBSERVATION NAME</name>
     <description>FILL IN DESCRIPTION</description>
     <currentStatus>
@@ -20,7 +20,7 @@
             <clock mode="200 MHz"/>
             <instrumentFilter>10-90 MHz</instrumentFilter>
             <integrationInterval>1</integrationInterval>
-            <channelsPerSubband>16</channelsPerSubband>
+            <channelsPerSubband>64</channelsPerSubband>
             <cnIntegrationSteps>12208</cnIntegrationSteps>
             <pencilBeams>
                 <flyseye>false</flyseye>
@@ -36,7 +36,7 @@
             <stokes>
                 <stokesSelection>I</stokesSelection>
                 <integrateChannels>false</integrateChannels>
-                <integrationSteps>16</integrationSteps>
+                <integrationSteps>4</integrationSteps>
             </stokes>
             <stationSet>Custom</stationSet>
             <stations>
