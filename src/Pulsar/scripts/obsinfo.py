@@ -215,11 +215,11 @@ class outputInfo:
 	def setcomment (self, comment):
 		self.comment = comment
 
-	def Init(self, id, datestring, duration, nodelist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source):
+	def Init(self, id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source):
 		self.id = id
 		self.datestring = datestring
 		self.duration = duration
-		self.nodelist = nodelist
+		self.nodeslist = nodeslist
 		self.datadir = datadir
 		self.dirsize_string = dirsize_string
 		self.totsize = totsize
@@ -478,7 +478,7 @@ for counter in np.arange(np.size(obsids)):
 			break
 
 	# combining info
-	out.Init(id, oi.datestring, oi.duration, oi.nodelist, oi.datadir, dirsize_string, totsize, oi.bftype, oi.fdtype, oi.imtype, oi.istype, oi.cstype, oi.fetype, statusline, oi.pointing, oi.source)
+	out.Init(id, oi.datestring, oi.duration, oi.nodeslist, oi.datadir, dirsize_string, totsize, oi.bftype, oi.fdtype, oi.imtype, oi.istype, oi.cstype, oi.fetype, statusline, oi.pointing, oi.source)
 
 	# Printing out the report (if we want unsorted list)
 	if tosort == False:
