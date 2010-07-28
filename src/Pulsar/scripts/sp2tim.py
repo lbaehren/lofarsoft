@@ -103,7 +103,7 @@ if __name__=="__main__":
 	# Princeton format (+ additional extra field is for sigma)
 	timfile=inffile.split(".inf")[0] + ".list"
 	if is_phase == True:
-		lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %f" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), phase[i]) for i in np.arange(np.size(offset))]
+		lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %f   %d" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), phase[i], downfact[i]) for i in np.arange(np.size(offset))]
 	else:
-		lines=["%1s %-12s %8.3f %-20s%9s%10s   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i])) for i in np.arange(np.size(offset))]
+		lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i]) for i in np.arange(np.size(offset))]
 	np.savetxt(timfile, np.transpose((lines)), fmt="%s")

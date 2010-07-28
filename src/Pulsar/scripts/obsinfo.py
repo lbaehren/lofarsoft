@@ -18,6 +18,8 @@ todate=""
 # if True then make a list in html format
 is_html=False
 htmlfile=""  # name of the html file in case is_html == True
+# View of presenting info (usual (defaul), brief, and plots)
+viewtype="usual"
 
 # storage nodes to collect info about Pulsar Observations
 # we assume that even for the case of long observations when data were spreaded out
@@ -54,6 +56,40 @@ class obsinfo:
                 	self.datestring=smonth+sday
         	else:
                 	self.datestring="????"
+
+		# Getting the Antenna info (HBA or LBA)
+        	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
+        	self.antenna=os.popen(cmd).readlines()
+        	if np.size(self.antenna)>0:
+                	# Antenna array setting exists in parset file
+                	self.antenna=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("_")[0]
+        	else:
+                	self.antenna="?"
+
+		# Getting the Filter setting
+        	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
+        	self.band=os.popen(cmd).readlines()
+        	if np.size(self.band)>0:
+                	# band filter setting exists in parset file
+                	self.band=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("A_")[-1]
+        	else:
+                	self.band="?"
+
+		# Getting the stations and their number (including separately the number of CS and RS)
+#        	cmd="grep 'Observation.VirtualInstrument.stationList' %s" % (self.parset,)
+        	cmd="grep 'OLAP.storageStationNames' %s" % (self.parset,)
+        	self.stations=os.popen(cmd).readlines()
+        	if np.size(self.stations)>0:
+                	# Stations setting exists in parset file
+                	self.stations=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
+			stations_array = self.stations.split(",")
+			self.nstations = np.size(stations_array)
+			self.ncorestations = self.stations.count("CS")
+			self.nremotestations = self.stations.count("RS")
+			self.stations_string = "%d [%dCS, %dRS]" % (self.nstations, self.ncorestations, self.nremotestations) 
+        	else:
+                	self.stations="?"
+			self.stations_string="?"
 
 	        # reading the parset file
 	        # getting the info about StorageNodes. Note! For old parsets there seems to be no such a keyword Virtual...
@@ -223,32 +259,23 @@ class outputInfo:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
 
-	def Init(self, id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source, comment, seconds):
+	def Init(self, id, oi, dirsize_string, totsize, statusline, comment):
 		self.id = id
-		self.datestring = datestring
-		self.duration = duration
-		self.nodeslist = nodeslist
-		self.datadir = datadir
+		self.oi = oi
 		self.dirsize_string = dirsize_string
 		self.totsize = totsize
-		self.bftype = bftype
-		self.fdtype = fdtype
-		self.imtype = imtype
-		self.istype = istype
-		self.cstype = cstype
-		self.fetype = fetype
 		self.statusline = statusline
-		self.pointing = pointing
-		self.source = source
 		self.comment = comment
-		self.seconds = seconds
 		self.colspan = 15 + len(self.dirsize_string.split("\t")) - 1
 
 		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
 		
 		if self.comment == "":
-			self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (self.id, self.datestring, self.duration, self.nodeslist, self.datadir, self.dirsize_string, self.totsize, self.bftype, self.fdtype, self.imtype, self.istype, self.cstype, self.fetype, self.statusline, self.pointing, self.source)
-			self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.datestring, self.duration, self.nodeslist, self.datadir, self.dirsize_string_html, self.totsize, self.bftype == "-" and "&#8211;" or self.bftype, self.fdtype == "-" and "&#8211;" or self.fdtype, self.imtype == "-" and "&#8211;" or self.imtype, self.istype == "-" and "&#8211;" or self.istype, self.cstype == "-" and "&#8211;" or self.cstype, self.fetype == "-" and "&#8211;" or self.fetype, self.statusline, self.pointing, self.source)
+			if viewtype == "brief" or viewtype == "plots":
+				self.info = "%s	%s	%s	%s	%s	%s	   %9s	%c  %c  %c  %c  %c  %c" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype)
+			else:
+				self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
+			self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
 		else:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
@@ -261,6 +288,7 @@ def usage (prg):
         print "Program %s lists info about sub5 (and other) observations" % (prg, )
 	print "Usage: %s [-s, --sorted <time|size>] [-f, --from <YYYY-MM-DD>] [-t, --to <YYYY-MM-DD>]\n\
                   [--html <html-file>] [--lse <lse nodes to search, default '13,14,15,16-18'>]\n\
+                  [-v, --view <usual (default)|brief|plots>]\n\
                   [-h, --help]\n" % (prg, )
 
 # Parse the command line
@@ -268,7 +296,7 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hs:f:t:", ["help", "sorted=", "from=", "html=", "to=", "lse="])
+		opts, args = getopt.getopt (argv, "hs:f:t:v:", ["help", "sorted=", "from=", "html=", "to=", "lse=", "view="])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -309,6 +337,9 @@ def parsecmd(prg, argv):
 				is_to = True
 				global todate
 				todate = arg
+			if opt in ("-v", "--view"):
+				global viewtype
+				viewtype = arg
 
 	except getopt.GetoptError:
 		print "Wrong option!"
@@ -341,7 +372,7 @@ if __name__ == "__main__":
 	# loop over the storage nodes and directories to get the list of all IDs
 	for s in storage_nodes:
 		for d in data_dirs:
-			cmd="ssh %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (s, d, "?20??_*")
+			cmd="ssh -XY %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (s, d, "?20??_*")
 			indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
 			obsids = np.append(obsids, indlist)
 
@@ -392,8 +423,6 @@ if __name__ == "__main__":
 		obstable=[]
 
 	# printing out the header of the table
-	# The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed FilteredData Imaging IncohStokes CohStokes Fly'sEye	Reduced Pointing Source
-
 	storage_nodes_string=""
 	for i in np.arange(Nnodes-1):
 		storage_nodes_string=storage_nodes_string+storage_nodes[i]+"\t"
@@ -404,15 +433,26 @@ if __name__ == "__main__":
 		htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
 		htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th>NodesList (lse)</th>\n <th align=center>Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Reduced</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
 
-	equalstrs=[]
-	equalstring_size=143+8*Nnodes
-	for e in np.arange(equalstring_size):
-		equalstrs = np.append(equalstrs, "=")
-	equalstring="#" + "".join(equalstrs)
+	if viewtype == "brief" or viewtype == "plots":
+		equalstrs=[]
+		equalstring_size=105
+		for e in np.arange(equalstring_size):
+			equalstrs = np.append(equalstrs, "=")
+		equalstring="#" + "".join(equalstrs)
 		
-	print equalstring
-	print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
-	print equalstring
+		print equalstring
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	BF FD IM IS CS FE"
+		print equalstring
+	else:
+		equalstrs=[]
+		equalstring_size=143+8*Nnodes
+		for e in np.arange(equalstring_size):
+			equalstrs = np.append(equalstrs, "=")
+		equalstring="#" + "".join(equalstrs)
+		
+		print equalstring
+		print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
+		print equalstring
 
 	j=0 # extra index to follow only printed lines
 	# loop for every observation
@@ -501,11 +541,11 @@ if __name__ == "__main__":
 		for lse in storage_nodes:
 			ddir=oi.datadir + "/" + id
 			dirsize="x"
-			cmd="ssh %s 'du -sh %s 2>&1 | cut -f 1 | grep -v such'" % (lse, ddir)
+			cmd="ssh -XY %s 'du -sh %s 2>&1 | cut -f 1 | grep -v such'" % (lse, ddir)
 			dirout=os.popen(cmd).readlines()
 			if np.size(dirout) > 0:
 				dirsize=dirout[0][:-1]
-				cmd="ssh %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such'" % (lse, ddir)
+				cmd="ssh -XY %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such'" % (lse, ddir)
 				totsize=totsize + float(os.popen(cmd).readlines()[0][:-1])
 			dirsize_string=dirsize_string+dirsize+"\t"
 
@@ -517,15 +557,15 @@ if __name__ == "__main__":
 		# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file in ./incoherentstokes/ directory
 		statusline="x"
 		for lse in storage_nodes:
-			cmd="ssh %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, "/data4", "LOFAR_PULSAR_ARCHIVE_" + lse)
+			cmd="ssh -XY %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, "/data4", "LOFAR_PULSAR_ARCHIVE_" + lse)
 			if np.size(os.popen(cmd).readlines()) == 0:
 				continue
-			cmd="ssh %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red")
+			cmd="ssh -XY %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red")
 			redout=os.popen(cmd).readlines()
 			if np.size(redout) > 0:
 				reddir=redout[0][:-1]
 				statusline=lse
-				cmd="ssh %s 'find %s -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, reddir + "/incoherentstokes", "*_plots.tar.gz")
+				cmd="ssh -XY %s 'find %s -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, reddir + "/incoherentstokes", "*_plots.tar.gz")
 				status=os.popen(cmd).readlines()
 				if np.size(status) > 0:
 					# tarfile exists
@@ -535,7 +575,7 @@ if __name__ == "__main__":
 				break
 
 		# combining info
-		out.Init(id, oi.datestring, oi.duration, oi.nodeslist, oi.datadir, dirsize_string, totsize, oi.bftype, oi.fdtype, oi.imtype, oi.istype, oi.cstype, oi.fetype, statusline, oi.pointing, oi.source, "", oi.seconds)
+		out.Init(id, oi, dirsize_string, totsize, statusline, "")
 
 		# Printing out the report (if we want unsorted list)
 		if tosort == False:
