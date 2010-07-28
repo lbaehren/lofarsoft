@@ -3,11 +3,11 @@ import os, struct, presto, sys
 
 telescope_ids = {"Fake": 0, "Arecibo": 1, "Ooty": 2, "Nancay": 3,
                  "Parkes": 4, "Jodrell": 5, "GBT": 6, "GMRT": 7,
-                 "Effelsberg": 8}
+                 "Effelsberg": 8, "LOFAR": 9}
 
 machine_ids = {"FAKE": 0, "PSPM": 1, "Wapp": 2,"AOFTM": 3,
                "BCPM1": 4, "OOTY": 5, "SCAMP": 6, 
-               "GBT Pulsar Spigot": 7, "SPIGOT": 7}
+               "GBT Pulsar Spigot": 7, "SPIGOT": 7, "STELLA": 8}
 
 def prep_string(string):
     return struct.pack('i', len(string))+string
