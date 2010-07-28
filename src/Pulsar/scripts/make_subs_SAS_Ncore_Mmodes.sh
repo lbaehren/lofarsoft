@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.14
+VERSION=1.15
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-rfi] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo]\n\n"\
@@ -985,6 +985,8 @@ do
 		   convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
 		   echo convert -rotate 90 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png >> $log
 		   convert -rotate 90 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png
+		   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png >> $log
+		   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png
 		done
 	else
 	    for jjj in $beams
@@ -995,6 +997,8 @@ do
 			   convert ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
 			   echo convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png >> $log
 			   convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png
+			   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png >> $log
+			   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png
 			done
 		done
 	fi
@@ -1077,6 +1081,8 @@ do
 		   convert ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf
 		   echo convert -rotate 90 ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png >> $log
 		   convert -rotate 90 ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png
+		   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.th.png >> $log
+		   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.th.png
 	   else
 		   while [ $ii -ne $yy ]
 		   do
@@ -1096,6 +1102,8 @@ do
 			   convert ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf
 			   echo convert -rotate 90 ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png >> $log
 			   convert -rotate 90 ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png
+			   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.th.png >> $log
+			   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.th.png
            done
        fi # end if (( $flyseye == 0 ))
        
@@ -1125,11 +1133,11 @@ date
 date >> $log
 if (( $flyseye_tar == 0 ))
    then
-   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf >> $log
-   tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf 
+   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf >> $log
+   tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf 
 else
-   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf >> $log
-   tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf
+   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf >> $log
+   tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf
 fi
 echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
 gzip ${PULSAR}_${OBSID}_plots.tar
