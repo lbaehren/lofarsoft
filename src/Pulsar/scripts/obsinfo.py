@@ -7,6 +7,8 @@ import time
 
 # True if we want the output list to be sorted by the TotalSize
 tosort=False
+sortkind=""  # two kinds of sorting currently: by start time ("time"), by volume ("size")
+
 # if True then will show only those observations newer than some date
 is_from=False
 fromdate=""
@@ -216,13 +218,14 @@ class outputInfo:
 	def setcomment (self, id, cs, comment):
 		self.id = id
 		self.comment = comment
+		self.seconds = 0
 		self.colspan = 15 + cs - 1
 
 		if self.comment != "":
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
 
-	def Init(self, id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source, comment):
+	def Init(self, id, datestring, duration, nodeslist, datadir, dirsize_string, totsize, bftype, fdtype, imtype, istype, cstype, fetype, statusline, pointing, source, comment, seconds):
 		self.id = id
 		self.datestring = datestring
 		self.duration = duration
@@ -240,6 +243,7 @@ class outputInfo:
 		self.pointing = pointing
 		self.source = source
 		self.comment = comment
+		self.seconds = seconds
 		self.colspan = 15 + len(self.dirsize_string.split("\t")) - 1
 
 		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t"))
@@ -256,8 +260,8 @@ class outputInfo:
 def usage (prg):
         """ Prints info how to use the script.
         """
-        print "Program %s lists info about sub5 observations" % (prg, )
-	print "Usage: %s [-s, --sorted] [-f, --from <YYYY-MM-DD>] [-t, --to <YYYY-MM-DD>]\n\
+        print "Program %s lists info about sub5 (and other) observations" % (prg, )
+	print "Usage: %s [-s, --sorted <time|size>] [-f, --from <YYYY-MM-DD>] [-t, --to <YYYY-MM-DD>]\n\
                   [--html <html-file>] [-h, --help]\n" % (prg, )
 
 # Parse the command line
@@ -265,7 +269,7 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hsf:t:", ["help", "sorted", "from=", "html=", "to="])
+		opts, args = getopt.getopt (argv, "hs:f:t:", ["help", "sorted=", "from=", "html=", "to="])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -273,6 +277,11 @@ def parsecmd(prg, argv):
 			if opt in ("-s", "--sorted"):
 				global tosort
 				tosort = True
+				global sortkind
+				sortkind = arg
+				if sortkind != "time" and sortkind != "size":
+					print "Arg for sort option should either be 'time' or 'size'\n"
+					sys.exit()
 			if opt in ("--html"):
 				global is_html
 				is_html = True
@@ -326,6 +335,15 @@ for s in storage_nodes:
 		indlist = np.append(indlist, glob.glob(mask + "??"))
 		indlist = np.append(indlist, glob.glob(mask + "???"))
 		obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
+
+#for s in storage_nodes:
+#	for d in data_dirs:
+#		cmd="ssh %s 'find %s -name \"%s\" -print'" % (s, storage_prefix + s + d, "?20??_*")
+#		indlist=os.popen(cmd).readlines()
+#		for j in indlist:
+#			print j
+##		obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
+#sys.exit()
 
 # number of storage nodes
 Nnodes=np.size(storage_nodes)
@@ -504,7 +522,7 @@ for counter in np.arange(np.size(obsids)):
 			break
 
 	# combining info
-	out.Init(id, oi.datestring, oi.duration, oi.nodeslist, oi.datadir, dirsize_string, totsize, oi.bftype, oi.fdtype, oi.imtype, oi.istype, oi.cstype, oi.fetype, statusline, oi.pointing, oi.source, "")
+	out.Init(id, oi.datestring, oi.duration, oi.nodeslist, oi.datadir, dirsize_string, totsize, oi.bftype, oi.fdtype, oi.imtype, oi.istype, oi.cstype, oi.fetype, statusline, oi.pointing, oi.source, "", oi.seconds)
 
 	# Printing out the report (if we want unsorted list)
 	if tosort == False:
@@ -524,7 +542,10 @@ for counter in np.arange(np.size(obsids)):
 Nrecs=j
 # printing the sorted list
 if tosort == True:
-	sorted_indices=np.flipud(np.argsort(totsz[:Nrecs], kind='mergesort'))
+	if sortkind == "size":
+		sorted_indices=np.flipud(np.argsort(totsz[:Nrecs], kind='mergesort'))
+	else:
+		sorted_indices=np.flipud(np.argsort([obstable[j].seconds for j in np.arange(Nrecs)], kind='mergesort'))
 	for i in np.arange(Nrecs):
 		print "%d	%s" % (i, obstable[sorted_indices[i]].info)
 	if is_html == True:
