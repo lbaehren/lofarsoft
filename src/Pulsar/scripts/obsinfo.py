@@ -246,7 +246,7 @@ class outputInfo:
 		self.seconds = seconds
 		self.colspan = 15 + len(self.dirsize_string.split("\t")) - 1
 
-		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t"))
+		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
 		
 		if self.comment == "":
 			self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (self.id, self.datestring, self.duration, self.nodeslist, self.datadir, self.dirsize_string, self.totsize, self.bftype, self.fdtype, self.imtype, self.istype, self.cstype, self.fetype, self.statusline, self.pointing, self.source)
@@ -308,257 +308,257 @@ if __name__ == "__main__":
 	# parsing command line
 	parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
 
-# writing the html code if chosen
-if is_html == True:
-	htmlptr = open(htmlfile, 'w')
-	htmlptr.write ("<html>\n\
-                         <head>\n\
-                          <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
-                          <meta name=\"Classification\" content=\"public HTML\">\n\
-                          <title>LOFAR pulsar observations</title>\n\
-                         </head>\n\n\
-                         <style type='text/css'>\n\
-                          tr.d0 td { background-color: #ccffff; color: black; font-size: 80% }\n\
-                          tr.d1 td { background-color: #99cccc; color: black; font-size: 80% }\n\
-                          tr.d th { background-color: #99cccc; color: black;}\n\
-                         </style>\n\n\
-                         <body bgcolor='white'>\n\
-                          <h2 align=left>LOFAR pulsar observations</h2>\n\
-                        \n")
-
-# loop over the storage nodes and directories to get the list of all IDs
-for s in storage_nodes:
-	for d in data_dirs:
-		mask = storage_prefix + s + d + "/?20??_?????"
-		indlist=glob.glob(mask)			
-		indlist = np.append(indlist, glob.glob(mask + "?"))
-		indlist = np.append(indlist, glob.glob(mask + "??"))
-		indlist = np.append(indlist, glob.glob(mask + "???"))
-		obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
-
-#for s in storage_nodes:
-#	for d in data_dirs:
-#		cmd="ssh %s 'find %s -name \"%s\" -print'" % (s, storage_prefix + s + d, "?20??_*")
-#		indlist=os.popen(cmd).readlines()
-#		for j in indlist:
-#			print j
-##		obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
-#sys.exit()
-
-# number of storage nodes
-Nnodes=np.size(storage_nodes)
-
-# getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
-# and sort in reverse order (most recent obs go first)
-# more recent obs is the obs with higher ID (as it should be)
-obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
-
-if is_html == True:
-	htmlptr.write("Number of observations in %s: <b>%d</b><br>\n" % (", ".join(storage_nodes), np.size(obsids), ))
-print "Number of observations in %s: %d" % (", ".join(storage_nodes), np.size(obsids), )
-
-if is_from == True and is_to == True:
+	# writing the html code if chosen
 	if is_html == True:
-		htmlptr.write ("List only observations since %s till %s<br>\n" % (fromdate, todate))
+		htmlptr = open(htmlfile, 'w')
+		htmlptr.write ("<html>\n\
+                	         <head>\n\
+                        	  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
+                          	<meta name=\"Classification\" content=\"public HTML\">\n\
+                          	<title>LOFAR pulsar observations</title>\n\
+                         	</head>\n\n\
+                         	<style type='text/css'>\n\
+                          	tr.d0 td { background-color: #ccffff; color: black; font-size: 80% }\n\
+                          	tr.d1 td { background-color: #99cccc; color: black; font-size: 80% }\n\
+                          	tr.d th { background-color: #99cccc; color: black;}\n\
+                         	</style>\n\n\
+                         	<body bgcolor='white'>\n\
+                          	<h2 align=left>LOFAR pulsar observations</h2>\n\
+                        	\n")
 
-	print "List only observations since %s till %s" % (fromdate, todate)
-	fromyear = fromdate.split("-")[0]
-	fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
-	toyear = todate.split("-")[0]
-	todate = time.mktime(time.strptime(todate, "%Y-%m-%d"))
+	# loop over the storage nodes and directories to get the list of all IDs
+	for s in storage_nodes:
+		for d in data_dirs:
+			mask = storage_prefix + s + d + "/?20??_?????"
+			indlist=glob.glob(mask)			
+			indlist = np.append(indlist, glob.glob(mask + "?"))
+			indlist = np.append(indlist, glob.glob(mask + "??"))
+			indlist = np.append(indlist, glob.glob(mask + "???"))
+			obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
 
-if is_from == True and is_to == False:
+#	for s in storage_nodes:
+#		for d in data_dirs:
+#			cmd="ssh %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (s, d, "?20??_*")
+#			indlist=os.popen(cmd).readlines()
+#			print np.size(indlist)
+#			for j in indlist:
+#				print j
+##			obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
+#	sys.exit()
+
+	# number of storage nodes
+	Nnodes=np.size(storage_nodes)
+
+	# getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
+	# and sort in reverse order (most recent obs go first)
+	# more recent obs is the obs with higher ID (as it should be)
+	obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
+
 	if is_html == True:
-		htmlptr.write ("List only observations since %s<br>\n" % (fromdate, ))
+		htmlptr.write("Number of observations in %s: <b>%d</b><br>\n" % (", ".join(storage_nodes), np.size(obsids), ))
+	print "Number of observations in %s: %d" % (", ".join(storage_nodes), np.size(obsids), )
 
-	print "List only observations since %s" % (fromdate, )
-	fromyear = fromdate.split("-")[0]
-	fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
-
-if is_from == False and is_to == True:
-	if is_html == True:
-		htmlptr.write ("List only observations till %s<br>\n" % (todate, ))
-
-	print "List only observations till %s" % (todate, )
-	toyear = todate.split("-")[0]
-	todate = time.mktime(time.strptime(todate, "%Y-%m-%d"))
-
-print
-
-# array of total sizes for every ObsID
-totsz = np.zeros(np.size(obsids))
-# table with obs info
-if tosort == True:
-	obstable=[]
-
-# printing out the header of the table
-# The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed FilteredData Imaging IncohStokes CohStokes Fly'sEye	Reduced Pointing Source
-
-storage_nodes_string=""
-for i in np.arange(Nnodes-1):
-	storage_nodes_string=storage_nodes_string+storage_nodes[i]+"\t"
-storage_nodes_string=storage_nodes_string+storage_nodes[-1]
-storage_nodes_string_html="</th>\n <th align=center>".join(storage_nodes_string.split("\t"))
-
-if is_html == True:
-	htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
-	htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th>NodesList (lse)</th>\n <th align=center>Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Reduced</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
-
-print "#======================================================================================================================================================================="
-print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
-print "#======================================================================================================================================================================="
-
-j=0 # extra index to follow only printed lines
-# loop for every observation
-for counter in np.arange(np.size(obsids)):
-	
-	id=obsids[counter]
-	# class instance with output Info
-	out=outputInfo(id)	
-
-	# prefix of ID, like L2010 or L2009
-        id_prefix=id.split("_")[0]   
-	# suffix of ID, the sequence number of observation
-        id_suffix=id.split("_")[1]   
-
-	# if request only newer observations, check first the year from the ID
-	# if it's less than specified year, then continue with the next ID
-	if is_from == True:
-		obsyear=id_prefix[1:]
-		if fromyear > obsyear:
-			continue
-	if is_to == True:
-		obsyear=id_prefix[1:]
-		if toyear < obsyear:
-			continue
-
-	# checking first if the directory with the parset file exists
-	logdir=parset_logdir + id + "/"
-	if not os.path.exists(logdir):
-		# checking in the oldlog directory
-		logdir=parset_oldlogdir + id + "/"
-		if not os.path.exists(logdir):
-			# Due to new naming convention and location of the parset files, also looking for the parset file
-			# in any L2010-??-??_?????? directories	
-			cmd="find %s -type f -name 'RTCP-%s.parset' -print" % (parset_logdir, id_suffix)
-			logdir=os.popen(cmd).readlines()
-			if np.size(logdir) > 0:
-				# it means we found the directory with parset file
-				logdir=os.popen(cmd).readlines()[0][:-1].split("RTCP-%s.parset" % (id_suffix,))[0]
-			else:
-				# no directory found
-				comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
-				out.setcomment(id, len(storage_nodes), comment)
-				totsz[j] = 0.
-				if tosort == False:
-					print "%d	%s %s" % (j, id, comment)
-				else:
-					obstable=np.append(obstable, out)
-				j=j+1
-				continue
-
-	# get the full path for the parset file for the current ID
-	log=logdir + parset
-	if not os.path.exists(log):
-		# also checking that maybe the parset file has name the same as Obs ID
-		log=logdir + id + ".parset"
-		if not os.path.exists(log):
-			# also checking that maybe the name of parset file has new naming convention, like "RTCP-<id_suffix>.parset"
-			log=logdir + "RTCP-" + id_suffix + ".parset"
-			if not os.path.exists(log):
-				comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
-				out.setcomment(id, len(storage_nodes), comment)
-				totsz[j] = 0.
-				if tosort == False:
-					print "%d	%s %s" % (j, id, comment)
-				else:
-					obstable=np.append(obstable, out)
-				j=j+1
-				continue
-
-	# initializing the obsinfo class
-	oi=obsinfo(log)
-
-	# check if we want to show only newer data and check if the current obs is newer than specified date
-	if is_from == True and np.size(oi.starttime) > 0:
-		to_show=time.mktime(time.strptime(oi.starttime, "%Y-%m-%d %H:%M:%S"))-fromdate
-		if to_show < 0:   # continue with the next ObsID
-			continue
-	if is_to == True and np.size(oi.starttime) > 0:
-		to_show=time.mktime(time.strptime(oi.starttime, "%Y-%m-%d %H:%M:%S"))-todate
-		if to_show > 0:   # continue with the next ObsID
-			continue
-
-	# checking if the datadir exists in all sub5 lse nodes and if it does, gets the size of directory
-	totsize=0
-	dirsize_string=""
-	for lse in storage_nodes:
-		ddir=storage_prefix + lse + oi.datadir + "/" + id
-		dirsize="x"
-		if os.path.exists(ddir):
-			dirsize=os.popen("du -sh %s | cut -f 1" % (ddir,)).readlines()[0][:-1]
-			totsize=totsize + float(os.popen("du -s -B 1 %s | cut -f 1" % (ddir,)).readlines()[0][:-1])
-		dirsize_string=dirsize_string+dirsize+"\t"
-	dirsize_string=dirsize_string[:-2]
-
-	# converting total size to GB
-	totsz[j] = totsize / 1024. / 1024. / 1024.
-	totsize = "%.1f" % (totsz[j],)
-
-	# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
-	# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file in ./incoherentstokes/ directory
-	statusline="x"
-	for lse in storage_nodes:
-                reddir=storage_prefix + lse + "/data4/LOFAR_PULSAR_ARCHIVE_" + lse + "/" + id + "_red"
-                if os.path.exists(reddir):
-			statusline=lse
-			tarball=reddir + "/incoherentstokes/*_plots.tar.gz"
-			status=glob.glob(tarball)
-			if np.size(status) > 0:
-				# tarfile exists
-				statusline=statusline+" +tar"	
-			else:
-				statusline=statusline+" x"
-			break
-
-	# combining info
-	out.Init(id, oi.datestring, oi.duration, oi.nodeslist, oi.datadir, dirsize_string, totsize, oi.bftype, oi.fdtype, oi.imtype, oi.istype, oi.cstype, oi.fetype, statusline, oi.pointing, oi.source, "", oi.seconds)
-
-	# Printing out the report (if we want unsorted list)
-	if tosort == False:
+	if is_from == True and is_to == True:
 		if is_html == True:
-			# making alternating colors in the table
-			if j%2 == 0:
-				htmlptr.write ("\n<tr class='d0' align=left>\n <td>%d</td>\n %s\n</tr>" % (j, out.infohtml))
-			else:
-				htmlptr.write ("\n<tr class='d1' align=left>\n <td>%d</td>\n %s\n</tr>" % (j, out.infohtml))
-		print "%d	%s" % (j, out.info)
-	else:
-		obstable=np.append(obstable, out)
+			htmlptr.write ("List only observations since %s till %s<br>\n" % (fromdate, todate))
 
-	# increase counter
-	j=j+1
+		print "List only observations since %s till %s" % (fromdate, todate)
+		fromyear = fromdate.split("-")[0]
+		fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+		toyear = todate.split("-")[0]
+		todate = time.mktime(time.strptime(todate, "%Y-%m-%d"))
 
-Nrecs=j
-# printing the sorted list
-if tosort == True:
-	if sortkind == "size":
-		sorted_indices=np.flipud(np.argsort(totsz[:Nrecs], kind='mergesort'))
-	else:
-		sorted_indices=np.flipud(np.argsort([obstable[j].seconds for j in np.arange(Nrecs)], kind='mergesort'))
-	for i in np.arange(Nrecs):
-		print "%d	%s" % (i, obstable[sorted_indices[i]].info)
+	if is_from == True and is_to == False:
+		if is_html == True:
+			htmlptr.write ("List only observations since %s<br>\n" % (fromdate, ))
+
+		print "List only observations since %s" % (fromdate, )
+		fromyear = fromdate.split("-")[0]
+		fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+
+	if is_from == False and is_to == True:
+		if is_html == True:
+			htmlptr.write ("List only observations till %s<br>\n" % (todate, ))
+
+		print "List only observations till %s" % (todate, )
+		toyear = todate.split("-")[0]
+		todate = time.mktime(time.strptime(todate, "%Y-%m-%d"))
+
+	print
+
+	# array of total sizes for every ObsID
+	totsz = np.zeros(np.size(obsids))
+	# table with obs info
+	if tosort == True:
+		obstable=[]
+
+	# printing out the header of the table
+	# The columns are ObsID   MMDD	Duration NodesList   Datadir   Size_in_lse013   Size_in_lse014  Size_in_lse015 TotalSize  Beam-Formed FilteredData Imaging IncohStokes CohStokes Fly'sEye	Reduced Pointing Source
+
+	storage_nodes_string=""
+	for i in np.arange(Nnodes-1):
+		storage_nodes_string=storage_nodes_string+storage_nodes[i]+"\t"
+	storage_nodes_string=storage_nodes_string+storage_nodes[-1]
+	storage_nodes_string_html="</th>\n <th align=center>".join(storage_nodes_string.split("\t"))
+
 	if is_html == True:
-		for i in np.arange(Nrecs):
-			if i%2 == 0:
-				htmlptr.write ("\n<tr class='d0' align=left>\n <td>%d</td>\n %s\n</tr>" % (i, obstable[sorted_indices[i]].infohtml))
-			else:
-				htmlptr.write ("\n<tr class='d1' align=left>\n <td>%d</td>\n %s\n</tr>" % (i, obstable[sorted_indices[i]].infohtml))
+		htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
+		htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th>NodesList (lse)</th>\n <th align=center>Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Reduced</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
 
-if is_html == True:
-	# getting date & time of last update
-	cmd="date +'%b %d, %Y %H:%M:%S'"
-	lupd=os.popen(cmd).readlines()[0][:-1]
-	htmlptr.write ("\n</table>\n\n<hr width=100%%>\n<address>\nLast Updated: %s\n</address>\n" % (lupd, ))
-	htmlptr.write ("\n</body>\n</html>")
-	htmlptr.close()
+	print "#======================================================================================================================================================================="
+	print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
+	print "#======================================================================================================================================================================="
+
+	j=0 # extra index to follow only printed lines
+	# loop for every observation
+	for counter in np.arange(np.size(obsids)):
+	
+		id=obsids[counter]
+		# class instance with output Info
+		out=outputInfo(id)	
+
+		# prefix of ID, like L2010 or L2009
+        	id_prefix=id.split("_")[0]   
+		# suffix of ID, the sequence number of observation
+        	id_suffix=id.split("_")[1]   
+
+		# if request only newer observations, check first the year from the ID
+		# if it's less than specified year, then continue with the next ID
+		if is_from == True:
+			obsyear=id_prefix[1:]
+			if fromyear > obsyear:
+				continue
+		if is_to == True:
+			obsyear=id_prefix[1:]
+			if toyear < obsyear:
+				continue
+
+		# checking first if the directory with the parset file exists
+		logdir=parset_logdir + id + "/"
+		if not os.path.exists(logdir):
+			# checking in the oldlog directory
+			logdir=parset_oldlogdir + id + "/"
+			if not os.path.exists(logdir):
+				# Due to new naming convention and location of the parset files, also looking for the parset file
+				# in any L2010-??-??_?????? directories	
+				cmd="find %s -type f -name 'RTCP-%s.parset' -print" % (parset_logdir, id_suffix)
+				logdir=os.popen(cmd).readlines()
+				if np.size(logdir) > 0:
+					# it means we found the directory with parset file
+					logdir=os.popen(cmd).readlines()[0][:-1].split("RTCP-%s.parset" % (id_suffix,))[0]
+				else:
+					# no directory found
+					comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
+					out.setcomment(id, len(storage_nodes), comment)
+					totsz[j] = 0.
+					if tosort == False:
+						print "%d	%s %s" % (j, id, comment)
+					else:
+						obstable=np.append(obstable, out)
+					j=j+1
+					continue
+
+		# get the full path for the parset file for the current ID
+		log=logdir + parset
+		if not os.path.exists(log):
+			# also checking that maybe the parset file has name the same as Obs ID
+			log=logdir + id + ".parset"
+			if not os.path.exists(log):
+				# also checking that maybe the name of parset file has new naming convention, like "RTCP-<id_suffix>.parset"
+				log=logdir + "RTCP-" + id_suffix + ".parset"
+				if not os.path.exists(log):
+					comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
+					out.setcomment(id, len(storage_nodes), comment)
+					totsz[j] = 0.
+					if tosort == False:
+						print "%d	%s %s" % (j, id, comment)
+					else:
+						obstable=np.append(obstable, out)
+					j=j+1
+					continue
+
+		# initializing the obsinfo class
+		oi=obsinfo(log)
+
+		# check if we want to show only newer data and check if the current obs is newer than specified date
+		if is_from == True and np.size(oi.starttime) > 0:
+			to_show=time.mktime(time.strptime(oi.starttime, "%Y-%m-%d %H:%M:%S"))-fromdate
+			if to_show < 0:   # continue with the next ObsID
+				continue
+		if is_to == True and np.size(oi.starttime) > 0:
+			to_show=time.mktime(time.strptime(oi.starttime, "%Y-%m-%d %H:%M:%S"))-todate
+			if to_show > 0:   # continue with the next ObsID
+				continue
+
+		# checking if the datadir exists in all sub5 lse nodes and if it does, gets the size of directory
+		totsize=0
+		dirsize_string=""
+		for lse in storage_nodes:
+			ddir=storage_prefix + lse + oi.datadir + "/" + id
+			dirsize="x"
+			if os.path.exists(ddir):
+				dirsize=os.popen("du -sh %s | cut -f 1" % (ddir,)).readlines()[0][:-1]
+				totsize=totsize + float(os.popen("du -s -B 1 %s | cut -f 1" % (ddir,)).readlines()[0][:-1])
+			dirsize_string=dirsize_string+dirsize+"\t"
+
+		# converting total size to GB
+		totsz[j] = totsize / 1024. / 1024. / 1024.
+		totsize = "%.1f" % (totsz[j],)
+
+		# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
+		# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file in ./incoherentstokes/ directory
+		statusline="x"
+		for lse in storage_nodes:
+                	reddir=storage_prefix + lse + "/data4/LOFAR_PULSAR_ARCHIVE_" + lse + "/" + id + "_red"
+                	if os.path.exists(reddir):
+				statusline=lse
+				tarball=reddir + "/incoherentstokes/*_plots.tar.gz"
+				status=glob.glob(tarball)
+				if np.size(status) > 0:
+					# tarfile exists
+					statusline=statusline+" +tar"	
+				else:
+					statusline=statusline+" x"
+				break
+
+		# combining info
+		out.Init(id, oi.datestring, oi.duration, oi.nodeslist, oi.datadir, dirsize_string, totsize, oi.bftype, oi.fdtype, oi.imtype, oi.istype, oi.cstype, oi.fetype, statusline, oi.pointing, oi.source, "", oi.seconds)
+
+		# Printing out the report (if we want unsorted list)
+		if tosort == False:
+			if is_html == True:
+				# making alternating colors in the table
+				if j%2 == 0:
+					htmlptr.write ("\n<tr class='d0' align=left>\n <td>%d</td>\n %s\n</tr>" % (j, out.infohtml))
+				else:
+					htmlptr.write ("\n<tr class='d1' align=left>\n <td>%d</td>\n %s\n</tr>" % (j, out.infohtml))
+			print "%d	%s" % (j, out.info)
+		else:
+			obstable=np.append(obstable, out)
+
+		# increase counter
+		j=j+1
+
+	Nrecs=j
+	# printing the sorted list
+	if tosort == True:
+		if sortkind == "size":
+			sorted_indices=np.flipud(np.argsort(totsz[:Nrecs], kind='mergesort'))
+		else:
+			sorted_indices=np.flipud(np.argsort([obstable[j].seconds for j in np.arange(Nrecs)], kind='mergesort'))
+		for i in np.arange(Nrecs):
+			print "%d	%s" % (i, obstable[sorted_indices[i]].info)
+		if is_html == True:
+			for i in np.arange(Nrecs):
+				if i%2 == 0:
+					htmlptr.write ("\n<tr class='d0' align=left>\n <td>%d</td>\n %s\n</tr>" % (i, obstable[sorted_indices[i]].infohtml))
+				else:
+					htmlptr.write ("\n<tr class='d1' align=left>\n <td>%d</td>\n %s\n</tr>" % (i, obstable[sorted_indices[i]].infohtml))
+
+	if is_html == True:
+		# getting date & time of last update
+		cmd="date +'%b %d, %Y %H:%M:%S'"
+		lupd=os.popen(cmd).readlines()[0][:-1]
+		htmlptr.write ("\n</table>\n\n<hr width=100%%>\n<address>\nLast Updated: %s\n</address>\n" % (lupd, ))
+		htmlptr.write ("\n</body>\n</html>")
+		htmlptr.close()
