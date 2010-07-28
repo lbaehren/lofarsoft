@@ -260,14 +260,15 @@ def usage (prg):
         """
         print "Program %s lists info about sub5 (and other) observations" % (prg, )
 	print "Usage: %s [-s, --sorted <time|size>] [-f, --from <YYYY-MM-DD>] [-t, --to <YYYY-MM-DD>]\n\
-                  [--html <html-file>] [-h, --help]\n" % (prg, )
+                  [--html <html-file>] [--lse <lse nodes to search, default '13,14,15,16-18'>]\n\
+                  [-h, --help]\n" % (prg, )
 
 # Parse the command line
 def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hs:f:t:", ["help", "sorted=", "from=", "html=", "to="])
+		opts, args = getopt.getopt (argv, "hs:f:t:", ["help", "sorted=", "from=", "html=", "to=", "lse="])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -285,6 +286,19 @@ def parsecmd(prg, argv):
 				is_html = True
 				global htmlfile
 				htmlfile = arg
+			if opt in ("--lse"):
+				if arg.isspace() == True:
+					print "--lse option has spaces that is not allowed"
+					sys.exit()
+				lsenodes = []
+				for s in arg.split(","):
+					if s.count("-") == 0:
+						lsenodes = np.append(lsenodes, "lse0" + s)
+					else:
+						for l in np.arange(int(s.split("-")[0]), int(s.split("-")[1])+1):
+							lsenodes = np.append(lsenodes, "lse0" + str(l))	
+				global storage_nodes
+				storage_nodes = lsenodes
 			if opt in ("-f", "--from"):
 				global is_from
 				is_from = True
@@ -390,9 +404,15 @@ if __name__ == "__main__":
 		htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
 		htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th>NodesList (lse)</th>\n <th align=center>Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Reduced</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
 
-	print "#======================================================================================================================================================================="
+	equalstrs=[]
+	equalstring_size=143+8*Nnodes
+	for e in np.arange(equalstring_size):
+		equalstrs = np.append(equalstrs, "=")
+	equalstring="#" + "".join(equalstrs)
+		
+	print equalstring
 	print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
-	print "#======================================================================================================================================================================="
+	print equalstring
 
 	j=0 # extra index to follow only printed lines
 	# loop for every observation
