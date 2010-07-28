@@ -27,6 +27,7 @@ int SAMPLES = 768;
 int AVERAGE_OVER = 600;
 int NUM_BLOCKGROUPS = -1;
 float N_sigma = 7;
+int old_bnr = 0;
 #define INITIALSUBBANDS			1
 #define WRITEFUNC(b)			(b[STOKES_SWITCH]) // I=0,Q=1,U/2=2,V/2=3
 //#define WRITEFUNC(b)			(b[0]+b[1]) // X power * 2
@@ -160,7 +161,6 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
  double max = -1e9, min= 1e9;
  int x = 0;
  int filterbank_buffer_size;
-
  stokesdata = (struct stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(struct stokesdata_struct) );
  if (writefb==1) {
    filterbank_buffer_size =  BEAMS * STOKES * (SAMPLES*AVERAGE_OVER) * (CHANNELS*n_infiles);
@@ -171,18 +171,16 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
      printf("Allocating write buffer of %d MByte\n", filterbank_buffer_size/(1024*1024));
    }
  }
-
  /* send the filterbank file header if needed */
  output = outputfile[0];
  if (writefb==1) write_filterbank_header(n_infiles, parsetfile, writefloats);
-
- input = inputfiles[current_file];
+ if (old_bnr != beamnr) current_file = 0; //fix for FE mode
+ old_bnr = beamnr;
+ input = inputfiles[current_file]; 
  current_file++;
- // printf("current_file (input) = %d\n",  current_file);
- fseek( input, 0, SEEK_SET );
-
- while( !feof( input ) ) {
-   //   while( !feof( inputfiles[0] ) ) { // not sure why I put this in -- jvl
+  fseek( input, 0, SEEK_SET ); 
+  while( !feof( input ) ) {
+   //   while( !feof( inputfiles[0] ) ) { //not sure why I put this in -- jvl
    if (x == NUM_BLOCKGROUPS) break;
    x++;
    unsigned num = 0;
@@ -207,7 +205,7 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
    
    for (f = 0; f < n_simult_files ; f++) {
      /* read data */
-     if (writefb==1) { 
+     if (writefb==1) {   
        num = fread( &stokesdata[0], sizeof stokesdata[0], AVERAGE_OVER, inputfiles[f] );
      } else { 
        num = fread( &stokesdata[0], sizeof stokesdata[0], AVERAGE_OVER, input );
@@ -664,12 +662,11 @@ void convert_collapse( FILE *input, FILE **outputfile, int beamnr )
 int main( int argc, char **argv ) {
  float avr;
  int f,b,c,y,n_outfiles,n_infiles;
- char buf[1024];
+ char buf[1024], buf2[1024];
 
  // for( y = 0; y < argc; y++ ){
  // printf("%s ",argv[y]);
  //}
- //printf("\n");
  int i=0;
  while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:hCF8")) != -1)
     {
@@ -815,7 +812,7 @@ int main( int argc, char **argv ) {
  printf("Lowest Subband: %d\n",BASESUBBAND);
  printf("Stokes Parameter: %d\n",STOKES_SWITCH);
 
- /* make beam dirs */ 
+ /* make beam dirs*/ 
  if( BEAMS > 1 ) {
    for( b = 0; b < BEAMS; b++ ) {
      sprintf( buf, "beam_%d", b );
@@ -856,13 +853,13 @@ int main( int argc, char **argv ) {
        for ( c = 0; c < n_outfiles; c++ ) { /* make CHANNEL output files */
 	 /* create names */
 	 sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
-	 if ( BEAMS > 1  ) sprintf( buf, "beam_%d/%s", b, buf ); /* prepend beam name */
-	 fprintf(stderr,"%s -> %s\n", argv[optind+f], buf); 
+	 if ( BEAMS > 1  ) sprintf(buf2, "beam_%d/%s", b, buf ); /* prepend beam name */
+	 fprintf(stderr,"%s -> %s\n", argv[optind+f], buf2); 
 	 /* open file */
 	 index++;
-	 outputfile[c] = fopen( buf, "wb" );
+	 outputfile[c] = fopen( buf2, "wb" );
 	 if( !outputfile[c] ) {
-	   perror( buf );
+	   perror( buf2 );
 	   exit(1);
 	 }
        }
@@ -873,7 +870,6 @@ int main( int argc, char **argv ) {
        } else {
 	 convert_collapse( input[f], outputfile, b );	// takes file *input for input
        }
-
        for ( c = 0; c < n_outfiles; c++ ) { /* close CHANNEL output files */
 	 fclose( outputfile[c] );
        }
