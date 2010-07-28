@@ -138,12 +138,12 @@
     double noise;
     //! calculated pulse height for exponential lateral distribution
     double lateralExpHeight;
+    //! error of calculated pulse height for exponential lateral distribution
+    double lateralExpHeightErr;
     //! relative deviation of calculated vs. measured pulse height
     double lateralExpDeviation;
-    //! calculated pulse height for power law lateral distribution
-    double lateralPowHeight;
-    //! relative deviation of calculated vs. measured pulse height
-    double lateralPowDeviation;
+    //! error of relative deviation of calculated vs. measured pulse height
+    double lateralExpDeviationErr;
     //! will be set to true, if antenna did not pass the lateral distribution cuts
     bool lateralCut;
     //! polarization

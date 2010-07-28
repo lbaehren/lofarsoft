@@ -2408,12 +2408,11 @@ int main (int argc, char *argv[])
     // print mean values of lateral distribution
     if ((config["calculateMeanValues"]->bValue()) && (config["lateralDistribution"]->bValue())) {
       cout << "\n\nMean values of lateral distribution of all events:\n"
-           << "antenna  distance  exp. residual  pow. residual\n";
+           << "antenna  distance  exp. residual \n";
       for (unsigned int i=0; i < MAX_NUM_ANTENNAS; ++i)
         cout << i+1 << " \t    "
              << meanCalPulses[i]->dist << "\t     "
-             << meanCalPulses[i]->lateralExpDeviation << "\t     "
-             << meanCalPulses[i]->lateralPowDeviation << "\n";
+             << meanCalPulses[i]->lateralExpDeviation << "\n";
     }
 
     // close root file
