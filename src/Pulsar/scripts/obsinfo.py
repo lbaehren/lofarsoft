@@ -23,9 +23,7 @@ htmlfile=""  # name of the html file in case is_html == True
 # we assume that even for the case of long observations when data were spreaded out
 # across many other nodes, these three "pulsar" sub5 nodes were used to record a part
 # of the data as well
-storage_nodes=["lse013", "lse014", "lse015"]
-# storage path
-storage_prefix = "/net/sub5/"
+storage_nodes=["lse013", "lse014", "lse015", "lse016", "lse017", "lse018"]
 # list of directories withe the data
 data_dirs=["/data1", "/data2", "/data3", "/data4"]
 
@@ -329,22 +327,9 @@ if __name__ == "__main__":
 	# loop over the storage nodes and directories to get the list of all IDs
 	for s in storage_nodes:
 		for d in data_dirs:
-			mask = storage_prefix + s + d + "/?20??_?????"
-			indlist=glob.glob(mask)			
-			indlist = np.append(indlist, glob.glob(mask + "?"))
-			indlist = np.append(indlist, glob.glob(mask + "??"))
-			indlist = np.append(indlist, glob.glob(mask + "???"))
-			obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
-
-#	for s in storage_nodes:
-#		for d in data_dirs:
-#			cmd="ssh %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (s, d, "?20??_*")
-#			indlist=os.popen(cmd).readlines()
-#			print np.size(indlist)
-#			for j in indlist:
-#				print j
-##			obsids = np.append(obsids, [el.split("/")[-1] for el in indlist])
-#	sys.exit()
+			cmd="ssh %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (s, d, "?20??_*")
+			indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
+			obsids = np.append(obsids, indlist)
 
 	# number of storage nodes
 	Nnodes=np.size(storage_nodes)
@@ -490,15 +475,18 @@ if __name__ == "__main__":
 			if to_show > 0:   # continue with the next ObsID
 				continue
 
-		# checking if the datadir exists in all sub5 lse nodes and if it does, gets the size of directory
+		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
 		totsize=0
 		dirsize_string=""
 		for lse in storage_nodes:
-			ddir=storage_prefix + lse + oi.datadir + "/" + id
+			ddir=oi.datadir + "/" + id
 			dirsize="x"
-			if os.path.exists(ddir):
-				dirsize=os.popen("du -sh %s | cut -f 1" % (ddir,)).readlines()[0][:-1]
-				totsize=totsize + float(os.popen("du -s -B 1 %s | cut -f 1" % (ddir,)).readlines()[0][:-1])
+			cmd="ssh %s 'du -sh %s 2>&1 | cut -f 1 | grep -v such'" % (lse, ddir)
+			dirout=os.popen(cmd).readlines()
+			if np.size(dirout) > 0:
+				dirsize=dirout[0][:-1]
+				cmd="ssh %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such'" % (lse, ddir)
+				totsize=totsize + float(os.popen(cmd).readlines()[0][:-1])
 			dirsize_string=dirsize_string+dirsize+"\t"
 
 		# converting total size to GB
@@ -509,11 +497,16 @@ if __name__ == "__main__":
 		# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file in ./incoherentstokes/ directory
 		statusline="x"
 		for lse in storage_nodes:
-                	reddir=storage_prefix + lse + "/data4/LOFAR_PULSAR_ARCHIVE_" + lse + "/" + id + "_red"
-                	if os.path.exists(reddir):
+			cmd="ssh %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, "/data4", "LOFAR_PULSAR_ARCHIVE_" + lse)
+			if np.size(os.popen(cmd).readlines()) == 0:
+				continue
+			cmd="ssh %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red")
+			redout=os.popen(cmd).readlines()
+			if np.size(redout) > 0:
+				reddir=redout[0][:-1]
 				statusline=lse
-				tarball=reddir + "/incoherentstokes/*_plots.tar.gz"
-				status=glob.glob(tarball)
+				cmd="ssh %s 'find %s -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, reddir + "/incoherentstokes", "*_plots.tar.gz")
+				status=os.popen(cmd).readlines()
 				if np.size(status) > 0:
 					# tarfile exists
 					statusline=statusline+" +tar"	
