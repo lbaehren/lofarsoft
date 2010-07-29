@@ -853,7 +853,11 @@ int main( int argc, char **argv ) {
        for ( c = 0; c < n_outfiles; c++ ) { /* make CHANNEL output files */
 	 /* create names */
 	 sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
-	 if ( BEAMS > 1  ) sprintf(buf2, "beam_%d/%s", b, buf ); /* prepend beam name */
+	 if ( BEAMS > 1  ) {
+	   sprintf(buf2, "beam_%d/%s", b, buf ); /* prepend beam name */
+	 } else {
+	   sprintf(buf2, "%s", buf);
+	 }
 	 fprintf(stderr,"%s -> %s\n", argv[optind+f], buf2); 
 	 /* open file */
 	 index++;
