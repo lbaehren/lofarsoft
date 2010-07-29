@@ -9,7 +9,12 @@ Doc string
 
 """
 
+__author__ = 'Evert Rol'
+__email__ = 'evert.astro@gmail.com'
+__contact__ = __author__ + ', ' + __email__
+__copyright__ = '2010, University of Amsterdam'
 __version__ = '0.2'
+
 
 import sys
 import os
@@ -158,8 +163,9 @@ class Info(object):
 
     def parse_options(self, args=None, nargs=[], usage_message=''):
         parser = ArgumentParser(description="Show information about one or "
-                                "more measurenent sets", prog="msinfo",
-                                version="%(prog)s " + __version__)
+                                "more measurenent sets", prog="msinfo")
+        parser.add_argument("--version", action='version', version="%(prog)s "
+                            + __version__)
         parser.add_argument("filename", nargs='+')
         parser.add_argument("-V", "--verbose", action='store_true', 
                             default=False, help="Show more output")
