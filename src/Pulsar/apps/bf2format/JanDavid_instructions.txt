@@ -1,0 +1,88 @@
+Hi,
+
+It would be nice to be able to hand this off. Convert.c is a minor tool but I'd rather focus on the online part. It is attached, feel free to email/drop by for any questions, and here is the explanation of what's going on:
+
+
+CONVERT.C:
+
+It's a bit of a mess, as it started out as a hack in the first place. Feel free to rewrite with this as a reference, the algorithms are pretty trivial as you see below. The tool itself is configured by #defines, and you provide the measurement sets on the command line. It will then output files with consecutive numbers for the subbands in the order they're provided (it assumes they're sorted already, and start at the subband number provided as #define BASESUBBAND). If INITIALSUBBANDS=1, the first file produced will have index 000. Separate beams are put into separate directories. One pass is done for each beam (inefficient but easiest to implement).
+
+In short, you compile it as
+
+gcc -O3 -o convert -lm convert.c
+
+and run it as
+
+/convert SB0.MS.stokes SB1.MS.stokes ...
+
+if you see insane sequence number or averages appear, some setting will be wrong.
+
+DATA FORMAT:
+
+The data coming out of the BG/P has the following format. We have one file per subband, consisting of a set of blocks. Everything is big endian now, including the data. The data used to be little endian if you need to parse old sets.
+
+struct {
+/* sequence number is padded to 512 byte alignment */
+uint32_t sequence_number; /* starts at 0 */
+char padding[508];
+
+/* data, in the future possibly 512-byte aligned as well */
+float samples[BEAMS][CHANNELS][SAMPLES|2][STOKES];
+};
+
+In which BEAMS is the number of pencil beams, CHANNELS the number of channels (or 1 after collapse), SAMPLES the number of samples per block (OLAP.CNProc.integrationSteps / Observation.stokesIntegrationSteps, commonly 768 / 1 for 256 channels, but the weekend obs had 24320 / 32 and 8 channels), and STOKES the number of stokes. In case of raw complex voltages, there are also 4 floats/sample, but they are the real/imaginary x/y polarisations respectively.
+
+FILTERING SAMPLES:
+
+Sequence numbers are increasing but can have holes in them. Replace any holes with blocks of zeroes.
+
+NANs should not occur but can in flagged data, treat them as zeroes. Zeroes are flagged data and will be converted to zeroes in the output, since that will denote the average value of the samples.
+
+CONVERSION TO SHORTS:
+
+For the latter I consider 10 minutes of data each time, calculate the average A, and start with some scaling factor S. Then, I apply f(x)=(x-A)/S on the samples of the same 10 minutes, and see how many samples won't fit into a (signed) int16_t. If too many don't fit, I do S = S * 2 and try again. If too few don't fit, I do S = S / 2 and try again. Currently I fit S to get 95% - 99.9% of the samples to fit. Beware that all samples can fit regardless of S (all zeroes for instance), so take care that your search terminates. Non-fitting samples are cut off at the maximum or minimum value.
+
+Jan David
+
+Jason Hessels wrote:
+
+Hi A2,
+
+As far as I know, the convert.c (I think it is called) program simply converts the raw ".MS" files from 32-bit floats to 16-bit shorts.  Remember that there is one .MS file per subband - e.g. SB0.MS is the subband with the lowest frequency.  This requires a dynamically adjusted scaling, the computation of which I think we still need to improve.  The situation becomes more complicated if we have multiple beams and/or multiple Stokes values because each .MS file has all of these for one subband.  So, for example, the program can also optionally extract the 4 Stokes parameters for one subband and write them to separate files.  Or, the data from multiple stations, recorded separately, might have to be extracted from a single .MS file.  PRESTO needs 16-bit subband files, one for each beam or Stokes value of each subband.  In the simplest case, there's not much that has to happen besides the scaling, but you can probably see how this could become quite compicated in the case where there are many beams and full Stokes parameters.
+
+I know he's very busy, but perhaps Jan David could sit down with you for an hour when you're at ASTRON next week and explain the various things convert.c does.  I think it was quite quickly hacked together, so it could probably do with some smoothing over _if_ we're going to be using it for some time to come.  I could imagine reconverting some of the old data we have as well, using a better scaling.
+
+As input args, I'd imagine specifying at least:
+
+- Number of beams per .MS file
+- Number of Stokes parameters per .MS file
+- Source name and output path/filename
+
+Groetjes,
+
+Jason
+
+PS In addition to the description I just sent.  convert.c also gets rid of the "data stamps" between each 1-s data chunk.  These are 3 samples long I think.  Recall that you can (in the case of 1 beam and just Stokes I) actually just copy a .MS file to a PRESTO-readable .dat timeseries file (you'll also need to add an appropriate .inf file with the basic header info).  The only problem is that the .dat file still has 3 samples each second with wonky values from the "data stamps".  You may recall these are the vertical lines in some of the plots from PBW4.
+
+OK, breakfast time...
+
+Groetjes,
+
+Jason
+
+On 5 nov 2009, at 06:35, Anastasia Alexov wrote:
+
+
+I'd be happy to update the convert program with command line switches, but I need documentation on what it does and what sort of things you need to have as input args, what sort of valid ranges inputs can be, etc.  I don't believe documentation exists, so can someone write down some basic functionality (current) and wish list of what they need it to do?  -A2
+
+On Nov 5, 2009, at 2:30 PM, Jason Hessels wrote:
+
+Hi All,
+
+Jan David's convert code has parameters hard coded, so you need to recompile it each time you run (I think).  As long as we can do that though, we should be able to run it ourselves in the future.  We might even want to invest a few days to make the program accept command line args and be a little more user friendly (assuming we'll use this for at least a few more months).  Anything we can do to take the load off Jan David in terms of the actual observing process would be good.  I think Ashish is coming up to speed on how to start the observations (partly through SAS/MAC now), but whenever we try something new Jan David is basically the only one who knows how to get things to work.
+
+Groetjes,
+
+Jason
+
+

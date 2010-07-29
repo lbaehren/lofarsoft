@@ -8,7 +8,7 @@
 cmake_minimum_required (VERSION 2.6)
 
 add_subdirectory (presto)
-add_subdirectory (bf2presto)
+add_subdirectory (bf2format)
 add_subdirectory (sigproc-4.3)
 add_subdirectory (see)
 add_subdirectory (fluxmaster)
