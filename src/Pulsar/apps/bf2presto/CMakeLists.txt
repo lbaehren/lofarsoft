@@ -21,8 +21,8 @@ target_link_libraries(bf2presto m) #link the math library
 add_executable(bf2presto8 bf2presto8.c)
 target_link_libraries(bf2presto8 m sigproc presto) #link libs
 
-add_executable(bf2puma2 bf2puma2.c)
-target_link_libraries(bf2puma2 m) #link the math library
+#add_executable(bf2puma2 bf2puma2.c)
+#target_link_libraries(bf2puma2 m) #link the math library
 
 
 add_custom_target (bf2presto_install
@@ -30,10 +30,11 @@ add_custom_target (bf2presto_install
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/bf2presto
   COMMENT "Install ${PULSAR_BINARY_DIR}/apps/bf2presto/bf2presto and bf2presto8 program into ${CMAKE_INSTALL_PREFIX}/bin/..."
   )
-add_dependencies (bf2presto_install bf2presto bf2presto8 bf2puma2)
+#add_dependencies (bf2presto_install bf2presto bf2presto8 bf2puma2)
+add_dependencies (bf2presto_install bf2presto bf2presto8)
 
 install (
-  TARGETS bf2presto bf2presto8 bf2puma2
+  TARGETS bf2presto bf2presto8 
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
