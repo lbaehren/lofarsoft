@@ -5,6 +5,7 @@ import os, os.path, stat, glob, sys, getopt
 import infodata as inf
 
 is_phase = False   # if True then calculate the phase of the pulses
+is_rphase = False  # if True then calculate phase relative to obs start time
 inffile=""   # inf-file
 spfile=""    # .singlepulse file
 polycofile="polyco.dat"  # polyco-file
@@ -20,6 +21,7 @@ def usage (prg):
          -o, --obs <obscode>        - set the observatory code (default = 1 for GBT)\n\
          -s, --source <psrname>     - pulsar name to be used for polyco and output tim-file\n\
          -p, --polyco <polyco-file> - use polyco-file to calculate the phase of the pulses\n\
+         --rphase                   - calculate phase relative to obs start time\n\
          -h, --help                 - print this message\n" % (prg,)
 
 def parsecmdline (prg, argv):
@@ -30,7 +32,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "hs:p:o:", ["help", "source=", "polyco=", "obs="])
+                        opts, args = getopt.getopt (argv, "hs:p:o:", ["help", "source=", "polyco=", "obs=", "rphase"])
                         for opt, arg in opts:
                                 if opt in ("-h", "--help"):
                                         usage (prg)
@@ -45,6 +47,10 @@ def parsecmdline (prg, argv):
                                 if opt in ("-s", "--source"):
                                         global psrname
                                         psrname = arg
+
+                                if opt in ("--rphase"):
+                                        global is_rphase
+                                        is_rphase = True
 
                                 if opt in ("-o", "--obs"):
                                         global obscode
@@ -73,6 +79,9 @@ if __name__=="__main__":
 	# reading inf-file
 	id = inf.infodata(inffile)
 
+	if is_phase == False and is_rphase == True:
+		is_rphase = False
+
 	if is_phase == True:
 		import polycos as poly
 
@@ -92,6 +101,12 @@ if __name__=="__main__":
 	# reading .singlepulse file
 	dm, sigma, secs = np.loadtxt(spfile, usecols=(0,1,2), comments='#', dtype=float, unpack=True)
 	offset, downfact = np.loadtxt(spfile, usecols=(3,4), comments='#', dtype=int, unpack=True)
+	if rphase == True:
+		dm = np.append(dm, dm[0])
+		sigma = np.append(sigma, 0.0)
+		secs = np.append(secs, 0.0)
+		offset = np.append(offset, 0)
+		downfact = np.append(downfact, 1)
 	toa = ["%.13f" % (startmjd + (offset[i] * tres)/86400.,) for i in np.arange(np.size(offset))]
 
 	# calculating the phases of pulses 
@@ -99,6 +114,17 @@ if __name__=="__main__":
 		pid=poly.polycos(source, polycofile)
 		phase=[pid.get_phs_and_freq(float(t.split(".")[0]), float("0." + t.split(".")[1]))[0] for t in toa]
 		rotfreq=[pid.get_phs_and_freq(float(t.split(".")[0]), float("0." + t.split(".")[1]))[1] for t in toa]
+
+	if is_rphase == True:
+		phase_offset = phase[-1]
+		dm = np.delete(dm, [-1])
+		sigma = np.delete(sigma, [-1])
+		secs = np.delete(secs, [-1])
+		offset = np.delete(offset, [-1])
+		downfact = np.delete(offset, [-1])
+		rotfreq = np.delete(rotfreq, [-1])
+		phase = np.delete(phase, [-1])
+		phase = [f-phase_offset for f in phase]
 
 	# writing the tim-file
 	# Princeton format (+ additional extra field is for sigma)
