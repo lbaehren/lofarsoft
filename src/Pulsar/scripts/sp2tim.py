@@ -101,7 +101,7 @@ if __name__=="__main__":
 	# reading .singlepulse file
 	dm, sigma, secs = np.loadtxt(spfile, usecols=(0,1,2), comments='#', dtype=float, unpack=True)
 	offset, downfact = np.loadtxt(spfile, usecols=(3,4), comments='#', dtype=int, unpack=True)
-	if rphase == True:
+	if is_rphase == True:
 		dm = np.append(dm, dm[0])
 		sigma = np.append(sigma, 0.0)
 		secs = np.append(secs, 0.0)
