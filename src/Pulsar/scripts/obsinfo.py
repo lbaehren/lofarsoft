@@ -434,7 +434,7 @@ if __name__ == "__main__":
 	# also checking the archive directories to extend the list of ObsIDs in case the raw data was removed
 	for s in storage_nodes:
 		cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, cexec_egrep_string)
-			if np.size(os.popen(cmd).readlines()) == 0:
+		if np.size(os.popen(cmd).readlines()) == 0:
 			continue
 		cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
 		indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
