@@ -122,7 +122,7 @@ if __name__=="__main__":
 		sigma = np.delete(sigma, [ssize-1])
 		secs = np.delete(secs, [ssize-1])
 		offset = np.delete(offset, [ssize-1])
-		downfact = np.delete(offset, [ssize-1])
+		downfact = np.delete(downfact, [ssize-1])
 		rotfreq = np.delete(rotfreq, [ssize-1])
 		phase = np.delete(phase, [ssize-1])
 		phase = [f-phase_offset for f in phase]
