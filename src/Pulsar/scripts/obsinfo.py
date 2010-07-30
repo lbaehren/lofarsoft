@@ -566,6 +566,12 @@ if __name__ == "__main__":
 					out.setcomment(id, len(storage_nodes), comment)
 					totsz[j] = 0.
 					if tosort == False:
+						if is_html == True:
+							# making alternating colors in the table
+							if j%2 == 0:
+								htmlptr.write ("\n<tr class='d0' align=left>\n <td>%d</td>\n %s\n</tr>" % (j, out.infohtml))
+							else:
+								htmlptr.write ("\n<tr class='d1' align=left>\n <td>%d</td>\n %s\n</tr>" % (j, out.infohtml))
 						print "%d	%s %s" % (j, id, comment)
 					else:
 						obstable=np.append(obstable, out)
@@ -585,6 +591,12 @@ if __name__ == "__main__":
 					out.setcomment(id, len(storage_nodes), comment)
 					totsz[j] = 0.
 					if tosort == False:
+						if is_html == True:
+							# making alternating colors in the table
+							if j%2 == 0:
+								htmlptr.write ("\n<tr class='d0' align=left>\n <td>%d</td>\n %s\n</tr>" % (j, out.infohtml))
+							else:
+								htmlptr.write ("\n<tr class='d1' align=left>\n <td>%d</td>\n %s\n</tr>" % (j, out.infohtml))
 						print "%d	%s %s" % (j, id, comment)
 					else:
 						obstable=np.append(obstable, out)
