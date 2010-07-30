@@ -116,15 +116,17 @@ if __name__=="__main__":
 		rotfreq=[pid.get_phs_and_freq(float(t.split(".")[0]), float("0." + t.split(".")[1]))[1] for t in toa]
 
 	if is_rphase == True:
-		phase_offset = phase[-1]
-		dm = np.delete(dm, [-1])
-		sigma = np.delete(sigma, [-1])
-		secs = np.delete(secs, [-1])
-		offset = np.delete(offset, [-1])
-		downfact = np.delete(offset, [-1])
-		rotfreq = np.delete(rotfreq, [-1])
-		phase = np.delete(phase, [-1])
+		ssize = np.size(offset)
+		phase_offset = phase[ssize-1]
+		dm = np.delete(dm, [ssize-1])
+		sigma = np.delete(sigma, [ssize-1])
+		secs = np.delete(secs, [ssize-1])
+		offset = np.delete(offset, [ssize-1])
+		downfact = np.delete(offset, [ssize-1])
+		rotfreq = np.delete(rotfreq, [ssize-1])
+		phase = np.delete(phase, [ssize-1])
 		phase = [f-phase_offset for f in phase]
+		phase = [f < 0 and f+1. or f for f in phase]
 
 	# writing the tim-file
 	# Princeton format (+ additional extra field is for sigma)
