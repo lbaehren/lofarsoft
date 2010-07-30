@@ -20,14 +20,26 @@ is_html=False
 htmlfile=""  # name of the html file in case is_html == True
 # View of presenting info (usual (defaul), brief, and plots)
 viewtype="usual"
+# where to copy profile plots (dop95)
+webserver="kondratiev@10.87.2.95"
+plotsdir="/home/kondratiev/Lofar/plots"
+webplotsdir="public_html/lofar/plots"
+
+atnflink_start="http://www.atnf.csiro.au/research/pulsar/psrcat/proc_form.php?startUserDefined=true&c1_val=&c2_val=&c3_val=&c4_val=&sort_attr=jname&sort_order=asc&condition=&pulsar_names="
+atnflink_end="&ephemeris=long&submit_ephemeris=Get+Ephemeris&coords_unit=raj%2Fdecj&radius=&coords_1=&coords_2=&style=Long+with+last+digit+error&no_value=*&fsize=3&x_axis=&x_scale=linear&y_axis=&y_scale=linear&state=query"
 
 # storage nodes to collect info about Pulsar Observations
 # we assume that even for the case of long observations when data were spreaded out
 # across many other nodes, these three "pulsar" sub5 nodes were used to record a part
 # of the data as well
-storage_nodes=["lse013", "lse014", "lse015", "lse016", "lse017", "lse018"]
+storage_nodes=["lse013", "lse014", "lse015"]
 # list of directories withe the data
 data_dirs=["/data1", "/data2", "/data3", "/data4"]
+
+# cexec corresponding table
+cexec_nodes={'lse013': 'sub5:9', 'lse014': 'sub5:10', 'lse015': 'sub5:11',
+             'lse016': 'sub6:9', 'lse017': 'sub6:10', 'lse018': 'sub6:11'}
+cexec_egrep_string="egrep -v \'\\*\\*\\*\\*\\*\' |egrep -v \'\\-\\-\\-\\-\\-\'"
 
 # directories with parset files
 parset_logdir="/globalhome/lofarsystem/log/"
@@ -56,6 +68,7 @@ class obsinfo:
                 	self.datestring=smonth+sday
         	else:
                 	self.datestring="????"
+			self.seconds = 0
 
 		# Getting the Antenna info (HBA or LBA)
         	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
@@ -253,29 +266,69 @@ class outputInfo:
 		self.id = id
 		self.comment = comment
 		self.seconds = 0
-		self.colspan = 15 + cs - 1
+		if viewtype == "brief":
+			self.colspan = 12
+		elif viewtype == "plots":
+			self.colspan = 16
+		else:
+			self.colspan = 15 + cs - 1
 
 		if self.comment != "":
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
 
-	def Init(self, id, oi, dirsize_string, totsize, statusline, comment):
+	def Init(self, id, oi, dirsize_string, totsize, statusline, comment, filestem_array, chi_array):
 		self.id = id
 		self.oi = oi
+		self.seconds = self.oi.seconds
 		self.dirsize_string = dirsize_string
 		self.totsize = totsize
 		self.statusline = statusline
 		self.comment = comment
-		self.colspan = 15 + len(self.dirsize_string.split("\t")) - 1
+		if viewtype == "brief":
+			self.colspan = 12
+		elif viewtype == "plots":
+			self.colspan = 16
+		else:
+			self.colspan = 15 + len(self.dirsize_string.split("\t")) - 1
+		self.filestem_array = filestem_array
+		self.chi_array = chi_array
 
 		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
 		
 		if self.comment == "":
 			if viewtype == "brief" or viewtype == "plots":
-				self.info = "%s	%s	%s	%s	%s	%s	   %9s	%c  %c  %c  %c  %c  %c" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype)
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype)
 			else:
 				self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-11s	%s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
-			self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
+			if viewtype == "brief":
+				if self.oi.source == "":
+					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
+				else:
+					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s%s%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, atnflink_start, self.oi.source.replace("+", "%2B"), atnflink_end, self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
+			elif viewtype == "plots":
+				if self.oi.source == "":
+					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
+				else:
+					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s%s%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, atnflink_start, self.oi.source.replace("+", "%2B"), atnflink_end, self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
+				chisize=np.size(self.chi_array)
+				filestemsize=np.size(self.filestem_array)
+				lmin=np.min([filestemsize, chisize])
+				for l in np.arange(lmin):
+					profile_string = "\n <td align=center>%s</td>\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.chi_array[l], self.id, self.filestem_array[l], self.id, self.filestem_array[l])
+					self.infohtml = self.infohtml + profile_string
+				if lmin < 2:
+					for l in np.arange(lmin, 2):
+						if l < chisize:
+							self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[l])
+						else:
+							self.infohtml = self.infohtml + "\n <td align=center></td>"
+						if l < filestemsize:
+							self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[l], self.id, self.filestem_array[l])
+						else:
+							self.infohtml = self.infohtml + "\n <td align=center></td>"
+			else:
+				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
 		else:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
@@ -356,14 +409,16 @@ if __name__ == "__main__":
 		htmlptr = open(htmlfile, 'w')
 		htmlptr.write ("<html>\n\
                 	         <head>\n\
-                        	  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
-                          	<meta name=\"Classification\" content=\"public HTML\">\n\
-                          	<title>LOFAR pulsar observations</title>\n\
+                                  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
+                          	  <meta name=\"Classification\" content=\"public HTML\">\n\
+                                  <meta name=\"robots\" content=\"noindex, nofollow\">\n\
+				  <base href=\"http://www.astron.nl/~kondratiev/lofar/\" />\n\
+                          	  <title>LOFAR pulsar observations</title>\n\
                          	</head>\n\n\
                          	<style type='text/css'>\n\
-                          	tr.d0 td { background-color: #ccffff; color: black; font-size: 80% }\n\
-                          	tr.d1 td { background-color: #99cccc; color: black; font-size: 80% }\n\
-                          	tr.d th { background-color: #99cccc; color: black;}\n\
+                          	 tr.d0 td { background-color: #ccffff; color: black; font-size: 80% }\n\
+                          	 tr.d1 td { background-color: #99cccc; color: black; font-size: 80% }\n\
+                          	 tr.d th { background-color: #99cccc; color: black;}\n\
                          	</style>\n\n\
                          	<body bgcolor='white'>\n\
                           	<h2 align=left>LOFAR pulsar observations</h2>\n\
@@ -372,9 +427,18 @@ if __name__ == "__main__":
 	# loop over the storage nodes and directories to get the list of all IDs
 	for s in storage_nodes:
 		for d in data_dirs:
-			cmd="ssh -XY %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (s, d, "?20??_*")
+			cmd="cexec %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[s], d, "?20??_*", cexec_egrep_string)
 			indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
 			obsids = np.append(obsids, indlist)
+
+	# also checking the archive directories to extend the list of ObsIDs in case the raw data was removed
+	for s in storage_nodes:
+		cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, cexec_egrep_string)
+			if np.size(os.popen(cmd).readlines()) == 0:
+				continue
+		cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
+		indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
+		obsids = np.append(obsids, indlist)
 
 	# number of storage nodes
 	Nnodes=np.size(storage_nodes)
@@ -431,17 +495,22 @@ if __name__ == "__main__":
 
 	if is_html == True:
 		htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
-		htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th>NodesList (lse)</th>\n <th align=center>Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Reduced</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
+		if viewtype == "brief":
+			htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n</tr>\n")
+		elif viewtype == "plots":
+			htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Chi-squared (RSP0)</th>\n <th align=center>Profile (RSP0)</th>\n <th align=center>Chi-squared (RSPA)</th>\n <th align=center>Profile (RSPA)</th>\n</tr>\n")
+		else:
+			htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th>NodesList (lse)</th>\n <th align=center>Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Reduced</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
 
 	if viewtype == "brief" or viewtype == "plots":
 		equalstrs=[]
-		equalstring_size=105
+		equalstring_size=109
 		for e in np.arange(equalstring_size):
 			equalstrs = np.append(equalstrs, "=")
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	BF FD IM IS CS FE"
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE"
 		print equalstring
 	else:
 		equalstrs=[]
@@ -538,44 +607,116 @@ if __name__ == "__main__":
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
 		totsize=0
 		dirsize_string=""
-		for lse in storage_nodes:
-			ddir=oi.datadir + "/" + id
-			dirsize="x"
-			cmd="ssh -XY %s 'du -sh %s 2>&1 | cut -f 1 | grep -v such'" % (lse, ddir)
-			dirout=os.popen(cmd).readlines()
-			if np.size(dirout) > 0:
-				dirsize=dirout[0][:-1]
-				cmd="ssh -XY %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such'" % (lse, ddir)
-				totsize=totsize + float(os.popen(cmd).readlines()[0][:-1])
-			dirsize_string=dirsize_string+dirsize+"\t"
+		if viewtype == "usual":
+			for lse in storage_nodes:
+				ddir=oi.datadir + "/" + id
+				dirsize="x"
+				cmd="cexec %s 'du -sh %s 2>&1 | cut -f 1 | grep -v such' | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
+				dirout=os.popen(cmd).readlines()
+				if np.size(dirout) > 0:
+					dirsize=dirout[0][:-1]
+					cmd="cexec %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such' | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
+					totsize=totsize + float(os.popen(cmd).readlines()[0][:-1])
+				dirsize_string=dirsize_string+dirsize+"\t"
 
-		# converting total size to GB
-		totsz[j] = totsize / 1024. / 1024. / 1024.
-		totsize = "%.1f" % (totsz[j],)
+			# converting total size to GB
+			totsz[j] = totsize / 1024. / 1024. / 1024.
+			totsize = "%.1f" % (totsz[j],)
 
 		# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
-		# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file in ./incoherentstokes/ directory
+		# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file
 		statusline="x"
-		for lse in storage_nodes:
-			cmd="ssh -XY %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, "/data4", "LOFAR_PULSAR_ARCHIVE_" + lse)
-			if np.size(os.popen(cmd).readlines()) == 0:
-				continue
-			cmd="ssh -XY %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red")
-			redout=os.popen(cmd).readlines()
-			if np.size(redout) > 0:
-				reddir=redout[0][:-1]
-				statusline=lse
-				cmd="ssh -XY %s 'find %s -name \"%s\" -print 2>&1 | grep -v Permission'" % (lse, reddir + "/incoherentstokes", "*_plots.tar.gz")
-				status=os.popen(cmd).readlines()
-				if np.size(status) > 0:
-					# tarfile exists
-					statusline=statusline+" +tar"	
-				else:
-					statusline=statusline+" x"
-				break
+		if viewtype == "usual":
+			for lse in storage_nodes:
+				cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
+				if np.size(os.popen(cmd).readlines()) == 0:
+					continue
+				cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red", cexec_egrep_string)
+				redout=os.popen(cmd).readlines()
+				if np.size(redout) > 0:
+					reddir=redout[0][:-1]
+					statusline=lse
+					cmd="cexec %s 'find %s -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[lse], reddir, "*_plots.tar.gz", cexec_egrep_string)
+					status=os.popen(cmd).readlines()
+					if np.size(status) > 0:
+						# tarfile exists
+						statusline=statusline+" +tar"	
+					else:
+						statusline=statusline+" x"
+					break
+
+		profiles_array=[]
+		chi_array=[]
+		if viewtype == "brief":
+			for lse in storage_nodes:
+				cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
+				if np.size(os.popen(cmd).readlines()) == 0:
+					continue
+				cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red", cexec_egrep_string)
+				redout=os.popen(cmd).readlines()
+				if np.size(redout) > 0:
+					reddir=redout[0][:-1]
+					# RSP0
+					# getting chi-squared
+					cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", cexec_egrep_string)
+					if np.size(os.popen(cmd).readlines()) > 0:
+						cmd="cexec %s \"find %s -name \"%s\" -print -exec cat {} \; | grep chi-squared\" | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.prepout", cexec_egrep_string)
+						status=os.popen(cmd).readlines()
+						if np.size(status) > 0:
+							chi_array = np.append(chi_array, status[0][:-1])
+					# RSPA
+					# getting chi-squared
+					cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", cexec_egrep_string)
+					if np.size(os.popen(cmd).readlines()) > 0:
+						cmd="cexec %s \"find %s -name \"%s\" -print -exec cat {} \; | grep chi-squared\" | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", "*.prepout", cexec_egrep_string)
+						status=os.popen(cmd).readlines()
+						if np.size(status) > 0:
+							chi_array = np.append(chi_array, status[0][:-1])
+					break
+
+		if viewtype == "plots":
+			for lse in storage_nodes:
+				cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
+				if np.size(os.popen(cmd).readlines()) == 0:
+					continue
+				cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red", cexec_egrep_string)
+				redout=os.popen(cmd).readlines()
+				if np.size(redout) > 0:
+					reddir=redout[0][:-1]
+					# RSP0
+					cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", cexec_egrep_string)
+					if np.size(os.popen(cmd).readlines()) > 0:
+						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.pfd*png", cexec_egrep_string)
+						status=os.popen(cmd).readlines()
+						if np.size(status) > 0:
+							# copying png files to local directory
+							cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[lse], " ".join([ss[:-1] for ss in status]), plotsdir, id)
+							os.system(cmd)
+							profiles_array = np.append(profiles_array, status[0].split("/")[-1].split(".pfd")[0] + ".pfd")
+						# getting chi-squared
+						cmd="cexec %s \"find %s -name \"%s\" -print -exec cat {} \; | grep chi-squared\" | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.prepout", cexec_egrep_string)
+						status=os.popen(cmd).readlines()
+						if np.size(status) > 0:
+							chi_array = np.append(chi_array, status[0][:-1])
+					# RSPA
+					cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", cexec_egrep_string)
+					if np.size(os.popen(cmd).readlines()) > 0:
+						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", "*.pfd*png", cexec_egrep_string)
+						status=os.popen(cmd).readlines()
+						if np.size(status) > 0:
+							# copying png files to local directory
+							cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[lse], " ".join([ss[:-1] for ss in status]), plotsdir, id)
+							os.system(cmd)
+							profiles_array = np.append(profiles_array, status[0].split("/")[-1].split(".pfd")[0] + ".pfd")
+						# getting chi-squared
+						cmd="cexec %s \"find %s -name \"%s\" -print -exec cat {} \; | grep chi-squared\" | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", "*.prepout", cexec_egrep_string)
+						status=os.popen(cmd).readlines()
+						if np.size(status) > 0:
+							chi_array = np.append(chi_array, status[0][:-1])
+					break
 
 		# combining info
-		out.Init(id, oi, dirsize_string, totsize, statusline, "")
+		out.Init(id, oi, dirsize_string, totsize, statusline, "", profiles_array, chi_array)
 
 		# Printing out the report (if we want unsorted list)
 		if tosort == False:
@@ -591,6 +732,11 @@ if __name__ == "__main__":
 
 		# increase counter
 		j=j+1
+
+	# uploading the png files to webserver
+	if viewtype == 'plots':
+		cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (plotsdir, webserver, webplotsdir)
+		os.system(cmd)
 
 	Nrecs=j
 	# printing the sorted list
