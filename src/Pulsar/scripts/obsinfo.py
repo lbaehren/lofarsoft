@@ -338,11 +338,28 @@ class outputInfo:
 def usage (prg):
         """ Prints info how to use the script.
         """
-        print "Program %s lists info about sub5 (and other) observations" % (prg, )
-	print "Usage: %s [-s, --sorted <time|size>] [-f, --from <YYYY-MM-DD>] [-t, --to <YYYY-MM-DD>]\n\
-                  [--html <html-file>] [--lse <lse nodes to search, default '13,14,15,16-18'>]\n\
-                  [-v, --view <usual (default)|brief|plots>]\n\
-                  [-h, --help]\n" % (prg, )
+        print "Program %s lists info about observations" % (prg, )
+	print "Usage: %s [-s, --sorted <mode>] [-f, --from <date>] [-t, --to <date>]\n\
+                  [--html <file>] [--lse <lsenodes>] [-v, --view <mode>] [-h, --help]\n\
+          -f, --from <date>          - list obs only _since_ <date>, <date> in format YYYY-MM-DD\n\
+          -t, --to <date>            - list obs only _till_ <date>, <date> in format YYYY-MM-DD\n\
+          -s, --sorted <mode>        - sort obs list. Default list is sorted by ObsID. Possible <mode>\n\
+                                       is \"time\" to sort by start obs time, and \"size\" to sort by total\n\
+                                       disk space occupied by _raw_ data\n\
+          --lse <lsenodes>           - set lse nodes to search for raw and processed data. Default are lse\n\
+                                       nodes in sub5, i.e. lse013, lse014,lse015, or <lsenodes> = 13-15\n\
+                                       <lsenodes> should not have any spaces, nodes are specified just by number\n\
+                                       without 'lse' prefix; comma and hyphen are allowed to list nodes and their ranges\n\
+          --html <file>              - also write the list of obs in html-format to the file <file>\n\
+          -v, --view <mode>          - set the format of output data, namely the type of info to be listed.\n\
+                                       Possible <mode> are \"usual\" (default) to list the data volume in every specified\n\
+                                       lse nodes, total disk volume of raw data, datadir, if data reduced or not\n\
+                                       in addition to start time, duration, source, etc. fiels that present in all formats.\n\
+                                       Second <mode> is \"brief\" that lists antenna array, band filter, number of stations\n\
+                                       used. Third <mode> is \"plots\" which is the same as \"brief\" mode in ascii output,\n\
+                                       but in html-format it also provides the profiles (if existed) for RSP0 split and\n\
+                                       in the full band (RSPA) together with chi-squared values of profiles.\n\
+          -h, --help                 - print this message\n" % (prg, )
 
 # Parse the command line
 def parsecmd(prg, argv):
