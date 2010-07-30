@@ -327,7 +327,7 @@ namespace CR { // Namespace CR -- begin
              << "R_0    = " << fitfuncExp->GetParameter(1) << "\t +/- " << fitfuncExp->GetParError(1) << "\t m\n"
              << "Chi^2  = " << fitfuncExp->GetChisquare() << "\t NDF " << fitfuncExp->GetNDF() << "\n"
              << endl;
-
+         
         if (fitSim) {        
           cout << "-------- SIMULATIONS ---------"<<endl;
           // define names for statistics
@@ -373,6 +373,66 @@ namespace CR { // Namespace CR -- begin
         plotNameStream << filePrefix << Gt << ".eps";
         cout << "\nCreating plot: " << plotNameStream.str() << endl;
         c1->Print(plotNameStream.str().c_str());
+        
+        // calculate expectet value from fitted function and relative deviation for each point.residual  
+        if (false) {
+          double angleToCore[Nant],angleToCoreErr[Nant],deviation[Nant],deviationErr[Nant];           
+          ant = 0;
+          cout << "Antenna\t distance \t expected \t measured \t deviation" << endl;
+          for (map <int, PulseProperties>::iterator it=pulsesRec.begin(); it != pulsesRec.end(); ++it)
+            if ( !(*it).second.lateralCut ) { // don't use an antenna marked to cut
+              (*it).second.lateralExpHeight = fitfuncExp->Eval((*it).second.dist);
+              (*it).second.lateralExpHeightErr = 0;
+              (*it).second.lateralExpDeviation = (*it).second.height/(*it).second.lateralExpHeight - 1.;
+              (*it).second.lateralExpDeviationErr = 0;
+              cout << (*it).second.antenna << " \t " << (*it).second.dist << " \t "
+                  << (*it).second.lateralExpHeight << " \t " << (*it).second.height << " \t "
+                  << (*it).second.lateralExpDeviation*100 << " %" << endl;
+              // fill arrays for plot
+              angleToCore[ant] = (*it).second.angleToCore;
+              angleToCoreErr[ant] = (*it).second.angleToCoreerr;
+              deviation[ant] = (*it).second.lateralExpDeviation * 100; // in percent
+              deviationErr[ant] = (*it).second.lateralExpDeviationErr * 100; // in percent
+              ++ant;
+              // cuts
+              if (deviation[ant] > 100)
+                deviation[ant] = 100;
+              if (deviation[ant] < -100)
+                deviation[ant] = -100;
+            }
+            
+          // make plot of deviation
+          TGraphErrors *latDev = new TGraphErrors (ant, angleToCore,deviation,angleToCoreErr,deviationErr);
+          latDev->SetFillColor(4);
+          latDev->SetLineColor(4);
+          latDev->SetMarkerColor(4);
+          latDev->SetMarkerStyle(20);
+          latDev->SetMarkerSize(1.1);
+          stringstream label;
+          label << "Lateral deviations - " << Gt;
+          latDev->SetTitle(label.str().c_str());
+          latDev->GetXaxis()->SetTitle("angle in radians"); 
+          latDev->GetYaxis()->SetTitle("deviation in percent");
+          latDev->GetXaxis()->SetTitleSize(0.05);
+          latDev->GetYaxis()->SetRange(-105,105);
+          latDev->GetYaxis()->SetTitleSize(0.05);
+          latDev->GetXaxis()->SetRange(-3.2,3.2);
+          
+          c1->Clear();
+          c1->SetLogy(0);
+          latDev->SetMinimum(-105);
+          latDev->SetMaximum(105);
+          latDev->SetTitle("");
+          latDev->SetFillColor(0);
+          latDev->GetXaxis()->SetRangeUser(-3.2,3.2);
+          latDev->GetYaxis()->SetRangeUser(-105,105);
+          latDev->Draw("AP");
+          
+          plotNameStream.str("");
+          plotNameStream << filePrefix << "dev-" << Gt << ".eps";
+          cout << "\nCreating plot: " << plotNameStream.str() << endl;
+          c1->Print(plotNameStream.str().c_str());
+        }
       }  
     } catch (AipsError x) {
       cerr << "lateralDistribution::fitLateralDistribution: " << x.getMesg() << endl;

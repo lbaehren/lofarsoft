@@ -652,7 +652,16 @@ namespace CR { // Namespace CR -- begin
                << calibPulses[antennaIDs(i)].distY << " +/-" << calibPulses[antennaIDs(i)].distYerr << "\t "
                << calibPulses[antennaIDs(i)].distZ << " +/-" << calibPulses[antennaIDs(i)].distZerr << "\t "
                << calibPulses[antennaIDs(i)].dist  << " = "
-               << sqrt(xS*xS+yS*yS) << " +/-" << calibPulses[antennaIDs(i)].disterr  << "\t " << endl;  */                                               
+               << sqrt(xS*xS+yS*yS) << " +/-" << calibPulses[antennaIDs(i)].disterr  << "\t " << endl;  */  
+               
+          // calculate azimuth on ground for each antenna (angle between core and antenna position)     
+          calibPulses[antennaIDs(i)].angleToCore = atan2(x,y);
+          // relative error corresponds roughly to relative error of coordinates
+          calibPulses[antennaIDs(i)].angleToCoreerr =
+            abs(calibPulses[antennaIDs(i)].angleToCore) * (2.*coreError)/(abs(x)+abs(y));
+          // limit angular error to Pi
+          if (calibPulses[antennaIDs(i)].angleToCoreerr > M_PI)
+            calibPulses[antennaIDs(i)].angleToCoreerr = M_PI;
         }
 
     } catch (AipsError x) {
