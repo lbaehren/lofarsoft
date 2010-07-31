@@ -4,10 +4,11 @@ import os, sys, glob
 import getopt
 import numpy as np
 import time
+import cPickle
 
-# True if we want the output list to be sorted by the TotalSize
-tosort=False
-sortkind=""  # three kinds of sorting currently: by start time ("time"), by volume ("size"), and by source pointing ("source")
+# sorting type
+sortkind="obsid"  # four kinds of sorting currently: by start time ("time"), 
+                  # by volume ("size"), by source pointing ("source"), and default is by ObsID ("obsid")
 
 # if True then will show only those observations newer than some date
 is_from=False
@@ -21,12 +22,19 @@ htmlfile=""  # name of the html file in case is_html == True
 # if True then create all sorted html lists linked together
 is_linkedhtml = False
 linkedhtmlstem=""   # filestem of linked html files if is_linkedhtml = True
+# if True then delete dump of obs list (if exists) and recreate it from scratch
+# if False then first read the dump, compare obsids with the current ones and process
+# only those ObsIDs that do not exist in the dump. After the dump is updated
+is_update = False
 
 # View of presenting info (usual (defaul), brief, and plots)
 viewtype="usual"
+
+# Setting User name
+username=os.environ['USER']
 # where to copy profile plots (dop95)
-webserver="kondratiev@10.87.2.95"
-plotsdir="/home/kondratiev/Lofar/plots"
+webserver="%s@10.87.2.95" % (username, )
+plotsdir="/home/%s/Lofar/plots" % (username, )
 webplotsdir="public_html/lofar/plots"
 
 atnflink_start="http://www.atnf.csiro.au/research/pulsar/psrcat/proc_form.php?startUserDefined=true&c1_val=&c2_val=&c3_val=&c4_val=&sort_attr=jname&sort_order=asc&condition=&pulsar_names="
@@ -42,8 +50,17 @@ data_dirs=["/data1", "/data2", "/data3", "/data4"]
 
 # cexec corresponding table
 cexec_nodes={'lse013': 'sub5:9', 'lse014': 'sub5:10', 'lse015': 'sub5:11',
-             'lse016': 'sub6:9', 'lse017': 'sub6:10', 'lse018': 'sub6:11'}
+             'lse016': 'sub6:9', 'lse017': 'sub6:10', 'lse018': 'sub6:11',
+             'lse019': 'sub7:9', 'lse020': 'sub7:10', 'lse021': 'sub7:11',
+             'lse022': 'sub8:9', 'lse023': 'sub8:10', 'lse024': 'sub8:11',
+             'lse001': 'sub1:9', 'lse002': 'sub1:10', 'lse003': 'sub1:11',
+             'lse004': 'sub2:9', 'lse005': 'sub2:10', 'lse006': 'sub2:11',
+             'lse007': 'sub3:9', 'lse008': 'sub3:10', 'lse009': 'sub3:11',
+             'lse010': 'sub4:9', 'lse011': 'sub4:10', 'lse012': 'sub4:11'}
 cexec_egrep_string="egrep -v \'\\*\\*\\*\\*\\*\' |egrep -v \'\\-\\-\\-\\-\\-\'"
+
+# file to dump the obs table
+dumpfile="/home/%s/Lofar/dump.b" % (username, )
 
 # directories with parset files
 parset_logdir="/globalhome/lofarsystem/log/"
@@ -53,6 +70,11 @@ parset="RTCP.parset.0"
 
 # list of obs ids
 obsids=[]
+# list of ObsIDs from the dump file 
+dbobsids=[]
+
+
+
 
 
 # Class obsinfo with info from the parset file
@@ -265,11 +287,12 @@ class obsinfo:
 class outputInfo:
 	def __init__(self, id):
 		self.id = id
+		self.obsyear = self.id.split("_")[0][1:]
+		self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 	
 	def setcomment (self, id, cs, comment):
 		self.id = id
 		self.comment = comment
-		self.seconds = 0
 		self.totsize = 0
 		self.pointing = "????_????"
 		if viewtype == "brief":
@@ -286,7 +309,8 @@ class outputInfo:
 	def Init(self, id, oi, dirsize_string, totsize, statusline, comment, filestem_array, chi_array):
 		self.id = id
 		self.oi = oi
-		self.seconds = self.oi.seconds
+		if self.oi.seconds != 0:
+			self.seconds = self.oi.seconds
 		self.pointing = self.oi.pointing
 		self.dirsize_string = dirsize_string
 		self.totsize = totsize
@@ -443,7 +467,7 @@ class writeHtmlList:
 			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th>NodesList (lse)</th>\n <th align=center>Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Reduced</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
 
 	def linkedheader (self, viewtype, storage_nodes_string_html):
-		sf=["-id.html", "-time.html", "-size.html", "-source.html"]
+		sf=["-obsid.html", "-time.html", "-size.html", "-source.html"]
 		sf=["%s%s" % (self.linkedhtmlstem, i) for i in sf]
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
 		if viewtype == "brief":
@@ -473,16 +497,16 @@ def usage (prg):
         """ Prints info how to use the script.
         """
         print "Program %s lists info about observations" % (prg, )
-	print "Usage: %s [-s, --sorted <mode>] [-f, --from <date>] [-t, --to <date>]\n\
-                  [--html <file>] [--lse <lsenodes>] [-v, --view <mode>] [--linkedhtml <filestem>] [-h, --help]\n\
+	print "Usage: %s [-s, --sort <mode>] [-f, --from <date>] [-t, --to <date>]\n\
+                  [--html <file>] [--lse <lsenodes>] [-v, --view <mode>] [--linkedhtml <filestem>]\n\
+                  [-u, --update] [-h, --help]\n\
           -f, --from <date>          - list obs only _since_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
           -t, --to <date>            - list obs only _till_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
-          -s, --sorted <mode>        - sort obs list. Default list is sorted by ObsID. Possible <mode>\n\
+          -s, --sort <mode>          - sort obs list. Default list is sorted by ObsID. Possible <mode>\n\
                                        is \"time\" to sort by start obs time, \"size\" to sort by total\n\
-                                       disk space occupied by _raw_ data, and \"source\" is to sort by\n\
-                                       the pointing coords of the source\n\
-                                       All sorting modes are: \"time\", \"size\", \"source\", without this option\n\
-                                       obs will be sorted by ObsId\n\
+                                       disk space occupied by _raw_ data, \"source\" to sort by\n\
+                                       the pointing coords of the source, and \"obsid\" is to sort by ObsID (default)\n\
+                                       All sorting modes are: \"time\", \"size\", \"source\", \"obsid\"\n\
           --lse <lsenodes>           - set lse nodes to search for raw and processed data. Default are lse\n\
                                        nodes in sub5, i.e. lse013, lse014,lse015, or <lsenodes> = 13-15\n\
                                        <lsenodes> should not have any spaces, nodes are specified just by number\n\
@@ -499,6 +523,8 @@ def usage (prg):
                                        but in html-format it also provides the profiles (if existed) for RSP0 split and\n\
                                        in the full band (RSPA) together with chi-squared values of profiles.\n\
                                        All view modes are: \"usual\" (default), \"brief\", \"plots\"\n\
+          -u, --update               - reprocess all observations from scratch (can take a while) rather than to read\n\
+                                       the existent database, process obs that do not exist there, and add them to the database\n\
           -h, --help                 - print this message\n" % (prg, )
 
 # Parse the command line
@@ -506,18 +532,16 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hs:f:t:v:", ["help", "sorted=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml="])
+		opts, args = getopt.getopt (argv, "hs:f:t:v:u", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "update"])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
 				sys.exit()
-			if opt in ("-s", "--sorted"):
-				global tosort
-				tosort = True
+			if opt in ("-s", "--sort"):
 				global sortkind
 				sortkind = arg
-				if sortkind != "time" and sortkind != "size" and sortkind != "source":
-					print "Arg for sort option should either be 'time' or 'size' or 'source'\n"
+				if sortkind != "time" and sortkind != "size" and sortkind != "source" and sortkind != "obsid":
+					print "Arg for sort option should either be 'time' or 'size' or 'source' or 'obsid'\n"
 					sys.exit()
 			if opt in ("--html"):
 				global is_html
@@ -536,10 +560,10 @@ def parsecmd(prg, argv):
 				lsenodes = []
 				for s in arg.split(","):
 					if s.count("-") == 0:
-						lsenodes = np.append(lsenodes, "lse0" + s)
+						lsenodes = np.append(lsenodes, "lse%03d" % (int(s),))
 					else:
 						for l in np.arange(int(s.split("-")[0]), int(s.split("-")[1])+1):
-							lsenodes = np.append(lsenodes, "lse0" + str(l))	
+							lsenodes = np.append(lsenodes, "lse%03d" % (l,))	
 				global storage_nodes
 				storage_nodes = lsenodes
 			if opt in ("-f", "--from"):
@@ -555,6 +579,9 @@ def parsecmd(prg, argv):
 			if opt in ("-v", "--view"):
 				global viewtype
 				viewtype = arg
+			if opt in ("-u", "--update"):
+				global is_update
+				is_update = True
 
 	except getopt.GetoptError:
 		print "Wrong option!"
@@ -565,6 +592,29 @@ if __name__ == "__main__":
 
 	# parsing command line
 	parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
+
+	# table with obs info
+	obstable=[]
+
+	# creating plotsdir directory if it does not exist
+	cmd="mkdir -p %s" % (plotsdir, )
+	os.system(cmd)
+
+	if is_update == True:
+		cmd="rm -f %s" % (dumpfile, )
+		os.system(cmd)
+	else:
+		if not os.path.exists(dumpfile):
+			print "Dumpfile \'%s\' does not exist! Use -u option to rebuild the database." % (dumpfile, )
+			sys.exit()
+		else:
+			dfdescr = open(dumpfile, "r")
+			obstable=cPickle.load(dfdescr)
+			dfdescr.close()
+			# update info and infohtml depending on current command line options
+			for r in obstable:
+				r.update()
+			dbobsids = [r.id for r in obstable]
 
 	# writing the html code if chosen
 	if is_html == True:
@@ -587,43 +637,36 @@ if __name__ == "__main__":
 		indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
 		obsids = np.append(obsids, indlist)
 
-	# number of storage nodes
-	Nnodes=np.size(storage_nodes)
-
 	# getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
 	# and sort in reverse order (most recent obs go first)
 	# more recent obs is the obs with higher ID (as it should be)
 	obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 
+	# Number of ObsIDs
+	Nobsids = np.size(obsids)
+
 	if is_html == True:
-		htmlrep.obsnumber(storage_nodes, np.size(obsids))
+		htmlrep.obsnumber(storage_nodes, Nobsids)
 		htmlrep.datesrange()
-	print "Number of observations in %s: %d" % (", ".join(storage_nodes), np.size(obsids), )
+	print "Number of observations in %s: %d" % (", ".join(storage_nodes), Nobsids)
 
 	if is_from == True and is_to == True:
 		print "List only observations since %s till %s" % (fromdate, todate)
 		fromyear = fromdate.split("-")[0]
-		fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
 		toyear = todate.split("-")[0]
-		todate = time.mktime(time.strptime(todate, "%Y-%m-%d"))
 
 	if is_from == True and is_to == False:
 		print "List only observations since %s" % (fromdate, )
 		fromyear = fromdate.split("-")[0]
-		fromdate = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
 
 	if is_from == False and is_to == True:
 		print "List only observations till %s" % (todate, )
 		toyear = todate.split("-")[0]
-		todate = time.mktime(time.strptime(todate, "%Y-%m-%d"))
 
 	print
 
-	# array of total sizes for every ObsID
-	totsz = np.zeros(np.size(obsids))
-
-	# table with obs info
-	obstable=[]
+	# number of storage nodes
+	Nnodes=np.size(storage_nodes)
 
 	# printing out the header of the table
 	storage_nodes_string=""
@@ -656,7 +699,13 @@ if __name__ == "__main__":
 		print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
 		print equalstring
 
-	j=0 # extra index to follow only printed lines
+
+	# if is_update == False then excluding ObsIDs from obsids list that are already in the database, i.e. in dbobsids list
+	# only new ObsIDs will be processed and added to database
+	if not is_update:
+		# now obsids have only those IDs that are not in the dump file
+		obsids=list(set(obsids)-set(obsids).intersection(set(dbobsids)))
+
 	# loop for every observation
 	for counter in np.arange(np.size(obsids)):
 	
@@ -668,17 +717,6 @@ if __name__ == "__main__":
         	id_prefix=id.split("_")[0]   
 		# suffix of ID, the sequence number of observation
         	id_suffix=id.split("_")[1]   
-
-		# if request only newer observations, check first the year from the ID
-		# if it's less than specified year, then continue with the next ID
-		if is_from == True:
-			obsyear=id_prefix[1:]
-			if fromyear > obsyear:
-				continue
-		if is_to == True:
-			obsyear=id_prefix[1:]
-			if toyear < obsyear:
-				continue
 
 		# checking first if the directory with the parset file exists
 		logdir=parset_logdir + id + "/"
@@ -697,15 +735,7 @@ if __name__ == "__main__":
 					# no directory found
 					comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
 					out.setcomment(id, len(storage_nodes), comment)
-					totsz[j] = 0.
 					obstable=np.append(obstable, out)
-					if tosort == False:
-						if is_html == True:
-							# making alternating colors in the table
-							htmlrep.record(j%2 == 0 and "d0" or "d1", j, out.infohtml)
-						print "%d	%s %s" % (j, id, comment)
-
-					j=j+1
 					continue
 
 		# get the full path for the parset file for the current ID
@@ -719,29 +749,11 @@ if __name__ == "__main__":
 				if not os.path.exists(log):
 					comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
 					out.setcomment(id, len(storage_nodes), comment)
-					totsz[j] = 0.
 					obstable=np.append(obstable, out)
-					if tosort == False:
-						if is_html == True:
-							# making alternating colors in the table
-							htmlrep.record(j%2 == 0 and "d0" or "d1", j, out.infohtml)
-						print "%d	%s %s" % (j, id, comment)
-
-					j=j+1
 					continue
 
 		# initializing the obsinfo class
 		oi=obsinfo(log)
-
-		# check if we want to show only newer data and check if the current obs is newer than specified date
-		if is_from == True and np.size(oi.starttime) > 0:
-			to_show=time.mktime(time.strptime(oi.starttime, "%Y-%m-%d %H:%M:%S"))-fromdate
-			if to_show < 0:   # continue with the next ObsID
-				continue
-		if is_to == True and np.size(oi.starttime) > 0:
-			to_show=time.mktime(time.strptime(oi.starttime, "%Y-%m-%d %H:%M:%S"))-todate
-			if to_show > 0:   # continue with the next ObsID
-				continue
 
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
 		totsize=0
@@ -758,8 +770,7 @@ if __name__ == "__main__":
 			dirsize_string=dirsize_string+dirsize+"\t"
 
 		# converting total size to GB
-		totsz[j] = totsize / 1024. / 1024. / 1024.
-		totsize = "%.1f" % (totsz[j],)
+		totsize = "%.1f" % (totsize / 1024. / 1024. / 1024.,)
 
 		# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
 		# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file
@@ -827,39 +838,51 @@ if __name__ == "__main__":
 
 		# combining info
 		out.Init(id, oi, dirsize_string, totsize, statusline, "", profiles_array, chi_array)
-
 		obstable=np.append(obstable, out)
-		# Printing out the report (if we want unsorted list)
-		if tosort == False:
-			if is_html == True:
-				# making alternating colors in the table
-				htmlrep.record(j%2 == 0 and "d0" or "d1", j, out.infohtml)
-			print "%d	%s" % (j, out.info)
 
-		# increase counter
-		j=j+1
+
+	# dump obs table to the file
+	dfdescr = open (dumpfile, "w")
+	cPickle.dump(obstable, dfdescr, True)
+	dfdescr.close()
 
 	# uploading the png files to webserver
 	if viewtype == 'plots':
+		cmd="ssh %s mkdir -p %s" % (webserver, webplotsdir)	
+		os.system(cmd)
 		cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (plotsdir, webserver, webplotsdir)
 		os.system(cmd)
 
-	Nrecs=j
-	# printing the sorted list
-	if tosort == True:
-		if sortkind == "size":
-			sorted_indices=np.flipud(np.argsort([obstable[j].totsize for j in np.arange(Nrecs)], kind='mergesort'))
-		elif sortkind == "time":
-			sorted_indices=np.flipud(np.argsort([obstable[j].seconds for j in np.arange(Nrecs)], kind='mergesort'))
-		# sorting by source (pointing coords)
-		else:
-			sorted_indices=np.argsort([obstable[j].pointing for j in np.arange(Nrecs)], kind='mergesort')
+	# if is_from and/or is_to are set, then we have to exclude those records
+	# from obstable that do not obey the conditions
+	if is_from == True:
+		obstable=list(np.compress(np.array([r.obsyear for r in obstable]) >= fromyear, obstable))
+		fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+		obstable=list(np.compress(np.array([r.seconds for r in obstable]) >= fromsecs, obstable))
 
+	if is_to == True:
+		obstable=list(np.compress(np.array([r.obsyear for r in obstable]) <= toyear, obstable))
+		tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d"))
+		obstable=list(np.compress(np.array([r.seconds for r in obstable]) <= tosecs, obstable))
+
+	Nrecs=np.size(obstable)
+	# printing the sorted list
+	if sortkind == "size":
+		sorted_indices=np.flipud(np.argsort([obstable[j].totsize for j in np.arange(Nrecs)], kind='mergesort'))
+	elif sortkind == "time":
+		sorted_indices=np.flipud(np.argsort([obstable[j].seconds for j in np.arange(Nrecs)], kind='mergesort'))
+	# sorting by source (pointing coords)
+	elif sortkind == "source":
+		sorted_indices=np.argsort([obstable[j].pointing for j in np.arange(Nrecs)], kind='mergesort')
+	# unsorted (i.e. by default sorted by ObsId)
+	else:
+		sorted_indices=np.arange(Nrecs)
+
+	for i in np.arange(Nrecs):
+		print "%d	%s" % (i, obstable[sorted_indices[i]].info)
+	if is_html == True:
 		for i in np.arange(Nrecs):
-			print "%d	%s" % (i, obstable[sorted_indices[i]].info)
-		if is_html == True:
-			for i in np.arange(Nrecs):
-				htmlrep.record(i%2 == 0 and "d0" or "d1", i, obstable[sorted_indices[i]].infohtml)
+			htmlrep.record(i%2 == 0 and "d0" or "d1", i, obstable[sorted_indices[i]].infohtml)
 
 	if is_html == True:
 		htmlrep.legend()
@@ -867,14 +890,14 @@ if __name__ == "__main__":
 
 	# create html files sorted for different sorting modes, linked together
 	if is_linkedhtml == True:
-		sf={"id": "-id.html", "time": "-time.html", "size": "-size.html", "source": "-source.html"}
+		sf={"obsid": "-obsid.html", "time": "-time.html", "size": "-size.html", "source": "-source.html"}
 		for key in sf.keys():
 			sf[key] = "%s%s" % (linkedhtmlstem, sf[key])
-		htmlrep=writeHtmlList(sf["id"], linkedhtmlstem, fromdate, todate)
+		htmlrep=writeHtmlList(sf["obsid"], linkedhtmlstem, fromdate, todate)
 		for key in sf.keys():
 			htmlrep.reInit(sf[key])
 			htmlrep.open()
-			htmlrep.obsnumber(storage_nodes, np.size(obsids))
+			htmlrep.obsnumber(storage_nodes, Nobsids)
 			htmlrep.datesrange()
 			htmlrep.linkedheader(viewtype, storage_nodes_string_html)
 			if key == "size":
