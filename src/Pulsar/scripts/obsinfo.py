@@ -25,7 +25,7 @@ linkedhtmlstem=""   # filestem of linked html files if is_linkedhtml = True
 # if True then delete dump of obs list (if exists) and recreate it from scratch
 # if False then first read the dump, compare obsids with the current ones and process
 # only those ObsIDs that do not exist in the dump. After the dump is updated
-is_update = False
+is_rebuild = False
 
 # View of presenting info (usual (defaul), brief, and plots)
 viewtype="usual"
@@ -283,6 +283,10 @@ class obsinfo:
 
 
 
+
+
+
+
 # Class (structure) with all fields to output
 class outputInfo:
 	def __init__(self, id):
@@ -292,6 +296,8 @@ class outputInfo:
 	
 	def setcomment (self, id, cs, comment):
 		self.id = id
+		self.obsyear = self.id.split("_")[0][1:]
+		self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 		self.comment = comment
 		self.totsize = 0
 		self.pointing = "????_????"
@@ -308,9 +314,12 @@ class outputInfo:
 
 	def Init(self, id, oi, dirsize_string, totsize, statusline, comment, filestem_array, chi_array):
 		self.id = id
+		self.obsyear = self.id.split("_")[0][1:]
 		self.oi = oi
 		if self.oi.seconds != 0:
 			self.seconds = self.oi.seconds
+		else:
+			self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 		self.pointing = self.oi.pointing
 		self.dirsize_string = dirsize_string
 		self.totsize = totsize
@@ -411,6 +420,9 @@ class outputInfo:
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
 
 
+
+
+
 # Class with functions to write Html obs list
 class writeHtmlList:
 	def __init__(self, file, stem, fd, td):
@@ -442,10 +454,13 @@ class writeHtmlList:
                           	<h2 align=left>LOFAR pulsar observations</h2>\n\
                         	\n")
 
-	def obsnumber (self, storage_nodes, nnodes):
+	def obsnumber (self, storage_nodes, ndbnodes, nnodes):
 		self.nodes_string = ", ".join(storage_nodes)
-		self.nnodes = nnodes
-		self.htmlptr.write("Number of observations in %s: <b>%d</b><br>\n" % (self.nodes_string, self.nnodes))
+		if nnodes == -100:
+			self.htmlptr.write("Number of observations in %s: <b>%d</b><br>\n" % (self.nodes_string, ndbnodes))
+		else:
+			self.htmlptr.write("Number of observations in db file: <b>%d</b><br>\n" % (ndbnodes, ))
+			self.htmlptr.write("Number of new observations found in %s: <b>%d</b><br>\n" % (self.nodes_string, nnodes))
 
 	def datesrange (self):
 		if self.fd == "":
@@ -492,6 +507,9 @@ class writeHtmlList:
 		self.htmlptr.close()
 
 
+
+
+
 # help
 def usage (prg):
         """ Prints info how to use the script.
@@ -499,7 +517,7 @@ def usage (prg):
         print "Program %s lists info about observations" % (prg, )
 	print "Usage: %s [-s, --sort <mode>] [-f, --from <date>] [-t, --to <date>]\n\
                   [--html <file>] [--lse <lsenodes>] [-v, --view <mode>] [--linkedhtml <filestem>]\n\
-                  [-u, --update] [-h, --help]\n\
+                  [-r, --rebuild] [-h, --help]\n\
           -f, --from <date>          - list obs only _since_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
           -t, --to <date>            - list obs only _till_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
           -s, --sort <mode>          - sort obs list. Default list is sorted by ObsID. Possible <mode>\n\
@@ -523,16 +541,19 @@ def usage (prg):
                                        but in html-format it also provides the profiles (if existed) for RSP0 split and\n\
                                        in the full band (RSPA) together with chi-squared values of profiles.\n\
                                        All view modes are: \"usual\" (default), \"brief\", \"plots\"\n\
-          -u, --update               - reprocess all observations from scratch (can take a while) rather than to read\n\
+          -r, --rebuild              - reprocess all observations from scratch (can take a while) rather than to read\n\
                                        the existent database, process obs that do not exist there, and add them to the database\n\
           -h, --help                 - print this message\n" % (prg, )
+
+
+
 
 # Parse the command line
 def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hs:f:t:v:u", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "update"])
+		opts, args = getopt.getopt (argv, "hs:f:t:v:r", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild"])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -579,15 +600,18 @@ def parsecmd(prg, argv):
 			if opt in ("-v", "--view"):
 				global viewtype
 				viewtype = arg
-			if opt in ("-u", "--update"):
-				global is_update
-				is_update = True
+			if opt in ("-r", "--rebuild"):
+				global is_rebuild
+				is_rebuild = True
 
 	except getopt.GetoptError:
 		print "Wrong option!"
 		usage(prg)
 		sys.exit(2)
 
+###################################################################################################################
+#          M A I N                                                                                                #
+###################################################################################################################
 if __name__ == "__main__":
 
 	# parsing command line
@@ -600,10 +624,7 @@ if __name__ == "__main__":
 	cmd="mkdir -p %s" % (plotsdir, )
 	os.system(cmd)
 
-	if is_update == True:
-		cmd="rm -f %s" % (dumpfile, )
-		os.system(cmd)
-	else:
+	if not is_rebuild:
 		if not os.path.exists(dumpfile):
 			print "Dumpfile \'%s\' does not exist! Use -u option to rebuild the database." % (dumpfile, )
 			sys.exit()
@@ -615,11 +636,6 @@ if __name__ == "__main__":
 			for r in obstable:
 				r.update()
 			dbobsids = [r.id for r in obstable]
-
-	# writing the html code if chosen
-	if is_html == True:
-		htmlrep=writeHtmlList(htmlfile, linkedhtmlstem, fromdate, todate)
-		htmlrep.open()
 
 	# loop over the storage nodes and directories to get the list of all IDs
 	for s in storage_nodes:
@@ -645,24 +661,22 @@ if __name__ == "__main__":
 	# Number of ObsIDs
 	Nobsids = np.size(obsids)
 
-	if is_html == True:
-		htmlrep.obsnumber(storage_nodes, Nobsids)
-		htmlrep.datesrange()
-	print "Number of observations in %s: %d" % (", ".join(storage_nodes), Nobsids)
+	# if is_rebuild == False then excluding ObsIDs from obsids list that are already in the database, i.e. in dbobsids list
+	# only new ObsIDs will be processed and added to database
+	if not is_rebuild:
+		# now obsids have only those IDs that are not in the dump file
+		obsids=list(set(obsids)-set(obsids).intersection(set(dbobsids)))
 
-	if is_from == True and is_to == True:
-		print "List only observations since %s till %s" % (fromdate, todate)
-		fromyear = fromdate.split("-")[0]
-		toyear = todate.split("-")[0]
+	if is_rebuild == True:
+		print "Number of observations in %s: %d" % (", ".join(storage_nodes), Nobsids)
+	else:
+		print "Number of observations in db file: %d" % (np.size(dbobsids), )
+		print "Number of new observations found in %s: %d" % (", ".join(storage_nodes), np.size(obsids))
+		
 
-	if is_from == True and is_to == False:
-		print "List only observations since %s" % (fromdate, )
-		fromyear = fromdate.split("-")[0]
-
-	if is_from == False and is_to == True:
-		print "List only observations till %s" % (todate, )
-		toyear = todate.split("-")[0]
-
+	if is_from == True or is_to == True:
+		print "List only observations%s%s" % (is_from and " since " + fromdate or (is_to and " till " + todate or ""), 
+                                                      is_to and (is_from and " till " + todate or "") or "")
 	print
 
 	# number of storage nodes
@@ -674,9 +688,6 @@ if __name__ == "__main__":
 		storage_nodes_string=storage_nodes_string+storage_nodes[i]+"\t"
 	storage_nodes_string=storage_nodes_string+storage_nodes[-1]
 	storage_nodes_string_html="</th>\n <th align=center>".join(storage_nodes_string.split("\t"))
-
-	if is_html == True:
-		htmlrep.header(viewtype, storage_nodes_string_html)
 
 	if viewtype == "brief" or viewtype == "plots":
 		equalstrs=[]
@@ -699,12 +710,6 @@ if __name__ == "__main__":
 		print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Reduced		Pointing    Source" % (storage_nodes_string,)
 		print equalstring
 
-
-	# if is_update == False then excluding ObsIDs from obsids list that are already in the database, i.e. in dbobsids list
-	# only new ObsIDs will be processed and added to database
-	if not is_update:
-		# now obsids have only those IDs that are not in the dump file
-		obsids=list(set(obsids)-set(obsids).intersection(set(dbobsids)))
 
 	# loop for every observation
 	for counter in np.arange(np.size(obsids)):
@@ -856,12 +861,10 @@ if __name__ == "__main__":
 	# if is_from and/or is_to are set, then we have to exclude those records
 	# from obstable that do not obey the conditions
 	if is_from == True:
-		obstable=list(np.compress(np.array([r.obsyear for r in obstable]) >= fromyear, obstable))
 		fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
 		obstable=list(np.compress(np.array([r.seconds for r in obstable]) >= fromsecs, obstable))
 
 	if is_to == True:
-		obstable=list(np.compress(np.array([r.obsyear for r in obstable]) <= toyear, obstable))
 		tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d"))
 		obstable=list(np.compress(np.array([r.seconds for r in obstable]) <= tosecs, obstable))
 
@@ -880,11 +883,20 @@ if __name__ == "__main__":
 
 	for i in np.arange(Nrecs):
 		print "%d	%s" % (i, obstable[sorted_indices[i]].info)
+
+
+	# writing the html code if chosen
 	if is_html == True:
+		htmlrep=writeHtmlList(htmlfile, linkedhtmlstem, fromdate, todate)
+		htmlrep.open()
+		if is_rebuild == True:
+			htmlrep.obsnumber(storage_nodes, Nobsids, -100)
+		else:
+			htmlrep.obsnumber(storage_nodes, np.size(dbobsids), np.size(obsids))
+		htmlrep.datesrange()
+		htmlrep.header(viewtype, storage_nodes_string_html)
 		for i in np.arange(Nrecs):
 			htmlrep.record(i%2 == 0 and "d0" or "d1", i, obstable[sorted_indices[i]].infohtml)
-
-	if is_html == True:
 		htmlrep.legend()
 		htmlrep.close()
 
@@ -897,7 +909,10 @@ if __name__ == "__main__":
 		for key in sf.keys():
 			htmlrep.reInit(sf[key])
 			htmlrep.open()
-			htmlrep.obsnumber(storage_nodes, Nobsids)
+			if is_rebuild == True:
+				htmlrep.obsnumber(storage_nodes, Nobsids, -100)
+			else:
+				htmlrep.obsnumber(storage_nodes, np.size(dbobsids), np.size(obsids))
 			htmlrep.datesrange()
 			htmlrep.linkedheader(viewtype, storage_nodes_string_html)
 			if key == "size":
