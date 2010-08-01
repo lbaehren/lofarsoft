@@ -761,7 +761,7 @@ if __name__ == "__main__":
 		oi=obsinfo(log)
 
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
-		totsize=0
+		totsize=0.0
 		dirsize_string=""
 		for lse in storage_nodes:
 			ddir=oi.datadir + "/" + id
@@ -771,7 +771,9 @@ if __name__ == "__main__":
 			if np.size(dirout) > 0:
 				dirsize=dirout[0][:-1]
 				cmd="cexec %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such' | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
-				totsize=totsize + float(os.popen(cmd).readlines()[0][:-1])
+				status=os.popen(cmd).readlines()[0][:-1]
+				if status.isdigit() == True:
+						totsize=totsize + float(status)
 			dirsize_string=dirsize_string+dirsize+"\t"
 
 		# converting total size to GB
