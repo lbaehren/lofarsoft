@@ -301,12 +301,13 @@ class outputInfo:
 		self.comment = comment
 		self.totsize = 0
 		self.pointing = "????_????"
+		self.cs = cs
 		if viewtype == "brief":
 			self.colspan = 12
 		elif viewtype == "plots":
 			self.colspan = 16
 		else:
-			self.colspan = 15 + cs - 1
+			self.colspan = 15 + self.cs - 1
 
 		if self.comment != "":
 			self.info = self.comment
@@ -325,12 +326,13 @@ class outputInfo:
 		self.totsize = totsize
 		self.statusline = statusline
 		self.comment = comment
+		self.cs = len(self.dirsize_string.split("\t"))
 		if viewtype == "brief":
 			self.colspan = 12
 		elif viewtype == "plots":
 			self.colspan = 16
 		else:
-			self.colspan = 15 + len(self.dirsize_string.split("\t")) - 1
+			self.colspan = 15 + self.cs - 1
 		self.filestem_array = filestem_array
 		self.chi_array = chi_array
 
@@ -379,7 +381,7 @@ class outputInfo:
 		elif viewtype == "plots":
 			self.colspan = 16
 		else:
-			self.colspan = 15 + len(self.dirsize_string.split("\t")) - 1
+			self.colspan = 15 + self.cs - 1
 
 		if self.comment == "":
 			if viewtype == "brief" or viewtype == "plots":
@@ -766,14 +768,16 @@ if __name__ == "__main__":
 		for lse in storage_nodes:
 			ddir=oi.datadir + "/" + id
 			dirsize="x"
-			cmd="cexec %s 'du -sh %s 2>&1 | cut -f 1 | grep -v such' | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
+			cmd="cexec %s 'du -sh %s 2>&1 | cut -f 1 | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
 			dirout=os.popen(cmd).readlines()
 			if np.size(dirout) > 0:
 				dirsize=dirout[0][:-1]
-				cmd="cexec %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such' | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
+				cmd="cexec %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
 				status=os.popen(cmd).readlines()[0][:-1]
 				if status.isdigit() == True:
 						totsize=totsize + float(status)
+				else:
+					print "%s %s %s %s %s" % (status, "--->", id, lse, ddir)
 			dirsize_string=dirsize_string+dirsize+"\t"
 
 		# converting total size to GB
