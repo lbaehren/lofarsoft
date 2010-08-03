@@ -43,9 +43,9 @@ endif (USG_ROOT)
 ## System inspection
 
 if (NOT NUMPY_VERBOSE_CONFIGURE)
-  set (LAPACK_FIND_QUIETLY   YES )
-  set (NUMPY_FIND_QUIETLY  YES )
-  set (PYTHON_FIND_QUIETLY YES )
+  set (LAPACK_FIND_QUIETLY  YES )
+  set (NUMPY_FIND_QUIETLY   YES )
+  set (PYTHON_FIND_QUIETLY  YES )
 endif (NOT NUMPY_VERBOSE_CONFIGURE)
 
 include (FindNumPy)
@@ -85,8 +85,6 @@ endif (NUMPY_API_VERSION)
 
 if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   
-  include (ExternalProject)
-
   set (NUMPY_VERSION     "1.3.0")
   set (NUMPY_DIRECTORY   "numpy-${NUMPY_VERSION}")
   set (NUMPY_TAR_ARCHIVE "${NUMPY_DIRECTORY}.tar.gz")
@@ -97,8 +95,10 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
     get_filename_component (python_libdir ${PYTHON_LIBRARIES} PATH)
   endif (PYTHON_LIBRARIES)
   
-  file (WRITE ${NUMPY_BINARY_DIR}/site.cfg "[DEFAULT] \n")
-  file (APPEND ${NUMPY_BINARY_DIR}/site.cfg "library_dirs = /usr/lib:/usr/local/lib:/usr/lib64:/usr/local/lib64:/sw/lib:${python_libdir} \n")
+  configure_file (
+    ${NUMPY_SOURCE_DIR}/site.cfg
+    ${NUMPY_BINARY_DIR}/site.cfg
+    )
 
   ##__________________________________________________________________
   ## Build the project
@@ -108,16 +108,17 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   if (have_numpy_tgz)
     ExternalProject_Add (numpy
       PREFIX ${NUMPY_BINARY_DIR}
-      DOWNLOAD_DIR ${NUMPY_BINARY_DIR}
-      SOURCE_DIR ${NUMPY_BINARY_DIR}
+      DOWNLOAD_DIR ${NUMPY_BINARY_DIR}/download
+      SOURCE_DIR ${NUMPY_BINARY_DIR}/source
       URL ${have_numpy_tgz}
+      URL_MD5 3f7773ff0971a5ebb8591536d8ec7bd6
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/setup.py --help
-      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND cp ${NUMPY_BINARY_DIR}/site.cfg ${NUMPY_BINARY_DIR}/source
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/source/setup.py build
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/source/setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
       )
   else (have_numpy_tgz)
-    message (WARNING "[Numpy] Unable to build project - missing source!")
+    message (WARNING "[NumPy] Unable to build project - missing source!")
   endif (have_numpy_tgz)
 
   ##__________________________________________________________________
@@ -136,7 +137,7 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   
 else (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   add_custom_target (numpy
-    WORKING_DIRECTORY ${BOOST_BINARY_DIR}
-    COMMENT "[Numpy] Found system-wide installation; skipping rebuild!"
+    WORKING_DIRECTORY ${NUMPY_BINARY_DIR}
+    COMMENT "[NumPy] Found system-wide installation; skipping rebuild!"
     )
 endif (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
