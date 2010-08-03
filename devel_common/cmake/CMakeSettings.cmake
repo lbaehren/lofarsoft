@@ -167,10 +167,11 @@ if (NOT USG_CMAKE_CONFIG)
 
   ## ============================================================================
   ##
-  ##  Custum modulea and macros
+  ##  Modules and Macro definitions
   ##
   ## ============================================================================
 
+  include (ExternalProject)
   include (FindTestDatasets)
   include (MD5Checksum)
 

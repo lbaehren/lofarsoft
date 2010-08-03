@@ -50,8 +50,6 @@ include (FindSZIP)
 
 if (NOT HAVE_SZIP OR SZIP_FORCE_BUILD)
   
-  include (ExternalProject)
-
   set (SZIP_VERSION "2.1")
   set (SZIP_TAR_ARCHIVE "szip-${SZIP_VERSION}.tar.gz")
 
@@ -66,6 +64,7 @@ if (NOT HAVE_SZIP OR SZIP_FORCE_BUILD)
       DOWNLOAD_DIR ${SZIP_BINARY_DIR}
       SOURCE_DIR ${SZIP_BINARY_DIR}
       URL ${have_szip_tgz}
+      URL_MD5 1e0621efa66c2e1b07d7659703df5ea8
       CONFIGURE_COMMAND ${SZIP_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX} --includedir=${USG_INSTALL_PREFIX}/include/szip
       )
   else (have_szip_tgz)
