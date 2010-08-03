@@ -154,6 +154,9 @@ class vdsmaker(LOFARrecipe):
             finally:
                 failure = True
         finally:
+            self.logger.debug("Unlinking temporary files")
+            for file in vdsnames:
+                os.unlink(file)
             self.logger.info("vdsmaker done")
         if failure:
             return 1
