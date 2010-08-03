@@ -1,4 +1,5 @@
 import os, sys, inspect, logging, errno
+import cPickle as pickle
 import utilities
 from lofarpipe.support.lofarexceptions import PipelineException, ClusterError
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
@@ -14,6 +15,8 @@ class LOFARrecipe(WSRTrecipe):
     """
     def __init__(self):
         super(LOFARrecipe, self).__init__()
+        self.state = []
+        self.completed = []
         self.optionparser.add_option(
             '-j', '--job-name', 
             dest="job_name",
@@ -71,25 +74,42 @@ class LOFARrecipe(WSRTrecipe):
     def run_task(self, configblock, datafiles=[], **kwargs):
         self.logger.info("Running task: %s" % (configblock,))
         try:
-            recipe = self.task_definitions.get(configblock, "recipe")
-        except NoSectionError:
-            raise PipelineException("%s not found -- check your task definitions" % configblock)
-        inputs = LOFARinput(self.inputs)
-        inputs['args'] = datafiles
-        inputs.update(self.task_definitions.items(configblock))
-        # Any kwargs supplied by the caller override (or supplement) the configblock
-        for key, value in kwargs.iteritems():
-            inputs[key] = value
-        # These inputs are never required:
-        for inp in ('recipe', 'recipe_directories', 'lofarroot', 'default_working_directory', 'cwd'):
-            del(inputs[inp])
-        outputs = LOFARoutput()
-        if self.cook_recipe(recipe, inputs, outputs):
-            self.logger.warn(
-                "%s reports failure (using %s recipe)" % (configblock, recipe)
-            )
-            raise PipelineRecipeFailed("%s failed", configblock)
-        return outputs
+            my_state = self.completed.pop()
+        except (AttributeError, IndexError):
+            my_state = ('','')
+
+        # Either...
+        if configblock == my_state[0]:
+            # We have already run this task and stored its state, or...
+            self.logger.info("Task already exists in saved state; skipping")
+            return my_state[1]
+        elif my_state[0] != '':
+            # There is a stored task, but it doesn't match this one, or...
+            self.logger.error("Stored state does not match pipeline definition; bailing out")
+            raise PipelineException("Stored state does not match pipeline definition")
+        else:
+            # We need to run this task now.
+            try:
+                recipe = self.task_definitions.get(configblock, "recipe")
+            except NoSectionError:
+                raise PipelineException("%s not found -- check your task definitions" % configblock)
+            inputs = LOFARinput(self.inputs)
+            inputs['args'] = datafiles
+            inputs.update(self.task_definitions.items(configblock))
+            # Any kwargs supplied by the caller override (or supplement) the configblock
+            for key, value in kwargs.iteritems():
+                inputs[key] = value
+            # These inputs are never required:
+            for inp in ('recipe', 'recipe_directories', 'lofarroot', 'default_working_directory', 'cwd'):
+                del(inputs[inp])
+            outputs = LOFARoutput()
+            if self.cook_recipe(recipe, inputs, outputs):
+                self.logger.warn(
+                    "%s reports failure (using %s recipe)" % (configblock, recipe)
+                )
+                raise PipelineRecipeFailed("%s failed", configblock)
+            self.state.append((configblock, outputs))
+            return outputs
 
     def _setup_logging(self):
         # Set up logging to file
@@ -112,6 +132,16 @@ class LOFARrecipe(WSRTrecipe):
         file_handler.setFormatter(formatter)
         self.logger.addHandler(stream_handler)
         self.logger.addHandler(file_handler)
+
+    def _save_state(self):
+        statefile = open(
+            os.path.join(
+                self.config.get('layout', 'job_directory'),
+                'statefile'
+            ),
+        'w')
+        state = [self.inputs, self.state]
+        pickle.dump(state, statefile)
 
     def go(self):
         # Every recipe needs a job identifier

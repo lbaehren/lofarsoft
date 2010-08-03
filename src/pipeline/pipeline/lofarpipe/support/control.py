@@ -1,4 +1,5 @@
 import sys, datetime, logging, os
+import cPickle as pickle
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
 from lofarpipe.support.lofarexceptions import PipelineException, PipelineQuit
@@ -20,6 +21,18 @@ class control(LOFARrecipe):
 
     def go(self):
         super(control, self).go()
+        statefile = os.path.join(
+            self.config.get('layout', 'job_directory'),
+            'statefile'
+        )
+        try:
+            statefile = open(statefile, 'r')
+            self.inputs, self.state = pickle.load(statefile)
+            statefile.close()
+            self.completed = list(reversed(self.state))
+        except (IOError, EOFError):
+            # Couldn't load state
+            self.completed = []
 
         self.logger.info(
             "LOFAR Pipeline (%s) starting." %
