@@ -604,7 +604,7 @@ do
 	# Calculating the number of samples to be passed to inf-file
 	if (( $flyseye == 0 ))
 	then
-		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/${PULSAR}_${OBSID}_RSP0.sub0000 | awk '{print $5}' -`
+		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/${PULSAR}_${OBSID}_RSP0.sub0000 | awk '{print $5 / 2}' -`
 	else
 		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR}_${OBSID}_RSP0.sub0000 | awk '{print $5 / 2}' -`
 	fi
