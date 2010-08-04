@@ -39,16 +39,15 @@ endif (USG_ROOT)
 
 if (NOT HAVE_PIL OR PIL_FORCE_BUILD)
   
-  include (ExternalProject)
-
   find_file (have_pil_tgz pil.tgz ${PIL_SOURCE_DIR})
   
   if (have_pil_tgz)
     ExternalProject_Add (pil
       PREFIX ${PIL_BINARY_DIR}
-      DOWNLOAD_DIR ${PIL_BINARY_DIR}
-      SOURCE_DIR ${PIL_BINARY_DIR}
+      DOWNLOAD_DIR ${PIL_BINARY_DIR}/download
+      SOURCE_DIR ${PIL_BINARY_DIR}/source
       URL ${have_pil_tgz}
+      URL_MD5 828350a6952d6dc1be1b9cacddede056
       CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${USG_INSTALL_PREFIX}
       )
     ## Pre-configure of configuration scripts
@@ -57,7 +56,7 @@ if (NOT HAVE_PIL OR PIL_FORCE_BUILD)
       COMMENT "Replacing original CMakeLists.txt"
       DEPENDEES patch
       DEPENDERS configure
-      WORKING_DIRECTORY ${PIL_BINARY_DIR}
+      WORKING_DIRECTORY ${PIL_BINARY_DIR}/source
       )
   else (have_pil_tgz)
     message (WARNING "[pil] Unable to build project - no sources found!")

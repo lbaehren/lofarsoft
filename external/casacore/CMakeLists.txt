@@ -50,8 +50,6 @@ find_program (wget_executable      wget      PATHS ${bin_locations})
 
 if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   
-  include (ExternalProject)
-
   find_file (have_casacore_tgz   casacore.tgz  ${CASACORE_SOURCE_DIR})
   find_file (have_casacore_cmake cmake.tgz     ${CASACORE_SOURCE_DIR})
 
