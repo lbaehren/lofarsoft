@@ -99,7 +99,7 @@ class skymodel(LOFARrecipe):
     """
 
     def __init__(self):
-        super(simple_se, self).__init__()
+        super(skymodel, self).__init__()
         self.optionparser.add_option(
             '--db-host',
             help="Host with MonetDB database instance",
@@ -121,7 +121,7 @@ class skymodel(LOFARrecipe):
             default="gsm"
         )
         self.optionparser.add_option(
-            '--db-dbase',
+            '--db-password',
             help="Database password",
             default="msss"
         )
@@ -153,25 +153,27 @@ class skymodel(LOFARrecipe):
 
     def go(self):
         self.logger.info("Building sky model")
-        super(simple_se, self).go()
+        super(skymodel, self).go()
 
         try:
-            with closing db.connect(
-                hostname=self.inputs["db_host"],
-                port=int(self.inputs["db_port"],
-                database=self.inputs["db_dbase"],
-                username=self.inputs["db_user"],
-                password=self.inputs["db_password"]
+            with closing(
+                db.connect(
+                    hostname=self.inputs["db_host"],
+                    port=int(self.inputs["db_port"]),
+                    database=self.inputs["db_dbase"],
+                    username=self.inputs["db_user"],
+                    password=self.inputs["db_password"]
+                )
             ) as db_connection:
                 with closing(db_connection.cursor()) as db_cursor:
                     db_cursor.execute(
                         query % (
                             4, 4, # Only using VLSS for now
-                            float(self.inputs('ra_min')),
-                            float(self.inputs('ra_max')),
-                            float(self.inputs('dec_min')),
-                            float(self.inputs('dec_max')),
-                            float(self.inputs('min_flux'))
+                            float(self.inputs['ra_min']),
+                            float(self.inputs['ra_max']),
+                            float(self.inputs['dec_min']),
+                            float(self.inputs['dec_max']),
+                            float(self.inputs['min_flux'])
                         )
                     )
                     results = db_cursor.fetchall()
@@ -182,8 +184,7 @@ class skymodel(LOFARrecipe):
 
         try:
             with open(self.inputs['skymodel_file'], 'w') as file:
-                for line in results:
-                    file.write(line)
+                file.writelines(line[0] + '\n' for line in results)
         except:
             self.logger.warn("Failed to write skymodel file")
             return 1
