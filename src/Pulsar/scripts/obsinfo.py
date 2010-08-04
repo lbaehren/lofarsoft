@@ -481,11 +481,8 @@ class writeHtmlList:
 
 	def obsnumber (self, storage_nodes, ndbnodes, nnodes):
 		self.nodes_string = ", ".join(storage_nodes)
-		if nnodes == -100:
-			self.htmlptr.write("Number of observations in %s: <b>%d</b><br>\n" % (self.nodes_string, ndbnodes))
-		else:
-			self.htmlptr.write("Number of observations in db file: <b>%d</b><br>\n" % (ndbnodes, ))
-			self.htmlptr.write("Number of new observations found in %s: <b>%d</b><br>\n" % (self.nodes_string, nnodes))
+		self.htmlptr.write("Number of observations in db file: <b>%d</b><br>\n" % (ndbnodes, ))
+		self.htmlptr.write("Number of new observations found in %s: <b>%d</b><br>\n" % (self.nodes_string, nnodes))
 
 	def datesrange (self):
 		if self.fd == "":
@@ -568,6 +565,7 @@ def usage (prg):
                                        All view modes are: \"usual\" (default), \"brief\", \"plots\"\n\
           -r, --rebuild              - reprocess all observations from scratch (can take a while) rather than to read\n\
                                        the existent database, process obs that do not exist there, and add them to the database\n\
+                                       Options --html and --linkedhtml are ignored, i.e. none files are created\n\
           -h, --help                 - print this message\n" % (prg, )
 
 
@@ -651,7 +649,7 @@ if __name__ == "__main__":
 
 	if not is_rebuild:
 		if not os.path.exists(dumpfile):
-			print "Dumpfile \'%s\' does not exist! Use -u option to rebuild the database." % (dumpfile, )
+			print "Dumpfile \'%s\' does not exist! Use -r option to rebuild the database." % (dumpfile, )
 			sys.exit()
 		else:
 			dfdescr = open(dumpfile, "r")
@@ -908,45 +906,40 @@ if __name__ == "__main__":
 
 
 	# writing the html code if chosen
-	if is_html == True:
-		htmlrep=writeHtmlList(htmlfile, linkedhtmlstem, fromdate, todate)
-		htmlrep.open()
-		if is_rebuild == True:
-			htmlrep.obsnumber(storage_nodes, Nobsids, -100)
-		else:
-			htmlrep.obsnumber(storage_nodes, np.size(dbobsids), np.size(obsids))
-		htmlrep.datesrange()
-		htmlrep.header(viewtype, storage_nodes_string_html)
-		for i in np.arange(Nrecs):
-			htmlrep.record(i%2 == 0 and "d0" or "d1", i, obstable[sorted_indices[i]].infohtml)
-		htmlrep.legend()
-		htmlrep.close()
-
-	# create html files sorted for different sorting modes, linked together
-	if is_linkedhtml == True:
-		sf={"obsid": "-obsid.html", "time": "-time.html", "size": "-size.html", "source": "-source.html"}
-		for key in sf.keys():
-			sf[key] = "%s%s" % (linkedhtmlstem, sf[key])
-		htmlrep=writeHtmlList(sf["obsid"], linkedhtmlstem, fromdate, todate)
-		for key in sf.keys():
-			htmlrep.reInit(sf[key])
+	if not is_rebuild:
+		if is_html == True:
+			htmlrep=writeHtmlList(htmlfile, linkedhtmlstem, fromdate, todate)
 			htmlrep.open()
-			if is_rebuild == True:
-				htmlrep.obsnumber(storage_nodes, Nobsids, -100)
-			else:
-				htmlrep.obsnumber(storage_nodes, np.size(dbobsids), np.size(obsids))
+			htmlrep.obsnumber(storage_nodes, np.size(dbobsids), np.size(obsids))
 			htmlrep.datesrange()
-			htmlrep.linkedheader(viewtype, storage_nodes_string_html)
-			if key == "size":
-				sorted_indices=np.flipud(np.argsort([obstable[j].totsize for j in np.arange(Nrecs)], kind='mergesort'))
-			elif key == "time":
-				sorted_indices=np.flipud(np.argsort([obstable[j].seconds for j in np.arange(Nrecs)], kind='mergesort'))
-			elif key == "source":
-				sorted_indices=np.argsort([obstable[j].pointing for j in np.arange(Nrecs)], kind='mergesort')
-			# unsorted (i.e. by default sorted by ObsId)
-			else:
-				sorted_indices=np.arange(Nrecs)
+			htmlrep.header(viewtype, storage_nodes_string_html)
 			for i in np.arange(Nrecs):
 				htmlrep.record(i%2 == 0 and "d0" or "d1", i, obstable[sorted_indices[i]].infohtml)
 			htmlrep.legend()
 			htmlrep.close()
+
+		# create html files sorted for different sorting modes, linked together
+		if is_linkedhtml == True:
+			sf={"obsid": "-obsid.html", "time": "-time.html", "size": "-size.html", "source": "-source.html"}
+			for key in sf.keys():
+				sf[key] = "%s%s" % (linkedhtmlstem, sf[key])
+			htmlrep=writeHtmlList(sf["obsid"], linkedhtmlstem, fromdate, todate)
+			for key in sf.keys():
+				htmlrep.reInit(sf[key])
+				htmlrep.open()
+				htmlrep.obsnumber(storage_nodes, np.size(dbobsids), np.size(obsids))
+				htmlrep.datesrange()
+				htmlrep.linkedheader(viewtype, storage_nodes_string_html)
+				if key == "size":
+					sorted_indices=np.flipud(np.argsort([obstable[j].totsize for j in np.arange(Nrecs)], kind='mergesort'))
+				elif key == "time":
+					sorted_indices=np.flipud(np.argsort([obstable[j].seconds for j in np.arange(Nrecs)], kind='mergesort'))
+				elif key == "source":
+					sorted_indices=np.argsort([obstable[j].pointing for j in np.arange(Nrecs)], kind='mergesort')
+				# unsorted (i.e. by default sorted by ObsId)
+				else:
+					sorted_indices=np.arange(Nrecs)
+				for i in np.arange(Nrecs):
+					htmlrep.record(i%2 == 0 and "d0" or "d1", i, obstable[sorted_indices[i]].infohtml)
+				htmlrep.legend()
+				htmlrep.close()
