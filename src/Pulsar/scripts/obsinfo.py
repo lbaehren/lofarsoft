@@ -26,6 +26,8 @@ linkedhtmlstem=""   # filestem of linked html files if is_linkedhtml = True
 # if False then first read the dump, compare obsids with the current ones and process
 # only those ObsIDs that do not exist in the dump. After the dump is updated
 is_rebuild = False
+# if True then updates only the records in the dumpfile without checking if new obs appeared
+is_update = False
 
 # View of presenting info (usual (defaul), brief, and plots)
 viewtype="usual"
@@ -541,7 +543,7 @@ def usage (prg):
         print "Program %s lists info about observations" % (prg, )
 	print "Usage: %s [-s, --sort <mode>] [-f, --from <date>] [-t, --to <date>]\n\
                   [--html <file>] [--lse <lsenodes>] [-v, --view <mode>] [--linkedhtml <filestem>]\n\
-                  [-r, --rebuild] [-h, --help]\n\
+                  [-r, --rebuild] [-u, --update] [-h, --help]\n\
           -f, --from <date>          - list obs only _since_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
           -t, --to <date>            - list obs only _till_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
           -s, --sort <mode>          - sort obs list. Default list is sorted by ObsID. Possible <mode>\n\
@@ -568,6 +570,7 @@ def usage (prg):
           -r, --rebuild              - reprocess all observations from scratch (can take a while) rather than to read\n\
                                        the existent database, process obs that do not exist there, and add them to the database\n\
                                        Options --html and --linkedhtml are ignored, i.e. none files are created\n\
+          -u, --update               - update db file only, new observations in /data? won't be added\n\
           -h, --help                 - print this message\n" % (prg, )
 
 
@@ -578,7 +581,7 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hs:f:t:v:r", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild"])
+		opts, args = getopt.getopt (argv, "hs:f:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update"])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -628,6 +631,9 @@ def parsecmd(prg, argv):
 			if opt in ("-r", "--rebuild"):
 				global is_rebuild
 				is_rebuild = True
+			if opt in ("-u", "--update"):
+				global is_update
+				is_update = True
 
 	except getopt.GetoptError:
 		print "Wrong option!"
@@ -642,8 +648,13 @@ if __name__ == "__main__":
 	# parsing command line
 	parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
 
+	if is_rebuild == True and is_update == True:
+		print "Choose what you want to do: rebuild, update or add new observations if any"
+		sys.exit()
+
 	# table with obs info
-	obstable=[]
+	# key is the ObsId, and value is outputInfo class instance
+	obstable={}
 
 	# creating plotsdir directory if it does not exist
 	cmd="mkdir -p %s" % (plotsdir, )
@@ -658,45 +669,52 @@ if __name__ == "__main__":
 			obstable=cPickle.load(dfdescr)
 			dfdescr.close()
 			# update info and infohtml depending on current command line options
-			for r in obstable:
-				r.update()
-			dbobsids = [r.id for r in obstable]
+			dbobsids = obstable.keys()
+			for r in dbobsids:
+				obstable[r].update()
 
-	# loop over the storage nodes and directories to get the list of all IDs
-	for s in storage_nodes:
-		for d in data_dirs:
-			cmd="cexec %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[s], d, "?20??_*", cexec_egrep_string)
-			indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
+	if not is_update:
+		# loop over the storage nodes and directories to get the list of all IDs
+		for s in storage_nodes:
+			for d in data_dirs:
+				cmd="cexec %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[s], d, "?20??_*", cexec_egrep_string)
+				indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
+				obsids = np.append(obsids, indlist)
+
+		# also checking the archive directories to extend the list of ObsIDs in case the raw data was removed
+		for s in storage_nodes:
+			cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, cexec_egrep_string)
+			if np.size(os.popen(cmd).readlines()) == 0:
+				continue
+			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
+			indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
 			obsids = np.append(obsids, indlist)
 
-	# also checking the archive directories to extend the list of ObsIDs in case the raw data was removed
-	for s in storage_nodes:
-		cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, cexec_egrep_string)
-		if np.size(os.popen(cmd).readlines()) == 0:
-			continue
-		cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission' | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
-		indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
-		obsids = np.append(obsids, indlist)
+		# getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
+		# and sort in reverse order (most recent obs go first)
+		# more recent obs is the obs with higher ID (as it should be)
+		obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 
-	# getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
-	# and sort in reverse order (most recent obs go first)
-	# more recent obs is the obs with higher ID (as it should be)
-	obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
+		# Number of ObsIDs
+		Nobsids = np.size(obsids)
 
-	# Number of ObsIDs
-	Nobsids = np.size(obsids)
-
-	# if is_rebuild == False then excluding ObsIDs from obsids list that are already in the database, i.e. in dbobsids list
-	# only new ObsIDs will be processed and added to database
-	if not is_rebuild:
-		# now obsids have only those IDs that are not in the dump file
-		obsids=list(set(obsids)-set(obsids).intersection(set(dbobsids)))
+		# if is_rebuild == False then excluding ObsIDs from obsids list that are already in the database, i.e. in dbobsids list
+		# only new ObsIDs will be processed and added to database
+		if not is_rebuild:
+			# now obsids have only those IDs that are not in the dump file
+			obsids=list(set(obsids)-set(obsids).intersection(set(dbobsids)))
+	else:
+		obsids = dbobsids
+		# Number of ObsIDs
+		Nobsids = np.size(obsids)
+		
 
 	if is_rebuild == True:
 		print "Number of observations in %s: %d" % (", ".join(storage_nodes), Nobsids)
 	else:
 		print "Number of observations in db file: %d" % (np.size(dbobsids), )
-		print "Number of new observations found in %s: %d" % (", ".join(storage_nodes), np.size(obsids))
+		if not is_update:
+			print "Number of new observations found in %s: %d" % (", ".join(storage_nodes), np.size(obsids))
 		
 
 	if is_from == True or is_to == True:
@@ -737,9 +755,8 @@ if __name__ == "__main__":
 
 
 	# loop for every observation
-	for counter in np.arange(np.size(obsids)):
+	for id in obsids:
 	
-		id=obsids[counter]
 		# class instance with output Info
 		out=outputInfo(id)	
 
@@ -765,7 +782,7 @@ if __name__ == "__main__":
 					# no directory found
 					comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
 					out.setcomment(id, comment)
-					obstable=np.append(obstable, out)
+					obstable[id] = out
 					continue
 
 		# get the full path for the parset file for the current ID
@@ -779,7 +796,7 @@ if __name__ == "__main__":
 				if not os.path.exists(log):
 					comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
 					out.setcomment(id, comment)
-					obstable=np.append(obstable, out)
+					obstable[id] = out
 					continue
 
 		# initializing the obsinfo class
@@ -865,7 +882,7 @@ if __name__ == "__main__":
 
 		# combining info
 		out.Init(id, oi, dirsizes, statusline, "", profiles_array, chi_array)
-		obstable=np.append(obstable, out)
+		obstable[id] = out
 
 
 	# dump obs table to the file
@@ -880,43 +897,49 @@ if __name__ == "__main__":
 		cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (plotsdir, webserver, webplotsdir)
 		os.system(cmd)
 
+	# copying to another list to keep the old one
+	obskeys = obsids
+
 	# if is_from and/or is_to are set, then we have to exclude those records
 	# from obstable that do not obey the conditions
 	if is_from == True:
 		fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
-		obstable=list(np.compress(np.array([r.seconds for r in obstable]) >= fromsecs, obstable))
+		obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) >= fromsecs, obskeys))
 
 	if is_to == True:
 		tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d"))
-		obstable=list(np.compress(np.array([r.seconds for r in obstable]) <= tosecs, obstable))
+		obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) <= tosecs, obskeys))
 
-	Nrecs=np.size(obstable)
 	# printing the sorted list
 	if sortkind == "size":
-		sorted_indices=np.flipud(np.argsort([obstable[j].totsize for j in np.arange(Nrecs)], kind='mergesort'))
+		sorted_indices=np.flipud(np.argsort([obstable[r].totsize for r in obskeys], kind='mergesort'))
 	elif sortkind == "time":
-		sorted_indices=np.flipud(np.argsort([obstable[j].seconds for j in np.arange(Nrecs)], kind='mergesort'))
+		sorted_indices=np.flipud(np.argsort([obstable[r].seconds for r in obskeys], kind='mergesort'))
 	# sorting by source (pointing coords)
 	elif sortkind == "source":
-		sorted_indices=np.argsort([obstable[j].pointing for j in np.arange(Nrecs)], kind='mergesort')
+		sorted_indices=np.argsort([obstable[r].pointing for r in obskeys], kind='mergesort')
 	# unsorted (i.e. by default sorted by ObsId)
 	else:
-		sorted_indices=np.arange(Nrecs)
+		sorted_indices=np.arange(np.size(obskeys))
 
-	for i in np.arange(Nrecs):
-		print "%d	%s" % (i, obstable[sorted_indices[i]].info)
+	counter=0
+	for i in sorted_indices:
+		print "%d	%s" % (counter, obstable[obskeys[i]].info)
+		counter += 1
 
 
 	# writing the html code if chosen
-	if not is_rebuild:
+	if not is_rebuild and not is_update:
 		if is_html == True:
 			htmlrep=writeHtmlList(htmlfile, linkedhtmlstem, fromdate, todate)
 			htmlrep.open()
 			htmlrep.obsnumber(storage_nodes, np.size(dbobsids), np.size(obsids))
 			htmlrep.datesrange()
 			htmlrep.header(viewtype, storage_nodes_string_html)
-			for i in np.arange(Nrecs):
-				htmlrep.record(i%2 == 0 and "d0" or "d1", i, obstable[sorted_indices[i]].infohtml)
+			counter = 0
+			for i in sorted_indices:
+				htmlrep.record(counter%2 == 0 and "d0" or "d1", counter, obstable[obskeys[i]].infohtml)
+				counter += 1
 			htmlrep.legend()
 			htmlrep.close()
 
@@ -933,15 +956,17 @@ if __name__ == "__main__":
 				htmlrep.datesrange()
 				htmlrep.linkedheader(viewtype, storage_nodes_string_html)
 				if key == "size":
-					sorted_indices=np.flipud(np.argsort([obstable[j].totsize for j in np.arange(Nrecs)], kind='mergesort'))
+					sorted_indices=np.flipud(np.argsort([obstable[r].totsize for r in obskeys], kind='mergesort'))
 				elif key == "time":
-					sorted_indices=np.flipud(np.argsort([obstable[j].seconds for j in np.arange(Nrecs)], kind='mergesort'))
+					sorted_indices=np.flipud(np.argsort([obstable[r].seconds for r in obskeys], kind='mergesort'))
 				elif key == "source":
-					sorted_indices=np.argsort([obstable[j].pointing for j in np.arange(Nrecs)], kind='mergesort')
+					sorted_indices=np.argsort([obstable[r].pointing for r in obskeys], kind='mergesort')
 				# unsorted (i.e. by default sorted by ObsId)
 				else:
-					sorted_indices=np.arange(Nrecs)
-				for i in np.arange(Nrecs):
-					htmlrep.record(i%2 == 0 and "d0" or "d1", i, obstable[sorted_indices[i]].infohtml)
+					sorted_indices=np.arange(np.size(obskeys))
+				counter = 0
+				for i in sorted_indices:
+					htmlrep.record(counter%2 == 0 and "d0" or "d1", counter, obstable[obskeys[i]].infohtml)
+					counter += 1
 				htmlrep.legend()
 				htmlrep.close()
