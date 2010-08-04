@@ -509,7 +509,7 @@ class writeHtmlList:
 
 	def linkedheader (self, viewtype, storage_nodes_string_html):
 		sf=["-obsid.html", "-time.html", "-size.html", "-source.html"]
-		sf=["%s%s" % (self.linkedhtmlstem, i) for i in sf]
+		sf=["%s%s" % (self.linkedhtmlstem.split("/")[-1], i) for i in sf]
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
 		if viewtype == "brief":
 			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n</tr>\n" % (sf[0], sf[3], sf[1]))
