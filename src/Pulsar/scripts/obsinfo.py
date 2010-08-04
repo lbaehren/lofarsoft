@@ -297,7 +297,8 @@ class outputInfo:
 		self.obsyear = self.id.split("_")[0][1:]
 		self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 		self.storage = {}
-		[self.storage[key] = ["x", "0.0"] for key in lsenames]
+		for key in lsenames:
+			self.storage[key] = ["x", "0.0"]
 	
 	def setcomment (self, id, comment):
 		self.id = id
@@ -342,7 +343,8 @@ class outputInfo:
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
 		self.totsize=0.0
 		self.dirsize_string=""
-		[self.storage[l]=dirsizes[l] for l in storage_nodes]
+		for l in storage_nodes:
+			self.storage[l]=dirsizes[l]
 		for l in storage_nodes:
 			self.totsize = self.totsize + float(self.storage[l][1])
 			self.dirsize_string = self.dirsize_string + self.storage[l][0] + "\t"
