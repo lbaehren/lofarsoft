@@ -59,6 +59,9 @@ cexec_nodes={'lse013': 'sub5:9', 'lse014': 'sub5:10', 'lse015': 'sub5:11',
              'lse010': 'sub4:9', 'lse011': 'sub4:10', 'lse012': 'sub4:11'}
 cexec_egrep_string="egrep -v \'\\*\\*\\*\\*\\*\' |egrep -v \'\\-\\-\\-\\-\\-\'"
 
+# list of lse nodes names for use as keys in the dictionary that keeps the sizes of obs directories in outputInfo class
+lsenames = ["lse%03d" % (n, ) for n in np.arange(1,25,1)]
+
 # file to dump the obs table
 dumpfile="/home/%s/Lofar/dump.b" % (username, )
 
@@ -293,15 +296,17 @@ class outputInfo:
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
 		self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
+		self.storage = {}
+		[self.storage[key] = ["x", "0.0"] for key in lsenames]
 	
-	def setcomment (self, id, cs, comment):
+	def setcomment (self, id, comment):
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
 		self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 		self.comment = comment
 		self.totsize = 0
 		self.pointing = "????_????"
-		self.cs = cs
+		self.cs = len(storage_nodes)
 		if viewtype == "brief":
 			self.colspan = 12
 		elif viewtype == "plots":
@@ -313,7 +318,7 @@ class outputInfo:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
 
-	def Init(self, id, oi, dirsize_string, totsize, statusline, comment, filestem_array, chi_array):
+	def Init(self, id, oi, dirsizes, statusline, comment, filestem_array, chi_array):
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
 		self.oi = oi
@@ -322,11 +327,9 @@ class outputInfo:
 		else:
 			self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 		self.pointing = self.oi.pointing
-		self.dirsize_string = dirsize_string
-		self.totsize = totsize
 		self.statusline = statusline
 		self.comment = comment
-		self.cs = len(self.dirsize_string.split("\t"))
+		self.cs = len(storage_nodes)
 		if viewtype == "brief":
 			self.colspan = 12
 		elif viewtype == "plots":
@@ -336,6 +339,15 @@ class outputInfo:
 		self.filestem_array = filestem_array
 		self.chi_array = chi_array
 
+		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
+		self.totsize=0.0
+		self.dirsize_string=""
+		[self.storage[l]=dirsizes[l] for l in storage_nodes]
+		for l in storage_nodes:
+			self.totsize = self.totsize + float(self.storage[l][1])
+			self.dirsize_string = self.dirsize_string + self.storage[l][0] + "\t"
+		# converting total size to GB
+		self.totsize = "%.1f" % (self.totsize / 1024. / 1024. / 1024.,)
 		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
 		
 		if self.comment == "":
@@ -376,6 +388,17 @@ class outputInfo:
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
 
 	def update(self):
+		self.cs = len(storage_nodes)
+		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
+		self.totsize=0.0
+		self.dirsize_string=""
+		for l in storage_nodes:
+			self.totsize = self.totsize + float(self.storage[l][1])
+			self.dirsize_string = self.dirsize_string + self.storage[l][0] + "\t"
+		# converting total size to GB
+		self.totsize = "%.1f" % (self.totsize / 1024. / 1024. / 1024.,)
+		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
+
 		if viewtype == "brief":
 			self.colspan = 12
 		elif viewtype == "plots":
@@ -741,7 +764,7 @@ if __name__ == "__main__":
 				else:
 					# no directory found
 					comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
-					out.setcomment(id, len(storage_nodes), comment)
+					out.setcomment(id, comment)
 					obstable=np.append(obstable, out)
 					continue
 
@@ -755,7 +778,7 @@ if __name__ == "__main__":
 				log=logdir + "RTCP-" + id_suffix + ".parset"
 				if not os.path.exists(log):
 					comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
-					out.setcomment(id, len(storage_nodes), comment)
+					out.setcomment(id, comment)
 					obstable=np.append(obstable, out)
 					continue
 
@@ -763,25 +786,18 @@ if __name__ == "__main__":
 		oi=obsinfo(log)
 
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
-		totsize=0.0
-		dirsize_string=""
+		dirsizes = {}
 		for lse in storage_nodes:
 			ddir=oi.datadir + "/" + id
-			dirsize="x"
+			dirsizes[lse] = ["x", "0.0"]
 			cmd="cexec %s 'du -sh %s 2>&1 | cut -f 1 | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
 			dirout=os.popen(cmd).readlines()
 			if np.size(dirout) > 0:
-				dirsize=dirout[0][:-1]
+				dirsizes[lse][0]=dirout[0][:-1]
 				cmd="cexec %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
 				status=os.popen(cmd).readlines()[0][:-1]
 				if status.isdigit() == True:
-						totsize=totsize + float(status)
-				else:
-					print "%s %s %s %s %s" % (status, "--->", id, lse, ddir)
-			dirsize_string=dirsize_string+dirsize+"\t"
-
-		# converting total size to GB
-		totsize = "%.1f" % (totsize / 1024. / 1024. / 1024.,)
+						dirsizes[lse][1] = status
 
 		# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
 		# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file
@@ -848,7 +864,7 @@ if __name__ == "__main__":
 				break
 
 		# combining info
-		out.Init(id, oi, dirsize_string, totsize, statusline, "", profiles_array, chi_array)
+		out.Init(id, oi, dirsizes, statusline, "", profiles_array, chi_array)
 		obstable=np.append(obstable, out)
 
 
