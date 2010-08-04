@@ -25,17 +25,17 @@ class bbs(LOFARrecipe):
             help="Initscript to source (ie, lofarinit.sh)"
         )
         self.optionparser.add_option(
-            '-p', '--parset', 
+            '-p', '--parset',
             dest="parset",
             help="BBS configuration parset"
         )
         self.optionparser.add_option(
-            '-s', '--skymodel', 
+            '-s', '--skymodel',
             dest="skymodel",
             help="initial sky model (in makesourcedb format)"
         )
         self.optionparser.add_option(
-            '-w', '--working-directory', 
+            '-w', '--working-directory',
             dest="working_directory",
             help="Working directory used on compute nodes"
         )
@@ -155,7 +155,7 @@ class bbs(LOFARrecipe):
                 raise IOError
 
             env = utilities.read_initscript(self.inputs['initscript'])
-            
+
             self.logger.debug("Building BBS command string")
             bbs_cmd = [
                 self.inputs['executable'],
