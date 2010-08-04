@@ -131,25 +131,19 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
 
   find_file (have_hdf5_tgz ${HDF5_TAR_ARCHIVE} ${HDF5_SOURCE_DIR})
 
-  if (have_hdf5_tgz)
-    ExternalProject_Add (hdf5
-      PREFIX ${HDF5_BINARY_DIR}
-      DOWNLOAD_DIR ${HDF5_BINARY_DIR}
-      SOURCE_DIR ${HDF5_BINARY_DIR}
-      URL ${have_hdf5_tgz}
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${HDF5_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX} --bindir=${USG_INSTALL_PREFIX}/bin --includedir=${USG_INSTALL_PREFIX}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_fortran} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
-      )
-  else (have_hdf5_tgz)
-    ExternalProject_Add (hdf5
-      PREFIX ${HDF5_BINARY_DIR}
-      DOWNLOAD_DIR ${HDF5_BINARY_DIR}
-      SOURCE_DIR ${HDF5_BINARY_DIR}
-      URL ${HDF5_URL}
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${HDF5_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX} --bindir=${USG_INSTALL_PREFIX}/bin --includedir=${USG_INSTALL_PREFIX}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_fortran} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
-      )
-  endif (have_hdf5_tgz)
+  if (NOT have_hdf5_tgz)
+    set (have_hdf5_tgz ${HDF5_URL})
+  endif (NOT have_hdf5_tgz)
+  
+  ExternalProject_Add (hdf5
+    PREFIX ${HDF5_BINARY_DIR}
+    DOWNLOAD_DIR ${HDF5_BINARY_DIR}/download
+    SOURCE_DIR ${HDF5_BINARY_DIR}/source
+    URL ${have_hdf5_tgz}
+    URL_MD5 5ce228d860bf9e797ca40ab1a823c380
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ${HDF5_BINARY_DIR}/source/configure --prefix=${USG_INSTALL_PREFIX} --bindir=${USG_INSTALL_PREFIX}/bin --includedir=${USG_INSTALL_PREFIX}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_fortran} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
+    )
   
   ##__________________________________________________________________
   ## Custom target wrapping the standard configure/build chain
