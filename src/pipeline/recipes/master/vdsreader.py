@@ -5,7 +5,8 @@ import lofarpipe.support.utilities as utilities
 
 class vdsreader(LOFARrecipe):
     """
-    Read a GVDS file and return a list of the MS filenames referenced therein.
+    Read a GVDS file and return a list of the MS filenames referenced therein
+    together with selected metadata.
     """
     def __init__(self):
         super(vdsreader, self).__init__()
@@ -33,6 +34,17 @@ class vdsreader(LOFARrecipe):
         self.logger.debug(ms_names)
 
         self.outputs['data'] = ms_names
-        self.outputs['start_time'] = gvds['StartTime']
-        self.outputs['end_time'] = gvds['EndTime']
+        try:
+            self.outputs['start_time'] = gvds['StartTime']
+            self.outputs['end_time'] = gvds['EndTime']
+        except:
+            self.logger.warn("Failed to read start/end time from GVDS file")
+        try:
+            self.outputs['pointing'] = {
+                'type': gvds.getStringVector('Extra.FieldDirectionType')[0],
+                'dec': gvds.getStringVector('Extra.FieldDirectionDec')[0],
+                'ra': gvds.getStringVector('Extra.FieldDirectionRa')[0]
+            }
+        except:
+            self.logger.warn("Failed to read pointing information from GVDS file")
         return 0
