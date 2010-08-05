@@ -63,11 +63,12 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
     if (CFITSIO_enable_lfs)
       ExternalProject_Add (cfitsio
 	PREFIX ${CFITSIO_BINARY_DIR}
-	DOWNLOAD_DIR ${CFITSIO_BINARY_DIR}
-	SOURCE_DIR ${CFITSIO_BINARY_DIR}
+	DOWNLOAD_DIR ${CFITSIO_BINARY_DIR}/download
+	SOURCE_DIR ${CFITSIO_BINARY_DIR}/source
 	URL ${have_cfitsio_tgz}
+	URL_MD5 7467fdacb807ebeef7fe088f2b69d9ee
 	BUILD_IN_SOURCE 1
-	CONFIGURE_COMMAND ${CFITSIO_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}  --includedir=${USG_INSTALL_PREFIX}/include/cfitsio --enable-lfs
+	CONFIGURE_COMMAND ${CFITSIO_BINARY_DIR}/source/configure --prefix=${USG_INSTALL_PREFIX}  --includedir=${USG_INSTALL_PREFIX}/include/cfitsio --enable-lfs
 	)
     else (CFITSIO_enable_lfs)
       ExternalProject_Add (cfitsio
@@ -75,6 +76,7 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
 	DOWNLOAD_DIR ${CFITSIO_BINARY_DIR}
 	SOURCE_DIR ${CFITSIO_BINARY_DIR}
 	URL ${have_cfitsio_tgz}
+	URL_MD5 7467fdacb807ebeef7fe088f2b69d9ee
 	BUILD_IN_SOURCE 1
 	CONFIGURE_COMMAND ${CFITSIO_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}  --includedir=${USG_INSTALL_PREFIX}/include/cfitsio
 	)
