@@ -138,11 +138,11 @@ void write_profiles(float *prof,int nbins, int nchan, int nifs, FILE *out)/*incl
       first=0;
       printf ("start writing");
       /* write profile in PSRFITS format */
-      printf ("fits_create_file(\&fits, \"stdout\", \&sta); -->");
+      printf ("fits_create_file(\&fits, \"stdout\", \&sta); -->\n");
       fits_create_file(&fits, "stdout", &sta);
-      printf ("fits_create_img(fits,bitpix,naxis,naxes,&sta); -->"); 
+      printf ("fits_create_img(fits,bitpix,naxis,naxes,&sta); -->\n"); 
       fits_create_img(fits,bitpix,naxis,naxes,&sta);
-      printf ("fits_write_date(fits,\&sta); -->");
+      printf ("fits_write_date(fits,\&sta); -->\n");
       fits_write_date(fits,&sta);
       /* Get DateTime string - required in various BINTABLEs */
       printf ("update keys....");
@@ -272,7 +272,7 @@ void write_profiles(float *prof,int nbins, int nchan, int nifs, FILE *out)/*incl
       subint_cnt=1;
       /* Add START TIME to primary HDU */
       /* Move to primary HDU */
-      printf ("fits_movabs_hdu( fits, 1, NULL, \&sta ); -->");
+      printf ("fits_movabs_hdu( fits, 1, NULL, \&sta ); -->\n");
       fits_movabs_hdu( fits, 1, NULL, &sta );
       cal(tstart,&epn.year,&epn.month,&epn.day);
       sprintf(datestr,"%4d-%02d-%02d",epn.year,epn.month,epn.day);
@@ -286,7 +286,7 @@ void write_profiles(float *prof,int nbins, int nchan, int nifs, FILE *out)/*incl
       fits_update_key( fits, TINT, "STT_SMJD", &dx,
 		     "[s] Start time (sec past UTC 00h) (J)", &sta);
       /* Move to last created HDU in scan header */
-      printf ("fits_movabs_hdu( fits, last_scanhdr_hdu, NULL, \&sta ); -->");
+      printf ("fits_movabs_hdu( fits, last_scanhdr_hdu, NULL, \&sta ); -->\n");
       fits_movabs_hdu( fits, last_scanhdr_hdu, NULL, &sta );
 
       /* Create SUBINT BINTABLE */
@@ -364,7 +364,7 @@ void write_profiles(float *prof,int nbins, int nchan, int nifs, FILE *out)/*incl
       naxes[1] = nchans;
       naxes[2] = nifs;
     
-      printf ("fits_write_tdim( fits, ncols, 3, naxes, \&sta ); -->");
+      printf ("fits_write_tdim( fits, ncols, 3, naxes, \&sta ); -->\n");
       fits_write_tdim( fits, ncols, 3, naxes, &sta );
       
       /* Add keywords */
@@ -382,13 +382,13 @@ void write_profiles(float *prof,int nbins, int nchan, int nifs, FILE *out)/*incl
 		     "Start channel/sub-band number (0 to NCHAN-1) (I)", &sta);
     
       /* Store subint hdu number */
-      printf ("fits_get_hdu_num( fits, \&subint_hdu ); -->");
+      printf ("fits_get_hdu_num( fits, \&subint_hdu ); -->\n");
       fits_get_hdu_num( fits, &subint_hdu );
     }
     
     /* Write SUBINT BINTABLE columns */
 
-    printf ("Write SUBINT BINTABLE columns -->");
+    printf ("Write SUBINT BINTABLE columns -->\n");
     
     /* Fill in columns of table */
     col = 1;
@@ -489,7 +489,7 @@ void write_profiles(float *prof,int nbins, int nchan, int nifs, FILE *out)/*incl
     fits_write_col(fits,TFLOAT,col, subint_cnt, 1, nbins*nchans*nifs, prof, &sta );
 
     subint_cnt++;
-    printf ("if (sta) fits_report_error(stderr,sta); -->");
+    printf ("if (sta) fits_report_error(stderr,sta); -->\n");
     if (sta) fits_report_error(stderr,sta);
 
     printf ("= END writing = ");
