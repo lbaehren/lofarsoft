@@ -482,10 +482,11 @@ void write_profiles(float *prof,int nbins, int nchan, int nifs, FILE *out)/*incl
     col++;
 
     /* Subint data table - Dimensions of data table = (NBIN,NCHAN,NPOL) */
-    for (i=0;i<nchans*nifs*nbins;i++) binned_data[i]=prof[i];
+    /* Vlad, Aug 5 Don't see the reason to use binned_data, we have more samples + we can just write prof array to file*/
+    /* for (i=0;i<nchans*nifs*nbins;i++) binned_data[i]=prof[i]; */
 
-    fits_write_col(fits,TFLOAT,col, subint_cnt, 1, nbins*nchans*nifs, 
-		   binned_data, &sta );
+    /* fits_write_col(fits,TFLOAT,col, subint_cnt, 1, nbins*nchans*nifs, binned_data, &sta ); */
+    fits_write_col(fits,TFLOAT,col, subint_cnt, 1, nbins*nchans*nifs, prof, &sta );
 
     subint_cnt++;
     printf ("if (sta) fits_report_error(stderr,sta); -->");
