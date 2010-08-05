@@ -33,9 +33,14 @@ def directionFromThreeAntennas(positions, times):
     get a direction of arrival (az, el) assuming a source at infinity (plane wave).
     From three antennas we get in general two solutions for the direction, 
     unless the arrival times are out of bounds, i.e. larger than the light-time between two antennas.
+    Usually, when the 3 antennas are in a more or less horizontal plane, one of the solutions will appear to come
+    from below the horizon (el < 0) and can be discarded.
+    
     In: positions array (x1, y1, z1, x2, y2, z2, x3, y3, z3); 
         times array (t1, t2, t3).
     Input is assumed to be Numpy arrays.
+    Out: (az1, el1, az2, el2), in radians, containing the two solutions.
+    
     """
     
     p1 = np.array(positions[0:3]) 
@@ -174,6 +179,96 @@ def testDirectionCalculationForThreeAntennas(positions):
                 print 'Wrong value for az: ' + str(az*rad2deg) + ' calculated: ' +str(calc_az * rad2deg) + ' or: ' + str(calc_az2 * rad2deg)
                 print 'el: ' + str(el*rad2deg) + ' calculated: ' + str(calc_el * rad2deg) + ' or: ' + str(calc_el2 * rad2deg)
     
+def directionBruteForceSearch(positions, times):
+    """
+    Given N antenna positions, and (pulse) arrival times for each antenna, 
+    get a direction of arrival (az, el) assuming a source at infinity (plane wave).
+    
+    The direction is found using a 'brute-force' search over a grid on the sky. 
+    For each direction, the corresponding time delays are calculated using timeDelaysFromDirection(positions, direction).
+    These are compared to the actual (measured) time delays in 'times'. The mean-squared error (MSE) 
+    serves as a fit criterion to be minimized. The global minimum and its MSE are returned.
+    Note that the square-root of the MSE value is useful to determine the average 'timing noise', 
+    i.e. the timing deviation from the plane-wave solution.
+    
+    In: positions array (x1, y1, z1, x2, y2, z2, x3, y3, z3), in meters
+        times array (t1, t2, t3), in seconds.
+    Input is assumed to be Numpy arrays.
+    
+    Out: (az, el, mse), in radians, and seconds-squared.
+    """
+    
+    # this can probably be done better by Scipy. But for now this is easy and it works...
+    
+    elSteps = 90
+    azSteps = 360 # where do we put the 'constant' parameters? Well, not here...
+    N = len(times)
+    
+    bestFit = (-1, -1)
+    minMSE = 1.0e9
+    
+    for i in range(elSteps+1):
+        for j in range(azSteps+1):
+            el = halfpi * float(i) / elSteps
+            az = twopi * float(j) / azSteps
+            
+            calcTimes = timeDelaysFromDirection(positions, (az, el))
+            timeOffsets = calcTimes - times
+            mu = (1.0/N) * np.sum(timeOffsets) # overall time offset to be subtracted in MSE
+            mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
+            
+            if mse < minMSE:
+                minMSE = mse
+#                print 'New MinMSE %e' % minMSE
+                bestFit = (az, el)
+
+    return bestFit + (minMSE,)       
+                                        
+def directionForHorizontalArray(positions, times):
+    """
+    Given N antenna positions, and (pulse) arrival times for each antenna, 
+    get a direction of arrival (az, el) assuming a source at infinity (plane wave).
+    
+    Here, we find the direction assuming all antennas are placed in the z=0 plane.
+    If all antennas are co-planar, the best-fitting solution can be found using a 2D-linear fit.
+    We find the best-fitting A and B in:
+    
+        t = A x + B y
+        
+    where t is the array of times; x and y are arrays of coordinates of the antennas.
+    This is done using numpy.linalg.lstsq.
+    
+    The (az, el) follows from:
+    
+        A = cos(el) cos(az)
+        B = cos(el) sin(az)
+    
+    In: positions array (x1, y1, z1, x2, y2, z2, x3, y3, z3), in meters. NB: z_i is simply ignored but still assumed to be there!
+        times array (t1, t2, t3), in seconds.
+    Input is assumed to be Numpy arrays.
+    
+    Out: (az, el), in radians, and seconds-squared.
+    """
+    
+    # make x, y arrays out of the input position array
+#    N = len(positions)
+    x = positions[0:-1:3]
+    y = positions[1:-1:3]
+    
+    # now a crude test for nonzero z-input, |z| > 0.5
+    z = positions[2:-1:3]
+    if max(abs(z)) > 0.5:
+        raise ValueError("Input values of z are nonzero ( > 0.5) !")
+        return (-1, -1)
+    
+    M = np.vstack([x, y]).T # says the linalg.lstsq doc
+    
+    (A, B) = np.linalg.lstsq(M, c * times)[0]
+        
+    el = np.arccos(np.sqrt(A*A + B*B))
+    az = np.arctan2(-B, -A) # note minus sign as we want the direction of the _incoming_ vector (from the sky, not towards it)
+    
+    return (az, el)
     
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
@@ -183,3 +278,13 @@ if __name__=='__main__':
     import doctest
     doctest.testmod()
 
+#    print A
+#    print B
+#    print A * x[1] + B * y[1]
+#    print c * times[1]
+#    print ' '
+#    print A * x[2] + B * y[2]
+#    print c * times[2]
+
+#    cosel = np.sqrt(A*A + B*B)
+#    print cosel
