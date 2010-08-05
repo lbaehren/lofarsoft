@@ -97,7 +97,9 @@ void write_filterbank_header ( int n_infiles, char *parsetfile, int writefloats)
 
   /* use parset to inf file convertor */
   sprintf(tempinffile, "/tmp/bf2presto"); // no suffix here
-  sprintf(script,      "$LOFARSOFT/src/Pulsar/apps/bf2presto/par2inf.py");
+  /* Vlad, Aug 5*/
+  /* sprintf(script,      "$LOFARSOFT/src/Pulsar/apps/bf2presto/par2inf.py"); */
+  sprintf(script,      "${LOFARSOFT}/release/share/pulsar/bin/par2inf.py");
 
   printf("Reading parset file %s using %s \n", parsetfile, script);
   sprintf(cmd, "%s -o %s.inf %s; ", script, tempinffile, parsetfile);  
