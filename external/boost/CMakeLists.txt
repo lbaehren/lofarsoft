@@ -72,6 +72,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       PATCH_COMMAND ${tar_executable} -xzf ${have_boost_cmake}
       SOURCE_DIR ${BOOST_BINARY_DIR}/boost
       URL ${have_boost_tgz}
+      URL_MD5 1ba819da0c1f8ea42d4aefed022cfd77
       CMAKE_ARGS -C ${BOOST_BINARY_DIR}/boost.cmake
       )
     ## Post-installation patch of include paths

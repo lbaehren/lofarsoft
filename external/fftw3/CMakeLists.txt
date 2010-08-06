@@ -54,6 +54,7 @@ if (NOT HAVE_FFTW3 OR FFTW3_FORCE_BUILD)
       DOWNLOAD_DIR ${FFTW3_BINARY_DIR}
       SOURCE_DIR ${FFTW3_BINARY_DIR}
       URL ${have_fftw3_tgz}
+      URL_MD5 b616e5c91218cc778b5aa735fefb61ae
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${FFTW3_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
       )
@@ -63,6 +64,7 @@ if (NOT HAVE_FFTW3 OR FFTW3_FORCE_BUILD)
       DOWNLOAD_DIR ${FFTW3_BINARY_DIR}
       SOURCE_DIR ${FFTW3_BINARY_DIR}
       URL ftp://ftp.fftw.org/pub/fftw/fftw-3.2.2.tar.gz
+      URL_MD5 b616e5c91218cc778b5aa735fefb61ae
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${FFTW3_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
       )

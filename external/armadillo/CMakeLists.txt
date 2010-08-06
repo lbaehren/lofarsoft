@@ -61,17 +61,19 @@ if (NOT HAVE_ARMADILLO OR ARMADILLO_FORCE_BUILD)
   if (have_armadillo_tgz)
     ExternalProject_Add (armadillo
       PREFIX ${ARMADILLO_BINARY_DIR}
-      DOWNLOAD_DIR ${ARMADILLO_BINARY_DIR}
-      SOURCE_DIR ${ARMADILLO_BINARY_DIR}
+      DOWNLOAD_DIR ${ARMADILLO_BINARY_DIR}/download
+      SOURCE_DIR ${ARMADILLO_BINARY_DIR}/source
       URL ${have_armadillo_tgz}
+      URL_MD5 1339cbb67b72d8aeab9d611c6f0e6c8c
       CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${USG_INSTALL_PREFIX}
       )
   else (have_armadillo_tgz)
     ExternalProject_Add (armadillo
       PREFIX ${ARMADILLO_BINARY_DIR}
-      DOWNLOAD_DIR ${ARMADILLO_BINARY_DIR}
-      SOURCE_DIR ${ARMADILLO_BINARY_DIR}
+      DOWNLOAD_DIR ${ARMADILLO_BINARY_DIR}/download
+      SOURCE_DIR ${ARMADILLO_BINARY_DIR}/source
       URL ${ARMADILLO_URL}
+      URL_MD5 1339cbb67b72d8aeab9d611c6f0e6c8c
       CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${USG_INSTALL_PREFIX}
       )
   endif (have_armadillo_tgz)

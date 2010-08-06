@@ -61,6 +61,7 @@ if (NOT HAVE_GSL OR GSL_FORCE_BUILD)
       DOWNLOAD_DIR ${GSL_BINARY_DIR}
       SOURCE_DIR ${GSL_BINARY_DIR}
       URL ${have_gsl_tgz}
+      URL_MD5 d9fcfa367c44ab68a25b4edf34c3c5f7
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${GSL_BINARY_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
       )
@@ -70,6 +71,7 @@ if (NOT HAVE_GSL OR GSL_FORCE_BUILD)
       DOWNLOAD_DIR ${GSL_BINARY_DIR}
       SOURCE_DIR ${GSL_BINARY_DIR}
       URL ftp://ftp.mirror.nl/pub/mirror/gnu/gsl/${GSL_TAR_ARCHIVE}
+      URL_MD5 d9fcfa367c44ab68a25b4edf34c3c5f7
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${GSL_BINARY_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
       )
