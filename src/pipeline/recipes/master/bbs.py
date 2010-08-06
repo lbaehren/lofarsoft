@@ -135,7 +135,7 @@ class bbs(LOFARrecipe):
             # Now set up a vdsmaker recipe to build a GDS file describing the
             # processed data
             self.logger.info("Calling vdsmaker")
-            bbs_gvds = tempfile.mkstemp()[1]
+            bbs_gvds = tempfile.mkstemp(suffix=".vds")[1]
             inputs = LOFARinput(self.inputs)
             inputs['directory'] = self.config.get('layout', 'vds_directory')
             inputs['gvds'] = bbs_gvds
