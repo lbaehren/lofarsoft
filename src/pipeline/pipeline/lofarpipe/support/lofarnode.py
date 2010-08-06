@@ -30,10 +30,12 @@ class LOFARnode(object):
         if self.loghost:
             my_tcp_handler = logging.handlers.SocketHandler(self.loghost, self.logport)
             self.logger.addHandler(my_tcp_handler)
-        self.run(*args)
-        if self.loghost:
-            my_tcp_handler.close()
-            self.logger.removeHandler(my_tcp_handler)
+        try:
+            return self.run(*args)
+        finally:
+            if self.loghost:
+                my_tcp_handler.close()
+                self.logger.removeHandler(my_tcp_handler)
 
     def run(self):
         # Override in subclass.
