@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 #
+# Script to convert .singlepulse to .tim file in Princeton format
+# with extra columns added in the end of each line (sigma, phase)
+#
+# Vlad, Aug 5, 2010 (c)
+######################################################################
 import numpy as np
 import os, os.path, stat, glob, sys, getopt
 import infodata as inf

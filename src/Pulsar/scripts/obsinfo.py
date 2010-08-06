@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 #
+# Script to collect info about LOFAR observations and write out
+# the list of obs with different parameters listed, both in ascii
+# and Html formats
+#
+# Vlad, Aug 5, 2010 (c)
+###################################################################
 import os, sys, glob
 import getopt
 import numpy as np
@@ -297,7 +303,11 @@ class outputInfo:
 	def __init__(self, id):
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
-		self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
+		try:
+			self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
+		except StandardError:
+			print "Network problems or non-standard obs dir name: %s" % (self.id, )
+			sys.exit(1)
 		self.storage = {}
 		for key in lsenames:
 			self.storage[key] = ["x", "0.0"]
@@ -812,9 +822,11 @@ if __name__ == "__main__":
 			if np.size(dirout) > 0:
 				dirsizes[lse][0]=dirout[0][:-1]
 				cmd="cexec %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
-				status=os.popen(cmd).readlines()[0][:-1]
-				if status.isdigit() == True:
-						dirsizes[lse][1] = status
+				status=os.popen(cmd).readlines()
+				if np.size(status) > 0:
+					status=status[0][-1]
+					if status.isdigit() == True:
+							dirsizes[lse][1] = status
 
 		# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
 		# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file
