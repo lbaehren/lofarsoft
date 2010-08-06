@@ -23,6 +23,8 @@
 
 #include <Analysis/lateralDistribution.h>
 
+#include <boost/lexical_cast.hpp>
+
 #include "TROOT.h"
 #include "TCanvas.h"
 #include "TGraphErrors.h"
@@ -77,7 +79,8 @@ namespace CR { // Namespace CR -- begin
                                                       map <int, PulseProperties> pulsesSim,
                                                       int Gt, double az, double ze,
                                                       const string& index1,
-                                                      const string& index2)
+                                                      const string& index2,
+                                                      const double& fitDistance)
   {
     Record erg;
     try {
@@ -90,6 +93,7 @@ namespace CR { // Namespace CR -- begin
       erg.define("chi2NDF",0.);
       erg.define("latMeanDist",0.);
       erg.define("NlateralAntennas",ant);
+      erg.define("fitDistance",fitDistance);
       
       cout << "\nFitting lateral distribution for simulations and data..." << endl;
       
@@ -290,16 +294,17 @@ namespace CR { // Namespace CR -- begin
       if (ant >= 3) {
         // define names for statistics
         if (index1 != "") {
-          epsName = "#epsilon_{0}- " + index1;
+          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index1;
           R0Name = "R_{0}- " + index1;
         } else {
-          epsName = "#epsilon_{0}";
+          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}";
           R0Name = "R_{0}";
         }
       
         // fit exponential
         TF1 *fitfuncExp;
-        fitfuncExp=new TF1("fitfuncExp","[0]*exp(-x/[1])",0.,maxdist*1.1);
+        string fitFunction = "[0]*exp(-(x-"+boost::lexical_cast<string>(fitDistance)+")/[1])";
+        fitfuncExp=new TF1("fitfuncExp",fitFunction.c_str(),0.,maxdist*1.1);
         //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
         fitfuncExp->SetParName(0,epsName.c_str());
         fitfuncExp->SetParameter(0,20);
@@ -332,14 +337,14 @@ namespace CR { // Namespace CR -- begin
           cout << "-------- SIMULATIONS ---------"<<endl;
           // define names for statistics
           if (index2 != "") {
-            epsName = "#epsilon_{0}- " + index2;
+            epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index2;
             R0Name = "R_{0}- " + index2;
           } else {
-            epsName = "#epsilon_{0}";
+            epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}";
             R0Name = "R_{0}";
           }
           TF1 *fitfuncExpS;
-          fitfuncExpS=new TF1("fitfuncExpS","[0]*exp(-x/[1])",0.,maxdist*1.1);
+          fitfuncExpS=new TF1("fitfuncExpS",fitFunction.c_str(),0.,maxdist*1.1);
           //fitfuncExpS=new TF1("fitfuncExpS","[0]*exp(-(x-100)/[1])",50,190);
           fitfuncExpS->SetParName(0,epsName.c_str());
           fitfuncExpS->SetParameter(0,20);

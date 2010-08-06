@@ -138,6 +138,7 @@ using CR::LopesEventIn;
   calibration             = false
   lateralDistribution     = false
   lateralOutputFile       = false
+  lateralFitDistance      = 100
   lateralSNRcut           = 1.0
   lateralTimeCut          = 15e-9
   calculateMeanValues     = false
@@ -279,6 +280,8 @@ using CR::LopesEventIn;
                             The applied cuts and the method itself is under test and investigation. Thus,
                             don't use it, if you are not exactly sure, what you are doing. The physics results
                             could be misleading.<br>
+    <li>\b lateralFitDistance  Status: <i>preliminary</i><br>
+                            distance for the epsilon parameter of the lateral distribution fit<br>
     <li>\b lateralSNRcut    Status: <i>switched off</i><br>
                             SNR cut for the lateral distribution.<br>
                             Caution: This option has no effect at the moment.<br>
@@ -901,6 +904,7 @@ void readConfigFile (const string &filename)
    config.addBool("calibrationMode", false);	      	// Calibration mode is off by default
    config.addBool("lateralDistribution", false);    	// the lateral distribution will not be generated
    config.addBool("lateralOutputFile", false);      	// no file for the lateral distribution will be created
+   config.addDouble("lateralFitDistance", 100.);        // distance for fit of epsilon
    config.addDouble("lateralSNRcut", 1.0);            	// SNR cut for removing points from lateral distribution
    config.addDouble("lateralTimeCut", 15e-9);         	// Allowed time window +/- arround CC-beam-center for found peaks
    config.addBool("calculateMeanValues", false);   	// calculate some mean values of all processed events
@@ -1260,15 +1264,15 @@ int main (int argc, char *argv[])
 
   unsigned int gt = 0;
   char eventfilename[64] ;                               // Name of event file (first 64 characters)
-  double CCheight, CCheight_NS, CCheight_VE;                          // CCheight will be used for EW polarization or ANY polarization
-  double CCwidth, CCwidth_NS, CCwidth_VE;
-  double CCcenter, CCcenter_NS, CCcenter_VE;                    // time of CC beam
-  double CCheight_error, CCheight_error_NS, CCheight_error_VE;
-  bool CCconverged, CCconverged_NS, CCconverged_VE;                       // is true if the Gaussian fit to the CCbeam converged
-  double Xheight, Xheight_NS, Xheight_VE;                            // CCheight will be used for EW polarization or ANY polarization
-  double Xheight_error, Xheight_error_NS, Xheight_error_VE;
-  bool Xconverged, Xconverged_NS, Xconverged_VE;                         // is true if the Gaussian fit to the CCbeam converged
-  double AzL, ElL, AzL_NS, ElL_NS, AzL_VE, ElL_VE;                       // Azimuth and Elevation
+  double CCheight=0, CCheight_NS=0, CCheight_VE=0;                          // CCheight will be used for EW polarization or ANY polarization
+  double CCwidth=0, CCwidth_NS=0, CCwidth_VE=0;
+  double CCcenter=0, CCcenter_NS=0, CCcenter_VE=0;                    // time of CC beam
+  double CCheight_error=0, CCheight_error_NS=0, CCheight_error_VE=0;
+  bool CCconverged=0, CCconverged_NS=0, CCconverged_VE=0;                       // is true if the Gaussian fit to the CCbeam converged
+  double Xheight=0, Xheight_NS=0, Xheight_VE=0;                            // CCheight will be used for EW polarization or ANY polarization
+  double Xheight_error=0, Xheight_error_NS=0, Xheight_error_VE=0;
+  bool Xconverged=0, Xconverged_NS=0, Xconverged_VE=0;                         // is true if the Gaussian fit to the CCbeam converged
+  double AzL=0, ElL=0, AzL_NS=0, ElL_NS=0, AzL_VE=0, ElL_VE=0;                       // Azimuth and Elevation
   double distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;       // distance = radius of curvature
   double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;             // R_0 from lateral distribution exponential fit
   double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;             // Epsilon from lateral distribution exponential fit
@@ -1283,9 +1287,9 @@ int main (int argc, char *argv[])
   map <int,PulseProperties> rawPulsesMap;                // pulse properties of pules in raw data traces
   map <int,PulseProperties> calibPulsesMap;              // pulse properties of pules in calibrated data traces
   bool goodEW = false, goodNS = false, goodVE = false;                // true if reconstruction worked
-  double rmsCCbeam, rmsCCbeam_NS, rmsCCbeam_VE;                        // rms values of the beams in remote region
-  double rmsXbeam, rmsXbeam_NS, rmsXbeam_VE;
-  double rmsPbeam, rmsPbeam_NS, rmsPbeam_VE;
+  double rmsCCbeam=0, rmsCCbeam_NS=0, rmsCCbeam_VE=0;                        // rms values of the beams in remote region
+  double rmsXbeam=0, rmsXbeam_NS=0, rmsXbeam_VE=0;
+  double rmsPbeam=0, rmsPbeam_NS=0, rmsPbeam_VE=0;
   unsigned int NCCbeamAntennas = 0, NlateralAntennas = 0; // antennas used for CC beam and lateral distribution
   unsigned int NCCbeamAntennas_NS = 0, NlateralAntennas_NS = 0; // antennas used for CC beam and lateral distribution
   unsigned int NCCbeamAntennas_VE = 0, NlateralAntennas_VE = 0; // antennas used for CC beam and lateral distribution
@@ -1293,12 +1297,12 @@ int main (int argc, char *argv[])
   //int CutSmallSignal, CutSmallSignal_NS, CutSmallSignal_VE;              // # of cut antennas in lateral distribution fit
   //int CutBadTiming, CutBadTiming_NS, CutBadTiming_VE;                  // # of cut antennas in lateral distribution fit
   //int CutSNR, CutSNR_NS, CutSNR_VE;                              // # of cut antennas in lateral distribution fit
-  double latMeanDist, latMeanDist_NS, latMeanDist_VE;                 // mean distance of the antennas in the lateral distribution
-  double latMeanDistCC, latMeanDistCC_NS, latMeanDistCC_VE;             // mean distance of the antennas used for the CC beam
-  double ratioDiffSign, ratioDiffSign_NS, ratioDiffSign_VE;
-  double ratioDiffSignEnv, ratioDiffSignEnv_NS, ratioDiffSignEnv_VE;
-  double weightedTotSign,weightedTotSign_NS,weightedTotSign_VE;
-  double weightedTotSignEnv,weightedTotSignEnv_NS,weightedTotSignEnv_VE;
+  double latMeanDist=0, latMeanDist_NS=0, latMeanDist_VE=0;                 // mean distance of the antennas in the lateral distribution
+  double latMeanDistCC=0, latMeanDistCC_NS=0, latMeanDistCC_VE=0;             // mean distance of the antennas used for the CC beam
+  double ratioDiffSign=0, ratioDiffSign_NS=0, ratioDiffSign_VE=0;
+  double ratioDiffSignEnv=0, ratioDiffSignEnv_NS=0, ratioDiffSignEnv_VE=0;
+  double weightedTotSign=0,weightedTotSign_NS=0,weightedTotSign_VE=0;
+  double weightedTotSignEnv=0,weightedTotSignEnv_NS=0,weightedTotSignEnv_VE=0;
 
   PulseProperties* rawPulses[MAX_NUM_ANTENNAS];       // use array of pointers to store pulse properties in root tree
   PulseProperties* calibPulses[MAX_NUM_ANTENNAS];     // use array of pointers to store pulse properties in root tree
@@ -1387,6 +1391,7 @@ int main (int argc, char *argv[])
              << "calibration = false\n"
              << "lateralDistribution = false\n"
              << "lateralOutputFile = false\n"
+             << "lateralFitDistance = 100\n"
              << "lateralSNRcut = 1.0\n"
              << "lateralTimeCut = 25e-9\n"
              << "calculateMeanValues = false\n"
@@ -1466,7 +1471,10 @@ int main (int argc, char *argv[])
       roottree = (TTree*)rootfile->Get("T;1");
     roottree->Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
     roottree->Branch("Eventname",&eventfilename,"Eventname/C");
-
+    double lateralFitDistance = config["LateralFitDistance"]->dValue();
+    if (config["lateralDistribution"]->bValue())
+      roottree->Branch("LateralFitDistance",&lateralFitDistance,"LateralFitDistance/D"); 
+  
     // the following branches are not used in the calibration mode
     if ( !config["calibrationMode"]->bValue() ) {
       if (kascadeRootFile == "") {
@@ -1967,7 +1975,8 @@ int main (int argc, char *argv[])
             if (config["lateralDistribution"]->bValue()) {
               Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
                                                                        calibPulsesMap, map <int, PulseProperties>(),
-                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"));
+                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
+                                                                       "","",config["LateralFitDistance"]->dValue());
               R_0 = latResults.asDouble("R_0");
               sigR_0 = latResults.asDouble("sigR_0");
               eps = latResults.asDouble("eps");
@@ -2100,7 +2109,8 @@ int main (int argc, char *argv[])
             if (config["lateralDistribution"]->bValue()) {
               Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
                                                                        newPulses, map <int, PulseProperties>(),
-                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"));
+                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
+                                                                       "","",config["LateralFitDistance"]->dValue());
               R_0_NS  = latResults.asDouble("R_0");
               sigR_0_NS  = latResults.asDouble("sigR_0");
               eps_NS  = latResults.asDouble("eps");
@@ -2236,7 +2246,8 @@ int main (int argc, char *argv[])
             if (config["lateralDistribution"]->bValue()) {
               Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
                                                                        newPulses, map <int, PulseProperties>(),
-                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"));
+                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
+                                                                       "","",config["LateralFitDistance"]->dValue());
               R_0_VE = latResults.asDouble("R_0");
               sigR_0_VE = latResults.asDouble("sigR_0");
               eps_VE = latResults.asDouble("eps");

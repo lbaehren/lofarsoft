@@ -949,6 +949,7 @@ namespace CR { // Namespace CR -- begin
 
 
         for (unsigned int i = 0; i < antennaSelection.nelements(); i++){
+          color = (i%10)+3;  // there are only 16 colors available, the first three not usable
           // consider only selected antennas
           if (antennaSelection(i)){
             // create filename and label
@@ -994,9 +995,6 @@ namespace CR { // Namespace CR -- begin
             // Add filename to list of created plots
             plotlist.push_back(plotfilename);
               cout << " " << (i+1);
-            color++;                                        // another color for the next antenna
-            if (color >= 13) color = 3;                        // there are only 16 colors available, 
-                                                        // use only ten as there are 3x10 antenna
           }
         }
         cout << endl;
@@ -1028,16 +1026,14 @@ namespace CR { // Namespace CR -- begin
         }
 
         // Create the plots looping through antennas
-        for (unsigned int i = 0; i < antennaSelection.nelements(); ++i)
+        for (unsigned int i = 0; i < antennaSelection.nelements(); ++i) {
+          color = (i%10)+3;  // there are only 16 colors available, the first three not usable
           if (antennaSelection(i)) {                        // consider only selected antennas
             // Plot (upsampled) trace
             plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
-
-            color++;                                        // another color for the next antenna
-            if (color >= 13) color = 3;                        // there are only 16 colors available, 
-                                                          // use only ten as there are 3x10 antennas
           }
-
+        }
+        
         // Add filename to list of created plots
         plotlist.push_back(plotfilename);
       } // else
