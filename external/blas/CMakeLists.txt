@@ -56,6 +56,12 @@ endif (BLAS_INSTALL_PREFIX)
 
 include (FindBLAS)
 
+if (BLAS_LIBRARIES)
+  find_library (BLAS_LIBRARIES blas
+    PATHS ${lib_locations}
+    )
+endif (BLAS_LIBRARIES)
+
 ## ==============================================================================
 ##
 ##  Package information
@@ -78,7 +84,7 @@ set (CBLAS_SVN            "" )
 ##
 ## ==============================================================================
 
-if (NOT BLAS_FOUND)
+if (NOT BLAS_LIBRARIES)
   
   ##____________________________________________________________________
   ##                                                                BLAS
@@ -148,4 +154,11 @@ if (NOT BLAS_FOUND)
   
   add_dependencies (cblas blas)
   
-endif (NOT BLAS_FOUND)
+else (NOT BLAS_LIBRARIES)
+
+    add_custom_target (blas
+    WORKING_DIRECTORY ${BLAS_BINARY_DIR}
+    COMMENT "[BLAS] Found system-wide installation; skipping rebuild!"
+    )
+
+endif (NOT BLAS_LIBRARIES)

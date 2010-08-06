@@ -1,3 +1,54 @@
+
+_________________________________________________________________________________
+>>> Organization of the code
+
+Once the check-out is completed, you will find the following directory structure
+on your disk:
+
+  lofarsoft
+  |-- data
+  |-- doc
+  |-- release
+  |-- build
+  |-- devel_common
+  |   |-- cmake
+  |   |-- scripts
+  |   `-- templates
+  |-- external
+  |   |-- cfitsio
+  |   |-- casacore
+  |   |-- hdf5
+  |   |-- plplot
+  |   |-- swig
+  |   `-- wcslib
+  `-- src
+      |-- contrib
+      |-- CR-Tools
+      |-- DAL
+      |-- LASA
+      |-- pipeline
+      |-- pybdsm
+      `-- RM
+
+In this:
+
+ - lofarsoft    : Root of the User Software code tree - go there if you want to
+                  synchronize your local working version against the repository.
+ - build        : Directory used for building individual packages in the code
+                  distribution; using a separate directory for this purpose makes
+                  it easy to simply erase all compile and link attempts and start
+                  again from a clean plate.
+ - devel_common : Directory holding common tools for development; this includes 
+                  e.g. the find scripts for CMake or file templates for creating
+                  new C++ classes. Unless you consider collaborating on the
+		  framework, you will not need to touch this (but you will need
+                  it).
+ - doc          : Local version of the Doxygen-based source code documentation.
+ - external     : Hosts the various external 3rd-party packages which will be
+                  required to build parts of the LOFAR User Software.
+ - src          : Contains the source code of the various projects andpackages
+                  developed and written within the framework of the LUS.
+
 _________________________________________________________________________________
 >>> Build high-level packages
 
@@ -8,7 +59,7 @@ on top of other external components:
   * [dal] Data Access Library
   * [rm] Rotation Measure Synthesis 
 
-Once completing the check-out of the source code from the USG repository, the
+Once completing the check-out of the source code from the LUS repository, the
 following steps are required:
 
   cd $LOFARSOFT/build
