@@ -56,11 +56,11 @@ endif (BLAS_INSTALL_PREFIX)
 
 include (FindBLAS)
 
-if (BLAS_LIBRARIES)
+if (NOT BLAS_LIBRARIES)
   find_library (BLAS_LIBRARIES blas
     PATHS ${lib_locations}
     )
-endif (BLAS_LIBRARIES)
+endif (NOT BLAS_LIBRARIES)
 
 ## ==============================================================================
 ##
