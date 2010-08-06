@@ -76,6 +76,7 @@ if (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
       DOWNLOAD_DIR ${SWIG_BINARY_DIR}
       SOURCE_DIR ${SWIG_BINARY_DIR}
       URL ${have_swig_tgz}
+      URL_MD5 2df766c9e03e02811b1ab4bba1c7b9cc
       CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
       )
   else (have_swig_tgz)

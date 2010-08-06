@@ -54,9 +54,9 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project
 
-  set (sip_version "4.10.1")
+  set (sip_version "4.10.5")
   set (SIP_DIRECTORY "sip-${sip_version}")
-  set (SIP_TAR_ARCHIVE "${SIP_DIRECTORY}.tar.gz")
+  set (SIP_TAR_ARCHIVE "${SIP_TAR_ARCHIVE}.tar.gz")
   set (sip_url "http://www.riverbankcomputing.co.uk/static/Downloads/sip4/${SIP_TAR_ARCHIVE}")
 
   ##__________________________________________________________________
@@ -65,25 +65,19 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   
   find_file (have_sip_tgz ${SIP_TAR_ARCHIVE} ${SIP_SOURCE_DIR})
 
-  if (have_sip_tgz) 
-    ExternalProject_Add (sip
-      PREFIX ${SIP_BINARY_DIR}
-      DOWNLOAD_DIR ${SIP_BINARY_DIR}
-      SOURCE_DIR ${SIP_BINARY_DIR}
-      BINARY_DIR ${SIP_BINARY_DIR}/build
-      URL ${have_sip_tgz}
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${SIP_BINARY_DIR}/configure.py -b ${CMAKE_INSTALL_PREFIX}/bin -d ${CMAKE_INSTALL_PREFIX}/lib/python -e ${CMAKE_INSTALL_PREFIX}/include/sip -v ${CMAKE_INSTALL_PREFIX}/share/sip
-      )
-  else (have_sip_tgz)
-    ExternalProject_Add (sip
-      PREFIX ${SIP_BINARY_DIR}
-      DOWNLOAD_DIR ${SIP_BINARY_DIR}
-      SOURCE_DIR ${SIP_BINARY_DIR}
-      BINARY_DIR ${SIP_BINARY_DIR}/build
-      URL ${sip_url}
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${SIP_BINARY_DIR}/configure.py -b ${CMAKE_INSTALL_PREFIX}/bin -d ${CMAKE_INSTALL_PREFIX}/lib/python -e ${CMAKE_INSTALL_PREFIX}/include/sip -v ${CMAKE_INSTALL_PREFIX}/share/sip
-      )
-  endif (have_sip_tgz)
+  if (NOT have_sip_tgz)
+    set (have_sip_tgz ${sip_url})
+  endif (NOT have_sip_tgz)
+
+  ExternalProject_Add (sip
+    PREFIX ${SIP_BINARY_DIR}
+    DOWNLOAD_DIR ${SIP_BINARY_DIR}
+    SOURCE_DIR ${SIP_BINARY_DIR}
+    BINARY_DIR ${SIP_BINARY_DIR}/build
+    URL ${have_sip_tgz}
+    URL_MD5 0a591ef6e59aa16e56822d3eb9fe21b8
+    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${SIP_BINARY_DIR}/configure.py -b ${CMAKE_INSTALL_PREFIX}/bin -d ${CMAKE_INSTALL_PREFIX}/lib/python -e ${CMAKE_INSTALL_PREFIX}/include/sip -v ${CMAKE_INSTALL_PREFIX}/share/sip
+    )
 
   ## <-- end build condition ----------------------------------------------------->
   

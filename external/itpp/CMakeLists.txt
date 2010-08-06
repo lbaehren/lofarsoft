@@ -89,6 +89,7 @@ if (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
       DOWNLOAD_DIR ${ITPP_BINARY_DIR}/itpp
       SOURCE_DIR ${ITPP_BINARY_DIR}/itpp
       URL ${have_itpp_tgz}
+      URL_MD5 f47da8c61de3dd042b94fc9b9adc345b
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${ITPP_BINARY_DIR}/itpp/run_configure
       )

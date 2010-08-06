@@ -69,6 +69,7 @@ if (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
       DOWNLOAD_DIR ${PLPLOT_BINARY_DIR}/plplot
       SOURCE_DIR ${PLPLOT_BINARY_DIR}/plplot
       URL ${have_plplot_tgz}
+      URL_MD5 2a14753112083badab87f1806cc12a46
       CMAKE_ARGS -C ${PLPLOT_BINARY_DIR}/plplot.cmake
       )
   else (have_plplot_tgz)

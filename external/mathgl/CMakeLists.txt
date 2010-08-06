@@ -166,6 +166,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 	SOURCE_DIR ${MATHGL_BINARY_DIR}
 	BINARY_DIR ${MATHGL_BINARY_DIR}/build
 	URL ${have_mathgl_tgz}
+	URL_MD5 4122428797fd0c25a096c377b9ffe44a
 	CMAKE_ARGS -C ${MATHGL_BINARY_DIR}/mathgl.cmake
 	)
     else (have_mathgl_tgz)
