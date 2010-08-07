@@ -312,12 +312,12 @@ class outputInfo:
 		for key in lsenames:
 			self.storage[key] = ["x", "0.0"]
 	
-	def setcomment (self, id, comment):
+	def setcomment (self, id, storage_nodes, comment):
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
 		self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 		self.comment = comment
-		self.totsize = 0
+		self.totsize = 0.0
 		self.pointing = "????_????"
 		self.cs = len(storage_nodes)
 		if viewtype == "brief":
@@ -331,7 +331,7 @@ class outputInfo:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
 
-	def Init(self, id, oi, dirsizes, statusline, comment, filestem_array, chi_array):
+	def Init(self, id, oi, storage_nodes, dirsizes, statusline, comment, filestem_array, chi_array):
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
 		self.oi = oi
@@ -401,7 +401,7 @@ class outputInfo:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=center>%s</td>" % (self.id, self.colspan, self.comment,)
 
-	def update(self):
+	def update(self, storage_nodes):
 		self.cs = len(storage_nodes)
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
 		self.totsize=0.0
@@ -681,7 +681,7 @@ if __name__ == "__main__":
 			# update info and infohtml depending on current command line options
 			dbobsids = obstable.keys()
 			for r in dbobsids:
-				obstable[r].update()
+				obstable[r].update(storage_nodes)
 
 	if not is_update:
 		# loop over the storage nodes and directories to get the list of all IDs
@@ -791,7 +791,7 @@ if __name__ == "__main__":
 				else:
 					# no directory found
 					comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
-					out.setcomment(id, comment)
+					out.setcomment(id, storage_nodes, comment)
 					obstable[id] = out
 					continue
 
@@ -805,7 +805,7 @@ if __name__ == "__main__":
 				log=logdir + "RTCP-" + id_suffix + ".parset"
 				if not os.path.exists(log):
 					comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
-					out.setcomment(id, comment)
+					out.setcomment(id, storage_nodes, comment)
 					obstable[id] = out
 					continue
 
@@ -893,7 +893,7 @@ if __name__ == "__main__":
 				break
 
 		# combining info
-		out.Init(id, oi, dirsizes, statusline, "", profiles_array, chi_array)
+		out.Init(id, oi, storage_nodes, dirsizes, statusline, "", profiles_array, chi_array)
 		obstable[id] = out
 
 
