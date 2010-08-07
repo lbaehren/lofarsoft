@@ -910,7 +910,7 @@ if __name__ == "__main__":
 		os.system(cmd)
 
 	# copying to another list to keep the old one
-	obskeys = obsids
+	obskeys = np.flipud(np.sort(obstable.keys(), kind='mergesort'))
 
 	# if is_from and/or is_to are set, then we have to exclude those records
 	# from obstable that do not obey the conditions
