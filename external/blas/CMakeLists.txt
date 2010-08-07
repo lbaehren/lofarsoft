@@ -72,11 +72,13 @@ set (BLAS_VERSION        "" )
 set (BLAS_SOURCE_ARCHIVE "blas.tgz" )
 set (BLAS_URL            "http://www.netlib.org/blas/${BLAS_SOURCE_ARCHIVE}" )
 set (BLAS_SVN            "" )
+set (BLAS_MD5            "7e6af7022440d8688d16be86d55fb358" )
 
 set (CBLAS_VERSION        "" )
 set (CBLAS_SOURCE_ARCHIVE "cblas.tgz" )
 set (CBLAS_URL            "http://www.netlib.org/blas/blast-forum/${CBLAS_SOURCE_ARCHIVE}" )
 set (CBLAS_SVN            "" )
+set (CBLAS_MD5            "716329646ac933592a7cbdbeae9d3d06" )
 
 ## ==============================================================================
 ##

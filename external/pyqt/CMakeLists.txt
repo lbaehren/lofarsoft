@@ -10,9 +10,9 @@ cmake_minimum_required (VERSION 2.8)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (PYQT_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
-option (PYQT_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
-option (PYQT_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
+option (PYQT_FORCE_BUILD       "Force rebuild and local installation?" NO    )
+option (PYQT_VERBOSE_CONFIGURE "Be verbose during configuration?"      NO    )
+option (PYQT_VERBOSE_BUILD     "Be verbose during build process?"      NO    )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -49,12 +49,14 @@ include (FindPyQt)
 
 if (NOT HAVE_PYQT OR PYQT_FORCE_BUILD)
   
-  set (PYQT_VERSION "4.7.2")
-  
+  set (PYQT_VERSION "4.7.2" )
+
   if (APPLE)
     set (PYQT_TAR_ARCHIVE "PyQt-mac-gpl-${PYQT_VERSION}.tar.gz")
+    set (PYQT_MD5 "18af44b8a51dc896200c8b299bee7937")
   else (APPLE)
     set (PYQT_TAR_ARCHIVE "PyQt-x11-gpl-${PYQT_VERSION}.tar.gz")
+    set (PYQT_MD5 "88e9f1bc467cccf424d2032e3470982c")
   endif (APPLE)
   
   set (PYQT_URL "http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4/${PYQT_TAR_ARCHIVE}")
@@ -74,6 +76,7 @@ if (NOT HAVE_PYQT OR PYQT_FORCE_BUILD)
 	DOWNLOAD_DIR ${PYQT_BINARY_DIR}
 	SOURCE_DIR ${PYQT_BINARY_DIR}
 	URL ${have_pyqt_tgz}
+	URL_MD5 ${PYQT_MD5}
 	BUILD_IN_SOURCE 1
 	CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYQT_BINARY_DIR}/configure.py -d ${CMAKE_INSTALL_PREFIX}/lib/python -b ${CMAKE_INSTALL_PREFIX}/bin -p ${CMAKE_INSTALL_PREFIX}/plugins
 	)
@@ -83,6 +86,7 @@ if (NOT HAVE_PYQT OR PYQT_FORCE_BUILD)
 	DOWNLOAD_DIR ${PYQT_BINARY_DIR}
 	SOURCE_DIR ${PYQT_BINARY_DIR}
 	URL ${PYQT_URL}
+	URL_MD5 ${PYQT_MD5}
 	BUILD_IN_SOURCE 1
 	CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYQT_BINARY_DIR}/configure.py -d ${CMAKE_INSTALL_PREFIX}/lib/python -b ${CMAKE_INSTALL_PREFIX}/bin -p ${CMAKE_INSTALL_PREFIX}/plugins
 	)
