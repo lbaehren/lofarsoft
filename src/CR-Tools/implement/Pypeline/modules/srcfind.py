@@ -301,7 +301,7 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     pos = np.column_stack([x, y, z]).ravel() # make flat array alternating x,y,z
     
     times = timeDelaysFromDirection(pos, (az, el))
-    noise = np.random.rand(N_ant) * max(abs(times)) * noiselevel
+    noise = (2 * np.random.rand(N_ant) - 1.0) * max(abs(times)) * noiselevel
     
     print 'Getting direction from linear fit method, without noise (should return the input):'
     (az, el) = directionForHorizontalArray(pos, times)
