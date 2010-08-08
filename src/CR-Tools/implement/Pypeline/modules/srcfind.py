@@ -178,6 +178,21 @@ def testDirectionCalculationForThreeAntennas(positions):
             if (abs(calc_az - az) > tolerance or abs(calc_el - el) > tolerance) and (abs(calc_az2 - az) > tolerance or abs(calc_el2 - el) > tolerance):
                 print 'Wrong value for az: ' + str(az*rad2deg) + ' calculated: ' +str(calc_az * rad2deg) + ' or: ' + str(calc_az2 * rad2deg)
                 print 'el: ' + str(el*rad2deg) + ' calculated: ' + str(calc_el * rad2deg) + ' or: ' + str(calc_el2 * rad2deg)
+
+def mse(az, el, pos, times):
+    """ 
+    Mean-squared error in the times for a given direction on the sky, as used in the brute force search
+    In: (az, el) in radians
+        pos, times as in the other functions
+    """
+    
+    N = len(times)
+    calcTimes = timeDelaysFromDirection(pos, (az, el))
+    timeOffsets = calcTimes - times
+    mu = (1.0/N) * np.sum(timeOffsets) # overall time offset to be subtracted in MSE
+    mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
+
+    return mse * c * c
     
 def directionBruteForceSearch(positions, times):
     """
@@ -200,8 +215,8 @@ def directionBruteForceSearch(positions, times):
     
     # this can probably be done better by Scipy. But for now this is easy and it works...
     
-    elSteps = 90
-    azSteps = 360 # where do we put the 'constant' parameters? Well, not here...
+    elSteps = 30
+    azSteps = 120 # where do we put the 'constant' parameters? Well, not here...
     N = len(times)
     
     bestFit = (-1, -1)
@@ -233,16 +248,20 @@ def directionForHorizontalArray(positions, times):
     If all antennas are co-planar, the best-fitting solution can be found using a 2D-linear fit.
     We find the best-fitting A and B in:
     
-        t = A x + B y
+        t = A x + B y + C
         
     where t is the array of times; x and y are arrays of coordinates of the antennas.
+    The C is the overall time offset in the data, that has to be subtracted out. 
+    The optimal value of C has to be determined in the fit process (it's not just the average time, nor the time at antenna 0).
+    
     This is done using numpy.linalg.lstsq.
     
     The (az, el) follows from:
     
         A = cos(el) cos(az)
         B = cos(el) sin(az)
-    
+        C can be discarded here
+        
     In: positions array (x1, y1, z1, x2, y2, z2, x3, y3, z3), in meters. NB: z_i is simply ignored but still assumed to be there!
         times array (t1, t2, t3), in seconds.
     Input is assumed to be Numpy arrays.
@@ -261,15 +280,49 @@ def directionForHorizontalArray(positions, times):
         raise ValueError("Input values of z are nonzero ( > 0.5) !")
         return (-1, -1)
     
-    M = np.vstack([x, y]).T # says the linalg.lstsq doc
+    M = np.vstack([x, y, np.ones(len(x))]).T # says the linalg.lstsq doc
     
-    (A, B) = np.linalg.lstsq(M, c * times)[0]
+    (A, B, C) = np.linalg.lstsq(M, c * times)[0]
         
     el = np.arccos(np.sqrt(A*A + B*B))
     az = np.arctan2(-B, -A) # note minus sign as we want the direction of the _incoming_ vector (from the sky, not towards it)
     
     return (az, el)
+
+def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
+    """
+    Play around to see how the fits behave in the presence of timing noise
+    """
     
+    x = np.random.rand(N_ant) * 100 - 50 # Antenna positions in a 100x100 m field
+    y = np.random.rand(N_ant) * 100 - 50
+    z = np.zeros(N_ant) # for use in the planar fit requires z = 0
+    
+    pos = np.column_stack([x, y, z]).ravel() # make flat array alternating x,y,z
+    
+    times = timeDelaysFromDirection(pos, (az, el))
+    noise = np.random.rand(N_ant) * max(abs(times)) * noiselevel
+    
+    print 'Getting direction from linear fit method, without noise (should return the input):'
+    (az, el) = directionForHorizontalArray(pos, times)
+    print '(az, el) = (%f, %f)' %(az, el)
+    print 'Getting direction from brute force search:'
+    
+    result = directionBruteForceSearch(pos, times)
+    print '(az, el) = (%f, %f)' %(result[0], result[1])
+    
+    times += noise
+    print ' '
+    print 'Getting direction from linear fit method, WITH noise:'
+    (az, el) = directionForHorizontalArray(pos, times)
+    print '(az, el) = (%f, %f)' %(az, el)
+    print 'Getting direction from brute force search:'
+    
+    result = directionBruteForceSearch(pos, times)
+    print '(az, el) = (%f, %f)' %(result[0], result[1])
+
+    
+
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
 #  as a selftest for the module.
