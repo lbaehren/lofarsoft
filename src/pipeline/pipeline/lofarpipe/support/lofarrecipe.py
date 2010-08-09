@@ -18,12 +18,12 @@ class LOFARrecipe(WSRTrecipe):
         self.state = []
         self.completed = []
         self.optionparser.add_option(
-            '-j', '--job-name', 
+            '-j', '--job-name',
             dest="job_name",
             help="Job name (required)"
         )
         self.optionparser.add_option(
-            '-r', '--runtime-directory', 
+            '-r', '--runtime-directory',
             dest="runtime_directory",
             help="Runtime directory"
         )
@@ -38,7 +38,7 @@ class LOFARrecipe(WSRTrecipe):
             help="Root of LOFAR software tree"
         )
         self.optionparser.add_option(
-            '-c', '--config', 
+            '-c', '--config',
             dest="config",
             help="Configuration file"
         )
@@ -200,6 +200,10 @@ class LOFARrecipe(WSRTrecipe):
                 )
             except NoOptionError:
                 self.inputs["task_files"] = []
+        else:
+            # A parent recipe just passes in the raw string from the config
+            # file, so we need to split that
+            self.inputs["task_files"] = utilities.string_to_list(self.inputs["task_files"])
 
         self.task_definitions = ConfigParser(self.config.defaults())
         self.task_definitions.read(self.inputs["task_files"])
