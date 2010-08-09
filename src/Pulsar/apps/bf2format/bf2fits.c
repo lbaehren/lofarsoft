@@ -44,7 +44,7 @@ float N_sigma = 7;
 #define FFTLENGTH			1024
 #define SAMPLEDURATION			(SAMPLESPERSTOKESINTEGRATION*1.0/(1.0*CLOCK/FFTLENGTH/CHANNELS))
 
-int constructFITSsearchsubint(datafile_definition datafile, float *data, int subintnr, unsigned char **subintdata, float **scales, float **offsets, int allocmem, int destroymem);
+int constructFITSsearchsubint(datafile_definition datafile, float *data, int subintnr, unsigned char **subintdata, float **scales, float **offsets, int alreadyscaled, int allocmem, int destroymem);
 int writeFITSsubint(datafile_definition datafile, long subintnr, unsigned char *subintdata, float *scales, float *offsets);
 int writePSRFITSHeader(datafile_definition *datafile, int verbose);
 
@@ -53,13 +53,17 @@ char *get_ptr_entry(char *str, char **txt, int nrlines, char *separator);
 
 void usage(){
   puts("Syntax: bf2presto8 [options] SB*.MS");
-  puts("-header\tChange something in the header\n");
-  puts("-headerlist\tlist available options\n");
-  puts("-A\tNumber of blocks to read in at the same time (Default = 600)");
-  puts("-nbits\tUse this number of bits.");
-  puts("-o\tOutput Name(Default = PULSAR_OBS)");
-  puts("-parset\tRead this parset file to obtain header parameters.");
-  puts("-v\tverbose");
+  puts("-A\t\tNumber of blocks to read in at the same time, which affects calc of running mean etc. (Default = 600)");
+  puts("-clipav\t\tInstead of normal clipping, write out average");
+  puts("-header\t\tChange something in the header");
+  puts("-headerlist\tlist available options");
+  puts("-nbits\t\tUse this number of bits.");
+  puts("-o\t\tOutput Name(Default = PULSAR_OBS)");
+  puts("-parset\t\tRead this parset file to obtain header parameters.");
+  puts("-sigma\t\tFor the packing, use this sigma limit instead of using the minimum and maximum.");
+  puts("\n");
+  puts("-debugpacking\tSuper verbose mode to debug packing algoritm.");
+  puts("-v\t\tverbose");
 }
 
 void swap_endian( char *x )
@@ -90,7 +94,7 @@ swap_endian(u.buffer);
 
 
 /* Returns 1 if successful, 0 on error */
-int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, int verbose)
+int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking)
 {
   typedef struct {
     unsigned	sequence_number;
@@ -144,7 +148,7 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
  /* Allocate temporary memory for packed data */
  unsigned char *packeddata;
  float *scales, *offsets;
- if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 1, 0) != 1) {
+ if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 1, 0) != 1) {
    fprintf(stderr, "ERROR writeFITSfile: Cannot allocate temporary memory               \n");      
    return 0;
  }
@@ -199,10 +203,10 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 
 
    /* Calculate average. RMS not used right now. */
-   float average[CHANNELS];
+   float average[CHANNELS], rms[CHANNELS];
    for( c = 0; c < CHANNELS; c++ ) {
      float sum = 0.0f;
-     /*     float ms = 0.0f, rms; */
+     float ms = 0.0f;
      int N = 0;
      unsigned validsamples = 0;
      float prev = WRITEFUNC( stokesdata[0].samples[beamnr][c][0]);
@@ -214,7 +218,7 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 	   prev = value;
 	 } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
            sum += value;
-	   /*	   ms += value*value; */
+	   ms += value*value;
 	   prev = value;
            validsamples++;
          }
@@ -223,10 +227,9 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
    
      N = validsamples?validsamples:1;
      average[c] = sum/N;
-     /*     rms = sqrt((ms-(N*average[c]*average[c]))/(N-1)); */
+     rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
    }
-
-
+ 
   /* convert and write the data */
    prev_seqnr = orig_prev_seqnr;
    for( i = 0; i < num; i++ ) {
@@ -251,7 +254,7 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 	 fflush(stdout);
        }
        /* Pack data */
-       if(constructFITSsearchsubint(fout, subintdata->data, gap+1, &packeddata, &scales, &offsets, 0, 0) != 1) {
+       if(constructFITSsearchsubint(fout, subintdata->data, gap+1, &packeddata, &scales, &offsets, 0, 0, 0) != 1) {
 	 fprintf(stderr, "ERROR: Cannot construct subint data               \n");      
 	 return 0;
        }
@@ -267,6 +270,26 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
      prev_seqnr = stokesdata[i].sequence_number;
 
      /*     fprintf(stderr, "XXXXXXXX %d - 2\n", i); */
+   
+       /* patrick */
+     if(sigmalimit > 0 && i == 0) {
+       for( c = 0; c < CHANNELS; c++ ) {
+	 /*
+	 0                         = ivalue(average[c]-sigmalimit*rms[c]);
+	 0                         = (average[c]-sigmalimit*rms[c] - offset)/scale;
+	 0                         = (average[c]-sigmalimit*rms[c] - offset);
+	 */
+	 offsets[c]                    = average[c]-sigmalimit*rms[c];
+
+	 /*
+	 pow(2,subintdata.NrBits)-1  = ivalue(average[c]+sigmalimit*rms[c]);
+	 pow(2,subintdata.NrBits)-1  = (average[c]+sigmalimit*rms[c]-offset)/scale;
+	 */
+	 scales[c]  = (average[c]+sigmalimit*rms[c]-offsets[c])/(float)(pow(2,subintdata->NrBits)-1);
+	 if(debugpacking)
+	   fprintf(stderr, "scale=%e offset=%e (av=%e  rms=%e)\n", scales[c], offsets[c], average[c], rms[c]);
+       }
+     }
      /* process data */
      for( c = 0; c < CHANNELS; c++ ) {
        for( time = 0; time < SAMPLES; time++ ) {
@@ -275,6 +298,31 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 	 
 	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
 	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[c] : sum;
+	 if(sigmalimit > 0) {
+	   if(debugpacking)
+	     printf("value %e ", sum);
+	   sum = (sum - offsets[c])/scales[c];
+	   if(debugpacking)
+	     printf(" %e ", sum);
+	   if(sum < 0) {
+	     if(clipav)
+	       sum = (average[c] - offsets[c])/scales[c];
+	     else
+	       sum = 0;
+	     /*	     printf("Underflow! %e\n", sum); */
+	   }
+	   if(sum > pow(2,subintdata->NrBits)-1) {
+	     if(clipav)
+	       sum = (average[c] - offsets[c])/scales[c];
+	     else
+	       sum = pow(2,subintdata->NrBits)-1;
+	     /*	     printf("Overflow! %e\n", sum); */
+	   }
+	   if(debugpacking)
+	     printf(" %e \n", sum);
+
+	   /*	   printf("value %e\n", sum); */
+	 }
 	 
 	 /* patrick: put polarization to 0, assume only one pol
 	    written out. Think x is the current bin nr */
@@ -288,15 +336,26 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 
        } // for( time = 0; time < SAMPLES; time++ ) 
      }
+
      /*     fprintf(stderr, "XXXXXXXX %d - 3\n", i); */
      if(verbose) {
        printf(".");
        fflush(stdout);
      }
      /* Pack data */
-     if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 0) != 1) {
-       fprintf(stderr, "ERROR: Cannot construct subint data               \n");      
-       return 0;
+     if(sigmalimit > 0) {
+       if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 1, 0, 0) != 1) {
+	 fprintf(stderr, "ERROR: Cannot construct subint data               \n");      
+	 return 0;
+       }
+       /*     for( c = 0; c < CHANNELS; c++ ) {
+       printf("XXXXX %e\n", scales[c]);
+       }*/
+     }else {
+       if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 0, 0) != 1) {
+	 fprintf(stderr, "ERROR: Cannot construct subint data               \n");      
+	 return 0;
+       }
      }
      /*     fprintf(stderr, "XXXXXXXX %d - 4\n", (x-1)*AVERAGE_OVER+i); */
      /* Write out subint */
@@ -310,7 +369,7 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 
  } //  while( !feof( input ) ) {
  printf("\n");
- if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 1) != 1) {
+ if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 0, 1) != 1) {
    fprintf(stderr, "ERROR writeFITSfile: Cannot allocate temporary memory               \n");      
    return 0;
  }
@@ -331,7 +390,7 @@ int isNum( char c )
 
 int main( int argc, char **argv ) 
 {
-  int i,j,b, index, firstseq, lastseq, readparset, totalnrchannels, subbandnr, nrbits;
+  int i,j,b, index, firstseq, lastseq, readparset, totalnrchannels, subbandnr, nrbits, debugpacking;
   char buf[1024], *filename, *dummy_ptr;
   datafile_definition subintdata, fout;
   patrickSoftApplication application;
@@ -339,8 +398,8 @@ int main( int argc, char **argv )
   char header_txt[1000][1000], *s_ptr, *txt[1000], dummy_string[1000], dummy_string2[1000];
   int channellist[1000];
   int nrlines, ret;
-  int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands;
-  float lowerBandFreq, lowerBandEdge, subband_width, bw, lofreq;
+  int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands, clipav;
+  float lowerBandFreq, lowerBandEdge, subband_width, bw, lofreq, sigma_limit;
 
   initApplication(&application, "bf2fits", "[options] inputfiles");
   application.switch_headerlist = 1;
@@ -351,6 +410,9 @@ int main( int argc, char **argv )
 
   cleanPRSData(&subintdata);
 
+  sigma_limit = -1;
+  debugpacking = 0;
+  clipav = 0;
   if(argc < 2) {
     usage();
     return 0;
@@ -373,6 +435,15 @@ int main( int argc, char **argv )
 	  return 0;
 	}
         i++;
+      }else if(strcmp(argv[i], "-sigma") == 0) {
+	j = sscanf(argv[i+1], "%f", &sigma_limit);
+	if(j != 1) {
+	  fprintf(stderr, "bf2fits: Error parsing %s option\n", argv[i]);
+	  return 0;
+	}
+        i++;
+      }else if(strcmp(argv[i], "-clipav") == 0) {
+	clipav = 1;
       }else if(strcmp(argv[i], "-o") == 0) {
 	j = sscanf(argv[i+1], "%s", OUTNAME);
 	if(j != 1) {
@@ -380,6 +451,8 @@ int main( int argc, char **argv )
 	  return 0;
 	}
         i++;
+      }else if(strcmp(argv[i], "-debugpacking") == 0) {
+	debugpacking = 1;
 	/*
       }else if(strcmp(argv[i], "-c") == 0) {
 	j = sscanf(argv[i+1], "%d", &CHANNELS);
@@ -673,7 +746,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 	fprintf(stderr, "bf2fits: Cannot open input file\n");
 	return 0;
       }
-      if(convert_nocollapse(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, application.verbose) == 0)
+      if(convert_nocollapse(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking) == 0)
 	return 0;
       if(application.verbose) printf("  File contains sequence numbers %d - %d\n", firstseq, lastseq);
 
@@ -692,7 +765,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 	return 0;
 
       /* convert */
-      if(convert_nocollapse(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, application.verbose) == 0)
+      if(convert_nocollapse(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking) == 0)
 	return 0;
 
       fclose(fin);

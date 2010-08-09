@@ -815,7 +815,7 @@ void initApplication(patrickSoftApplication *application, char *name, char *genu
   application->verbose = 0;
 }
 
-int constructFITSsearchsubint(datafile_definition datafile, float *data, int subintnr, unsigned char **subintdata, float **scales, float **offsets, int allocmem, int destroymem)
+int constructFITSsearchsubint(datafile_definition datafile, float *data, int subintnr, unsigned char **subintdata, float **scales, float **offsets, int alreadyscaled, int allocmem, int destroymem)
 {
   long subintsize, f, p, b, samplenr, bitnr, bytenr;
   int bitoff, ivalue, bitofffac[8];
@@ -859,14 +859,19 @@ int constructFITSsearchsubint(datafile_definition datafile, float *data, int sub
   memset(*subintdata, 0, subintsize);
   for(f = 0; f < datafile.nrFreqChan; f++) {
     for(p = 0; p < datafile.NrPols; p++) {
-      internalFITSscalePulse(&data[datafile.NrBins*(p+datafile.NrPols*(f+subintnr*datafile.nrFreqChan))], datafile.NrBins, &offset, &scale, pow(2, datafile.NrBits)-1);
-      (*offsets)[p*datafile.nrFreqChan+f] = offset;
-      (*scales)[p*datafile.nrFreqChan+f] = scale;
+      if(alreadyscaled == 0) {
+	internalFITSscalePulse(&data[datafile.NrBins*(p+datafile.NrPols*(f+subintnr*datafile.nrFreqChan))], datafile.NrBins, &offset, &scale, pow(2, datafile.NrBits)-1);
+	(*offsets)[p*datafile.nrFreqChan+f] = offset;
+	(*scales)[p*datafile.nrFreqChan+f] = scale;
       /*      fprintf(stderr, "f=%ld p=%ld\n", f, p);
 	      fprintf(stderr, "  scale=%e offset=%e\n", scale, offset);*/
+      }
       /* Now pack the data */
       for(b = 0; b < datafile.NrBins; b++) {
-	fvalue = (data[datafile.NrBins*(p+datafile.NrPols*(f+subintnr*datafile.nrFreqChan))+b]-(*offsets)[p*datafile.nrFreqChan+f])/(*scales)[p*datafile.nrFreqChan+f];
+	if(alreadyscaled == 0) 
+	  fvalue = (data[datafile.NrBins*(p+datafile.NrPols*(f+subintnr*datafile.nrFreqChan))+b]-(*offsets)[p*datafile.nrFreqChan+f])/(*scales)[p*datafile.nrFreqChan+f];
+	else
+	  fvalue = data[datafile.NrBins*(p+datafile.NrPols*(f+subintnr*datafile.nrFreqChan))+b];
 	/* Add 0.5 to make it rounding rather than truncating. fvalue should be positive. */
 	ivalue = fvalue+0.5;
 	/*	fprintf(stderr, "  b=%ld data=%f ivalue=%d\n", b, data[datafile.NrBins*(p+datafile.NrPols*(f+subintnr*datafile.nrFreqChan))+b], ivalue);*/
@@ -888,6 +893,7 @@ int constructFITSsearchsubint(datafile_definition datafile, float *data, int sub
 
   return 1;
 }
+
 
 int writeFITSsubint(datafile_definition datafile, long subintnr, unsigned char *subintdata, float *scales, float *offsets)
 {
