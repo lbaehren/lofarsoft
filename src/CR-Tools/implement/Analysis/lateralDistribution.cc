@@ -371,6 +371,7 @@ namespace CR { // Namespace CR -- begin
               << "R_0sim    = " << fitfuncExpS->GetParameter(1) << "\t +/- " << fitfuncExpS->GetParError(1) << "\t m\n"
               << "Chi^2_sim  = " << fitfuncExpS->GetChisquare() << "\t NDF " << fitfuncExpS->GetNDF() << "\n"
               << endl;
+          delete fitfuncExpS;
         }
 
         // write plot to file
@@ -437,8 +438,25 @@ namespace CR { // Namespace CR -- begin
           plotNameStream << filePrefix << "dev-" << Gt << ".eps";
           cout << "\nCreating plot: " << plotNameStream.str() << endl;
           c1->Print(plotNameStream.str().c_str());
+          latDev->Delete();
+          //delete latDev;
         }
+        fitfuncExp->Delete();
+        //delete fitfuncExp;
       }  
+      
+      ptstats->Delete();
+      ptstatsS->Delete();
+      easstats->Delete();
+      latPro->Delete();
+      latProSim->Delete();
+      //c1->Delete();
+      //delete latPro;
+      //delete latProSim;
+      delete c1;
+      //delete ptstats;
+      //delete ptstatsS;
+      //delete easstats;
     } catch (AipsError x) {
       cerr << "lateralDistribution::fitLateralDistribution: " << x.getMesg() << endl;
     }
@@ -623,9 +641,17 @@ namespace CR { // Namespace CR -- begin
         plotNameStream << filePrefix << GT <<".eps";
         cout << "\nCreating plot: " << plotNameStream.str() << endl;
         c1->Print(plotNameStream.str().c_str());
+        fitFunc->Delete();
       } else {
         cout<<"No fit was done, because less than 3 antennas are 'good':\n";
       }
+      
+      easstats->Delete();
+      ptstats->Delete();
+      // ptstatsS->Delete();
+      latPro->Delete();
+      // latProSim->Delete();
+      delete c1;
     } catch (AipsError x) {
       cerr << "lateralDistribution::lateralTimeDistribution: " << x.getMesg() << endl;
     }

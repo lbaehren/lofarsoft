@@ -827,6 +827,7 @@ UInt_t randomSeed = 1;                // random seed for root random number gene
 // Event parameters for calling the pipeline
 string eventfilelistname("");			         // Name of the ASCII event list
 string kascadeRootFile("");			         // Name of root file with Kascade reconstruction and event names
+string lopesRootFile("");                                // Name of root file with earlier LOPES reconstruction
 string eventname("");
 double azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;   // basic input parameters (e.g. from Kascade), in m and degree
 double azimuthError = 0, zenithError = 0, coreError = 0; // errors (in m and radians!)
@@ -1235,6 +1236,156 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
 
 
 /*!
+  \brief reads the next event from an root file containing an earlier LOPES reconstruction
+
+  \param kascadeRootFile     -- input file
+
+  \return true if an event could be read in, false in case of EOF or error
+*/
+
+bool getEventFromLOPES (const string &lopesRootFile)
+{
+  static bool fileOpen = false;         // will be set to true, once an eventlist was openend
+  static int eventNumber = 0;
+  static TFile *inputFile = NULL;
+  static TTree *inputTree  = NULL;
+
+  // for input form root file
+  static char Eventname[64];
+
+  try {
+    // reset pipeline parameters before readin
+    eventname ="";
+    azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;
+
+    // if this function is called for the first time, then try to open the file
+    if (!fileOpen) {
+      // open root file with the KASCADE results
+      inputFile = new TFile(lopesRootFile.c_str());
+      if(!inputFile || inputFile->IsZombie()) {
+        cerr << "Failed to open file \"" << lopesRootFile <<"\"." << endl;
+        return false;
+      }
+
+      inputTree = (TTree*)inputFile->Get("T;1");
+      if (!inputTree || (inputTree->GetEntries() == 0) ) {
+        cerr << "Failed to get tree of file \"" << lopesRootFile <<"\" or tree is empty." << endl;
+        return false;
+      }
+
+      // set the read in variables in the tree
+      inputTree->SetBranchAddress("Az",&Az);
+      inputTree->SetBranchAddress("Ze",&Ze);
+      inputTree->SetBranchAddress("Xc",&Xc);
+      inputTree->SetBranchAddress("Yc",&Yc);
+      inputTree->SetBranchAddress("Azg",&Azg);
+      inputTree->SetBranchAddress("Zeg",&Zeg);
+      inputTree->SetBranchAddress("Xcg",&Xcg);
+      inputTree->SetBranchAddress("Ycg",&Ycg);
+      inputTree->SetBranchAddress("Size",&Size);
+      inputTree->SetBranchAddress("Sizeg",&Sizeg);
+      inputTree->SetBranchAddress("Age",&Age);
+      inputTree->SetBranchAddress("Ageg",&Ageg);
+      inputTree->SetBranchAddress("Nmu",&Nmu);
+      inputTree->SetBranchAddress("Lmuo",&Lmuo);
+      inputTree->SetBranchAddress("Sizmg",&Sizmg);
+      inputTree->SetBranchAddress("lgE",&lgE);
+      inputTree->SetBranchAddress("lgEg",&lgEg);
+      inputTree->SetBranchAddress("lnA",&lnA);
+      inputTree->SetBranchAddress("lnAg",&lnAg);
+      inputTree->SetBranchAddress("err_lgE",&err_lgE);
+      inputTree->SetBranchAddress("err_lgEg",&err_lgEg);
+      inputTree->SetBranchAddress("err_lnA",&err_lnA);
+      inputTree->SetBranchAddress("err_lnAg",&err_lnAg);
+      inputTree->SetBranchAddress("err_core",&err_core);
+      inputTree->SetBranchAddress("err_coreg",&err_coreg);
+      inputTree->SetBranchAddress("err_Az",&err_Az);
+      inputTree->SetBranchAddress("err_Azg",&err_Azg);
+      inputTree->SetBranchAddress("err_Ze",&err_Ze);
+      inputTree->SetBranchAddress("err_Zeg",&err_Zeg);
+      inputTree->SetBranchAddress("geomag_angle",&geomag_angle);
+      inputTree->SetBranchAddress("geomag_angleg",&geomag_angleg);
+      inputTree->SetBranchAddress("Eventname",&Eventname);
+      inputTree->SetBranchAddress("KRETAver",&KRETAver);
+      inputTree->SetBranchAddress("EfieldMaxAbs",&EfieldMaxAbs);
+      inputTree->SetBranchAddress("EfieldAvgAbs",&EfieldAvgAbs);
+      inputTree->SetBranchAddress("kappaMario",&kappaMario);
+      inputTree->SetBranchAddress("lgEMario",&lgEMario);
+      // use same input reconstruction as previous time
+      inputTree->SetBranchAddress("reconstruction",&reconstruction);
+        
+      // as there is no radius of curvature in the file, set ignoreDistance to true
+      if (!config["ignoreDistance"]->bValue()) {
+        config["ignoreDistance"]->setValue("TRUE");
+        cout << "\nWARNING: OVERWRITING CONFIGURATION: ignoreDistance was set to 'true'!\n" << endl;
+      }
+      // finding the radius of curvature works only, if the simplex fit is on
+      if (!config["simplexFit"]->bValue()) {
+        config["simplexFit"]->setValue("TRUE");
+        cout << "\nWARNING: OVERWRITING CONFIGURATION: simplexFit was set to 'true'!\n" << endl;
+      }
+
+      cout << "Opened file for readin: " << lopesRootFile << endl;
+      fileOpen = true;
+    }
+
+    // check if events are remaining
+    if ( inputFile->IsZombie() || (eventNumber >= inputTree->GetEntries()) ) {
+      cout << "\nFile \"" << lopesRootFile
+           << "\" contains no more events. Do not worry if this message appears after processing the last event."
+           << endl;
+      fileOpen = false;
+      return false;
+    }
+
+    // if file is open the get the next event
+    if (fileOpen) {
+      cout << "\nReading event number " << eventNumber+1 << " from file \"" << lopesRootFile << "\" ";
+      inputTree->GetEntry(eventNumber);
+      eventNumber++;
+      // choose if Kascade or Grande date should be used:
+      // this can be done by looking, if there is any energy estimation avaiable from KASCADE or Grande
+      if ((lgE == 0) && (lgEg == 0)) {
+        cerr << "call_pipeline:getEventFromLOPES: ERROR: For this event there is neither KASCADE nor Grande data available!" << endl;
+        return false;
+      }  
+  
+      // set variables (Grande or KASCADE reconstruction, as obtained from root file)
+      eventname = string(Eventname);
+      if (reconstruction == 'G') {
+        cout << "using the LOPES + Grande reconstruction as input..." << endl;
+        azimuth = static_cast<double>(Azg/Pi()*180.);
+        azimuthError = static_cast<double>(err_Azg);
+        elevation = static_cast<double>(90.-Zeg/Pi()*180.);
+        zenithError = static_cast<double>(err_Zeg);
+        core_x = static_cast<double>(Xcg);
+        core_y = static_cast<double>(Ycg);
+        coreError = static_cast<double>(err_coreg);
+        reconstruction = 'G';
+      } else {
+        cout << "using the LOPES + KASCADE reconstruction as input..." << endl;
+        azimuth = static_cast<double>(Az/Pi()*180.);
+        azimuthError = static_cast<double>(err_Az);
+        elevation = static_cast<double>(90.-Ze/Pi()*180.);
+        zenithError = static_cast<double>(err_Ze);
+        core_x = static_cast<double>(Xc);
+        core_y = static_cast<double>(Yc);
+        coreError = static_cast<double>(err_core);
+        reconstruction = 'A';
+      }
+      return true;
+    }
+
+  } catch (AipsError x) {
+    cerr << "call_pipeline:getEventFromLOPES: " << x.getMesg() << endl;
+  }
+
+  // normally should not get here, if so return false
+  return false;
+}
+
+
+/*!
   \brief reads the next event from the input list
 
   \return true if an event could be read in, false in case of EOF or error
@@ -1247,6 +1398,8 @@ bool getNextEvent()
     return getEventFromEventlist(eventfilelistname);
   if (kascadeRootFile != "")
     return getEventFromKASCADE(kascadeRootFile);
+  if (lopesRootFile != "")
+    return getEventFromLOPES(lopesRootFile);
 
   cerr << "\ncall_pipeline:getNextEvent: No input list found!" << endl;
   return false; 		// should not come to this point
@@ -1419,9 +1572,13 @@ int main (int argc, char *argv[])
         continue;
       }
 
-      // look for keywords which require an option
       if ( (option == "--k") || (option == "-k")) {
         kascadeRootFile = argument;
+        continue;
+      }
+
+      if ( (option == "--l") || (option == "-l")) {
+        lopesRootFile = argument;
         continue;
       }
 
@@ -1439,13 +1596,15 @@ int main (int argc, char *argv[])
     }
 
     // Check if options are set correctly
-    if ((eventfilelistname == "") && (kascadeRootFile == "") ) {
-      cerr << "ERROR: Please set an input file with the --in or --k option!\n";
+    if ((eventfilelistname == "") && (kascadeRootFile == "")  && (lopesRootFile == "")) {
+      cerr << "ERROR: Please set an input file with the --in, --k or --l option!\n";
       cerr << "Use --help for more information." << endl;
       return 1;
     }
-    if (!(eventfilelistname == "") && !(kascadeRootFile == "") ) {
-      cerr << "ERROR: Please set only one input file with the --in and --k option!\n";
+    if ( (!(eventfilelistname == "") && !(kascadeRootFile == "")) 
+       ||(!(eventfilelistname == "") && !(lopesRootFile == ""))
+       ||(!(lopesRootFile == "") && !(kascadeRootFile == "")) ) {
+      cerr << "ERROR: Please set only one input file with the --in, --k and --l option!\n";
       cerr << "Use --help for more information." << endl;
       return 1;
     }
