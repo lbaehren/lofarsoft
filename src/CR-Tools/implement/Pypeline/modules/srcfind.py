@@ -298,7 +298,7 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     y = np.random.rand(N_ant) * 100 - 50
     z = np.zeros(N_ant) # for use in the planar fit requires z = 0
     
-    pos = np.column_stack([x, y, z]).ravel() # make flat array alternating x,y,z
+    pos = np.column_stack([x, y, z]).ravel() # make flat array alternating x,y,z. This thing can be retained as global if speed is important
     
     times = timeDelaysFromDirection(pos, (az, el))
     noise = (2 * np.random.rand(N_ant) - 1.0) * max(abs(times)) * noiselevel
@@ -321,8 +321,47 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     result = directionBruteForceSearch(pos, times)
     print '(az, el) = (%f, %f)' %(result[0], result[1])
 
+def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel):
+    x = np.random.rand(N_ant) * 100 - 50 # Antenna positions in a 100x100 m field
+    y = np.random.rand(N_ant) * 100 - 50
+    z = np.zeros(N_ant) # for use in the planar fit requires z = 0
     
-
+    pos = np.column_stack([x, y, z]).ravel() # make flat array alternating x,y,z
+#    az = 1.0
+#    el = 0.1
+    exactTimes = timeDelaysFromDirection(pos, (az, el))
+    
+    results_az = np.zeros(n_trials)
+    results_el = np.zeros(n_trials)
+    for i in range(n_trials):
+        noise = (2 * np.random.rand(N_ant) - 1.0) * max(abs(exactTimes)) * noiselevel
+        times = exactTimes + noise
+        
+        result = directionForHorizontalArray(pos, times)
+        results_az[i] = result[0]
+        results_el[i] = result[1]
+        
+    el_avg = np.average(results_el)
+    el_std = np.std(results_el)
+    az_avg = np.average(results_az)
+    az_std = np.std(results_az)
+    
+    u_el = el_std / np.sqrt(n_trials)
+    u_az = az_std / np.sqrt(n_trials)
+#    print results_el.nansum
+    
+    print 'Average az = %f' %az_avg
+    print 'Average el = %f' %el_avg
+    print ' '
+    print 'Difference az = %f' %(az_avg - az)
+    print 'Difference el = %f' %(el_avg - el)
+    print ' '
+    print 'Uncertainty az (stddev / sqrt(n_trials)) = %f' %u_az
+    print 'Uncertainty el = %f' %u_el
+    
+    
+    
+        
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
 #  as a selftest for the module.
