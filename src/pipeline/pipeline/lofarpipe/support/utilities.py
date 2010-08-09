@@ -114,20 +114,24 @@ def string_to_list(my_string):
     """
     return [x.strip() for x in my_string.strip('[] ').split(',')]
 
-def izip_longest(*args, **kwds):
-    # This code is lifted from the Python 2.6 manual, since izip_longest isn't
-    # available in the 2.5 standard library.
-    # izip_longest('ABCD', 'xy', fillvalue='-') --> Ax By C- D-
-    fillvalue = None
-    def sentinel(counter = ([fillvalue]*(len(args)-1)).pop):
-        yield counter()         # yields the fillvalue, or raises IndexError
-    fillers = repeat(fillvalue)
-    iters = [chain(it, sentinel(), fillers) for it in args]
-    try:
-        for tup in izip(*iters):
-            yield tup
-    except IndexError:
-        pass
+try:
+    from itertools import izip_longest
+except ImportError:
+    def izip_longest(*args, **kwds):
+        # This code is lifted from the Python 2.6 manual, since izip_longest
+        # isn't available in the 2.5 standard library.
+        # izip_longest('ABCD', 'xy', fillvalue='-') --> Ax By C- D-
+
+        fillvalue = None
+        def sentinel(counter = ([fillvalue]*(len(args)-1)).pop):
+            yield counter()         # yields the fillvalue, or raises IndexError
+        fillers = repeat(fillvalue)
+        iters = [chain(it, sentinel(), fillers) for it in args]
+        try:
+            for tup in izip(*iters):
+                yield tup
+        except IndexError:
+            pass
 
 def group_iterable(iterable, size):
     """

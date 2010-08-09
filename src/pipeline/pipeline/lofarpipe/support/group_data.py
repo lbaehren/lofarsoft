@@ -25,12 +25,12 @@ def group_files(logger, clusterdesc, node_directory, group_size, filenames):
                 [element for element in data[node] if element in filenames],
                 group_size,
             )
-                    
+
         # Now produce an iterator which steps through the various chunks of
         # data to image, and image each chunk
         data_iterator = utilities.izip_longest(*list(data.values()))
         for data_chunk in data_iterator:
             to_process = []
             for node_data in data_chunk:
-                if node_data: to_process.extend(node_data) 
+                if node_data: to_process.extend(node_data)
             yield to_process
