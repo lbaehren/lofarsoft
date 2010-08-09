@@ -340,7 +340,9 @@ def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel):
         result = directionForHorizontalArray(pos, times)
         results_az[i] = result[0]
         results_el[i] = result[1]
-        
+    
+    results_el = np.nan_to_num(results_el)
+    results_az = np.nan_to_num(results_az)        
     el_avg = np.average(results_el)
     el_std = np.std(results_el)
     az_avg = np.average(results_az)
