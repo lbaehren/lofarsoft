@@ -45,37 +45,30 @@ include (FindGSL)
 
 if (NOT HAVE_GSL OR GSL_FORCE_BUILD)
 
-  set (gsl_version     "1.13")
-  set (gsl_tar_archive "gsl-${gsl_version}.tar.gz")
+  set (GSL_VERSION  "1.13" )
+  set (GSL_SOURCE   "gsl-${GSL_VERSION}.tar.gz" )
+  set (GSL_URL      "ftp://ftp.mirror.nl/pub/mirror/gnu/gsl/${GSL_SOURCE}" )
   
   ##__________________________________________________________________
   ## Build the project
   
   include (ExternalProject)
   
-  find_file (have_gsl_tgz ${gsl_tar_archive}  ${GSL_SOURCE_DIR})
+  find_file (have_gsl_tgz ${GSL_SOURCE} ${GSL_SOURCE_DIR})
+
+  if (NOT have_gsl_tgz)
+    set (have_gsl_tgz ${GSL_URL})
+  endif (NOT have_gsl_tgz)
   
-  if (have_gsl_tgz)
-    ExternalProject_Add (gsl
-      PREFIX ${GSL_BINARY_DIR}
-      DOWNLOAD_DIR ${GSL_BINARY_DIR}
-      SOURCE_DIR ${GSL_BINARY_DIR}
-      URL ${have_gsl_tgz}
-      URL_MD5 d9fcfa367c44ab68a25b4edf34c3c5f7
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${GSL_BINARY_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
-      )
-  else (have_gsl_tgz)
-    ExternalProject_Add (gsl
-      PREFIX ${GSL_BINARY_DIR}
-      DOWNLOAD_DIR ${GSL_BINARY_DIR}
-      SOURCE_DIR ${GSL_BINARY_DIR}
-      URL ftp://ftp.mirror.nl/pub/mirror/gnu/gsl/${GSL_TAR_ARCHIVE}
-      URL_MD5 d9fcfa367c44ab68a25b4edf34c3c5f7
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${GSL_BINARY_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
-      )
-  endif (have_gsl_tgz)
+  ExternalProject_Add (gsl
+    PREFIX ${GSL_BINARY_DIR}
+    DOWNLOAD_DIR ${GSL_BINARY_DIR}/download
+    SOURCE_DIR ${GSL_BINARY_DIR}/source
+    URL ${have_gsl_tgz}
+    URL_MD5 d9fcfa367c44ab68a25b4edf34c3c5f7
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ${GSL_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+    )
   
   ## <-- end build condition ----------------------------------------------------->
   

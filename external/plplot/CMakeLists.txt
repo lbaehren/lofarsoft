@@ -56,7 +56,10 @@ if (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project
 
-  find_file (have_plplot_tgz plplot-5.9.2.tar.gz ${PLPLOT_SOURCE_DIR})
+  set (PLPLOT_VERSION "5.9.2" )
+  set (PLPLOT_SOURCE  "plplot-${PLPLOT_VERSION}.tar.gz" )
+
+  find_file (have_plplot_tgz ${PLPLOT_SOURCE} ${PLPLOT_SOURCE_DIR})
   
   configure_file (
     ${PLPLOT_SOURCE_DIR}/plplot.cmake.in
@@ -66,8 +69,8 @@ if (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
   if (have_plplot_tgz)
     ExternalProject_Add (plplot
       PREFIX ${PLPLOT_BINARY_DIR}
-      DOWNLOAD_DIR ${PLPLOT_BINARY_DIR}/plplot
-      SOURCE_DIR ${PLPLOT_BINARY_DIR}/plplot
+      DOWNLOAD_DIR ${PLPLOT_BINARY_DIR}/download
+      SOURCE_DIR ${PLPLOT_BINARY_DIR}/source
       URL ${have_plplot_tgz}
       URL_MD5 2a14753112083badab87f1806cc12a46
       CMAKE_ARGS -C ${PLPLOT_BINARY_DIR}/plplot.cmake

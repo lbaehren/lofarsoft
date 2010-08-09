@@ -43,32 +43,26 @@ include (FindFFTW3)
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_FFTW3 OR FFTW3_FORCE_BUILD)
+
+  set (FFTW3_VERSION "3.2.2")
+  set (FFTW3_SOURCE  "fftw-${FFTW3_VERSION}.tar.gz")
+  set (FFTW3_URL     "ftp://ftp.fftw.org/pub/fftw/${FFTW3_SOURCE}")
   
-  include (ExternalProject)
+  find_file (have_fftw3_tgz ${FFTW3_SOURCE} ${FFTW3_SOURCE_DIR})
+
+  if (NOT have_fftw3_tgz)
+    set (have_fftw3_tgz ${FFTW3_URL})
+  endif (NOT have_fftw3_tgz)
   
-  find_file (have_fftw3_tgz fftw-3.2.2.tar.gz  ${FFTW3_SOURCE_DIR})
-  
-  if (have_fftw3_tgz)
-    ExternalProject_Add (fftw3
-      PREFIX ${FFTW3_BINARY_DIR}
-      DOWNLOAD_DIR ${FFTW3_BINARY_DIR}
-      SOURCE_DIR ${FFTW3_BINARY_DIR}
-      URL ${have_fftw3_tgz}
-      URL_MD5 b616e5c91218cc778b5aa735fefb61ae
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${FFTW3_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
-      )
-  else (have_fftw3_tgz)
-    ExternalProject_Add (fftw3
-      PREFIX ${FFTW3_BINARY_DIR}
-      DOWNLOAD_DIR ${FFTW3_BINARY_DIR}
-      SOURCE_DIR ${FFTW3_BINARY_DIR}
-      URL ftp://ftp.fftw.org/pub/fftw/fftw-3.2.2.tar.gz
-      URL_MD5 b616e5c91218cc778b5aa735fefb61ae
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${FFTW3_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
-      )
-  endif (have_fftw3_tgz)
+  ExternalProject_Add (fftw3
+    PREFIX ${FFTW3_BINARY_DIR}
+    DOWNLOAD_DIR ${FFTW3_BINARY_DIR}/download
+    SOURCE_DIR ${FFTW3_BINARY_DIR}/source
+    URL ${have_fftw3_tgz}
+    URL_MD5 b616e5c91218cc778b5aa735fefb61ae
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ${FFTW3_BINARY_DIR}/source/configure --prefix=${USG_INSTALL_PREFIX}
+    )
   
   ## <-- end build condition ----------------------------------------------------->
   
