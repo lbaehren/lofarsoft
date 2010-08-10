@@ -38,6 +38,7 @@ class bbs(LOFARnode):
             env = read_initscript(initscript)
             try:
                 cmd = [executable, parset_filename, "0"]
+                self.logger.debug("Exceuting BBS kernel")
                 bbs_kernel_process = Popen(cmd, stdout=PIPE, stderr=PIPE)
                 sout, serr = bbs_kernel_process.communicate()
                 self.logger.debug("BBS kernel stdout: %s" % (sout,))
@@ -46,7 +47,7 @@ class bbs(LOFARnode):
                     raise CalledProcessError(bbs_kernel_process.returncode, executable)
             except CalledProcessError, e:
                 self.logger.error(str(e))
-                raise Exception
+                return 1
             finally:
                 os.unlink(parset_filename)
 
@@ -54,9 +55,4 @@ class bbs(LOFARnode):
 
 if __name__ == "__main__":
     loghost, logport = sys.argv[1:3]
-    try:
-        bbs(loghost, logport).run_with_logging(*sys.argv[3:])
-    except:
-        return 1
-    else:
-        return 0
+    sys.exit(bbs(loghost, logport).run_with_logging(*sys.argv[3:]))

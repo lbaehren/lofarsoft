@@ -101,23 +101,6 @@ class bbs(LOFARrecipe):
 
         ms_names = self.inputs['args']
 
-        # First: clean the database
-        self.logger.debug("Cleaning BBS database for key %s" % (self.inputs["key"]))
-        with closing(
-            psycopg2.connect(
-                host=self.inputs["db_host"],
-                user=self.inputs["db_user"],
-                database=self.inputs["db_name"]
-            )
-        ) as db_connection:
-            db_connection.set_isolation_level(
-                psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT
-            )
-            with closing(db_connection.cursor()) as db_cursor:
-                db_cursor.execute(
-                    "DELETE FROM blackboard.session WHERE key=%s",
-                    (self.inputs["key"],)
-                )
 
         # Build a VDS file describing all the data to be processed
         self.logger.debug("Building VDS file describing all data for BBS")
@@ -132,6 +115,25 @@ class bbs(LOFARrecipe):
         for to_process in gvds_iterator(vds_file):
             # to_process is a list of (host, filename) tuples.
             ms_names = [filename for host, filename in to_process]
+
+            # Clean the database for this run
+            self.logger.debug("Cleaning BBS database for key %s" % (self.inputs["key"]))
+            with closing(
+                psycopg2.connect(
+                    host=self.inputs["db_host"],
+                    user=self.inputs["db_user"],
+                    database=self.inputs["db_name"]
+                )
+            ) as db_connection:
+                db_connection.set_isolation_level(
+                    psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT
+                )
+                with closing(db_connection.cursor()) as db_cursor:
+                    db_cursor.execute(
+                        "DELETE FROM blackboard.session WHERE key=%s",
+                        (self.inputs["key"],)
+                    )
+
             # Build a VDS file describing the data for this run
             self.logger.debug("Building VDS file describing data for BBS run")
             vds_dir = tempfile.mkdtemp()
@@ -164,15 +166,15 @@ class bbs(LOFARrecipe):
             bbs_control.start()
             run_flag.wait() # Wait for control to start before proceeding
 
-            command = "python /opt/pipeline/recipe/nodes/bbs.py"
+            command = "python /opt/pipeline/recipes/nodes/bbs.py"
             with clusterlogger(self.logger) as (loghost, logport):
                 self.logger.debug("Logging to %s:%d" % (loghost, logport))
                 with utilities.log_time(self.logger):
                     bbs_kernels = [
                         threading.Thread(
-                            target=run_via_ssh,
+                            target=self._run_via_ssh,
                             args=(host, command,
-                                loghost, logport,
+                                loghost, str(logport),
                                 self.inputs['kernel_exec'],
                                 self.inputs['initscript'],
                                 file,
@@ -199,7 +201,14 @@ class bbs(LOFARrecipe):
         return 0
 
     def _run_via_ssh(self, host, command, *arguments):
-        ssh_cmd = ["ssh", "-x", host, "--", command]
+        engine_ppath = self.config.get('deploy', 'engine_ppath')
+        engine_lpath = self.config.get('deploy', 'engine_lpath')
+        ssh_cmd = [
+            "ssh", "-x", host, "--",
+            "PYTHONPATH=%s" % engine_ppath,
+            "LD_LIBRARY_PATH=%s" % engine_lpath,
+            command
+        ]
         ssh_cmd.extend(arguments)
         self.logger.info("Running %s" % " ".join(ssh_cmd))
         subprocess.check_call(ssh_cmd)
