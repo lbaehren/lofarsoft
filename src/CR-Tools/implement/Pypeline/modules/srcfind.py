@@ -316,6 +316,7 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     result = directionFromAllTriangles(pos, times)
     print '(az, el) = (%f, %f)' %(result[0], result[1])
     print '(u_az, u_el) = (%f, %f)' %(result[2], result[3])
+    print 'Better (az, el) = (%f, %f)' %(result[4], result[5])
 
     times += noise
     print '\n-----\n'
@@ -332,6 +333,7 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     result = directionFromAllTriangles(pos, times)
     print '(az, el) = (%f, %f)' %(result[0], result[1])
     print '(u_az, u_el) = (%f, %f)' %(result[2], result[3])
+    print 'Better (az, el) = (%f, %f)' %(result[4], result[5])
 
 def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel, fitType = 'LinearFit'):
     print 'Testing for bias using fit type = %s' %fitType
@@ -420,7 +422,20 @@ def directionFromAllTriangles(positions, times):
                     
     solutions_az = solutions_az[0:validcount]
     solutions_el = solutions_el[0:validcount]
-     
+    
+    # make direction vectors for all the az, el results, get the average vector, get az, el back from that...
+    # that's a better way of averaging the results
+    outvec_x = cos(solutions_el) * cos(solutions_az)
+    outvec_y = cos(solutions_el) * sin(solutions_az)
+    outvec_z = sin(solutions_el)
+    
+    avg_x = np.average(outvec_x)
+    avg_y = np.average(outvec_y)
+    avg_z = np.average(outvec_z)
+    
+    test_el = np.arcsin(avg_z)
+    test_az = np.arctan2(avg_y, avg_x)  
+       
     az_avg = np.average(solutions_az)
     el_avg = np.average(solutions_el)
      
@@ -436,20 +451,9 @@ def directionFromAllTriangles(positions, times):
 #    print '# Uncertainty az (stddev / sqrt(n_trials)) = %f' %u_az
 #    print '# Uncertainty el = %f' %u_el
     print '# Total triangles = %d, valid = %d' %(count, validcount)
-    return (az_avg, el_avg, u_az, u_el)
-
-#def testTriangleMethod(N_ant, noiselevel):
-#    x = np.random.rand(N_ant) * 100 - 50 # Antenna positions in a 100x100 m field
-#    y = np.random.rand(N_ant) * 100 - 50
-#    z = np.zeros(N_ant) # for use in the planar fit requires z = 0
+    return (az_avg, el_avg, u_az, u_el, test_az, test_el)
     
-#    pos = np.column_stack([x, y, z]).ravel() # make flat array alternating x,y,z
-#    az = 1.0
-#    el = 0.1
-#    times = timeDelaysFromDirection(pos, (az, el))
-#    noise = (2 * np.random.rand(N_ant) - 1.0) * max(abs(times)) * noiselevel
-    
-     
+            
        
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
@@ -459,13 +463,3 @@ if __name__=='__main__':
     import doctest
     doctest.testmod()
 
-#    print A
-#    print B
-#    print A * x[1] + B * y[1]
-#    print c * times[1]
-#    print ' '
-#    print A * x[2] + B * y[2]
-#    print c * times[2]
-
-#    cosel = np.sqrt(A*A + B*B)
-#    print cosel
