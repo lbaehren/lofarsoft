@@ -111,14 +111,14 @@ if (NOT HAVE_SCIPY OR SCIPY_FORCE_BUILD)
   if (have_scipy_tgz)
     ExternalProject_Add (scipy
       PREFIX ${SCIPY_BINARY_DIR}
-      DOWNLOAD_DIR ${SCIPY_BINARY_DIR}
-      SOURCE_DIR ${SCIPY_BINARY_DIR}
+      DOWNLOAD_DIR ${SCIPY_BINARY_DIR}/download
+      SOURCE_DIR ${SCIPY_BINARY_DIR}/source
       URL ${have_scipy_tgz}
       URL_MD5 33f883f5ea4227de7097c47d70d5402a
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${SCIPY_BINARY_DIR}/setup.py --help
-      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${SCIPY_BINARY_DIR}/setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${SCIPY_BINARY_DIR}/setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${SCIPY_BINARY_DIR}/source/setup.py --help
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${SCIPY_BINARY_DIR}/source/setup.py build
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${SCIPY_BINARY_DIR}/source/setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
       )
   else (have_scipy_tgz)
     message (WARNING "[SciPy] Unable to build project - missing source!")

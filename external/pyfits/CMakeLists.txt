@@ -86,14 +86,14 @@ if (NOT HAVE_PYFITS OR PYFITS_FORCE_BUILD)
   if (have_pyfits_tgz)
     ExternalProject_Add (pyfits
       PREFIX ${PYFITS_BINARY_DIR}
-      DOWNLOAD_DIR ${PYFITS_BINARY_DIR}
-      SOURCE_DIR ${PYFITS_BINARY_DIR}
+      DOWNLOAD_DIR ${PYFITS_BINARY_DIR}/download
+      SOURCE_DIR ${PYFITS_BINARY_DIR}/source
       URL ${have_pyfits_tgz}
       URL_MD5 82e6919667aea99925db212d38670b38
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/setup.py --help
-      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/source/setup.py --help
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/source/setup.py build
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/source/setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
       )
   else (have_pyfits_tgz)
     message (WARNING "[PyFITS] Unable to build project - missing source!")
