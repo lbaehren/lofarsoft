@@ -33,11 +33,18 @@ class vdsmaker(LOFARrecipe):
             help="combinevds executable",
             default="/opt/LofIm/daily/lofar/bin/combinevds"
         )
+        self.optionparser.add_option(
+            '--unlink',
+            help="Unlink VDS files after combining",
+            default="True"
+        )
 
     def go(self):
         super(vdsmaker, self).go()
 
         ms_names = self.inputs['args']
+        if self.inputs['unlink'] == "False":
+            self.inputs['unlink'] = False
 
         try:
             os.makedirs(self.inputs['directory'])
@@ -154,9 +161,10 @@ class vdsmaker(LOFARrecipe):
             finally:
                 failure = True
         finally:
-            self.logger.debug("Unlinking temporary files")
-            for file in vdsnames:
-                os.unlink(file)
+            if self.inputs["unlink"]:
+                self.logger.debug("Unlinking temporary files")
+                for file in vdsnames:
+                    os.unlink(file)
             self.logger.info("vdsmaker done")
         if failure:
             return 1

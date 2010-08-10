@@ -32,7 +32,8 @@ def gvds_iterator(gvds_file, nproc=4):
     for part in range(parset.getInt('NParts')):
         host = parset.getString("Part%d.FileSys" % part).split(":")[0]
         file = parset.getString("Part%d.FileName" % part)
-        data[host].append(file)
+        vds  = parset.getString("Part%d.Name" % part)
+        data[host].append((file, vds))
 
     for host, values in data.iteritems():
         data[host] = utilities.group_iterable(values, nproc)
@@ -41,8 +42,8 @@ def gvds_iterator(gvds_file, nproc=4):
         yieldable = []
         for host, values in data.iteritems():
             try:
-                for filename in values.next():
-                    yieldable.append((host, filename))
+                for filename, vds in values.next():
+                    yieldable.append((host, filename, vds))
             except StopIteration:
                 pass
         if len(yieldable) == 0:
@@ -101,20 +102,20 @@ class bbs(LOFARrecipe):
 
         ms_names = self.inputs['args']
 
-
         # Build a VDS file describing all the data to be processed
         self.logger.debug("Building VDS file describing all data for BBS")
         vds_file = os.path.join(
             self.config.get("layout", "vds_directory"), "bbs.gvds"
         )
-        self.run_task('vdsmaker', ms_names, gvds=vds_file)
+        self.run_task('vdsmaker', ms_names, gvds=vds_file, unlink="False")
         self.logger.debug("BBS VDS is %s" % (vds_file,))
 
         # Iterate over groups in the VDS file for suitable for cluster
         # processing
         for to_process in gvds_iterator(vds_file):
             # to_process is a list of (host, filename) tuples.
-            ms_names = [filename for host, filename in to_process]
+            ms_names  = [filename for host, filename, vds in to_process]
+            vds_files = [vds for host, filename, vds in to_process]
 
             # Clean the database for this run
             self.logger.debug("Cleaning BBS database for key %s" % (self.inputs["key"]))
@@ -138,8 +139,17 @@ class bbs(LOFARrecipe):
             self.logger.debug("Building VDS file describing data for BBS run")
             vds_dir = tempfile.mkdtemp()
             vds_file = os.path.join(vds_dir, "bbs.gvds")
-            self.run_task('vdsmaker', ms_names, gvds=vds_file)
-            self.logger.debug("BBS VDS is %s" % (vds_file,))
+            combineproc = subprocess.Popen(
+                [
+                    "/opt/LofIm/daily/lofar/bin/combinevds",
+                    vds_file,
+                ] + vds_files,
+                stdout = subprocess.PIPE,
+                stderr = subprocess.PIPE
+            )
+            sour, serr = combineproc.communicate()
+            if combineproc.returncode != 0:
+                raise subprocess.CalledProcessError(combineproc.returncode, command)
 
             # Construct a parset for BBS control
             self.logger.debug("Building parset for BBS control")
@@ -184,7 +194,7 @@ class bbs(LOFARrecipe):
                                 self.inputs['db_host']
                             )
                         )
-                        for host, file in to_process
+                        for host, file, vds in to_process
                     ]
                     [thread.start() for thread in bbs_kernels]
                     self.logger.debug("Waiting for all kernels to complete")
