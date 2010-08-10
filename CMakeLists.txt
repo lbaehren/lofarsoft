@@ -41,11 +41,12 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
-option (LUS_VERBOSE_CONFIGURE   "Be verbose during configuration?"            NO )
-option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO )
-option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO )
-option (TEST_DATASETS          "Download and install sample test datasets?"   NO )
-option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO )
+option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"            NO  )
+option (LUS_ENABLE_TESTING     "Enable testing of configuration and build?"  YES )
+option (POST_BUILD_CLEAN       "Clean up the build directory after a build?" NO  )
+option (MULTITHREADED_BUILD    "Enable multithreading during build?"         NO  )
+option (TEST_DATASETS          "Download and install sample test datasets?"  NO  )
+option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"         NO  )
 
 ## Options affecting the build of individual packages
 
@@ -54,6 +55,13 @@ option (CR_WITH_GUI          "Build CR-Tools with graphical interface?"   NO  )
 option (DAL_PYTHON_BINDINGS  "Create python bindings for DAL?"            YES )
 option (RM_ENABLE_ITPP       "Enable using IT++ library?"                 NO  )
 option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"            YES )
+
+## Handle options
+
+if (LUS_ENABLE_TESTING)
+  include (CTest)
+  enable_testing()
+endif (LUS_ENABLE_TESTING)
 
 ## ==============================================================================
 ##
