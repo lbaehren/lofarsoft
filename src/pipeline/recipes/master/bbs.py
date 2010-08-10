@@ -202,6 +202,7 @@ class bbs(LOFARrecipe):
 
             # And wait for control
             try:
+                self.logger.info("Waiting for GlobalControl")
                 bbs_control.join()
             finally:
                 os.unlink(bbs_parset)
@@ -239,7 +240,6 @@ class bbs(LOFARrecipe):
                 stderr=subprocess.PIPE
             )
             run_flag.set()
-            self.logger.info("Waiting for GlobalControl")
             sout, serr = bbs_control_process.communicate()
         self.logger.info("Global Control stdout: %s" % (sout,))
         self.logger.info("Global Control stderr: %s" % (serr,))
