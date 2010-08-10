@@ -49,6 +49,7 @@ option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO
 
 ## Options affecting the build of individual packages
 
+option (BDSM_WITH_SCIPY      "Build SciPy as interactive environment?"    NO  )
 option (CR_WITH_GUI          "Build CR-Tools with graphical interface?"   NO  )
 option (DAL_PYTHON_BINDINGS  "Create python bindings for DAL?"            YES )
 option (RM_ENABLE_ITPP       "Enable using IT++ library?"                 NO  )
@@ -247,7 +248,11 @@ endif (HAVE_ROOT)
 
 build_package (bdsm src/BDSM)
 
-add_dependencies (bdsm wcslib cfitsio boost num_util scipy pyfits)
+add_dependencies (bdsm wcslib cfitsio boost num_util pyfits)
+
+if (BDSM_WITH_SCIPY)
+  add_dependencies (bdsm scipy)
+endif (BDSM_WITH_SCIPY)
 
 ##____________________________________________________________________
 ##                                           Data Access Library (DAL)
