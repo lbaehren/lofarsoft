@@ -181,7 +181,7 @@ class bbs(LOFARrecipe):
             bbs_control.start()
             run_flag.wait() # Wait for control to start before proceeding
 
-            command = "python /opt/pipeline/recipes/nodes/bbs.py"
+            command = "python %s" % (self.__file__.replace('master', 'nodes'))
             with clusterlogger(self.logger) as (loghost, logport):
                 self.logger.debug("Logging to %s:%d" % (loghost, logport))
                 with utilities.log_time(self.logger):

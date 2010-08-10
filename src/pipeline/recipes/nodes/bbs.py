@@ -38,7 +38,7 @@ class bbs(LOFARnode):
             env = read_initscript(initscript)
             try:
                 cmd = [executable, parset_filename, "0"]
-                self.logger.debug("Exceuting BBS kernel")
+                self.logger.debug("Executing BBS kernel")
                 bbs_kernel_process = Popen(cmd, stdout=PIPE, stderr=PIPE)
                 sout, serr = bbs_kernel_process.communicate()
                 self.logger.debug("BBS kernel stdout: %s" % (sout,))
