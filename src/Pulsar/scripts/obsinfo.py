@@ -824,7 +824,7 @@ if __name__ == "__main__":
 				cmd="cexec %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
 				status=os.popen(cmd).readlines()
 				if np.size(status) > 0:
-					status=status[0][-1]
+					status=status[0][:-1]
 					if status.isdigit() == True:
 							dirsizes[lse][1] = status
 
