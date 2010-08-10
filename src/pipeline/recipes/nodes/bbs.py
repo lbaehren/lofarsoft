@@ -1,6 +1,6 @@
 from __future__ import with_statement
 from lofarpipe.support.lofarnode import LOFARnode
-from lofarpipe.support.utilities import log_time, read_initscript
+from lofarpipe.support.utilities import log_time, read_initscript, log_prop
 from lofarpipe.cuisine.parset import Parset
 
 from tempfile import mkstemp
@@ -35,11 +35,19 @@ class bbs(LOFARnode):
             kernel_parset.writeToFile(parset_filename)
             self.logger.debug("Parset written to %s" % (parset_filename,))
 
+            # Dummy log_prop file to disable stupid messages
+            working_dir = tempfile.mkdtemp()
+            log_prop_filename = os.path.join(
+                working_dir, os.path.basename(executable) + ".log_prop"
+            )
+            with open(log_prop_filename, 'w') as log_prop_file:
+                log_prop_file.write(log_prop)
+
             env = read_initscript(initscript)
             try:
                 cmd = [executable, parset_filename, "0"]
                 self.logger.debug("Executing BBS kernel")
-                bbs_kernel_process = Popen(cmd, stdout=PIPE, stderr=PIPE)
+                bbs_kernel_process = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=working_dir)
                 sout, serr = bbs_kernel_process.communicate()
                 self.logger.debug("BBS kernel stdout: %s" % (sout,))
                 self.logger.debug("BBS kernel stderr: %s" % (serr,))
@@ -50,6 +58,7 @@ class bbs(LOFARnode):
                 return 1
             finally:
                 os.unlink(parset_filename)
+                shutil.rmtree(working_dir)
 
             return 0
 

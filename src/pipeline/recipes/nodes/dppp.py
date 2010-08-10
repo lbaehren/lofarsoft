@@ -72,7 +72,7 @@ class dppp(LOFARnode):
                     )
                     log_prop_file.write(log_format)
 
-                # We use subprocess.check_call() to spawn DPPP and check 
+                # We use subprocess.check_call() to spawn DPPP and check
                 # its exit status.
                 # What is the '1' for? Required by DP3...
                 cmd = [executable, temp_parset_filename, '1']
