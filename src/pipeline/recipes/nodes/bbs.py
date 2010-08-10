@@ -6,6 +6,7 @@ from lofarpipe.cuisine.parset import Parset
 from tempfile import mkstemp, mkdtemp
 import os
 import sys
+import shutil
 
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
 
