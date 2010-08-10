@@ -83,6 +83,11 @@ if (NOT HAVE_PYTHON)
   set (BDSM_WITH_PYBDSM FALSE)
 endif (NOT HAVE_PYTHON)
 
+if (BDSM_ENABLE_TESTING)
+  include (CTest)
+  enable_testing() 
+endif (BDSM_ENABLE_TESTING)
+
 ## ==============================================================================
 ##
 ##  Project subdirectories
