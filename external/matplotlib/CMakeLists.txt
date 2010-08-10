@@ -65,14 +65,14 @@ if (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
   if (have_matplotlib_tgz)
     ExternalProject_Add (matplotlib
       PREFIX ${MATPLOTLIB_BINARY_DIR}
-      DOWNLOAD_DIR ${MATPLOTLIB_BINARY_DIR}
-      SOURCE_DIR ${MATPLOTLIB_BINARY_DIR}
+      DOWNLOAD_DIR ${MATPLOTLIB_BINARY_DIR}/download
+      SOURCE_DIR ${MATPLOTLIB_BINARY_DIR}/source
       URL ${have_matplotlib_tgz}
       URL_MD5 952e2c992e4a762b8538171f51c9140a
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} setup.py --help
-      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/setup.py install --prefix=  --home=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/source/setup.py --help
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/source/setup.py build
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/source/setup.py install --prefix=  --home=${USG_INSTALL_PREFIX}
       )
   else (have_matplotlib_tgz)
     status (WARNING "[Matplotlib] Unable to build project - no sources found!")
