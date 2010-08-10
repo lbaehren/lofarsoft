@@ -3,7 +3,7 @@ from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import log_time, read_initscript, log_prop
 from lofarpipe.cuisine.parset import Parset
 
-from tempfile import mkstemp
+from tempfile import mkstemp, mkdtemp
 import os
 import sys
 
@@ -36,7 +36,7 @@ class bbs(LOFARnode):
             self.logger.debug("Parset written to %s" % (parset_filename,))
 
             # Dummy log_prop file to disable stupid messages
-            working_dir = tempfile.mkdtemp()
+            working_dir = mkdtemp()
             log_prop_filename = os.path.join(
                 working_dir, os.path.basename(executable) + ".log_prop"
             )
