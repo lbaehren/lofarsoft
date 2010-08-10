@@ -95,6 +95,11 @@ class bbs(LOFARrecipe):
             dest="db_name",
             help="Database name"
         )
+        self.optionparser.add_option(
+            '--combinevds',
+            help="combinevds executable",
+            default="/opt/LofIm/daily/lofar/bin/combinevds"
+        )
 
     def go(self):
         self.logger.info("Starting BBS run")
@@ -141,7 +146,7 @@ class bbs(LOFARrecipe):
             vds_file = os.path.join(vds_dir, "bbs.gvds")
             combineproc = subprocess.Popen(
                 [
-                    "/opt/LofIm/daily/lofar/bin/combinevds",
+                    self.inputs['combinevds'],
                     vds_file,
                 ] + vds_files,
                 stdout = subprocess.PIPE,
