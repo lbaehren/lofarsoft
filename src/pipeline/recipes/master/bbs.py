@@ -5,6 +5,8 @@ import subprocess
 import sys
 import os
 import threading
+import tempfile
+import shutil
 
 # Local helpers
 from lofarpipe.support.lofarrecipe import LOFARrecipe
@@ -12,6 +14,42 @@ from lofarpipe.support.lofarnode import run_node
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
 import lofarpipe.support.utilities as utilities
+
+from lofar.parameterset import parameterset
+from collections import defaultdict
+
+def gvds_iterator(gvds_file, nproc=4):
+    """
+    Reads a GVDS file.
+
+    Provides a generator, which successively returns the contents of the GVDS
+    file in the form (host, filename), in chunks suitable for processing
+    across the cluster. Ie, no more than nproc files per host at a time.
+    """
+    parset = parameterset(gvds_file)
+
+    data = defaultdict(list)
+    for part in range(parset.getInt('NParts')):
+        host = parset.getString("Part%d.FileSys" % part).split(":")[0]
+        file = parset.getString("Part%d.FileName" % part)
+        data[host].append(file)
+
+    for host, values in data.iteritems():
+        data[host] = utilities.group_iterable(values, nproc)
+
+    while True:
+        yieldable = []
+        for host, values in data.iteritems():
+            try:
+                for filename in values.next():
+                    yieldable.append((host, filename))
+            except StopIteration:
+                pass
+        if len(yieldable) == 0:
+            raise StopIteration
+        else:
+            yield yieldable
+
 
 class bbs(LOFARrecipe):
     def __init__(self):
@@ -81,116 +119,90 @@ class bbs(LOFARrecipe):
                     (self.inputs["key"],)
                 )
 
-        # Second, build a VDS file describing the data to be processed
-        self.logger.debug("Building VDS file for BBS")
+        # Build a VDS file describing all the data to be processed
+        self.logger.debug("Building VDS file describing all data for BBS")
         vds_file = os.path.join(
             self.config.get("layout", "vds_directory"), "bbs.gvds"
         )
         self.run_task('vdsmaker', ms_names, gvds=vds_file)
         self.logger.debug("BBS VDS is %s" % (vds_file,))
 
-        # Third, construct a parset for BBS control
-        self.logger.debug("Building parset for BBS control")
-        bbs_parset = utilities.patch_parset(
-            self.inputs['parset'],
-            {
-                'Observation': vds_file,
-                'BBDB.Key': self.inputs['key'],
-                'BBDB.Name': self.inputs['db_name'],
-                'BBDB.User': self.inputs['db_user'],
-                'BBDB.Host': self.inputs['db_host'],
-#                'BBDB.Port': self.inputs['db_name'],
-            }
-        )
-        self.logger.debug("BBS control parset is %s" % (bbs_parset,))
+        # Iterate over groups in the VDS file for suitable for cluster
+        # processing
+        for to_process in gvds_iterator(vds_file):
+            # to_process is a list of (host, filename) tuples.
+            ms_names = [filename for host, filename in to_process]
+            # Build a VDS file describing the data for this run
+            self.logger.debug("Building VDS file describing data for BBS run")
+            vds_dir = tempfile.mkdtemp()
+            vds_file = os.path.join(vds_dir, "bbs.gvds")
+            self.run_task('vdsmaker', ms_names, gvds=vds_file)
+            self.logger.debug("BBS VDS is %s" % (vds_file,))
 
-        # Fourth, start BBS kernels
-        tc, mec = self._get_cluster()
-        mec.push_function(
-            dict(
-                run_bbs=run_node,
-                build_available_list=utilities.build_available_list,
-                clear_available_list=utilities.clear_available_list
+            # Construct a parset for BBS control
+            self.logger.debug("Building parset for BBS control")
+            bbs_parset = utilities.patch_parset(
+                self.inputs['parset'],
+                {
+                    'Observation': vds_file,
+                    'BBDB.Key': self.inputs['key'],
+                    'BBDB.Name': self.inputs['db_name'],
+                    'BBDB.User': self.inputs['db_user'],
+                    'BBDB.Host': self.inputs['db_host'],
+    #                'BBDB.Port': self.inputs['db_name'],
+                }
             )
-        )
-        self.logger.debug("Pushed functions to cluster")
+            self.logger.debug("BBS control parset is %s" % (bbs_parset,))
 
-        # Use build_available_list() to determine which SBs are available
-        # on each engine; we use this for dependency resolution later.
-        self.logger.debug("Building list of data available on engines")
-        available_list = "%s%s" % (
-            self.inputs['job_name'], self.__class__.__name__
-        )
-        mec.push(dict(filenames=ms_names))
-        mec.execute(
-            "build_available_list(\"%s\")" % (available_list,)
-        )
+            # Run BBS control in a separate thread.
+            run_flag = threading.Event()
+            run_flag.clear()
+            bbs_control = threading.Thread(
+                target=self._run_bbs_control,
+                args=(bbs_parset, run_flag)
+            )
+            bbs_control.start()
+            run_flag.wait() # Wait for control to start before proceeding
 
-        # Run BBS control in a separate thread.
-        run_flag = threading.Event()
-        run_flag.clear()
-        bbs_control = threading.Thread(
-            target=self._run_bbs_control,
-            args=(bbs_parset, run_flag)
-        )
-        bbs_control.start()
-        import time
-        time.sleep(10)
-        run_flag.wait()
-
-        with clusterlogger(self.logger) as (loghost, logport):
-            with utilities.log_time(self.logger):
+            command = "python /opt/pipeline/recipe/nodes/bbs.py"
+            with clusterlogger(self.logger) as (loghost, logport):
                 self.logger.debug("Logging to %s:%d" % (loghost, logport))
-                tasks = []
-                for ms_name in ms_names:
-                    task = LOFARTask(
-                        "result = run_bbs(executable, initscript, ms_name, key, db_name, db_user, db_host)",
-                        push=dict(
-                            recipename=self.name,
-                            nodepath=os.path.dirname(self.__file__.replace('master', 'nodes')),
-                            ms_name=ms_name,
-                            executable=self.inputs['kernel_exec'],
-                            initscript=self.inputs['initscript'],
-                            key=self.inputs['key'],
-                            db_name=self.inputs['db_name'],
-                            db_user=self.inputs['db_user'],
-                            db_host=self.inputs['db_host'],
-                            loghost=loghost,
-                            logport=logport
-                        ),
-                        pull="result",
-                        depend=utilities.check_for_path,
-                        dependargs=(ms_name, available_list)
-                    )
-                    self.logger.info("Scheduling processing of %s" % (ms_name,))
-                    tasks.append((tc.run(task), ms_name))
+                with utilities.log_time(self.logger):
+                    bbs_kernels = [
+                        threading.Thread(
+                            target=run_via_ssh,
+                            args=(host, command,
+                                loghost, logport,
+                                self.inputs['kernel_exec'],
+                                self.inputs['initscript'],
+                                file,
+                                self.inputs['key'],
+                                self.inputs['db_name'],
+                                self.inputs['db_user'],
+                                self.inputs['db_host']
+                            )
+                        )
+                        for host, file in to_process
+                    ]
+                    [thread.start() for thread in bbs_kernels]
+                    self.logger.debug("Waiting for all kernels to complete")
+                    [thread.join() for thread in bbs_kernels]
 
+            # And wait for control
+            try:
+                bbs_control.join()
+            finally:
+                os.unlink(bbs_parset)
+                shutil.rmtree(vds_dir)
 
-                self.logger.debug("Waiting for all sourcedb tasks to complete")
-                # Wait for kernels to finish
-                tc.barrier([task for task, subband in tasks])
-
-        # Collect kernel results
-        failure = False
-        for task, subband in tasks:
-            res = tc.get_task_result(task)
-            if res.failure:
-                self.logger.warn("Task %s failed (processing %s)" % (task, subband))
-                self.logger.warn(res)
-                self.logger.warn(res.failure.getTraceback())
-                failure = True
-
-        # And wait for control
-        try:
-            bbs_control.join()
-        finally:
-            os.unlink(bbs_parset)
-            os.unlink(vds_file)
-
-        if failure:
-            return 1
         self.outputs['data'] = self.inputs['args']
         return 0
+
+    def _run_via_ssh(self, host, command, *arguments):
+        ssh_cmd = ["ssh", "-x", host, "--", command]
+        ssh_cmd.extend(arguments)
+        self.logger.info("Running %s" % " ".join(ssh_cmd))
+        subprocess.check_call(ssh_cmd)
 
     def _run_bbs_control(self, bbs_parset, run_flag):
         # Run BBS control & wait for it to finish

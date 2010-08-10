@@ -5,6 +5,7 @@ from lofarpipe.cuisine.parset import Parset
 
 from tempfile import mkstemp
 import os
+import sys
 
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
 
@@ -50,3 +51,12 @@ class bbs(LOFARnode):
                 os.unlink(parset_filename)
 
             return 0
+
+if __name__ == "__main__":
+    loghost, logport = sys.argv[1:3]
+    try:
+        bbs(loghost, logport).run_with_logging(*sys.argv[3:])
+    except:
+        return 1
+    else:
+        return 0
