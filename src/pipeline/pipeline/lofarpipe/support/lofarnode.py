@@ -22,7 +22,7 @@ class LOFARnode(object):
         )
         self.logger.setLevel(logging.DEBUG)
         self.loghost = loghost
-        self.logport = logport
+        self.logport = int(logport)
 
     def run_with_logging(self, *args):
         # Call the run() method, ensuring that the logging handler is added
