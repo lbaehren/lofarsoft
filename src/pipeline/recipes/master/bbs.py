@@ -4,6 +4,7 @@ import psycopg2
 import subprocess
 import sys
 import os
+import threading
 
 # Local helpers
 from lofarpipe.support.lofarrecipe import LOFARrecipe
@@ -125,6 +126,18 @@ class bbs(LOFARrecipe):
             "build_available_list(\"%s\")" % (available_list,)
         )
 
+        # Run BBS control in a separate thread.
+        run_flag = threading.Event()
+        run_flag.clear()
+        bbs_control = threading.Thread(
+            target=self._run_bbs_control,
+            args=(bbs_parset, run_flag)
+        )
+        bbs_control.start()
+        import time
+        time.sleep(10)
+        run_flag.wait()
+
         with clusterlogger(self.logger) as (loghost, logport):
             with utilities.log_time(self.logger):
                 self.logger.debug("Logging to %s:%d" % (loghost, logport))
@@ -152,36 +165,12 @@ class bbs(LOFARrecipe):
                     self.logger.info("Scheduling processing of %s" % (ms_name,))
                     tasks.append((tc.run(task), ms_name))
 
-                # Fifth, run BBS control & wait for it to finish
-                env = utilities.read_initscript(self.inputs['initscript'])
-                try:
-                    self.logger.info("Running BBS GlobalControl")
-                    with utilities.log_time(self.logger):
-                        bbs_control_process = subprocess.Popen(
-                            [
-                                self.inputs['control_exec'],
-                                bbs_parset,
-                                "0"
-                            ],
-                            env=env,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE
-                        )
-                        self.logger.info("Waiting for GlobalControl")
-                        sout, serr = bbs_control_process.communicate()
-                    if bbs_control_process.returncode != 0:
-                        raise subprocess.CalledProcessError(
-                            bbs_control_process.returncode,
-                            self.inputs['control_exec']
-                        )
-                finally:
-                    os.unlink(bbs_parset)
-                    os.unlink(vds_file)
 
                 self.logger.debug("Waiting for all sourcedb tasks to complete")
+                # Wait for kernels to finish
                 tc.barrier([task for task, subband in tasks])
 
-        # Finally, wait for kernels to finish
+        # Collect kernel results
         failure = False
         for task, subband in tasks:
             res = tc.get_task_result(task)
@@ -190,10 +179,44 @@ class bbs(LOFARrecipe):
                 self.logger.warn(res)
                 self.logger.warn(res.failure.getTraceback())
                 failure = True
+
+        # And wait for control
+        try:
+            bbs_control.join()
+        finally:
+            os.unlink(bbs_parset)
+            os.unlink(vds_file)
+
         if failure:
             return 1
         self.outputs['data'] = self.inputs['args']
         return 0
+
+    def _run_bbs_control(self, bbs_parset, run_flag):
+        # Run BBS control & wait for it to finish
+        env = utilities.read_initscript(self.inputs['initscript'])
+        self.logger.info("Running BBS GlobalControl")
+        with utilities.log_time(self.logger):
+            bbs_control_process = subprocess.Popen(
+                [
+                    self.inputs['control_exec'],
+                    bbs_parset,
+                    "0"
+                ],
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            run_flag.set()
+            self.logger.info("Waiting for GlobalControl")
+            sout, serr = bbs_control_process.communicate()
+        self.logger.info("Global Control stdout: %s" % (sout,))
+        self.logger.info("Global Control stderr: %s" % (serr,))
+        if bbs_control_process.returncode != 0:
+            raise subprocess.CalledProcessError(
+                bbs_control_process.returncode,
+                self.inputs['control_exec']
+            )
 
 
 if __name__ == '__main__':
