@@ -3,13 +3,14 @@ from contextlib import closing
 import psycopg2
 import subprocess
 import sys
+import os
 
 # Local helpers
 from lofarpipe.support.lofarrecipe import LOFARrecipe
-from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
-from lofarpipe.support.group_data import group_files
+from lofarpipe.support.lofarnode import run_node
+from lofarpipe.support.ipython import LOFARTask
+from lofarpipe.support.clusterlogger import clusterlogger
 import lofarpipe.support.utilities as utilities
-from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
 
 class bbs(LOFARrecipe):
     def __init__(self):
@@ -89,7 +90,7 @@ class bbs(LOFARrecipe):
 
         # Third, construct a parset for BBS control
         self.logger.debug("Building parset for BBS control")
-        bbs_parset = utilities.patch_patset(
+        bbs_parset = utilities.patch_parset(
             self.inputs['parset'],
             {
                 'Observation': vds_file,
@@ -136,6 +137,7 @@ class bbs(LOFARrecipe):
                             nodepath=os.path.dirname(self.__file__.replace('master', 'nodes')),
                             ms_name=ms_name,
                             executable=self.inputs['kernel_exec'],
+                            initscript=self.inputs['initscript'],
                             key=self.inputs['key'],
                             db_name=self.inputs['db_name'],
                             db_user=self.inputs['db_user'],

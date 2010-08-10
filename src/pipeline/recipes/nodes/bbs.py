@@ -6,12 +6,10 @@ from lofarpipe.cuisine.parset import Parset
 from tempfile import mkstemp
 import os
 
-
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
-import shutil, os.path
 
 def get_mountpoint(path):
-    return path if os.path.ismount(path) else get_mount(os.path.abspath(os.path.join(path, os.pardir)))
+    return path if os.path.ismount(path) else get_mountpoint(os.path.abspath(os.path.join(path, os.pardir)))
 
 class bbs(LOFARnode):
     def run(self, executable, initscript, infile, key, db_name, db_user, db_host):
@@ -31,14 +29,15 @@ class bbs(LOFARnode):
                 "BBDB.Host": db_host,
                 "ParmDB.Sky": os.path.join(infile, "sky"),
                 "ParmDB.Instrument": os.path.join(infile, "instrument")
-            }:
-                kernel_parset.writeToFile(parset_filename)
+            }.iteritems():
+                kernel_parset[key] = value
+            kernel_parset.writeToFile(parset_filename)
             self.logger.debug("Parset written to %s" % (parset_filename,))
 
             env = read_initscript(initscript)
             try:
-                cmd = [executable, parset_filename, 0]
-                bbs_kernel_process = Popen(cmd, stdout=PIPE, sterr=PIPE)
+                cmd = [executable, parset_filename, "0"]
+                bbs_kernel_process = Popen(cmd, stdout=PIPE, stderr=PIPE)
                 sout, serr = bbs_kernel_process.communicate()
                 self.logger.debug("BBS kernel stdout: %s" % (sout,))
                 self.logger.debug("BBS kernel stderr: %s" % (serr,))
