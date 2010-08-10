@@ -26,6 +26,7 @@ c = 299792458.0 # speed of ligth in m/s
 twopi = 2 * pi
 halfpi = 0.5 * pi
 rad2deg = 360.0 / twopi
+nan = float('nan')
 
 def directionFromThreeAntennas(positions, times):
     """
@@ -87,7 +88,7 @@ def directionFromThreeAntennas(positions, times):
     elif (square - 1) < 1e-15: # this does happen because of floating point errors, when time delays 'exactly' match elevation = 0
         C = 0 # so this correction is needed to ensure this function correctly inverts timeDelaysFromDirection(...)
     else:
-        return (-1, -1) # calculation fails, arrival times out of bounds!
+        return (nan, nan, nan, nan) # calculation fails, arrival times out of bounds!
        
     # Now we have to transform this vector back to normal x-y-z coordinates, and then to (az, el) to get our direction.
     # This is where the above xx, yy, zz vectors come in (normal notation: x', y', z')
@@ -105,7 +106,6 @@ def directionFromThreeAntennas(positions, times):
     
     az1 = phi
     el1 = halfpi - theta
-
     x =  signal2[0]; y =  signal2[1]; z =  signal2[2]
     
     theta = np.arccos(z) # in fact, z/R with R = 1
@@ -116,7 +116,7 @@ def directionFromThreeAntennas(positions, times):
     az2 = phi
     el2 = halfpi - theta
 
-    return (az1, el1, az2, el2) 
+    return (az1, el1, az2, el2)
 
 def timeDelaysFromDirection(positions, direction):
     """
@@ -306,22 +306,35 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     print 'Getting direction from linear fit method, without noise (should return the input):'
     (az, el) = directionForHorizontalArray(pos, times)
     print '(az, el) = (%f, %f)' %(az, el)
+    print ' '
     print 'Getting direction from brute force search:'
     
     result = directionBruteForceSearch(pos, times)
     print '(az, el) = (%f, %f)' %(result[0], result[1])
-    
-    times += noise
     print ' '
+    print 'Getting direction from triangle method: '
+    result = directionFromAllTriangles(pos, times)
+    print '(az, el) = (%f, %f)' %(result[0], result[1])
+    print '(u_az, u_el) = (%f, %f)' %(result[2], result[3])
+
+    times += noise
+    print '\n-----\n'
     print 'Getting direction from linear fit method, WITH noise:'
     (az, el) = directionForHorizontalArray(pos, times)
     print '(az, el) = (%f, %f)' %(az, el)
+    print ' '
     print 'Getting direction from brute force search:'
     
     result = directionBruteForceSearch(pos, times)
     print '(az, el) = (%f, %f)' %(result[0], result[1])
+    print ' '
+    print 'Getting direction from triangle method: '
+    result = directionFromAllTriangles(pos, times)
+    print '(az, el) = (%f, %f)' %(result[0], result[1])
+    print '(u_az, u_el) = (%f, %f)' %(result[2], result[3])
 
-def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel):
+def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel, fitType = 'LinearFit'):
+    print 'Testing for bias using fit type = %s' %fitType
     x = np.random.rand(N_ant) * 100 - 50 # Antenna positions in a 100x100 m field
     y = np.random.rand(N_ant) * 100 - 50
     z = np.zeros(N_ant) # for use in the planar fit requires z = 0
@@ -337,7 +350,15 @@ def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel):
         noise = (2 * np.random.rand(N_ant) - 1.0) * max(abs(exactTimes)) * noiselevel
         times = exactTimes + noise
         
-        result = directionForHorizontalArray(pos, times)
+        if fitType == 'LinearFit':
+            result = directionForHorizontalArray(pos, times)
+        elif fitType == 'BruteForce':
+            result = directionBruteForceSearch(pos, times)
+        elif fitType == 'Triangles':
+            result = directionFromAllTriangles(pos, times)
+        else:
+            raise ValueError("Wrong fit type specified, must be LinearFit, BruteForce or Triangles")
+            
         results_az[i] = result[0]
         results_el[i] = result[1]
     
@@ -361,9 +382,75 @@ def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel):
     print 'Uncertainty az (stddev / sqrt(n_trials)) = %f' %u_az
     print 'Uncertainty el = %f' %u_el
     
+def directionFromAllTriangles(positions, times):
+    """
+    Make all possible N(N-1)/2 triangles from the antenna positions
+    Find the direction of arrival belonging to each triangle;
+    Average over all directions to find the best (?) estimate...
+    """
+    N = len(times)
+    trianglecount = N * (N-1) * (N-2) / 6 # that's a whole lot, O(N^3)!
+    count = 0
+    validcount = 0
+    solutions_az = np.zeros(trianglecount)
+    solutions_el = np.zeros(trianglecount)
+    for i in range(N):
+        for j in range(i+1, N):
+            for k in range(j+1, N):
+                pos1 = positions[3*i:3*(i+1)]
+                pos2 = positions[3*j:3*(j+1)]
+                pos3 = positions[3*k:3*(k+1)]
+                count += 1
+                triangle = np.concatenate((pos1, pos2, pos3)) # need to specify the sequence of arrays as a tuple
+                triangleTimes = np.array([times[i], times[j], times[k]])
+                
+                (az1, el1, az2, el2) = directionFromThreeAntennas(triangle, triangleTimes)
+                # from the two solutions get the one with the highest elevation
+                if el2 > el1:
+                    az = az2
+                    el = el2
+                else:
+                    az = az1
+                    el = el1 # ah, this looks clumsy. Why no (az, el) = (el2 > el1) ? (az2, el2) : (az1, el1)... Hmm, not that pretty either.
+                
+                if not (np.isnan(el) or np.isnan(az)): # valid solution
+                    solutions_az[validcount] = az
+                    solutions_el[validcount] = el
+                    validcount += 1
+                    
+    solutions_az = solutions_az[0:validcount]
+    solutions_el = solutions_el[0:validcount]
+     
+    az_avg = np.average(solutions_az)
+    el_avg = np.average(solutions_el)
+     
+    u_az = np.std(solutions_az) / np.sqrt(validcount)
+    u_el = np.std(solutions_el) / np.sqrt(validcount)
+
+#    print '# Average az = %f' %az_avg
+#    print '# Average el = %f' %el_avg
+#    print ' '
+#    print 'Difference az = %f' %(az_avg - az)
+#    print 'Difference el = %f' %(el_avg - el)
+#    print ' '
+#    print '# Uncertainty az (stddev / sqrt(n_trials)) = %f' %u_az
+#    print '# Uncertainty el = %f' %u_el
+    print '# Total triangles = %d, valid = %d' %(count, validcount)
+    return (az_avg, el_avg, u_az, u_el)
+
+#def testTriangleMethod(N_ant, noiselevel):
+#    x = np.random.rand(N_ant) * 100 - 50 # Antenna positions in a 100x100 m field
+#    y = np.random.rand(N_ant) * 100 - 50
+#    z = np.zeros(N_ant) # for use in the planar fit requires z = 0
     
+#    pos = np.column_stack([x, y, z]).ravel() # make flat array alternating x,y,z
+#    az = 1.0
+#    el = 0.1
+#    times = timeDelaysFromDirection(pos, (az, el))
+#    noise = (2 * np.random.rand(N_ant) - 1.0) * max(abs(times)) * noiselevel
     
-        
+     
+       
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
 #  as a selftest for the module.
