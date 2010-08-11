@@ -82,6 +82,9 @@ endif (BDSM_WITH_FBDSM)
 ## Python-based version
 
 if (BDSM_WITH_PYBDSM)
+  ## additional CMake modules 
+  include (AddPythonModule)
+  ## project sub-directories
   add_subdirectory (minpack)
   add_subdirectory (port3)
   add_subdirectory (pybdsm)
