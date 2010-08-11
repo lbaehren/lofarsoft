@@ -41,16 +41,15 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
-option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"            NO  )
-option (LUS_ENABLE_TESTING     "Enable testing of configuration and build?"  YES )
-option (POST_BUILD_CLEAN       "Clean up the build directory after a build?" NO  )
-option (MULTITHREADED_BUILD    "Enable multithreading during build?"         NO  )
-option (TEST_DATASETS          "Download and install sample test datasets?"  NO  )
-option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"         NO  )
+option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"             NO )
+option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO )
+option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO )
+option (TEST_DATASETS          "Download and install sample test datasets?"   NO )
+option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO )
 
 ## Options affecting the build of individual packages
 
-option (BDSM_WITH_SCIPY      "Build SciPy as interactive environment?"    NO  )
+option (ANAAMIKA_WITH_SCIPY  "Build SciPy as interactive environment?"    NO  )
 option (CR_WITH_GUI          "Build CR-Tools with graphical interface?"   NO  )
 option (DAL_PYTHON_BINDINGS  "Create python bindings for DAL?"            YES )
 option (RM_ENABLE_ITPP       "Enable using IT++ library?"                 NO  )
@@ -144,7 +143,7 @@ endif (doxygen_executable)
 add_custom_target (clean-build
   COMMAND rm -rf *~
   COMMAND rm -rf contrib devel_common external
-  COMMAND rm -rf bdsm cr dal lasa pulsar pybdsm smosaic
+  COMMAND rm -rf anaamika cr dal lasa pulsar smosaic
   COMMAND rm -rf cmake_install.cmake
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeFiles
@@ -252,15 +251,15 @@ endif (HAVE_ROOT)
 ## ==============================================================================
 
 ##____________________________________________________________________
-##                                                                BDSM
+##                                                            Anaamika
 
-build_package (bdsm src/BDSM)
+build_package (anaamika src/Anaamika)
 
-add_dependencies (bdsm wcslib cfitsio boost num_util pyfits)
+add_dependencies (anaamika wcslib cfitsio boost num_util pyfits)
 
-if (BDSM_WITH_SCIPY)
-  add_dependencies (bdsm scipy)
-endif (BDSM_WITH_SCIPY)
+if (ANAAMIKA_WITH_SCIPY)
+  add_dependencies (anaamika scipy)
+endif (ANAAMIKA_WITH_SCIPY)
 
 ##____________________________________________________________________
 ##                                           Data Access Library (DAL)
