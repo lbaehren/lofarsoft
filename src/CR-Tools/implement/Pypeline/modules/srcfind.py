@@ -104,7 +104,7 @@ def directionFromThreeAntennas(positions, times):
     if phi < 0:
         phi += twopi
     
-    az1 = phi
+    az1 = halfpi - phi # phi is w.r.t. x pointing east and y pointing north. So, reverse angle and add 90 degrees...
     el1 = halfpi - theta
     x =  signal2[0]; y =  signal2[1]; z =  signal2[2]
     
@@ -113,7 +113,7 @@ def directionFromThreeAntennas(positions, times):
     if phi < 0:
         phi += twopi
     
-    az2 = phi
+    az2 = halfpi - phi
     el2 = halfpi - theta
 
     return (az1, el1, az2, el2)
@@ -132,7 +132,7 @@ def timeDelaysFromDirection(positions, direction):
     """
     
     n = len(positions) / 3
-    phi = direction[0] # warning, 90 degree?
+    phi = halfpi - direction[0] # warning, 90 degree? -- Changed to az = 90_deg - phi
     theta = halfpi - direction[1] # theta as in standard spherical coords, while el=90 means zenith...
     
     cartesianDirection = np.array([sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)])
@@ -285,8 +285,8 @@ def directionForHorizontalArray(positions, times):
     (A, B, C) = np.linalg.lstsq(M, c * times)[0]
         
     el = np.arccos(np.sqrt(A*A + B*B))
-    az = np.arctan2(-B, -A) # note minus sign as we want the direction of the _incoming_ vector (from the sky, not towards it)
-    
+    az = halfpi - np.arctan2(-B, -A) # note minus sign as we want the direction of the _incoming_ vector (from the sky, not towards it)
+    # note: Changed to az = 90_deg - phi 
     return (az, el)
 
 def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
@@ -315,8 +315,8 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     print 'Getting direction from triangle method: '
     result = directionFromAllTriangles(pos, times)
     print '(az, el) = (%f, %f)' %(result[0], result[1])
-    print '(u_az, u_el) = (%f, %f)' %(result[2], result[3])
-    print 'Better (az, el) = (%f, %f)' %(result[4], result[5])
+#    print '(u_az, u_el) = (%f, %f)' %(result[2], result[3])
+#    print 'Better (az, el) = (%f, %f)' %(result[4], result[5])
 
     times += noise
     print '\n-----\n'
@@ -332,8 +332,8 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     print 'Getting direction from triangle method: '
     result = directionFromAllTriangles(pos, times)
     print '(az, el) = (%f, %f)' %(result[0], result[1])
-    print '(u_az, u_el) = (%f, %f)' %(result[2], result[3])
-    print 'Better (az, el) = (%f, %f)' %(result[4], result[5])
+#    print '(u_az, u_el) = (%f, %f)' %(result[2], result[3])
+#    print 'Better (az, el) = (%f, %f)' %(result[4], result[5])
 
 def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel, fitType = 'LinearFit'):
     print 'Testing for bias using fit type = %s' %fitType
@@ -433,14 +433,14 @@ def directionFromAllTriangles(positions, times):
     avg_y = np.average(outvec_y)
     avg_z = np.average(outvec_z)
     
-    test_el = np.arcsin(avg_z)
-    test_az = np.arctan2(avg_y, avg_x)  
+    el_avg = np.arcsin(avg_z)
+    az_avg = np.arctan2(avg_y, avg_x)  
        
-    az_avg = np.average(solutions_az)
-    el_avg = np.average(solutions_el)
+#    az_avg = np.average(solutions_az)  # This is a wrong way of averaging results! So no longer using it
+#    el_avg = np.average(solutions_el)
      
-    u_az = np.std(solutions_az) / np.sqrt(validcount)
-    u_el = np.std(solutions_el) / np.sqrt(validcount)
+    #u_az = np.std(solutions_az) / np.sqrt(validcount) # And then this way of getting the uncertainty is also no longer valid
+    #u_el = np.std(solutions_el) / np.sqrt(validcount)
 
 #    print '# Average az = %f' %az_avg
 #    print '# Average el = %f' %el_avg
@@ -451,7 +451,7 @@ def directionFromAllTriangles(positions, times):
 #    print '# Uncertainty az (stddev / sqrt(n_trials)) = %f' %u_az
 #    print '# Uncertainty el = %f' %u_el
     print '# Total triangles = %d, valid = %d' %(count, validcount)
-    return (az_avg, el_avg, u_az, u_el, test_az, test_el)
+    return (az_avg, el_avg)
     
             
        
