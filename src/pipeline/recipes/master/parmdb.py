@@ -27,7 +27,8 @@ class parmdb(LOFARrecipe):
         super(parmdb, self).__init__()
         self.optionparser.add_option(
             '--executable',
-            help="Executable for parmdbm"
+            help="Executable for parmdbm",
+            default="/opt/LofIm/daily/lofar/bin/parmdbm"
         )
 
     def go(self):

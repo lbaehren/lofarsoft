@@ -13,7 +13,8 @@ class sourcedb(LOFARrecipe):
         super(sourcedb, self).__init__()
         self.optionparser.add_option(
             '--executable',
-            help="Executable for makesourcedb"
+            help="Executable for makesourcedb",
+            default="/opt/LofIm/daily/lofar/bin/makesourcedb"
         )
         self.optionparser.add_option(
             '-s', '--skymodel',

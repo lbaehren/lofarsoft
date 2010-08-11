@@ -13,44 +13,8 @@ from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.lofarnode import run_node
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
+from lofarpipe.support.group_data import gvds_iterator
 import lofarpipe.support.utilities as utilities
-
-from lofar.parameterset import parameterset
-from collections import defaultdict
-
-def gvds_iterator(gvds_file, nproc=4):
-    """
-    Reads a GVDS file.
-
-    Provides a generator, which successively returns the contents of the GVDS
-    file in the form (host, filename), in chunks suitable for processing
-    across the cluster. Ie, no more than nproc files per host at a time.
-    """
-    parset = parameterset(gvds_file)
-
-    data = defaultdict(list)
-    for part in range(parset.getInt('NParts')):
-        host = parset.getString("Part%d.FileSys" % part).split(":")[0]
-        file = parset.getString("Part%d.FileName" % part)
-        vds  = parset.getString("Part%d.Name" % part)
-        data[host].append((file, vds))
-
-    for host, values in data.iteritems():
-        data[host] = utilities.group_iterable(values, nproc)
-
-    while True:
-        yieldable = []
-        for host, values in data.iteritems():
-            try:
-                for filename, vds in values.next():
-                    yieldable.append((host, filename, vds))
-            except StopIteration:
-                pass
-        if len(yieldable) == 0:
-            raise StopIteration
-        else:
-            yield yieldable
-
 
 class bbs(LOFARrecipe):
     def __init__(self):
@@ -100,12 +64,21 @@ class bbs(LOFARrecipe):
             help="combinevds executable",
             default="/opt/LofIm/daily/lofar/bin/combinevds"
         )
+        self.optionparser.add_option(
+            '--nproc',
+            help="Maximum number of simultaneous processes per compute node",
+            default="4"
+        )
 
     def go(self):
         self.logger.info("Starting BBS run")
         super(bbs, self).go()
 
         ms_names = self.inputs['args']
+
+        # Generate source and parameter databases for all input data
+        self.run_task("parmdb", ms_names)
+        self.run_task("sourcedb", ms_names)
 
         # Build a VDS file describing all the data to be processed
         self.logger.debug("Building VDS file describing all data for BBS")
@@ -117,7 +90,7 @@ class bbs(LOFARrecipe):
 
         # Iterate over groups in the VDS file for suitable for cluster
         # processing
-        for to_process in gvds_iterator(vds_file):
+        for to_process in gvds_iterator(vds_file, int(self.inputs["nproc"])):
             # to_process is a list of (host, filename) tuples.
             ms_names  = [filename for host, filename, vds in to_process]
             vds_files = [vds for host, filename, vds in to_process]
