@@ -25,8 +25,7 @@ add_executable(bf2puma2 bf2puma2.cpp)
 target_link_libraries(bf2puma2 m) #link the math library
 
 add_executable(bf2fits bf2fits.c)
-target_link_libraries(bf2fits m cfitsio) #link the math library
-
+target_link_libraries(bf2fits m ${CFITSIO_LIBRARIES}) #link the math library
 
 add_custom_target (bf2format_install
   COMMAND cp ${PULSAR_BINARY_DIR}/apps/bf2format/bf2presto ${PULSAR_BINARY_DIR}/apps/bf2format/bf2presto8 ${CMAKE_INSTALL_PREFIX}/bin/
