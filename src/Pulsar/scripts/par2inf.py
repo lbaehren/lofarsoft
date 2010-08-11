@@ -252,7 +252,7 @@ decd = float(par.decr) * 180.0 / math.pi
 decdi = int(decd)
 decm  = int((decd - decdi) * 60.0)
 decs  = (((decd - decdi) * 60.0) - decm)*60.0
-id.DEC = "%02d:%02d:%f" % (decdi,decm,decs)
+id.DEC = "%02d:%02d:%f" % (decdi,abs(decm),abs(decs))
 
 # Calculate the MJD of the observation.
 
