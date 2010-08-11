@@ -143,6 +143,8 @@ using CR::LopesEventIn;
   lateralTimeCut          = 15e-9
   calculateMeanValues     = false
   lateralTimeDistribution = false
+  startEvent              = 0
+  stopEvent               = 0
   \endverbatim
 
   <h3>Configuration options </h3>
@@ -265,6 +267,11 @@ using CR::LopesEventIn;
                             Should be set to 'true' for the evaluation of time calibration measurements.<br>
     <li>\b PreferGrande     Status: <i>preliminary</i> - under test<br>
                             In doubt the KASCADE (instead of Grande) reconstruction is taken as input.<br>
+    <li>\b startEvent       Status: <i>preliminary</i> - under test<br>
+                            Event to start with. Counting starts with 1. <br>
+    <li>\b stopEvent        Status: <i>preliminary</i> - under test<br>
+                            Event to stop with (stopEvent is included, 0 for all events)<br>
+                
   <br>
   <b>Other options (for completeness):</b><br>
     <li>\b lateralOutputFile Status: <i>obsolete</i><br>
@@ -912,6 +919,8 @@ void readConfigFile (const string &filename)
    config.addBool("lateralTimeDistribution", false);    // the lateral time distribution will not be generated
    config.addDouble("randomDelay", 0.);                 // random delay (in  ns), for timing uncertainty studies
    config.addUint("startRandomSeed", 0);                // random seed for root random number generator
+   config.addUint("startEvent", 0);                     // event to start with (other events will be skipped)
+   config.addUint("stopEvent", 0);                      // event to stop with (0 means stopping at end of file)
  
    IntType* _doTVcal = new IntType(-1);                // 1: yes, 0: no, -1: use default	
    _doTVcal->addAllowedValue(1);
@@ -1463,6 +1472,7 @@ int main (int argc, char *argv[])
   PulseProperties* meanCalPulses[MAX_NUM_ANTENNAS];   // mean pulse properties of all events
   unsigned int meanRawCounter[MAX_NUM_ANTENNAS], meanCalCounter[MAX_NUM_ANTENNAS];  // Counters for mean calculation
   unsigned int meanResCounter[MAX_NUM_ANTENNAS];  // Counter for mean calculation of lateral distr. residuals
+  unsigned int eventCounter = 0;
 
 
   try {
@@ -1551,6 +1561,8 @@ int main (int argc, char *argv[])
              << "lateralTimeDistribution = false\n"
              << "randomDelay = 0\n"
              << "startRandomSeed = 1\n"
+             << "startEvent = 0\n"
+             << "stopEvent = 0\n"
              << "... \n"
              << endl;
         return 0;	// exit here
@@ -1892,16 +1904,34 @@ int main (int argc, char *argv[])
       }
     }
 
+    // jump to start event
+    while ( (eventCounter+1) < config["startEvent"]->uiValue() ) {
+      if (! getNextEvent()) {
+        cerr << "ERROR: startEvent to high! File seems to contain only " << eventCounter << " events.\n" << endl;
+        break;
+      } 
+      cout << "Skipping event because start event is not reached, yet." << endl;
+      ++eventCounter;
+    }
 
     // Process events from event file list
     while ( getNextEvent() ) {
+    
+      // check if stop Event is reached
+      ++eventCounter;      
+      if ( (config["stopEvent"]->uiValue()!=0) && (eventCounter>config["stopEvent"]->uiValue()) ) {
+        cout << "\nStop event reached at event #" << eventCounter << "!\n" << endl;
+        break;
+      }  
+      
       // print information and process the event
       if (config["calibrationMode"]->bValue()) {
-        cout << "\nProcessing calibration event \"" << eventname << "\".\n" << endl;
+        cout << "\nProcessing calibration event #"<< eventCounter <<": \"" << eventname << "\".\n" << endl;
       } else {
-        cout << "\nProcessing event \"" << eventname << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
-                  << " °, distance (radius of curvature) " << radiusOfCurvature << " m, core position X " << core_x
-                  << " m and core position Y " << core_y << " m." << endl;
+        cout << "\nProcessing event #"<< eventCounter <<": \"" << eventname << "\"\nwith azimuth " << azimuth
+             << " °, elevation " << elevation << " °, distance (radius of curvature) " << radiusOfCurvature
+             << " m, core position X " << core_x << " m and core position Y " << core_y << " m."
+             << endl;
       }
 
       // Check if file exists
