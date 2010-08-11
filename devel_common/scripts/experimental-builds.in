@@ -23,7 +23,7 @@ echo "-- Building projects ..."
 cd ${USG_ROOT}/build
 ./bootstrap
 
-for USG_PACKAGE in dal rm cr
+for USG_PACKAGE in dal rm cr anaamika
 {
     echo "-- Building $USG_PACKAGE ..."
     cd ${USG_ROOT}/build
