@@ -291,7 +291,13 @@ def directionForHorizontalArray(positions, times):
 
 def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     """
-    Play around to see how the fits behave in the presence of timing noise
+    A random set of N_ant antennas is generated, and time differences are calculated for given (az, el) direction.
+    Then, for the 3 different fit methods, the result is calculated back.
+    This is done without noise (should return the input), and with noise 
+    
+    In: az, el, N_ant
+        noiselevel: as a fraction of the max time difference across the antennas, e.g. 0.1 
+
     """
     
     x = np.random.rand(N_ant) * 100 - 50 # Antenna positions in a 100x100 m field
@@ -336,6 +342,17 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
 #    print 'Better (az, el) = (%f, %f)' %(result[4], result[5])
 
 def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel, fitType = 'LinearFit'):
+    """
+    Do a number of trials with random antenna positions and random timing noise.
+    Put in the given (az, el) direction, see what comes out of the fits.
+    By averaging over these trials, we can see if the fit result is biased or not.
+    
+    In: n_trials, N_ant, az, el
+        noiselevel: as a fraction of the max time difference across the antennas, e.g. 0.1
+        fitType = 'LinearFit': can choose 'LinearFit', 'BruteForce', or 'Triangles'.
+    Output is printed.
+    """
+    
     print 'Testing for bias using fit type = %s' %fitType
     x = np.random.rand(N_ant) * 100 - 50 # Antenna positions in a 100x100 m field
     y = np.random.rand(N_ant) * 100 - 50
@@ -386,7 +403,7 @@ def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel, fitType = 'Lin
     
 def directionFromAllTriangles(positions, times):
     """
-    Make all possible N(N-1)/2 triangles from the antenna positions
+    Make all possible N(N-1)(N-2) / 6 triangles from the antenna positions
     Find the direction of arrival belonging to each triangle;
     Average over all directions to find the best (?) estimate...
     """
