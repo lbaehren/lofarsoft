@@ -7,6 +7,8 @@ import os
 import threading
 import tempfile
 import shutil
+import time
+import signal
 
 # Local helpers
 from lofarpipe.support.lofarrecipe import LOFARrecipe
@@ -144,52 +146,69 @@ class bbs(LOFARrecipe):
             )
             self.logger.debug("BBS control parset is %s" % (bbs_parset,))
 
-            # Run BBS control in a separate thread.
-            run_flag = threading.Event()
-            run_flag.clear()
-            bbs_control = threading.Thread(
-                target=self._run_bbs_control,
-                args=(bbs_parset, run_flag)
-            )
-            bbs_control.start()
-            run_flag.wait() # Wait for control to start before proceeding
-
-            command = "python %s" % (self.__file__.replace('master', 'nodes'))
-            with clusterlogger(self.logger) as (loghost, logport):
-                self.logger.debug("Logging to %s:%d" % (loghost, logport))
-                with utilities.log_time(self.logger):
-                    bbs_kernels = [
-                        threading.Thread(
-                            target=self._run_via_ssh,
-                            args=(host, command,
-                                loghost, str(logport),
-                                self.inputs['kernel_exec'],
-                                self.inputs['initscript'],
-                                file,
-                                self.inputs['key'],
-                                self.inputs['db_name'],
-                                self.inputs['db_user'],
-                                self.inputs['db_host']
-                            )
-                        )
-                        for host, file, vds in to_process
-                    ]
-                    [thread.start() for thread in bbs_kernels]
-                    self.logger.debug("Waiting for all kernels to complete")
-                    [thread.join() for thread in bbs_kernels]
-
-            # And wait for control
             try:
-                self.logger.info("Waiting for GlobalControl")
-                bbs_control.join()
+                # When one of our processes fails, we'll set the killswitch.
+                # Everything else will then come crashing down, rather than
+                # hanging about forever.
+                self.killswitch = threading.Event()
+                self.killswitch.clear()
+
+                # Run BBS Global Control in a separate thread.
+                run_flag = threading.Event()
+                run_flag.clear()
+                bbs_control = threading.Thread(
+                    target=self._run_bbs_control,
+                    args=(bbs_parset, run_flag)
+                )
+                bbs_control.start()
+                run_flag.wait() # Wait for control to start before proceeding
+
+                command = "python %s" % (self.__file__.replace('master', 'nodes'))
+                with clusterlogger(self.logger) as (loghost, logport):
+                    self.logger.debug("Logging to %s:%d" % (loghost, logport))
+                    with utilities.log_time(self.logger):
+                        bbs_kernels = [
+                            threading.Thread(
+                                target=self._run_via_ssh,
+                                args=(host, command,
+                                    loghost, str(logport),
+                                    self.inputs['kernel_exec'],
+                                    self.inputs['initscript'],
+                                    file,
+                                    self.inputs['key'],
+                                    self.inputs['db_name'],
+                                    self.inputs['db_user'],
+                                    self.inputs['db_host']
+                                )
+                            )
+                            for host, file, vds in to_process
+                        ]
+                        [thread.start() for thread in bbs_kernels]
+                        self.logger.debug("Waiting for all kernels to complete")
+                        [thread.join() for thread in bbs_kernels]
+
+                    # And wait for control
+                    self.logger.info("Waiting for GlobalControl thread")
+                    bbs_control.join()
             finally:
                 os.unlink(bbs_parset)
                 shutil.rmtree(vds_dir)
+                if self.killswitch.isSet():
+                    # If killswitch is set, then one of our processes failed so the
+                    # whole run is invalid.
+                    return 1
 
         self.outputs['data'] = self.inputs['args']
         return 0
 
     def _run_via_ssh(self, host, command, *arguments):
+        """
+        Run command with arguments on the specified host using ssh. Return its
+        return code.
+
+        The resultant process is monitored for failure; see
+        _monitor_process() for details.
+        """
         engine_ppath = self.config.get('deploy', 'engine_ppath')
         engine_lpath = self.config.get('deploy', 'engine_lpath')
         ssh_cmd = [
@@ -200,10 +219,14 @@ class bbs(LOFARrecipe):
         ]
         ssh_cmd.extend(arguments)
         self.logger.info("Running %s" % " ".join(ssh_cmd))
-        subprocess.check_call(ssh_cmd)
+        bbs_kernel_process = subprocess.Popen(ssh_cmd)
+        return(self._monitor_process(bbs_kernel_process, "BBS Kernel"))
 
     def _run_bbs_control(self, bbs_parset, run_flag):
-        # Run BBS control & wait for it to finish
+        """
+        Run BBS Global Control and wait for it to finish. Return its return
+        code.
+        """
         env = utilities.read_initscript(self.inputs['initscript'])
         self.logger.info("Running BBS GlobalControl")
         with utilities.log_time(self.logger):
@@ -218,15 +241,43 @@ class bbs(LOFARrecipe):
                 stderr=subprocess.PIPE
             )
             run_flag.set()
-            sout, serr = bbs_control_process.communicate()
+
+        returncode = self._monitor_process(bbs_control_process, "BBS Control")
+        sout, serr = bbs_control_process.communicate()
         self.logger.info("Global Control stdout: %s" % (sout,))
         self.logger.info("Global Control stderr: %s" % (serr,))
-        if bbs_control_process.returncode != 0:
-            raise subprocess.CalledProcessError(
-                bbs_control_process.returncode,
-                self.inputs['control_exec']
-            )
+        return returncode
 
+    def _monitor_process(self, process, name="Monitored process"):
+        """
+        Monitor a process for successful exit. If it fails, set the kill
+        switch, so everything else gets killed too. If the kill switch is set,
+        then kill this process off.
+
+        Name is an optional parameter used only for identification in logs.
+        """
+        while True:
+            returncode = process.poll()
+            if returncode == None:
+                # Process still running
+                time.sleep(1)
+            elif returncode != 0:
+                # Process broke!
+                self.logger.warn(
+                    "%s returned code %d; aborting run" % (name, returncode)
+                )
+                self.killswitch.set()
+                break
+            else:
+                self.logger.info("%s clean shutdown" % (name))
+                break
+            if self.killswitch.isSet():
+               # Some other process has failed, so we abort
+               self.logger.warn("Killing %s" % (name))
+               os.kill(process.pid, signal.SIGKILL)
+               returncode = process.wait()
+               break
+        return returncode
 
 if __name__ == '__main__':
     sys.exit(bbs().main())

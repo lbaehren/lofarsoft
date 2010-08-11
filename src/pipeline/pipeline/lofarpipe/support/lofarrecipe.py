@@ -14,6 +14,13 @@ class LOFARrecipe(WSRTrecipe):
     Provides standard boiler-plate used in the various LOFAR pipeline recipes.
     """
     def __init__(self):
+        """
+        All parameters required by the recipe should be added to the
+        optionparser.
+
+        Subclasses should define their own parameters, but remember to call
+        this __init__() method to include the required defaults.
+        """
         super(LOFARrecipe, self).__init__()
         self.state = []
         self.completed = []
@@ -61,6 +68,9 @@ class LOFARrecipe(WSRTrecipe):
 
     @property
     def __file__(self):
+        """
+        Provides the file name of the currently executing recipe.
+        """
         import inspect
         full_location = os.path.abspath(inspect.getsourcefile(self.__class__))
         # DANGER WILL ROBINSON!
@@ -72,6 +82,12 @@ class LOFARrecipe(WSRTrecipe):
 
 
     def run_task(self, configblock, datafiles=[], **kwargs):
+        """
+        A task is a combination of a recipe and a set of parameters.
+        Tasks can be prefedined in the task file set in the pipeline
+        configuration (default: tasks.cfg).
+        Here, we load a task configuration and execute it.
+        """
         self.logger.info("Running task: %s" % (configblock,))
         try:
             my_state = self.completed.pop()
@@ -112,7 +128,9 @@ class LOFARrecipe(WSRTrecipe):
             return outputs
 
     def _setup_logging(self):
-        # Set up logging to file
+        """
+        Boilerplate to set up logging to file
+        """
         try:
             os.makedirs(self.config.get("layout", "log_directory"))
         except OSError, failure:
@@ -134,6 +152,9 @@ class LOFARrecipe(WSRTrecipe):
         self.logger.addHandler(file_handler)
 
     def _save_state(self):
+        """
+        Dump pipeline state to file.
+        """
         statefile = open(
             os.path.join(
                 self.config.get('layout', 'job_directory'),
@@ -143,7 +164,29 @@ class LOFARrecipe(WSRTrecipe):
         state = [self.inputs, self.state]
         pickle.dump(state, statefile)
 
+    def _get_cluster(self):
+        """
+        Return task and multiengine clients connected to the running
+        pipeline's IPython cluster.
+        """
+        self.logger.info("Connecting to IPython cluster")
+        try:
+            tc  = IPclient.TaskClient(self.config.get('cluster', 'task_furl'))
+            mec = IPclient.MultiEngineClient(self.config.get('cluster', 'multiengine_furl'))
+        except NoSectionError:
+            self.logger.error("Cluster not definied in configuration")
+            raise ClusterError
+        except:
+            self.logger.error("Unable to initialise cluster")
+            raise ClusterError
+        return tc, mec
+
     def go(self):
+        """
+        This is where the work of the recipe gets done.
+        Subclasses should define their own go() method, but remember to call
+        this one to perform necessary initialisation.
+        """
         # Every recipe needs a job identifier
         if not self.inputs["job_name"]:
             raise PipelineException("Job undefined")
@@ -219,15 +262,3 @@ class LOFARrecipe(WSRTrecipe):
             # Otherwise, our parent should have done it for us.
             self._setup_logging()
 
-    def _get_cluster(self):
-        self.logger.info("Connecting to IPython cluster")
-        try:
-            tc  = IPclient.TaskClient(self.config.get('cluster', 'task_furl'))
-            mec = IPclient.MultiEngineClient(self.config.get('cluster', 'multiengine_furl'))
-        except NoSectionError:
-            self.logger.error("Cluster not definied in configuration")
-            raise ClusterError
-        except:
-            self.logger.error("Unable to initialise cluster")
-            raise ClusterError
-        return tc, mec
