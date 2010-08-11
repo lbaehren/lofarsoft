@@ -116,6 +116,10 @@ static char *telescope_name(int telescope_id)
       strcpy(string, "Effelsberg");
       Tdiam = 100.0;
       break;
+   case 9:
+      strcpy(string, "LOFAR");
+      Tdiam = 999.0; // certainly not right, depends on config
+      break;
    default:
       strcpy(string, "???????");
       break;
@@ -152,6 +156,9 @@ static char *backend_name(int machine_id)
       break;
    case 7:
       strcpy(string, "SPIGOT");
+      break;
+   case 9:
+      strcpy(string, "BG/P");
       break;
    default:
       strcpy(string, "????");
