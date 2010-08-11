@@ -28,6 +28,8 @@ header_params = {
     "tstart": 'd',  
     "tsamp": 'd',  
     "nbits": 'i', 
+    "nbeams": 'i', 
+    "ibeam": 'i', 
     "nsamples": 'i', 
     "fch1": 'd',  
     "foff": 'd',
