@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.15
+VERSION=1.16
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-rfi] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo]\n\n"\
@@ -570,8 +570,8 @@ do
 		    cd ${location}/${STOKES}/"RSP"${ii}
 
 	 	    echo 'Converting subbands: '`cat RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 
-		    echo bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
-		    bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+		    echo bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+		    bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
 		    bf2presto_pid[$ii]=$!  
 		    
 #			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
