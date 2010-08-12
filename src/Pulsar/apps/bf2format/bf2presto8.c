@@ -111,8 +111,8 @@ void write_filterbank_header ( int n_infiles, char *parsetfile, int writefloats)
   /* broadcast header */
   send_string("HEADER_START");
   send_string("source_name");  send_string(idata.object);
-  send_int("machine_id", 0);
-  send_int("telescope_id", 1);
+  send_int("machine_id", 9);
+  send_int("telescope_id", 9);
   send_int("data_type",1);
   send_double("fch1", idata.freq  + 0.1953125*n_infiles); //139.56484375 + 0.1953125*n_infiles);
   send_double("foff", -0.1953125/CHANNELS);
