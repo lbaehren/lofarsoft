@@ -13,7 +13,9 @@ USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Outp
 "      -o Output_Processing_Location ==> Specify the Output Processing Location \n"\
 "         (i.e. /net/sub5/lse013/data4/LOFAR_PULSAR_ARCHIVE_lse013/L2010_06296_red) \n"\
 "      [-all] ==> optional parameter perform folding on entire subband set in addition to N-splits (takes 11 extra min)\n"\
+"      [-all_pproc] ==> Post-Processing optional parameter to ONLY perform folding on entire subband set based on already-processed N-splits\n"\
 "      [-rfi] ==> optional parameter perform Vlad's RFI checker and only use clean results (takes 7 extra min)\n"\
+"      [-rfi_pproc] ==> Post-Processing optional parameter to perform Vlad's RFI checker on already-processed N-splits\n"\
 "      [-C | -c] ==> optional parameter to switch on bf2presto COLLAPSE (Collapse all channels in MS to a single .sub file)\n"\
 "      [-del] ==> optional parameter to delete the previous ENTIRE Output_Processing_Location if it exists (override previous results!)\n"\
 "      [-core N] ==> optional parameter to change the number of cores (splits) used for processing (default = 8)\n"\
@@ -35,7 +37,9 @@ location=""
 COLLAPSE=""
 delete=0
 all=0
+all_pproc=0
 rfi=0
+rfi_pproc=0
 core=8
 incoh_only=0
 coh_only=0
@@ -52,7 +56,9 @@ do
 	-c)    COLLAPSE="-C";;
 	-del)  delete=1;;
 	-rfi)  rfi=1;;
+	-rfi_pproc)  rfi_pproc=1;;
 	-all)  all=1;;
+	-all_pproc)  all_pproc=1;;
 	-core) core=$2; shift;;
 	-incoh_only)  incoh_only=1;;
 	-coh_only)    coh_only=1;;
@@ -84,11 +90,19 @@ then
 else
    echo "    No additional processing requested on ALL the subbands"
 fi
+if [ $all_pproc -eq 1 ]
+then 
+   echo "    Performing only post-processing of ALL the subbands"
+fi
 if [ $rfi -eq 1 ]
 then 
    echo "    Performing additional RFI processing"
 else
    echo "    No additional RFI processing requested"
+fi
+if [ $rfi_pproc -eq 1 ]
+then 
+   echo "    Performing only rfi-checking as post-processing"
 fi
 echo "    Using N=$core cores for processing (change with '-core N' command line option)"
 
@@ -125,30 +139,42 @@ then
 fi
 
 #Check whether Output Processing Location already exists
-if [ -d $location ] && [ $delete -ne 1 ] && [ $incoh_redo -ne 1 ] && [ $coh_redo -ne 1 ]
+if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 then
-   echo "ERROR: Output Processing Location $location already exists;  "
-   echo "       please specify different output location or try again with delete option (-del)."
-   exit 1
-elif [ -d $location ] && [ $delete -eq 1 ] && [ $incoh_redo -ne 1 ] && [ $coh_redo -ne 1 ]
-then
-   echo "Deleting previous processing run in $location/*"
-   rm -rf $location/*
-   cd $location
-elif [ -d $location/incoherentstokes ] && [ $delete -ne 1 ] && [ $incoh_redo -eq 1 ] 
-then
-   echo "Deleting previous Incoherentstokes processing run in $location/incoherentstokes"
-   rm -rf $location/incoherentstokes
-   cd $location
-elif [ -d $location/stokes ] && [ $delete -ne 1 ] && [ $coh_redo -eq 1 ] 
-then
-   echo "Deleting previous Coherentstokes processing run in $location/stokes"
-   rm -rf $location/stokes
-   cd $location
+	if [ ! -d $location ] 
+	then
+	   echo "ERROR: Output Pre-Processed Location $location does not exist; "
+	   echo "       it is required when using the -all_pproc and/or -rfi_pproc flags."
+	   exit 1
+	fi
+    cd $location
 else
-   mkdir -p $location 
-   cd $location
-fi
+	if [ -d $location ] && [ $delete -ne 1 ] && [ $incoh_redo -ne 1 ] && [ $coh_redo -ne 1 ]
+	then
+	   echo "ERROR: Output Processing Location $location already exists;  "
+	   echo "       please specify different output location or try again with delete option (-del)."
+	   exit 1
+	elif [ -d $location ] && [ $delete -eq 1 ] && [ $incoh_redo -ne 1 ] && [ $coh_redo -ne 1 ]
+	then
+	   echo "Deleting previous processing run in $location/*"
+	   rm -rf $location/*
+	   cd $location
+	elif [ -d $location/incoherentstokes ] && [ $delete -ne 1 ] && [ $incoh_redo -eq 1 ] 
+	then
+	   echo "Deleting previous Incoherentstokes processing run in $location/incoherentstokes"
+	   rm -rf $location/incoherentstokes
+	   cd $location
+	elif [ -d $location/stokes ] && [ $delete -ne 1 ] && [ $coh_redo -eq 1 ] 
+	then
+	   echo "Deleting previous Coherentstokes processing run in $location/stokes"
+	   rm -rf $location/stokes
+	   cd $location
+	else
+	   mkdir -p $location 
+	   cd $location
+	fi
+fi # end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
+
 
 #In the event that location is a specified relative path, put the absolute path as location
 location=`pwd`
@@ -156,31 +182,43 @@ location=`pwd`
 #Set these parameters by hand
 ###OBSID=L2010_06296
 
-#Set up the parset location:
-# (1) OLD parset was here: /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
-# (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
-
-#Check if case 1; else case 2
-PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
-
-if [ ! -f /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0 ] 
+if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 then
-   short_id=`echo $OBSID | sed 's/L.....//g'`
-   new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
-   if [[ $new_parset == "" ]]
-   then
-      echo "ERROR: Unable to find parset for $short_id in /globalhome/lofarsystem/log/ directory"
-      exit 1
-   else
-      found_nof_parsets=`echo $new_parset | wc -l | awk '{print $1}'`
-      if (( $found_nof_parsets !=  1 ))
-      then
-         echo "ERROR: Found more than one parset for $short_id in /globalhome/lofarsystem/log/ directory; unable to resolve problem"
-         exit 1
-      fi
-   fi
-   PARSET=$new_parset
-fi
+    PARSET=$location/${OBSID}.parset
+    if [ ! -f $PARSET ]
+    then
+	   echo "ERROR: Pre-Processed parset file $PARSET is missing; "
+	   echo "       perhaps these data have not yet been processed by the pipeline?"
+	   echo "       Previous processing is required when using the -all_pproc and/or -rfi_pproc flags."
+	   exit 1
+    fi
+else
+	#Set up the parset location:
+	# (1) OLD parset was here: /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
+	# (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
+	
+	#Check if case 1; else case 2
+	PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
+	
+	if [ ! -f /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0 ] 
+	then
+	   short_id=`echo $OBSID | sed 's/L.....//g'`
+	   new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
+	   if [[ $new_parset == "" ]]
+	   then
+	      echo "ERROR: Unable to find parset for $short_id in /globalhome/lofarsystem/log/ directory"
+	      exit 1
+	   else
+	      found_nof_parsets=`echo $new_parset | wc -l | awk '{print $1}'`
+	      if (( $found_nof_parsets !=  1 ))
+	      then
+	         echo "ERROR: Found more than one parset for $short_id in /globalhome/lofarsystem/log/ directory; unable to resolve problem"
+	         exit 1
+	      fi
+	   fi
+	   PARSET=$new_parset
+	fi
+fi # end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 
 ###PULSAR=B2111+46
 #STOKES=incoherentstokes
@@ -196,7 +234,14 @@ date_start=`date`
 
 #Set up generic pipeline version log file
 log=${location}/make_subs_SAS_Ncore_Mmodes.log
-echo "Pulsar Pipeline run with: $0" > $log
+if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
+then
+   echo "-------------------------------------------------------------" >> $log
+   echo "Pulsar Pipeline additional-run with: $0" >> $log
+   echo "-------------------------------------------------------------" >> $log
+else
+   echo "Pulsar Pipeline run with: $0" > $log
+fi
 echo "Pipeline V$VERSION" >> $log
 echo "$0 $input_string" >> $log
 echo "Start date: $date_start" >> $log
@@ -308,8 +353,10 @@ for modes in $mode_str
 do
 
     STOKES=$modes
-    mkdir -p ${STOKES}
-    
+    if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+    then
+       mkdir -p ${STOKES}
+    fi
     # STOKES mode="stokes" always comes first, to do fly's eye mode before incoherentstokes;
     # reset fly's eye variable to 0 when mode=incoherentstokes (after fly's eye is done)
     if [[ $STOKES == "incoherentstokes" ]]
@@ -330,68 +377,90 @@ do
 
     # Get the list of input files; and check if divisible by N cores
 	master_list=${STOKES}/SB_master.list
-	#Create subband lists
-	all_list=`ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
-#XXX	all_list=`ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
-	ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
-#XXX	ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
-	all_num=`wc -l $master_list | awk '{print $1}'`
 	
-	echo "Found a total of $all_num SB MS ${STOKES} input datafiles to process" 
-	echo "Found a total of $all_num SB MS ${STOKES} input datafiles to process" >> $log
-	
-	if [ $all_num -lt $core ]
+	if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 	then
-	  echo "ERROR: Less than $core subbands found, unlikely to be a valid observation"
-	  echo "ERROR: Less than $core subbands found, unlikely to be a valid observation" >> $log
-	  exit 1
-	fi
-	
-	modulo_files=`echo $all_num $core | awk '{print ($1 % $2)}'`
-	# If the number of cores does not evenly divide into the # of files, then find another good value
-	if (( $modulo_files != 0 ))
-	then
-	   echo "WARNING: User requested $core cores; this does not evently divide into $all_num number of files"
-	   echo "WARNING: User requested $core cores; this does not evently divide into $all_num number of files" >> $log
-	   echo "         Searching for alternative N core value..."
-	   echo "         Searching for alternative N core value..." >> $log
-	   ii=`expr $core - 1`
-	   while (( $ii > 0 ))
-	   do 
-	       modulo_files=`echo $all_num $ii | awk '{print ($1 % $2)}'`
-	       if (( $modulo_files == 0 ))
-	       then
-	          echo "Success: $ii cores divides into $all_num subbands"
-	          break
-	       else
-	          echo "Tried $ii cores, but still not divisble into $all_num" >> $log
-	          echo "Tried $ii cores, but still not divisble into $all_num"
-	       fi
-	       ii=`expr $ii - 1`
-	   done
-	   echo "WARNING: Resetting user requested number of cores from $core to $ii for processing of $all_num subbands"
-	   echo "WARNING: Resetting user requested number of cores from $core to $ii for processing of $all_num subbands" >> $log
-	   core=$ii
-	fi
+	    # find the number of RSP? directories;  this is the number of cores used previously for processing
+	    if [ $flyseye == 0 ]
+	    then
+	       core=`ls -F $location/${STOKES} | grep -w 'RSP[0-7].' | wc -l`
+	    else
+	       core=`ls -F $location/${STOKES}/* | grep -w 'RSP[0-7].' | wc -l`	    
+	    fi
 	    
-	div_files=`echo $all_num $core | awk '{print $1 / $2}'`
-	count=0
-	
-	#Create N-split sections of the file list
-	echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
-	echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_" >> $log
-	split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
-	status=$?
-	
-	if [ $status -ne 0 ]
-	then
-	   echo "ERROR: 'split' command unable to split ($all_num files/$core cores) into $div_files chunks each (not integer number);"
-	   echo "       you may need to run with a different number of cores which divide $all_num files evenly"
-	   echo "ERROR: 'split' command unable to split ($all_num files/$core cores) into $div_files chunks each (not integer number);" >> $log
-	   echo "       you may need to run with a different number of cores which divide $all_num files evenly"  >> $log
-	
-	   exit 1
-	fi
+	    if [ $core -lt 1 ]
+	    then
+	       echo "ERROR: cannot determine the number of cores used in previous processing in $location/${STOKES}"
+	       echo "ERROR: cannot determine the number of cores used in previous processing in $location/${STOKES}" >> $log
+	       exit 1
+	    fi
+	    echo "These data were previously processed with $core cores, based on number of RSP-directories"
+	    echo "These data were previously processed with $core cores, based on number of RSP-directories" >> $log
+		all_num=`wc -l $master_list | awk '{print $1}'`
+	else
+		#Create subband lists
+		all_list=`ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
+	#XXX	all_list=`ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
+		ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
+	#XXX	ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
+		all_num=`wc -l $master_list | awk '{print $1}'`
+		
+		echo "Found a total of $all_num SB MS ${STOKES} input datafiles to process" 
+		echo "Found a total of $all_num SB MS ${STOKES} input datafiles to process" >> $log
+		
+		if [ $all_num -lt $core ]
+		then
+		  echo "ERROR: Less than $core subbands found, unlikely to be a valid observation"
+		  echo "ERROR: Less than $core subbands found, unlikely to be a valid observation" >> $log
+		  exit 1
+		fi
+		
+		modulo_files=`echo $all_num $core | awk '{print ($1 % $2)}'`
+		# If the number of cores does not evenly divide into the # of files, then find another good value
+		if (( $modulo_files != 0 ))
+		then
+		   echo "WARNING: User requested $core cores; this does not evently divide into $all_num number of files"
+		   echo "WARNING: User requested $core cores; this does not evently divide into $all_num number of files" >> $log
+		   echo "         Searching for alternative N core value..."
+		   echo "         Searching for alternative N core value..." >> $log
+		   ii=`expr $core - 1`
+		   while (( $ii > 0 ))
+		   do 
+		       modulo_files=`echo $all_num $ii | awk '{print ($1 % $2)}'`
+		       if (( $modulo_files == 0 ))
+		       then
+		          echo "Success: $ii cores divides into $all_num subbands"
+		          break
+		       else
+		          echo "Tried $ii cores, but still not divisble into $all_num" >> $log
+		          echo "Tried $ii cores, but still not divisble into $all_num"
+		       fi
+		       ii=`expr $ii - 1`
+		   done
+		   echo "WARNING: Resetting user requested number of cores from $core to $ii for processing of $all_num subbands"
+		   echo "WARNING: Resetting user requested number of cores from $core to $ii for processing of $all_num subbands" >> $log
+		   core=$ii
+		fi
+		    
+		div_files=`echo $all_num $core | awk '{print $1 / $2}'`
+		count=0
+		
+		#Create N-split sections of the file list
+		echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+		echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_" >> $log
+		split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+		status=$?
+		
+		if [ $status -ne 0 ]
+		then
+		   echo "ERROR: 'split' command unable to split ($all_num files/$core cores) into $div_files chunks each (not integer number);"
+		   echo "       you may need to run with a different number of cores which divide $all_num files evenly"
+		   echo "ERROR: 'split' command unable to split ($all_num files/$core cores) into $div_files chunks each (not integer number);" >> $log
+		   echo "       you may need to run with a different number of cores which divide $all_num files evenly"  >> $log
+		
+		   exit 1
+		fi
+    fi # end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 
 	if [ $core -eq 1 ]
 	then
@@ -429,7 +498,7 @@ do
 		
 	#Set up the strings for the beam names when in fly's eye mode;  max 8 beams currently allowed
 	beams=""
-	if (( $flyseye == 1 ))
+	if (( $flyseye == 1 )) && (( $all_pproc == 0 ))
 	then
 	   if (( $NBEAMS == 1 ))
 	   then
@@ -468,6 +537,20 @@ do
 	      echo "ERROR: unable to work on more than 8 beams in this pipeline" >> $log
 	      exit 1
 	   fi
+	fi
+
+	if (( $flyseye == 1 )) && (( $all_pproc == 1 ))
+	then
+       beams_tmp=""
+	   for jjj in $beams
+		  do
+			N=`echo $jjj | awk -F "_" '{print $2}'`
+			N=`echo "$N+1" | bc`
+			NAME=`cat $PARSET| grep "OLAP.storageStationNames" | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F "," '{print $'$N'}'`
+			beams_tmp="$beams_tmp $NAME"
+			last_beam=$NAME
+	   done
+	   beams=$beams_tmp
     fi
 
 	#Set up the list of files called "DONE" for output checking of prepfold results
@@ -499,42 +582,48 @@ do
 	fi # end if (( $flyseye == 0 ))
     
 	#Create directories with appropriate permissions (beams are ignored/blank when not needed)
-	if (( $flyseye == 0 ))
-	then
-	   for ii in $num_dir
-       do
-          mkdir -p ${STOKES}/RSP$ii
-       done	
-	else
-       for ii in $num_dir
-	   do
-#	       for jjj in $beams
-#	       do
-#	          mkdir -p ${STOKES}/RSP$ii/${jjj}
+    if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+    then
+		if (( $flyseye == 0 ))
+		then
+		   for ii in $num_dir
+	       do
 	          mkdir -p ${STOKES}/RSP$ii
-#	       done
-	   done
-	fi
+	       done	
+		else
+	       for ii in $num_dir
+		   do
+	#	       for jjj in $beams
+	#	       do
+	#	          mkdir -p ${STOKES}/RSP$ii/${jjj}
+		          mkdir -p ${STOKES}/RSP$ii
+	#	       done
+		   done
+		fi
 	
-	if [ $core -eq 1 ]
-	then
-	   echo "Warning - turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0"
-	   echo "Warning - turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0" >> $log
-	   all=0
-	fi
-	
-	chmod -R 774 . * 
-	chgrp -R pulsar . *
+		if [ $core -eq 1 ]
+		then
+		   echo "Warning - turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0"
+		   echo "Warning - turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0" >> $log
+		   all=0
+		fi
+		
+		chmod -R 774 . * 
+		chgrp -R pulsar . *
+    fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
 	  	
     #Move the split lists to the appropriate directories
 #	if (( $flyseye == 0 ))
 #	then
+    if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+    then
 		for ii in $num_dir
 		do
 		  echo mv ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list" >> $log
 		  mv ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list"
 		done
+	fi
 #	else
 #	    for ii in $num_dir
 #		do
@@ -549,40 +638,42 @@ do
 #    fi	
 	
 	#Convert the subbands with bf2presto
-	echo "Starting bf2presto8 conversion for RSP-splits"
-	echo "Starting bf2presto8 conversion for RSP-splits" >> $log
-	date
-	date >> $log
-	
-	if (( $flyseye == 0 ))
+	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 	then
-		for ii in $num_dir
-		do
-		  echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
-		  echo bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
-		  bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
-		  bf2presto_pid[$ii]=$!  
-		done
-	else
-		for ii in $num_dir
-		do	
-		    # note, should be in STOKES/RSP? directory because output gets "beam_N" PREFIX
-		    cd ${location}/${STOKES}/"RSP"${ii}
-
-	 	    echo 'Converting subbands: '`cat RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 
-		    echo bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
-		    bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
-		    bf2presto_pid[$ii]=$!  
-		    
-#			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
-#		    echo bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID} `cat SB_master.list` >> $log
-#		    bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID} `cat SB_master.list` >> bf2presto.out 2>&1 &
-#			set bf2presto_pid=$!  
-		done
-		cd ${location}
-    fi
-
-	echo "Running bf2presto8 in the background for RSP-splits..." 
+		echo "Starting bf2presto8 conversion for RSP-splits"
+		echo "Starting bf2presto8 conversion for RSP-splits" >> $log
+		date
+		date >> $log
+		
+		if (( $flyseye == 0 ))
+		then
+			for ii in $num_dir
+			do
+			  echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
+			  echo bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
+			  bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
+			  bf2presto_pid[$ii]=$!  
+			done
+		else
+			for ii in $num_dir
+			do	
+			    # note, should be in STOKES/RSP? directory because output gets "beam_N" PREFIX
+			    cd ${location}/${STOKES}/"RSP"${ii}
+	
+		 	    echo 'Converting subbands: '`cat RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 
+			    echo bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+			    bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+			    bf2presto_pid[$ii]=$!  
+			    
+	#			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
+	#		    echo bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID} `cat SB_master.list` >> $log
+	#		    bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID} `cat SB_master.list` >> bf2presto.out 2>&1 &
+	#			set bf2presto_pid=$!  
+			done
+			cd ${location}
+	    fi
+	
+		echo "Running bf2presto8 in the background for RSP-splits..." 
 
 #	if (( $flyseye == 0 ))
 #	then
@@ -596,10 +687,12 @@ do
 #		wait $bf2presto_pid
 #    fi
 	
-	echo "Done bf2presto8 (splits)" 
-	echo "Done bf2presto8 (splits)" >> $log
-	date
-	date >> $log
+		echo "Done bf2presto8 (splits)" 
+		echo "Done bf2presto8 (splits)" >> $log
+		date
+		date >> $log
+	
+	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
 	# Calculating the number of samples to be passed to inf-file
 	if (( $flyseye == 0 ))
@@ -609,77 +702,94 @@ do
 		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR}_${OBSID}_RSP0.sub0000 | awk '{print $5 / 2}' -`
 	fi
 	
-	#Create .sub.inf files with par2inf.py
-	echo cp $PARSET ./${OBSID}.parset >> $log
-	cp $PARSET ./${OBSID}.parset
-	echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
-	cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
-	#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
-	echo "Running par2inf" 
-	echo "Running par2inf" >> $log
-	
-    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset >> $log
-    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
-    status=$?
-
-	if [ $status -ne 0 ]
+	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 	then
-	   echo "ERROR: Unable to successfully run par2inf task"
-	   echo "ERROR: Unable to successfully run par2inf task" >> $log
-	   exit 1
-	fi
+		#Create .sub.inf files with par2inf.py
+		echo cp $PARSET ./${OBSID}.parset >> $log
+		cp $PARSET ./${OBSID}.parset
+		echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
+		cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
+		#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+		echo "Running par2inf" 
+		echo "Running par2inf" >> $log
+		
+	    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset >> $log
+	    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+	    status=$?
 	
-	jj=0    
-    if (( $flyseye == 0 ))
-    then
-		for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
-		do
-		   echo mv ${ii} ${STOKES}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf >> $log
-		   mv ${ii} ${STOKES}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
-		   jj=`expr $jj + 1`
-		done
-	else
-	    for jjj in $beams
-	    do
-	        jj=0    
-		    for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
+		if [ $status -ne 0 ]
+		then
+		   echo "ERROR: Unable to successfully run par2inf task"
+		   echo "ERROR: Unable to successfully run par2inf task" >> $log
+		   exit 1
+		fi
+		
+		jj=0    
+	    if (( $flyseye == 0 ))
+	    then
+			for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
+			do
+			   echo mv ${ii} ${STOKES}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf >> $log
+			   mv ${ii} ${STOKES}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
+			   jj=`expr $jj + 1`
+			done
+		else
+		    for jjj in $beams
 		    do
-		       #cp ${ii} ${STOKES}/${jjj}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
-		       echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf >> $log
-		       cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
-		       jj=`expr $jj + 1`
+		        jj=0    
+			    for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
+			    do
+			       #cp ${ii} ${STOKES}/${jjj}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
+			       echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf >> $log
+			       cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
+			       jj=`expr $jj + 1`
+			    done
 		    done
-	    done
-	fi 
-	
-    if (( $flyseye == 1 ))
-    then
-       echo rm test*.inf >> $log
-       rm test*.inf
-    fi
+		fi 
+		
+	    if (( $flyseye == 1 ))
+	    then
+	       echo rm test*.inf >> $log
+	       rm test*.inf
+	    fi
+	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
     # Create the RSPA (all) directory when the all option is requested
-	if [ $all -eq 1 ]
+	if [ $all == 1 ] || [ $all_pproc == 1 ]
 	then 
 	  if (( $flyseye == 0 ))
 	  then
-		  mkdir ${STOKES}/"RSPA"
+	      if [ -d ${STOKES}/RSPA ]
+	      then 
+	         echo "${STOKES}/RSPA already exist;  deleting contents in order to process all subbands correctly"
+	         echo "${STOKES}/RSPA already exist;  deleting contents in order to process all subbands correctly" >> $log
+	         rm -rf ${STOKES}/RSPA/*
+	      else
+		     mkdir ${STOKES}/"RSPA"
+		  fi
 	  else
-         for jjj in $beams
-         do
-            mkdir -p ${STOKES}/${jjj}/RSPA
-#            mkdir -p ${STOKES}/RSPA
-         done
+		  for jjj in $beams
+		  do
+  	        if [ -d ${STOKES}/$jjj/RSPA ]
+	        then 
+	           echo "${STOKES}/$jjj/RSPA already exist;  deleting contents in order to process all subbands correctly"
+	           echo "${STOKES}/$jjj/RSPA already exist;  deleting contents in order to process all subbands correctly" >> $log
+	           rm -rf ${STOKES}/$jjj/RSPA/*
+	        else
+		       mkdir ${STOKES}/$jjj/RSPA
+		    fi
+		  done
 	  fi
-    fi
+    fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
 		
 	#Create the .sub.inf file for the entire set (in background, as there is plenty of time to finish before file is needed
-	if (( $all == 1 )) && (( $flyseye == 0 ))
+	if (( (( $all == 1 )) || (( $all_pproc == 1 )) )) && (( $flyseye == 0 ))
 	then 
 	     echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset >> $log
 	     echo mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf >> $log
-	     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset && mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf
-	elif (( $all == 1 )) && (( $flyseye == 1 ))
+	     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset
+	     mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf
+	elif (( (( $all == 1 )) || (( $all_pproc == 1 )) )) && (( $flyseye == 1 ))
     then
     	for jjj in $beams
 	    do
@@ -733,27 +843,30 @@ do
 #	then
 
 
-    # Move the RSP?/beam_? directory structure output from bf2presto into beam_?/RSP? structure
-	if (( $flyseye == 1 ))
-	then
-	    for jjj in $beams
-	    do
-	        mkdir -p ${STOKES}/${jjj}
-	        echo mkdir -p ${STOKES}/${jjj} >> $log
-	        for ii in $num_dir
-	        do
-	           mkdir ${STOKES}/${jjj}/RSP${ii}
-	           echo mkdir ${STOKES}/${jjj}/RSP${ii} >> $log
-	           mv ${STOKES}/RSP${ii}/${jjj}/* ${STOKES}/${jjj}/RSP${ii}/
-	           echo mv ${STOKES}/RSP${ii}/${jjj}/* ${STOKES}/${jjj}/RSP${ii}/ >> $log
-	           cp ${STOKES}/RSP${ii}/bf2presto* ${STOKES}/RSP${ii}/*list ${STOKES}/${jjj}/
-	           echo cp ${STOKES}/RSP${ii}/bf2presto* ${STOKES}/RSP${ii}/*list ${STOKES}/${jjj}/ >> $log
+    if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+    then
+	    # Move the RSP?/beam_? directory structure output from bf2presto into beam_?/RSP? structure
+		if (( $flyseye == 1 ))
+		then
+		    for jjj in $beams
+		    do
+		        mkdir -p ${STOKES}/${jjj}
+		        echo mkdir -p ${STOKES}/${jjj} >> $log
+		        for ii in $num_dir
+		        do
+		           mkdir ${STOKES}/${jjj}/RSP${ii}
+		           echo mkdir ${STOKES}/${jjj}/RSP${ii} >> $log
+		           mv ${STOKES}/RSP${ii}/${jjj}/* ${STOKES}/${jjj}/RSP${ii}/
+		           echo mv ${STOKES}/RSP${ii}/${jjj}/* ${STOKES}/${jjj}/RSP${ii}/ >> $log
+		           cp ${STOKES}/RSP${ii}/bf2presto* ${STOKES}/RSP${ii}/*list ${STOKES}/${jjj}/
+		           echo cp ${STOKES}/RSP${ii}/bf2presto* ${STOKES}/RSP${ii}/*list ${STOKES}/${jjj}/ >> $log
+		        done
 	        done
-        done
-        rm -rf ${STOKES}/RSP[0-7]
-    fi
+	        rm -rf ${STOKES}/RSP[0-7]
+	    fi
+    fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
-	if [ $all -eq 1 ]
+	if [ $all == 1 ] || [ $all_pproc == 1 ]
 	then 
 	     #master_counter=0
 	     offset=$(( $all_num / $core * $CHAN ))
@@ -777,7 +890,12 @@ do
 		        echo "Warning - possible problem running on ALL subbands in $STOKES/$jjj/RSPA;  master list is too short (is $check_number but should be $total rows)" >> $log
 		    else
 		        echo ./run.sh >> $log
-		        ./run.sh &
+		        if [ $all_pproc == 0 ]
+		        then
+		           ./run.sh &
+		        else
+		           ./run.sh 
+                fi
 		        echo "Done subband linking for all RPSs in one location for $STOKES/$jjj/RSPA"
 		        echo "Done subband linking for all RPSs in one location for $STOKES/$jjj/RSPA" >> $log
 		    fi
@@ -803,7 +921,12 @@ do
 			        echo "Warning - possible problem running on ALL subbands in $STOKES/$jjj/RSPA;  master list is too short (is $check_number but should be $total rows)" >> $log
 			    else
 			        echo ./run.sh >> $log
-			        ./run.sh &
+		            if [ $all_pproc == 0 ]	
+		            then		        
+			           ./run.sh &
+			        else
+			           ./run.sh 
+			        fi
 			        echo "Done subband linking for all RPSs in one location for $STOKES/$jjj/RSPA"
 			        echo "Done subband linking for all RPSs in one location for $STOKES/$jjj/RSPA" >> $log
 			    fi
@@ -821,73 +944,76 @@ do
 #	         break
 #	     fi
 	
-	fi # end if [ $all -eq 1 ]
+	fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
 #    fi # end if (( $flyseye == 0 ))
 	
-	echo "Starting folding for RSP-splits"
-	echo "Starting folding for RSP-splits" >> $log
-	date
-	date >> $log
-	
-	#Fold the data
-    if (( $flyseye == 0 ))
-    then
-		for ii in $num_dir
-	    do
-		   cd ${location}/${STOKES}/RSP${ii}
-		   echo cd ${location}/${STOKES}/RSP${ii} >> $log
-		   echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 
-#		   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
-		   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
-		   prepfold_pid[$ii]=$!  
-		   echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
-		   sleep 5
-	    done
-	else
-	    for jjj in $beams
-	    do
+	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+	then
+		echo "Starting folding for RSP-splits"
+		echo "Starting folding for RSP-splits" >> $log
+		date
+		date >> $log
+		
+		#Fold the data
+	    if (( $flyseye == 0 ))
+	    then
 			for ii in $num_dir
 		    do
-			   cd ${location}/${STOKES}/${jjj}/RSP${ii}
-			   echo cd ${location}/${STOKES}/${jjj}/RSP${ii} >> $log
+			   cd ${location}/${STOKES}/RSP${ii}
+			   echo cd ${location}/${STOKES}/RSP${ii} >> $log
 			   echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 
-#			   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
+	#		   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
 			   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
-			   kk=`echo "$ii * $jjj" | bc`
-		       prepfold_pid[$kk]=$!  
+			   prepfold_pid[$ii]=$!  
 			   echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
 			   sleep 5
 		    done
-	    done
-	fi # end if (( $flyseye == 0 ))
-	
-	echo cd ${location} >> $log
-	cd ${location}
-	
-	#Check when all DONE files are available, then all processes have exited
-    if (( $flyseye == 0 ))
-    then
-	   for ii in $num_dir
-	   do
-	      echo "Waiting for loop $ii prepfold to finish"
-	      wait ${prepfold_pid[ii]}
-	   done
-	else
-	    for jjj in $beams
-	    do
-			for ii in $num_dir
+		else
+		    for jjj in $beams
 		    do
-			   kk=`echo "$ii * $jjj" | bc`
-	           echo "Waiting for loop $ii $jjj beam prepfold to finish"
-	           wait ${prepfold_pid[kk]}
-            done	
-	    done
-	fi
+				for ii in $num_dir
+			    do
+				   cd ${location}/${STOKES}/${jjj}/RSP${ii}
+				   echo cd ${location}/${STOKES}/${jjj}/RSP${ii} >> $log
+				   echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 
+	#			   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
+				   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
+				   kk=`echo "$ii * $jjj" | bc`
+			       prepfold_pid[$kk]=$!  
+				   echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
+				   sleep 5
+			    done
+		    done
+		fi # end if (( $flyseye == 0 ))
+		
+		echo cd ${location} >> $log
+		cd ${location}
+		
+		#Check when all DONE files are available, then all processes have exited
+	    if (( $flyseye == 0 ))
+	    then
+		   for ii in $num_dir
+		   do
+		      echo "Waiting for loop $ii prepfold to finish"
+		      wait ${prepfold_pid[ii]}
+		   done
+		else
+		    for jjj in $beams
+		    do
+				for ii in $num_dir
+			    do
+				   kk=`echo "$ii * $jjj" | bc`
+		           echo "Waiting for loop $ii $jjj beam prepfold to finish"
+		           wait ${prepfold_pid[kk]}
+	            done	
+		    done
+		fi
+    fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
     
 #    if (( $flyseye == 0 ))
 #    then
 	   #When the first folding task finishes, start the folding for the "all" directory
-	   if [ $all -eq 1 ] 
+	   if [ $all == 1 ] || [ $all_pproc == 1 ]
 	   then
 		  echo "Starting folding for RSPA (all subbands)"
 		  echo "Starting folding for RSPA (all subbands)" >> $log
@@ -914,8 +1040,8 @@ do
 		         echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> $log
 		         cd ${location}
 		     done
-		  fi # end (( $flyseye == 0 ))
-	   fi # end [ $all -eq 1 ]
+		  fi # end if (( $flyseye == 0 ))
+	   fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
 #	fi 
 
 	
@@ -936,26 +1062,13 @@ do
 #		done
 #	fi
 	
-	#Make a cumulative plot of the profiles
-    if (( $flyseye == 0 ))
-    then
-        cd ${location}/${STOKES}
-        cd ${location}/${STOKES} >> $log
-		echo "Running plot summary script plot_profs8new.py in `pwd`"
-		echo "Running plot summary script plot_profs8new.py in `pwd`" >> $log
-		date
-		date >> $log
-		echo python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8new.py >> $log
-		python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8new.py >> $log 2>&1
-		echo convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf >> $log
-		convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf
-		echo rm profiles.ps >> $log
-		rm profiles.ps
-	else
-	    for jjj in $beams
-	    do
-	        cd ${location}/${STOKES}/${jjj}
-	        cd ${location}/${STOKES}/${jjj} >> $log
+	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+	then
+		#Make a cumulative plot of the profiles
+	    if (( $flyseye == 0 ))
+	    then
+	        cd ${location}/${STOKES}
+	        cd ${location}/${STOKES} >> $log
 			echo "Running plot summary script plot_profs8new.py in `pwd`"
 			echo "Running plot summary script plot_profs8new.py in `pwd`" >> $log
 			date
@@ -966,45 +1079,61 @@ do
 			convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf
 			echo rm profiles.ps >> $log
 			rm profiles.ps
-		done	
-	fi
-    echo cd ${location} >> $log
-    cd ${location}
+		else
+		    for jjj in $beams
+		    do
+		        cd ${location}/${STOKES}/${jjj}
+		        cd ${location}/${STOKES}/${jjj} >> $log
+				echo "Running plot summary script plot_profs8new.py in `pwd`"
+				echo "Running plot summary script plot_profs8new.py in `pwd`" >> $log
+				date
+				date >> $log
+				echo python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8new.py >> $log
+				python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8new.py >> $log 2>&1
+				echo convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf >> $log
+				convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf
+				echo rm profiles.ps >> $log
+				rm profiles.ps
+			done	
+		fi
+	    echo cd ${location} >> $log
+	    cd ${location}
+		
+		#Make a .pdf and .png version of the plots
+		echo "Running convert on ps to pdf and png of the plots"
+		echo "Running convert on ps to pdf and png of the plots" >> $log
+		date
+		date >> $log
 	
-	#Make a .pdf and .png version of the plots
-	echo "Running convert on ps to pdf and png of the plots"
-	echo "Running convert on ps to pdf and png of the plots" >> $log
-	date
-	date >> $log
-
-    if (( $flyseye == 0 ))
-    then
-		for ii in $num_dir
-		do
-		   echo convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf >> $log
-		   convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
-		   echo convert -rotate 90 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png >> $log
-		   convert -rotate 90 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png
-		   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png >> $log
-		   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png
-		done
-	else
-	    for jjj in $beams
-	    do
+	    if (( $flyseye == 0 ))
+	    then
 			for ii in $num_dir
 			do
-			   echo convert ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf >> $log
-			   convert ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
-			   echo convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png >> $log
-			   convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png
-			   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png >> $log
-			   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png
+			   echo convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf >> $log
+			   convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
+			   echo convert -rotate 90 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png >> $log
+			   convert -rotate 90 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png
+			   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png >> $log
+			   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png
 			done
-		done
-	fi
+		else
+		    for jjj in $beams
+		    do
+				for ii in $num_dir
+				do
+				   echo convert ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf >> $log
+				   convert ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
+				   echo convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png >> $log
+				   convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png
+				   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png >> $log
+				   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png
+				done
+			done
+		fi
+	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 		
 	#RFI-Report
-	if [ $rfi -eq 1 ] 
+	if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 	then 
 	   echo "Producing rfi report"
 	   echo "Producing rfi report" >> $log
@@ -1052,10 +1181,10 @@ do
 	         done
 	      done
        fi	   
-	fi # end if [ $rfi -eq 1 ] 
+	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ] 
 	
 	#Wait for the all prepfold to finish
-	if [ $all -eq 1 ] 
+	if [ $all -eq 1 ] || [ $all_pproc == 1 ]
 	then
 	   ii=1
 	   yy=0
@@ -1107,10 +1236,10 @@ do
            done
        fi # end if (( $flyseye == 0 ))
        
-	fi # end if [ $all -eq 1 ] 
+	fi # end if [ $all -eq 1 ] || [ $all_pproc == 1 ]
 
 	#Rename the beam_? to their actual names based on the observation parset names
-    if (( $flyseye == 1 ))
+    if (( $flyseye == 1 )) && [ $all_pproc == 0 ]
     then
         cd ${location}/${STOKES}/
 		for jj in $beams
@@ -1131,24 +1260,26 @@ echo "Creating tar file of plots"
 echo "Creating tar file of plots" >> $log
 date
 date >> $log
-if (( $flyseye_tar == 0 ))
-   then
-   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf >> $log
-   tar cvf ${PULSAR}_${OBSID}_plots.tar */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf 
-else
-   echo tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf >> $log
-   tar cvf ${PULSAR}_${OBSID}_plots.tar */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf
+if [ $flyseye_tar == 0 ] 
+then
+   echo tar cvfz ${PULSAR}_${OBSID}_plots.tar.gz */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf >> $log
+   tar cvfz ${PULSAR}_${OBSID}_plots.tar.gz */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf 
+elif [ $flyseye_tar == 1 ] 
+then  
+   echo tar cvfz ${PULSAR}_${OBSID}_plots.tar.gz */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf >> $log
+   tar cvfz ${PULSAR}_${OBSID}_plots.tar.gz */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf
 fi
-echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
-gzip ${PULSAR}_${OBSID}_plots.tar
+#echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
+#gzip ${PULSAR}_${OBSID}_plots.tar
+cd ${location}
 
 #Change permissions and move files
 echo "Changing permissions of files"
 echo "Changing permissions of files" >> $log
 date
 date >> $log
-echo chmod -R 774 . * >> $log
-chmod -R 774 . * 
+echo chmod 774 -R . * >> $log
+chmod 774 -R . * 
 echo chgrp -R pulsar . * >> $log
 chgrp -R pulsar . * 
 	
