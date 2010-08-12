@@ -36,7 +36,6 @@ class bbs(LOFARnode):
             kernel_parset.writeToFile(parset_filename)
             self.logger.debug("Parset written to %s" % (parset_filename,))
 
-            # Dummy log_prop file to disable stupid messages
             working_dir = mkdtemp()
             catch_log4cplus(
                 working_dir,
