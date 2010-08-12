@@ -22,7 +22,7 @@ if [ $# == 0 ]; then
  echo "   -df      - prints usage of /data directories"
  echo "              (this is alias for 'df -H | grep data | grep -v offline | grep -v net')"
  echo
- echo "If there is no nodes' list given then command will be executed in all lse and lce nodes in sub5"
+ echo "If there is no nodes' list given then command will be executed in all lse and lce nodes in sub5/6"
  echo "If node number is between 13 and 15 then script recognizes it as storage node (lse)"
  echo "otherwise the node is considered to be compute node (lce)"
  exit 0
@@ -49,7 +49,7 @@ shift 1
 
 if [ "$1" == "-p" ] || [ $# == 0 ]; then
  if [ $# == 0 ]; then
-  string="13-15,38-45"
+  string="13-18,37-54"
  else
   shift 1
   string=$1
@@ -59,48 +59,48 @@ if [ "$1" == "-p" ] || [ $# == 0 ]; then
   isdash=`echo $n | grep - | wc -l`
   # no range of nodes is specified
   if [ $isdash == 0 ]; then
-   if [ $n -ge 13 ] && [ $n -le 15 ]; then
+   if [ $n -ge 13 ] && [ $n -le 18 ]; then
     node="lse0"$n
     echo -e $bold"$node..."$none
     ssh $sshopts "$node" $action
-   elif [ $n -ge 38 ] && [ $n -le 45 ]; then
+   elif [ $n -ge 37 ] && [ $n -le 54 ]; then
     node="lce0"$n
     echo -e $bold"$node..."$none
     ssh $sshopts "$node" $action
    else
-    echo -e $bold"$node - non-sub5 node..."$none
+    echo -e $bold"$node - non-sub5/6 node..."$none
    fi
   # if the range of nodes is specified
   else
    begin=`echo $n | cut -d - -f 1`
    end=`echo $n | cut -d - -f 2`
    for (( i=$begin ; $i<=$end ; i++ )); do 
-    if [ $i -ge 13 ] && [ $i -le 15 ]; then
+    if [ $i -ge 13 ] && [ $i -le 18 ]; then
      node="lse0"$i
      echo -e $bold"$node..."$none
      ssh $sshopts "$node" $action
-    elif [ $i -ge 38 ] && [ $i -le 45 ]; then
+    elif [ $i -ge 37 ] && [ $i -le 54 ]; then
      node="lce0"$i
      echo -e $bold"$node..."$none
      ssh $sshopts "$node" $action
     else
-     echo -e $bold"$node - non-sub5 node..."$none
+     echo -e $bold"$node - non-sub5/6 node..."$none
     fi
    done
   fi
  done
 else
  for n in $@; do
-  if [ $n -ge 13 ] && [ $n -le 15 ]; then
+  if [ $n -ge 13 ] && [ $n -le 18 ]; then
    node="lse0"$n
    echo -e $bold"$node..."$none
    ssh $sshopts "$node" $action
-  elif [ $n -ge 38 ] && [ $n -le 45 ]; then
+  elif [ $n -ge 37 ] && [ $n -le 54 ]; then
    node="lce0"$n
    echo -e $bold"$node..."$none
    ssh $sshopts "$node" $action
   else
-   echo -e $bold"$node - non-sub5 node..."$none
+   echo -e $bold"$node - non-sub5/6 node..."$none
   fi
  done
 fi
