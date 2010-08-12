@@ -212,7 +212,7 @@ class bbs(LOFARrecipe):
         engine_ppath = self.config.get('deploy', 'engine_ppath')
         engine_lpath = self.config.get('deploy', 'engine_lpath')
         ssh_cmd = [
-            "ssh", "-t", "-x", host, "--",
+            "ssh", "-n", "-t", "-x", host, "--",
             "PYTHONPATH=%s" % engine_ppath,
             "LD_LIBRARY_PATH=%s" % engine_lpath,
             command
