@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matching as match
 import srcfind as sfind
 
+rad2deg = 180./np.pi
 #------------------------------------------------------------------------
 """
 (++) Parameters
@@ -32,9 +33,9 @@ LOFARSOFT=os.environ["LOFARSOFT"]
 #filename='/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs005/trigger-dumps-2010-07-07-cs005--40'
 filename='/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/trigger-dumps-2010-07-07-cs006--37'
 #-------
-#triggerMassageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs003.dat'
-#triggerMassageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs005.dat'
-triggerMassageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs006.dat'
+#triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs003.dat'
+#triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs005.dat'
+triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs006.dat'
 #-------
 #stationname="RS205"
 #stationname="CS003"
@@ -44,7 +45,7 @@ antennaset="LBA_OUTER"
 phase_center_in=[0., 0., 0.]
 def_pointing=[172.+90., 63.,  10000.]
 def_pointing=[276.43448936,  62.61439182, 300862.05968806]
-FarField=True
+FarField=False
 
 #------------------------------------------------------------------------
 """
@@ -103,18 +104,18 @@ positions.
 
 """
 ddate =dr["date"] + dr["sample_number"][0]/200e6
-(mIDs, mdDates, mTdiffs, mTriggerDates, mSampleNums) = match.matchTriggerfileToTime((ddate+0.00033024),triggerMassageFile)
+(mIDs, mdDates, mTdiffs, mTriggerDates, mSampleNums) = match.matchTriggerfileToTime((ddate+0.00033024),triggerMessageFile)
 
 match_positions = antenna_positions[mIDs]
 
 match_positions = np.reshape(antenna_positions[mIDs],(len(mIDs)*3))
 
-print 'Brute Force direction search:'
+print 'Brute Force direction search with', len(mIDs), 'antennas:'
 (bfaz, bfel, bftime) = sfind.directionBruteForceSearch(match_positions, mTdiffs)
 print (bfaz, bfel, bftime)
 print 'mse:', sfind.mse(bfaz, bfel, match_positions, mTdiffs)
 
-print 'Linear Fit direction search:'
+print 'Linear Fit direction search with', len(mIDs), 'antennas:'
 (lfaz, lfel) = sfind.directionForHorizontalArray(match_positions, mTdiffs)
 print (lfaz, lfel)
 print 'mse:', sfind.mse(lfaz, lfel, match_positions, mTdiffs)
@@ -151,7 +152,7 @@ shifted_fft = cr_fft*weights
 for ant in range(ants):
     status =  cr.backwardFFTW(shifted_efield[ant], shifted_fft[ant])
 
-ant_indices = range(0,96,2)
+ant_indices = range(1,96,2)
     
 """
 Display
@@ -209,13 +210,25 @@ def beamform_function(azel_in):
     return erg
 
 from scipy.optimize import fmin
+
+ant_indices = range(0,96,2)
+start_pointing = [(bfaz*rad2deg), (bfel*rad2deg), 30000.]
 if (FarField):
-    xopt = fmin(beamform_function, def_pointing[0:2], xtol=1e-2, ftol=1e-4)
+    evenopt = fmin(beamform_function, start_pointing[0:2], xtol=1e-2, ftol=1e-4)
 else:
-    xopt = fmin(beamform_function, def_pointing, xtol=1e-2, ftol=1e-4)
+    evenopt = fmin(beamform_function, start_pointing, xtol=1e-2, ftol=1e-4)
+
+ant_indices = range(1,96,2)
+start_pointing = [(bfaz*rad2deg), (bfel*rad2deg), 30000.]
+if (FarField):
+    oddopt = fmin(beamform_function, start_pointing[0:2], xtol=1e-2, ftol=1e-4)
+else:
+    oddopt = fmin(beamform_function, start_pointing, xtol=1e-2, ftol=1e-4)
 
 
-
+print 'Fitting results:'
+print '    Even Antennas:', evenopt
+print '     Odd Antennas:', oddopt
 
 
 
