@@ -7,6 +7,22 @@ from itertools import islice, repeat, chain, izip
 
 log_prop = ""
 
+def log_file(filename, logger):
+    """
+    Do the equivalent of tail -f on filename -- ie, watch it for updates --
+    and send any lines written to the file to the logger.
+    """
+    if not os.path.exists(filename):
+        open(filename, 'w').close()
+    with open(filename, 'r') as f:
+        while True:
+            line = f.readline()
+            if not line:
+                f.seek(0, 2)
+                time.sleep(1)
+            else:
+                logger.debug(line.strip())
+
 def get_parset(parset):
     p = Parset()
     p.readFromFile(parset)

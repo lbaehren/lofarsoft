@@ -1,6 +1,6 @@
 from __future__ import with_statement
 from lofarpipe.support.lofarnode import LOFARnode
-from lofarpipe.support.utilities import log_time, read_initscript, log_prop
+from lofarpipe.support.utilities import log_time, read_initscript, log_file
 from lofarpipe.cuisine.parset import Parset
 
 from tempfile import mkstemp, mkdtemp
@@ -9,21 +9,23 @@ import sys
 import shutil
 import threading
 import time
+import logging
 
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
+from string import Template
 
-log_prop = """
+log_prop = Template("""
 log4cplus.rootLogger=DEBUG, FILE
 log4cplus.logger.TRC=TRACE9
 
 log4cplus.appender.FILE=log4cplus::RollingFileAppender
-log4cplus.appender.FILE.File=KernelControl.log
+log4cplus.appender.FILE.File=$log_filename
 log4cplus.appender.FILE.ImmediateFlush=true
 log4cplus.appender.FILE.MaxFileSize=10MB
 log4cplus.appender.FILE.MaxBackupIndex=1
 log4cplus.appender.FILE.layout=log4cplus::PatternLayout
 log4cplus.appender.FILE.layout.ConversionPattern=%l [%-3p] - %m%n
-"""
+""")
 
 def get_mountpoint(path):
     return path if os.path.ismount(path) else get_mountpoint(os.path.abspath(os.path.join(path, os.pardir)))
@@ -53,22 +55,13 @@ class bbs(LOFARnode):
 
             # Dummy log_prop file to disable stupid messages
             working_dir = mkdtemp()
-            log_prop_filename = os.path.join(
-                working_dir, os.path.basename(executable) + ".log_prop"
+            self.set_up_logging(
+                working_dir,
+                self.logger.name + "." + os.path.basename(infile),
+                os.path.basename(executable)
             )
-            with open(log_prop_filename, 'w') as log_prop_file:
-                log_prop_file.write(log_prop)
-            log_filename = (os.path.join(working_dir, 'KernelControl.log'))
-            open(log_filename, 'w').close()
-            logging_thread = threading.Thread(
-                target=self._log_file,
-                args=(log_filename,)
-            )
-            logging_thread.setDaemon(True)
-            logging_thread.start()
 
             env = read_initscript(initscript)
-
             try:
                 cmd = [executable, parset_filename, "0"]
                 self.logger.debug("Executing BBS kernel")
@@ -87,15 +80,22 @@ class bbs(LOFARnode):
 
             return 0
 
-    def _log_file(self, filename):
-        with open(filename, 'r') as f:
-            while True:
-                line = f.readline()
-                if not line:
-                    f.seek(0, 2)
-                    time.sleep(1)
-                else:
-                    self.logger.debug(line.strip())
+    def set_up_logging(self, working_dir, logger_name, executable_name):
+            log_filename = os.path.join(
+                working_dir, "pipeline_process.log"
+            )
+            log_prop_filename = os.path.join(
+                working_dir, executable_name + ".log_prop"
+            )
+            with open(log_prop_filename, 'w') as log_prop_file:
+                log_prop_file.write(log_prop.substitute(log_filename=log_filename))
+            local_logger = logging.getLogger(logger_name)
+            logging_thread = threading.Thread(
+                target=log_file,
+                args=(log_filename, local_logger)
+            )
+            logging_thread.setDaemon(True)
+            logging_thread.start()
 
 if __name__ == "__main__":
     loghost, logport = sys.argv[1:3]
