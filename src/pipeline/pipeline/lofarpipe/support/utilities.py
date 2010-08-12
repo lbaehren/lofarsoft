@@ -2,10 +2,22 @@ from __future__ import with_statement
 from contextlib import closing, contextmanager
 from lofarpipe.cuisine.parset import Parset
 from tempfile import mkstemp
-import os, errno, shutil, subprocess, time, resource
+import os, errno, shutil, subprocess, time, resource, threading, logging
 from itertools import islice, repeat, chain, izip
+from string import Template
 
-log_prop = ""
+log_prop = Template("""
+log4cplus.rootLogger=DEBUG, FILE
+log4cplus.logger.TRC=TRACE9
+
+log4cplus.appender.FILE=log4cplus::RollingFileAppender
+log4cplus.appender.FILE.File=$log_filename
+log4cplus.appender.FILE.ImmediateFlush=true
+log4cplus.appender.FILE.MaxFileSize=10MB
+log4cplus.appender.FILE.MaxBackupIndex=1
+log4cplus.appender.FILE.layout=log4cplus::PatternLayout
+log4cplus.appender.FILE.layout.ConversionPattern=%l [%-3p] - %m%n
+""")
 
 def log_file(filename, logger):
     """
@@ -22,6 +34,23 @@ def log_file(filename, logger):
                 time.sleep(1)
             else:
                 logger.debug(line.strip())
+
+def catch_log4cplus(working_dir, logger_name, executable_name):
+        log_filename = os.path.join(
+            working_dir, "pipeline_process.log"
+        )
+        log_prop_filename = os.path.join(
+            working_dir, executable_name + ".log_prop"
+        )
+        with open(log_prop_filename, 'w') as log_prop_file:
+            log_prop_file.write(log_prop.substitute(log_filename=log_filename))
+        local_logger = logging.getLogger(logger_name)
+        logging_thread = threading.Thread(
+            target=log_file,
+            args=(log_filename, local_logger)
+        )
+        logging_thread.setDaemon(True)
+        logging_thread.start()
 
 def get_parset(parset):
     p = Parset()

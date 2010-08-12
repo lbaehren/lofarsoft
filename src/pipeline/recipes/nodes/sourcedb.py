@@ -15,13 +15,13 @@ class sourcedb(LOFARnode):
             # Remove any old sky database
             shutil.rmtree(output, ignore_errors=True)
 
-            # Dummy log_prop file to disable stupid messages
+#            # Dummy log_prop file to disable stupid messages
             working_dir = tempfile.mkdtemp()
-            log_prop_filename = os.path.join(
-                working_dir, os.path.basename(executable) + ".log_prop"
-            )
-            with open(log_prop_filename, 'w') as log_prop_file:
-                log_prop_file.write(log_prop)
+#            log_prop_filename = os.path.join(
+#                working_dir, os.path.basename(executable) + ".log_prop"
+#            )
+#            with open(log_prop_filename, 'w') as log_prop_file:
+#                log_prop_file.write(log_prop)
 
 
             try:
