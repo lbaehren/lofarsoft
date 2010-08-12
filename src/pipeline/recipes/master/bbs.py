@@ -229,6 +229,12 @@ class bbs(LOFARrecipe):
         """
         env = utilities.read_initscript(self.inputs['initscript'])
         self.logger.info("Running BBS GlobalControl")
+        working_dir = tempfile.mkdtemp()
+        utilities.catch_log4cplus(
+            working_dir,
+            self.logger.name + ".GlobalControl",
+            os.path.basename(self.inputs['control_exec'])
+        )
         with utilities.log_time(self.logger):
             bbs_control_process = subprocess.Popen(
                 [
@@ -238,12 +244,14 @@ class bbs(LOFARrecipe):
                 ],
                 env=env,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
+                cwd=working_dir
             )
             run_flag.set()
 
         returncode = self._monitor_process(bbs_control_process, "BBS Control")
         sout, serr = bbs_control_process.communicate()
+        shutil.rmtree(working_dir)
         self.logger.info("Global Control stdout: %s" % (sout,))
         self.logger.info("Global Control stderr: %s" % (serr,))
         return returncode
