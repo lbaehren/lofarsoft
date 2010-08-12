@@ -28,6 +28,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include <TCut.h>
+
 #include <crtools.h>
 #include <Analysis/analyseLOPESevent2.h>
 #include <Analysis/lateralDistribution.h>
@@ -271,6 +273,8 @@ using CR::LopesEventIn;
                             Event to start with. Counting starts with 1. <br>
     <li>\b stopEvent        Status: <i>preliminary</i> - under test<br>
                             Event to stop with (stopEvent is included, 0 for all events)<br>
+    <li>\b rootCut          Status: <i>preliminary</i> - under test<br>
+                            Cut on input eventlist (root files)<br>
                 
   <br>
   <b>Other options (for completeness):</b><br>
@@ -876,6 +880,7 @@ void readConfigFile (const string &filename)
    // define default configuration values
    config.addString("caltablepath", caltable_lopes);
    config.addString("path", "");
+   config.addString("rootCut", "");                     // cut for input root files
    config.addBool("preferGrande", false);		// per default prefer KASCADE reconstruction as input
    config.addBool("generatePlots", true);         	// the plot prefix will be the name of the event file
    config.addBool("eventDisplayPlot", false);           // Plot an event display (amplitudes + arrival times)
@@ -1122,7 +1127,22 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
         return false;
       }
 
-      inputTree = (TTree*)inputFile->Get("k;1");
+      cout << "Opened file for readin: " << kascadeRootFile << endl;
+
+      TTree* readTree = static_cast<TTree*>(inputFile->Get("k;1"));
+      
+      // apply additional cut on selection      
+      TCut cut("");
+      if (config["rootCut"]->sValue() == "") {
+        inputTree = readTree;
+      } else {
+        cut += config["rootCut"]->sValue().c_str();       
+        cout << "Applying cut: " << cut << endl;
+        cout << "Cut reduces number of events from " << readTree->GetEntries();
+        inputTree = readTree->CopyTree(cut);
+        cout << " to " << inputTree->GetEntries() << "." << endl;
+      }  
+      
       if (!inputTree || (inputTree->GetEntries() == 0) ) {
         cerr << "Failed to get tree of file \"" << kascadeRootFile <<"\" or tree is empty." << endl;
         return false;
@@ -1177,8 +1197,6 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
         config["simplexFit"]->setValue("TRUE");
         cout << "\nWARNING: OVERWRITING CONFIGURATION: simplexFit was set to 'true'!\n" << endl;
       }
-
-      cout << "Opened file for readin: " << kascadeRootFile << endl;
       fileOpen = true;
     }
 
@@ -1193,7 +1211,7 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
 
     // if file is open the get the next event
     if (fileOpen) {
-      cout << "\nReading event number " << eventNumber+1 << " from file \"" << kascadeRootFile << "\" ";
+      cout << "\nReading event number " << eventNumber+1 << " of " <<  inputTree->GetEntries() << " from file \"" << kascadeRootFile << "\" ";
       inputTree->GetEntry(eventNumber);
       eventNumber++;
       // choose if Kascade or Grande date should be used:
@@ -1266,7 +1284,7 @@ bool getEventFromLOPES (const string &lopesRootFile)
     // reset pipeline parameters before readin
     eventname ="";
     azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;
-
+    
     // if this function is called for the first time, then try to open the file
     if (!fileOpen) {
       // open root file with the KASCADE results
@@ -1276,7 +1294,22 @@ bool getEventFromLOPES (const string &lopesRootFile)
         return false;
       }
 
-      inputTree = (TTree*)inputFile->Get("T;1");
+      cout << "Opened file for readin: " << lopesRootFile << endl;
+      
+      TTree* readTree = static_cast<TTree*>(inputFile->Get("T;1"));
+      
+      // apply additional cut on selection      
+      TCut cut("");
+      if (config["rootCut"]->sValue() == "") {
+        inputTree = readTree;
+      } else {
+        cut += config["rootCut"]->sValue().c_str();       
+        cout << "Applying cut: " << cut << endl;
+        cout << "Cut reduces number of events from " << readTree->GetEntries();
+        inputTree = readTree->CopyTree(cut);
+        cout << " to " << inputTree->GetEntries() << "." << endl;
+      }  
+
       if (!inputTree || (inputTree->GetEntries() == 0) ) {
         cerr << "Failed to get tree of file \"" << lopesRootFile <<"\" or tree is empty." << endl;
         return false;
@@ -1333,8 +1366,6 @@ bool getEventFromLOPES (const string &lopesRootFile)
         config["simplexFit"]->setValue("TRUE");
         cout << "\nWARNING: OVERWRITING CONFIGURATION: simplexFit was set to 'true'!\n" << endl;
       }
-
-      cout << "Opened file for readin: " << lopesRootFile << endl;
       fileOpen = true;
     }
 
@@ -1349,7 +1380,7 @@ bool getEventFromLOPES (const string &lopesRootFile)
 
     // if file is open the get the next event
     if (fileOpen) {
-      cout << "\nReading event number " << eventNumber+1 << " from file \"" << lopesRootFile << "\" ";
+      cout << "\nReading event number " << eventNumber+1 << " of " <<  inputTree->GetEntries() << " from file \"" << lopesRootFile << "\" ";
       inputTree->GetEntry(eventNumber);
       eventNumber++;
       // choose if Kascade or Grande date should be used:
@@ -1516,6 +1547,7 @@ int main (int argc, char *argv[])
              << "# some comments if you like\n"
              << "caltablepath = $LOFARSOFT/data/lopes/LOPES-CalTable\n"
              << "path = /home/schroeder/lopes/events\n"
+             << "rootCut = ()"
              << "preferGrande = false\n"
              << "RotatePos = true\n"
              << "generatePlots = true\n"
