@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# ttest
+
 from os.path import join
 
 
