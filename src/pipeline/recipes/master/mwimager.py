@@ -28,12 +28,12 @@ class mwimager(LOFARrecipe):
             help="G(V)DS file describing data to be processed"
         )
         self.optionparser.add_option(
-            '-p', '--parset', 
+            '-p', '--parset',
             dest="parset",
             help="MWImager configuration parset"
         )
         self.optionparser.add_option(
-            '-w', '--working-directory', 
+            '-w', '--working-directory',
             dest="working_directory",
             help="Working directory used on compute nodes"
         )
@@ -78,6 +78,8 @@ class mwimager(LOFARrecipe):
             self.config.get('cluster', 'clusterdesc')
         )
 
+        self.outputs["data"] = []
+
         # Given a limited number of processes per node, the first task is to
         # partition up the data for processing.
         for iteration, data_group in enumerate(group_files(
@@ -88,25 +90,18 @@ class mwimager(LOFARrecipe):
             self.inputs['args']
         )):
             self.logger.info("Calling vdsmaker")
-            inputs = LOFARinput(self.inputs)
-            inputs['directory'] = self.config.get('layout', 'vds_directory')
-            inputs['gvds'] = self.inputs['gvds']
-            inputs['args'] = data_group
-            inputs['makevds'] = self.inputs['makevds_exec']
-            inputs['combinevds'] = self.inputs['combinevds_exec']
-            outputs = LOFARoutput()
-            if self.cook_recipe('vdsmaker', inputs, outputs):
-                self.logger.warn("vdsmaker reports failure")
-                return 1
-
-            self.outputs["data"] = []
+            vds_file = os.path.join(
+                self.config.get("layout", "vds_directory"), self.inputs['gvds']
+            )
+            self.run_task('vdsmaker', data_group, gvds=vds_file, unlink=False)
 
             # Patch GVDS filename into parset
             self.logger.debug("Setting up MWImager configuration")
             temp_parset_filename = utilities.patch_parset(
                 self.inputs['parset'],
-                {'dataset': os.path.join(
-                    self.config.get('layout', 'vds_directory'), self.inputs['gvds']
+                {
+                    'dataset': os.path.join(
+                        self.config.get('layout', 'vds_directory'), self.inputs['gvds']
                     )
                 },
                 self.config.get('layout', 'parset_directory')
