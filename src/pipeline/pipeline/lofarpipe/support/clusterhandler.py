@@ -1,11 +1,31 @@
+#                                                       LOFAR PIPELINE FRAMEWORK
+#
+#                                        Management of IPython cluster processes
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
 from __future__ import with_statement
-import shlex, subprocess, threading, logging, os, time
+
+import shlex
+import subprocess
+import threading
+import logging
+import os
+import time
+
 from contextlib import contextmanager
+
 from lofarpipe.support.lofarexceptions import ClusterError
 from lofarpipe.support.clusterdesc import ClusterDesc
 from lofarpipe.support.clusterdesc import get_compute_nodes, get_head_node
 
 class ClusterHandler(object):
+    """
+    ClusterHandler provides a convenient interface for setting up and tearing
+    down an IPython cluser -- engines & controller -- over a network topology
+    described by a clusterdesc file.
+    """
     def __init__(self, config, logger=None):
         if not logger:
             logging.basicConfig()
@@ -90,6 +110,13 @@ class ClusterHandler(object):
 
 @contextmanager
 def ipython_cluster(config, logger, nproc=""):
+    """
+    Provides a context in which an IPython cluster is available. Designed for
+    use within LOFAR pipeline recipes.
+
+    THe optional nproc argument specifies the number of engines which will be
+    started per compute node.
+    """
     cluster_handler = ClusterHandler(config, logger)
     cluster_handler.start_cluster(nproc)
     # If an exception is raised during the pipeline run, make sure we catch it
