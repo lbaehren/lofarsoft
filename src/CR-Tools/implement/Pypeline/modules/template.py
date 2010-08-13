@@ -3,7 +3,7 @@
 #  Note that a script is not the same as a module, the difference can
 #  already be seen by the #! on the first line.
 #  For scripts (e.g. files that you want to execute from the commandline)
-#  you should use modules/template.py instead.
+#  you should use scripts/template.py instead.
 
 """Each module should have a documentation string describing it.
 
@@ -51,7 +51,7 @@ def example_function(a, b):
 
     Examples (also for doctests):
 
-    >>> template.example_function(1,2)
+    >>> example_function(1,2)
     (1, 2)
     """
 
