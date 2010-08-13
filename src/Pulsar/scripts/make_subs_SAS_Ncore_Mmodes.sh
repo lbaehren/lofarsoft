@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.16
+VERSION=1.17
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo]\n\n"\
@@ -385,7 +385,8 @@ do
 	    then
 	       core=`ls -F $location/${STOKES} | grep -w 'RSP[0-7].' | wc -l`
 	    else
-	       core=`ls -F $location/${STOKES}/* | grep -w 'RSP[0-7].' | wc -l`	    
+	       # for multiple beams / divide by the number of beams to get the splits 
+	       core=`ls -F $location/${STOKES}/* | grep -w 'RSP[0-7].' | wc -l | awk -v nbeams=$NBEAMS '{print $1 / nbeams}'`	    
 	    fi
 	    
 	    if [ $core -lt 1 ]
@@ -498,7 +499,7 @@ do
 		
 	#Set up the strings for the beam names when in fly's eye mode;  max 8 beams currently allowed
 	beams=""
-	if (( $flyseye == 1 )) && (( $all_pproc == 0 ))
+	if (( $flyseye == 1 )) 
 	then
 	   if (( $NBEAMS == 1 ))
 	   then
@@ -539,7 +540,7 @@ do
 	   fi
 	fi
 
-	if (( $flyseye == 1 )) && (( $all_pproc == 1 ))
+	if (( $flyseye == 1 )) && (( (( $all_pproc == 1 )) || (( $rfi_pproc == 1 )) ))
 	then
        beams_tmp=""
 	   for jjj in $beams
@@ -786,8 +787,8 @@ do
 	if (( (( $all == 1 )) || (( $all_pproc == 1 )) )) && (( $flyseye == 0 ))
 	then 
 	     echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset >> $log
-	     echo mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf >> $log
 	     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset
+	     echo mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf >> $log
 	     mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA.sub.inf
 	elif (( (( $all == 1 )) || (( $all_pproc == 1 )) )) && (( $flyseye == 1 ))
     then
@@ -1146,7 +1147,7 @@ do
 	         echo cd ${location}/${STOKES}/RSP${ii} >> $log
 	         cd ${location}/${STOKES}/RSP${ii}
 	         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  >> $log
-	         python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  && touch DONE &
+	         python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0??? &
 	         subdyn_pid[$ii]=$!
 	      else
 			 for jjj in $beams
@@ -1154,7 +1155,7 @@ do
 		         echo cd ${location}/${STOKES}/${jjj}/RSP${ii} >> $log
 		         cd ${location}/${STOKES}/${jjj}/RSP${ii}
 		         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  >> $log
-		         python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  && touch DONE &
+		         python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0??? &
 		         subdyn_pid[$ii][$jjj]=$!	
 	         done      
           fi
@@ -1183,6 +1184,57 @@ do
        fi	   
 	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ] 
 	
+	#Gather the RFI RSPN/*rfiprep files into one summary RFI file
+    if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+	then 
+	   echo "Creating RFI Summary files from RSP-split results."
+	   echo "Creating RFI Summary files from RSP-split results." >> $log
+
+       max_num=$(( (( $all_num * $CHAN )) - 1 ))
+
+	   if (( $flyseye == 0 ))
+	   then
+          rfi_file=$location/${STOKES}/${PULSAR}_${OBSID}_sub0-${max_num}.rfirep
+	      if [ -f $rfi_file ]
+	      then
+	         rm $rfi_file
+	         echo "WARNING: deleting previous version of RFI summary file: $rfi_file"
+	      fi
+	      
+	      # put the header line into the RFI summary file
+	      echo "# Subband       Freq (MHz)" > $rfi_file
+	      
+	      for ii in $num_dir
+	      do
+	         offset=$(( $all_num * $CHAN / $core * $ii ))
+	         echo "RFI all_num=$all_num, chan=$CHAN, core=$core, num_dir=ii=$ii ==> offset=$offset"
+	         cat $location/${STOKES}/RSP${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
+	      done
+	      
+	   else
+	   	  for jjj in $beams
+		  do
+              rfi_file=$location/${STOKES}/${jjj}/${PULSAR}_${OBSID}_sub0-${max_num}.rfirep
+		      if [ -f $rfi_file ]
+		      then
+		         rm $rfi_file
+		         echo "WARNING: deleting previous version of RFI summary file: $rfi_file"
+		      fi
+	      
+	          # put the header line into the RFI summary file
+	          echo "# Subband       Freq (MHz)" > $rfi_file
+
+		      for ii in $num_dir
+		      do
+		         offset=$(( $all_num * $CHAN / $core * $ii ))
+	             echo "RFI beam=$jjj, all_num=$all_num, chan=$CHAN, core=$core, num_dir=ii=$ii ==> offset=$offset"
+		         cat $location/${STOKES}/${jjj}/RSP${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
+		      done
+
+	      done
+	   fi
+	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+		
 	#Wait for the all prepfold to finish
 	if [ $all -eq 1 ] || [ $all_pproc == 1 ]
 	then
@@ -1239,7 +1291,7 @@ do
 	fi # end if [ $all -eq 1 ] || [ $all_pproc == 1 ]
 
 	#Rename the beam_? to their actual names based on the observation parset names
-    if (( $flyseye == 1 )) && [ $all_pproc == 0 ]
+    if [ $flyseye == 1 ] && [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] 
     then
         cd ${location}/${STOKES}/
 		for jj in $beams
@@ -1252,7 +1304,7 @@ do
 		done
 		cd ${location}	
     fi
-
+ 
 done # for loop over modes in $mode_str 
 	
 #Make a tarball of all the plots
@@ -1262,13 +1314,24 @@ date
 date >> $log
 if [ $flyseye_tar == 0 ] 
 then
-   echo tar cvfz ${PULSAR}_${OBSID}_plots.tar.gz */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf >> $log
-   tar cvfz ${PULSAR}_${OBSID}_plots.tar.gz */*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf 
+   if [ $rfi == 1 ]  || [ $rfi_pproc == 1 ]
+   then
+      tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
+   else
+      tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf"
+   fi
 elif [ $flyseye_tar == 1 ] 
 then  
-   echo tar cvfz ${PULSAR}_${OBSID}_plots.tar.gz */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf >> $log
-   tar cvfz ${PULSAR}_${OBSID}_plots.tar.gz */*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf
+   if [ $rfi == 1 ]  || [ $rfi_pproc == 1 ]
+   then
+      tar_list="*/*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf */*/*.rfirep"
+   else
+      tar_list="*/*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf"
+   fi
 fi
+echo 'tar cvzf ${PULSAR}_${OBSID}_plots.tar.gz  $tar_list' >> $log
+tar cvzf ${PULSAR}_${OBSID}_plots.tar.gz $tar_list
+
 #echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
 #gzip ${PULSAR}_${OBSID}_plots.tar
 cd ${location}
