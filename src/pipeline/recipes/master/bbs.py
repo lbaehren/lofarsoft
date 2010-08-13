@@ -92,9 +92,6 @@ class bbs(LOFARrecipe):
         [thread.start() for thread in threads]
         [thread.join()  for thread in threads]
 
-#        self.run_task("parmdb", ms_names)
-#        self.run_task("sourcedb", ms_names)
-
         # Build a VDS file describing all the data to be processed
         self.logger.debug("Building VDS file describing all data for BBS")
         vds_file = os.path.join(
