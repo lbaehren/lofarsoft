@@ -37,18 +37,17 @@ class bbs(LOFARnode):
             self.logger.debug("Parset written to %s" % (parset_filename,))
 
             working_dir = mkdtemp()
-            catch_log4cplus(
-                working_dir,
-                self.logger.name + "." + os.path.basename(infile),
-                os.path.basename(executable)
-            )
-
             env = read_initscript(initscript)
             try:
                 cmd = [executable, parset_filename, "0"]
                 self.logger.debug("Executing BBS kernel")
-                bbs_kernel_process = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=working_dir)
-                sout, serr = bbs_kernel_process.communicate()
+                with catch_log4cplus(
+                    working_dir,
+                    self.logger.name + "." + os.path.basename(infile),
+                    os.path.basename(executable),
+                ):
+                    bbs_kernel_process = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=working_dir)
+                    sout, serr = bbs_kernel_process.communicate()
                 self.logger.debug("BBS kernel stdout: %s" % (sout,))
                 self.logger.debug("BBS kernel stderr: %s" % (serr,))
                 if bbs_kernel_process.returncode != 0:

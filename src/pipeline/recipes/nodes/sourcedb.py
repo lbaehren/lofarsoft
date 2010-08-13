@@ -16,16 +16,15 @@ class sourcedb(LOFARnode):
             shutil.rmtree(output, ignore_errors=True)
 
             working_dir = tempfile.mkdtemp()
-            catch_log4cplus(
-                working_dir,
-                self.logger.name + "." + os.path.basename(infile),
-                os.path.basename(executable)
-            )
-
             try:
                 cmd = [executable, "format=<", "in=%s" % (catalogue), "out=%s" % (output)]
-                makesourcedb_process = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=working_dir)
-                sout, serr = makesourcedb_process.communicate()
+                with catch_log4cplus(
+                    working_dir,
+                    self.logger.name + "." + os.path.basename(infile),
+                    os.path.basename(executable)
+                ):
+                    makesourcedb_process = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=working_dir)
+                    sout, serr = makesourcedb_process.communicate()
                 self.logger.debug("makesourcedb stdout: %s" % (sout,))
                 self.logger.debug("makesourcedb stderr: %s" % (serr,))
                 if makesourcedb_process.returncode != 0:

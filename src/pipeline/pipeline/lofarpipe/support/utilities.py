@@ -19,7 +19,7 @@ log4cplus.appender.FILE.layout=log4cplus::PatternLayout
 log4cplus.appender.FILE.layout.ConversionPattern=%l [%-3p] - %m%n
 """)
 
-def log_file(filename, logger):
+def log_file(filename, logger, killswitch):
     """
     Do the equivalent of tail -f on filename -- ie, watch it for updates --
     and send any lines written to the file to the logger.
@@ -27,7 +27,7 @@ def log_file(filename, logger):
     if not os.path.exists(filename):
         open(filename, 'w').close()
     with open(filename, 'r') as f:
-        while True:
+        while not killswitch.isSet():
             line = f.readline()
             if not line:
                 f.seek(0, 2)
@@ -35,6 +35,7 @@ def log_file(filename, logger):
             else:
                 logger.debug(line.strip())
 
+@contextmanager
 def catch_log4cplus(working_dir, logger_name, executable_name):
         log_filename = os.path.join(
             working_dir, "pipeline_process.log"
@@ -45,12 +46,15 @@ def catch_log4cplus(working_dir, logger_name, executable_name):
         with open(log_prop_filename, 'w') as log_prop_file:
             log_prop_file.write(log_prop.substitute(log_filename=log_filename))
         local_logger = logging.getLogger(logger_name)
+        killswitch = threading.Event()
         logging_thread = threading.Thread(
             target=log_file,
-            args=(log_filename, local_logger)
+            args=(log_filename, local_logger, killswitch)
         )
-        logging_thread.setDaemon(True)
         logging_thread.start()
+        yield
+        killswitch.set()
+        logging_thread.join()
 
 def get_parset(parset):
     p = Parset()

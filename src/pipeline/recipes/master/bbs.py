@@ -79,8 +79,21 @@ class bbs(LOFARrecipe):
         ms_names = self.inputs['args']
 
         # Generate source and parameter databases for all input data
-        self.run_task("parmdb", ms_names)
-        self.run_task("sourcedb", ms_names)
+        threads = (
+            threading.Thread(
+                target=self.run_task,
+                args=("parmdb", ms_names)
+            ),
+            threading.Thread(
+                target=self.run_task,
+                args=("sourcedb", ms_names)
+            )
+        )
+        [thread.start() for thread in threads]
+        [thread.join()  for thread in threads]
+
+#        self.run_task("parmdb", ms_names)
+#        self.run_task("sourcedb", ms_names)
 
         # Build a VDS file describing all the data to be processed
         self.logger.debug("Building VDS file describing all data for BBS")
@@ -230,27 +243,27 @@ class bbs(LOFARrecipe):
         env = utilities.read_initscript(self.inputs['initscript'])
         self.logger.info("Running BBS GlobalControl")
         working_dir = tempfile.mkdtemp()
-        utilities.catch_log4cplus(
+        with utilities.catch_log4cplus(
             working_dir,
             self.logger.name + ".GlobalControl",
             os.path.basename(self.inputs['control_exec'])
-        )
-        with utilities.log_time(self.logger):
-            bbs_control_process = subprocess.Popen(
-                [
-                    self.inputs['control_exec'],
-                    bbs_parset,
-                    "0"
-                ],
-                env=env,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                cwd=working_dir
-            )
-            run_flag.set()
+        ):
+            with utilities.log_time(self.logger):
+                bbs_control_process = subprocess.Popen(
+                    [
+                        self.inputs['control_exec'],
+                        bbs_parset,
+                        "0"
+                    ],
+                    env=env,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=working_dir
+                )
+                run_flag.set()
 
-        returncode = self._monitor_process(bbs_control_process, "BBS Control")
-        sout, serr = bbs_control_process.communicate()
+            returncode = self._monitor_process(bbs_control_process, "BBS Control")
+            sout, serr = bbs_control_process.communicate()
         shutil.rmtree(working_dir)
         self.logger.info("Global Control stdout: %s" % (sout,))
         self.logger.info("Global Control stderr: %s" % (serr,))
