@@ -1,9 +1,21 @@
+#                                                       LOFAR PIPELINE FRAMEWORK
+#
+#                                                     Cluster description handler
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
 from __future__ import with_statement
+
 import os.path
 import lofar.parameterset
 from lofarpipe.support.lofarexceptions import ClusterError
 
 class ClusterDesc(object):
+    """
+    Wrap a clusterdesc file, providing a more convenient, Pythonic interface
+    for accessing its contents.
+    """
     def __init__(self, filename):
         self.filename = filename
         self.parameterset = lofar.parameterset.parameterset(self.filename)
@@ -44,13 +56,22 @@ class ClusterDesc(object):
         return "ClusterDesc: " + self.name
 
 def get_compute_nodes(clusterdesc):
+    """
+    Return a list of all compute nodes defined (under the key "Compute.Nodes")
+    in the ClusterDesc class object clusterdesc.
+    """
     try:
         return clusterdesc.get('Compute.Nodes')
     except:
         raise ClusterError("Unable to find compute nodes in clusterdesc.")
 
 def get_head_node(clusterdesc):
-    # Always return the first head node, even if there are several defined
+    """
+    Return the head node, defined by the key "Head.Nodes" in the ClusterDesc
+    class object clusterdesc.
+
+    Always return the first head node, even if there are several defined.
+    """
     try:
         return [clusterdesc.get('Head.Nodes')[0]]
     except:

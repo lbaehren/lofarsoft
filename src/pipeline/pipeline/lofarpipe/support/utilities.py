@@ -25,6 +25,7 @@ from lofarpipe.cuisine.parset import Parset
 
 #                                                                        Logging
 # ------------------------------------------------------------------------------
+
 log_prop = Template("""
 log4cplus.rootLogger=DEBUG, FILE
 log4cplus.logger.TRC=TRACE9

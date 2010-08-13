@@ -1,18 +1,34 @@
-import subprocess
-from collections import defaultdict
-from lofar.parameterset import parameterset
+#                                                       LOFAR PIPELINE FRAMEWORK
+#
+#                              Group data into appropriate chunks for processing
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
 
+from collections import defaultdict
+import subprocess
+
+from lofar.parameterset import parameterset
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.clusterdesc import get_compute_nodes
 
 def group_files(logger, clusterdesc, node_directory, group_size, filenames):
+        """
+        Group a list of files into blocks suitable for simultaneous
+        processing, such that a limited number of processes run on any given
+        host at a time.
+
+        All node_directory on all compute nodes specified in clusterdesc is
+        searched for any of the files listed in filenames. A generator is
+        produced; on each call, no more than group_size files per node
+        are returned.
+        """
         # Given a limited number of processes per node, the first task is to
         # partition up the data for processing.
         logger.debug('Listing data on nodes')
         data = {}
         for node in get_compute_nodes(clusterdesc):
             logger.debug("Node: %s" % (node))
-#            try:
             exec_string = ["ssh", node, "--", "find",
                 node_directory,
                 "-maxdepth 1",
@@ -22,8 +38,6 @@ def group_files(logger, clusterdesc, node_directory, group_size, filenames):
             my_process = subprocess.Popen(exec_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             sout, serr = my_process.communicate()
             data[node] = sout.split('\x00')
-#            except:
-#                pass
             data[node] = utilities.group_iterable(
                 [element for element in data[node] if element in filenames],
                 group_size,

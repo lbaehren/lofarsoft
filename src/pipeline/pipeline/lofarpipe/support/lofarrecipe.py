@@ -1,13 +1,27 @@
-import os, sys, inspect, logging, errno
-import cPickle as pickle
-import utilities
+#                                                       LOFAR PIPELINE FRAMEWORK
+#
+#                                                              Base LOFAR Recipe
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
+from ConfigParser import NoOptionError, NoSectionError
+from ConfigParser import SafeConfigParser as ConfigParser
+
+import os
+import sys
+import inspect
+import logging
+import errno
+import cPickle
+
+from IPython.kernel import client as IPclient
+
+import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarexceptions import PipelineException, ClusterError
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
 from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
 from lofarpipe.support.clusterhandler import ClusterHandler
-from IPython.kernel import client as IPclient
-from ConfigParser import NoOptionError, NoSectionError
-from ConfigParser import SafeConfigParser as ConfigParser
 
 class LOFARrecipe(WSRTrecipe):
     """
@@ -162,7 +176,7 @@ class LOFARrecipe(WSRTrecipe):
             ),
         'w')
         state = [self.inputs, self.state]
-        pickle.dump(state, statefile)
+        cPickle.dump(state, statefile)
 
     def _get_cluster(self):
         """

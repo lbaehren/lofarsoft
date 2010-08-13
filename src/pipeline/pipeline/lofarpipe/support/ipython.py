@@ -1,3 +1,9 @@
+#                                                       LOFAR PIPELINE FRAMEWORK
+#
+#                                                   Extensions to IPython system
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
 from IPython.kernel.task import StringTask
 
 class LOFARTask(StringTask):

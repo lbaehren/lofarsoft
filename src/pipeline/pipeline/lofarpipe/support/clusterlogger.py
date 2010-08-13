@@ -1,3 +1,12 @@
+#                                                       LOFAR PIPELINE FRAMEWORK
+#
+#                                                         Network logging system
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
+from contextlib import contextmanager
+
 import cPickle
 import logging.handlers
 import SocketServer
@@ -6,7 +15,6 @@ import threading
 import select
 import socket
 import signal # KeyboardInterrupt guaranteed to main thread if signal is "available". Hm.
-from contextlib import contextmanager
 
 @contextmanager
 def clusterlogger(
@@ -14,6 +22,11 @@ def clusterlogger(
     host=None,
     port=0
 ):
+    """
+    Provides a context in which a network logging sever is available.
+
+    Yields a host name & port to which log messages can be sent.
+    """
     if not host:
         host = socket.gethostname()
     logserver = LogRecordSocketReceiver(logger, host=host, port=port)

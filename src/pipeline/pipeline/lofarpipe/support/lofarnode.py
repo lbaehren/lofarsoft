@@ -1,15 +1,31 @@
-import platform
-import logging, logging.handlers
+#                                                       LOFAR PIPELINE FRAMEWORK
+#
+#                                                            Compute node system
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
 import os
+import platform
+import logging
+import logging.handlers
 
 def run_node(*args):
+    """
+    Run on node to automatically locate, instantiate and execute the
+    correct LOFARnode class.
+    """
     import imp
-    control_script = getattr(imp.load_module(recipename, *imp.find_module(recipename, [nodepath])), recipename)
+    control_script = getattr(
+        imp.load_module(recipename, *imp.find_module(recipename, [nodepath])),
+        recipename
+    )
     return control_script(loghost=loghost, logport=logport).run_with_logging(*args)
 
 class LOFARnode(object):
     """
-    Base class for node jobs called through IPython.
+    Base class for node jobs called through IPython or directly via SSH.
+
     Sets up TCP based logging.
     """
     def __init__(
