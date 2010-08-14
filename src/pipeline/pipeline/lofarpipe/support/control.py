@@ -1,15 +1,31 @@
-import sys, datetime, logging, os
+#                                                       LOFAR PIPELINE FRAMEWORK
+#
+#                                                        Pipeline control recipe
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
 import cPickle as pickle
+
+import os
+import sys
+import datetime
+import threading
+import collections
+
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
 from lofarpipe.support.lofarexceptions import PipelineException, PipelineQuit
 import lofarpipe.support.utilities as utilities
 
-# The below are necessary for the MAC interface
+#                                            Required by MAC EventPort Interface
+# ------------------------------------------------------------------------------
+
 from ep.control import *
 from ep.control import OK as controlOK
-import threading, collections
 
+#                                             Standalone Pipeline Control System
+# ------------------------------------------------------------------------------
 
 class control(LOFARrecipe):
     """
@@ -47,6 +63,8 @@ class control(LOFARrecipe):
 
         return 0
 
+#                                                           Integration with MAC
+# ------------------------------------------------------------------------------
 
 class MAC_control(control):
     """
@@ -60,7 +78,9 @@ class MAC_control(control):
         self.optionparser.add_option('--treeid')
 
     def pipeline_logic(self):
-        # Define pipeline logic here in subclasses
+        """
+        Define pipeline logic in subclasses.
+        """
         raise NotImplementedError
 
     def run_task(self, configblock, datafiles=[]):
@@ -78,10 +98,13 @@ class MAC_control(control):
 #            raise PipelineQuit
 
     def go(self):
+        #     Pipeline logic proceeds as in a standard recipe in its own thread
+        #                          MAC control takes place in a separate thread
+        # ---------------------------------------------------------------------
         super(control, self).go()
 
         self.logger.info(
-            "Standard Imaging Pipeline (%s) starting." %
+            "LOFAR Pipeline (%s) starting." %
             (self.name,)
         )
 
@@ -99,22 +122,32 @@ class MAC_control(control):
         control_thread.start()
         pipeline_thread.start()
         control_thread.join()
-        logging.info("Control loop finished; shutting down")
+        self.logger.info("Control loop finished; shutting down")
         return 0
 
     def control_loop(self):
+        """
+        Loop until the pipeline finishes, receiving and responding to messages
+        sent by MAC.
+        """
+        #                                             Connect to the MAC server
+        # ---------------------------------------------------------------------
         try:
-            my_interface = ControllerPort_Interface(self.inputs['servicemask'], self.inputs['targethost'])
+            my_interface = ControllerPort_Interface(
+                self.inputs['servicemask'], self.inputs['targethost']
+            )
         except:
             self.logger.info("Control interface not connected; quitting")
             self.state['quit'].set()
             self.state['run'].set()
             return
-        my_interface.send_event(ControlConnectEvent(self.inputs['controllername']))
+        my_interface.send_event(
+            ControlConnectEvent(self.inputs['controllername'])
+        )
 
+        #                    Buffer events received from the EventPort interface
+        # ----------------------------------------------------------------------
         class ReceiverThread(threading.Thread):
-            # The receiver thread buffers all events received from the
-            # eventport interface.
             def __init__(self, interface):
                 super(ReceiverThread, self).__init__()
                 self.interface = interface
@@ -129,57 +162,85 @@ class MAC_control(control):
                     return self.event_queue.popleft()
                 except IndexError:
                     return None
-
         event_receiver = ReceiverThread(my_interface)
         event_receiver.setDaemon(True)
         event_receiver.start()
+        controllername = self.inputs['controllername']
 
+        #            The main control loop continues until the pipeline finshes
+        # ---------------------------------------------------------------------
         while True:
-            # Check for newly received events
+            #                               Handle any events received from MAC
+            # -----------------------------------------------------------------
             current_event = event_receiver.next_event()
 
-            # Handle any new events
             if isinstance(current_event, ControlConnectedEvent):
                 self.logger.debug("Received ConnectedEvent")
             elif isinstance(current_event, ControlClaimEvent):
                 self.logger.debug("Received ClaimEvent")
-                my_interface.send_event(ControlClaimedEvent(self.inputs['controllername'], controlOK))
+                my_interface.send_event(
+                    ControlClaimedEvent(controllername, controlOK)
+                )
             elif isinstance(current_event, ControlPrepareEvent):
                 self.logger.debug("Received PrepareEvent")
-                my_interface.send_event(ControlPreparedEvent(self.inputs['controllername'], controlOK))
+                my_interface.send_event(
+                    ControlPreparedEvent(controllername, controlOK)
+                )
             elif isinstance(current_event, ControlSuspendEvent):
                 self.logger.debug("Received SuspendEvent")
                 self.logger.debug("Clearing run state; pipeline must pause")
                 self.state['run'].clear()
-                my_interface.send_event(ControlSuspendedEvent(self.inputs['controllername'], controlOK))
+                my_interface.send_event(
+                    ControlSuspendedEvent(controllername, controlOK)
+                )
             elif isinstance(current_event, ControlResumeEvent):
                 self.logger.debug("Received ResumeEvent")
                 self.logger.debug("Setting run state: pipeline may run")
                 self.state['run'].set()
-                my_interface.send_event(ControlResumedEvent(self.inputs['controllername'], controlOK))
+                my_interface.send_event(
+                    ControlResumedEvent(controllername, controlOK)
+                )
             elif isinstance(current_event, ControlReleaseEvent):
                 self.logger.debug("Received ReleaseEvent")
-                my_interface.send_event(ControlReleasedEvent(self.inputs['controllername'], controlOK))
+                my_interface.send_event(
+                    ControlReleasedEvent(controllername, controlOK)
+                )
             elif isinstance(current_event, ControlQuitEvent):
                 self.logger.debug("Received QuitEvent")
                 self.logger.debug("Setting quit state: pipeline must exit")
-                self.state['quit'].set() # Signal pipeline to stop at next opportunity
-                self.state['run'].set()  # Pipeline needs to be able to run in order to quit
-                my_interface.send_event(ControlQuitedEvent(self.inputs['controllername'], self.inputs['treeid'], controlOK, "no error"))
+                self.state['quit'].set()
+                self.state['run'].set()
+                my_interface.send_event(
+                    ControlQuitedEvent(
+                        controllername,
+                        self.inputs['treeid'],
+                        controlOK,
+                        "no error"
+                    )
+                )
             elif isinstance(current_event, ControlResyncEvent):
                 self.logger.debug("Received ResyncEvent")
-                my_interface.send_event(ControlResyncedEvent(self.inputs['controllername'], controlOK))
+                my_interface.send_event(
+                    ControlResyncedEvent(controllername, controlOK)
+                )
             elif isinstance(current_event, ControlScheduleEvent):
                 self.logger.debug("Received ScheduleEvent")
-                my_interface.send_event(ControlScheduledEvent(self.inputs['controllername'], controlOK))
+                my_interface.send_event(
+                    ControlScheduledEvent(controllername, controlOK)
+                )
 
-            # The pipeline thread reports all done.
-            # Break out of the control loop & the pipeline is finished.
-            # The daemonic event_receiver shouldn't be a problem, but
-            # let's stop it just in case.
+            #                  Shut everything down if the pipeline is finished
+            # -----------------------------------------------------------------
             if self.state['finished'].isSet():
                 self.logger.debug("Got finished state: control loop exiting")
-                my_interface.send_event(ControlQuitedEvent(self.inputs['controllername'], self.inputs['treeid'], controlOK, "pipeline finished"))
+                my_interface.send_event(
+                    ControlQuitedEvent(
+                        controllername,
+                        self.inputs['treeid'],
+                        controlOK,
+                        "pipeline finished"
+                    )
+                )
                 event_receiver.active = False
                 break
 
