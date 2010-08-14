@@ -147,6 +147,11 @@ def patch_parset(parset, data, output_dir=None):
 #                                                File and Directory Manipulation
 # ------------------------------------------------------------------------------
 
+def get_mountpoint(path):
+    return path if os.path.ismount(path) else get_mountpoint(
+        os.path.abspath(os.path.join(path, os.pardir))
+    )
+
 def create_directory(dirname):
     """
     Recursively create a directory, without failing if it already exists.

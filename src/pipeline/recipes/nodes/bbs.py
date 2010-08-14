@@ -1,20 +1,28 @@
-from __future__ import with_statement
-from lofarpipe.support.lofarnode import LOFARnode
-from lofarpipe.support.utilities import log_time, read_initscript, catch_log4cplus
-from lofarpipe.cuisine.parset import Parset
+#                                                         LOFAR IMAGING PIPELINE
+#
+#                                                  BBS (BlackBoard Selfcal) node
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
 
+from __future__ import with_statement
+from subprocess import Popen, CalledProcessError, PIPE, STDOUT
 from tempfile import mkstemp, mkdtemp
 import os
 import sys
 import shutil
 
-from subprocess import Popen, CalledProcessError, PIPE, STDOUT
-
-def get_mountpoint(path):
-    return path if os.path.ismount(path) else get_mountpoint(os.path.abspath(os.path.join(path, os.pardir)))
+from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.utilities import catch_log4cplus
+from lofarpipe.support.utilities import read_initscript
+from lofarpipe.support.utilities import get_mountpoint
+from lofarpipe.support.utilities import log_time
+from lofarpipe.cuisine.parset import Parset
 
 class bbs(LOFARnode):
-    def run(self, executable, initscript, infile, key, db_name, db_user, db_host):
+    def run(
+        self, executable, initscript, infile, key, db_name, db_user, db_host
+    ):
         with log_time(self.logger):
             self.logger.info("Processing %s" % (infile,))
 
@@ -46,21 +54,27 @@ class bbs(LOFARnode):
                     self.logger.name + "." + os.path.basename(infile),
                     os.path.basename(executable),
                 ):
-                    bbs_kernel_process = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=working_dir)
+                    bbs_kernel_process = Popen(
+                        cmd, stdout=PIPE, stderr=PIPE, cwd=working_dir
+                    )
                     sout, serr = bbs_kernel_process.communicate()
                 self.logger.debug("BBS kernel stdout: %s" % (sout,))
                 self.logger.debug("BBS kernel stderr: %s" % (serr,))
                 if bbs_kernel_process.returncode != 0:
-                    raise CalledProcessError(bbs_kernel_process.returncode, executable)
+                    raise CalledProcessError(
+                        bbs_kernel_process.returncode, executable
+                    )
             except CalledProcessError, e:
                 self.logger.error(str(e))
                 return 1
             finally:
                 os.unlink(parset_filename)
                 shutil.rmtree(working_dir)
-
             return 0
 
 if __name__ == "__main__":
+    #   If invoked directly, parse command line arguments for logger information
+    #                        and pass the rest to the run() method defined above
+    # --------------------------------------------------------------------------
     loghost, logport = sys.argv[1:3]
     sys.exit(bbs(loghost, logport).run_with_logging(*sys.argv[3:]))

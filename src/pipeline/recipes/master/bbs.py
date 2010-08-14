@@ -1,3 +1,10 @@
+#                                                         LOFAR IMAGING PIPELINE
+#
+#                                                BBS (BlackBoard Selfcal) recipe
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
 from __future__ import with_statement
 from contextlib import closing
 import psycopg2
@@ -10,7 +17,6 @@ import shutil
 import time
 import signal
 
-# Local helpers
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.lofarnode import run_node
 from lofarpipe.support.ipython import LOFARTask
@@ -19,6 +25,14 @@ from lofarpipe.support.group_data import gvds_iterator
 import lofarpipe.support.utilities as utilities
 
 class bbs(LOFARrecipe):
+    """
+    Provides a convenient, pipeline-based mechanism of running the BBS system
+    on a dataset.
+
+    Includes setting up source and parameter databases, selecting subbands for
+    simultaneous processing, and orchestrating the running of GlobalControl
+    and KernelControl executables.
+    """
     def __init__(self):
         super(bbs, self).__init__()
         self.optionparser.add_option(
@@ -75,10 +89,10 @@ class bbs(LOFARrecipe):
     def go(self):
         self.logger.info("Starting BBS run")
         super(bbs, self).go()
-
         ms_names = self.inputs['args']
 
-        # Generate source and parameter databases for all input data
+        #             Generate source and parameter databases for all input data
+        # ----------------------------------------------------------------------
         threads = (
             threading.Thread(
                 target=self.run_task,
@@ -92,7 +106,8 @@ class bbs(LOFARrecipe):
         [thread.start() for thread in threads]
         [thread.join()  for thread in threads]
 
-        # Build a VDS file describing all the data to be processed
+        #              Build a GVDS file describing all the data to be processed
+        # ----------------------------------------------------------------------
         self.logger.debug("Building VDS file describing all data for BBS")
         vds_file = os.path.join(
             self.config.get("layout", "vds_directory"), "bbs.gvds"
@@ -100,15 +115,21 @@ class bbs(LOFARrecipe):
         self.run_task('vdsmaker', ms_names, gvds=vds_file, unlink="False")
         self.logger.debug("BBS VDS is %s" % (vds_file,))
 
-        # Iterate over groups in the VDS file for suitable for cluster
-        # processing
-        for to_process in gvds_iterator(vds_file, int(self.inputs["nproc"])):
-            # to_process is a list of (host, filename) tuples.
-            ms_names  = [filename for host, filename, vds in to_process]
-            vds_files = [vds for host, filename, vds in to_process]
 
-            # Clean the database for this run
-            self.logger.debug("Cleaning BBS database for key %s" % (self.inputs["key"]))
+        #      Iterate over groups of subbands divided up for convenient cluster
+        #          procesing -- ie, no more than nproc subbands per compute node
+        # ----------------------------------------------------------------------
+        self.logger.debug("Building VDS file describing all data for BBS")
+        for to_process in gvds_iterator(vds_file, int(self.inputs["nproc"])):
+            #               to_process is a list of (host, filename, vds) tuples
+            # ------------------------------------------------------------------
+            hosts, ms_names, vds_files = zip(*to_process)
+
+            #             The BBS session database should be cleared for our key
+            # ------------------------------------------------------------------
+            self.logger.debug(
+                "Cleaning BBS database for key %s" % (self.inputs["key"])
+            )
             with closing(
                 psycopg2.connect(
                     host=self.inputs["db_host"],
@@ -125,7 +146,10 @@ class bbs(LOFARrecipe):
                         (self.inputs["key"],)
                     )
 
-            # Build a VDS file describing the data for this run
+            #     BBS GlobalControl requires a GVDS file describing all the data
+            #          to be processed. We assemble that from the separate parts
+            #                                         already available on disk.
+            # ------------------------------------------------------------------
             self.logger.debug("Building VDS file describing data for BBS run")
             vds_dir = tempfile.mkdtemp()
             vds_file = os.path.join(vds_dir, "bbs.gvds")
@@ -139,9 +163,13 @@ class bbs(LOFARrecipe):
             )
             sour, serr = combineproc.communicate()
             if combineproc.returncode != 0:
-                raise subprocess.CalledProcessError(combineproc.returncode, command)
+                raise subprocess.CalledProcessError(
+                    combineproc.returncode, command
+                )
 
-            # Construct a parset for BBS control
+            #      Construct a parset for BBS GlobalControl by patching the GVDS
+            #           file and database information into the supplied template
+            # ------------------------------------------------------------------
             self.logger.debug("Building parset for BBS control")
             bbs_parset = utilities.patch_parset(
                 self.inputs['parset'],
@@ -157,13 +185,15 @@ class bbs(LOFARrecipe):
             self.logger.debug("BBS control parset is %s" % (bbs_parset,))
 
             try:
-                # When one of our processes fails, we'll set the killswitch.
-                # Everything else will then come crashing down, rather than
-                # hanging about forever.
+                #        When one of our processes fails, we set the killswitch.
+                #      Everything else will then come crashing down, rather than
+                #                                         hanging about forever.
+                # --------------------------------------------------------------
                 self.killswitch = threading.Event()
                 self.killswitch.clear()
 
-                # Run BBS Global Control in a separate thread.
+                #                           GlobalControl runs in its own thread
+                # --------------------------------------------------------------
                 run_flag = threading.Event()
                 run_flag.clear()
                 bbs_control = threading.Thread(
@@ -171,12 +201,17 @@ class bbs(LOFARrecipe):
                     args=(bbs_parset, run_flag)
                 )
                 bbs_control.start()
-                run_flag.wait() # Wait for control to start before proceeding
+                run_flag.wait()    # Wait for control to start before proceeding
 
+                #      We run BBS KernelControl on each compute node by directly
+                #                             invoking the node script using SSH
+                # --------------------------------------------------------------
                 command = "python %s" % (self.__file__.replace('master', 'nodes'))
                 with clusterlogger(self.logger) as (loghost, logport):
                     self.logger.debug("Logging to %s:%d" % (loghost, logport))
                     with utilities.log_time(self.logger):
+                        #               Each SSH process runs in its own thread
+                        # -----------------------------------------------------
                         bbs_kernels = [
                             threading.Thread(
                                 target=self._run_via_ssh,
@@ -197,15 +232,17 @@ class bbs(LOFARrecipe):
                         self.logger.debug("Waiting for all kernels to complete")
                         [thread.join() for thread in bbs_kernels]
 
-                    # And wait for control
+                    #         When GlobalControl finishes, our work here is done
+                    # ----------------------------------------------------------
                     self.logger.info("Waiting for GlobalControl thread")
                     bbs_control.join()
             finally:
                 os.unlink(bbs_parset)
                 shutil.rmtree(vds_dir)
                 if self.killswitch.isSet():
-                    # If killswitch is set, then one of our processes failed so the
-                    # whole run is invalid.
+                    #  If killswitch is set, then one of our processes failed so
+                    #                                   the whole run is invalid
+                    # ----------------------------------------------------------
                     return 1
 
         self.outputs['data'] = self.inputs['args']
@@ -259,7 +296,9 @@ class bbs(LOFARrecipe):
                 )
                 run_flag.set()
 
-            returncode = self._monitor_process(bbs_control_process, "BBS Control")
+            returncode = self._monitor_process(
+                bbs_control_process, "BBS Control"
+            )
             sout, serr = bbs_control_process.communicate()
         shutil.rmtree(working_dir)
         self.logger.info("Global Control stdout: %s" % (sout,))
@@ -276,21 +315,18 @@ class bbs(LOFARrecipe):
         """
         while True:
             returncode = process.poll()
-            if returncode == None:
-                # Process still running
+            if returncode == None:                       # Process still running
                 time.sleep(1)
-            elif returncode != 0:
-                # Process broke!
+            elif returncode != 0:                               # Process broke!
                 self.logger.warn(
                     "%s returned code %d; aborting run" % (name, returncode)
                 )
                 self.killswitch.set()
                 break
-            else:
+            else:                                       # Process exited cleanly
                 self.logger.info("%s clean shutdown" % (name))
                 break
-            if self.killswitch.isSet():
-               # Some other process has failed, so we abort
+            if self.killswitch.isSet():            # Other process failed; abort
                self.logger.warn("Killing %s" % (name))
                os.kill(process.pid, signal.SIGKILL)
                returncode = process.wait()
