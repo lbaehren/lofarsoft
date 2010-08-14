@@ -253,7 +253,12 @@ def group_iterable(iterable, size):
     (1, 2, 3)
     (4, 5)
     """
-    return (filter(lambda x: x is not None, x) for x in izip_longest(*[islice(iterable, n, None, size) for n in xrange(size)]))
+    return (
+        filter(lambda x: x is not None, x)
+        for x in izip_longest(
+            *[islice(iterable, n, None, size) for n in xrange(size)]
+        )
+    )
 
 #                                                                  Miscellaneous
 # ------------------------------------------------------------------------------
