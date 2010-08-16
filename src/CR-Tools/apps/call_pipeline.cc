@@ -378,34 +378,35 @@ bool fromString(T &t, const string &s, std::ios_base& (*f)(ios_base&))
 class AnyType
 {
 public:
-    virtual bool         setValue(string)       { return false; }
-    virtual string       errorSetVal()                { return ""; }
-    virtual bool         bValue()
-    {
-      cerr<<"Error: calling bValue() on object which is not bool"<<endl;
-      return bDef; 
-    }
-    virtual double       dValue()
-    {
-      cerr<<"Error: calling dValue() on object which is not double"<<endl;
-      return dDef; 
-    }
-    virtual int          iValue()
-    {
-      cerr<<"Error: calling iValue() on object which is not int"<<endl;
-      return iDef; 
-    }
-    virtual unsigned int uiValue()
-    {
-      cerr<<"Error: calling uiValue() on object which is not uint"<<endl;
-      return uiDef; 
-    }
-    virtual string       sValue()
-    {
-      cerr<<"Error: calling sValue() on object which is not string"<<endl;
-      return sDef; 
-    }
-    virtual int          getType()                    { return (int)_AnyType; }
+  virtual ~AnyType() {}
+  virtual bool         setValue(string)       { return false; }
+  virtual string       errorSetVal()                { return ""; }
+  virtual bool         bValue()
+  {
+    cerr<<"Error: calling bValue() on object which is not bool"<<endl;
+    return bDef; 
+  }
+  virtual double       dValue()
+  {
+    cerr<<"Error: calling dValue() on object which is not double"<<endl;
+    return dDef; 
+  }
+  virtual int          iValue()
+  {
+    cerr<<"Error: calling iValue() on object which is not int"<<endl;
+    return iDef; 
+  }
+  virtual unsigned int uiValue()
+  {
+    cerr<<"Error: calling uiValue() on object which is not uint"<<endl;
+    return uiDef; 
+  }
+  virtual string       sValue()
+  {
+    cerr<<"Error: calling sValue() on object which is not string"<<endl;
+    return sDef; 
+  }
+  virtual int          getType()                    { return (int)_AnyType; }
 };
 
 // Bool type
