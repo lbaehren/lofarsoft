@@ -2,6 +2,12 @@
 set (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX} CACHE PATH
   "CMake installation area."
   )
+set (LUS_ENABLE_TESTING ${LUS_ENABLE_TESTING} CACHE BOOL
+  "Enable testing?"
+  )
+set (LUS_ENABLE_DASHBOARD ${LUS_ENABLE_DASHBOARD} CACHE BOOL
+  "Enable Experimental/Nightly builds with results send to Dashboard?"
+  )
 
 ## === Anaamika =================================================================
 
