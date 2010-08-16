@@ -1267,11 +1267,12 @@ parseCmdline(int argc, char **argv)
             Program);
     exit(EXIT_FAILURE);
   }
-  if( 1024<cmd.argc ) {
-    fprintf(stderr, "%s: there should be at most 1024 non-option argument(s)\n",
-            Program);
-    exit(EXIT_FAILURE);
-  }
+  //  /* For LOFAR, more than 1024 files are used as input */
+  //if( 1024<cmd.argc ) {
+  //  fprintf(stderr, "%s: there should be at most 1024 non-option argument(s)\n",
+  //          Program);
+  //  exit(EXIT_FAILURE);
+  //}
   /*@-compmempass*/  return &cmd;
 }
 

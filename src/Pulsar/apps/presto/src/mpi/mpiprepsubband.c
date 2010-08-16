@@ -377,6 +377,8 @@ int main(int argc, char *argv[])
                strcpy(obs, "GB");
             } else if (!strcmp(idata.telescope, "GMRT")) {
                strcpy(obs, "GM");
+            } else if (!strcmp(idata.telescope, "LOFAR")) {
+               strcpy(obs, "LF");
             } else {
                printf("\nYou need to choose a telescope whose data is in\n");
                printf("$TEMPO/obsys.dat.  Exiting.\n\n");
@@ -452,6 +454,8 @@ int main(int argc, char *argv[])
                strcpy(obs, "EF");
             } else if (!strcmp(idata.telescope, "GBT")) {
                strcpy(obs, "GB");
+            } else if (!strcmp(idata.telescope, "LOFAR")) {
+               strcpy(obs, "LF");
             } else {
                printf("\nYou need to choose a telescope whose data is in\n");
                printf("$TEMPO/obsys.dat.  Exiting.\n\n");
@@ -523,6 +527,8 @@ int main(int argc, char *argv[])
                strcpy(obs, "GB");
             } else if (!strcmp(scope, "arecibo")) {
                strcpy(obs, "AO");
+            } else if (!strcmp(scope, "LOFAR")) {
+               strcpy(obs, "LF");
             } else {
                printf("\nWARNING!!!:  I don't recognize the observatory (%s)!",
                       idata.telescope);
