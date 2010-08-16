@@ -117,9 +117,9 @@
 
 using namespace std;
 using namespace TMath;
-
-
-   ///***** Preparing Energy and primary Mass functions reconstructed by KASCADE (Ralph's formulas) ******///
+///we comment KASCADE formulas and we try to use Grande (Wommer) formula with Ne and Nmu reconstructed from KASCADE
+/*
+   /// Preparing Energy and primary Mass functions reconstructed by KASCADE (Ralph's formulas) ///
    double D=(-186.5562)+(1222.6562)*exp(-110.*100./994186.38); //atm depht at KASCADE level
    double xatte=158.;
    double xattm=823.;
@@ -144,18 +144,18 @@ using namespace TMath;
      lgEn += pare[3]*lgNe0*lgNe0 + pare[4]*lgNmu0*lgNmu0 + pare[5]*lgNe0*lgNmu0;
      return lgEn; //in log
    }
-  /*    // Energy error function***********************
-    double err_lg_EnergyK(double theta, double errlgNe, double errlgNmu, double errTheta){
+//      // Energy error function***********************
+//    double err_lg_EnergyK(double theta, double errlgNe, double errlgNmu, double errTheta){
 
-     varNe = pow(matrix[0][0]*errlgNe,2);
-     varNmu = pow(matrix[0][1]*errlgNmu,2);
-     dEdTheta = D/log(10.) * (matrix[0][0]/xatte+matrix[0][1]/xattm);
-     dEdTheta *= sin(theta) / pow(cos(theta),2); 
-     varTheta = pow(dEdTheta*errTheta,2);
+//     varNe = pow(matrix[0][0]*errlgNe,2);
+//     varNmu = pow(matrix[0][1]*errlgNmu,2);
+//     dEdTheta = D/log(10.) * (matrix[0][0]/xatte+matrix[0][1]/xattm);
+//     dEdTheta *= sin(theta) / pow(cos(theta),2); 
+//     varTheta = pow(dEdTheta*errTheta,2);
 
-     errlgEn=sqrt(varNe + varNmu + varTheta);
-     return errlgEn;
-    }*/
+//     errlgEn=sqrt(varNe + varNmu + varTheta);
+//     return errlgEn;
+//    }
     
    // Mass function***********************
    double lg_A(double lgNe, double lgNmu, double theta) 
@@ -171,23 +171,25 @@ using namespace TMath;
      lnM += parm[3]*lgNe0*lgNe0 + parm[4]*lgNmu0*lgNmu0 + parm[5]*lgNe0*lgNmu0;
      return lnM; //in ln
    }
-  /*  // Mass error function***********************
-     double err_lg_A(double theta, double errlgNe, double errlgNmu, double errTheta){
+//    // Mass error function***********************
+//     double err_lg_A(double theta, double errlgNe, double errlgNmu, double errTheta){
 
-      varNe = pow(matrix[1][0]*errlgNe,2);
-      varNmu = pow(matrix[1][1]*errlgNmu,2);
-      dAdTheta = D/log(10.) * (matrix[1][0]/xatte+matrix[1][1]/xattm);
-      dAdTheta *= sin(theta) / pow(cos(theta),2); 
-      varTheta = pow(dAdTheta*errTheta,2);
+//      varNe = pow(matrix[1][0]*errlgNe,2);
+//      varNmu = pow(matrix[1][1]*errlgNmu,2);
+//      dAdTheta = D/log(10.) * (matrix[1][0]/xatte+matrix[1][1]/xattm);
+//      dAdTheta *= sin(theta) / pow(cos(theta),2); 
+//      varTheta = pow(dAdTheta*errTheta,2);
  
-      errlnM=sqrt(varNe + varNmu + varTheta);
-      return errlnM;
-    }*/
-    
-  // Mario's formula for Grande energy and mass
+//      errlnM=sqrt(varNe + varNmu + varTheta);
+//      return errlnM;
+//    }
+*/
+
+
+  /// Mario's formula for Grande energy and mass
   // returns valuse by reference
   float correction_array_mario[51][29][16];  // global variable: myon correction table from mario
-  
+
   int readMuonCorrectionTable(const string& filename) 
   {
     FILE *fp;
@@ -210,7 +212,7 @@ using namespace TMath;
   }
   
   // Mario's formula returns values mass kappa and energy by reference
-  void mariosFormula(const float& Sizeg,
+  void mariosFormula(const float& Nch,
                      const float& Sizmg,
                      const float& Xcg,
                      const float& Ycg,
@@ -223,8 +225,10 @@ using namespace TMath;
     energy = -99; kappa = -99;
   
     // consistency check
-    double lgSizeg=log10(Sizeg);
-    if (lgSizeg<5.5) {
+
+    //double lgSizeg=log10(Sizeg);
+    double lgNch=log10(Nch);
+    if (lgNch<5.5) {
       cout << "Mario's formula not applicable: log10(Sizeg) should be >5.5!" << endl;
       return;
     }
@@ -258,28 +262,28 @@ using namespace TMath;
     double ang=Zeg*180./3.141592654;
 
     if(ang < 16.71) {
-      kappa=(-(lgSizeg-Sizmgc)+(0.96029+0.08176*lgSizeg))/((0.96029+0.08176*lgSizeg)-(0.01115+0.15504*lgSizeg));
-      energy=(0.93960-0.05839*kappa)*lgSizeg+1.1017+0.6625*kappa;
+      kappa=(-(lgNch-Sizmgc)+(0.96029+0.08176*lgNch))/((0.96029+0.08176*lgNch)-(0.01115+0.15504*lgNch));
+      energy=(0.93960-0.05839*kappa)*lgNch+1.1017+0.6625*kappa;
       energy=pow(10,energy);
       //printf("BIN 1: Energy (GeV): %f, kappa: %f \n",energy,kappa);
     } else if(ang >= 16.71 && ang < 23.99) {
-      kappa=(-(lgSizeg-Sizmgc)+(1.11510+0.05376*lgSizeg))/((1.11510+0.05376*lgSizeg)-(-0.13512+0.16555*lgSizeg));
-      energy=(0.94488-0.07806*kappa)*lgSizeg+1.1319+0.8264*kappa;
+      kappa=(-(lgNch-Sizmgc)+(1.11510+0.05376*lgNch))/((1.11510+0.05376*lgNch)-(-0.13512+0.16555*lgNch));
+      energy=(0.94488-0.07806*kappa)*lgNch+1.1319+0.8264*kappa;
       energy=pow(10,energy);
       //printf("BIN 2: Energy (GeV): %f, kappa: %f \n",energy,kappa);
     } else if(ang >= 23.99 && ang < 29.86) {
-      kappa=(-(lgSizeg-Sizmgc)+(1.03040+0.05980*lgSizeg))/((1.03040+0.05980*lgSizeg)-(-0.14095+0.15450*lgSizeg));
-      energy=(0.94332-0.08154*kappa)*lgSizeg+1.1961+0.9089*kappa;
+      kappa=(-(lgNch-Sizmgc)+(1.03040+0.05980*lgNch))/((1.03040+0.05980*lgNch)-(-0.14095+0.15450*lgNch));
+      energy=(0.94332-0.08154*kappa)*lgNch+1.1961+0.9089*kappa;
       energy=pow(10,energy);
       //printf("BIN 3: Energy (GeV): %f, kappa: %f \n",energy,kappa);
     } else if(ang >= 29.86 && ang < 35.09) {
-      kappa=(-(lgSizeg-Sizmgc)+(0.81923+0.06755*lgSizeg))/((0.81923+0.06755*lgSizeg)-(-0.31778+0.16913*lgSizeg));
-      energy=(0.93774-0.05491*kappa)*lgSizeg+1.4258+0.6609*kappa;
+      kappa=(-(lgNch-Sizmgc)+(0.81923+0.06755*lgNch))/((0.81923+0.06755*lgNch)-(-0.31778+0.16913*lgNch));
+      energy=(0.93774-0.05491*kappa)*lgNch+1.4258+0.6609*kappa;
       energy=pow(10,energy);
       //printf("BIN 4: Energy (GeV): %f, kappa: %f \n",energy,kappa);
     } else if(ang >= 35.09 && ang <= 40.00) {
-      kappa=(-(lgSizeg-Sizmgc)+(0.69480+0.07953*lgSizeg))/((0.69480+0.07953*lgSizeg)-(-0.24169+0.14337*lgSizeg));
-      energy=(0.9506-0.0706*kappa)*lgSizeg+1.4779+0.7656*kappa;
+      kappa=(-(lgNch-Sizmgc)+(0.69480+0.07953*lgNch))/((0.69480+0.07953*lgNch)-(-0.24169+0.14337*lgNch));
+      energy=(0.9506-0.0706*kappa)*lgNch+1.4779+0.7656*kappa;
       energy=pow(10,energy);
       //printf("BIN 5: Energy (GeV): %f, kappa: %f \n",energy,kappa);
     } else {
@@ -493,6 +497,7 @@ int main(int argc, char* argv[])
   Double_t geomag_angle, geomag_angleg;
   Double_t kappaMario, energyMario, lgEMario;
   Double_t EfieldMaxAbs, EfieldAvgAbs; // Maximum and average of the absolute of the Efield in +/- 15 minutes arround event [V/m]
+  double Nch=0;
   
   k->Branch("Eventname",&eventname,"Eventname/C");
   k->Branch("Size",&Size,"Size/F");
@@ -711,18 +716,19 @@ int main(int argc, char* argv[])
     gtstring.resize(64,char(0));
     strcpy (eventname, gtstring.c_str());
 
-    // Calculating energy and geomagnetic angel for KASCADE and GRANDE data **************************
+    // Calculating energy and geomagnetic angle for KASCADE and GRANDE data **************************
     cos_geomag=-1.;
     geomag=0;
     energy=0;
     energyMario = -99;
     lgEMario = 0;
     kappaMario = -99;
+    Nch = Sizeg + Sizmg ;
 
     //double errNe, errNmu, errTheta, errlog10Size,errlog10Lmuo,;
-    double log10Size, log10Lmuo, log10Nmu, log10sizeg,log10sizmg;
+    double log10Size,log10Lmuo,log10Nmu,log10sizeg,log10sizmg;
     double FDeltaA, FDeltaTheta;  
-
+    double log10Nch;
     //errNe = (Size*20.)/100.;  //preliminar value!
     //errNmu = (Lmuo*20.)/100.; //preliminar value!
     //errTheta = 0.3;
@@ -735,6 +741,8 @@ int main(int argc, char* argv[])
     //errlog10Lmuo = (errNmu)/(Lmuo*log(10.));
     log10sizeg = Log10(Sizeg);
     log10sizmg = Log10(Sizmg);
+    log10Nch = Log10(Nch);
+
 
     ///********** Energy and primary Mass reconstructed by Grande (Wommer's formulas) *****///
     if( !(Azg==0||Zeg==0) && Sizeg>0 && Sizmg>0) { // Ze and Az in rad
@@ -764,7 +772,7 @@ int main(int argc, char* argv[])
 
       // in addition, use Mario's formula
       if (muonCorrectionTable != "") {
-        mariosFormula(Sizeg, Sizmg, Xcg, Ycg, Zeg, Azg, energyMario, kappaMario);
+        mariosFormula(Nch, Sizmg, Xcg, Ycg, Zeg, Azg, energyMario, kappaMario);
         if (energyMario > 0)
           lgEMario = log10(energyMario);
         else
@@ -786,6 +794,7 @@ int main(int argc, char* argv[])
 
     ///********** Energy and primary Mass reconstructed by KASCADE (Ralph's formulas) ******///
     //NB- here no log---no LgE and LnA
+/*
     if ( !(Az==0||Ze==0) && Size>0 && Nmu>0) {
       //Energy and Energy error
       lgE = lg_EnergyK(log10Size,log10Nmu,Ze);
@@ -839,6 +848,49 @@ int main(int argc, char* argv[])
       err_Ze = 0.;
       geomag_angle = 0.;
       // if no KASCADE reconstruction is available, continue if KASCADE is wanted
+      if ((!useBothReconstructions) && (!Grande))
+        continue;
+    }
+*/
+
+
+    ///********** Energy and primary Mass reconstructed by KASCADE (Wommer's formulas) with KASCADE Nmu Ne*****///
+    if( !(Az==0||Ze==0) && Size>0 && Nmu>0) { // Ze and Az in rad
+      // calculate energy and mass
+      lgE = 0.3069*log10Size + 0.7064*log10Nmu + 1.2699/TMath::Cos(Ze) + 0.2931;
+      lnA = -8.2485*log10Size + 10.7833*log10Nmu - 14.7251/TMath::Cos(Ze) + 12.3177;
+      // calculate energy and mass error
+      if (exp(lnA)<=1.5) {
+        err_lgE=0.1588;  //from Michael's plots
+        err_lnA=2.13;
+      } else {
+        err_lgE=0.0922;
+        err_lnA=( ((1.17 - 1.26) / (60.-2.))*exp(lnA) + 1.263); //from Michael's plots, linear dependence
+      }  
+      
+      // use fixed error for core and angular uncertainties
+      // (approximation for E > 10^17 eV)
+      err_core = 7.;
+      err_Az = 0.006; // ~0.35°
+      err_Ze = 0.003; // ~0.17°
+
+      // calculate geomagnetic angle
+      cos_geomag =   TMath::Cos(Az) * TMath::Sin(Ze) * TMath::Cos(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25)
+                   + TMath::Sin(Az) * TMath::Sin(Ze) * TMath::Sin(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25)
+                   + TMath::Cos(Ze) * TMath::Cos(TMath::Pi()/180.0 * 25);
+      geomag_angle = ACos(cos_geomag);
+
+ 
+    } else {
+      lgE=0.;
+      lnA=0.;
+      err_lgE=0.;
+      err_lnA=0.;
+      err_core = 0.;
+      err_Az = 0.;
+      err_Ze = 0.;
+      geomag_angle = 0.;
+
       if ((!useBothReconstructions) && (!Grande))
         continue;
     }
