@@ -60,7 +60,7 @@ set (presto_binaries
   search_bin search_rzw swap_endian prepdata
   check_parkes_raw bary shiftdata dftfold
   patchdata readfile toas2dat taperaw
-  prepsubband prepsubband_mod cal2mjd split_parkes_beams
+  prepsubband cal2mjd split_parkes_beams
   dat2sdat sdat2dat downsample rednoise un_sc_td bincand
   dump_spigot_zerolag spigot2filterbank
   spigotSband2filterbank GBT350filterbank test_multifiles
@@ -79,7 +79,6 @@ set (presto_fc_binaries
 set (presto_fc_special_binaries
   prepfold 
   show_pfd 
-  prepfold_mod
 )
 
 set (presto_makewisdom_binaries
@@ -262,26 +261,9 @@ add_executable (prepsubband
   ${INSTRUMENTOBJS}
   )
 
-add_executable (prepsubband_mod
-  prepsubband_cmd.c
-  prepsubband_mod.c
-  ${INSTRUMENTOBJS}
-  )
-
 add_executable (prepfold
   prepfold_cmd.c
   prepfold.c
-  prepfold_utils.c
-  prepfold_plot.c
-  polycos.c
-  readpar.c
-  ${INSTRUMENTOBJS}
-  ${PLOT2DOBJS}
-  )
-
-add_executable (prepfold_mod
-  prepfold_cmd.c
-  prepfold_mod.c
   prepfold_utils.c
   prepfold_plot.c
   polycos.c
