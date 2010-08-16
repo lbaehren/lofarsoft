@@ -92,7 +92,6 @@ find_path (NUMPY_INCLUDES numpy/arrayobject.h numpy/ndarrayobject.h
   python${PYTHON_VERSION}/site-packages/numpy
   python${PYTHON_VERSION}/site-packages/numpy/core/include
   ${PYTHON_VERSION}/Extras/lib/python/numpy/core/include
-#  NO_DEFAULT_PATH
 )
 
 ## -----------------------------------------------------------------------------

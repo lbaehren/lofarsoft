@@ -67,8 +67,6 @@ find_library (NUM_UTIL_LIBRARIES num_util
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-set (NUM_UTIL_FIND_QUIETLY ${NUMUTIL_FIND_QUIETLY})
-
 if (NUM_UTIL_INCLUDES AND NUM_UTIL_LIBRARIES)
   set (HAVE_NUM_UTIL TRUE)
 else (NUM_UTIL_INCLUDES AND NUM_UTIL_LIBRARIES)
