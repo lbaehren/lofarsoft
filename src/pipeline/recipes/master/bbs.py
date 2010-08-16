@@ -123,7 +123,7 @@ class bbs(LOFARrecipe):
         for to_process in gvds_iterator(vds_file, int(self.inputs["nproc"])):
             #               to_process is a list of (host, filename, vds) tuples
             # ------------------------------------------------------------------
-            hosts, ms_names, vds_files = zip(*to_process)
+            hosts, ms_names, vds_files = map(list, zip(*to_process))
 
             #             The BBS session database should be cleared for our key
             # ------------------------------------------------------------------
