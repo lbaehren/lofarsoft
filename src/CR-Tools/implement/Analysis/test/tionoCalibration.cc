@@ -72,7 +72,9 @@ using CR::SubbandID ;
 				  295312500, 296875000, 298437500, 300000000, 301562500, 303125000 } ;
  
  Double sampling_frequency( 1600e6 );
-// -----------------------------------------------------------------------------
+
+//_______________________________________________________________________________
+//                                                           test_ionoCalibration
 
 /*!
   \brief Test constructors for a new ionoCalibration object
@@ -82,38 +84,39 @@ using CR::SubbandID ;
 int test_ionoCalibration ()
 {
   int nofFailedTests (0);
+
   try {
-     
-     ppfimplement ppf_impl;
-     
-     ppfinversion ppf_inv ;
-     
-     SubbandID sbID ;
-     
-     ionoCalibration iono_cal ;
-     }
-     
-    catch ( AipsError x){
-    cerr << "test_ppfimplement :--- testing the default constructor.... " << x.getMesg() << endl;
-    }
-   return nofFailedTests ;
+    ppfimplement ppf_impl;
+    ppfinversion ppf_inv ;
+    SubbandID sbID ;
+  }
+  catch ( AipsError x) {
+    cerr << "test_ppfimplement :--- testing the default constructor.... "
+	 << x.getMesg()
+	 << endl;
+    ++nofFailedTests;
+  }
+
+  return nofFailedTests ;
 }
 
- 
- Bool  test_ionoCalibrations ()
- {
-   Bool ok(True) ;
-   
-     try {
+//_______________________________________________________________________________
+//                                                          test_ionoCalibrations
+
+Bool  test_ionoCalibrations ()
+{
+  Bool ok(True) ;
+  
+  try {
     
-	//---------------------- to generate Gaussian noise ---------------------------
-	
-	cout << "testing the MLCG generator " << endl ;
-	{
-	  ACG gen(1, dataBlockSize*nofsegmentation );
-	  
-	  for( uint k =0; k < dataBlockSize*nofsegmentation; k++ ){
-	       Normal rnd(&gen, 0.0, 0.1 );
+    //---------------------- to generate Gaussian noise ---------------------------
+    
+    cout << "testing the MLCG generator " << endl ;
+    {
+      ACG gen(1, dataBlockSize*nofsegmentation );
+      
+      for( uint k =0; k < dataBlockSize*nofsegmentation; k++ ){
+	Normal rnd(&gen, 0.0, 0.1 );
 	       Double nextExpRand = rnd() ;
 	       samples(k) = nextExpRand ;
 	       }
