@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #include <Analysis/inverseFFT.h>
 
 namespace CR {  // Namespace CR -- begin
@@ -30,41 +28,21 @@ namespace CR {  // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ----------------------------------------------------------------- inverseFFT
+  //_____________________________________________________________________________
+  //                                                                   inverseFFT
   
   inverseFFT::inverseFFT ()
   {
-    f107_p      = 0.0;
-    longitude_p = 0.0;
-    latitude_p  = 0.0;
-    altitude_p  = 0.0;
+    f107_p        = 0.0;
+    longitude_p   = 0.0;
+    latitude_p    = 0.0;
+    altitude_p    = 0.0;
+    tableNumber_p = 0.0;
   }
   
-  // ----------------------------------------------------------------- inverseFFT
+  //_____________________________________________________________________________
+  //                                                                   inverseFFT
   
-  inverseFFT::inverseFFT (Double const &F107,
-                          const Double& mean_F107,
-		          const uint& tableno,
-                          const uint& col,
-                          const uint& t_d,
-                          const Double& tau,
-                          const Double& t,
-                          const Double& Ap,
-                          const Double& latitude,
-                          const Double& longitude,
-                          const Double& altitude,
-                          const Double& molecular_weight,
-                          const Double& n_l_average )
-  
-  {
-    f107_p      = F107;
-    longitude_p = longitude;
-    latitude_p  = latitude;
-    altitude_p  = altitude;
-  }
-  
-  // ----------------------------------------------------------------- inverseFFT
-
   inverseFFT::inverseFFT (inverseFFT const &other)
   {
     copy (other);
@@ -75,11 +53,6 @@ namespace CR {  // Namespace CR -- begin
   //  Destruction
   //
   // ============================================================================
-  
-  inverseFFT::~inverseFFT ()
-  {
-    destroy();
-  }
   
   void inverseFFT::destroy ()
   {;}
@@ -248,7 +221,7 @@ namespace CR {  // Namespace CR -- begin
   // ------------------------------------------------------------- solar_activity
   
   Double inverseFFT::solar_activity( const Double& F107,
-				     const Double& mean_F107,
+				     const Double& F107_mean,
 				     const uint& tableno,
 				     const uint& col,
 				     const Double& latitude ) 
@@ -256,8 +229,8 @@ namespace CR {  // Namespace CR -- begin
     Double solar_act(0.0) ;
     
     try {
-      Double del_F      = F107 - mean_F107 ;
-      Double del_mean_F = mean_F107 - 150 ;
+      Double del_F      = F107 - F107_mean ;
+      Double del_mean_F = F107_mean - 150 ;
       
       Matrix<Double> mcoeff1( 106, 7, 0.0) ;
       Matrix<Double> mcoeff2( 27, 6, 0.0 ) ;
@@ -330,7 +303,7 @@ namespace CR {  // Namespace CR -- begin
   // --------------------------------------------------------------- asymmetrical
   
   Double inverseFFT::asymmetrical( const Double& F107,
-                                   const Double& mean_F107,
+                                   const Double& F107_mean,
                                    const uint& tableno,
                                    const uint& col,
                                    const Double& t_d,
@@ -341,8 +314,8 @@ namespace CR {  // Namespace CR -- begin
     try {
       Double omega_d = 2*pi/365. ;
       
-      Double del_F = F107 - mean_F107 ;
-      Double del_mean_F = mean_F107 - 150 ;
+      Double del_F = F107 - F107_mean ;
+      Double del_mean_F = F107_mean - 150 ;
       
       Matrix<Double> mcoeff1( 106, 7, 0.0) ;
       Matrix<Double> mcoeff2( 27, 6, 0.0 ) ;
@@ -380,7 +353,7 @@ namespace CR {  // Namespace CR -- begin
   // -------------------------------------------------------------------- diurnal
   
   Double inverseFFT::diurnal( const Double& F107,
-			      const Double& mean_F107,
+			      const Double& F107_mean,
 			      const uint& tableno,
 			      const uint& col,
 			      const Double& t_d,
@@ -396,8 +369,8 @@ namespace CR {  // Namespace CR -- begin
       Double omega_d = 2*pi/365. ;
       Double omega = 2*pi/24. ;
       
-      Double del_F = F107 -mean_F107 ;
-      Double del_mean_F = mean_F107 - 150 ;
+      Double del_F = F107 -F107_mean ;
+      Double del_mean_F = F107_mean - 150 ;
       
       Matrix<Double> mcoeff1( 106, 7, 0.0) ;
       Matrix<Double> mcoeff2( 27, 6, 0.0 ) ;
@@ -441,7 +414,7 @@ namespace CR {  // Namespace CR -- begin
   // ---------------------------------------------------------------- semidiurnal
 
   Double inverseFFT::semidiurnal( const Double& F107,
-                                  const Double& mean_F107,
+                                  const Double& F107_mean,
                                   const uint& tableno,
                                   const uint& col,
                                   const Double& t_d,
@@ -455,8 +428,8 @@ namespace CR {  // Namespace CR -- begin
       Double semidiurnal2 = 0;
       Double o_d          = 2*pi/365. ;
       Double omega        = 2*pi/24. ;
-      Double del_F        = F107 -mean_F107 ;
-      Double del_mean_F   = mean_F107 -150 ;
+      Double del_F        = F107 -F107_mean ;
+      Double del_mean_F   = F107_mean -150 ;
       
       Matrix<Double> mcoeff1( 106, 7, 0.0) ;
       Matrix<Double> mcoeff2( 27, 6, 0.0 ) ;
@@ -497,7 +470,7 @@ namespace CR {  // Namespace CR -- begin
   // ----------------------------------------------------------------- terdiurnal
   
   Double inverseFFT::terdiurnal( const Double& F107,
-                                 const Double& mean_F107,
+                                 const Double& F107_mean,
                                  const uint& tableno,
                                  const uint& col,
                                  const Double& t_d,
@@ -513,8 +486,8 @@ namespace CR {  // Namespace CR -- begin
       
       Double o_d        = 2*pi/365. ;
       Double omega      = 2*pi/24. ;
-      Double del_F      = F107 -mean_F107 ;
-      Double del_mean_F = mean_F107 -150 ;
+      Double del_F      = F107 -F107_mean ;
+      Double del_mean_F = F107_mean -150 ;
       
       Matrix<Double> mcoeff1( 106, 7, 0.0) ;
       Matrix<Double> mcoeff2( 27, 6, 0.0 ) ;
@@ -613,10 +586,11 @@ namespace CR {  // Namespace CR -- begin
     return magnetic_func ;
  }
 
-  // --------------------------------------------------------------- longitudinal
+  //_____________________________________________________________________________
+  //                                                                 longitudinal
 
-  Double inverseFFT::longitudinal( const Double& F107,
-                                   const Double& mean_F107,
+  Double inverseFFT::longitudinal (const Double& F107,
+                                   const Double& F107_mean,
                                    const uint& tableno,
                                    const uint& col,
                                    const Double& t_d,
@@ -625,17 +599,18 @@ namespace CR {  // Namespace CR -- begin
                                    const Double& longitude )
 				   
   {				     				     
-    Double long_func(0.0) ;
+    Double long_func = 0.0;
+
+    f107_p = F107;
     
     try {
-      Double long1(0.0) ;
-      Double long2(0.0) ;
-      Double long3(0.0) ;
-      Double long4(0.0) ;
-      
+      Double long1      = 0.0;
+      Double long2      = 0.0;
+      Double long3      = 0.0;
+      Double long4      = 0.0;
       Double o_d        = 2*pi/365. ;
       Double omega      = 2*pi/24. ;
-      Double del_mean_F = mean_F107 -150 ;
+      Double del_mean_F = F107_mean -150 ;
       
       Matrix<Double> mcoeff1( 106, 7, 0.0) ;
       Matrix<Double> mcoeff2( 27, 6, 0.0 ) ;
@@ -673,41 +648,41 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
      return long_func ;
   }
 
+  //_____________________________________________________________________________
+  //                                                                           UT
   
-  
-  Double inverseFFT::UT( const Double& F107,
-                        const Double& mean_F107,
-                        const uint& tableno,
-                        const uint& col,
-                        const Double& t_d,
-                        const Double& tau,
-                        const Double& t,
-                        const Double& latitude,
-                        const Double& longitude ) 
-			
+  Double inverseFFT::UT (const Double& F107,
+			 const Double& F107_mean,
+			 const uint& tableno,
+			 const uint& col,
+			 const Double& t_d,
+			 const Double& tau,
+			 const Double& t,
+			 const Double& latitude,
+			 const Double& longitude ) 
+    
   {				     				     
-    Double UT_func(0.0) ;
+    Double UT_func = 0.0;
+
+    f107_p = F107;
     
     try {
-      Double UT1(0.0) ;
-      Double UT2(0.0) ;
-      Double UT3(0.0) ;
-      
-      Double o_d = 2*pi/365. ;
+      Double UT1        = 0.0;
+      Double UT2        = 0.0;
+      Double UT3        = 0.0;
+      Double o_d        = 2*pi/365. ;
       Double omega_dash = 2*pi/86400. ;
-      
-      Double del_mean_F = mean_F107 -150 ;
-      
+      Double del_mean_F = F107_mean -150 ;
+
+      // Matrices to hold the coefficients
       Matrix<Double> mcoeff1( 106, 7, 0.0) ;
       Matrix<Double> mcoeff2( 27, 6, 0.0 ) ;
-      
+      // Read in the coefficients
       readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
       readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
       
       Vector<Double> coeff1 = mcoeff1.column(col) ;
       Vector<Double> coeff2 = mcoeff2.column(col) ;
-      
-      // 	  Double del_A(0.0);
       
       Double asl_10 = legendre(latitude, 1, 0) ;
       Double asl_30 = legendre(latitude, 3, 0) ;
@@ -716,18 +691,16 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
       Double asl_52 = legendre(latitude, 5, 2) ;
       
       
-      if( tableno ==1)
-	{
-	  UT1=(coeff1(70)*asl_10+coeff1(71)*asl_30+coeff1(72)*asl_50)*(1+coeff1(95)*del_mean_F)*(1+coeff1(74)*asl_10) ;
-	  UT2= (1+coeff1(75)*cos(o_d*(t_d-coeff1(30))))*cos(omega_dash*(t-coeff1(73))) ;
-	  UT3= (coeff1(76)*asl_32+coeff1(77)*asl_52)*cos(omega_dash*(t-coeff1(78))+2*longitude*pi/180.) ;
-	  UT_func= UT1*UT2 +UT3 ;
-	}
+      if( tableno ==1) {
+	UT1=(coeff1(70)*asl_10+coeff1(71)*asl_30+coeff1(72)*asl_50)*(1+coeff1(95)*del_mean_F)*(1+coeff1(74)*asl_10) ;
+	UT2= (1+coeff1(75)*cos(o_d*(t_d-coeff1(30))))*cos(omega_dash*(t-coeff1(73))) ;
+	UT3= (coeff1(76)*asl_32+coeff1(77)*asl_52)*cos(omega_dash*(t-coeff1(78))+2*longitude*pi/180.) ;
+	UT_func= UT1*UT2 +UT3 ;
+      }
       else
-	if(tableno ==2)     
-	  {  
-	    UT_func =0.0 ;
-	  }
+	if(tableno ==2) {  
+	  UT_func =0.0 ;
+	}
     } catch( AipsError x ) {
       cerr << "inverseFFT::UT" <<x.getMesg() << endl ;
     } 
@@ -735,10 +708,11 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
     return UT_func ;
   }
   
-  // ----------- 
+  //_____________________________________________________________________________
+  //                                                                     combined
   
-  Double inverseFFT::combined( const Double& F107,
-                               const Double& mean_F107,
+  Double inverseFFT::combined (const Double& F107,
+                               const Double& F107_mean,
                                const uint& tableno,
                                const uint& col,
                                const Double& t_d,
@@ -749,7 +723,9 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
                                const Double& longitude ) 
   
   {				     				     
-    Double combined_func(0.0) ;
+    Double combined_func = 0.0;
+
+    f107_p = F107;
     
     try {
       Double com1(0.0) ;
@@ -799,10 +775,11 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
     return combined_func ;
   }
 
-  // ----------------
-
-  Double inverseFFT::expansion( const Double& F107,
-				const Double& mean_F107,
+  //_____________________________________________________________________________
+  //                                                                    expansion
+  
+  Double inverseFFT::expansion (const Double& F107,
+				const Double& F107_mean,
 				const uint& tableno,
 				const uint& col,
 				const Double& t_d,
@@ -832,16 +809,16 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
       Double asl_20 = legendre(latitude, 2, 0) ; 
       Double asl_40 = legendre(latitude, 4, 0) ;
       
-      Double solar_fun = solar_activity(F107, mean_F107, tableno, col, latitude) ;
+      Double solar_fun = solar_activity(F107, F107_mean, tableno, col, latitude) ;
       Double sym_fun = symmetrical(tableno, col, t_d, latitude ) ;
-      Double asym_fun = asymmetrical(F107, mean_F107, tableno, col, t_d, latitude ) ;
-      Double diurnal_fun =diurnal(F107, mean_F107, tableno, col, t_d, tau, latitude) ;
-      Double semidiurnal_fun = semidiurnal(F107, mean_F107, tableno, col, t_d, tau, latitude ) ;
-      Double terdiurnal_fun = terdiurnal( F107, mean_F107, tableno, col, t_d, tau, latitude ) ;
+      Double asym_fun = asymmetrical(F107, F107_mean, tableno, col, t_d, latitude ) ;
+      Double diurnal_fun =diurnal(F107, F107_mean, tableno, col, t_d, tau, latitude) ;
+      Double semidiurnal_fun = semidiurnal(F107, F107_mean, tableno, col, t_d, tau, latitude ) ;
+      Double terdiurnal_fun = terdiurnal( F107, F107_mean, tableno, col, t_d, tau, latitude ) ;
       Double magnetic_fun = magnetic( tableno, col, t_d, tau, Ap, latitude ) ;
-      Double longitudinal_fun = longitudinal( F107, mean_F107, tableno, col, t_d, tau, latitude, longitude ) ;
-      Double UT_fun = UT( F107, mean_F107, tableno, col, t_d, tau, t, latitude, longitude ) ;
-      Double combined_fun = combined( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
+      Double longitudinal_fun = longitudinal( F107, F107_mean, tableno, col, t_d, tau, latitude, longitude ) ;
+      Double UT_fun = UT( F107, F107_mean, tableno, col, t_d, tau, t, latitude, longitude ) ;
+      Double combined_fun = combined( F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
       
       if( tableno ==1)
 	{
@@ -866,7 +843,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
   // ---------------------------------------------------------------- temperature
   
   Double inverseFFT::temperature( const Double& F107,
-				  const Double& mean_F107,
+				  const Double& F107_mean,
 				  const uint& tableno,
 				  const uint& col,
 				  const Double& t_d,
@@ -877,8 +854,12 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 				  const Double& longitude,
 				  const Double& altitude )
   {				     				     
-    Double temp_profile(0.0) ;
-    
+    Double temp_profile    = 0.0;
+    Double temp_l_dash_G_L = 0.0;
+    Double temp_inf_G_L    = 0.0;
+
+    tableNumber_p = tableno;
+
     try {
       Matrix<Double> mcoeff1( 106, 7, 0.0) ;
       Matrix<Double> mcoeff2( 27, 6, 0.0 ) ;
@@ -889,12 +870,30 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
       Vector<Double> coeff1 = mcoeff1.column(col) ;
       Vector<Double> coeff2 = mcoeff2.column(col) ;
       
-      Double temp_l_dash_G_L = expansion(F107, mean_F107, 2, 5, t_d, tau, t, Ap, latitude, longitude) ;
-      Double temp_inf_G_L = expansion(F107, mean_F107, 1, 0, t_d, tau, t, Ap, latitude, longitude) ;
-      Double temp_l_G_L = expansion(F107, mean_F107, 2, 1, t_d, tau, t, Ap, latitude, longitude) ;
-      Double temp_0_G_L = expansion(F107, mean_F107, 2, 3, t_d, tau, t, Ap, latitude, longitude) ;
-      Double z_0_G_L = expansion(F107, mean_F107, 2, 2, t_d, tau, t, Ap, latitude, longitude) ;
-      Double temp_R_G_L = expansion(F107, mean_F107, 2, 4, t_d, tau, t, Ap, latitude, longitude) ;
+      temp_l_dash_G_L = expansion (F107,
+				   F107_mean,
+				   2,
+				   5,
+				   t_d,
+				   tau,
+				   t,
+				   Ap,
+				   latitude,
+				   longitude) ;
+      temp_inf_G_L    = expansion (F107,
+				   F107_mean,
+				   1, 
+				   0,
+				   t_d,
+				   tau,
+				   t,
+				   Ap,
+				   latitude,
+				   longitude) ;
+      Double temp_l_G_L      = expansion(F107, F107_mean, 2, 1, t_d, tau, t, Ap, latitude, longitude) ;
+      Double temp_0_G_L      = expansion(F107, F107_mean, 2, 3, t_d, tau, t, Ap, latitude, longitude) ;
+      Double z_0_G_L = expansion(F107, F107_mean, 2, 2, t_d, tau, t, Ap, latitude, longitude) ;
+      Double temp_R_G_L = expansion(F107, F107_mean, 2, 4, t_d, tau, t, Ap, latitude, longitude) ;
       
       Double temp_l_dash = mcoeff2(1,5)*(1+temp_l_dash_G_L);
       Double temp_inf   = mcoeff1(1,0)*(1+temp_inf_G_L);
@@ -934,7 +933,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
   // ------------------------------------------------------------------- Dprofile
   
   Double inverseFFT::Dprofile( const Double& F107,
-			       const Double& mean_F107,
+			       const Double& F107_mean,
 			       const uint& tableno,
 			       const uint& col,
 			       const Double& t_d,
@@ -966,12 +965,12 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
       Vector<Double> coeff1 = mcoeff1.column(col) ;
       Vector<Double> coeff2 = mcoeff2.column(col) ;
       
-      Double temp_l_dash_G_L = expansion(F107, mean_F107, 2, 5, t_d, tau, t, Ap, latitude, longitude) ;
-      Double temp_inf_G_L = expansion(F107, mean_F107, 1, 0, t_d, tau, t, Ap, latitude, longitude) ;
-      Double temp_l_G_L = expansion(F107, mean_F107, 2, 1, t_d, tau, t, Ap, latitude, longitude) ;
-      Double temp_0_G_L = expansion(F107, mean_F107, 2, 3, t_d, tau, t, Ap, latitude, longitude) ;
-      Double z_0_G_L = expansion(F107, mean_F107, 2, 2, t_d, tau, t, Ap, latitude, longitude) ;
-      Double temp_R_G_L = expansion(F107, mean_F107, 2, 4, t_d, tau, t, Ap, latitude, longitude) ;
+      Double temp_l_dash_G_L = expansion(F107, F107_mean, 2, 5, t_d, tau, t, Ap, latitude, longitude) ;
+      Double temp_inf_G_L = expansion(F107, F107_mean, 1, 0, t_d, tau, t, Ap, latitude, longitude) ;
+      Double temp_l_G_L = expansion(F107, F107_mean, 2, 1, t_d, tau, t, Ap, latitude, longitude) ;
+      Double temp_0_G_L = expansion(F107, F107_mean, 2, 3, t_d, tau, t, Ap, latitude, longitude) ;
+      Double z_0_G_L = expansion(F107, F107_mean, 2, 2, t_d, tau, t, Ap, latitude, longitude) ;
+      Double temp_R_G_L = expansion(F107, F107_mean, 2, 4, t_d, tau, t, Ap, latitude, longitude) ;
       
       Double temp_l_dash = mcoeff2(1,6)*(1+temp_l_dash_G_L);
       Double temp_inf = mcoeff1(1,0)*(1+temp_inf_G_L);
@@ -987,9 +986,9 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
       
       Double x =-(eta_z_za-eta_z0_za)/eta_z0_za ;
       
-      Double temp_zl =temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl) ;
-      // 	   Double temp_za =temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, za) ;
-      Double temp_z =temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude) ; 
+      Double temp_zl =temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl) ;
+      // 	   Double temp_za =temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, za) ;
+      Double temp_z =temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude) ; 
       
       Double sigma = temp_l_dash/(temp_inf -temp_l ) ;
       Double temp_a = temp_inf -(temp_inf-temp_l)*exp(-sigma*eta_za_zl);
@@ -1030,7 +1029,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
   
     
   Double inverseFFT::N2densityprofile( const Double& F107,
-				       const Double& mean_F107,
+				       const Double& F107_mean,
 				       const Double& t_d,
 				       const Double& tau,
 				       const Double& t,
@@ -1061,24 +1060,24 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
       Double zh = 105. ;
       Double zl = 120. ;
       
-      Double G_L = expansion( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
+      Double G_L = expansion( F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
       Double n_l = n_l_average*exp(G_L) ;
-      Double D_z_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
+      Double D_z_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
       
-      Double temp_zl = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
-      Double temp_zh = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
-      Double temp_z = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
+      Double temp_zl = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
+      Double temp_zh = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
+      Double temp_z = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
       
       Double arguement1 = (temp_zl/temp_z) ;
       Double pow_factor1 =pow(arguement1, (1+alpha));
       
       Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
       
-      Double D_zh_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+      Double D_zh_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
       
       //mixing profile
-      Double D_zh_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
-      Double D_z_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
+      Double D_zh_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
+      Double D_z_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
       
       Double arguement2 = (temp_zl/temp_zh) ;
       Double pow_factor2 =pow(arguement2, alpha);
@@ -1100,7 +1099,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
   }
 
   Double inverseFFT::O2densityprofile( const Double& F107,
-                           	      const Double& mean_F107,
+                           	      const Double& F107_mean,
                                       const Double& t_d,
                                       const Double& tau,
                                       const Double& t,
@@ -1131,24 +1130,24 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
      Double zh = 105. ;
      Double zl = 120. ;
      
-     Double G_L = expansion( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
+     Double G_L = expansion( F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
      Double n_l = n_l_average*exp(G_L) ;
-     Double D_z_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
+     Double D_z_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
      
-     Double temp_zl = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
-     Double temp_zh = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
-     Double temp_z = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
+     Double temp_zl = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
+     Double temp_zh = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
+     Double temp_z = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
 	
      Double arguement1 = (temp_zl/temp_z) ;
      Double pow_factor1 =pow(arguement1, (1+alpha));
      
      Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
      
-     Double D_zh_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+     Double D_zh_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
      
      //mixing profile
-     Double D_zh_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
-     Double D_z_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
+     Double D_zh_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
+     Double D_z_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
      
      Double arguement2 = (temp_zl/temp_zh) ;
      Double pow_factor2 =pow(arguement2, alpha);
@@ -1174,7 +1173,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
   				      
   
   Double inverseFFT::Ardensityprofile( const Double& F107,
-                           	       const Double& mean_F107,
+                           	       const Double& F107_mean,
                                        const Double& t_d,
                                        const Double& tau,
                                        const Double& t,
@@ -1205,24 +1204,24 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
       Double zh = 105. ;
       Double zl = 120. ;
       
-      Double G_L = expansion( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
+      Double G_L = expansion( F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
       Double n_l = n_l_average*exp(G_L) ;
-      Double D_z_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
+      Double D_z_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
       
-      Double temp_zl = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
-      Double temp_zh = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
-      Double temp_z = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
+      Double temp_zl = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
+      Double temp_zh = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
+      Double temp_z = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
       
       Double arguement1 = (temp_zl/temp_z) ;
       Double pow_factor1 =pow(arguement1, (1+alpha));
       
       Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
       
-      Double D_zh_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+      Double D_zh_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
       
       //mixing profile
-      Double D_zh_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
-      Double D_z_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
+      Double D_zh_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
+      Double D_z_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
       
       Double arguement2 = (temp_zl/temp_zh) ;
       Double pow_factor2 =pow(arguement2, alpha);
@@ -1247,7 +1246,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 
 		   
  Double inverseFFT::Odensityprofile( const Double& F107,
-                           	     const Double& mean_F107,
+                           	     const Double& F107_mean,
                                      const Double& t_d,
                                      const Double& tau,
                                      const Double& t,
@@ -1277,24 +1276,24 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
      Double zh = 105. ;
      Double zl = 120. ;
      
-     Double G_L = expansion( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
+     Double G_L = expansion( F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
      Double n_l = n_l_average*exp(G_L) ;
-     Double D_z_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
+     Double D_z_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
      
-     Double temp_zl = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
-     Double temp_zh = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
-     Double temp_z = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
+     Double temp_zl = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
+     Double temp_zh = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
+     Double temp_z = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
      
      Double arguement1 = (temp_zl/temp_z) ;
      Double pow_factor1 =pow(arguement1, (1+alpha));
      
      Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
      
-     Double D_zh_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+     Double D_zh_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
      
      //mixing profile
-     Double D_zh_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
-     Double D_z_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
+     Double D_zh_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
+     Double D_z_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
      
      Double arguement2 = (temp_zl/temp_zh) ;
      Double pow_factor2 =pow(arguement2, alpha);
@@ -1318,7 +1317,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
   
   
   Double inverseFFT::Ndensityprofile( const Double& F107,
-				      const Double& mean_F107,
+				      const Double& F107_mean,
 				      const Double& t_d,
 				      const Double& tau,
 				      const Double& t,
@@ -1349,24 +1348,24 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
      Double zh = 105. ;
      Double zl = 120. ;
      
-     Double G_L = expansion( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
+     Double G_L = expansion( F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
      Double n_l = n_l_average*exp(G_L) ;
-     Double D_z_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
+     Double D_z_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
      
-     Double temp_zl = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
-     Double temp_zh = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
-     Double temp_z = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
+     Double temp_zl = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
+     Double temp_zh = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
+     Double temp_z = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
      
      Double arguement1 = (temp_zl/temp_z) ;
      Double pow_factor1 =pow(arguement1, (1+alpha));
      
      Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
      
-     Double D_zh_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+     Double D_zh_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
      
      //mixing profile
-     Double D_zh_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
-     Double D_z_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
+     Double D_zh_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
+     Double D_z_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
      
      Double arguement2 = (temp_zl/temp_zh) ;
      Double pow_factor2 =pow(arguement2, alpha);
@@ -1390,7 +1389,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
   
 
  Double inverseFFT::Hedensityprofile( const Double& F107,
-                           	      const Double& mean_F107,
+                           	      const Double& F107_mean,
                                       const Double& t_d,
                                       const Double& tau,
                                       const Double& t,
@@ -1418,24 +1417,24 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
        alpha = 0.0 ;
      }
      
-     Double G_L = expansion( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
+     Double G_L = expansion( F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
      Double n_l = n_l_average*exp(G_L) ;
-     Double D_z_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
+     Double D_z_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
      
-     Double temp_zl = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
-     Double temp_zh = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
-     Double temp_z = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
+     Double temp_zl = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
+     Double temp_zh = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
+     Double temp_z = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
      
      Double arguement1 = (temp_zl/temp_z) ;
      Double pow_factor1 =pow(arguement1, (1+alpha));
      
      Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
      
-     Double D_zh_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+     Double D_zh_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
      
      //mixing profile
-     Double D_zh_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
-     Double D_z_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
+     Double D_zh_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
+     Double D_z_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
      
      Double arguement2 = (temp_zl/temp_zh) ;
      Double pow_factor2 =pow(arguement2, alpha);
@@ -1460,7 +1459,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
   // ------------------------------------------------------------ Hdensityprofile
 
   Double inverseFFT::Hdensityprofile( const Double& F107,
-                           	      const Double& mean_F107,
+                           	      const Double& F107_mean,
                                       const Double& t_d,
                                       const Double& tau,
                                       const Double& t,
@@ -1486,24 +1485,24 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
       Double zh = 105. ;
       Double zl = 120. ;
       
-      Double G_L = expansion( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
+      Double G_L = expansion( F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
       Double n_l = n_l_average*exp(G_L) ;
-      Double D_z_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
+      Double D_z_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
       
-      Double temp_zl = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
-      Double temp_zh = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
-      Double temp_z = temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
+      Double temp_zl = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
+      Double temp_zh = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
+      Double temp_z = temperature(F107, F107_mean, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
       
       Double arguement1 = (temp_zl/temp_z) ;
       Double pow_factor1 =pow(arguement1, (1+alpha));
       
       Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
       
-      Double D_zh_M = Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+      Double D_zh_M = Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
       
       //mixing profile
-      Double D_zh_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
-      Double D_z_M0 =Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
+      Double D_zh_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
+      Double D_z_M0 =Dprofile( F107,F107_mean,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
       
       Double arguement2 = (temp_zl/temp_zh) ;
       Double pow_factor2 =pow(arguement2, alpha);

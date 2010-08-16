@@ -95,47 +95,16 @@ namespace CR {  // Namespace CR -- begin
     double latitude_p;
     //! The altitude in km
     double altitude_p;
+    //! Table number
+    uint tableNumber_p;
     
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     inverseFFT ();
     
-    /*!
-      \brief Argumented constructor
-
-      \param F107  -- F107 is the 10.7 cm flux on previous day (1e-22 W/m^2/Hz )
-      \param mea_F107 -- average F107 over three solar rotations (81 days)
-      \param tableno  -- modelcoefficients table has to be used
-      \param col -- whether coefficients are called for temperature or for number density
-      \param t_day -- day of the year like 20th day or 200th day of the year
-      \param tau -- local time in hrs
-      \param t -- UT in seconds
-      \param Ap -- daily magnetic index
-      \param latitude -- geographic latitude
-      \param longitude -- geographic longitude (eastward positive)
-      \param altitude -- height in Km
-      \param molecular weight -- molecular weight of the molecule (just like N2= 28)
-      \param n_l_average -- average density at height zl =120 km.
-    */
-
-    inverseFFT (Double const &F107,
-                const Double& mean_F107,
-		const uint& tableno,
-                const uint& col,
-                const uint& t_d,
-                const Double& tau,
-                const Double& t,
-                const Double& Ap,
-                const Double& latitude,
-                const Double& longitude,
-                const Double& altitude,
-                const Double& molecular_weight,
-                const Double& n_l_average );
 	
     /*!
       \brief Copy constructor 
@@ -144,14 +113,7 @@ namespace CR {  // Namespace CR -- begin
     */
     inverseFFT (inverseFFT const &other);
       
-    // -------------------------------------------------------------- Destruction
-
-    /*!
-      \brief Destructor
-    */
-    ~inverseFFT ();
-    
-    // ---------------------------------------------------------------- Operators
+    // === Operators ============================================================
 
     /*!
       \brief Overloading of the copy operator
@@ -160,7 +122,7 @@ namespace CR {  // Namespace CR -- begin
     */
     inverseFFT& operator= (inverseFFT const &other); 
     
-    // --------------------------------------------------------------- Parameters
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the 10.7 cm flux on previous day
@@ -237,53 +199,34 @@ namespace CR {  // Namespace CR -- begin
     */
     void summary (std::ostream &os);    
 
-    // ------------------------------------------------------------------ Methods
+    // === Methods ==============================================================
     
-    /*!
-      \brief derivatives of associated legendre polynomial functions
-      
-    */
+    //! Derivatives of associated legendre polynomial functions
     Double diff_legendre( const Double& latitude,
                           const uint& degree,
                           const uint& order ) ;
 
 
-      /*!
-      \brief value of associated legendre polynomial functions
-      
-    */
+    //! value of associated legendre polynomial functions
     Double legendre( const Double& latitude,
                      const uint& degree,
                      const uint& order ) ;
 
    
-     /*!
-      \brief value of solar activity function
-      
-    */
-
+    //! value of solar activity function
     Double solar_activity( const Double& F107,
                            const Double& mean_F107,
                            const uint& tableno,
                            const uint& col,
                            const Double& latitude ) ;
 
-      
-     /*!
-      \brief value of symmetrical function
-      
-    */
-
+    //! value of symmetrical function
     Double symmetrical( const uint& tableno,
                         const uint& col,
                         const Double& t_d,
                         const Double& latitude ) ;
 
-    /*!
-      \brief value of asymmetrical function
-      
-    */
-
+    //! value of asymmetrical function
     Double asymmetrical( const Double& F107,
                          const Double& mean_F107,
                          const uint& tableno,
@@ -291,11 +234,7 @@ namespace CR {  // Namespace CR -- begin
                          const Double& t_d,
                          const Double& latitude ) ;
 
-    /*!
-      \brief value of diurnal function
-      
-    */
-   
+    //! Value of diurnal function
     Double diurnal( const Double& F107,
                     const Double& mean_F107,
                     const uint& tableno,
@@ -304,11 +243,7 @@ namespace CR {  // Namespace CR -- begin
                     const Double& tau,
                     const Double& latitude ) ; 
 
-    /*!
-      \brief value of semidiurnal function
-      
-    */
-   
+    //! Value of semidiurnal function
     Double semidiurnal( const Double& F107,
                         const Double& mean_F107,
                         const uint& tableno,
@@ -317,11 +252,7 @@ namespace CR {  // Namespace CR -- begin
                         const Double& tau,
                         const Double& latitude ) ; 
   
-   /*!
-      \brief value of terdiurnal function
-      
-    */
-   
+    //! Value of terdiurnal function
     Double terdiurnal( const Double& F107,
                         const Double& mean_F107,
                         const uint& tableno,
@@ -330,12 +261,7 @@ namespace CR {  // Namespace CR -- begin
                         const Double& tau,
                         const Double& latitude ) ; 
 
-   
-   /*!
-      \brief value of magnetic function
-      
-    */
-   
+    //! Value of magnetic function
     Double magnetic( const uint& tableno,
                      const uint& col,
                      const Double& t_d,
@@ -343,11 +269,7 @@ namespace CR {  // Namespace CR -- begin
                      const Double& Ap,
                      const Double& latitude ) ; 
  
-    /*!
-      \brief value of longitudinal function
-      
-    */
-   
+    //! Value of longitudinal function
     Double longitudinal( const Double& F107,
                          const Double& mean_F107,
                          const uint& tableno,
@@ -356,11 +278,8 @@ namespace CR {  // Namespace CR -- begin
                          const Double& tau,
                          const Double& latitude,
                          const Double& longitude ) ; 
-    /*!
-      \brief value of UT function
-      
-    */
-   
+
+    //! Value of UT function
     Double UT( const Double& F107,
                const Double& mean_F107,
                const uint& tableno,
@@ -371,11 +290,7 @@ namespace CR {  // Namespace CR -- begin
                const Double& latitude,
                const Double& longitude ) ;
 
-    /*!
-      \brief value of combined function
-      
-    */
-   
+    //! Value of combined function
     Double combined( const Double& F107,
                      const Double& mean_F107,
                      const uint& tableno,
@@ -387,11 +302,7 @@ namespace CR {  // Namespace CR -- begin
                      const Double& latitude,
                      const Double& longitude ) ;
 
-    /*!
-      \brief value of expansion function
-      
-    */
-   
+    //! Value of expansion function
     Double expansion( const Double& F107,
                       const Double& mean_F107,
                       const uint& tableno,
@@ -403,10 +314,7 @@ namespace CR {  // Namespace CR -- begin
                       const Double& latitude,
                       const Double& longitude ) ;
 		     
-    /*!
-      \brief value of temperature profile      
-    */
-   
+    //! Value of temperature profile      
     Double temperature( const Double& F107,
                         const Double& mean_F107,
                         const uint& tableno,
