@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #include <Analysis/SubbandID.h>
 
 namespace CR { // Namespace CR -- begin
@@ -78,6 +76,10 @@ namespace CR { // Namespace CR -- begin
   
   void SubbandID::summary (std::ostream &os)
   {
+    os << "[SubbandID] Summary of internal parameters."  << std::endl;
+    os << "-- Sample frequency  = " << sampleFrequency_p << std::endl;
+    os << "-- Frequency band ID = " << bandID_p          << std::endl;
+    os << "-- nof. sub-bands    = " << nofSubbands_p     << std::endl;
   }
   
   // ============================================================================

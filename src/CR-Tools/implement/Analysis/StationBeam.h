@@ -68,6 +68,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class StationBeam
     
+    \ingroup CR
     \ingroup CR_Analysis
     
     \brief Brief description for class StationBeam
@@ -95,6 +96,10 @@ namespace CR { // Namespace CR -- begin
     Double source_declination_p;
     //! Hour angle of the source
     Double source_hr_angle_p;
+    //! x--coordinates of the position
+    casa::Vector<Double> positionX_p;
+    //! y-coordinates of the position
+    casa::Vector<Double> positionY_p;
 
   public:
     

@@ -413,10 +413,11 @@ namespace CR { // Namespace CR -- begin
       return Double ();
     }       
   }	
+
+  //_____________________________________________________________________________
+  //                                                           incoherent_beaming
   
-  
-  
-  Double StationBeam::incoherent_beaming( const Double& hr_angle,
+  Double StationBeam::incoherent_beaming (const Double& hr_angle,
 					  const Double& declination,
 					  const Double& source_declination,
 					  const Double& source_hr_angle,
@@ -432,30 +433,21 @@ namespace CR { // Namespace CR -- begin
     try {
       
       StationBeam stbm ;
+      positionX_p = position_x;
+      positionY_p = position_y;
       
-      Double pi(3.1416) ;
       DComplex j(0, 1 );
-      Double sum_tied_array(0.0);
-      Double integral_value (0.0) ;
-      
-      uint n_stations = station_id.nelements() ;
-      // 	uint n_stat = 0 ;
-      
-      Double observed_L(0.0) ;
-      Double observed_M(0.0) ;
-      Double observed_N(0.0) ;
-      // 	Double pos_new_x(0.0) ;
-      // 	Double pos_new_y(0.0) ;
-      
-      // 	Double position_new_x(0.0);
-      // 	Double position_new_y(0.0);
-      // 	Double position_new_y1(0.0);
-      // 	Double position_new_y2(0.0);
-      
-      Double sourceHrAngle = pi/180.*source_hr_angle ;
+      Double pi                = 3.14159265;
+      Double sum_tied_array    = 0.0;
+      Double integral_value    = 0.0;
+      uint n_stations          = station_id.nelements() ;
+      Double observed_L        = 0.0;
+      Double observed_M        = 0.0;
+      Double observed_N        = 0.0;
+      Double sourceHrAngle     = pi/180.*source_hr_angle ;
       Double sourceDeclination = pi/180.*source_declination ;
-      Double hrAngle = pi/180.*hr_angle ;
-      Double decAngle = pi/180.*declination ;
+      Double hrAngle           = pi/180.*hr_angle ;
+      Double decAngle          = pi/180.*declination ;
       
       observed_L = sin(decAngle-sourceDeclination)*cos(hrAngle-sourceHrAngle) ;
       
@@ -489,7 +481,8 @@ namespace CR { // Namespace CR -- begin
     
   }	
   
-  
+  //_____________________________________________________________________________
+  //                                                                integrate_phi
   
   Double StationBeam::integrate_phi( const Double& declination,
 				     const Double& source_declination,
@@ -511,18 +504,15 @@ namespace CR { // Namespace CR -- begin
       uint nroots = legendre_root.nelements() ;
       
       Double phi_final(360.0);
-      //           Double phi_init(0.0);
       Double phi_interval(1.0);
       
       Double power_beam(0.0) ;
-      //           Double power_sum(0.0); 
       Double hrangle(0.0);
       
       Double k1_phi(0.0) ;
       Double k2_phi(0.0) ;
       Double k1phi(0.0);
       Double k2phi(0.0);
-      //           Double phi(0.0);
       Double y_outer_sum(0.0);
       Double y_inner_sum(0.0);
       
