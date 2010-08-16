@@ -1,7 +1,7 @@
 #                                                         LOFAR IMAGING PIPELINE
 #
 #                                                  BBS (BlackBoard Selfcal) node
-#                                                         John Swinbank, 2009-10
+#                                                            John Swinbank, 2010
 #                                                      swinbank@transientskp.org
 # ------------------------------------------------------------------------------
 
