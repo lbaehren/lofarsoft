@@ -1,5 +1,41 @@
 
 _________________________________________________________________________________
+>>> TABLE OF CONTENTS:
+
+  - Quick start
+  - Organization of the code
+  - Building packages
+  - Documentation generation
+
+
+_________________________________________________________________________________
+>>> Quick start
+
+Once checkout from the repository is complete, you can change into the "build"
+directory to run the bootstrap script.
+
+  cd build
+  ./bootstrap
+
+The the main job of the bootstrap script is to check whether or not a recent
+enough version of CMake (www.cmake.org) is installed on your system; if the found
+installation is too old or not available at all, a build from the provided
+sources is triggered and the resulting executables will be installed into
+"release/bin" (which of course then should be in your PATH).
+
+In order to get a list of possible build targets, type
+
+  make help
+
+Running 
+
+  make <target>
+
+will try to build the selected target -- including, where required, required
+packages.
+
+
+_________________________________________________________________________________
 >>> Organization of the code
 
 Once the check-out is completed, you will find the following directory structure
@@ -48,15 +84,17 @@ In this:
  - src          : Contains the source code of the various projects andpackages
                   developed and written within the framework of the LUS.
 
+
 _________________________________________________________________________________
->>> Build high-level packages
+>>> Building packages
 
 High-level build targets are available for a number of packages, which are build
 on top of other external components:
 
-  * [cr] CR-Tools
-  * [dal] Data Access Library
-  * [rm] Rotation Measure Synthesis 
+  * anaamika : Blob detection and source modeling
+  * cr       : CR-Tools
+  * dal      : Data Access Library
+  * rm       : Rotation Measure Synthesis 
 
 Once completing the check-out of the source code from the LUS repository, the
 following steps are required:
@@ -71,12 +109,12 @@ So in order to e.g. build the DAL, run
 
 from within the "build" directory.
 
+
 _________________________________________________________________________________
->>> Create Doxygen documentation
+>>> Documentation generation
 
 Create a local version of the documentation:
 
-  ./bootstrap
   make doc
 
 Point your web browser to
