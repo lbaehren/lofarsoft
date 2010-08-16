@@ -1,0 +1,35 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+if ( ! -f tempo2-1.11.tar.gz ) then
+  echo "Downloading TEMPO2 source code"
+  @download@ http://www.atnf.csiro.au/research/pulsar/tempo2/tempo2-1.11.tar.gz
+endif
+
+gunzip -c tempo2-1.11.tar.gz | tar xvf -
+
+cd tempo2-1.11
+mv runtime $PSRHOME/runtime/tempo2
+
+cd src
+
+# use gfortran
+perl -pi -e 's/FC = g77/FC = gfortran/' Makefile.config
+
+# don't compile the plugins
+
+make tempo2 libtempo2pred.a
+
+setenv TEMPO2 $PSRHOME/runtime/tempo2
+
+mkdir -p $TEMPO2/lib
+mkdir -p $TEMPO2/include
+
+cp -p libtempo2pred.a libtempo2.a sofa/libsofa.a $TEMPO2/lib
+cp -p tempo2.h tempo2pred.h tempo2pred_int.h $TEMPO2/include
+
+
