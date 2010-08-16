@@ -659,7 +659,8 @@ int main (int argc, char *argv[])
     ofstream checkDistanceNS("checkDistance_NS.dat");
     checkDistanceEW<<"# id      Ant    dist sim    dist lopes  "<<endl;
     checkDistanceNS<<"# id      Ant    dist sim    dist lopes  "<<endl;
-
+    
+    int dat2counter = 0; // counter for second root file
     for(int i=0; i<entries; ++i) { //loop on the events
       for (int k=0; k < totAntenna; ++k) {
           *antPulses[k] = PulseProperties();
@@ -667,7 +668,12 @@ int main (int argc, char *argv[])
       recTree->GetEntry(i);
       if (resultsName2 != "") {
         while (Gt2 < Gt) {
-          recTree2->GetEntry(i);
+          recTree2->GetEntry(dat2counter);
+          ++dat2counter;
+          if (dat2counter > recTree2->GetEntries()) {
+            cerr << "Error: Reached end of second root file!\n" << endl;
+            return 1;
+          }
           cout << "Reading in event GT " << Gt2 << " from second root file." << endl;
         }
         if (Gt2 != Gt) {
