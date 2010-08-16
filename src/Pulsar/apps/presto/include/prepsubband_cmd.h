@@ -81,6 +81,7 @@ typedef struct s_Cmdline {
   char maskfileP;
   char* maskfile;
   int maskfileC;
+  int runavgint;
   /***** uninterpreted command line parameters */
   int argc;
   /*@null*/char **argv;
