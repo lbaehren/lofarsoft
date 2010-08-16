@@ -62,6 +62,7 @@ static Cmdline cmd = {
   /* subdmP = */ 1,
   /* subdm = */ 0.0,
   /* subdmC = */ 1,
+  
   /***** -numout: Output this many values.  If there are not enough values in the original data file, will pad the output file with the average value */
   /* numoutP = */ 0,
   /* numout = */ (int)0,
@@ -94,6 +95,8 @@ static Cmdline cmd = {
   /* maskfileP = */ 0,
   /* maskfile = */ (char*)0,
   /* maskfileC = */ 0,
+  /***** -runavg : Running mean substraction */
+  /* runavgint = */ 0,
   /***** uninterpreted rest of command line */
   /* argc = */ 0,
   /* argv = */ (char**)0,
@@ -916,6 +919,15 @@ showOptionValues(void)
     printf("-noclip found:\n");
   }
 
+  /***** -runavg: Running mean substraction */
+  if( !cmd.runavgint ) {
+    printf("-runavg not found.\n");
+  } else {
+    printf("-runavg found:\n");
+  }
+
+
+
   /***** -sub: Write subbands instead of de-dispersed data */
   if( !cmd.subP ) {
     printf("-sub not found.\n");
@@ -1047,7 +1059,7 @@ showOptionValues(void)
 void
 usage(void)
 {
-  fprintf(stderr,"%s","   -o outfile [-pkmb] [-gmrt] [-bcpm] [-spigot] [-filterbank] [-psrfits] [-wapp] [-window] [-numwapps numwapps] [-if ifs] [-clip clip] [-noclip] [-sub] [-subdm subdm] [-numout numout] [-nobary] [-DE405] [-lodm lodm] [-dmstep dmstep] [-numdms numdms] [-nsub nsub] [-downsamp downsamp] [-mask maskfile] [--] infile ...\n");
+  fprintf(stderr,"%s","   -o outfile [-pkmb] [-gmrt] [-bcpm] [-spigot] [-filterbank] [-psrfits] [-wapp] [-window] [-numwapps numwapps] [-if ifs] [-clip clip] [-noclip] [-runavg] [-sub] [-subdm subdm] [-numout numout] [-nobary] [-DE405] [-lodm lodm] [-dmstep dmstep] [-numdms numdms] [-nsub nsub] [-downsamp downsamp] [-mask maskfile] [--] infile ...\n");
   fprintf(stderr,"%s","      Converts a raw radio data file into many de-dispersed time-series (including barycentering).\n");
   fprintf(stderr,"%s","             -o: Root of the output file names\n");
   fprintf(stderr,"%s","                 1 char* value\n");
@@ -1068,6 +1080,7 @@ usage(void)
   fprintf(stderr,"%s","                 1 float value between 0 and 1000.0\n");
   fprintf(stderr,"%s","                 default: `6.0'\n");
   fprintf(stderr,"%s","        -noclip: Do not clip the data.  (The default is to _always_ clip!)\n");
+  fprintf(stderr,"%s","        -runavg: Running mean substraction from the input data ( Vishal 5 july 2010 ) \n");
   fprintf(stderr,"%s","           -sub: Write subbands instead of de-dispersed data\n");
   fprintf(stderr,"%s","         -subdm: The DM to use when de-dispersing subbands for -sub\n");
   fprintf(stderr,"%s","                 1 double value between 0 and 4000.0\n");
@@ -1194,6 +1207,11 @@ parseCmdline(int argc, char **argv)
 
     if( 0==strcmp("-noclip", argv[i]) ) {
       cmd.noclipP = 1;
+      continue;
+    }
+  
+    if( 0==strcmp("-runavg", argv[i]) ) {
+      cmd.runavgint = 1;
       continue;
     }
 

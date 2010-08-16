@@ -97,7 +97,7 @@ PRESTOOBJS = amoeba.o atwood.o barycenter.o birdzap.o cand_output.o\
 	rzinterp.o rzwinterp.o select.o sorter.o swapendian.o\
 	transpose.o twopass.o twopass_real_fwd.o\
 	twopass_real_inv.o vectors.o multifiles.o mask.o\
-	fitsfile.o hget.o hput.o imio.o
+	fitsfile.o hget.o hput.o imio.o prepsubband_mod.o
 
 INSTRUMENTOBJS = multibeam.o bpp.o gmrt.o spigot.o sigproc_fb.o\
 	wapp.o wapp_head_parse.o wapp_y.tab.o psrfits.o
@@ -112,8 +112,8 @@ BINARIES = makedata makeinf mjd2cal realfft quicklook\
 	dat2sdat sdat2dat downsample rednoise un_sc_td bincand\
 	dump_spigot_zerolag spigot2filterbank\
 	spigotSband2filterbank GBT350filterbank\
-	psrorbit window plotbincand prepfold show_pfd\
-	rfifind zapbirds explorefft exploredat weight_psrfits
+	psrorbit window plotbincand prepfold prepfold_mod show_pfd\
+	rfifind zapbirds explorefft exploredat weight_psrfits prepsubband_mod
 
 all: libpresto slalib binaries
 
@@ -208,8 +208,14 @@ prepdata: prepdata_cmd.c prepdata_cmd.o prepdata.o $(INSTRUMENTOBJS)
 prepsubband: prepsubband_cmd.c prepsubband_cmd.o prepsubband.o $(INSTRUMENTOBJS)
 	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ prepsubband.o prepsubband_cmd.o $(INSTRUMENTOBJS) $(PRESTOLINK) -lcfitsio -lm
 
+prepsubband_mod: prepsubband_cmd.c prepsubband_cmd.o prepsubband_mod.o $(INSTRUMENTOBJS)
+	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ prepsubband_mod.o prepsubband_cmd.o $(INSTRUMENTOBJS) $(PRESTOLINK) -lcfitsio -lm
+
 prepfold: prepfold_cmd.c prepfold_cmd.o prepfold.o prepfold_utils.o prepfold_plot.o least_squares.o polycos.o readpar.o $(INSTRUMENTOBJS) $(PLOT2DOBJS)
 	$(FC) $(FLINKFLAGS) -o $(PRESTO)/bin/$@ prepfold.o prepfold_utils.o prepfold_plot.o prepfold_cmd.o least_squares.o polycos.o readpar.o $(PLOT2DOBJS) $(INSTRUMENTOBJS) $(LAPACKLINK) $(PRESTOLINK) $(PGPLOTLINK) -lcfitsio -lm
+
+prepfold_mod: prepfold_cmd.c prepfold_cmd.o prepfold_mod.o prepfold_utils.o prepfold_plot.o least_squares.o polycos.o readpar.o $(INSTRUMENTOBJS) $(PLOT2DOBJS)
+        $(FC) $(FLINKFLAGS) -o $(PRESTO)/bin/$@ prepfold_mod.o prepfold_utils.o prepfold_plot.o prepfold_cmd.o least_squares.o polycos.o readpar.o $(PLOT2DOBJS) $(INSTRUMENTOBJS) $(LAPACKLINK) $(PRESTOLINK) $(PGPLOTLINK) -lcfitsio -lm
 
 dump_spigot_zerolag: dump_spigot_zerolag.o spigot.o
 	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ dump_spigot_zerolag.o spigot.o $(PRESTOLINK) -lm

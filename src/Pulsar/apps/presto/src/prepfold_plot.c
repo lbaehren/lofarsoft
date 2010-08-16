@@ -352,6 +352,11 @@ void prepfold_plot(prepfoldinfo * search, plotflags * flags, int xwin, float *pp
    double perr, pderr, pdderr;
    double pfold, pdfold, pddfold = 0.0;
    float *ftmparr1;
+/*   FILE *fp1;
+   if((fp1 = fopen("single_pulses_prepfold.asc","wb"))==NULL) {
+        printf("error in openning single pulse file\n");
+	exit(0);
+   }*/
    foldstats currentstats, beststats;
    /* Best Fold Plot */
    double *dbestprof = NULL;
@@ -718,6 +723,15 @@ void prepfold_plot(prepfoldinfo * search, plotflags * flags, int xwin, float *pp
                    levels, &x1, &x2, &y1, &y2, tr);
          cpgimag(timeprofs, nc, nr, 0 + 1, nc, 0 + 1, nr, bg, fg, tr);
          free(levels);
+/*         if(flags->asc == 1){
+           for(ii = 0 ; ii < nr ; ii++ )
+           {
+	     fprintf(fp1,"# 0.0 0.0 0.0 0 0 0 %d 0 0 0\n",nr);
+             for(jj = 0 ; jj < nc ; jj++)
+	         fprintf(fp1,"%d\t %f\n",jj,(float)timeprofs[jj + ii*nc]);        
+           } 
+         }*/
+//         printf("NR and NC %d %d\n",nr,nc);
       }
       if (1) {                  /* if 0 skip the chi-squared vs time plot */
          cpgbox("BCNST", 0.0, 0, "BNST", 0.0, 0);
