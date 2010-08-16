@@ -31,7 +31,7 @@ include_directories (
 
 ## Check file for usage of PGPlot ________________
 
-if (BDSM_WITH_FBDSM AND NOT HAVE_PGPLOT)
+if (ANAAMIKA_ENABLE_FBDSM AND NOT HAVE_PGPLOT)
 
   ## Report on activity
   message (STATUS "Processing source files to remove PGPlot function calls ...")
@@ -55,7 +55,7 @@ if (BDSM_WITH_FBDSM AND NOT HAVE_PGPLOT)
     
   endforeach (_module)
   
-endif (BDSM_WITH_FBDSM AND NOT HAVE_PGPLOT)
+endif (ANAAMIKA_ENABLE_FBDSM AND NOT HAVE_PGPLOT)
 
 ## ==============================================================================
 ##
@@ -64,28 +64,28 @@ endif (BDSM_WITH_FBDSM AND NOT HAVE_PGPLOT)
 ## ==============================================================================
 
 configure_file (
-  ${BDSM_SOURCE_DIR}/implement/create.in
-  ${BDSM_BINARY_DIR}/implement/bdsm/create
+  ${PROJECT_SOURCE_DIR}/implement/create.in
+  ${PROJECT_BINARY_DIR}/implement/bdsm/create
   )
 
 add_custom_target (create
   COMMAND ./create
-  WORKING_DIRECTORY ${BDSM_BINARY_DIR}/implement/bdsm
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/implement/bdsm
   )
 
 ## Fortran-based version
 
-if (BDSM_WITH_FBDSM)
+if (ANAAMIKA_ENABLE_FBDSM)
   add_subdirectory (fbdsm)
-endif (BDSM_WITH_FBDSM)
+endif (ANAAMIKA_ENABLE_FBDSM)
 
 ## Python-based version
 
-if (BDSM_WITH_PYBDSM)
+if (ANAAMIKA_ENABLE_PYBDSM)
   ## additional CMake modules 
   include (AddPythonModule)
   ## project sub-directories
   add_subdirectory (minpack)
   add_subdirectory (port3)
   add_subdirectory (pybdsm)
-endif (BDSM_WITH_PYBDSM)
+endif (ANAAMIKA_ENABLE_PYBDSM)

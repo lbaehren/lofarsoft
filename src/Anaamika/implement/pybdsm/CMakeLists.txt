@@ -66,14 +66,14 @@ set_target_properties (_pytesselate
 
 ## compiler instructions
 add_library (_py2fbdsm MODULE
-  ../fbdsm/iland_mat2list.f
-  ../fbdsm/get_keyword.f
-  ../fbdsm/gaul2gaulbin.f
-  ../fbdsm/writearray.f
-  ../fbdsm/writefitshead.f
-  ../fbdsm/sub_prog.f
-  ../fbdsm/readarray.f
-  ../fbdsm/check.f
+  ${PROJECT_SOURCE_DIR}/implement/fbdsm/iland_mat2list.f
+  ${PROJECT_SOURCE_DIR}/implement/fbdsm/get_keyword.f
+  ${PROJECT_SOURCE_DIR}/implement/fbdsm/gaul2gaulbin.f
+  ${PROJECT_SOURCE_DIR}/implement/fbdsm/writearray.f
+  ${PROJECT_SOURCE_DIR}/implement/fbdsm/writefitshead.f
+  ${PROJECT_SOURCE_DIR}/implement/fbdsm/sub_prog.f
+  ${PROJECT_SOURCE_DIR}/implement/fbdsm/readarray.f
+  ${PROJECT_SOURCE_DIR}/implement/fbdsm/check.f
   )
 ## linker instructions
 target_link_libraries (_py2fbdsm

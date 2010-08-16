@@ -5,8 +5,12 @@ set (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX} CACHE PATH
 
 ## === Anaamika =================================================================
 
-set (ANAAMIKA_WITH_SCIPY ${ANAAMIKA_WITH_SCIPY} CACHE BOOL
+option (ANAAMIKA_ENABLE_SCIPY ${ANAAMIKA_ENABLE_SCIPY} CACHE BOOL
   "Build SciPy as interactive environment?"                           )
+option (ANAAMIKA_ENABLE_FBDSM ${ANAAMIKA_ENABLE_FBDSM} CACHE BOOL
+  "Build Fortran-based version of BDSM?"                              )
+option (ANAAMIKA_ENABLE_PYBDSM ${ANAAMIKA_ENABLE_PYBDSM} CACHE BOOL
+  "Build Python-enabled version of BDSM?"                             )
 
 ## === CR-Tools =================================================================
 

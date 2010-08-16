@@ -16,10 +16,10 @@ cmake_minimum_required (VERSION 2.8)
 
 find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
-  ${BDSM_SOURCE_DIR}
-  ${BDSM_SOURCE_DIR}/..
-  ${BDSM_SOURCE_DIR}/../..
-  ${BDSM_SOURCE_DIR}/../../..
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/..
+  ${CMAKE_CURRENT_SOURCE_DIR}/../..
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../..
   $ENV{LOFARSOFT}
   )
 
@@ -35,11 +35,11 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
-option (BDSM_BUILD_TESTS       "Build the test programs?"              YES )
-option (BDSM_ENABLE_TESTING    "Build the test programs?"              YES )
-option (BDSM_VERBOSE_CONFIGURE "Verbose output during configuration?"  NO  )
-option (BDSM_WITH_FBDSM        "Build Fortran-based version of BDSM?"  NO  )
-option (BDSM_WITH_PYBDSM       "Build Python-enabled version of BDSM?" YES )
+option (ANAAMIKA_BUILD_TESTS       "Build the test programs?"              YES )
+option (ANAAMIKA_ENABLE_TESTING    "Build the test programs?"              YES )
+option (ANAAMIKA_VERBOSE_CONFIGURE "Verbose output during configuration?"  NO  )
+option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
+option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
 
 ## ==============================================================================
 ##
@@ -60,7 +60,7 @@ set (bdsm_cmake_modules
   WCSLIB
   )
 
-include_find_module (${bdsm_cmake_modules} ${BDSM_VERBOSE_CONFIGURE})
+include_find_module (${bdsm_cmake_modules} ${ANAAMIKA_VERBOSE_CONFIGURE})
 
 ## ==============================================================================
 ##
@@ -70,23 +70,23 @@ include_find_module (${bdsm_cmake_modules} ${BDSM_VERBOSE_CONFIGURE})
 
 if (NOT HAVE_BOOST OR NOT BOOST_PYTHON_LIBRARY)
   message (STATUS "[BDSM] Unable to build pybdsm - missing Boost!")
-  set (BDSM_WITH_PYBDSM FALSE)
+  set (ANAAMIKA_ENABLE_PYBDSM FALSE)
 endif (NOT HAVE_BOOST OR NOT BOOST_PYTHON_LIBRARY)
 
 if (NOT HAVE_NUMPY)
   message (STATUS "[BDSM] Unable to build pybdsm - missing NumPy!")
-  set (BDSM_WITH_PYBDSM FALSE)
+  set (ANAAMIKA_ENABLE_PYBDSM FALSE)
 endif (NOT HAVE_NUMPY)
 
 if (NOT HAVE_PYTHON)
   message (STATUS "[BDSM] Unable to build pybdsm - missing Python!")
-  set (BDSM_WITH_PYBDSM FALSE)
+  set (ANAAMIKA_ENABLE_PYBDSM FALSE)
 endif (NOT HAVE_PYTHON)
 
-if (BDSM_ENABLE_TESTING)
+if (ANAAMIKA_ENABLE_TESTING)
   include (CTest)
   enable_testing() 
-endif (BDSM_ENABLE_TESTING)
+endif (ANAAMIKA_ENABLE_TESTING)
 
 ## ==============================================================================
 ##
