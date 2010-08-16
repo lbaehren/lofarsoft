@@ -1681,7 +1681,7 @@ int main (int argc, char *argv[])
   
     // the following branches are not used in the calibration mode
     if ( !config["calibrationMode"]->bValue() ) {
-      if (kascadeRootFile == "") {
+      if ((kascadeRootFile == "")&&(lopesRootFile == "")) {
         roottree->Branch("Xc",&core_x,"Xc/D");
         roottree->Branch("Yc",&core_y,"Yc/D");
         roottree->Branch("AzIn",&azimuth,"AzIn/D");

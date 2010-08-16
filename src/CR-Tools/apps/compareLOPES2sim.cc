@@ -212,6 +212,7 @@ int main (int argc, char *argv[])
     int totAntenna = 30;
 
     // open root file for input
+    cout << "\nOpening root file for data input: " << resultsName1 << endl;
     TFile *recRoot = new TFile (resultsName1.c_str(), "READ");
     if(!recRoot || recRoot->IsZombie()) {
       cerr << "Error, cannot open root file: "<< resultsName1 << endl;
@@ -224,6 +225,7 @@ int main (int argc, char *argv[])
     // open root file for output
     TFile *rootOutfile=NULL;
     string outputRootFileName = outPrefix + ".root";
+    cout << "\nOpening root file for output: " << outputRootFileName << endl;
     rootOutfile = new TFile(outputRootFileName.c_str(),"RECREATE","Comparison of Lateral Distribution");
     if (rootOutfile->IsZombie()) {
       cerr << "\nError: Could not create file: " << outputRootFileName << "\n" << endl;
@@ -605,6 +607,7 @@ int main (int argc, char *argv[])
       index1 = "old";
       index2 = "new";
 
+      cout << "\nOpening second root file for data input: " << resultsName2 << endl;
       recRoot2 = new TFile (resultsName2.c_str(), "READ");
       if(!recRoot2 || recRoot2->IsZombie()) {
         cerr << "Error, cannot open root file: "<< resultsName2 << endl;
