@@ -143,9 +143,9 @@ add_dependencies (ppgplot_install ppgplot_build ppgplot_unpack)
 ##
 ## ==============================================================================
 
-set (psrchive_version "13.0")
-set (psrchive_name "psrchive-${psrchive_version}-patched")
-set (psrchive_directory "psrchive/psrchive-${psrchive_version}-patched")
+set (psrchive_version "13.3")
+set (psrchive_name "psrchive-${psrchive_version}")
+set (psrchive_directory "psrchive/psrchive-${psrchive_version}")
 
 add_custom_target (psrchive_unpack
   COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${psrchive_name}
@@ -154,12 +154,12 @@ add_custom_target (psrchive_unpack
   COMMENT "Copying PSRCHIVE from ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
   )
 
-add_custom_target (psrchive_bootstrap
-  COMMAND ./bootstrap
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
-  COMMENT "Running bootstrap for project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
-  )
-add_dependencies (psrchive_bootstrap psrchive_unpack)
+#add_custom_target (psrchive_bootstrap
+#  COMMAND ./bootstrap
+#  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
+#  COMMENT "Running bootstrap for project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
+#  )
+#add_dependencies (psrchive_bootstrap psrchive_unpack)
 
 if (UNIX)
  if (APPLE)
@@ -168,14 +168,16 @@ add_custom_target (psrchive_configure
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
   )
-add_dependencies (psrchive_configure psrchive_bootstrap psrchive_unpack)
+#add_dependencies (psrchive_configure psrchive_bootstrap psrchive_unpack)
+add_dependencies (psrchive_configure psrchive_unpack)
  else (APPLE)
 add_custom_target (psrchive_configure
   COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX}/psrchive --exec-prefix=${CMAKE_INSTALL_PREFIX}/psrchive --with-x LOGIN_ARCH=linux
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
   )
-add_dependencies (psrchive_configure psrchive_bootstrap psrchive_unpack)
+#add_dependencies (psrchive_configure psrchive_bootstrap psrchive_unpack)
+add_dependencies (psrchive_configure psrchive_unpack)
  endif (APPLE)
 endif (UNIX)
 
@@ -185,14 +187,16 @@ add_custom_target (psrchive_build
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name}
   COMMENT "Building project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name}..."
   )
-add_dependencies (psrchive_build psrchive_configure psrchive_bootstrap psrchive_unpack)
+#add_dependencies (psrchive_build psrchive_configure psrchive_bootstrap psrchive_unpack)
+add_dependencies (psrchive_build psrchive_configure psrchive_unpack)
 
 add_custom_target (psrchive_install
   COMMAND make install
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name}
   COMMENT "Install project psrchive into ${CMAKE_INSTALL_PREFIX}..."
   )
-add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_bootstrap psrchive_unpack)
+#add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_bootstrap psrchive_unpack)
+add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_unpack)
 
 ## ==============================================================================
 ##
