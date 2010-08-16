@@ -19,10 +19,10 @@ option (SWIG_VERBOSE_BUILD     "Be verbose during build process?"       NO )
 
 find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
-  ${SWIG_SOURCE_DIR}
-  ${SWIG_SOURCE_DIR}/..
-  ${SWIG_SOURCE_DIR}/../..
-  ${SWIG_SOURCE_DIR}/../../..
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/..
+  ${CMAKE_CURRENT_SOURCE_DIR}/../..
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../..
   $ENV{LOFARSOFT}
   )
 
@@ -68,7 +68,7 @@ if (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
   set (SWIG_TAR_ARCHIVE "${SWIG_DIRECTORY}.tar.gz")
   set (SWIG_URL "${USG_DOWNLOAD}/software/${SWIG_TAR_ARCHIVE}")
 
-  find_file (have_swig_tgz ${SWIG_TAR_ARCHIVE} ${SWIG_SOURCE_DIR})
+  find_file (have_swig_tgz ${SWIG_TAR_ARCHIVE} ${CMAKE_CURRENT_SOURCE_DIR})
   
   if (have_swig_tgz)
     ExternalProject_Add (swig

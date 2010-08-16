@@ -1,4 +1,8 @@
 
+set (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX} CACHE PATH
+  "CMake installation area."
+  )
+
 ## === Anaamika =================================================================
 
 set (ANAAMIKA_WITH_SCIPY ${ANAAMIKA_WITH_SCIPY} CACHE BOOL
