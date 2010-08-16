@@ -12,8 +12,8 @@ import os
 import sys
 import shutil
 
+from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 from lofarpipe.support.lofarnode import LOFARnode
-from lofarpipe.support.utilities import catch_log4cplus
 from lofarpipe.support.utilities import read_initscript
 from lofarpipe.support.utilities import get_mountpoint
 from lofarpipe.support.utilities import log_time
@@ -49,7 +49,7 @@ class bbs(LOFARnode):
             try:
                 cmd = [executable, parset_filename, "0"]
                 self.logger.debug("Executing BBS kernel")
-                with catch_log4cplus(
+                with CatchLog4CPlus(
                     working_dir,
                     self.logger.name + "." + os.path.basename(infile),
                     os.path.basename(executable),

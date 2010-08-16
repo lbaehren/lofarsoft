@@ -10,113 +10,19 @@ from __future__ import with_statement
 from itertools import islice, repeat, chain, izip
 from contextlib import closing, contextmanager
 from tempfile import mkstemp
-from string import Template
 
 import os
 import errno
 import shutil
 import subprocess
-import time
-import resource
-import threading
-import logging
 
 from lofarpipe.cuisine.parset import Parset
 
-#                                                                        Logging
+#                                                                  Compatibility
+#                               The following used to be defined in this module;
+#                                      include so as not to break existing code.
 # ------------------------------------------------------------------------------
-
-log_prop = Template("""
-log4cplus.rootLogger=DEBUG, FILE
-log4cplus.logger.TRC=TRACE9
-
-log4cplus.appender.FILE=log4cplus::RollingFileAppender
-log4cplus.appender.FILE.File=$log_filename
-log4cplus.appender.FILE.ImmediateFlush=true
-log4cplus.appender.FILE.MaxFileSize=10MB
-log4cplus.appender.FILE.MaxBackupIndex=1
-log4cplus.appender.FILE.layout=log4cplus::PatternLayout
-log4cplus.appender.FILE.layout.ConversionPattern=%l [%-3p] - %m%n
-""")
-
-def log_file(filename, logger, killswitch):
-    """
-    Do the equivalent of tail -f on filename -- ie, watch it for updates --
-    and send any lines written to the file to the logger.
-
-    killswitch is an instance of threading.Event: when set, we bail out of the
-    loop.
-    """
-    if not os.path.exists(filename):
-        open(filename, 'w').close()
-    with open(filename, 'r') as f:
-        while not killswitch.isSet():
-            line = f.readline()
-            if not line:
-                f.seek(0, 2)
-                time.sleep(1)
-            else:
-                logger.debug(line.strip())
-
-@contextmanager
-def catch_log4cplus(working_dir, logger_name, executable_name):
-        """
-        Set up a log4cplus log_prop file for executable_name in working dir.
-
-        Set up a context in which we monitor the resulting log file in a
-        separate thread, and send the reuslts to a logger called logger_name.
-
-        When the context finishes, terminate the monitoring thread.
-        """
-        log_filename = os.path.join(
-            working_dir, "pipeline_process.log"
-        )
-        log_prop_filename = os.path.join(
-            working_dir, executable_name + ".log_prop"
-        )
-        with open(log_prop_filename, 'w') as log_prop_file:
-            log_prop_file.write(log_prop.substitute(log_filename=log_filename))
-        local_logger = logging.getLogger(logger_name)
-        killswitch = threading.Event()
-        logging_thread = threading.Thread(
-            target=log_file,
-            args=(log_filename, local_logger, killswitch)
-        )
-        logging_thread.start()
-        yield
-        killswitch.set()
-        logging_thread.join()
-
-@contextmanager
-def log_time(logger):
-    """
-    Send information about the processing time used by code in this context to
-    the specified logger.
-    """
-    def get_rusage():
-        return [
-            x + y for x, y in zip(
-                resource.getrusage(resource.RUSAGE_CHILDREN),
-                resource.getrusage(resource.RUSAGE_SELF)
-            )
-        ]
-
-    start_time = time.time()
-    start_rusage = get_rusage()
-    try:
-        yield
-    finally:
-        total_rusage = [x - y for x, y in zip(get_rusage(), start_rusage)]
-        logger.info(
-            "Total time %.4fs; user time: %.4fs; system time: %.4fs" % (
-                time.time() - start_time, total_rusage[0], total_rusage[1]
-            )
-        )
-        logger.debug(
-            "Start time was %.4fs; end time was %.4fs" % (
-                start_time, time.time()
-            )
-        )
+from lofarpipe.support.pipelinelogging import log_time
 
 #                                                            Parset Manipulation
 # ------------------------------------------------------------------------------

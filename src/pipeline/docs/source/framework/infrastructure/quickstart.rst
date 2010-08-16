@@ -102,7 +102,7 @@ You should ensure the ``clusterdesc`` directive points at the clusterdesc
 file you are using. Note that ``%(runtime_directory)s`` will be expanded to
 the path you've specified for the runtime directory.
 
-``engine_ppath`` and ``engine_lpath`` specify (respectively) the
+``engine_lpath`` and ``engine_ppath`` specify (respectively) the
 ``$LD_LIBRARY_PATH`` and ``$PYTHONPATH`` that will be set for jobs on the
 compute nodes. These should (at least) point to the dependencies and the
 framework, as above, but should also include any necessary paths for code

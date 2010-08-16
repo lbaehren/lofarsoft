@@ -9,6 +9,7 @@ from collections import defaultdict
 import subprocess
 
 from lofar.parameterset import parameterset
+
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.clusterdesc import get_compute_nodes
 

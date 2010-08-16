@@ -1,6 +1,7 @@
 from __future__ import with_statement
 from lofarpipe.support.lofarnode import LOFARnode
-from lofarpipe.support.utilities import log_time, catch_log4cplus
+from lofarpipe.support.utilities import log_time
+from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
 import shutil, os.path, tempfile
 
@@ -18,7 +19,7 @@ class sourcedb(LOFARnode):
             working_dir = tempfile.mkdtemp()
             try:
                 cmd = [executable, "format=<", "in=%s" % (catalogue), "out=%s" % (output)]
-                with catch_log4cplus(
+                with CatchLog4CPlus(
                     working_dir,
                     self.logger.name + "." + os.path.basename(infile),
                     os.path.basename(executable)

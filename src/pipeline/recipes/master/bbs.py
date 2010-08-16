@@ -22,6 +22,7 @@ from lofarpipe.support.lofarnode import run_node
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import gvds_iterator
+from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 import lofarpipe.support.utilities as utilities
 
 class bbs(LOFARrecipe):
@@ -113,7 +114,7 @@ class bbs(LOFARrecipe):
             self.config.get("layout", "vds_directory"), "bbs.gvds"
         )
         self.run_task('vdsmaker', ms_names, gvds=vds_file, unlink="False")
-        self.logger.debug("BBS VDS is %s" % (vds_file,))
+        self.logger.debug("BBS GVDS is %s" % (vds_file,))
 
 
         #      Iterate over groups of subbands divided up for convenient cluster
@@ -277,7 +278,7 @@ class bbs(LOFARrecipe):
         env = utilities.read_initscript(self.inputs['initscript'])
         self.logger.info("Running BBS GlobalControl")
         working_dir = tempfile.mkdtemp()
-        with utilities.catch_log4cplus(
+        with CatchLog4CPlus(
             working_dir,
             self.logger.name + ".GlobalControl",
             os.path.basename(self.inputs['control_exec'])
