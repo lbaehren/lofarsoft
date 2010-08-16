@@ -164,7 +164,7 @@ add_custom_target (psrchive_unpack
 if (UNIX)
  if (APPLE)
 add_custom_target (psrchive_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX}/psrchive --exec-prefix=${CMAKE_INSTALL_PREFIX}/psrchive --with-x LOGIN_ARCH=mac --x-includes=${X11_X11_INCLUDE_PATH} --x-libraries=${X11_X11_INCLUDE_PATH}/../lib --build=mac --enable-debug --disable-local --with-mpi --with-fftw-include-dir=${CMAKE_INSTALL_PREFIX}/include --with-fftw-lib-dir=${CMAKE_INSTALL_PREFIX}/lib
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=mac --x-includes=${X11_X11_INCLUDE_PATH} --x-libraries=${X11_X11_INCLUDE_PATH}/../lib --build=mac --enable-debug --disable-local --with-mpi --with-fftw-include-dir=${CMAKE_INSTALL_PREFIX}/include --with-fftw-lib-dir=${CMAKE_INSTALL_PREFIX}/lib
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
   )
@@ -172,7 +172,7 @@ add_custom_target (psrchive_configure
 add_dependencies (psrchive_configure psrchive_unpack)
  else (APPLE)
 add_custom_target (psrchive_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX}/psrchive --exec-prefix=${CMAKE_INSTALL_PREFIX}/psrchive --with-x LOGIN_ARCH=linux
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=linux
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
   )
@@ -197,6 +197,64 @@ add_custom_target (psrchive_install
   )
 #add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_bootstrap psrchive_unpack)
 add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_unpack)
+
+## ==============================================================================
+##
+##  Handle configuration and build of DSPSR
+##
+## ==============================================================================
+
+set (dspsr_version "1.0")
+set (dspsr_name "dspsr-${dspsr_version}")
+set (dspsr_directory "dspsr/dspsr-${dspsr_version}")
+
+add_custom_target (dspsr_unpack
+  COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
+  COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} ${PULSAR_BINARY_DIR}/apps/
+  COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+  COMMENT "Copying DSPSR from ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} to ${PULSAR_BINARY_DIR}/apps/${dspsr_name}"
+  )
+
+add_custom_target (dspsr_bootstrap
+  COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name} 
+  COMMENT "Running bootstrap for project dspsr in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
+  )
+add_dependencies (dspsr_bootstrap dspsr_unpack)
+
+if (UNIX)
+ if (APPLE)
+add_custom_target (dspsr_configure
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=darwin --with-psrchive-dir=${CMAKE_INSTALL_PREFIX}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
+  COMMENT "Configuring project dspsr (darwin) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
+  )
+add_dependencies (dspsr_configure dspsr_bootstrap dspsr_unpack)
+ else (APPLE)
+add_custom_target (dspsr_configure
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
+  COMMENT "Configuring project dspsr (linux) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
+  )
+add_dependencies (dspsr_configure dspsr_bootstrap dspsr_unpack)
+ endif (APPLE)
+endif (UNIX)
+
+
+add_custom_target (dspsr_build
+  COMMAND make prefix=${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
+  COMMENT "Building project dspsr in ${PULSAR_BINARY_DIR}/apps/${dspsr_name}..."
+  )
+add_dependencies (dspsr_build dspsr_configure dspsr_unpack)
+
+add_custom_target (dspsr_install
+  COMMAND make install prefix=${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build prefix=${CMAKE_INSTALL_PREFIX}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
+  COMMENT "Install project dspsr into ${CMAKE_INSTALL_PREFIX}..."
+  )
+add_dependencies (dspsr_install dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 
 ## ==============================================================================
 ##
