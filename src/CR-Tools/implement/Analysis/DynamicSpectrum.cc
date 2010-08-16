@@ -43,9 +43,9 @@ namespace CR {  // Namespace CR -- begin
   //                                                              DynamicSpectrum
   
   /*!
-    \param crval -- [freq,time] 
-    \param cdelt -- [freq,time] 
-    \param units -- [freq,time] 
+    \param crval -- [freq,time] Reference value.
+    \param cdelt -- [freq,time] Coordinate increment.
+    \param units -- [freq,time] World axis units.
   */
   DynamicSpectrum::DynamicSpectrum (const Vector<double>& crval,
 				    const Vector<double>& cdelt,
@@ -143,17 +143,6 @@ namespace CR {  // Namespace CR -- begin
   DynamicSpectrum::DynamicSpectrum (DynamicSpectrum const& other)
   {
     copy (other);
-  }
-  
-  // ============================================================================
-  //
-  //  Destruction
-  //
-  // ============================================================================
-  
-  DynamicSpectrum::~DynamicSpectrum ()
-  {
-    destroy();
   }
   
   // ============================================================================
@@ -357,14 +346,16 @@ namespace CR {  // Namespace CR -- begin
     return averageSpectrum;
   }
 
-  // ---------------------------------------------------------------------- toImage
-
+  //_____________________________________________________________________________
+  //                                                                      toImage
+  
   bool DynamicSpectrum::toImage ()
   {
-    return true;
+    return false;
   }
-  
-  // ----------------------------------------------------------------------- toFITS
+
+  //_____________________________________________________________________________
+  //                                                                       toFITS
   
 #ifdef HAVE_CFITSIO
   bool DynamicSpectrum::toFITS ()
@@ -375,7 +366,7 @@ namespace CR {  // Namespace CR -- begin
      */
     //float minimum = (float) min(dynamicSpectrum_p);
     casa::Matrix<float> dynamicSpectrum_float(dynamicSpectrum_p.shape());
-
+    
     for (uint j=0; j<dynamicSpectrum_float.ncolumn(); j++) {
       for (uint i=0; i<dynamicSpectrum_float.nrow(); i++) {
 	dynamicSpectrum_float(i,j) = (float) log(dynamicSpectrum_p(i,j));
@@ -388,16 +379,14 @@ namespace CR {  // Namespace CR -- begin
     uint nelements        = dynamicSpectrum_float.nrow() * dynamicSpectrum_float.ncolumn();
     long firstelement = 1;
     long naxes[2];
-    char *ctype[2];
+    char *ctype[2] = {"TIME", "FREQ"};
     // char *cunit[] = {"sec","Hz"};
     // get the incrementvalues and units for the axes 
     std::string cd1(casa::String::toString(timeAxis_p.increment()(0)));
     std::string cd2(casa::String::toString(freqAxis_p.increment()(0)));
-
+    
     naxes[0] = shape(0);
     naxes[1] = shape(1);
-    ctype[0] = "TIME";
-    ctype[1] = "FREQ";
     
     std::string tunit(timeAxis_p.worldAxisUnits()(0));
     std::string funit(freqAxis_p.worldAxisUnits()(0));
@@ -449,79 +438,68 @@ namespace CR {  // Namespace CR -- begin
     //clean up the storage
     dynamicSpectrum_float.putStorage(datapointer, storage);
     
- 	//set keywords for the axis
-	  //std::cout << " -- Set the keywords for the coordinate type" << std::endl;
-	  ffukys (fptr, "CTYPE1", ctype[0], "Time axis", &status);
-	  ffukys (fptr, "CTYPE2", ctype[1], "Frequency axis", &status);
-	  
-	  //std::cout << " -- Set the keywords for the units on the coordinate axes"<< std::endl;
-	  ffukys (fptr, "CUNIT1", cunit0, "Time axis units", &status);
-	  ffukys (fptr, "CUNIT2", cunit1, "Frequency axis units", &status);
-	  
-	  ffukys (fptr, "CD1_1", cd11, "Time axis scaling", &status);
-	  ffukys (fptr, "CD2_2", cd12, "Frequency axis scaling", &status);
-	  
-	  ffukys (fptr, "CRVAL2", cval1, "Frequency start", &status);
-	  
-	  //ADD start value CRVAL1 by start pixel CRPIX1 to complete the picture. This is needed for the second nyquist zone
-	  //CRVAL = (PIXEL - CRPIX1)*CD1_1 + CRVAL1
-	  //
+    //set keywords for the axis
+    //std::cout << " -- Set the keywords for the coordinate type" << std::endl;
+    ffukys (fptr, "CTYPE1", ctype[0], "Time axis", &status);
+    ffukys (fptr, "CTYPE2", ctype[1], "Frequency axis", &status);
+    
+    //std::cout << " -- Set the keywords for the units on the coordinate axes"<< std::endl;
+    ffukys (fptr, "CUNIT1", cunit0, "Time axis units", &status);
+    ffukys (fptr, "CUNIT2", cunit1, "Frequency axis units", &status);
+    
+    ffukys (fptr, "CD1_1", cd11, "Time axis scaling", &status);
+    ffukys (fptr, "CD2_2", cd12, "Frequency axis scaling", &status);
+    
+    ffukys (fptr, "CRVAL2", cval1, "Frequency start", &status);
+    
+    //ADD start value CRVAL1 by start pixel CRPIX1 to complete the picture. This is needed for the second nyquist zone
+    //CRVAL = (PIXEL - CRPIX1)*CD1_1 + CRVAL1
+    //
+    
+    
+    //Add frequency spectrum
+    Vector<double> avSpectrum = log(averageSpectrum());
+    casa::IPosition shape_F   = avSpectrum.shape();
+    long naxis_F              = shape_F.nelements();
+    uint nelements_F          = avSpectrum.nelements();
+    long naxes_F[2]           = { shape_F(0), shape_F(1)};
+    long firstelement_F       = 1; 
+    
+    casa::Bool storage_F;
+    casa::Double* datapointer_F = avSpectrum.getStorage(storage_F);
+    
+    fits_create_img (fptr, DOUBLE_IMG, naxis_F, naxes_F, &status);
+    fits_write_img (fptr, TDOUBLE, firstelement_F, nelements_F, datapointer_F, &status);
+    avSpectrum.putStorage(datapointer_F, storage_F);	  
 
+    ffukys (fptr, "CTYPE1", ctype[1], "Frequency axis", &status);
+    ffukys (fptr, "CUNIT1", cunit1, "Frequency axis units", &status);
+    ffukys (fptr, "CD1_1", cd12, "Frequency axis scaling", &status);
+    ffukys (fptr, "BUNIT", "log(averageSpectrum)", "Power axis", &status);
+    ffukys (fptr, "CRVAL1", cval1, "Frequency start", &status);
+    ffukys (fptr, "EXTNAME", "Average Spectrum (logscale)", "Frequency spectrum averaged over time in logarithmic scale", &status);
+    
+    //Add powerspectrum
+    Vector<double> totPower = log(totalPower());
+    casa::IPosition shape_P = totPower.shape();
+    long naxis_P            = shape_P.nelements();
+    uint nelements_P        = totPower.nelements();
+    long naxes_P[2]         = { shape_P(0), shape_P(1)};
+    long firstelement_P     = 1; 
+    
+    casa::Bool storage_P;
+    casa::Double* datapointer_P = totPower.getStorage(storage_P);
 
-	  
+    fits_create_img (fptr, DOUBLE_IMG, naxis_P, naxes_P, &status);
+    fits_write_img (fptr, TDOUBLE, firstelement_P, nelements_P, datapointer_P, &status);
+    totPower.putStorage(datapointer_P, storage_P);	 
+    ffukys (fptr, "CTYPE1", ctype[0], "Time axis", &status);
+    ffukys (fptr, "CUNIT1", cunit0, "Time axis units", &status);
+    ffukys (fptr, "CD1_1", cd11, "Time axis scaling", &status);
+    ffukys (fptr, "BUNIT", "log(totalPower)", "Power axis", &status);
+    ffukys (fptr, "EXTNAME", "Total Power (logscale)", "Total power for each time in logarithmic scale", &status);
 
-	  
-	  //Add frequency spectrum
-	  Vector<double> avSpectrum = log(averageSpectrum());
-	  
-	  casa::IPosition shape_F = avSpectrum.shape();
-	  long naxis_F            = shape_F.nelements();
-	  uint nelements_F        = avSpectrum.nelements();
-	  long naxes_F[2]         = { shape_F(0), shape_F(1)};
-	  long firstelement_F = 1; 
-	  
-	  casa::Bool storage_F;
-	  casa::Double* datapointer_F = avSpectrum.getStorage(storage_F);
-	  
-	  fits_create_img (fptr, DOUBLE_IMG, naxis_F, naxes_F, &status);
-	  fits_write_img (fptr, TDOUBLE, firstelement_F, nelements_F, datapointer_F, &status);
-	  avSpectrum.putStorage(datapointer_F, storage_F);	  
-
-	  
-	  
-
-	  ffukys (fptr, "CTYPE1", ctype[1], "Frequency axis", &status);
-	  ffukys (fptr, "CUNIT1", cunit1, "Frequency axis units", &status);
-	  ffukys (fptr, "CD1_1", cd12, "Frequency axis scaling", &status);
-      ffukys (fptr, "BUNIT", "log(averageSpectrum)", "Power axis", &status);
-      ffukys (fptr, "CRVAL1", cval1, "Frequency start", &status);
-	  ffukys (fptr, "EXTNAME", "Average Spectrum (logscale)", "Frequency spectrum averaged over time in logarithmic scale", &status);
-
-	  //Add powerspectrum
-	  Vector<double> totPower = log(totalPower());
-	  
-	  casa::IPosition shape_P = totPower.shape();
-	  long naxis_P            = shape_P.nelements();
-	  uint nelements_P        = totPower.nelements();
-	  long naxes_P[2]         = { shape_P(0), shape_P(1)};
-	  long firstelement_P = 1; 
-	  
-	  casa::Bool storage_P;
-	  casa::Double* datapointer_P = totPower.getStorage(storage_P);
-
-	  
-	  fits_create_img (fptr, DOUBLE_IMG, naxis_P, naxes_P, &status);
-	  fits_write_img (fptr, TDOUBLE, firstelement_P, nelements_P, datapointer_P, &status);
-	  totPower.putStorage(datapointer_P, storage_P);	 
-	  ffukys (fptr, "CTYPE1", ctype[0], "Time axis", &status);
-	  ffukys (fptr, "CUNIT1", cunit0, "Time axis units", &status);
-	  ffukys (fptr, "CD1_1", cd11, "Time axis scaling", &status);
-	  ffukys (fptr, "BUNIT", "log(totalPower)", "Power axis", &status);
-	  ffukys (fptr, "EXTNAME", "Total Power (logscale)", "Total power for each time in logarithmic scale", &status);
-
-
-
-	  fits_close_file (fptr, &status);  
+    fits_close_file (fptr, &status);  
     return true;
   }
 #endif

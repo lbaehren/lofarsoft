@@ -1,7 +1,7 @@
 /*!
   \file stat.cc
   
-  \ingroup BDSM
+  \ingroup Anaamika
   \ingroup pybdsm
   
   \author Oleksandr Usov

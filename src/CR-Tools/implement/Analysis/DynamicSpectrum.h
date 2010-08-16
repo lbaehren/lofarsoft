@@ -120,11 +120,6 @@ namespace CR {  // Namespace CR -- begin
     //! Copy constructor
     DynamicSpectrum (DynamicSpectrum const& other);
     
-    // === Destruction ==========================================================
-    
-    //! Destructor
-    ~DynamicSpectrum ();
-    
     // === Operators ============================================================
     
     /*!
@@ -262,7 +257,7 @@ namespace CR {  // Namespace CR -- begin
 #endif
     
   private:
-    
+
     //! Unconditional copying
     void copy (DynamicSpectrum const& other);
     //! Unconditional deletion 

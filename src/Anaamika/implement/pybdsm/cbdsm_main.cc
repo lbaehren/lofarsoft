@@ -1,7 +1,7 @@
 /*!
   \file cbdsm_main.cc
   
-  \ingroup BDSM
+  \ingroup Anaamika
   \ingroup pybdsm
   
   \author Oleksandr Usov
