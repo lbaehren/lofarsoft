@@ -42,6 +42,7 @@ endif (USG_ROOT)
 ## ==============================================================================
 
 option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"             NO )
+option (LUS_ENABLE_TESTING     "Enable testing and experimental builds?"      NO )
 option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO )
 option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO )
 option (TEST_DATASETS          "Download and install sample test datasets?"   NO )
