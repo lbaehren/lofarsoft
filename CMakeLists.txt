@@ -49,11 +49,28 @@ option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO
 
 ## Options affecting the build of individual packages
 
-option (ANAAMIKA_WITH_SCIPY  "Build SciPy as interactive environment?"    NO  )
-option (CR_WITH_GUI          "Build CR-Tools with graphical interface?"   NO  )
-option (DAL_PYTHON_BINDINGS  "Create python bindings for DAL?"            YES )
-option (RM_ENABLE_ITPP       "Enable using IT++ library?"                 NO  )
-option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"            YES )
+option (ANAAMIKA_WITH_SCIPY  "Build SciPy as interactive environment?"     NO  )
+
+option (CR_WITH_GLISH           "Support for Glish applications?"          NO  )
+option (CR_WITH_PYCR            "Support for Python applications?"         NO  )
+option (CR_WITH_PLOTTING        "Support for generation of plots?"         YES )
+option (CR_WITH_GUI             "Build the graphical interface?"           NO  )
+option (CR_WITH_PYPELINE        "Build the Pypeline library?"              YES )
+option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"   YES )
+option (CR_WITH_CASAPY          "Build Pyline library against CASApy?"     NO  )
+
+option (DAL_BUILD_TESTS        "Build the test programs?"                     YES )
+option (DAL_BUILD_APPS         "Build the applications?"                      YES )
+option (DAL_ENABLE_TESTING     "Build the test programs?"                     YES )
+option (DAL_ENABLE_DASHBOARD   "Send a build report to the Dashboard server?" YES )
+option (DAL_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"    ON  )
+option (DAL_HDF5_MACROS        "HDF5 compatibility macros version"            YES )
+option (DAL_PYTHON_BINDINGS    "Create python bindings?"                      YES )
+option (DAL_DEBUGGING_MESSAGES "Print debugging information?"                 NO  )
+option (DAL_VERBOSE_CONFIGURE  "Verbose output during configuration?"         NO  )
+
+option (RM_ENABLE_ITPP       "Enable using IT++ library?"                  NO  )
+option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"             YES )
 
 ## Handle options
 
@@ -61,6 +78,13 @@ if (LUS_ENABLE_TESTING)
   include (CTest)
   enable_testing()
 endif (LUS_ENABLE_TESTING)
+
+## Create common options file
+
+configure_file (
+  ${LUS_SOURCE_DIR}/CMakeOptions.cmake
+  ${LUS_BINARY_DIR}/CMakeOptions.cmake
+  )
 
 ## ==============================================================================
 ##
@@ -283,11 +307,7 @@ endif (DAL_PYTHON_BINDINGS)
 ##____________________________________________________________________
 ##                                                            CR-Tools
 
-add_custom_target (cr
-  COMMAND ./build_package.sh cr ${USG_ROOT}/src/CR-Tools -DCR_WITH_GUI:BOOL=${CR_WITH_GUI}
-  WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Building package CR-Tools ..."
-  )
+build_package (cr src/CR-Tools)
 
 add_dependencies (cr dal plplot fftw3 gsl)
 

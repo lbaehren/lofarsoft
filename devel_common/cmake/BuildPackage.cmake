@@ -28,8 +28,16 @@
 ##  Macro definition
 
 macro (build_package _packageName _packageSource)
+
+  ## Locate common options
+
+  find_file (LUS_CMAKE_OPTIONS CMakeOptions.cmake
+    PATHS ${USG_BUILD}
+    )
+
   ## get components of the path to the package's source code
   get_filename_component (_packageLocation ${_packageSource} PATH)
+
   ## feedback
   if (${_packageLocation} STREQUAL "external")
     message (STATUS "Adding external package ${_packageName} ...")
@@ -37,13 +45,25 @@ macro (build_package _packageName _packageSource)
   else (${_packageLocation} STREQUAL "external")
     set (_packageBuildLocation ${USG_BUILD}/${_packageName})
   endif (${_packageLocation} STREQUAL "external")
+
   ## create the directory within which the build is performed
   file (MAKE_DIRECTORY ${_packageBuildLocation})
-  add_custom_target (${_packageName}
-    COMMAND ${CMAKE_COMMAND} ${USG_ROOT}/${_packageSource}
-    COMMAND make install
-    WORKING_DIRECTORY ${_packageBuildLocation}
-    COMMENT "Building package ${package_name} ..."
-    )
+
+  if (LUS_CMAKE_OPTIONS)
+    add_custom_target (${_packageName}
+      COMMAND ${CMAKE_COMMAND} ${USG_ROOT}/${_packageSource} -C${LUS_CMAKE_OPTIONS}
+      COMMAND make install
+      WORKING_DIRECTORY ${_packageBuildLocation}
+      COMMENT "Building package ${package_name} ..."
+      )
+  else (LUS_CMAKE_OPTIONS)
+    add_custom_target (${_packageName}
+      COMMAND ${CMAKE_COMMAND} ${USG_ROOT}/${_packageSource}
+      COMMAND make install
+      WORKING_DIRECTORY ${_packageBuildLocation}
+      COMMENT "Building package ${package_name} ..."
+      )
+  endif (LUS_CMAKE_OPTIONS)
+  
 endmacro (build_package _packageName _packageSource)
 
