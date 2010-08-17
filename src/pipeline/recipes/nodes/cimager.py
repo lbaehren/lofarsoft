@@ -17,63 +17,16 @@ from lofar.parameterset import parameterset
 from lofarpipe.support.pipelinelogging import CatchLog4CXX
 from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import log_time
-from lofarpipe.support.utilities import patch_parset
 
 class cimager(LOFARnode):
-    def run(self, imager_exec, convert_exec, vds, parset, resultsdir):
+    def run(self, imager_exec, vds, parset, resultsdir):
         #       imager_exec:                          path to cimager executable
-        #      convert_exec:              path to convertimagerparset executable
-        #               vds: single subband VDS file describing data for imaging
-        #            parset:                       template imager configuration
+        #               vds:           VDS file describing the data to be imaged
+        #            parset:                                imager configuration
         #        resultsdir:                         place resulting images here
         # ----------------------------------------------------------------------
         with log_time(self.logger):
             self.logger.info("Processing %s" % (vds,))
-
-            #        Patch information required for imaging into template parset
-            # ------------------------------------------------------------------
-            self.logger.debug("Creating parset")
-            vds_data = parameterset(vds)
-            frequency_range = [
-                vds_data.getFloatVector("StartFreqs")[0],
-                vds_data.getFloatVector("EndFreqs")[-1]
-            ]
-            cimager_parset = patch_parset(
-                parset,
-                {
-                    'dataset': vds_data.getString("FileName"),
-                    'Images.frequency': str(frequency_range),
-                    'msDirType': vds_data.getString("Extra.FieldDirectionType"),
-                    'msDirRa': vds_data.getStringVector(
-                        "Extra.FieldDirectionRa"
-                    )[0],
-                    'msDirDec': vds_data.getStringVector(
-                        "Extra.FieldDirectionDec"
-                    )[0]
-                }
-            )
-
-            #                 Convert populated parset into ASKAP cimager format
-            # ------------------------------------------------------------------
-            try:
-                self.logger.debug("Converting parset")
-                converted_parset = mkstemp()[1]
-                convert_process = Popen(
-                    [convert_exec, cimager_parset, converted_parset],
-                    stdout=PIPE, stderr=PIPE
-                )
-                sout, serr = convert_process.communicate()
-                self.logger.debug("Parset conversion stdout: %s" % (sout,))
-                self.logger.debug("Parset conversion stderr: %s" % (serr,))
-                if convert_process.returncode != 0:
-                    raise CalledProcessError(
-                        convert_process.returncode, convert_exec
-                    )
-                os.unlink(cimager_parset)
-            except CalledProcessError, e:
-                self.logger.error(str(e))
-                return 1
-
             #                                                        Run cimager
             # ------------------------------------------------------------------
             try:
@@ -84,7 +37,7 @@ class cimager(LOFARnode):
                     self.logger.name + "." + os.path.basename(vds)
                 ):
                     cimager_process = Popen(
-                        [imager_exec, "-inputs", converted_parset],
+                        [imager_exec, "-inputs", parset],
                         stdout=PIPE, stderr=PIPE, cwd=working_dir
                     )
                     sout, serr = cimager_process.communicate()
@@ -99,7 +52,7 @@ class cimager(LOFARnode):
                 #    I'm not aware of a foolproof way to predict the image names
                 #        that will be produced, so we read them from the parset.
                 # --------------------------------------------------------------
-                parset = parameterset(converted_parset)
+                parset = parameterset(parset)
                 image_names = parset.getStringVector("Cimager.Images.Names")
                 for image_name in image_names:
                     shutil.move(
@@ -110,7 +63,6 @@ class cimager(LOFARnode):
                 self.logger.error(str(e))
                 return 1
             finally:
-                os.unlink(converted_parset)
                 shutil.rmtree(working_dir)
             return 0
 

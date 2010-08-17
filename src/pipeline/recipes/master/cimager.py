@@ -12,12 +12,14 @@ import sys
 import threading
 import collections
 import subprocess
+import tempfile
 
 from lofar.parameterset import parameterset
 
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.pipelinelogging import log_time
 from lofarpipe.support.clusterlogger import clusterlogger
+from lofarpipe.support.utilities import patch_parset
 
 
 class cimager(LOFARrecipe):
@@ -53,6 +55,7 @@ class cimager(LOFARrecipe):
         self.logger.info("Starting cimager run")
         super(cimager, self).go()
         ms_names = self.inputs['args']
+        self.outputs['images' ] = []
 
         #              Build a GVDS file describing all the data to be processed
         # ----------------------------------------------------------------------
@@ -92,13 +95,13 @@ class cimager(LOFARrecipe):
             with log_time(self.logger):
                 imager_threads =[
                     threading.Thread(
-                        target=self._run_via_ssh,
+                        target=self._run_cimager_node,
                         args=(host, compute_nodes_lock[host], command,
                             loghost, str(logport),
-                            self.inputs['imager_exec'],
-                            self.inputs['convert_exec'],
                             vds,
                             self.inputs['parset'],
+                            self.inputs['convert_exec'],
+                            self.inputs['imager_exec'],
                             self.config.get('layout', 'results_directory')
                         )
                     )
@@ -116,34 +119,105 @@ class cimager(LOFARrecipe):
         else:
             return 0
 
-    def _run_via_ssh(self, host, semaphore, command, *arguments):
+    def _run_cimager_node(
+        self, host, semaphore, command, loghost, logport, vds,
+        template_parset, convert_exec, imager_exec, resultsdir
+    ):
         """
-        Run command with arguments on the specified host using ssh. Return its
-        return code.
+        Run cimager on host for the data described in vds using the template
+        parset provided.
 
         We use a semaphore to limit the number of simultaneous processes per
         node.
         """
-        engine_ppath = self.config.get('deploy', 'engine_ppath')
-        engine_lpath = self.config.get('deploy', 'engine_lpath')
-        ssh_cmd = [
-            "ssh", "-n", "-t", "-x", host, "--",
-            "PYTHONPATH=%s" % engine_ppath,
-            "LD_LIBRARY_PATH=%s" % engine_lpath,
-            command
-        ]
-        ssh_cmd.extend(arguments)
+        # The cimager parset is generated here, rather than on the node, so that
+        #               we can scrape it to discover the image names produced(!)
+        # ----------------------------------------------------------------------
         semaphore.acquire()
-        self.logger.info("Running %s" % " ".join(ssh_cmd))
         try:
+            #        Patch information required for imaging into template parset
+            # ------------------------------------------------------------------
+            self.logger.debug("Creating parset for %s" % vds)
+            vds_data = parameterset(vds)
+            frequency_range = [
+                vds_data.getFloatVector("StartFreqs")[0],
+                vds_data.getFloatVector("EndFreqs")[-1]
+            ]
+            cimager_parset = patch_parset(
+                template_parset,
+                {
+                    'dataset': vds_data.getString("FileName"),
+                    'Images.frequency': str(frequency_range),
+                    'msDirType': vds_data.getString("Extra.FieldDirectionType"),
+                    'msDirRa': vds_data.getStringVector(
+                        "Extra.FieldDirectionRa"
+                    )[0],
+                    'msDirDec': vds_data.getStringVector(
+                        "Extra.FieldDirectionDec"
+                    )[0]
+                }
+            )
+            self.logger.debug(cimager_parset)
+
+            #                 Convert populated parset into ASKAP cimager format
+            # ------------------------------------------------------------------
+            try:
+                self.logger.debug("Converting parset for %s" % vds)
+                converted_parset = tempfile.mkstemp(
+                    dir=self.config.get("layout", "parset_directory")
+                )[1]
+                convert_process = subprocess.Popen(
+                    [convert_exec, cimager_parset, converted_parset],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+                sout, serr = convert_process.communicate()
+                self.logger.debug("Parset conversion stdout: %s" % (sout,))
+                self.logger.debug("Parset conversion stderr: %s" % (serr,))
+                if convert_process.returncode != 0:
+                    raise subprocess.CalledProcessError(
+                        convert_process.returncode, convert_exec
+                    )
+                os.unlink(cimager_parset)
+            except subprocess.CalledProcessError, e:
+                self.logger.error(str(e))
+                return 1
+
+            #                                Run cimager process on compute node
+            # ------------------------------------------------------------------
+            engine_ppath = self.config.get('deploy', 'engine_ppath')
+            engine_lpath = self.config.get('deploy', 'engine_lpath')
+            ssh_cmd = [
+                "ssh", "-n", "-t", "-x", host, "--",
+                "PYTHONPATH=%s" % engine_ppath,
+                "LD_LIBRARY_PATH=%s" % engine_lpath,
+                command
+            ]
+            ssh_cmd.extend(
+                [
+                    loghost,
+                    logport,
+                    imager_exec,
+                    vds,
+                    converted_parset,
+                    resultsdir
+                ]
+            )
+            self.logger.info("Running %s" % " ".join(ssh_cmd))
             cimager_process = subprocess.Popen(ssh_cmd)
             sout, serr = cimager_process.communicate()
+
+            #                          Copy names of created images into outputs
+            # ------------------------------------------------------------------
+            parset = parameterset(converted_parset)
+            image_names = parset.getStringVector("Cimager.Images.Names")
+            self.outputs['images'].extend(image_names)
+
         finally:
+    #        os.unlink(converted_parset)
             semaphore.release()
         if cimager_process.returncode != 0:
             self.error.set()
         return(cimager_process.returncode)
-
 
 if __name__ == '__main__':
     sys.exit(cimager().main())
