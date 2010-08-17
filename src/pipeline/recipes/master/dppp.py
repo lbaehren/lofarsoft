@@ -95,19 +95,14 @@ class dppp(LOFARrecipe):
                             os.path.basename(ms_name) + self.inputs['suffix']
                         )
                     )
-                    log_location = os.path.join(
-                        self.config.get('layout', 'log_directory'),
-                        'dppp'
-                    )
                     task = LOFARTask(
-                        "result = run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript, start_time, end_time)",
+                        "result = run_dppp(ms_name, ms_outname, parset, executable, initscript, start_time, end_time)",
                         push=dict(
                             recipename=self.name,
                             nodepath=os.path.dirname(self.__file__.replace('master', 'nodes')),
                             ms_name=ms_name,
                             ms_outname=outnames[-1],
                             parset=self.inputs['parset'],
-                            log_location=log_location,
                             executable=self.inputs['executable'],
                             initscript=self.inputs['initscript'],
                             start_time=self.inputs['data_start_time'],
