@@ -3013,6 +3013,114 @@ void h{$MFUNC}2(const Iter vec,const Iter vec_end,  const Iterin1 vec1,const Ite
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 //$ENDITERATE
 
+
+
+
+//========================================================================
+//$ITERATE MFUNC Fmod
+//========================================================================
+
+//$DOCSTRING: Perform a $MFUNC!LOW with a scalar parameter on the elements of a numeric vector and return the result in the same numeric vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h$MFUNC
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(param)()("Scalar parameter of function $MFUNC")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
+		    const HNumber param) {
+  Iter it = vec;
+  while (it != vec_end) {
+    *it = $MFUNC!LOW(*it, param);
+    ++it;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Perform a $MFUNC!LOW with scalar parameter on the elements of the second numeric vector and return the result in the first numeric vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h$MFUNC
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(param)()("Scalar parameter of function $MFUNC")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  h$MFUNC(vec, vecin, param) -> vec = $MFUNC!LOW(vecin, param)
+  vec.$MFUNC(vecin, param) -> vec = $MFUNC!LOW(vecin, param)
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
+		    const Iter vecin, const Iter vecin_end,
+		    const HNumber scalar) {
+  Iter it_in = vecin;
+  Iter it_out = vecout;
+  while ((it_in != vecin_end) && (it_out != vecout_end)) {
+    *it_out = $MFUNC!LOW(*it_in, scalar);
+    ++it_out; ++it_in;
+    if (it_in == vecin_end) it_in = vecin;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+//$DOCSTRING: Perform a $MFUNC!LOW with a scalar parameter from a vector on the elements of the second numeric vector and return the result in the first numeric vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h$MFUNC
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(vecin)()("Numeric inpuit vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(vecpar)()("Parameter vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  h$MFUNC(vec, vecin, vecpar) -> vec = $MFUNC!LOW(vecin, vecpar)
+  vec.$MFUNC(vecin, vecpar) -> vec = $MFUNC!LOW(vecin, vecpar)
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
+		    const Iter vecin, const Iter vecin_end,
+		    const Iter vecpar, const Iter vecpar_end) {
+  Iter it_in = vecin;
+  Iter it_out = vecout;
+  Iter it_par = vecpar;
+  while ((it_in != vecin_end) && (it_out != vecout_end)) {
+    *it_out = $MFUNC!LOW(*it_in, *it_par);
+    ++it_in; ++it_out; it_par++;
+    if (it_par == vecpar_end) it_par = vecpar;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$ENDITERATE
+
+
+
+
+
+
+
+
 ////////////////////
 //COMPLEX FUNCTIONS
 ///////////////////
