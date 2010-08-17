@@ -250,14 +250,14 @@ add_dependencies (psrdada_build psrdada_configure psrdada_unpack)
 
 add_custom_target (psrdada_install
   COMMAND make install prefix=${CMAKE_INSTALL_PREFIX}/psrdada
-  COMMAND cd ${CMAKE_INSTALL_PREFIX}/include && find ./ -type l -exec rm {} \\;
-  COMMAND cd ${CMAKE_INSTALL_PREFIX}/include && find ./ \( -iname "*.h" -not -iname "ascii_header.h" \) -exec ln -s {} . \\;
-  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib && find ./ -type l \( -not -iname "libfftw3f*" \) -exec rm {} \\;
+  COMMAND cd ${CMAKE_INSTALL_PREFIX}/include && find ./ -type l -exec rm {} "\;"
+  COMMAND cd ${CMAKE_INSTALL_PREFIX}/include && find ../psrdada/include "\\(" -iname \"*.h\" -not -iname \"ascii_header.h\" "\\)" -exec ln -s {} . "\;"
+  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib && find ./ -type l "\\(" -not -iname \"libfftw3f*\" "\\)" -exec rm {} "\;"
   COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib && ln -s ../psrdada/lib/* .
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrdada_name}
-  COMMENT "Install project psrdada into ${CMAKE_INSTALL_PREFIX}/psrdata..."
+  COMMENT "Install project psrdada into ${CMAKE_INSTALL_PREFIX}/psrdada..."
   )
-add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootstrap psrdada_unpack)
+#add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootstrap psrdada_unpack)
 
 ## ==============================================================================
 ##
