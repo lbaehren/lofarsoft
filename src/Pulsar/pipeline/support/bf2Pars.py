@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 
-from os.path import join
-
+from os.path import join, isfile
+from os import walk
 
 #arch       = '/net/sub5/lse013/data4/PULSAR_ARCHIVE/'
 arch       = '/net/sub5/lse015/data4/PULSAR_ARCHIVE/'
 parsetPath = '/globalhome/lofarsystem/log/'
-parsetName = 'RTCP.parset.0'
+oParsetName= 'RTCP.parset.0'
 stokes     = 'incoherentstokes'
 
 class bf2Pars():
@@ -17,11 +17,11 @@ class bf2Pars():
 
     <target_name>_<obsid>_RSP[i].sub[nnn],
     
-    though this is dependent upon the number input subbands.
-    Presently, these output files are dispersed across four (4)
-    directories, named RSP[0123].  Below, the output files
-    in our current operational mode would be under a directory called
-    'incoherentstokes' which would lead to a output_base equal to
+    though this is dependent upon the of number input subbands.
+    
+    Below, the output files in our current operational mode
+    would be under a directory called 'incoherentstokes' which 
+    would lead to a output_base equal to
     
     incoherentstokes/RSP[0123]/<targetName>_<obsid>_RSP[0123],
 
@@ -58,7 +58,7 @@ class bf2Pars():
         self.stokes      = stokes
         self.arch_base   = arch
         self.parsetPath  = parsetPath
-        self.parsetName  = parsetName
+        self.parsetName  = oParsetName
 
         # output_base will be the full "head" of archive path, i.e. everything but
         # the file extension.
@@ -66,43 +66,81 @@ class bf2Pars():
         # Caller must an RSP number (1,2,3, ... etc)
         output_path  = join(self.arch_base, self.obsid, self.stokes, self.RSP)
         self.headout = join(output_path, self.target + '_' + self.obsid + '_' + self.RSP)
+        self.testParset()
+
+
+    def testParset(self):
+        """
+        test for parset location type
+
+        old location style
+
+        /globalhome/lofarsystem/log/<obsid>/RTCP.parset.0
+        
+        new location style,
+
+        /globalhome/lofarsystem/log/L<yyy-mm-dd>_<hhmmss>/RTCP-09874.parset
+
+        where hhmmss is the time of file write on day, <yyyy-mm-dd>
+
+        """
+
+        nominalParsetFile = join(self.parsetPath, self.obsid, self.parsetName)
+
+        if isfile(nominalParsetFile):
+            print "Found nominal parset file."
+            self.parsetName = nominalParsetFile
+        else:
+            print "searching for alternate parset..."
+            parsetTuple     = self.__findParsetFile()
+            self.parsetName = join(parsetTuple[0],parsetTuple[1])
+        return
 
 
     def readParset(self):
         """
-        Read a LOFAR observation parset file for the passed LOFAR obsid.
-        Parameters grabbed:
 
-        Observation.bandFilter -- currently not used.
-        Observation.channelsPerSubband
-        Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps
-        OLAP.CNProc.integrationSteps
+        Read a LOFAR observation parset file for the passed LOFAR obsid.
+
+        This method has been adapted to read 'nominal', re: old, and 'new'
+        parameter sets, the kind determined by testParset() and indicated
+        by instance variable, self.parsetKind
+
+        Parameters grabbed from  parsets:
+
+           Observation.bandFilter -- currently not used.
+           Observation.channelsPerSubband
+           OLAP.Stokes.integrationSteps
+           OLAP.CNProc.integrationSteps
+
+        TBD:
+        ===
+
+        -- New parameters for new processing modes
+
+        NBEAMS           'OLAP.storageStationNames'
+        FLYSEYE          'OLAP.PencilInfo.flysEye'
+        INCOHERENTSTOKES 'OLAP.outputIncoherentStokes'
+        COHERENTSTOKES   'OLAP.outputCoherentStokes'
+
         """
 
-        parsetFile = join(self.parsetPath, self.obsid, self.parsetName)
-        pars = open(parsetFile).readlines()
+        pars = open(self.parsetName).readlines()
         for line in pars:
-
             if ('Observation.bandFilter' in line):
                 self.array = line.split('=')[1].split('_')[0].strip()
-
+                continue
             if ('Observation.channelsPerSubband' in line):
                 self.channels = line.split('=')[1].strip()
-
-            if ('"OLAP.Stokes.integrationSteps' in line):
+                continue
+            if ('OLAP.Stokes.integrationSteps' in line):
                 self.down = line.split('=')[1].strip()
-            if ("Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps" in line):
-                self.down = line.split('=')[1].strip()
-
+                continue
             if ('OLAP.CNProc.integrationSteps' in line):
                 self.magicNum = line.split('=')[1].strip()
-
-            #if ('OLAP.PencilInfo.flysEye' in line):
-            #    self.flyseye = line.split('=').strip()
-
+                continue
             if (self.array and self.channels and self.down and self.magicNum):
                 break
-
         self.Nsamples = int(float(self.magicNum)/float(self.down))
         return
 
@@ -117,3 +155,34 @@ class bf2Pars():
             print "Parameter: ",key, "\t= ",self.__dict__[key]
         print "---------------------"
         return
+
+
+    def __findParsetFile(self):
+        """
+        Hunt down the parset for a given obsid.
+        Host site is
+
+        /globalhome/lofarsystem/log/
+
+        which is self.parsetPath
+
+        Ivocation of this method necessarily implies that "nominalparsetFile"
+        did not exist, and this obsid has a "new form" parset file.
+
+        """
+
+        parsetFile   = None
+        parsetLogDir = None
+
+        searchPath = self.parsetPath
+        for root, dir, files in walk(searchPath,topdown=False):
+            for file in files:
+                if file == "RTCP-"+self.obsid.split("_")[1]+".parset":
+                    parsetLogDir = root
+                    parsetFile   = file
+                    break
+                continue
+            if parsetFile and parsetLogDir:
+                break
+            else: continue
+        return (parsetLogDir, parsetFile)
