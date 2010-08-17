@@ -19,6 +19,8 @@ from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import log_time
 
 class cimager(LOFARnode):
+    #                 Handles running a single cimager process on a compute node
+    # --------------------------------------------------------------------------
     def run(self, imager_exec, vds, parset, resultsdir):
         #       imager_exec:                          path to cimager executable
         #               vds:           VDS file describing the data to be imaged

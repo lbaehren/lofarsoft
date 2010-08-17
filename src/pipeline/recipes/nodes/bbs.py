@@ -20,12 +20,22 @@ from lofarpipe.support.utilities import log_time
 from lofarpipe.cuisine.parset import Parset
 
 class bbs(LOFARnode):
+    #                      Handles running a single BBS kernel on a compute node
+    # --------------------------------------------------------------------------
     def run(
         self, executable, initscript, infile, key, db_name, db_user, db_host
     ):
+        #                           executable: path to KernelControl executable
+        #                           initscript:             path to lofarinit.sh
+        #                               infile:    MeasurementSet for processing
+        #       key, db_name, db_user, db_host:   database connection parameters
+        # ----------------------------------------------------------------------
         with log_time(self.logger):
             self.logger.info("Processing %s" % (infile,))
 
+            #        Build a configuration parset specifying database parameters
+            #                                                     for the kernel
+            # ------------------------------------------------------------------
             self.logger.debug("Setting up kernel parset")
             filesystem = "%s:%s" % (os.uname()[1], get_mountpoint(infile))
             parset_filename = mkstemp()[1]
@@ -44,6 +54,10 @@ class bbs(LOFARnode):
             kernel_parset.writeToFile(parset_filename)
             self.logger.debug("Parset written to %s" % (parset_filename,))
 
+
+            #                                                     Run the kernel
+            #               Catch & log output from the kernel logger and stdout
+            # ------------------------------------------------------------------
             working_dir = mkdtemp()
             env = read_initscript(initscript)
             try:
