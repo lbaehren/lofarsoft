@@ -1,0 +1,42 @@
+
+DIFFDATA=$(nobase_dist_data_DATA) $(dist_data_DATA) $(data_DATA)
+DIFFSCRIPTS=$(nobase_dist_mod_SCRIPTS) $(dist_bin_SCRIPTS)
+
+diff: diffdata diffscripts
+
+diffdata:
+	@for file in $(DIFFDATA); do \
+	 if diff $$file $(datadir)/$$file > /dev/null; then \
+	  echo > /dev/null ; \
+	 else \
+	  echo "###########################################################"; \
+	  echo "#"; \
+	  echo "#"; \
+	  echo diff $$file $(datadir)/$$file; \
+	  diff $$file $(datadir)/$$file; \
+	  echo "#"; \
+	  echo "#"; \
+	 fi; \
+	done
+
+
+diffscripts:
+	@for file in $(DIFFSCRIPTS); do \
+  if test -f $(bindir)/$$file; then \
+    compare=$(bindir)/$$file; \
+  else \
+    compare=$(moddir)/$$file; \
+  fi; \
+	 if diff $$file $$compare > /dev/null; then \
+	  echo > /dev/null ; \
+	 else \
+	  echo "###########################################################"; \
+	  echo "#"; \
+	  echo "#"; \
+	  echo diff $$file $$compare; \
+	  diff $$file $$compare; \
+	  echo "#"; \
+	  echo "#"; \
+	 fi; \
+	done
+

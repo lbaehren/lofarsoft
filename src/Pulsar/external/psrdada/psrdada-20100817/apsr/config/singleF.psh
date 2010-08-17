@@ -1,0 +1,13 @@
+
+# the calibrator database is loaded only once
+init cal load /lfs/data0/apsr/calibrators/database.txt
+
+# calibrate the archive using the database
+cal
+
+# zap the first channel, corrupted by the PDFB3 frequency shift bug
+zap chan 0
+
+# integrate all frequency channels
+fscrunch
+

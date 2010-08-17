@@ -1,0 +1,151 @@
+\chapter{Header Block}
+\label{ch:header}
+
+In this chapter, the Header Block API is specified in detail.  The
+Header Block is the buffer through which the Write Client communicates
+auxiliary information about the data stream to the Read Client(s).
+Access to the Header Block shared memory is controlled through the
+same semaphore-based interface as the Data Block.  The major difference
+is that the Header Block ring buffer is opened only once, and each
+sub-block written to the ring buffer represents a unique header.
+
+The Data Block API includes software for creating and initializing the
+shared memory and semaphore resources, locking the shared memory into
+physical RAM, connecting to the ring buffer, writing data to the ring
+buffer and reading data from the ring buffer.
+
+\section{Setting and Getting Header Values}
+
+Each sub-block of the Header Block ring buffer contains an ASCII text
+description of the data that is currently being written to the Data
+Block.  An ASCII representation offers a number of significant
+advantages; it is human readable, and there is no need to worry about
+byte alignment and endian issues.  Data attributes are stored as
+keyword-value pairs, each separated by a new line.
+
+Given the base address of an ASCII header block, keyword-value pairs
+may be conveniently set and queried using the {\tt ascii\_header} API,
+which includes:
+\begin{verbatim}
+int ascii_header_set (char* header, const char* keyword,
+                      const char* format, ...);
+\end{verbatim}
+
+\begin{itemize}
+\item {\tt header} pointer to a null-terminated ASCII header block
+
+\item {\tt keyword} the name of the attribute to be set
+
+\item {\tt format} an fprintf-style formatting string
+
+\item {\tt ...} the value(s) to be printed following the keyword
+\end{itemize}
+and
+\begin{verbatim}
+int ascii_header_get (const char* header, const char* keyword,
+                      const char* format, ...);
+\end{verbatim}
+
+\begin{itemize}
+\item {\tt header} pointer to a null-terminated ASCII header block
+
+\item {\tt keyword} the name of the attribute to be queried
+
+\item {\tt format} an fscanf-style formatting string
+
+\item {\tt ...} the value(s) to be parsed following the keyword
+\end{itemize}
+
+\section{Example}
+
+\begin{verbatim}
+#include "ascii_header.h"
+
+[...]
+
+  char ascii_header[MY_ASCII_HEADER_SIZE] = "";
+
+  char* telescope_name = "westerbork";
+  ascii_header_set (ascii_header, "TELESCOPE", "%s", telescope_name);
+
+  float bandwidth = 20.0;
+  ascii_header_set (ascii_header, "BW", "%f", float);
+
+[...]
+
+  double centre_frequency;
+  ascii_header_get (ascii_header, "FREQ", "%lf", &centre_frequency);
+
+  float min, max;
+  ascii_header_get (ascii_header, "GAIN", "%f %f", &min, &max);
+\end{verbatim}
+
+Note that the formatting of a ``value'' is completely flexible; any
+number of values can be associated with a single ASCII header keyword.
+If the keyword does not exist when {\tt ascii\_header\_set} is called,
+it will be added; if it does exists, its value will be replaced with
+the new value.
+
+It is also important to note that in the current API, {\tt
+ascii\_header\_set} has no idea about the size of the ASCII header.
+Therefore, it is up to the user to ensure that new attributes will not
+cause the length of the string to exceed that of the allocated memory.
+
+\section{DATA header parameters}
+
+The following header parameters will be included in the DADA ASCII header:
+\begin{itemize}
+\item{\tt HEADER} name of the header
+\item{\tt HDR\_VERSION} version of the header
+\item{\tt HDR\_SIZE} size of the header in bytes
+\item{\tt INSTRUMENT} name of the instrument
+\item{\tt PRIMARY} host name of the Primary Node on which the data was acquired
+\item{\tt HOSTNAME} host name of the machine on which data were written
+\item{\tt FILE\_NAME} full path of the file to which data were written
+\item{\tt FILE\_SIZE} requested size of data files
+\item{\tt FILE\_NUMBER} number of data files written prior to this one
+\item{\tt OBS\_ID} the identifier for the observations
+\item{\tt UTC\_START} the UTC of the first sample in the observation
+\item{\tt MJD\_START} the MJD of the first sample
+\item{\tt OBS\_OFFSET} the number of bytes from the start of the observation
+\item{\tt OBS\_OVERLAP} the amount by which neighbouring files overlap
+\item{\tt TELESCOPE}
+\item{\tt SOURCE}
+\item{\tt FREQ}
+\item{\tt BW}
+\item{\tt NPOL}
+\item{\tt NBIT}
+\item{\tt NDIM}
+\item{\tt TSAMP}
+\item{\tt RA}
+\item{\tt DEC}
+\end{itemize}
+
+
+\subsection{Notes}
+
+The {\tt HDR\_VERSION} parameter should monotonically increase, and
+change only when a fundamental change in the interpretation of the
+header attributes is required.
+
+The {\tt OBS\_ID} parameter must uniquely identify the data stream.
+As multiple data streams will be acquired simultaneously, the unique
+identifier will describe both the epoch/sequence number and the data
+stream/band.
+
+The {\tt OBS\_OFFSET} parameter is added only after the data leaves
+the Data Block of the Primary Node.  It counts the number of bytes
+offset from the start of the observation of the first byte of data
+described by the header.  For instance, if the Read Client is writing
+files to disk, it would place in the ASCII header of each file written
+to disk an {\tt OBS\_OFFSET} equal to the number of bytes that
+preceded the first byte of data in the file.  If the Read Client is
+writing data to a Secondary Node via a network interface, it would set
+{\tt OBS\_OFFSET} to the number of bytes that preceded the first byte
+of data to follow the header in the transmission.
+
+The {\tt OBS\_OVERLAP} parameter is used by {\tt dbnic} to determine
+the amount by which neighbouring data segments that are sent to
+different Secondary nodes should overlap.
+
+

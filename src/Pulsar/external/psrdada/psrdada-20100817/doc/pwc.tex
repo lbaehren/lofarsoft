@@ -1,0 +1,164 @@
+\section{Primary Write Client Command Interface}
+\label{sec:pwc}
+
+This section describes the behaviour of the Write Client software that
+will run on each of the Primary nodes, known as the Primary Write
+Client (PWC) software.  In the case of PuMa-II, the PWC is 
+{\tt puma2\_dmadb}.
+
+\subsection{Operational States}
+
+The PWC has four main states of operation:
+\begin{itemize}
+\item {\bf idle} waiting for configuration parameters
+\item {\bf prepared} configuration parameters received; waiting for start
+\item {\bf clocking} clocking data but not recording
+\item {\bf recording} recording data
+\end{itemize}
+
+\subsubsection{Idle State}
+
+In the idle state, the PWC sleeps until configuration parameters are
+sent from the control software.  All configuration parameters are sent
+in a single ASCII header, and at any time before entering the {\bf
+recording}, the duration of the recording may be specified
+\begin{itemize} 
+\item {\tt\bf HEADER text} copy text to the Header Block and enter 
+the {\bf prepared} state.
+\item {\tt\bf DURATION time} record for the time specified as
+{\it HH:MM:SS} or number of samples.
+\end{itemize}
+
+\subsubsection{Prepared State}
+
+In the prepared state, the PWC sleeps until a start command is sent
+from the control software.  There are two different start commands
+that can be received in this state:
+\begin{itemize}
+\item {\tt\bf CLOCK} enter the {\bf clocking} state
+\item {\tt\bf START [YYYY-MM-DD-hh:mm:ss]} enter the {\bf recording} state
+\end{itemize}
+If the optional UTC time argument is specified, the PWC will enter the
+{\bf recording} state at the specified time.  Otherwise, the PWC will
+enter the requested state at the next available opportunity (for
+PuMa-II, on the next {\tt SYSTICK}).
+
+\subsubsection{Clocking State}
+
+In this state, the PWC software clocks data into the Data Block but
+does not flag the data as valid.  The PWC will overwrite the data in
+each sub-block, and will remain in this state until one of the
+following commands is received:
+\begin{itemize}
+\item {\tt\bf STOP} enter the {\bf idle} state immediately
+\item {\tt\bf REC\_START YYYY-MM-DD-hh:mm:ss} raise the valid data flag
+	at the specified UTC time in the data stream and enter the {\bf
+	recording} state
+\end{itemize}
+Note that the UTC time specified in the first argument to {\tt
+REC\_START} may be any time in the future.  If it is in the past, then
+the difference between the specified UTC and the present cannot be
+greater than the amount of time corresponding to the length of the
+Data Block.
+
+\subsubsection{Recording State}
+
+In this state, the PWC software clocks data into the Data Block, flags
+the data as valid, and will not overwrite a sub-block until it has
+been flagged as cleared.  The PWC will remain in this state until one
+of the following commands is received:
+\begin{itemize}
+\item {\tt\bf STOP [YYYY-MM-DD-hh:mm:ss]} enter the {\bf idle} state
+\item {\tt\bf REC\_STOP YYYY-MM-DD-hh:mm:ss} raise the end of data flag
+	at the specified UTC time in the data stream and enter the {\bf
+	clocking} state
+\end{itemize}
+
+Note that with the exception of {\tt REC\_START} all UTC times {\bf
+must} be in the future.  If this is not true, the command will take
+effect immediately.  If {\tt DURATION} has been specified, it will not
+be corrected to reflect the difference between requested and actual
+start times.
+
+The command interface described in this section is implemented by the
+{\tt dada\_pwc} software, as documented in Appendix~\ref{app:dada_pwc}.
+
+\section{Primary Write Client Main Loop}
+\label{sec:pwc_main}
+
+In addition to providing the command interface described in the
+previous section, the Primary Write Client must implement the transfer
+of data to the Data Block.  This section gives an outline of how this
+will be done.
+
+\subsection{Top Down Description}
+
+The following describes the behaviour of the Primary Write Client
+
+\begin{itemize}
+\item Initialization
+\vspace{-3mm}
+	\begin{itemize}
+	\item read configuration file
+	\item parse command line options
+	\item initialize DMA and PiC cards
+	\item connect to Data and Header Blocks
+	\item open a port and listen for command connection
+	\end{itemize}
+\item Main Loop
+\vspace{-3mm}
+	\begin{itemize}
+	\item Idle State
+	\vspace{-2mm}
+		\begin{itemize}
+		\item wait for configuration
+		\item set configuration
+		\item enter {\bf prepared} state
+		\end{itemize}
+	\item Prepared State
+	\vspace{-2mm}
+		\begin{itemize}
+		\item wait for a command
+		\item if command={\tt CLOCK}, enter {\bf clocking} state
+		\item if command={\tt START}, enter {\bf recording} state
+		\item if command={\tt STOP}, return to {\bf idle} state
+		\end{itemize}
+	\item Clocking State (loop)
+	\vspace{-2mm}
+		\begin{itemize}
+		\item check for a command
+		\item if command={\tt STOP}, return to {\bf idle} state
+		\item if command={\tt REC\_START}, enter {\bf recording} state
+		\item copy buffer from DMA to Data Block
+		\end{itemize}
+	\item Recording State (loop)
+	\vspace{-2mm}
+		\begin{itemize}
+		\item check for a command
+		\item if command={\tt STOP}, flag end of data (EOD) and return to {\bf idle} state
+		\item if command={\tt REC\_STOP}, flag EOD and enter {\bf clocking} state
+		\item wait for next free Data Block sub-block
+		\item copy buffer from DMA to Data Block and flag as valid
+		\end{itemize}
+	\end{itemize}
+\item Shutdown
+\vspace{-3mm}
+	\begin{itemize}
+	\item close command connection
+	\item disconnect from Data and Header Blocks
+	\end{itemize}
+\end{itemize}
+
+\begin{figure}
+\centerline{\psfig{figure=pwc_state.eps,height=3in,angle=0}}
+\caption [\sffamily DADA Control Flow]
+{
+Schematic overview of DADA control flow.  Note that the state 
+can be toggled between clocking and recording.
+}
+\label{fig:pwc_state}
+\end{figure}
+
+The behaviour described in this section is implemented by the {\tt
+dada\_pwc\_main} software, as documented in
+Appendix~\ref{app:dada_pwc_main}.

@@ -1,0 +1,40 @@
+#!/bin/csh
+#
+# Willem van Straten  1 July 1999
+#
+# loops n from $2 to $3, running $4 on $1$n
+
+if ( $1 == "" || $2 == "" || $3 == "" || "$4" == "" ) then
+	echo usage: $0 prefix start end \'command\' [ssh args]
+	echo ssh to \'prefix\'\$n where \$n runs from
+	echo \'start\' to \'end\', and run \'command\' in the background
+	exit 1
+endif
+
+mkdir -p $HOME/.loopssh
+chmod a+rwx $HOME/.loopssh
+
+set job = `mktemp -p $HOME/.loopssh`
+echo "$4" > $job
+
+echo Running ssh $5 \'`cat $job`\' on $1$2-\>$3
+
+rm -f $job
+
+set n = $2
+while ( $n <= $3 )
+
+  # make a unique job for each node
+  set job = `mktemp -p $HOME/.loopssh`
+  echo "$4" > $job
+  echo "rm -f $job" >> $job
+  chmod a+rw $job
+
+	set nn = `echo $n | awk '{printf ("%02d", $1)}'`
+
+	ssh -x -f $5 $1$nn source $job
+
+	@ n = $n + 1
+
+end
+

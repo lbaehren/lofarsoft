@@ -1,0 +1,58 @@
+#-*-Makefile-*- helps emacs recognize this file as a Makefile
+
+##########################################################################
+#
+# standard Makefile rules for latex stuff
+#
+##########################################################################
+
+.SUFFIXES: .ps .dvi
+
+# Standard ways of making things
+
+# convert Postscript to Abobe Acrobat Portable Document Format
+%.pdf: %.ps
+	ps2pdf $<
+
+# convert dvi file format to Postscript using Adobe safe ligatures
+%.ps: %.dvi
+	dvips -Ppdf -G0 -o $@ $<
+
+%.dvi: %.tex $(FIGS) $(TEXS)
+# Get new refs
+	latex $*
+# Generate tex for em
+	bibtex $* ; date
+# Tell latex about them
+	latex $* 
+# Second pass to fix cross-references
+	latex $*
+
+# convert xfig file format (.fig) to Postscript (.ps)
+%.eps: %.fig
+	fig2dev -L eps $< $@
+
+# standard targets
+# Note, DOCS must be set to a list of .tex files first
+DVIS := ${DOCS:.tex=.dvi}
+PSS := ${DOCS:.tex=.ps}
+
+all: ps
+ps: $(PSS)
+dvi: $(DVIS)
+
+.PHONY : clean veryclean texclean verytexclean
+
+# this trick makes Makefile.tex compatible with Makefile.extended
+clean : texclean
+veryclean : verytexclean
+
+texclean :
+	-rm -f *.aux *.bbl *.blg *.log *.toc
+
+verytexclean :
+	-rm -f *.aux *.bbl *.blg *.log *.toc *.dvi *.ps
+
+%:%.ps
+	@echo $@.ps is up-to-date.
+

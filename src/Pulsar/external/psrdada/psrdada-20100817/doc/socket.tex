@@ -1,0 +1,68 @@
+\chapter{Socket Communications}
+
+\section{Examples}
+\subsection{Example Server}
+
+\begin{verbatim}
+#include "sock.h"
+
+[...]
+
+  char hostname [100];
+  int port = 20013;
+
+  /* Ask for the fully qualified hostname ... */
+  sock_getname (hostname, 100, 1);
+  /* ... or, ask for the IP address */
+  sock_getname (hostname, 100, 0);
+
+  int sfd = sock_create (&port);
+  if (sfd < 0)
+    perror ("Error creating socket");
+
+  fprintf (stderr, "listening on %s %d\n", hostname, port);
+  int cfd = sock_accept (sfd);
+  if (cfd < 0)
+    perror ("Error accepting connection");
+\end{verbatim}
+The open file descriptor returned by {\tt sock\_accept} may be used in
+calls to the standard C I/O routines, {\tt read} and {\tt write} as
+well as {\tt send} and {\tt recv}.  Furthermore, the open file
+descriptor can be converted into a stream by calling {\tt fdopen}.  It
+is important to note that sockets do not support seeking; therefore, a
+stream should be opened for only read or write access, never both.
+For example.
+\begin{verbatim}
+  /* two separate I/O streams are required for reading and writing */
+  FILE* sockin = fdopen (cfd, "r");
+  FILE* sockout = fdopen (cfd, "w");
+
+  /* line buffer the socket stream output */
+  setvbuf (sockout, 0, _IOLBF, 0);
+\end{verbatim}
+The server can now read from {\tt sockin} using standard C I/O stream
+routines such as {\tt fscanf}, {\tt fread}, and {\tt fgets}.  It can
+also write to {\tt sockout} using {\tt fprintf} and {\tt fwrite}.
+The call to {\tt setvbuf} is important; without this call, it would
+be necessary to {\tt fflush} the output stream to ensure that messages
+are communicated immediately.
+
+\subsection{Example Client}
+
+\begin{verbatim}
+#include "sock.h"
+
+[...]
+
+  char* hostname = "apsr0.atnf.csiro.au";
+  int port = 20013;
+
+  /* Connect to the specified host and port */
+  int cfd = sock_open (hostname, port);
+  if (cfd < 0)
+    perror ("Error opening socket");
+
+  fprintf (stderr, "connected to %s %d\n", hostname, port);
+\end{verbatim}
+As with the server, the socket file descriptor may be accessed using
+standard C I/O stream routines by calling {\tt fdopen}.

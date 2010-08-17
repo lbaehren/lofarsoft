@@ -1,0 +1,5 @@
+#!/bin/csh
+
+ipcrm `ipcs -m | grep $USER | awk '{print "-m "$2}'`
+ipcrm `ipcs -s | grep $USER | awk '{print "-s "$2}'`
+

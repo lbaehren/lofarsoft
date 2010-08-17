@@ -1,0 +1,65 @@
+\chapter{Primary Read Client Main Loop}
+\label{app:dada_prc_main}
+
+In this chapter, the Primary Read Client Main Loop API is specified in
+detail.  The Primary Read Client (PRC) Main Loop implements the PRC
+Data Flow Control.  The PRC Main Loop is implemented as a function,
+{\tt dada\_prc\_main}, which receives a pointer to a struct, {\tt
+dada\_prc\_main\_t}, as its only argument.  The member variables of
+this struct must be properly set up before the Main Loop is entered,
+as described in the following section.
+
+\section{Initialization}
+
+The Primary Read Client Main Loop structure is created as follows:
+\begin{verbatim}
+#include "dada_prc_main.h"
+dada_prc_main_t* prcm = dada_prc_main_create ();
+\end{verbatim}
+After creation, the following member variables must be initialized:
+\begin{enumerate}
+
+\item {\bf {\tt log}} pointer to the {\tt multilog\_t} struct
+	that will be used for status and error reporting
+
+\item {\bf {\tt data\_block}} pointer to the {\tt ipcio\_t} struct 
+	that is connected to the Data Block
+
+\item {\bf {\tt header\_block}} pointer to the {\tt ipcio\_t} struct
+	that is connected to the Header Block
+
+\item {\bf {\tt open\_function}} pointer to the function that opens
+	the file descriptor to which data will be written:
+\begin{verbatim}
+int open_function (dada_prc_main_t*);
+\end{verbatim}
+  This function should initialize the following member
+  variables of {\tt dada\_prc\_main\_t}:
+\begin{itemize}
+\item {\bf {\tt fd}} file descriptor to which data will be written
+\item {\bf {\tt transfer\_bytes}} total number of bytes to write
+\item {\bf {\tt optimal\_bytes}} optimal number of bytes to write each time
+\item {\bf {\tt header}} [optional] header to be written to the file descriptor
+\end{itemize}
+  The {\tt header} member variable will be initialized before calling
+  {\tt open\_function} and will be written to the file descriptor
+  after this function returns. This function should return a value
+  less than zero in the case of any error.
+\newpage
+\item {\bf {\tt close\_function}} pointer to the function that closes
+	the file descriptor after data has been written:
+\begin{verbatim}
+int close_function (dada_prc_main_t*, uint64_t bytes_written);
+\end{verbatim}
+  The {\tt bytes\_written} argument specifies the total number of bytes
+  successfully written to the file descriptor.  This function should
+  perform any tasks required to close the file descriptor and return a
+  value less than zero in the case of any error.
+
+\item {\bf {\tt context}} [optional] pointer to any additional information.
+  Should the implementation of any of the above functions
+  require access to other information, a pointer to this information
+  can be stored in the {\tt context} member variable and retrieved by
+  casting this member inside the function.
+
+\end{enumerate}

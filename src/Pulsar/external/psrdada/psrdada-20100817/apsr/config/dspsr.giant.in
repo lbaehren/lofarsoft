@@ -1,0 +1,5 @@
+# Do not edit dspsr.giant
+# Edit dspsr.giant.in
+
+PROC_CMD dspsr -Q -t 7 SELECT -s -K -W -2c0 -J @datadir@/giant.psh
+

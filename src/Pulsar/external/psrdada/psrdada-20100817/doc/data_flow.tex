@@ -1,0 +1,222 @@
+\chapter{Data Flow Control Software}
+
+Data Flow Control software running on the Primary and Secondary nodes
+must handle the flow of data in a modular and extensible manner,
+enabling future developments by replacement of a single component.
+The required modularity is met by basing all data transfer on a single
+ring buffer protocol, which will be known as the Data Block.
+
+\section{Data Block}
+\label{sec:data_block}
+
+The Data Block is a ring buffer that will be allocated as a shared
+memory resource, logically divided into a header block followed by a
+number of sub-blocks.  Each sub-block will have an associated byte
+count that may be used to calculate the time offset from the start of
+the observation.  Only one contiguous stream of data may be
+represented in the Data Block at any one time; therefore, the size of
+the Data Block will determine the maximum amount of time required to
+flush the ring buffer between stopping an observation and starting the
+next observation.
+
+%\subsubsection{Start of Data}
+
+At the beginning of an observation, every sub-block of the ring buffer
+will be empty and the header block will be initialized with the
+relevant observation information (such as bandwidth, centre frequency,
+source, start time, etc.). In order that data acquisition may be
+started before the data are valid, data may be written to sub-blocks
+before the start-of-data flag is raised.  Data may be read from
+sub-blocks only after the start-of-data flag is raised.
+
+%\subsubsection{End of Data}
+
+Data will be written to sub-blocks in sequential order until the end
+of the observation, at which point an end-of-data flag will be raised,
+the last full sub-block and the number of valid bytes written to this
+sub-block will be recorded.   Data will be read from sub-blocks in
+sequential until the end-of-data flag is raised and the current
+sub-block is equal to the last full sub-block.
+
+%\subsubsection{Data Validity}
+
+Data that are written to the Data Block may not necessarily be valid.
+Therefore, each sub-block will have associated variables to indicate:
+\begin{itemize}
+\item the state of the block: empty or full.
+\item the byte offset at which data became valid
+\item the byte offset at which data became invalid
+\end{itemize}
+Note that data can transit from valid to invalid (or vice versa) only
+once per data block.  However, these transitions may occur an
+arbitrary number of times between the start and end of data.
+
+\subsection{Write Client}
+
+A single, high-priority process, called the Write Client, will be
+given write access to the Data Block; only the Write Client can change
+the state of a sub-block from empty to full.  The Write Client can
+write data to the ring buffer before flagging the start of the
+observation.  In this way, it can clock data without activating the
+Read Clients, and may change the state of the validity flags before
+raising the start-of-data flag.
+
+After raising the start-of-data flag, the Write Client will not write
+data to a sub-block until its state is empty; after filling a
+sub-block, it will change its state to full and set the data validity
+byte offsets.  If the Write Client cannot obtain an empty sub-block,
+an overflow condition will occur; this condition will be handled
+according to the mode of operation:
+
+\begin{itemize}
+
+\item {\bf contiguous}, a contiguous stream of data is required (as is
+  often the case in search observations).  In this case, data overflow
+  is treated as an error that is propagated to the Command and Control
+  software, and data acquisition is stopped.
+
+\item {\bf discontinuous}, an end-of-data is written to the Data
+  Block, and the Write Client continues to receive data from its
+  source.  When the ring buffer has been cleared by the Read Client,
+  the Write Client starts a new observation and data acquisition
+  continues.
+
+\item {\bf tolerant}, the Write Client will wait indefinitely for
+  the next empty sub-block.
+
+\end{itemize}
+
+Other specifics of overflow handling will depend upon the application.
+For example, discontinuous overflow handling may include a sending a
+signal to to the Primary Node that instructs it to move on to the next
+Secondary node.
+
+\subsection{Read Clients}
+
+One or more Read Clients may attach to the Data Block and read the
+data from sub-blocks marked as full.  Only the bytes designated as
+valid will be used from each sub-block.  Only a single, high-priority
+Read Client will be given permission to change the state of a
+sub-block from full to empty.  Read Clients will access sub-blocks in
+contiguous order after the start-of-data flag is raised and until the
+end-of-data condition is encountered.
+
+\subsubsection{Example}
+
+Consider a tight schedule, in which the time required to synchronize
+and start data acquisition is considered too costly.  In this case,
+some time may be saved by starting data acquisition before the
+telescope is on source and continuing to acquire data while the
+telescope slews between sources.
+
+In this case, the Write Client will begin writing data to the Data
+Block before raising the start-of-data flag.  The Write Client knows
+the UTC time at which it started clocking data into the Data Block.
+When the signal is given to the Write Client that the data became
+valid at a certain UTC time, the Write Client can go back to that time
+in its buffer, flag all data from that point to the present buffer as
+valid, and raise the start-of-data flag.  In this way, the Write
+Client can retroactively flag data as valid {\bf before the start of
+the observation}.
+
+In order to slew to the next source, a data invalid message must be
+sent to the Write Client before the data becomes invalid.  The Write
+Client will continue to clock data into the Data Buffer, but the data
+will be marked as invalid and therefore will be ignored by the Read
+Clients; the designated Read Client will simply mark the buffers as
+empty as they are encountered. (This is why retroactive validity
+flagging can be done only before the start of the observation.)
+
+\section{Data Flow Write Clients}
+
+Write Client software will read data from a device and write it to
+the Data Block.
+
+\subsection{DMA Client: {\tt dmadb}}
+
+The DMA Client software, {\tt dmadb}, is responsible for transferring
+data from the telescope to the Data Block.  It will talk directly to
+the PiC through its PCI interface, start and stop the data transfer,
+and record the UTC start time of the observation.  Data from the PiC
+will be transferred to Primary node RAM via a Direct Memory Access
+(DMA) card that is commercially available from Engineering Design Team
+(EDT).  The DMA Client software will:
+
+\begin{enumerate}
+
+\item allocate a number of fixed memory buffers of a size and number
+to be determined during the testing stage;
+
+\item send start and stop instructions to the PiC via the PCI/DMA interface;
+
+\item determine the UTC start time of the first sample recorded
+
+\item copy filled DMA buffers to the Data Block; and
+
+\item monitor the number of DMA buffers filled and copied, ensuring that
+no data overflow occurs.
+
+\end{enumerate}
+
+\noindent
+The DMA buffers will be separate from the Data Block buffers and
+accessed only by the DMA card driver and {\tt dmadb}.  Once started,
+DMA transfer will continue uninterrupted until a stop flag is raised
+or an overflow occurs.
+
+\subsection{Network Interface Client: {\tt nicdb}}
+
+The software for network I/O will run on both Primary and Secondary
+nodes.  The Data Flow Control software running on the Secondary nodes,
+{\tt nicdb}, will open a port and listen for incoming Data Flow
+Control connections from {\tt dbnic}, which will run on the Primary
+nodes.  A single incoming channel will be connected and used to
+establish a high-bandwidth data communication channel between a single
+Primary node and a single Secondary node.  The protocol for the
+network communications will be a simple, custom-built design on top of
+internet sockets.  This may change in the future to some sort of
+grid-based protocol.  Data received via this communication channel
+will be copied to the Data Block in contiguous order.  Each packet of
+data will be preceded by a copy of the Data Block header from the
+Primary node.  This header will be copied to the Secondary node Data
+Block.
+
+The {\tt nicdb} software has the responsibility to monitor the Data
+Block and ensure that there is sufficient space to hold incoming data
+packets.  It will send a message to the Primary node if there is
+insufficient space, and the Primary node will cease data transfer,
+possibly initiating data transfer to the next in Secondary node in the
+ring.
+
+\section{Data Flow Read Clients}
+
+Read Client software will read data from the Data Block and write it
+to a device.
+
+\subsection{Data Storage Client: {\tt dbdisk}}
+
+Writes data blocks to disk, breaking up data into files of arbitrary
+length.  Each file will be preceded by the header block from the Data
+Block.  Runs on either Primary or Secondary nodes, depending on the
+mode of operation.  After each file is written to disk, an entry will
+be added to an ASCII text log file; each entry will describe:
+\begin{itemize}
+\item the full path to the file
+\item the time it was written
+\item the size of the file
+\item the time required to write the file
+\item the observation identifier
+\end{itemize}
+This log file will be polled by the Configuration and Scheduling
+software, which will add the information to a centralized database.
+
+\subsection{Network Interface Client: {\tt dbnic}}
+
+This software runs on the Primary nodes; it reads from the Data Block
+and writes to one or more Secondary nodes, breaking up data into
+packets of arbitrary length.  The total length of data sent to an
+individual Secondary node will be independent of the Data Block buffer
+sizes, and may depend on the overlap specified by the Configuration
+and Scheduling software.  Header information (including all available
+observation information as well as offset byte counts) will be sent
+with each block of data transmitted to the Secondary nodes.

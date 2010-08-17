@@ -1,0 +1,8 @@
+#!/usr/bin/env psrsh
+
+if ( $nbin > 256 ) bscrunch 256
+
+if ( $nchan > 16 ) fscrunch 16
+
+unload ext=lowres
+

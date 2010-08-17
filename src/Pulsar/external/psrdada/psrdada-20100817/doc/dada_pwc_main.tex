@@ -1,0 +1,105 @@
+\chapter{Primary Write Client Main Loop}
+\label{app:dada_pwc_main}
+
+In this chapter, the Primary Write Client Main Loop API is specified
+in detail.  The Primary Write Client (PWC) Main Loop implements the
+PWC Data Flow Control described in Chapter~\ref{sec:pwc_main}.  The
+PWC Main Loop is implemented as a function, {\tt dada\_pwc\_main},
+which receives a pointer to a struct, {\tt dada\_pwc\_main\_t}, as its
+only argument.  The member variables of this struct must be properly
+set up before the Main Loop is entered, as described in the following
+section.
+
+\section{Initialization}
+
+The Primary Write Client Main Loop structure is created as follows:
+\begin{verbatim}
+#include "dada_pwc_main.h"
+dada_pwc_main_t* pwcm = dada_pwc_main_create ();
+\end{verbatim}
+After creation, the following member variables must be initialized:
+\begin{enumerate}
+
+\item {\bf {\tt pwc}} pointer to a {\tt dada\_pwc\_t} struct; 
+   this struct is used to communicate between the thread that parses
+   external commands from the Command Interface and the thread that
+   runs the PWC Main Loop.  The {\tt pwc} member variable can simply
+   be set as in the following example:
+\begin{verbatim}
+/* create the command communication structure */
+pwcm->pwc = dada_pwc_create ();
+
+/* start the control connection server */
+if (dada_pwc_serve (pwcm->pwc) < 0)
+  /* report an error message */
+\end{verbatim}
+
+\item {\bf {\tt log}} pointer to the {\tt multilog\_t} struct
+	that will be used for status and error reporting
+
+\item {\bf {\tt data\_block}} pointer to the {\tt ipcio\_t} struct 
+	that is connected to the Data Block
+
+\item {\bf {\tt header\_block}} pointer to the {\tt ipcio\_t} struct
+	that is connected to the Header Block
+
+\item {\bf {\tt start\_function}} pointer to the function that starts the 
+  data transfer:
+\begin{verbatim}
+time_t start_function (dada_pwc_main_t*, time_t utc);
+\end{verbatim}
+  This function receives the UTC start time, {\tt utc} at which the
+  data transfer should begin.  If {\tt utc} equals zero, the function
+  should start the data transfer at the soonest available opportunity.
+  This function should take care of everything required to start the
+  data transfer, and should return the UTC of the first time sample to
+  be transfered or zero on error.
+
+\item {\bf {\tt buffer\_function}} pointer to the function that returns
+  the next buffer to be written to the Data Block:
+\begin{verbatim}
+void* buffer_function (dada_pwc_main_t*, uint64_t* size);
+\end{verbatim}
+  This function should return the base address of the next buffer or
+  the {\tt NULL} pointer on error.  The size of the buffer (in bytes)
+  should be returned in the {\tt size} argument.
+
+\item {\bf {\tt stop\_function}} pointer to the function that stops
+  the data transfer:
+\begin{verbatim}
+int stop_function (dada_pwc_main_t*);
+\end{verbatim}
+  This function should perform any tasks required to stop the data
+  transfer before returning to the idle state.  This function should return
+  a value less than zero in the case of error.
+
+\item {\bf {\tt context}} [optional] pointer to any additional information.
+  Should the implementation of any of the above three functions
+  require access to other information, a pointer to this information
+  can be stored in the {\tt context} member variable and retrieved by
+  casting this member inside the function. e.g.
+\begin{verbatim}
+  struct puma2_t {
+    EdtDev* edt_p;
+    pic_t pic;
+    unsigned buf_size;
+  };
+
+  void* puma2_buffer_function (dada_pwc_main_t* pwcm, uint64_t* size)
+  {
+    struct puma2_t* xfer = (struct puma2_t*) pwcm->context;
+    *size = xfer->buf_size;
+    return edt_wait_for_buffers (xfer->edt_p, 1);
+  }
+
+  [...]
+
+  struct puma2_t xfer_data;
+
+  pwcm->context = &xfer_data;
+  pwcm->buffer_function = puma2_buffer_function;
+
+  [etc...]
+\end{verbatim}
+
+\end{enumerate}

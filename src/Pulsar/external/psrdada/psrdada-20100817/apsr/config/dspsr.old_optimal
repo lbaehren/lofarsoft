@@ -1,0 +1,1 @@
+PROC_CMD dspsr -q -t 8 -F 128:D -x minX2 -U minX2  -L 10

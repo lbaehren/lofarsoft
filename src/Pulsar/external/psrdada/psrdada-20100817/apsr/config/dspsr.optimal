@@ -1,0 +1,1 @@
+PROC_CMD dspsr -Q -t 7 SELECT -L 10

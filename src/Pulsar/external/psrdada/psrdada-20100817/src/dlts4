@@ -1,0 +1,302 @@
+#!/bin/csh -f
+#
+# Willem van Straten 
+# 24 September 2008
+#
+# based on barcodes script by Russell Edwards (1 October 1998)
+#
+# Script to generate postscript for printing DLT-S4 labels with
+# barcodes readable by the Quantum PX 502 tape robot.
+#
+# Main loop at end of file
+#
+############################BEGIN POSTSCRIPT HEADER#######################
+
+@ num_args = `echo $argv[*] | awk '{print NF}'`
+if ( $num_args == 3 ) then
+  @ help = 0
+else
+  @ help = 1
+endif
+
+if ( $help ) then
+cat << EOD
+
+dlts4: produces labels for DLT-S4 tapes
+
+Usage: dlts4 <prefix> <first> <last>
+
+Arguments:  prefix - three digit label prefix
+            first - number of first label
+            last  - number of last label
+
+EOD
+exit 1
+endif
+
+set prefix = `echo $1 | awk '{printf ("%03s", $0);}'`
+
+if ( $prefix != $1 ) then
+  echo "ERROR: prefix must be three characters"
+  exit 1
+endif
+
+if ( $2 > 999 ) then
+  echo "ERROR: first must be less than 1000"
+  exit 1
+endif
+
+if ( $3 > 999 ) then
+  echo "ERROR: last must be less than 1000"
+  exit 1
+endif
+
+cat << EOD
+%!PS-Adobe-2.0
+%%Title: barcode.ps
+%%Creator: Willem van Schaik
+%%CreationDate: aug 1992
+%%Pages: 1
+%%DocumentFonts: Helvetica Code39
+%%BoundingBox: 0 0 595 842
+%%EndComments
+
+/newfont 10 dict def
+newfont begin
+/FontType 3 def
+/FontMatrix [0.01 0 0 0.01 0 0] def
+/FontBBox [0 0 100 100] def
+
+/Encoding 256 array def
+0 1 255 {Encoding exch /.notdef put} for
+Encoding 32 /barSpace put
+Encoding 36 /barDollar put
+Encoding 37 /barPercent put
+Encoding 42 /barAsterisk put
+Encoding 43 /barPlus put
+Encoding 45 /barHyphen put
+Encoding 46 /barPeriod put
+Encoding 47 /barSlash put
+Encoding 48 /bar0 put
+Encoding 49 /bar1 put
+Encoding 50 /bar2 put
+Encoding 51 /bar3 put
+Encoding 52 /bar4 put
+Encoding 53 /bar5 put
+Encoding 54 /bar6 put
+Encoding 55 /bar7 put
+Encoding 56 /bar8 put
+Encoding 57 /bar9 put
+Encoding 65 /barA put
+Encoding 66 /barB put
+Encoding 67 /barC put
+Encoding 68 /barD put
+Encoding 69 /barE put
+Encoding 70 /barF put
+Encoding 71 /barG put
+Encoding 72 /barH put
+Encoding 73 /barI put
+Encoding 74 /barJ put
+Encoding 75 /barK put
+Encoding 76 /barL put
+Encoding 77 /barM put
+Encoding 78 /barN put
+Encoding 79 /barO put
+Encoding 80 /barP put
+Encoding 81 /barQ put
+Encoding 82 /barR put
+Encoding 83 /barS put
+Encoding 84 /barT put
+Encoding 85 /barU put
+Encoding 86 /barV put
+Encoding 87 /barW put
+Encoding 88 /barX put
+Encoding 89 /barY put
+Encoding 90 /barZ put
+
+/CharProcs 45 dict def
+CharProcs begin
+/.notdef {} def
+/barSpace {0 7 17 17 7 7 7 17 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barDollar {0 7 17 7 17 7 17 7 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barPercent {0 7 7 7 17 7 17 7 17 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barAsterisk {0 7 17 7 7 17 7 17 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barPlus {0 7 17 7 7 7 17 7 17 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barHyphen {0 7 17 7 7 7 7 17 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barPeriod {0 17 17 7 7 7 7 17 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barSlash {0 7 17 7 17 7 7 7 17 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/bar0 {0 7 7 7 17 17 7 17 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/bar1 {0 17 7 7 17 7 7 7 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/bar2 {0 7 7 17 17 7 7 7 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/bar3 {0 17 7 17 17 7 7 7 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/bar4 {0 7 7 7 17 17 7 7 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/bar5 {0 17 7 7 17 17 7 7 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/bar6 {0 7 7 17 17 17 7 7 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/bar7 {0 7 7 7 17 7 7 17 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/bar8 {0 17 7 7 17 7 7 17 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/bar9 {0 7 7 17 17 7 7 17 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barA {0 17 7 7 7 7 17 7 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barB {0 7 7 17 7 7 17 7 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barC {0 17 7 17 7 7 17 7 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barD {0 7 7 7 7 17 17 7 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barE {0 17 7 7 7 17 17 7 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barF {0 7 7 17 7 17 17 7 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barG {0 7 7 7 7 7 17 17 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barH {0 17 7 7 7 7 17 17 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barI {0 7 7 17 7 7 17 17 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barJ {0 7 7 7 7 17 17 17 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barK {0 17 7 7 7 7 7 7 17 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barL {0 7 7 17 7 7 7 7 17 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barM {0 17 7 17 7 7 7 7 17 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barN {0 7 7 7 7 17 7 7 17 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barO {0 17 7 7 7 17 7 7 17 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barP {0 7 7 17 7 17 7 7 17 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barQ {0 7 7 7 7 7 7 17 17 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barR {0 17 7 7 7 7 7 17 17 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barS {0 7 7 17 7 7 7 17 17 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barT {0 7 7 7 7 17 7 17 17 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barU {0 17 17 7 7 7 7 7 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barV {0 7 17 17 7 7 7 7 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barW {0 17 17 17 7 7 7 7 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barX {0 7 17 7 7 17 7 7 7 17 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barY {0 17 17 7 7 17 7 7 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+/barZ {0 7 17 17 7 17 7 7 7 7 newpath 93 0 moveto 5 {dup 0 100 rlineto
+neg 0 rlineto 0 -100 rlineto closepath add neg 0 rmoveto} repeat fill} def
+end
+
+/BuildChar
+{ 100 0 0 0 93 100 setcachedevice
+  exch
+  begin
+    Encoding exch get
+    CharProcs exch get
+    end
+  exec
+} def
+end
+
+/Code39 newfont definefont pop
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% redwards 1 Oct 98
+% Postscript routine to draw a DLT label with barcode at a certain
+% row and column on the current page. 
+% <(string)> <col> <row> dltlabel
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/dltlabel {
+newpath
+% First 2 args are location in units of LABELS. Transform to real coords
+% and push 2 copies (1 for later use)
+2 index   % copy of string for second printing
+2 index 160 mul 60 add % copy of location for second printing (x coord)
+2 index 60 mul  20 add % copy of location for second printing (y coord)
+2 index   % copy of string for first printing
+2 index   % copy of location for initial location (x coord)
+2 index   % copy of location for initial location (y coord)
+
+moveto             % POPs initial location
+
+% draw frame around label
+160 0 rlineto
+0 60 rlineto
+-160 0 rlineto
+0 -60 rlineto
+
+% draw bar code
+/Code39 findfont [12 0 0 30  0 0] makefont setfont
+20 20 rmoveto
+(*) show
+show               % POPs first copy of string
+(*) show
+
+% draw human readable label
+/Helvetica-Bold findfont 12 scalefont setfont
+moveto             % POPs second copy of location
+20 10 rmoveto
+show               % POPs second copy of string
+
+pop pop pop        % POP off passed arguments
+stroke
+} def
+
+EOD
+#######################END POSTSCRIPT HEADER##########################
+
+# now simply do a label for each argument: 3 cols x 13 rows per page
+
+set first = $2
+set last  = $3
+
+set current = $first
+set barargs = "barcodes "
+
+set shown = 0
+set i = 1
+
+while ( $current <= $last )
+
+  set newstr = `echo $current | awk -vp=$prefix '{printf ("%s%03dS4",p,$0);}'`
+
+  @ col = ($i - 1) % 3          
+  @ row = (($i - 1)  / 3) % 13 
+
+  echo $newstr | awk '{print "("$1") '$col' '$row' dltlabel"}'
+
+  @ current = $current + 1
+  @ i = $i + 1
+
+  if (($i - 1) / (13 * 3) > ($i - 2) / (13 * 3)) then
+    echo showpage
+    set shown = 1
+  else
+    set shown = 0
+  endif
+
+end
+
+if ( ! $shown ) echo showpage
+

@@ -1,0 +1,1 @@
+PROC_CMD dspsr -Q -t 8 SELECT -2c100 -L 10

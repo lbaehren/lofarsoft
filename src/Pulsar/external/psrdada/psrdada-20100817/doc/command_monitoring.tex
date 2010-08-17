@@ -1,0 +1,83 @@
+\chapter{Command and Monitoring Software}
+
+\section{Command}
+
+Each element of the DADA software must be coordinated to operate as
+a single instrument.  Therefore, many of the processes described in
+the previous chapter will have to be synchronized and configured
+through communications channels.  Some degree of synchronization will
+be achieved through the hand-shaking protocol of the Data Block
+specification.  Other communication requirements will be met through
+internet socket connections.
+
+\subsection{Data Block Communications}
+
+Many of the Data Clients can be implemented as a persistent process,
+like a daemon, that is configured once during an initialization stage
+and runs automatically from that point onward.  Apart from
+configuration, the behaviour of these automatic processes will depend
+completely upon the state of the Data Block.
+
+Two Read Client programs that can run in this manner are {\tt dbdisk}
+and {\tt dbnic}.  These automatic processes need only start reading
+from the Data Block when it is active, as determined by the behaviour
+of the Write Client.  They start when the header is initialized and
+stop when the end of data flag is raised.
+Also, the {\tt nicdb} Write Client can be run as an automatic process
+that starts when it receives packets from the Primary Node and ends
+when the end of data message is received.
+If it is shown that the operation of these Data Clients may have to
+change from observation to observation, then there are two possible
+solutions:
+\begin{itemize}
+\item Stop and restart the daemons with different configuration parameters
+\item Enable socket communications that set configuration parameters
+\end{itemize}
+
+\subsection{Internet Socket Communications}
+
+Certain processes will require internet socket communications in order
+to be configured between observations and to start and stop the
+observation.  In order that communications may be sent and received
+during normal operation, the processes that require socket
+communications will be multi-threaded.  The communication threads may
+have lower priority than the main thread, if required.  More than one
+communication channel may be opened to each process; however, only one
+channel will be able to issue control commands.  The others may only
+inquire about the status of the process.
+
+All communications will be human readable, ASCII text.  This enables
+interface testing using standard tools like telnet.  If large amounts
+of binary data must be sent between the Control Interface and Data
+Flow Control software, then it should be done using a separate
+communication channel designated for this purpose.  Text commands will
+be sent on a single line of text.  After every command received, the
+process will respond with {\tt ok} or {\tt fail}, followed by any
+additional information, and ending with the command prompt.
+
+\subsubsection{DMA Data Client}
+
+The {\tt dmadb} processes running on each of the primary nodes
+require careful synchronization with the Control Interface software,
+especially if they are all to be started on the same UTC second.  For
+this reason, it will not suffice to remotely start the processes at
+the desired beginning of each observation.  The processes must be
+persistent and must maintain socket communications with the Control
+Interface.  The Command Interface to {\tt dmadb} is described in
+Section~\ref{sec:pwc}.
+
+\section{Monitoring}
+
+Monitoring processes will be run on all nodes in the instrument,
+reporting on remaining disk space, CPU load, network traffic, etc.  At
+the time of this writing, it is not clear if standard cluster
+monitoring tools like Ganglia will suffice.  For example, it may prove
+useful to have a regular report on which Secondary nodes are currently
+receiving data.  This information would have to come from {\tt dbnic},
+possibly via a socket connection to this process.
+
+In addition to live monitoring, it may also prove useful to maintain a
+database of relevant statistics, such as the average time required to
+write a block of data to file or over the network.  These monitoring
+tasks would be performed by the relevant process, {\tt dbdisk} and/or
+{\tt dbnic} and communicated to a central database via some protocol.

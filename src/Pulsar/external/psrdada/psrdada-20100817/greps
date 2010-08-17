@@ -1,0 +1,16 @@
+#!/bin/csh -fe
+
+if ( "$1" == "-h" || "$1" == "--help" || "$1" == "" ) then
+  echo
+  echo "greps: searches psrdada source code for regular expression"
+  echo
+  echo "usage:"
+  echo "  greps <regex>"
+  echo
+  exit
+endif
+
+grep $* `find apsr bpsr caspsr puma2 src -name "*.[hcC]"`
+
+grep $* `find apsr bpsr caspsr puma2 src -name Makefile.am`
+

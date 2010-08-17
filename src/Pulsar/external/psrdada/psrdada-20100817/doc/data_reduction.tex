@@ -1,0 +1,39 @@
+\chapter{Data Reduction Software}
+
+\section{Operational Phases}
+
+The data reduction software supports three models:
+
+\begin{itemize}
+\item {\bf offline} processing: performed after the recording has finished
+\item {\bf simultaneous} processing: performed during the recording
+\item {\bf diskless} processing: as above, but completely in memory
+\end{itemize}
+
+\subsection{Offline Data Reduction}
+
+The data reduction software operates only on data files stored on
+local disk space, and only after the recording has completed.  After
+the observations have been completed, the data files from each Primary
+node will be farmed out to the Secondary nodes.  After each file has
+been copied, an entry will be added to the log file that is monitored
+by the Configuration and Scheduling software, which will attend to the
+data reduction as described in Chapter 6.
+
+\subsection{Simultaneous Data Reduction}
+
+The data reduction software runs during the observation.  In this
+mode, data are sent directly to Secondary nodes and written to disk.
+As before, an entry will be made in a log file and the Configuration
+and Scheduling software will coordinate the data reduction.
+
+\subsection{Diskless Data Reduction}
+
+The data reduction software is able to keep up completely with the
+flow of data on the Primary nodes.  In this case, the data is never
+written to disk, and {\tt dspsr} operates as a Read Client directly
+connected to the Data Block.  Another Read Client may be written that
+will farm data reduction tasks to a grid computing facility.  In this
+case, the data reduction Read Client will have to incorporate the
+Configuration and Scheduling tasks.
+

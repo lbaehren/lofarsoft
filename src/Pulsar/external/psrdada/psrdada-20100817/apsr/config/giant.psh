@@ -1,0 +1,12 @@
+
+# form a total intensity copy of the raw data
+push
+fscrunch
+pscrunch
+
+# reduce to 512 phase bins
+bscrunch 512
+
+# keep only profiles with a peak greater than five sigma
+test $all:max > ( $off:avg + 5*$off:rms )
+

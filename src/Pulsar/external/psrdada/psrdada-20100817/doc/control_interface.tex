@@ -1,0 +1,85 @@
+\chapter{Control Interface Software}
+
+The Control Interface software will implement the single instrument
+look and feel of a DADA-based instrument.  A single process, {\tt dada\_nexus}, will:
+
+\begin{itemize}
+\item connect to the Command interface of each Primary Write Client (PWC)
+\item issue commands as necessary to each PWC
+\item collate monitoring information from all processes
+\item provide Command and Monitoring connections to outside world
+\item start and stop DADA processes on any node as required
+\end{itemize}
+
+In addition to maintaining the required control connections with
+processes on each of the Primary nodes, the Control Interface software
+will also present a Command and Monitoring connection to the outside
+world.  To this connection, an operator can connect to issue commands
+and check on the status of the instrument/observation.  As before,
+multiple communication channels may be connected, but only one will be
+able to send control commands.  The operator will connect using a
+textual user interface program, {\tt dadatui}, which will present all
+information from the Control Interface in an organized manner,
+possibly employing the curses terminal control library.
+
+Another process, {\tt dadatms}, will be written to provide automated
+control of the DADA instrument by the WSRT TMS.  Commands sent by
+TMS will be received by {\tt dadatms}, converted to text commands,
+and sent to {\tt dada} through the operator interface.
+
+The Control Interface software will enable complete initialization of
+the DADA instrument through a single command.  That is, on any or
+all nodes, it will be able to start and stop various processes, create
+and destroy the Data Block shared memory and semaphore resources, and
+perform whatever other tasks prove useful in the initialization and
+configuration of the DADA instrument.
+
+\section{Data Flow configuration}
+
+The {\tt dada\_nexus} software will distribute Data Flow configuration
+options to each Primary Write Client (PWC).  Data Flow configuration
+describes the parameters of the Data Flow Control software that may
+need to change between observations.  These currently
+include:
+\begin{itemize}
+\item{\tt FILE\_SIZE} requested size of data files
+\item{\tt OBS\_OVERLAP} the amount by which neighbouring files overlap
+\item{\tt TARGET\_NODES} the nodes to which data will be sent
+\end{itemize}
+These parameters configure the behaviour of the {\tt dbnic} or {\tt
+dbdisk} processes.  As there may be a long delay between the time at
+which the data was acquired on the Primary node and that at which data
+reaches the Secondary nodes, these processes must be able to operate
+independently of the Control Interface software.  Therefore, the
+Data Flow configuration parameters will be stored as attributes in the
+ASCII Header for each observation (see Chapter~\ref{ch:header}).  The
+Header Block for each PWC is unique and each data
+path may be configured independently.
+
+The {\tt dada\_nexus} software will read all configuration parameters
+from observation specification files.  This file will contain all
+information about the observation, including the Data Flow
+configuration configuration parameters, as described in the following
+section.  The {\tt dada\_nexus} will parse the specification file and
+create a unique header for each PWC.
+
+\section{Observation Specification}
+
+Each observation must be completely specified before it may be started
+on the DADA instrument.  Specifications will be created using the
+specification tool, a graphical user interface designed to ease the
+creation, duplication, and verification of observation and data
+reduction configurations.
+
+\section{Control Interface Configuration}
+
+Will also be read from a text file.  Parameters include:
+\begin{itemize}
+\item{\tt PWC\_PORT} the port to connect with the PWC Command Interface 
+\item{\tt NUM\_PWC} the number of Primary Write Clients
+\item{\tt PWC\_$N$} the name of the $N$th Primary Write Client
+\item{\tt COM\_POLL} the polling interval for communication connections
+\item{\tt HDR\_SIZE} the size of the Data Header
+\item{\tt HDR\_TEMPLATE} file containing the header template
+\item{\tt SPEC\_PARAM\_FILE} file containing the specification parameter list
+\end{itemize}

@@ -1,0 +1,355 @@
+BODY {
+  /*background: #1c1c1c;*/
+  background: #EEEEEE;
+  color: black;
+  font-family: arial,helvetica,sans-serif,times;
+  font-size: 10pt;
+  text-align: center;
+}
+                                                                                
+P {
+  font-family: arial,helvetica,sans-serif,times;
+  background: #EEEEEE;
+  color: black;
+  font-size: 10pt;
+  margin-top: 2px;
+  margin-bottom: 15px;
+  margin-left: 10px;
+}
+
+SPAN {
+  font-family: arial,helvetica,sans-serif,times;
+  font-size: 10pt;
+}
+                                                                                
+TABLE {
+  font-family: arial,helvetica,sans-serif,times;
+  font-size: 10pt;
+}
+                                                                                
+TD {
+  font-family: arial,helvetica,sans-serif,times;
+  font-size: 10pt;
+  /*vertical-align: top; */
+}
+
+SELECT {
+  font-family: arial,helvetica,sans-serif,times;
+  font-size: 10pt;
+}
+
+INPUT {
+  font-family: arial,helvetica,sans-serif,times;
+  font-size: 10pt;
+}
+                                                                                
+TH {
+  font-family: arial,helvetica,sans-serif,times;
+  font-size: 10pt;
+  font-weight: bold;
+}
+
+table.gmail{
+  border-width: 0px 0px 0px 0px;
+  border-spacing: 2px;
+  border-style: solid solid solid solid;
+  border-color: #7fb8ff #7fb8ff #7fb8ff #7fb8ff;
+  border-collapse: collapse;
+}
+table.gmail th {
+  border-width: 0px 0px 0px 0px;
+  padding: 1px 10px 1px 10px;
+  border-style: inset inset solid inset;
+  border-color: gray gray #7fb8ff gray;
+  font-size: 10pt;
+  text-align: left;
+}
+table.gmail td {
+  border-width: 1px 0px 0px 0px;
+  padding: 1px 20px 1px 10px;
+  border-style: inset inset inset inset;
+  border-color: gray gray gray gray;
+  font-size: 8pt;
+}
+
+table.gmailtrunc td {
+  border-width: 1px 0px 0px 0px;
+  padding: 1px 20px 1px 10px;
+  border-style: inset inset inset inset;
+  border-color: gray gray gray gray;
+  font-size: 8pt;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+}
+
+table.datatable {
+  margin: 0; 
+  padding: 0;
+  border-collapse: collapse;
+  width: 100%;
+  clear: both;
+  text-align: right; /* change this to right as most of table is right aligned */
+}
+
+.datatable th {
+  padding: 4px 7px;
+  /*background: #E6E6E6;
+  border-width: 1px 1px 1px 0;
+  border-style: solid;
+  border-top-color: #FFF;
+  border-bottom-color: #C1C1C1;
+  border-right-color: #C1C1C1; */
+  font-size: 9pt;
+  font-weight: bold;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.datatable tbody tr {
+}
+
+.datatable tbody td {
+  padding: 1px 6px 1px 6px;
+  border: 1px solid #C6C6C6;
+  font-size: 8pt;
+  vertical-align:top;
+  white-space: nowrap;
+} 
+
+.datatable .new {
+  font-weight: bold;
+}
+
+
+/* set only elements with the trunc class to align left either th or td */
+.datatable .trunc {
+  width: 100%; 
+  text-align: left;
+}
+
+/* wrap the content in .trunc cells in a div and set the overflow properties on it instead see IE conditional below */
+.datatable .trunc div {
+  overflow: hidden; 
+  /* text-overflow: ellipsis; */
+} 
+
+TD.multibeam {
+  text-align: center;
+  vertical-align: middle;
+}
+
+a.multibeam {
+  text-decoration: none;
+}
+
+a.gmail {
+  text-decoration: none;
+}
+
+.smalltext {
+  font-size: 8pt;
+}
+
+TD.largetext {
+  font-size: 16pt;
+  vertical-align: middle;
+}
+
+TD.notselected {
+  text-align: center;
+  vertical-align: middle;
+  background: #EEEEEE;
+  font-size: 8pt;
+}
+
+TD.selected {
+  text-align: center;
+  vertical-align: middle;
+  background: #BBBBBB;
+  font-size: 8pt;
+}
+
+TD.notselected_logwin {
+  text-align: center;
+  background: #EEEEEE;
+  padding: 5px 5px 5px 5px;
+  color: green;
+}
+                                                                                
+TD.selected_logwin {
+  background: #CCCCCC;
+  text-align: center;
+  padding: 5px 5px 5px 5px;
+}
+
+
+A {
+  text-decoration: underline;
+  color: #0040FF;
+}
+
+A:HOVER {
+  text-decoration: none;
+}
+
+.centertext {
+  text-align: center;
+}
+
+div.btns{
+  white-space:nowrap;
+}
+
+div.btns:after
+{
+  display:block;
+  clear:both;
+  content:'';
+}
+
+div.btns a.btn{
+  float:left;
+  background:buttonface url(/images/border-2.gif) no-repeat;cursor:pointer;font-size:0;text-align:center;
+  text-align:center;
+  display:block;
+  min-width:30px;
+  text-decoration:none;
+  margin:3px 5px;
+}
+
+div.btns a.btn:hover span{
+
+  opacity:0.6;
+  /*filter:alpha(opacity:80);*/
+}
+
+div.btns a.btn span
+{
+  padding:3px 8px 4px 8px;
+
+  text-align:center;
+  position:relative;
+  left:1px;top:1px;
+  display:block;
+  text-decoration:none;
+  background:url(/images/border.gif) right bottom no-repeat;
+  font:small/1 Verdana;
+  color:#222;
+
+}
+
+a.button {
+  display: block;
+  margin: 5px;
+  padding: 1px 1px 0 1px;
+  float: left;
+  cursor: default;
+  font-family: "Trebuchet MS", Verdana, Helvetica, sans-serif;
+  font-size: 14px;
+  }
+a.button:link,
+a.button:visited,
+a.button:active,
+a.button:hover,
+a.button:focus {
+  text-decoration: none;
+  color: #333;
+  }
+a.button:active,
+a.button:hover,
+a.button:focus {
+  color: #02c;
+  }
+a.button span,
+a.button b,
+a.button i {
+  display: block;
+  margin: 0;
+  padding: 0;
+  line-height: 18px;
+  float: left;
+  height: 22px;
+  width: 4px;
+  }
+a.button i {
+  width: auto;
+  height: 20px;
+  padding: 1px 6px;
+  font-style: normal;
+  }
+a.button:link span,
+a.button:focus span,
+a.button:visited span {
+  background-image: url(/images/gb_left.png);
+  }
+a.button:link i,
+a.button:focus i,
+a.button:visited i {
+  background-image: url(/images/gb.png);
+  }
+a.button:link b,
+a.button:focus b,
+a.button:visited b {
+  background-image: url(/images/gb_right.png);
+  }
+a.button:active span {
+  background-image: url(/images/gb_pressed_left.jpg);
+  }
+a.button:active i {
+  background-image: url(/images/gb_pressed.jpg);
+  }
+a.button:active b {
+  background-image: url(/images/gb_pressed_right.jpg);
+  }
+
+
+/* For the Results pages */
+
+TABLE.results {
+  border-spacing: 0pt 0pt;
+  padding: 0px 0px 0px 0px;
+  font-size: 8pt;
+  border: 1px;
+}
+
+TH.results {
+  font-weight: bold;
+  font-size: 8pt;
+}
+
+TD.results {
+  font-size: 8pt;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 10px;
+  padding-right: 20px;
+}
+
+
+/* These are optional. They demonstrate how you can individually format tooltip
+ * content  */
+.ttheader { 
+  background: #DDDDDD;
+  color: black;
+  font-size:12px; 
+  font-weight:bold;
+  padding: 2px 20px 2px 20px;
+  border: 1px;
+  BORDER-RIGHT: #558844 1px solid; 
+  BORDER-TOP: #558844 1px solid;
+  BORDER-LEFT: #558844 1px solid;
+  BORDER-BOTTOM: #558844 1px solid
+}
+.ttbody { 
+  background: white;
+  color: #222222;
+  font-size:10px;
+  padding: 5px 20px 2px 20px;
+  BORDER-RIGHT: #558844 1px solid; 
+  BORDER-LEFT: #558844 1px solid;
+  BORDER-BOTTOM: #558844 1px solid
+
+}
+

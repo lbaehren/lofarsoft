@@ -1,0 +1,238 @@
+# Instrument this configuration is valid for
+INSTRUMENT              bpsr
+
+# Owner of data files produced
+USER                    bpsr
+SCRIPTS_DIR             @PSRDADA_INSTALL@/bin
+CONFIG_DIR              @PSRDADA_INSTALL@/share
+WEB_DIR                 @PSRDADA_INSTALL@/web
+STATUS_DIR              @PSRDADA_INSTALL@/web/bpsr/status
+PROCESSING_DB_KEY       @PSRDADA_INSTALL@/share/bpsr.info
+
+###############################################################################
+# Server directory configuration
+#
+
+SERVER_HOST             srv0.apsr.edu.au
+SERVER_ALIASES          apsr-srv0.atnf.csiro.au srv0.apsr.edu.au
+SERVER_RESULTS_DIR      /export/results/bpsr
+SERVER_ARCHIVE_DIR      /export/archives/bpsr
+SERVER_STATS_DIR        /export/results/bpsr/stats
+SERVER_LOG_DIR          /export/logs/bpsr
+SERVER_CONTROL_DIR      @PSRDADA_INSTALL@/control
+SERVER_RESULTS_NFS_MNT  /nfs/results/bpsr
+SERVER_ARCHIVE_NFS_MNT  /nfs/archives/bpsr
+SERVER_DAEMONS          bpsr_pwc_monitor bpsr_src_monitor bpsr_sys_monitor bpsr_tcs_interface bpsr_results_manager bpsr_multibob_manager bpsr_web_monitor
+SERVER_DAEMONS_PERSIST  bpsr_transfer_manager bpsr_tape_swin bpsr_tape_parkes
+
+###############################################################################
+#
+# Port Configuration for BPSR, start @ 51000
+#
+# TCS Interface configuration. Note on different interface to server
+TCS_INTERFACE_HOST        apsr-srv0.atnf.csiro.au
+TCS_INTERFACE_PORT        59010      # TCS connects here
+TCS_STATE_INFO_PORT       51001      # Web interface state information 
+
+
+# PWCC -> PWC configuration
+PWCC_HOST               srv0.apsr.edu.au
+PWCC_PORT               51020
+PWCC_LOGPORT            51021
+PWC_PORT                51022
+PWC_LOGPORT             51023
+
+
+# For clients to log system messages
+SERVER_SRC_LOG_PORT        51002
+SERVER_SYS_LOG_PORT        51003
+SERVER_GAIN_CONTROL_PORT   51004
+SERVER_PWC_RESPONSE_PORT   51005
+SERVER_PWCC_LOG_PORT       51006
+SERVER_WEB_MONITOR_PORT    51024
+SERVER_XFER_PID_PORT       51025
+SERVER_PARKESTAPE_PID_PORT 51026
+SERVER_SWINTAPE_PID_PORT   51027
+
+###############################################################################
+# DFB Simluator configuration
+#
+USE_DFB_SIMULATOR         0         # 1 means tcs_interface will launch dfb sim
+DFB_SIM_BINARY            bpsr_udpgenerator
+DFB_SIM_HOST              apsr16    # host which runs DFB_SIM_BINARY
+DFB_SIM_PORT              51007     # port to connect/configure DFB_DIM_BINARY
+DFB_SIM_DEST_PORT         4001      # SHOULD mactch CLIENT_UDPDB_PORT below
+IBOB_SIM_HOST             srv0      # host masquerading as ibob for the PWC's
+IBOB_SIM_PORT             51008     # port for PWC's to connect to is simulating
+
+
+###############################################################################
+# Tape Archive Locations
+# 
+NUM_SWIN_DIRS           4
+SWIN_DIR_0              pulsar:shrek210-evlbi:/export/shrek210a/bpsr
+SWIN_DIR_1              pulsar:shrek210-evlbi:/export/shrek210b/bpsr
+SWIN_DIR_2              pulsar:shrek211-evlbi:/export/shrek211a/bpsr
+SWIN_DIR_3              pulsar:shrek211-evlbi:/export/shrek211b/bpsr
+SWIN_S4_DEVICE          /dev/nst0
+SWIN_DB_DIR             pulsar:shrek211-evlbi:/home/ssi/pulsar/bookkeeping/tape_archiver
+NUM_SWIN_FOLD_DIRS      1
+SWIN_FOLD_DIR_0         pulsar:shrek210-evlbi:/export/shrek210a/bpsr
+
+NUM_PARKES_DIRS         4
+PARKES_DIR_0            bpsr:apsr14:/lfs/data0/bpsr
+PARKES_DIR_1            bpsr:apsr15:/lfs/data0/bpsr
+PARKES_DIR_2            bpsr:apsr16:/lfs/data0/bpsr
+PARKES_DIR_3            bpsr:apsr17:/lfs/data0/bpsr
+PARKES_S4_DEVICE        /dev/nst0
+PARKES_DB_DIR           dada:jura:/home/dada/bookkeeping/tape_archiver
+NUM_PARKES_FOLD_DIRS    0
+#PARKES_FOLD_DIR_0       bpsr:apsr00:/nfs/apsr00/bpsr/from_parkes_pulsars
+
+
+###############################################################################
+# Client directory configuration
+#
+CLIENT_LOCAL_DIR        /lfs/data0/bpsr/
+CLIENT_CONTROL_DIR      /lfs/data0/bpsr/control
+CLIENT_LOG_DIR          /lfs/data0/bpsr/logs
+CLIENT_ARCHIVE_DIR      /lfs/data0/bpsr/archives
+CLIENT_RECORDING_DIR    /lfs/data0/bpsr/rawdata
+CLIENT_SCRATCH_DIR      /lfs/data0/bpsr/scratch
+
+CLIENT_DAEMONS          bpsr_observation_manager bpsr_results_monitor bpsr_disk_cleaner
+
+CLIENT_UDPDB_PORT       4001      # udp packets arrive on this port
+CLIENT_MASTER_PORT      51009     # client master script listens on this port
+CLIENT_PROC_LOAD_PORT   51010     # reports load information
+CLIENT_BG_PROC_PORT     51011     # reports observation current active
+CLIENT_NUM_CORES        8         # total number of processing cores
+CLIENT_UDPDB_STATS_PORT 51012     # udpdb reports stats on this port
+
+################################################################################
+# Data block definitions
+# 
+DATA_BLOCKS             DEDA
+PROCESSING_DATA_BLOCK   DEDA
+                                                                                                             
+DEDA_BLOCK_NBUFS        1000
+DEDA_BLOCK_BUFSZ        4194304
+
+# MACHINE DOWN FAIL BROKEN
+
+# Primary Write Client (PWC) configuration
+PWC_BINARY              bpsr_udpdb
+NUM_PWC                 13
+PWC_0                   apsr01
+PWC_1                   apsr02
+PWC_2                   apsr03
+PWC_3                   apsr04
+PWC_4                   apsr05
+PWC_5                   apsr06
+PWC_6                   apsr07
+PWC_7                   apsr08
+PWC_8                   apsr09
+PWC_9                   apsr10
+PWC_10                  apsr11
+PWC_11                  apsr12
+PWC_12                  apsr13
+
+# Beam assignment
+BEAM_0                  01
+BEAM_1                  02
+BEAM_2                  03
+BEAM_3                  04
+BEAM_4                  05
+BEAM_5                  06
+BEAM_6                  07
+BEAM_7                  08
+BEAM_8                  09
+BEAM_9                  10
+BEAM_10                 11
+BEAM_11                 12
+BEAM_12                 13
+
+# The PWC will run a level setting script to connect 
+# to this IBOB_HOST_i machine on port IBOB_PORT_i
+IBOB_HOST_0             srv0
+IBOB_HOST_1             srv0
+IBOB_HOST_2             srv0
+IBOB_HOST_3             srv0
+IBOB_HOST_4             srv0
+IBOB_HOST_5             srv0
+IBOB_HOST_6             srv0
+IBOB_HOST_7             srv0
+IBOB_HOST_8             srv0
+IBOB_HOST_9             srv0
+IBOB_HOST_10            srv0
+IBOB_HOST_11            srv0
+IBOB_HOST_12            srv0
+
+IBOB_PORT_0             52000
+IBOB_PORT_1             52001
+IBOB_PORT_2             52002
+IBOB_PORT_3             52003
+IBOB_PORT_4             52004
+IBOB_PORT_5             52005
+IBOB_PORT_6             52006
+IBOB_PORT_7             52007
+IBOB_PORT_8             52008
+IBOB_PORT_9             52009
+IBOB_PORT_10            52010
+IBOB_PORT_11            52011
+IBOB_PORT_12            52012
+
+# The config/startup script will connect to the IBOB_HOST_i:IBOB_PORT_i
+# to IBOB_DEST_i:23 via the IBOB_GATEWAY using a ssh tunnel with a 
+# passphraseless SSH key.
+IBOB_MANAGER_PORT       52013
+
+IBOB_DEST_0             169.254.128.1
+IBOB_DEST_1             169.254.128.2
+IBOB_DEST_2             169.254.128.3
+IBOB_DEST_3             169.254.128.4
+IBOB_DEST_4             169.254.128.5
+IBOB_DEST_5             169.254.128.6
+IBOB_DEST_6             169.254.128.7
+IBOB_DEST_7             169.254.128.8
+IBOB_DEST_8             169.254.128.9
+IBOB_DEST_9             169.254.128.10
+IBOB_DEST_10            169.254.128.11
+IBOB_DEST_11            169.254.128.12
+IBOB_DEST_12            169.254.128.13
+
+# MACHINE DOWN FAILED BROKEN
+
+# The MAC address of the myricom 10Gig Ethernet card that is directly
+# connected to each IBOB
+IBOB_LOCAL_MAC_ADDR_0   00:60:DD:47:16:7B   # apsr01
+IBOB_LOCAL_MAC_ADDR_1   00:60:DD:47:15:5D   # apsr02
+IBOB_LOCAL_MAC_ADDR_2   00:60:DD:47:16:75   # apsr03
+IBOB_LOCAL_MAC_ADDR_3   00:60:DD:47:16:69   # apsr04
+IBOB_LOCAL_MAC_ADDR_4   00:60:DD:47:16:6A   # apsr05
+IBOB_LOCAL_MAC_ADDR_5   00:60:DD:47:17:02   # apsr06
+IBOB_LOCAL_MAC_ADDR_6   00:60:DD:47:16:15   # apsr07
+IBOB_LOCAL_MAC_ADDR_7   00:60:DD:47:16:79   # apsr08
+IBOB_LOCAL_MAC_ADDR_8   00:60:DD:47:15:DD   # apsr09
+IBOB_LOCAL_MAC_ADDR_9   00:60:DD:47:16:E2   # apsr10
+IBOB_LOCAL_MAC_ADDR_10  00:60:DD:47:17:07   # apsr11
+IBOB_LOCAL_MAC_ADDR_11  00:60:DD:47:16:EC   # apsr12
+IBOB_LOCAL_MAC_ADDR_12  00:60:DD:47:16:77   # apsr13
+
+# Spare machines with 10 gig cards:
+#IBOB_LOCAL_MAC_ADDR_i   00:60:DD:47:16:EE   # apsr14
+#IBOB_LOCAL_MAC_ADDR_i   00:60:DD:47:16:6E   # apsr00
+
+# Machine that runs the iBOB udp simulator
+DFB_0                   apsr16
+
+NUM_HELP                4
+HELP_0                  apsr14
+HELP_1                  apsr15
+HELP_2                  apsr16
+HELP_3                  apsr17
+
+# Project Destination configuration
+P630_DEST               swin parkes
+P682_DEST               parkes
+

@@ -1,0 +1,5 @@
+# Do not edit dspsr.singleF
+# Edit dspsr.singleF.in
+
+PROC_CMD dspsr -Q -t 7 SELECT -s -K -W -2c0 -UminX16 -J @datadir@/singleF.psh
+

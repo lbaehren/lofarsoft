@@ -1,0 +1,2 @@
+PROC_CMD dada_dbdisk -s -o -D /lfs/data0/caspsr/scratch
+

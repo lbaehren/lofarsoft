@@ -1,0 +1,47 @@
+\chapter{Summary}
+
+The following table summarizes the DADA software, its basic
+functionality, and the machine on which it will run.
+
+\vspace{5mm}
+
+\begin{tabular}{l|p{8cm}|l}
+
+Name & \multicolumn{1}{c}{Function} & Machine \\ \hline
+
+{\tt dmadb} & Transfers data from EDT buffers to the Data Block.
+	& Primary \\
+
+{\bf\tt udpdb} & Transfers data from UDP stream to the Data Block.
+	& Primary \\
+
+{\tt dbdisk} & Reads data from the Data Block and writes it, with
+	header information, to disk. & Both \\
+
+{\tt dbnic} & Reads data from the Data Block and sends it, with
+	header information, to a Secondary node. & Primary \\
+
+{\tt nicdb} & Receives data from Primary node and writes it to the 
+	Data Block. & Secondary \\
+
+{\bf\tt dspsr} & Attaches to the Data Block and processes raw data
+	according to specification, writing results to disk. &
+	Secondary \\
+
+{\tt dadanexus} & Connects to the Command and Control interface of
+	the various Primary Write Clients.  Accepts a text-based
+	control connection.  & fixed \\
+
+{\bf\tt dadatcs} & Translates telescope control system commands into
+	text-based commands as accepted by {\tt dada} control
+	connection. & fixed \\
+
+{\bf\tt dadatui} & Textual user interface connects to {\tt dada},
+	displays various quantities of interest, and controls
+	the instrument. & variable \\
+
+{\bf\tt dadaskd} & High-level code that schedules and records
+        data reduction operations & fixed \\
+
+\end{tabular}
+

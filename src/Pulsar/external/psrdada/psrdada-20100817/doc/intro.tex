@@ -1,0 +1,146 @@
+
+\chapter{Introduction}
+
+\section{Design Goals}
+
+\begin{enumerate}
+\item modularity
+
+\item separation of data transport, control, and data reduction
+
+\item near real-time data reduction
+
+\item elegant scaling to slower data reduction speeds
+\end{enumerate}
+
+\section{Overview}
+
+\subsection{Workstation Cluster}
+
+The functionality of DADA may be divided across multiple workstations.
+These are divided into two main classes:
+
+\begin{enumerate}
+
+\item Primary nodes - workstations equipped with Direct Memory Access 
+	(DMA) card, large data storage, and high-speed interconnect.
+
+\item Secondary nodes - workstations equipped with high-speed interconnect
+	and modest data storage facilities.
+
+\end{enumerate}
+
+A single Primary node may have multiple Secondary nodes associated
+with it.  To these, it will send the observed data either during an
+offline, post-recording stage or in real-time.
+
+\begin{figure}
+\centerline{\psfig{figure=layout.eps,width=3.5in,angle=0}}
+\caption [\sffamily DADA Data Flow]
+{
+Schematic overview of DADA data flow; note the parallelism and 
+symmetry of the operations on Primary and Secondary nodes.
+}
+\label{fig:layout}
+\end{figure}
+
+\subsection{Software}
+
+The major functionality of DADA is divided into five categories:
+
+\begin{enumerate}
+
+\item Data Flow Control - high-bandwidth data transfer and storage
+\item Data Reduction - process and archive the observed data
+\item Command and Monitoring - communication channels for external control
+\item Control Interface - centralized access to Command and Monitoring
+\item Configuration and Scheduling - files and databases for automated control
+
+\end{enumerate}
+
+Communication between each of the levels of software will take place
+primarily through shared memory, semaphores, and internet socket
+connections.
+
+\subsubsection{Data Flow Control}
+
+Data Flow Control software will control all aspects of the
+high-bandwidth data recording, including DMA control, interim storage
+on internal RAID, and high-speed transfer between the Primary and
+Secondary nodes.  The transfer to Secondary nodes will include the
+overlap required to compensate for data reduction losses (owing to
+dispersion smearing, filter rise times, etc.) as specified by the
+Configuration and Scheduling software.
+
+On both Primary and Secondary nodes, data will be stored in a large
+buffer established as shared memory, called the Data Block.  The
+various tasks that must run in parallel will be implemented as unique
+processes, as opposed to multiple threads of a single process.
+Therefore, access to the Data Block will be controlled by an
+inter-process communication (IPC) locking method, known as a
+semaphore.
+
+Rationale: It is better to begin with multiple processes and IPC in the
+early stages of development because this paradigm is more modular.
+For example, the process that reads data from the Data Block and
+writes it to local file storage may be run on either a Primary or
+Secondary node.  If data reduction can later be performed in
+real-time, the disk writing client may be replaced by a data
+processing client.
+
+\subsubsection{Data Reduction}
+
+On both Primary and Secondary nodes, one or more Data Clients may
+attach to the Data Block and operate on the data.  A single,
+high-priority Data Client will be given permission to flag sub-blocks
+as processed.  Initially, this client will be part of the Data Flow
+Control software that writes the data to local file storage.  Later,
+this client may be a data processing client.  
+
+Data Clients may perform any number of tasks, including various forms
+of data reduction, calculation and display of data quality statistics
+such as the bandpass, storage of the data to some form of medium, or
+farming the data out to a grid.  The data reduction client will
+process the data according to the specifications of the Configuration
+and Scheduling software.
+
+\subsubsection{Command and Monitoring}
+
+Command and Monitoring software includes the Command software that
+establishes low-bandwidth network communication channels between
+Primary and Secondary nodes and the Control Interfaces.  These
+channels are used for sending high-level control commands, such as
+start, stop, and information about the source.  These communication
+channels may be implemented as a control thread in each component of
+the Data Flow Control software. 
+
+The Monitoring software will perform any tasks required to maintain
+proper operation of the instrument and present useful information to
+the user.  This includes monitoring telescope status information from
+TMS, disk space consumption, network traffic, CPU load, etc.
+
+\subsubsection{Control Interface}
+
+The Control Interface software defines the centralized command/control
+point, and will be connected to the various communication channels
+established by the Control and Monitoring software on each of the
+Primary and Secondary nodes.  The Control Interface software should be
+run on a single designated workstation, as it will provide the means
+through which other processes may treat the various components as a
+single instrument.  For example, a text or graphical user interface
+and/or automated scheduling program may connect, issue commands, and
+inquire about the status of the instrument.  A textual user interface
+(TUI) will be developed to connect to the Control Interface and:
+\begin{itemize}
+\item allow DADA to be configured, started, and stopped;
+
+\item display various status variables; and
+
+\item create diagnostic plots, such as the passband and digitizer statistics
+\end{itemize}
+
+\subsubsection{Configuration and Scheduling}
+
+Configuration and scheduling software will be make use of database
+information to configure the instrument and schedule data reduction
+operations, based upon the parameters of the observation.

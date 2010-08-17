@@ -1,0 +1,23 @@
+/Caspsr.pm/1.1/Thu Jul 16 02:38:24 2009//
+/Makefile.am/1.2/Sun Apr 11 06:20:53 2010//
+/check_perl_syntax.csh/1.1/Thu Jul 16 02:38:24 2009//
+/client_caspsr_archive_manager.pl/1.1/Thu Jul 16 02:38:24 2009//
+/client_caspsr_auxiliary_manager.pl/1.2/Sun Apr 11 06:20:53 2010//
+/client_caspsr_background_processor.pl/1.2/Sun Apr 11 06:20:53 2010//
+/client_caspsr_command.pl/1.1/Sun Apr 11 06:21:58 2010//
+/client_caspsr_gain_controller.pl/1.1/Thu Jul 16 02:38:24 2009//
+/client_caspsr_master_control.pl/1.1/Sun Apr 11 06:21:58 2010//
+/client_caspsr_observation_manager.pl/1.2/Sun Apr 11 06:20:53 2010//
+/client_caspsr_processing_manager.pl/1.2/Sun Apr 11 06:20:53 2010//
+/client_caspsr_src_logger.pl/1.1/Thu Jul 16 02:38:24 2009//
+/client_caspsr_sys_logger.pl/1.1/Thu Jul 16 02:38:24 2009//
+/server_caspsr_auxiliary_manager.pl/1.1/Thu Jul 16 02:38:24 2009//
+/server_caspsr_gain_manager.pl/1.1/Thu Jul 16 02:38:24 2009//
+/server_caspsr_logger.pl/1.1/Thu Jul 16 02:38:24 2009//
+/server_caspsr_pwc_monitor.pl/1.1/Thu Jul 16 02:38:24 2009//
+/server_caspsr_results_manager.pl/1.1/Thu Jul 16 02:38:24 2009//
+/server_caspsr_src_monitor.pl/1.1/Sun Apr 11 06:21:58 2010//
+/server_caspsr_sys_monitor.pl/1.1/Thu Jul 16 02:38:24 2009//
+/server_caspsr_tcs_interface.pl/1.1/Thu Jul 16 02:38:24 2009//
+/server_caspsr_web_monitor.pl/1.1/Thu Jul 16 02:38:24 2009//
+D

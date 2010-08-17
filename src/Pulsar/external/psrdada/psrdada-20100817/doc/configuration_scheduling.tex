@@ -1,0 +1,66 @@
+\chapter{Configuration and Scheduling Software}
+
+Depending upon the objectives of the experiment, DADA configuration
+may change from observation to observation.
+
+\section{Instrumental Configuration}
+
+Based upon the parameters of observation, the {\tt dada} control
+program will set up various operational parameters, including:
+\begin{itemize}
+\item buffer sizes: DMA, Data Block, file and network I/O
+\item number of Primary nodes
+\item number of Secondary nodes
+\item assignment of Secondary to Primary nodes
+\item operational mode: offline, simultaneous, or diskless
+\item overlap required between Secondary nodes
+\end{itemize}
+These operational parameters will be stored in a {\bf configuration
+database}, which will specify the instrument configuration and data
+reduction requirements for various combinations of source, receiver,
+centre frequency, band width, etc.
+
+Entries in the configuration database may have an expiration date
+associated with them.  In this manner, the observer may specify
+special configuration and/or reduction options for a specific
+experiment without permanently changing the default behaviour.
+
+\section{Data Reduction}
+
+The Configuration and Scheduling program, {\tt dadaskd}, will be used
+to configure and schedule all data reduction operations.  Before the
+{\bf diskless} mode of data reduction is implemented, all data will
+exist as a file on either the Primary or Secondary nodes.  Whenever a
+file is written to disk, an entry will be registered in a centralized
+{\bf observations database}, which will contain basic header
+information such as
+\begin{itemize}
+\item source name
+
+\item start time (UTC)
+
+\item centre frequency (MHz)
+
+\item band width (MHz)
+\end{itemize}
+as well as the location (machine and file name) of the data.  Each
+entry will also contain a time-stamped list of {\bf performed
+operations}, describing when the data was written, when and how it was
+processed, when it was deleted, etc.  The header information will be
+used to find matches in the configuration database.  An observation
+may be processed in multiple ways, as specified by the list of {\bf
+requested operations} in the configuration database entry.
+
+If it is possible to achieve two requested operations in one execution
+of {\tt dspsr} then this will be done.  Otherwise, data reduction
+operations will be performed one at a time.  After each operation is
+completed, it will be recorded in the list of performed operations of
+the observations database entry.
+
+The scheduling software will periodically check or poll the
+observations database.  Any entries that require data reduction will
+be scheduled according to the data reduction parameters of the
+requested operations in the corresponding configuration database
+entry.  An observation will be considered completely processed when
+the list of performed operations is equal to the list of requested
+operations.  At this point, the raw data will be deleted or archived.

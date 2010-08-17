@@ -1,0 +1,73 @@
+\chapter{Operational Logging}
+
+The various messages produced by the data acquisition software must be
+logged and/or communicated to possibly more than one listener.  Therefore,
+all messages will be sent using the {\tt multilog} API.  A multilog session
+is opened by calling
+\begin{verbatim}
+multilog_t* multilog_open (const char* program_name, char syslog);
+\end{verbatim}
+
+\begin{itemize}
+\item {\tt program\_name} the name of the program will precede each log message
+
+\item {\tt syslog} if non-zero, all messages are cc'd to syslog
+\end{itemize}
+and closed by calling
+\begin{verbatim}
+int multilog_close (multilog_t* log);
+\end{verbatim}
+
+\begin{itemize}
+\item {\tt log} pointer to an open multilog session
+\end{itemize}
+Once opened, file streams may be added by calling
+\begin{verbatim}
+int multilog_add (multilog_t* log, FILE* fptr);
+\end{verbatim}
+
+\begin{itemize}
+\item {\tt log} pointer to an open multilog session
+
+\item {\tt fptr} pointer to an open file stream
+\end{itemize}
+Messages are written to all file streams (and syslog, if enabled) by calling
+\begin{verbatim}
+int multilog (multilog_t* log, int priority, const char* format, ...);
+\end{verbatim}
+
+\begin{itemize}
+\item {\tt log} pointer to an open multilog session
+
+\item {\tt priority} a {\tt syslog} priority
+
+\item {\tt format} an fprintf-style formatting string
+
+\item {\tt ...} the value(s) to be printed according to the format
+\end{itemize}
+
+Output messages are assigned a priority as described in the man page
+for the standard C {\tt syslog} utility.
+
+\section{Example}
+
+\begin{verbatim}
+#include "multilog.h"
+
+[...]
+
+  /* open a connection to syslogd using the standard C facility */
+  openlog ("dada_dbdisk", LOG_CONS, LOG_USER);
+
+  /* open a multilog session that will use syslog */
+  multilog_t* log = multilog_open (1);
+
+  /* copy all messages to the standard error */
+  multilog_add (log, stderr);
+
+  /* write a message */
+  char* world_name = "Earth";
+  int world_number = 1;
+
+  multilog (log, LOG_INFO, "Hello %s %d", world_name, world_number);
+\end{verbatim}

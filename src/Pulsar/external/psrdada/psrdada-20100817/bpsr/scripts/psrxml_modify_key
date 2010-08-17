@@ -1,0 +1,35 @@
+#!/bin/bash
+psrxml=$1
+key=$2
+newval=$3
+newargs=$4
+inkey=$5
+
+curr=`grep -e "<$key[ >]" $psrxml`
+if [[ $curr == "" ]]
+then
+  # we have to insert the key
+  echo  adding new key $key = $newval
+    if test x$newargs = x ; then
+      newargs=""
+    else
+      newargs=" $newargs"
+    fi
+
+  sed -i -e "s&\(^.*<psrxml [^>]*>.*\)&\1\n<$key$newargs>$newval</$key>&" $psrxml
+else
+  # we have to replace the key
+  echo replacing existing key $key =$newval in $inkey
+  if test x$newargs = x ; then
+    newargs="\1"
+  else
+    newargs=" $newargs"
+  fi
+  if test x$inkey = x ; then
+  sed -i -e "s&<$key\([^>]*\)>.*</$key>&<$key$newargs>$newval</$key>&" $psrxml
+  else
+    echo replacing existing key $key inside $inkey
+    sed -i -e "/<$inkey>/,/<\/$inkey>/s&<$key\([^>]*\)>.*</$key>&<$key$newargs>$newval</$key>&" $psrxml
+  fi
+fi
+

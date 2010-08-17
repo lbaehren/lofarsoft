@@ -1,0 +1,69 @@
+\chapter{APSR Objectives}
+\label{app:dada_todo}
+
+APSR will depend upon the following new techniques, which must be
+implemented, demonstrated, and rigorously tested.
+
+\begin{itemize}
+
+\item streaming UDP packets from board to nodes
+
+\item optimal use of multiple cores
+
+\item processing directly from RAM 
+
+\item simultaneously processing and writing to disk
+
+\item processing data written to disk \\
+
+\end{itemize}
+
+\noindent
+In addition, the following management software must be written/adapted:
+
+\begin{itemize}
+
+\item Data reduction control: scheduling and logging
+
+\item User Interfaces: text, gui, web-based?
+
+\item TCS Interface
+
+\item Collection, presentation, and archival of reduced data
+
+\end{itemize}
+\section{Streaming UDP packets from board to nodes}
+
+Can it be done while processing? How should dropped packets be handled? \\
+{\bf Who:} Grant and Willem \\
+{\bf Status:} hardware ready, no software
+
+\section{Optimal use of multiple cores}
+
+Is a multi-threaded solution the most efficient? \\
+{\bf Who:} Willem \\
+{\bf Status:} implemented but not optimized, currently debugging
+
+\section{Processing directly from RAM}
+
+Should multiple threads be triggered to return results before reaching
+end-of-data, or should end-of-data be induced at regular intervals? \\
+{\bf Who:} Willem \\
+{\bf Status:} implemented, tested on single archive only
+
+\section{Simultaneously processing and writing to disk}
+
+Should a monitor be used to schedule the two tasks intelligently, or
+should priorities be assigned to the processes? \\
+{\bf Who:} Willem {\it and Andrew?} \\
+{\bf Status:} requires redesign of ring buffer
+
+\section{Processing data written to disk}
+
+Can the redistribution and processing of data written to disk take
+place during easy observations, or only offline?  How should different
+data sets be scheduled?  \\
+{\bf Who:} Willem {\it and Andrew?} \\
+{\bf Status:} simple plan: process easiest (lowest DM) observations first
+
+

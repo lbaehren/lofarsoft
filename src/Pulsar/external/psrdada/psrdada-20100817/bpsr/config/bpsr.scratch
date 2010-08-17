@@ -1,0 +1,1 @@
+PROC_CMD dada_dbdisk -s -D /lfs/data0/bpsr/scratch -k deda

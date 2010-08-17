@@ -1,0 +1,83 @@
+\documentclass{scrreprt}
+\usepackage{psfig}
+\usepackage{atbeginend}
+
+\makeatletter
+\makeatother
+
+\BeforeBegin{itemize}{\setlength{\topsep}{-2mm}}
+\BeforeBegin{itemize}{\setlength{\partopsep}{-2mm}}
+
+\BeforeBegin{enumerate}{\setlength{\topsep}{-2mm}}
+\BeforeBegin{enumerate}{\setlength{\partopsep}{-2mm}}
+
+\AfterBegin{itemize}{\setlength{\itemsep}{-1mm}}
+\AfterBegin{enumerate}{\setlength{\itemsep}{-1mm}}
+
+\begin{document}
+
+\title{Distributed Acquisition and Data Analysis (DADA) Software Specification}
+
+\author{Willem van Straten}
+
+\maketitle
+\tableofcontents{}
+
+\begin{abstract}
+
+This document describes the software component of the Distributed
+Acqusisition and Data Analysis (DADA) system.  This software has been
+developed to support the recording and processing of timeseries from
+one or more digitizers using one or more computers.  The first version
+of the code was written for the 2nd generation of the
+Caltech-Parkes-Swinburne Recorder, CPSR-II, installed at the Parkes
+Observatory in 2002.  This code was updated and revised for the 2nd
+generation of the Dutch Pulsar Machine, PuMa-II, installed at the
+Westerbork Synthesis Radio Telescope (WSRT) in 2005.  The next
+revision of this code will be used to implement the
+ATNF-Parkes-Swinburne Recorder, APSR, to be installed at Parkes in
+2007.
+
+The DADA software must be run on one or more data acquisition
+machines, called the \emph{Primary} nodes, and may optionally include
+the use of a (possibly distributed) processing cluster of
+\emph{Secondary} nodes.
+
+Each Primary Node interfaces directly with the data acquisition
+hardware at the telescope; for example, via a Direct Memory Access
+(DMA) card, a PCI card, or a Network Interface Card (NIC).  From RAM,
+the Primary Node may write the data to a local file system, forward
+the data on to one or more Secondary nodes, or process the data
+directly from RAM.
+
+The communications plan and protocol used for sending the data from
+Primary to Secondary node may change over the life of an instrument.
+Therefore, an adaptable and modular design philosophy has been
+employed in the data flow control software, based on the use of a ring
+buffer in shared memory.  This document contains an overview of the
+software model, including a discussion of the design decisions made at
+each level of command, control, and configuration.
+
+\end{abstract}
+
+\input{intro}
+\input{data_flow}
+\input{data_reduction}
+\input{command_monitoring}
+\input{pwc}
+\input{control_interface}
+\input{configuration_scheduling}
+\input{todo}
+\input{summary}
+
+\appendix
+\input{ipc}
+\input{header}
+\input{log}
+\input{socket}
+\input{dada_pwc}
+\input{dada_pwc_main}
+\input{dada_prc_main}
+\input{testing}
+
+\end{document}

@@ -1,0 +1,122 @@
+\chapter{Testing the DADA Software}
+\label{app:software}
+
+This chapter describes the various programs that have been designed to
+facilitate testing and development of the DADA software
+
+\section{Primary Write Client Demonstration, {\tt dada\_pwc\_demo}}
+
+The Primary Write Client (PWC) Demonstration program, {\tt
+dada\_pwc\_demo}, implements an example PWC interface.  It does not
+actually acquire any data and therefore can be run on any computer.
+This program has two modes of operation: free and locked.
+
+In {\em free} mode, {\tt dada\_pwc\_demo} does not connect to the
+Header and Data Blocks; therefore, it is not necessary to create the
+shared memory resources and run a Primary Read Client program.  This
+mode is most useful when testing the command interface and state
+machine of the Primary Write Client.  To run in {\em free} mode,
+simply type
+\begin{verbatim}
+dada\_pwc\_demo
+\end{verbatim}
+
+In {\em locked} mode, {\tt dada\_pwc\_demo} connects to the Header and
+Data Blocks; therefore, it is necessary to first create the shared
+memory resources and also run a Primary Read Client program, such as
+{\tt dada\_dbdisk}.  This mode is most useful when testing the
+interface between Primary Write Client, Header and Data Blocks, and
+Primary Read Client software.  To run in {\em locked} mode, for
+example
+\begin{verbatim}
+dada\_db -d         # destroy existing shared memory resources
+dada\_db            # create new shared memory resources
+dada\_pwc\_demo -l   # run in locked mode
+\end{verbatim}
+The first step is particularly useful when debugging.
+In another window on the same machine, you might also run
+\begin{verbatim}
+dada\_dbdisk -WD /tmp
+\end{verbatim}
+
+To connect with the PWC demonstration program and begin issuing
+commands, simply run
+\begin{verbatim}
+telnet localhost 56026
+\end{verbatim}
+or replace {\tt localhost} with the name of the machine on which the
+program is running.
+
+As described in Section ???, it is necessary to enter the 
+{\bf prepared} state before recording can begin.  This is done by issuing
+the {\bf header} command.
+
+\subsection{Primary Write Client Command, {\tt dada\_pwc\_command}}
+
+It is also possible to control one or more instance of {\tt
+dada\_pwc\_demo} using the Primary Write Client Command program, {\tt
+dada\_pwc\_command}. 
+
+This program takes a specification file and creates a unique header
+for each primary write client.
+
+Therefore, it requires a configuration file that specifies the number
+of primary write clients, the port on which they are listening, and
+the full path to a file that lists the parameters that should be
+copied from the specification to the header block of each primary
+write client.
+
+A sample configuration file can be found in config/test\_dada.cfg.
+Make a copy of this file and edit the parameters appropriately.
+
+The SPEC\_PARAM\_FILE parameter must list the full path to
+config/specification\_to\_header.txt, which should not require editing.
+
+By default, {\tt dada\_pwc\_command} uses the same port number (56026)
+as {\tt dada\_pwc\_demo}.  Therefore, if you are running both programs
+on the same machine, it will be necessary to specify a different port
+number for the command interface; e.g.
+\begin{verbatim}
+dada\_pwc\_command -p 20013
+\end{verbatim}
+
+The PWC command program must be configured using a specification file;
+an example can be found in config/test\_specification.txt.  Tell
+{\tt dada\_pwc\_command} to use this file using the ``config'' command,
+giving the full path to config/test\_specification.txt.
+
+\subsubsection{Example: {\tt dada\_pwc\_command}}
+
+Suppose that you want to simulate control of two primary write clients
+on two different machines, named dada01 and dada02:
+
+\begin{enumerate}
+
+\item Copy config/test\_data.cfg to \$HOME/test\_my.cfg
+
+\item Copy config/specification\_to\_header.txt to \$HOME/spec2hdr.txt
+
+\item Copy config/test\_specification.txt to \$HOME/spec.cfg
+
+\item Set the environment variable, DADA\_CONFIG to \$HOME/test\_my.cfg
+
+\item Edit the file, setting {\tt PWC\_0} and {\tt PWC\_1} to {\tt dada01}
+	and {\tt dada02}, and SPEC\_PARAM\_FILE to \$HOME/spec2hdr.txt
+        [you will have to expand the shell variable \$HOME]
+
+\item run {\tt dada\_pwc\_demo} on dada01 and dada02
+
+\item On any machine with network access to dada01 and dada02, say dada,
+      run {\tt dada\_pwc\_command -p 20013}
+
+\item On any machine with network access to dada, run {telnet dada 20013}
+
+\item Enter the specification, {\tt config \$HOME/spec.cfg} and note
+      the action on dada01 and dada02, ending with {\tt STATE = prepared}
+
+\item Type {\tt start} and note the {\tt Start recording data} messages
+      on dada01 and dada02
+
+\item Type {\tt stop} and return to {\tt STATE = idle}
+
+\end {enumerate}
