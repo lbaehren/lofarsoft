@@ -257,7 +257,7 @@ add_custom_target (psrdada_install
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrdada_name}
   COMMENT "Install project psrdada into ${CMAKE_INSTALL_PREFIX}/psrdada..."
   )
-#add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootstrap psrdada_unpack)
+add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootstrap psrdada_unpack)
 
 ## ==============================================================================
 ##
