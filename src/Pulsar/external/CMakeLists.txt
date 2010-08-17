@@ -200,6 +200,63 @@ add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_un
 
 ## ==============================================================================
 ##
+##  Handle configuration and build of PSRDADA
+##
+## ==============================================================================
+
+set (psrdada_version "20100817")
+set (psrdada_name "psrdada-${psrdada_version}")
+set (psrdada_directory "psrdada/psrdada-${psrdada_version}")
+
+add_custom_target (psrdada_unpack
+  COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${psrdada_name}
+  COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${psrdada_directory} ${PULSAR_BINARY_DIR}/apps/
+  COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${psrdada_name}/build
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+  COMMENT "Copying psrdada from ${PULSAR_SOURCE_DIR}/external/${psrdada_directory} to ${PULSAR_BINARY_DIR}/apps/${psrdada_name}"
+  )
+
+add_custom_target (psrdada_bootstrap
+  COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrdada_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrdada_name} 
+  COMMENT "Running bootstrap for project psrdada in ${PULSAR_BINARY_DIR}/apps/${psrdada_name} ..."
+  )
+add_dependencies (psrdada_bootstrap psrdada_unpack)
+
+if (UNIX)
+ if (APPLE)
+add_custom_target (psrdada_configure
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrdada_name} LOGIN_ARCH=darwin --with-psrchive-dir=${CMAKE_INSTALL_PREFIX}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrdada_name}
+  COMMENT "Configuring project psrdada (darwin) in ${PULSAR_BINARY_DIR}/apps/${psrdada_name} ..."
+  )
+add_dependencies (psrdada_configure psrdada_bootstrap psrdada_unpack)
+ else (APPLE)
+add_custom_target (psrdada_configure
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrdada_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrdada_name}
+  COMMENT "Configuring project psrdada (linux) in ${PULSAR_BINARY_DIR}/apps/${psrdada_name} ..."
+  )
+add_dependencies (psrdada_configure psrdada_bootstrap psrdada_unpack)
+ endif (APPLE)
+endif (UNIX)
+
+add_custom_target (psrdada_build
+  COMMAND make prefix=${PULSAR_BINARY_DIR}/apps/${psrdada_name}/build
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrdada_name}
+  COMMENT "Building project psrdada in ${PULSAR_BINARY_DIR}/apps/${psrdada_name}..."
+  )
+add_dependencies (psrdada_build psrdada_configure psrdada_unpack)
+
+add_custom_target (psrdada_install
+  COMMAND make install prefix=${CMAKE_INSTALL_PREFIX}/psrdada
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrdada_name}
+  COMMENT "Install project psrdada into ${CMAKE_INSTALL_PREFIX}/psrdata..."
+  )
+add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootstrap psrdada_unpack)
+
+## ==============================================================================
+##
 ##  Handle configuration and build of DSPSR
 ##
 ## ==============================================================================
@@ -217,7 +274,7 @@ add_custom_target (dspsr_unpack
   )
 
 add_custom_target (dspsr_bootstrap
-  COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX}
+  COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdata
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name} 
   COMMENT "Running bootstrap for project dspsr in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
@@ -226,21 +283,20 @@ add_dependencies (dspsr_bootstrap dspsr_unpack)
 if (UNIX)
  if (APPLE)
 add_custom_target (dspsr_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=darwin --with-psrchive-dir=${CMAKE_INSTALL_PREFIX}
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=darwin --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdata
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Configuring project dspsr (darwin) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
 add_dependencies (dspsr_configure dspsr_bootstrap dspsr_unpack)
  else (APPLE)
 add_custom_target (dspsr_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX}
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdata
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Configuring project dspsr (linux) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
 add_dependencies (dspsr_configure dspsr_bootstrap dspsr_unpack)
  endif (APPLE)
 endif (UNIX)
-
 
 add_custom_target (dspsr_build
   COMMAND make prefix=${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
@@ -250,7 +306,7 @@ add_custom_target (dspsr_build
 add_dependencies (dspsr_build dspsr_configure dspsr_unpack)
 
 add_custom_target (dspsr_install
-  COMMAND make install prefix=${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build prefix=${CMAKE_INSTALL_PREFIX}
+  COMMAND make install prefix=${CMAKE_INSTALL_PREFIX}
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Install project dspsr into ${CMAKE_INSTALL_PREFIX}..."
   )
