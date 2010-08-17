@@ -250,6 +250,8 @@ add_dependencies (psrdada_build psrdada_configure psrdada_unpack)
 
 add_custom_target (psrdada_install
   COMMAND make install prefix=${CMAKE_INSTALL_PREFIX}/psrdada
+  COMMAND cd ${CMAKE_INSTALL_PREFIX}/include && ln -s ../psrdada/include/* .
+  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib && ln -s ../psrdada/lib/* .
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrdada_name}
   COMMENT "Install project psrdada into ${CMAKE_INSTALL_PREFIX}/psrdata..."
   )
@@ -306,7 +308,7 @@ add_custom_target (dspsr_build
 add_dependencies (dspsr_build dspsr_configure dspsr_unpack)
 
 add_custom_target (dspsr_install
-  COMMAND make install prefix=${CMAKE_INSTALL_PREFIX}
+  COMMAND make install prefix=${CMAKE_INSTALL_PREFIX} -I${CMAKE_INSTALL_PREFIX}/psrdada/include 
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Install project dspsr into ${CMAKE_INSTALL_PREFIX}..."
   )
