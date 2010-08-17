@@ -23,14 +23,15 @@
 # - Check for the presence of HDF5
 #
 # The following variables are set when HDF5 is found:
-#  HAVE_HDF5            = Set to true, if all components of HDF5 have been found.
-#  HDF5_INCLUDES        = Include path for the header files of HDF5
-#  HDF5_HDF5_LIBRARY    = Path to libhdf5
-#  HDF5_HDF5_HL_LIBRARY = Path to libhdf5_hl, the high-level interface
-#  HDF5_LIBRARIES       = Link these to use HDF5
-#  HDF5_MAJOR_VERSION   = Major version of the HDF5 library
-#  HDF5_MINOR_VERSION   = Minor version of the HDF5 library
-#  HDF5_RELEASE_VERSION = Release version of the HDF5 library
+#  HAVE_HDF5             = Set to true, if all components of HDF5 have been found.
+#  HDF5_INCLUDES         = Include path for the header files of HDF5
+#  HDF5_HDF5_LIBRARY     = Path to libhdf5
+#  HDF5_HDF5_HL_LIBRARY  = Path to libhdf5_hl, the high-level interface
+#  HDF5_HDF5_CPP_LIBRARY = Path to libhdf5_cpp
+#  HDF5_LIBRARIES        = Link these to use HDF5
+#  HDF5_MAJOR_VERSION    = Major version of the HDF5 library
+#  HDF5_MINOR_VERSION    = Minor version of the HDF5 library
+#  HDF5_RELEASE_VERSION  = Release version of the HDF5 library
 
 if (NOT FIND_HDF5_CMAKE)
 
@@ -49,7 +50,7 @@ if (NOT FIND_HDF5_CMAKE)
     PATH_SUFFIXES hdf5
     NO_DEFAULT_PATH
     )
-  
+
   ## search for individual header files
   
   find_path (HAVE_HDF5_HDF5_H hdf5.h
@@ -206,6 +207,28 @@ if (NOT FIND_HDF5_CMAKE)
     endif (HAVE_HDF5 AND HAVE_TESTHDF5VERSION)
     
   endif (HAVE_H5PUBLIC_H)
+
+  ##_____________________________________________________________________________
+  ## HDF5 compiled with parallel IO support?
+
+  set( HDF5_IS_PARALLEL FALSE )
+  
+  foreach( _dir ${HDF5_INCLUDES} )
+    
+    if( EXISTS "${_dir}/H5pubconf.h" )
+      file( STRINGS "${_dir}/H5pubconf.h" 
+        HDF5_HAVE_PARALLEL_DEFINE
+        REGEX "HAVE_PARALLEL 1" )
+      if( HDF5_HAVE_PARALLEL_DEFINE )
+        set( HDF5_IS_PARALLEL TRUE )
+      endif()
+    endif()
+    
+  endforeach()
+  
+  set( HDF5_IS_PARALLEL ${HDF5_IS_PARALLEL} CACHE BOOL
+    "HDF5 library compiled with parallel IO support" )
+  
   
   ##_____________________________________________________________________________
   ## Feedback
@@ -239,6 +262,7 @@ if (NOT FIND_HDF5_CMAKE)
     HDF5_HDF5_LIBRARY
     HDF5_HDF5_HL_LIBRARY
     HDF5_HDF5_CPP_LIBRARY
+    HDF5_IS_PARALLEL
     )
   
 endif (NOT FIND_HDF5_CMAKE)

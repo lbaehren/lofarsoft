@@ -55,7 +55,7 @@ option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
 option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
 
 option (CR_WITH_GLISH           "Support for Glish applications?"          NO  )
-option (CR_WITH_PYCR            "Support for Python applications?"         NO  )
+option (CR_WITH_PYCR            "Support for Python applications?"         YES )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"         YES )
 option (CR_WITH_GUI             "Build the graphical interface?"           NO  )
 option (CR_WITH_PYPELINE        "Build the Pypeline library?"              YES )

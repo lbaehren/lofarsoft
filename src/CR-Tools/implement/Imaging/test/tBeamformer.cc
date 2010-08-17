@@ -489,7 +489,6 @@ int test_weights (uint blocksize=1024)
   cout << "\n[tBeamformer::test_weights]\n" << endl;
 
   int nofFailedTests (0);
-  uint fftLength = (blocksize+1)/2;
 
   /* Create beamformer object to work with */
   CR::Beamformer bf (get_antennaPositions(),
@@ -502,7 +501,7 @@ int test_weights (uint blocksize=1024)
 		     CR::test_frequencyValues(),
 		     false);
 
-  bf.summary();
+  std::cout << "-- blocksize = " << blocksize << std::endl;
 
   /* Work with default settings (geometrical weights only) */
   try {
@@ -667,18 +666,17 @@ int test_coordinates (uint blocksize=512)
   incoming antennas (in the frequency domain) into beamformed data.
 
   \param blocksize -- The number of samples per input block of data
-  \param fftLength -- Output size of the FFT.
 
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
-int test_processing (uint blocksize=1024,
-		     uint fftLength=513)
+int test_processing (uint blocksize=1024)
 {
   cout << "\n[tBeamformer::test_processing]\n" << endl;
 
   int nofFailedTests (0);
   bool status (true);
+  // uint fftLength = (blocksize+1)/2;
   
   // parameters for GeomDelay
   uint nofAntennas (4);
