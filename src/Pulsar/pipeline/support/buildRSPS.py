@@ -7,10 +7,10 @@ import RSPlist
 
 subnet       = '/net/sub5'
 parts        = ['data1', 'data2', 'data3', 'data4']
-#nodes        = ['lse013', 'lse014', 'lse015']
-nodes        = ['lse015']
+nodes        = ['lse013', 'lse014', 'lse015']
+#nodes        = ['lse015']
 pulsArch     = 'PULSAR_ARCHIVE'
-pulsArchPath = os.path.join(subnet, nodes[0], parts[3])
+pulsArchPath = os.path.join(subnet, nodes[2], parts[3])
 stokes       = "incoherentstokes"
 lofarSoft    = "/home/kanderson/LOFAR/lofarsoft"
 defaultInf   = os.path.join(lofarSoft, "release/share/pulsar/data/lofar_default.inf")
@@ -34,7 +34,7 @@ class buildRSPS():
         self.obsidPath = os.path.join(self.pArchive,self.obsid)
         self.stokesPath= os.path.join(self.obsidPath,stokes)
         self.filefactor= filefactor
-        self.parset    = os.path.join(defParsets,self.obsid,defParFile)
+        self.parset    = self.testParset()
 
 
     def buildRSPS(self):
@@ -71,6 +71,68 @@ class buildRSPS():
 
         return
 
+
+    def testParset(self):
+        """
+        test for parset location type
+
+        old location style
+
+        /globalhome/lofarsystem/log/<obsid>/RTCP.parset.0
+        
+        new location style,
+
+        /globalhome/lofarsystem/log/L<yyy-mm-dd>_<hhmmss>/RTCP-09874.parset
+
+        where hhmmss is the time of file write on day, <yyyy-mm-dd>
+
+        """
+
+        nominalParsetFile = os.path.join(defParsets, self.obsid, defParFile)
+
+        if os.path.isfile(nominalParsetFile):
+            print "Found nominal parset file."
+            parset = nominalParsetFile
+        else:
+            print "searching for alternate parset..."
+            parsetTuple = self.__findParsetFile()
+            parset = os.path.join(parsetTuple[0],parsetTuple[1])
+        return parset
+
+
+
+    def __findParsetFile(self):
+        """
+        Hunt down the parset for a given obsid.
+        Host site is
+
+        /globalhome/lofarsystem/log/
+
+        which is 
+
+        Ivocation of this method necessarily implies that "nominalparsetFile"
+        did not exist, and this obsid has a "new form" parset file.
+
+        """
+
+        parsetFile   = None
+        parsetLogDir = None
+
+        searchPath = defParsets
+        for root, dir, files in os.walk(searchPath,topdown=False):
+            for file in files:
+                if file == "RTCP-"+self.obsid.split("_")[1]+".parset":
+                    parsetLogDir = root
+                    parsetFile   = file
+                    break
+                continue
+            if parsetFile and parsetLogDir:
+                break
+            else: continue
+        return (parsetLogDir, parsetFile)
+
+
+
     def __prepRSPS(self, rspGroupLists):
 
         """
@@ -90,6 +152,8 @@ class buildRSPS():
         # get default parset file into obsid directory  #
 
         finalParFile = os.path.join(self.obsidPath,self.obsid+".parset")
+        print finalParFile
+        print "copy ",self.parset,"to obsid directory"
         shutil.copyfile(self.parset,os.path.join(self.obsidPath,finalParFile))
 
         # _____________________________________________ #
