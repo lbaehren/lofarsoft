@@ -19,7 +19,6 @@ import signal
 
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.lofarnode import run_node
-from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import gvds_iterator
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
