@@ -4,10 +4,10 @@ import os
 
 subnet       = '/net/sub5'
 parts        = ['data1', 'data2', 'data3', 'data4']
-nodes        = ['lse015']
-#nodes        = ['lse013', 'lse014', 'lse015']
+#nodes        = ['lse015']
+nodes        = ['lse013', 'lse014', 'lse015']
 pulsArch     = 'PULSAR_TESTARCH'
-pulsArchPath = os.path.join(subnet, nodes[0], parts[3])
+pulsArchPath = os.path.join(subnet, nodes[2], parts[3])
 logLocation  = '/globalhome/lofarsystem/log'
 logFileName  = 'run.Storage.R00.log'
 
