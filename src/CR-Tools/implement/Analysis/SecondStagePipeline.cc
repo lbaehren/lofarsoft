@@ -165,7 +165,9 @@ namespace CR { // Namespace CR -- begin
     return PhaseCalDelays_p;
   };
 
- 
+  //_____________________________________________________________________________
+  //                                                                 InitPhaseCal
+
   Bool SecondStagePipeline::InitPhaseCal(DataReader *dr){
     try {
       Vector<Int> AntennaIDs;
@@ -218,9 +220,12 @@ namespace CR { // Namespace CR -- begin
 
   };
   
+  //_____________________________________________________________________________
+  //                                                            InitRFIMitigation
+
   Bool SecondStagePipeline::InitRFIMitigation(DataReader *dr){
     try {
-      
+      dr->summary();
     } catch (AipsError x) {
       cerr << "SecondStagePipeline::InitRFIMitigation: " << x.getMesg() << endl;
       return False;
@@ -228,6 +233,8 @@ namespace CR { // Namespace CR -- begin
     return True;
   };
   
+  //_____________________________________________________________________________
+  //                                                        FlagNotActiveAntennas
 
   Bool SecondStagePipeline::FlagNotActiveAntennas(DataReader *dr) {
     try {

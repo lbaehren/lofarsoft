@@ -61,7 +61,10 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   void genTVSpec::summary (std::ostream &os)
-  {;}
+  {
+    os << "[genTVSpec] Summary of internal parameters" << std::endl;
+    os << "-- nof. frequencies = " << frequency_p.nelements() << std::endl;
+  }
   
   // ============================================================================
   //

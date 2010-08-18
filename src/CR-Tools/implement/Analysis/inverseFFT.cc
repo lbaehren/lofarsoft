@@ -602,6 +602,7 @@ namespace CR {  // Namespace CR -- begin
     Double long_func = 0.0;
 
     f107_p = F107;
+    tau_p  = tau;
     
     try {
       Double long1      = 0.0;
@@ -665,6 +666,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
     Double UT_func = 0.0;
 
     f107_p = F107;
+    tau_p  = tau;
     
     try {
       Double UT1        = 0.0;
@@ -726,6 +728,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
     Double combined_func = 0.0;
 
     f107_p = F107;
+    tau_p  = tau;
     
     try {
       Double com1(0.0) ;

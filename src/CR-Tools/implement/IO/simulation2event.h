@@ -2,8 +2,8 @@
  | $Id                                                                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -81,25 +81,19 @@ namespace CR { // Namespace CR -- begin
   */  
   class simulation2event {
     
-    /*!
-      \brief The CalTableReader
-    */
+    //! The CalTableReader
     CalTableReader *CTRead;
 
   public:
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     simulation2event ();
     
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~simulation2event ();
         
     // --------------------------------------------------------------- Parameters
@@ -153,9 +147,14 @@ namespace CR { // Namespace CR -- begin
       
       \result returns true if read was successful
     */
-    Bool generateEvent(String outfile, String const SimulationName,String const AntListName,
-		       String const path=".", uInt date=1104580800, int presync=32768,
-		       Bool AddTV=True, Bool AddNoise=True); 
+    Bool generateEvent(String outfile,
+		       String const SimulationName,
+		       String const AntListName,
+		       String const path=".",
+		       uInt date=1104580800,
+		       int presync=32768,
+		       Bool AddTV=True,
+		       Bool AddNoise=True); 
     
   private:
         

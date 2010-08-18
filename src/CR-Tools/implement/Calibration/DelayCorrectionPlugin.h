@@ -79,16 +79,12 @@ namespace CR { // Namespace CR -- begin
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     DelayCorrectionPlugin ();
         
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~DelayCorrectionPlugin ();
         
     // --------------------------------------------------------------- Parameters

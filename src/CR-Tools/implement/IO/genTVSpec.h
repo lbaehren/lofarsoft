@@ -72,19 +72,11 @@ namespace CR { // Namespace CR -- begin
 
   protected:
     
-    /*!
-      \brief The CalTableReader
-    */
+    //! The CalTableReader
     CalTableReader *CTRead;
-
-    /*!
-      \brief Storage for the frequency-axis
-    */
+    //! Storage for the frequency-axis
     Vector<Double> frequency_p;
-
-    /*!
-      \brief Storage for the Antenna-IDs
-    */
+    //! Storage for the Antenna-IDs
     Vector<Int> AntIDs_p;
 
   public:

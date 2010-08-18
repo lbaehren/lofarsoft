@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -31,7 +31,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  DelayCorrectionPlugin::DelayCorrectionPlugin () {
+  DelayCorrectionPlugin::DelayCorrectionPlugin ()
+  {
     parameters_p.define("frequencyValues",  Vector<Double>());
     parameters_p.define("delays",           Vector<Double>());
     parameters_p.define("sampleRate",       Double(80e6) );
@@ -55,9 +56,9 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   void DelayCorrectionPlugin::summary (std::ostream &os)
-  {;}
-  
-  
+  {
+    os << "[DelayCorrectionPlugin] Summary of internal parameters" << std::endl;
+  }
   
   // ============================================================================
   //

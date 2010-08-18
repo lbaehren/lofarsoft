@@ -97,6 +97,8 @@ namespace CR {  // Namespace CR -- begin
     double altitude_p;
     //! Table number
     uint tableNumber_p;
+
+    double tau_p;
     
   public:
     

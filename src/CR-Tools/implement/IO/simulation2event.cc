@@ -56,7 +56,9 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   void simulation2event::summary (std::ostream &os)
-  {;}
+  {
+    os << "[simulation2event] Summary of internal parameters" << std::endl;
+  }
   
   
   // ============================================================================
@@ -65,10 +67,15 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  
-  Bool simulation2event::generateEvent(String outfile, String const SimulationName,
-				       String const AntListName, String const path, 
-				       uInt date, int presync, Bool AddTV, Bool AddNoise){
+  Bool simulation2event::generateEvent(String outfile,
+				       String const SimulationName,
+				       String const AntListName,
+				       String const path, 
+				       uInt date,
+				       int presync,
+				       Bool AddTV,
+				       Bool AddNoise)
+  {
     Bool success=True;
     try{
       if (CTRead == NULL){
