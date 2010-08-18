@@ -43,7 +43,7 @@ check_function_exists (strstr   HAVE_STRSTR  )
 
 ## Create config.h -----------------------------------------
 
-configure_file (${USG_ROOT}/devel_common/cmake/config_wcslib.h.in
+configure_file (${LUS_ROOT}/devel_common/cmake/config_wcslib.h.in
   ${WCSLIB_BINARY_DIR}/config.h)
 
 ## -----------------------------------------------------------------------------

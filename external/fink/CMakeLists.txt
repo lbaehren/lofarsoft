@@ -19,7 +19,7 @@ option (FINK_ASSUME_YES        "Default answer for all interactive questions?" Y
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${FINK_SOURCE_DIR}
   ${FINK_SOURCE_DIR}/..
@@ -28,11 +28,11 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   $ENV{LOFARSOFT}
   )
 
-if (USG_ROOT)
-  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (USG_ROOT)
+if (LUS_ROOT)
+  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (LUS_ROOT)
   message (FATAL_ERROR "[Fink] Unable to locate additional CMake scripts!")
-endif (USG_ROOT)
+endif (LUS_ROOT)
 
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available

@@ -18,22 +18,22 @@ cmake_policy (VERSION 2.8)
 ##
 ## ==============================================================================
 
-find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${LUS_SOURCE_DIR}
   ${LUS_SOURCE_DIR}/..
   $ENV{LOFARSOFT}
   )
 
-if (USG_ROOT)
+if (LUS_ROOT)
   ## load custom modules
-  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
   ## define custom variables
-  set (USG_BUILD ${USG_ROOT}/build)
-  set (USG_EXTERNAL ${USG_ROOT}/external)
-else (USG_ROOT)
+  set (USG_BUILD ${LUS_ROOT}/build)
+  set (USG_EXTERNAL ${LUS_ROOT}/external)
+else (LUS_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (USG_ROOT)
+endif (LUS_ROOT)
 
 ## ==============================================================================
 ##
@@ -54,6 +54,7 @@ option (ANAAMIKA_ENABLE_SCIPY   "Build SciPy as interactive environment?"  NO  )
 option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
 option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
 
+option (CR_WITH_DAL             "Build and use the Data Access Library?"   YES )
 option (CR_WITH_GLISH           "Support for Glish applications?"          NO  )
 option (CR_WITH_PYCR            "Support for Python applications?"         YES )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"         YES )
@@ -145,7 +146,7 @@ add_custom_target (clean-doc
   COMMAND rm -f html/*.map
   COMMAND rm -f html/*.html
   COMMAND rm -f html/*.md5
-  WORKING_DIRECTORY ${USG_ROOT}/doc  
+  WORKING_DIRECTORY ${LUS_ROOT}/doc  
   COMMENT "Cleaning up documentation directory ..."
   )
 
@@ -157,13 +158,13 @@ add_custom_target (clean-release
   COMMAND rm -rf lib lib64
   COMMAND rm -rf plugins
   COMMAND rm -rf share
-  WORKING_DIRECTORY ${USG_ROOT}/release
+  WORKING_DIRECTORY ${LUS_ROOT}/release
   COMMENT "Cleaning up release directory ..."
 )
 
 add_custom_target (clean-src
   COMMAND rm -rf *~ */*~ */*/*~ */*/*/*~
-  WORKING_DIRECTORY ${USG_ROOT}/src
+  WORKING_DIRECTORY ${LUS_ROOT}/src
   COMMENT "Cleaning up build directory ..."
 )
 
@@ -176,7 +177,7 @@ add_custom_target (clean-src
 ## Packages with build handled through shell script
 
 configure_file (
-  ${USG_ROOT}/devel_common/scripts/build_package.sh.in
+  ${LUS_ROOT}/devel_common/scripts/build_package.sh.in
   ${USG_BUILD}/build_package.sh
   )
 
@@ -192,10 +193,10 @@ endif (HAVE_ROOT)
 
 ## Packages handled directly through CMake
 
-add_subdirectory (${USG_ROOT}/data)
-add_subdirectory (${USG_ROOT}/doc)
-add_subdirectory (${USG_ROOT}/external)
-add_subdirectory (${USG_ROOT}/devel_common)
+add_subdirectory (${LUS_ROOT}/data)
+add_subdirectory (${LUS_ROOT}/doc)
+add_subdirectory (${LUS_ROOT}/external)
+add_subdirectory (${LUS_ROOT}/devel_common)
 
 ## Build instructions for packages
 
@@ -271,7 +272,11 @@ endif (DAL_PYTHON_BINDINGS)
 
 build_package (cr src/CR-Tools)
 
-add_dependencies (cr dal plplot fftw3 gsl)
+add_dependencies (cr plplot fftw3 gsl)
+
+if (CR_WITH_DAL)
+  add_dependencies (cr dal)
+endif (CR_WITH_DAL)
 
 if (CR_WITH_GUI)
   add_dependencies (cr mathgl)
@@ -335,7 +340,7 @@ add_dependencies (contrib dal)
 if (LUS_VERBOSE_CONFIGURE)
   message (STATUS "------------------------------------------------------------")
   message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
-  message (STATUS "USG_ROOT           = ${USG_ROOT}")
+  message (STATUS "LUS_ROOT           = ${LUS_ROOT}")
   message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
   message (STATUS "USG_PYTHONPATH     = ${USG_PYTHONPATH}")
   message (STATUS "USG_DATA           = ${USG_DATA}")

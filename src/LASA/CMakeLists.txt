@@ -14,7 +14,7 @@ cmake_minimum_required (VERSION 2.6)
 ##
 ## ==============================================================================
 
-find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${LASA_SOURCE_DIR}
   ${LASA_SOURCE_DIR}/..
@@ -23,11 +23,11 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   $ENV{LOFARSOFT}
   )
 
-if (USG_ROOT)
-  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (USG_ROOT)
+if (LUS_ROOT)
+  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (LUS_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (USG_ROOT)
+endif (LUS_ROOT)
 
 ## ==============================================================================
 ##

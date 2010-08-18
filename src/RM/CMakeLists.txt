@@ -16,8 +16,8 @@ enable_testing()
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-if (NOT USG_ROOT)
-  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+if (NOT LUS_ROOT)
+  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
     PATHS 
     ${RM_SOURCE_DIR}
     ${RM_SOURCE_DIR}/..
@@ -26,12 +26,12 @@ if (NOT USG_ROOT)
     ENV LOFARSOFT
     )
   
-  if (USG_ROOT)
-    include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  else (USG_ROOT)
+  if (LUS_ROOT)
+    include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  else (LUS_ROOT)
     message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (USG_ROOT)
-endif (NOT USG_ROOT)
+  endif (LUS_ROOT)
+endif (NOT LUS_ROOT)
 
 ## =============================================================================
 ##

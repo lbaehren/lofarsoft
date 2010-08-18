@@ -20,7 +20,7 @@ option (StarTools_BUILD_APPLICATIONS "Build all the applications in the package?
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${StarTools_SOURCE_DIR}
   ${StarTools_SOURCE_DIR}/..
@@ -29,12 +29,12 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   $ENV{LOFARSOFT}
   )
 
-if (USG_ROOT)
-  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+if (LUS_ROOT)
+  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
   include (FindStarTools)
-else (USG_ROOT)
+else (LUS_ROOT)
   message (FATAL_ERROR "[Star-Tools] Unable to locate additional CMake scripts!")
-endif (USG_ROOT)
+endif (LUS_ROOT)
 
 ## ============================================================================== 
 ##

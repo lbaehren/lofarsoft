@@ -23,6 +23,8 @@ option (ANAAMIKA_ENABLE_PYBDSM ${ANAAMIKA_ENABLE_PYBDSM} CACHE BOOL
 
 ## === CR-Tools =================================================================
 
+option (CR_WITH_DAL ${CR_WITH_DAL} CACHE BOOL
+  "Build and use the Data Access Library?"                            )
 set (CR_WITH_GLISH ${CR_WITH_GLISH} CACHE BOOL
   "Support for Glish applications?"                                   )
 set (CR_WITH_PYCR ${CR_WITH_PYCR} CACHE BOOL

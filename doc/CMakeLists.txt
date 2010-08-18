@@ -21,22 +21,22 @@ if (doxygen_executable)
     endif (pdflatex_executable)
   endif (DOXYGEN_GENERATE_LATEX)
   ## Creation configuration file for Doxygen
-  configure_file (${USG_ROOT}/doc/Doxyfile.in ${USG_ROOT}/doc/Doxyfile)
+  configure_file (${LUS_ROOT}/doc/Doxyfile.in ${LUS_ROOT}/doc/Doxyfile)
   ## Create documentation
   add_custom_target (doc
     COMMAND cmake --help-html CMake.html
     COMMAND ctest --help-html CTest.html
     COMMAND ${doxygen_executable}
     COMMAND rm -f *.tmp
-    WORKING_DIRECTORY ${USG_ROOT}/doc
-    COMMENT "Creating browsable documentation in ${USG_ROOT}/doc ..."
+    WORKING_DIRECTORY ${LUS_ROOT}/doc
+    COMMENT "Creating browsable documentation in ${LUS_ROOT}/doc ..."
     )
   ## Source file dependency of build target
 else (doxygen_executable)
   add_custom_target (doc
     COMMAND cmake --help-html CMake.html
     COMMAND ctest --help-html CTest.html
-    WORKING_DIRECTORY ${USG_ROOT}/doc
-    COMMENT "Creating browsable documentation in ${USG_ROOT}/doc ..."
+    WORKING_DIRECTORY ${LUS_ROOT}/doc
+    COMMENT "Creating browsable documentation in ${LUS_ROOT}/doc ..."
     )
 endif (doxygen_executable)

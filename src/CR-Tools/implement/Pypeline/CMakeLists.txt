@@ -155,14 +155,14 @@ install (
 # Create output directories
 add_custom_command(
   TARGET hftools
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${USG_ROOT}/release/lib/python
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${USG_ROOT}/release/bin/python
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${LUS_ROOT}/release/lib/python
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${LUS_ROOT}/release/bin/python
   )
 
 # Install Python modules
 foreach(FILENAME ${PYPELINE_MODULES})
   set(SRC "${CMAKE_CURRENT_SOURCE_DIR}/modules/${FILENAME}")
-  set(DST "${USG_ROOT}/release/lib/python/${FILENAME}")
+  set(DST "${LUS_ROOT}/release/lib/python/${FILENAME}")
 
   add_custom_command(
     TARGET hftools
@@ -173,7 +173,7 @@ endforeach(FILENAME)
 # Install Python scripts
 foreach(FILENAME ${PYPELINE_SCRIPTS})
   set(SRC "${CMAKE_CURRENT_SOURCE_DIR}/scripts/${FILENAME}")
-  set(DST "${USG_ROOT}/release/bin/python/${FILENAME}")
+  set(DST "${LUS_ROOT}/release/bin/python/${FILENAME}")
 
   add_custom_command(
     TARGET hftools

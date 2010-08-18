@@ -23,7 +23,7 @@ foreach (infile
     nightly-builds
     install_doxygen
     )
-  configure_file (${infile}.in ${USG_ROOT}/release/bin/${infile})
+  configure_file (${infile}.in ${LUS_ROOT}/release/bin/${infile})
 endforeach (infile )
 
 install (

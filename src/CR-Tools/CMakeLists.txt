@@ -12,8 +12,8 @@ cmake_minimum_required (VERSION 2.6)
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-if (NOT USG_ROOT)
-  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+if (NOT LUS_ROOT)
+  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
     PATHS 
     ${CR_SOURCE_DIR}
     ${CR_SOURCE_DIR}/..
@@ -22,12 +22,12 @@ if (NOT USG_ROOT)
     ENV LOFARSOFT
     )
   
-  if (USG_ROOT)
-    include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  else (USG_ROOT)
+  if (LUS_ROOT)
+    include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  else (LUS_ROOT)
     message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (USG_ROOT)
-endif (NOT USG_ROOT)
+  endif (LUS_ROOT)
+endif (NOT LUS_ROOT)
 
 ## =============================================================================
 ##
@@ -456,7 +456,7 @@ include (FindTestDatasets)
 
 find_path (caltable_lopes table.dat table.info
   PATHS
-  ${USG_ROOT}/data/lopes
+  ${LUS_ROOT}/data/lopes
   PATH_SUFFIXES
   LOPES-CalTable
   )
@@ -475,7 +475,7 @@ endif (dataset_tbb)
 find_file (dataset_lopes_example example.event
   PATHS
   ${CR_SOURCE_DIR}/data
-  ${USG_ROOT}/data
+  ${LUS_ROOT}/data
   PATH_SUFFIXES
   lopes
   )
@@ -699,7 +699,7 @@ if (tar_executable AND gzip_executable)
 
   add_custom_target (create_archive
     COMMENT "Creating tar-archive for CR-Tools and required packages."
-    WORKING_DIRECTORY ${USG_ROOT}
+    WORKING_DIRECTORY ${LUS_ROOT}
     COMMAND ${tar_executable} -cvf crtools.tar --exclude .svn CMakeLists.txt
     COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn devel_common
     COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn release/release_area.txt

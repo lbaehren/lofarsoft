@@ -17,7 +17,7 @@ option (contrib_ENABLE_TESTING    "Build and enable running test programs?"  YES
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${contrib_SOURCE_DIR}
   ${contrib_SOURCE_DIR}/..
@@ -26,12 +26,12 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   ENV LOFARSOFT
   )
 
-if (USG_ROOT)
-  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+if (LUS_ROOT)
+  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
   SET (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX})
-else (USG_ROOT)
+else (LUS_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (USG_ROOT)
+endif (LUS_ROOT)
 
 ## ------------------------------------------------------------------------------
 ## Locate components of required external packages
