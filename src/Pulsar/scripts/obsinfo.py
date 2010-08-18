@@ -439,29 +439,6 @@ class outputInfo:
 		# converting total size to GB
 		self.totsize = "%.1f" % (self.totsize / 1024. / 1024. / 1024.,)
 		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
-		### Remove these 21 lines below after the rebuild of the database
-		try:
-			self.redlocation = self.statusline.split(" ")[0]
-		except:
-			self.redlocation = "x"
-		try:
-			self.oi.stations = re.sub("HBA0", "/0", self.oi.stations)
-			self.oi.stations = re.sub("HBA1", "/1", self.oi.stations)
-			self.oi.stations = re.sub("HBA", "", self.oi.stations)
-			self.oi.stations = re.sub("LBA", "", self.oi.stations)
-		except:
-			pass
-		try:
-			self.stations=self.oi.stations
-			self.stations_array=self.stations.split(",")
-			self.oi.stations_html=""
-			for n in np.arange(np.size(self.stations_array)-1):
-				if n != 0 and n % 9 == 0: self.oi.stations_html += "<br>"
-				self.oi.stations_html += self.stations_array[n] + ","
-			self.oi.stations_html += self.stations_array[-1]
-		except:
-			pass
-		###
 
 		if viewtype == "brief":
 			self.colspan = 13
