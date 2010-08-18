@@ -140,8 +140,8 @@ class cimager(LOFARrecipe):
             self.logger.debug("Creating parset for %s" % vds)
             vds_data = parameterset(vds)
             frequency_range = [
-                vds_data.getFloatVector("StartFreqs")[0],
-                vds_data.getFloatVector("EndFreqs")[-1]
+                vds_data.getDoubleVector("StartFreqs")[0],
+                vds_data.getDoubleVector("EndFreqs")[-1]
             ]
             cimager_parset = patch_parset(
                 template_parset,
