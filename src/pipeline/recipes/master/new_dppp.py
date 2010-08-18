@@ -9,6 +9,7 @@ from __future__ import with_statement
 
 from itertools import cycle
 
+import cPickle as pickle
 import subprocess
 import collections
 import threading
@@ -68,25 +69,12 @@ class new_dppp(LOFARrecipe):
         self.logger.info("Starting DPPP run")
         super(new_dppp, self).go()
 
-        #      We build lists of compute-nodes per cluster and data-per-cluster,
-        # then match them up to schedule the DPPP jobs in a round-robin fashion.
+        #                           Load file <-> compute node mapping from disk
         # ----------------------------------------------------------------------
-        clusterdesc = ClusterDesc(self.config.get('cluster', "clusterdesc"))
-        if clusterdesc.subclusters:
-            available_nodes = dict(
-                (cl.name, cycle(get_compute_nodes(cl)))
-                for cl in clusterdesc.subclusters
-            )
-        else:
-            available_nodes = {
-                clusterdesc.name: cycle(get_compute_nodes(clusterdesc))
-            }
-
-        data = []
-        for filename in self.inputs['args']:
-            subcluster = filename.split('/')[2]
-            host = available_nodes[subcluster].next()
-            data.append((host, filename))
+        self.logger.debug("Loading map from %s" % self.inputs['args'])
+        dumpfile = open(self.inputs['args'], 'r')
+        data = pickle.load(dumpfile)
+        dumpfile.close()
 
         #   BoundedSempaphores will manage the number of simulataneous jobs/node
         # ----------------------------------------------------------------------
