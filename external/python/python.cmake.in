@@ -1,6 +1,6 @@
 
 set (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX} CACHE PATH "Installation prefix" FORCE)
-set (USG_ROOT             ${USG_ROOT}           CACHE PATH "Top of code tree"    FORCE)
+set (LUS_ROOT             ${LUS_ROOT}           CACHE PATH "Top of code tree"    FORCE)
 
 set (BOOST_INCLUDES    ${BOOST_INCLUDES}    CACHE  PATH     "Boost headers"    FORCE)
 set (BOOST_LIBRARIES   ${BOOST_LIBRARIES}   CACHE  FILEPATH "Boost libraries"  FORCE)

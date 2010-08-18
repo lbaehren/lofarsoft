@@ -145,8 +145,8 @@ endmacro (casacore_find_module _name)
 ## ==============================================================================
 
 list (APPEND include_locations
-  ${USG_ROOT}/release/include
-  ${USG_ROOT}/external/casacore
+  ${LUS_ROOT}/release/include
+  ${LUS_ROOT}/external/casacore
   /usr/include
   /usr/local/include
   /sw/share/casacore

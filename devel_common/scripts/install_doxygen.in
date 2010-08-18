@@ -3,13 +3,13 @@
 ##____________________________________________________________________
 ## Set up environment variables
 
-export LOFARSOFT=${USG_ROOT}
-. ${USG_ROOT}/devel_common/scripts/init.sh
+export LOFARSOFT=${LUS_ROOT}
+. ${LUS_ROOT}/devel_common/scripts/init.sh
 
 ##____________________________________________________________________
 ## Update the working copy
 
-cd ${USG_ROOT}
+cd ${LUS_ROOT}
 
 svn cleanup
 svn up
@@ -17,7 +17,7 @@ svn up
 ##____________________________________________________________________
 ## Run the bootstrap script
 
-cd ${USG_ROOT}/build
+cd ${LUS_ROOT}/build
 
 rm -rf CMake*
 rm -rf Makefile
@@ -27,7 +27,7 @@ rm -rf Makefile
 ##____________________________________________________________________
 ## Build the documentation
 
-cd ${USG_ROOT}/build
+cd ${LUS_ROOT}/build
 
 make doc
 
@@ -45,7 +45,7 @@ else
 	mkdir $1;
     fi
     ## copy the generated documentation to the target directory
-    cd ${USG_ROOT}/doc/html
+    cd ${LUS_ROOT}/doc/html
     tar -cf doc.tar *
     mv doc.tar $1
     cd $1

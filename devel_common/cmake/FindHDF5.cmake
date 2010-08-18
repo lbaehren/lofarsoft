@@ -161,7 +161,7 @@ if (NOT FIND_HDF5_CMAKE)
     string (REGEX MATCH "[0-9]" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
   else (HAVE_H5PUBLIC_H)
     find_file (HAVE_TESTHDF5VERSION TestHDF5Version.cc
-      PATHS ${CMAKE_MODULE_PATH} ${USG_ROOT}
+      PATHS ${CMAKE_MODULE_PATH} ${LUS_ROOT}
       PATH_SUFFIXES devel_common/cmake
       )
     

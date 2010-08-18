@@ -51,14 +51,14 @@ macro (build_package _packageName _packageSource)
 
   if (LUS_CMAKE_OPTIONS)
     add_custom_target (${_packageName}
-      COMMAND ${CMAKE_COMMAND} ${USG_ROOT}/${_packageSource} -C${LUS_CMAKE_OPTIONS}
+      COMMAND ${CMAKE_COMMAND} ${LUS_ROOT}/${_packageSource} -C${LUS_CMAKE_OPTIONS}
       COMMAND make install
       WORKING_DIRECTORY ${_packageBuildLocation}
       COMMENT "Building package ${package_name} ..."
       )
   else (LUS_CMAKE_OPTIONS)
     add_custom_target (${_packageName}
-      COMMAND ${CMAKE_COMMAND} ${USG_ROOT}/${_packageSource}
+      COMMAND ${CMAKE_COMMAND} ${LUS_ROOT}/${_packageSource}
       COMMAND make install
       WORKING_DIRECTORY ${_packageBuildLocation}
       COMMENT "Building package ${package_name} ..."

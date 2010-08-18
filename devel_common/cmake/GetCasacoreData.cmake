@@ -35,9 +35,9 @@
 ##____________________________________________________________________
 ## Connect to configuration framework
 
-if (NOT USG_ROOT)
+if (NOT LUS_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (NOT USG_ROOT)  
+endif (NOT LUS_ROOT)  
 
 find_program (HAVE_WGET  wget  ${bin_locations} )
 find_program (HAVE_CURL  curl  ${bin_locations} )
@@ -51,14 +51,14 @@ set (MEASURES_DATA_TARFILE "casacore-data.tgz")
 if (HAVE_WGET)
   add_custom_target (measures_download
     COMMAND wget -c ${USG_DOWNLOAD}/software/${MEASURES_DATA_TARFILE}
-    WORKING_DIRECTORY ${USG_ROOT}/data
+    WORKING_DIRECTORY ${LUS_ROOT}/data
     COMMENT "Retrieving tar-archive of the measures data from the USG server ..."
     )
 else (HAVE_WGET)
   if (HAVE_CURL)
     add_custom_target (measures_download
       COMMAND curl ${USG_DOWNLOAD}/software/${MEASURES_DATA_TARFILE}
-      WORKING_DIRECTORY ${USG_ROOT}/data
+      WORKING_DIRECTORY ${LUS_ROOT}/data
       COMMENT "Retrieving tar-archive of the measures data from the USG server ..."
       )
   else (HAVE_CURL)
@@ -72,8 +72,8 @@ endif (HAVE_WGET)
 
 if (HAVE_TAR)
   add_custom_target (measures_unpack
-    WORKING_DIRECTORY ${USG_ROOT}/data
-    COMMAND tar -xvzf ${USG_ROOT}/data/${MEASURES_DATA_TARFILE}
+    WORKING_DIRECTORY ${LUS_ROOT}/data
+    COMMAND tar -xvzf ${LUS_ROOT}/data/${MEASURES_DATA_TARFILE}
     COMMENT "Expanding tar-archive of measures data ..."
     )
   add_dependencies (measures_unpack measures_download)
@@ -83,7 +83,7 @@ endif (HAVE_TAR)
 ## Summary target, which also also does post-installation cleaning
 
 add_custom_target (measures_install
-  WORKING_DIRECTORY ${USG_ROOT}/data
+  WORKING_DIRECTORY ${LUS_ROOT}/data
   COMMAND rm -rf ${MEASURES_DATA_TARFILE}
   COMMENT "Post-installation cleanup of the data directory ..."
   )

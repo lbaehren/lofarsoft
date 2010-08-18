@@ -32,7 +32,7 @@ if (LUS_ROOT)
   set (USG_BUILD ${LUS_ROOT}/build)
   set (USG_EXTERNAL ${LUS_ROOT}/external)
 else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  set (LUS_ROOT ${LUS_SOURCE_DIR})
 endif (LUS_ROOT)
 
 ## ==============================================================================

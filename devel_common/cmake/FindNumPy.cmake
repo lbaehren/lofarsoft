@@ -170,7 +170,7 @@ if (numpy_version_test_output)
 else (numpy_version_test_output)
 
   find_file (NUMPY_TEST_PROGRAM TestNumPyVersion.cc
-    PATHS ${CMAKE_MODULE_PATH} ${USG_ROOT}
+    PATHS ${CMAKE_MODULE_PATH} ${LUS_ROOT}
     PATH_SUFFIXES devel_common/cmake
     )
 

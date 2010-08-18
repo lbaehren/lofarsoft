@@ -5,7 +5,7 @@
 
 ## Variables used through the configuration environment:
 ##
-##  USG_ROOT              -- Root of the USG directory tree.
+##  LUS_ROOT              -- Root of the USG directory tree.
 ##  USG_CMAKE_CONFIG      -- Cache variable used to control running through the
 ##                           common set of instructions provided with this file.
 ##                           since this file will be included multiple times
@@ -24,10 +24,10 @@
 if (NOT USG_CMAKE_CONFIG)
 
   ##________________________________________________________
-  ## Check if USG_ROOT is defined
+  ## Check if LUS_ROOT is defined
 
-  if (NOT USG_ROOT)
-    message (STATUS "[USG CMake] USG_ROOT undefined; trying to locate it...")
+  if (NOT LUS_ROOT)
+    message (STATUS "[USG CMake] LUS_ROOT undefined; trying to locate it...")
     ## try to find the root directory based on the location of the release
     ## directory
     find_path (USG_INSTALL_PREFIX release/release_area.txt
@@ -38,38 +38,38 @@ if (NOT USG_CMAKE_CONFIG)
       NO_DEFAULT_PATH
       )
     ## convert the relative path to an absolute one
-    get_filename_component (USG_ROOT ${USG_INSTALL_PREFIX} ABSOLUTE)
-  endif (NOT USG_ROOT)
+    get_filename_component (LUS_ROOT ${USG_INSTALL_PREFIX} ABSOLUTE)
+  endif (NOT LUS_ROOT)
 
-  ## Second pass: check once more if USG_ROOT is defined
+  ## Second pass: check once more if LUS_ROOT is defined
   
-  if (USG_ROOT)
+  if (LUS_ROOT)
     ## This addition to the module path needs to go into the cache,
     ## because otherwise it will be gone at the next time CMake is run
-    set (CMAKE_MODULE_PATH ${USG_ROOT}/devel_common/cmake CACHE PATH
+    set (CMAKE_MODULE_PATH ${LUS_ROOT}/devel_common/cmake CACHE PATH
       "USG cmake modules"
       FORCE)
     ## installation location
-    set (USG_INSTALL_PREFIX ${USG_ROOT}/release CACHE PATH
+    set (USG_INSTALL_PREFIX ${LUS_ROOT}/release CACHE PATH
       "USG default install area"
       FORCE
       )
-    set (CMAKE_INSTALL_PREFIX ${USG_ROOT}/release CACHE PATH
+    set (CMAKE_INSTALL_PREFIX ${LUS_ROOT}/release CACHE PATH
       "CMake installation area" 
       FORCE
       )
     ## header files
-    include_directories (${USG_ROOT}/release/include CACHE PATH
+    include_directories (${LUS_ROOT}/release/include CACHE PATH
       "USG include area"
       FORCE
       )
     ## (Test) data
-    set (USG_DATA ${USG_ROOT}/data CACHE PATH
+    set (USG_DATA ${LUS_ROOT}/data CACHE PATH
       "USG data area"
       FORCE
       )
     ## USG augmentation to PYTHONPATH
-    set (USG_PYTHONPATH ${USG_ROOT}/release/lib/python2.6;${USG_ROOT}/release/lib/python2.5
+    set (USG_PYTHONPATH ${LUS_ROOT}/release/lib/python2.6;${LUS_ROOT}/release/lib/python2.5
       CACHE
       PATH
       "USG data area"
@@ -83,9 +83,9 @@ if (NOT USG_CMAKE_CONFIG)
 	WORKING_DIRECTORY ${USG_INSTALL_PREFIX}
 	)
     endif (USG_INSTALL_PREFIX)
-  else (USG_ROOT)
-    message (SEND_ERROR "USG_ROOT is undefined!")
-  endif (USG_ROOT)
+  else (LUS_ROOT)
+    message (SEND_ERROR "LUS_ROOT is undefined!")
+  endif (LUS_ROOT)
   
   ## ---------------------------------------------------------------------------
   ## generic search locations
@@ -299,7 +299,7 @@ if (NOT USG_CMAKE_CONFIG)
   execute_process (COMMAND hostname -s
     OUTPUT_VARIABLE hostname
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  set (USG_VARIANTS_FILE ${USG_ROOT}/devel_common/cmake/variants.${hostname})
+  set (USG_VARIANTS_FILE ${LUS_ROOT}/devel_common/cmake/variants.${hostname})
   
   if (EXISTS ${USG_VARIANTS_FILE})
     message (STATUS "Loading settings variants " ${USG_VARIANTS_FILE})
@@ -327,7 +327,7 @@ if (NOT USG_CMAKE_CONFIG)
   message (STATUS " CMAKE_SYSTEM_VERSION ...... : ${CMAKE_SYSTEM_VERSION}"        )
   message (STATUS " CMAKE_SYSTEM_PROCESSOR .... : ${CMAKE_SYSTEM_PROCESSOR}"      )
   message (STATUS " CMAKE_SYSTEM_KERNEL ....... : ${CMAKE_SYSTEM_KERNEL}"         )
-  message (STATUS " USG_ROOT .................. : ${USG_ROOT}"                    )
+  message (STATUS " LUS_ROOT .................. : ${LUS_ROOT}"                    )
   message (STATUS " CMAKE_INSTALL_PREFIX ...... : ${CMAKE_INSTALL_PREFIX}"        )
   message (STATUS " CMAKE_FIND_LIBRARY_PREFIXES : ${CMAKE_FIND_LIBRARY_PREFIXES}" )
   message (STATUS " CMAKE_FIND_LIBRARY_SUFFIXES : ${CMAKE_FIND_LIBRARY_SUFFIXES}" )

@@ -2,34 +2,34 @@
 
 echo "-- Set environment variables ..."
 
-export LOFARSOFT=${USG_ROOT}
-export PATH=${USG_ROOT}/release/bin:$PATH
-. ${USG_ROOT}/devel_common/scripts/init.sh
+export LOFARSOFT=${LUS_ROOT}
+export PATH=${LUS_ROOT}/release/bin:$PATH
+. ${LUS_ROOT}/devel_common/scripts/init.sh
 
 echo "-- Cleaning up code base ..."
 
-cd ${USG_ROOT}
+cd ${LUS_ROOT}
 rm -rf release/*
 rm -rf build/*
 
 echo "-- Updating working copy ..."
 
-cd ${USG_ROOT}
+cd ${LUS_ROOT}
 ${svn_executable} cleanup
 ${svn_executable} up
 
 echo "-- Building projects ..."
 
-cd ${USG_ROOT}/build
+cd ${LUS_ROOT}/build
 ./bootstrap
 
 for USG_PACKAGE in anaamika cr dal pulsar rm
 {
     echo "-- Building $USG_PACKAGE ..."
-    cd ${USG_ROOT}/build
+    cd ${LUS_ROOT}/build
     make $USG_PACKAGE
     echo "-- Experimental build of $USG_PACKAGE ..."
-    cd ${USG_ROOT}/build/$USG_PACKAGE
+    cd ${LUS_ROOT}/build/$USG_PACKAGE
     make install
     make Experimental
 }

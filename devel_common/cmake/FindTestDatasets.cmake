@@ -9,8 +9,8 @@ if (NOT FIND_TESTDATASETS_CMAKE)
   if (NOT dataset_fits)
     find_file (dataset_fits WN65341H.fits
       PATHS
-      ${USG_ROOT}/data
-      ${USG_ROOT}/data/test
+      ${LUS_ROOT}/data
+      ${LUS_ROOT}/data/test
       )
   endif (NOT dataset_fits)
   
@@ -19,8 +19,8 @@ if (NOT FIND_TESTDATASETS_CMAKE)
   if (NOT dataset_ms)
     find_path (dataset_ms table.dat table.info
       PATHS
-      ${USG_ROOT}/data
-      ${USG_ROOT}/data/test
+      ${LUS_ROOT}/data
+      ${LUS_ROOT}/data/test
       PATH_SUFFIXES
       L2007_01810_SB18-20_OB20.MS
       lofar/cs1/L2007_01810_SB18-20_OB20.MS
@@ -37,8 +37,8 @@ if (NOT FIND_TESTDATASETS_CMAKE)
       lightning_16_48.h5
       rw_20090417_181700.h5
       PATHS
-      ${USG_ROOT}/data
-      ${USG_ROOT}/data/test
+      ${LUS_ROOT}/data
+      ${LUS_ROOT}/data/test
       )
   endif (NOT dataset_tbb)
   
@@ -49,9 +49,9 @@ if (NOT FIND_TESTDATASETS_CMAKE)
       rw_20071024_090656_0101.dat
       rw_20071024_090656_0102.dat
       PATHS
-      ${USG_ROOT}/data
-      ${USG_ROOT}/data/test
-      ${USG_ROOT}/data/lofar/trigger-2010-02-11
+      ${LUS_ROOT}/data
+      ${LUS_ROOT}/data/test
+      ${LUS_ROOT}/data/lofar/trigger-2010-02-11
       )
   endif (NOT dataset_tbb_raw)
   
@@ -62,8 +62,8 @@ if (NOT FIND_TESTDATASETS_CMAKE)
       NAMES
       bf_20080604_121337.cor
       PATHS
-      ${USG_ROOT}/data
-      ${USG_ROOT}/data/test
+      ${LUS_ROOT}/data
+      ${LUS_ROOT}/data/test
       )
   endif (NOT dataset_bf_raw)
   
@@ -72,8 +72,8 @@ if (NOT FIND_TESTDATASETS_CMAKE)
       NAMES
       bf_20080604_121337.cor.h5 bf_20080604_121337.h5 TBB1.cor.h5
       PATHS
-      ${USG_ROOT}/data
-      ${USG_ROOT}/data/test
+      ${LUS_ROOT}/data
+      ${LUS_ROOT}/data/test
       )
   endif (NOT dataset_beamformed)
   
@@ -84,8 +84,8 @@ if (NOT FIND_TESTDATASETS_CMAKE)
       NAMES
       2007.01.31.23:59:33.960.event
       PATHS
-      ${USG_ROOT}/data
-      ${USG_ROOT}/data/test
+      ${LUS_ROOT}/data
+      ${LUS_ROOT}/data/test
       PATH_SUFFIXES
       lopes
       )
