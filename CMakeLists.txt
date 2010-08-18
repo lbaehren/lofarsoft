@@ -225,6 +225,8 @@ add_dependencies (pyqt sip)
 
 add_dependencies (wcslib boost flex)
 
+add_dependencies (pelican git)
+
 add_dependencies (plplot numpy swig)
 
 if (HAVE_ROOT)

@@ -17,14 +17,16 @@ option (<PROJECT>_VERBOSE_BUILD     "Be verbose during build process?"         N
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/..
-  ${CMAKE_CURRENT_SOURCE_DIR}/../..
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+if (NOT LUS_ROOT)
+  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS 
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../..
+    $ENV{LOFARSOFT}
+    )
+endif (LUS_ROOT)
 
 if (LUS_ROOT)
   include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)

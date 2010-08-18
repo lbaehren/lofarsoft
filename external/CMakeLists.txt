@@ -23,6 +23,7 @@ set (external_packages
   numeric
   numpy
   scipy
+  pelican
   pil
   plplot
   pyfits
