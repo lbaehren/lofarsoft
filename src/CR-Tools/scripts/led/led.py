@@ -277,8 +277,9 @@ class ApplicationWindow(QtGui.QMainWindow):
                         self.timer.start(self.refresh)
 
                     # Store data (converting time to ms)
-                    #self.time[self.i] = float(values[timeKey])*5e-6 BUGGY for non-matching time flow
-                    self.time[self.i] = self.ctime
+                    self.time[self.i] = float(values[timeKey])*5e-6 # BUGGY for non-matching time flow
+                    #self.time[self.i] = self.ctime
+                    self.ctime = self.time[self.i]
                     #print 'time is: ' + str(self.time[self.i])
                     self.phi[self.i] = float(values[phiKey]) + random.gauss(0.0, randomizationInDegrees)
                     #print self.phi[self.i]
@@ -287,7 +288,7 @@ class ApplicationWindow(QtGui.QMainWindow):
                     else:
                         self.theta[self.i] = float(values[distanceKey])
                     #print self.theta[self.i]
-                    # Reuse data buffer by cycling through it's indices
+                    # Reuse data buffer by cycling through its indices
                     if self.i>=self.buffersize-1:
                         self.i=0
                     else:
