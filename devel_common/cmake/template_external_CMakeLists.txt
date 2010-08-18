@@ -26,7 +26,7 @@ if (NOT LUS_ROOT)
     ${CMAKE_CURRENT_SOURCE_DIR}/../../..
     $ENV{LOFARSOFT}
     )
-endif (LUS_ROOT)
+endif (NOT LUS_ROOT)
 
 if (LUS_ROOT)
   include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
