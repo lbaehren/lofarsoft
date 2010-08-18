@@ -72,10 +72,16 @@ class new_dppp(LOFARrecipe):
         # then match them up to schedule the DPPP jobs in a round-robin fashion.
         # ----------------------------------------------------------------------
         clusterdesc = ClusterDesc(self.config.get('cluster', "clusterdesc"))
-        available_nodes = dict(
-            (cl.name, cycle(get_compute_nodes(cl)))
-            for cl in clusterdesc.subclusters
-        )
+        if clusterdesc.subclusters:
+            available_nodes = dict(
+                (cl.name, cycle(get_compute_nodes(cl)))
+                for cl in clusterdesc.subclusters
+            )
+        else:
+            available_nodes = {
+                clusterdesc.name: cycle(get_compute_nodes(clusterdesc))
+            }
+
         data = []
         for filename in self.inputs['args']:
             subcluster = filename.split('/')[2]
