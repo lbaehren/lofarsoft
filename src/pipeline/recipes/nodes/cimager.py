@@ -67,6 +67,11 @@ class cimager(LOFARnode):
                             os.path.join(working_dir, filename),
                             os.path.join(resultsdir, filename)
                         )
+                    if parset.getBool('Cimager.restore'):
+                        shutil.move(
+                            os.path.join(working_dir, filename + ".restored"),
+                            os.path.join(resultsdir, filename + ".restored")
+                        )
             except CalledProcessError, e:
                 self.logger.error(str(e))
                 return 1
