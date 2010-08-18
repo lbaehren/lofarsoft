@@ -3046,6 +3046,36 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+//$DOCSTRING: Perform a $MFUNC!LOW with a scalar parameter from a vector on the elements of the first numeric vector and return the result in the same vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h$MFUNC
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(vecpar)()("Parameter vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  h$MFUNC(vec, vecpar) -> vec = $MFUNC!LOW(vec, vecpar)
+  vec.$MFUNC(vecpar) -> vec = $MFUNC!LOW(vecin, vecpar)
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
+		    const Iter vecpar, const Iter vecpar_end) {
+  Iter it = vec;
+  Iter it_par = vecpar;
+  while (it != vec_end) {
+    *it = $MFUNC!LOW(*it, *it_par);
+    ++it; ++it_par;
+    if (it_par == vecpar_end) it_par = vecpar;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Perform a $MFUNC!LOW with scalar parameter on the elements of the second numeric vector and return the result in the first numeric vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h$MFUNC
@@ -3105,7 +3135,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
   Iter it_par = vecpar;
   while ((it_in != vecin_end) && (it_out != vecout_end)) {
     *it_out = $MFUNC!LOW(*it_in, *it_par);
-    ++it_in; ++it_out; it_par++;
+    ++it_in; ++it_out; ++it_par;
     if (it_par == vecpar_end) it_par = vecpar;
   }
 }
