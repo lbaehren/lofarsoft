@@ -17,13 +17,25 @@ class vdsmaker(LOFARnode):
                 if not os.access(executable, os.X_OK):
                     raise ExecutableMissing(executable)
                 cmd = [executable, clusterdesc, infile, outfile]
-                self.logger.debug("Running: %s" % (' '.join(cmd,)))
-                makevds_process = Popen(
-                    cmd, stdout=PIPE, stderr=STDOUT, close_fds=True
-                )
-                result = makevds_process.wait()
-                if result != 0:
-                    raise CalledProcessError(result, cmd)
+                #   Catch makevds segfaults (a regular occurance), and retry
+                # ----------------------------------------------------------
+                tries = 0
+                while tries < 2:
+                    if tries > 0:
+                        self.logger.debug("Retrying...")
+                    self.logger.debug("Running: %s" % (' '.join(cmd),))
+                    makevds_process = Popen(
+                        cmd, stdout=PIPE, stderr=STDOUT, close_fds=True
+                    )
+                    result = makevds_process.wait()
+                    if result == 0:
+                        break
+                    elif result == -11:
+                        self.logger.warn("makevds process segfaulted!")
+                        tries += 1
+                        continue
+                    else:
+                        raise CalledProcessError(result, executable)
                 return result
             except ExecutableMissing, e:
                 self.logger.error("%s not found" % (e.args[0]))
