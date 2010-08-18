@@ -225,7 +225,7 @@ add_dependencies (pyqt sip)
 
 add_dependencies (wcslib boost flex)
 
-add_dependencies (pelican git)
+add_dependencies (pelican git boost cfitsio)
 
 add_dependencies (plplot numpy swig)
 
