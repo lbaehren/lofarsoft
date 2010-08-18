@@ -93,7 +93,7 @@ class cimager(LOFARrecipe):
         with clusterlogger(self.logger) as (loghost, logport):
             self.logger.debug("Logging to %s:%d" % (loghost, logport))
             with log_time(self.logger):
-                imager_threads =[
+                imager_threads = [
                     threading.Thread(
                         target=self._run_cimager_node,
                         args=(host, compute_nodes_lock[host], command,
@@ -218,7 +218,7 @@ class cimager(LOFARrecipe):
             semaphore.release()
         if cimager_process.returncode != 0:
             self.error.set()
-        return(cimager_process.returncode)
+        return cimager_process.returncode
 
 if __name__ == '__main__':
     sys.exit(cimager().main())

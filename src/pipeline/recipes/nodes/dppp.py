@@ -1,13 +1,13 @@
 #                                                         LOFAR IMAGING PIPELINE
 #
-#                                   NDPPP (New Data Pre-Procesing Pipeline) node
+#                                        DPPP (Data Pre-Procesing Pipeline) node
 #                                                            John Swinbank, 2010
 #                                                      swinbank@transientskp.org
 # ------------------------------------------------------------------------------
 
 from __future__ import with_statement
-from contextlib import closing
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
+import sys
 import os.path
 import tempfile
 import shutil
