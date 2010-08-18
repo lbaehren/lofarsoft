@@ -52,15 +52,21 @@ class cimager(LOFARnode):
 
                 #        Dump the resulting images in the pipeline results area.
                 #    I'm not aware of a foolproof way to predict the image names
-                #        that will be produced, so we read them from the parset.
+                #                that will be produced, so we read them from the
+                #                      parset and add standard cimager prefixes.
                 # --------------------------------------------------------------
                 parset = parameterset(parset)
                 image_names = parset.getStringVector("Cimager.Images.Names")
+                prefixes = [
+                    "image", "psf", "residual", "weights", "sensitivity"
+                ]
                 for image_name in image_names:
-                    shutil.move(
-                        os.path.join(working_dir, image_name),
-                        os.path.join(resultsdir, image_name)
-                    )
+                    for prefix in prefixes:
+                        filename = image_name.replace("image", prefix, 1)
+                        shutil.move(
+                            os.path.join(working_dir, filename),
+                            os.path.join(resultsdir, filename)
+                        )
             except CalledProcessError, e:
                 self.logger.error(str(e))
                 return 1
