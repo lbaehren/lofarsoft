@@ -26,28 +26,23 @@ class new_dppp(LOFARrecipe):
         super(new_dppp, self).__init__()
         self.optionparser.add_option(
             '--executable',
-            dest="executable",
             help="DPPP executable"
         )
         self.optionparser.add_option(
             '--initscript',
-            dest="initscript",
             help="DPPP initscript"
         )
         self.optionparser.add_option(
             '-p', '--parset',
-            dest="parset",
             help="Parset containing configuration for DPPP"
         )
         self.optionparser.add_option(
             '--suffix',
-            dest="suffix",
             default=".dppp",
             help="Suffix to add to trimmed data (default: overwrite existing)"
         )
         self.optionparser.add_option(
             '-w', '--working-directory',
-            dest="working_directory",
             help="Working directory used on compute nodes"
         )
         self.optionparser.add_option(
