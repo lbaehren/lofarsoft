@@ -118,6 +118,7 @@ include (BuildPackage)
 include (FindBlitz)
 include (FindGit)
 include (FindOpenGL)
+include (FindOpenMP)
 include (FindROOT)
 include (FindVersionControl)
 

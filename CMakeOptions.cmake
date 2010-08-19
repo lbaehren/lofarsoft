@@ -12,6 +12,11 @@ set (LUS_ENABLE_DASHBOARD ${LUS_ENABLE_DASHBOARD} CACHE BOOL
   FORCE
   )
 
+## === System description =======================================================
+
+option (HAVE_OPENMP ${OPENMP_FOUND} CACHE BOOL
+  "Does the compiler support OpenMP?")
+
 ## === Anaamika =================================================================
 
 option (ANAAMIKA_ENABLE_SCIPY ${ANAAMIKA_ENABLE_SCIPY} CACHE BOOL
