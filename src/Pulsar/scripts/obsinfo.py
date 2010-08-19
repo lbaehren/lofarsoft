@@ -722,8 +722,8 @@ if __name__ == "__main__":
 			dfdescr = open(dumpfile, "r")
 			obstable=cPickle.load(dfdescr)
 			dfdescr.close()
-			# update info and infohtml depending on current command line options
-			dbobsids = obstable.keys()
+			# update info and infohtml depending on current command line options and make the sorted list of Db obsids
+			dbobsids = np.flipud(np.sort(obstable.keys(), kind='mergesort'))
 			for r in dbobsids:
 				obstable[r].update(storage_nodes)
 
@@ -757,11 +757,20 @@ if __name__ == "__main__":
 		if not is_rebuild:
 			# now obsids have only those IDs that are not in the dump file
 			obsids=list(set(obsids)-set(obsids).intersection(set(dbobsids)))
-	else:
+	else:   ## --update is set
 		obsids = dbobsids
+		# for the db update we also have to choose only those IDs within the desired time range
+		# if --from and/or --to are specified
+		if is_from == True:
+			fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
+
+		if is_to == True:
+			tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d"))
+			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 		# Number of ObsIDs
 		Nobsids = np.size(obsids)
-		
+
 
 	if is_rebuild == True:
 		print "Number of observations in %s: %d" % (", ".join(storage_nodes), Nobsids)
