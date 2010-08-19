@@ -1,6 +1,14 @@
+#                                                         LOFAR IMAGING PIPELINE
+#
+#                                                                  vdsmaker node
+#                                                         John Swinbank, 2009-10
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
 from __future__ import with_statement
-import os
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
+import os
+import sys
 
 from lofarpipe.support.lofarexceptions import ExecutableMissing
 from lofarpipe.support.utilities import create_directory, log_time
@@ -45,3 +53,10 @@ class vdsmaker(LOFARnode):
                 # Temporary workaround...
                 self.logger.error(str(e))
                 raise Exception
+
+if __name__ == "__main__":
+    #   If invoked directly, parse command line arguments for logger information
+    #                        and pass the rest to the run() method defined above
+    # --------------------------------------------------------------------------
+    loghost, logport = sys.argv[1:3]
+    sys.exit(vdsmaker(loghost, logport).run_with_logging(*sys.argv[3:]))

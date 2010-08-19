@@ -1,11 +1,16 @@
 from __future__ import with_statement
-import os, tempfile, subprocess, shutil
+import os
+import tempfile
+import subprocess
+import shutil
+import threading
 
 # Local helpers
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
-from lofarpipe.support.lofarnode import run_node
+from lofarpipe.support.remotecommand import run_remote_command
+from lofarpipe.cuisine.parset import Parset
 import lofarpipe.support.utilities as utilities
 
 template = """
@@ -51,73 +56,65 @@ class parmdb(LOFARrecipe):
         self.logger.info("parmdb stdout: %s" % (sout,))
         self.logger.info("parmdb stderr: %s" % (serr,))
 
-        ms_names = self.inputs['args']
+        #                           Load file <-> compute node mapping from disk
+        # ----------------------------------------------------------------------
+        self.logger.debug("Loading map from %s" % self.inputs['args'])
+        datamap = Parset(self.inputs['args'])
 
-        # Connect to the IPython cluster and initialise it with
-        # the funtions we need.
-        tc, mec = self._get_cluster()
-        mec.push_function(
-            dict(
-                run_parmdb=run_node,
-                build_available_list=utilities.build_available_list,
-                clear_available_list=utilities.clear_available_list
-            )
-        )
-        self.logger.debug("Pushed functions to cluster")
+        data = []
+        for host in datamap.iterkeys():
+            for filename in datamap.getStringVector(host):
+                data.append((host, filename))
 
-        # Use build_available_list() to determine which SBs are available
-        # on each engine; we use this for dependency resolution later.
-        self.logger.debug("Building list of data available on engines")
-        available_list = "%s%s" % (
-            self.inputs['job_name'], self.__class__.__name__
-        )
-        mec.push(dict(filenames=ms_names))
-        mec.execute(
-            "build_available_list(\"%s\")" % (available_list,)
-        )
+        #       If an imager process fails, set the error Event & bail out later
+        # ----------------------------------------------------------------------
+        self.error = threading.Event()
+        self.error.clear()
 
+        command = "python %s" % (self.__file__.replace('master', 'nodes'))
         with clusterlogger(self.logger) as (loghost, logport):
+            self.logger.debug("Logging to %s:%d" % (loghost, logport))
             with utilities.log_time(self.logger):
-                self.logger.debug("Logging to %s:%d" % (loghost, logport))
-                tasks = []
-                for ms_name in ms_names:
-                    task = LOFARTask(
-                        "result = run_parmdb(ms_name, pdbfile)",
-                        push=dict(
-                            recipename=self.name,
-                            nodepath=os.path.dirname(self.__file__.replace('master', 'nodes')),
-                            ms_name=ms_name,
-                            pdbfile=pdbfile,
-                            loghost=loghost,
-                            logport=logport
-                        ),
-                        pull="result",
-                        depend=utilities.check_for_path,
-                        dependargs=(ms_name, available_list)
+                parmdb_threads = []
+                for host, ms in data:
+                    parmdb_threads.append(
+                        threading.Thread(
+                            target=self._run_parmdb_node,
+                            args=(host, command, loghost, str(logport),
+                                ms, pdbfile
+                            )
+                        )
                     )
-                    self.logger.info("Scheduling processing of %s" % (ms_name,))
-                    tasks.append((tc.run(task), ms_name))
-
-                self.logger.debug("Waiting for all parmdb tasks to complete")
-                tc.barrier([task for task, subband in tasks])
-
-        failure = False
-        for task, subband in tasks:
-            res = tc.get_task_result(task)
-            if res.failure:
-                self.logger.warn("Task %s failed (processing %s)" % (task, subband))
-                self.logger.warn(res)
-                self.logger.warn(res.failure.getTraceback())
-                failure = True
+                [thread.start() for thread in parmdb_threads]
+                self.logger.info("Waiting for parmdb threads")
+                [thread.join() for thread in parmdb_threads]
 
         self.logger.debug("Removing template parmdb")
         shutil.rmtree(pdbdir, ignore_errors=True)
 
-        if failure:
+        if self.error.isSet():
             return 1
         else:
-            self.outputs['data'] = self.inputs['args']
+            self.outputs['mapfile'] = self.inputs['args']
             return 0
+
+    def _run_parmdb_node(self, host, command, loghost, logport, ms, pdbfile):
+        parmdb_process = run_remote_command(
+            host,
+            command,
+            {
+                "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
+                "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
+            },
+            loghost,
+            logport,
+            ms,
+            pdbfile
+        )
+        sout, serr = parmdb_process.communicate()
+        if parmdb_process.returncode != 0:
+            self.error.set()
+        return parmdb_process.returncode
 
 if __name__ == '__main__':
     sys.exit(parmdb().main())

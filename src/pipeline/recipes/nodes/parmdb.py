@@ -2,6 +2,7 @@ from __future__ import with_statement
 from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import log_time
 import shutil, os.path
+import sys
 
 class parmdb(LOFARnode):
     def run(self, infile, pdb):
@@ -18,3 +19,9 @@ class parmdb(LOFARnode):
 
         return 0
 
+if __name__ == "__main__":
+    #   If invoked directly, parse command line arguments for logger information
+    #                        and pass the rest to the run() method defined above
+    # --------------------------------------------------------------------------
+    loghost, logport = sys.argv[1:3]
+    sys.exit(parmdb(loghost, logport).run_with_logging(*sys.argv[3:]))

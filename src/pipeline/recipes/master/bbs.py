@@ -90,22 +90,11 @@ class bbs(LOFARrecipe):
     def go(self):
         self.logger.info("Starting BBS run")
         super(bbs, self).go()
-        ms_names = self.inputs['args']
 
         #             Generate source and parameter databases for all input data
         # ----------------------------------------------------------------------
-        threads = (
-            threading.Thread(
-                target=self.run_task,
-                args=("parmdb", ms_names)
-            ),
-            threading.Thread(
-                target=self.run_task,
-                args=("sourcedb", ms_names)
-            )
-        )
-        [thread.start() for thread in threads]
-        [thread.join()  for thread in threads]
+        self.run_task("parmdb", self.inputs['args'])
+        self.run_task("sourcedb", self.inputs['args'])
 
         #              Build a GVDS file describing all the data to be processed
         # ----------------------------------------------------------------------
@@ -113,7 +102,7 @@ class bbs(LOFARrecipe):
         vds_file = os.path.join(
             self.config.get("layout", "vds_directory"), "bbs.gvds"
         )
-        self.run_task('vdsmaker', ms_names, gvds=vds_file, unlink="False")
+        self.run_task('vdsmaker', self.inputs['args'], gvds=vds_file, unlink="False")
         self.logger.debug("BBS GVDS is %s" % (vds_file,))
 
 
