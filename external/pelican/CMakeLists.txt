@@ -38,9 +38,11 @@ endif (LUS_ROOT)
 ## Check if the program/package/library is already available
 
 if (NOT PELICAN_VERBOSE_CONFIGURE)
+  set (GIT_FIND_QUIETLY         YES )
   set (PELICAN_FIND_QUIETLY     YES )
 endif (NOT PELICAN_VERBOSE_CONFIGURE)
 
+include (FindGit)
 include (FindPELICAN)
 
 ## <-- begin build condition --------------------------------------------------->
@@ -52,36 +54,47 @@ if (NOT HAVE_PELICAN OR PELICAN_FORCE_BUILD)
   set (PELICAN_URL            "" )
   set (PELICAN_GIT            "http://github.com/pelican/pelican.git" )
   
-##__________________________________________________________
-## Required packages
-
-find_path (CPPUNIT_INCLUDE_DIR cppunit/TestAssert.h
-  PATHS /sw /usr /usr/local ${CMAKE_INSTALL_PREFIX}
-  PATH_SUFFIXES include
-  )
-
-find_path (CPPUNIT_LIBRARIES libcppunit
-  PATHS /sw /usr /usr/local ${CMAKE_INSTALL_PREFIX}
-  PATH_SUFFIXES lib
-  )
-
-if (CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARIES)
-  set (CPPUNIT_FOUND TRUE)
-endif (CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARIES)
-
+  ##__________________________________________________________
+  ## Required packages
+  
+  find_path (CPPUNIT_INCLUDE_DIR cppunit/TestAssert.h
+    PATHS /sw /usr /usr/local ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES include
+    )
+  
+  find_path (CPPUNIT_LIBRARIES libcppunit
+    PATHS /sw /usr /usr/local ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES lib
+    )
+  
+  if (CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARIES)
+    set (CPPUNIT_FOUND TRUE)
+  endif (CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARIES)
+  
   ##__________________________________________________________________
   ## Build the project
   
   include (ExternalProject)
   
-  ExternalProject_Add (pelican
-    PREFIX ${PROJECT_BINARY_DIR}
-    DOWNLOAD_DIR download
-    SOURCE_DIR source
-    GIT_REPOSITORY ${PELICAN_GIT}
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCPPUNIT_INCLUDE_DIR=${CPPUNIT_INCLUDE_DIR} -DDCPPUNIT_LIBRARIES=${CPPUNIT_LIBRARIES} -DCMAKE_BUILD_TYPE=Release ${PROJECT_BINARY_DIR}/source/pelican
-    INSTALL_COMMAND make install
-    )
+  if (GIT_EXECUTABLE)
+    
+    ExternalProject_Add (pelican
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      GIT_REPOSITORY ${PELICAN_GIT}
+      CONFIGURE_COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCPPUNIT_INCLUDE_DIR=${CPPUNIT_INCLUDE_DIR} -DDCPPUNIT_LIBRARIES=${CPPUNIT_LIBRARIES} -DCMAKE_BUILD_TYPE=Release ${PROJECT_BINARY_DIR}/source/pelican
+      INSTALL_COMMAND make install
+      )
+    
+  else (GIT_EXECUTABLE)
+    
+    add_custom_target (pelican
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      COMMENT "[PELICAN] Missing Git - unable to retrieve source code!"
+      )
+    
+  endif (GIT_EXECUTABLE)
   
   ## <-- end build condition ----------------------------------------------------->
   

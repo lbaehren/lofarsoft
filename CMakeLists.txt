@@ -116,6 +116,7 @@ set (VERSION_CONTROL_FIND_QUIETLY YES )
 
 include (BuildPackage)
 include (FindBlitz)
+include (FindGit)
 include (FindOpenGL)
 include (FindROOT)
 include (FindVersionControl)
