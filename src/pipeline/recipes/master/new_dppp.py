@@ -15,6 +15,8 @@ import threading
 import sys
 import os
 
+from lofar.parameterset import parameterset
+
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.clusterlogger import clusterlogger
@@ -100,9 +102,9 @@ class new_dppp(LOFARrecipe):
             self.logger.debug("Logging to %s:%d" % (loghost, logport))
             with utilities.log_time(self.logger):
                 dppp_threads = []
-                outnames = []
+                outnames = collections.defaultdict(list)
                 for host, ms in data:
-                    outnames.append(
+                    outnames[host].append(
                         os.path.join(
                             self.inputs['working_directory'],
                             self.inputs['job_name'],
@@ -133,7 +135,11 @@ class new_dppp(LOFARrecipe):
             self.logger.warn("Failed imager process detected")
             return 1
         else:
-            self.outputs['data'] = outnames
+            parset = parameterset()
+            for host, filenames in data.iteritems():
+                parset.add(host, "[ %s ]" % ", ".join(filenames))
+            self.outputs['mapfile'] = mkstemp()[1]
+            parset.writeFile(self.outputs['mapfile'])
             return 0
 
     def _run_dppp_node(
