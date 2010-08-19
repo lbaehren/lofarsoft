@@ -38,7 +38,7 @@ class PPF():
     def __init__(self):
         """Constructor"""
         
-        weights_filename=hf.LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat'
+        weights_filename=hf.LOFARSOFT+'/src/CR-Tools/data/ppfWeights16384.dat'
 # Initialize arrays and values
         weights=hf.hArray(float,[16,1024])
         weights.readdump(weights_filename)
@@ -52,6 +52,7 @@ class PPF():
             for i in range(0,16*1024):
                 weights[i]=float(f.readline())
             weights.setDim([16,1024])
+            weights.writedump(weights_filename)
         
         self.weights=weights
         self.buffer=hf.hArray(float,[16,1024])
@@ -66,6 +67,8 @@ class PPF():
         
         self.total_rows_added+=1
         self.startrow-=1
+        if self.startrow < 0:
+            self.startrow=15
         if self.total_rows_added < 16:
             input.fill(0)
             return False
