@@ -55,7 +55,6 @@ class cimager(LOFARrecipe):
     def go(self):
         self.logger.info("Starting cimager run")
         super(cimager, self).go()
-        ms_names = self.inputs['args']
         self.outputs['images' ] = []
 
         #              Build a GVDS file describing all the data to be processed
@@ -64,7 +63,7 @@ class cimager(LOFARrecipe):
         gvds_file = os.path.join(
             self.config.get("layout", "vds_directory"), "cimager.gvds"
         )
-        self.run_task('vdsmaker', ms_names, gvds=gvds_file, unlink="False")
+        self.run_task('vdsmaker', self.inputs['args'], gvds=gvds_file, unlink="False")
         self.logger.debug("cimager GVDS is %s" % (gvds_file,))
 
         #                            Read data for processing from the GVDS file
