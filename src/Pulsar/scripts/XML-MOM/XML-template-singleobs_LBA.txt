@@ -20,7 +20,7 @@
             <clock mode="200 MHz"/>
             <instrumentFilter>10-90 MHz</instrumentFilter>
             <integrationInterval>1</integrationInterval>
-            <channelsPerSubband>64</channelsPerSubband>
+            <channelsPerSubband>CHANNELS PER SUBBAND</channelsPerSubband>
             <cnIntegrationSteps>12208</cnIntegrationSteps>
             <pencilBeams>
                 <flyseye>false</flyseye>
@@ -36,7 +36,7 @@
             <stokes>
                 <stokesSelection>I</stokesSelection>
                 <integrateChannels>false</integrateChannels>
-                <integrationSteps>4</integrationSteps>
+                <integrationSteps>INTEG STEPS</integrationSteps>
             </stokes>
             <stationSet>Custom</stationSet>
             <stations>
