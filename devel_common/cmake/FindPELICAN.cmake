@@ -55,6 +55,30 @@ if (NOT FIND_PELICAN_CMAKE)
     )
   
   ##_____________________________________________________________________________
+  ## Check for the CMake modules directory
+  
+  find_path (PELICAN_CMAKE_MODULE_DIR FindPelicanInstall.cmake
+    PATHS
+    /usr/
+    /usr/share
+    /usr/share/pelican
+    /usr/share/pelican/cmake
+    /usr/local/
+    /usr/local/share
+    /usr/local/share/pelican
+    /usr/local/share/pelican/cmake
+    $ENV{PELICAN_INSTALL_DIR}/share/pelican/cmake
+    ${PELICAN_INSTALL_DIR}/share/pelican/cmake
+    ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES
+    share
+    cmake
+    pelican
+    DOC
+    "Location of Pelican cmake modules."
+    )
+  
+  ##_____________________________________________________________________________
   ## Actions taken when all components have been found
   
   if (PELICAN_INCLUDES AND PELICAN_LIBRARIES)
@@ -73,9 +97,10 @@ if (NOT FIND_PELICAN_CMAKE)
   
   if (HAVE_PELICAN)
     if (NOT PELICAN_FIND_QUIETLY)
-      message (STATUS "Found components for PELICAN")
-      message (STATUS "PELICAN_INCLUDES  = ${PELICAN_INCLUDES}")
-      message (STATUS "PELICAN_LIBRARIES = ${PELICAN_LIBRARIES}")
+      message (STATUS "[FindPELICAN] Configuration summary.")
+      message (STATUS "PELICAN_INCLUDES         = ${PELICAN_INCLUDES}")
+      message (STATUS "PELICAN_LIBRARIES        = ${PELICAN_LIBRARIES}")
+      message (STATUS "PELICAN_CMAKE_MODULE_DIR = ${PELICAN_CMAKE_MODULE_DIR}")
     endif (NOT PELICAN_FIND_QUIETLY)
   else (HAVE_PELICAN)
     if (PELICAN_FIND_REQUIRED)
@@ -89,6 +114,7 @@ if (NOT FIND_PELICAN_CMAKE)
   mark_as_advanced (
     PELICAN_INCLUDES
     PELICAN_LIBRARIES
+    PELICAN_CMAKE_MODULE_DIR
     )
   
 endif (NOT FIND_PELICAN_CMAKE)
