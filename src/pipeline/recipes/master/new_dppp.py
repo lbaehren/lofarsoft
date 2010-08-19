@@ -8,6 +8,7 @@
 from __future__ import with_statement
 
 from itertools import cycle
+from tempfile import mkstemp
 
 import subprocess
 import collections
@@ -117,7 +118,7 @@ class new_dppp(LOFARrecipe):
                             args=(host, compute_nodes_lock[host], command,
                                 loghost, str(logport),
                                 ms,
-                                outnames[-1],
+                                outnames[host][-1],
                                 self.inputs['parset'],
                                 self.inputs['executable'],
                                 self.inputs['initscript'],
@@ -136,7 +137,7 @@ class new_dppp(LOFARrecipe):
             return 1
         else:
             parset = parameterset()
-            for host, filenames in data.iteritems():
+            for host, filenames in outnames.iteritems():
                 parset.add(host, "[ %s ]" % ", ".join(filenames))
             self.outputs['mapfile'] = mkstemp()[1]
             parset.writeFile(self.outputs['mapfile'])
