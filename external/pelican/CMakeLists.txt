@@ -41,6 +41,8 @@ if (NOT PELICAN_VERBOSE_CONFIGURE)
   set (PELICAN_FIND_QUIETLY     YES )
 endif (NOT PELICAN_VERBOSE_CONFIGURE)
 
+include (FindPELICAN)
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_PELICAN OR PELICAN_FORCE_BUILD)
