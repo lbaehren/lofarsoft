@@ -9,7 +9,6 @@ from __future__ import with_statement
 
 from itertools import cycle
 
-import cPickle as pickle
 import subprocess
 import collections
 import threading
@@ -20,6 +19,7 @@ import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
+from lofarpipe.cuisine.parset import Parset
 
 class new_dppp(LOFARrecipe):
     def __init__(self):
@@ -72,9 +72,12 @@ class new_dppp(LOFARrecipe):
         #                           Load file <-> compute node mapping from disk
         # ----------------------------------------------------------------------
         self.logger.debug("Loading map from %s" % self.inputs['args'])
-        dumpfile = open(self.inputs['args'], 'r')
-        data = pickle.load(dumpfile)
-        dumpfile.close()
+        datamap = Parset(self.inputs['args'])
+
+        data = []
+        for host in datamap.iterkeys():
+            for filename in datamap.getStringVector(host):
+                data.append((host, filename))
 
         #   BoundedSempaphores will manage the number of simulataneous jobs/node
         # ----------------------------------------------------------------------

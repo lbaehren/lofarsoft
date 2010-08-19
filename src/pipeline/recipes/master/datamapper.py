@@ -7,7 +7,9 @@
 
 from itertools import cycle
 from tempfile import mkstemp
-import cPickle as pickle
+from collections import defaultdict
+
+from lofar.parameterset import parameterset
 
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
@@ -31,19 +33,20 @@ class datamapper(LOFARrecipe):
                 clusterdesc.name: cycle(get_compute_nodes(clusterdesc))
             }
 
-        data = []
+        data = defaultdict(list)
         for filename in self.inputs['args']:
             subcluster = filename.split('/')[2]
             host = available_nodes[subcluster].next()
-            data.append((host, filename))
+            data[host].append(filename)
 
-        #                         Dump the generated mapping to a temporary file
+        #                                 Dump the generated mapping to a parset
         # ----------------------------------------------------------------------
+        parset = parameterset()
+        for host, filenames in data.iteritems():
+            parset.add(host, "[ %s ]" % ", ".join(filenames))
+
         self.outputs['mapfile'] = mkstemp()[1]
-        self.logger.debug("Mapfile is %s" % self.outputs['mapfile'])
-        dumpfile = open(self.outputs['mapfile'], 'w')
-        pickle.dump(data, dumpfile)
-        dumpfile.close()
+        parset.writeFile(self.outputs['mapfile'])
 
         return 0
 
