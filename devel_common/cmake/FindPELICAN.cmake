@@ -41,7 +41,7 @@ if (NOT FIND_PELICAN_CMAKE)
   ## Check for the header files
   
   find_path (PELICAN_INCLUDES pelican/comms/ServerRequest.h
-    PATHS ${include_locations}
+    PATHS ${include_locations} ${CMAKE_INSTALL_PREFIX}/include
     PATH_SUFFIXES pelican
     NO_DEFAULT_PATH
     )
@@ -50,7 +50,7 @@ if (NOT FIND_PELICAN_CMAKE)
   ## Check for the library
   
   find_library (PELICAN_LIBRARIES pelican
-    PATHS ${lib_locations}
+    PATHS ${lib_locations} ${CMAKE_INSTALL_PREFIX}/lib
     NO_DEFAULT_PATH
     )
   
@@ -70,20 +70,22 @@ if (NOT FIND_PELICAN_CMAKE)
     $ENV{PELICAN_INSTALL_DIR}/share/pelican/cmake
     ${PELICAN_INSTALL_DIR}/share/pelican/cmake
     ${CMAKE_INSTALL_PREFIX}
+    ${CMAKE_INSTALL_PREFIX}/share
+    ${CMAKE_INSTALL_PREFIX}/share/pelican
     PATH_SUFFIXES
     share
     cmake
     pelican
     DOC
-    "Location of Pelican cmake modules."
+    "Location of Pelican CMake modules."
     )
   
   ##_____________________________________________________________________________
   ## Actions taken when all components have been found
   
-  if (PELICAN_INCLUDES AND PELICAN_LIBRARIES)
+  if (PELICAN_INCLUDES AND PELICAN_LIBRARIES AND PELICAN_CMAKE_MODULE_DIR)
     set (HAVE_PELICAN TRUE)
-  else (PELICAN_INCLUDES AND PELICAN_LIBRARIES)
+  else (PELICAN_INCLUDES AND PELICAN_LIBRARIES AND PELICAN_CMAKE_MODULE_DIR)
     set (HAVE_PELICAN FALSE)
     if (NOT PELICAN_FIND_QUIETLY)
       if (NOT PELICAN_INCLUDES)
@@ -93,7 +95,7 @@ if (NOT FIND_PELICAN_CMAKE)
 	message (STATUS "Unable to find PELICAN library files!")
       endif (NOT PELICAN_LIBRARIES)
     endif (NOT PELICAN_FIND_QUIETLY)
-  endif (PELICAN_INCLUDES AND PELICAN_LIBRARIES)
+  endif (PELICAN_INCLUDES AND PELICAN_LIBRARIES AND PELICAN_CMAKE_MODULE_DIR)
   
   if (HAVE_PELICAN)
     if (NOT PELICAN_FIND_QUIETLY)
