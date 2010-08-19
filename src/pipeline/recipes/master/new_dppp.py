@@ -63,6 +63,11 @@ class new_dppp(LOFARrecipe):
             help="Maximum number of simultaneous processes per compute node",
             default="4"
         )
+        self.optionparser.add_option(
+            '--nthreads',
+            help="Number of threads per (N)DPPP process",
+            default="2"
+        )
 
 
     def go(self):
@@ -119,7 +124,8 @@ class new_dppp(LOFARrecipe):
                                 self.inputs['executable'],
                                 self.inputs['initscript'],
                                 self.inputs['data_start_time'],
-                                self.inputs['data_end_time']
+                                self.inputs['data_end_time'],
+                                self.inputs['nthreads'],
                             )
                         )
                     )
@@ -136,7 +142,7 @@ class new_dppp(LOFARrecipe):
 
     def _run_dppp_node(
         self, host, semaphore, command, loghost, logport, infile, outfile,
-        parset, executable, initscript, start_time, end_time
+        parset, executable, initscript, start_time, end_time, nthreads
     ):
         semaphore.acquire()
         try:
@@ -160,7 +166,8 @@ class new_dppp(LOFARrecipe):
                     executable,
                     initscript,
                     start_time,
-                    end_time
+                    end_time,
+                    nthreads
                 ]
             )
             self.logger.info("Running %s" % " ".join(ssh_cmd))

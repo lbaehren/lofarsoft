@@ -44,6 +44,11 @@ class dppp(LOFARrecipe):
             '--data-end-time',
             help="End time to be passed to DPPP (optional)",
         )
+        self.optionparser.add_option(
+            '--nthreads',
+            help="Number of threads per (N)DPPP process",
+            default="2"
+        )
 
 
     def go(self):
@@ -96,7 +101,7 @@ class dppp(LOFARrecipe):
                         )
                     )
                     task = LOFARTask(
-                        "result = run_dppp(ms_name, ms_outname, parset, executable, initscript, start_time, end_time)",
+                        "result = run_dppp(ms_name, ms_outname, parset, executable, initscript, start_time, end_time, nthreads)",
                         push=dict(
                             recipename=self.name,
                             nodepath=os.path.dirname(self.__file__.replace('master', 'nodes')),
@@ -107,6 +112,7 @@ class dppp(LOFARrecipe):
                             initscript=self.inputs['initscript'],
                             start_time=self.inputs['data_start_time'],
                             end_time=self.inputs['data_end_time'],
+                            end_time=self.inputs['nthreads'],
                             loghost=loghost,
                             logport=logport
                         ),

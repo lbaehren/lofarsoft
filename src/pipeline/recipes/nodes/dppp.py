@@ -22,7 +22,8 @@ from lofarpipe.support.lofarexceptions import ExecutableMissing
 
 class dppp(LOFARnode):
     def run(
-        self, infile, outfile, parset, executable, initscript, start_time, end_time
+        self, infile, outfile, parset, executable, initscript,
+        start_time, end_time, nthreads
     ):
         # Time execution of this job
         with log_time(self.logger):
@@ -33,7 +34,9 @@ class dppp(LOFARnode):
             #                 Limit number of threads used, per request from GvD
             # ------------------------------------------------------------------
             env = read_initscript(initscript)
-            env['OMP_NUM_THREADS'] = "1"
+            if nthreads == "None": nthreads = 1
+            self.logger.debug("Using %s threads for NDPPP" % nthreads)
+            env['OMP_NUM_THREADS'] = nthreads
 
             #    If the input and output filenames are the same, DPPP should not
             #       write a new MS, but rather update the existing one in-place.
