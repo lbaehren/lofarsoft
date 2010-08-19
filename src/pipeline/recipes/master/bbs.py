@@ -22,6 +22,7 @@ from lofarpipe.support.lofarnode import run_node
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import gvds_iterator
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
+from lofarpipe.support.remotecommand import run_remote_command
 import lofarpipe.support.utilities as utilities
 
 class bbs(LOFARrecipe):
@@ -214,7 +215,7 @@ class bbs(LOFARrecipe):
                         # -----------------------------------------------------
                         bbs_kernels = [
                             threading.Thread(
-                                target=self._run_via_ssh,
+                                target=self._run_bbs_kernel,
                                 args=(host, command,
                                     loghost, str(logport),
                                     self.inputs['kernel_exec'],
@@ -248,7 +249,7 @@ class bbs(LOFARrecipe):
         self.outputs['data'] = self.inputs['args']
         return 0
 
-    def _run_via_ssh(self, host, command, *arguments):
+    def _run_bbs_kernel(self, host, command, *arguments):
         """
         Run command with arguments on the specified host using ssh. Return its
         return code.
@@ -256,17 +257,15 @@ class bbs(LOFARrecipe):
         The resultant process is monitored for failure; see
         _monitor_process() for details.
         """
-        engine_ppath = self.config.get('deploy', 'engine_ppath')
-        engine_lpath = self.config.get('deploy', 'engine_lpath')
-        ssh_cmd = [
-            "ssh", "-n", "-t", "-x", host, "--",
-            "PYTHONPATH=%s" % engine_ppath,
-            "LD_LIBRARY_PATH=%s" % engine_lpath,
-            command
-        ]
-        ssh_cmd.extend(arguments)
-        self.logger.info("Running %s" % " ".join(ssh_cmd))
-        bbs_kernel_process = subprocess.Popen(ssh_cmd)
+        bbs_kernel_process = run_remote_command(
+            host,
+            command,
+            {
+                "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
+                "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
+            },
+            *arguments
+        )
         return(self._monitor_process(bbs_kernel_process, "BBS Kernel"))
 
     def _run_bbs_control(self, bbs_parset, run_flag):

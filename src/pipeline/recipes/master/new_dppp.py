@@ -19,6 +19,7 @@ import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
+from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.cuisine.parset import Parset
 
 class new_dppp(LOFARrecipe):
@@ -143,30 +144,24 @@ class new_dppp(LOFARrecipe):
         try:
             #                                   Run DPPP process on compute node
             # ------------------------------------------------------------------
-            engine_ppath = self.config.get('deploy', 'engine_ppath')
-            engine_lpath = self.config.get('deploy', 'engine_lpath')
-            ssh_cmd = [
-                "ssh", "-n", "-t", "-x", host, "--",
-                "PYTHONPATH=%s" % engine_ppath,
-                "LD_LIBRARY_PATH=%s" % engine_lpath,
-                command
-            ]
-            ssh_cmd.extend(
-                [
-                    loghost,
-                    logport,
-                    infile,
-                    outfile,
-                    parset,
-                    executable,
-                    initscript,
-                    start_time,
-                    end_time,
-                    nthreads
-                ]
+            dppp_process = run_remote_command(
+                host,
+                command,
+                {
+                    "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
+                    "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
+                },
+                loghost,
+                logport,
+                infile,
+                outfile,
+                parset,
+                executable,
+                initscript,
+                start_time,
+                end_time,
+                nthreads
             )
-            self.logger.info("Running %s" % " ".join(ssh_cmd))
-            dppp_process = subprocess.Popen(ssh_cmd)
             sout, serr = dppp_process.communicate()
         finally:
             semaphore.release()
