@@ -731,7 +731,7 @@ if __name__ == "__main__":
 		# loop over the storage nodes and directories to get the list of all IDs
 		for s in storage_nodes:
 			for d in data_dirs:
-				cmd="cexec %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission | grep -v such' 2>/dev/null | %s" % (cexec_nodes[s], d, "?20??_*", cexec_egrep_string)
+				cmd="cexec %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>&1 | grep -v Permission | grep -v such' 2>/dev/null | grep -v such | %s" % (cexec_nodes[s], d, "?20??_*", cexec_egrep_string)
 				indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
 				obsids = np.append(obsids, indlist)
 
@@ -740,7 +740,7 @@ if __name__ == "__main__":
 			cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, cexec_egrep_string)
 			if np.size(os.popen(cmd).readlines()) == 0:
 				continue
-			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission | grep -v such' 2>/dev/null | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
+			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission | grep -v such' 2>/dev/null | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
 			indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
 			obsids = np.append(obsids, indlist)
 
@@ -881,11 +881,11 @@ if __name__ == "__main__":
 		for lse in storage_nodes:
 			ddir=oi.datadir + "/" + id
 			dirsizes[lse] = ["x", "0.0"]
-			cmd="cexec %s 'du -sh %s 2>&1 | cut -f 1 | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
+			cmd="cexec %s 'du -sh %s 2>&1 | cut -f 1 | grep -v such' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
 			dirout=os.popen(cmd).readlines()
 			if np.size(dirout) > 0:
 				dirsizes[lse][0]=dirout[0][:-1]
-				cmd="cexec %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
+				cmd="cexec %s 'du -s -B 1 %s 2>&1 | cut -f 1 | grep -v such' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
 				status=os.popen(cmd).readlines()
 				if np.size(status) > 0:
 					status=status[0][:-1]
@@ -900,13 +900,13 @@ if __name__ == "__main__":
 			cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
 			if np.size(os.popen(cmd).readlines()) == 0:
 				continue
-			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red", cexec_egrep_string)
+			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission | grep -v such' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red", cexec_egrep_string)
 			redout=os.popen(cmd).readlines()
 			if np.size(redout) > 0:
 				reddir=redout[0][:-1]
 				statusline=lse
 				redlocation="%s/%s/%s%s" % ("/net", cexec_nodes[lse].split(":")[0], lse, reddir)
-				cmd="cexec %s 'find %s -name \"%s\" -print 2>&1 | grep -v Permission | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], reddir, "*_plots.tar.gz", cexec_egrep_string)
+				cmd="cexec %s 'find %s -name \"%s\" -print 2>&1 | grep -v Permission | grep -v such' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir, "*_plots.tar.gz", cexec_egrep_string)
 				status=os.popen(cmd).readlines()
 				if np.size(status) > 0:
 					# tarfile exists
@@ -922,7 +922,7 @@ if __name__ == "__main__":
 			cmd="cexec %s 'ls -d %s 2>/dev/null' | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
 			if np.size(os.popen(cmd).readlines()) == 0:
 				continue
-			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission | grep -v such' 2>/dev/null | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red", cexec_egrep_string)
+			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>&1 | grep -v Permission | grep -v such' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red", cexec_egrep_string)
 			redout=os.popen(cmd).readlines()
 			if np.size(redout) > 0:
 				reddir=redout[0][:-1]
