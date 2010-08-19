@@ -154,7 +154,7 @@ class cimager(LOFARrecipe):
                     )[0],
                     'msDirDec': vds_data.getStringVector(
                         "Extra.FieldDirectionDec"
-                    )[0]
+                    )[0],
                     'restore': 'True' # cimager bug: non-restored image unusable
                 }
             )
