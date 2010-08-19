@@ -30,18 +30,15 @@ For Python, PEP 8  has emerged as the style guide that most projects adhere to; 
 ## Imports
 #  Only import modules that are actually needed and avoid
 #  "from module import *" as much as possible to prevent name clashes.
-import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
 import pycrtools as hf
 ## Examples
-class ExampleClass():
+class PPF():
     """Class documentation"""
 
     def __init__(self):
         """Constructor"""
-
-        weights_filename=LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat'
+        
+        weights_filename=hf.LOFARSOFT+'/src/CR-tools/data/ppfWeights16384.dat'
 # Initialize arrays and values
         weights=hf.hArray(float,[16,1024])
         weights.readdump(weights_filename)
@@ -49,49 +46,34 @@ class ExampleClass():
         if weights[0,0].val()==0.0:
             print "Obtaining Kaiser coefficient from file"
             # Reading of weights failed
-            f=open(LOFARSOFT+'/src/CR-Tools/data/Coeffs16384Kaiser-quant.dat')
+            f=open(hf.LOFARSOFT+'/src/CR-Tools/data/Coeffs16384Kaiser-quant.dat')
             weights.setDim([16*1024])
             f.seek(0)
             for i in range(0,16*1024):
                 weights[i]=float(f.readline())
             weights.setDim([16,1024])
         
-        buffer=hf.hArray(float,[16,1024])
-        startrow=15
-        total_rows_added=0
+        self.weights=weights
+        self.buffer=hf.hArray(float,[16,1024])
+        self.startrow=15
+        self.total_rows_added=0
 
-    def add(input):
+    def add(self,input):
         self.buffer[self.startrow].copy(input)
         input.fill(0)
         for row in range(0,16):
-            input.muladd(weights[row],self.buffer[(row+self.startrow)%16])
+            input.muladd(self.weights[row],self.buffer[(row+self.startrow)%16])
         
-        total_rows_added+=1
+        self.total_rows_added+=1
         self.startrow-=1
-        if total_row_added < 16:
+        if self.total_rows_added < 16:
             input.fill(0)
-            return false
+            return False
         
-        return true
+        return True
 
 
         
-
-
-
-def example_function(a, b):
-    """This is a docstring, each function should have one.
-
-    *a* description of parameter a
-    *b* description of parameter b
-
-    Examples (also for doctests):
-
-    >>> example_function(1,2)
-    (1, 2)
-    """
-
-    return a, b
 
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
