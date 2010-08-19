@@ -1,25 +1,28 @@
 import struct
 import numpy as np
-
+import os
 
 def get_stokes_data(file, block, channels, samples, nrstations=1, type="StokesI"):
-    """Get a lofar datablock from stokesI raw data format. 
-    Returns a tuple of sequence number and data(channels,samples).
-    Note that the internal data format is data(channels,samples|2).
+    """Get a lofar datablock from stokes (I or IQUV) raw data format. 
+    Returns a array of data(stations,channels,samples,nrstokes).
     
     *file* opened data file
-    *block* which block to read, negative numbers means just the first block
+    *block* which block to read, negative numbers mean the next block
     *channels* nr of channels per subband
-    *samples* nr of samples per subband
-    *type* StokesI or StokesIQUV
+    *samples* nr of samples per subband (This is the samples/block divided by integration length)
+    *nr stations* Nr of stations in flysEye mode.
+    *type* StokesI, I, StokesIQUV, IQUV
     """
     
     # 
-    if type is "StokesI":
+    if type is "StokesI" or type is "I":
         nrStokes=1
-    elif type is "StokesIQUV":
+    elif type is "StokesIQUV" or type is "IQUV":
         nrStokes=4
-    
+    else:
+        print "Unsupported datatype. Aborting...."
+        assert False
+ 
     # Calculate how large the datablock is.
     n=nrstations*channels*(samples|2)*nrStokes
     
@@ -48,7 +51,7 @@ def get_stokes_data(file, block, channels, samples, nrstations=1, type="StokesI"
             x=file.read(sz)
             t=struct.unpack(fmt,x)
             if t[0] != block:
-                print "Discontinuous data is not supported yet"
+                print "Discontinuous data is not supported yet in this mode. Use blocknr = -1 and step through the data"
                 assert False
                  
     # unpack struct into intermediate data
@@ -56,7 +59,62 @@ def get_stokes_data(file, block, channels, samples, nrstations=1, type="StokesI"
     
     
     # return sequence number as uint, and data as nparray
-    return np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrStokes)
+    return np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrStokes)[:,:,0:samples,:]
+
+def get_rawvoltage_data(file, block, channels, samples, nrstations=1, nrpol=2):
+    """Get a lofar datablock from raw voltage complex data. 
+    Returns a array of data(stations,channels,samples,nrpol,(real,imag)).
+    
+    *file* opened data file
+    *block* which block to read, negative numbers mean the next block
+    *channels* nr of channels per subband
+    *samples* nr of samples per subband (This is the samples/block divided by integration length)
+    *nr stations* Nr of stations in flysEye mode.
+    *nrpol* Nr of polarisations
+    """
+    
+    # 
+    
+    # Calculate how large the datablock is.
+    n=nrstations*channels*(samples|2)*2*nrpol
+  
+    # Format string for sequence number, padding and data (Big endian)
+    fmt='>I508x'+str(n)+'f'
+    
+    # Size represented by format string in bytes
+    sz=struct.calcsize(fmt)
+    
+    # read data from file
+    if block < 0:
+        x=file.read(sz)
+        # unpack struct into intermediate data
+        t=struct.unpack(fmt,x)
+    else:
+        file.seek(sz*block)
+        x=file.read(sz)
+        # unpack struct into intermediate data
+        t=struct.unpack(fmt,x)
+        if t[0] != block:
+            file.seek(0)
+            x=file.read(sz)
+            t=struct.unpack(fmt,x)
+            startblock=t[0]
+            file.seek((block-startblock)*sz)
+            x=file.read(sz)
+            t=struct.unpack(fmt,x)
+            if t[0] != block:
+                print "Discontinuous data is not supported yet in this mode. Useblocknr = -1 and step through the data"
+                assert False
+                 
+    # unpack struct into intermediate data
+    #t=struct.unpack(fmt,x)
+    
+    
+    # return sequence number as uint, and data as nparray
+    return np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrpol,2)[:,:,0:samples,:,:]
+
+
+
 
 def check_data_parameters(file, channels, samples, nrstations=1, type="StokesI"):
     """Checks if the first two blocks have a continuous sequence number.
@@ -64,13 +122,13 @@ def check_data_parameters(file, channels, samples, nrstations=1, type="StokesI")
     *file* opened data file
     *channels* nr of channels per subband
     *samples* nr of samples per subband
-    *type* StokesI or StokesIQUV
+    *type* StokesI, I, StokesIQUV, IQUV or RawVoltage
     """
     
     # 
     if type is "StokesI" or type is "I":
         nrStokes=1
-    elif type is "StokesIQUV" or type is "IQUV":
+    elif type is "StokesIQUV" or type is "IQUV" or type is "RawVoltage":
         nrStokes=4
     
     # Calculate how large the datablock is.
@@ -99,7 +157,7 @@ def check_data_parameters(file, channels, samples, nrstations=1, type="StokesI")
      
     return t1[0]-t0[0] == 1
 
-def get_stokes_data_size(channels, samples, nrstations=1, type="StokesI"):
+def get_data_size(channels, samples, nrstations=1, type="StokesI"):
     """Get the size in bytes of a lofar data block. 
     
     *channels* nr of channels per subband
@@ -108,9 +166,9 @@ def get_stokes_data_size(channels, samples, nrstations=1, type="StokesI"):
     """
     
     # 
-    if type is "StokesI":
+    if type is "StokesI" or type is "I":
         nrStokes=1
-    elif type is "StokesIQUV":
+    elif type is "StokesIQUV" or type is "IQUV" or type is "RawVoltage":
         nrStokes=4
     
     # Calculate how large the datablock is.
@@ -133,15 +191,15 @@ def get_sequence_number(file, block, channels, samples, nrstations=1, type="Stok
     *block* which block to read, negative numbers means just the first block
     *channels* nr of channels per subband
     *samples* nr of samples per subband
-    *type* StokesI or StokesIQUV
+    *type* StokesI,I, StokesIQUV, IQUV or RawVoltage
     """
     
-    
     # Calculate the size of one datablock
-    seeksize=get_stokes_data_size(channels,samples,nrstations,type)
+    seeksize=get_data_size(channels,samples,nrstations,type)
     
-    # Go to the start of one datablock
-    file.seek(block*seeksize)
+    if block >= 0: 
+        # Go to the start of one datablock
+        file.seek(block*seeksize)
     
     # Format string for sequence number, padding and data (Big endian)
     fmt='>I'
@@ -154,9 +212,13 @@ def get_sequence_number(file, block, channels, samples, nrstations=1, type="Stok
     
     # unpack struct into intermediate data
     t=struct.unpack(fmt,x)
+   
+    if block >= 0: 
+        # Go back to the start of one datablock
+        file.seek(block*seeksize)
     
     # return sequence number as uint, and data as nparray
-    return t 
+    return t[0] 
 
 
 
@@ -406,6 +468,10 @@ def get_blockheader_raw_station_data(file,nrSamplesPerSubband,nrSubbands):
 
     
     # Read data
+    if endiannes is '>':
+        endiannes='<'
+    else:
+        endiannes='>'
     fmt=endiannes+str(nrSamplesPerSubband*nrSubbands*4)+'h' 
     data= struct.unpack(fmt,file.read(struct.calcsize(fmt)))
     data=np.array(data)
@@ -415,8 +481,168 @@ def get_blockheader_raw_station_data(file,nrSamplesPerSubband,nrSubbands):
     return (coarseDelayApplied,fineDelayRemainingAtBegin, fineDelayRemainingAfterEnd, time, flags,data)
 
 
-    #  sizeof(blockheader)
-    #  +
-    #  ( header.nrSamplesPerSubband * header.nrSubbands * sizeof(Sample) );
-    #nrOfBlocks = (file_byte_size - sizeof(header)) / oneSecondBlockSize;
-    #std::cout << "Number of one second blocks in file: " << nrOfBlocks << std::endl;
+
+def get_parameters(obsid, useFilename=False):
+    """Get the most important observation parameters. Returns a dictionary with these parameters.
+    *obsid*        Observation id, f.e. L2010_08834 or D2009_16234. Only works on lofar cluster.
+    *useFilename*  If set to true, obsid is filename of the parset.
+    """
+    if useFilename:
+        parsetfilename=obsid
+    else:
+        # What is the observation number? This determines the filename
+        obsnr=obsid.split('_')[1]
+        
+        # Name of the parset file
+        parsetfilename='/globalhome/lofarsystem/log/'+obsid+'/RTCP-'+obsnr+'.parset'
+        if not os.path.isfile(parsetfilename):
+            parsetfilename='/globalhome/lofarsystem/log/'+obsid+'/RTCP.parset.0'   
+
+ 
+    # Open the file
+    parsetfile=open(parsetfilename,'r')
+    parsetfile.seek(0)
+    # Read in the parameters from the parset file
+    allparameters={}
+    for line in parsetfile:
+        str2 = line.split(None,2)
+        if len(str2)>=3:
+            allparameters[str2[0]] = str2[2].strip('\n')
+        else:
+            allparameters[str2[0]] = "UNDEFINED"
+
+    # Link the important parameters
+    parameters={}
+    parameters["channels"]=int(allparameters["Observation.channelsPerSubband"])
+    parameters["samples"]=int(allparameters["OLAP.CNProc.integrationSteps"])
+    parameters["namemask"]=allparameters["Observation.MSNameMask"]
+    parameters["stationnames"]=allparameters["OLAP.storageStationNames"]
+    parameters["storagenodes"]=allparameters["Observation.VirtualInstrument.storageNodeList"].strip('[]').split(',')
+    parameters["storagenodes"].sort()
+    SBspernode=allparameters["OLAP.storageNodeList"].strip('[]').split(',')
+    for i in range(len(SBspernode)):
+        SBspernode[i]=int(SBspernode[i].split('*')[0])
+    parameters["SBspernode"]=SBspernode
+    parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
+    parameters["subbands"]=allparameters["Observation.subbandList"]
+    #parameters["subbandsperMS"]=allparameters["OLAP.StorageProc.subbandsPerMS"]
+    #parameters["antennaset"]=allparameters["Observation.antennaSet"]
+    parameters["filterselection"]=allparameters["Observation.bandFilter"]
+    parameters["clockfrequency"]=allparameters["Observation.sampleClock"]
+    obsid2=allparameters["Observation.ObsID"]
+    while len(obsid2) < 5:
+        obsid2 = '0' + obsid2
+    parameters["obsid"]=obsid2
+    parameters["starttime"]=allparameters["Observation.startTime"]
+    parameters["stoptime"]=allparameters["Observation.stopTime"]
+    parameters["coherentstokes"]=allparameters["OLAP.outputCoherentStokes"]=='true'
+    parameters["incoherentstokes"]=allparameters["OLAP.outputIncoherentStokes"]=='true'
+    parameters["beamformeddata"]=allparameters["OLAP.outputBeamFormedData"]=='true'
+    parameters["correlateddata"]=allparameters["OLAP.outputCorrelatedData"]=='true'
+    parameters["filtereddata"]=allparameters["OLAP.outputFilteredData"]=='true'
+    parameters["flyseyes"]=allparameters["OLAP.PencilInfo.flysEye"]=='true' 
+    parameters["stokestype"]=allparameters["OLAP.Stokes.which"]
+
+    # Get file names
+    year=parameters['starttime'].split('-')[0].replace('\'','')
+
+    subcluster={}
+    subcluster["lse001"]="sub1"
+    subcluster["lse002"]="sub1"
+    subcluster["lse003"]="sub1"
+    subcluster["lse004"]="sub2"
+    subcluster["lse005"]="sub2"
+    subcluster["lse006"]="sub2"
+    subcluster["lse007"]="sub3"
+    subcluster["lse008"]="sub3"
+    subcluster["lse009"]="sub3"
+    subcluster["lse010"]="sub4"
+    subcluster["lse011"]="sub4"
+    subcluster["lse012"]="sub4"
+    subcluster["lse013"]="sub5"
+    subcluster["lse014"]="sub5"
+    subcluster["lse015"]="sub5"
+    subcluster["lse016"]="sub6"
+    subcluster["lse017"]="sub6"
+    subcluster["lse018"]="sub6"
+    subcluster["lse019"]="sub7"
+    subcluster["lse020"]="sub7"
+    subcluster["lse021"]="sub7"
+    subcluster["lse022"]="sub8"
+    subcluster["lse023"]="sub8"
+    subcluster["lse024"]="sub8"
+   
+    names=[]
+    datatype=[] 
+    if parameters["coherentstokes"]:
+        sb=0
+        for i in range(len(parameters["storagenodes"])):
+            node=parameters["storagenodes"][i]
+            nrpernode=parameters["SBspernode"][i]
+            mask=parameters["namemask"]
+            for j in range(int(nrpernode)):
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',str(sb))
+                name=name+'.stokes'
+                names.append(name)
+                sb+=1
+        
+    if parameters["incoherentstokes"]:
+        sb=0
+        for i in range(len(parameters["storagenodes"])):
+            node=parameters["storagenodes"][i]
+            nrpernode=parameters["SBspernode"][i]
+            mask=parameters["namemask"]
+            for j in range(int(nrpernode)):
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',str(sb))
+                name=name+'.incoherentstokes'
+                names.append(name)
+                sb+=1
+
+    if parameters["beamformeddata"]:
+        sb=0
+        for i in range(len(parameters["storagenodes"])):
+            node=parameters["storagenodes"][i]
+            nrpernode=parameters["SBspernode"][i]
+            mask=parameters["namemask"]
+            for j in range(int(nrpernode)):
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',str(sb))
+                name=name+'.beams'
+                names.append(name)
+                sb+=1
+
+
+    if parameters["correlateddata"]:
+        sb=0
+        for i in range(len(parameters["storagenodes"])):
+            node=parameters["storagenodes"][i]
+            nrpernode=parameters["SBspernode"][i]
+            mask=parameters["namemask"]
+            for j in range(int(nrpernode)):
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',str(sb))
+                name=name+'.MS'
+                names.append(name)
+                sb+=1
+
+
+    if parameters["filtereddata"]:
+        sb=0
+        for i in range(len(parameters["storagenodes"])):
+            node=parameters["storagenodes"][i]
+            nrpernode=parameters["SBspernode"][i]
+            mask=parameters["namemask"]
+            for j in range(int(nrpernode)):
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',str(sb))
+                name=name+'.unknown'
+                names.append(name)
+                sb+=1
+
+    parameters["files"]=names
+
+    return parameters
+
+
