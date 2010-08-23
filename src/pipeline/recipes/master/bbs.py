@@ -84,7 +84,7 @@ class bbs(LOFARrecipe):
         self.optionparser.add_option(
             '--nproc',
             help="Maximum number of simultaneous processes per compute node",
-            default="4"
+            default="8"
         )
 
     def go(self):

@@ -60,7 +60,7 @@ class new_dppp(LOFARrecipe):
         self.optionparser.add_option(
             '--nproc',
             help="Maximum number of simultaneous processes per compute node",
-            default="4"
+            default="8"
         )
         self.optionparser.add_option(
             '--nthreads',
