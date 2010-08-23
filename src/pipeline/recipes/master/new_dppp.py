@@ -21,8 +21,8 @@ from lofar.parameterset import parameterset
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.clusterlogger import clusterlogger
-from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
 from lofarpipe.support.remotecommand import run_remote_command
+from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.cuisine.parset import Parset
 
 class new_dppp(LOFARrecipe):
@@ -68,7 +68,6 @@ class new_dppp(LOFARrecipe):
             default="2"
         )
 
-
     def go(self):
         self.logger.info("Starting DPPP run")
         super(new_dppp, self).go()
@@ -83,11 +82,10 @@ class new_dppp(LOFARrecipe):
             for filename in datamap.getStringVector(host):
                 data.append((host, filename))
 
-        #   BoundedSempaphores will manage the number of simulataneous jobs/node
+        #                               Limit number of process per compute node
         # ----------------------------------------------------------------------
-        compute_nodes_lock = collections.defaultdict(
-            lambda: threading.BoundedSemaphore(int(self.inputs['nproc']))
-        )
+        compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
+
 
         #       If an imager process fails, set the error Event & bail out later
         # ----------------------------------------------------------------------

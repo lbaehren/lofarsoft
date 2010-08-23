@@ -5,7 +5,17 @@
 #                                                      swinbank@transientskp.org
 # ------------------------------------------------------------------------------
 
+from collections import defaultdict
+from threading import BoundedSemaphore
+
 import subprocess
+
+
+class ProcessLimiter(defaultdict):
+    def __init__(self, nproc):
+        super(ProcessLimiter, self).__init__(
+            lambda: BoundedSemaphore(int(nproc))
+        )
 
 def run_remote_command(host, command, environment, *arguments):
     """

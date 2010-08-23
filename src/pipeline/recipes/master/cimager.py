@@ -21,7 +21,7 @@ from lofarpipe.support.pipelinelogging import log_time
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.utilities import patch_parset
 from lofarpipe.support.remotecommand import run_remote_command
-
+from lofarpipe.support.remotecommand import ProcessLimiter
 
 class cimager(LOFARrecipe):
     """
@@ -51,7 +51,6 @@ class cimager(LOFARrecipe):
             default="8"
         )
 
-
     def go(self):
         self.logger.info("Starting cimager run")
         super(cimager, self).go()
@@ -76,11 +75,9 @@ class cimager(LOFARrecipe):
             vds  = parset.getString("Part%d.Name" % part)
             data.append((host, vds))
 
-        #   BoundedSempaphores will manage the number of simulataneous jobs/node
+        #                               Limit number of process per compute node
         # ----------------------------------------------------------------------
-        compute_nodes_lock = collections.defaultdict(
-            lambda: threading.BoundedSemaphore(int(self.inputs['nproc']))
-        )
+        compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
 
         #       If an imager process fails, set the error Event & bail out later
         # ----------------------------------------------------------------------
