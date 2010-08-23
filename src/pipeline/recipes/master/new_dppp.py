@@ -9,6 +9,7 @@ from __future__ import with_statement
 
 from itertools import cycle
 from tempfile import mkstemp
+from contextlib import nested
 
 import subprocess
 import collections
@@ -86,38 +87,39 @@ class new_dppp(LOFARrecipe):
         command = "python %s" % (
             self.__file__.replace('master', 'nodes').replace('new_dppp', 'dppp')
         )
-        with clusterlogger(self.logger) as (loghost, logport):
+        with nested(
+            clusterlogger(self.logger), utilities.log_time(self.logger)
+        ) as (loghost, logport):
             self.logger.debug("Logging to %s:%d" % (loghost, logport))
-            with utilities.log_time(self.logger):
-                dppp_threads = []
-                outnames = collections.defaultdict(list)
-                for host, ms in data:
-                    outnames[host].append(
-                        os.path.join(
-                            self.inputs['working_directory'],
-                            self.inputs['job_name'],
-                            os.path.basename(ms) + self.inputs['suffix']
+            dppp_threads = []
+            outnames = collections.defaultdict(list)
+            for host, ms in data:
+                outnames[host].append(
+                    os.path.join(
+                        self.inputs['working_directory'],
+                        self.inputs['job_name'],
+                        os.path.basename(ms) + self.inputs['suffix']
+                    )
+                )
+                dppp_threads.append(
+                    threading.Thread(
+                        target=self._dispatch_compute_job,
+                        args=(host, command, compute_nodes_lock[host],
+                            loghost, str(logport),
+                            ms,
+                            outnames[host][-1],
+                            self.inputs['parset'],
+                            self.inputs['executable'],
+                            self.inputs['initscript'],
+                            self.inputs['data_start_time'],
+                            self.inputs['data_end_time'],
+                            self.inputs['nthreads'],
                         )
                     )
-                    dppp_threads.append(
-                        threading.Thread(
-                            target=self._dispatch_compute_job,
-                            args=(host, command, compute_nodes_lock[host],
-                                loghost, str(logport),
-                                ms,
-                                outnames[host][-1],
-                                self.inputs['parset'],
-                                self.inputs['executable'],
-                                self.inputs['initscript'],
-                                self.inputs['data_start_time'],
-                                self.inputs['data_end_time'],
-                                self.inputs['nthreads'],
-                            )
-                        )
-                    )
-                [thread.start() for thread in dppp_threads]
-                self.logger.info("Waiting for DPPP threads")
-                [thread.join() for thread in dppp_threads]
+                )
+            [thread.start() for thread in dppp_threads]
+            self.logger.info("Waiting for DPPP threads")
+            [thread.join() for thread in dppp_threads]
 
         if self.error.isSet():
             self.logger.warn("Failed DPPP process detected")
