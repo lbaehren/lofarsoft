@@ -9,7 +9,7 @@ import threading
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
-from lofarpipe.support.remotecommand import run_remote_command
+from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.group_data import load_data_map
 import lofarpipe.support.utilities as utilities
 
@@ -34,6 +34,11 @@ class parmdb(LOFARrecipe):
             '--executable',
             help="Executable for parmdbm",
             default="/opt/LofIm/daily/lofar/bin/parmdbm"
+        )
+        self.optionparser.add_option(
+            '--nproc',
+            help="Maximum number of simultaneous processes per compute node",
+            default="8"
         )
 
     def go(self):
@@ -61,10 +66,10 @@ class parmdb(LOFARrecipe):
         self.logger.debug("Loading map from %s" % self.inputs['args'])
         data = load_data_map(self.inputs['args'])
 
-        #               If a process fails, set the error Event & bail out later
+        #                               Limit number of process per compute node
         # ----------------------------------------------------------------------
-        self.error = threading.Event()
-        self.error.clear()
+        self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
+        compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
 
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
         with clusterlogger(self.logger) as (loghost, logport):
@@ -74,8 +79,9 @@ class parmdb(LOFARrecipe):
                 for host, ms in data:
                     parmdb_threads.append(
                         threading.Thread(
-                            target=self._run_parmdb_node,
-                            args=(host, command, loghost, str(logport),
+                            target=self._dispatch_compute_job,
+                            args=(host, command, compute_nodes_lock[host],
+                                loghost, str(logport),
                                 ms, pdbfile
                             )
                         )
@@ -92,24 +98,6 @@ class parmdb(LOFARrecipe):
         else:
             self.outputs['mapfile'] = self.inputs['args']
             return 0
-
-    def _run_parmdb_node(self, host, command, loghost, logport, ms, pdbfile):
-        parmdb_process = run_remote_command(
-            host,
-            command,
-            {
-                "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
-                "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
-            },
-            loghost,
-            logport,
-            ms,
-            pdbfile
-        )
-        sout, serr = parmdb_process.communicate()
-        if parmdb_process.returncode != 0:
-            self.error.set()
-        return parmdb_process.returncode
 
 if __name__ == '__main__':
     sys.exit(parmdb().main())

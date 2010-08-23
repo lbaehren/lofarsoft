@@ -14,11 +14,10 @@ import subprocess
 import threading
 
 import lofarpipe.support.utilities as utilities
-from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.clusterlogger import clusterlogger
-from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.group_data import load_data_map
+from lofarpipe.support.remotecommand import ProcessLimiter
 
 class new_vdsmaker(LOFARrecipe):
     def __init__(self):
@@ -50,6 +49,11 @@ class new_vdsmaker(LOFARrecipe):
             help="Unlink VDS files after combining",
             default="True"
         )
+        self.optionparser.add_option(
+            '--nproc',
+            help="Maximum number of simultaneous processes per compute node",
+            default="8"
+        )
 
     def go(self):
         super(new_vdsmaker, self).go()
@@ -59,6 +63,10 @@ class new_vdsmaker(LOFARrecipe):
         self.logger.debug("Loading map from %s" % self.inputs['args'])
         data = load_data_map(self.inputs['args'])
 
+        #                               Limit number of process per compute node
+        # ----------------------------------------------------------------------
+        self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
+        compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
 
         if self.inputs['unlink'] == "False":
             self.inputs['unlink'] = False
@@ -68,11 +76,6 @@ class new_vdsmaker(LOFARrecipe):
         except OSError, failure:
             if failure.errno != errno.EEXIST:
                 raise
-
-        #               If a process fails, set the error Event & bail out later
-        # ----------------------------------------------------------------------
-        self.error = threading.Event()
-        self.error.clear()
 
         command = "python %s" % (
             self.__file__.replace('master', 'nodes').replace('new_vdsmaker', 'vdsmaker')
@@ -88,8 +91,9 @@ class new_vdsmaker(LOFARrecipe):
                     )
                     vdsmaker_threads.append(
                         threading.Thread(
-                            target=self._run_vdsmaker_node,
-                            args=(host, command, loghost, str(logport),
+                            target=self._dispatch_compute_job,
+                            args=(host, command, compute_nodes_lock[host],
+                                loghost, str(logport),
                                 ms,
                                 self.config.get('cluster', 'clusterdesc'),
                                 vdsnames[-1],
@@ -136,29 +140,6 @@ class new_vdsmaker(LOFARrecipe):
             return 1
         else:
             return 0
-
-    def _run_vdsmaker_node(
-        self, host, command, loghost, logport, infile,
-        clusterdesc, outfile, executable
-    ):
-        vdsmaker_process = run_remote_command(
-            host,
-            command,
-            {
-                "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
-                "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
-            },
-            loghost,
-            logport,
-            infile,
-            clusterdesc,
-            outfile,
-            executable
-        )
-        sout, serr = vdsmaker_process.communicate()
-        if vdsmaker_process.returncode != 0:
-            self.error.set()
-        return vdsmaker_process.returncode
 
 if __name__ == '__main__':
     sys.exit(new_vdsmaker().main())

@@ -7,6 +7,7 @@
 
 from ConfigParser import NoOptionError, NoSectionError
 from ConfigParser import SafeConfigParser as ConfigParser
+from threading import Event
 
 import os
 import sys
@@ -22,6 +23,7 @@ from lofarpipe.support.lofarexceptions import PipelineException, ClusterError
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
 from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
 from lofarpipe.support.clusterhandler import ClusterHandler
+from lofarpipe.support.remotecommand import run_remote_command
 
 class LOFARrecipe(WSRTrecipe):
     """
@@ -38,6 +40,8 @@ class LOFARrecipe(WSRTrecipe):
         super(LOFARrecipe, self).__init__()
         self.state = []
         self.completed = []
+        self.error = Event()
+        self.error.clear()
         self.optionparser.add_option(
             '-j', '--job-name',
             dest="job_name",
@@ -194,6 +198,33 @@ class LOFARrecipe(WSRTrecipe):
             self.logger.error("Unable to initialise cluster")
             raise ClusterError
         return tc, mec
+
+    def _dispatch_compute_job(
+        self, host, command, semaphore, loghost, logport, *arguments
+    ):
+        """
+        Dispatch a command to be run on the given host.
+        Set the recipe's error Event if it does not return 0.
+        """
+        semaphore.acquire()
+        try:
+            process = run_remote_command(
+                host,
+                command,
+                {
+                    "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
+                    "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
+                },
+                loghost,
+                logport,
+                *arguments
+            )
+            sout, serr = process.communicate()
+        finally:
+            semaphore.release()
+        if process.returncode != 0:
+            self.error.set()
+        return process.returncode
 
     def go(self):
         """

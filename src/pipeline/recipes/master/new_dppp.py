@@ -21,7 +21,6 @@ from lofar.parameterset import parameterset
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.clusterlogger import clusterlogger
-from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.group_data import load_data_map
 
@@ -82,11 +81,6 @@ class new_dppp(LOFARrecipe):
         self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
         compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
 
-        #       If an imager process fails, set the error Event & bail out later
-        # ----------------------------------------------------------------------
-        self.error = threading.Event()
-        self.error.clear()
-
         #       We can use the same node script as the "old" IPython dppp recipe
         # ----------------------------------------------------------------------
         command = "python %s" % (
@@ -107,8 +101,8 @@ class new_dppp(LOFARrecipe):
                     )
                     dppp_threads.append(
                         threading.Thread(
-                            target=self._run_dppp_node,
-                            args=(host, compute_nodes_lock[host], command,
+                            target=self._dispatch_compute_job,
+                            args=(host, command, compute_nodes_lock[host],
                                 loghost, str(logport),
                                 ms,
                                 outnames[host][-1],
@@ -126,7 +120,7 @@ class new_dppp(LOFARrecipe):
                 [thread.join() for thread in dppp_threads]
 
         if self.error.isSet():
-            self.logger.warn("Failed imager process detected")
+            self.logger.warn("Failed DPPP process detected")
             return 1
         else:
             parset = parameterset()
@@ -135,40 +129,6 @@ class new_dppp(LOFARrecipe):
             self.outputs['mapfile'] = mkstemp()[1]
             parset.writeFile(self.outputs['mapfile'])
             return 0
-
-    def _run_dppp_node(
-        self, host, semaphore, command, loghost, logport, infile, outfile,
-        parset, executable, initscript, start_time, end_time, nthreads
-    ):
-        semaphore.acquire()
-        try:
-            #                                   Run DPPP process on compute node
-            # ------------------------------------------------------------------
-            dppp_process = run_remote_command(
-                host,
-                command,
-                {
-                    "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
-                    "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
-                },
-                loghost,
-                logport,
-                infile,
-                outfile,
-                parset,
-                executable,
-                initscript,
-                start_time,
-                end_time,
-                nthreads
-            )
-            sout, serr = dppp_process.communicate()
-        finally:
-            semaphore.release()
-
-        if dppp_process.returncode != 0:
-            self.error.set()
-        return dppp_process.returncode
 
 if __name__ == '__main__':
     sys.exit(new_dppp().main())

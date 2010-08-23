@@ -79,11 +79,6 @@ class cimager(LOFARrecipe):
         # ----------------------------------------------------------------------
         compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
 
-        #       If an imager process fails, set the error Event & bail out later
-        # ----------------------------------------------------------------------
-        self.error = threading.Event()
-        self.error.clear()
-
         #                          Run each cimager process in a separate thread
         # ----------------------------------------------------------------------
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
@@ -92,8 +87,8 @@ class cimager(LOFARrecipe):
             with log_time(self.logger):
                 imager_threads = [
                     threading.Thread(
-                        target=self._run_cimager_node,
-                        args=(host, compute_nodes_lock[host], command,
+                        target=self._dispatch_compute_job,
+                        args=(host, command, compute_nodes_lock[host],
                             loghost, str(logport),
                             vds,
                             self.inputs['parset'],
@@ -116,8 +111,8 @@ class cimager(LOFARrecipe):
         else:
             return 0
 
-    def _run_cimager_node(
-        self, host, semaphore, command, loghost, logport, vds,
+    def _dispatch_compute_job(
+        self, host, command, semaphore, loghost, logport, vds,
         template_parset, convert_exec, imager_exec, resultsdir
     ):
         """
