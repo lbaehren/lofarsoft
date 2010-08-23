@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 import array as ar
 import os, os.path, stat, glob, sys, getopt
