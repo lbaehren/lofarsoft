@@ -5,7 +5,7 @@
 # Example run:
 # prompt> multi-templates.sh -in obs.lis -out out.xml
 
-USAGE1="\nusage : $0 -in observation_list_file -out template_output_file [-start obs_start] [-time duration] [-st stations_list] [[-subsHBA subband_range]] [[-subsLBA subband_range]] [[-gap duration]] [[-antenna LBA_or_HBA]] \n\n"\
+USAGE1="\nusage : $0 -in observation_list_file -out template_output_file [-start obs_start] [-time duration] [-st stations_list] [[-lst]] [[-project project_name]] [[-IM list_or_ALL]] [[-subsHBA subband_range]] [[-subsLBA subband_range]] [[-gap duration]] [[-antenna LBA_or_HBA]] [[-chansubsHBA channels_per_subband_HBA]] [[-chansubsLBA channels_per_subband_LBA]] [[-integstepsHBA integration_steps_HBA]] [[-integstepsLBA integration_steps_LBA]]\n\n"\
 "      This script is run using two different methodologies: \n"\
 "         \n"\
 "      1) The input file contains all the information: pulsar-name  antenna  chan_per_subs  integ_steps  obs-start  duration  station-list \n"\
@@ -14,9 +14,12 @@ USAGE1="\nusage : $0 -in observation_list_file -out template_output_file [-start
 "         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
 "         -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) \n"\
 "         \n"\
-"         Optionally you can also change the just subband list (HBA and/or LBA), which will then be used for all the pulsars in the list:\n"\
-"         [[-subsHBA subband_range]] ==> The HBA subband range (default '200..447') \n"\
-"         [[-subsLBA subband_range]] ==> The LBA subband range (default '154..401') \n"\
+"         Optionally you can also specify the following parameters:\n"\
+"         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
+"         [[-project project_name]]  ==> The name of the MOM project 'Pulsars' or 'LEA032' (default = Pulsars)\n"\
+"         [[-subsHBA subband_range]] ==> The HBA subband range (default = '200..447') \n"\
+"         [[-subsLBA subband_range]] ==> The LBA subband range (default = '154..401') \n"\
+"         [[-IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         \n"\
 "         Example input file:\n"\
 "         # pulsar     antenna  chan_per_subs  integ_steps    start-time           duration     stations\n"\
@@ -30,7 +33,7 @@ USAGE1="\nusage : $0 -in observation_list_file -out template_output_file [-start
 "         \n"\
 "         Example runs:\n"\
 "         > $0 -in obs_list_July22_b.txt -out output.xml \n"\
-"         > $0 -in obs_list_July22_b.txt -out output.xml -subsLBA 10..45 \n"\
+"         > $0 -in obs_list_July22_b.txt -out output.xml -subsLBA 10..45 -IM 6,7\n"\
 "         \n"
 USAGE2="      2) The input file contains 4 columns with: pulsar-name  antenna  chan_per_subs  integ_steps. \n"\
 "         You must specify the input file name and output file name. \n"\
@@ -42,10 +45,13 @@ USAGE2="      2) The input file contains 4 columns with: pulsar-name  antenna  c
 "         [-time duration] ==> The duration of ALL observations in the list, in minutes; supercede's infile values (i.e. 60) \n"\
 "         [-stations stations_list] ==> The list of LOFAR stations, supercede's infile values and used for all obs (i.e. 'CS001,CS002') \n"\
 "         \n"\
-"         Optionally you can also change the subband list (HBA and/or LBA) and the gap between observations::\n"\
-"         [[-subsHBA subband_range]] ==> The subband range (default '200..447') \n"\
-"         [[-subsLBA subband_range]] ==> The subband range (default '154..401') \n"\
-"         [[-gap duration]] ==> The time between ALL observations in minutes (default 3) \n"\
+"         Optionally you can also specify the following parameters:\n"\
+"         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
+"         [[-project project_name]]  ==> The name of the MOM project 'Pulsars' or 'LEA032' (default = Pulsars)\n"\
+"         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
+"         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
+"         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
+"         [[-IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         \n"\
 "         Example input file:\n"\
 "         # pulsar     antenna  chan_per_subs  integ_steps  \n"\
@@ -60,7 +66,7 @@ USAGE2="      2) The input file contains 4 columns with: pulsar-name  antenna  c
 "         Example runs:\n"\
 "         > $0 -in obs_list_July22_b.txt -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001\n"\
 "         > $0 -in obs_list_July22_b.txt -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 \n"\
-"         > $0 -in obs_list_July22_b.txt -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 \n"\
+"         > $0 -in obs_list_July22_b.txt -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 -IM 2,4,6\n"\
 "         \n"
 USAGE3="      3) The input file contains just 2 columns with: pulsar-name  antenna. \n"\
 "         You must specify the input file name and output file name. \n"\
@@ -72,14 +78,17 @@ USAGE3="      3) The input file contains just 2 columns with: pulsar-name  anten
 "         [-time duration] ==> The duration of ALL observations in the list, in minutes; supercede's infile values (i.e. 60) \n"\
 "         [-stations stations_list] ==> The list of LOFAR stations, supercede's infile values and used for all obs (i.e. 'CS001,CS002') \n"\
 "         \n"\
-"         Optionally you can also change subband list, the channels per subband, the integration steps and the gap between observations::\n"\
-"         [[-subsHBA subband_range]] ==> The subband range (default '200..447') \n"\
-"         [[-subsLBA subband_range]] ==> The subband range (default '154..401') \n"\
-"         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default 4) \n"\
-"         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default 4) \n"\
-"         [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default 16) \n"\
-"         [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default 16) \n"\
-"         [[-gap duration]] ==> The time between ALL observations in minutes (default 3) \n"\
+"         Optionally you can also specify the following parameters:\n"\
+"         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
+"         [[-project project_name]]  ==> The name of the MOM project 'Pulsars' or 'LEA032' (default = Pulsars)\n"\
+"         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
+"         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
+"         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 4) \n"\
+"         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 4) \n"\
+"         [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) \n"\
+"         [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) \n"\
+"         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
+"         [[-IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         \n"\
 "         Example input file:\n"\
 "         # pulsar       antenna\n"\
@@ -92,29 +101,32 @@ USAGE3="      3) The input file contains just 2 columns with: pulsar-name  anten
 "         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6\n"\
 "         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 \n"\
 "         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsLBA 10..45  \n"\
-"         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001  \n"\
+"         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -project LEA032 -IM ALL \n"\
 "         \n"
 USAGE4="      4) The input file contains just 1 column with: pulsar-name. \n"\
 "         You must specify the input file name and output file name. \n"\
 "         In this case, you MUST also specify the following parameters on the command line as input...\n"\
 "         Note, these parameters are used for the entire list;  start time of subsequent observations\n"\
 "         is calculated based on observation duration and gap between observations.\n"\
-"         Only one ANTENNA is used for the entire list of input pulsars (default = HBA). \n"\ 
+"         Only one ANTENNA is used for the entire list of input pulsars (default = HBA). \n"\
 "         \n"
 USAGE5="         \n"\
 "         [-start obs_start] ==> The start date/time for 1st source in the list of observations; note format; supercede's infile values (i.e. 2010-07-22T14:50:00) \n"\
 "         [-time duration] ==> The duration of ALL observations in the list, in minutes; supercede's infile values (i.e. 60) \n"\
 "         [-stations stations_list] ==> The list of LOFAR stations, supercede's infile values and used for all obs (i.e. 'CS001,CS002') \n"\
 "         \n"\
-"         Optionally you can also change the antenna, the subband list, the channels per subband, the integration steps and the gap between observations:\n"\
+"         Optionally you can also specify the following parameters:\n"\
+"         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
+"         [[-project project_name]]  ==> The name of the MOM project 'Pulsars' or 'LEA032' (default = Pulsars)\n"\
 "         [[-antenna HBA_or_LBA]] ==> The antenna name: HBA or LBA (default = HBA) \n"\
-"         [[-subsHBA subband_range]] ==> The subband range (default '200..447') \n"\
-"         [[-subsLBA subband_range]] ==> The subband range (default '154..401') \n"\
-"         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default 16) \n"\
-"         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default 16) \n"\
-"         [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default 16) \n"\
-"         [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default 16) \n"\
-"         [[-gap duration]] ==> The time between ALL observations in minutes (default 3) \n"\
+"         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
+"         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
+"         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16) \n"\
+"         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16) \n"\
+"         [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) \n"\
+"         [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) \n"\
+"         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
+"         [[-IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         \n"
 USAGE6="         Example input file:\n"\
 "         # pulsar  \n"\
@@ -124,7 +136,7 @@ USAGE6="         Example input file:\n"\
 "         \n"\
 "         Example runs:\n"\
 "         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004\n"\
-"         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6\n"\
+"         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -project LEA032 -IM 1,2\n"\
 "         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 \n"\
 "         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -chansubsHBA 64 -integstepsHBA 4  \n"\
 "         > $0 -in obs_single_col.txt -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  \n"\
@@ -172,11 +184,17 @@ user_steps_hba=0
 STEPS_LBA=16
 user_steps_lba=0
 STEPS=0
+LST=0
+LST_DIFF=0
+PROJECT="Pulsars"
+user_project=0
+IM=0
+IM_LIST=""
 
 while [ $# -gt 0 ]
 do
     case "$1" in
-      -in)               infile=$2; shift;;
+     -in)                infile=$2; shift;;
      -out)               outfile=$2; shift;;
      -start)             START=$2; previous_start=$2; user_start=1; shift;;
      -time)              TIME=$2; user_duration=1; shift;;
@@ -189,6 +207,9 @@ do
      -chansubsLBA)       CHAN_SUBS_LBA=$2; user_chan_subs_lba=1; shift;;
      -integstepsHBA)     STEPS_HBA=$2; user_steps_hba=1; shift;;
      -integstepsLBA)     STEPS_LBA=$2; user_steps_lba=1; shift;;
+     -project)           PROJECT=$2; user_project=1; shift;;
+     -IM)                IM=1; IM_LIST=$2; shift;;
+     -lst|-LST)          LST=1;;
        -*)
             print >&2 \
             "$USAGE1" \
@@ -215,6 +236,17 @@ then
    rm -rf $outfile
 fi
 
+if [ $PROJECT != "Pulsars" ] && [ $PROJECT != "LEA032" ]
+then
+   echo "ERROR: Project name '$PROJECT' is not recognized;  allowed values are: 'Pulsars' or 'LEA032'"
+   exit 1
+fi
+
+#The 'date' command is highly dependant on the OS;  
+#BSD 'date' has more functionality than Linux/Ubuntu date;
+#therefore, need to make to cases for the date-oriented calculations
+system_typ=`uname -s | awk '{print $1}'`
+
 #Find out which type of input file was given:
 # (1) 7-column input
 # (2) 4-column input
@@ -226,21 +258,66 @@ ncols=`grep -v "#" $infile | grep -v '^$' | tail -1 | wc -w`
 echo "Your input file $infile contains $ncols columns"
 if (( $ncols == 7 ))
 then
-   type=1
    if (( $user_gap != 0 ))
    then
       echo "WARNING: ignoring user-specified gap setting;  start time from observation list will be used."
+      user_gap=0
    fi
-elif (( $ncols == 4 ))
+   if (( $user_start == 1 ))
+   then
+      echo "WARNING: ignoring user-specified start setting;  start time from observation list will be used."
+      user_start=0
+   fi
+   if (( $user_duration == 1 ))
+   then
+      echo "WARNING: ignoring user-specified gap setting;  start time from observation list will be used."
+      user_duration=0
+   fi
+   if (( $user_stations == 1 ))
+   then
+      echo "WARNING: ignoring user-specified stations list;  input file station list will be used."
+      user_stations=0
+   fi
+fi
+
+if (( $ncols >= 4 ))
 then
-   type=2
-elif (( $ncols == 2 ))
+   if (( $user_chan_subs_hba == 1 ))
+   then
+      echo "WARNING: ignoring user-specified channels per subband HBA setting;  input file setting will be used."
+      user_chan_subs_hba=0
+   fi
+   if (( $user_chan_subs_lba == 1 ))
+   then
+      echo "WARNING: ignoring user-specified channels per subband LBA setting;  input file setting will be used."
+      user_chan_subs_lba=0
+   fi
+   if (( $user_steps_hba == 1 ))
+   then
+      echo "WARNING: ignoring user-specified integration steps HBA setting;  input file setting will be used."
+      user_steps_hba=0
+   fi
+   if (( $user_steps_lba == 1 ))
+   then
+      echo "WARNING: ignoring user-specified integration steps LBA setting;  input file setting will be used."
+      user_steps_lba=0
+   fi
+fi
+
+if (( $ncols >= 2 ))
 then
-   type=3
-elif (( $ncols == 1 ))
+   if (( $user_antenna == 1 ))
+   then
+      echo "WARNING: ignoring user-specified antenna setting;  input file antenna setting will be used."
+      user_antenna=0
+   fi
+fi
+
+if (( $ncols == 1 ))
 then
    type=4
-else
+elif (( $ncols != 1 )) && (( $ncols != 2 )) && (( $ncols != 4 )) && (( $ncols != 7 ))
+then
    echo "ERROR: Input file must have 7, 4, 2, or 1 columns;  your file contains $ncols columns which is not allowed."
    echo "       Please refer to the script usage for input file options (type > $0) by itself."
    exit 1
@@ -279,11 +356,57 @@ then
    fi
 fi   
 
+if (( $LST == 1 )) && (( user_start == 1 ))
+then
+    LST_DIFF=120
+    # change the start time from LST to UT
+    #new_start=`date -j -v +$LST_DIFF"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+    #echo "new start is $new_start"
+    #START=$new_start
+    #previous_start=$new_start
+    
+    tot_time=$LST_DIFF
+   			   
+	if [[ $system_typ == "Darwin" ]]
+	then
+          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+          START=$previous_start
+	else
+	      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
+          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+          START=$previous_start
+	fi
+
+else 
+    LST_DIFF=0
+fi
+
+num_lines=0
 num_lines=`grep -v "#" $infile | wc -l | awk '{print $1}'`
 catalog=$LOFARSOFT/release/share/pulsar/data/PSR_catalog.txt
 echo "Wokring on $infile with $num_lines sources"
 echo "Using PSR catalog file $catalog"
-echo "Using output file $outfile"
+echo "Writing to output file $outfile"
+
+if (( $IM == 1 ))
+then
+   if [ $IM_LIST == "ALL" ]  || [ $IM_LIST == "all" ]
+   then
+      # create the full range of row numbers for the Image data
+      tmp=""
+      ii=1
+      while (( $ii <= $num_lines ))
+      do
+         tmp="$tmp $ii"
+         ((ii+=$ii))
+      done
+      IM_LIST=$tmp
+   else 
+      # change the commas to spaces for the row numbers which need Image data
+      tmp=`echo $IM_LIST | sed 's/,/ /g'`
+      IM_LIST=$tmp
+   fi
+fi
 
 #create the header of the xml output file
 header=$LOFARSOFT/release/share/pulsar/data/XML-template-header.txt
@@ -315,19 +438,16 @@ PULSAR=""
 RA=0.0
 DEC=0.0
 
-
-#The 'date' command is highly dependant on the OS;  
-#BSD 'date' has more functionality than Linux/Ubuntu date;
-#therefore, need to make to cases for the date-oriented calculations
-system_typ=`uname -s | awk '{print $1}'`
-
 #for each source, create an observation
+counter=0
 while read line
 do
    echo "------------------------------------------------------------------"
    is_header=`echo $line | grep "#"`
    if [[ $is_header == "" ]]
    then
+        ((counter += 1))
+
 	    PULSAR=`echo $line | awk '{print $1}'`
 	    
 	    if (( $ncols >= 2 ))
@@ -363,8 +483,20 @@ do
 	        START=`echo $line | awk '{print $5}'`
 	        TIME=`echo $line | awk '{print $6}'`
 	        STATIONS=`echo $line | awk '{print $7}'`                
-	    fi
 
+		    if (( $LST == 1 ))
+		    then
+	           LST_DIFF=120
+		       # change the start time from LST to UT
+		       #new_start=`date -j -v +$LST_DIFF"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+		       #echo "new start is $new_start"
+		       #START=$new_start
+		       #previous_start=$new_start
+		    else 
+		       LST_DIFF=0
+		    fi
+	    fi
+	
 		if (( $user_subbands_hba == 0 )) && [[ $ANTENNA == "HBA" ]]
 		then
 		    SUBBANDS="200..447"
@@ -423,15 +555,26 @@ do
 	 	    #calculate the start/stop time if set by the user as input (assume 1 min for times less than 1 min)
 			if (( $user_start == 1 ))
 			then
-			   START=$previous_start
-			   tot_time=`echo "1 + $GAP" | bc"`
+			    START=$previous_start
+			    tot_time=`echo "1 + $GAP" | bc"`
 			   
 				if [[ $system_typ == "Darwin" ]]
 				then
-			       previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+			          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 				else
-				   new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
-			       previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
+			          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+				fi
+			elif (( $LST == 1 ))
+			then
+			    tot_time=$LST_DIFF
+			   
+				if [[ $system_typ == "Darwin" ]]
+				then
+			          START=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+				else
+				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
+			          START=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 				fi
 			fi
 
@@ -449,17 +592,27 @@ do
 	 	    #calculate the start/stop time if set by the user as input (assume 1 min for times less than 1 min)
 			if (( $user_start == 1 ))
 			then
-			   START=$previous_start
-			   tot_time=`echo "$TIME + $GAP" | bc`
+			    START=$previous_start
+			    tot_time=`echo "$TIME + $GAP" | bc`
 			   			   
 				if [[ $system_typ == "Darwin" ]]
 				then
-			       previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+			          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 				else
-				   new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
-			       previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
+			          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 				fi
-
+			elif (( $LST == 1 ))
+			then
+			    tot_time=$LST_DIFF
+			   
+				if [[ $system_typ == "Darwin" ]]
+				then
+			          START=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+				else
+				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
+			          START=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+				fi
 			fi
 
 			if (( $TIME > 0 )) && (( $TIME <= 10 ))
@@ -479,10 +632,10 @@ do
 
 		if [[ $system_typ == "Darwin" ]]
 		then
-		   END=`date -j -v +$TIME"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+		      END=`date -j -v +$TIME"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 		else
-		   new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $TIME * 60" | bc` 
-	       END=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+		      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $TIME * 60" | bc` 
+  	          END=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 		fi
 		
 		# Print the basic information about input parameters to STDOUT at start 
@@ -490,6 +643,10 @@ do
 	    echo "ANTENNA = $ANTENNA"
 		echo "Channels per Subband = $CHAN_SUBS"
 		echo "Integration Steps = $STEPS"
+		if (( $LST == 1 ))
+		then
+		   echo "Observation Start Time is given as input in LST units"
+		fi
 		echo "Observation Start Time = $START (UT)"
 		echo "Observation duration = $TIME minutes"
 		echo "Time Start $START + duration $TIME min = $END End Time"
@@ -499,6 +656,18 @@ do
 		echo "DEC Pointing = $DEC radians"
 		echo "Subbands list = $SUBBANDS"
 		echo "Stations list = $STATIONS"
+		IM_TF=false
+		if (( $IM == 1 )) 
+		then
+		   for jj in $IM_LIST
+		   do 
+		      if (( $counter == $jj ))
+		      then
+		         echo "Imaging turned on (TRUE) for this Pulsar Observation"
+		         IM_TF=true
+		      fi
+		   done
+		fi
 
 		#write the observation section per pulsar in the list
 
@@ -517,10 +686,13 @@ do
 
         if [[ $ANTENNA == "HBA" ]]
         then 
-            sed -e "s/\<name\>FILL IN OBSERVATION NAME\<\/name\>/\<name\>Obs $PULSAR ($ANTENNA)\<\/name\>/" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/\<description\>FILL IN DESCRIPTION\<\/description\>/\<description\>Obs $PULSAR ($ANTENNA) at $START for $TIME min\<\/description\>/" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" $middleHBA >> $outfile
+            middle=$middleHBA 
         else
-            sed -e "s/\<name\>FILL IN OBSERVATION NAME\<\/name\>/\<name\>Obs $PULSAR ($ANTENNA)\<\/name\>/" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/\<description\>FILL IN DESCRIPTION\<\/description\>/\<description\>Obs $PULSAR ($ANTENNA) at $START for $TIME min\<\/description\>/" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" $middleLBA >> $outfile
+            middle=$middleLBA
         fi
+        
+        sed -e "s/\<name\>FILL IN OBSERVATION NAME\<\/name\>/\<name\>Obs $PULSAR ($ANTENNA)\<\/name\>/" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/\<description\>FILL IN DESCRIPTION\<\/description\>/\<description\>Obs $PULSAR ($ANTENNA) at $START for $TIME min\<\/description\>/" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" $middle >> $outfile
+
    fi   
 done < $infile
 

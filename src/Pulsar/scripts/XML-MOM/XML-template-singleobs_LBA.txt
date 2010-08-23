@@ -8,10 +8,10 @@
     <lofar:observationAttributes>
         <observationId></observationId>
         <name>FILL IN OBSERVATION NAME</name>
-        <projectName>Pulsars</projectName>
+        <projectName>PROJECT NAME</projectName>
         <instrument>Beam Observation</instrument>
         <userSpecification>
-            <correlatedData>false</correlatedData>
+            <correlatedData>IMAGING</correlatedData>
             <filteredData>false</filteredData>
             <beamformedData>false</beamformedData>
             <coherentStokesData>false</coherentStokesData>
