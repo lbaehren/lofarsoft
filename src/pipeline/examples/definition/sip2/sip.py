@@ -30,14 +30,6 @@ class sip(control):
             vdsinfo = self.run_task("vdsreader")
             self._save_state()
 
-            # Build a sky model ready for BBS.
-            ra = quantity(vdsinfo['pointing']['ra']).get_value('deg')
-            dec = quantity(vdsinfo['pointing']['dec']).get_value('deg')
-            ra_min, ra_max = ra-2.5, ra+2.5
-            dec_min, dec_max = dec-2.5, dec+2.5
-            self.run_task("skymodel", ra_min=ra_min, ra_max=ra_max, dec_min=dec_min, dec_max=dec_max)
-            self._save_state()
-
             # NDPPP reads the data from the storage nodes, according to the
             # map. It returns a new map, describing the location of data on
             # the compute nodes.
@@ -49,6 +41,14 @@ class sip(control):
             )['mapfile']
             if os.path.exists(storage_mapfile):
                 os.unlink(storage_mapfile)
+            self._save_state()
+
+            # Now build a sky model ready for BBS
+            ra = quantity(vdsinfo['pointing']['ra']).get_value('deg')
+            dec = quantity(vdsinfo['pointing']['dec']).get_value('deg')
+            ra_min, ra_max = ra-2.5, ra+2.5
+            dec_min, dec_max = dec-2.5, dec+2.5
+            self.run_task("skymodel", ra_min=ra_min, ra_max=ra_max, dec_min=dec_min, dec_max=dec_max)
             self._save_state()
 
             # BBS modifies data in place, so the map produced by NDPPP remains

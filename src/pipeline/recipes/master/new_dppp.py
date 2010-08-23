@@ -89,7 +89,7 @@ class new_dppp(LOFARrecipe):
         )
         with nested(
             clusterlogger(self.logger), utilities.log_time(self.logger)
-        ) as (loghost, logport):
+        ) as ((loghost, logport), unused):
             self.logger.debug("Logging to %s:%d" % (loghost, logport))
             dppp_threads = []
             outnames = collections.defaultdict(list)
@@ -105,7 +105,7 @@ class new_dppp(LOFARrecipe):
                     threading.Thread(
                         target=self._dispatch_compute_job,
                         args=(host, command, compute_nodes_lock[host],
-                            loghost, str(logport),
+                            loghost, logport,
                             ms,
                             outnames[host][-1],
                             self.inputs['parset'],

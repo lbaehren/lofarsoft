@@ -216,7 +216,7 @@ class LOFARrecipe(WSRTrecipe):
                     "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
                 },
                 loghost,
-                logport,
+                str(logport),
                 *arguments
             )
             sout, serr = process.communicate()
