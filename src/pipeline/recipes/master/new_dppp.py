@@ -23,7 +23,7 @@ from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.remotecommand import ProcessLimiter
-from lofarpipe.cuisine.parset import Parset
+from lofarpipe.support.group_data import load_data_map
 
 class new_dppp(LOFARrecipe):
     def __init__(self):
@@ -75,17 +75,12 @@ class new_dppp(LOFARrecipe):
         #                           Load file <-> compute node mapping from disk
         # ----------------------------------------------------------------------
         self.logger.debug("Loading map from %s" % self.inputs['args'])
-        datamap = Parset(self.inputs['args'])
-
-        data = []
-        for host in datamap.iterkeys():
-            for filename in datamap.getStringVector(host):
-                data.append((host, filename))
+        data = load_data_map(self.inputs['args'])
 
         #                               Limit number of process per compute node
         # ----------------------------------------------------------------------
+        self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
         compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
-
 
         #       If an imager process fails, set the error Event & bail out later
         # ----------------------------------------------------------------------

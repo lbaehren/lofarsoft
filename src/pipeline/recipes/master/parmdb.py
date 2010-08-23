@@ -10,7 +10,7 @@ from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import run_remote_command
-from lofarpipe.cuisine.parset import Parset
+from lofarpipe.support.group_data import load_data_map
 import lofarpipe.support.utilities as utilities
 
 template = """
@@ -59,14 +59,9 @@ class parmdb(LOFARrecipe):
         #                           Load file <-> compute node mapping from disk
         # ----------------------------------------------------------------------
         self.logger.debug("Loading map from %s" % self.inputs['args'])
-        datamap = Parset(self.inputs['args'])
+        data = load_data_map(self.inputs['args'])
 
-        data = []
-        for host in datamap.iterkeys():
-            for filename in datamap.getStringVector(host):
-                data.append((host, filename))
-
-        #       If an imager process fails, set the error Event & bail out later
+        #               If a process fails, set the error Event & bail out later
         # ----------------------------------------------------------------------
         self.error = threading.Event()
         self.error.clear()

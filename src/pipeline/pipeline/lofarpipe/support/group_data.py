@@ -12,6 +12,7 @@ from lofar.parameterset import parameterset
 
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.clusterdesc import get_compute_nodes
+from lofarpipe.support.cuisine import Parset
 
 def group_files(logger, clusterdesc, node_directory, group_size, filenames):
         """
@@ -85,3 +86,14 @@ def gvds_iterator(gvds_file, nproc=4):
             raise StopIteration
         else:
             yield yieldable
+
+def load_data_map(filename):
+    """
+    Load a mapping of filename <-> compute node from a parset on disk.
+    """
+    datamap = Parset(self.inputs['args'])
+    data = []
+    for host in datamap.iterkeys():
+        for filename in datamap.getStringVector(host):
+            data.append((host, filename))
+    return data
