@@ -101,7 +101,7 @@ class MAC_control(control):
         #     Pipeline logic proceeds as in a standard recipe in its own thread
         #                          MAC control takes place in a separate thread
         # ---------------------------------------------------------------------
-        super(control, self).go()
+        super(MAC_control, self).go()
 
         self.logger.info(
             "LOFAR Pipeline (%s) starting." %
