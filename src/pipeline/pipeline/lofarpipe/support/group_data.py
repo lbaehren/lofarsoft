@@ -12,7 +12,7 @@ from lofar.parameterset import parameterset
 
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.clusterdesc import get_compute_nodes
-from lofarpipe.support.cuisine import Parset
+from lofarpipe.cuisine.parset import Parset
 
 def group_files(logger, clusterdesc, node_directory, group_size, filenames):
         """
@@ -91,7 +91,7 @@ def load_data_map(filename):
     """
     Load a mapping of filename <-> compute node from a parset on disk.
     """
-    datamap = Parset(self.inputs['args'])
+    datamap = Parset(filename)
     data = []
     for host in datamap.iterkeys():
         for filename in datamap.getStringVector(host):
