@@ -10,8 +10,6 @@ import sys, os
 from pyrap.quanta import quantity
 from lofarpipe.support.control import control
 from lofarpipe.support.utilities import log_time, patch_parset
-from lofarpipe.support.clusterhandler import ipython_cluster
-from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
 
 class sip(control):
     def pipeline_logic(self):
