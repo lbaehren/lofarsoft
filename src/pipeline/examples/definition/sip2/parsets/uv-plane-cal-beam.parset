@@ -16,9 +16,9 @@ Step.solve.Solve.Options.ColFactor = 1e-9
 Step.solve.Solve.Options.LMFactor = 1.0
 Step.solve.Solve.Options.BalancedEqs = F
 Step.solve.Solve.Options.UseSVD = T
-Step.solve.Beam.Enable = T
-Step.solve.Beam.StationConfig.Path = /home/zwieten/StationConfig/
-Step.solve.Beam.Element.Type = HAMAKER_LBA
+Step.solve.Model.Beam.Enable = T
+Step.solve.Model.Beam.StationConfig.Path = /home/zwieten/StationConfig/
+Step.solve.Model.Beam.Element.Type = HAMAKER_LBA
 
 Step.correct.Operation = CORRECT
 Step.correct.Model.Sources = []
