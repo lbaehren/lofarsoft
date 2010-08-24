@@ -6,11 +6,23 @@ to a job directory and customise it as appropriate for the particular task at
 hand.
 """
 from __future__ import with_statement
+from contextlib import closing
 from itertools import repeat
-import sys, os
+import sys
+import os
+
 from pyrap.quanta import quantity
+from monetdb.sql import connect as db_connect
+
 from lofarpipe.support.control import control
 from lofarpipe.support.utilities import log_time, patch_parset
+
+query = """
+SELECT
+    catsrcname
+FROM
+    nearestneighborincat(%s,%s,'%s')
+"""
 
 class sip(control):
     def pipeline_logic(self):
@@ -46,32 +58,57 @@ class sip(control):
                 os.unlink(storage_mapfile)
             self._save_state()
 
-            # Now build a sky model ready for BBS
+            # Build a sky model ready for BBS
             ra = quantity(vdsinfo['pointing']['ra']).get_value('deg')
             dec = quantity(vdsinfo['pointing']['dec']).get_value('deg')
             ra_min, ra_max = ra-2.5, ra+2.5
             dec_min, dec_max = dec-2.5, dec+2.5
-            self.run_task("skymodel", ra_min=ra_min, ra_max=ra_max, dec_min=dec_min, dec_max=dec_max)
-            self._save_state()
+            self.run_task(
+                "skymodel",
+                ra_min=ra_min, ra_max=ra_max, dec_min=dec_min, dec_max=dec_max
+            )
+
+            # Patch the name of the central source into the BBS parset for
+            # subtraction.
+            conn = db_connect(
+                hostname="ldb001", port=50000, database="gsm",
+                username="gsm", password="msss"
+            )
+            cur = conn.cursor()
+            cur.execute(query % (ra, dec, 'VLSS'))
+            source_name = cur.fetchone()[0]
+            cur.close()
+            conn.close()
+            bbs_parset = patch_parset(
+                self.task_definitions.get("bbs", "parset"),
+                {
+                    'Step.subtract.Model.Sources': "[ \"%s\" ]" % (source_name)
+                }
+            )
+            self.logger.info("BBS parset is %s" % bbs_parset)
 
             # BBS modifies data in place, so the map produced by NDPPP remains
             # valid.
-            self.run_task("bbs", compute_mapfile)
+            self.run_task("bbs", compute_mapfile, parset=bbs_parset)
+            os.unlink(bbs_parset)
             self._save_state()
 
             # Now, run DPPP three times on the output of BBS.
+            # Note that the generated maps are all duplicates.
             for i in repeat(None, 3):
-                self.run_task(
-                    "ndppp",
-                    compute_mapfile,
-                    parset=os.path.join(
-                        self.config.get("layout", "parset_directory"),
-                        "ndppp.1.postbbs.parset"
-                    ),
-                    data_start_time=vdsinfo['start_time'],
-                    data_end_time=vdsinfo['end_time'],
-                    suffix=""
-                )['mapfile']
+                os.unlink(
+                    self.run_task(
+                        "ndppp",
+                        compute_mapfile,
+                        parset=os.path.join(
+                            self.config.get("layout", "parset_directory"),
+                            "ndppp.1.postbbs.parset"
+                        ),
+                        data_start_time=vdsinfo['start_time'],
+                        data_end_time=vdsinfo['end_time'],
+                        suffix=""
+                    )['mapfile']
+                )
                 self._save_state()
 
             # Patch the pointing direction recorded in the VDS file into
