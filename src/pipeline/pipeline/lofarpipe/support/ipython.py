@@ -6,6 +6,8 @@
 # ------------------------------------------------------------------------------
 from IPython.kernel.task import StringTask
 
+from lofarpipe.support.lofarexceptions import ClusterError
+
 class LOFARTask(StringTask):
     """
     Extended version of IPython's StringTask, allowing external
@@ -31,3 +33,23 @@ class LOFARTask(StringTask):
         else:
             return True
 
+class IPythonRecipeMixIn(object):
+    """
+    Mix-in for recipes to provide access to an IPython cluster.
+    """
+    def _get_cluster(self):
+        """
+        Return task and multiengine clients connected to the running
+        pipeline's IPython cluster.
+        """
+        self.logger.info("Connecting to IPython cluster")
+        try:
+            tc  = IPclient.TaskClient(self.config.get('cluster', 'task_furl'))
+            mec = IPclient.MultiEngineClient(self.config.get('cluster', 'multiengine_furl'))
+        except NoSectionError:
+            self.logger.error("Cluster not definied in configuration")
+            raise ClusterError
+        except:
+            self.logger.error("Unable to initialise cluster")
+            raise ClusterError
+        return tc, mec

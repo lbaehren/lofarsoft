@@ -16,16 +16,14 @@ import logging
 import errno
 import cPickle
 
-from IPython.kernel import client as IPclient
-
 import lofarpipe.support.utilities as utilities
-from lofarpipe.support.lofarexceptions import PipelineException, ClusterError
+from lofarpipe.support.lofarexceptions import PipelineException
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
 from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
-from lofarpipe.support.clusterhandler import ClusterHandler
-from lofarpipe.support.remotecommand import run_remote_command
+from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
+from lofarpipe.support.ipython import IPythonRecipeMixIn
 
-class LOFARrecipe(WSRTrecipe):
+class BaseRecipe(WSRTrecipe):
     """
     Provides standard boiler-plate used in the various LOFAR pipeline recipes.
     """
@@ -37,7 +35,7 @@ class LOFARrecipe(WSRTrecipe):
         Subclasses should define their own parameters, but remember to call
         this __init__() method to include the required defaults.
         """
-        super(LOFARrecipe, self).__init__()
+        super(BaseRecipe, self).__init__()
         self.state = []
         self.completed = []
         self.error = Event()
@@ -98,6 +96,42 @@ class LOFARrecipe(WSRTrecipe):
         # good long-term solution.
         return full_location.replace('/data/users', '/home')
 
+    def _setup_logging(self):
+        """
+        Boilerplate to set up logging to file
+        """
+        try:
+            os.makedirs(self.config.get("layout", "log_directory"))
+        except OSError, failure:
+            if failure.errno != errno.EEXIST:
+                raise
+
+        stream_handler = logging.StreamHandler(sys.stdout)
+        file_handler = logging.FileHandler('%s/pipeline.log' % (
+                self.config.get("layout", "log_directory")
+            )
+        )
+        formatter = logging.Formatter(
+            "%(asctime)s %(levelname)-7s %(name)s: %(message)s",
+            "%Y-%m-%d %H:%M:%S"
+        )
+        stream_handler.setFormatter(formatter)
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(stream_handler)
+        self.logger.addHandler(file_handler)
+
+    def _save_state(self):
+        """
+        Dump pipeline state to file.
+        """
+        statefile = open(
+            os.path.join(
+                self.config.get('layout', 'job_directory'),
+                'statefile'
+            ),
+        'w')
+        state = [self.inputs, self.state]
+        cPickle.dump(state, statefile)
 
     def run_task(self, configblock, datafiles=[], **kwargs):
         """
@@ -144,87 +178,6 @@ class LOFARrecipe(WSRTrecipe):
                 raise PipelineRecipeFailed("%s failed", configblock)
             self.state.append((configblock, outputs))
             return outputs
-
-    def _setup_logging(self):
-        """
-        Boilerplate to set up logging to file
-        """
-        try:
-            os.makedirs(self.config.get("layout", "log_directory"))
-        except OSError, failure:
-            if failure.errno != errno.EEXIST:
-                raise
-
-        stream_handler = logging.StreamHandler(sys.stdout)
-        file_handler = logging.FileHandler('%s/pipeline.log' % (
-                self.config.get("layout", "log_directory")
-            )
-        )
-        formatter = logging.Formatter(
-            "%(asctime)s %(levelname)-7s %(name)s: %(message)s",
-            "%Y-%m-%d %H:%M:%S"
-        )
-        stream_handler.setFormatter(formatter)
-        file_handler.setFormatter(formatter)
-        self.logger.addHandler(stream_handler)
-        self.logger.addHandler(file_handler)
-
-    def _save_state(self):
-        """
-        Dump pipeline state to file.
-        """
-        statefile = open(
-            os.path.join(
-                self.config.get('layout', 'job_directory'),
-                'statefile'
-            ),
-        'w')
-        state = [self.inputs, self.state]
-        cPickle.dump(state, statefile)
-
-    def _get_cluster(self):
-        """
-        Return task and multiengine clients connected to the running
-        pipeline's IPython cluster.
-        """
-        self.logger.info("Connecting to IPython cluster")
-        try:
-            tc  = IPclient.TaskClient(self.config.get('cluster', 'task_furl'))
-            mec = IPclient.MultiEngineClient(self.config.get('cluster', 'multiengine_furl'))
-        except NoSectionError:
-            self.logger.error("Cluster not definied in configuration")
-            raise ClusterError
-        except:
-            self.logger.error("Unable to initialise cluster")
-            raise ClusterError
-        return tc, mec
-
-    def _dispatch_compute_job(
-        self, host, command, semaphore, loghost, logport, *arguments
-    ):
-        """
-        Dispatch a command to be run on the given host.
-        Set the recipe's error Event if it does not return 0.
-        """
-        semaphore.acquire()
-        try:
-            process = run_remote_command(
-                host,
-                command,
-                {
-                    "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
-                    "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
-                },
-                loghost,
-                str(logport),
-                *arguments
-            )
-            sout, serr = process.communicate()
-        finally:
-            semaphore.release()
-        if process.returncode != 0:
-            self.error.set()
-        return process.returncode
 
     def go(self):
         """
@@ -303,3 +256,5 @@ class LOFARrecipe(WSRTrecipe):
             # Otherwise, our parent should have done it for us.
             self._setup_logging()
 
+class LOFARrecipe(BaseRecipe, IPythonRecipeMixIn, RemoteCommandRecipeMixIn):
+    pass
