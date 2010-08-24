@@ -16,39 +16,12 @@ import errno
 import shutil
 import subprocess
 
-from lofarpipe.cuisine.parset import Parset
-
 #                                                                  Compatibility
 #                               The following used to be defined in this module;
-#                                      include so as not to break existing code.
+#                        they are now included so as not to break existing code.
 # ------------------------------------------------------------------------------
 from lofarpipe.support.pipelinelogging import log_time
-
-#                                                            Parset Manipulation
-# ------------------------------------------------------------------------------
-
-def get_parset(parset_filename):
-    """
-    Read a parset from a parset_filename and return the result as an instance
-    of lofarpipe.cuisine.Parset to the caller.
-    """
-    p = Parset()
-    p.readFromFile(parset_filename)
-    return p
-
-def patch_parset(parset, data, output_dir=None):
-    """
-    Generate a parset file by adding the contents of the data dictionary to
-    the specified parset object. Write it to file, and return the filename.
-    """
-    # We want to be able to update parsets on the fly, for instance to add the
-    # names of data files which need processing into a standard configuration
-    temp_parset_filename = mkstemp(dir=output_dir)[1]
-    temp_parset = get_parset(parset)
-    for k, v in data.items():
-        temp_parset[k] = v
-    temp_parset.writeToFile(temp_parset_filename)
-    return temp_parset_filename
+from lofarpipe.support.parset import get_parset, patch_parset
 
 #                                                File and Directory Manipulation
 # ------------------------------------------------------------------------------

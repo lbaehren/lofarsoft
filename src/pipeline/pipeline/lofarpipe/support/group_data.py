@@ -12,7 +12,7 @@ from lofar.parameterset import parameterset
 
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.clusterdesc import get_compute_nodes
-from lofarpipe.cuisine.parset import Parset
+from lofarpipe.support.parset import Parset
 
 def group_files(logger, clusterdesc, node_directory, group_size, filenames):
         """
@@ -62,7 +62,7 @@ def gvds_iterator(gvds_file, nproc=4):
     file in the form (host, filename), in chunks suitable for processing
     across the cluster. Ie, no more than nproc files per host at a time.
     """
-    parset = parameterset(gvds_file)
+    parset = Parset(gvds_file)
 
     data = defaultdict(list)
     for part in range(parset.getInt('NParts')):
@@ -93,7 +93,7 @@ def load_data_map(filename):
     """
     datamap = Parset(filename)
     data = []
-    for host in datamap.iterkeys():
+    for host in datamap:
         for filename in datamap.getStringVector(host):
             data.append((host, filename))
     return data
