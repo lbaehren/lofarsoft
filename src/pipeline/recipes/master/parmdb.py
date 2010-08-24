@@ -5,8 +5,8 @@ import subprocess
 import shutil
 import threading
 
-# Local helpers
-from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofarrecipe import BaseRecipe
+from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import ProcessLimiter
@@ -27,7 +27,7 @@ adddef AntennaOrientation values=5.497787144
 quit
 """
 
-class parmdb(LOFARrecipe):
+class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
     def __init__(self):
         super(parmdb, self).__init__()
         self.optionparser.add_option(

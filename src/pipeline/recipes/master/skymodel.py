@@ -4,7 +4,7 @@ from contextlib import closing
 import monetdb.sql as db
 from monetdb.sql import Error as Error
 
-from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofarrecipe import BaseRecipe
 
 query = """
 SELECT
@@ -93,7 +93,7 @@ FROM (
 ) t
 """
 
-class skymodel(LOFARrecipe):
+class skymodel(BaseRecipe):
     """
     Extract basic sky model information from database
     """

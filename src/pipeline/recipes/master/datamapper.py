@@ -11,10 +11,10 @@ from collections import defaultdict
 
 from lofar.parameterset import parameterset
 
-from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
 
-class datamapper(LOFARrecipe):
+class datamapper(BaseRecipe):
     def go(self):
         self.logger.info("Starting datamapper run")
         super(datamapper, self).go()

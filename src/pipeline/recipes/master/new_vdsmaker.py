@@ -14,12 +14,13 @@ import subprocess
 import threading
 
 import lofarpipe.support.utilities as utilities
-from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofarrecipe import BaseRecipe
+from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.remotecommand import ProcessLimiter
 
-class new_vdsmaker(LOFARrecipe):
+class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
     def __init__(self):
         super(new_vdsmaker, self).__init__()
         self.optionparser.add_option(

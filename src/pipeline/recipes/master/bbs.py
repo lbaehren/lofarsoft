@@ -17,7 +17,7 @@ import shutil
 import time
 import signal
 
-from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.lofarnode import run_node
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import gvds_iterator
@@ -25,7 +25,7 @@ from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 from lofarpipe.support.remotecommand import run_remote_command
 import lofarpipe.support.utilities as utilities
 
-class bbs(LOFARrecipe):
+class bbs(BaseRecipe):
     """
     Provides a convenient, pipeline-based mechanism of running the BBS system
     on a dataset.

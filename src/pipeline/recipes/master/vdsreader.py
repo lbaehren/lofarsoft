@@ -1,9 +1,8 @@
-# Local helpers
-from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.utilities import get_parset
 import lofarpipe.support.utilities as utilities
 
-class vdsreader(LOFARrecipe):
+class vdsreader(BaseRecipe):
     """
     Read a GVDS file and return a list of the MS filenames referenced therein
     together with selected metadata.
@@ -25,7 +24,7 @@ class vdsreader(LOFARrecipe):
         except:
             self.logger.error("Unable to read G(V)DS file")
             raise
-        
+
         self.logger.info("Building list of measurementsets")
         ms_names = [
             gvds["Part%d.FileName" % (part_no,)]

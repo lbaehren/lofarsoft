@@ -20,12 +20,13 @@ import os
 from lofar.parameterset import parameterset
 
 import lofarpipe.support.utilities as utilities
-from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofarrecipe import BaseRecipe
+from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.group_data import load_data_map
 
-class new_dppp(LOFARrecipe):
+class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
     def __init__(self):
         super(new_dppp, self).__init__()
         self.optionparser.add_option(

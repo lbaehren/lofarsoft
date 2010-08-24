@@ -17,7 +17,7 @@ import tempfile
 from lofar.parameterset import parameterset
 from pyrap.quanta import quantity
 
-from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.pipelinelogging import log_time
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.utilities import get_parset
@@ -25,7 +25,7 @@ from lofarpipe.support.utilities import patch_parset
 from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.remotecommand import ProcessLimiter
 
-class cimager(LOFARrecipe):
+class cimager(BaseRecipe):
     """
     Provides a convenient, pipeline-based mechanism of running the cimager on
     a dataset.

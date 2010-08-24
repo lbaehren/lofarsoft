@@ -2,15 +2,14 @@ from __future__ import with_statement
 import os
 import threading
 
-# Local helpers
-from lofarpipe.support.lofarrecipe import LOFARrecipe
-from lofarpipe.support.ipython import LOFARTask
+import lofarpipe.support.utilities as utilities
+from lofarpipe.support.lofarrecipe import BaseRecipe
+from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import load_data_map
-import lofarpipe.support.utilities as utilities
 from lofarpipe.support.remotecommand import ProcessLimiter
 
-class sourcedb(LOFARrecipe):
+class sourcedb(BaseRecipe, RemoteCommandRecipeMixIn):
     def __init__(self):
         super(sourcedb, self).__init__()
         self.optionparser.add_option(
