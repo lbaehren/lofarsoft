@@ -1,3 +1,10 @@
+# Quick way of priming the pipeline with a list of datafiles to be processed.
+# Generate this file by, eg:
+#
+# $ obsid=L2010_08322; for i in `seq 0 7`; do ssh lce`printf %03d $((i*9+1))` # ls /net/sub$((i+1))/lse*/data*/L2010_$obsid/* | grep SB >> /to_process.py; done
+#
+# then tweak with your favourite text editor.
+
 datafiles = [
 '/net/sub1/lse001/data3/L2010_08567/SB0.MS',
 '/net/sub1/lse001/data3/L2010_08567/SB10.MS',
