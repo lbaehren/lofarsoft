@@ -91,8 +91,8 @@ class cimager(LOFARnode):
                 #                that will be produced, so we read them from the
                 #                      parset and add standard cimager prefixes.
                 # --------------------------------------------------------------
-                parset = parameterset(parset)
-                image_names = parset.getStringVector("Cimager.Images.Names")
+                parset_data = parameterset(parset)
+                image_names = parset_data.getStringVector("Cimager.Images.Names")
                 prefixes = [
                     "image", "psf", "residual", "weights", "sensitivity"
                 ]
@@ -104,7 +104,7 @@ class cimager(LOFARnode):
                             os.path.join(working_dir, filename),
                             os.path.join(resultsdir, filename)
                         )
-                    if parset.getBool('Cimager.restore'):
+                    if parset_data.getBool('Cimager.restore'):
                         shutil.move(
                             os.path.join(working_dir, image_name + ".restored"),
                             os.path.join(resultsdir, image_name + ".restored")
