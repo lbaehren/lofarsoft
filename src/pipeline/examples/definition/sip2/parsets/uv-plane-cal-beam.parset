@@ -17,6 +17,7 @@ Step.solve.Solve.Options.LMFactor = 1.0
 Step.solve.Solve.Options.BalancedEqs = F
 Step.solve.Solve.Options.UseSVD = T
 Step.solve.Model.Beam.Enable = T
+Step.solve.Model.Beam.StationConfig.Name = LBA_OUTER
 Step.solve.Model.Beam.StationConfig.Path = /home/zwieten/StationConfig/
 Step.solve.Model.Beam.Element.Type = HAMAKER_LBA
 
@@ -25,6 +26,7 @@ Step.correct.Model.Sources = []
 Step.correct.Model.Gain.Enable = T
 Step.correct.Output.Column = CORRECTED_DATA
 Step.correct.Model.Beam.Enable = T
+Step.correct.Model.Beam.StationConfig.Name = LBA_OUTER
 Step.correct.Model.Beam.StationConfig.Path = /home/zwieten/StationConfig/
 Step.correct.Model.Beam.Element.Type = HAMAKER_LBA
 
