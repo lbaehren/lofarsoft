@@ -61,11 +61,13 @@ class cimager(LOFARnode):
                     t.query(query, name=output)
                     #       Patch updated information into imager configuration.
                     # ----------------------------------------------------------
-                    parset = patch_parset(parset,
+                    old_parset = parset
+                    parset = patch_parset(old_parset,
                         {
                             'Cimager.dataset': output
                         }
                     )
+                    os.unlink(old_parset)
                 else:
                     self.logger.debug("No time range selected")
 
@@ -114,10 +116,7 @@ class cimager(LOFARnode):
                 return 1
             finally:
                 shutil.rmtree(working_dir)
-                try:
-                    os.unlink(parset)
-                except:
-                    pass
+                os.unlink(parset)
             return 0
 
 if __name__ == "__main__":
