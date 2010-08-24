@@ -12,15 +12,13 @@ import os
 import sys
 import shutil
 
-from lofar.parameterset import parameterset
 from pyrap.quanta import quantity
 from pyrap.tables import table
 
 from lofarpipe.support.pipelinelogging import CatchLog4CXX
 from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import log_time
-from lofarpipe.support.utilities import patch_parset
-from lofarpipe.support.utilities import get_parset
+from lofarpipe.support.parset import Parset, patch_parset, get_parset
 
 class cimager(LOFARnode):
     #                 Handles running a single cimager process on a compute node
@@ -57,7 +55,7 @@ class cimager(LOFARnode):
                     self.logger.debug("Query is %s" % query)
                     output = os.path.join(working_dir, "timeslice.MS")
                     vds_parset = get_parset(vds)
-                    t = table(vds_parset["FileName"])
+                    t = table(vds_parset.getString("FileName"))
                     t.query(query, name=output)
                     #       Patch updated information into imager configuration.
                     # ----------------------------------------------------------
@@ -91,7 +89,7 @@ class cimager(LOFARnode):
                 #                that will be produced, so we read them from the
                 #                      parset and add standard cimager prefixes.
                 # --------------------------------------------------------------
-                parset_data = parameterset(parset)
+                parset_data = Parset(parset)
                 image_names = parset_data.getStringVector("Cimager.Images.Names")
                 prefixes = [
                     "image", "psf", "residual", "weights", "sensitivity"

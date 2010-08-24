@@ -51,6 +51,10 @@ class Parset(parameterset):
             self.keys
         )
 
+    def addStringVector(self, key, vector):
+        super(Parset, self).add(key, "[ %s ]" % ", ".join(vector))
+        self.keys.append(key)
+
     def _append_file(self, filename, prefix=''):
         for line in open(filename, 'r'):
             key = line.split("=")[0].strip()

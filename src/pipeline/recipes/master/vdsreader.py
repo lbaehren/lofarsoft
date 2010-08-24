@@ -27,15 +27,15 @@ class vdsreader(BaseRecipe):
 
         self.logger.info("Building list of measurementsets")
         ms_names = [
-            gvds["Part%d.FileName" % (part_no,)]
-            for part_no in xrange(int(gvds["NParts"]))
+            gvds.getString("Part%d.FileName" % (part_no,))
+            for part_no in xrange(gvds.getInt("NParts"))
         ]
         self.logger.debug(ms_names)
 
         self.outputs['data'] = ms_names
         try:
-            self.outputs['start_time'] = gvds['StartTime']
-            self.outputs['end_time'] = gvds['EndTime']
+            self.outputs['start_time'] = gvds.getString('StartTime')
+            self.outputs['end_time'] = gvds.getString('EndTime')
         except:
             self.logger.warn("Failed to read start/end time from GVDS file")
         try:

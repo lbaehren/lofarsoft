@@ -17,7 +17,7 @@ from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import read_initscript
 from lofarpipe.support.utilities import get_mountpoint
 from lofarpipe.support.utilities import log_time
-from lofarpipe.cuisine.parset import Parset
+from lofarpipe.support.parset import Parset
 
 class bbs(LOFARnode):
     #                      Handles running a single BBS kernel on a compute node
@@ -50,8 +50,8 @@ class bbs(LOFARnode):
                 "ParmDB.Sky": os.path.join(infile, "sky"),
                 "ParmDB.Instrument": os.path.join(infile, "instrument")
             }.iteritems():
-                kernel_parset[key] = value
-            kernel_parset.writeToFile(parset_filename)
+                kernel_parset.add(key, value)
+            kernel_parset.writeFile(parset_filename)
             self.logger.debug("Parset written to %s" % (parset_filename,))
 
 

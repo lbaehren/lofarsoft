@@ -17,14 +17,13 @@ import threading
 import sys
 import os
 
-from lofar.parameterset import parameterset
-
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.group_data import load_data_map
+from lofarpipe.support.parset import Parset
 
 class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
     def __init__(self):
@@ -126,9 +125,9 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
             self.logger.warn("Failed DPPP process detected")
             return 1
         else:
-            parset = parameterset()
+            parset = Parset()
             for host, filenames in outnames.iteritems():
-                parset.add(host, "[ %s ]" % ", ".join(filenames))
+                parset.addStringVector(host, filenames)
             self.outputs['mapfile'] = mkstemp()[1]
             parset.writeFile(self.outputs['mapfile'])
             return 0

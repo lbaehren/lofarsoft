@@ -14,16 +14,16 @@ import collections
 import subprocess
 import tempfile
 
-from lofar.parameterset import parameterset
 from pyrap.quanta import quantity
 
 from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.pipelinelogging import log_time
 from lofarpipe.support.clusterlogger import clusterlogger
-from lofarpipe.support.utilities import get_parset
-from lofarpipe.support.utilities import patch_parset
 from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.remotecommand import ProcessLimiter
+from lofarpipe.support.parset import Parset
+from lofarpipe.support.parset import get_parset
+from lofarpipe.support.parset import patch_parset
 
 class cimager(BaseRecipe):
     """
@@ -74,7 +74,7 @@ class cimager(BaseRecipe):
 
         #                            Read data for processing from the GVDS file
         # ----------------------------------------------------------------------
-        parset = parameterset(gvds_file)
+        parset = Parset(gvds_file)
 
         data = []
         for part in range(parset.getInt('NParts')):
@@ -166,7 +166,7 @@ class cimager(BaseRecipe):
             #        Patch information required for imaging into template parset
             # ------------------------------------------------------------------
             self.logger.debug("Creating parset for %s" % vds)
-            vds_data = parameterset(vds)
+            vds_data = Parset(vds)
             frequency_range = [
                 vds_data.getDoubleVector("StartFreqs")[0],
                 vds_data.getDoubleVector("EndFreqs")[-1]
@@ -234,7 +234,7 @@ class cimager(BaseRecipe):
 
             #                          Copy names of created images into outputs
             # ------------------------------------------------------------------
-            parset = parameterset(converted_parset)
+            parset = Parset(converted_parset)
             image_names = parset.getStringVector("Cimager.Images.Names")
             self.outputs['images'].extend(image_names)
             os.unlink(converted_parset)

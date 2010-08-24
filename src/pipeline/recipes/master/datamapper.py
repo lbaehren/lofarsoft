@@ -9,10 +9,9 @@ from itertools import cycle
 from tempfile import mkstemp
 from collections import defaultdict
 
-from lofar.parameterset import parameterset
-
 from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
+from lofarpipe.support.parset import Parset
 
 class datamapper(BaseRecipe):
     def go(self):
@@ -41,9 +40,9 @@ class datamapper(BaseRecipe):
 
         #                                 Dump the generated mapping to a parset
         # ----------------------------------------------------------------------
-        parset = parameterset()
+        parset = Parset()
         for host, filenames in data.iteritems():
-            parset.add(host, "[ %s ]" % ", ".join(filenames))
+            parset.addStringVector(host, filenames)
 
         self.outputs['mapfile'] = mkstemp()[1]
         parset.writeFile(self.outputs['mapfile'])
