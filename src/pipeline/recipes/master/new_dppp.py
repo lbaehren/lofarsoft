@@ -43,7 +43,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         self.optionparser.add_option(
             '--suffix',
             default=".dppp",
-            help="Suffix to add to trimmed data (default: overwrite existing)"
+            help="Suffix to add to trimmed data (default: .dppp)"
         )
         self.optionparser.add_option(
             '-w', '--working-directory',

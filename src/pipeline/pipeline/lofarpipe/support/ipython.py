@@ -4,8 +4,8 @@
 #                                                         John Swinbank, 2009-10
 #                                                      swinbank@transientskp.org
 # ------------------------------------------------------------------------------
+from ConfigParser import NoSectionError
 from IPython.kernel.task import StringTask
-
 from lofarpipe.support.lofarexceptions import ClusterError
 
 class LOFARTask(StringTask):
