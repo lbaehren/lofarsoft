@@ -1,13 +1,13 @@
-#!/bin/ksh 
+#!/bin/ksh
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.17
+VERSION=1.18
 
 #Check the usage
-USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo]\n\n"\
+USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
 "      -p Pulsar_name ==> Specify the Pulsar Name (i.e. B2111+46) \n"\
 "      -o Output_Processing_Location ==> Specify the Output Processing Location \n"\
@@ -22,7 +22,8 @@ USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Outp
 "      [-incoh_only] ==> optional parameter to process ONLY Incoherentstokes (even though coherentstokes data exist)\n"\
 "      [-coh_only] ==> optional parameter to process ONLY Coherentstokes  (even though incoherentstokes data exist)\n"\
 "      [-incoh_redo] ==> optional parameter to redo processing for Incoherentstokes (deletes previous incoh results!)\n"\
-"      [-coh_redo] ==> optional parameter to redo processing for Coherentstokes (deletes previous coh results!)\n"
+"      [-coh_redo] ==> optional parameter to redo processing for Coherentstokes (deletes previous coh results!)\n"\
+"      [-transpose] ==> optional parameter to indicate the input data were run through the TAB 2nd transpose\n"
 
 if [ $# -lt 6 ]                    # this script needs at least 6 args, including -switches
 then
@@ -45,6 +46,7 @@ incoh_only=0
 coh_only=0
 incoh_redo=0
 coh_redo=0
+transpose=0
 input_string=$*
 while [ $# -gt 0 ]
 do
@@ -64,6 +66,7 @@ do
 	-coh_only)    coh_only=1;;
 	-incoh_redo)  incoh_redo=1;;
 	-coh_redo)    coh_redo=1;;
+	-transpose)   transpose=1;;
 	-*)
 	    echo >&2 \
 	    "$USAGE"
@@ -138,6 +141,11 @@ then
    exit 1
 fi
 
+if [ $transpose -eq 1 ]
+then
+   echo "    Performing processing on BG/P TAB output data which were run through the 2nd transpose" 
+fi
+
 #Check whether Output Processing Location already exists
 if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 then
@@ -196,6 +204,7 @@ else
 	#Set up the parset location:
 	# (1) OLD parset was here: /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
 	# (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
+	# (3) 2nd transpose parset as of Aug 20, 2010 is here: /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L2010-MM-DD-DATE/RTCP-ID.parset
 	
 	#Check if case 1; else case 2
 	PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
@@ -206,8 +215,19 @@ else
 	   new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
 	   if [[ $new_parset == "" ]]
 	   then
-	      echo "ERROR: Unable to find parset for $short_id in /globalhome/lofarsystem/log/ directory"
-	      exit 1
+	      new_parset=`find /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ -name RTCP-${short_id}.parset -print`
+   	      if [[ $new_parset == "" ]]
+	      then
+	          echo "ERROR: Unable to find parset for $short_id in /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ directory"
+	          exit 1
+	      else
+		      found_nof_parsets=`echo $new_parset | wc -l | awk '{print $1}'`
+		      if (( $found_nof_parsets !=  1 ))
+		      then
+		         echo "ERROR: Found more than one parset for $short_id in /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ directory; unable to resolve problem"
+		         exit 1
+		      fi
+	      fi
 	   else
 	      found_nof_parsets=`echo $new_parset | wc -l | awk '{print $1}'`
 	      if (( $found_nof_parsets !=  1 ))
@@ -257,6 +277,8 @@ SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
 FLYSEYE=`cat $PARSET | grep "OLAP.PencilInfo.flysEye" | head -1 | awk -F "= " '{print $2}'`
 INCOHERENTSTOKES=`cat $PARSET | grep "OLAP.outputIncoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
 COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
+CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
+SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
 
 echo "PULSAR:" $PULSAR 
 echo "PULSAR:" $PULSAR >> $log
@@ -266,6 +288,10 @@ echo "CHANNELS:" $CHAN
 echo "CHANNELS:" $CHAN >> $log
 echo "Number of SAMPLES:" $SAMPLES
 echo "Number of SAMPLES:" $SAMPLES >> $log
+echo "Number of Channels per Frame:" $CHANPFRAME
+echo "Number of Channels per Frame:" $CHANPFRAME >> $log
+echo "Number of Subbands per Pset:" $SUBSPPSET 
+echo "Number of Subbands per Pset:" $SUBSPPSET >> $log
 echo "Incoherentstokes set to:" $INCOHERENTSTOKES
 echo "Incoherentstokes set to:" $INCOHERENTSTOKES >> $log
 echo "Coherentstokes set to:" $COHERENTSTOKES
@@ -346,6 +372,13 @@ then
    flyseye_tar=1
 fi
 
+if (( $transpose == 1 )) && (( $core > 1 ))
+then
+   core=1
+   echo "WARNING: 2nd Transpose must have N cores=1;  resetting user-repcified core to 1."
+   echo "WARNING: 2nd Transpose data processing takes a long time since processing is not split between cores."
+fi
+
 ###############################################################################
 # Main program loop over "incoherentstokes" and coherentstokes/"stokes" strings
 ###############################################################################
@@ -409,6 +442,13 @@ do
 		echo "Found a total of $all_num SB MS ${STOKES} input datafiles to process" 
 		echo "Found a total of $all_num SB MS ${STOKES} input datafiles to process" >> $log
 		
+		if (( $transpose == 1 )) 
+        then
+           all_num=`echo "$CHANPFRAME * $SUBSPPSET" | bc`
+  		   echo "2nd transpose has $all_num subbands in one MS file" 
+  		   echo "2nd transpose has $all_num subbands in one MS file" >> $log
+        fi
+        
 		if [ $all_num -lt $core ]
 		then
 		  echo "ERROR: Less than $core subbands found, unlikely to be a valid observation"
@@ -651,9 +691,16 @@ do
 			for ii in $num_dir
 			do
 			  echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
-			  echo bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
-			  bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
-			  bf2presto_pid[$ii]=$!  
+			  if (( $transpose == 0))
+			  then
+			     echo bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
+			     bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
+			     bf2presto_pid[$ii]=$!  
+			  else
+			     echo bf2presto8 ${COLLAPSE} -T ${all_num} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
+			     bf2presto8 ${COLLAPSE} -T ${all_num} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
+			     bf2presto_pid[$ii]=$!  
+			  fi
 			done
 		else
 			for ii in $num_dir
@@ -662,10 +709,16 @@ do
 			    cd ${location}/${STOKES}/"RSP"${ii}
 	
 		 	    echo 'Converting subbands: '`cat RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 
-			    echo bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
-			    bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
-			    bf2presto_pid[$ii]=$!  
-			    
+		 	    if (( $transpose == 0))
+			    then
+			       echo bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+			       bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+			       bf2presto_pid[$ii]=$!  
+			    else
+			       echo bf2presto8 ${COLLAPSE} -T ${all_num} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+			       bf2presto8 ${COLLAPSE} -T ${all_num} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+			       bf2presto_pid[$ii]=$!  
+			    fi
 	#			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
 	#		    echo bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID} `cat SB_master.list` >> $log
 	#		    bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID} `cat SB_master.list` >> bf2presto.out 2>&1 &
