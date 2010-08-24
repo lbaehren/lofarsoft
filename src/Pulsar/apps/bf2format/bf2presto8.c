@@ -16,7 +16,8 @@ int BASESUBBAND = 0;
 int BEAMS = 1;
 int CHANNELS = 1;
 int STOKES = 1;	
-int STOKES_SWITCH = 0;			
+int STOKES_SWITCH = 0;
+int TRANSPOSE = 0;			
 int collapse = 0;
 int writefloats = 0;
 int writefb     = 0;
@@ -57,6 +58,7 @@ void usage(){
   puts("-s\tNumber of Stokes Parameters (Default = 1)");
   puts("-S\tStokes Parameter to write out (Default = StokesI):\n\t 0 = StokesI\n\t 1 = StokesQ\n\t 2 = StokesU\n\t 3 = StokesV");
   puts("-r\tData further than <r>*sigma from the mean will be clipped (Default = 7)");
+  puts("-T <number of subbands>\t Data in Second Transpose mode");
 }
 
 void swap_endian( char *x )
@@ -670,7 +672,7 @@ int main( int argc, char **argv ) {
  // printf("%s ",argv[y]);
  //}
  int i=0;
- while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:hCF8")) != -1)
+ while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:hCFT:8")) != -1)
     {
       i++;
       switch (c)
@@ -748,6 +750,19 @@ int main( int argc, char **argv ) {
 	  eightBit = 1;
 	  break;
 	  
+	case 'T':
+	  TRANSPOSE = 1;
+	  puts("IN SECOND TRANSPOSE MODE");
+	  fprintf(stderr,"%s", optarg);
+	   if (sscanf(optarg, "%d", &TRANSPOSE) != 1) {
+	    fprintf(stderr,"ERROR: Number of Subbands = %s\n", optarg);
+	    exit(-1);
+	   }
+	   BEAMS = TRANSPOSE;
+	   TRANSPOSE = 1;
+	   puts("IN SECOND TRANSPOSE MODE");
+	   break; 
+
 	case 'o':
 	  if (sscanf(optarg, "%99s", &OUTNAME) != 1) {
 	    printf("ERROR: Output Name = %s\n", optarg);
@@ -815,7 +830,7 @@ int main( int argc, char **argv ) {
  printf("Stokes Parameter: %d\n",STOKES_SWITCH);
 
  /* make beam dirs*/ 
- if( BEAMS > 1 ) {
+ if( BEAMS > 1 && TRANSPOSE == 0 ) {
    for( b = 0; b < BEAMS; b++ ) {
      sprintf( buf, "beam_%d", b );
      mkdir( buf, 0775 );
@@ -854,9 +869,15 @@ int main( int argc, char **argv ) {
      for( f = 0; f < n_infiles; f++ ) { /* loop over input files */
        for ( c = 0; c < n_outfiles; c++ ) { /* make CHANNEL output files */
 	 /* create names */
+	 int transpose_sub;
 	 sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
 	 if ( BEAMS > 1  ) {
+	   if ( TRANSPOSE==0 ) {
 	   sprintf(buf2, "beam_%d/%s", b, buf ); /* prepend beam name */
+	   } else {
+	     transpose_sub = b*CHANNELS+c;
+	     sprintf(buf2, "%s.sub%04d", OUTNAME, transpose_sub );
+	   }
 	 } else {
 	   sprintf(buf2, "%s", buf);
 	 }
