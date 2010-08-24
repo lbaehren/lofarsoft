@@ -54,29 +54,94 @@ class PPF():
             weights.setDim([16,1024])
             weights.writedump(weights_filename)
         
+
         self.weights=weights
-        self.buffer=hf.hArray(float,[16,1024])
+        self.buffer=None#hf.hArray(float,[16,1024])
         self.startrow=15
         self.total_rows_added=0
 
     def add(self,input):
+        if not self.buffer:
+            assert input.getSize() == 1024 or input.getDim()[1] == 1024
+            
+            size=input.getSize() 
+            firstdim=size/1024    
+            self.buffer=hf.hArray(float,[16,firstdim,1024])
+
+        self.startrow += 1
+        if self.startrow > 15:
+            self.startrow = 0
+         
         self.buffer[self.startrow].copy(input)
         input.fill(0)
-        for row in range(0,16):
-            input.muladd(self.weights[row],self.buffer[(row+self.startrow)%16])
+        for ant in range(self.buffer.getDim()[0]):
+            for row in range(0,16):
+                input[ant].muladd(self.weights[row],self.buffer[(row+self.startrow)%16,ant])
         
         self.total_rows_added+=1
-        self.startrow-=1
-        if self.startrow < 0:
-            self.startrow=15
+        #self.startrow-=1
+        #if self.startrow < 0:
+        #    self.startrow=15
         if self.total_rows_added < 16:
             input.fill(0)
             return False
         
         return True
-
-
         
+class iPPF():
+    """Class documentation"""
+
+    def __init__(self):
+        """Constructor"""
+        
+        weights_filename=hf.LOFARSOFT+'/src/CR-Tools/data/ippfWeights16384.dat'
+# Initialize arrays and values
+        weights=hf.hArray(float,[16,1024])
+        weights.readdump(weights_filename)
+        
+        if weights[0,0].val()==0.0:
+            print "Obtaining inverse PPF coefficient from file"
+            # Reading of weights failed
+            f=open(hf.LOFARSOFT+'/src/CR-Tools/data/ppf_inv.dat')
+            f.seek(0)
+            for i in range(0,1024):
+                for j in range(0,16):
+                    weights[j,i]=float(f.readline())           
+            #weights.setDim([16,1024])
+            weights.writedump(weights_filename)
+        
+        self.weights=weights
+        self.buffer=None#hf.hArray(float,[16,1024])
+        self.startrow=15
+        self.total_rows_added=0
+
+    def add(self,input):
+        if not self.buffer:
+            assert input.getSize() == 1024 or input.getDim()[1] == 1024
+            
+            size=input.getSize() 
+            firstdim=size/1024    
+            self.buffer=hf.hArray(float,[16,firstdim,1024])
+        
+        self.startrow += 1
+        if self.startrow > 15:
+            self.startrow = 0
+        self.buffer[self.startrow].copy(input)
+        input.fill(0)
+        
+        for ant in range(self.buffer.getDim()[0]):
+            for row in range(0,16):
+                input[ant].muladd(self.weights[row],self.buffer[(row+self.startrow)%16,ant])
+        
+        self.total_rows_added+=1
+        #self.startrow-=1
+        #if self.startrow < 0:
+        #    self.startrow=15
+        if self.total_rows_added < 16:
+            input.fill(0)
+            return False
+        
+        return True
 
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
