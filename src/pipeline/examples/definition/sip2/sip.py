@@ -26,7 +26,7 @@ FROM
 
 class sip(control):
     def pipeline_logic(self):
-        from to_process import datafiles # to_process is a list of MS paths.
+        from to_process import datafiles # datafiles is a list of MS paths.
         with log_time(self.logger):
             # Build a map of compute node <-> data location on storage nodes.
             storage_mapfile = self.run_task(
