@@ -6,6 +6,7 @@ to a job directory and customise it as appropriate for the particular task at
 hand.
 """
 from __future__ import with_statement
+from itertools import repeat
 import sys, os
 from pyrap.quanta import quantity
 from lofarpipe.support.control import control
@@ -34,6 +35,10 @@ class sip(control):
             compute_mapfile = self.run_task(
                 "ndppp",
                 storage_mapfile,
+                parset=os.path.join(
+                    self.config.get("layout", "parset_directory"),
+                    "ndppp.1.initial.parset"
+                ),
                 data_start_time=vdsinfo['start_time'],
                 data_end_time=vdsinfo['end_time']
             )['mapfile']
@@ -53,6 +58,21 @@ class sip(control):
             # valid.
             self.run_task("bbs", compute_mapfile)
             self._save_state()
+
+            # Now, run DPPP three times on the output of BBS.
+            for i in repeat(None, 3):
+                self.run_task(
+                    "ndppp",
+                    compute_mapfile,
+                    parset=os.path.join(
+                        self.config.get("layout", "parset_directory"),
+                        "ndppp.1.postbbs.parset"
+                    ),
+                    data_start_time=vdsinfo['start_time'],
+                    data_end_time=vdsinfo['end_time'],
+                    suffix=""
+                )['mapfile']
+                self._save_state()
 
             # Patch the pointing direction recorded in the VDS file into
             # the parset for the cimager.
