@@ -237,6 +237,7 @@ class cimager(BaseRecipe):
             parset = parameterset(converted_parset)
             image_names = parset.getStringVector("Cimager.Images.Names")
             self.outputs['images'].extend(image_names)
+            os.unlink(converted_parset)
 
         finally:
             semaphore.release()
