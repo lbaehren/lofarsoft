@@ -13,27 +13,63 @@ import sys
 import shutil
 
 from lofar.parameterset import parameterset
+from pyrap.quanta import quantity
+from pyrap.tables import table
 
 from lofarpipe.support.pipelinelogging import CatchLog4CXX
 from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import log_time
+from lofarpipe.support.utilities import patch_parset
+from lofarpipe.support.utilities import get_parset
 
 class cimager(LOFARnode):
     #                 Handles running a single cimager process on a compute node
     # --------------------------------------------------------------------------
-    def run(self, imager_exec, vds, parset, resultsdir):
+    def run(self, imager_exec, vds, parset, resultsdir, start_time, end_time):
         #       imager_exec:                          path to cimager executable
         #               vds:           VDS file describing the data to be imaged
         #            parset:                                imager configuration
         #        resultsdir:                         place resulting images here
+        #        start_time:                        )    time range to be imaged
+        #          end_time:                        ) in seconds (may be "None")
         # ----------------------------------------------------------------------
         with log_time(self.logger):
             self.logger.info("Processing %s" % (vds,))
-            #                                                        Run cimager
-            # ------------------------------------------------------------------
             try:
-                self.logger.debug("Running cimager")
                 working_dir = mkdtemp()
+
+                #   If a time range has been specified, copy that section of the
+                #                                  input MS and only image that.
+                # --------------------------------------------------------------
+                query = []
+                if start_time != "None":
+                    self.logger.debug("Start time is %s" % start_time)
+                    start_time = quantity(float(start_time), 's')
+                    query.append("TIME > %f" % start_time.get('s').get_value())
+                if end_time != "None":
+                    self.logger.debug("End time is %s" % end_time)
+                    end_time = quantity(float(end_time), 's')
+                    query.append("TIME < %f" % end_time.get('s').get_value())
+                query = " AND ".join(query)
+                if query:
+                    #                             Select relevant section of MS.
+                    # ----------------------------------------------------------
+                    self.logger.debug("Query is %s" % query)
+                    output = os.path.join(working_dir, "timeslice.MS")
+                    vds_parset = get_parset(vds)
+                    t = table(vds_parset["FileName"])
+                    t.query(query, name=output)
+                    #       Patch updated information into imager configuration.
+                    # ----------------------------------------------------------
+                    parset = patch_parset(parset,
+                        {
+                            'Cimager.dataset': output
+                        }
+                    )
+                else:
+                    self.logger.debug("No time range selected")
+
+                self.logger.debug("Running cimager")
                 with CatchLog4CXX(
                     working_dir,
                     self.logger.name + "." + os.path.basename(vds)
@@ -60,6 +96,7 @@ class cimager(LOFARnode):
                 prefixes = [
                     "image", "psf", "residual", "weights", "sensitivity"
                 ]
+                self.logger.debug("Copying images to %s" % resultsdir)
                 for image_name in image_names:
                     for prefix in prefixes:
                         filename = image_name.replace("image", prefix, 1)
@@ -77,6 +114,10 @@ class cimager(LOFARnode):
                 return 1
             finally:
                 shutil.rmtree(working_dir)
+                try:
+                    os.unlink(parset)
+                except:
+                    pass
             return 0
 
 if __name__ == "__main__":

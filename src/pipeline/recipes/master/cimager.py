@@ -15,10 +15,12 @@ import subprocess
 import tempfile
 
 from lofar.parameterset import parameterset
+from pyrap.quanta import quantity
 
 from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.pipelinelogging import log_time
 from lofarpipe.support.clusterlogger import clusterlogger
+from lofarpipe.support.utilities import get_parset
 from lofarpipe.support.utilities import patch_parset
 from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.remotecommand import ProcessLimiter
@@ -50,6 +52,11 @@ class cimager(LOFARrecipe):
             help="Maximum number of simultaneous processes per compute node",
             default="8"
         )
+        self.optionparser.add_option(
+            '--timestep',
+            help="If set, multiple images will be made, each using timestep seconds of data",
+            default="None"
+        )
 
     def go(self):
         self.logger.info("Starting cimager run")
@@ -79,29 +86,58 @@ class cimager(LOFARrecipe):
         # ----------------------------------------------------------------------
         compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
 
+
+        #                                 Divide data into timesteps for imaging
+        #          timesteps is a list of (start, end, results directory) tuples
+        # ----------------------------------------------------------------------
+        timesteps = []
+        results_dir = self.config.get('layout', 'results_directory')
+        if self.inputs['timestep'] == "None":
+            self.logger.info("No timestep specified; imaging all data")
+            timesteps = [("None", "None", results_dir)]
+        else:
+            self.logger.info("Using timestep of %s s" % self.inputs['timestep'])
+            gvds = get_parset(gvds_file)
+            start_time = quantity(gvds['StartTime']).get('s').get_value()
+            end_time = quantity(gvds['EndTime']).get('s').get_value()
+            step = float(self.inputs['timestep'])
+            while start_time < end_time:
+                timesteps.append(
+                    (
+                        str(start_time), str(start_time+step),
+                        os.path.join(results_dir, str(start_time))
+                    )
+                )
+                start_time += step
+
         #                          Run each cimager process in a separate thread
         # ----------------------------------------------------------------------
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
         with clusterlogger(self.logger) as (loghost, logport):
             self.logger.debug("Logging to %s:%d" % (loghost, logport))
             with log_time(self.logger):
-                imager_threads = [
-                    threading.Thread(
-                        target=self._dispatch_compute_job,
-                        args=(host, command, compute_nodes_lock[host],
-                            loghost, str(logport),
-                            vds,
-                            self.inputs['parset'],
-                            self.inputs['convert_exec'],
-                            self.inputs['imager_exec'],
-                            self.config.get('layout', 'results_directory')
+                for label, timestep in enumerate(timesteps):
+                    self.logger.info("Processing timestep %d" % label)
+                    start_time, end_time, resultsdir = timestep
+                    imager_threads = [
+                        threading.Thread(
+                            target=self._dispatch_compute_job,
+                            args=(host, command, compute_nodes_lock[host],
+                                loghost, str(logport),
+                                vds,
+                                self.inputs['parset'],
+                                self.inputs['convert_exec'],
+                                self.inputs['imager_exec'],
+                                resultsdir,
+                                start_time,
+                                end_time
+                            )
                         )
-                    )
-                    for host, vds in data
-                ]
-                [thread.start() for thread in imager_threads]
-                self.logger.info("Waiting for imager threads")
-                [thread.join() for thread in imager_threads]
+                        for host, vds in data
+                    ]
+                    [thread.start() for thread in imager_threads]
+                    self.logger.info("Waiting for imager threads")
+                    [thread.join() for thread in imager_threads]
 
         #                Check if we recorded a failing process before returning
         # ----------------------------------------------------------------------
@@ -112,8 +148,8 @@ class cimager(LOFARrecipe):
             return 0
 
     def _dispatch_compute_job(
-        self, host, command, semaphore, loghost, logport, vds,
-        template_parset, convert_exec, imager_exec, resultsdir
+        self, host, command, semaphore, loghost, logport, vds, template_parset,
+        convert_exec, imager_exec, resultsdir, start_time, end_time
     ):
         """
         Run cimager on host for the data described in vds using the template
@@ -187,11 +223,13 @@ class cimager(LOFARrecipe):
                     "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
                 },
                 loghost,
-                logport,
+                str(logport),
                 imager_exec,
                 vds,
                 converted_parset,
-                resultsdir
+                resultsdir,
+                str(start_time),
+                str(end_time)
             )
             sout, serr = cimager_process.communicate()
 
@@ -200,7 +238,6 @@ class cimager(LOFARrecipe):
             parset = parameterset(converted_parset)
             image_names = parset.getStringVector("Cimager.Images.Names")
             self.outputs['images'].extend(image_names)
-            os.unlink(converted_parset)
 
         finally:
             semaphore.release()
