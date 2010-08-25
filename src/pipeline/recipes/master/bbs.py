@@ -255,7 +255,7 @@ class bbs(BaseRecipe):
             },
             *arguments
         )
-        return(self._monitor_process(bbs_kernel_process, "BBS Kernel"))
+        return(self._monitor_process(bbs_kernel_process, "BBS Kernel on %s" % host))
 
     def _run_bbs_control(self, bbs_parset, run_flag):
         """
