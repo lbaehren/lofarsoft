@@ -47,42 +47,35 @@ include (Find<PROJECT>)
 
 if (NOT HAVE_<PROJECT> OR <PROJECT>_FORCE_BUILD)
   
-  set (<PROJECT>_VERSION "")
-  set (<PROJECT>_TAR_ARCHIVE "")
-  set (<PROJECT>_URL "")
+  set (<PROJECT>_VERSION     "" )
+  set (<PROJECT>_TAR_ARCHIVE "" )
+  set (<PROJECT>_URL         "" )
 
   ##__________________________________________________________________
   ## Build the project
   
   include (ExternalProject)
   
-  find_file (have_<project>_tgz ${<PROJECT>_TAR_ARCHIVE}  ${<PROJECT>_SOURCE_DIR})
+  find_file (HAVE_<project>_SOURCE ${<PROJECT>_TAR_ARCHIVE}  ${<PROJECT>_SOURCE_DIR})
   
-  if (have_<project>_tgz)
-    ExternalProject_Add (<project>
-      PREFIX ${<PROJECT>_BINARY_DIR}
-      DOWNLOAD_DIR ${<PROJECT>_BINARY_DIR}
-      SOURCE_DIR ${<PROJECT>_BINARY_DIR}
-      URL ${have_<project>_tgz}
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${<PROJECT>_BINARY_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
-      )
-  else (have_<project>_tgz)
-    ExternalProject_Add (<project>
-      PREFIX ${<PROJECT>_BINARY_DIR}
-      DOWNLOAD_DIR ${<PROJECT>_BINARY_DIR}
-      SOURCE_DIR ${<PROJECT>_BINARY_DIR}
-      URL ${<PROJECT>_URL}
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${<PROJECT>_BINARY_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
-      )
-  endif (have_<project>_tgz)
+  if (NOT HAVE_<project>_SOURCE)
+    set (HAVE_<project>_SOURCE ${<PROJECT>_URL})
+  endif (NOT HAVE_<project>_SOURCE)
+  
+  ExternalProject_Add (<project>
+    PREFIX ${PROJECT_BINARY_DIR}
+    DOWNLOAD_DIR ${PROJECT_BINARY_DIR}/download
+    SOURCE_DIR ${PROJECT_BINARY_DIR}/source
+    URL ${HAVE_<project>_SOURCE}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+    )
   
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_<PROJECT> OR <PROJECT>_FORCE_BUILD)
   add_custom_target (<project>
-    WORKING_DIRECTORY ${<PROJECT>_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[<PROJECT>] Found system-wide installation; skipping rebuild!"
     )
 endif (NOT HAVE_<PROJECT> OR <PROJECT>_FORCE_BUILD)
