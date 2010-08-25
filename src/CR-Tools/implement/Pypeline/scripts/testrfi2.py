@@ -26,7 +26,9 @@ ws["ncoeffs"]=12
 if ws["datafile"]["Observatory"]=='LOFAR':
     ws["numin"]=12 #MHz
     ws["numax"]=82 #MHz
-elif ws["datafile"]["Observatory"]=='LOPES':
+ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")  
+ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256)#256) #fittype="POLY" or "BSPLINE"
+lif ws["datafile"]["Observatory"]=='LOPES':
     ws["numin"]=43 #MHz
     ws["numax"]=73 #MHz
 

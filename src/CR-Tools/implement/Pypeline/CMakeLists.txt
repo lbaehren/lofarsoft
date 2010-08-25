@@ -92,6 +92,7 @@ target_link_libraries (hftools
   ${GSL_LIBRARIES}	
   )
 
+##to speed up computations use -g -O2 or -g0 -O3 if no debuggng is needed.
 ## additional target properties
 if (APPLE)
   set_target_properties (hftools
@@ -106,7 +107,7 @@ else (APPLE)
     PROPERTIES
     PREFIX ""
     SUFFIX .so
-    COMPILE_FLAGS "-DH_DEBUG_CPP"
+    COMPILE_FLAGS "-DH_DEBUG_CPP -g -O2"
     LINK_FLAGS "-fPIC -shared -Wl"
     )
 endif (APPLE)

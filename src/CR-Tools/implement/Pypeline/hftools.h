@@ -226,6 +226,13 @@ template <class T>
 //                    Casting & Conversion Functions
 //========================================================================
 
+template <class S, class T>
+void aipsvec2stlvec(CasaVector<S>& data, std::vector<T>& stlvec);
+
+template <class S, class Iter>
+void aipsvec2stdit(CasaVector<S>& data, const Iter stlvec, const Iter stlvec_end);
+
+
 //Identity
 template<class T> inline T hfcast(/*const*/ T v);
 

@@ -16,46 +16,6 @@ def savefigure():
     print "- ###################"
 
 
-#Functions with a changed API (output first ...)
-# 1 hConvert
-# 2 hConvertResize
-# 3 hCopy
-# 4 hExp
-# 5 hLog
-# 6 hLog10
-# 7 hSin
-# 8 hSinh
-# 9 hSqrt
-# 10 hSquare
-# 11 hTan
-# 12 hTanh
-# 13 hAbs
-# 14 hCos
-# 15 hCosh
-# 16 hCeil
-# 17 hFloor
-# 18 hRound
-# 19 hAcos
-# 20 hAsin
-# 21 hAtan
-# 22 hReal
-# 23 hArg
-# 24 hImag
-# 25 hNorm
-# 26 hDownsample
-# 27 hRunningAverage(i,o,wgt)
-# 28 hRunningAverage(i,o,wht,wtype)
-# 29 hGeometricPhases
-# 30 hGeometricDelays
-# 31 hGeometricWeights
-# 32 hSpectralPower
-# 33 hFFT
-# 34 hInvFFT
-# 35 hRFIDownsampling
-# 36 hRFIBaselineFitting
-# 37 hRFIFlagging
-# 38 hRFIMitigation
-
 """
 ========================================================================
                           pycrtools TUTORIAL

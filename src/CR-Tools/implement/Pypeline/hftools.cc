@@ -996,17 +996,25 @@ void aipscol2stlvec(casa::Matrix<S> &data, std::vector<T>& stlvec, const HIntege
 
 template <class S, class T>
 void aipsvec2stlvec(CasaVector<S>& data, std::vector<T>& stlvec){
-    HInteger i,n;
-//    std::vector<R>::iterator p;
-
-    n=data.size();
+    HInteger i,n=data.size();
     stlvec.resize(n);
-//    p=stlvec.begin();
     for (i=0;i<n;i++) {
-//	*p=hfcast<T>(data[i]);
 	stlvec[i]=hfcast<T>(data[i]);
-//	++p;
     };
+}
+
+/*!
+  \brief Copies a aips++ vector to a vector of a different type specified by iterators or pointers.
+ */
+template <class S, class Iter>
+void aipsvec2stdit(CasaVector<S>& data, const Iter stlvec, const Iter stlvec_end){
+  typedef IterValueType T;
+  HInteger i,n=data.size();
+  Iter vec=stlvec;
+  for (i=0; (i<n) && (vec!=stlvec_end); i++) {
+    *vec=hfcast<T>(data[i]);
+    ++vec;
+  };
 }
 
 
@@ -6234,7 +6242,7 @@ void HFPP_FUNC_NAME(
 {
   HInteger Ncoeffs(coeffs_end-coeffs);      /* nbreak = ncoeffs + 2 - k = ncoeffs - 2 since k = 4 */
   Iter itout(vecout), itx(xvec), itx_end(itx+Ncoeffs);
-  Iter coeffs2(coeffs),  coeffs_end2(coeffs_end2);
+  Iter coeffs2(coeffs),  coeffs_end2(coeffs_end);
   if (vecout_end<=vecout) return;
   if (xvec_end<=xvec) return;
   while ((itout < vecout_end) && (itx_end < xvec_end)) {
@@ -7041,20 +7049,18 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-
 //$DOCSTRING: Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hFileRead
+#define HFPP_FUNC_NAME hFileRead 
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_CLASS_hARRAY  // Additional C++ wrapper to generate - STL is not needed, since this is already STL
-#define HFPP_PYTHON_WRAPPER_CLASSES HFPP_CLASS_hARRAY HFPP_CLASS_STL //expose STL and hARRAY classes to python
-//#define HFPP_FUNC_SLICED HFPP_FALSE
+#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY  //HFPP_CLASS_hARRAYALL is missing due to a deficiency of hfppnew to deal with pass as reference 
+#define HFPP_PYTHON_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY
 #define HFPP_FUNC_KEEP_RETURN_TYPE_FIXED HFPP_TRUE //return a single DataReader object and not a vector thereof for array operations
 #define HFPP_FUNC_MASTER_ARRAY_PARAMETER 2 // Use the third parameter as the master array for looping and history informations
 #define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object, opened e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(Datatype)()("Name of the data column to be retrieved (e.g., FFT, Fx,Time, Frequency...)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
@@ -7074,16 +7080,17 @@ The data will then be in the vector idata. You can covert that to a
 Python list with [].extend(idata)
 */
 
-template <class T>
+template <class Iter>
 CRDataReader & HFPP_FUNC_NAME(
 		    CRDataReader &dr,
 		    HString Datatype,
-		    std::vector<T> & vec
+		    const Iter vec, const Iter vec_end
 		    )
 {
 
-  //Create a DataReader Pointer from an interger variable
+  //Create a DataReader Pointer from an integer variable
   DataReader *drp=&dr;
+  typedef IterValueType T;
 
   //Check whether it is non-NULL.
   if (drp==Null_p){
@@ -7093,37 +7100,37 @@ CRDataReader & HFPP_FUNC_NAME(
 
   //------TIME------------------------------
   if (Datatype=="Time") {
-    if (typeid(vec) == typeid(vector<double>)) {
-      std::vector<double> * vec_p;
-      vec_p=reinterpret_cast<vector<double>*>(&vec); //That is just a trick to fool the compiler
-      drp->timeValues(*vec_p);
+    casa::IPosition shape(1,vec_end-vec); //tell casa the size of the vector
+    if (typeid(*vec) == typeid(double)) {
+      double * storage = reinterpret_cast<double*>(&(*vec));
+      CasaVector<double> casavec(shape,storage,casa::SHARE);
+      drp->timeValues(casavec);
     }  else {
-      cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
+      CasaVector<double> casavec(shape);
+      drp->timeValues(casavec);
+      aipsvec2stdit(casavec,vec,vec_end);
     };
-  //------FREQUENCY------------------------------
+    //------FREQUENCY------------------------------
   } else if (Datatype=="Frequency") {
-    if (typeid(vec) == typeid(vector<double>)) {
     CasaVector<double> val = drp->frequencyValues();
-    aipsvec2stlvec(val,vec);
-    }  else {
-      cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
-    };
+    aipsvec2stdit(val,vec,vec_end);
   }
 //..........................................................................................
 //Conversion from aips to stl using shared memory space
 //..........................................................................................
 #define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD,SIZE)				\
-  if (typeid(vec)==typeid(std::vector<TYPESTL>)) {	_H_NL_			\
+  if (typeid(T)==typeid(TYPESTL)) {	_H_NL_			\
     casa::IPosition shape(2);				_H_NL_		\
     shape(0)=drp->SIZE (); shape(1)=drp->nofSelectedAntennas();	_H_NL_\
-    casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(vec[0])),casa::SHARE); _H_NL_\
+    if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(0) << " antennas times " << shape(1) << " data points (= " << shape(0)*shape(1) <<")!"); return dr;}; _H_NL_ \
+    casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(*vec)),casa::SHARE); _H_NL_\
     drp->FIELD (casamtrx);						_H_NL_\
   } else {								_H_NL_\
     cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; _H_NL_\
   }
 //..........................................................................................
 
-  //------FX------------------------------
+  //------FX----------------------------TYPESTL,TYPECASA,FIELD,SIZE
   else if (Datatype=="Fx") {HFPP_REPEAT(HNumber,double,fx,blocksize);}
   //------VOLTAGE------------------------------
   else if (Datatype=="Voltage") {HFPP_REPEAT(HNumber,double,voltage,blocksize);}
@@ -7133,7 +7140,6 @@ CRDataReader & HFPP_FUNC_NAME(
   else if (Datatype=="CalFFT") {HFPP_REPEAT(HComplex,CasaComplex,calfft,fftLength);}
   else {
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype=" << Datatype << " is unknown.");
-    vec.clear();
   };
   return dr;
 }

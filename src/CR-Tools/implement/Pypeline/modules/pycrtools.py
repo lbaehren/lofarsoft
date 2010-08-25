@@ -39,10 +39,10 @@ f.close()
 
 trackHistory.__doc__="""
 Function for PYCRTOOLS module. Globally switch history tracking of
-hArrays on (True) or off (False). This setting is valid for all arrays
-created after the function is called. If history tracking is on, you
-can use array.history() to see a list of actions that were performed
-with the array."""
+hArrays on (True) or off (False). Default at start-up is "on". This
+setting is valid for all arrays created after the function is
+called. If history tracking is on, you can use array.history() to see
+a list of actions that were performed with the array."""
 
 #======================================================================
 #  Help Functions
