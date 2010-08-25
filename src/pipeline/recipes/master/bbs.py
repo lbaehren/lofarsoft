@@ -197,6 +197,11 @@ class bbs(BaseRecipe):
                 #                             invoking the node script using SSH
                 # --------------------------------------------------------------
                 command = "python %s" % (self.__file__.replace('master', 'nodes'))
+                env = {
+                    "LOFARROOT": utilities.read_initscript(self.inputs['initscript'])["LOFARROOT"],
+                    "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
+                    "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
+                }
                 with clusterlogger(self.logger) as (loghost, logport):
                     self.logger.debug("Logging to %s:%d" % (loghost, logport))
                     with utilities.log_time(self.logger):
@@ -206,6 +211,7 @@ class bbs(BaseRecipe):
                             threading.Thread(
                                 target=self._run_bbs_kernel,
                                 args=(host, command,
+                                    env,
                                     loghost, str(logport),
                                     self.inputs['kernel_exec'],
                                     self.inputs['initscript'],
@@ -218,6 +224,7 @@ class bbs(BaseRecipe):
                             )
                             for host, file, vds in to_process
                         ]
+                        self.logger.info("Starting %d threads" % len(bbs_kernels))
                         [thread.start() for thread in bbs_kernels]
                         self.logger.debug("Waiting for all kernels to complete")
                         [thread.join() for thread in bbs_kernels]
@@ -238,7 +245,7 @@ class bbs(BaseRecipe):
         self.outputs['data'] = self.inputs['args']
         return 0
 
-    def _run_bbs_kernel(self, host, command, *arguments):
+    def _run_bbs_kernel(self, host, command, env, *arguments):
         """
         Run command with arguments on the specified host using ssh. Return its
         return code.
@@ -249,10 +256,7 @@ class bbs(BaseRecipe):
         bbs_kernel_process = run_remote_command(
             host,
             command,
-            {
-                "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
-                "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
-            },
+            env,
             *arguments
         )
         return(self._monitor_process(bbs_kernel_process, "BBS Kernel on %s" % host))
