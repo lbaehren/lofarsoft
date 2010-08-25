@@ -114,6 +114,7 @@ class WSRTrecipe(object):
             self.main_result()
         else:
             self.help()
+        logging.shutdown()
         return status
 
     def run(self, name):

@@ -14,6 +14,7 @@ import struct
 import threading
 import select
 import socket
+import Queue
 import signal # KeyboardInterrupt guaranteed to main thread if signal is "available". Hm.
 
 @contextmanager
@@ -37,6 +38,7 @@ def clusterlogger(
         logserver.stop()
         raise
     logserver.stop()
+    [handler.flush() for handler in logger.handlers]
 
 class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
     """
@@ -45,7 +47,6 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
     This basically logs the record using whatever logging policy is
     configured locally.
     """
-
     def handle(self):
         """
         Handle multiple requests - each expected to be a 4-byte length,
@@ -69,10 +70,7 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
         return cPickle.loads(data)
 
     def handleLogRecord(self, record):
-        # Manually check the level against the pipeline's root logger.
-        # Not sure this should be necessary, but it seems to work...
-        if self.server.logger.isEnabledFor(record.levelno):
-            self.server.logger.handle(record)
+        self.server.queue.put_nowait(record)
 
 class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
     """
@@ -91,19 +89,42 @@ class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
         self.abort = False
         self.timeout = 1
         self.logger = logger
+        self.queue = Queue.Queue()
 
     def start(self):
+        # Messages are received in one thread, and appended to an instance of
+        # Queue.Queue. Another thread picks messages off the queue and sends
+        # them to the log handlers. We keep the latter thread running until
+        # the queue is empty, thereby avoiding the problem of falling out of
+        # the clusterlogger threads before all log messages have been handled.
         def loop_in_thread():
-            while not self.abort:
+            while True:
                 rd, wr, ex = select.select(
                     [self.socket.fileno()], [], [], self.timeout
                 )
                 if rd:
                     self.handle_request()
+                elif self.abort:
+                    break
+        def log_from_queue():
+            while True:
+                try:
+                    record = self.queue.get(True, 1)
+                    # Manually check the level against the pipeline's root logger.
+                    # Not sure this should be necessary, but it seems to work...
+                    if self.logger.isEnabledFor(record.levelno):
+                        self.logger.handle(record)
+                except Queue.Empty:
+                    if self.abort:
+                        break
+
         self.runthread = threading.Thread(target=loop_in_thread)
+        self.logthread = threading.Thread(target=log_from_queue)
         self.runthread.start()
+        self.logthread.start()
 
     def stop(self):
         self.abort = True
         self.runthread.join()
+        self.logthread.join()
         self.server_close()
