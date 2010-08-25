@@ -35,35 +35,52 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
 
     stationIDs=np.array(antennaIDs/1000000)
     rcuIDs=np.mod(antennaIDs,1000)
-    
     allStIDs=np.unique(stationIDs)
-    
     allValues={}
     for station in allStIDs:
-        allValues[station]=functionname(station,antennaset)
-    
-    if keyword not in ["StationPositions","ClockCorrection"]:
-        if dim2==1:
-            mdata=np.zeros(antennaIDs.getDim(),dtype=allValues[allStIDs[0]].dtype)
+        allValues[station]=functionname(int(station),antennaset,return_as_hArray)
+   
+    if not return_as_hArray:
+        if keyword not in ["StationPositions","ClockCorrection"]:
+            if dim2==1:
+                mdata=np.zeros(antennaIDs.getDim(),dtype=allValues[allStIDs[0]].dtype)
+            else:
+                mdata=np.zeros((antennaIDs.getDim(),allValues[allStIDs[0]].shape[1]),dtype=allValues[allStIDs[0]].dtype)
+
+            for st in allStIDs:
+                mdata[stationIDs==st]=allValues[st][rcuIDs[stationIDs==st]]    
         else:
-            mdata=np.zeros((antennaIDs.getDim(),allValues[allStIDs[0]].shape[1]),dtype=allValues[allStIDs[0]].dtype)
+            if dim2==1:
+                mdata=np.zeros(antennaIDs.getDim())
+            else:
+                mdata=np.zeros((antennaIDs.getDim(),allValues[allStIDs[0]].shape[0]),dtype=allValues[allStIDs[0]].dtype)
 
-        for st in allStIDs:
-            mdata[stationIDs==st]=allValues[st][rcuIDs[stationIDs==st]]    
-    else:
-        if dim2==1:
-            mdata=np.zeros(antennaIDs.getDim())
+            for st in allStIDs:
+                mdata[stationIDs==st]=allValues[st]   
+    else:    
+        import pycrtools as hf
+        if keyword not in ["StationPositions","ClockCorrection"]:
+            if dim2==1:
+                mdata=hf.hArray(allValues[allStIDs[0]],antennaIDs.getDim())
+            else:
+                mdata=hf.hArray(allValues[allStIDs[0]],[antennaIDs.getDim(),allValues[allStIDs[0]].getDim()[1]])
+            for st in allStIDs:
+                for num, check in enumerate(stationIDs==st):
+                    if check:
+                        mdata[num]=allValues[st][int(rcuIDs[num])]
         else:
-            mdata=np.zeros((antennaIDs.getDim(),allValues[allStIDs[0]].shape[0]),dtype=allValues[allStIDs[0]].dtype)
-
-        for st in allStIDs:
-            mdata[stationIDs==st]=allValues[st]   
-        
-
+            if keyword == "ClockCorrection": #dim2==1
+                mdata=hf.hArray(float,antennaIDs.getDim(),fill=0)
+            else:
+                mdata=hf.hArray(allValues[allStIDs[0]],[antennaIDs.getDim(),allValues[allStIDs[0]].getDim()[0]])
+            for st in allStIDs:
+                for num, check in enumerate(stationIDs==st):
+                    if check:
+                        mdata[num]=allValues[st]
     return mdata
 
 
-def getStationPhaseCalibration(station, antennaset):
+def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
     """Read phase calibration data for a station.
 
     *station* station name or ID.
@@ -111,9 +128,13 @@ def getStationPhaseCalibration(station, antennaset):
     if antennaset in [ "LBA_OUTER" , 1, "1" ]:
         modenr="1"
     else:
-        print "Calibration data not yet available. Returning 1"
-        complexdata=np.zeros(shape=(96,512),dtype=complex)
-        complexdata.real=1
+        print "Station phase calibration data not yet available for antennaset",antennaset,".Returning 1"
+        if return_as_hArray:
+            import pycrtools as hf
+            complexdata=hf.hArray(complex,[96,512],fill=complex(1,0))    
+        else:
+            complexdata=np.zeros(shape=(96,512),dtype=complex)
+            complexdata.real=1
         return complexdata
 
     # Convert station name to file identifier
@@ -130,9 +151,13 @@ def getStationPhaseCalibration(station, antennaset):
     elif station in [ "CS007",7,"007" ]:
         stationname = "007"
     else:
-        print "Calibration data not yet available. Returning 1"
-        complexdata=np.zeros(shape=(96,512),dtype=complex)
-        complexdata.real=1
+        print "Calibration data not yet available for station",station,"Returning 1"
+        if return_as_hArray:
+            import pycrtools as hf
+            complexdata=hf.hArray(complex,[96,512],fill=complex(1,0))    
+        else:
+            complexdata=np.zeros(shape=(96,512),dtype=complex)
+            complexdata.real=1
         return complexdata
 
     # filename
@@ -153,14 +178,31 @@ def getStationPhaseCalibration(station, antennaset):
     data=struct.unpack(fmt,rawdata)
 
     #
-    data=np.array(data)
-    data.resize(512,96,2)
+    if return_as_hArray:
+        import pycrtools as hf
+        data=hf.hArray(data,[512*96,2])
+        realdata=hf.hArray(float,[512*96])
+        imagdata=hf.hArray(float,[512*96])
+        complexdata=hf.hArray(complex,[96,512])
+        realdata[...].copy(data[...,0])
+        imagdata[...].copy(data[...,1])
+        complexdata2=hf.hArray(complex,[512*96])
+        complexdata2.fill(complex(0,1))
+        complexdata2.mul(imagdata)
+        complexdata2.add(realdata)
+        complexdata2.setDim([512,96])
+        complexdata.transpose(complexdata2)
 
-    complexdata=np.empty(shape=(512,96),dtype=complex)
-    complexdata.real=data[:,:,0]
-    complexdata.imag=data[:,:,1]
-
-    return complexdata.transpose()
+        return complexdata
+    else:
+        data=np.array(data)
+        data.resize(512,96,2)
+        
+        complexdata=np.empty(shape=(512,96),dtype=complex)
+        complexdata.real=data[:,:,0]
+        complexdata.imag=data[:,:,1]
+        
+        return complexdata.transpose()
 
 def getCableDelays(station,antennaset,return_as_hArray=False):
     """ Get cable delays in s.
@@ -393,10 +435,10 @@ def getClockCorrection(station,antennaset="HBA",time=1278480000):
     if station in clockcorrection.keys():
         return clockcorrection[station]
     else:
-        print "NO VALUE FOUND IN THE DATABASE"
+        print "NO CLOCK CORRECTION VALUE AVAILABLE IN THE DATABASE"
         return 0
 
-def getStationPositions(station,antennaset,coordinatesystem="WGS84",return_as_hArray=False):
+def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesystem="WGS84",):
     """Returns the antenna positions of all the antennas in the station
     relative to the station center for the specified antennaset.
     station can be the name or id of the station. Default returns as numpy

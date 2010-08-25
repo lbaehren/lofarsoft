@@ -67,6 +67,9 @@ class PPF():
             size=input.getSize() 
             firstdim=size/1024    
             self.buffer=hf.hArray(float,[16,firstdim,1024])
+            weights2=self.buffer.new()
+            weights2[...].copy(self.weights[...])
+            self.weights=weights2
 
         self.startrow += 1
         if self.startrow > 15:
@@ -74,9 +77,8 @@ class PPF():
          
         self.buffer[self.startrow].copy(input)
         input.fill(0)
-        for ant in range(self.buffer.getDim()[0]):
-            for row in range(0,16):
-                input[ant].muladd(self.weights[row],self.buffer[(row+self.startrow)%16,ant])
+        for row in range(0,16):
+            input.muladd(self.weights[row],self.buffer[(row+self.startrow)%16])
         
         self.total_rows_added+=1
         #self.startrow-=1
@@ -122,6 +124,9 @@ class iPPF():
             size=input.getSize() 
             firstdim=size/1024    
             self.buffer=hf.hArray(float,[16,firstdim,1024])
+            weights2=self.buffer.new()
+            weights2[...].copy(self.weights[...])
+            self.weights=weights2
         
         self.startrow += 1
         if self.startrow > 15:
@@ -129,9 +134,8 @@ class iPPF():
         self.buffer[self.startrow].copy(input)
         input.fill(0)
         
-        for ant in range(self.buffer.getDim()[0]):
-            for row in range(0,16):
-                input[ant].muladd(self.weights[row],self.buffer[(row+self.startrow)%16,ant])
+        for row in range(0,16):
+            input.muladd(self.weights[row],self.buffer[(row+self.startrow)%16])
         
         self.total_rows_added+=1
         #self.startrow-=1
