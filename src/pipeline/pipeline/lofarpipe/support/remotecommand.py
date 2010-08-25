@@ -39,7 +39,9 @@ def run_via_ssh(host, command, environment, *arguments):
 
     ssh_cmd.append(command)
     ssh_cmd.extend(arguments)
-    return subprocess.Popen(ssh_cmd)
+    return subprocess.Popen(
+        ssh_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE
+    )
 
 class RemoteCommandRecipeMixIn(object):
     """
