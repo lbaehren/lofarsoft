@@ -11,7 +11,7 @@ USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out t
 "         In this case, you only need to specify the input file and type, output file and the project name.:\n"\
 "         \n"\
 "         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
-"         -intype source_or_position ==> The input file type is either `source` based or `position` based \n"\
+"         -intype source_or_position ==> The input file type is either 'source' based or 'position' based \n"\
 "         -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) \n"\
 "         -project project_name  ==> The name of the project exactly as it appears in MOM (including capital letters) \n"\
 "         \n"\
@@ -20,8 +20,8 @@ USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out t
 "         [[-subsHBA subband_range]] ==> The HBA subband range (default = '200..447') \n"\
 "         [[-subsLBA subband_range]] ==> The LBA subband range (default = '154..401') \n"\
 "         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
-"         \n"\
-"         Example Type I input file using source names:\n"\
+"         \n"
+USAGE2="         Example Type I input file using source names:\n"\
 "         # object     antenna           start-time           duration-mins     stations\n"\
 "         3C14            HBAHigh        2010-07-22T14:50:00     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
 "         3C14            LBA            2010-07-22T15:03:00     20           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
@@ -49,7 +49,7 @@ USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out t
 "         > $0 -in obs_list_pos.txt -intype position -out output.xml -project LEA016\n"\
 "         > $0 -in obs_list_pos.txt -intype position -out output.xml -project LEA017 -subsLBA 10..45 -subsHBA 200..245\n"\
 "         \n"
-USAGE2="      2) The input file contains just: object-name/position  antenna \n"\
+USAGE3="      2) The input file contains just: object-name/position  antenna \n"\
 "         You must specify the input file name and type, output file name and project name. \n"\
 "         In this case, you MUST also specify the following parameters on the command line as input...\n"\
 "         Note, these parameters are used for the entire list;  start time of subsequent observations\n"\
@@ -90,14 +90,14 @@ USAGE2="      2) The input file contains just: object-name/position  antenna \n"
 "         > $0 -in obs_list_names.txt -intype position -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 \n"\
 "         > $0 -in obs_list_names.txt -intype position -out output.xml -project LEA033 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsLBA 10..45  \n"\
 "         \n"
-USAGE3="      3) The input file contains just: object-name/position. \n"\
+USAGE4="      3) The input file contains just: object-name/position. \n"\
 "         You must specify the input file name and type, output file name and project name. \n"\
 "         In this case, you MUST also specify the following parameters on the command line as input...\n"\
 "         Note, these parameters are used for the entire list;  start time of subsequent observations\n"\
 "         is calculated based on observation duration and gap between observations.\n"\
 "         Only one ANTENNA is used for the entire list of input OBJECTs (default = HBAHigh). \n"\
 "         \n"
-USAGE4="         \n"\
+USAGE5="         \n"\
 "         [-start obs_start] ==> The start date/time for 1st source in the list of observations; note format; supercede's infile values (i.e. 2010-07-22T14:50:00) \n"\
 "         [-time duration] ==> The duration of ALL observations in the list, in minutes; supercede's infile values (i.e. 60) \n"\
 "         [-stations stations_list] ==> The list of LOFAR stations, supercede's infile values and used for all obs (i.e. 'CS001,CS002') \n"\
@@ -111,7 +111,7 @@ USAGE4="         \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
 "         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
 "         \n"
-USAGE5="         Example Type III input file using source names:\n"\
+USAGE6="         Example Type III input file using source names:\n"\
 "         # object      \n"\
 "         3C99   \n"\
 "         3C327  \n"\
