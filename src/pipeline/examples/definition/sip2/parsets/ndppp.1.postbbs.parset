@@ -1,8 +1,8 @@
 msin.startchan = 0
 msin.nchan = 1
-msin.datacolumn = CORRECTED_DATA     # is the default
+msin.datacolumn = CORRECTED_DATA
 
-msout.datacolumn = CORRECTED_DATA    # is the default
+msout.datacolumn = CORRECTED_DATA
 
 steps = [flag3,flag4,flag5,flag6]   # if defined as [] the MS will be copied and NaN/infinite will be  flagged
 
