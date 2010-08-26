@@ -22,7 +22,7 @@ Step.solve.Model.Beam.StationConfig.Path = /home/zwieten/StationConfig/
 Step.solve.Model.Beam.Element.Type = HAMAKER_LBA
 
 Step.correct.Operation = CORRECT
-Step.correct.Model.Sources = []
+Step.correct.Model.Sources = [**central_source**]
 Step.correct.Model.Gain.Enable = T
 Step.correct.Output.Column = CORRECTED_DATA
 Step.correct.Model.Beam.Enable = T

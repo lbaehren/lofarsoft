@@ -82,6 +82,7 @@ class sip(control):
             bbs_parset = patch_parset(
                 self.task_definitions.get("bbs", "parset"),
                 {
+                    'Step.correct.Model.Sources': "[ \"%s\" ]" % (source_name),
                     'Step.subtract.Model.Sources': "[ \"%s\" ]" % (source_name)
                 }
             )
