@@ -12,7 +12,6 @@ import sys
 import os
 
 from pyrap.quanta import quantity
-from monetdb.sql import connect as db_connect
 
 from lofarpipe.support.control import control
 from lofarpipe.support.utilities import log_time, patch_parset
@@ -58,27 +57,16 @@ class sip(control):
                 os.unlink(storage_mapfile)
             self._save_state()
 
-            # Build a sky model ready for BBS
+            # Build a sky model ready for BBS & return the name of the central
+            # source.
             ra = quantity(vdsinfo['pointing']['ra']).get_value('deg')
             dec = quantity(vdsinfo['pointing']['dec']).get_value('deg')
-            ra_min, ra_max = ra-2.5, ra+2.5
-            dec_min, dec_max = dec-2.5, dec+2.5
-            self.run_task(
-                "skymodel",
-                ra_min=ra_min, ra_max=ra_max, dec_min=dec_min, dec_max=dec_max
-            )
+            source_name = self.run_task(
+                "skymodel", ra=ra, dec=dec, search_size=2.5
+            )['source_name']
 
             # Patch the name of the central source into the BBS parset for
             # subtraction.
-            conn = db_connect(
-                hostname="ldb001", port=50000, database="gsm",
-                username="gsm", password="msss"
-            )
-            cur = conn.cursor()
-            cur.execute(query % (ra, dec, 'VLSS'))
-            source_name = cur.fetchone()[0]
-            cur.close()
-            conn.close()
             bbs_parset = patch_parset(
                 self.task_definitions.get("bbs", "parset"),
                 {
