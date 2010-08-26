@@ -231,7 +231,7 @@ then
    echo "ERROR: Input file type must be specified with '-intype position' or '-intype source'."
    exit 1
 else
-   if [ $INTYPE_STR != "source" ]  && [ $INTYPE_STR != "position" ]]
+   if [ $INTYPE_STR != "source" ]  && [ $INTYPE_STR != "position" ]
    then
       echo "ERROR: Input file type must be specified with '-intype position' or '-intype source'."
       exit 1
@@ -371,7 +371,7 @@ fi
 num_lines=0
 num_lines=`grep -v "#" $infile | wc -l | awk '{print $1}'`
 catalog=$LOFARSOFT/release/share/pulsar/data/3cCatalog_RADEC.txt
-echo "Wokring on $infile with $num_lines sources"
+echo "Working on $infile with $num_lines sources"
 if (( $INTYPE == 1 ))
 then
    echo "Using 3C catalog file $catalog"
