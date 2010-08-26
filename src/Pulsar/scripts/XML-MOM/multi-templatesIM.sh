@@ -17,7 +17,7 @@ USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out t
 "         \n"\
 "         Optionally you can also specify the following parameters:\n"\
 "         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
-"         [[-subsHBA subband_range]] ==> The HBA subband range (default = '200..447') \n"\
+"         [[-subsHBA subband_range]] ==> The HBA subband range (default = '77..324' for HBAHigh and 54..301 for HBALow) \n"\
 "         [[-subsLBA subband_range]] ==> The LBA subband range (default = '154..401') \n"\
 "         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
 "         \n"
@@ -61,7 +61,7 @@ USAGE3="      2) The input file contains just: object-name/position  antenna \n"
 "         \n"\
 "         Optionally you can also specify the following parameters:\n"\
 "         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
-"         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
+"         [[-subsHBA subband_range]] ==> The HBA subband range (default = '77..324' for HBAHigh and 54..301 for HBALow) \n"\
 "         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
 "         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
@@ -106,7 +106,7 @@ USAGE5="         \n"\
 "         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
 "         [[-project project_name]]  ==> The name of the MOM project 'OBJECTs' or 'LEA032' (default = OBJECTs)\n"\
 "         [[-antenna antenna_setup]] ==> The antenna name: HBAHigh, HBALow or LBA (default = HBAHigh) \n"\
-"         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
+"         [[-subsHBA subband_range]] ==> The HBA subband range (default = '77..324' for HBAHigh and 54..301 for HBALow) \n"\
 "         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
 "         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
@@ -503,13 +503,19 @@ do
            fi
 	    fi
 	    
-		if (( $user_subbands_hba == 0 )) && [[ $ANT_SHORT == "HBA" ]]
+		if (( $user_subbands_hba == 0 )) && [[ $ANTENNA == "HBAHigh" ]]
 		then
-		    SUBBANDS="200..447"
-        elif (( $user_subbands_hba == 1 )) && [[ $ANT_SHORT == "HBA" ]]
+		    SUBBANDS="77..324"
+        elif (( $user_subbands_hba == 1 )) && [[ $ANTENNA == "HBAHigh" ]]
         then
 		    SUBBANDS=$SUBBANDS_HBA
-		elif (( $user_subbands_lba == 0 )) && [[ $ANT_SHORT == "LBA" ]]
+        elif (( $user_subbands_hba == 0 )) && [[ $ANTENNA == "HBALow" ]]
+        then
+		    SUBBANDS="54..301"
+        elif (( $user_subbands_hba == 1 )) && [[ $ANTENNA == "HBALow" ]]
+        then
+		    SUBBANDS=$SUBBANDS_HBA
+		elif (( $user_subbands_lba == 0 )) && [[ $ANTENNA == "LBA" ]]
 		then
 		    SUBBANDS="154..401"
         else
