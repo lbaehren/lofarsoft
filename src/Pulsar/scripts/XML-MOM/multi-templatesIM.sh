@@ -69,8 +69,8 @@ USAGE2="      2) The input file contains just: object-name/position  antenna \n"
 "         Example Type II input file using source names:\n"\
 "         # object       antenna\n"\
 "         3C99           LBA \n"\
-"         3C99           HBA-low \n"\
-"         3C327          HBA-low \n"\
+"         3C99           HBALow \n"\
+"         3C327          HBALow \n"\
 "         \n"\
 "         Example runs:\n"\
 "         > $0 -in obs_list_names.txt -intype source -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004\n"\
@@ -81,8 +81,8 @@ USAGE2="      2) The input file contains just: object-name/position  antenna \n"
 "         Example Type II input file using ra dec positions:\n"\
 "         # ra     dec           antenna\n"\
 "         13.98   +68.487         LBA \n"\
-"         70.498  +1.728          HBA-low \n"\
-"         217.17   -1.623         HBA-low \n"\
+"         70.498  +1.728          HBALow \n"\
+"         217.17   -1.623         HBALow \n"\
 "         \n"\
 "         Example runs:\n"\
 "         > $0 -in obs_list_names.txt -intype position -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004\n"\
