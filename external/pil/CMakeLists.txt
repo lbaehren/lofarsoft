@@ -35,6 +35,8 @@ endif (LUS_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
+include (FindPIL)
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_PIL OR PIL_FORCE_BUILD)
