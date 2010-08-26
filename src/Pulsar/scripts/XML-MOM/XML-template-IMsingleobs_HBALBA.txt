@@ -19,7 +19,7 @@
             <antenna>ANTENNA SETTING</antenna>
             <clock mode="200 MHz"/>
             <instrumentFilter>INSTRUMENT FILTER MHz</instrumentFilter>
-            <integrationInterval>INTEGRATION INTERVAL</integrationInterval>
+            <integrationInterval>INTEG INTERVAL</integrationInterval>
             <pencilBeams>
                 <flyseye>false</flyseye>
                 <pencilBeamList>

@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/ksh -x
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -19,16 +19,17 @@ USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out t
 "         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
 "         [[-subsHBA subband_range]] ==> The HBA subband range (default = '200..447') \n"\
 "         [[-subsLBA subband_range]] ==> The LBA subband range (default = '154..401') \n"\
+"         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
 "         \n"\
 "         Example Type I input file using source names:\n"\
 "         # object     antenna           start-time           duration-mins     stations\n"\
-"         3C14            HBA-high       2010-07-22T14:50:00     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
+"         3C14            HBAHigh        2010-07-22T14:50:00     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
 "         3C14            LBA            2010-07-22T15:03:00     20           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
-"         3C99            HBA-low        2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
+"         3C99            HBALow         2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
 "         3C83.1          LBA            2010-07-22T15:27:30     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
 "         3C99            LBA            2010-07-22T15:39:00    120           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
-"         3C99            HBA-high       2010-07-22T15:52:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
-"         3C99            HBA-low        2010-07-22T16:55:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
+"         3C99            HBAHigh        2010-07-22T15:52:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
+"         3C99            HBALow         2010-07-22T16:55:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
 "         \n"\
 "         Example runs:\n"\
 "         > $0 -in obs_list_names.txt -intype source -out output.xml -project LEA016\n"\
@@ -36,13 +37,13 @@ USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out t
 "         \n"\
 "         Example Type I input file using ra dec positions:\n"\
 "         # ra     dec           antenna           start-time           duration-mins     stations\n"\
-"         13.98   +68.487         HBA-high       2010-07-22T14:50:00     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
+"         13.98   +68.487         HBAHigh        2010-07-22T14:50:00     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
 "         13.98   +68.487         LBA            2010-07-22T15:03:00     20           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
-"         70.498  +1.728          HBA-low        2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
+"         70.498  +1.728          HBALow         2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
 "         208.074 +31.409         LBA            2010-07-22T15:27:30     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
 "         217.17   -1.623         LBA            2010-07-22T15:39:00    120           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
-"         217.17   -1.623         HBA-high       2010-07-22T15:52:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
-"         217.17   -1.623         HBA-low        2010-07-22T16:55:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
+"         217.17   -1.623         HBAHigh        2010-07-22T15:52:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
+"         217.17   -1.623         HBALow         2010-07-22T16:55:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007\n"\
 "         \n"\
 "         Example runs:\n"\
 "         > $0 -in obs_list_pos.txt -intype position -out output.xml -project LEA016\n"\
@@ -63,6 +64,7 @@ USAGE2="      2) The input file contains just: object-name/position  antenna \n"
 "         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
 "         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
+"         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
 "         \n"\
 "         Example Type II input file using source names:\n"\
 "         # object       antenna\n"\
@@ -93,7 +95,7 @@ USAGE3="      3) The input file contains just: object-name/position. \n"\
 "         In this case, you MUST also specify the following parameters on the command line as input...\n"\
 "         Note, these parameters are used for the entire list;  start time of subsequent observations\n"\
 "         is calculated based on observation duration and gap between observations.\n"\
-"         Only one ANTENNA is used for the entire list of input pulsars (default = HBA-high). \n"\
+"         Only one ANTENNA is used for the entire list of input OBJECTs (default = HBAHigh). \n"\
 "         \n"
 USAGE4="         \n"\
 "         [-start obs_start] ==> The start date/time for 1st source in the list of observations; note format; supercede's infile values (i.e. 2010-07-22T14:50:00) \n"\
@@ -102,11 +104,12 @@ USAGE4="         \n"\
 "         \n"\
 "         Optionally you can also specify the following parameters:\n"\
 "         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
-"         [[-project project_name]]  ==> The name of the MOM project 'Pulsars' or 'LEA032' (default = Pulsars)\n"\
-"         [[-antenna antenna_setup]] ==> The antenna name: HBA-high, HBA-low or LBA (default = HBA-high) \n"\
+"         [[-project project_name]]  ==> The name of the MOM project 'OBJECTs' or 'LEA032' (default = OBJECTs)\n"\
+"         [[-antenna antenna_setup]] ==> The antenna name: HBAHigh, HBALow or LBA (default = HBAHigh) \n"\
 "         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
 "         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
+"         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
 "         \n"
 USAGE5="         Example Type III input file using source names:\n"\
 "         # object      \n"\
@@ -115,8 +118,8 @@ USAGE5="         Example Type III input file using source names:\n"\
 "         372.1  \n"\
 "         \n"\
 "         Example runs:\n"\
-"         > $0 -in obs_list_names.txt -intype source -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 -antenna HBA-high\n"\
-"         > $0 -in obs_list_names.txt -intype source -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -antenna HBA-low\n"\
+"         > $0 -in obs_list_names.txt -intype source -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 -antenna HBAHigh\n"\
+"         > $0 -in obs_list_names.txt -intype source -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -antenna HBALow\n"\
 "         > $0 -in obs_list_names.txt -intype source -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -antenna LBA\n"\
 "         \n"\
 "         Example Type II input file using ra dec positions:\n"\
@@ -127,7 +130,7 @@ USAGE5="         Example Type III input file using source names:\n"\
 "         \n"\
 "         Example runs:\n"\
 "         > $0 -in obs_list_names.txt -intype position -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004\n"\
-"         > $0 -in obs_list_names.txt -intype position -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -antenna HBA-low\n"\
+"         > $0 -in obs_list_names.txt -intype position -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -antenna HBALow\n"\
 "         > $0 -in obs_list_names.txt -intype position -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -antenna LBA \n"\
 "         \n"
 
@@ -149,7 +152,8 @@ infile=""
 user_infile=0
 outfile=""
 user_outfile=0
-INTYPE=""
+INTYPE_STR=""
+INTYPE=1
 user_intype=0
 SUBBANDS_HBA="200..447"
 user_subbands_hba=0
@@ -165,19 +169,20 @@ STATIONS=""
 user_stations=0
 GAP=3
 user_gap=0
-ANTENNA=HBA-high
+ANTENNA=HBAHigh
 user_antenna=0
 LST=0
 LST_DIFF=0
 PROJECT=""
 user_project=0
-
+INTEGRATION=3
+user_integration=0
 
 while [ $# -gt 0 ]
 do
     case "$1" in
      -in)                infile=$2; user_infile=1; shift;;
-     -intype)            INTYPE=$2; user_intype=1; shift;;
+     -intype)            INTYPE_STR=$2; user_intype=1; shift;;
      -out)               outfile=$2; user_outfile=1; shift;;
      -start)             START=$2; previous_start=$2; user_start=1; shift;;
      -time)              TIME=$2; user_duration=1; shift;;
@@ -187,6 +192,7 @@ do
      -antenna)           ANTENNA=$2; user_antenna=1; shift;;
      -stations)          STATIONS=$2; user_stations=1; shift;;
      -project)           PROJECT=$2; user_project=1; shift;;
+     -integration)       INTEGRATION=$2; user_integration=1; shift;;
      -lst|-LST)          LST=1;;
        -*)
             print >&2 \
@@ -225,10 +231,16 @@ then
    echo "ERROR: Input file type must be specified with '-intype position' or '-intype source'."
    exit 1
 else
-   if [ $INTYPE != "source" ]  && [ $INTYPE != "position" ]]
+   if [ $INTYPE_STR != "source" ]  && [ $INTYPE_STR != "position" ]]
    then
       echo "ERROR: Input file type must be specified with '-intype position' or '-intype source'."
       exit 1
+   fi
+   if [ $INTYPE_STR == "source" ] 
+   then
+       INTYPE=1
+   else
+       INTYPE=2
    fi
 fi
 
@@ -251,15 +263,17 @@ fi
 system_typ=`uname -s | awk '{print $1}'`
 
 #Find out which type of input file was given:
-# (1) 7-column input
-# (2) 4-column input
-# (3) 2-column input
-# (4) 1-column input
+# (1) 6-column input
+# (2) 5-column input
+# (3) 4-column input
+# (4) 3-column input
+# (5) 2-column input
+# (6) 1-column input
 #depending on the type of input, check for required input parameters
 ncols=0
 ncols=`grep -v "#" $infile | grep -v '^$' | tail -1 | wc -w`
 echo "Your input file $infile contains $ncols columns"
-if (( $ncols == 7 ))
+if (( $ncols == 6 )) || (( $ncols == 5 ))
 then
    if (( $user_gap != 0 ))
    then
@@ -283,31 +297,8 @@ then
    fi
 fi
 
-if (( $ncols >= 4 ))
-then
-   if (( $user_chan_subs_hba == 1 ))
-   then
-      echo "WARNING: ignoring user-specified channels per subband HBA setting;  input file setting will be used."
-      user_chan_subs_hba=0
-   fi
-   if (( $user_chan_subs_lba == 1 ))
-   then
-      echo "WARNING: ignoring user-specified channels per subband LBA setting;  input file setting will be used."
-      user_chan_subs_lba=0
-   fi
-   if (( $user_steps_hba == 1 ))
-   then
-      echo "WARNING: ignoring user-specified integration steps HBA setting;  input file setting will be used."
-      user_steps_hba=0
-   fi
-   if (( $user_steps_lba == 1 ))
-   then
-      echo "WARNING: ignoring user-specified integration steps LBA setting;  input file setting will be used."
-      user_steps_lba=0
-   fi
-fi
 
-if (( $ncols >= 2 ))
+if (( $ncols >= 3 )) || (( (( $ncols == 2 )) && (( $INTYPE == 1 )) ))
 then
    if (( $user_antenna == 1 ))
    then
@@ -316,17 +307,7 @@ then
    fi
 fi
 
-if (( $ncols == 1 ))
-then
-   type=4
-elif (( $ncols != 1 )) && (( $ncols != 2 )) && (( $ncols != 4 )) && (( $ncols != 7 ))
-then
-   echo "ERROR: Input file must have 7, 4, 2, or 1 columns;  your file contains $ncols columns which is not allowed."
-   echo "       Please refer to the script usage for input file options (type > $0) by itself."
-   exit 1
-fi
-
-if (( $ncols <= 4 )) 
+if (( $ncols <= 3 )) 
 then
    # check that the user has specified required input
    if (( $user_start == 0 )) 
@@ -339,23 +320,26 @@ then
       exit 1
    elif (( $user_stations == 0 )) 
    then
-      echo "ERROR: $ncols column input file requires '-st stations_list' as input"
+      echo "ERROR: $ncols column input file requires '-stations stations_list' as input"
       exit 1
    fi
 fi
 
-if (( $ncols == 1 )) 
+if (( $ncols == 1 )) || (( (( $ncols == 2 )) && (( $INTYPE == 1 )) ))
 then
    # check that the user has specified optional params
-   if [[ $ANTENNA == "HBA" ]]
+   if [[ $ANTENNA == "HBALow" ]]
    then
-       CHAN_SUBS=$CHAN_SUBS_HBA
-       STEPS=$STEPS_HBA
-   fi
-   if [[ $ANTENNA == "LBA" ]]
+       ANT_SHORT=HBA
+   elif [[ $ANTENNA == "HBAHigh" ]]
    then
-       CHAN_SUBS=$CHAN_SUBS_LBA
-       STEPS=$STEPS_LBA
+       ANT_SHORT=HBA
+   elif [[ $ANTENNA == "LBA" ]]
+   then
+       ANT_SHORT=LBA
+   else
+      echo "ERROR: Antenna must be set to any of these three values: HBALow, HBAHigh or LBA"
+      exit 1
    fi
 fi   
 
@@ -386,30 +370,13 @@ fi
 
 num_lines=0
 num_lines=`grep -v "#" $infile | wc -l | awk '{print $1}'`
-catalog=$LOFARSOFT/release/share/pulsar/data/PSR_catalog.txt
+catalog=$LOFARSOFT/release/share/pulsar/data/3cCatalog_RADEC.txt
 echo "Wokring on $infile with $num_lines sources"
-echo "Using PSR catalog file $catalog"
-echo "Writing to output file $outfile"
-
-if (( $IM == 1 ))
+if (( $INTYPE == 1 ))
 then
-   if [ $IM_LIST == "ALL" ]  || [ $IM_LIST == "all" ]
-   then
-      # create the full range of row numbers for the Image data
-      tmp=""
-      ii=1
-      while (( $ii <= $num_lines ))
-      do
-         tmp="$tmp $ii"
-         ((ii+=$ii))
-      done
-      IM_LIST=$tmp
-   else 
-      # change the commas to spaces for the row numbers which need Image data
-      tmp=`echo $IM_LIST | sed 's/,/ /g'`
-      IM_LIST=$tmp
-   fi
+   echo "Using 3C catalog file $catalog"
 fi
+echo "Writing to output file $outfile"
 
 #create the header of the xml output file
 header=$LOFARSOFT/release/share/pulsar/data/XML-template-header.txt
@@ -417,17 +384,19 @@ if [ ! -f $header ]
 then
    echo "ERROR: missing USG installation of files \$LOFARSOFT/release/share/pulsar/data/XML-template-*.txt"
    echo "       Make sure you have run 'make install' in \$LOFARSOFT/build/pulsar"
+   echo "       Or, use the Daily Build 'LUS' package."
    exit 1
 fi 
 
-cat $header > $outfile
 
-middleHBA=$LOFARSOFT/release/share/pulsar/data/XML-template-singleobs_HBA.txt
-middleLBA=$LOFARSOFT/release/share/pulsar/data/XML-template-singleobs_LBA.txt
-if [ ! -f $middleHBA ] || [ ! -f $middleLBA ]
+cat $header | sed "s/Pulsars/$PROJECT/g" > $outfile
+
+middle=$LOFARSOFT/release/share/pulsar/data/XML-template-IMsingleobs_HBALBA.txt
+if [ ! -f $middle ] 
 then
    echo "ERROR: missing USG installation of files \$LOFARSOFT/release/share/pulsar/data/XML-template-*.txt"
    echo "       Make sure you have run 'make install' in \$LOFARSOFT/build/pulsar"
+   echo "       Or, use the Daily Build 'LUS' package."
    exit 1
 fi 
 
@@ -437,7 +406,7 @@ pi=$(echo "scale=10; 4*a(1)" | bc -l)
 
 RA_DEG=0.0
 DEC_DEG=0.0
-PULSAR=""
+OBJECT=""
 RA=0.0
 DEC=0.0
 
@@ -451,62 +420,96 @@ do
    then
         ((counter += 1))
 
-	    PULSAR=`echo $line | awk '{print $1}'`
-	    
-	    if (( $ncols >= 2 ))
-	    then
-	        ANTENNA=`echo $line | awk '{print $2}'`
-			if [[ $ANTENNA != "HBA" ]] && [[ $ANTENNA != "LBA" ]]
-			then 
-			   echo "ERROR: ANTENNA setting $ANTENNA is unrecognized (must be 'HBA' or 'LBA')."
-			   exit 1
-			fi
-	    fi
+        # when input table contains object-names
+        if (( $INTYPE == 1))
+        then
+	       OBJECT=`echo $line | awk '{print $1}'`
+	       if (( $ncols >= 2 ))
+	       then
+	           ANTENNA=`echo $line | awk '{print $2}'`
 
-	    if (( $ncols == 2 ))
-	    then
-			if [[ $ANTENNA == "HBA" ]] 
-			then 
-		        CHAN_SUBS=$CHAN_SUBS_HBA
-		        STEPS=$STEPS_HBA
-			else
-		        CHAN_SUBS=$CHAN_SUBS_LBA
-		        STEPS=$STEPS_LBA
-			fi
-	    fi
-
-	    if (( $ncols >= 4 ))
-	    then
-	        CHAN_SUBS=`echo $line | awk '{print $3}'`
-	        STEPS=`echo $line | awk '{print $4}'`
-	    fi
-
-	    if (( $ncols == 7 ))
-	    then
-	        START=`echo $line | awk '{print $5}'`
-	        TIME=`echo $line | awk '{print $6}'`
-	        STATIONS=`echo $line | awk '{print $7}'`                
-
-		    if (( $LST == 1 ))
-		    then
-	           LST_DIFF=120
-		       # change the start time from LST to UT
-		       #new_start=`date -j -v +$LST_DIFF"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
-		       #echo "new start is $new_start"
-		       #START=$new_start
-		       #previous_start=$new_start
-		    else 
-		       LST_DIFF=0
-		    fi
-	    fi
+			   if [[ $ANTENNA == "HBALow" ]]
+			   then
+			       ANT_SHORT=HBA
+			   elif [[ $ANTENNA == "HBAHigh" ]]
+			   then
+			       ANT_SHORT=HBA
+			   elif [[ $ANTENNA == "LBA" ]]
+			   then
+			       ANT_SHORT=LBA
+			   else
+			      echo "ERROR: Antenna must be set to any of these three values: HBALow, HBSHigh or LBA"
+			      exit 1
+			   fi
+           fi
+	       if (( $ncols == 5 ))
+	       then
+		        START=`echo $line | awk '{print $3}'`
+		        TIME=`echo $line | awk '{print $4}'`
+		        STATIONS=`echo $line | awk '{print $5}'`                
 	
-		if (( $user_subbands_hba == 0 )) && [[ $ANTENNA == "HBA" ]]
+			    if (( $LST == 1 ))
+			    then
+		           LST_DIFF=120
+			       # change the start time from LST to UT
+			       #new_start=`date -j -v +$LST_DIFF"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+			       #echo "new start is $new_start"
+			       #START=$new_start
+			       #previous_start=$new_start
+			    else 
+			       LST_DIFF=0
+			    fi
+           fi
+        # when input table contains ra and dec values
+	    else
+	       RA_DEG=`echo $line | awk '{print $1}'`
+	       DEC_DEG=`echo $line | awk '{print $2}'`
+
+	       if (( $ncols >= 3 ))
+	       then
+	           ANTENNA=`echo $line | awk '{print $3}'`
+
+			   if [[ $ANTENNA == "HBALow" ]]
+			   then
+			       ANT_SHORT=HBA
+			   elif [[ $ANTENNA == "HBAHigh" ]]
+			   then
+			       ANT_SHORT=HBA
+			   elif [[ $ANTENNA == "LBA" ]]
+			   then
+			       ANT_SHORT=LBA
+			   else
+			      echo "ERROR: Antenna must be set to any of these three values: HBALow, HBSHigh or LBA"
+			      exit 1
+			   fi
+           fi
+	       if (( $ncols == 6 ))
+	       then
+		        START=`echo $line | awk '{print $4}'`
+		        TIME=`echo $line | awk '{print $5}'`
+		        STATIONS=`echo $line | awk '{print $6}'`                
+	
+			    if (( $LST == 1 ))
+			    then
+		           LST_DIFF=120
+			       # change the start time from LST to UT
+			       #new_start=`date -j -v +$LST_DIFF"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+			       #echo "new start is $new_start"
+			       #START=$new_start
+			       #previous_start=$new_start
+			    else 
+			       LST_DIFF=0
+			    fi
+           fi
+	    fi
+	    
+		if (( $user_subbands_hba == 0 )) && [[ $ANT_SHORT == "HBA" ]]
 		then
 		    SUBBANDS="200..447"
-        elif (( $user_subbands_hba == 1 )) && [[ $ANTENNA == "HBA" ]]
+        elif (( $user_subbands_hba == 1 )) && [[ $ANT_SHORT == "HBA" ]]
         then
 		    SUBBANDS=$SUBBANDS_HBA
-		elif (( $user_subbands_lba == 0 )) && [[ $ANTENNA == "LBA" ]]
+		elif (( $user_subbands_lba == 0 )) && [[ $ANT_SHORT == "LBA" ]]
 		then
 		    SUBBANDS="154..401"
         else
@@ -516,19 +519,22 @@ do
 	    #make sure station list has all capital letters
 	    STATIONS=`echo $STATIONS | sed 's/a-z/A-Z/g'`                
 	                   
-	    found_pulsar=`grep $PULSAR $catalog`
-	    if [[ $found_pulsar == "" ]]
+	    if (( $INTYPE == 1 ))
 	    then
-	       echo "WARNING: Pulsar $PULSAR not found in catalog $catalog."
-	       echo "WARNING: skipping pulsar $PULSAR from template creation."
-	       continue
-	    fi
-
+		    found_OBJECT=`grep $OBJECT $catalog`
+		    if [[ $found_OBJECT == "" ]]
+		    then
+		       echo "WARNING: OBJECT $OBJECT not found in catalog $catalog."
+		       echo "WARNING: skipping OBJECT $OBJECT from template creation."
+		       continue
+		    fi
+        fi
+        
 	    found_stations=`echo $STATIONS | egrep -i "CS|RS"`
 	    if [[ $found_stations == "" ]]
 	    then
 	       echo "WARNING: STATION list ($STATIONS) seems invalid, does not contain CS or RS characters."
-	       echo "WARNING: skipping pulsar $PULSAR from template creation."
+	       echo "WARNING: skipping OBJECT $OBJECT from template creation."
 	       continue
 	    fi
 
@@ -541,13 +547,16 @@ do
 #           STATION_LIST=`echo $STATION_LIST | tr "RT" "\n"`
         done
 
-	    RA_DEG=`grep -i $PULSAR $catalog | awk '{print $6}'`
-	    DEC_DEG=`grep -i $PULSAR $catalog | awk '{print $7}'`
-	    if [[ $RA_DEG == "" ]] || [[ $DEC_DEG == "" ]] 
-	    then
-	       echo "WARNING: unable to find position for pulsar $PULSAR in position catalog ($catalog)."
-	       echo "WARNING: skipping pulsar $PULSAR from template creation."
-	       continue
+        if (( $INTYPE == 1 ))
+        then
+	        RA_DEG=`grep -i "$OBJECT " $catalog | awk '{print $1}'`
+	        DEC_DEG=`grep -i "$OBJECT " $catalog | awk '{print $2}'`
+		    if [[ $RA_DEG == "" ]] || [[ $DEC_DEG == "" ]] 
+		    then
+		       echo "WARNING: unable to find position for OBJECT $OBJECT in position catalog ($catalog)."
+		       echo "WARNING: skipping OBJECT $OBJECT from template creation."
+		       continue
+		    fi
 	    fi
         #convert to radians	   
 		RA=`echo "scale=10; $RA_DEG * $pi / 180.0" | bc | awk '{printf("%1.9f\n",$1)}'`
@@ -640,12 +649,51 @@ do
 		      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $TIME * 60" | bc` 
   	          END=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 		fi
+
+	    if [[ $ANTENNA == "HBAHigh" ]]
+	    then
+	       ANTENNA_SETTING="HBA Dual"
+	       INSTRUMENT_FILTER="210-250"
+	    elif [[ $ANTENNA == "HBALow" ]]
+	    then
+	       ANTENNA_SETTING="HBA Dual"
+	       INSTRUMENT_FILTER="110-190"
+	    elif [[ $ANTENNA == "LBA" ]]
+	    then
+	       ANTENNA_SETTING="LBA Outer"
+	       INSTRUMENT_FILTER="30-90"
+	    fi
+		
+		if (( $user_integration == 0 ))
+		then
+		   if [[ $ANT_SHORT == "HBA" ]]
+		   then
+		       INGETRATION=3
+		   else
+		       INGETRATION=1
+		   fi
+		elif (( $INTEGRATION < 1 ))
+		then
+		    echo "ERROR: integration time of $INTEGRATION is invalid; must be >= 1."
+		    exit 1
+		fi
 		
 		# Print the basic information about input parameters to STDOUT at start 
-		echo "PULSAR NAME = $PULSAR"
+		if (( $INTYPE == 1 ))
+		then
+		   echo "OBJECT NAME = $OBJECT"
+		else
+		   OBJECT="Pointing $RA_DEG $DEC_DEG"
+		fi
+		echo "RA Pointing = $RA_DEG deg"
+		echo "DEC Pointing = $DEC_DEG deg"
+		echo "RA Pointing = $RA radians"
+		echo "DEC Pointing = $DEC radians"
 	    echo "ANTENNA = $ANTENNA"
-		echo "Channels per Subband = $CHAN_SUBS"
-		echo "Integration Steps = $STEPS"
+	    echo "ANTENNA short name = $ANT_SHORT"
+	    echo "ANTENNA Setting = $ANTENNA_SETTING"
+	    echo "Instrument Filter = $INSTRUMENT_FILTER"
+	    echo "Integration Interval = $INTEGRATION"
 		if (( $LST == 1 ))
 		then
 		   echo "Observation Start Time is given as input in LST units"
@@ -653,26 +701,10 @@ do
 		echo "Observation Start Time = $START (UT)"
 		echo "Observation duration = $TIME minutes"
 		echo "Time Start $START + duration $TIME min = $END End Time"
-		echo "RA Pointing = $RA_DEG deg"
-		echo "DEC Pointing = $DEC_DEG deg"
-		echo "RA Pointing = $RA radians"
-		echo "DEC Pointing = $DEC radians"
 		echo "Subbands list = $SUBBANDS"
 		echo "Stations list = $STATIONS"
-		IM_TF=false
-		if (( $IM == 1 )) 
-		then
-		   for jj in $IM_LIST
-		   do 
-		      if (( $counter == $jj ))
-		      then
-		         echo "Imaging turned on (TRUE) for this Pulsar Observation"
-		         IM_TF=true
-		      fi
-		   done
-		fi
 
-		#write the observation section per pulsar in the list
+		#write the observation section per OBJECT in the list
 
 #		if [[ $ANTENNA == "HBA" ]] 
 #		then 
@@ -686,15 +718,8 @@ do
 #		      exit 1
 #		   fi 
 #		fi
-
-        if [[ $ANTENNA == "HBA" ]]
-        then 
-            middle=$middleHBA 
-        else
-            middle=$middleLBA
-        fi
         
-        sed -e "s/\<name\>FILL IN OBSERVATION NAME\<\/name\>/\<name\>Obs $PULSAR ($ANTENNA)\<\/name\>/" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/\<description\>FILL IN DESCRIPTION\<\/description\>/\<description\>Obs $PULSAR ($ANTENNA) at $START for $TIME min\<\/description\>/" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" $middle >> $outfile
+        sed -e "s/\<name\>FILL IN OBSERVATION NAME\<\/name\>/\<name\>Obs $OBJECT ($ANTENNA)\<\/name\>/" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/\<description\>FILL IN DESCRIPTION\<\/description\>/\<description\>Obs $OBJECT ($ANTENNA) at $START for $TIME min\<\/description\>/" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTEGRATION/g" -e "s/TARGET NAME/$OBJECT/g" $middle >> $outfile
 
    fi   
 done < $infile
