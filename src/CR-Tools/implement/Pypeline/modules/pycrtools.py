@@ -15,8 +15,8 @@ import numpy as np
 print "Loading PYCRTOOL Module"
 
 LOFARSOFT=os.environ["LOFARSOFT"]
-PYCRBIN=LOFARSOFT+"/release/bin/python/"
-PYCR=LOFARSOFT+"/src/CR-Tools/implement/Pypeline/scripts/"
+PYCRBIN=LOFARSOFT+"/release/bin/python"
+PYCR=LOFARSOFT+"/src/CR-Tools/implement/Pypeline/scripts"
 
 
 pydocpyfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.py"
@@ -1017,7 +1017,7 @@ for v in hAllVectorTypes:
 
 
 for v in hAllContainerTypes:
-    for s in ["hFill","hSet","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute","hPPrint","hPrettyString"]:
+    for s in ["hFill","hSet","hFlip","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute","hPPrint","hPrettyString"]:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
 

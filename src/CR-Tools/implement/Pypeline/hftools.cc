@@ -2017,6 +2017,38 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//-----------------------------------------------------------------------
+//$DOCSTRING: Will reverse the order of elements in a vector, such the data will run from right to left rather than left to right.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFlip
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input and output vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  vec = [a_0,a_1,....,a_n-1,a_n]
+  vec.flip() ->  [a_n,a_n-1,a_n-2,...,a_0]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  The order of the elements in the vector will be reversed.
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
+{
+  Iter it1(vec),it2(vec_end-1);
+  typename Iter::value_type tmp;
+  while (it2 >= it1) {
+    tmp=*it1;
+    *it1=*it2;
+    *it2=tmp;
+    ++it1; --it2;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Returns the contents of a vector (up to a maximum length) as a pretty string for printing
 //$COPY_TO HFILE START --------------------------------------------------
@@ -3006,7 +3038,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 //$COPY_TO END --------------------------------------------------
 /*!
   h$MFUNC(vec,vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
-  vec.$MFUNC(vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
+  vec.$MFUNC(vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2 
 
   \brief $DOCSTRING
   $PARDOCSTRING

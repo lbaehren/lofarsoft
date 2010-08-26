@@ -18,4 +18,9 @@ smaller blocksizes will also work)
 into the array starting at any location
 
 2010-08-26 - Heino Falcke - rev 5751:
+- added hMulAdd2 which will loop over the second rather than the 1st
+parameter in looping mode
+
+2010-08-26 - Heino Falcke - rev 5751+:
+- added hFlip to reverse the order of elements in a vector
 

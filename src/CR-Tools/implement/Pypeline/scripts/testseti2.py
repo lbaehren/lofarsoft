@@ -20,9 +20,10 @@ datafile=crfile(filename)
 antennas=list(datafile["antennas"])
 datafile["selectedAntennas"]=[0]
 
-block_size_1=2**int(ceil(log(sqrt(datafile["filesize"]),2)))
-#block_size_1=2**(int(ceil(log(sqrt(datafile["filesize"]),2)))+4)
-#block_size_1=int(sqrt(datafile["filesize"])/2)*2
+block_size_1=1024
+#block_size_1=2**int(ceil(log(sqrt(datafile["filesize"]),2)))
+##block_size_1=2**(int(ceil(log(sqrt(datafile["filesize"]),2)))+4)
+##block_size_1=int(sqrt(datafile["filesize"])/2)*2
 datafile["blocksize"]=block_size_1 #Setting initial block size
 deltanu_1=datafile["increment"][1] #Retrieving frequency interval of first step spectrum
 block_size_2=min(2*int(deltanu_1/deltanu_input/2),datafile.filesize/block_size_1)
@@ -89,7 +90,7 @@ for loop in range(nLoops):
             subbands.redistribute(fft1,b,nBlocks_1) # i.e. the size of the last dimension of subbands
         subbands *= hanning2
         fft_subbands[...].fftw(subbands[...])
-        fft_subbands.spectralpower(power) ##Note here the order is changed, output is in second argument ...
+        power.spectralpower(fft_subbands)
 
 print "t=",time.clock()-t0,"s -","Done with calculation."
 
@@ -119,7 +120,7 @@ for ant in antennas[0:nAntennas]:
         fx_full.read(datafile.set("block",loop),"Fx").none()
         fx_full *= hanning3
         fft_full.fftw(fx_full)
-        fft_full.spectralpower(power_full)
+        power_full.spectralpower(fft_full)
 print "t=",time.clock()-t0,"s -","Done with calculation."
 
 power_full2=hArray(power_full,dimensions=power,xvalues=frequency)
