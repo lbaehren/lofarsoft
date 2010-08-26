@@ -134,6 +134,7 @@ add_custom_target (clean-build
   COMMAND rm -rf anaamika cr dal lasa pulsar smosaic
   COMMAND rm -rf cmake_install.cmake
   COMMAND rm -rf CMakeCache.txt
+  COMMAND rm -rf CMakeOptions.cmake
   COMMAND rm -rf CMakeFiles
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Cleaning up build directory ..."
