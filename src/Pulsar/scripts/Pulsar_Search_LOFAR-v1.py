@@ -499,8 +499,8 @@ if __name__ == "__main__":
 	fp.close()
 
 #    The actual path of the psr_cats should be specified here. 
-
-	fp = open("psr_cats.txt","r")
+    bright_catalog = @os.environ["LOFARSOFT"] + "/release/share/pulsar/data/psr_cats.txt"
+	fp = open(bright_catalog,"r")
 	realpsr = fp.read().split("\n")
 	fp.close()	
 
