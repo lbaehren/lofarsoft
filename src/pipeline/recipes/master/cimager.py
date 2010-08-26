@@ -57,6 +57,10 @@ class cimager(BaseRecipe):
             help="If set, multiple images will be made, each using timestep seconds of data",
             default="None"
         )
+        self.optionparser.add_option(
+            '--results-dir',
+            help="Directory in which resulting images will be placed",
+        )
 
     def go(self):
         self.logger.info("Starting cimager run")
@@ -91,7 +95,7 @@ class cimager(BaseRecipe):
         #          timesteps is a list of (start, end, results directory) tuples
         # ----------------------------------------------------------------------
         timesteps = []
-        results_dir = self.config.get('layout', 'results_directory')
+        results_dir = self.inputs['results_dir']
         if self.inputs['timestep'] == "None":
             self.logger.info("No timestep specified; imaging all data")
             timesteps = [("None", "None", results_dir)]
