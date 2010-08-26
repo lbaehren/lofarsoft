@@ -1,10 +1,10 @@
-#!/bin/ksh -x
+#!/bin/ksh
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
 # output is an XML file which can be uploaded into MOM (if you have ADMIN privileges)
 
-USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out template_output_file -project project_name [-start obs_start] [-time duration] [-st stations_list] [[-lst|-LST]] [[-subsHBA subband_range]] [[-subsLBA subband_range]] [[-gap duration]] [[-antenna antenna_setup]]\n\n"\
+USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out template_output_file -project project_name [-start obs_start] [-time duration] [-st stations_list] [[-lst|-LST]] [[-subsHBA subband_range]] [[-subsLBA subband_range]] [[-gap duration]] [[-antenna antenna_setup]] [[-interation integration_interval]]\n\n"\
 "      This script is run using several different methodologies which are explained below: \n"\
 "         \n"\
 "      1) The input file contains all the information: object-name/position  antenna  obs-start  duration  station-list \n"\
