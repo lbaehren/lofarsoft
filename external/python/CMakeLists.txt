@@ -45,7 +45,7 @@ include (FindPython)
 
 ## <-- begin build condition --------------------------------------------------->
 
-if (NOT HAVE_Python OR Python_FORCE_BUILD)
+if (NOT HAVE_PYTHON OR Python_FORCE_BUILD)
   
   set (Python_VERSION        "2.6.5")
   set (Python_SOURCE_ARCHIVE "Python-${Python_VERSION}.tgz")
@@ -73,9 +73,9 @@ if (NOT HAVE_Python OR Python_FORCE_BUILD)
   
   ## <-- end build condition ----------------------------------------------------->
   
-else (NOT HAVE_Python OR Python_FORCE_BUILD)
+else (NOT HAVE_PYTHON OR Python_FORCE_BUILD)
   add_custom_target (python
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[Python] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_Python OR Python_FORCE_BUILD)
+endif (NOT HAVE_PYTHON OR Python_FORCE_BUILD)
