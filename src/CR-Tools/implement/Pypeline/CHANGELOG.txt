@@ -13,3 +13,9 @@ smaller blocksizes will also work)
 - added calculation of time delays with cross-correlation from CR data (testcr2.py)
 - remaining: some not-understood behaviour of invfftw
 
+2010-08-25 - Heino Falcke:
+- changed hFileRead to accept iterate input and hence to read data
+into the array starting at any location
+
+2010-08-26 - Heino Falcke - rev 5751:
+

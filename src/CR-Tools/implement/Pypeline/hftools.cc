@@ -2957,11 +2957,12 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different type.
+//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different type. Looping will be done over the first argument, i.e. the input/output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h{$MFUNC}Add
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 0 // Use the first parameter as the master array for looping and history informations
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Output vector containing the result of operation")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec1)()("Vector containing the first operand")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec2)()("Vector containing the second operand")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -2972,6 +2973,48 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 
   \brief $DOCSTRING
   $PARDOCSTRING
+
+Related Functions are hMulAdd, hDivAdd, HSubAdd, hAddAdd.
+
+To loop over the second argument (i.e., vec1) use hMulAdd2, hDivAdd2, HSubAdd2, hAddAdd2.
+
+*/
+template <class Iter, class Iterin1, class Iterin2>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
+{
+  typedef IterValueType T;
+  Iterin1 it1=vec1;
+  Iterin2 it2=vec2;
+  Iter itout=vec;
+  while ((it1!=vec1_end)  && (itout !=vec_end)) {
+    *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
+    ++it1; ++it2; ++itout;
+    if (it2==vec2_end) it2=vec2;
+  };
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different type. Looping will be done over the first argument, i.e. the input/output vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC}Add2
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the first parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Output vector containing the result of operation")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec1)()("Vector containing the first operand")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec2)()("Vector containing the second operand")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  h$MFUNC(vec,vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
+  vec.$MFUNC(vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Related Functions are hMulAdd2, hDivAdd2, HSubAdd2, hAddAdd2.
+
+To loop over the first argument (i.e., vec) use hMulAdd, hDivAdd, HSubAdd, hAddAdd.
+
 */
 template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
