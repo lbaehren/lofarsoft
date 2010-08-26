@@ -1,10 +1,14 @@
 from __future__ import with_statement
+from subprocess import Popen, CalledProcessError, PIPE, STDOUT
+import shutil
+import os.path
+import tempfile
+import sys
+
 from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import log_time
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
-from subprocess import Popen, CalledProcessError, PIPE, STDOUT
-import shutil, os.path, tempfile
-import sys
+from lofarpipe.support.pipelinelogging import log_process_output
 
 
 class sourcedb(LOFARnode):
@@ -27,8 +31,7 @@ class sourcedb(LOFARnode):
                 ):
                     makesourcedb_process = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=working_dir)
                     sout, serr = makesourcedb_process.communicate()
-                self.logger.debug("makesourcedb stdout: %s" % (sout,))
-                self.logger.debug("makesourcedb stderr: %s" % (serr,))
+                log_process_output("makesourcedb", sout, serr, self.logger)
                 if makesourcedb_process.returncode != 0:
                     raise CalledProcessError(makesourcedb_process.returncode, executable)
             except CalledProcessError, e:

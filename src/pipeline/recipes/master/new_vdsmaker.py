@@ -16,9 +16,10 @@ import threading
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
+from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import load_data_map
-from lofarpipe.support.remotecommand import ProcessLimiter
+from lofarpipe.support.pipelinelogging import log_process_output
 
 class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
     def __init__(self):
@@ -123,7 +124,8 @@ class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
             )
-            sour, serr = combineproc.communicate()
+            sout, serr = combineproc.communicate()
+            log_process_output(executable, sout, serr, self.logger)
             if combineproc.returncode != 0:
                 raise subprocess.CalledProcessError(combineproc.returncode, command)
             self.outputs['gvds'] = gvds_out

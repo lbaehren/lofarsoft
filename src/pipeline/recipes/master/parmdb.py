@@ -11,6 +11,7 @@ from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.group_data import load_data_map
+from lofarpipe.support.pipelinelogging import log_process_output
 import lofarpipe.support.utilities as utilities
 
 template = """
@@ -58,8 +59,7 @@ class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
             stderr=subprocess.PIPE
         )
         sout, serr = parmdbm_process.communicate(template % pdbfile)
-        self.logger.info("parmdb stdout: %s" % (sout,))
-        self.logger.info("parmdb stderr: %s" % (serr,))
+        log_process_output("parmdbm", sout, serr, self.logger)
 
         #                           Load file <-> compute node mapping from disk
         # ----------------------------------------------------------------------

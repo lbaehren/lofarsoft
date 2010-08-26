@@ -17,7 +17,7 @@ import tempfile
 from pyrap.quanta import quantity
 
 from lofarpipe.support.lofarrecipe import BaseRecipe
-from lofarpipe.support.pipelinelogging import log_time
+from lofarpipe.support.pipelinelogging import log_time, log_process_output
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.remotecommand import ProcessLimiter
@@ -199,8 +199,7 @@ class cimager(BaseRecipe):
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
                 sout, serr = convert_process.communicate()
-                self.logger.debug("Parset conversion stdout: %s" % (sout,))
-                self.logger.debug("Parset conversion stderr: %s" % (serr,))
+                log_process_output(convert_exec, sout, serr, self.logger)
                 if convert_process.returncode != 0:
                     raise subprocess.CalledProcessError(
                         convert_process.returncode, convert_exec
@@ -231,6 +230,7 @@ class cimager(BaseRecipe):
                 str(end_time)
             )
             sout, serr = cimager_process.communicate()
+            log_process_output("Remote cimager", sout, serr, self.logger)
 
             #                          Copy names of created images into outputs
             # ------------------------------------------------------------------

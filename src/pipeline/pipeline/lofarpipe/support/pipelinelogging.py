@@ -143,3 +143,12 @@ def log_time(logger):
             )
         )
 
+def log_process_output(process_name, stdout, stderr, logger):
+    """
+    Log stdout/stderr from a process if they contain anything interesting.
+    """
+    if len(stdout.strip()) > 0:
+        logger.debug("%s stdout: %s" % (process_name, stdout))
+    stderr = stderr.replace("Debug: registered context Global=0\n", "")
+    if len(stderr.strip()) > 0:
+        logger.debug("%s stderr: %s" % (process_name, stdout))

@@ -17,6 +17,7 @@ from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import read_initscript
 from lofarpipe.support.utilities import get_mountpoint
 from lofarpipe.support.utilities import log_time
+from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.parset import Parset
 
 class bbs(LOFARnode):
@@ -72,8 +73,7 @@ class bbs(LOFARnode):
                         cmd, stdout=PIPE, stderr=PIPE, cwd=working_dir
                     )
                     sout, serr = bbs_kernel_process.communicate()
-                self.logger.debug("BBS kernel stdout: %s" % (sout,))
-                self.logger.debug("BBS kernel stderr: %s" % (serr,))
+                log_process_output("BBS kernel", sout, serr, self.logger)
                 if bbs_kernel_process.returncode != 0:
                     raise CalledProcessError(
                         bbs_kernel_process.returncode, executable

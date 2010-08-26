@@ -18,6 +18,7 @@ from pyrap.tables import table
 from lofarpipe.support.pipelinelogging import CatchLog4CXX
 from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import log_time
+from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.parset import Parset, patch_parset, get_parset
 
 class cimager(LOFARnode):
@@ -77,8 +78,7 @@ class cimager(LOFARnode):
                         stdout=PIPE, stderr=PIPE, cwd=working_dir
                     )
                     sout, serr = cimager_process.communicate()
-                self.logger.debug("cimager stdout: %s" % (sout,))
-                self.logger.debug("cimager stderr: %s" % (serr,))
+                log_process_output("cimager", sout, serr, self.logger)
                 if cimager_process.returncode != 0:
                     raise CalledProcessError(
                         cimager_process.returncode, imager_exec

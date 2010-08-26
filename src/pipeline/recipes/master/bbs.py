@@ -23,6 +23,7 @@ from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import gvds_iterator
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 from lofarpipe.support.remotecommand import run_remote_command
+from lofarpipe.support.pipelinelogging import log_process_output
 import lofarpipe.support.utilities as utilities
 
 class bbs(BaseRecipe):
@@ -151,7 +152,8 @@ class bbs(BaseRecipe):
                 stdout = subprocess.PIPE,
                 stderr = subprocess.PIPE
             )
-            sour, serr = combineproc.communicate()
+            sout, serr = combineproc.communicate()
+            log_process_output(self.inputs['combinevds'], sout, serr, self.logger)
             if combineproc.returncode != 0:
                 raise subprocess.CalledProcessError(
                     combineproc.returncode, command
@@ -253,12 +255,15 @@ class bbs(BaseRecipe):
         The resultant process is monitored for failure; see
         _monitor_process() for details.
         """
-        bbs_kernel_process = run_remote_command(
-            host,
-            command,
-            env,
-            *arguments
-        )
+        try:
+            bbs_kernel_process = run_remote_command(
+                host,
+                command,
+                env,
+                *arguments
+            )
+        except:
+            self.killswitch.set()
         return(self._monitor_process(bbs_kernel_process, "BBS Kernel on %s" % host))
 
     def _run_bbs_control(self, bbs_parset, run_flag):
@@ -293,8 +298,9 @@ class bbs(BaseRecipe):
             )
             sout, serr = bbs_control_process.communicate()
         shutil.rmtree(working_dir)
-        self.logger.info("Global Control stdout: %s" % (sout,))
-        self.logger.info("Global Control stderr: %s" % (serr,))
+        log_process_output(
+            self.inputs['control_exec'], sout, serr, self.logger
+        )
         return returncode
 
     def _monitor_process(self, process, name="Monitored process"):
