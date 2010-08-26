@@ -417,7 +417,12 @@ then
    exit 1
 fi 
 
-cat $header > $outfile
+if [ $PROJECT != "Pulsars" ] 
+then
+   cat $header | sed "s/Pulsars/$PROJECT/g" > $outfile
+else
+   cat $header  > $outfile
+fi
 
 middleHBA=$LOFARSOFT/release/share/pulsar/data/XML-template-singleobs_HBA.txt
 middleLBA=$LOFARSOFT/release/share/pulsar/data/XML-template-singleobs_LBA.txt
