@@ -16,13 +16,6 @@ from pyrap.quanta import quantity
 from lofarpipe.support.control import control
 from lofarpipe.support.utilities import log_time, patch_parset
 
-query = """
-SELECT
-    catsrcname
-FROM
-    nearestneighborincat(%s,%s,'%s')
-"""
-
 class sip(control):
     def pipeline_logic(self):
         from to_process import datafiles # datafiles is a list of MS paths.
