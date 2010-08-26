@@ -47,26 +47,26 @@ include (FindPython)
 
 if (NOT HAVE_Python OR Python_FORCE_BUILD)
   
-  set (Python_VERSION     "2.6.5")
-  set (Python_TAR_ARCHIVE "Python-${Python_VERSION}.tgz")
-  set (Python_URL         "http://www.python.org/ftp/python/${Python_VERSION}/${Python_SOURCE_ARCHIVE}")
+  set (Python_VERSION        "2.6.5")
+  set (Python_SOURCE_ARCHIVE "Python-${Python_VERSION}.tgz")
+  set (Python_URL            "http://www.python.org/ftp/python/${Python_VERSION}/${Python_SOURCE_ARCHIVE}")
 
   ##__________________________________________________________________
   ## Build the project
   
   include (ExternalProject)
   
-  find_file (HAVE_Python_SOURCE ${Python_TAR_ARCHIVE}  ${PROJECT_SOURCE_DIR})
+  find_file (Python_SOURCE ${Python_SOURCE_ARCHIVE} ${PROJECT_SOURCE_DIR})
   
-  if (NOT HAVE_Python_SOURCE)
-    set (HAVE_Python_SOURCE ${Python_URL})
-  endif (NOT HAVE_Python_SOURCE)
+  if (NOT Python_SOURCE)
+    set (Python_SOURCE ${Python_URL})
+  endif (NOT Python_SOURCE)
   
   ExternalProject_Add (python
     PREFIX ${PROJECT_BINARY_DIR}
     DOWNLOAD_DIR ${PROJECT_BINARY_DIR}
     SOURCE_DIR ${PROJECT_BINARY_DIR}
-    URL ${HAVE_Python_SOURCE}
+    URL ${Python_SOURCE}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
     )
