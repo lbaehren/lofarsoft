@@ -33,8 +33,9 @@ namespace CR {  // -- Namespace CR -- begin
   //
   // ============================================================================
   
-  // ------------------------------------------------------------ ObservationData
-  
+  //_____________________________________________________________________________
+  //                                                              ObservationData
+
   ObservationData::ObservationData ()
   {
     ObsInfo obsInfo;
@@ -48,8 +49,9 @@ namespace CR {  // -- Namespace CR -- begin
     ObservationData::init (obsInfo);
   }
   
-  // ------------------------------------------------------------ ObservationData
-  
+  //_____________________________________________________________________________
+  //                                                              ObservationData
+
   ObservationData::ObservationData (String const &observatory)
   {
     ObsInfo obsInfo;
@@ -62,25 +64,26 @@ namespace CR {  // -- Namespace CR -- begin
     ObservationData::init (obsInfo);
   }
   
-  // ------------------------------------------------------------ ObservationData
-  
+  //_____________________________________________________________________________
+  //                                                              ObservationData
+
   ObservationData::ObservationData (String const &observatory,
 				    String const &observer)
   {
     ObsInfo obsInfo;
     Time startTime;
     Quantity epoch (startTime.modifiedJulianDay(), "d");
-    String telescope ("WSRT");
     //
     obsInfo.setObsDate (epoch);
-    obsInfo.setTelescope (telescope);
+    obsInfo.setTelescope (observatory);
     obsInfo.setObserver (observer);
     //
     ObservationData::init (obsInfo);
   }
 
-  // ------------------------------------------------------------ ObservationData
-  
+  //_____________________________________________________________________________
+  //                                                              ObservationData
+
   ObservationData::ObservationData (const Quantity epoch,
 				    String const &observatory)
   {
@@ -93,8 +96,9 @@ namespace CR {  // -- Namespace CR -- begin
     ObservationData::init (obsInfo);
   }
   
-  // ------------------------------------------------------------ ObservationData
-  
+  //_____________________________________________________________________________
+  //                                                              ObservationData
+
   ObservationData::ObservationData (const MEpoch epoch,
 				    String const &observatory)
   {
@@ -106,8 +110,9 @@ namespace CR {  // -- Namespace CR -- begin
     ObservationData::init (obsInfo);
   }
   
-  // ------------------------------------------------------------ ObservationData
-  
+  //_____________________________________________________________________________
+  //                                                              ObservationData
+
   ObservationData::ObservationData (const MEpoch obsDate,
 				    String const &obsName,
 				    Matrix<double> const &antennaPositions,
@@ -119,8 +124,9 @@ namespace CR {  // -- Namespace CR -- begin
 	  observer);
   }
   
-  // ------------------------------------------------------------ ObservationData
-  
+  //_____________________________________________________________________________
+  //                                                              ObservationData
+
   ObservationData::ObservationData (const MEpoch obsDate,
 				    String const &obsName,
 				    const MPosition obsPosition,
@@ -134,15 +140,17 @@ namespace CR {  // -- Namespace CR -- begin
 	  observer);
   }
   
-  // ------------------------------------------------------------ ObservationData
-  
+  //_____________________________________________________________________________
+  //                                                              ObservationData
+
   ObservationData::ObservationData (const ObsInfo obsInfo)
   {
     ObservationData::init (obsInfo);
   }
   
-  // ------------------------------------------------------------ ObservationData
-  
+  //_____________________________________________________________________________
+  //                                                              ObservationData
+
   ObservationData::ObservationData (ObservationData const& other)
   {
     copy (other);
