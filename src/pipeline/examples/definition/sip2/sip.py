@@ -26,7 +26,6 @@ class sip(control):
                 storage_mapfile = self.run_task(
                     "datamapper", datafiles
                 )['mapfile']
-                temporary_files.append(storage_mapfile)
 
                 # Produce a GVDS file describing the data on the storage nodes.
                 self.run_task('vdsmaker', storage_mapfile)
@@ -49,7 +48,6 @@ class sip(control):
                     data_start_time=vdsinfo['start_time'],
                     data_end_time=vdsinfo['end_time']
                 )['mapfile']
-                temporary_files.append(compute_mapfile)
                 self._save_state()
 
                 # Build a sky model ready for BBS & return the name of the
@@ -77,23 +75,20 @@ class sip(control):
                 self.run_task("bbs", compute_mapfile, parset=bbs_parset)
                 self._save_state()
 
-                # Now, run DPPP three times on the output of BBS.  Note that
-                # the generated maps are all duplicates so are immediately
-                # removed. We'll run this twice: once on CORRECTED_DATA, and
-                # once on SUBTRACTED_DATA.
+                # Now, run DPPP three times on the output of BBS. We'll run
+                # this twice: once on CORRECTED_DATA, and once on
+                # SUBTRACTED_DATA.
                 for i in repeat(None, 3):
-                    temporary_files.append(
-                        self.run_task(
-                            "ndppp",
-                            compute_mapfile,
-                            parset=os.path.join(
-                                self.config.get("layout", "parset_directory"),
-                                "ndppp.1.postbbs.parset"
-                            ),
-                            data_start_time=vdsinfo['start_time'],
-                            data_end_time=vdsinfo['end_time'],
-                            suffix=""
-                        )['mapfile']
+                    self.run_task(
+                        "ndppp",
+                        compute_mapfile,
+                        parset=os.path.join(
+                            self.config.get("layout", "parset_directory"),
+                            "ndppp.1.postbbs.parset"
+                        ),
+                        data_start_time=vdsinfo['start_time'],
+                        data_end_time=vdsinfo['end_time'],
+                        suffix=""
                     )
                     self._save_state()
 
@@ -111,15 +106,13 @@ class sip(control):
                 temporary_files.append(subtracted_ndppp_parset)
 
                 for i in repeat(None, 3):
-                    temporary_files.append(
-                        self.run_task(
-                            "ndppp",
-                            compute_mapfile,
-                            parset=subtracted_ndppp_parset,
-                            data_start_time=vdsinfo['start_time'],
-                            data_end_time=vdsinfo['end_time'],
-                            suffix=""
-                        )['mapfile']
+                    self.run_task(
+                        "ndppp",
+                        compute_mapfile,
+                        parset=subtracted_ndppp_parset,
+                        data_start_time=vdsinfo['start_time'],
+                        data_end_time=vdsinfo['end_time'],
+                        suffix=""
                     )
                     self._save_state()
 
