@@ -20,7 +20,8 @@
             <clock mode="200 MHz"/>
             <instrumentFilter>INSTRUMENT FILTER MHz</instrumentFilter>
             <integrationInterval>INTEG INTERVAL</integrationInterval>
-            <pencilBeams>
+            <channelsPerSubband>256</channelsPerSubband>
+           <pencilBeams>
                 <flyseye>false</flyseye>
                 <pencilBeamList>
                 </pencilBeamList>
