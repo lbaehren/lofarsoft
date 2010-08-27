@@ -527,7 +527,7 @@ do
 	                   
 	    if (( $INTYPE == 1 ))
 	    then
-		    found_OBJECT=`grep $OBJECT $catalog`
+		    found_OBJECT=`grep -i "$OBJECT " $catalog`
 		    if [[ $found_OBJECT == "" ]]
 		    then
 		       echo "WARNING: OBJECT $OBJECT not found in catalog $catalog."
