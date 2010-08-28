@@ -9,7 +9,6 @@ from __future__ import with_statement
 
 from itertools import islice, repeat, chain, izip
 from contextlib import closing, contextmanager
-from tempfile import mkstemp
 
 import os
 import errno
