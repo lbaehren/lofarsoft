@@ -81,7 +81,7 @@ def patch_parset(parset, data, output_dir=None):
     temp_parset = get_parset(parset)
     for key, value in data.iteritems():
         temp_parset.replace(key, value)
-    fd, output = mkstemp()
+    fd, output = mkstemp(dir=output_dir)
     temp_parset.writeFile(output)
     os.close(fd)
     return output
