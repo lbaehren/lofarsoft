@@ -5,7 +5,8 @@
 #                                                      swinbank@transientskp.org
 # ------------------------------------------------------------------------------
 
-from tempfile import NamedTemporaryFile
+import os
+from tempfile import mkstemp
 
 from lofar.parameterset import parameterset
 
@@ -80,6 +81,7 @@ def patch_parset(parset, data, output_dir=None):
     temp_parset = get_parset(parset)
     for key, value in data.iteritems():
         temp_parset.replace(key, value)
-    output = NamedTemporaryFile()
-    temp_parset.writeFile(output.name)
+    fd, output = mkstemp()
+    temp_parset.writeFile(output)
+    os.close(fd)
     return output
