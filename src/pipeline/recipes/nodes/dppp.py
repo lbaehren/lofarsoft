@@ -58,7 +58,10 @@ class dppp(LOFARnode):
                 patch_dictionary['msin.starttime'] = start_time
             if end_time:
                 patch_dictionary['msin.endtime'] = end_time
-            temp_parset_filename = patch_parset(parset, patch_dictionary)
+            try:
+                temp_parset_filename = patch_parset(parset, patch_dictionary)
+            except Exception, e:
+                self.logger.error(e)
 
             try:
                 if not os.access(executable, os.X_OK):
