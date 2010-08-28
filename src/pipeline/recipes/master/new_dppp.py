@@ -8,7 +8,6 @@
 from __future__ import with_statement
 
 from itertools import cycle
-from tempfile import mkstemp
 from contextlib import nested
 
 import subprocess
@@ -66,6 +65,10 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
             '--nthreads',
             help="Number of threads per (N)DPPP process",
             default="2"
+        )
+        self.optionparser.add_option(
+            '--mapfile',
+            help="Output mapfile"
         )
 
     def go(self):
@@ -128,9 +131,8 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
             parset = Parset()
             for host, filenames in outnames.iteritems():
                 parset.addStringVector(host, filenames)
-            fd, self.outputs['mapfile'] = mkstemp()
+            self.outputs['mapfile'] = self.inputs['mapfile']
             parset.writeFile(self.outputs['mapfile'])
-            os.close(fd)
             return 0
 
 if __name__ == '__main__':
