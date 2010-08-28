@@ -5,7 +5,7 @@
 #                                                      swinbank@transientskp.org
 # ------------------------------------------------------------------------------
 
-from tempfile import mkstemp
+from tempfile import NamedTemporaryFile
 
 from lofar.parameterset import parameterset
 
@@ -56,10 +56,12 @@ class Parset(parameterset):
         self.keys.append(key)
 
     def _append_file(self, filename, prefix=''):
-        for line in open(filename, 'r'):
+        file = open(filename, 'r')
+        for line in file:
             key = line.split("=")[0].strip()
             if key:
                 self.keys.append(prefix + key)
+        file.close()
 
     def __iter__(self):
         return iter(self.keys)
@@ -75,12 +77,9 @@ def patch_parset(parset, data, output_dir=None):
     Generate a parset file by adding the contents of the data dictionary to
     the specified parset object. Write it to file, and return the filename.
     """
-    temp_parset_filename = mkstemp(dir=output_dir)[1]
     temp_parset = get_parset(parset)
     for key, value in data.iteritems():
         temp_parset.replace(key, value)
-    temp_parset.writeFile(temp_parset_filename)
-    return temp_parset_filename
-
-
-
+    output = NamedTemporaryFile()
+    temp_parset.writeFile(output.name)
+    return output
