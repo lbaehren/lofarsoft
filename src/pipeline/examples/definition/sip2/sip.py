@@ -116,7 +116,7 @@ class sip(control):
                     )
                     self._save_state()
 
-                # Image CORRECTED_DATA
+                # Image CORRECTED_DATA.
                 self.logger.info("Imaging CORRECTED_DATA")
 
                 # Patch the pointing direction recorded in the VDS file into
@@ -141,8 +141,9 @@ class sip(control):
                         "corrected"
                     )
                 )['images']
+                self._save_state()
 
-                # Image SUBTRACTED_DATA
+                # Image SUBTRACTED_DATA.
                 self.logger.info("Imaging SUBTRACTED_DATA")
 
                 # Patch the pointing direction recorded in the VDS file into
