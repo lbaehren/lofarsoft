@@ -14,6 +14,13 @@ from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
 from lofarpipe.support.parset import Parset
 
 class datamapper(BaseRecipe):
+    def __init__(self):
+        super(datamapper, self).__init__()
+        self.optionparser.add_option(
+            '--mapfile',
+            help="Filename for output mapfile (clobbered if exists)"
+        )
+
     def go(self):
         self.logger.info("Starting datamapper run")
         super(datamapper, self).go()
@@ -44,13 +51,10 @@ class datamapper(BaseRecipe):
         for host, filenames in data.iteritems():
             parset.addStringVector(host, filenames)
 
-        self.outputs['mapfile'] = mkstemp()[1]
+        self.outputs['mapfile'] = self.inputs['mapfile']
         parset.writeFile(self.outputs['mapfile'])
 
         return 0
 
 if __name__ == '__main__':
     sys.exit(datamapper().main())
-
-
-
