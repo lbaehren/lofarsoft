@@ -108,7 +108,7 @@ class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
                 [thread.join() for thread in vdsmaker_threads]
 
         if self.error.isSet():
-            self.logger.warn("Failed imager process detected")
+            self.logger.warn("Failed vdsmaker process detected")
             return 1
 
         # Combine VDS files to produce GDS
