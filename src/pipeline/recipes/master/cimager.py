@@ -211,29 +211,34 @@ class cimager(BaseRecipe):
                 os.unlink(cimager_parset)
             except subprocess.CalledProcessError, e:
                 self.logger.error(str(e))
+                self.error.set()
                 return 1
 
             #                                Run cimager process on compute node
             # ------------------------------------------------------------------
             engine_ppath = self.config.get('deploy', 'engine_ppath')
             engine_lpath = self.config.get('deploy', 'engine_lpath')
-            cimager_process = run_remote_command(
-                host,
-                command,
-                {
-                    "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
-                    "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
-                },
-                loghost,
-                str(logport),
-                imager_exec,
-                vds,
-                converted_parset,
-                resultsdir,
-                str(start_time),
-                str(end_time)
-            )
-            sout, serr = cimager_process.communicate()
+            try:
+                cimager_process = run_remote_command(
+                    host,
+                    command,
+                    {
+                        "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
+                        "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
+                    },
+                    loghost,
+                    str(logport),
+                    imager_exec,
+                    vds,
+                    converted_parset,
+                    resultsdir,
+                    str(start_time),
+                    str(end_time)
+                )
+                sout, serr = cimager_process.communicate()
+            except Exception, e:
+                self.logger.error(str(e))
+                self.error.set()
             log_process_output("Remote cimager", sout, serr, self.logger)
 
             #                          Copy names of created images into outputs
