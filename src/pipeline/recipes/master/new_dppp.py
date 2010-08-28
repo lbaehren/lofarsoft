@@ -128,8 +128,9 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
             parset = Parset()
             for host, filenames in outnames.iteritems():
                 parset.addStringVector(host, filenames)
-            self.outputs['mapfile'] = mkstemp()[1]
+            fd, self.outputs['mapfile'] = mkstemp()
             parset.writeFile(self.outputs['mapfile'])
+            os.close(fd)
             return 0
 
 if __name__ == '__main__':

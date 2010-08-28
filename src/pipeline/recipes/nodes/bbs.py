@@ -39,7 +39,7 @@ class bbs(LOFARnode):
             # ------------------------------------------------------------------
             self.logger.debug("Setting up kernel parset")
             filesystem = "%s:%s" % (os.uname()[1], get_mountpoint(infile))
-            parset_filename = mkstemp()[1]
+            fd, parset_filename = mkstemp()
             kernel_parset = Parset()
             for key, value in {
                 "ObservationPart.Filesystem": filesystem,
@@ -53,6 +53,7 @@ class bbs(LOFARnode):
             }.iteritems():
                 kernel_parset.add(key, value)
             kernel_parset.writeFile(parset_filename)
+            os.close(fd)
             self.logger.debug("Parset written to %s" % (parset_filename,))
 
 

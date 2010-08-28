@@ -6,7 +6,6 @@
 # ------------------------------------------------------------------------------
 
 from itertools import cycle
-from tempfile import mkstemp
 from collections import defaultdict
 
 from lofarpipe.support.lofarrecipe import BaseRecipe

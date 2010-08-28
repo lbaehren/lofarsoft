@@ -195,13 +195,14 @@ class cimager(BaseRecipe):
             # ------------------------------------------------------------------
             try:
                 self.logger.debug("Converting parset for %s" % vds)
-                converted_parset = tempfile.mkstemp(
+                fd, converted_parset = tempfile.mkstemp(
                     dir=self.config.get("layout", "parset_directory")
-                )[1]
+                )
                 convert_process = subprocess.Popen(
                     [convert_exec, cimager_parset, converted_parset],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
+                os.close(fd)
                 sout, serr = convert_process.communicate()
                 log_process_output(convert_exec, sout, serr, self.logger)
                 if convert_process.returncode != 0:

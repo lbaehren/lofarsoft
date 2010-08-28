@@ -7,7 +7,7 @@
 
 from __future__ import with_statement
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
-from tempfile import mkstemp, mkdtemp
+from tempfile import mkdtemp
 import os
 import sys
 import shutil
