@@ -7,6 +7,7 @@
 
 import os
 from tempfile import mkstemp
+from contextlib import contextmanager
 
 from lofar.parameterset import parameterset
 
@@ -85,3 +86,13 @@ def patch_parset(parset, data, output_dir=None):
     temp_parset.writeFile(output)
     os.close(fd)
     return output
+
+@contextmanager
+def patched_parset(parset, data, output_dir=None):
+    """
+    Wrap patch_parset() in a contextmanager which removes the generated parset
+    when it finishes.
+    """
+    filename = patch_parset(parset, data, output_dir)
+    yield filename
+    os.unlink(filename)
