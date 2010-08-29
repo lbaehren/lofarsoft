@@ -23,7 +23,7 @@ from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.parset import Parset
 from lofarpipe.support.parset import get_parset
-from lofarpipe.support.parset import patch_parset
+from lofarpipe.support.parset import patched_parset
 
 class cimager(BaseRecipe):
     """
@@ -175,7 +175,7 @@ class cimager(BaseRecipe):
                 vds_data.getDoubleVector("StartFreqs")[0],
                 vds_data.getDoubleVector("EndFreqs")[-1]
             ]
-            cimager_parset = patch_parset(
+            with patched_parset(
                 template_parset,
                 {
                     'dataset': vds_data.getString("FileName"),
@@ -189,31 +189,29 @@ class cimager(BaseRecipe):
                     )[0],
                     'restore': 'True' # cimager bug: non-restored image unusable
                 }
-            )
-
-            #                 Convert populated parset into ASKAP cimager format
-            # ------------------------------------------------------------------
-            try:
-                self.logger.debug("Converting parset for %s" % vds)
-                fd, converted_parset = tempfile.mkstemp(
-                    dir=self.config.get("layout", "parset_directory")
-                )
-                convert_process = subprocess.Popen(
-                    [convert_exec, cimager_parset, converted_parset],
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                )
-                os.close(fd)
-                sout, serr = convert_process.communicate()
-                log_process_output(convert_exec, sout, serr, self.logger)
-                if convert_process.returncode != 0:
-                    raise subprocess.CalledProcessError(
-                        convert_process.returncode, convert_exec
+            ) as cimager_parset:
+                #             Convert populated parset into ASKAP cimager format
+                # --------------------------------------------------------------
+                try:
+                    self.logger.debug("Converting parset for %s" % vds)
+                    fd, converted_parset = tempfile.mkstemp(
+                        dir=self.config.get("layout", "parset_directory")
                     )
-                os.unlink(cimager_parset)
-            except subprocess.CalledProcessError, e:
-                self.logger.error(str(e))
-                self.error.set()
-                return 1
+                    convert_process = subprocess.Popen(
+                        [convert_exec, cimager_parset, converted_parset],
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                    )
+                    os.close(fd)
+                    sout, serr = convert_process.communicate()
+                    log_process_output(convert_exec, sout, serr, self.logger)
+                    if convert_process.returncode != 0:
+                        raise subprocess.CalledProcessError(
+                            convert_process.returncode, convert_exec
+                        )
+                except subprocess.CalledProcessError, e:
+                    self.logger.error(str(e))
+                    self.error.set()
+                    return 1
 
             #                                Run cimager process on compute node
             # ------------------------------------------------------------------
