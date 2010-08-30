@@ -59,7 +59,7 @@ if (NOT HAVE_VALGRIND OR VALGRIND_FORCE_BUILD)
     PATCH_COMMAND ${VALGRIND_BINARY_DIR}/autogen.sh
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${VALGRIND_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
-    INSTALL_COMMAND sudo make install
+    INSTALL_COMMAND make install
     )
   
   ## <-- end build condition ----------------------------------------------------->
