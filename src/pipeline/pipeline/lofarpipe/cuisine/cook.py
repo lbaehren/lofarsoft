@@ -1,5 +1,6 @@
 #from message import ErrorLevel, NotifyLevel, VerboseLevel, DebugLevel
 import time, os, select, pty, fcntl, sys, logging, imp
+from lofarpipe.support.pipelinelogging import getSearchingLogger
 
 class CookError(Exception):
     """Base class for all exceptions raised by this module."""
@@ -26,7 +27,7 @@ class PipelineCook(WSRTCook):
                 module_details = imp.find_module(task.lower(), recipe_path)
             module = imp.load_module(task, *module_details)
             self.recipe = getattr(module, task)()
-            self.recipe.logger = logging.getLogger("%s.%s" % (self.logger.name, task))
+            self.recipe.logger = getSearchingLogger("%s.%s" % (self.logger.name, task))
             self.recipe.logger.setLevel(self.logger.level)
         except Exception, e:
             self.logger.exception("Exception caught: " + str(e))
@@ -94,10 +95,10 @@ class SystemCook(WSRTCook):
                 #fcntl.fcntl(self.errw, fcntl.F_SETFL, os.O_NONBLOCK)
                 #os.dup2(self.outputpipe_front, 1) ## This makes stdio screw
                 #up buffering because a pipe is a block device
-                
+
                 # we hardcoded assume stderr of the pty has fd 2
                 os.dup2(self._errorpipe_front, 2)
-                
+
                 os.close(self._errorpipe_end)
                 os.close(self._errorpipe_front) ## close what we don't need
                 self.logger.info("starting " + " ".join(self.inputs))

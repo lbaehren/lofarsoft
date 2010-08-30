@@ -15,6 +15,7 @@ import time
 import resource
 import threading
 import logging
+import re
 
 class SearchPatterns(dict):
     def __init__(self):
@@ -39,7 +40,15 @@ class SearchingLogger(logging.Logger):
         message = record.getMessage()
         for pattern, results in self.searchpatterns.itervalues():
             if pattern.search(message):
-                results.append(message)
+                results.append(record)
+
+def getSearchingLogger(name):
+    old_class = logging.getLoggerClass()
+    logging.setLoggerClass(SearchingLogger)
+    try:
+        return logging.getLogger(name)
+    finally:
+        logging.setLoggerClass(old_class)
 
 def log_file(filename, logger, killswitch):
     """

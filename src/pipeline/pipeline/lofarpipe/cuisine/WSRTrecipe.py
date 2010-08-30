@@ -9,6 +9,7 @@ from optparse import OptionParser
 # Standard error of external jobs goes to logging.WARN, standard output goes
 # to logging.INFO.
 import logging
+from lofarpipe.support.pipelinelogging import getSearchingLogger
 
 from traceback import format_exc
 
@@ -88,7 +89,7 @@ class WSRTrecipe(object):
         the command line"""
         # The root logger has a null handler; we'll override in recipes.
         logging.getLogger().addHandler(NullLogHandler())
-        self.logger = logging.getLogger(self.name)
+        self.logger = getSearchingLogger(self.name)
         opts = sys.argv[1:]
         try:
             myParset = parset.Parset(self.name + ".parset")
