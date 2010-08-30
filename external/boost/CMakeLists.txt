@@ -67,7 +67,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap.sh
     BUILD_COMMAND ${PROJECT_BINARY_DIR}/source/bjam
-    INSTALL_COMMAND sudo ${PROJECT_BINARY_DIR}/source/bjam install --prefix=${USG_INSTALL_PREFIX}
+    INSTALL_COMMAND ${PROJECT_BINARY_DIR}/source/bjam install --prefix=${USG_INSTALL_PREFIX}
     )
   
   ## <-- end build condition ----------------------------------------------------->
