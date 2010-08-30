@@ -7,6 +7,7 @@
 
 from __future__ import with_statement
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
+from logging import getLogger
 import sys
 import os.path
 import tempfile
@@ -89,7 +90,9 @@ class dppp(LOFARnode):
                             stderr=STDOUT
                         )
                         sout, serr = ndppp_process.communicate()
-                        self.logger.debug("NDPPP stdout: %s" % (sout,))
+                        logger = getLogger(self.logger.name + "." + os.path.basename(infile))
+                        for line in sout.split('\n'):
+                            logger.debug(line.strip())
                         self.logger.debug("NDPPP stderr: %s" % (serr,))
                         if ndppp_process.returncode == 0:
                             break
