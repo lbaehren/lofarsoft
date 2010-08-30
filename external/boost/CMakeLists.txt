@@ -43,49 +43,32 @@ include (FindBoost)
 
 if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   
-  ##__________________________________________________________________
-  ## Additional CMake modules
+  ## Package information
 
-  include (ExternalProject)
-  find_program (tar_executable tar ${bin_locations})
-  find_program (ln_executable  ln  ${bin_locations})
+  set (Boost_VERSION        "1_43_0" )
+  set (Boost_SOURCE_ARCHIVE "boost_${Boost_VERSION}.tar.gz" )
+  set (Boost_URL            "http://sourceforge.net/projects/boost/files/boost/${Boost_VERSION}/${Boost_SOURCE_ARCHIVE}/download" )
 
-  ##__________________________________________________________________
-  ## Configure and build the project
-
-  set (boost_version "1_40_0")
-  set (boost_preprocessor ${LUS_ROOT}/release/include/boost/preprocessor)
-
-  find_file (have_boost_tgz   boost_${boost_version}.tar.gz ${BOOST_SOURCE_DIR})
-  find_file (have_boost_cmake boost_cmake.tgz               ${BOOST_SOURCE_DIR})
+  ## Check for package source
   
-  configure_file (
-    ${BOOST_SOURCE_DIR}/boost.cmake.in
-    ${BOOST_BINARY_DIR}/boost.cmake
+  find_file (Boost_SOURCE ${Boost_SOURCE_ARCHIVE}
+    PATHS ${Boost_SOURCE_DIR}
     )
-
-  if (have_boost_tgz)
-    ## Basic install of the package
-    ExternalProject_Add (boost
-      PREFIX ${BOOST_BINARY_DIR}
-      DOWNLOAD_DIR ${BOOST_BINARY_DIR}/boost
-      PATCH_COMMAND ${tar_executable} -xzf ${have_boost_cmake}
-      SOURCE_DIR ${BOOST_BINARY_DIR}/boost
-      URL ${have_boost_tgz}
-      URL_MD5 1ba819da0c1f8ea42d4aefed022cfd77
-      CMAKE_ARGS -C ${BOOST_BINARY_DIR}/boost.cmake
-      )
-    ## Post-installation patch of include paths
-    ExternalProject_Add_Step (boost boost_step1
-      COMMAND rm -f ${boost_preprocessor}/seq/detail
-      COMMAND ${ln_executable} -s ${boost_preprocessor}/detail ${boost_preprocessor}/seq/detail
-      COMMENT "Creating symbolic link seq/detail -> detail"
-      DEPENDEES install
-      WORKING_DIRECTORY ${boost_preprocessor}
-      )
-  else (have_boost_tgz)
-    message (WARNING "[Boost++] Unable to build project - no sources found!")
-  endif (have_boost_tgz)
+  
+  if (NOT Boost_SOURCE)
+    set (Boost_SOURCE ${Boost_URL})
+  endif (NOT Boost_SOURCE)
+  
+  ExternalProject_Add (boost
+    PREFIX ${PROJECT_BINARY_DIR}
+    DOWNLOAD_DIR download
+    SOURCE_DIR source
+    URL ${Boost_SOURCE}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap.sh
+    BUILD_COMMAND ${PROJECT_BINARY_DIR}/source/bjam
+    INSTALL_COMMAND sudo ${PROJECT_BINARY_DIR}/source/bjam install --prefix=${USG_INSTALL_PREFIX}
+    )
   
   ## <-- end build condition ----------------------------------------------------->
   
