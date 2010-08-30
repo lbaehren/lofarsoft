@@ -47,7 +47,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
 
   set (Boost_VERSION        "1_43_0" )
   set (Boost_SOURCE_ARCHIVE "boost_${Boost_VERSION}.tar.gz" )
-  set (Boost_URL            "http://sourceforge.net/projects/boost/files/boost/${Boost_VERSION}/${Boost_SOURCE_ARCHIVE}/download" )
+  set (Boost_URL            "http://downloads.sourceforge.net/project/boost/boost/1.43.0/${Boost_SOURCE_ARCHIVE}" )
 
   ## Check for package source
   
