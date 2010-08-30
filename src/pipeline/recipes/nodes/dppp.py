@@ -55,9 +55,9 @@ class dppp(LOFARnode):
                 'msin': infile,
                 'msout': outfile,
             }
-            if start_time:
+            if start_time and start_time != "None":
                 patch_dictionary['msin.starttime'] = start_time
-            if end_time:
+            if end_time and end_time != "None":
                 patch_dictionary['msin.endtime'] = end_time
             try:
                 temp_parset_filename = patch_parset(parset, patch_dictionary)
