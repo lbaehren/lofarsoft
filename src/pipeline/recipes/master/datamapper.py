@@ -41,7 +41,12 @@ class datamapper(BaseRecipe):
         data = defaultdict(list)
         for filename in self.inputs['args']:
             subcluster = filename.split('/')[2]
-            host = available_nodes[subcluster].next()
+            try:
+                host = available_nodes[subcluster].next()
+            except KeyError, key:
+                self.logger.error("%s is not a known cluster" % str(key))
+                raise
+
             data[host].append(filename)
 
         #                                 Dump the generated mapping to a parset
