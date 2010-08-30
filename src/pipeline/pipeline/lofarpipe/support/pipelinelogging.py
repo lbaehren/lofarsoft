@@ -16,6 +16,31 @@ import resource
 import threading
 import logging
 
+class SearchPatterns(dict):
+    def __init__(self):
+        super(SearchPatterns, self).__init__()
+
+    def add(self, name, pattern):
+        self[name] = (re.compile(pattern), [])
+
+    def remove(self, name):
+        del self[name]
+
+    def zero(self, name):
+        self[name][1] = []
+
+class SearchingLogger(logging.Logger):
+    def __init__(self, *args, **kwargs):
+        logging.Logger.__init__(self, *args, **kwargs)
+        self.searchpatterns = SearchPatterns()
+
+    def handle(self, record):
+        logging.Logger.handle(self, record)
+        message = record.getMessage()
+        for pattern, results in self.searchpatterns.itervalues():
+            if pattern.search(message):
+                results.append(message)
+
 def log_file(filename, logger, killswitch):
     """
     Do the equivalent of tail -f on filename -- ie, watch it for updates --
