@@ -38,7 +38,7 @@ def run_via_ssh(host, command, environment, *arguments):
         ssh_cmd.append("%s=%s" % (key, value))
 
     ssh_cmd.append(command)
-    ssh_cmd.extend(arguments)
+    ssh_cmd.extend(str(arg) for arg in arguments)
     return subprocess.Popen(
         ssh_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
