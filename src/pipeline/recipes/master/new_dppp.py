@@ -75,6 +75,10 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         self.logger.info("Starting DPPP run")
         super(new_dppp, self).go()
 
+        #                Keep track of "Total flagged" messages in the DPPP logs
+        # ----------------------------------------------------------------------
+        self.logger.searchpatterns["totalflagged"] = "Total flagged"
+
         #                           Load file <-> compute node mapping from disk
         # ----------------------------------------------------------------------
         self.logger.debug("Loading map from %s" % self.inputs['args'])
@@ -123,6 +127,14 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
             [thread.start() for thread in dppp_threads]
             self.logger.info("Waiting for DPPP threads")
             [thread.join() for thread in dppp_threads]
+
+        #    Log some information on total amount of data flagged (as a proof of
+        #               concept, rather than a really useful facility, for now).
+        # ----------------------------------------------------------------------
+        matches = self.logger.searchpatterns["totalflagged"].results
+        self.logger.searchpatterns.clear() # Clear searchpatterns to avoid loop!
+        for match in matches:
+            self.logger.info(match.getMessage())
 
         if self.error.isSet():
             self.logger.warn("Failed DPPP process detected")

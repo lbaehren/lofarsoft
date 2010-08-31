@@ -17,32 +17,84 @@ import threading
 import logging
 import re
 
+class SearchPattern(object):
+    """
+    Match the contents of LogRecords against a regular expression, keeping
+    track of matching records.
+    """
+    def __init__(self, pattern):
+        self.pattern = re.compile(pattern)
+        self.zero()
+
+    def check(self, record):
+        """
+        If the message attached to LogRecords record matches our pattern,
+        store the record.
+        """
+        if self.pattern.search(record.getMessage()):
+            self.results.append(record)
+
+    def zero(self):
+        """
+        Reset our list of stored messages.
+        """
+        self.results = []
+
 class SearchPatterns(dict):
+    """
+    A dictionary of SearchPattern objects.
+
+    When a new entry is appended, it's automatically compiled into a
+    SearchPattern. Other access patterns are as for a dictionary.
+    """
     def __init__(self):
+        # We only support "bare" init, ie no arguments.
         super(SearchPatterns, self).__init__()
 
-    def add(self, name, pattern):
-        self[name] = (re.compile(pattern), [])
+    def __setitem__(self, name, pattern):
+        # Compile supplied string to a SearchPattern and add it to our
+        # dictionary.
+        super(SearchPatterns, self).__setitem__(name, SearchPattern(pattern))
 
-    def remove(self, name):
-        del self[name]
+    def check(self, record):
+        """
+        Check the supplied LogRecord against all
+        registered SearchPatetrn objects.
+        """
+        for pattern in self.itervalues():
+            pattern.check(record)
 
     def zero(self, name):
-        self[name][1] = []
+        """
+        Zero the counter on a given SearchPattern.
+        """
+        self[name].zero()
+
+    def zero_all(self, name):
+        """
+        Zero the counter on all SearchPatterns registered.
+        """
+        for name in self.iterkeys():
+            self.zero(name)
 
 class SearchingLogger(logging.Logger):
+    """
+    A SearchingLogger will act as a normal logger object, forwarding
+    LogRecords to the appropriate handlers. In addition, it will check the
+    LogRecord against a SearchPatterns object and save any useful results.
+    """
     def __init__(self, *args, **kwargs):
         logging.Logger.__init__(self, *args, **kwargs)
         self.searchpatterns = SearchPatterns()
 
     def handle(self, record):
         logging.Logger.handle(self, record)
-        message = record.getMessage()
-        for pattern, results in self.searchpatterns.itervalues():
-            if pattern.search(message):
-                results.append(record)
+        self.searchpatterns.check(record)
 
 def getSearchingLogger(name):
+    """
+    Return an instance of SearchingLogger with the given name.
+    """
     old_class = logging.getLoggerClass()
     logging.setLoggerClass(SearchingLogger)
     try:
