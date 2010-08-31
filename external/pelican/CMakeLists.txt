@@ -45,6 +45,18 @@ endif (NOT PELICAN_VERBOSE_CONFIGURE)
 include (FindGit)
 include (FindPELICAN)
 
+## Check if we have a recent enough version of Git
+
+set (GIT_VERSION_REQUIRED "1.6.5")
+
+if (GIT_EXECUTABLE AND GIT_VERSION)
+  if (${GIT_VERSION} STRLESS ${GIT_VERSION_REQUIRED})
+    set (GIT_FOUND_REQUIRED FALSE)
+  else (${GIT_VERSION} STRLESS ${GIT_VERSION_REQUIRED})
+    set (GIT_FOUND_REQUIRED TRUE)
+  endif (${GIT_VERSION} STRLESS ${GIT_VERSION_REQUIRED})
+endif (GIT_EXECUTABLE AND GIT_VERSION)
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_PELICAN OR PELICAN_FORCE_BUILD)
@@ -76,7 +88,7 @@ if (NOT HAVE_PELICAN OR PELICAN_FORCE_BUILD)
   
   include (ExternalProject)
   
-  if (GIT_EXECUTABLE)
+  if (GIT_FOUND_REQUIRED)
     
     ExternalProject_Add (pelican
       PREFIX ${PROJECT_BINARY_DIR}
@@ -87,14 +99,14 @@ if (NOT HAVE_PELICAN OR PELICAN_FORCE_BUILD)
       INSTALL_COMMAND make install
       )
     
-  else (GIT_EXECUTABLE)
+  else (GIT_FOUND_REQUIRED)
     
     add_custom_target (pelican
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-      COMMENT "[PELICAN] Missing Git - unable to retrieve source code!"
+      COMMENT "[PELICAN] Git missing or too old - unable to retrieve source code!"
       )
     
-  endif (GIT_EXECUTABLE)
+  endif (GIT_FOUND_REQUIRED)
   
   ## <-- end build condition ----------------------------------------------------->
   
