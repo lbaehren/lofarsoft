@@ -264,7 +264,10 @@ class bbs(BaseRecipe):
             )
         except:
             self.killswitch.set()
-        return(self._monitor_process(bbs_kernel_process, "BBS Kernel on %s" % host))
+        result = self._monitor_process(bbs_kernel_process, "BBS Kernel on %s" % host)
+        sout, serr = bbs_kernel_process.communicate()
+        log_process_output("SSH session (BBS kernel)", sout, serr, self.logger)
+        return result
 
     def _run_bbs_control(self, bbs_parset, run_flag):
         """

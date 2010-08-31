@@ -10,6 +10,8 @@ from threading import BoundedSemaphore
 
 import subprocess
 
+from lofarpipe.support.pipelinelogging import log_process_output
+
 class ProcessLimiter(defaultdict):
     def __init__(self, nproc):
         super(ProcessLimiter, self).__init__(
@@ -67,6 +69,7 @@ class RemoteCommandRecipeMixIn(object):
                 *arguments
             )
             sout, serr = process.communicate()
+            log_process_output("SSH session", sout, serr, self.logger)
         finally:
             semaphore.release()
         if process.returncode != 0:

@@ -20,6 +20,7 @@ from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.pipelinelogging import log_time, log_process_output
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import run_remote_command
+from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.parset import Parset
 from lofarpipe.support.parset import get_parset
@@ -235,6 +236,7 @@ class cimager(BaseRecipe):
                     str(end_time)
                 )
                 sout, serr = cimager_process.communicate()
+                log_process_output("SSH session (cimager)", sout, serr, self.logger)
             except Exception, e:
                 self.logger.error(str(e))
                 self.error.set()
