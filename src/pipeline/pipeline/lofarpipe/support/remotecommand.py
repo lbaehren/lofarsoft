@@ -32,13 +32,12 @@ def run_via_ssh(host, command, environment, *arguments):
     """
     Run a remote command via SSH.
     """
-    ssh_cmd = ["ssh", "-n", "-t", "-x", host, "--"]
+    ssh_cmd = ["ssh", "-n", "-t", "-x", host, "--", "/bin/sh", "-c"]
 
-    for key, value in environment.iteritems():
-        ssh_cmd.append("%s=%s" % (key, value))
-
-    ssh_cmd.append(command)
-    ssh_cmd.extend(str(arg) for arg in arguments)
+    commandstring = ["%s=%s" % (key, value) for key, value in environment.items()]
+    commandstring.append(command)
+    commandstring.extend(str(arg) for arg in arguments)
+    ssh_cmd.append('"' + " ".join(commandstring) + '"')
     return subprocess.Popen(
         ssh_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
