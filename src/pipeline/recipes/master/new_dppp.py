@@ -75,6 +75,14 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         self.logger.info("Starting DPPP run")
         super(new_dppp, self).go()
 
+        #                            Check if the specified parset really exists
+        # ----------------------------------------------------------------------
+        if not os.path.exists(str(self.inputs['parset'])):
+            self.logger.error(
+                "DPPP parset (%s) not found" % (str(self.inputs['parset']))
+            )
+            return 1
+
         #                Keep track of "Total flagged" messages in the DPPP logs
         # ----------------------------------------------------------------------
         self.logger.searchpatterns["totalflagged"] = "Total flagged"
