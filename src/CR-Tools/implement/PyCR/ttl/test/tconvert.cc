@@ -48,7 +48,7 @@ int main()
   }
 
   // Calculate grid
-  status=toWorld(world.begin(), world.end(),
+  status=pixel2World(world.begin(), world.end(),
                  pixel.begin(), pixel.end(),
                  refcode, projection,
                  refLong, refLat,

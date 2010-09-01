@@ -36,6 +36,7 @@ set (external_packages
   swig
   szip
   valgrind
+  tmf
   )
 
 if (NOT HAVE_BLITZ)

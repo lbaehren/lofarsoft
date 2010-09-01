@@ -11,6 +11,7 @@ include (FindPython)
 include (FindBoost)
 include (FindNumPy)
 include (FindNumUtil)
+include (FindTMF)
 
 ## Required external package: Python
 if (NOT HAVE_PYTHON)
@@ -61,6 +62,7 @@ if (TTL_WITH_BINDINGS)
       ## linker instructions
       target_link_libraries(${MODULE}
         cr
+        ${TMF_LIBRARIES}
         ${PYTHON_LIBRARIES}
         ${BOOST_LIBRARIES}
         ${NUM_UTIL_LIBRARIES}

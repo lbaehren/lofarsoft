@@ -29,6 +29,7 @@
 #include <coordinates/Coordinates/Projection.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <measures/Measures/MEpoch.h>
+#include <tmf.h>
 
 // LOCAL INCLUDES
 //
@@ -64,25 +65,25 @@ namespace ttl
       \param refY reference y pixel (CRPIX)
      */
     template <class DIter>
-      bool toWorld(const DIter world, const DIter world_end,
-                   const DIter pixel, const DIter pixel_end,
-                   const std::string refcode, const std::string projection,
-                   const double refLong, const double refLat,
-                   const double incLong, const double incLat,
-                   const double refX, const double refY
-                   )
+      bool pixel2World(const DIter world, const DIter world_end,
+          const DIter pixel, const DIter pixel_end,
+          const std::string refcode, const std::string projection,
+          const double refLong, const double refLat,
+          const double incLong, const double incLat,
+          const double refX, const double refY
+          )
       {
         // Check input
         if (world_end-world != pixel_end-pixel)
         {
-          std::cerr<<"Error, in toWorld(): input and output vector not of same length."<<std::endl;
+          std::cerr<<"Error, in pixel2World(): input and output vector not of same length."<<std::endl;
           return false;
         }
 
         casa::MDirection::Types type;
         if (casa::MDirection::getType(type, refcode) != true)
         {
-          std::cerr<<"Error, in toWorld(): input reference type invalid."<<std::endl;
+          std::cerr<<"Error, in pixel2World(): input reference type invalid."<<std::endl;
           return false;
         }
 
@@ -90,7 +91,7 @@ namespace ttl
         proj=casa::Projection::type(static_cast<casa::String>(projection));
         if (proj==casa::Projection::N_PROJ)
         {
-          std::cerr<<"Error, in toWorld(): input projection type invalid."<<std::endl;
+          std::cerr<<"Error, in pixel2World(): input projection type invalid."<<std::endl;
         }
 
         // Get spatial direction coordinate system
@@ -98,17 +99,17 @@ namespace ttl
         xform = 0.0; xform.diagonal() = 1.0;
 
         casa::DirectionCoordinate dir(type,
-                                      proj,
-                                      static_cast<casa::Double>(refLong),
-                                      static_cast<casa::Double>(refLat),
-                                      static_cast<casa::Double>(incLong),
-                                      static_cast<casa::Double>(incLat),
-                                      xform,
-                                      static_cast<casa::Double>(refX),
-                                      static_cast<casa::Double>(refY));
+            proj,
+            static_cast<casa::Double>(refLong),
+            static_cast<casa::Double>(refLat),
+            static_cast<casa::Double>(incLong),
+            static_cast<casa::Double>(incLat),
+            xform,
+            static_cast<casa::Double>(refX),
+            static_cast<casa::Double>(refY));
 
-//        std::cout<<casa::MDirection::showType(dir.directionType())<<"\t"<<dir.projection().name()<<std::endl;
-        
+        //        std::cout<<casa::MDirection::showType(dir.directionType())<<"\t"<<dir.projection().name()<<std::endl;
+
         // Get iterators
         DIter world_it=world;
         DIter pixel_it=pixel;
@@ -158,25 +159,25 @@ namespace ttl
       \param refY reference y pixel (CRPIX)
      */
     template <class DIter>
-      bool toPixel(const DIter pixel, const DIter pixel_end,
-                   const DIter world, const DIter world_end,
-                   const std::string refcode, const std::string projection,
-                   const double refLong, const double refLat,
-                   const double incLong, const double incLat,
-                   const double refX, const double refY
-                   )
+      bool world2Pixel(const DIter pixel, const DIter pixel_end,
+          const DIter world, const DIter world_end,
+          const std::string refcode, const std::string projection,
+          const double refLong, const double refLat,
+          const double incLong, const double incLat,
+          const double refX, const double refY
+          )
       {
         // Check input
         if (world_end-world != pixel_end-pixel)
         {
-          std::cerr<<"Error, in toPixel(): input and output vector not of same length."<<std::endl;
+          std::cerr<<"Error, in world2Pixel(): input and output vector not of same length."<<std::endl;
           return false;
         }
 
         casa::MDirection::Types type;
         if (casa::MDirection::getType(type, refcode) != true)
         {
-          std::cerr<<"Error, in toPixel(): input reference type invalid."<<std::endl;
+          std::cerr<<"Error, in world2Pixel(): input reference type invalid."<<std::endl;
           return false;
         }
 
@@ -184,7 +185,7 @@ namespace ttl
         proj=casa::Projection::type(static_cast<casa::String>(projection));
         if (proj==casa::Projection::N_PROJ)
         {
-          std::cerr<<"Error, in toPixel(): input projection type invalid."<<std::endl;
+          std::cerr<<"Error, in world2Pixel(): input projection type invalid."<<std::endl;
         }
 
         // Get spatial direction coordinate system
@@ -192,16 +193,16 @@ namespace ttl
         xform = 0.0; xform.diagonal() = 1.0;
 
         casa::DirectionCoordinate dir(type,
-                                      proj,
-                                      static_cast<casa::Double>(refLong),
-                                      static_cast<casa::Double>(refLat),
-                                      static_cast<casa::Double>(incLong),
-                                      static_cast<casa::Double>(incLat),
-                                      xform,
-                                      static_cast<casa::Double>(refX),
-                                      static_cast<casa::Double>(refY));
-        
-//        std::cout<<casa::MDirection::showType(dir.directionType())<<"\t"<<dir.projection().name()<<std::endl;
+            proj,
+            static_cast<casa::Double>(refLong),
+            static_cast<casa::Double>(refLat),
+            static_cast<casa::Double>(incLong),
+            static_cast<casa::Double>(incLat),
+            xform,
+            static_cast<casa::Double>(refX),
+            static_cast<casa::Double>(refY));
+
+        //        std::cout<<casa::MDirection::showType(dir.directionType())<<"\t"<<dir.projection().name()<<std::endl;
 
         // Get iterators
         DIter world_it=world;
@@ -241,37 +242,98 @@ namespace ttl
      */
     template <class DIter>
       void azElRadius2Cartesian(DIter out, DIter out_end,
-                                DIter in, DIter in_end,
-                                bool anglesInDegrees)
+          DIter in, DIter in_end,
+          bool anglesInDegrees)
       {
-	double deg2rad = (3.14159265359/180.);
-	  
+        double deg2rad = (3.14159265359/180.);
+
         // Get iterators
         DIter out_it=out;
         DIter in_it=in;
-	
+
         // Loop over coordinates
-	if (anglesInDegrees) {
-	  while (out_it!=out_end && in_it!=in_end)
-	    {
-	      *out_it     = *(in_it+2)*cos(*(in_it+1) * deg2rad)*sin(*in_it * deg2rad);
-	      *(out_it+1) = *(in_it+2)*cos(*(in_it+1) * deg2rad)*cos(*in_it * deg2rad);
-	      *(out_it+2) = *(in_it+2)*sin(*(in_it+1) * deg2rad);
-	      
-	      in_it=in_it+3;
-	      out_it=out_it+3;
-	    }
-	} else {
-	  while (out_it!=out_end && in_it!=in_end)
-	    {
-	      *out_it     = *(in_it+2)*cos(*(in_it+1))*sin(*in_it);
-	      *(out_it+1) = *(in_it+2)*cos(*(in_it+1))*cos(*in_it);
-	      *(out_it+2) = *(in_it+2)*sin(*(in_it+1));
-	      
-	      in_it=in_it+3;
-	      out_it=out_it+3;
-	    }
-	};
+        if (anglesInDegrees) {
+          while (out_it!=out_end && in_it!=in_end)
+          {
+            *out_it     = *(in_it+2)*cos(*(in_it+1) * deg2rad)*sin(*in_it * deg2rad);
+            *(out_it+1) = *(in_it+2)*cos(*(in_it+1) * deg2rad)*cos(*in_it * deg2rad);
+            *(out_it+2) = *(in_it+2)*sin(*(in_it+1) * deg2rad);
+
+            in_it=in_it+3;
+            out_it=out_it+3;
+          }
+        } else {
+          while (out_it!=out_end && in_it!=in_end)
+          {
+            *out_it     = *(in_it+2)*cos(*(in_it+1))*sin(*in_it);
+            *(out_it+1) = *(in_it+2)*cos(*(in_it+1))*cos(*in_it);
+            *(out_it+2) = *(in_it+2)*sin(*(in_it+1));
+
+            in_it=in_it+3;
+            out_it=out_it+3;
+          }
+        };
+      }
+
+    /*!
+      \brief Convert array of equatorial J2000 coordinates to horizontal,
+      AZEL coordinates.
+
+      \param hc array with horizontal coordiates (alt, az, alt, az, ...)
+      \param ec array with equatorial coordinates (ra, dec, ra, dec, ...) 
+      \param jd UTC as Julian Day
+      \param ut1_utc difference UT1-UTC (as obtained from IERS bullitin A)
+             if 0 a maximum error of 0.9 seconds is made.
+      \param L longitude of telescope
+      \param phi latitude of telescope
+     */
+    template <class DIter>
+      void equatorial2Horizontal(const DIter hc, const DIter hc_end,
+          const DIter ec, const DIter ec_end,
+          const double utc, const double ut1_utc,
+          const double L, const double phi)
+      {
+        // Constants
+        const int SECONDS_PER_DAY = 24 * 3600;
+
+        // Variables
+        double alpha, delta, A, h, H;
+
+        // Calculate Terestrial Time (TT)
+        const double tt = utc + tmf::tt_utc(utc) / SECONDS_PER_DAY;
+
+        // Calculate Universal Time (UT1)
+        const double ut1 = utc + ut1_utc / SECONDS_PER_DAY;
+
+        // Calculate Local Apparant Sidereal Time (LAST)
+        const double theta_L = tmf::last(ut1, tt, L);
+
+        // Get iterators
+        DIter hc_it=hc;
+        DIter ec_it=ec;
+
+        while (hc_it!=hc_end && ec_it!=ec_end)
+        {
+          // Get equatorial coordinates
+          alpha = *ec_it;
+          ++ec_it;
+          delta = *ec_it;
+
+          // Calculate hour angle
+          H = tmf::rad2circle(theta_L - alpha);
+
+          // Convert from equatorial to horizontal coordinates
+          tmf::equatorial2horizontal(A, h, H, delta, phi);
+
+          // Store output
+          *hc_it = A;
+          ++hc_it;
+          *hc_it = h;
+
+          // Advance iterator
+          ++hc_it;
+          ++ec_it;
+        }
       }
   } // End coordinates
 } // End ttl
