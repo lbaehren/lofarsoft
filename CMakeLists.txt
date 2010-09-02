@@ -287,6 +287,10 @@ if (CR_WITH_GUI)
   add_dependencies (cr mathgl)
 endif (CR_WITH_GUI)
 
+if (CR_WITH_PYCR)
+  add_dependencies (cr tmf)
+endif (CR_WITH_PYCR)
+
 if (HAVE_ROOT AND CR_WITH_STARTOOLS)
   add_dependencies (cr startools)
 endif (HAVE_ROOT AND CR_WITH_STARTOOLS)
