@@ -164,6 +164,7 @@ namespace CR { // Namespace CR -- begin
 
       //  do all corrections which have an effect on the pulse shape
       pipeline_p->doGainCal(true);
+      //pipeline_p->doGainCal(false); // for plotting noise at voltage     
       pipeline_p->doDispersionCal(true);
       pipeline_p->doDelayCal(false);
       pipeline_p->doFlagNotActiveAnts(false);
@@ -764,9 +765,7 @@ namespace CR { // Namespace CR -- begin
           // round y-axis height
           int digit = trunc(log10(ymax));
           ymax = double(ceil(ymax*pow(10.,-digit)*25))/25./pow(10.,-digit)*1.19;
-          ymin = -ymax;
-      
-          
+          ymin = -ymax;        
         
           // create filename and label
           antennanumber.str("");
@@ -777,7 +776,7 @@ namespace CR { // Namespace CR -- begin
           //set the plotfilename to filename + "-" + antennanumber.str() + ".ps";
           if ( (i+1) < 10 ){
              plotfilename = filename + "-0" + antennanumber.str() + ".ps";
-          }else{
+          } else {
              plotfilename = filename + "-" + antennanumber.str() + ".ps";
           }
           //set label "GT - Ant.Nr"
@@ -787,6 +786,8 @@ namespace CR { // Namespace CR -- begin
           plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
           plotter.AddLabels("time t [#gms]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
+          //plotter.AddLabels("time t [#gms]", "field strength A [#gmV/m/MHz]");
+          //plotter.AddLabels("time t [#gms]", "voltage [#gmV]");
 
           // Plot (upsampled) trace
           plotter.PlotLine(upxaxis(upplotRange),trace,color,1);

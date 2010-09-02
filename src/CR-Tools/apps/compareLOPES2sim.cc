@@ -694,20 +694,27 @@ int main (int argc, char *argv[])
 
       //fill the first rec maps
       for(int j=0; j<totAntenna; j++) {
-        m_recPulses[antPulses[j]->antennaID] = *antPulses[j]; //I fill the rec map with pulse properties in the root file
-        
+        // consistency check: if one antenna ID is empty, do not consider this antenna
+        if (antPulses[j]->antennaID == 0) 
+          continue;
+
         // also fill the second data map, if provided
         if (resultsName2!="") {
-          m_recPulses2[antPulses2[j]->antennaID] = *antPulses2[j];
+          // consistency checks
+          if (antPulses2[j]->antennaID == 0) 
+            continue;
           if (antPulses[j]->antennaID != antPulses2[j]->antennaID) {
-            cerr << "Error: Antenna IDs of both root files do not match.\n" << endl;
-            return 1;
-          }
+            cerr << "\nError: Antenna IDs of both root files do not match: " 
+                 << antPulses[j]->antennaID << " vs. "  
+                 << antPulses2[j]->antennaID << " at value number " << j << endl;
+            return 1;  
+          } else {
+            m_recPulses2[antPulses2[j]->antennaID] = *antPulses2[j];
+          }  
           if (antPulses[j]->polarization != antPulses2[j]->polarization) {
-            cerr << "Error: Polarization of both root files do not match.\n" << endl;
+            cerr << "\nError: Polarization of both root files do not match.\n" << endl;
             return 1;
           }
-          
           if (antPulses[j]->polarization == "EW") {
             m_recEW[antPulses[j]->antennaID] = *antPulses[j]; 
             m_simEW[antPulses2[j]->antennaID] = *antPulses2[j]; 
@@ -716,7 +723,9 @@ int main (int argc, char *argv[])
             m_recNS[antPulses[j]->antennaID] = *antPulses[j]; 
             m_simNS[antPulses2[j]->antennaID] = *antPulses2[j]; 
           } 
-        }  
+        }    
+
+        m_recPulses[antPulses[j]->antennaID] = *antPulses[j]; //I fill the rec map with pulse properties in the root file
       }
       
       /*sim file*/

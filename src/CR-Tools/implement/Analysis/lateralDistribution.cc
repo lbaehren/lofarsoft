@@ -182,7 +182,7 @@ namespace CR { // Namespace CR -- begin
       latPro->SetFillColor(4);
       latPro->SetLineColor(4);
       latPro->SetMarkerColor(4);
-      latPro->SetMarkerStyle(20);
+      latPro->SetMarkerStyle(kFullCircle);
       latPro->SetMarkerSize(1.1);
       stringstream label;
       label << "Lateral distribution - " << Gt;
@@ -198,7 +198,7 @@ namespace CR { // Namespace CR -- begin
       latProSim->SetFillColor(2);
       latProSim->SetLineColor(2);
       latProSim->SetMarkerColor(2);
-      latProSim->SetMarkerStyle(20);
+      latProSim->SetMarkerStyle(kFullSquare);
       latProSim->SetMarkerSize(1.1);
  
       /* Canvas and Plotting */
@@ -533,7 +533,7 @@ namespace CR { // Namespace CR -- begin
       latPro->SetFillColor(1);
       latPro->SetLineColor(4);
       latPro->SetMarkerColor(4);
-      latPro->SetMarkerStyle(20);
+      latPro->SetMarkerStyle(kFullCircle);
       latPro->SetMarkerSize(1.1);
       stringstream label;
       label << "radius of curvature - " << GT;

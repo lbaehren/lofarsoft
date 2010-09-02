@@ -1785,6 +1785,47 @@ namespace CR { // Namespace CR -- begin
     try {
       Matrix<DComplex> FFTData;
       FFTData = GetData(dr);
+
+      // apply antenna gain for zenith, as in CRinvFFT::GetShiftedFFT()
+      if (DoGainCal_p) {
+        Vector<Int> AntennaIDs;
+        uInt date;
+        dr->headerRecord().get("Date",date);
+        dr->headerRecord().get("AntennaIDs",AntennaIDs);
+
+        if (!AntGainInterpInit_p) { //AntGainInterpInit_p is defined in FirstStagePipeline.h and reset in InitEvent()
+          if (!initGainInterp(dr)) {
+            cerr << "CRinvFFT::GetUnshiftedTimeSeries: " << "Error while initializing the CalTableInterpolater." << endl;
+            return Matrix<Double>();
+          }
+        }
+        
+        // Set the direction in the caltable interpolater: Az=0°, El=90°
+        Vector<Double> tmpvec;
+        tmpvec.resize(1);
+        tmpvec(0) = 0;
+        InterAntGain_p->SetAxisValue(2,tmpvec);
+        tmpvec(0) = 90;
+        InterAntGain_p->SetAxisValue(3,tmpvec);
+        
+        // get the interpolated gains
+        Matrix<DComplex> AntGainFactors(FFTData.shape());
+        Vector<DComplex> tmpCvec;
+        Array<Double> tmparr;
+        DComplex tmpCval;
+        tmpCvec.resize(dr->fftLength());
+        tmparr.resize(tmpCvec.shape());
+
+        for (unsigned int i=0; i<AntennaIDs.nelements(); ++i) {
+          InterAntGain_p->GetValues(date, AntennaIDs(i), &tmparr);
+          convertArray(tmpCvec,Vector<Double>(tmparr));
+          tmpCval = 1.947*1e6/(stopFreq_p-startFreq_p);
+          AntGainFactors.column(i) = tmpCvec*tmpCval;
+        }
+        
+        FFTData = AntGainFactors*GetData(dr);
+      }
+      
       uInt i,nants=FFTData.ncolumn(),nselants,blocksize=dr->blocksize();
       if (antennaSelection.nelements() != nants){
         antennaSelection = Vector<Bool>(nants,True);
