@@ -525,7 +525,7 @@ def plot2d(z, x=None, y=None, title=None, rangex=None, rangey=None, \
         pgpalette.setpalette(image)
         ppgplot.pgctab(pgpalette.l,pgpalette.r,pgpalette.g,pgpalette.b)
         # Construct the image
-        ppgplot.pgimag_s(z, 0.0, 0.0, rangex[0], rangey[0], \
+        ppgplot.pgimag_s(z, rangez[1], rangez[0], rangex[0], rangey[0], \
                          rangex[1], rangey[1])  
         reset_colors()
     if contours is not None:
