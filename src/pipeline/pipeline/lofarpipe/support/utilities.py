@@ -107,6 +107,17 @@ def check_for_path(properties, dependargs):
 #                                                       Iterators and Generators
 # ------------------------------------------------------------------------------
 
+def is_iterable(obj):
+    """
+    Return True if the given object is iterable, else False.
+    """
+    try:
+        iter(obj)
+    except:
+        return False
+    else:
+        return True
+
 try:
     from itertools import izip_longest
 except ImportError:

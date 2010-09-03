@@ -17,9 +17,10 @@ import errno
 import cPickle
 
 import lofarpipe.support.utilities as utilities
+import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.lofarexceptions import PipelineException
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
-from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
+#from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.ipython import IPythonRecipeMixIn
 
@@ -27,6 +28,18 @@ class BaseRecipe(WSRTrecipe):
     """
     Provides standard boiler-plate used in the various LOFAR pipeline recipes.
     """
+    class MyInputs(LOFARinput):
+        default_working_directory = ingredient.FileField(
+            '--default-working-directory',
+            help="Default working directory"
+        )
+        lofarroot = ingredient.FileField(
+            '--lofarroot',
+            dest="lofarroot",
+            help="Root of LOFAR software tree"
+        )
+        # Use metaclass to automatically set up self.inputs on initt?
+
     def __init__(self):
         """
         All parameters required by the recipe should be added to the
@@ -40,47 +53,6 @@ class BaseRecipe(WSRTrecipe):
         self.completed = []
         self.error = Event()
         self.error.clear()
-        self.optionparser.add_option(
-            '-j', '--job-name',
-            dest="job_name",
-            help="Job name (required)"
-        )
-        self.optionparser.add_option(
-            '-r', '--runtime-directory',
-            dest="runtime_directory",
-            help="Runtime directory"
-        )
-        self.optionparser.add_option(
-            '--default-working-directory',
-            dest="default_working_directory",
-            help="Default working directory"
-        )
-        self.optionparser.add_option(
-            '--lofarroot',
-            dest="lofarroot",
-            help="Root of LOFAR software tree"
-        )
-        self.optionparser.add_option(
-            '-c', '--config',
-            dest="config",
-            help="Configuration file"
-        )
-        self.optionparser.add_option(
-            '--task-file',
-            dest="task_files",
-            help="Task definition file"
-        )
-        self.optionparser.add_option(
-            '-n', '--dry-run',
-            dest="dry_run",
-            help="Dry run",
-            action="store_true"
-        )
-        self.optionparser.add_option(
-            '--start-time',
-            dest="start_time",
-            help="[Expert use] Pipeline start time"
-        )
 
     @property
     def __file__(self):
