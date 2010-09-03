@@ -11,14 +11,19 @@ from collections import defaultdict
 from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
 from lofarpipe.support.parset import Parset
+import lofarpipe.support.lofaringredient as ingredient
 
 class datamapper(BaseRecipe):
-    def __init__(self):
-        super(datamapper, self).__init__()
-        self.optionparser.add_option(
+    inputs = {
+        'mapfile': ingredient.StringField(
             '--mapfile',
             help="Filename for output mapfile (clobbered if exists)"
         )
+    }
+
+    outputs = {
+        'mapfile': ingredient.FileField()
+    }
 
     def go(self):
         self.logger.info("Starting datamapper run")

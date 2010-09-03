@@ -14,6 +14,8 @@ import subprocess
 import threading
 
 import lofarpipe.support.utilities as utilities
+import lofarpipe.support.lofaringredient as ingredient
+
 from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.remotecommand import ProcessLimiter
@@ -22,48 +24,43 @@ from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.pipelinelogging import log_process_output
 
 class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
-    def __init__(self):
-        super(new_vdsmaker, self).__init__()
-        self.optionparser.add_option(
+    inputs = {
+        'gvds': ingredient.StringField(
             '-g', '--gvds',
-            dest="gvds",
             help="Output file name"
-        )
-        self.optionparser.add_option(
-            '--directory',
-            dest="directory",
-            help="Directory for output files"
-        )
-        self.optionparser.add_option(
-            '--makevds',
-            dest="makevds",
-            help="makevds executable",
-            default="/opt/LofIm/daily/lofar/bin/makevds"
-        )
-        self.optionparser.add_option(
-            '--combinevds',
-            dest="combinevds",
-            help="combinevds executable",
-            default="/opt/LofIm/daily/lofar/bin/combinevds"
-        )
-        self.optionparser.add_option(
+        ),
+        'directory': ingredient.StringField(
+            '--directory', help="Output directory"
+        ),
+        'makevds': ingredient.ExecField(
+            '--makevds', help="makevds executable"
+        ),
+        'combinevds': ingredient.ExecField(
+            '--combinevds', help="combinevds executable"
+        ),
+        'unlink': ingredient.BoolField(
             '--unlink',
             help="Unlink VDS files after combining",
-            default="True"
-        )
-        self.optionparser.add_option(
+            default=True
+        ),
+        'nproc': ingredient.IntField(
             '--nproc',
             help="Maximum number of simultaneous processes per compute node",
-            default="8"
+            default=8
         )
+    }
+
+    outputs = {
+        'gvds': ingredient.FileField()
+    }
 
     def go(self):
         super(new_vdsmaker, self).go()
 
         #                           Load file <-> compute node mapping from disk
         # ----------------------------------------------------------------------
-        self.logger.debug("Loading map from %s" % self.inputs['args'])
-        data = load_data_map(self.inputs['args'])
+        self.logger.debug("Loading map from %s" % self.inputs['args'][0])
+        data = load_data_map(self.inputs['args'][0])
 
         #                               Limit number of process per compute node
         # ----------------------------------------------------------------------
