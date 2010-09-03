@@ -65,7 +65,7 @@ class cimager(BaseRecipe):
     }
 
     outputs = {
-        'images': ingredient.FileList()
+        'images': ingredient.ListField()
     }
 
     def go(self):
