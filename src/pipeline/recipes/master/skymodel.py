@@ -6,6 +6,7 @@ import sys
 import monetdb.sql as db
 from monetdb.sql import Error as Error
 
+import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.lofarrecipe import BaseRecipe
 
 header_line = """\
@@ -86,63 +87,66 @@ class skymodel(BaseRecipe):
     """
     Extract basic sky model information from database
     """
-
-    def __init__(self):
-        super(skymodel, self).__init__()
-        self.optionparser.add_option(
+    inputs = {
+        'db_host': ingredient.StringField(
             '--db-host',
             help="Host with MonetDB database instance",
             default="ldb001"
-        )
-        self.optionparser.add_option(
+        ),
+        'db_port': ingredient.IntField(
             '--db-port',
             help="Host with MonetDB database instance",
-            default="50000"
-        )
-        self.optionparser.add_option(
+            default=50000
+        ),
+        'db_dbase': ingredient.StringField(
             '--db-dbase',
             help="Database name",
             default="gsm"
-        )
-        self.optionparser.add_option(
+        ),
+        'db_user': ingredient.StringField(
             '--db-user',
             help="Database user",
             default="gsm"
-        )
-        self.optionparser.add_option(
+        ),
+        'db_password': ingredient.StringField(
             '--db-password',
             help="Database password",
             default="msss"
-        )
-        self.optionparser.add_option(
+        ),
+        'ra': ingredient.FloatField(
             '--ra',
             help='RA of image centre (degrees)'
-        )
-        self.optionparser.add_option(
+        ),
+        'dec': ingredient.FloatField(
             '--dec',
             help='dec of image centre (degres)'
-        )
-        self.optionparser.add_option(
+        ),
+        'search_size': ingredient.FloatField(
             '--search-size',
             help='Distance to search in each of RA/dec (degrees)'
-        )
-        self.optionparser.add_option(
+        ),
+        'min_flux': ingredient.FloatField(
             '--min-flux',
             help="Integrated flus threshold, in Jy, for source selection"
-        )
-        self.optionparser.add_option(
+        ),
+        'skymodel_file': ingredient.StringField(
             '--skymodel-file',
             help="Output file for BBS-format sky model definition"
         )
+    }
+
+    outputs = {
+        'source_name': ingredient.StringField()
+    }
 
     def go(self):
         self.logger.info("Building sky model")
         super(skymodel, self).go()
 
-        ra_min = float(self.inputs['ra']) - float(self.inputs['search_size'])
-        ra_max = float(self.inputs['ra']) + float(self.inputs['search_size'])
-        dec_min = float(self.inputs['dec']) - float(self.inputs['search_size'])
-        dec_max = float(self.inputs['dec']) + float(self.inputs['search_size'])
+        ra_min = self.inputs['ra'] - self.inputs['search_size']
+        ra_max = self.inputs['ra'] + self.inputs['search_size']
+        dec_min = self.inputs['dec'] - self.inputs['search_size']
+        dec_max = self.inputs['dec'] + self.inputs['search_size']
 
         try:
             with closing(

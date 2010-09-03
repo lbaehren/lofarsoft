@@ -13,6 +13,7 @@ from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.pipelinelogging import log_process_output
 import lofarpipe.support.utilities as utilities
+import lofarpipe.support.lofaringredient as ingredient
 
 template = """
 create tablename="%s"
@@ -29,18 +30,22 @@ quit
 """
 
 class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
-    def __init__(self):
-        super(parmdb, self).__init__()
-        self.optionparser.add_option(
+    inputs = {
+        'executable': ingredient.ExecField(
             '--executable',
             help="Executable for parmdbm",
             default="/opt/LofIm/daily/lofar/bin/parmdbm"
-        )
-        self.optionparser.add_option(
+        ),
+        'nproc': ingredient.IntField(
             '--nproc',
             help="Maximum number of simultaneous processes per compute node",
-            default="8"
+            default=8
         )
+    }
+
+    outputs = {
+        'mapfile': ingredient.FileField()
+    }
 
     def go(self):
         self.logger.info("Starting parmdb run")
@@ -63,8 +68,8 @@ class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
 
         #                           Load file <-> compute node mapping from disk
         # ----------------------------------------------------------------------
-        self.logger.debug("Loading map from %s" % self.inputs['args'])
-        data = load_data_map(self.inputs['args'])
+        self.logger.debug("Loading map from %s" % self.inputs['args'][0])
+        data = load_data_map(self.inputs['args'][0])
 
         #                               Limit number of process per compute node
         # ----------------------------------------------------------------------
@@ -96,7 +101,7 @@ class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
         if self.error.isSet():
             return 1
         else:
-            self.outputs['mapfile'] = self.inputs['args']
+            self.outputs['mapfile'] = self.inputs['args'][0]
             return 0
 
 if __name__ == '__main__':

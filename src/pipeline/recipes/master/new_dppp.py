@@ -17,6 +17,7 @@ import sys
 import os
 
 import lofarpipe.support.utilities as utilities
+import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.clusterlogger import clusterlogger
@@ -25,63 +26,62 @@ from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.parset import Parset
 
 class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
-    def __init__(self):
-        super(new_dppp, self).__init__()
-        self.optionparser.add_option(
+    inputs = {
+        'executable': ingredient.ExecField(
             '--executable',
             help="DPPP executable"
-        )
-        self.optionparser.add_option(
+        ),
+        'initscript': ingredient.FileField(
             '--initscript',
             help="DPPP initscript"
-        )
-        self.optionparser.add_option(
+        ),
+        'parset': ingredient.FileField(
             '-p', '--parset',
             help="Parset containing configuration for DPPP"
-        )
-        self.optionparser.add_option(
+        ),
+        'suffix': ingredient.StringField(
             '--suffix',
             default=".dppp",
             help="Suffix to add to trimmed data (default: .dppp)"
-        )
-        self.optionparser.add_option(
+        ),
+        'working_directory': ingredient.StringField(
             '-w', '--working-directory',
             help="Working directory used on compute nodes"
-        )
-        self.optionparser.add_option(
+        ),
+        'data_start_time': ingredient.StringField(
             '--data-start-time',
-            help="Start time to be passed to DPPP (optional)",
-        )
-        self.optionparser.add_option(
+            default="None",
+            help="Start time to be passed to DPPP (optional)"
+        ),
+        'data_end_time': ingredient.StringField(
             '--data-end-time',
-            help="End time to be passed to DPPP (optional)",
-        )
-        self.optionparser.add_option(
+            default="None",
+            help="End time to be passed to DPPP (optional)"
+        ),
+        'nproc': ingredient.IntField(
             '--nproc',
-            help="Maximum number of simultaneous processes per compute node",
-            default="8"
-        )
-        self.optionparser.add_option(
+            default=8,
+            help="Maximum number of simultaneous processes per compute node"
+        ),
+        'nthreads': ingredient.IntField(
             '--nthreads',
-            help="Number of threads per (N)DPPP process",
-            default="2"
-        )
-        self.optionparser.add_option(
+            default=2,
+            help="Number of threads per (N)DPPP process"
+        ),
+        'mapfile': ingredient.StringField(
             '--mapfile',
-            help="Output mapfile"
+            help="Output mapfile name"
         )
+    }
+
+    outputs = {
+        'mapfile': ingredient.FileField()
+    }
+
 
     def go(self):
         self.logger.info("Starting DPPP run")
         super(new_dppp, self).go()
-
-        #                            Check if the specified parset really exists
-        # ----------------------------------------------------------------------
-        if not os.path.exists(str(self.inputs['parset'])):
-            self.logger.error(
-                "DPPP parset (%s) not found" % (str(self.inputs['parset']))
-            )
-            return 1
 
         #                Keep track of "Total flagged" messages in the DPPP logs
         # ----------------------------------------------------------------------
@@ -90,7 +90,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         #                           Load file <-> compute node mapping from disk
         # ----------------------------------------------------------------------
         self.logger.debug("Loading map from %s" % self.inputs['args'])
-        data = load_data_map(self.inputs['args'])
+        data = load_data_map(self.inputs['args'][0])
 
         #                               Limit number of process per compute node
         # ----------------------------------------------------------------------
@@ -151,8 +151,8 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
             parset = Parset()
             for host, filenames in outnames.iteritems():
                 parset.addStringVector(host, filenames)
+            parset.writeFile(self.inputs['mapfile'])
             self.outputs['mapfile'] = self.inputs['mapfile']
-            parset.writeFile(self.outputs['mapfile'])
             return 0
 
 if __name__ == '__main__':

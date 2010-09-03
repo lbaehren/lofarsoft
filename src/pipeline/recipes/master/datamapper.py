@@ -60,8 +60,8 @@ class datamapper(BaseRecipe):
         for host, filenames in data.iteritems():
             parset.addStringVector(host, filenames)
 
+        parset.writeFile(self.inputs['mapfile'])
         self.outputs['mapfile'] = self.inputs['mapfile']
-        parset.writeFile(self.outputs['mapfile'])
 
         return 0
 

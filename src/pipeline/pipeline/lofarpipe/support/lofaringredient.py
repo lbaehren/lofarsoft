@@ -73,6 +73,16 @@ class IntField(Field):
     def is_valid(self, value):
         return isinstance(value, int)
 
+    def coerce(self, value):
+        return int(value)
+
+class FloatField(Field):
+    def is_valid(self, value):
+        return isinstance(value, float)
+
+    def coerce(self, value):
+        return float(value)
+
 class FileField(Field):
     def is_valid(self, value):
         return os.path.exists(value)
@@ -80,6 +90,18 @@ class FileField(Field):
 class ExecField(Field):
     def is_valid(self, value):
         return os.access(value, os.X_OK)
+
+class DirectoryField(Field):
+    def is_valid(self, value):
+        return os.path.isdir(value)
+
+    def coerce(self, value):
+        try:
+            os.makedirs(value)
+        except:
+            pass
+        finally:
+            return value
 
 class BoolField(Field):
     def is_valid(self, value):
@@ -102,6 +124,10 @@ class ListField(Field):
             return string_to_list(value)
         else:
             return value
+
+class DictField(Field):
+    def is_valid(self, value):
+        return isinstance(value, dict)
 
 class FileList(ListField):
     def is_valid(self, value):

@@ -1,19 +1,35 @@
+#                                                         LOFAR IMAGING PIPELINE
+#
+#                  vdsreader recipe: extract filenames + metadata from GVDS file
+#                                                            John Swinbank, 2010
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
+import lofarpipe.support.utilities as utilities
+import lofarpipe.support.lofaringredient as ingredient
+
 from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.utilities import get_parset
-import lofarpipe.support.utilities as utilities
+
 
 class vdsreader(BaseRecipe):
     """
     Read a GVDS file and return a list of the MS filenames referenced therein
     together with selected metadata.
     """
-    def __init__(self):
-        super(vdsreader, self).__init__()
-        self.optionparser.add_option(
-            '-g', '--g(v)ds-file',
-            dest="gvds",
-            help="G(V)DS file describing data to be processed"
+    inputs = {
+        'gvds': ingredient.FileField(
+            '-g', '--gvds',
+            help="Output file name"
         )
+    }
+
+    outputs = {
+        'data': ingredient.ListField(),
+        'start_time': ingredient.StringField(),
+        'end_time': ingredient.StringField(),
+        'pointing': ingredient.DictField()
+    }
 
     def go(self):
         self.logger.info("Starting vdsreader run")

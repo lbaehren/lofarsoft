@@ -25,6 +25,7 @@ from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.pipelinelogging import log_process_output
 import lofarpipe.support.utilities as utilities
+import lofarpipe.support.lofaringredient as ingredient
 
 class bbs(BaseRecipe):
     """
@@ -35,58 +36,62 @@ class bbs(BaseRecipe):
     simultaneous processing, and orchestrating the running of GlobalControl
     and KernelControl executables.
     """
-    def __init__(self):
-        super(bbs, self).__init__()
-        self.optionparser.add_option(
+    inputs = {
+        'control_exec': ingredient.ExecField(
             '--control-exec',
             dest="control_exec",
             help="BBS Control executable"
-        )
-        self.optionparser.add_option(
+        ),
+        'kernel_exec': ingredient.ExecField(
             '--kernel-exec',
             dest="kernel_exec",
             help="BBS Kernel executable"
-        )
-        self.optionparser.add_option(
+        ),
+        'initscript': ingredient.FileField(
             '--initscript',
             dest="initscript",
             help="Initscript to source (ie, lofarinit.sh)"
-        )
-        self.optionparser.add_option(
+        ),
+        'parset': ingredient.FileField(
             '-p', '--parset',
             dest="parset",
             help="BBS configuration parset"
-        )
-        self.optionparser.add_option(
+        ),
+        'key': ingredient.StringField(
             '--key',
             dest="key",
             help="Key to identify BBS session"
-        )
-        self.optionparser.add_option(
+        ),
+        'db_host': ingredient.StringField(
             '--db-host',
             dest="db_host",
             help="Database host with optional port"
-        )
-        self.optionparser.add_option(
+        ),
+        'db_user': ingredient.StringField(
             '--db-user',
             dest="db_user",
             help="Database user"
-        )
-        self.optionparser.add_option(
+        ),
+        'db_name': ingredient.StringField(
             '--db-name',
             dest="db_name",
             help="Database name"
-        )
-        self.optionparser.add_option(
+        ),
+        'combinevds': ingredient.ExecField(
             '--combinevds',
             help="combinevds executable",
             default="/opt/LofIm/daily/lofar/bin/combinevds"
-        )
-        self.optionparser.add_option(
+        ),
+        'nproc': ingredient.IntField(
             '--nproc',
             help="Maximum number of simultaneous processes per compute node",
-            default="8"
+            default=8
         )
+    }
+
+    outputs = {
+        'data': ingredient.ListField()
+    }
 
     def go(self):
         self.logger.info("Starting BBS run")

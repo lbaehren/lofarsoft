@@ -29,11 +29,13 @@ class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
             '-g', '--gvds',
             help="Output file name"
         ),
-        'directory': ingredient.StringField(
-            '--directory', help="Output directory"
+        'directory': ingredient.DirectoryField(
+            '--directory',
+            help="Output directory"
         ),
         'makevds': ingredient.ExecField(
-            '--makevds', help="makevds executable"
+            '--makevds',
+            help="makevds executable"
         ),
         'combinevds': ingredient.ExecField(
             '--combinevds', help="combinevds executable"
@@ -66,15 +68,6 @@ class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
         # ----------------------------------------------------------------------
         self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
         compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
-
-        if self.inputs['unlink'] == "False":
-            self.inputs['unlink'] = False
-
-        try:
-            os.makedirs(self.inputs['directory'])
-        except OSError, failure:
-            if failure.errno != errno.EEXIST:
-                raise
 
         command = "python %s" % (
             self.__file__.replace('master', 'nodes').replace('new_vdsmaker', 'vdsmaker')
@@ -138,6 +131,8 @@ class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
         if failure:
             self.logger.info("Failure was set")
             return 1
+        elif not self.outputs.complete():
+            self.logger.info("Outputs incomplete")
         else:
             return 0
 

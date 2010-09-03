@@ -16,6 +16,7 @@ import tempfile
 
 from pyrap.quanta import quantity
 
+import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.lofarrecipe import BaseRecipe
 from lofarpipe.support.pipelinelogging import log_time, log_process_output
 from lofarpipe.support.clusterlogger import clusterlogger
@@ -34,34 +35,38 @@ class cimager(BaseRecipe):
     Ingests an MWimager-style parset, converting it to cimager format as
     required.
     """
-    def __init__(self):
-        super(cimager, self).__init__()
-        self.optionparser.add_option(
+    inputs = {
+        'imager_exec': ingredient.ExecField(
             '--imager-exec',
             help="cimager executable"
-        )
-        self.optionparser.add_option(
+        ),
+        'convert_exec': ingredient.ExecField(
             '--convert-exec',
             help="convertimagerparset executable"
-        )
-        self.optionparser.add_option(
+        ),
+        'parset': ingredient.FileField(
             '--parset',
             help="Imager configuration parset (mwimager format)"
-        )
-        self.optionparser.add_option(
+        ),
+        'nproc': ingredient.IntField(
             '--nproc',
             help="Maximum number of simultaneous processes per compute node",
-            default="8"
-        )
-        self.optionparser.add_option(
+            default=8
+        ),
+        'timestep': ingredient.FloatField(
             '--timestep',
-            help="If set, multiple images will be made, each using timestep seconds of data",
-            default="None"
-        )
-        self.optionparser.add_option(
+            help="If non-zero, multiple images will be made, each using timestep seconds of data",
+            default=0.0
+        ),
+        'results_dir': ingredient.DirectoryField(
             '--results-dir',
             help="Directory in which resulting images will be placed",
         )
+    }
+
+    outputs = {
+        'images': ingredient.FileList()
+    }
 
     def go(self):
         self.logger.info("Starting cimager run")
@@ -97,7 +102,7 @@ class cimager(BaseRecipe):
         # ----------------------------------------------------------------------
         timesteps = []
         results_dir = self.inputs['results_dir']
-        if self.inputs['timestep'] == "None":
+        if self.inputs['timestep'] == 0:
             self.logger.info("No timestep specified; imaging all data")
             timesteps = [("None", "None", results_dir)]
         else:
