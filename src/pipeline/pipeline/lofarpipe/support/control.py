@@ -14,7 +14,6 @@ import threading
 import collections
 
 from lofarpipe.support.lofarrecipe import LOFARrecipe
-from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
 from lofarpipe.support.lofarexceptions import PipelineException, PipelineQuit
 import lofarpipe.support.utilities as utilities
 
