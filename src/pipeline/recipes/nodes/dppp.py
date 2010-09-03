@@ -50,10 +50,12 @@ class dppp(LOFARnode):
 
             #       Patch the parset with the correct input/output MS names and,
             #                                   if available, start & end times.
+            #                            The uselogger option enables log4cplus.
             # ------------------------------------------------------------------
             patch_dictionary = {
                 'msin': infile,
                 'msout': outfile,
+                'uselogger': 'True'
             }
             if start_time and start_time != "None":
                 patch_dictionary['msin.starttime'] = start_time

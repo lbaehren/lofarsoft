@@ -85,7 +85,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
 
         #                Keep track of "Total flagged" messages in the DPPP logs
         # ----------------------------------------------------------------------
-        self.logger.searchpatterns["totalflagged"] = "Total flagged"
+        self.logger.searchpatterns["fullyflagged"] = "Fully flagged baselines"
 
         #                           Load file <-> compute node mapping from disk
         # ----------------------------------------------------------------------
@@ -139,7 +139,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         #    Log some information on total amount of data flagged (as a proof of
         #               concept, rather than a really useful facility, for now).
         # ----------------------------------------------------------------------
-        matches = self.logger.searchpatterns["totalflagged"].results
+        matches = self.logger.searchpatterns["fullyflagged"].results
         self.logger.searchpatterns.clear() # Clear searchpatterns to avoid loop!
         for match in matches:
             self.logger.info(match.getMessage())
