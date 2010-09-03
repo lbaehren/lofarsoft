@@ -152,15 +152,15 @@ class BaseRecipe(BaseIngredients, WSRTrecipe):
         this one to perform necessary initialisation.
         """
         # Every recipe needs a job identifier
-        if not self.inputs["job_name"]:
+        if not self.inputs.has_key("job_name"):
             raise PipelineException("Job undefined")
 
-        if not self.inputs["start_time"]:
+        if not self.inputs.has_key("start_time"):
             import datetime
             self.inputs["start_time"] = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
 
         # If a config file hasn't been specified, use the default
-        if not self.inputs["config"]:
+        if not self.inputs.has_key("config"):
             # Possible config files, in order of preference:
             conf_locations = (
                 os.path.join(sys.path[0], 'pipeline.cfg'),
@@ -170,7 +170,7 @@ class BaseRecipe(BaseIngredients, WSRTrecipe):
                 if os.access(path, os.R_OK):
                     self.inputs["config"] = path
                     break
-            if not self.inputs["config"]:
+            if not self.inputs.has_key("config"):
                 raise PipelineException("Configuration file not found")
 
         self.logger.debug("Pipeline start time: %s" % self.inputs['start_time'])
@@ -182,7 +182,7 @@ class BaseRecipe(BaseIngredients, WSRTrecipe):
         })
         self.config.read(self.inputs["config"])
 
-        if not self.inputs['runtime_directory']:
+        if not self.inputs.has_key('runtime_directory'):
             self.inputs["runtime_directory"] = self.config.get(
                 "DEFAULT", "runtime_directory"
             )
@@ -192,15 +192,14 @@ class BaseRecipe(BaseIngredients, WSRTrecipe):
         if not os.access(self.inputs['runtime_directory'], os.F_OK):
             raise IOError, "Runtime directory doesn't exist"
 
-
-        if not self.inputs['default_working_directory']:
+        if not self.inputs.has_key('default_working_directory'):
             self.inputs["default_working_directory"] = self.config.get(
                 "DEFAULT", "default_working_directory"
             )
         else:
             self.config.set('DEFAULT', 'default_working_directory', self.inputs['default_working_directory'])
 
-        if not self.inputs["task_files"] or isinstance(self.inputs["task_files"], str):
+        if not self.inputs.has_key("task_files"):
             try:
                 self.inputs["task_files"] = utilities.string_to_list(
                     self.config.get('DEFAULT', "task_files")
