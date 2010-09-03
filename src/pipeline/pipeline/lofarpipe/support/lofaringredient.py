@@ -28,12 +28,11 @@ class LOFARinput(WSRTingredient):
     def __init__(self, defaults):
         super(LOFARinput, self).__init__(self)
         for param in (
-            "job_name", "runtime_directory", "config", "task_files", "dry_run", "start_time"
+            "job_name", "runtime_directory", "config",
+            "task_files", "dry_run", "start_time"
         ):
             if defaults.has_key(param):
                 self[param] = defaults[param]
-            else:
-                self[param] = None
 
 class LOFARoutput(WSRTingredient):
     """
@@ -57,7 +56,7 @@ class Field(object):
     def is_valid(self, value):
         raise NotImplementedError
 
-    def convert(self, value):
+    def coerce(self, value):
         """
         Try to convert value into the appropriate type for this sort of field.
         """
@@ -78,11 +77,15 @@ class FileField(Field):
     def is_valid(self, value):
         return os.path.exists(value)
 
+class ExecField(Field):
+    def is_valid(self, value):
+        return os.access(value, os.X_OK)
+
 class BoolField(Field):
     def is_valid(self, value):
         return isinstance(value, bool)
 
-    def convert(self, value):
+    def coerce(self, value):
         if value == "False" or value == "None" or value == "":
             return False
         elif value == "True":
@@ -92,9 +95,9 @@ class BoolField(Field):
 
 class ListField(Field):
     def is_valid(self, value):
-        return not isinstance(value, str) and is_iterable(obj)
+        return not isinstance(value, str) and is_iterable(value)
 
-    def convert(self, value):
+    def coerce(self, value):
         if isinstance(value, str):
             return string_to_list(value)
         else:
@@ -125,11 +128,11 @@ class LOFARingredient(dict):
     def __setitem__(self, key, value):
         if key in self._fields:
             field = self._fields[key]
-            converted_value = field.convert(value)
+            converted_value = field.coerce(value)
             if not field.is_valid(converted_value):
                 raise TypeError("%s has invalid type for %s" % (str(value), key))
         else:
-            raise TypeError("Input %s not defined" % key)
+            raise TypeError("Ingredient %s not defined" % key)
         super(LOFARingredient, self).__setitem__(key, converted_value)
 
     def make_options(self):
@@ -138,26 +141,60 @@ class LOFARingredient(dict):
     def complete(self):
         return not False in [self.has_key(key) for key in self._fields.iterkeys()]
 
-class RecipeMeta(type):
+class RecipeIngredientsMeta(type):
     def __init__(cls, name, bases, ns):
         if not hasattr(cls, "_fields"):
             cls._fields = {}
 
-        for key, value in ns.iteritems():
-            if issubclass(type(value), Field):
+        if ns.has_key('inputs'):
+            for key, value in ns['inputs'].iteritems():
                 cls._fields[key] = value
 
-class BaseIngredients(object):
-    __metaclass__ = RecipeMeta
+class RecipeIngredients(object):
+    __metaclass__ = RecipeIngredientsMeta
 
-    job_name = StringField('-j', '--job-name', help="Job name")
-    runtime_directory = FileField('-r', '--runtime-directory', help="Runtime directory")
-    config = FileField('-c', '--config', help="Configuration file")
-    task_files = FileList('--task-file', help="Task definition file")
-    start_time = StringField('--start-time', help="[Expert use] Pipeline start time")
-    dry_run = BoolField('-n', '--dry-run', help="Dry run", default=False)
-    args = ListField('--args', help="Args", default=[])
+    inputs = {
+        'job_name': StringField(
+            '-j', '--job-name',
+            help="Job name"
+        ),
+        'runtime_directory': FileField(
+            '-r', '--runtime-directory',
+            help="Runtime directory"
+        ),
+        'config': FileField(
+            '-c', '--config',
+            help="Configuration file"
+        ),
+        'task_files': FileList(
+            '--task-file',
+            help="Task definition file"
+        ),
+        'start_time': StringField(
+            '--start-time',
+            help="[Expert use] Pipeline start time"
+        ),
+        'default_working_directory': StringField(
+            '--default-working-directory',
+            help="Default working directory"
+        ),
+        'dry_run': BoolField(
+            '-n', '--dry-run',
+            help="Dry run",
+            default=False
+        ),
+        'args': ListField(
+            '--args', help="Args", default=[]
+        )
+    }
+
+    outputs = {}
 
     def __init__(self):
-        super(BaseIngredients, self).__init__()
-        self.inputs = LOFARingredient(self._fields) # Must run *after* WSRTrecipe.__init__()
+        self._outputs = self.outputs   # Make a copy before WSRTrecipe clobbers!
+        super(RecipeIngredients, self).__init__()
+        #                  Must run the following *after* WSRTrecipe.__init__().
+        # ----------------------------------------------------------------------
+        self.inputs = LOFARingredient(self._fields)
+        self.optionparser.add_options(self.inputs.make_options())
+        self.outputs = LOFARingredient(self._outputs)

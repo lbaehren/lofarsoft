@@ -20,11 +20,11 @@ import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.lofarexceptions import PipelineException
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
-from lofarpipe.support.lofaringredient import BaseIngredients, LOFARinput, LOFARoutput
+from lofarpipe.support.lofaringredient import RecipeIngredients, LOFARinput, LOFARoutput
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.ipython import IPythonRecipeMixIn
 
-class BaseRecipe(BaseIngredients, WSRTrecipe):
+class BaseRecipe(RecipeIngredients, WSRTrecipe):
     """
     Provides standard boiler-plate used in the various LOFAR pipeline recipes.
     """
