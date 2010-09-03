@@ -11,6 +11,8 @@ from optparse import make_option
 from lofarpipe.cuisine.ingredient import WSRTingredient
 from lofarpipe.support.utilities import string_to_list, is_iterable
 
+#                          Old-skool input and output dicts can still be useful.
+# ------------------------------------------------------------------------------
 class LOFARinput(WSRTingredient):
     """
     All LOFAR pipeline ingredients are required to provide a few basic
@@ -39,6 +41,9 @@ class LOFARoutput(WSRTingredient):
     """
     pass
 
+#                   Fields provide validation and type checking of input/output.
+#                                                     All should subclass Field.
+# ------------------------------------------------------------------------------
 class Field(object):
     def __init__(self, *opts, **attrs):
         self.optionstrings = opts
@@ -97,11 +102,17 @@ class ListField(Field):
 
 class FileList(ListField):
     def is_valid(self, value):
-        if super(FileList, self).convert(value) and \
+        if super(FileList, self).is_valid(value) and \
         not False in [os.path.exists(file) for file in value]:
             return True
         else:
             return False
+
+#                                            The magic that makes it all work...
+#                      RecipeIngredients should be mixed in to any recipes which
+#             need to deal with input or output. BaseRecipe already includes it,
+#                                so that will almost always the case by default.
+# ------------------------------------------------------------------------------
 
 class LOFARingredient(dict):
     def __init__(self, fields):
