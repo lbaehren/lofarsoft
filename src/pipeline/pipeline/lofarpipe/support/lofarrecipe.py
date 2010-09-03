@@ -134,7 +134,7 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
             for key, value in kwargs.iteritems():
                 inputs[key] = value
             # These inputs are never required:
-            for inp in ('recipe', 'recipe_directories', 'lofarroot', 'default_working_directory', 'cwd'):
+            for inp in ('recipe', 'recipe_directories', 'lofarroot', 'cwd'):
                 del(inputs[inp])
             outputs = LOFARoutput()
             if self.cook_recipe(recipe, inputs, outputs):
@@ -191,13 +191,6 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
 
         if not os.access(self.inputs['runtime_directory'], os.F_OK):
             raise IOError, "Runtime directory doesn't exist"
-
-        if not self.inputs.has_key('default_working_directory'):
-            self.inputs["default_working_directory"] = self.config.get(
-                "DEFAULT", "default_working_directory"
-            )
-        else:
-            self.config.set('DEFAULT', 'default_working_directory', self.inputs['default_working_directory'])
 
         if not self.inputs.has_key("task_files"):
             try:

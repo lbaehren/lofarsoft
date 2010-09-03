@@ -200,10 +200,6 @@ class RecipeIngredients(object):
             '--start-time',
             help="[Expert use] Pipeline start time"
         ),
-        'default_working_directory': StringField(
-            '--default-working-directory',
-            help="Default working directory"
-        ),
         'dry_run': BoolField(
             '-n', '--dry-run',
             help="Dry run",
