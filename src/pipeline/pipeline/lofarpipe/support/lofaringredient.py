@@ -169,12 +169,15 @@ class LOFARingredient(dict):
 
 class RecipeIngredientsMeta(type):
     def __init__(cls, name, bases, ns):
-        if not hasattr(cls, "_fields"):
-            cls._fields = {}
-
+        # Inputs are inherited from the superclass...
+        if not hasattr(cls, "_infields"):
+            cls._infields = {}
         if ns.has_key('inputs'):
-            for key, value in ns['inputs'].iteritems():
-                cls._fields[key] = value
+            cls._infields.update(ns['inputs'])
+
+        # Outputs are not.
+        if ns.has_key('outputs'):
+            cls._outfields = ns['outputs']
 
 class RecipeIngredients(object):
     __metaclass__ = RecipeIngredientsMeta
@@ -213,10 +216,9 @@ class RecipeIngredients(object):
     outputs = {}
 
     def __init__(self):
-        self._outputs = self.outputs   # Make a copy before WSRTrecipe clobbers!
         super(RecipeIngredients, self).__init__()
         #                  Must run the following *after* WSRTrecipe.__init__().
         # ----------------------------------------------------------------------
-        self.inputs = LOFARingredient(self._fields)
+        self.inputs = LOFARingredient(self._infields)
+        self.outputs = LOFARingredient(self._outfields)
         self.optionparser.add_options(self.inputs.make_options())
-        self.outputs = LOFARingredient(self._outputs)
