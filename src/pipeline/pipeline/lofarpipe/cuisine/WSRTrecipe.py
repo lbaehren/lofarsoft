@@ -98,7 +98,9 @@ class WSRTrecipe(object):
         except IOError:
             logging.debug("Unable to open parset")
         (options, args) = self.optionparser.parse_args(opts)
-        self.inputs = vars(options)
+        for key, value in vars(options).iteritems():
+            if value is not None:
+                self.inputs[key] = value
         self.inputs['args'] = args
         if options.help:
             return 1
