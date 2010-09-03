@@ -11,10 +11,31 @@ from optparse import make_option
 from lofarpipe.cuisine.ingredient import WSRTingredient
 from lofarpipe.support.utilities import string_to_list, is_iterable
 
+class LOFARinput(WSRTingredient):
+    """
+    All LOFAR pipeline ingredients are required to provide a few basic
+    parameters:
+
+    * job_name
+    * runtime_directory
+    * config
+    * task_files
+    * dry_run
+    * start_time
+    """
+    def __init__(self, defaults):
+        super(LOFARinput, self).__init__(self)
+        for param in (
+            "job_name", "runtime_directory", "config", "task_files", "dry_run", "start_time"
+        ):
+            if defaults.has_key(param):
+                self[param] = defaults[param]
+            else:
+                self[param] = None
+
 class LOFARoutput(WSRTingredient):
     """
-    LOFARoutput makes no changes to WSRTingredient. It merely provudes
-    nominative consistency with LOFARinput.
+    LOFARoutput makes no changes to WSRTingredient.
     """
     pass
 
@@ -82,18 +103,10 @@ class FileList(ListField):
         else:
             return False
 
-class LOFARingredientMeta(type):
-    def __init__(cls, name, bases, ns):
-        if not hasattr(cls, "_fields"):
-            cls._fields = {}
-
-        for key, value in ns.iteritems():
-            if issubclass(type(value), Field):
-                cls._fields[key] = value
-
 class LOFARingredient(dict):
-    __metaclass__ = LOFARingredientMeta
-    def __init__(self):
+    def __init__(self, fields):
+        self._fields = fields
+
         for key, value in self._fields.iteritems():
             if hasattr(value, "default"):
                 self[key] = value.default
@@ -105,7 +118,7 @@ class LOFARingredient(dict):
             if not field.is_valid(converted_value):
                 raise TypeError("%s has invalid type for %s" % (str(value), key))
         else:
-            raise TypeError("Field %s not defined" % key)
+            raise TypeError("Input %s not defined" % key)
         super(LOFARingredient, self).__setitem__(key, converted_value)
 
     def make_options(self):
@@ -114,13 +127,26 @@ class LOFARingredient(dict):
     def complete(self):
         return not False in [self.has_key(key) for key in self._fields.iterkeys()]
 
-class LOFARinput(LOFARingredient):
+class RecipeMeta(type):
+    def __init__(cls, name, bases, ns):
+        if not hasattr(cls, "_fields"):
+            cls._fields = {}
+
+        for key, value in ns.iteritems():
+            if issubclass(type(value), Field):
+                cls._fields[key] = value
+
+class BaseIngredients(object):
+    __metaclass__ = RecipeMeta
+
     job_name = StringField('-j', '--job-name', help="Job name")
     runtime_directory = FileField('-r', '--runtime-directory', help="Runtime directory")
     config = FileField('-c', '--config', help="Configuration file")
     task_files = FileList('--task-file', help="Task definition file")
-    dry_run = BoolField('-n', '--dry-run', help="Dry run", default=False)
     start_time = StringField('--start-time', help="[Expert use] Pipeline start time")
+    dry_run = BoolField('-n', '--dry-run', help="Dry run", default=False)
+    args = ListField('--args', help="Args", default=[])
 
-class MoreInputs(LOFARinput):
-    foo = StringField('--foo')
+    def __init__(self):
+        super(BaseIngredients, self).__init__()
+        self.inputs = LOFARingredient(self._fields) # Must run *after* WSRTrecipe.__init__()

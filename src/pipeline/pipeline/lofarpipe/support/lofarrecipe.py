@@ -20,25 +20,19 @@ import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.lofarexceptions import PipelineException
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
-#from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
+from lofarpipe.support.lofaringredient import BaseIngredients, LOFARinput, LOFARoutput
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.ipython import IPythonRecipeMixIn
 
-class BaseRecipe(WSRTrecipe):
+class BaseRecipe(BaseIngredients, WSRTrecipe):
     """
     Provides standard boiler-plate used in the various LOFAR pipeline recipes.
     """
-    class MyInputs(LOFARinput):
-        default_working_directory = ingredient.FileField(
-            '--default-working-directory',
-            help="Default working directory"
-        )
-        lofarroot = ingredient.FileField(
-            '--lofarroot',
-            dest="lofarroot",
-            help="Root of LOFAR software tree"
-        )
-        # Use metaclass to automatically set up self.inputs on initt?
+    # Class ordering is important here.
+    # WSRTrecipe.__init__ does not call a superclass, hence BaseIngredients
+    # must go first.
+    # Further, BaseIngredients.__init__ overwrites the inputs dict provided by
+    # WSRTrecipe, so it must call super() before setting up inputs.
 
     def __init__(self):
         """
