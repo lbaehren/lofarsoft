@@ -439,6 +439,7 @@ def hArray_getitem(self,indexlist):
 
     Use array.setDim([dim1,dim2,...,dimN]) to set the dimensions.
     """
+
     if type(indexlist)==tuple: indexlist=list(indexlist)
     else: indexlist=[indexlist]
     ary=hArray(self)
@@ -746,7 +747,10 @@ def type2vector(basetype):
     """
     if basetype in hBaseTypes:
         return hVectorTypeDictionary[basetype]()
-    else: return None
+    elif basetype == long:
+        return hVectorTypeDictionary[int]()
+    else:
+        return None
 
 def type2array(basetype):
     """type2array(float) -> Vec(0)=[]
@@ -1225,8 +1229,8 @@ def DataReader_getHeaderVariables(self):
     put it into attributes of the DataReader object.
     """
     self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample']))
-    for v in self.keywords:
-        setattr(self,v,self.get(v))
+#    for v in self.keywords:
+#        setattr(self,v,self.get(v))
 
 def DataReader_getitem(self,*keys):
     """

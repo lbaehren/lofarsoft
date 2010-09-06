@@ -64,11 +64,11 @@ class TBBdata:
         
         nyquistZone=get(self.files,"nyquistZone",True)
         if antennaset and "HBA" in antennaset and 1 in nyquistZone:
-            if get(files,"sampleFrequency") > 180000000.0:
+            if get(self.files,"sampleFrequency") > 180000000.0:
                 nyquistZone=2
             else:
                 nyquistZone=3
-            set(files,"nyquistZone",nyquistZone)
+            set(self.files,"nyquistZone",nyquistZone)
         else:
             nyquistZone=nyquistZone[0]
         

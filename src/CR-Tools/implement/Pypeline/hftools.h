@@ -21,6 +21,7 @@
 #include <typeinfo>
 #include <ctime>
 #include <fftw3.h>
+#include <tmf.h>
 
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>

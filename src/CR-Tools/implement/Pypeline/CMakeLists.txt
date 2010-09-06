@@ -1,6 +1,13 @@
 
 message (STATUS "[CR-Tools] Adding implement/Pypeline ...")
 
+##__________________________________________________________
+## Check required external packages
+
+include (FindPython)
+include (FindBoost)
+include (FindTMF)
+
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
 
@@ -17,8 +24,11 @@ set (PYPELINE_MODULES
   metadata.py
   bfdata.py
   imager.py
-  IO.py
   calibration.py
+  IO.py
+  srcfind.py
+  PPF.py
+  matching.py
   )
 
 set (PYPELINE_SCRIPTS
@@ -63,7 +73,7 @@ foreach (FILE ${PYPELINE_CPP_FILES})
     PRE_BUILD
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.split.cc
 
-    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP  -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.split.cc | ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.cc
+    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP  -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.split.cc | ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.cc
     )
 endforeach (FILE)
 
@@ -85,6 +95,7 @@ add_library (hftools MODULE
 
 target_link_libraries (hftools
   cr
+  ${TMF_LIBRARIES}
   ${DAL_LIBRARIES}
   ${HDF5_LIBRARIES}
   ${CASA_LIBRARIES}

@@ -1349,7 +1349,7 @@ template <class T> hArray<T> &  hArray<T>::setSlice(HInteger beg, HInteger end){
   return *this;
 }
 
-/*!  \brief Sets begin and end of the currently active slice using an integer array of array indices.
+/*!  \brief Sets begin and end of the currently active slice sing an integer array of array indices.
 
 If the length of the index vector is shorter than the actual number of
 dimensions, this will provide a slice over the remanining dimensions
@@ -5213,6 +5213,261 @@ void HFPP_FUNC_NAME (const CIter weights,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Get pixel coordinates for given vector of world coordinates
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hWorld2Pixel
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(pixel)()("Pixel coordinates")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(world)()("World coordinates")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (string)(refcode)()("reference code for coordinate system e.g. AZEL,J2000,...")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (string)(projection)()("the projection used e.g. SIN,STG,...")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HNumber)(refLong)()("reference value for longtitude (CRVAL)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HNumber)(refLat)()("reference value for latitude (CRVAL)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_6 (HNumber)(incLon)()("incLon increment value for longtitude (CDELT)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_7 (HNumber)(incLat)()("incLon increment value for latitude (CDELT)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_8 (HNumber)(refX)()("refX reference x pixel (CRPIX)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_9 (HNumber)(refY)()("refY reference y pixel (CRPIX)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter pixel, const Iter pixel_end,
+    const Iter world, const Iter world_end,
+    const string refcode, const string projection,
+    const HNumber refLong, const HNumber refLat,
+    const HNumber incLong, const HNumber incLat,
+    const HNumber refX, const HNumber refY
+    )
+{
+  // Check input
+  if (world_end-world != pixel_end-pixel)
+  {
+    std::cerr<<"Error, in world2Pixel(): input and output vector not of same length."<<std::endl;
+  }
+
+  casa::MDirection::Types type;
+  if (casa::MDirection::getType(type, refcode) != true)
+  {
+    std::cerr<<"Error, in world2Pixel(): input reference type invalid."<<std::endl;
+  }
+
+  casa::Projection::Type proj;
+  proj=casa::Projection::type(static_cast<casa::String>(projection));
+  if (proj==casa::Projection::N_PROJ)
+  {
+    std::cerr<<"Error, in world2Pixel(): input projection type invalid."<<std::endl;
+  }
+
+  // Get spatial direction coordinate system
+  casa::Matrix<casa::Double> xform(2,2);
+  xform = 0.0; xform.diagonal() = 1.0;
+
+  casa::DirectionCoordinate dir(type,
+      proj,
+      static_cast<casa::Double>(refLong),
+      static_cast<casa::Double>(refLat),
+      static_cast<casa::Double>(incLong),
+      static_cast<casa::Double>(incLat),
+      xform,
+      static_cast<casa::Double>(refX),
+      static_cast<casa::Double>(refY));
+
+  // Get iterators
+  Iter world_it=world;
+  Iter pixel_it=pixel;
+
+  // Placeholders for conversion
+  casa::Vector<casa::Double> cworld(2), cpixel(2); 
+
+  // Loop over all world coordinates 
+  while (world_it!=world_end && pixel_it!=pixel_end)
+  {
+    // Get world coordinates into casa vector for conversion
+    cworld[0]=static_cast<casa::Double>(*world_it);
+    ++world_it;
+    cworld[1]=static_cast<casa::Double>(*world_it);
+
+    // Convert world to pixel coordinates
+    dir.toPixel(cpixel, cworld);
+
+    // Retrieve pixel coordinates
+    *pixel_it=static_cast<HNumber>(cpixel[0]);
+    ++pixel_it;
+    *pixel_it=static_cast<HNumber>(cpixel[1]);
+
+    // Next pixel
+    ++pixel_it;
+    ++world_it;
+  }
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Get world coordinates for given vector of pixel coordinates.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hPixel2World
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(world)()("World coordinates")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(pixel)()("Pixel coordinates")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (string)(refcode)()("reference code for coordinate system e.g. AZEL,J2000,...")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (string)(projection)()("the projection used e.g. SIN,STG,...")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HNumber)(refLong)()("reference value for longtitude (CRVAL)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HNumber)(refLat)()("reference value for latitude (CRVAL)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_6 (HNumber)(incLon)()("incLon increment value for longtitude (CDELT)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_7 (HNumber)(incLat)()("incLon increment value for latitude (CDELT)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_8 (HNumber)(refX)()("refX reference x pixel (CRPIX)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_9 (HNumber)(refY)()("refY reference y pixel (CRPIX)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
+    const Iter pixel, const Iter pixel_end,
+    const string refcode, const string projection,
+    const HNumber refLong, const HNumber refLat,
+    const HNumber incLong, const HNumber incLat,
+    const HNumber refX, const HNumber refY
+    )
+{
+  // Check input
+  if (world_end-world != pixel_end-pixel)
+  {
+    std::cerr<<"Error, in hPixel2World(): input and output vector not of same length."<<std::endl;
+  }
+
+  casa::MDirection::Types type;
+  if (casa::MDirection::getType(type, refcode) != true)
+  {
+    std::cerr<<"Error, in hPixel2World(): input reference type invalid."<<std::endl;
+  }
+
+  casa::Projection::Type proj;
+  proj=casa::Projection::type(static_cast<casa::String>(projection));
+  if (proj==casa::Projection::N_PROJ)
+  {
+    std::cerr<<"Error, in hPixel2World(): input projection type invalid."<<std::endl;
+  }
+
+  // Get spatial direction coordinate system
+  casa::Matrix<casa::Double> xform(2,2);
+  xform = 0.0; xform.diagonal() = 1.0;
+
+  casa::DirectionCoordinate dir(type,
+      proj,
+      static_cast<casa::Double>(refLong),
+      static_cast<casa::Double>(refLat),
+      static_cast<casa::Double>(incLong),
+      static_cast<casa::Double>(incLat),
+      xform,
+      static_cast<casa::Double>(refX),
+      static_cast<casa::Double>(refY));
+
+  // Get iterators
+  Iter world_it=world;
+  Iter pixel_it=pixel;
+
+  // Placeholders for conversion
+  casa::Vector<casa::Double> cworld(2), cpixel(2); 
+
+  // Loop over all pixels
+  while (world_it!=world_end && pixel_it!=pixel_end)
+  {
+    // Get pixel coordinates into casa vector for conversion
+    cpixel[0]=static_cast<casa::Double>(*pixel_it);
+    ++pixel_it;
+    cpixel[1]=static_cast<casa::Double>(*pixel_it);
+
+    // Convert pixel to world coordinates
+    dir.toWorld(cworld, cpixel);
+
+    // Retrieve world coordinates
+    *world_it=static_cast<HNumber>(cworld[0]);
+    ++world_it;
+    *world_it=static_cast<HNumber>(cworld[1]);
+
+    // Next pixel
+    ++pixel_it;
+    ++world_it;
+  }
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Convert array of equatorial J2000 coordinates to horizontal, AZEL coordinates.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hEquatorial2Horizontal
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(hc)()("array with horizontal coordiates (alt, az, alt, az, ...)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(ec)()("array with equatorial coordinates (ra, dec, ra, dec, ...) ")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(utc)()("UTC as Julian Day")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(ut1_utc)()("difference UT1-UTC (as obtained from IERS bullitin A) if 0 a maximum error of 0.9 seconds is made.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HNumber)(L)()("longitude of telescope")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HNumber)(phi)()("latitude of telescope")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter hc, const Iter hc_end,
+    const Iter ec, const Iter ec_end,
+    const HNumber utc, const HNumber ut1_utc,
+    const HNumber L, const HNumber phi)
+{
+  // Constants
+  const int SECONDS_PER_DAY = 24 * 3600;
+
+  // Variables
+  HNumber alpha, delta, A, h, H;
+
+  // Calculate Terestrial Time (TT)
+  const HNumber tt = utc + tmf::tt_utc(utc) / SECONDS_PER_DAY;
+
+  // Calculate Universal Time (UT1)
+  const HNumber ut1 = utc + ut1_utc / SECONDS_PER_DAY;
+
+  // Calculate Local Apparant Sidereal Time (LAST)
+  const HNumber theta_L = tmf::last(ut1, tt, L);
+
+  // Get iterators
+  Iter hc_it=hc;
+  Iter ec_it=ec;
+
+  while (hc_it!=hc_end && ec_it!=ec_end)
+  {
+    // Get equatorial coordinates
+    alpha = *ec_it;
+    ++ec_it;
+    delta = *ec_it;
+
+    // Calculate hour angle
+    H = tmf::rad2circle(theta_L - alpha);
+
+    // Convert from equatorial to horizontal coordinates
+    tmf::equatorial2horizontal(A, h, H, delta, phi);
+
+    // Store output
+    *hc_it = A;
+    ++hc_it;
+    *hc_it = h;
+
+    // Advance iterator
+    ++hc_it;
+    ++ec_it;
+  }
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Calculates the square root of the power of a complex spectrum and add it to an output vector.
 //$COPY_TO HFILE START --------------------------------------------------

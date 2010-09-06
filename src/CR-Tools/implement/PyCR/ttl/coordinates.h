@@ -281,7 +281,7 @@ namespace ttl
 
       \param hc array with horizontal coordiates (alt, az, alt, az, ...)
       \param ec array with equatorial coordinates (ra, dec, ra, dec, ...) 
-      \param jd UTC as Julian Day
+      \param utc UTC as Julian Day
       \param ut1_utc difference UT1-UTC (as obtained from IERS bullitin A)
              if 0 a maximum error of 0.9 seconds is made.
       \param L longitude of telescope
