@@ -99,6 +99,7 @@ class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
         shutil.rmtree(pdbdir, ignore_errors=True)
 
         if self.error.isSet():
+            self.logger.warn("Detected failed parmdb job")
             return 1
         else:
             self.outputs['mapfile'] = self.inputs['args'][0]
