@@ -3055,9 +3055,10 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   Iterin1 it1=vec1;
   Iterin2 it2=vec2;
   Iter itout=vec;
-  while ((it1!=vec1_end)  && (itout !=vec_end)) {
+  while ((it1!=vec1_end)) {
     *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
     ++it1; ++it2; ++itout;
+	if (itout==vec_end) itout=vec;
     if (it2==vec2_end) it2=vec2;
   };
 }

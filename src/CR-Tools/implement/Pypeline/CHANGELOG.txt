@@ -24,3 +24,7 @@ parameter in looping mode
 2010-08-26 - Heino Falcke - rev 5751+:
 - added hFlip to reverse the order of elements in a vector
 
+2010-08-26 - Sander ter Veen - rev 5836 +
+- Corrected hMulAdd2
+- Added IO and calibration module
+- Added pipeline_start.py script for the first basic steps using these modules

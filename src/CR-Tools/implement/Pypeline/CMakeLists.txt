@@ -17,6 +17,8 @@ set (PYPELINE_MODULES
   metadata.py
   bfdata.py
   imager.py
+  IO.py
+  calibration.py
   )
 
 set (PYPELINE_SCRIPTS
