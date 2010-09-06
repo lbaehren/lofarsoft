@@ -7,7 +7,11 @@ import sys
 class parmdb(LOFARnode):
     def run(self, infile, pdb):
         with log_time(self.logger):
-            self.logger.info("Processing %s" % (infile,))
+            if os.path.exists(infile):
+                self.logger.info("Processing %s" % (infile))
+            else:
+                self.logger.error("%s does not exist" % (infile))
+                return 1
 
             output = os.path.join(infile, os.path.basename(pdb))
 

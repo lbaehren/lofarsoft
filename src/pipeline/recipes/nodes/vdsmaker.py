@@ -12,6 +12,7 @@ import sys
 
 from lofarpipe.support.lofarexceptions import ExecutableMissing
 from lofarpipe.support.utilities import create_directory, log_time
+from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.lofarnode import LOFARnode
 
 class vdsmaker(LOFARnode):
@@ -20,7 +21,12 @@ class vdsmaker(LOFARnode):
     """
     def run(self, infile, clusterdesc, outfile, executable):
         with log_time(self.logger):
-            self.logger.info("Processing: %s" % (infile))
+            if os.path.exists(infile):
+                self.logger.info("Processing %s" % (infile))
+            else:
+                self.logger.error("%s does not exist" % (infile))
+                return 1
+
             try:
                 if not os.access(executable, os.X_OK):
                     raise ExecutableMissing(executable)
@@ -33,9 +39,11 @@ class vdsmaker(LOFARnode):
                         self.logger.debug("Retrying...")
                     self.logger.debug("Running: %s" % (' '.join(cmd),))
                     makevds_process = Popen(
-                        cmd, stdout=PIPE, stderr=STDOUT, close_fds=True
+                        cmd, stdout=PIPE, stderr=PIPE, close_fds=True
                     )
-                    result = makevds_process.wait()
+                    sout, serr = makevds_process.communicate()
+                    result = makevds_process.returncode
+                    log_process_output("makevds", sout, serr, self.logger)
                     if result == 0:
                         break
                     elif result == -11:

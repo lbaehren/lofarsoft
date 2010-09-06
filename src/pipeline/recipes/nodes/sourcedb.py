@@ -14,7 +14,11 @@ from lofarpipe.support.pipelinelogging import log_process_output
 class sourcedb(LOFARnode):
     def run(self, executable, infile, catalogue):
         with log_time(self.logger):
-            self.logger.info("Processing %s" % (infile,))
+            if os.path.exists(infile):
+                self.logger.info("Processing %s" % (infile))
+            else:
+                self.logger.error("%s does not exist" % (infile))
+                return 1
 
             output = os.path.join(infile, "sky")
 
