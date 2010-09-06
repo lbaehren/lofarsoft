@@ -76,6 +76,8 @@ option (DAL_VERBOSE_CONFIGURE  "Verbose output during configuration?"         NO
 option (RM_ENABLE_ITPP       "Enable using IT++ library?"                  NO  )
 option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"             YES )
 
+option (TMF_ENABLE_PYTHON    "Build Python bindings for TMF library?"      NO)
+
 ## Handle options
 
 if (LUS_ENABLE_TESTING)
@@ -287,9 +289,9 @@ if (CR_WITH_GUI)
   add_dependencies (cr mathgl)
 endif (CR_WITH_GUI)
 
-if (CR_WITH_PYCR)
+if (CR_WITH_PYPELINE)
   add_dependencies (cr tmf)
-endif (CR_WITH_PYCR)
+endif (CR_WITH_PYPELINE)
 
 if (HAVE_ROOT AND CR_WITH_STARTOOLS)
   add_dependencies (cr startools)

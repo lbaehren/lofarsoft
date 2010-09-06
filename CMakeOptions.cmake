@@ -72,3 +72,8 @@ set (RM_ENABLE_ITPP ${RM_ENABLE_ITPP} CACHE BOOL
   "Enable using IT++ library?"                                        )
 set (RM_ENABLE_ARMADILLO ${RM_ENABLE_ARMADILLO} CACHE BOOL
   "Enable using Armadillo library?"                                   )
+
+## === TMF ======================================================================
+
+option (BUILD_PYTMF ${TMF_ENABLE_PYTHON} CACHE BOOL
+  "Build pytmf")

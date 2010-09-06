@@ -182,6 +182,7 @@ set (cr_cmake_modules
   Qt4
   ROOT
   SZIP
+  TMF
   WCSLIB
   ZLIB
   X11
