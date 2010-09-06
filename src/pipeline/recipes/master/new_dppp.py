@@ -18,7 +18,7 @@ import os
 
 import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
-from lofarpipe.support.lofarrecipe import BaseRecipe
+from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import ProcessLimiter

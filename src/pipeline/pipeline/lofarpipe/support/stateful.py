@@ -1,0 +1,61 @@
+#                                                       LOFAR PIPELINE FRAMEWORK
+#
+#                                                          Stateful LOFAR Recipe
+#                                                            John Swinbank, 2010
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
+from functools import wraps
+
+import os.path
+import cPickle
+
+from lofarpipe.support.baserecipe import BaseRecipe
+
+def stateful(run_task):
+    @wraps(run_task)
+    def wrapper(self, configblock, datafiles=[], **kwargs):
+        try:
+            my_state = self.completed.pop()
+        except (AttributeError, IndexError):
+            my_state = ('','')
+
+        if configblock == my_state[0]:
+            # We have already run this task and stored its state, or...
+            self.logger.info("Task already exists in saved state; skipping")
+            return my_state[1]
+        elif my_state[0] != '':
+            # There is a stored task, but it doesn't match this one, or...
+            self.logger.error("Stored state does not match pipeline definition; bailing out")
+            raise PipelineException("Stored state does not match pipeline definition")
+        else:
+            # We need to run this task now.
+            outputs = run_task(self, configblock, datafiles, **kwargs)
+            self.state.append((configblock, outputs))
+            self._save_state()
+            return outputs
+    return wrapper
+
+class StatefulRecipe(BaseRecipe):
+    """
+    Enables recipes to save and restore state.
+    """
+    def __init__(self):
+        super(StatefulRecipe, self).__init__()
+        self.state = []
+        self.completed = []
+
+    def _save_state(self):
+        """
+        Dump pipeline state to file.
+        """
+        statefile = open(
+            os.path.join(
+                self.config.get('layout', 'job_directory'),
+                'statefile'
+            ),
+        'w')
+        state = [self.inputs, self.state]
+        cPickle.dump(state, statefile)
+
+    run_task = stateful(BaseRecipe.run_task)

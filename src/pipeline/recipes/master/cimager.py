@@ -17,7 +17,7 @@ import tempfile
 from pyrap.quanta import quantity
 
 import lofarpipe.support.lofaringredient as ingredient
-from lofarpipe.support.lofarrecipe import BaseRecipe
+from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.pipelinelogging import log_time, log_process_output
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import run_remote_command

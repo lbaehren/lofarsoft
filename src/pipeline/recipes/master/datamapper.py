@@ -8,7 +8,7 @@
 from itertools import cycle
 from collections import defaultdict
 
-from lofarpipe.support.lofarrecipe import BaseRecipe
+from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
 from lofarpipe.support.parset import Parset
 import lofarpipe.support.lofaringredient as ingredient

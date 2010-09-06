@@ -8,7 +8,7 @@
 import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
 
-from lofarpipe.support.lofarrecipe import BaseRecipe
+from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.utilities import get_parset
 
 

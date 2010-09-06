@@ -5,7 +5,7 @@ import subprocess
 import shutil
 import threading
 
-from lofarpipe.support.lofarrecipe import BaseRecipe
+from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.ipython import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger

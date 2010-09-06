@@ -7,7 +7,7 @@ import monetdb.sql as db
 from monetdb.sql import Error as Error
 
 import lofarpipe.support.lofaringredient as ingredient
-from lofarpipe.support.lofarrecipe import BaseRecipe
+from lofarpipe.support.baserecipe import BaseRecipe
 
 header_line = """\
 #(Name, Type, Ra, Dec, I, Q, U, V, MajorAxis, MinorAxis, Orientation, ReferenceFrequency='60e6', SpectralIndexDegree='0', SpectralIndex:0='0.0', SpectralIndex:1='0.0') = format
