@@ -1,13 +1,6 @@
 
 message (STATUS "[CR-Tools] Adding implement/Pypeline ...")
 
-##__________________________________________________________
-## Check required external packages
-
-include (FindPython)
-include (FindBoost)
-include (FindTMF)
-
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
 
