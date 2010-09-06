@@ -123,20 +123,37 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
             raise PipelineException("Stored state does not match pipeline definition")
         else:
             # We need to run this task now.
+
+            # Does the task definition exist?
             try:
                 recipe = self.task_definitions.get(configblock, "recipe")
             except NoSectionError:
-                raise PipelineException("%s not found -- check your task definitions" % configblock)
+                raise PipelineException(
+                    "%s not found -- check your task definitions" % configblock
+                )
+
+            # Build inputs dict.
+
+            # First, take details from caller.
             inputs = LOFARinput(self.inputs)
             inputs['args'] = datafiles
-            inputs.update(self.task_definitions.items(configblock))
-            # Any kwargs supplied by the caller override (or supplement) the configblock
-            for key, value in kwargs.iteritems():
-                inputs[key] = value
-            # These inputs are never required:
-            for inp in ('recipe', 'recipe_directories', 'lofarroot', 'cwd'):
-                del(inputs[inp])
+
+            # Add parameters from the task file.
+            # Note that we neither need the recipe name nor any items from the
+            # DEFAULT config.
+            parameters = dict(self.task_definitions.items(configblock))
+            del parameters['recipe']
+            for key in dict(self.config.items("DEFAULT")).keys():
+                del parameters[key]
+            inputs.update(parameters)
+
+            # Update inputs with provided kwargs, if any.
+            inputs.update(kwargs)
+
+            # Default outputs dict.
             outputs = LOFARoutput()
+
+            # Cook the recipe and return the results"
             if self.cook_recipe(recipe, inputs, outputs):
                 self.logger.warn(
                     "%s reports failure (using %s recipe)" % (configblock, recipe)
