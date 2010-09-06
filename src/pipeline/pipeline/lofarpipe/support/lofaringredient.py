@@ -11,7 +11,8 @@ from optparse import make_option
 from lofarpipe.cuisine.ingredient import WSRTingredient
 from lofarpipe.support.utilities import string_to_list, is_iterable
 
-#                          Old-skool input and output dicts can still be useful.
+#       These are currently only used by lofarrecipe.run_task to provide default
+#              input and output dicts based on copying metadata from the parent.
 # ------------------------------------------------------------------------------
 class LOFARinput(WSRTingredient):
     """
@@ -24,14 +25,14 @@ class LOFARinput(WSRTingredient):
     * task_files
     * dry_run
     * start_time
+
+    These are defined in the RecipeIngredients class; all options (but not
+    arguments) defined there are required.
     """
     def __init__(self, defaults):
         super(LOFARinput, self).__init__(self)
-        for param in (
-            "job_name", "runtime_directory", "config",
-            "task_files", "dry_run", "start_time"
-        ):
-            if defaults.has_key(param):
+        for param in RecipeIngredients.inputs.iterkeys():
+            if param != "args" and defaults.has_key(param):
                 self[param] = defaults[param]
 
 class LOFARoutput(WSRTingredient):
