@@ -272,9 +272,17 @@ else (HAVE_BOOST)
   endif (BOOST_FIND_REQUIRED)
 endif (HAVE_BOOST)
 
+## Provide standard CMake variable
+
+set (Boost_FOUND     ${HAVE_BOOST}      )
+set (Boost_LIBRARIES ${BOOST_LIBRARIES} )
+
 ## -----------------------------------------------------------------------------
 
 mark_as_advanced (
+  HAVE_BOOST
   BOOST_INCLUDES
   BOOST_LIBRARIES
+  Boost_FOUND
+  Boost_LIBRARIES
 )
