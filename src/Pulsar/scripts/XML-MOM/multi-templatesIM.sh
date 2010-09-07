@@ -4,7 +4,7 @@
 # required input: list of object names or ra/dec positions
 # output is an XML file which can be uploaded into MOM (if you have ADMIN privileges)
 
-USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out template_output_file -project project_name [-start obs_start] [-time duration] [-st stations_list] [[-lst|-LST]] [[-subsHBA subband_range]] [[-subsLBA subband_range]] [[-gap duration]] [[-antenna antenna_setup]] [[-interation integration_interval]]\n\n"\
+USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out template_output_file -project project_name [-start obs_start] [-time duration] [-st stations_list] [[-lst|-LST]] [[-subsHBA subband_range]] [[-subsLBA subband_range]] [[-gap duration]] [[-antenna antenna_setup]] [[-interation integration_interval]] [[-modeHBA antenna_submode]] [[-modeLBA antenna_submode]]\n\n"\
 "      This script is run using several different methodologies which are explained below: \n"\
 "         \n"\
 "      1) The input file contains all the information: object-name/position  antenna  obs-start  duration  station-list \n"\
@@ -20,6 +20,8 @@ USAGE1="\nusage : $0 -in observation_list_file -intype source_or_position -out t
 "         [[-subsHBA subband_range]] ==> The HBA subband range (default = '77..324' for HBAHigh and 54..301 for HBALow) \n"\
 "         [[-subsLBA subband_range]] ==> The LBA subband range (default = '154..401') \n"\
 "         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
+"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)\n"\
+"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)\n"\
 "         \n"
 USAGE2="         Example Type I input file using source names:\n"\
 "         # object     antenna           start-time           duration-mins     stations\n"\
@@ -65,6 +67,8 @@ USAGE3="      2) The input file contains just: object-name/position  antenna \n"
 "         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
 "         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
+"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)\n"\
+"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)\n"\
 "         \n"\
 "         Example Type II input file using source names:\n"\
 "         # object       antenna\n"\
@@ -110,6 +114,8 @@ USAGE5="         \n"\
 "         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
 "         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) \n"\
+"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)\n"\
+"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)\n"\
 "         \n"
 USAGE6="         Example Type III input file using source names:\n"\
 "         # object      \n"\
@@ -177,6 +183,10 @@ PROJECT=""
 user_project=0
 INTEGRATION=3
 user_integration=0
+modeHBA="Dual"
+user_modeHBA=0
+modeLBA="Outer"
+user_modeLBA=0
 
 while [ $# -gt 0 ]
 do
@@ -190,6 +200,8 @@ do
      -subsHBA)           SUBBANDS_HBA=$2; user_subbands_hba=1; shift;;
      -subsLBA)           SUBBANDS_LBA=$2; user_subbands_lba=1; shift;;
      -antenna)           ANTENNA=$2; user_antenna=1; shift;;
+     -modeHBA)           modeHBA=$2; user_modeHBA=1; shift;;
+     -modeLBA)           modeLBA=$2; user_modeLBA=1; shift;;
      -stations)          STATIONS=$2; user_stations=1; shift;;
      -project)           PROJECT=$2; user_project=1; shift;;
      -integration)       INTEGRATION=$2; user_integration=1; shift;;
@@ -359,7 +371,8 @@ then
           previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
           START=$previous_start
 	else
-          tmp=`date -d "$START" "+%s"`
+          tmp_start=`echo "$START" | sed 's/T/ /'`
+          tmp=`date -d "$tmp_start" "+%s"`
           new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
 	  #new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
           previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
@@ -584,7 +597,8 @@ do
 				then
 			          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 				else
-                                  tmp=`date -d "$START" "+%s"`
+                                  tmp_start=`echo "$START" | sed 's/T/ /'`
+                                  tmp=`date -d "$tmp_start" "+%s"`
                                   new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
 				  #new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
 			          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
@@ -597,7 +611,8 @@ do
 				then
 			          START=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 				else
-                                  tmp=`date -d "$START" "+%s"`
+                                  tmp_start=`echo "$START" | sed 's/T/ /'`
+                                  tmp=`date -d "$tmp_start" "+%s"`
                                   new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
 				  # new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
 			          START=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
@@ -625,7 +640,8 @@ do
 				then
 			          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 				else
-                                  tmp=`date -d "$START" "+%s"`
+                                  tmp_start=`echo "$START" | sed 's/T/ /'`
+                                  tmp=`date -d "$tmp_start" "+%s"`
                                   new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
 	  			  #new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
 			          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
@@ -638,7 +654,8 @@ do
 				then
 			          START=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 				else
-                                  tmp=`date -d "$START" "+%s"`
+                                  tmp_start=`echo "$START" | sed 's/T/ /'`
+                                  tmp=`date -d "$tmp_start" "+%s"`
                                   new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
 				  #new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
 			          START=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
@@ -664,23 +681,57 @@ do
 		then
 		      END=`date -j -v +$TIME"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 		else
-                      tmp=`date -d "$START" "+%s"`
+              tmp_start=`echo "$START" | sed 's/T/ /'`
+              tmp=`date -d "$tmp_start" "+%s"`
 		      new_date_seconds=`echo "$tmp + $TIME * 60" | bc` 
   	              END=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 		fi
 
 	    if [[ $ANTENNA == "HBAHigh" ]]
 	    then
-	       ANTENNA_SETTING="HBA Dual"
 	       INSTRUMENT_FILTER="210-250"
+	       if [[ $user_modeHBA == 0 ]]
+	       then
+	          ANTENNA_SETTING="HBA Dual"
+	       else
+	          if [[ $modeHBA == "Zero" ]] || [[ $modeHBA == "One" ]] || [[ $modeHBA == "Dual" ]] || [[ $modeHBA == "Joined" ]]
+	          then
+	             ANTENNA_SETTING="HBA $modeHBA"
+	          else 
+	             echo "WARNING: user antenna mode HBA $modeHBA is not recognized, using defaul HBA Dual"
+	             ANTENNA_SETTING="HBA Dual"
+	          fi
+	       fi
 	    elif [[ $ANTENNA == "HBALow" ]]
 	    then
-	       ANTENNA_SETTING="HBA Dual"
 	       INSTRUMENT_FILTER="110-190"
+	       if [[ $user_modeHBA == 0 ]]
+	       then
+	          ANTENNA_SETTING="HBA Dual"
+	       else
+	          if [[ $modeHBA == "Zero" ]] || [[ $modeHBA == "One" ]] || [[ $modeHBA == "Dual" ]] || [[ $modeHBA == "Joined" ]]
+	          then
+	             ANTENNA_SETTING="HBA $modeHBA"
+	          else 
+	             echo "WARNING: user antenna mode HBA $modeHBA is not recognized, using defaul HBA Dual"
+	             ANTENNA_SETTING="HBA Dual"
+	          fi
+	       fi
 	    elif [[ $ANTENNA == "LBA" ]]
 	    then
-	       ANTENNA_SETTING="LBA Outer"
 	       INSTRUMENT_FILTER="30-90"
+	       if [[ $user_modeLBA == 0 ]]
+	       then
+	          ANTENNA_SETTING="LBA Outer"
+	       else
+	          if [[ $modeLBA == "Zero" ]] || [[ $modeLBA == "One" ]] || [[ $modeLBA == "Dual" ]] || [[ $modeLBA == "Joined" ]]
+	          then
+	             ANTENNA_SETTING="HBA $modeLBA"
+	          else 
+	             echo "WARNING: user antenna mode LBA $modeLBA is not recognized, using defaul LBA Outer"
+	             ANTENNA_SETTING="LBA Outer"
+	          fi
+	       fi
 	    fi
 		
 		if (( $user_integration == 0 ))
