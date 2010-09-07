@@ -724,7 +724,7 @@ do
 	       then
 	          ANTENNA_SETTING="LBA Outer"
 	       else
-	          if [[ $modeLBA == "Zero" ]] || [[ $modeLBA == "One" ]] || [[ $modeLBA == "Dual" ]] || [[ $modeLBA == "Joined" ]]
+	          if [[ $modeLBA == "Outer" ]] || [[ $modeLBA == "Inner" ]] || [[ $modeLBA == "Sparse Even" ]] || [[ $modeLBA == "Sparse Odd" ]] || [[ $modeLBA == "X" ]] || [[ $modeLBA == "Y" ]]
 	          then
 	             ANTENNA_SETTING="HBA $modeLBA"
 	          else 
