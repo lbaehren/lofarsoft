@@ -510,12 +510,24 @@ do
 		    SUBBANDS="200..447"
         elif (( $user_subbands_hba == 1 )) && [[ $ANTENNA == "HBA" ]]
         then
-		    SUBBANDS=$SUBBANDS_HBA
+            needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
+            if [[ $needs_expand != "" ]]
+            then
+               SUBBANDS=`echo "$SUBBANDS_HBA" | expand_sblist.py`
+            else
+		       SUBBANDS=$SUBBANDS_HBA
+		    fi		    
 		elif (( $user_subbands_lba == 0 )) && [[ $ANTENNA == "LBA" ]]
 		then
 		    SUBBANDS="154..401"
         else
-		    SUBBANDS=$SUBBANDS_LBA
+            needs_expand=`echo $SUBBANDS_LBA | grep "," | grep ".."`
+            if [[ $needs_expand != "" ]]
+            then
+               SUBBANDS=`echo "$SUBBANDS_LBA" | expand_sblist.py`
+            else
+		       SUBBANDS=$SUBBANDS_LBA
+		    fi
 	    fi   
 	    
 	    #make sure station list has all capital letters
