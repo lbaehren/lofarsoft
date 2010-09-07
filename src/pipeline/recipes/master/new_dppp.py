@@ -9,6 +9,7 @@ from __future__ import with_statement
 
 from itertools import cycle
 from contextlib import nested
+from collections import defaultdict
 
 import subprocess
 import collections
@@ -136,13 +137,23 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
             self.logger.info("Waiting for DPPP threads")
             [thread.join() for thread in dppp_threads]
 
-        #    Log some information on total amount of data flagged (as a proof of
-        #               concept, rather than a really useful facility, for now).
+        #                                  Log number of fully flagged baselines
         # ----------------------------------------------------------------------
         matches = self.logger.searchpatterns["fullyflagged"].results
-        self.logger.searchpatterns.clear() # Clear searchpatterns to avoid loop!
+        self.logger.searchpatterns.clear() # finished searching
+        stripchars = "".join(set("Fully flagged baselines: "))
+        baselinecounter = defaultdict(lambda: 0)
         for match in matches:
-            self.logger.info(match.getMessage())
+            for pair in (
+                pair.strip(stripchars) for pair in match.getMessage().split(";")
+            ):
+                baselinecounter[pair] += 1
+        for key, value in baselinecounter.iteritems():
+            self.logger.info(
+                "Baseline %s has been fully flagged %d times (%f%%)" % (
+                    key, value, float(value)/len(outnames)
+                )
+            )
 
         if self.error.isSet():
             self.logger.warn("Failed DPPP process detected")
