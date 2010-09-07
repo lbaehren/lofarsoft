@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/ksh
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -525,18 +525,36 @@ do
 		    SUBBANDS="77..324"
         elif (( $user_subbands_hba == 1 )) && [[ $ANTENNA == "HBAHigh" ]]
         then
-		    SUBBANDS=$SUBBANDS_HBA
+            needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
+            if [[ $needs_expand != "" ]]
+            then
+               SUBBANDS=`echo "$SUBBANDS_HBA" | expand_sblist.py`
+            else
+		       SUBBANDS=$SUBBANDS_HBA
+		    fi
         elif (( $user_subbands_hba == 0 )) && [[ $ANTENNA == "HBALow" ]]
         then
 		    SUBBANDS="54..301"
         elif (( $user_subbands_hba == 1 )) && [[ $ANTENNA == "HBALow" ]]
         then
-		    SUBBANDS=$SUBBANDS_HBA
+		    needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
+            if [[ $needs_expand != "" ]]
+            then
+               SUBBANDS=`echo "$SUBBANDS_HBA" | expand_sblist.py`
+            else
+		       SUBBANDS=$SUBBANDS_HBA
+		    fi
 		elif (( $user_subbands_lba == 0 )) && [[ $ANTENNA == "LBA" ]]
 		then
 		    SUBBANDS="154..401"
         else
-		    SUBBANDS=$SUBBANDS_LBA
+            needs_expand=`echo $SUBBANDS_LBA | grep "," | grep ".."`
+            if [[ $needs_expand != "" ]]
+            then
+               SUBBANDS=`echo "$SUBBANDS_LBA" | expand_sblist.py`
+            else
+		       SUBBANDS=$SUBBANDS_LBA
+		    fi
 	    fi   
 	    
 	    #make sure station list has all capital letters
@@ -726,7 +744,7 @@ do
 	       else
 	          if [[ $modeLBA == "Outer" ]] || [[ $modeLBA == "Inner" ]] || [[ $modeLBA == "Sparse Even" ]] || [[ $modeLBA == "Sparse Odd" ]] || [[ $modeLBA == "X" ]] || [[ $modeLBA == "Y" ]]
 	          then
-	             ANTENNA_SETTING="HBA $modeLBA"
+	             ANTENNA_SETTING="LBA $modeLBA"
 	          else 
 	             echo "WARNING: user antenna mode LBA $modeLBA is not recognized, using defaul LBA Outer"
 	             ANTENNA_SETTING="LBA Outer"
