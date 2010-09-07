@@ -16,7 +16,7 @@
             <beamformedData>false</beamformedData>
             <coherentStokesData>false</coherentStokesData>
             <incoherentStokesData>true</incoherentStokesData>
-            <antenna>HBA Zero</antenna>
+            <antenna>ANTENNA SETTING</antenna>
             <clock mode="200 MHz"/>
             <instrumentFilter>110-190 MHz</instrumentFilter>
             <integrationInterval>1</integrationInterval>

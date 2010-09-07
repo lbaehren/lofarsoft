@@ -5,7 +5,7 @@
 # Example run:
 # prompt> multi-templates.sh -in obs.lis -out out.xml
 
-USAGE1="\nusage : $0 -in observation_list_file -out template_output_file [-start obs_start] [-time duration] [-st stations_list] [[-lst]] [[-project project_name]] [[-IM list_or_ALL]] [[-subsHBA subband_range]] [[-subsLBA subband_range]] [[-gap duration]] [[-antenna LBA_or_HBA]] [[-chansubsHBA channels_per_subband_HBA]] [[-chansubsLBA channels_per_subband_LBA]] [[-integstepsHBA integration_steps_HBA]] [[-integstepsLBA integration_steps_LBA]]\n\n"\
+USAGE1="\nusage : $0 -in observation_list_file -out template_output_file [-start obs_start] [-time duration] [-st stations_list] [[-lst]] [[-project project_name]] [[-IM list_or_ALL]] [[-subsHBA subband_range]] [[-subsLBA subband_range]] [[-gap duration]] [[-antenna LBA_or_HBA]] [[-chansubsHBA channels_per_subband_HBA]] [[-chansubsLBA channels_per_subband_LBA]] [[-integstepsHBA integration_steps_HBA]] [[-integstepsLBA integration_steps_LBA]] [[-modeHBA antenna_submode]] [[-modeLBA antenna_submode]]\n\n"\
 "      This script is run using two different methodologies: \n"\
 "         \n"\
 "      1) The input file contains all the information: pulsar-name  antenna  chan_per_subs  integ_steps  obs-start  duration  station-list \n"\
@@ -20,6 +20,8 @@ USAGE1="\nusage : $0 -in observation_list_file -out template_output_file [-start
 "         [[-subsHBA subband_range]] ==> The HBA subband range (default = '200..447') \n"\
 "         [[-subsLBA subband_range]] ==> The LBA subband range (default = '154..401') \n"\
 "         [[-IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)\n"\
+"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)\n"\
 "         \n"\
 "         Example input file:\n"\
 "         # pulsar     antenna  chan_per_subs  integ_steps    start-time           duration     stations\n"\
@@ -52,6 +54,8 @@ USAGE2="      2) The input file contains 4 columns with: pulsar-name  antenna  c
 "         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
 "         [[-IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero (default), One, Dual, Joined)\n"\
+"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer, Inner (default), 'Sparse Even', 'Sparse Odd', X, Y)\n"\
 "         \n"\
 "         Example input file:\n"\
 "         # pulsar     antenna  chan_per_subs  integ_steps  \n"\
@@ -89,6 +93,8 @@ USAGE3="      3) The input file contains just 2 columns with: pulsar-name  anten
 "         [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
 "         [[-IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)\n"\
+"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)\n"\
 "         \n"\
 "         Example input file:\n"\
 "         # pulsar       antenna\n"\
@@ -127,6 +133,8 @@ USAGE5="         \n"\
 "         [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
 "         [[-IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)\n"\
+"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)\n"\
 "         \n"
 USAGE6="         Example input file:\n"\
 "         # pulsar  \n"\
@@ -190,6 +198,10 @@ PROJECT="Pulsars"
 user_project=0
 IM=0
 IM_LIST=""
+modeHBA="Dual"
+user_modeHBA=0
+modeLBA="Outer"
+user_modeLBA=0
 
 while [ $# -gt 0 ]
 do
@@ -209,6 +221,8 @@ do
      -integstepsLBA)     STEPS_LBA=$2; user_steps_lba=1; shift;;
      -project)           PROJECT=$2; user_project=1; shift;;
      -IM)                IM=1; IM_LIST=$2; shift;;
+     -modeHBA)           modeHBA=$2; user_modeHBA=1; shift;;
+     -modeLBA)           modeLBA=$2; user_modeLBA=1; shift;;
      -lst|-LST)          LST=1;;
        -*)
             print >&2 \
@@ -672,10 +686,42 @@ do
 #		      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $TIME * 60" | bc` 
   	          END=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 		fi
+
+	    if [[ $ANTENNA == "HBA" ]]
+	    then
+	       if [[ $user_modeHBA == 0 ]]
+	       then
+	          ANTENNA_SETTING="HBA Zero"
+	       else
+	          if [[ $modeHBA == "Zero" ]] || [[ $modeHBA == "One" ]] || [[ $modeHBA == "Dual" ]] || [[ $modeHBA == "Joined" ]]
+	          then
+	             ANTENNA_SETTING="HBA $modeHBA"
+	          else 
+	             echo "WARNING: user antenna mode HBA $modeHBA is not recognized, using defaul HBA Zero"
+	             ANTENNA_SETTING="HBA Zero"
+	          fi
+	       fi
+	    elif [[ $ANTENNA == "LBA" ]]
+	    then
+	       if [[ $user_modeLBA == 0 ]]
+	       then
+	          ANTENNA_SETTING="LBA Inner"
+	       else
+	          if [[ $modeLBA == "Outer" ]] || [[ $modeLBA == "Inner" ]] || [[ $modeLBA == "Sparse Even" ]] || [[ $modeLBA == "Sparse Odd" ]] || [[ $modeLBA == "X" ]] || [[ $modeLBA == "Y" ]]
+	          then
+	             ANTENNA_SETTING="LBA $modeLBA"
+	          else 
+	             echo "WARNING: user antenna mode LBA $modeLBA is not recognized, using defaul LBA Inner"
+	             ANTENNA_SETTING="LBA Inner"
+	          fi
+	       fi
+	    fi
+
 		
 		# Print the basic information about input parameters to STDOUT at start 
 		echo "PULSAR NAME = $PULSAR"
 	    echo "ANTENNA = $ANTENNA"
+	    echo "ANTENNA sub mode = $ANTENNA_SETTING"
 		echo "Channels per Subband = $CHAN_SUBS"
 		echo "Integration Steps = $STEPS"
 		if (( $LST == 1 ))
@@ -726,7 +772,7 @@ do
             middle=$middleLBA
         fi
         
-        sed -e "s/\<name\>FILL IN OBSERVATION NAME\<\/name\>/\<name\>Obs $PULSAR ($ANTENNA)\<\/name\>/" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/\<description\>FILL IN DESCRIPTION\<\/description\>/\<description\>Obs $PULSAR ($ANTENNA) at $START for $TIME min\<\/description\>/" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" $middle >> $outfile
+        sed -e "s/\<name\>FILL IN OBSERVATION NAME\<\/name\>/\<name\>Obs $PULSAR ($ANTENNA)\<\/name\>/" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/\<description\>FILL IN DESCRIPTION\<\/description\>/\<description\>Obs $PULSAR ($ANTENNA) at $START for $TIME min\<\/description\>/" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" $middle >> $outfile
 
    fi   
 done < $infile

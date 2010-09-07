@@ -16,7 +16,7 @@
             <beamformedData>false</beamformedData>
             <coherentStokesData>false</coherentStokesData>
             <incoherentStokesData>true</incoherentStokesData>
-            <antenna>LBA Inner</antenna>
+            <antenna>ANTENNA SETTING</antenna>
             <clock mode="200 MHz"/>
             <instrumentFilter>10-90 MHz</instrumentFilter>
             <integrationInterval>1</integrationInterval>
