@@ -372,7 +372,10 @@ then
           previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
           START=$previous_start
 	else
-	      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
+          tmp_start=`echo "$START" | sed 's/T/ /'`
+          tmp=`date -d "$tmp_start" "+%s"`
+          new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
+#	      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
           previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
           START=$previous_start
 	fi
@@ -567,7 +570,10 @@ do
 				then
 			          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 				else
-				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
+			          tmp_start=`echo "$START" | sed 's/T/ /'`
+			          tmp=`date -d "$tmp_start" "+%s"`
+			          new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
+#				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
 			          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 				fi
 			elif (( $LST == 1 ))
@@ -578,7 +584,10 @@ do
 				then
 			          START=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 				else
-				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
+			          tmp_start=`echo "$START" | sed 's/T/ /'`
+			          tmp=`date -d "$tmp_start" "+%s"`
+			          new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
+#				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
 			          START=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 				fi
 			fi
@@ -604,7 +613,10 @@ do
 				then
 			          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 				else
-				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
+			          tmp_start=`echo "$START" | sed 's/T/ /'`
+			          tmp=`date -d "$tmp_start" "+%s"`
+			          new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
+#				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
 			          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 				fi
 			elif (( $LST == 1 ))
@@ -615,7 +627,10 @@ do
 				then
 			          START=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 				else
-				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
+			          tmp_start=`echo "$START" | sed 's/T/ /'`
+			          tmp=`date -d "$tmp_start" "+%s"`
+			          new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
+#				      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
 			          START=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 				fi
 			fi
@@ -639,7 +654,10 @@ do
 		then
 		      END=`date -j -v +$TIME"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
 		else
-		      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $TIME * 60" | bc` 
+	          tmp_start=`echo "$START" | sed 's/T/ /'`
+	          tmp=`date -d "$tmp_start" "+%s"`
+	          new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
+#		      new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $TIME * 60" | bc` 
   	          END=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 		fi
 		
