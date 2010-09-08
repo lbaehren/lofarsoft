@@ -7,6 +7,7 @@
 
 from __future__ import with_statement
 
+from subprocess import Popen, CalledProcessError, PIPE
 from itertools import islice, repeat, chain, izip
 from contextlib import closing, contextmanager
 
@@ -14,6 +15,8 @@ import os
 import errno
 import shutil
 import subprocess
+
+from lofarpipe.support.pipelinelogging import log_process_output
 
 #                                                                  Compatibility
 #                               The following used to be defined in this module;
@@ -178,3 +181,30 @@ def string_to_list(my_string):
     """
     return [x.strip() for x in my_string.strip('[] ').split(',')]
 
+def catch_segfaults(cmd, cwd, env, logger, max=1):
+    """
+    Run cmd in cwd with env, sending output to logger.
+
+    If it segfaults, retry upto max times.
+    """
+    tries = 0
+    while tries < max+1:
+        if tries > 0:
+            logger.debug("Retrying...")
+        logger.debug("Running: %s" % (' '.join(cmd),))
+        process = Popen(
+            cmd, cwd=cwd, env=env, stdout=PIPE, stderr=PIPE
+        )
+        sout, serr = process.communicate()
+        log_process_output(cmd[0], sout, serr, logger)
+        if process.returncode == 0:
+            break
+        elif process.returncode == -11:
+            logger.warn("%s process segfaulted!" % cmd[0])
+            tries += 1
+            continue
+        else:
+            raise CalledProcessError(
+                process.returncode, cmd[0]
+            )
+    return process

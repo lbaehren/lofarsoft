@@ -65,7 +65,7 @@ class sourcedb(BaseRecipe, RemoteCommandRecipeMixIn):
                         )
                     )
                 [thread.start() for thread in sourcedb_threads]
-                self.logger.info("Waiting for parmdb threads")
+                self.logger.info("Waiting for sourcedb threads")
                 [thread.join() for thread in sourcedb_threads]
 
         if self.error.isSet():

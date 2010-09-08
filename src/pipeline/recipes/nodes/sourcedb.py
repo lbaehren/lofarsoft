@@ -8,7 +8,7 @@ import sys
 from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import log_time
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
-from lofarpipe.support.pipelinelogging import log_process_output
+from lofarpipe.support.utilities import catch_segfaults
 
 
 class sourcedb(LOFARnode):
@@ -32,17 +32,13 @@ class sourcedb(LOFARnode):
                     working_dir,
                     self.logger.name + "." + os.path.basename(infile),
                     os.path.basename(executable)
-                ):
-                    makesourcedb_process = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=working_dir)
-                    sout, serr = makesourcedb_process.communicate()
-                log_process_output("makesourcedb", sout, serr, self.logger)
-                if makesourcedb_process.returncode != 0:
-                    raise CalledProcessError(makesourcedb_process.returncode, executable)
+                ) as logger:
+                    catch_segfaults(cmd, working_dir, None, logger)
             except CalledProcessError, e:
                 # For CalledProcessError isn't properly propagated by IPython
                 # Temporary workaround...
                 self.logger.error(str(e))
-                raise Exception
+                return 1
             finally:
                 shutil.rmtree(working_dir)
 

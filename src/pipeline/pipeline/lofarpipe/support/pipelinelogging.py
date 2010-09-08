@@ -148,6 +148,7 @@ class LogCatcher(object):
             args=(log_filename, local_logger, self.killswitch)
         )
         self.logging_thread.start()
+        return local_logger
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         time.sleep(2)   # Wait in case any remaining data is to be flushed to log

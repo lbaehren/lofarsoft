@@ -88,11 +88,16 @@ def patch_parset(parset, data, output_dir=None):
     return output
 
 @contextmanager
-def patched_parset(parset, data, output_dir=None):
+def patched_parset(parset, data, output_dir=None, unlink=True):
     """
     Wrap patch_parset() in a contextmanager which removes the generated parset
     when it finishes.
+
+    The never_unlink flag is to facilitate debugging -- one can leave a
+    patched parset in place for manual checking if required.
     """
     filename = patch_parset(parset, data, output_dir)
-    yield filename
-    os.unlink(filename)
+    try:
+        yield filename
+    finally:
+        if unlink: os.unlink(filename)

@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 from __future__ import with_statement
-from subprocess import Popen, CalledProcessError, PIPE, STDOUT
+from subprocess import CalledProcessError
 from logging import getLogger
 import sys
 import os.path
@@ -18,6 +18,7 @@ from lofarpipe.support.pipelinelogging import log_time
 from lofarpipe.support.utilities import patch_parset
 from lofarpipe.support.utilities import read_initscript
 from lofarpipe.support.utilities import create_directory
+from lofarpipe.support.utilities import catch_segfaults
 from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.lofarexceptions import ExecutableMissing
 
@@ -77,48 +78,23 @@ class dppp(LOFARnode):
 
                 working_dir = tempfile.mkdtemp()
                 cmd = [executable, temp_parset_filename, '1']
+
                 with CatchLog4CPlus(
                     working_dir,
                     self.logger.name + "." + os.path.basename(infile),
                     os.path.basename(executable),
-                ):
+                ) as logger:
                     #     Catch NDPPP segfaults (a regular occurance), and retry
                     # ----------------------------------------------------------
-                    tries = 0
-                    while tries < 2:
-                        if tries > 0:
-                            self.logger.debug("Retrying...")
-                        self.logger.debug("Running: %s" % (' '.join(cmd),))
-                        ndppp_process = Popen(
-                            cmd,
-                            cwd=working_dir,
-                            env=env,
-                            stdout=PIPE,
-                            stderr=STDOUT
-                        )
-                        sout, serr = ndppp_process.communicate()
-                        logger = getLogger(self.logger.name + "." + os.path.basename(infile))
-                        for line in sout.split('\n'):
-                            logger.debug(line.strip())
-                        self.logger.debug("NDPPP stderr: %s" % (serr,))
-                        if ndppp_process.returncode == 0:
-                            break
-                        elif ndppp_process.returncode == -11:
-                            self.logger.warn("NDPPP process segfaulted!")
-                            tries += 1
-                            continue
-                        else:
-                            raise CalledProcessError(
-                                ndppp_process.returncode, executable
-                            )
+                    catch_segfaults(cmd, working_dir, env, logger)
             except ExecutableMissing, e:
                 self.logger.error("%s not found" % (e.args[0]))
-                raise
+                return 1
             except CalledProcessError, e:
                 #        CalledProcessError isn't properly propagated by IPython
                 # --------------------------------------------------------------
                 self.logger.error(str(e))
-                raise Exception
+                return 1
             finally:
                 os.unlink(temp_parset_filename)
                 shutil.rmtree(working_dir)
