@@ -51,7 +51,7 @@ if (NOT HAVE_TMF OR TMF_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project
 
-  find_file (have_tmf_tgz tmf-1.4.tar.gz ${TMF_SOURCE_DIR})
+  find_file (have_tmf_tgz tmf-1.4.1.tar.gz ${TMF_SOURCE_DIR})
   
   if (have_tmf_tgz)
     ExternalProject_Add (tmf
