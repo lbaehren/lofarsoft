@@ -33,12 +33,18 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
         print "function not supported."
         return False
 
-    stationIDs=np.array(antennaIDs/1000000)
+    print "hello"
+    print antennaIDs
+    print list(antennaIDs)
+    stationIDs=np.array(list(antennaIDs))/1000000
+    print "hello3"
     rcuIDs=np.mod(antennaIDs,1000)
     allStIDs=np.unique(stationIDs)
     allValues={}
+    print "hello4"
     for station in allStIDs:
         allValues[station]=functionname(int(station),antennaset,return_as_hArray)
+    print "hello again"
    
     if not return_as_hArray:
         if keyword not in ["StationPositions","ClockCorrection"]:

@@ -156,6 +156,10 @@ def hArrayToPrintString(self,maxlen=5):
     if name=="": name="hArray";
     return name+"("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
 
+def hArray_toNumpy(self):
+    """Returns a copy of the array as a numpy.ndarray object with the correct dimensions."""
+    return np.asarray(self.vec()).reshape(self.getDim())
+
 def hArray_repr(self,maxlen=8,long=True):
     loops=""
     if self.loopingMode(): loops="*"
@@ -749,6 +753,18 @@ def type2vector(basetype):
         return hVectorTypeDictionary[basetype]()
     elif basetype == long:
         return hVectorTypeDictionary[int]()
+    elif str(basetype)=="<type 'numpy.bool_'>":
+        return hVectorTypeDictionary[bool]()
+    elif str(basetype)=="<type 'numpy.int32'>":
+        return hVectorTypeDictionary[int]()
+    elif str(basetype)=="<type 'numpy.int64'>":
+        return hVectorTypeDictionary[int]()
+    elif str(basetype)=="<type 'numpy.float32'>":
+        return hVectorTypeDictionary[float]()
+    elif str(basetype)=="<type 'numpy.float64'>":
+        return hVectorTypeDictionary[float]()
+    elif str(basetype)=="<type 'numpy.complex128'>":
+        return hVectorTypeDictionary[complex]()
     else:
         return None
 
@@ -985,6 +1001,7 @@ setattr(FloatArray,"fft",hFFTCasa)
 
 for v in hAllArrayTypes:
     setattr(v,"__repr__",hArray_repr)
+    setattr(v,"toNumpy", hArray_toNumpy)
     setattr(v,"setPar",hArray_setPar)
     setattr(v,"setDim",hArray_setDim)
     setattr(v,"getDim",hArray_getDim)
@@ -1084,12 +1101,18 @@ def Vector(Type=float,size=-1,fill=None):
     will contain only [1,2]. Vector([1,2,3],size=2,fill=4) will give
     [4,4].
     """
+    
     vtype=Type
     if type(size) in hListAndArrayTypes: size=len(size)
     if (type(vtype) in hAllArrayTypes):  # hArrayClass
         vtype=basetype(Type)
         vec=Vector(Type.vec())
     elif (type(vtype) in hAllListTypes):  #List or Vector
+        vtype=type(Type[0])
+        vec=type2vector(vtype)
+        vec.extend(Type)
+    elif type(vtype) == np.ndarray:  #List or Vector
+        Type=list(Type.ravel())
         vtype=type(Type[0])
         vec=type2vector(vtype)
         vec.extend(Type)
@@ -1190,6 +1213,8 @@ Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues
     elif ishArray(Type):  # Just make a copy with reference to same vector
         ary=Type.newreference()
     else: # Create a new vector
+        if type(Type) == np.ndarray and not dimensions:
+            dimensions=Type.shape
         vec=Vector(Type=Type)
         ary=type2array(basetype(vec))
         ary.stored_vector=vec
