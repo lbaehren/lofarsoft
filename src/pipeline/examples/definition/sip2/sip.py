@@ -33,11 +33,9 @@ class sip(control):
 
             # Produce a GVDS file describing the data on the storage nodes.
             self.run_task('vdsmaker', storage_mapfile)
-            self._save_state()
 
             # Read metadata (start, end times, pointing direction) from GVDS.
             vdsinfo = self.run_task("vdsreader")
-            self._save_state()
 
             # NDPPP reads the data from the storage nodes, according to the
             # map. It returns a new map, describing the location of data on
@@ -52,7 +50,6 @@ class sip(control):
                 data_start_time=vdsinfo['start_time'],
                 data_end_time=vdsinfo['end_time']
             )['mapfile']
-            self._save_state()
 
             # Build a sky model ready for BBS & return the name of the
             # central source.
@@ -76,7 +73,6 @@ class sip(control):
                 # BBS modifies data in place, so the map produced by NDPPP
                 # remains valid.
                 self.run_task("bbs", compute_mapfile, parset=bbs_parset)
-                self._save_state()
 
             # Now, run DPPP three times on the output of BBS. We'll run
             # this twice: once on CORRECTED_DATA, and once on
@@ -93,7 +89,6 @@ class sip(control):
                     data_end_time=vdsinfo['end_time'],
                     suffix=""
                 )
-                self._save_state()
 
             with patched_parset(
                 os.path.join(
@@ -115,7 +110,6 @@ class sip(control):
                         data_end_time=vdsinfo['end_time'],
                         suffix=""
                     )
-                    self._save_state()
 
             # Image CORRECTED_DATA.
             self.logger.info("Imaging CORRECTED_DATA")
@@ -140,7 +134,6 @@ class sip(control):
                         "corrected"
                     )
                 )['images']
-                self._save_state()
 
             # Image SUBTRACTED_DATA.
             self.logger.info("Imaging SUBTRACTED_DATA")
