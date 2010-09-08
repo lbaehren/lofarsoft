@@ -608,14 +608,16 @@ namespace CR { // Namespace CR -- begin
       if (ant >= 3) {
         // fit polynomial
         TF1 *fitFunc;
-        fitFunc=new TF1("fitFunc","[0]+[1]*(sqrt([2]**2+x**2)-[2])",50,190);
-        fitFunc->SetParName(0,"offset");
+        fitFunc=new TF1("fitFunc","[0]+[1]*(sqrt([2]**2+(x-[3])**2)-[2])",0,1000);
+        fitFunc->SetParName(0,"t_offset");
         fitFunc->SetParName(1,"1/c");
-        fitFunc->SetParName(2,"R_curv");
+        fitFunc->SetParName(2,"R_curv Sph");
+        fitFunc->SetParName(3,"lat_offset");
         fitFunc->SetParameter(0,0);
         fitFunc->FixParameter(1,1e9/lightspeed);
         fitFunc->SetParameter(2,1000);
-        fitFunc->GetXaxis()->SetRange(20,300);
+        fitFunc->SetParameter(3,0);
+        //fitFunc->GetXaxis()->SetRange(0,1000);
         fitFunc->SetFillStyle(0);
         fitFunc->SetLineWidth(2);
 
@@ -626,22 +628,67 @@ namespace CR { // Namespace CR -- begin
         // write fit results to record with other results
         erg.define("latTime_offset",fitFunc->GetParameter(0));
         erg.define("latTime_R_curv",fitFunc->GetParameter(2));
+        erg.define("latTime_latOffset",fitFunc->GetParameter(3));
         erg.define("latTime_sigoffset",fitFunc->GetParError(0));
         erg.define("latTime_sigR_curv",fitFunc->GetParError(2));
+        erg.define("latTime_siglatOffset",fitFunc->GetParError(3));
         erg.define("latTime_chi2NDF",fitFunc->GetChisquare()/double(fitFunc->GetNDF()));
-        cout << "Results of fit"
-             << "offset = " << fitFunc->GetParameter(0) << "\t +/- " << fitFunc->GetParError(0) << "\t ns\n"
-             << "R_curv = " << fitFunc->GetParameter(2) << "\t +/- " << fitFunc->GetParError(2) << "\t m\n"
+        cout << "Results of spherical fit"
+             << "R_curv     = " << fitFunc->GetParameter(2) << "\t +/- " << fitFunc->GetParError(2) << "\t m\n"
+             << "t offset   = " << fitFunc->GetParameter(0) << "\t +/- " << fitFunc->GetParError(0) << "\t ns\n"
+             << "lat offset = " << fitFunc->GetParameter(3) << "\t +/- " << fitFunc->GetParError(3) << "\t m\n"
              << "Chi^2  = " << fitFunc->GetChisquare() << "\t NDF " << fitFunc->GetNDF() << "\n"
              << "Curvature radius of CC-beam (to compare) = " << erg.asDouble("Distance") << " m\n"
              << endl;
 
         // write plot to file
-        stringstream plotNameStream;
-        plotNameStream << filePrefix << GT <<".eps";
+        stringstream plotNameStream("");
+        plotNameStream << filePrefix << "sphere-" << GT <<".eps";
         cout << "\nCreating plot: " << plotNameStream.str() << endl;
         c1->Print(plotNameStream.str().c_str());
         fitFunc->Delete();
+        
+        // fit parabola
+        TF1 *fitFunc2;
+        fitFunc2=new TF1("fitFunc2","[0]+[1]*((x-[3])**2/(2*[2]))",0,1000);
+        fitFunc2->SetParName(0,"t_offset");
+        fitFunc2->SetParName(1,"1/c");
+        fitFunc2->SetParName(2,"R_curv Par");
+        fitFunc2->SetParName(3,"lat_offset");
+        fitFunc2->SetParameter(0,0);
+        fitFunc2->FixParameter(1,1e9/lightspeed);
+        fitFunc2->SetParameter(2,1000);
+        fitFunc2->SetParameter(3,0);
+        //fitFunc2->GetXaxis()->SetRange(0,1000);
+        fitFunc2->SetFillStyle(0);
+        fitFunc2->SetLineWidth(2);
+
+        cout << "------------------------------"<<endl;
+        latPro->Fit(fitFunc2, "");
+        ptstats->Draw();
+
+        // write fit results to record with other results
+        erg.define("latTimePar_offset",fitFunc2->GetParameter(0));
+        erg.define("latTimePar_R_curv",fitFunc2->GetParameter(2));
+        erg.define("latTimePar_latOffset",fitFunc2->GetParameter(3));
+        erg.define("latTimePar_sigoffset",fitFunc2->GetParError(0));
+        erg.define("latTimePar_sigR_curv",fitFunc2->GetParError(2));
+        erg.define("latTimePar_siglatOffset",fitFunc2->GetParError(3));
+        erg.define("latTimePar_chi2NDF",fitFunc2->GetChisquare()/double(fitFunc2->GetNDF()));
+        cout << "Results of parabolic fit"
+             << "R_curv     = " << fitFunc2->GetParameter(2) << "\t +/- " << fitFunc2->GetParError(2) << "\t m\n"
+             << "t offset   = " << fitFunc2->GetParameter(0) << "\t +/- " << fitFunc2->GetParError(0) << "\t ns\n"
+             << "lat offset = " << fitFunc2->GetParameter(3) << "\t +/- " << fitFunc2->GetParError(3) << "\t m\n"
+             << "Chi^2  = " << fitFunc2->GetChisquare() << "\t NDF " << fitFunc2->GetNDF() << "\n"
+             << "Curvature radius of CC-beam (to compare) = " << erg.asDouble("Distance") << " m\n"
+             << endl;
+
+        // write plot to file
+        plotNameStream.str("");
+        plotNameStream << filePrefix << "parabo-" << GT <<".eps";
+        cout << "\nCreating plot: " << plotNameStream.str() << endl;
+        c1->Print(plotNameStream.str().c_str());
+        fitFunc2->Delete();
       } else {
         cout<<"No fit was done, because less than 3 antennas are 'good':\n";
       }
