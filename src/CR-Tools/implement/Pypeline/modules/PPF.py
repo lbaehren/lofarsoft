@@ -57,7 +57,7 @@ class PPF():
 
         self.weights=weights
         self.buffer=None#hf.hArray(float,[16,1024])
-        self.startrow=15
+        self.startrow=0
         self.total_rows_added=0
 
     def add(self,input):
@@ -71,19 +71,18 @@ class PPF():
             weights2[...].copy(self.weights[...])
             self.weights=weights2
 
+        
+       # print "adding data in row",self.startrow
+        self.buffer[self.startrow].copy(input)
+        input.fill(0)
         self.startrow += 1
         if self.startrow > 15:
             self.startrow = 0
-         
-        self.buffer[self.startrow].copy(input)
-        input.fill(0)
         for row in range(0,16):
             input.muladd(self.weights[row],self.buffer[(row+self.startrow)%16])
-        
+           # print "multiplying weight",row,"with buffer",(row+self.startrow)%16
+         
         self.total_rows_added+=1
-        #self.startrow-=1
-        #if self.startrow < 0:
-        #    self.startrow=15
         if self.total_rows_added < 16:
             input.fill(0)
             return False
@@ -114,7 +113,7 @@ class iPPF():
         
         self.weights=weights
         self.buffer=None#hf.hArray(float,[16,1024])
-        self.startrow=15
+        self.startrow=0
         self.total_rows_added=0
 
     def add(self,input):
@@ -128,19 +127,17 @@ class iPPF():
             weights2[...].copy(self.weights[...])
             self.weights=weights2
         
-        self.startrow += 1
-        if self.startrow > 15:
-            self.startrow = 0
         self.buffer[self.startrow].copy(input)
         input.fill(0)
         
+        #print "adding data in row",self.startrow
+        self.startrow += 1
+        if self.startrow > 15:
+            self.startrow = 0
         for row in range(0,16):
             input.muladd(self.weights[row],self.buffer[(row+self.startrow)%16])
-        
+           # print "multiplying weight",row,"with buffer",(row+self.startrow)%16
         self.total_rows_added+=1
-        #self.startrow-=1
-        #if self.startrow < 0:
-        #    self.startrow=15
         if self.total_rows_added < 16:
             input.fill(0)
             return False
