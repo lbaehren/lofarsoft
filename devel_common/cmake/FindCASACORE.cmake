@@ -211,6 +211,10 @@ foreach (CASACORE_HEADER ${casacore_headers})
   endif (header_path)
 endforeach (CASACORE_HEADER)
 
+## Remove duplicates from the list of include directories
+
+list (REMOVE_DUPLICATES CASACORE_INCLUDES)
+
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
