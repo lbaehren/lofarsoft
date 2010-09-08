@@ -1,10 +1,10 @@
+uselogger = True
 msin.startchan = 8
 msin.nchan = 240
 msin.datacolumn = DATA     # is the default
-
 msout.datacolumn = DATA    # is the default
 
-steps = [preflag,flag1,count,avg1,flag2,avg2,count]   # if defined as [] the MS will be copied and NaN/infinite will be  flagged
+steps = [preflag,flag1,avg1,flag2,avg2,count]   # if defined as [] the MS will be copied and NaN/infinite will be  flagged
 
 
 preflag.type=preflagger    # This step will flag the autocorrelations. Note that they are not flagged by default by NDPPP
@@ -26,3 +26,6 @@ flag2.timewindow=51
 
 avg2.type = squash
 avg2.timestep = 5          #it compresses the data by a factor of 5 in time
+
+count.type = counter
+count.showfullyflagged = True
