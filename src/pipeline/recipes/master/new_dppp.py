@@ -149,10 +149,9 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
             ):
                 baselinecounter[pair] += 1
         for key, value in baselinecounter.iteritems():
+            self.logger.info(str(len(outnames)))
             self.logger.info(
-                "Baseline %s has been fully flagged %d times (%f%%)" % (
-                    key, value, float(value)/len(outnames)
-                )
+                "Baseline %s has been fully flagged %d times" % (key, value)
             )
 
         if self.error.isSet():
