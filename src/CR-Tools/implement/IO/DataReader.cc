@@ -30,21 +30,21 @@ using std::cout;
 using std::endl;
 
 namespace CR {  //  Namespace CR -- begin
-  
+
   // ============================================================================
   //
   //  Construction
   //
   // ============================================================================
-  
+
   //_____________________________________________________________________________
   //                                                                   DataReader
-  
+
   /*!
     This is the default constructor for a new DataReader object; this will not
     enable the actual reading of data, but otherwise represents a fully
     operational object.
-    
+
     \verbatim
     - blocksize   = 1
     - FFT length  = 1
@@ -58,10 +58,10 @@ namespace CR {  //  Namespace CR -- begin
   {
     init (TimeFreq::blocksize());
   }
-  
+
   //_____________________________________________________________________________
   //                                                                   DataReader
-  
+
   /*!
     \param blocksize   -- Size of a block of data, [samples]
   */
@@ -71,10 +71,10 @@ namespace CR {  //  Namespace CR -- begin
   {
     init (TimeFreq::blocksize());
   }
-  
+
   //_____________________________________________________________________________
   //                                                                   DataReader
-  
+
   /*!
     \param blocksize       -- Blocksize, [samples]
     \param sampleFrequency -- Sample frequency in the ADC, [Hz]
@@ -92,10 +92,10 @@ namespace CR {  //  Namespace CR -- begin
 	  nyquistZone,
 	  samplerate);
   }
-  
+
   //_____________________________________________________________________________
   //                                                                   DataReader
-  
+
   /*!
     \param blocksize   -- Size of a block of data, [samples]
     \param adc2voltage -- Multiplication factors for conversion from ADC values
@@ -112,15 +112,15 @@ namespace CR {  //  Namespace CR -- begin
     init (TimeFreq::blocksize(),
 	  TimeFreq::nyquistZone(),
 	  TimeFreq::sampleFrequency());
-    
+
     init (blocksize,
 	  adc2voltage,
 	  fft2calfft);
   }
-  
+
   //_____________________________________________________________________________
   //                                                                   DataReader
-  
+
   /*!
     \param blocksize   -- Size of a block of data, [samples]
     \param adc2voltage -- Multiplication factors for conversion from ADC values
@@ -137,15 +137,15 @@ namespace CR {  //  Namespace CR -- begin
     init (TimeFreq::blocksize(),
 	  TimeFreq::nyquistZone(),
 	  TimeFreq::sampleFrequency());
-    
+
     init (blocksize,
 	  adc2voltage,
 	  fft2calfft);
   }
-  
+
   //_____________________________________________________________________________
   //                                                                   DataReader
-  
+
   /*!
     \todo Implementation incomplete - not all input parameter used
 
@@ -157,7 +157,7 @@ namespace CR {  //  Namespace CR -- begin
     \param fft2calfft  -- Multiplication factors for conversion from raw to
                           calibrated FFT
   */
-  template <class T> 
+  template <class T>
   DataReader::DataReader (String const &filename,
 			  uint const &blocksize,
 			  T const &var,
@@ -169,15 +169,15 @@ namespace CR {  //  Namespace CR -- begin
     init (TimeFreq::blocksize(),
 	  TimeFreq::nyquistZone(),
 	  TimeFreq::sampleFrequency());
-    
+
     init (TimeFreq::blocksize(),
 	  adc2voltage,
 	  fft2calfft);
   }
-  
+
   //_____________________________________________________________________________
   //                                                                   DataReader
-  
+
   /*!
     \todo Based on (a) the problem of creating a copy of a stream - what does
     this actually mean - and (b) the triggered discussion with Marcel and Ger
@@ -194,24 +194,24 @@ namespace CR {  //  Namespace CR -- begin
   {
     copy (other);
   }
-  
+
   // ============================================================================
   //
   //  Destruction
   //
   // ============================================================================
-  
+
   //_____________________________________________________________________________
   //                                                                  ~DataReader
-  
+
   DataReader::~DataReader ()
   {
     destroy();
   }
-  
+
   //_____________________________________________________________________________
   //                                                                      destroy
-  
+
   void DataReader::destroy ()
   {
     /*
@@ -227,13 +227,13 @@ namespace CR {  //  Namespace CR -- begin
       }
       // release the fileStream array
       delete [] fileStream_p;
-    };  
-    
+    };
+
     if (iterator_p != NULL) {
       delete [] iterator_p;
     }
   }
-  
+
   // ============================================================================
   //
   //  Operators
@@ -242,7 +242,7 @@ namespace CR {  //  Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                                    operator=
-  
+
   DataReader& DataReader::operator= (DataReader const &other)
   {
     if (this != &other) {
@@ -251,16 +251,16 @@ namespace CR {  //  Namespace CR -- begin
     }
     return *this;
   }
-  
+
   //_____________________________________________________________________________
   //                                                                         copy
-  
+
   void DataReader::copy (DataReader const &other)
-  {  
+  {
     blocksize_p       = other.blocksize_p;
     sampleFrequency_p = other.sampleFrequency_p;
     nyquistZone_p     = other.nyquistZone_p;
-    
+
     try {
       // -- header -----------------------------------------
       header_p     = other.header_p;
@@ -269,7 +269,7 @@ namespace CR {  //  Namespace CR -- begin
       // -- conversion -------------------------------------
       haveADC2Voltage_p = other.haveADC2Voltage_p;
       haveFFT2CalFFT_p  = other.haveFFT2CalFFT_p;
-      
+
       if (haveADC2Voltage_p) {
 	ADC2Voltage_p.resize (other.ADC2Voltage_p.shape());
 	ADC2Voltage_p    = other.ADC2Voltage_p;
@@ -283,20 +283,20 @@ namespace CR {  //  Namespace CR -- begin
       // -- Antennas ---------------------------------------
       antennas_p.resize (other.antennas_p.shape());
       antennas_p       = other.antennas_p;
-      
+
       selectedAntennas_p.resize (other.selectedAntennas_p.shape());
       selectedAntennas_p = other.selectedAntennas_p;
-      
+
       // -- Frequency channels -----------------------------
       selectedChannels_p.resize (other.selectedChannels_p.shape());
       selectedChannels_p = other.selectedChannels_p;
-      
+
       selectChannels_p = other.selectChannels_p;
       hanningFilter_p  = other.hanningFilter_p;
       applyHanning_p   = other.applyHanning_p;
-      
+
       // -- File streams -----------------------------------
-      
+
       nofStreams_p = other.nofStreams_p;
       startBlock_p = other.startBlock_p;
       iterator_p   = new DataIterator[nofStreams_p];
@@ -310,7 +310,7 @@ namespace CR {  //  Namespace CR -- begin
 	fileStream_p = NULL;
 	streamsConnected_p = false;
       };
-      
+
       try {
 	for (uint stream (0); stream<nofStreams_p; stream++) {
 	  iterator_p[stream]   = other.iterator_p[stream];
@@ -318,12 +318,12 @@ namespace CR {  //  Namespace CR -- begin
       } catch (AipsError x) {
 	cerr << x.getMesg() << endl;
       }
-      
+
     } catch (AipsError x) {
       cerr << "[DataReader::copy]" << x.getMesg() << endl;
     }
   }
-  
+
   // ============================================================================
   //
   //  Parameters
@@ -332,11 +332,11 @@ namespace CR {  //  Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                                         init
-  
+
   /*!
     \param blocksize -- Blocksize, [samples]
   */
-  void DataReader::init (uint const &blocksize) 
+  void DataReader::init (uint const &blocksize)
   {
     streamsConnected_p     = false;
     haveADC2Voltage_p      = false;
@@ -346,15 +346,15 @@ namespace CR {  //  Namespace CR -- begin
     startBlock_p           = 0;
     uint nyquistZone       = nyquistZone_p;
     double sampleFrequency = sampleFrequency_p;
-    
+
     init (blocksize,
 	  nyquistZone,
 	  sampleFrequency);
   }
-  
+
   //_____________________________________________________________________________
   //                                                                         init
-  
+
   /*!
     \param blocksize       -- Blocksize, [samples]
     \param nyquistZone     -- Nyquist zone
@@ -384,10 +384,10 @@ namespace CR {  //  Namespace CR -- begin
     iterator_p[0].setStride(0);
     iterator_p[0].setBlocksize(blocksize);
   }
-  
+
   //_____________________________________________________________________________
   //                                                                         init
-  
+
   /*!
     \param blocksize   -- Size of a block of data, [samples]
     \param adc2voltage -- Multiplication factors for conversion from ADC values
@@ -410,16 +410,16 @@ namespace CR {  //  Namespace CR -- begin
 	adc2voltageMatrix (sample,antenna) = adc2voltage (antenna);
       }
     }
-    
+
     // ... which then is forwarded to the next init function
     init (blocksize,
 	  adc2voltageMatrix,
 	  fft2calfft);
   }
-  
+
   //_____________________________________________________________________________
   //                                                                         init
-  
+
   /*!
     \param blocksize   -- Size of a block of data, [samples]
     \param adc2voltage -- [sample,antenna] Multiplication factors for
@@ -436,11 +436,11 @@ namespace CR {  //  Namespace CR -- begin
       conformant - esp. the number of elements in 'adc2voltage' must correspond
       to the length of the second axis of 'fft2calfft'.
     */
-    
+
     bool status (true);
     IPosition shapeADC (adc2voltage.shape());  // [blocksize,nofAntennas]
     IPosition shapeFFT (fft2calfft.shape());   // [fftLength,nofAntennas]
-    
+
     /* Check of the number of antennas is consistent */
     if (shapeADC(1) != shapeFFT(1)) {
       cerr << "[DataReader::init] Inconsistent number of antennas!" << endl;
@@ -449,15 +449,15 @@ namespace CR {  //  Namespace CR -- begin
       cerr << " => Rejecting conversion arrays!"                    << endl;
       status = false;
       /*
-	If the shapes are incorrect there is no way to determine, which of the 
-	arrays we'd have to adjust, to get to a consistent setup; in order to 
-	nevertheless at least create a valid DataReader object, we make a call to 
+	If the shapes are incorrect there is no way to determine, which of the
+	arrays we'd have to adjust, to get to a consistent setup; in order to
+	nevertheless at least create a valid DataReader object, we make a call to
 	init (uint const&)
       */
       init (blocksize);
     } else {
       /*
-	The blocksize must be set at first, because this also will determine the 
+	The blocksize must be set at first, because this also will determine the
 	output length of the FFT, which in turn is required for further checking
       */
       try {
@@ -466,38 +466,38 @@ namespace CR {  //  Namespace CR -- begin
 	cerr << "[DataReader::init]" << message << endl;
 	status = false;
       }
-      
+
       /*
 	Antenna selection: by default we enable all antennas
       */
       Vector<uint> antennas (shapeADC(1));
       Vector<uint> selectedAntennas (shapeADC(1));
-      
+
       try {
 	for (int n(0); n<shapeADC(1); n++) {
 	  antennas(n) = selectedAntennas(n) = n;
 	}
-	
+
 	setAntennas (antennas,
 		     selectedAntennas);
       } catch (std::string message) {
 	cerr << "[DataReader::init]" << message << endl;
 	status = false;
       }
-      
+
       /* book-keeping: memorize the number of data streams */
       nofStreams_p = shapeADC(1);
-      
+
       /*
 	Frequency channel selection: by default we enable all frequency channels
       */
       try {
 	Vector<Bool> selectedChannels (fftLength_p);
 	selectedChannels = True;
-	
+
 	setSelectedChannels (selectedChannels);
 	selectChannels_p = False;
-	
+
 	// process provided parameters
 	setADC2Voltage (adc2voltage);
 	setFFT2calFFT (fft2calfft);
@@ -505,16 +505,16 @@ namespace CR {  //  Namespace CR -- begin
 	cerr << "[DataReader::init]" << message << endl;
 	status = false;
       }
-      
+
       // -- Setup of the Hanning filter (disabled by default)
-      
+
       setHanningFilter (0.0);
-    }    
+    }
   }
-  
+
   //_____________________________________________________________________________
   //                                                                         init
-  
+
   /*!
     \param blocksize   -- Size of a block of data, [samples]
     \param antennas    -- Antennas included in the experiment/observation and
@@ -526,7 +526,7 @@ namespace CR {  //  Namespace CR -- begin
     \param filenames   -- Names of the files from which to read in the data
     \param iterators   -- Set of DataIterator objects used for navigation within
            the file streams.
-    
+
     This is the primary method for the derived classes to initialize the
     underlying DataReader object handling conversion of data.
   */
@@ -539,7 +539,7 @@ namespace CR {  //  Namespace CR -- begin
   {
     Bool status (True);
     uint nofFiles (filenames.nelements());
-    
+
     /*
       [Step 1]
       Make a call to the more simple internal init method first - this will
@@ -548,18 +548,18 @@ namespace CR {  //  Namespace CR -- begin
     init (blocksize,
 	  adc2voltage,
 	  fft2calfft);
-    
+
     /*
       [Step 2]
       Take care of the antenna numbers, as they are needed later of for accessing
       the array containg conversion values and data to be returned
     */
-    
+
     /*
       [Step 3]
       Take care of the file streams
     */
-    
+
     // check the values for the number of files and the data block size
     if (nofFiles != nofStreams_p ||
 	blocksize != blocksize_p) {
@@ -580,10 +580,10 @@ namespace CR {  //  Namespace CR -- begin
 	fileStream_p[file].open(filenames(file).c_str(), ios::in | ios::binary);
 	iterator_p[file] = iterators[file];
 	iterator_p[file].setBlocksize(blocksize);
-      } 
+      }
       streamsConnected_p = true;
     }
-    
+
   }
 
   //_____________________________________________________________________________
@@ -602,7 +602,7 @@ namespace CR {  //  Namespace CR -- begin
     /* Store the new value for the blocksize */
     TimeFreq::setBlocksize (blocksize);
 
-    /* 
+    /*
      * Book-keeping: if the blocksize is changed the conversion arrays become
      * invalid. The only real counter-measure is to inded mark the arrays as
      * no longer valid, such that new values need to be provided for them as well,
@@ -610,18 +610,18 @@ namespace CR {  //  Namespace CR -- begin
      */
     haveADC2Voltage_p = false;
     haveFFT2CalFFT_p  = false;
-    
+
     ADC2Voltage_p.resize(1,1);
     FFT2CalFFT_p.resize(1,1);
 
     selectedChannels_p.resize(fftLength_p);
     casa::indgen(selectedChannels_p);
-    
+
     /* Update the blocksize parameter for the set of DataIterators. */
     for (unsigned int n(0); n<nofStreams_p; n++) {
       iterator_p[n].setBlocksize(blocksize);
     }
-    
+
 #ifdef DEBUGGING_MESSAGES
     cout << "[DataReader::setBlocksize(uint)]"                  << endl;
     cout << "-- blocksize          = " << blocksize_p           << endl;
@@ -631,7 +631,7 @@ namespace CR {  //  Namespace CR -- begin
     cout << "-- shape(fft2calfft)  = " << FFT2CalFFT_p.shape()  << endl;
 #endif
   }
-  
+
   //_____________________________________________________________________________
   //                                                                 setBlocksize
 
@@ -646,13 +646,13 @@ namespace CR {  //  Namespace CR -- begin
     DataReader::setBlocksize (blocksize);
     DataReader::setADC2Voltage (adc2voltage);
   }
-  
+
   //_____________________________________________________________________________
   //                                                                 setBlocksize
-  
+
   /*!
     \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
-    
+
     \param blocksize   -- Blocksize, [samples]
     \param adc2voltage -- [sample,antenna] Weights to convert raw ADC samples to
            voltages
@@ -666,7 +666,7 @@ namespace CR {  //  Namespace CR -- begin
     DataReader::setADC2Voltage (adc2voltage);
     DataReader::setFFT2calFFT (fft2calfft);
   }
-  
+
   //_____________________________________________________________________________
   //                                                              frequencyValues
 
@@ -675,10 +675,10 @@ namespace CR {  //  Namespace CR -- begin
     uint nofChannels = selectedChannels_p.nelements();
     uint channel (0);
     Vector<Double> frequencies;
-    
+
     // Get the values of all frequency channels
     casa::Vector<double> freq (TimeFreq::frequencyValues());
-    
+
     if (onlySelected && nofChannels) {
       frequencies.resize (nofChannels);
       //
@@ -693,7 +693,7 @@ namespace CR {  //  Namespace CR -- begin
 	frequencies(channel) = freq(channel);
       }
     }
-    
+
     return frequencies;
   }
 
@@ -743,7 +743,7 @@ namespace CR {  //  Namespace CR -- begin
   {
     header_p.define("Observatory","UNDEFINED");
     header_p.define("Filesize",0);
-    
+
     return true;
   }
 
@@ -762,7 +762,7 @@ namespace CR {  //  Namespace CR -- begin
 
     return status;
   }
-  
+
   // ============================================================================
   //
   //  Navigation through the data volume
@@ -771,7 +771,7 @@ namespace CR {  //  Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                                     setBlock
-  
+
   /*!
     \param block -- The number of the block at which reading out of data will
            start.
@@ -785,17 +785,17 @@ namespace CR {  //  Namespace CR -- begin
     // Set the corresponding sample offset
     TimeFreq::setSampleOffset(iterator_p[0].block(),false);
   }
-  
+
   //_____________________________________________________________________________
   //                                                                    setStride
-  
+
   void DataReader::setStride (uint const &stride)
   {
     for (unsigned int n(0); n<nofStreams_p; n++) {
       iterator_p[n].setStride(stride);
     }
   }
-  
+
   //_____________________________________________________________________________
   //                                                                        shift
 
@@ -809,7 +809,20 @@ namespace CR {  //  Namespace CR -- begin
 
     return s;
   }
-  
+
+  Vector<int> DataReader::shiftcasa ()
+  {
+    Vector<int> s (nofStreams_p);
+
+    for (unsigned int n(0); n<nofStreams_p; n++) {
+      s[n] = iterator_p[n].shift();
+    }
+
+    return s;
+  }
+
+
+
   //_____________________________________________________________________________
   //                                                                     setShift
 
@@ -819,7 +832,7 @@ namespace CR {  //  Namespace CR -- begin
       iterator_p[n].setShift(shift);
     }
   }
-  
+
   //_____________________________________________________________________________
   //                                                                     setShift
 
@@ -832,7 +845,7 @@ namespace CR {  //  Namespace CR -- begin
       std::cerr << "[DataReader::setShift] Invalid index for stream!" << endl;
     }
   }
-  
+
   //_____________________________________________________________________________
   //                                                                     setShift
 
@@ -841,13 +854,13 @@ namespace CR {  //  Namespace CR -- begin
     if (shift.size() == nofStreams_p) {
       for (unsigned int n(0); n<nofStreams_p; n++) {
 	iterator_p[n].setShift(shift[n]);
-      } 
+      }
     } else {
       std::cerr << "[DataReader::setShift]"
 		<< " Length of vector does not match nof. streams!" << endl;
     }
   }
-  
+
   //_____________________________________________________________________________
   //                                                                    nextBlock
 
@@ -863,42 +876,42 @@ namespace CR {  //  Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                                    positions
-  
+
   Vector<unsigned int> DataReader::positions ()
   {
     Vector<unsigned int> currentPositions (nofStreams_p);
-    
+
     for (unsigned int n(0); n<nofStreams_p; n++) {
       currentPositions(n) = iterator_p[n].position();
     }
-    
+
     return currentPositions;
   }
-  
+
   // ==============================================================================
   //
   //  Methods
   //
   // ==============================================================================
-  
+
   //_______________________________________________________________________________
   //                                                                             fx
-  
+
   /*!
     \return fx -- [sample,antenna] Raw ADC time series, [Counts]
   */
   Matrix<Double> DataReader::fx ()
   {
     Matrix<Double> data (blocksize_p,nofSelectedAntennas());
-    
+
     DataReader::fx (data);
 
     return data;
   }
-  
+
   //_______________________________________________________________________________
   //                                                                             fx
-  
+
   /*!
     \retval data -- [sample,antenna] Raw ADC time series, [Counts]
   */
@@ -915,22 +928,22 @@ namespace CR {  //  Namespace CR -- begin
 
   //_______________________________________________________________________________
   //                                                                        voltage
-  
+
   /*!
     \return voltage -- [sample,antenna] Voltage time series, [Volt]
   */
   Matrix<Double> DataReader::voltage ()
   {
     Matrix<Double> data (blocksize_p,nofSelectedAntennas());
-    
+
     DataReader::voltage (data);
 
     return data;
   }
-  
+
   //_______________________________________________________________________________
   //                                                                        voltage
-  
+
   /*!
     \retval voltage -- [sample,antenna] Voltage time series, [Volt]
   */
@@ -940,18 +953,18 @@ namespace CR {  //  Namespace CR -- begin
     casa::Matrix<Double> in (fx());
     uint sample (0);
     uint antenna(0);
-    
+
     /* Check the shape of the array returning the data */
     if (in.shape() == shape) {
       if (data.shape() != shape) {
 	data.resize(shape);
-      } 
+      }
     } else {
       std::cerr << "[DataReader::voltage] Mismatching array shapes!" << std::endl;
       std::cerr << "-- shape(fx)      = " << in.shape() << std::endl;
       std::cerr << "-- shape(voltage) = " << shape      << std::endl;
     }
-    
+
     /* Keep in mind here, that there might be a set of antennas selected */
     if (haveADC2Voltage_p) {
       for (antenna=0; antenna<nofSelectedAntennas(); antenna++) {
@@ -967,10 +980,10 @@ namespace CR {  //  Namespace CR -- begin
       }
     }
   }
-  
+
   //_______________________________________________________________________________
   //                                                                            fft
-  
+
   Matrix<DComplex> DataReader::fft ()
   {
     casa::IPosition shape (2,
@@ -982,10 +995,10 @@ namespace CR {  //  Namespace CR -- begin
 
     return data;
   }
-  
+
   //_______________________________________________________________________________
   //                                                                            fft
-  
+
   /*!
     \return fft -- [channel,antenna] Raw FFT of the voltage time series
 
@@ -1031,7 +1044,7 @@ namespace CR {  //  Namespace CR -- begin
 
     //____________________________________________
     // Check of array size
-    
+
     if (data.shape() != shape) {
       data.resize(shape);
     }
@@ -1082,9 +1095,9 @@ namespace CR {  //  Namespace CR -- begin
 	break;
       }
     }
-    
+
   }
-  
+
   //_______________________________________________________________________________
   //                                                                         calfft
 
@@ -1098,13 +1111,13 @@ namespace CR {  //  Namespace CR -- begin
 			   DataReader::nofSelectedAntennas());
 
     DataReader::calfft (data);
-    
+
     return data;
   }
-  
+
   //_______________________________________________________________________________
   //                                                                         calfft
-  
+
   /*!
     \return calfft -- [channel,antenna] Calibrated FFT, i.e. spectra after
             correction for the antenna gain-curves.
@@ -1122,7 +1135,7 @@ namespace CR {  //  Namespace CR -- begin
     if (data.shape() != shape) {
       data.resize(shape);
     }
-    
+
     /*
       Conversion from raw to calibrated FFT: as we may have selected on both
       antenna numbers and frequency channels, we cannot simply do
@@ -1141,10 +1154,10 @@ namespace CR {  //  Namespace CR -- begin
     }
 
   }
-  
+
   //_____________________________________________________________________________
   //                                                                       invfft
-  
+
   Matrix<Double> DataReader::invfft (Matrix<DComplex> fftdata)
   {
     uint nants = nofSelectedAntennas();
@@ -1158,7 +1171,7 @@ namespace CR {  //  Namespace CR -- begin
     };
     Matrix<Double> out(blocksize_p,
 		       nofSelectedAntennas(),0.);
-    try {      
+    try {
       Vector <Double> outColumn(blocksize_p);
       Vector<DComplex> inColumn(fftLength_p);
       FFTServer<Double,DComplex> server(IPosition(1,blocksize_p),
@@ -1176,28 +1189,28 @@ namespace CR {  //  Namespace CR -- begin
 	  }
 	  break;
 	}
-	// inv-FFT the data block for the current antenna 
+	// inv-FFT the data block for the current antenna
 	server.fft(outColumn,inColumn);
 	out.column(antenna) = outColumn;
       }
     } catch (AipsError x) {
       cerr << "[DataReader::invfft]" << x.getMesg() << endl;
     }
-    
+
     return out;
   }
 
   //_____________________________________________________________________________
   //                                                                       invfft
-  
+
   Vector<Double> DataReader::invfft (Vector<DComplex> fftdata)
   {
-    Vector<Double> out(blocksize_p,0.);		
+    Vector<Double> out(blocksize_p,0.);
     if (fftdata.nelements() != fftLength_p) {
       cerr << "[DataReader::invfft] Bad input: nrow != fftLength" << endl;
       return out;
     };
-    try {      
+    try {
       Vector<DComplex> inColumn(fftLength_p);
       FFTServer<Double,DComplex> server(IPosition(1,blocksize_p),
 					FFTEnums::REALTOCOMPLEX);
@@ -1215,17 +1228,17 @@ namespace CR {  //  Namespace CR -- begin
 	}
 	break;
       }
-      // inv-FFT the data block for the current antenna 
+      // inv-FFT the data block for the current antenna
       server.fft(out,inColumn);
     } catch (AipsError x) {
       cerr << "[DataReader::invfft]" << x.getMesg() << endl;
-    }    
+    }
     return out;
   }
 
   //_____________________________________________________________________________
   //                                                                    ccSpectra
-  
+
   /*!
     \param fromCalFFT -- Cross-correlation spectra from the calibrated FFT data? If
                          set to <i>False</i>, the cross-correlation is carried out on
@@ -1249,7 +1262,7 @@ namespace CR {  //  Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                                    ccSpectra
-  
+
   /*!
     \retval ccSpectra -- Data cube with the cross-correlation spectra,
             [nfreq,nant,nant]
@@ -1268,7 +1281,7 @@ namespace CR {  //  Namespace CR -- begin
 			   DataReader::nofSelectedAntennas(),
 			   DataReader::nofSelectedAntennas());
     Matrix<DComplex> in (shape(0),shape(1));
-    
+
     /* Check the shape of the array returning the data */
     if (data.shape() != shape) {
       data.resize(shape);
@@ -1290,15 +1303,15 @@ namespace CR {  //  Namespace CR -- begin
       }
     }
   }
-  
+
   //_____________________________________________________________________________
   //                                                                 visibilities
-  
+
   /*!
     \param fromCalFFT -- Cross-correlation spectra from the calibrated FFT data? If
            set to <i>False</i>, the cross-correlation is carried out
 	   on the raw FFT.
-    
+
     \return vis -- The visibilities
 
     \todo The antenna combinations for the baselines must be provided as well;
@@ -1315,16 +1328,16 @@ namespace CR {  //  Namespace CR -- begin
     int baseline (0);
     Matrix<DComplex> in (DataReader::nofSelectedChannels(),
 			 DataReader::nofSelectedAntennas());
-    
+
     if (fromCalFFT == True) {
       in = calfft();
     } else {
       in = fft();
     }
-    
+
     IPosition shape (in.shape());
     Matrix<DComplex> vis (shape(0),nofBaselines(false));
-    
+
     for (antenna1=0; antenna1<shape(1); antenna1++) {
       for (antenna2=antenna1+1; antenna2<shape(1); antenna2++) {
 	for (channel=0; channel<shape(0); channel++) {
@@ -1333,31 +1346,31 @@ namespace CR {  //  Namespace CR -- begin
 	baseline++;
       }
     }
-    
+
     return vis;
   }
-  
+
   // ==============================================================================
   //
   //  Conversion & Selection
   //
   // ==============================================================================
-  
+
   //_____________________________________________________________________________
   //                                                               setADC2Voltage
-  
+
   /*!
-    Kepp in mind, that there two possible shapes in which the data will be 
+    Kepp in mind, that there two possible shapes in which the data will be
     accepted:
     <ol>
-      <li>nelem == nofSelectedAntennas() : only conversion values for the 
+      <li>nelem == nofSelectedAntennas() : only conversion values for the
       selected antennas are provided.
-      <li>nelem == nofAntennas() : conversion values for all antennas in the 
+      <li>nelem == nofAntennas() : conversion values for all antennas in the
       dataset are provided; this is the more secure method, as this will allow
       for later re-selection of antennas without affecting the proper conversion
       from ADC values to voltages.
     </ol>
-    This routine assignes a single conversion value to each antenna; in case 
+    This routine assignes a single conversion value to each antenna; in case
     you want to use this step to also flag in the time domain, use the method
     below.
 
@@ -1369,7 +1382,7 @@ namespace CR {  //  Namespace CR -- begin
     bool ok (true);
     uint nofAntennas (adc2voltage.nelements());
     Matrix<double> arr (blocksize_p,nofAntennas);
-    
+
     // insert the input values into the full parameter matrix
     try {
       uint antenna(0);
@@ -1382,24 +1395,24 @@ namespace CR {  //  Namespace CR -- begin
     } catch (std::string message) {
       cerr << "[DataReader::setADC2Voltage] " << message << endl;
       ok = false;
-    } 
-    
+    }
+
     // forward the matrix to internal storage
     if (ok) {
       setADC2Voltage (arr);
     } else {
-      cerr << "[DataReader::setADC2Voltage] Not forwarding ADC2Voltage values!" 
+      cerr << "[DataReader::setADC2Voltage] Not forwarding ADC2Voltage values!"
 	   << endl;
     }
   }
-  
+
   // --------------------------------------------------------------- setADC2Voltage
-  
+
   void DataReader::setADC2Voltage (Matrix<Double> const &adc2voltage)
   {
     casa::IPosition shape (adc2voltage.shape());
-    
-    // check for the blocksize 
+
+    // check for the blocksize
     if (shape(0) != int(blocksize_p)) {
       cerr << "[DataReader::setADC2Voltage] Shape information mistmatch!" << endl;
       cerr << " --> blocksize    = " << blocksize_p << endl;
@@ -1416,7 +1429,7 @@ namespace CR {  //  Namespace CR -- begin
 	    tmp(sample,selectedAntennas_p(antenna)) = adc2voltage (sample,antenna);
 	  }
 	}
-	// store the values 
+	// store the values
 	ADC2Voltage_p.resize(tmp.shape());
 	ADC2Voltage_p = tmp;
 	// book-keeping
@@ -1436,16 +1449,16 @@ namespace CR {  //  Namespace CR -- begin
       }
     }
   }
-  
+
   //_____________________________________________________________________________
   //                                                                setFFT2calFFT
-  
+
   /*!
     \param fft2calfft -- Weights to convert the output of the Fourier transform
            on the voltages to calibrated spectra, accounting for the slope of
 	   the bandpass filter.
     \return status -- Status of the operation; returns <tt>True</tt> in case
-            the conversion array was successfully stored, <tt>False</tt> 
+            the conversion array was successfully stored, <tt>False</tt>
 	    otherwise.
   */
   bool DataReader::setFFT2calFFT (Matrix<DComplex> const &fft2calfft)
@@ -1456,7 +1469,7 @@ namespace CR {  //  Namespace CR -- begin
     unsigned int nofAntennas         = DataReader::nofAntennas();
     unsigned int nofSelectedAntennas = DataReader::nofSelectedAntennas();
     unsigned int nofSelectedChannels = DataReader::nofSelectedChannels();
-    
+
     /* Get the shape of the current conversion array */
     if (haveFFT2CalFFT_p) {
       shape = fft2calfft.shape();
@@ -1465,7 +1478,7 @@ namespace CR {  //  Namespace CR -- begin
 			       nofSelectedChannels,
 			       nofSelectedAntennas);
     }
-    
+
     /*
      * Check consistence between array with conversion factors and the array
      * holding the selected channels; of course the latter once cannot have more
@@ -1484,14 +1497,14 @@ namespace CR {  //  Namespace CR -- begin
       // ... and update the variable used for further processing
       nofSelectedChannels = DataReader::nofSelectedChannels();
     }
-    
+
     /*
       We can use a single general loop for accepting the input data; the only
       difference in the actual access to the matrix elements will be caused by the
       shape of the input matrix, thus if we check for this first we can use generic
       code later on.
     */
-    
+
     if (uint(shape(0)) == nofSelectedChannels &&
 	uint(shape(1)) == nofSelectedAntennas) {
       //
@@ -1524,7 +1537,7 @@ namespace CR {  //  Namespace CR -- begin
       //
       status = false;
     }
-    
+
 #ifdef DEBUGGING_MESSAGES
     cout << "[DataReader::setFFT2calFFT (Matrix<DComplex>)]" << endl;
     cout << " -- FFT output length .... = " << fftLength_p           << endl;
@@ -1534,7 +1547,7 @@ namespace CR {  //  Namespace CR -- begin
     cout << " -- nofSelectedAntennas .. = " << nofSelectedAntennas << endl;
     cout << " -- shape(fft2calfft) .... = " << shape                 << endl;
 #endif
-    
+
     /*
      * If all the test we have been running up to this point hacve succeeded,
      * we are clear to go copy the provided input values to internal storage
@@ -1555,13 +1568,13 @@ namespace CR {  //  Namespace CR -- begin
       /* Do the book-keeping */
       haveFFT2CalFFT_p = true;
     }
-    
+
     return status;
   }
-  
+
   //_____________________________________________________________________________
   //                                                             setHanningFilter
-  
+
   /*!
     \param alpha -- Slope parameter of the HanningFilter.
 
@@ -1580,7 +1593,7 @@ namespace CR {  //  Namespace CR -- begin
       applyHanning_p = True;
     }
   }
-  
+
   //_____________________________________________________________________________
   //                                                             setHanningFilter
 
@@ -1601,7 +1614,7 @@ namespace CR {  //  Namespace CR -- begin
       applyHanning_p = True;
     }
   }
-  
+
   //_____________________________________________________________________________
   //                                                             setHanningFilter
 
@@ -1614,7 +1627,7 @@ namespace CR {  //  Namespace CR -- begin
   */
   void DataReader::setHanningFilter (double const &alpha,
 				     uint const &beta,
-				     uint const &betaRise, 
+				     uint const &betaRise,
 				     uint const &betaFall)
   {
     if (alpha == 0.0) {
@@ -1629,31 +1642,31 @@ namespace CR {  //  Namespace CR -- begin
       applyHanning_p = True;
     }
   }
-  
+
   // ==============================================================================
   //
   //  Antennas and antenna selection
   //
   // ==============================================================================
-  
+
   //_____________________________________________________________________________
   //                                                                  setAntennas
 
   bool DataReader::setAntennas (Vector<uint> const &antennas)
   {
     bool status (true);
-    
+
     /*
       We might need additional checking against the number of elements in
       adc2voltage, in case the latter is defined.
     */
-    
+
     antennas_p.resize (antennas.shape());
     antennas_p = antennas;
-    
+
     return status;
   }
-  
+
   //_____________________________________________________________________________
   //                                                                  setAntennas
 
@@ -1663,7 +1676,7 @@ namespace CR {  //  Namespace CR -- begin
     bool status (true);
     uint nofAntennas (antennas.nelements());
     uint nofSelectedAntennas (selectedAntennas.nelements());
-    
+
     if (nofSelectedAntennas > nofAntennas) {
       cerr << "[DataReader::setAntennas]"                        << endl;
       cerr << " nof antennas          = " << nofAntennas         << endl;
@@ -1673,10 +1686,10 @@ namespace CR {  //  Namespace CR -- begin
       setAntennas (antennas);
       setSelectedAntennas (selectedAntennas);
     }
-    
+
     return status;
   }
-  
+
   //_____________________________________________________________________________
   //                                                                  setAntennas
 
@@ -1685,7 +1698,7 @@ namespace CR {  //  Namespace CR -- begin
   {
     bool status (true);
     uint nofAntennas (antennas.nelements());
-    
+
     if (nofAntennas != antennaSelection.nelements()) {
       cerr << "[DataReader::setAntennas]"                               << endl;
       cerr << " shape(antennas)         = " << antennas.shape()         << endl;
@@ -1695,10 +1708,10 @@ namespace CR {  //  Namespace CR -- begin
       setAntennas (antennas);
       setSelectedAntennas (antennaSelection);
     }
-    
+
     return status;
   }
-  
+
   //_____________________________________________________________________________
   //                                                          setSelectedAntennas
 
@@ -1709,9 +1722,9 @@ namespace CR {  //  Namespace CR -- begin
 					bool const &absolute)
   {
     Bool status (True);
-    
+
     // check if the arrays size is correct
-    
+
     try {
       if (antennaSelection.nelements() > antennas_p.nelements()) {
 	cerr << "[DataReader::setSelectedAntennas] Too many selected antennas!"
@@ -1731,10 +1744,10 @@ namespace CR {  //  Namespace CR -- begin
       cerr << "[DataReader::setSelectedAntennas]" << x.getMesg() << endl;
       status = False;
     }
-    
+
     return status;
   }
-  
+
   //_____________________________________________________________________________
   //                                                          setSelectedAntennas
 
@@ -1744,7 +1757,7 @@ namespace CR {  //  Namespace CR -- begin
   Bool DataReader::setSelectedAntennas (Vector<Bool> const &antennaSelection)
   {
     uint nelem (antennaSelection.nelements());
-    
+
     /*!
       We need to check the number of elements in the selection array; of course
       the number of selected antennas should always be <= the total number of
@@ -1754,17 +1767,17 @@ namespace CR {  //  Namespace CR -- begin
     if (nelem == nofAntennas()) {
       Vector<uint> selectedAntennas (ntrue(antennaSelection));
       uint counter (0);
-      
+
       //    antennaSelection_p.resize(nelem);
       //    antennaSelection_p = antennaSelection;
-      
+
       for (uint antenna(0); antenna<nelem; antenna++) {
 	if (antennaSelection(antenna)) {
 	  selectedAntennas (counter) = antenna;
 	  counter++;
 	}
       }
-      
+
       return setSelectedAntennas (selectedAntennas);
     } else {
       cerr << "[DataReader::setSelectedAntennas]"               << endl;
@@ -1777,7 +1790,7 @@ namespace CR {  //  Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                             antennaSelection
-  
+
   /*!
     \return antennaSelection -- Array with the antenna selection flags
   */
@@ -1792,45 +1805,45 @@ namespace CR {  //  Namespace CR -- begin
 
     return selection;
   }
-  
+
   //_____________________________________________________________________________
   //                                                                 nofBaselines
-  
+
   uint DataReader::nofBaselines (bool const &allAntennas) const
   {
     uint nant (nofSelectedAntennas());
-    
+
     if (allAntennas) {
       nant = nofAntennas ();
     }
-    
+
     return (nant-1)*nant/2;
   }
-  
+
   // ============================================================================
   //
   //  Frequency channels and frequency channel selection
   //
   // ============================================================================
-  
+
   // -------------------------------------------------------- setSelectedChannels
-  
+
   Bool DataReader::setSelectedChannels (Vector<uint> const &channelSelection)
   {
 #ifdef DEBUGGING_MESSAGES
     cout << "[DataReader::setSelectedChannels (Vector<uint>)]" << endl;
     cout << " -- channelSelection = " << channelSelection.shape() << endl;
-#endif 
+#endif
     Bool status (True);
-    
+
     selectedChannels_p.resize (channelSelection.shape());
     selectedChannels_p = channelSelection;
-    
+
     selectChannels_p = true;
-    
+
     return status;
   }
-  
+
   // -------------------------------------------------------- setSelectedChannels
 
   Bool DataReader::setSelectedChannels (Vector<Bool> const &channelSelection)
@@ -1838,20 +1851,20 @@ namespace CR {  //  Namespace CR -- begin
 #ifdef DEBUGGING_MESSAGES
     cout << "[DataReader::setSelectedChannels (Vector<bool>)]" << endl;
     cout << " -- channelSelection = " << channelSelection.shape() << endl;
-#endif 
+#endif
     uint nelem (channelSelection.nelements());
-    
+
     if (nelem == fftLength_p) {
       Vector<uint> selectedChannels (ntrue(channelSelection));
       uint counter (0);
-      
+
       for (uint channel(0); channel<nelem; channel++) {
 	if (channelSelection(channel)) {
 	  selectedChannels (counter) = channel;
 	  counter++;
 	}
       }
-      
+
       return setSelectedChannels (selectedChannels);
     } else {
       cerr << "[DataReader::setSelectedChannels] ";
@@ -1865,19 +1878,19 @@ namespace CR {  //  Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                                      summary
-  
+
   void DataReader::summary (std::ostream &os)
   {
     IPosition fxShape;
     IPosition voltageShape;
     IPosition fftShape;
     IPosition calfftShape;
-    
+
     fxShape      = fx().shape();
     voltageShape = voltage().shape();
     fftShape     = fft().shape();
     calfftShape  = calfft().shape();
-    
+
     os << "[DataReader::summary]" << endl;
     // basic parameters
     os << " -- blocksize ............ = " << blocksize_p  << endl;

@@ -3038,7 +3038,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 //$COPY_TO END --------------------------------------------------
 /*!
   h$MFUNC(vec,vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
-  vec.$MFUNC(vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2 
+  vec.$MFUNC(vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
 
   \brief $DOCSTRING
   $PARDOCSTRING
@@ -5281,9 +5281,9 @@ void HFPP_FUNC_NAME (const Iter pixel, const Iter pixel_end,
   Iter pixel_it=pixel;
 
   // Placeholders for conversion
-  casa::Vector<casa::Double> cworld(2), cpixel(2); 
+  casa::Vector<casa::Double> cworld(2), cpixel(2);
 
-  // Loop over all world coordinates 
+  // Loop over all world coordinates
   while (world_it!=world_end && pixel_it!=pixel_end)
   {
     // Get world coordinates into casa vector for conversion
@@ -5375,7 +5375,7 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
   Iter pixel_it=pixel;
 
   // Placeholders for conversion
-  casa::Vector<casa::Double> cworld(2), cpixel(2); 
+  casa::Vector<casa::Double> cworld(2), cpixel(2);
 
   // Loop over all pixels
   while (world_it!=world_end && pixel_it!=pixel_end)
@@ -7220,12 +7220,20 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
     HFPP_REPEAT(double,HNumber,increment)
     HFPP_REPEAT(double,HNumber,frequencyValues)
     HFPP_REPEAT(double,HNumber,frequencyRange)
+    HFPP_REPEAT(int, HNumber, shiftcasa)
 #undef HFPP_REPEAT
-    if ((key== "shift") || (key2== "shift")) {
-      std::vector<int> result(drp->shift());
-      HPyObject pyob(result);
-      return pyob;
-    } else
+    // if ((key== "shift") || (key2== "shift")) {
+    //   Vector<int> casavec(drp->shiftcasa());
+    //   std::vector<int> result;
+    //   aipsvec2stlvec(casavec,result);
+    //   HPyObject pyob(result);
+    //   return pyob;
+    // } else
+    // if ((key== "shift") || (key2== "shift")) {
+    //   std::vector<int> result(drp->shift());
+    //   HPyObject pyob(result);
+    //   return pyob;
+    // } else
 // --- Reading data from the headerrecord in a scalar---
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  \
       if ((key== #KEY) || (key2== #KEY)) {_H_NL_\
@@ -7382,9 +7390,9 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 
 //$DOCSTRING: Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hFileRead 
+#define HFPP_FUNC_NAME hFileRead
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY  //HFPP_CLASS_hARRAYALL is missing due to a deficiency of hfppnew to deal with pass as reference 
+#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY  //HFPP_CLASS_hARRAYALL is missing due to a deficiency of hfppnew to deal with pass as reference
 #define HFPP_PYTHON_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY
 #define HFPP_FUNC_KEEP_RETURN_TYPE_FIXED HFPP_TRUE //return a single DataReader object and not a vector thereof for array operations
 #define HFPP_FUNC_MASTER_ARRAY_PARAMETER 2 // Use the third parameter as the master array for looping and history informations
