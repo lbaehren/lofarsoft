@@ -37,16 +37,6 @@ class sip(control):
             # Read metadata (start, end times, pointing direction) from GVDS.
             vdsinfo = self.run_task("vdsreader")
 
-            # Build a sky model ready for BBS & return the name of the
-            # central source.
-            ra = quantity(vdsinfo['pointing']['ra']).get_value('deg')
-            dec = quantity(vdsinfo['pointing']['dec']).get_value('deg')
-            central = self.run_task(
-                "skymodel", ra=ra, dec=dec, search_size=2.5
-            )
-            self.logger.info(central["source_name"])
-            self.logger.info(central["source_flux"])
-
             # NDPPP reads the data from the storage nodes, according to the
             # map. It returns a new map, describing the location of data on
             # the compute nodes.
@@ -61,21 +51,21 @@ class sip(control):
                 data_end_time=vdsinfo['end_time']
             )['mapfile']
 
-            # Build a sky model ready for BBS & return the name of the
+            # Build a sky model ready for BBS & return the name & flux of the
             # central source.
             ra = quantity(vdsinfo['pointing']['ra']).get_value('deg')
             dec = quantity(vdsinfo['pointing']['dec']).get_value('deg')
-            source_name = self.run_task(
+            central = self.run_task(
                 "skymodel", ra=ra, dec=dec, search_size=2.5
-            )['source_name']
+            )
 
             # Patch the name of the central source into the BBS parset for
             # subtraction.
             with patched_parset(
                 self.task_definitions.get("bbs", "parset"),
                 {
-                    'Step.correct.Model.Sources': "[ \"%s\" ]" % (source_name),
-                    'Step.subtract.Model.Sources': "[ \"%s\" ]" % (source_name)
+                    'Step.correct.Model.Sources': "[ \"%s\" ]" % (central["source_name"]),
+                    'Step.subtract.Model.Sources': "[ \"%s\" ]" % (central["source_name"])
                 }
             ) as bbs_parset:
                 self.logger.info("BBS parset is %s" % bbs_parset)
@@ -86,7 +76,8 @@ class sip(control):
 
             # Now, run DPPP three times on the output of BBS. We'll run
             # this twice: once on CORRECTED_DATA, and once on
-            # SUBTRACTED_DATA.
+            # SUBTRACTED_DATA. Clip anything at more than 5 times the flux of
+            # the central source.
             with patched_parset(
                 os.path.join(
                     self.config.get("layout", "parset_directory"),
