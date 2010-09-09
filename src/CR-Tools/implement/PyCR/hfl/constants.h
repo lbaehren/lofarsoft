@@ -1,5 +1,5 @@
 /**************************************************************************
- *  This file is part of the Transient Template Library.                  *
+ *  This file is part of the Heino Falcke Library.                        *
  *  Copyright (C) 2010 Pim Schellart <P.Schellart@astro.ru.nl>            *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
@@ -16,8 +16,8 @@
  *  along with this library. If not, see <http://www.gnu.org/licenses/>.  *
  **************************************************************************/
 
-#ifndef TTL_CONSTANTS_H
-#define TTL_CONSTANTS_H
+#ifndef HFL_CONSTANTS_H
+#define HFL_CONSTANTS_H
 
 // SYSTEM INCLUDES
 //
@@ -35,10 +35,10 @@
 /*!
   \file constants.h
   \ingroup CR
-  \ingroup CR_TTL
+  \ingroup CR_HFL
  */
 
-namespace ttl
+namespace hfl
 {
   namespace constants
   {
@@ -46,7 +46,7 @@ namespace ttl
 
     const double LIGHT_SPEED = 299792458.0;
   } // End constants
-} // End ttl
+} // End hfl
 
-#endif // TTL_CONSTANTS_H
+#endif // HFL_CONSTANTS_H
 

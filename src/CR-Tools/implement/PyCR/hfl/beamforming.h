@@ -1,5 +1,5 @@
 /**************************************************************************
- *  This file is part of the Transient Template Library.                  *
+ *  This file is part of the Heino Falcke Library.                        *
  *  Copyright (C) 2010 Pim Schellart <P.Schellart@astro.ru.nl>            *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
@@ -16,16 +16,16 @@
  *  along with this library. If not, see <http://www.gnu.org/licenses/>.  *
  **************************************************************************/
 
-#ifndef TTL_BEAMFORMING_H
-#define TTL_BEAMFORMING_H
+#ifndef HFL_BEAMFORMING_H
+#define HFL_BEAMFORMING_H
 
 // SYSTEM INCLUDES
 #include <cmath>
 #include <complex>
 
 // PROJECT INCLUDES
-#include <ttl/math.h>
-#include <ttl/constants.h>
+#include <hfl/math.h>
+#include <hfl/constants.h>
 
 // LOCAL INCLUDES
 //
@@ -37,10 +37,10 @@
 /*!
   \file beamforming.h
   \ingroup CR
-  \ingroup CR_TTL
+  \ingroup CR_HFL
  */
 
-namespace ttl
+namespace hfl
 {
   namespace beamforming
   {
@@ -335,7 +335,7 @@ namespace ttl
         };
       }
   } // End beamforming
-} // End ttl
+} // End hfl
 
-#endif // TTL_BEAMFORMING_H
+#endif // HFL_BEAMFORMING_H
 

@@ -10,12 +10,12 @@ from _core import *
 # Import module for temporary access to metadata
 import metadata
 
-# Try to import everything from the TTL
+# Try to import everything from the HFL
 try:
-    import ttl
-    from ttl import *
+    import hfl
+    from hfl import *
 except ImportError:
-    warnings.warn('Could not import ttl module, algorithms from ttl will not be available.')
+    warnings.warn('Could not import hfl module, algorithms from hfl will not be available.')
 
 ## -------------------------------------------------------------------------
 #  Datareader

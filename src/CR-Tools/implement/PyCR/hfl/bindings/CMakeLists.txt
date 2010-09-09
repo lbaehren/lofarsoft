@@ -1,6 +1,6 @@
 ## =========================================================================
 ##
-##  Python bindings to the Transient Template Library
+##  Python bindings to the Heino Falcke Library
 ##
 ## =========================================================================
 
@@ -15,33 +15,33 @@ include (FindTMF)
 
 ## Required external package: Python
 if (NOT HAVE_PYTHON)
-  message (STATUS "[TTL-Tools] Generation of pyttl disabled; missing Python!")
-  set (TTL_WITH_BINDINGS OFF)
+  message (STATUS "[HFL-Tools] Generation of pyhfl disabled; missing Python!")
+  set (HFL_WITH_BINDINGS OFF)
 endif (NOT HAVE_PYTHON)
 ## Required external package: Boost++
 if (NOT HAVE_BOOST)
-  message (STATUS "[TTL-Tools] Generation of pyttl disabled; missing Boost!")
-  set (TTL_WITH_BINDINGS OFF)
+  message (STATUS "[HFL-Tools] Generation of pyhfl disabled; missing Boost!")
+  set (HFL_WITH_BINDINGS OFF)
 endif (NOT HAVE_BOOST)
 ## Required external package: NumPy
 if (HAVE_NUMPY)
   include_directories (${NUMPY_INCLUDES})
 else (HAVE_NUMPY)
-  message (STATUS "[TTL-Tools] Generation of pyttl disabled; missing NumPy!")
-  set (TTL_WITH_BINDINGS OFF)
+  message (STATUS "[HFL-Tools] Generation of pyhfl disabled; missing NumPy!")
+  set (HFL_WITH_BINDINGS OFF)
 endif (HAVE_NUMPY)
 ## Required external package: NumUtil
 if (HAVE_NUM_UTIL)
   include_directories (${NUM_UTIL_INCLUDES})
 else (HAVE_NUM_UTIL)
-  message (STATUS "[TTL-Tools] Generation of pyttl disabled; missing NumUtil!")
-  set (TTL_WITH_BINDINGS OFF)
+  message (STATUS "[HFL-Tools] Generation of pyhfl disabled; missing NumUtil!")
+  set (HFL_WITH_BINDINGS OFF)
 endif (HAVE_NUM_UTIL)
 
 ##__________________________________________________________
 ## Build the library
 
-if (TTL_WITH_BINDINGS)
+if (HFL_WITH_BINDINGS)
   set (MODULES
       math
       beamforming
@@ -92,9 +92,9 @@ if (TTL_WITH_BINDINGS)
   ## Installation
 
   if (CR_WITH_PYCR)
-      set (DESTDIR lib/python/pycr/ttl)
+      set (DESTDIR lib/python/pycr/hfl)
   else (CR_WITH_PYCR)
-      set (DESTDIR lib/python/ttl)
+      set (DESTDIR lib/python/hfl)
   endif (CR_WITH_PYCR)
   
   # Install package init script
@@ -116,9 +116,9 @@ if (TTL_WITH_BINDINGS)
   ##
   ## =======================================================================
   
-  if (TTL_BUILD_TESTS)
+  if (HFL_BUILD_TESTS)
     add_subdirectory (test)
-  endif (TTL_BUILD_TESTS)
+  endif (HFL_BUILD_TESTS)
 
-endif (TTL_WITH_BINDINGS)
+endif (HFL_WITH_BINDINGS)
 

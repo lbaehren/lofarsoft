@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 ##########################################################################
-#  This file is part of the Transient Template Library.                  #
+#  This file is part of the Heino Falcke Library.                        #
 #  Copyright (C) 2010 Pim Schellart <P.Schellart@astro.ru.nl>            #
 #                                                                        #
 #  This library is free software: you can redistribute it and/or modify  #
@@ -18,6 +18,7 @@
 #  along with this library. If not, see <http://www.gnu.org/licenses/>.  #
 ##########################################################################
 
+import sys
 import re
 import xml.dom.minidom
 from optparse import OptionParser
@@ -90,7 +91,7 @@ def insertTypes(template, argnames, argtypes):
                     block += 'break;\n'
 
             block += 'default:\n{\n'
-            block += 'throw ttl::TypeError();\n'
+            block += 'throw hfl::TypeError();\n'
             block += '}\n'
             block += 'break;\n'
             block += '}\n'
@@ -336,13 +337,13 @@ def elementToCode(node, namespace=''):
         argtypes=[]
         iarg=0
 
-        # Add TTL function call
+        # Add HFL function call
         if ftype == 'void':
             placeholder+=namespace+fname+'('
         else:
             placeholder+='return '+namespace+fname+'('
 
-        # Add TTL function call arguments
+        # Add HFL function call arguments
         if node.hasChildNodes():
             # Make copy of list to prevent removing elements from the DOM
             arguments = node.childNodes[:]
@@ -384,7 +385,7 @@ def elementToCode(node, namespace=''):
                         argnames.append(name)
                         argtypes.append(['int', 'long', 'float', 'double'])
 
-                    placeholder+='ttl::numpyBeginPtr<'+'TYPE_'+name+'>('+name.strip()+'), ttl::numpyEndPtr<'+'TYPE_'+name+'>('+name.strip()+')'
+                    placeholder+='hfl::numpyBeginPtr<'+'TYPE_'+name+'>('+name.strip()+'), hfl::numpyEndPtr<'+'TYPE_'+name+'>('+name.strip()+')'
 
                     # Add ',' between parameters
                     if len(arguments)>1:
@@ -416,7 +417,7 @@ def elementToCode(node, namespace=''):
                         argnames.append(name)
                         argtypes.append(['int', 'long', 'float', 'double'])
 
-                    placeholder+='ttl::numpyBeginPtr<'+'TYPE_'+name+'>('+name.strip()+')'
+                    placeholder+='hfl::numpyBeginPtr<'+'TYPE_'+name+'>('+name.strip()+')'
 
                     # Add ',' between parameters
                     if len(arguments)>=1:
@@ -437,7 +438,7 @@ def elementToCode(node, namespace=''):
                     if len(arguments)>=1:
                         placeholder+=', '
         
-        # Add TTL function closing
+        # Add HFL function closing
         placeholder+=')'+';\n'
 
         code+=insertTypes(placeholder, argnames, argtypes)
@@ -459,7 +460,7 @@ def elementToBoostWrapper(node, module=''):
     wrap = ""
 
     # Check for namespace
-    if node.nodeName == 'module' and node.getAttribute('name') != 'ttl':
+    if node.nodeName == 'module' and node.getAttribute('name') != 'hfl':
         # Add module name
         wrap += 'BOOST_PYTHON_MODULE('+node.getAttribute('name')+')\n{\n'
 
@@ -471,13 +472,13 @@ def elementToBoostWrapper(node, module=''):
         wrap += 'using namespace boost::python;\n\n'
   
         # Register exception translator for TypeError
-        wrap += 'boost::python::register_exception_translator<ttl::TypeError>(ttl::exceptionTranslator);\n\n'
+        wrap += 'boost::python::register_exception_translator<hfl::TypeError>(hfl::exceptionTranslator);\n\n'
     
     elif node.nodeName == 'function':
         # Add function wrapper with correct namespace
         fname = node.getAttribute('name')
 
-        wrap+='def("'+fname+'", ttl::bindings::'+fname
+        wrap+='def("'+fname+'", hfl::bindings::'+fname
 
         # Get function docstring
         docstring = node.getAttribute('docstring').strip()+'\n\n'
@@ -506,7 +507,7 @@ def elementToBoostWrapper(node, module=''):
             temp, module = elementToBoostWrapper(e, module)
             wrap += temp
 
-    if node.nodeName == 'module' and node.getAttribute('name') != 'ttl':
+    if node.nodeName == 'module' and node.getAttribute('name') != 'hfl':
         # Add module closing
         wrap += '}\n'
 
@@ -516,7 +517,7 @@ def getModule(node):
     """Recursively move through all child elements of *node* and output module name."""
 
     # Check for namespace
-    if node.nodeName == 'module' and node.getAttribute('name') != 'ttl':
+    if node.nodeName == 'module' and node.getAttribute('name') != 'hfl':
         return node.getAttribute('name')
     elif node.hasChildNodes():
         for e in node.childNodes:
@@ -527,19 +528,16 @@ def getModule(node):
         return None
 
 # Parse commandline arguments
-parser=OptionParser(usage="usage: %prog [options] template.h", version="%prog 1.0")
+parser=OptionParser(usage="usage: %prog [options] template.h template.cc", version="%prog 1.0")
 parser.add_option("-v", "--verbose",
                   action="store_true", dest="verbose", default=False,
                   help="verbose output")
 parser.add_option("-x", "--output-xml",
                   action="store_true", dest="xml", default=False,
-                  help="save xml output for analysis")
-parser.add_option("-d", "--output-directory",
-                  action="store", dest="outdir", default="",
-                  help="output directory")
+                  help="save xml representation of DOM for analysis")
 (options, args)=parser.parse_args()
 
-if not args:
+if len(args) < 2:
     parser.print_help()
     sys.exit(0)
 
@@ -550,11 +548,11 @@ f = open(args[0])
 dom = parse_file(f, options.verbose)
 
 # Write output file
-out = open(options.outdir+'/'+args[0].split('/')[-1].rstrip('h')+'cc', 'w')
+out = open(args[1], 'w')
 
 # Write license
 license = """/**************************************************************************
- *  This file is part of the Transient Template Library.                  *
+ *  This file is part of the Heino Falcke Library.                        *
  *  Copyright (C) 2010 Pim Schellart <P.Schellart@astro.ru.nl>            *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
@@ -582,7 +580,7 @@ include += "// SYSTEM INCLUDES\n"
 include += "//\n\n"
 
 include += "// PROJECT INCLUDES\n"
-include += "#include <ttl/"+getModule(dom)+".h>\n\n"
+include += "#include <hfl/"+getModule(dom)+".h>\n\n"
 
 include += "// LOCAL INCLUDES\n"
 include += "#define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle\n"
@@ -597,20 +595,20 @@ out.write(include)
 
 if options.xml:
     # Write DOM to file
-    xml = open(options.outdir+'/'+args[0].split('/')[-1].rstrip('h')+'xml', 'w')
+    xml = open(args[0].split('/')[-1].rstrip('h')+'xml', 'w')
     dom.writexml(xml, indent="  ", addindent="  ", newl="\n")
 
 # Create code
 code = ""
 
 # Open namespace
-code+="namespace ttl\n{\n  namespace bindings\n  {\n\n"
+code+="namespace hfl\n{\n  namespace bindings\n  {\n\n"
 
 # Write code
 code+=elementToCode(dom)[0]
 
 # Close namespace
-code+="  } // End bindings\n} // End ttl\n\n"
+code+="  } // End bindings\n} // End hfl\n\n"
 
 # Wrappers
 code+=elementToBoostWrapper(dom)[0]

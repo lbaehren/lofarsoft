@@ -1,5 +1,5 @@
 /**************************************************************************
- *  This file is part of the Transient Template Library.                  *
+ *  This file is part of the Heino Falcke Library.                        *
  *  Copyright (C) 2010 Andreas Horneffer <A.Horneffer@astro.ru.nl>        *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
@@ -16,8 +16,8 @@
  *  along with this library. If not, see <http://www.gnu.org/licenses/>.  *
  **************************************************************************/
 
-#ifndef TTL_NUMPY_PTR_H
-#define TTL_NUMPY_PTR_H
+#ifndef HFL_NUMPY_PTR_H
+#define HFL_NUMPY_PTR_H
 
 // SYSTEM INCLUDES
 #include <string>
@@ -40,7 +40,7 @@
 // FORWARD REFERENCES
 //
 
-namespace ttl
+namespace hfl
 {
   /*!
     \brief Exception for type errors.
@@ -108,7 +108,7 @@ namespace ttl
 
     return (T *)num_util::data(pydata) + size;
   }
-} // End ttl
+} // End hfl
 
-#endif // TTL_NUMPY_PTR_H
+#endif // HFL_NUMPY_PTR_H
 

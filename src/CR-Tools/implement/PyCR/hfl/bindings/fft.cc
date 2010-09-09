@@ -1,5 +1,5 @@
 /**************************************************************************
- *  This file is part of the Transient Template Library.                  *
+ *  This file is part of the Heino Falcke Library.                        *
  *  Copyright (C) 2010 Pim Schellart <P.Schellart@astro.ru.nl>            *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
@@ -20,7 +20,7 @@
 //
 
 // PROJECT INCLUDES
-#include <ttl/fft.h>
+#include <hfl/fft.h>
 
 // LOCAL INCLUDES
 #define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
@@ -30,23 +30,23 @@
 // FORWARD REFERENCES
 //
 
-namespace ttl
+namespace hfl
 {
     namespace bindings
     {
 
     bool forwardFFTW(boost::python::numeric::array out, boost::python::numeric::array in)
     {
-      return ttl::fft::forwardFFTW(ttl::numpyBeginPtr< std::complex<double> >(out), ttl::numpyEndPtr< std::complex<double> >(out), ttl::numpyBeginPtr<double>(in), ttl::numpyEndPtr<double>(in));
+      return hfl::fft::forwardFFTW(hfl::numpyBeginPtr< std::complex<double> >(out), hfl::numpyEndPtr< std::complex<double> >(out), hfl::numpyBeginPtr<double>(in), hfl::numpyEndPtr<double>(in));
     }
 
     bool backwardFFTW(boost::python::numeric::array out, boost::python::numeric::array in)
     {
-      return ttl::fft::backwardFFTW(ttl::numpyBeginPtr<double>(out), ttl::numpyEndPtr<double>(out), ttl::numpyBeginPtr< std::complex<double> >(in), ttl::numpyEndPtr< std::complex<double> >(in));
+      return hfl::fft::backwardFFTW(hfl::numpyBeginPtr<double>(out), hfl::numpyEndPtr<double>(out), hfl::numpyBeginPtr< std::complex<double> >(in), hfl::numpyEndPtr< std::complex<double> >(in));
     }
 
     } // End bindings
-} // End ttl
+} // End hfl
 
 BOOST_PYTHON_MODULE(fft)
 {
@@ -55,9 +55,9 @@ BOOST_PYTHON_MODULE(fft)
 
   using namespace boost::python;
 
-  boost::python::register_exception_translator<ttl::TypeError>(ttl::exceptionTranslator);
+  boost::python::register_exception_translator<hfl::TypeError>(hfl::exceptionTranslator);
 
-  def("forwardFFTW", ttl::bindings::forwardFFTW, "Calculates the forward FFT real -> complex\n\n\n      This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf\n\n      The DFT results are stored in-order in the array out, with the\n      zero-frequency (DC) component in data_out[0].\n\n      Users should note that FFTW computes an unnormalized DFT. Thus,\n      computing a forward followed by a backward transform (or vice versa)\n      results in the original array scaled by N.\n\n      The size N can be any positive integer, but sizes that are products of\n      small factors are transformed most efficiently (although prime sizes\n      still use an O(N log N) algorithm).\n\n*out* output array\n*out_end* \n*in* input array\n*in_end* \n");
-  def("backwardFFTW", ttl::bindings::backwardFFTW, "Calculates the backward FFT complex -> real\n\n\n      Users should note that FFTW computes an unnormalized DFT. Thus,\n      computing a forward followed by a backward transform (or vice versa)\n      results in the original array scaled by N.\n\n*out* output array\n*out_end* \n*in* input array\n*in_end* \n");
+  def("forwardFFTW", hfl::bindings::forwardFFTW, "Calculates the forward FFT real -> complex\n\n\n      This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf\n\n      The DFT results are stored in-order in the array out, with the\n      zero-frequency (DC) component in data_out[0].\n\n      Users should note that FFTW computes an unnormalized DFT. Thus,\n      computing a forward followed by a backward transform (or vice versa)\n      results in the original array scaled by N.\n\n      The size N can be any positive integer, but sizes that are products of\n      small factors are transformed most efficiently (although prime sizes\n      still use an O(N log N) algorithm).\n\n*out* output array\n*out_end* \n*in* input array\n*in_end* \n");
+  def("backwardFFTW", hfl::bindings::backwardFFTW, "Calculates the backward FFT complex -> real\n\n\n      Users should note that FFTW computes an unnormalized DFT. Thus,\n      computing a forward followed by a backward transform (or vice versa)\n      results in the original array scaled by N.\n\n*out* output array\n*out_end* \n*in* input array\n*in_end* \n");
 }
 

@@ -1,8 +1,8 @@
 ***********
-coordinates
+beamforming
 ***********
 
-.. automodule:: pycr.ttl.coordinates
+.. automodule:: pycr.hfl.beamforming
     :members:
     :undoc-members:
     :show-inheritance:

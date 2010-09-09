@@ -1,5 +1,5 @@
 /**************************************************************************
- *  This file is part of the Transient Template Library.                  *
+ *  This file is part of the Heino Falcke Library.                        *
  *  Copyright (C) 2010 Pim Schellart <P.Schellart@astro.ru.nl>            *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
@@ -16,14 +16,14 @@
  *  along with this library. If not, see <http://www.gnu.org/licenses/>.  *
  **************************************************************************/
 
-#ifndef TTL_MATH_H
-#define TTL_MATH_H
+#ifndef HFL_MATH_H
+#define HFL_MATH_H
 
 // SYSTEM INCLUDES
 #include <cmath>
 
 // PROJECT INCLUDES
-#include <ttl/constants.h>
+#include <hfl/constants.h>
 
 // LOCAL INCLUDES
 //
@@ -35,10 +35,10 @@
 /*!
   \file math.h
   \ingroup CR
-  \ingroup CR_TTL
+  \ingroup CR_HFL
  */
 
-namespace ttl
+namespace hfl
 {
   namespace math
   {
@@ -375,7 +375,7 @@ namespace ttl
         return std::sqrt(sum);
       }
   } // End math
-} // End ttl
+} // End hfl
 
-#endif // TTL_MATH_H
+#endif // HFL_MATH_H
 

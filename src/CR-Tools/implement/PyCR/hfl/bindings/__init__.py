@@ -1,5 +1,5 @@
 ##########################################################################
-#  This file is part of the Transient Template Library.                  #
+#  This file is part of the Heino Falcke Library.                        #
 #  Copyright (C) 2010 Pim Schellart <P.Schellart@astro.ru.nl>            #
 #                                                                        #
 #  This library is free software: you can redistribute it and/or modify  #
@@ -16,10 +16,10 @@
 #  along with this library. If not, see <http://www.gnu.org/licenses/>.  #
 ##########################################################################
 
-# Make subpackages available when doing from ttl import *
+# Make subpackages available when doing from hfl import *
 __all__ = ['beamforming', 'coordinates', 'fft']
 
-# Make content of subpackages available when calling from ttl import *
+# Make content of subpackages available when calling from hfl import *
 def extend_all(module):
     adict = {}
     for a in __all__:
@@ -40,7 +40,7 @@ extend_all(beamforming)
 extend_all(coordinates)
 extend_all(fft)
 
-# Make content of subpackages available when calling import ttl
+# Make content of subpackages available when calling import hfl
 from beamforming import *
 from coordinates import *
 from fft import *

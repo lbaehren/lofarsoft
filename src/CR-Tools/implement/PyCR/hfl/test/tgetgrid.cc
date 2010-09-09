@@ -3,9 +3,9 @@
 #include <cmath>
 #include <string>
 
-#include <ttl/coordinates.h>
+#include <hfl/coordinates.h>
 
-using namespace ttl::coordinates;
+using namespace hfl::coordinates;
 
 int main()
 {
@@ -28,8 +28,8 @@ int main()
 //  const double dateObs = 50237.29;
 
   std::vector<double> pixel(2*NX*NY);
+  std::vector<double> opixel(2*NX*NY);
   std::vector<double> world(2*NX*NY);
-  std::vector<double> oworld(2*NX*NY);
 
   // Set grid
   int k=0;
@@ -39,8 +39,8 @@ int main()
     {
       world[2*k] = 0.0;
       world[2*k+1] = 0.0;
-      oworld[2*k] = 0.0;
-      oworld[2*k+1] = 0.0;
+      opixel[2*k] = 0.0;
+      opixel[2*k+1] = 0.0;
       pixel[2*k] = static_cast<double>(i+1);
       pixel[2*k+1] = static_cast<double>(j+1);
       k++;
@@ -55,16 +55,19 @@ int main()
                  incLong, incLat,
                  refX, refY);
 
-  // Convert world coordinates
-  //status=worldToWorld(oworld.begin(), oworld.end(),
-  //                    world.begin(), world.end());
+  status=world2Pixel(opixel.begin(), opixel.end(),
+                 world.begin(), world.end(),
+                 refcode, projection,
+                 refLong, refLat,
+                 incLong, incLat,
+                 refX, refY);
 
   if (status)
   {
     // Display output grid
     for (int i=0; i<2*NX*NY; i++)
     {
-      std::cout<<pixel[i]<<"\t"<<world[i]<<"\t"<<oworld[i]<<std::endl;
+      std::cout<<pixel[i]<<"\t"<<world[i]<<"\t"<<opixel[i]<<std::endl;
     }
   }
   else

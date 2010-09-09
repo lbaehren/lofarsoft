@@ -1,5 +1,5 @@
 /**************************************************************************
- *  This file is part of the Transient Template Library.                  *
+ *  This file is part of the Heino Falcke Library.                        *
  *  Copyright (C) 2010 Pim Schellart <P.Schellart@astro.ru.nl>            *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
@@ -16,8 +16,8 @@
  *  along with this library. If not, see <http://www.gnu.org/licenses/>.  *
  **************************************************************************/
 
-#ifndef TTL_COORDINATES_H
-#define TTL_COORDINATES_H
+#ifndef HFL_COORDINATES_H
+#define HFL_COORDINATES_H
 
 // SYSTEM INCLUDES
 #include <string>
@@ -41,10 +41,10 @@
 /*!
   \file coordinates.h
   \ingroup CR
-  \ingroup CR_TTL
+  \ingroup CR_HFL
  */
 
-namespace ttl
+namespace hfl
 {
   namespace coordinates
   {
@@ -336,7 +336,7 @@ namespace ttl
         }
       }
   } // End coordinates
-} // End ttl
+} // End hfl
 
-#endif // TTL_COORDINATES_H
+#endif // HFL_COORDINATES_H
 

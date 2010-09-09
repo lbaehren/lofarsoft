@@ -2,9 +2,8 @@
 """
 
 import matplotlib.pyplot as plt
-from ttl import beamforming
-from ttl import coordinates
-#import pycrtools
+from hfl import beamforming
+from hfl import coordinates
 import numpy as np
 
 class Imager():
