@@ -76,7 +76,8 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
     }
 
     outputs = {
-        'mapfile': ingredient.FileField()
+        'mapfile': ingredient.FileField(),
+        'fullyflagged': ingredient.ListField()
     }
 
 
@@ -148,11 +149,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
                 pair.strip(stripchars) for pair in match.getMessage().split(";")
             ):
                 baselinecounter[pair] += 1
-        for key, value in baselinecounter.iteritems():
-            self.logger.info(str(len(outnames)))
-            self.logger.info(
-                "Baseline %s has been fully flagged %d times" % (key, value)
-            )
+        self.outputs['fullyflagged'] = baselinecounter.keys()
 
         if self.error.isSet():
             self.logger.warn("Failed DPPP process detected")
