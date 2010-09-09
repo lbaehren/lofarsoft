@@ -57,7 +57,7 @@ class sip(control):
                 "flag_baseline",
                 ndppp_results['mapfile'],
                 baselines=ndppp_results['fullyflagged']
-            )
+            )['mapfile']
 
             # Build a sky model ready for BBS & return the name & flux of the
             # central source.
