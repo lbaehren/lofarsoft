@@ -2265,21 +2265,25 @@ int main (int argc, char *argv[])
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue()) {
-              lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-", calibPulsesMap, results);
-              latTimeRcurv = results.asDouble("latTime_R_curv");
-              latTimeSigRcurv = results.asDouble("latTime_sigR_curv");
-              latTimeOffset = results.asDouble("latTime_offset");
-              latTimeSigOffset = results.asDouble("latTime_sigoffset");
-              latTimeLatOffset = results.asDouble("latTime_latOffset");
-              latTimeSigLatOffset = results.asDouble("latTime_siglatOffset");
-              latTimeChi2NDF = results.asDouble("latTime_chi2NDF");
-              latTimeParRcurv = results.asDouble("latTimePar_R_curv");
-              latTimeParSigRcurv = results.asDouble("latTimePar_sigR_curv");
-              latTimeParOffset = results.asDouble("latTimePar_offset");
-              latTimeParSigOffset = results.asDouble("latTimePar_sigoffset");
-              latTimeParLatOffset = results.asDouble("latTimePar_latOffset");
-              latTimeParSigLatOffset = results.asDouble("latTimePar_siglatOffset");
-              latTimeParChi2NDF = results.asDouble("latTimePar_chi2NDF");
+              Record latTimeResults = 
+                       lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",
+                                                              calibPulsesMap, map <int, PulseProperties>(),
+                                                              gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
+                                                              results.asDouble("ccCenter"),"","");
+              latTimeRcurv = latTimeResults.asDouble("latTime_R_curv");
+              latTimeSigRcurv = latTimeResults.asDouble("latTime_sigR_curv");
+              latTimeOffset = latTimeResults.asDouble("latTime_offset");
+              latTimeSigOffset = latTimeResults.asDouble("latTime_sigoffset");
+              latTimeLatOffset = latTimeResults.asDouble("latTime_latOffset");
+              latTimeSigLatOffset = latTimeResults.asDouble("latTime_siglatOffset");
+              latTimeChi2NDF = latTimeResults.asDouble("latTime_chi2NDF");
+              latTimeParRcurv = latTimeResults.asDouble("latTimePar_R_curv");
+              latTimeParSigRcurv = latTimeResults.asDouble("latTimePar_sigR_curv");
+              latTimeParOffset = latTimeResults.asDouble("latTimePar_offset");
+              latTimeParSigOffset = latTimeResults.asDouble("latTimePar_sigoffset");
+              latTimeParLatOffset = latTimeResults.asDouble("latTimePar_latOffset");
+              latTimeParSigLatOffset = latTimeResults.asDouble("latTimePar_siglatOffset");
+              latTimeParChi2NDF = latTimeResults.asDouble("latTimePar_chi2NDF");
             }  
 
             // getting necessary data to plot [added: mfranc]
@@ -2408,21 +2412,25 @@ int main (int argc, char *argv[])
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue()) {
-              lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-", newPulses, results);
-              latTimeRcurv_NS = results.asDouble("latTime_R_curv");
-              latTimeSigRcurv_NS = results.asDouble("latTime_sigR_curv");
-              latTimeOffset_NS = results.asDouble("latTime_offset");
-              latTimeSigOffset_NS = results.asDouble("latTime_sigoffset");
-              latTimeLatOffset_NS = results.asDouble("latTime_latOffset");
-              latTimeSigLatOffset_NS = results.asDouble("latTime_siglatOffset");
-              latTimeChi2NDF_NS = results.asDouble("latTime_chi2NDF");
-              latTimeParRcurv_NS = results.asDouble("latTimePar_R_curv");
-              latTimeParSigRcurv_NS = results.asDouble("latTimePar_sigR_curv");
-              latTimeParOffset_NS = results.asDouble("latTimePar_offset");
-              latTimeParSigOffset_NS = results.asDouble("latTimePar_sigoffset");
-              latTimeParLatOffset_NS = results.asDouble("latTimePar_latOffset");
-              latTimeParSigLatOffset_NS = results.asDouble("latTimePar_siglatOffset");
-              latTimeParChi2NDF_NS = results.asDouble("latTimePar_chi2NDF");
+              Record latTimeResults = 
+                       lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",
+                                                              newPulses, map <int, PulseProperties>(),
+                                                              gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
+                                                              results.asDouble("ccCenter"),"","");
+              latTimeRcurv_NS = latTimeResults.asDouble("latTime_R_curv");
+              latTimeSigRcurv_NS = latTimeResults.asDouble("latTime_sigR_curv");
+              latTimeOffset_NS = latTimeResults.asDouble("latTime_offset");
+              latTimeSigOffset_NS = latTimeResults.asDouble("latTime_sigoffset");
+              latTimeLatOffset_NS = latTimeResults.asDouble("latTime_latOffset");
+              latTimeSigLatOffset_NS = latTimeResults.asDouble("latTime_siglatOffset");
+              latTimeChi2NDF_NS = latTimeResults.asDouble("latTime_chi2NDF");
+              latTimeParRcurv_NS = latTimeResults.asDouble("latTimePar_R_curv");
+              latTimeParSigRcurv_NS = latTimeResults.asDouble("latTimePar_sigR_curv");
+              latTimeParOffset_NS = latTimeResults.asDouble("latTimePar_offset");
+              latTimeParSigOffset_NS = latTimeResults.asDouble("latTimePar_sigoffset");
+              latTimeParLatOffset_NS = latTimeResults.asDouble("latTimePar_latOffset");
+              latTimeParSigLatOffset_NS = latTimeResults.asDouble("latTimePar_siglatOffset");
+              latTimeParChi2NDF_NS = latTimeResults.asDouble("latTimePar_chi2NDF");
             }  
 
             // insert calibrated pulse properties here, for eventual changes during the lateral distribution
@@ -2554,21 +2562,25 @@ int main (int argc, char *argv[])
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue()) {
-              lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-", newPulses, results);
-              latTimeRcurv_VE = results.asDouble("latTime_R_curv");
-              latTimeSigRcurv_VE = results.asDouble("latTime_sigR_curv");
-              latTimeOffset_VE = results.asDouble("latTime_offset");
-              latTimeSigOffset_VE = results.asDouble("latTime_sigoffset");
-              latTimeLatOffset_VE = results.asDouble("latTime_latOffset");
-              latTimeSigLatOffset_VE = results.asDouble("latTime_siglatOffset");
-              latTimeChi2NDF_VE = results.asDouble("latTime_chi2NDF");               
-              latTimeParRcurv_VE = results.asDouble("latTimePar_R_curv");
-              latTimeParSigRcurv_VE = results.asDouble("latTimePar_sigR_curv");
-              latTimeParOffset_VE = results.asDouble("latTimePar_offset");
-              latTimeParSigOffset_VE = results.asDouble("latTimePar_sigoffset");
-              latTimeParLatOffset_VE = results.asDouble("latTimePar_latOffset");
-              latTimeParSigLatOffset_VE = results.asDouble("latTimePar_siglatOffset");
-              latTimeParChi2NDF_VE = results.asDouble("latTimePar_chi2NDF");               
+              Record latTimeResults = 
+                       lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",
+                                                              newPulses, map <int, PulseProperties>(),
+                                                              gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
+                                                              results.asDouble("ccCenter"),"","");
+              latTimeRcurv_VE = latTimeResults.asDouble("latTime_R_curv");
+              latTimeSigRcurv_VE = latTimeResults.asDouble("latTime_sigR_curv");
+              latTimeOffset_VE = latTimeResults.asDouble("latTime_offset");
+              latTimeSigOffset_VE = latTimeResults.asDouble("latTime_sigoffset");
+              latTimeLatOffset_VE = latTimeResults.asDouble("latTime_latOffset");
+              latTimeSigLatOffset_VE = latTimeResults.asDouble("latTime_siglatOffset");
+              latTimeChi2NDF_VE = latTimeResults.asDouble("latTime_chi2NDF");               
+              latTimeParRcurv_VE = latTimeResults.asDouble("latTimePar_R_curv");
+              latTimeParSigRcurv_VE = latTimeResults.asDouble("latTimePar_sigR_curv");
+              latTimeParOffset_VE = latTimeResults.asDouble("latTimePar_offset");
+              latTimeParSigOffset_VE = latTimeResults.asDouble("latTimePar_sigoffset");
+              latTimeParLatOffset_VE = latTimeResults.asDouble("latTimePar_latOffset");
+              latTimeParSigLatOffset_VE = latTimeResults.asDouble("latTimePar_siglatOffset");
+              latTimeParChi2NDF_VE = latTimeResults.asDouble("latTimePar_chi2NDF");               
             }  
 
             // insert calibrated pulse properties here, for eventual changes during the lateral distribution

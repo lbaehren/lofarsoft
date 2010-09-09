@@ -183,7 +183,7 @@ namespace CR { // Namespace CR -- begin
        \param fitDistance - distance at which the fit will be done (e.g., 0 for epsilon 0)
     */
 
-    Record fitLateralDistribution (const string filePrefix,
+    Record fitLateralDistribution (const string& filePrefix,
                                    map <int, PulseProperties> pulsesRec,
                                    map <int, PulseProperties> pulsesSim,
                                    int Gt, double az, double ze,
@@ -195,12 +195,22 @@ namespace CR { // Namespace CR -- begin
        \brief Plots lateral distribution of pulse arrival times
 
        \param filePrefix - the filename will be prefix+GT+".dat".
-       \param pulses     - map with information about pulses
-       \param erg        - results of the pipeline (results from the fit will be added)
+       \param pulsesRec   - map with information about pulses from LOPES data
+       \param pulsesSim   - map with information about pulses from simulated data (leave it empty if there is no simulation)
+       \param Gt          - gt from the pipeline root file
+       \param az          - azimuth from the pipeline root file
+       \param ze          - zenith from the pipeline root file
+       \param ccCenter    - time of CC beam (center of gaussian fit)
+       \param index1      - index for statistics box
+       \param index2      - index for statistics box
     */
-    void lateralTimeDistribution (const string& filePrefix,
-                                  map <int, PulseProperties>& pulses,
-                                  Record& erg);
+    Record lateralTimeDistribution (const string& filePrefix,
+                                    map <int, PulseProperties> pulsesRec,
+                                    map <int, PulseProperties> pulsesSim,
+                                    int Gt, double az, double ze,
+                                    double ccCenter,
+                                    const string& index1 = "",
+                                    const string& index2 = "2");
                                    
   };
 } // Namespace CR -- end

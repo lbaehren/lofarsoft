@@ -100,6 +100,7 @@ int main (int argc, char *argv[])
 
     // check arguments
     string resultsName1(""), resultsName2(""), simDictName(""), simPath("");
+    // simPath e.g. = /lxdata/d2lx68/huege/lopeseventsR3i
     string index1(""), index2("");  // name indices for lateral distribution
     string outPrefix("simANDrec_fitvalue");  // prefix for output filename
     for (int i=1; i < argc; ++i) {
@@ -732,15 +733,15 @@ int main (int argc, char *argv[])
       if (simDictName!="") {
         int NantS=0;
         double EWfield=0.,NSfield=0.,VEfield=0.;
+        double timeREAS = 0.;
         double distS=0.,azSREAS=0.,azS=0.,azimuth=0.,zenith=0.;
         double sim2lopesField=(2.9979246e+10/31.); //convert to muV/m/MHz and divide by the band-width
         double distanceS=0., distanceSerr=0.,showerCoord=0.;
-        double dummy;
         double distanceR=0.;
 
-        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat";
+        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat";
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
-        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
+        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
         ifstream reasFile(reasFileName.c_str());
         if (!reasFile.is_open()) {
@@ -760,7 +761,7 @@ int main (int argc, char *argv[])
           reasFile.getline(buffer2,1024);
           istringstream iss2 (buffer2);
           if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {//in sim file:az in reas sistem
-            iss2>>NantS>>distS>>azSREAS>>NSfield>>EWfield>>VEfield>>dummy;
+            iss2>>NantS>>distS>>azSREAS>>NSfield>>EWfield>>VEfield>>timeREAS;
             azS=180.-(azSREAS*gradeg); //convert to LOPES coordinates
             if(azS<0.){
             azS = azS+360.; //azS in grad
@@ -797,6 +798,8 @@ int main (int argc, char *argv[])
                 simPropEW.height = EWfield;
                 //cout<<"EW Field  "<<EWfield<<endl;
                 simPropEW.heightError = 0.;
+                simPropEW.time = timeREAS*1e9; // pulse time in ns
+                simPropEW.timeError = 0;
                 distanceR=m_recEW[NantS].dist;
                 // calculate simulation distance for consistency check
                 if (!simulationDistances) { // overwrite direction with values of LOPES reconstruction
@@ -832,6 +835,8 @@ int main (int argc, char *argv[])
                 simPropNS.height = NSfield;
                 //cout<<"NS Field  "<<NSfield<<endl;
                 simPropNS.heightError = 0.;
+                simPropNS.time = timeREAS*1e9; // pulse time in ns
+                simPropNS.timeError = 0;
                 distanceR=m_recNS[NantS].dist;
                 // calculate simulation distance for consistency check
                 if (!simulationDistances) { // overwrite direction with values of LOPES reconstruction
@@ -878,7 +883,7 @@ int main (int argc, char *argv[])
           plotPrefix = "lateral-EW-";
         Record ergew = lateralFitter.fitLateralDistribution(plotPrefix,
                                                             m_recEW,m_simEW,
-                                                            Gt,(Az*gradeg),(Ze*gradeg),
+                                                            Gt,AzL,90.-ElL,
                                                             index1, index2);
         eps_EW = ergew.asDouble("eps");
         R_0_EW = ergew.asDouble("R_0");
@@ -893,6 +898,12 @@ int main (int argc, char *argv[])
 
         //write info of the fit into file
         outputEW <<m_dict[Gt]<<"\t"<<eps_EW<<"\t"<<sigeps_EW<<"\t"<<R_0_EW<<"\t"<<sigR_0_EW<<"\t"<<chi2NDF_EW<<"\t"<<eps_sim_EW<<"\t"<<sigeps_sim_EW<<"\t"<<R_0_sim_EW<<"\t"<<sigR_0_sim_EW<<"\t"<<chi2NDF_sim_EW<<endl;			
+        
+        Record ergTimeew = lateralFitter.lateralTimeDistribution(plotPrefix,
+                                                                 m_recEW,m_simEW,
+                                                                 Gt,AzL,90.-ElL,
+                                                                 CCcenter,
+                                                                 index1, index2);        
       }
       if ((hasNS) && (m_recNS.size()>=4)) {
         if (simDictName!="") 
@@ -901,7 +912,7 @@ int main (int argc, char *argv[])
           plotPrefix = "lateral-NS-";
         Record ergns = lateralFitter.fitLateralDistribution(plotPrefix,
                                                             m_recNS,m_simNS,
-                                                            Gt,(Az*gradeg),(Ze*gradeg),
+                                                            Gt,AzL,90.-ElL,
                                                             index1, index2);
         eps_NS = ergns.asDouble("eps");
         R_0_NS = ergns.asDouble("R_0");
@@ -915,7 +926,14 @@ int main (int argc, char *argv[])
         chi2NDF_sim_NS = ergns.asDouble("chi2NDF_sim");
 
         //write info of the fit into file
-        outputEW <<m_dict[Gt]<<"\t"<<eps_NS<<"\t"<<sigeps_NS<<"\t"<<R_0_NS<<"\t"<<sigR_0_NS<<"\t"<<chi2NDF_NS<<"\t"<<eps_sim_NS<<"\t"<<sigeps_sim_NS<<"\t"<<R_0_sim_NS<<"\t"<<sigR_0_sim_NS<<"\t"<<chi2NDF_sim_NS<<endl;                        
+        outputEW <<m_dict[Gt]<<"\t"<<eps_NS<<"\t"<<sigeps_NS<<"\t"<<R_0_NS<<"\t"<<sigR_0_NS<<"\t"<<chi2NDF_NS<<"\t"<<eps_sim_NS<<"\t"<<sigeps_sim_NS<<"\t"<<R_0_sim_NS<<"\t"<<sigR_0_sim_NS<<"\t"<<chi2NDF_sim_NS<<endl; 
+        
+        Record ergTimens = lateralFitter.lateralTimeDistribution(plotPrefix,
+                                                                 m_recNS,m_simNS,
+                                                                 Gt,AzL,90.-ElL,
+                                                                 CCcenter_NS,
+                                                                 index1, index2);
+        
       }
       
       // Fill information in root file
