@@ -77,7 +77,7 @@ FROM (
 
 query_central = """
 SELECT
-    catsrcname
+    catsrcname, i_int
 FROM
     nearestneighborincat(%s,%s,'%s')
 """
@@ -136,7 +136,8 @@ class skymodel(BaseRecipe):
     }
 
     outputs = {
-        'source_name': ingredient.StringField()
+        'source_name': ingredient.StringField(),
+        'source_flux': ingredient.FloatField()
     }
 
     def go(self):
@@ -162,8 +163,10 @@ class skymodel(BaseRecipe):
                     db_cursor.execute(
                         query_central % (float(self.inputs['ra']), float(self.inputs['dec']), "VLSS")
                     )
-                    self.outputs["source_name"] = db_cursor.fetchone()[0]
-                    self.logger.info("Central source is %s" % self.outputs["source_name"])
+                    self.outputs["source_name"], self.outputs["source_flux"] = db_cursor.fetchone()
+                    self.logger.info("Central source is %s; flux %f" %
+                        (self.outputs["source_name"], self.outputs["source_flux"])
+                    )
                     db_cursor.execute(
                         query_skymodel % (
                             4, 4, # Only using VLSS for now
