@@ -78,8 +78,9 @@ class PPF():
         self.startrow += 1
         if self.startrow > 15:
             self.startrow = 0
-        for row in range(0,16):
-            input.muladd(self.weights[row],self.buffer[(row+self.startrow)%16])
+        input.muladd2(self.weights[0:16-self.startrow],self.buffer[self.startrow:16])
+        input.muladd2(self.weights[16-self.startrow:16],self.buffer[0:self.startrow])
+           
            # print "multiplying weight",row,"with buffer",(row+self.startrow)%16
          
         self.total_rows_added+=1
@@ -134,8 +135,8 @@ class iPPF():
         self.startrow += 1
         if self.startrow > 15:
             self.startrow = 0
-        for row in range(0,16):
-            input.muladd(self.weights[row],self.buffer[(row+self.startrow)%16])
+        input.muladd2(self.weights[0:16-self.startrow],self.buffer[self.startrow:16])
+        input.muladd2(self.weights[16-self.startrow:16],self.buffer[0:self.startrow])
            # print "multiplying weight",row,"with buffer",(row+self.startrow)%16
         self.total_rows_added+=1
         if self.total_rows_added < 16:
