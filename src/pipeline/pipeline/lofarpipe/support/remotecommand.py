@@ -34,14 +34,14 @@ def run_via_ssh(host, command, environment, *arguments):
     """
     Run a remote command via SSH.
     """
-    ssh_cmd = ["ssh", "-n", "-t", "-x", host, "--", "/bin/sh", "-c"]
+    ssh_cmd = ["ssh", "-n", "-tt", "-x", host, "--", "/bin/sh", "-c"]
 
     commandstring = ["%s=%s" % (key, value) for key, value in environment.items()]
     commandstring.append(command)
     commandstring.extend(str(arg) for arg in arguments)
     ssh_cmd.append('"' + " ".join(commandstring) + '"')
     return subprocess.Popen(
-        ssh_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ssh_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
 class RemoteCommandRecipeMixIn(object):
