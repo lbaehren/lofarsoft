@@ -40,7 +40,7 @@ class sip(control):
             # NDPPP reads the data from the storage nodes, according to the
             # map. It returns a new map, describing the location of data on
             # the compute nodes.
-            compute_mapfile = self.run_task(
+            ndppp_results = self.run_task(
                 "ndppp",
                 storage_mapfile,
                 parset=os.path.join(
@@ -49,7 +49,15 @@ class sip(control):
                 ),
                 data_start_time=vdsinfo['start_time'],
                 data_end_time=vdsinfo['end_time']
-            )['mapfile']
+            )
+
+            # Remove baselines which have been fully-flagged in any individual
+            # subband.
+            compute_mapfile = self.run_task(
+                "flag_baseline",
+                ndppp_results['mapfile'],
+                baselines=ndppp_results['fullyflagged']
+            )
 
             # Build a sky model ready for BBS & return the name & flux of the
             # central source.
