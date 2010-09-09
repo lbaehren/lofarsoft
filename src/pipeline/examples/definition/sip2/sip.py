@@ -37,6 +37,16 @@ class sip(control):
             # Read metadata (start, end times, pointing direction) from GVDS.
             vdsinfo = self.run_task("vdsreader")
 
+            # Build a sky model ready for BBS & return the name of the
+            # central source.
+            ra = quantity(vdsinfo['pointing']['ra']).get_value('deg')
+            dec = quantity(vdsinfo['pointing']['dec']).get_value('deg')
+            central = self.run_task(
+                "skymodel", ra=ra, dec=dec, search_size=2.5
+            )
+            self.logger.info(central["source_name"])
+            self.logger.info(central["source_flux"])
+
             # NDPPP reads the data from the storage nodes, according to the
             # map. It returns a new map, describing the location of data on
             # the compute nodes.
@@ -77,18 +87,25 @@ class sip(control):
             # Now, run DPPP three times on the output of BBS. We'll run
             # this twice: once on CORRECTED_DATA, and once on
             # SUBTRACTED_DATA.
-            for i in repeat(None, 3):
-                self.run_task(
-                    "ndppp",
-                    compute_mapfile,
-                    parset=os.path.join(
-                        self.config.get("layout", "parset_directory"),
-                        "ndppp.1.postbbs.parset"
-                    ),
-                    data_start_time=vdsinfo['start_time'],
-                    data_end_time=vdsinfo['end_time'],
-                    suffix=""
-                )
+            with patched_parset(
+                os.path.join(
+                    self.config.get("layout", "parset_directory"),
+                    "ndppp.1.postbbs.parset"
+                ),
+                {
+                    "clip1.amplmax": str(5 * central["source_flux"])
+                },
+                output_dir=self.config.get("layout", "parset_directory")
+            ) as corrected_ndppp_parset:
+                for i in repeat(None, 3):
+                    self.run_task(
+                        "ndppp",
+                        compute_mapfile,
+                        parset=corrected_ndppp_parset,
+                        data_start_time=vdsinfo['start_time'],
+                        data_end_time=vdsinfo['end_time'],
+                        suffix=""
+                    )
 
             with patched_parset(
                 os.path.join(
@@ -97,7 +114,8 @@ class sip(control):
                 ),
                 {
                     "msin.datacolumn": "SUBTRACTED_DATA",
-                    "msout.datacolumn": "SUBTRACTED_DATA"
+                    "msout.datacolumn": "SUBTRACTED_DATA",
+                    "clip1.amplmax": str(5 * central["source_flux"])
                 },
                 output_dir=self.config.get("layout", "parset_directory")
             ) as subtracted_ndppp_parset:
