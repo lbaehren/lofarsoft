@@ -7220,15 +7220,15 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
     HFPP_REPEAT(double,HNumber,increment)
     HFPP_REPEAT(double,HNumber,frequencyValues)
     HFPP_REPEAT(double,HNumber,frequencyRange)
-    HFPP_REPEAT(int, HNumber, shiftcasa)
+//    HFPP_REPEAT(int, HNumber, shiftcasa)
 #undef HFPP_REPEAT
-    // if ((key== "shift") || (key2== "shift")) {
-    //   Vector<int> casavec(drp->shiftcasa());
-    //   std::vector<int> result;
-    //   aipsvec2stlvec(casavec,result);
-    //   HPyObject pyob(result);
-    //   return pyob;
-    // } else
+     if ((key== "shift") || (key2== "shift")) {
+       Vector<int> casavec(drp->shiftcasa());
+       std::vector<int> result;
+       aipsvec2stlvec(casavec,result);
+       HPyObject pyob(result);
+       return pyob;
+     } else
     // if ((key== "shift") || (key2== "shift")) {
     //   std::vector<int> result(drp->shift());
     //   HPyObject pyob(result);
