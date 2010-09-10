@@ -56,6 +56,15 @@ class flag_baseline(LOFARnode):
                 self.logger.warn(str(e))
                 return 1
 
+            # QUICK HACK: Also flag last timestep
+            cmd = "UPDATE %s SET FLAG=True WHERE TIME=MAX(TIME)" % (infile)
+            self.logger.info("Running TaQL: " + cmd)
+            try:
+                taql(cmd)
+            except Exception, e:
+                self.logger.warn(str(e))
+                return 1
+
         return 0
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ class flagger(LOFARnode):
     Flag out CORRECTED_DATA greater than some maximum value.
     """
     def run(self, input, output, max_value):
-        with log_time(self.logger): 
+        with log_time(self.logger):
             self.logger.info("Processing: %s" % (input))
             try:
                 t = table(input)
