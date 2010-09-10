@@ -96,7 +96,6 @@ class cimager(BaseRecipe):
         # ----------------------------------------------------------------------
         compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
 
-
         #                                 Divide data into timesteps for imaging
         #          timesteps is a list of (start, end, results directory) tuples
         # ----------------------------------------------------------------------

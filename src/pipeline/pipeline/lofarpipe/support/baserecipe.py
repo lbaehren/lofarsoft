@@ -56,23 +56,39 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
 
     def _setup_logging(self):
         """
-        Boilerplate to set up logging to file
+        Set up logging.
+
+        We always produce a log file and log to stdout. The name of the file
+        and the logging format can be set in the pipeline configuration file.
         """
         try:
-            os.makedirs(self.config.get("layout", "log_directory"))
+            logfile = self.config.get("logging", "log_file")
+        except:
+            logfile = os.path.join(
+                self.config.get("layout", "job_directory"), 'logs/pipeline.log'
+            )
+
+        try:
+            format = self.config.get("logging", "format", raw=True)
+        except:
+            format = "%(asctime)s %(levelname)-7s %(name)s: %(message)s"
+
+        try:
+            datefmt = self.config.get("logging", "datefmt", raw=True)
+        except:
+            datefmt = "%Y-%m-%d %H:%M:%S"
+
+        try:
+            os.makedirs(os.path.dirname(logfile))
         except OSError, failure:
             if failure.errno != errno.EEXIST:
                 raise
 
         stream_handler = logging.StreamHandler(sys.stdout)
-        file_handler = logging.FileHandler('%s/pipeline.log' % (
-                self.config.get("layout", "log_directory")
-            )
-        )
-        formatter = logging.Formatter(
-            "%(asctime)s %(levelname)-7s %(name)s: %(message)s",
-            "%Y-%m-%d %H:%M:%S"
-        )
+        file_handler = logging.FileHandler(logfile)
+
+        formatter = logging.Formatter(format, datefmt)
+
         stream_handler.setFormatter(formatter)
         file_handler.setFormatter(formatter)
         self.logger.addHandler(stream_handler)
