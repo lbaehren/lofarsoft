@@ -6,6 +6,8 @@
 # ------------------------------------------------------------------------------
 
 from __future__ import with_statement
+from tempfile import mkstemp
+from cPickle import dump
 import os
 import threading
 
@@ -43,35 +45,50 @@ class flag_baseline(BaseRecipe, RemoteCommandRecipeMixIn):
         self.logger.info("Starting flag_baseline run")
         super(flag_baseline, self).go()
 
-        #                           Load file <-> compute node mapping from disk
+        #       Serialise list of baselines to disk for compute nodes to pick up
         # ----------------------------------------------------------------------
-        self.logger.debug("Loading map from %s" % self.inputs['args'][0])
-        data = load_data_map(self.inputs['args'][0])
+        fd, baseline_filename = mkstemp(
+            dir=self.config.get("layout", "parset_directory")
+        )
+        baseline_file = os.fdopen(fd, "w")
+        dump(self.inputs["baselines"], baseline_file)
+        baseline_file.close()
 
-        #                               Limit number of process per compute node
+        #                 try block ensures baseline_filename is always unlinked
         # ----------------------------------------------------------------------
-        self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
-        compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
+        try:
+            #                       Load file <-> compute node mapping from disk
+            # ------------------------------------------------------------------
+            self.logger.debug("Loading map from %s" % self.inputs['args'][0])
+            data = load_data_map(self.inputs['args'][0])
 
-        command = "python %s" % (self.__file__.replace('master', 'nodes'))
-        with clusterlogger(self.logger) as (loghost, logport):
-            with utilities.log_time(self.logger):
-                self.logger.debug("Logging to %s:%d" % (loghost, logport))
-                flagger_threads = []
-                for host, ms in data:
-                    flagger_threads.append(
-                        threading.Thread(
-                            target=self._dispatch_compute_job,
-                            args=(host, command, compute_nodes_lock[host],
-                                loghost, str(logport),
-                                ms,
-                                self.inputs['baselines']
+            #                           Limit number of process per compute node
+            # ------------------------------------------------------------------
+            self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
+            compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
+
+            command = "python %s" % (self.__file__.replace('master', 'nodes'))
+            with clusterlogger(self.logger) as (loghost, logport):
+                with utilities.log_time(self.logger):
+                    self.logger.debug("Logging to %s:%d" % (loghost, logport))
+                    flagger_threads = []
+                    for host, ms in data:
+                        flagger_threads.append(
+                            threading.Thread(
+                                target=self._dispatch_compute_job,
+                                args=(host, command, compute_nodes_lock[host],
+                                    loghost, str(logport),
+                                    ms,
+                                    baseline_filename
+                                )
                             )
                         )
-                    )
-                [thread.start() for thread in flagger_threads]
-                self.logger.info("Waiting for flagger threads")
-                [thread.join() for thread in flagger_threads]
+                    [thread.start() for thread in flagger_threads]
+                    self.logger.info("Waiting for flagger threads")
+                    [thread.join() for thread in flagger_threads]
+
+        finally:
+            os.unlink(baseline_filename)
 
         if self.error.isSet():
             return 1
