@@ -69,10 +69,6 @@ class RemoteCommandRecipeMixIn(object):
                 *arguments
             )
             sout, serr = process.communicate()
-            # Trim some useless information from stderr -- we only want to
-            # catch failures in the remote command, not SSH debug messages.
-            serr = serr.replace("tcgetattr: Invalid argument\n", "")
-            serr = serr.replace("Connection to %s closed.\r\n" % host, "")
             log_process_output("SSH session", sout, serr, self.logger)
         finally:
             semaphore.release()

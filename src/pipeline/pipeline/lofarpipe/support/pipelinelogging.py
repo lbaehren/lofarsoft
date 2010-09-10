@@ -234,9 +234,19 @@ def log_process_output(process_name, sout, serr, logger):
     """
     Log sout/serr from a process if they contain anything interesting.
     """
-    sout = sout.replace("Debug: registered context Global=0\n", "")
+    #     These lines are never logged, since they don't tell us anything useful
+    # --------------------------------------------------------------------------
+    excludepatterns = (
+        "Debug: registered context Global=0\n",
+        "tcgetattr: Invalid argument\n",
+        "Connection to %s closed.\r\n"
+    )
+
+    for pattern in excludepatterns:
+        sout = sout.replace(pattern, "")
+        serr = serr.replace(pattern, "")
+
     if len(sout.strip()) > 0:
-        logger.debug("%s sout: %s" % (process_name, sout))
-    serr = serr.replace("Debug: registered context Global=0\n", "")
+        logger.debug("%s stdout: %s" % (process_name, sout))
     if len(serr.strip()) > 0:
-        logger.debug("%s serr: %s" % (process_name, serr))
+        logger.debug("%s stderr: %s" % (process_name, serr))
