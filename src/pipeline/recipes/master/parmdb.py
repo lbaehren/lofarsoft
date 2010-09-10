@@ -66,37 +66,41 @@ class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
         sout, serr = parmdbm_process.communicate(template % pdbfile)
         log_process_output("parmdbm", sout, serr, self.logger)
 
-        #                           Load file <-> compute node mapping from disk
+        #                     try-finally block to always remove temporary files
         # ----------------------------------------------------------------------
-        self.logger.debug("Loading map from %s" % self.inputs['args'][0])
-        data = load_data_map(self.inputs['args'][0])
+        try:
+            #                       Load file <-> compute node mapping from disk
+            # ------------------------------------------------------------------
+            self.logger.debug("Loading map from %s" % self.inputs['args'][0])
+            data = load_data_map(self.inputs['args'][0])
 
-        #                               Limit number of process per compute node
-        # ----------------------------------------------------------------------
-        self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
-        compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
+            #                           Limit number of process per compute node
+            # ------------------------------------------------------------------
+            self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
+            compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
 
-        command = "python %s" % (self.__file__.replace('master', 'nodes'))
-        with clusterlogger(self.logger) as (loghost, logport):
-            self.logger.debug("Logging to %s:%d" % (loghost, logport))
-            with utilities.log_time(self.logger):
-                parmdb_threads = []
-                for host, ms in data:
-                    parmdb_threads.append(
-                        threading.Thread(
-                            target=self._dispatch_compute_job,
-                            args=(host, command, compute_nodes_lock[host],
-                                loghost, str(logport),
-                                ms, pdbfile
+            command = "python %s" % (self.__file__.replace('master', 'nodes'))
+            with clusterlogger(self.logger) as (loghost, logport):
+                self.logger.debug("Logging to %s:%d" % (loghost, logport))
+                with utilities.log_time(self.logger):
+                    parmdb_threads = []
+                    for host, ms in data:
+                        parmdb_threads.append(
+                            threading.Thread(
+                                target=self._dispatch_compute_job,
+                                args=(host, command, compute_nodes_lock[host],
+                                    loghost, str(logport),
+                                    ms, pdbfile
+                                )
                             )
                         )
-                    )
-                [thread.start() for thread in parmdb_threads]
-                self.logger.info("Waiting for parmdb threads")
-                [thread.join() for thread in parmdb_threads]
+                    [thread.start() for thread in parmdb_threads]
+                    self.logger.info("Waiting for parmdb threads")
+                    [thread.join() for thread in parmdb_threads]
 
-        self.logger.debug("Removing template parmdb")
-        shutil.rmtree(pdbdir, ignore_errors=True)
+        finally:
+            self.logger.debug("Removing template parmdb")
+            shutil.rmtree(pdbdir, ignore_errors=True)
 
         if self.error.isSet():
             self.logger.warn("Detected failed parmdb job")
