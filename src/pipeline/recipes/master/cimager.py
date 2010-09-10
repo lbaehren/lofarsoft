@@ -240,6 +240,7 @@ class cimager(BaseRecipe):
                     str(end_time)
                 )
                 sout, serr = cimager_process.communicate()
+                serr = serr.replace("Connection to %s closed.\r\n" % host, "")
                 log_process_output("SSH session (cimager)", sout, serr, self.logger)
             except Exception, e:
                 self.logger.error(str(e))

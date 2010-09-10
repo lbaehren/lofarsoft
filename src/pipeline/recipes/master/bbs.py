@@ -271,6 +271,7 @@ class bbs(BaseRecipe):
             self.killswitch.set()
         result = self._monitor_process(bbs_kernel_process, "BBS Kernel on %s" % host)
         sout, serr = bbs_kernel_process.communicate()
+        serr = serr.replace("Connection to %s closed.\r\n" % host, "")
         log_process_output("SSH session (BBS kernel)", sout, serr, self.logger)
         return result
 

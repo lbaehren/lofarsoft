@@ -69,6 +69,7 @@ class RemoteCommandRecipeMixIn(object):
                 *arguments
             )
             sout, serr = process.communicate()
+            serr = serr.replace("Connection to %s closed.\r\n" % host, "")
             log_process_output("SSH session", sout, serr, self.logger)
         finally:
             semaphore.release()

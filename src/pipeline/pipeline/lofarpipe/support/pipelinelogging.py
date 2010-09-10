@@ -239,7 +239,6 @@ def log_process_output(process_name, sout, serr, logger):
     excludepatterns = (
         "Debug: registered context Global=0\n",
         "tcgetattr: Invalid argument\n",
-        "Connection to %s closed.\r\n"
     )
 
     for pattern in excludepatterns:
