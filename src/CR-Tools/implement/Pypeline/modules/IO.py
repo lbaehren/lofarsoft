@@ -294,7 +294,6 @@ def applySelection(selection,array,rArray=None):
         else:
             return True
     else:
-        print "selection could not be made"
         if returnArray:
             return array
         else:

@@ -253,6 +253,7 @@ template<class T> inline T hfcast(CR::DataReader v);
 
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
+template<>  inline HInteger hfcast<HInteger>(int v);
 template<>  inline HInteger hfcast<HInteger>(HNumber v);
 template<>  inline HInteger hfcast<HInteger>(HComplex v);
 template<>  inline HNumber hfcast<HNumber>(HComplex v);

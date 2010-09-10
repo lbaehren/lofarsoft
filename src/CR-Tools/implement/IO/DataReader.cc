@@ -799,18 +799,7 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                        shift
 
-  std::vector<int> DataReader::shift ()
-  {
-    std::vector<int> s (nofStreams_p);
-
-    for (unsigned int n(0); n<nofStreams_p; n++) {
-      s[n] = iterator_p[n].shift();
-    }
-
-    return s;
-  }
-
-  Vector<int> DataReader::shiftcasa ()
+  Vector<int> DataReader::shift ()
   {
     Vector<int> s (nofStreams_p);
 

@@ -1254,8 +1254,8 @@ def DataReader_getHeaderVariables(self):
     put it into attributes of the DataReader object.
     """
     self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample']))
-#    for v in self.keywords:
-#        setattr(self,v,self.get(v))
+    for v in self.keywords:
+        setattr(self,v,self.get(v))
 
 def DataReader_getitem(self,*keys):
     """
@@ -1283,7 +1283,8 @@ def DataReader_getitem(self,*keys):
             if keys0=="TimeLag": ary.fillrange(-self["blocksize"]/2*self["sampleInterval"],self["sampleInterval"])
             else: ary.read(self,keys0)
         return ary
-    else: return hFileGetParameter(self,keys0)
+    else:
+        return hFileGetParameter(self,keys0)
 
 def DataReader_set(self,key,val):
     """

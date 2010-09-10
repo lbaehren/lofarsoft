@@ -826,6 +826,7 @@ template<class T> inline T hfcast(/*const*/ T v){return v;}
 
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
+template<>  inline HInteger hfcast<HInteger>(int v){return static_cast<HInteger>(v);}
 template<>  inline HInteger hfcast<HInteger>(ptrdiff_t v){return static_cast<HInteger>(v);}
 template<>  inline HInteger hfcast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v));}
 template<>  inline HInteger hfcast<HInteger>(HComplex v){return static_cast<HInteger>(floor(real(v)));}
@@ -7220,20 +7221,9 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
     HFPP_REPEAT(double,HNumber,increment)
     HFPP_REPEAT(double,HNumber,frequencyValues)
     HFPP_REPEAT(double,HNumber,frequencyRange)
-//    HFPP_REPEAT(int, HNumber, shiftcasa)
+    HFPP_REPEAT(int, HInteger, shift)
 #undef HFPP_REPEAT
-     if ((key== "shift") || (key2== "shift")) {
-       Vector<int> casavec(drp->shiftcasa());
-       std::vector<int> result;
-       aipsvec2stlvec(casavec,result);
-       HPyObject pyob(result);
-       return pyob;
-     } else
-    // if ((key== "shift") || (key2== "shift")) {
-    //   std::vector<int> result(drp->shift());
-    //   HPyObject pyob(result);
-    //   return pyob;
-    // } else
+
 // --- Reading data from the headerrecord in a scalar---
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  \
       if ((key== #KEY) || (key2== #KEY)) {_H_NL_\

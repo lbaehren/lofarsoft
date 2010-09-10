@@ -162,11 +162,10 @@ def idToStationName(station_id):
 
     return station_name
 
-def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
+def getRelativeAntennaPositions(station,antennaset):
     """Returns the antenna positions of all the antennas in the station
     relative to the station center for the specified antennaset. 
-    station can be the name or id of the station. Default returns as numpy
-    array, option to return as hArray.
+    station can be the name or id of the station.
 
     *station*      Name or id of the station. e.g. "CS302" or 142
     *antennaset*   Antennaset used for this station. Options:
@@ -179,7 +178,6 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
                    HBA_0
                    HBA_1
                    HBA
-    *return_as_hArray*  Return as hArray.
 
     Examples:
     >>> import pycr_metadata as md

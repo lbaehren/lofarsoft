@@ -518,21 +518,21 @@ namespace CR {  //  Namespace CR -- begin
   */
   void setStride (uint const & stride);
 
+//  /*!
+//    \brief Get the shift between the start of the data segment and the first block.
+//
+//    \return shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$,
+//            for all the streams managed by the DataReader
+//  */
+//  std::vector<int> shift ();
+
   /*!
     \brief Get the shift between the start of the data segment and the first block.
 
     \return shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$,
             for all the streams managed by the DataReader
   */
-  std::vector<int> shift ();
-
-  /*!
-    \brief Get the shift between the start of the data segment and the first block.
-
-    \return shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$,
-            for all the streams managed by the DataReader
-  */
-  Vector<int> shiftcasa ();
+  Vector<int> shift ();
   /*!
     \brief Get the shift between the start of the data segment and the first block.
 
