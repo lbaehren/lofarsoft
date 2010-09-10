@@ -76,8 +76,6 @@ class sip(control):
                     'Step.subtract.Model.Sources': "[ \"%s\" ]" % (central["source_name"])
                 }
             ) as bbs_parset:
-                self.logger.info("BBS parset is %s" % bbs_parset)
-
                 # BBS modifies data in place, so the map produced by NDPPP
                 # remains valid.
                 self.run_task("bbs", compute_mapfile, parset=bbs_parset)
