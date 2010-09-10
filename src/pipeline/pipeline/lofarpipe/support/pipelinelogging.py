@@ -234,6 +234,7 @@ def log_process_output(process_name, sout, serr, logger):
     """
     Log sout/serr from a process if they contain anything interesting.
     """
+    sout = sout.replace("Debug: registered context Global=0\n", "")
     if len(sout.strip()) > 0:
         logger.debug("%s sout: %s" % (process_name, sout))
     serr = serr.replace("Debug: registered context Global=0\n", "")
