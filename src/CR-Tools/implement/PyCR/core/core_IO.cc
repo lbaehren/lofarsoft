@@ -32,7 +32,7 @@ namespace CR { // Namespace CR -- begin
   namespace PYCR { // Namespace PYCR -- begin
 
     // --------------------------------------------------------------- CRFileOpen
-    DataReader & CRFileOpen(std::string filename) { 
+    DataReader * CRFileOpen(std::string filename) { 
       std::string ext, filetype;
       int size=filename.size();
       int pos=filename.rfind('.',size);
@@ -50,7 +50,7 @@ namespace CR { // Namespace CR -- begin
       return CRFileOpenType(filename, filetype);
     };
 
-    DataReader & CRFileOpenType(std::string Filename, std::string filetype) { 
+    DataReader * CRFileOpenType(std::string Filename, std::string filetype) { 
       bool opened;
       //Create the a pointer to the DataReader object and store the pointer
       CR::DataReader* drp;
@@ -77,7 +77,7 @@ namespace CR { // Namespace CR -- begin
         CR::LopesEventIn* lep = new CR::LopesEventIn; //Make a dummy data reader ....
         drp=lep;
       };
-      return *drp;
+      return drp;
     };
 
     // --------------------------------------------------------------- CRsummary
@@ -183,12 +183,12 @@ namespace CR { // Namespace CR -- begin
         return numpyFromSTL(dr.shift());
         // scalar values from the header record
       } else if (key== "date") {
-        cout << "CRFileGetParameter: date " << dr.headerRecord().asDouble("Date") << endl;
+        //cout << "CRFileGetParameter: date " << dr.headerRecord().asDouble("Date") << endl;
         return bpl::object(dr.headerRecord().asuInt("Date"));
       } else if (key== "observatory") {
         return bpl::object(dr.headerRecord().asString("Observatory"));
       } else if (key== "filesize") {
-        cout << "CRFileGetParameter: filesize " << dr.headerRecord().asDouble("Filesize") << endl;
+        //cout << "CRFileGetParameter: filesize " << dr.headerRecord().asDouble("Filesize") << endl;
         return bpl::object(dr.headerRecord().asInt("Filesize"));
       } else if (key== "ddate") {
         return bpl::object(dr.headerRecord().asDouble("dDate"));
@@ -304,14 +304,14 @@ namespace CR { // Namespace CR -- begin
 
     // -------------------------------------------------------- export_DataReader
     void export_DataReader() {  
-      bpl::class_<CR::DataReader>("DataReader")
+      bpl::class_<CR::DataReader>("DataReader",bpl::no_init)
         .def("summary",&CR::PYCR::CRsummary)
         .def("read",&CR::PYCR::CRFileRead)
         .def("crFileGetParameter",&CR::PYCR::CRFileGetParameter)
         .def("crFileSetParameter",&CR::PYCR::CRFileSetParameter)
         ;   
-      def("crFileOpen", &CR::PYCR::CRFileOpen,bpl::return_internal_reference<>());
-      def("crFileOpen", &CR::PYCR::CRFileOpenType,bpl::return_internal_reference<>());
+      def("crFileOpen", &CR::PYCR::CRFileOpen,bpl::return_value_policy<bpl::manage_new_object>());
+      def("crFileOpen", &CR::PYCR::CRFileOpenType,bpl::return_value_policy<bpl::manage_new_object>());
 
     }
 

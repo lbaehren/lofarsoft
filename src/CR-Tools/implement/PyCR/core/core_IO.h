@@ -84,7 +84,7 @@ namespace CR { // Namespace CR -- begin
 
       This version tries to guess the filetype from the filename.
     */
-    DataReader & CRFileOpen(std::string Filename); 
+    DataReader * CRFileOpen(std::string Filename); 
 
     /*!
       \brief Open a file and return the corresponding DataReader object
@@ -94,7 +94,7 @@ namespace CR { // Namespace CR -- begin
       
       \return the newly created DataReader object
     */
-    DataReader & CRFileOpenType(std::string Filename, std::string filetype);
+    DataReader * CRFileOpenType(std::string Filename, std::string filetype);
 
     /*!
       \brief Read data from a file and return it in the given numpy array

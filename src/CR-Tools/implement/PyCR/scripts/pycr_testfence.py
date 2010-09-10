@@ -20,11 +20,23 @@ Set some parameters "by hand", such as:
 
 """
 LOFARSOFT=os.environ["LOFARSOFT"]
-filename=LOFARSOFT+"/data/lofar/trigger-2010-04-15/triggered-pulse-2010-04-15-RS205.h5"
-stationname="RS205"
+#filename=LOFARSOFT+"/data/lofar/trigger-2010-04-15/triggered-pulse-2010-04-15-RS205.h5"
+#-------
+#filename='/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs003/trigger-dumps-2010-07-07-cs003--23'
+#filename='/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs005/trigger-dumps-2010-07-07-cs005--38'
+filename='/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/trigger-dumps-2010-07-07-cs006--35'
+#-------
+#filename='/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs003/trigger-dumps-2010-07-07-cs003--25'
+#filename='/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs005/trigger-dumps-2010-07-07-cs005--40'
+#filename='/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/trigger-dumps-2010-07-07-cs006--37'
+#-------
+#stationname="RS205"
+#stationname="CS003"
+#stationname="CS005"
+stationname="CS006"
 antennaset="LBA_OUTER"
-azRange=[180., 360., 1.]
-elRange=[0., 60., 1.]
+azRange=[0., 360., 1.]
+elRange=[0., 90., 1.]
 distsRange=[10., 50., 100., 500., 1000.]
 fixedDist=200.
 FarField=True
@@ -33,10 +45,10 @@ FarField=True
 """
   Open the file, set the parameters in the DataReader, and get the data
 """
-dr = cr.open(filename)
+dr = cr.open(filename,'LOFAR_TBB')
 
 dr.blocksize = 512
-dr.block = 128
+dr.block = 128-1
 
 ants = dr["nofantennas"]
 blocksize = dr["blocksize"]
@@ -61,6 +73,8 @@ cr_fft = np.empty( (ants, fftlength), dtype=complex )
 for ant in range(ants):
     status =  cr.forwardFFTW(cr_fft[ant], cr_efield[ant])
 
+#cr.applyRFIMitigation(cr_fft)
+
 """
 
 (++) Coordinates
@@ -73,7 +87,7 @@ positions.
 
 dr.station = stationname
 dr.antennaset = antennaset
-antenna_positions = dr["antpos"]
+antenna_positions = dr["antenna_position"]
 
 """
 
@@ -109,6 +123,9 @@ az_values = np.arange(azRange[0], azRange[1], azRange[2])
 
 ant_indices =  range(1,96,2)
 
+window = np.array([1.,1.,1.])
+window /= np.sum(window)
+
 azel[2]= fixedDist
 for el_ind in range(n_el):
     print "processing elevation",el_ind,"out of",n_el
@@ -126,7 +143,8 @@ for el_ind in range(n_el):
             beamformed_fft += shifted_fft[n]
 
         cr.backwardFFTW(beamformed_efield, beamformed_fft); 
-        pixarray[el_ind,az_ind] = np.sum(np.abs(beamformed_efield))
+        #pixarray[el_ind,az_ind] = np.sum(np.abs(beamformed_efield))
+        pixarray[el_ind,az_ind] = np.max(np.convolve(np.abs(beamformed_efield),window,'same'))
 
 """
         beamformed_efield.abs()
