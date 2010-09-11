@@ -9,7 +9,7 @@ from cPickle import load
 import os.path
 import sys
 
-from pyrap.tables import taql
+from pyrap.tables import taql, table
 
 from lofarpipe.support.lofarnode import LOFARnode
 from lofarpipe.support.utilities import log_time
@@ -57,7 +57,10 @@ class flag_baseline(LOFARnode):
                 return 1
 
             # QUICK HACK: Also flag last timestep
-            cmd = "UPDATE %s SET FLAG=True WHERE TIME=MAX(TIME)" % (infile)
+            t = table(infile)
+            maxtime = t.getcol('TIME').max()
+            t.close()
+            cmd = "UPDATE %s SET FLAG=True WHERE TIME=%f" % (infile, maxtime)
             self.logger.info("Running TaQL: " + cmd)
             try:
                 taql(cmd)
