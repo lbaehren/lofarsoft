@@ -224,7 +224,7 @@ def catch_segfaults(cmd, cwd, env, logger, max=1, cleanup=lambda: None):
         if tries > 0:
             logger.debug("Retrying...")
         logger.debug("Running: %s" % (' '.join(cmd),))
-        process = spawn_process(cmd, cwd, env, logger)
+        process = spawn_process(cmd, logger, cwd, env)
         sout, serr = process.communicate()
         log_process_output(cmd[0], sout, serr, logger)
         if process.returncode == 0:

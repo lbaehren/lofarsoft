@@ -11,6 +11,7 @@ from threading import BoundedSemaphore
 import subprocess
 
 from lofarpipe.support.pipelinelogging import log_process_output
+from lofarpipe.support.utilities import spawn_process
 
 class ProcessLimiter(defaultdict):
     def __init__(self, nproc):
@@ -40,7 +41,7 @@ def run_via_ssh(logger, host, command, environment, *arguments):
     commandstring.append(command)
     commandstring.extend(str(arg) for arg in arguments)
     ssh_cmd.append('"' + " ".join(commandstring) + '"')
-    return spawn_process(cmd, logger)
+    return spawn_process(ssh_cmd, logger)
 
 class RemoteCommandRecipeMixIn(object):
     """
@@ -71,7 +72,7 @@ class RemoteCommandRecipeMixIn(object):
             serr = serr.replace("Connection to %s closed.\r\n" % host, "")
             log_process_output("SSH session", sout, serr, self.logger)
         except Exception, e:
-            self.logger.error("Failed to run remote process %s (%s)" % (cmd, str(e)))
+            self.logger.error("Failed to run remote process %s (%s)" % (command, str(e)))
             self.error.set()
         finally:
             semaphore.release()
