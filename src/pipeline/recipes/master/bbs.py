@@ -149,13 +149,12 @@ class bbs(BaseRecipe):
             self.logger.debug("Building VDS file describing data for BBS run")
             vds_dir = tempfile.mkdtemp()
             vds_file = os.path.join(vds_dir, "bbs.gvds")
-            combineproc = subprocess.Popen(
+            combineproc = utilities.spawn_process(
                 [
                     self.inputs['combinevds'],
                     vds_file,
                 ] + vds_files,
-                stdout = subprocess.PIPE,
-                stderr = subprocess.PIPE
+                self.logger
             )
             sout, serr = combineproc.communicate()
             log_process_output(self.inputs['combinevds'], sout, serr, self.logger)
@@ -262,6 +261,7 @@ class bbs(BaseRecipe):
         """
         try:
             bbs_kernel_process = run_remote_command(
+                self.logger,
                 host,
                 command,
                 env,
@@ -290,16 +290,15 @@ class bbs(BaseRecipe):
         ):
             with utilities.log_time(self.logger):
                 try:
-                    bbs_control_process = subprocess.Popen(
+                    bbs_control_process = utilities.spawn_process(
                         [
                             self.inputs['control_exec'],
                             bbs_parset,
                             "0"
                         ],
-                        env=env,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        cwd=working_dir
+                        self.logger,
+                        cwd=working_dir,
+                        env=env
                     )
                 except OSError, e:
                     self.logger.error("Failed to spawn BBS Control (%s)" % str(e))

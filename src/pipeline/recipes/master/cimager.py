@@ -26,6 +26,7 @@ from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.parset import Parset
 from lofarpipe.support.parset import get_parset
 from lofarpipe.support.parset import patched_parset
+from lofarpipe.support.utilities import spawn_process
 
 class cimager(BaseRecipe):
     """
@@ -202,9 +203,9 @@ class cimager(BaseRecipe):
                     fd, converted_parset = tempfile.mkstemp(
                         dir=self.config.get("layout", "parset_directory")
                     )
-                    convert_process = subprocess.Popen(
+                    convert_process = spawn_process(
                         [convert_exec, cimager_parset, converted_parset],
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                        self.logger
                     )
                     os.close(fd)
                     sout, serr = convert_process.communicate()
@@ -228,6 +229,7 @@ class cimager(BaseRecipe):
             engine_lpath = self.config.get('deploy', 'engine_lpath')
             try:
                 cimager_process = run_remote_command(
+                    self.logger,
                     host,
                     command,
                     {

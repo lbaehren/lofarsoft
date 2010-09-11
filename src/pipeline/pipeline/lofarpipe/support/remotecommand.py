@@ -18,7 +18,7 @@ class ProcessLimiter(defaultdict):
             lambda: BoundedSemaphore(int(nproc))
         )
 
-def run_remote_command(host, command, environment, *arguments):
+def run_remote_command(logger, host, command, environment, *arguments):
     """
     Run command on host, passing it arguments from the arguments list and
     exporting key/value pairs from environment (a dictionary).
@@ -28,9 +28,9 @@ def run_remote_command(host, command, environment, *arguments):
     This is a generic interface to potentially multiple ways of running
     commands (SSH, mpirun, etc).
     """
-    return run_via_ssh(host, command, environment, *arguments)
+    return run_via_ssh(logger, host, command, environment, *arguments)
 
-def run_via_ssh(host, command, environment, *arguments):
+def run_via_ssh(logger, host, command, environment, *arguments):
     """
     Run a remote command via SSH.
     """
@@ -40,9 +40,7 @@ def run_via_ssh(host, command, environment, *arguments):
     commandstring.append(command)
     commandstring.extend(str(arg) for arg in arguments)
     ssh_cmd.append('"' + " ".join(commandstring) + '"')
-    return subprocess.Popen(
-        ssh_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    return spawn_process(cmd, logger)
 
 class RemoteCommandRecipeMixIn(object):
     """
@@ -58,6 +56,7 @@ class RemoteCommandRecipeMixIn(object):
         semaphore.acquire()
         try:
             process = run_remote_command(
+                self.logger,
                 host,
                 command,
                 {
@@ -71,8 +70,8 @@ class RemoteCommandRecipeMixIn(object):
             sout, serr = process.communicate()
             serr = serr.replace("Connection to %s closed.\r\n" % host, "")
             log_process_output("SSH session", sout, serr, self.logger)
-        except OSError, e:
-            self.logger.error("Failed to spawn external process %s (%s)" % (cmd, str(e)))
+        except Exception, e:
+            self.logger.error("Failed to run remote process %s (%s)" % (cmd, str(e)))
             self.error.set()
         finally:
             semaphore.release()

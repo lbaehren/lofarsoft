@@ -10,6 +10,7 @@ from __future__ import with_statement
 from subprocess import Popen, CalledProcessError, PIPE
 from itertools import islice, repeat, chain, izip
 from contextlib import closing, contextmanager
+from time import sleep
 
 import os
 import errno
@@ -181,6 +182,37 @@ def string_to_list(my_string):
     """
     return [x.strip() for x in my_string.strip('[] ').split(',')]
 
+def spawn_process(cmd, logger, cwd=None, env=None, max_tries=20, timeout=10):
+    """
+    Tries to spawn a process.
+
+    If it hits an OSError due to lack of memory or too many open files, it
+    will keep trying max_tries times, waiting timeout seconds between each.
+
+    If successful, the process object is returned. Otherwise, we eventually
+    propagate the exception.
+    """
+    trycounter = 0
+    while True:
+        try:
+            process = Popen(
+                cmd, cwd=cwd, env=env, stdin=PIPE, stdout=PIPE, stderr=PIPE
+            )
+        except OSError, e:
+            logger.warn("Failed to spawn external process %s (%s)" % (cmd, str(e)))
+    #        if (
+    #            failure.errno == errno.ENOMEM or failure.errno == errno.EMFILE
+    #        ) and trycounter < max_tries:
+            if trycounter < max_tries:
+                self.logger.warn("Retrying in %d seconds." % timeout)
+                trycounter += 1
+                sleep(timeout)
+            else:
+                raise
+        else:
+            break
+    return process
+
 def catch_segfaults(cmd, cwd, env, logger, max=1, cleanup=lambda: None):
     """
     Run cmd in cwd with env, sending output to logger.
@@ -192,9 +224,7 @@ def catch_segfaults(cmd, cwd, env, logger, max=1, cleanup=lambda: None):
         if tries > 0:
             logger.debug("Retrying...")
         logger.debug("Running: %s" % (' '.join(cmd),))
-        process = Popen(
-            cmd, cwd=cwd, env=env, stdout=PIPE, stderr=PIPE
-        )
+        process = spawn_process(cmd, cwd, env, logger)
         sout, serr = process.communicate()
         log_process_output(cmd[0], sout, serr, logger)
         if process.returncode == 0:
