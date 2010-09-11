@@ -181,7 +181,7 @@ def string_to_list(my_string):
     """
     return [x.strip() for x in my_string.strip('[] ').split(',')]
 
-def catch_segfaults(cmd, cwd, env, logger, max=1):
+def catch_segfaults(cmd, cwd, env, logger, max=1, cleanup=lambda: None):
     """
     Run cmd in cwd with env, sending output to logger.
 
@@ -201,6 +201,7 @@ def catch_segfaults(cmd, cwd, env, logger, max=1):
             break
         elif process.returncode == -11:
             logger.warn("%s process segfaulted!" % cmd[0])
+            cleanup()
             tries += 1
             continue
         else:

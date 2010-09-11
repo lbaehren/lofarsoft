@@ -86,7 +86,13 @@ class dppp(LOFARnode):
                 ) as logger:
                     #     Catch NDPPP segfaults (a regular occurance), and retry
                     # ----------------------------------------------------------
-                    catch_segfaults(cmd, working_dir, env, logger)
+                    if outfile != infile:
+                        cleanup_fn = lambda : shutil.rmtree(outfile, ignore_errors=True)
+                    else:
+                        cleanup_fn = lambda : None
+                    catch_segfaults(
+                        cmd, working_dir, env, logger, cleanup=cleanup_fn
+                    )
             except ExecutableMissing, e:
                 self.logger.error("%s not found" % (e.args[0]))
                 return 1
