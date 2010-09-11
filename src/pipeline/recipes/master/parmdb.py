@@ -57,14 +57,18 @@ class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
         )
         pdbfile = os.path.join(pdbdir, 'instrument')
 
-        parmdbm_process = subprocess.Popen(
-            [self.inputs['executable']],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        sout, serr = parmdbm_process.communicate(template % pdbfile)
-        log_process_output("parmdbm", sout, serr, self.logger)
+        try:
+            parmdbm_process = subprocess.Popen(
+                [self.inputs['executable']],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            sout, serr = parmdbm_process.communicate(template % pdbfile)
+            log_process_output("parmdbm", sout, serr, self.logger)
+        except OSError, e:
+            self.logger.error("Failed to spawn parmdbm: %s" % str(e))
+            return 1
 
         #                     try-finally block to always remove temporary files
         # ----------------------------------------------------------------------

@@ -289,18 +289,24 @@ class bbs(BaseRecipe):
             os.path.basename(self.inputs['control_exec'])
         ):
             with utilities.log_time(self.logger):
-                bbs_control_process = subprocess.Popen(
-                    [
-                        self.inputs['control_exec'],
-                        bbs_parset,
-                        "0"
-                    ],
-                    env=env,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    cwd=working_dir
-                )
-                run_flag.set()
+                try:
+                    bbs_control_process = subprocess.Popen(
+                        [
+                            self.inputs['control_exec'],
+                            bbs_parset,
+                            "0"
+                        ],
+                        env=env,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        cwd=working_dir
+                    )
+                except OSError, e:
+                    self.logger.error("Failed to spawn BBS Control (%s)" % str(e))
+                    self.killswitch.set()
+                    return 1
+                finally:
+                    run_flag.set()
 
             returncode = self._monitor_process(
                 bbs_control_process, "BBS Control"

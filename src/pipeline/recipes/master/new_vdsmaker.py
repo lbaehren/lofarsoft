@@ -122,6 +122,9 @@ class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
         except subprocess.CalledProcessError, cpe:
             self.logger.exception("combinevds failed with status %d: %s" % (cpe.returncode, serr))
             failure = True
+        except OSError, e:
+            self.logger.error("Failed to spawn combinevds (%s)" % str(e))
+            failure = True
         finally:
             if self.inputs["unlink"]:
                 self.logger.debug("Unlinking temporary files")

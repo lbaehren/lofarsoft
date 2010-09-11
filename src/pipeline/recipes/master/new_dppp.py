@@ -11,7 +11,6 @@ from itertools import cycle
 from contextlib import nested
 from collections import defaultdict
 
-import subprocess
 import collections
 import threading
 import sys

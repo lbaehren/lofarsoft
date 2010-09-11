@@ -71,6 +71,9 @@ class RemoteCommandRecipeMixIn(object):
             sout, serr = process.communicate()
             serr = serr.replace("Connection to %s closed.\r\n" % host, "")
             log_process_output("SSH session", sout, serr, self.logger)
+        except OSError, e:
+            self.logger.error("Failed to spawn external process %s (%s)" % (cmd, str(e)))
+            self.error.set()
         finally:
             semaphore.release()
         if process.returncode != 0:
