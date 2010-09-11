@@ -213,6 +213,10 @@ class cimager(BaseRecipe):
                         raise subprocess.CalledProcessError(
                             convert_process.returncode, convert_exec
                         )
+                except OSError, e:
+                    self.logger.error("Failed to spawn convertimagerparset (%s)" % str(e))
+                    self.error.set()
+                    return 1
                 except subprocess.CalledProcessError, e:
                     self.logger.error(str(e))
                     self.error.set()
