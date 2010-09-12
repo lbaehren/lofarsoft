@@ -74,6 +74,7 @@ class RemoteCommandRecipeMixIn(object):
         except Exception, e:
             self.logger.exception("Failed to run remote process %s (%s)" % (command, str(e)))
             self.error.set()
+            return 1
         finally:
             semaphore.release()
         if process.returncode != 0:
