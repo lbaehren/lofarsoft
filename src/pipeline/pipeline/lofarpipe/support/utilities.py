@@ -11,6 +11,7 @@ from subprocess import Popen, CalledProcessError, PIPE
 from itertools import islice, repeat, chain, izip
 from contextlib import closing, contextmanager
 from time import sleep
+from random import randint
 
 import os
 import errno
@@ -182,7 +183,7 @@ def string_to_list(my_string):
     """
     return [x.strip() for x in my_string.strip('[] ').split(',')]
 
-def spawn_process(cmd, logger, cwd=None, env=None, max_tries=20, timeout=10):
+def spawn_process(cmd, logger, cwd=None, env=None, max_tries=2, max_timeout=30):
     """
     Tries to spawn a process.
 
@@ -199,12 +200,15 @@ def spawn_process(cmd, logger, cwd=None, env=None, max_tries=20, timeout=10):
                 cmd, cwd=cwd, env=env, stdin=PIPE, stdout=PIPE, stderr=PIPE
             )
         except OSError, e:
-            logger.warn("Failed to spawn external process %s (%s)" % (cmd, str(e)))
-    #        if (
-    #            failure.errno == errno.ENOMEM or failure.errno == errno.EMFILE
-    #        ) and trycounter < max_tries:
+            logger.warn(
+                "Failed to spawn external process %s (%s)" % (" ".join(cmd), str(e))
+            )
             if trycounter < max_tries:
-                self.logger.warn("Retrying in %d seconds." % timeout)
+                timeout = randint(1, max_timeout)
+                logger.warn(
+                    "Retrying in %d seconds (%d more retries)." %
+                    (timeout, max_tries - trycounter - 1)
+                )
                 trycounter += 1
                 sleep(timeout)
             else:
