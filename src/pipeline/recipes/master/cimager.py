@@ -263,6 +263,9 @@ class cimager(BaseRecipe):
         finally:
             semaphore.release()
         if cimager_process.returncode != 0:
+            self.logger.error(
+                "cimager failed: returned %d" % cimager_process.returncode
+            )
             self.error.set()
         return cimager_process.returncode
 
