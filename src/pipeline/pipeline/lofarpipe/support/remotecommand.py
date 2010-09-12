@@ -72,10 +72,11 @@ class RemoteCommandRecipeMixIn(object):
             serr = serr.replace("Connection to %s closed.\r\n" % host, "")
             log_process_output("SSH session", sout, serr, self.logger)
         except Exception, e:
-            self.logger.error("Failed to run remote process %s (%s)" % (command, str(e)))
+            self.logger.exception("Failed to run remote process %s (%s)" % (command, str(e)))
             self.error.set()
         finally:
             semaphore.release()
         if process.returncode != 0:
+            self.logger.error("Remote process %s failed (status: %d)" % (command, process.returncode)
             self.error.set()
         return process.returncode
