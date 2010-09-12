@@ -78,6 +78,8 @@ class RemoteCommandRecipeMixIn(object):
         finally:
             semaphore.release()
         if process.returncode != 0:
-            self.logger.error("Remote process %s failed (status: %d)" % (command, process.returncode)
+            self.logger.error(
+                "Remote process %s failed (status: %d)" % (command, process.returncode)
+            )
             self.error.set()
         return process.returncode
