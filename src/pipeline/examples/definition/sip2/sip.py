@@ -99,8 +99,6 @@ class sip(control):
                         "ndppp",
                         compute_mapfile,
                         parset=corrected_ndppp_parset,
-                        data_start_time=vdsinfo['start_time'],
-                        data_end_time=vdsinfo['end_time'],
                         suffix=""
                     )
 
@@ -121,8 +119,6 @@ class sip(control):
                         "ndppp",
                         compute_mapfile,
                         parset=subtracted_ndppp_parset,
-                        data_start_time=vdsinfo['start_time'],
-                        data_end_time=vdsinfo['end_time'],
                         suffix=""
                     )
 
