@@ -34,6 +34,18 @@ class cimager(LOFARnode):
         # ----------------------------------------------------------------------
         with log_time(self.logger):
             self.logger.info("Processing %s" % (vds,))
+
+            #    Bail out if destination exists (can thus resume a partial run).
+            #                                            Should be configurable?
+            # ------------------------------------------------------------------
+            parset_data = Parset(parset)
+            image_names = parset_data.getStringVector("Cimager.Images.Names")
+            for image_name in image_names:
+                outputfile = os.path.join(resultsdir, image_name + ".restored")
+                self.logger.info(outputfile)
+                if os.path.exists(outputfile):
+                    self.logger.info("Image already exists: aborting.")
+                    return 0
             try:
                 working_dir = mkdtemp()
 
