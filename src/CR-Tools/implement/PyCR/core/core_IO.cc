@@ -32,7 +32,7 @@ namespace CR { // Namespace CR -- begin
   namespace PYCR { // Namespace PYCR -- begin
 
     // --------------------------------------------------------------- CRFileOpen
-    DataReader * CRFileOpen(std::string filename) { 
+    DataReader * CRFileOpen(std::string filename) {
       std::string ext, filetype;
       int size=filename.size();
       int pos=filename.rfind('.',size);
@@ -50,7 +50,7 @@ namespace CR { // Namespace CR -- begin
       return CRFileOpenType(filename, filetype);
     };
 
-    DataReader * CRFileOpenType(std::string Filename, std::string filetype) { 
+    DataReader * CRFileOpenType(std::string Filename, std::string filetype) {
       bool opened;
       //Create the a pointer to the DataReader object and store the pointer
       CR::DataReader* drp;
@@ -122,7 +122,7 @@ namespace CR { // Namespace CR -- begin
         dr.calfft(data);
       } else {
         std::string fields;
-        fields = fields + "help" 
+        fields = fields + "help"
           + ", " + "Time" + ", " + "Frequency"
           + ", " + "Fx" + ", " + "Voltage"
           + ", " + "FFT" + ", " + "CalFFT";
@@ -180,7 +180,7 @@ namespace CR { // Namespace CR -- begin
       } else if (key== "frequencyrange") {
         return numpyFromCasa(dr.frequencyRange());
       } else if (key== "shift") {
-        return numpyFromSTL(dr.shift());
+        return numpyFromCasa(dr.shift());
         // scalar values from the header record
       } else if (key== "date") {
         //cout << "CRFileGetParameter: date " << dr.headerRecord().asDouble("Date") << endl;
@@ -218,26 +218,26 @@ namespace CR { // Namespace CR -- begin
       std::string fields("help");
       fields = fields + ", " + "keywords"
         // scalar values from methods
-        + ", " + "nofAntennas" + ", " + "nofSelectedChannels" 
-        + ", " + "nofSelectedAntennas" + ", " + "blocksize" 
-        + ", " + "fftLength" + ", " + "block" 
-        + ", " + "stride" + ", " + "nyquistZone" 
-        + ", " + "sampleInterval" + ", " + "referenceTime" 
+        + ", " + "nofAntennas" + ", " + "nofSelectedChannels"
+        + ", " + "nofSelectedAntennas" + ", " + "blocksize"
+        + ", " + "fftLength" + ", " + "block"
+        + ", " + "stride" + ", " + "nyquistZone"
+        + ", " + "sampleInterval" + ", " + "referenceTime"
         + ", " + "sampleFrequency" + ", " + "nofBaselines"
         // arrays from methods
-        + ", " + "antennas" + ", " + "selectedAntennas" 
-        + ", " + "selectedChannels" + ", " + "positions" 
-        + ", " + "increment" + ", " + "frequencyValues" 
+        + ", " + "antennas" + ", " + "selectedAntennas"
+        + ", " + "selectedChannels" + ", " + "positions"
+        + ", " + "increment" + ", " + "frequencyValues"
         + ", " + "frequencyRange" + ", " + "shift"
         // scalar values from the header record
-        + ", " + "Date" + ", " + "Observatory" 
-        + ", " + "Filesize" + ", " + "dDate" 
-        + ", " + "presync" + ", " + "TL" 
-        + ", " + "LTL" + ", " + "EventClass" 
-        + ", " + "SampleFreq" + ", " + "StartSample" 
+        + ", " + "Date" + ", " + "Observatory"
+        + ", " + "Filesize" + ", " + "dDate"
+        + ", " + "presync" + ", " + "TL"
+        + ", " + "LTL" + ", " + "EventClass"
+        + ", " + "SampleFreq" + ", " + "StartSample"
         // array from the header record
-        + ", " + "AntennaIDs" + ", " + "SAMPLE_OFFSET" 
-        + ", " + "SAMPLE_NUMBER" + ", " + "TIME"; 
+        + ", " + "AntennaIDs" + ", " + "SAMPLE_OFFSET"
+        + ", " + "SAMPLE_NUMBER" + ", " + "TIME";
       if (key== "keywords") {
         return bpl::object(fields);
       };
@@ -276,21 +276,21 @@ namespace CR { // Namespace CR -- begin
         dr.setReferenceTime( bpl::extract<double>(pyob) );
       } else if (key == "samplefrequency") {
         dr.setSampleFrequency( bpl::extract<double>(pyob) );
-      } else if (key=="shiftvector") {	
-        //cout << "CRFileSetParameter:shiftvector: data:" <<STLVecFromPyob<int>(pyob) << endl; 
+      } else if (key=="shiftvector") {
+        //cout << "CRFileSetParameter:shiftvector: data:" <<STLVecFromPyob<int>(pyob) << endl;
         dr.setShift(STLVecFromPyob<int>(pyob));
       } else if (key=="selectedantennas") {
-        //cout << "CRFileSetParameter:selectedantennas: data:" << casaFromPyob<uint>(pyob) << endl; 
+        //cout << "CRFileSetParameter:selectedantennas: data:" << casaFromPyob<uint>(pyob) << endl;
         dr.setSelectedAntennas(casaFromPyob<uint>(pyob));
       } else {
         std::string fields;
-        fields = fields + "help" 
+        fields = fields + "help"
           + ", " + "Block" + ", " + "Blocksize"
           + ", " + "StartBlock" + ", " + "Stride"
           + ", " + "SampleOffset" + ", " + "NyquistZone"
           + ", " + "Shift" + ", " + "ReferenceTime"
           + ", " + "SampleFrequency" + ", " + "ShiftVector"
-          + ", " + "SelectedAntennas" + ", " + "";	
+          + ", " + "SelectedAntennas" + ", " + "";
         if (key== "help") {
           cout << "CRFileSetParameter" << " - available keywords: "<< fields <<endl;
         } else {
@@ -303,13 +303,13 @@ namespace CR { // Namespace CR -- begin
     }
 
     // -------------------------------------------------------- export_DataReader
-    void export_DataReader() {  
+    void export_DataReader() {
       bpl::class_<CR::DataReader>("DataReader",bpl::no_init)
         .def("summary",&CR::PYCR::CRsummary)
         .def("read",&CR::PYCR::CRFileRead)
         .def("crFileGetParameter",&CR::PYCR::CRFileGetParameter)
         .def("crFileSetParameter",&CR::PYCR::CRFileSetParameter)
-        ;   
+        ;
       def("crFileOpen", &CR::PYCR::CRFileOpen,bpl::return_value_policy<bpl::manage_new_object>());
       def("crFileOpen", &CR::PYCR::CRFileOpenType,bpl::return_value_policy<bpl::manage_new_object>());
 
