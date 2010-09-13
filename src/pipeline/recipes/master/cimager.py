@@ -20,7 +20,6 @@ import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.pipelinelogging import log_time, log_process_output
 from lofarpipe.support.clusterlogger import clusterlogger
-from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.parset import Parset
@@ -228,7 +227,7 @@ class cimager(BaseRecipe):
             engine_ppath = self.config.get('deploy', 'engine_ppath')
             engine_lpath = self.config.get('deploy', 'engine_lpath')
             try:
-                cimager_process = run_remote_command(
+                cimager_process = self.run_remote_command(
                     self.logger,
                     host,
                     command,
@@ -236,14 +235,10 @@ class cimager(BaseRecipe):
                         "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
                         "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
                     },
-                    loghost,
-                    str(logport),
-                    imager_exec,
-                    vds,
-                    converted_parset,
-                    resultsdir,
-                    str(start_time),
-                    str(end_time)
+                    arguments=(
+                        loghost, str(logport), imager_exec, vds, converted_parset,
+                        resultsdir, str(start_time), str(end_time)
+                    )
                 )
                 sout, serr = cimager_process.communicate()
                 serr = serr.replace("Connection to %s closed.\r\n" % host, "")

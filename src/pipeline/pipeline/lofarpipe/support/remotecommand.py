@@ -8,10 +8,46 @@
 from collections import defaultdict
 from threading import BoundedSemaphore
 
+import os
+import signal
 import subprocess
 
 from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.utilities import spawn_process
+
+class ParamikoWrapper(object):
+    """
+    Sends an SSH command to a host using paramiko, then emulates a Popen-like
+    interface so that we can pass it back to pipeline recipes.
+    """
+    def __init__(self, paramiko_client, command):
+        self.returncode = None
+        self.client = paramiko_client
+        self.chan = paramiko_client.get_transport().open_session()
+        self.chan.get_pty()
+        self.chan.exec_command(command)
+        self.stdout = self.chan.makefile('rb', -1)
+        self.stderr = self.chan.makefile_stderr('rb', -1)
+
+    def communicate(self):
+        if not self.returncode:
+            self.returncode = self.chan.recv_exit_status()
+        stdout = "\n".join(line.strip() for line in self.stdout.readlines()) + "\n"
+        stderr = "\n".join(line.strip() for line in self.stdout.readlines()) + "\n"
+        return stdout, stderr
+
+    def poll(self):
+        if not self.returncode and self.chan.exit_status_ready():
+            self.returncode = self.chan.recv_exit_status()
+        return self.returncode
+
+    def wait(self):
+        if not self.returncode:
+            self.returncode = self.chan.recv_exit_status()
+        return self.returncode
+
+    def kill(self):
+        self.chan.close()
 
 class ProcessLimiter(defaultdict):
     def __init__(self, nproc):
@@ -19,36 +55,65 @@ class ProcessLimiter(defaultdict):
             lambda: BoundedSemaphore(int(nproc))
         )
 
-def run_remote_command(logger, host, command, environment, *arguments):
+def run_remote_command(
+    logger, host, command, environment, arguments=None, method=None, key_filename=None
+):
     """
     Run command on host, passing it arguments from the arguments list and
     exporting key/value pairs from environment (a dictionary).
 
-    Returns an instance of subprocess.Popen connected to the remove command.
+    Returns an object with poll() and communicate() methods, similar to
+    subprocess.Popen.
 
     This is a generic interface to potentially multiple ways of running
     commands (SSH, mpirun, etc).
     """
-    return run_via_ssh(logger, host, command, environment, *arguments)
 
-def run_via_ssh(logger, host, command, environment, *arguments):
+    if method=="paramiko":
+        return run_via_paramiko(logger, host, command, environment, arguments, key_filename)
+    else:
+        return run_via_ssh(logger, host, command, environment, arguments)
+
+def run_via_ssh(logger, host, command, environment, arguments):
     """
-    Run a remote command via SSH.
+    Dispatch a remote command via SSH.
+
+    We return a Popen object pointing at the SSH session, to which we add a
+    kill method for shutting down the connection if required.
     """
+    logger.debug("Dispatching command with ssh")
     ssh_cmd = ["ssh", "-n", "-tt", "-x", host, "--", "/bin/sh", "-c"]
 
     commandstring = ["%s=%s" % (key, value) for key, value in environment.items()]
     commandstring.append(command)
     commandstring.extend(str(arg) for arg in arguments)
     ssh_cmd.append('"' + " ".join(commandstring) + '"')
-    return spawn_process(ssh_cmd, logger)
+    process = spawn_process(ssh_cmd, logger)
+    process.kill = lambda : os.kill(process.pid, signal.SIGKILL)
+    return process
+
+def run_via_paramiko(logger, host, command, environment, arguments, key_filename):
+    """
+    Dispatch a remote command via paramiko.
+
+    We return an instance of ParamikoWrapper.
+    """
+    logger.debug("Dispatching command with paramiko")
+    import paramiko
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(host, key_filename=key_filename)
+    commandstring = ["%s=%s" % (key, value) for key, value in environment.items()]
+    commandstring.append(command)
+    commandstring.extend(str(arg) for arg in arguments)
+    return ParamikoWrapper(client, " ".join(commandstring))
 
 class RemoteCommandRecipeMixIn(object):
     """
     Mix-in for recipes to dispatch jobs using the remote command mechanism.
     """
     def _dispatch_compute_job(
-        self, host, command, semaphore, loghost, logport, *arguments
+        self, host, command, semaphore, *arguments
     ):
         """
         Dispatch a command to be run on the given host.
@@ -56,7 +121,7 @@ class RemoteCommandRecipeMixIn(object):
         """
         semaphore.acquire()
         try:
-            process = run_remote_command(
+            process = self.run_remote_command(
                 self.logger,
                 host,
                 command,
@@ -64,9 +129,7 @@ class RemoteCommandRecipeMixIn(object):
                     "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
                     "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
                 },
-                loghost,
-                str(logport),
-                *arguments
+                arguments=arguments
             )
             sout, serr = process.communicate()
             serr = serr.replace("Connection to %s closed.\r\n" % host, "")

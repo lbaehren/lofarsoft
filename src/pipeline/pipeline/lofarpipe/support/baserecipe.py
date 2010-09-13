@@ -8,6 +8,7 @@
 from ConfigParser import NoOptionError, NoSectionError
 from ConfigParser import SafeConfigParser as ConfigParser
 from threading import Event
+from functools import partial
 
 import os
 import sys
@@ -20,6 +21,7 @@ import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.lofarexceptions import PipelineException
 from lofarpipe.cuisine.WSRTrecipe import WSRTrecipe
 from lofarpipe.support.lofaringredient import RecipeIngredients, LOFARinput, LOFARoutput
+from lofarpipe.support.remotecommand import run_remote_command
 
 class BaseRecipe(RecipeIngredients, WSRTrecipe):
     """
@@ -202,6 +204,22 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
                 self.config.get('DEFAULT', "recipe_directories")
             )
         ]
+
+        # We'll prime a run_remote_command function with the appropriate ssh
+        # information (ie, paramiko or ssh), so that other methods can refer
+        # to it if necessary.
+        kwargs = {}
+        try:
+            kwargs['method'] = self.config.get('ssh', 'method')
+        except:
+            pass
+        try:
+            kwargs['key_filename'] = self.config.get('ssh', 'key_filename')
+        except:
+            pass
+        self.run_remote_command = partial(
+            run_remote_command, **kwargs
+        )
 
         if isinstance(self.logger.parent, logging.RootLogger):
             # Only configure handlers if our parent is the root logger.

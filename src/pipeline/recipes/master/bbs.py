@@ -22,7 +22,6 @@ from lofarpipe.support.lofarnode import run_node
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import gvds_iterator
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
-from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.pipelinelogging import log_process_output
 import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
@@ -260,15 +259,17 @@ class bbs(BaseRecipe):
         _monitor_process() for details.
         """
         try:
-            bbs_kernel_process = run_remote_command(
+            bbs_kernel_process = self.run_remote_command(
                 self.logger,
                 host,
                 command,
                 env,
-                *arguments
+                arguments=arguments
             )
-        except:
+        except Exception, e:
+            self.logger.exception("BBS Kernel failed to start")
             self.killswitch.set()
+            return 1
         result = self._monitor_process(bbs_kernel_process, "BBS Kernel on %s" % host)
         sout, serr = bbs_kernel_process.communicate()
         serr = serr.replace("Connection to %s closed.\r\n" % host, "")
@@ -300,6 +301,8 @@ class bbs(BaseRecipe):
                         cwd=working_dir,
                         env=env
                     )
+                    # _monitor_process() needs a convenient kill() method.
+                    bbs_control_process.kill = lambda : os.kill(bbs_control_process.pid, signal.SIGKILL)
                 except OSError, e:
                     self.logger.error("Failed to spawn BBS Control (%s)" % str(e))
                     self.killswitch.set()
@@ -339,10 +342,10 @@ class bbs(BaseRecipe):
                 self.logger.info("%s clean shutdown" % (name))
                 break
             if self.killswitch.isSet():            # Other process failed; abort
-               self.logger.warn("Killing %s" % (name))
-               os.kill(process.pid, signal.SIGKILL)
-               returncode = process.wait()
-               break
+                self.logger.warn("Killing %s" % (name))
+                process.kill()
+                returncode = process.wait()
+                break
         return returncode
 
 if __name__ == '__main__':
