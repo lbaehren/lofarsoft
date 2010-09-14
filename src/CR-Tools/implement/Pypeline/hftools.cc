@@ -5916,6 +5916,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   p = fftw_plan_dft_1d(N, (fftw_complex*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_FORWARD, FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
+  fftw_cleanup();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -5963,6 +5964,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   p = fftw_plan_dft_1d(N, (fftw_complex*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_BACKWARD, FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
+  fftw_cleanup();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -6017,6 +6019,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   fftw_execute(p); /* repeat as needed */
   hDiv2(data_out,data_out_end,(IterValueType)N);
   fftw_destroy_plan(p);
+  fftw_cleanup();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -6072,6 +6075,7 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   p = fftw_plan_dft_c2r_1d(N, (fftw_complex*) &(scratchfft[0]), (double*) &(*data_out), FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
+  fftw_cleanup();
   hDiv2(data_out,data_out_end,(HNumber)N);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -6118,6 +6122,7 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   p = fftw_plan_dft_r2c_1d(N, (double*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
+  fftw_cleanup();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -6163,6 +6168,7 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   p = fftw_plan_dft_c2r_1d(N, (fftw_complex*) &(*data_in), (double*) &(*data_out), FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
+  fftw_cleanup();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
