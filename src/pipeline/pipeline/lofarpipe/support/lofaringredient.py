@@ -75,14 +75,20 @@ class IntField(Field):
         return isinstance(value, int)
 
     def coerce(self, value):
-        return int(value)
+        try:
+            return int(value)
+        except:
+            return value
 
 class FloatField(Field):
     def is_valid(self, value):
         return isinstance(value, float)
 
     def coerce(self, value):
-        return float(value)
+        try:
+            return float(value)
+        except:
+            return value
 
 class FileField(Field):
     def is_valid(self, value):
