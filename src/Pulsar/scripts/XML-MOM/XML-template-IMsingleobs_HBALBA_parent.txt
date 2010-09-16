@@ -1,0 +1,42 @@
+<item index="0">
+<lofar:observation>
+    <name>FILL IN OBSERVATION NAME</name>
+    <description>FILL IN DESCRIPTION</description>
+    <currentStatus>
+        <mom2:openedStatus/>
+    </currentStatus>
+    <lofar:observationAttributes>
+        <observationId></observationId>
+        <name>FILL IN OBSERVATION NAME</name>
+        <projectName>PROJECT NAME</projectName>
+        <instrument>Interferometer</instrument>
+        <userSpecification>
+            <correlatedData>true</correlatedData>
+            <filteredData>false</filteredData>
+            <beamformedData>false</beamformedData>
+            <coherentStokesData>false</coherentStokesData>
+            <incoherentStokesData>false</incoherentStokesData>
+            <antenna>ANTENNA SETTING</antenna>
+            <clock mode="200 MHz"/>
+            <instrumentFilter>INSTRUMENT FILTER MHz</instrumentFilter>
+            <integrationInterval>INTEG INTERVAL</integrationInterval>
+            <channelsPerSubband>256</channelsPerSubband>
+           <pencilBeams>
+                <flyseye>false</flyseye>
+                <pencilBeamList>
+                </pencilBeamList>
+            </pencilBeams>
+            <stokes>
+                <integrateChannels>false</integrateChannels>
+            </stokes>
+            <stationSet>Custom</stationSet>
+            <stations>
+                STATION_LIST
+            </stations>
+            <startTime>STARTTIME</startTime>
+            <endTime>ENDTIME</endTime>
+			<duration>LENGTH</duration>
+        </userSpecification>
+    </lofar:observationAttributes>
+
+    <children>

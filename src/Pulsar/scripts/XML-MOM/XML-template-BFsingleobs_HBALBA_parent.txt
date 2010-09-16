@@ -1,0 +1,52 @@
+<item index="0">
+<lofar:observation>
+    <name>FILL IN OBSERVATION NAME</name>
+    <description>FILL IN DESCRIPTION</description>
+    <currentStatus>
+        <mom2:openedStatus/>
+    </currentStatus>
+    <lofar:observationAttributes>
+        <observationId></observationId>
+        <name>FILL IN OBSERVATION NAME</name>
+        <projectName>PROJECT NAME</projectName>
+        <instrument>Beam Observation</instrument>
+        <userSpecification>
+            <correlatedData>IMAGING</correlatedData>
+            <filteredData>false</filteredData>
+            <beamformedData>false</beamformedData>
+            <coherentStokesData>false</coherentStokesData>
+            <incoherentStokesData>true</incoherentStokesData>
+            <antenna>ANTENNA SETTING</antenna>
+            <clock mode="200 MHz"/>
+            <instrumentFilter>INSTRUMENT FILTER MHz</instrumentFilter>
+            <integrationInterval>1</integrationInterval>
+            <channelsPerSubband>CHANNELS PER SUBBAND</channelsPerSubband>
+            <cnIntegrationSteps>12208</cnIntegrationSteps>
+            <pencilBeams>
+                <flyseye>false</flyseye>
+                <nrPencilRings>0</nrPencilRings>
+                <pencilRingSize>0</pencilRingSize>
+                <pencilBeamList>
+                    <pencilBeam>
+                        <angle1>RA</angle1>
+                        <angle2>DEC</angle2>
+                    </pencilBeam>
+                </pencilBeamList>
+            </pencilBeams>
+            <stokes>
+                <stokesSelection>I</stokesSelection>
+                <integrateChannels>false</integrateChannels>
+                <integrationSteps>INTEG STEPS</integrationSteps>
+            </stokes>
+            <stationSet>Custom</stationSet>
+            <stations>
+                STATION_LIST
+            </stations>
+			<duration>LENGTH</duration>
+			<timeFrame>UT</timeFrame>
+            <startTime>STARTTIME</startTime>
+            <endTime>ENDTIME</endTime>
+        </userSpecification>
+    </lofar:observationAttributes>
+
+    <children>

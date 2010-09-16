@@ -1,0 +1,35 @@
+        <item index="BEAM NUMBER">
+            <lofar:measurement xsi:type="lofar:UVMeasurementType">
+                <name>FILL IN OBSERVATION NAME</name>
+                <description>FILL IN DESCRIPTION</description>
+
+                <currentStatus>
+                    <mom2:openedStatus/>
+                </currentStatus>
+                <lofar:uvMeasurementAttributes>
+                    <ra>RDEG</ra>
+                    <dec>DDEG</dec>
+                    <equinox>J2000</equinox>
+                    <duration>LENGTH</duration>
+                    <startTime>STARTTIME</startTime>
+                    <endTime>ENDTIME</endTime>
+                    <centralFrequency unit="MHz">140.13671875</centralFrequency>
+                    <bandWidth unit="MHz">48.2421875</bandWidth>
+                    <subbands>SUBBANDS</subbands>
+                    <measurementType>Target</measurementType>
+                    <specification>
+                        <targetName>PULSAR</targetName>
+                        <ra>RDEG</ra>
+                        <dec>DDEG</dec>
+                        <equinox>J2000</equinox>
+                        <duration>LENGTH</duration>
+                        <subbandsSpecification>
+                            <bandWidth unit="MHz">48</bandWidth>
+                            <centralFrequency unit="MHz">140</centralFrequency>
+                            <contiguous>true</contiguous>
+                            <subbands>SUBBANDS</subbands>
+                        </subbandsSpecification>
+                    </specification>
+                </lofar:uvMeasurementAttributes>
+            </lofar:measurement>
+        </item>
