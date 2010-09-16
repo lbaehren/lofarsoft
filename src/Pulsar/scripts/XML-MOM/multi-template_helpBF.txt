@@ -1,0 +1,155 @@
+
+Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]] 
+       -in observation_list_file -inswitch BF -intype source_or_position 
+       -out template_output_file -project project_name [-st stations_list]   
+       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] 
+       [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] 
+       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [-multi] 
+       [-IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] 
+       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] 
+
+        For help on Imaging input format and options, use '-help IM' switch
+
+      This script is run using several different methodologies and input file options.
+      Listed first are the types of file formats allowed as input, followed by an 
+      explanation of all the input argument options.
+        
+      Input File Options (Single Beam): 
+      1) Example input file with maximum number of items specified:
+
+         # pulsar  antenna chan_per_subs integ_steps    start-time       duration stations                                 subbands
+         B1133+16   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                    200..220
+         B1133+16   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007              55..200
+         B1133+16   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..220
+         B1133+16   LBA        16            16       2010-07-22T15:27:30    10   CS001,CS002,CS003,CS006,CS007              77..220
+         B1133+16   LBA        64             4       2010-07-22T15:39:00    10   CS001,CS002,CS003,CS004,CS006,CS007        44..189
+         B1508+55   HBA        16            64       2010-07-22T16:55:00    60   CS001,CS005,CS006,CS007                    180..301
+         
+      2) Example input file with maximum number of items specified without subbands:
+
+         # pulsar  antenna chan_per_subs integ_steps    start-time       duration stations                                
+         B1133+16   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                  
+         B1133+16   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007             
+         B1133+16   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         B1133+16   LBA        16            16       2010-07-22T15:27:30    10   CS001,CS002,CS003,CS006,CS007            
+         B1133+16   LBA        64             4       2010-07-22T15:39:00    10   CS001,CS002,CS003,CS004,CS006,CS007      
+         B1508+55   HBA        16            64       2010-07-22T16:55:00    60   CS001,CS005,CS006,CS007                  
+         
+      3) Example input file 4 column input
+
+         # pulsar  antenna chan_per_subs integ_steps                                   
+         B1133+16   HBA        16            16                         
+         B1133+16   LBA        64             4                   
+         B1133+16   LBA        64            16            
+         B1508+55   HBA        16            64                         
+         
+
+      4) Example input file 2 column input
+
+         # pulsar  antenna                                   
+         B1133+16   HBA                           
+         B1133+16   LBA                     
+         B1133+16   LBA               
+         B1508+55   HBA                            
+         
+      5) Example input file 1 column input
+
+         # pulsar                                     
+         B1133+16                         
+         B1133+16                    
+         B1133+16               
+         B1508+55                        
+
+      Input File Options (Miltiple Beams): 
+         Multiple Beams are designated by the ";" separator on the same input line.  Any of the 
+         above 5 input file column options can be used for multiple beam designation.  You can 
+         mix single and multiple beams within one input file.
+         
+         For multiple beams, the first beam gets the primary settings for the observation, either
+         using the columns in the input file or the command line arguments.  The only items which
+         change for multiple beams are the Pulsar-Name and (optionally the subband-range).
+         
+      1) Example input file with maximum number of items specified; line 2 and 3 contain multiple beams:
+
+         # pulsar  antenna chan_per_subs integ_steps    start-time       duration stations                                 subbands   ;  BeamN-pulsar BeamN-subbands
+         B1133+16   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                    200..220
+         B1133+16   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007              55..200  ;  B1133+16   66..251
+         B1133+16   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..220 ;  B1133+16   66..251  ; B1919+55  77..279
+         
+      2) Example input file with maximum number of items specified w/o subbands; line 2 and 3 contain multiple beams:
+
+         # pulsar  antenna chan_per_subs integ_steps    start-time       duration stations                                   ;  BeamN-pulsar 
+         B1133+16   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                    
+         B1133+16   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007              ;  B1133+25  
+         B1133+16   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007  ;  B1144+45  ; B1919+55 
+
+
+      3) Example input file 4 column input; line 2 and 3 contain multiple beams:
+
+         # pulsar  antenna chan_per_subs integ_steps                                   
+         B1133+16   HBA        16            16                         
+         B1133+16   LBA        64             4        ;   B1133+25         
+         B1133+16   LBA        64            16        ;   B1144+45   ; B1919+55
+         B1508+55   HBA        16            64                         
+         
+
+      4) Example input file 2 column input; line 1 and 2 contain multiple beams:
+
+         # pulsar  antenna                                   
+         B1133+16   HBA   ;   B1133+25                        
+         B1133+16   LBA   ;   B1144+45   ; B1919+55  ; B1755+19                  
+         B1133+16   LBA               
+         B1508+55   HBA                            
+         
+      5) Example input file 1 column input; line 1 and 4 contain multiple beams:
+
+         # pulsar                                     
+         B1133+16     ;   B1144+45   ; B1919+55  ; B1755+19                     
+         B1133+16                    
+         B1133+16               
+         B1508+55     ;   B1144+45   ; B1755+19                    
+
+
+           
+         REQUIRED Input Parameters:
+         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
+         -inswitch BF_or_IM   ==>  Switch between BF and IMAGING 
+         -intype source_or_position ==> Input file contains "source"-based or "position"-based input
+         -project project_name   ==> Name of the MOM project (usually "Pulsars" or "MSSS")
+         -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) 
+         
+         
+         OPTIONAL parameters (generally depend on the type of input file column format):
+         [[-multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.
+         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
+         [[-antenna HBA_or_LBA]] ==> The antenna name: HBA or LBA (default = HBA) 
+         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') 
+         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') 
+         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16) 
+         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16) 
+         [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) 
+         [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) 
+         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
+         [[-IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One (default), Dual, Joined)
+         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
+         
+
+         Example runs:
+         > multi-templatesNbeams.sh -in obs_list_July22_b.txt -inswitch BF -intype source -project Pulsars -out output.xml 
+         > multi-templatesNbeams -in obs_list_July22_b.txt -intype source -project Pulsars -out output.xml -subsLBA 10..45 -IM 6,7
+         > multi-templatesNbeams.sh -in obs_list_July22_b.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001
+         > multi-templatesNbeams.sh -in obs_list_July22_b.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 
+         > multi-templatesNbeams.sh -in obs_list_July22_b.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 -IM 2,4,6
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 -multi
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -IM ALL -multi
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..401  
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -project LEA032 -IM ALL 
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -project LEA032 -IM 1,2
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -chansubsHBA 64 -integstepsHBA 4  -multi
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  
+         
+

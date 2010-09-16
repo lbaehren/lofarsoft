@@ -1,0 +1,143 @@
+
+usage : /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in observation_list_file -intype source_or_position -out template_output_file -project project_name [-start obs_start] [-time duration] [-st stations_list] [[-lst|-LST]] [[-subsHBA subband_range]] [[-subsLBA subband_range]] [[-gap duration]] [[-antenna antenna_setup]] [[-interation integration_interval]] [[-modeHBA antenna_submode]] [[-modeLBA antenna_submode]]
+
+      This script is run using several different methodologies which are explained below: 
+         
+      1) The input file contains all the information: object-name/position  antenna  obs-start  duration  station-list 
+         In this case, you only need to specify the input file and type, output file and the project name.:
+         
+         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
+         -intype source_or_position ==> The input file type is either 'source' based or 'position' based 
+         -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) 
+         -project project_name  ==> The name of the project exactly as it appears in MOM (including capital letters) 
+         
+         Optionally you can also specify the following parameters:
+         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
+         [[-subsHBA subband_range]] ==> The HBA subband range (default = '77..324' for HBAHigh and 54..301 for HBALow) 
+         [[-subsLBA subband_range]] ==> The LBA subband range (default = '154..401') 
+         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) 
+         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)
+         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
+         
+
+         Example Type I input file using source names:
+         # object     antenna           start-time           duration-mins     stations
+         3C14            HBAHigh        2010-07-22T14:50:00     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         3C14            LBA            2010-07-22T15:03:00     20           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         3C99            HBALow         2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         3C83.1          LBA            2010-07-22T15:27:30     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         3C99            LBA            2010-07-22T15:39:00    120           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         3C99            HBAHigh        2010-07-22T15:52:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         3C99            HBALow         2010-07-22T16:55:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         
+         Example runs:
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA016
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA017 -subsLBA 10..45
+         
+         Example Type I input file using ra dec positions:
+         # ra     dec           antenna           start-time           duration-mins     stations
+         13.98   +68.487         HBAHigh        2010-07-22T14:50:00     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         13.98   +68.487         LBA            2010-07-22T15:03:00     20           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         70.498  +1.728          HBALow         2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         208.074 +31.409         LBA            2010-07-22T15:27:30     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         217.17   -1.623         LBA            2010-07-22T15:39:00    120           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         217.17   -1.623         HBAHigh        2010-07-22T15:52:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         217.17   -1.623         HBALow         2010-07-22T16:55:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         
+         Example runs:
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_pos.txt -intype position -out output.xml -project LEA016
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_pos.txt -intype position -out output.xml -project LEA017 -subsLBA 10..45 -subsHBA 200..245
+         
+
+      2) The input file contains just: object-name/position  antenna 
+         You must specify the input file name and type, output file name and project name. 
+         In this case, you MUST also specify the following parameters on the command line as input...
+         Note, these parameters are used for the entire list;  start time of subsequent observations
+         is calculated based on observation duration and gap between observations.
+         
+         [-start obs_start] ==> The start date/time for 1st source in the list of observations; note format; supercede's infile values (i.e. 2010-07-22T14:50:00) 
+         [-time duration] ==> The duration of ALL observations in the list, in minutes; supercede's infile values (i.e. 60) 
+         [-stations stations_list] ==> The list of LOFAR stations, supercede's infile values and used for all obs (i.e. 'CS001,CS002') 
+         
+         Optionally you can also specify the following parameters:
+         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
+         [[-subsHBA subband_range]] ==> The HBA subband range (default = '77..324' for HBAHigh and 54..301 for HBALow) 
+         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') 
+         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
+         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) 
+         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)
+         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
+         
+         Example Type II input file using source names:
+         # object       antenna
+         3C99           LBA 
+         3C99           HBALow 
+         3C327          HBALow 
+         
+         Example runs:
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA033 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsLBA 10..45  
+         
+         Example Type II input file using ra dec positions:
+         # ra     dec           antenna
+         13.98   +68.487         LBA 
+         70.498  +1.728          HBALow 
+         217.17   -1.623         HBALow 
+         
+         Example runs:
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA033 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsLBA 10..45  
+         
+
+      3) The input file contains just: object-name/position. 
+         You must specify the input file name and type, output file name and project name. 
+         In this case, you MUST also specify the following parameters on the command line as input...
+         Note, these parameters are used for the entire list;  start time of subsequent observations
+         is calculated based on observation duration and gap between observations.
+         Only one ANTENNA is used for the entire list of input OBJECTs (default = HBAHigh). 
+         
+
+         
+         [-start obs_start] ==> The start date/time for 1st source in the list of observations; note format; supercede's infile values (i.e. 2010-07-22T14:50:00) 
+         [-time duration] ==> The duration of ALL observations in the list, in minutes; supercede's infile values (i.e. 60) 
+         [-stations stations_list] ==> The list of LOFAR stations, supercede's infile values and used for all obs (i.e. 'CS001,CS002') 
+         
+         Optionally you can also specify the following parameters:
+         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
+         [[-project project_name]]  ==> The name of the MOM project 'OBJECTs' or 'LEA032' (default = OBJECTs)
+         [[-antenna antenna_setup]] ==> The antenna name: HBAHigh, HBALow or LBA (default = HBAHigh) 
+         [[-subsHBA subband_range]] ==> The HBA subband range (default = '77..324' for HBAHigh and 54..301 for HBALow) 
+         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') 
+         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
+         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) 
+         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)
+         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
+         
+
+         Example Type III input file using source names:
+         # object      
+         3C99   
+         3C327  
+         372.1  
+         
+         Example runs:
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 -antenna HBAHigh
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -antenna HBALow
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -antenna LBA
+         
+         Example Type II input file using ra dec positions:
+         # ra     dec        
+         13.98   +68.487     
+         70.498  +1.728      
+         217.17   -1.623     
+         
+         Example runs:
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -antenna HBALow
+         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -antenna LBA 
+         
+
