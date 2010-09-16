@@ -15,7 +15,7 @@
             <filteredData>false</filteredData>
             <beamformedData>false</beamformedData>
             <coherentStokesData>false</coherentStokesData>
-            <incoherentStokesData>false</incoherentStokesData>
+            <incoherentStokesData>INCOHERENTSTOKES</incoherentStokesData>
             <antenna>ANTENNA SETTING</antenna>
             <clock mode="200 MHz"/>
             <instrumentFilter>INSTRUMENT FILTER MHz</instrumentFilter>

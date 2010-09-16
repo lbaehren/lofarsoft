@@ -4,8 +4,8 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        -out template_output_file -project project_name [-st stations_list]   
        [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] 
        [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] 
-       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [-multi] 
-       [-IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] 
+       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] 
+       [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] 
        [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] 
 
         For help on Imaging input format and options, use '-help IM' switch
@@ -114,13 +114,13 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
          REQUIRED Input Parameters:
          -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
          -inswitch BF_or_IM   ==>  Switch between BF and IMAGING 
-         -intype source_or_position ==> Input file contains "source"-based or "position"-based input
-         -project project_name   ==> Name of the MOM project (usually "Pulsars" or "MSSS")
+         -intype source_or_position ==> Input file contains 'source'-based or 'position'-based input
+         -project project_name   ==> Name of the MOM project (usually 'Pulsars' or 'MSSS')
          -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) 
          
          
          OPTIONAL parameters (generally depend on the type of input file column format):
-         [[-multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.
+         [[+multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.
          [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
          [[-antenna HBA_or_LBA]] ==> The antenna name: HBA or LBA (default = HBA) 
          [[-subsHBA subband_range]] ==> The subband range (default = '200..447') 
@@ -130,26 +130,26 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
          [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) 
          [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) 
          [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
-         [[-IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+         [[+IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
          [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One (default), Dual, Joined)
          [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
          
 
          Example runs:
          > multi-templatesNbeams.sh -in obs_list_July22_b.txt -inswitch BF -intype source -project Pulsars -out output.xml 
-         > multi-templatesNbeams -in obs_list_July22_b.txt -intype source -project Pulsars -out output.xml -subsLBA 10..45 -IM 6,7
+         > multi-templatesNbeams -in obs_list_July22_b.txt -intype source -project Pulsars -out output.xml -subsLBA 10..45 +IM 6,7
          > multi-templatesNbeams.sh -in obs_list_July22_b.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001
          > multi-templatesNbeams.sh -in obs_list_July22_b.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 
-         > multi-templatesNbeams.sh -in obs_list_July22_b.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 -IM 2,4,6
-         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 -multi
-         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -IM ALL -multi
+         > multi-templatesNbeams.sh -in obs_list_July22_b.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 +IM 2,4,6
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 +multi
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +IM ALL +multi
          > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 
          > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..401  
-         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -project LEA032 -IM ALL 
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -project LEA032 +IM ALL 
          > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
-         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -project LEA032 -IM 1,2
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -project LEA032 +IM 1,2
          > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 
-         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -chansubsHBA 64 -integstepsHBA 4  -multi
+         > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -chansubsHBA 64 -integstepsHBA 4  +multi
          > multi-templatesNbeams.sh -in obs_single_col.txt -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  
          
 

@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/ksh -x
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -20,16 +20,29 @@ USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       [-IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
 "       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] \n"
 
-USAGE3="\n        For help on Imaging input format and options, use '-help IM' switch\n"\
+USAGE3="\n         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
+"         -inswitch BF_or_IM   ==>  Switch between BF and IMAGING \n"\
+"         -intype source_or_position ==> Input file contains 'source'-based or 'position'-based input\n"\
+"         -project project_name   ==> Name of the MOM project (usually 'Pulsars' or 'MSSS')\n"\
+"         -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) \n"\         
+"         [[+multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.\n"\
+"         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
+"         [[-antenna HBA_or_LBA]] ==> The antenna name: HBA or LBA (default = HBA) \n"\
+"         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
+"         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
+"         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16) \n"\
+"         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16) \n"\
+"         [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) \n"\
+"         [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) \n"\
+"         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
+"         [[+IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[+BF list_or_ALL]] ==> Turn on BF with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One (default), Dual, Joined)\n"\
+"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)\n"\        
+
+USAGE4="\n        For help on Imaging input format and options, use '-help IM' switch\n"\
 "        For help on BF (BF+IM) input format and options, use '-help BF' switch\n"
 
-if [ $# -lt 8 ]                    
-then
-   print "$USAGE1" 
-   print "$USAGE2" 
-   print "$USAGE3" 
-   exit 1
-fi
 
 ##################################################
 # Input parametes and switches (set some defaults)
@@ -78,6 +91,8 @@ INTEGRATION=3
 user_integration=0
 IM=0
 IM_LIST=""
+BF=0
+BF_LIST=""
 modeHBA="Dual"
 user_modeHBA=0
 modeLBA="Outer"
@@ -108,21 +123,32 @@ do
      -integstepsLBA)     STEPS_LBA=$2; user_steps_lba=1; shift;;
      -stations)          STATIONS=$2; user_stations=1; shift;;
      -project)           PROJECT=$2; user_project=1; shift;;
-     -IM)                IM=1; IM_LIST=$2; shift;;
+     +IM)                IM=1; IM_LIST=$2; shift;;
+     +BF)                BF=1; BF_LIST=$2; shift;;
      -integration)       INTEGRATION=$2; user_integration=1; shift;;
      -help)              HELP=$2; user_help=1; shift;;
      -lst|-LST)          LST=1;;
-     -multi)             MULTI=1; user_multi=1;;
+     +multi)             MULTI=1; user_multi=1;;
        -*)
             print >&2 \
             "$USAGE1" \
             "$USAGE2" \
-            "$USAGE3" 
+            "$USAGE3" \
+            "$USAGE4" 
             exit 1;;
         *)  break;;     
     esac
     shift
 done
+
+#if [ $# -lt 8 ]                    
+#then
+#   print "$USAGE1" 
+#   print "$USAGE2" 
+#   print "$USAGE3" 
+#   print "$USAGE4" 
+#   exit 1
+#fi
 
 ##################################################
 # If -help was requested, print the help and exit
@@ -340,13 +366,19 @@ then
 	      exit 1
 	   elif (( $user_stations == 0 )) 
 	   then
-	      echo "ERROR: $ncols column input file requires '-st stations_list' as input"
+	      echo "ERROR: $ncols column input file requires '-stations stations_list' as input"
 	      exit 1
 	   fi
 	fi
 	
 	if (( $ncols == 1 )) 
 	then
+       # set the default antenna to HBA for BF when user has not specified one
+	   if [[ $user_antenna == 0 ]]
+	   then
+	       ANTENNA="HBA"
+       fi
+
 	   # check that the user has specified optional params
 	   if [[ $ANTENNA == "HBA" ]]
 	   then
@@ -483,16 +515,25 @@ fi
 # Set up the header, middle and beam sections depending on IM/BF
 num_lines=0
 num_lines=`grep -v "#" $infile | wc -l | awk '{print $1}'`
-if [ $INSWITCH == 1 ]
-then
-   catalog=$LOFARSOFT/release/share/pulsar/data/PSR_catalog.txt
-else
-   catalog=$LOFARSOFT/release/share/pulsar/data/3cCatalog_RADEC.txt
-fi
+#if [ $INSWITCH == 1 ]
+#then
+#   catalog=$LOFARSOFT/release/share/pulsar/data/PSR_catalog.txt
+#else
+#   catalog=$LOFARSOFT/release/share/pulsar/data/3cCatalog_RADEC.txt
+#fi
+catalog=$LOFARSOFT/release/share/pulsar/data/Combined_3C_PSR_catalog.txt
 echo "Working on $infile with $num_lines sources"
 if (( $INTYPE == 1 ))
 then
-   echo "Using source catalog file $catalog"
+   if [ ! -f $catalog ]
+   then
+      echo "ERROR: Unable to find combined catalog file $catalog."
+      echo "       Make sure you have run 'make install' in \$LOFARSOFT/build/pulsar"
+      echo "       Or, use the Daily Build 'LUS' package."
+      exit 1
+   else
+      echo "Using source catalog file $catalog"
+   fi
 fi
 echo "Writing to output file $outfile"
 
@@ -515,6 +556,28 @@ then
       # change the commas to spaces for the row numbers which need Image data
       tmp=`echo $IM_LIST | sed 's/,/ /g'`
       IM_LIST=$tmp
+   fi
+fi
+
+##################################################
+# For IM processing, check if +BF was turned on;  create the bf number list
+if [ $BF == 1 ] && [ $INSWITCH == 2 ]
+then
+   if [ $BF_LIST == "ALL" ]  || [ $BF_LIST == "all" ]
+   then
+      # create the full range of row numbers for the Image data
+      tmp=""
+      ii=1
+      while (( $ii <= $num_lines ))
+      do
+         tmp="$tmp $ii"
+         ((ii += 1))
+      done
+      BF_LIST=$tmp
+   else 
+      # change the commas to spaces for the row numbers which need Image data
+      tmp=`echo $BF_LIST | sed 's/,/ /g'`
+      BF_LIST=$tmp
    fi
 fi
 
@@ -800,7 +863,7 @@ do
 				elif [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBAHigh" ] && [ $INSWITCH == 2 ] && [ $SUBBANDS_SET == 0 ]
 				then
 				    SUBBANDS="77..324"
-		        elif ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == HBA ] && [ $INSWITCH == 1 ] ) || ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == HBAHigh ] && [ $INSWITCH == 2 ] )
+		        elif ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBA" ] && [ $INSWITCH == 1 ] && [ $SUBBANDS_SET == 0 ] ) || ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBAHigh" ] && [ $INSWITCH == 2 ] && [ $SUBBANDS_SET == 0 ] )
 		        then
 		            needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
 		            if [ $needs_expand != "" ]
@@ -812,7 +875,7 @@ do
 		        elif [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ] && [ $SUBBANDS_SET == 0 ]
 		        then
 				    SUBBANDS="54..301"
-		        elif [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ]
+		        elif [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ] && [ $SUBBANDS_SET == 0 ]
 		        then
 				    needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
 		            if [ $needs_expand != "" ]
@@ -835,6 +898,8 @@ do
 				    fi
 			    fi   
 		    fi # end if (( $beam < 1 ))
+		    
+		    # If multi-beam obs, split up subbands by N beams (TBD)
 		    
 		    #make sure station list has all capital letters
 		    STATIONS=`echo $STATIONS | sed 's/a-z/A-Z/g'`                
@@ -875,8 +940,8 @@ do
 	        # Get the RA an DEG and convert to radians
 	        if (( $INTYPE == 1 )) && (( $INSWITCH == 1 ))
 	        then
-			    RA_DEG=`grep -i $OBJECT $catalog | awk '{print $6}'`
-			    DEC_DEG=`grep -i $OBJECT $catalog | awk '{print $7}'`
+			    RA_DEG=`grep -i $OBJECT $catalog | awk '{print $1}'`
+			    DEC_DEG=`grep -i $OBJECT $catalog | awk '{print $2}'`
 	        elif (( $INTYPE == 1 )) && (( $INSWITCH == 2 ))
 	        then
 		        RA_DEG=`grep -i "$OBJECT " $catalog | awk '{print $1}'`
@@ -1068,6 +1133,13 @@ do
 			    echo "ERROR: integration time of $INTEGRATION is invalid; must be >= 1."
 			    exit 1
 			fi
+
+	       	if [ $MULTI == 0 ]
+	        then
+	           beam_counter=0
+	        else
+	           ((beam_counter = $beam - 1))
+	        fi
 			
 	        ##################################################
 			# Print the basic information about input parameters to STDOUT at start 
@@ -1078,17 +1150,21 @@ do
 			   if [ $nbeams == 1 ]
 			   then
 			      OBJECT_LONG="$OBJECT"
+			      OBJECT_LONG_BEAM="$OBJECT"
 			   else
 			      OBJECT_LONG="$OBJECT Multi-Beam"
+			      OBJECT_LONG_BEAM="$OBJECT Multi-Beam #$beam"
 			   fi
 			else
 			   if [ $nbeams == 1 ]
 			   then
 			      OBJECT="Pos $RA_DEG $DEC_DEG"
 			      OBJECT_LONG="Pos $RA_DEG $DEC_DEG ($ANTENNA)"
+			      OBJECT_LONG_BEAM="Pos $RA_DEG $DEC_DEG ($ANTENNA)"
 			   else
 			      OBJECT="Pos $RA_DEG $DEC_DEG"
 			      OBJECT_LONG="Pos $RA_DEG $DEC_DEG ($ANTENNA) Multi-Beam"
+			      OBJECT_LONG_BEAM="Pos $RA_DEG $DEC_DEG ($ANTENNA) Multi-Beam #$beam"
 			   fi
 			fi
 			echo "RA Pointing = $RA_DEG deg"
@@ -1127,6 +1203,19 @@ do
 			      fi
 			   done
 			fi
+
+			BF_TF=false
+			if (( $BF == 1 )) 
+			then
+			   for jj in $BF_LIST
+			   do 
+			      if (( $counter == $jj ))
+			      then
+			         echo "Beam-Formed turned on (TRUE) for this Imaging Observation"
+			         BF_TF=true
+			      fi
+			   done
+			fi
 	
 			#write the observation section per OBJECT in the list
 	
@@ -1146,31 +1235,26 @@ do
 	        ##################################################
 	        # Create the XML per beam
 	       
-	       	if [ $MULTI == 0 ]
-	        then
-	           beam_counter=0
-	        else
-	           ((beam_counter = $beam - 1))
-	        fi
-
-	        if [ $INSWITCH == 1 ]
+	        if [ $INSWITCH == 1 ] && [ $skip = 0 ]
 	        then 
 	           if (( $beam_counter == 0 ))
 	           then
 	              sed -e "s/FILL IN OBSERVATION NAME/Obs $PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $middle >> $outfile
 	           fi
-	        else
+	        elif [ $INSWITCH == 2 ]  && [ $skip = 0 ]
+	        then
 	           if (( $beam_counter == 0 ))
 	           then
-	              sed -e "s/FILL IN OBSERVATION NAME/$OBJECT/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTEGRATION/g" -e "s/TARGET NAME/$OBJECT/g" $middle >> $outfile
+	              sed -e "s/FILL IN OBSERVATION NAME/$OBJECT/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTEGRATION/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/INCOHERENTSTOKES/$BF_TF/g" $middle >> $outfile
 	           fi
 	        fi 
 		        
-	        if [ $INSWITCH == 1 ]
+	        if [ $INSWITCH == 1 ] && [ $skip = 0 ]
 	        then 
-	           sed -e "s/FILL IN OBSERVATION NAME/Obs $PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $beam_xml >> $outfile
-	        else
-	           sed -e "s/FILL IN OBSERVATION NAME/$OBJECT/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTEGRATION/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/BEAM NUMBER/$beam_counter/g" $beam_xml >> $outfile
+	           sed -e "s/FILL IN OBSERVATION NAME/Obs $PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $beam_xml >> $outfile
+	        elif [ $INSWITCH == 2 ] && [ $skip = 0 ]
+	        then
+	           sed -e "s/FILL IN OBSERVATION NAME/$OBJECT/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTEGRATION/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/BEAM NUMBER/$beam_counter/g" $beam_xml >> $outfile
 	        fi
 	        	        
 	        echo "Finished working on Beam #$beam"
