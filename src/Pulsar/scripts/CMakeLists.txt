@@ -12,8 +12,8 @@ add_custom_target (scripts_install
   COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/bin/pulp.sh
   COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/bin/make_subs_SAS_Ncore_Mmodes.sh ${CMAKE_INSTALL_PREFIX}/bin/pulp.sh
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/lofar_default.inf ${PULSAR_SOURCE_DIR}/scripts/psr_cats.txt ${CMAKE_INSTALL_PREFIX}/data/
-  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/create_obs_template.sh ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/multi-templates.sh ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/multi-templatesIM.sh ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/xml_pipeline_kickoff.sh ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/expand_sblist.py ${CMAKE_INSTALL_PREFIX}/bin/
-  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/XML-template-*txt ${CMAKE_INSTALL_PREFIX}/data/
+  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/create_obs_template.sh ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/multi-templates.sh ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/multi-templatesIM.sh ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/multi-templatesNbeams.sh ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/xml_pipeline_kickoff.sh ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/expand_sblist.py ${CMAKE_INSTALL_PREFIX}/bin/
+  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/XML-template-*txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/multi-template_help*txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/PSR_catalog.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/3cCatalog_RADEC.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND chmod 755 ${CMAKE_INSTALL_PREFIX}/bin/*.py ${CMAKE_INSTALL_PREFIX}/bin/*.sh
