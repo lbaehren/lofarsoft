@@ -116,14 +116,15 @@ def getTriggerIndicesFromTime(ddate, dDates, coinctime=1e-6):
     """
     return np.where(np.logical_and(dDates>(ddate-coinctime),dDates<(ddate+coinctime)))[0]
 
-def matchTriggerfileToTime(ddate, filename, coinctime=1e-5):
+def matchTriggerfileToTime(ddate, triggerfile, coinctime=1e-5):
     """
     Find the triggers from a triggerfile which arrived within  "coinctime" of
     "ddate". Returns a tuple of 1-d numpy arrays: (antennaIDs, dDates, difftimes, dates, samplenumers)
 
-    *ddate*     Timestamp around which to find the triggers
-    *filename*  Name of the TBBDriver-dumpfile to be read in
-    *coinctime* Maximum time-difference to search the triggers in
+    *ddate*       Timestamp around which to find the triggers
+    *triggerfile* Either the name of the TBBDriver-dumpfile to be read in or a tuple with 
+                  the data from a triggerfile (as read in by "readtriggers()")
+    *coinctime*   Maximum time-difference to search the triggers in
 
     matchTriggerfileToTime((1278508300.6189337+0.00033024),'/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs005.dat')
 
@@ -131,7 +132,10 @@ def matchTriggerfileToTime(ddate, filename, coinctime=1e-5):
     readtriggers: File: /mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs005.dat has: 539405 lines
 
     """
-    (allIDs, allDDates, alldates, allSNs) = readtriggers(filename)
+    if isinstance(triggerfile,str):
+        (allIDs, allDDates, alldates, allSNs) = readtriggers(triggerfile)
+    else:
+        (allIDs, allDDates, alldates, allSNs) = triggerfile
     indices = getTriggerIndicesFromTime(ddate, allDDates, coinctime)
     if (len(indices)>0):
       selectedIDs = allIDs[indices]
