@@ -409,7 +409,7 @@ then
 
 else ###### Imaging column check
 
-	if (( (( $ncols == 6 )) && (( $INTYPE == 1 )) )) || (( (( $ncols == 7 )) && (( $INTYPE == 2 )) ))
+	if  (( $ncols >= 5 )) 
 	then
 	   if (( $user_subbands_hba != 0 ))
 	   then
@@ -423,7 +423,7 @@ else ###### Imaging column check
 	   fi
     fi
 
-	if (( $ncols == 6 )) || (( $ncols == 5 ))
+	if (( $ncols >= 5 )) 
 	then
 	   if (( $user_gap != 0 ))
 	   then
@@ -796,7 +796,7 @@ do
 						      exit 1
 						   fi
 			           fi
-				       if (( $ncols == 5 ))
+				       if (( $ncols >= 5 ))
 				       then
 					        START=`echo $line | awk '{print $3}'`
 					        TIME=`echo $line | awk '{print $4}'`
@@ -814,9 +814,9 @@ do
 						       LST_DIFF=0
 						    fi
 			           fi
-				       if (( $ncols == 5 ))
+				       if (( $ncols == 6 ))
 				       then
-					        SUBBANDS=`echo $line | awk '{print $5}'`
+					        SUBBANDS=`echo $line | awk '{print $6}'`
 					        SUBBANDS_SET=1
 		               fi
 			        # when input table contains ra and dec values
@@ -842,7 +842,7 @@ do
 						      exit 1
 						   fi
 			           fi
-				       if (( $ncols == 6 ))
+				       if (( $ncols >= 6 ))
 				       then
 					        START=`echo $line | awk '{print $4}'`
 					        TIME=`echo $line | awk '{print $5}'`
