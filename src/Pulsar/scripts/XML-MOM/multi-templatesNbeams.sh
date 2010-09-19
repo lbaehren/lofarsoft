@@ -1,4 +1,4 @@
-#!/bin/ksh -x
+#!/bin/ksh 
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -20,15 +20,16 @@ USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       [-IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
 "       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] \n"
 
-USAGE3="\n         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
+USAGE3="Options: \n"\
+"         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
 "         -inswitch BF_or_IM   ==>  Switch between 'BF' (Beam-Formed) or 'IM' (IMAGING) type of default obs \n"\
 "         -intype source_or_position ==> Input file contains 'source'-based or 'position'-based input\n"\
 "         -project project_name   ==> Name of the MOM project (usually 'Pulsars' or 'MSSS')\n"\
-"         -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) \n"\         
-"         [[+multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.\n"\
+"         -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) \n"         
+USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.\n"\
 "         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
-"         [[-stations stations_list]] ==> Comma separated list of stations: (i.e. CS001,CS002,RS405) \n"\
-"         [[-antenna HBA_or_LBA]] ==> The antenna name: HBA, HBAHigh, HBALow or LBA (default = HBA (BF); HBAHigh (IM)) \n"\
+"         [[-stations stations_list]] ==> Comma separated list of stations (i.e. CS001,CS002,RS405) \n"\
+"         [[-antenna HBA_or_LBA]] ==> The antenna name - HBA, HBAHigh, HBALow or LBA (default = HBA (BF); HBAHigh (IM)) \n"\
 "         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
 "         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
 "         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16) \n"\
@@ -39,11 +40,21 @@ USAGE3="\n         -in observation_list_file ==> Specify the ascii file with obs
 "         [[+IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         [[+BF list_or_ALL]] ==> Turn on BF with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One (default), Dual, Joined)\n"\
-"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)\n"\        
+"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, Sparse Even, Sparse Odd, X, Y)\n"
 
-USAGE4="\n        For help on Imaging input format and options, use '-help IM' switch\n"\
-"        For help on BF (BF+IM) input format and options, use '-help BF' switch\n"
+USAGE5="For help on Imaging input format and options, use '-help IM' switch\n"\
+"For help on BF (BF+IM) input format and options, use '-help BF' switch\n"
 
+
+if [ $# -lt 2 ]                    
+then
+   print "$USAGE1" 
+   print "$USAGE2" 
+   print "$USAGE3" 
+   print "$USAGE4" 
+   print "$USAGE5" 
+   exit 1
+fi
 
 ##################################################
 # Input parametes and switches (set some defaults)
@@ -135,21 +146,13 @@ do
             "$USAGE1" \
             "$USAGE2" \
             "$USAGE3" \
-            "$USAGE4" 
+            "$USAGE4" \
+            "$USAGE5" 
             exit 1;;
         *)  break;;     
     esac
     shift
 done
-
-#if [ $# -lt 8 ]                    
-#then
-#   print "$USAGE1" 
-#   print "$USAGE2" 
-#   print "$USAGE3" 
-#   print "$USAGE4" 
-#   exit 1
-#fi
 
 ##################################################
 # If -help was requested, print the help and exit
@@ -167,6 +170,17 @@ then
    fi
    exit 1
 fi
+
+
+#if [ $# -lt 8 ]                    
+#then
+#   print "$USAGE1" 
+#   print "$USAGE2" 
+#   print "$USAGE3" 
+#   print "$USAGE4" 
+#   print "$USAGE5" 
+#   exit 1
+#fi
 
 ##################################################
 # Check required input/output settings;  exit if there are problems.
@@ -652,7 +666,7 @@ do
         while (( $beam <= $nbeams ))
         do 
             beam_str=`echo $line_orig | awk -F";" -v beam=$beam '{print $beam}'`
-            echo "Reading:  $beam_str"
+            echo "Reading input:  $beam_str"
             line=$beam_str
             
             if (( $beam > 1 ))
@@ -1284,8 +1298,11 @@ do
 	        then
 	           sed -e "s/FILL IN OBSERVATION NAME/$OBJECT/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTEGRATION/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/BEAM NUMBER/$beam_counter/g" $beam_xml >> $outfile
 	        fi
-	        	        
-	        echo "Finished working on Beam #$beam"
+	        
+	        if (( $MULTI == 1 ))  && (( $nbeams > 1 ))
+	        then	        
+	           echo "Finished working on Beam #$beam"
+	        fi
 	        ((beam = $beam + 1))
        done # end loop over beams
        
