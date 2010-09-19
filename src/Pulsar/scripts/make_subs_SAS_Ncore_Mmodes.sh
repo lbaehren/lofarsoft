@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.18
+VERSION=1.19
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose]\n\n"\
@@ -819,7 +819,7 @@ do
 	         echo "${STOKES}/RSPA already exist;  deleting contents in order to process all subbands correctly" >> $log
 	         rm -rf ${STOKES}/RSPA/*
 	      else
-		     mkdir ${STOKES}/"RSPA"
+		     mkdir -p ${STOKES}/"RSPA"
 		  fi
 	  else
 		  for jjj in $beams
@@ -830,7 +830,7 @@ do
 	           echo "${STOKES}/$jjj/RSPA already exist;  deleting contents in order to process all subbands correctly" >> $log
 	           rm -rf ${STOKES}/$jjj/RSPA/*
 	        else
-		       mkdir ${STOKES}/$jjj/RSPA
+		       mkdir -p ${STOKES}/$jjj/RSPA
 		    fi
 		  done
 	  fi
