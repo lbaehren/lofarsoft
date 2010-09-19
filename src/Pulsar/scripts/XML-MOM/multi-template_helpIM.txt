@@ -1,143 +1,172 @@
 
-usage : /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in observation_list_file -intype source_or_position -out template_output_file -project project_name [-start obs_start] [-time duration] [-st stations_list] [[-lst|-LST]] [[-subsHBA subband_range]] [[-subsLBA subband_range]] [[-gap duration]] [[-antenna antenna_setup]] [[-interation integration_interval]] [[-modeHBA antenna_submode]] [[-modeLBA antenna_submode]]
+Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help IM]] 
+       -in observation_list_file -inswitch IM -intype source_or_position 
+       -out template_output_file -project project_name [-stations stations_list]   
+       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] 
+       [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] 
+       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode]  
+       [+multi] [+BF list_or_ALL] 
 
-      This script is run using several different methodologies which are explained below: 
+       REQUIRED Input Parameters:
+       -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
+       -inswitch BF_or_IM   ==>  Switch between 'BF' (Beam-Formed) or 'IM' (IMAGING) type of default obs
+       -intype source_or_position ==> Input file contains 'source'-based or 'position'-based input
+       -project project_name   ==> Name of the MOM project (usually 'Pulsars' or 'MSSS')
+       -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) 
          
-      1) The input file contains all the information: object-name/position  antenna  obs-start  duration  station-list 
-         In this case, you only need to specify the input file and type, output file and the project name.:
+       OPTIONAL parameters (generally depend on the type of input file column format):
+       [[+multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.
+       [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
+       [[-stations stations_list]] ==> Comma separated list of stations: (i.e. CS001,CS002,RS405) 
+       [[-antenna HBA_or_LBA]] ==> The antenna name: HBAHigh, HBALow or LBA (default = HBAHigh) 
+       [[-subsHBA subband_range]] ==> The subband range (default = '200..447') 
+       [[-subsLBA subband_range]] ==> The subband range (default = '154..401') 
+       [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
+       [[+BF list_or_ALL]] ==> Turn on Beam-Formed with IM observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)
+       [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
          
-         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
-         -intype source_or_position ==> The input file type is either 'source' based or 'position' based 
-         -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) 
-         -project project_name  ==> The name of the project exactly as it appears in MOM (including capital letters) 
-         
-         Optionally you can also specify the following parameters:
-         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
-         [[-subsHBA subband_range]] ==> The HBA subband range (default = '77..324' for HBAHigh and 54..301 for HBALow) 
-         [[-subsLBA subband_range]] ==> The LBA subband range (default = '154..401') 
-         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) 
-         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)
-         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
-         
+       For help on Beam_formed input format and options, use '-help BF' switch
 
+      This script is run using several different methodologies and input file options.
+      Listed first are the types of file formats allowed as input, followed by an 
+      explanation of all the input argument options.
+        
+      Input File Options (SINGLE BEAM): 
+      1) Example input file with maximum number of items specified:
          Example Type I input file using source names:
-         # object     antenna           start-time           duration-mins     stations
-         3C14            HBAHigh        2010-07-22T14:50:00     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         3C14            LBA            2010-07-22T15:03:00     20           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         3C99            HBALow         2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         3C83.1          LBA            2010-07-22T15:27:30     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         3C99            LBA            2010-07-22T15:39:00    120           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         3C99            HBAHigh        2010-07-22T15:52:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         3C99            HBALow         2010-07-22T16:55:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         
-         Example runs:
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA016
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA017 -subsLBA 10..45
-         
+         # object   antenna     start-time           duration-mins stations                                  subbands
+         3C14       HBAHigh     2010-07-22T14:50:00     10         CS001,CS002,CS003,CS005,CS006,CS007        200..261
+         3C14       LBA         2010-07-22T15:03:00     20         CS001,CS002,CS005,CS006,CS007              230..351
+         3C99       HBALow      2010-07-22T15:15:30     10         CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..447
+         3C83.1     LBA         2010-07-22T15:27:30     60         CS001,CS002,CS006,CS007                    100..159
+         3C99       HBAHigh     2010-07-22T15:52:00     60         CS001,CS003,CS004                          200..401
+          
          Example Type I input file using ra dec positions:
-         # ra     dec           antenna           start-time           duration-mins     stations
-         13.98   +68.487         HBAHigh        2010-07-22T14:50:00     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         13.98   +68.487         LBA            2010-07-22T15:03:00     20           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         70.498  +1.728          HBALow         2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         208.074 +31.409         LBA            2010-07-22T15:27:30     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         217.17   -1.623         LBA            2010-07-22T15:39:00    120           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         217.17   -1.623         HBAHigh        2010-07-22T15:52:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
-         217.17   -1.623         HBALow         2010-07-22T16:55:00     60           CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         # ra     dec       antenna    start-time          duration-mins stations                            subbands
+         13.98   +68.487    HBAHigh    2010-07-22T14:50:00     10        CS005,CS006,CS007                   200..261
+         13.98   +68.487    LBA        2010-07-22T15:03:00     20        CS001,CS006,CS007                   230..351
+         70.498  +1.728     HBALow     2010-07-22T15:15:30     10        CS001,CS002,CS003,CS004             230..351
+         217.17   -1.623    LBA        2010-07-22T15:39:00    120        CS001,CS002,CS003,CS004,CS006,CS007 200..447
+         217.17   -1.623    HBAHigh    2010-07-22T15:52:00     60        CS007                               200..401
          
-         Example runs:
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_pos.txt -intype position -out output.xml -project LEA016
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_pos.txt -intype position -out output.xml -project LEA017 -subsLBA 10..45 -subsHBA 200..245
-         
-
-      2) The input file contains just: object-name/position  antenna 
-         You must specify the input file name and type, output file name and project name. 
-         In this case, you MUST also specify the following parameters on the command line as input...
-         Note, these parameters are used for the entire list;  start time of subsequent observations
-         is calculated based on observation duration and gap between observations.
-         
-         [-start obs_start] ==> The start date/time for 1st source in the list of observations; note format; supercede's infile values (i.e. 2010-07-22T14:50:00) 
-         [-time duration] ==> The duration of ALL observations in the list, in minutes; supercede's infile values (i.e. 60) 
-         [-stations stations_list] ==> The list of LOFAR stations, supercede's infile values and used for all obs (i.e. 'CS001,CS002') 
-         
-         Optionally you can also specify the following parameters:
-         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
-         [[-subsHBA subband_range]] ==> The HBA subband range (default = '77..324' for HBAHigh and 54..301 for HBALow) 
-         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') 
-         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
-         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) 
-         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)
-         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
-         
+      2) Example input file with maximum number of items specified without subbands:
          Example Type II input file using source names:
+         # object   antenna     start-time         duration-mins stations
+         3C14       HBAHigh    2010-07-22T14:50:00    10         CS001,CS002,CS003,CS005,CS006,CS007
+         3C83.1     LBA        2010-07-22T15:27:30    60         CS001,CS002,CS006,CS007
+         3C99       HBALow     2010-07-22T15:52:00    60         CS001,CS003,CS004
+          
+         Example Type II input file using ra dec positions:
+         # ra     dec           antenna           start-time           duration-mins     stations
+         13.98   +68.487         HBAHigh        2010-07-22T14:50:00     10           CS005,CS006,CS007
+         70.498  +1.728          HBALow         2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004
+         217.17   -1.623         LBA            2010-07-22T15:39:00    120           CS002,CS003,CS004,CS006,CS007
+
+      3) Example input file with pointing and antenna specification:
+         Example Type III input file using source names:
          # object       antenna
          3C99           LBA 
          3C99           HBALow 
          3C327          HBALow 
          
-         Example runs:
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA033 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsLBA 10..45  
-         
-         Example Type II input file using ra dec positions:
+         Example Type III input file using ra dec positions:
          # ra     dec           antenna
          13.98   +68.487         LBA 
          70.498  +1.728          HBALow 
-         217.17   -1.623         HBALow 
+         217.17   -1.623         HBAHigh 
          
-         Example runs:
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA033 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsLBA 10..45  
-         
-
-      3) The input file contains just: object-name/position. 
-         You must specify the input file name and type, output file name and project name. 
-         In this case, you MUST also specify the following parameters on the command line as input...
-         Note, these parameters are used for the entire list;  start time of subsequent observations
-         is calculated based on observation duration and gap between observations.
-         Only one ANTENNA is used for the entire list of input OBJECTs (default = HBAHigh). 
-         
-
-         
-         [-start obs_start] ==> The start date/time for 1st source in the list of observations; note format; supercede's infile values (i.e. 2010-07-22T14:50:00) 
-         [-time duration] ==> The duration of ALL observations in the list, in minutes; supercede's infile values (i.e. 60) 
-         [-stations stations_list] ==> The list of LOFAR stations, supercede's infile values and used for all obs (i.e. 'CS001,CS002') 
-         
-         Optionally you can also specify the following parameters:
-         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
-         [[-project project_name]]  ==> The name of the MOM project 'OBJECTs' or 'LEA032' (default = OBJECTs)
-         [[-antenna antenna_setup]] ==> The antenna name: HBAHigh, HBALow or LBA (default = HBAHigh) 
-         [[-subsHBA subband_range]] ==> The HBA subband range (default = '77..324' for HBAHigh and 54..301 for HBALow) 
-         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') 
-         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
-         [[-intagration integration_interval]] ==> The integration interval (default = 3 for HBA; 1 for LBA) 
-         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)
-         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
-         
-
-         Example Type III input file using source names:
+      4) Example input file with just the pointing input
+         Example Type IV input file using source names:
          # object      
          3C99   
          3C327  
          372.1  
-         
-         Example runs:
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 -antenna HBAHigh
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -antenna HBALow
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype source -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -antenna LBA
-         
-         Example Type II input file using ra dec positions:
+                  
+         Example Type IV input file using ra dec positions:
          # ra     dec        
          13.98   +68.487     
          70.498  +1.728      
          217.17   -1.623     
+
+
+      Input File Options (MULTIPLE BEAMS): 
+         Multiple Beams are designated by the ";" separator on the same input line.  Any of the 
+         above 5 input file column options can be used for multiple beam designation.  You can 
+         mix single and multiple beams within one input file.
          
-         Example runs:
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA016 -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA116 -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -antenna HBALow
-         > /Users/aalexov/software/usg/lofarsoft/release/share/pulsar/bin/multi-templatesIM.sh -in obs_list_names.txt -intype position -out output.xml -project LEA216 -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -antenna LBA 
+         For multiple beams, the first beam gets the primary settings for the observation, either
+         using the columns in the input file or the command line arguments.  The only items which
+         change for multiple beams are the Pulsar-Name and (optionally the subband-range).  If
+         the subband range is not specified per beam, then the total subband range is divided by
+         the number of requested beams (remainder subbands are dropped).
+         
+      1) Example input file with maximum number of items specified; lines 2 and 3 contain multiple beams:
+         Example Type I input file using source names:
+         # object   antenna     start-time           duration-mins stations                                  subbands  ; object_beamN  subbands_beamN
+         3C14       HBAHigh     2010-07-22T14:50:00     10         CS001,CS002,CS003,CS005,CS006,CS007        200..261 
+         3C14       LBA         2010-07-22T15:03:00     20         CS001,CS002,CS005,CS006,CS007              230..351 ;   3C327         352..401
+         3C99       HBALow      2010-07-22T15:15:30     10         CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..261 ;   3C14          262..371 
+          
+         Example Type I input file using ra dec positions:
+         # ra     dec       antenna    start-time          duration-mins stations                            subbands  ; ra_beamN dec_beamN subbands_beamN
+         13.98   +68.487    HBAHigh    2010-07-22T14:50:00     10        CS005,CS006,CS007                   200..261
+         217.17   -1.623    LBA        2010-07-22T15:39:00    120        CS001,CS002,CS003,CS004,CS006,CS007 300..447  ;   13.98   +68.487    448..461
+         217.17   -1.623    HBAHigh    2010-07-22T15:52:00     60        CS007                               300..401  ;   217.17   -1.623    402..431
+         
+      2) Example input file with maximum number of items specified w/o subbands; lines 2 and 3 contain multiple beams:
+         Example Type II input file using source names:
+         # object   antenna     start-time         duration-mins stations                             ; object_beamN 
+         3C14       HBAHigh    2010-07-22T14:50:00    10         CS001,CS002,CS003,CS005,CS006,CS007  
+         3C83.1     LBA        2010-07-22T15:27:30    60         CS001,CS002,CS006,CS007              ;    3C327       
+         3C99       HBALow     2010-07-22T15:52:00    60         CS001,CS003,CS004                    ;    3C14    ;    3C327      
+          
+         Example Type II input file using ra dec positions:
+         # ra     dec           antenna           start-time           duration-mins     stations                  ; ra_beamN dec_beamN
+         13.98   +68.487         HBAHigh        2010-07-22T14:50:00     10           CS005,CS006,CS007
+         70.498  +1.728          HBALow         2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004       ;    13.98   +68.487 
+         217.17   -1.623         LBA            2010-07-22T15:39:00    120           CS002,CS003,CS004,CS006,CS007 ;    13.98   +68.487 
+
+      3) Example input file with pointing and antenna specification; lines 2 and 3 contain multiple beams:
+         Example Type III input file using source names:
+         # object       antenna
+         3C99           LBA 
+         3C99           HBALow   ;    3C14   
+         3C327          HBALow   ;    3C14    ;    3C327
+         
+         Example Type III input file using ra dec positions:
+         # ra     dec           antenna
+         13.98   +68.487         LBA 
+         70.498  +1.728          HBALow  ;    13.98   +68.487
+         217.17   -1.623         HBAHigh ;    70.498  +1.728    ;    13.98   +68.487
+         
+         
+      4) Example input file with just the pointing input; lines 2 and 3 contain multiple beams:
+         Example Type IV input file using source names:
+         # object      
+         3C99   
+         3C327  ;  3C99  ; 3C99
+         372.1  ;  3C99  ; 3C327 ; 3C327
+                  
+         Example Type IV input file using ra dec positions:
+         # ra     dec        
+         13.98   +68.487     
+         70.498  +1.728   ;  13.98   +68.487
+         217.17   -1.623  ;  13.98   +68.487  ;    70.498  +1.728
+
          
 
+         EXAMPLE runs:
+         > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml 
+         > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype position -project MSSS -out output.xml 
+         > multi-templatesNbeams -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -subsLBA 10..45 +BF 6,7
+         > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001
+         > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 
+         > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 +IM 2,4,6
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 +multi
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +BF ALL +multi
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..401  
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 
+         

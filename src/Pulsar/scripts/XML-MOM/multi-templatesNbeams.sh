@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/ksh -x
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -6,7 +6,7 @@
 
 USAGE1="\nUsage for Imaging: $0 [[-help IM]] \n"\
 "       -in observation_list_file -inswitch IM -intype source_or_position \n"\
-"       -out template_output_file -project project_name [-st stations_list]   \n"\
+"       -out template_output_file -project project_name [-stations stations_list]   \n"\
 "       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] \n"\
 "       [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [-multi] \n"
@@ -21,13 +21,14 @@ USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] \n"
 
 USAGE3="\n         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
-"         -inswitch BF_or_IM   ==>  Switch between BF and IMAGING \n"\
+"         -inswitch BF_or_IM   ==>  Switch between 'BF' (Beam-Formed) or 'IM' (IMAGING) type of default obs \n"\
 "         -intype source_or_position ==> Input file contains 'source'-based or 'position'-based input\n"\
 "         -project project_name   ==> Name of the MOM project (usually 'Pulsars' or 'MSSS')\n"\
 "         -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) \n"\         
 "         [[+multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.\n"\
 "         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
-"         [[-antenna HBA_or_LBA]] ==> The antenna name: HBA or LBA (default = HBA) \n"\
+"         [[-stations stations_list]] ==> Comma separated list of stations: (i.e. CS001,CS002,RS405) \n"\
+"         [[-antenna HBA_or_LBA]] ==> The antenna name: HBA, HBAHigh, HBALow or LBA (default = HBA (BF); HBAHigh (IM)) \n"\
 "         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
 "         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
 "         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16) \n"\
@@ -656,14 +657,14 @@ do
             
             if (( $beam > 1 ))
             then
-				ncols=`echo $line | awk -F" " '{print NF}'`
+				ncols_beam=`echo $line | awk -F" " '{print NF}'`
                # only have source/pos and possibly subband info
 			    if [ $INSWITCH == 1 ] # BF
 			    then				    
 				    PULSAR=`echo $line | awk '{print $1}'`
 				    OBJECT=$PULSAR
 				    
-				    if (( $ncols == 2 ))
+				    if (( $ncols_beam == 2 ))
 				    then
 				        SUBBANDS=`echo $line | awk '{print $2}'`
 				        SUBBANDS_SET=1
@@ -673,7 +674,7 @@ do
 			        then
 				       OBJECT=`echo $line | awk '{print $1}'`
 				       
-					   if (( $ncols == 2 ))
+					   if (( $ncols_beam == 2 ))
 					   then
 					       SUBBANDS=`echo $line | awk '{print $2}'`
 					       SUBBANDS_SET=1
@@ -681,7 +682,7 @@ do
 				    else
 				       RA_DEG=`echo $line | awk '{print $1}'`
 				       DEC_DEG=`echo $line | awk '{print $2}'`
-					   if (( $ncols == 3 ))
+					   if (( $ncols_beam == 3 ))
 					   then
 					       SUBBANDS=`echo $line | awk '{print $3}'`
 					       SUBBANDS_SET=1
@@ -857,50 +858,77 @@ do
 		
 		        ##################################################
 		        # Set up the Subbands
-				if [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBA" ] && [ $INSWITCH == 1 ] && [ $SUBBANDS_SET == 0 ]
-				then
-				    SUBBANDS="200..447"
-				elif [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBAHigh" ] && [ $INSWITCH == 2 ] && [ $SUBBANDS_SET == 0 ]
-				then
-				    SUBBANDS="77..324"
-		        elif ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBA" ] && [ $INSWITCH == 1 ] && [ $SUBBANDS_SET == 0 ] ) || ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBAHigh" ] && [ $INSWITCH == 2 ] && [ $SUBBANDS_SET == 0 ] )
+		        if [ $SUBBANDS_SET == 0 ]
 		        then
-		            needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
-		            if [ $needs_expand != "" ]
-		            then
-		               SUBBANDS=`echo "$SUBBANDS_HBA" | expand_sblist.py`
-		            else
-				       SUBBANDS=$SUBBANDS_HBA
-				    fi
-		        elif [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ] && [ $SUBBANDS_SET == 0 ]
-		        then
-				    SUBBANDS="54..301"
-		        elif [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ] && [ $SUBBANDS_SET == 0 ]
-		        then
-				    needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
-		            if [ $needs_expand != "" ]
-		            then
-		               SUBBANDS=`echo "$SUBBANDS_HBA" | expand_sblist.py`
-		            else
-				       SUBBANDS=$SUBBANDS_HBA
-				    fi
-				elif [ $user_subbands_lba == 0 ] && [ $ANTENNA == "LBA" ] && [ $SUBBANDS_SET == 0 ]
-				then
-				    SUBBANDS="154..401"
-		        elif [ $user_subbands_lba == 1 ] && [ $ANTENNA == "LBA" ] && [ $SUBBANDS_SET == 0 ]
-		        then
-		            needs_expand=`echo $SUBBANDS_LBA | grep "," | grep ".."`
-		            if [ $needs_expand != "" ]
-		            then
-		               SUBBANDS=`echo "$SUBBANDS_LBA" | expand_sblist.py`
-		            else
-				       SUBBANDS=$SUBBANDS_LBA
-				    fi
-			    fi   
-		    fi # end if (( $beam < 1 ))
+					if [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBA" ] && [ $INSWITCH == 1 ] 
+					then
+					    SUBBANDS="200..447"
+					elif [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBAHigh" ] && [ $INSWITCH == 2 ] 
+					then
+					    SUBBANDS="77..324"
+			        elif ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBA" ] && [ $INSWITCH == 1 ] ) || ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBAHigh" ] && [ $INSWITCH == 2 ] )
+			        then
+			            needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
+			            if [ $needs_expand != "" ]
+			            then
+			               SUBBANDS=`echo "$SUBBANDS_HBA" | expand_sblist.py`
+			            else
+					       SUBBANDS=$SUBBANDS_HBA
+					    fi
+			        elif [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ] 
+			        then
+					    SUBBANDS="54..301"
+			        elif [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ] 
+			        then
+					    needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
+			            if [ $needs_expand != "" ]
+			            then
+			               SUBBANDS=`echo "$SUBBANDS_HBA" | expand_sblist.py`
+			            else
+					       SUBBANDS=$SUBBANDS_HBA
+					    fi
+					elif [ $user_subbands_lba == 0 ] && [ $ANTENNA == "LBA" ] 
+					then
+					    SUBBANDS="154..401"
+			        elif [ $user_subbands_lba == 1 ] && [ $ANTENNA == "LBA" ] 
+			        then
+			            needs_expand=`echo $SUBBANDS_LBA | grep "," | grep ".."`
+			            if [ $needs_expand != "" ]
+			            then
+			               SUBBANDS=`echo "$SUBBANDS_LBA" | expand_sblist.py`
+			            else
+					       SUBBANDS=$SUBBANDS_LBA
+					    fi
+				    fi   
+			    fi # end if [ $SUBBANDS_SET == 0 ]
+		    fi # end if (( $beam > 1 ))
 		    
-		    # If multi-beam obs, split up subbands by N beams (TBD)
-		    
+		    ##################################################
+		    # If multi-beam obs, split up subbands by N beams (TBD) if subbands > 248
+		    if (( $MULTI == 1 )) && (( $beam == 1 )) && (( $nbeams > 1 )) && (( $SUBBANDS_SET == 0 ))
+		    then
+		       total_subbands=`echo $SUBBANDS | expand_sblist.py | awk -F"," '{print NF}'`
+		       if (( $total_subbands >= 248 ))
+		       then
+		          echo "WARNING: Multi-beam specification must have total subbands <= 248;"
+		          echo "         Input has $total_subbands;  splitting subbands by $nbeams beams"
+		          split_subs=`echo $total_subbands / $nbeams | bc`
+		       fi
+		       SUBBANDS_ORIG=`echo $SUBBANDS | expand_sblist.py`
+		    fi
+		    if (( $MULTI == 1 )) && (( $SUBBANDS_SET == 0 )) && (( $nbeams > 1 ))
+		    then
+		          if (( $beam == 1 ))
+		          then
+		             min_range=1
+		             max_range=$split_subs
+		          else
+		             min_range=`echo "$max_range + 1" | bc`
+		             max_range=`echo "$min_range + $split_subs - 1" | bc`
+		          fi
+		          SUBBANDS=`echo $SUBBANDS_ORIG | cut -d"," -f$min_range-$max_range`
+            fi
+            
 		    #make sure station list has all capital letters
 		    STATIONS=`echo $STATIONS | sed 's/a-z/A-Z/g'`                
 		                   
