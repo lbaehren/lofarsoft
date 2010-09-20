@@ -1,15 +1,16 @@
-#!/bin/ksh
+#!/bin/ksh 
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.19
+VERSION=1.20
 
 #Check the usage
-USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_name -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose]\n\n"\
+USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
-"      -p Pulsar_name ==> Specify the Pulsar Name (i.e. B2111+46) \n"\
+"      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces)\n"\
+"         (i.e. single Pulsar: B2111+46) (i.e. multiple pulsars to fold:  B2111+46,B2106+44) \n"\
 "      -o Output_Processing_Location ==> Specify the Output Processing Location \n"\
 "         (i.e. /net/sub5/lse013/data4/LOFAR_PULSAR_ARCHIVE_lse013/L2010_06296_red) \n"\
 "      [-all] ==> optional parameter perform folding on entire subband set in addition to N-splits (takes 11 extra min)\n"\
@@ -34,6 +35,7 @@ fi
 #Get the input arguments
 OBSID=""
 PULSAR=""
+PULSAR_LIST=""
 location=""
 COLLAPSE=""
 delete=0
@@ -52,7 +54,7 @@ while [ $# -gt 0 ]
 do
     case "$1" in
     -id)   OBSID=$2; shift;;
-	-p)    PULSAR="$2"; shift;;
+	-p)    PULSAR="$2"; PULSAR_LIST=$2; shift;;
 	-o)    location="$2"; shift;;
 	-C)    COLLAPSE="$1";;
 	-c)    COLLAPSE="-C";;
@@ -280,6 +282,19 @@ COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk 
 CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
 SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
 
+is_psr_list=`echo $PULSAR_LIST | grep ","`
+if [[ $is_psr_list != "" ]]
+then
+   multi_fold=1
+   PULSAR=`echo $PULSAR_LIST | awk -F"," '{print $1}'`
+   nfolds=`echo $PULSAR_LIST | awk -F"," '{print NF}'`
+   PULSAR_LIST=`echo $PULSAR_LIST | sed 's/\,/ /g'`
+else
+   multi_fold=0
+   PULSAR=$PULSAR_LIST
+   nfolds=1
+fi
+
 echo "PULSAR:" $PULSAR 
 echo "PULSAR:" $PULSAR >> $log
 echo "ARRAY:" $ARRAY 
@@ -298,6 +313,10 @@ echo "Coherentstokes set to:" $COHERENTSTOKES
 echo "Coherentstokes set to:" $COHERENTSTOKES >> $log
 echo "FlysEye set to:" $FLYSEYE 
 echo "FlysEye set to:" $FLYSEYE >> $log
+if [[ $multi_fold == 1 ]]
+then
+   echo "Will perform folding for the following $nfolds Pulsars: $PULSAR_LIST"
+fi
 
 echo "Starting Time"
 echo "Starting Time" >> $log
@@ -1008,60 +1027,63 @@ do
 		date
 		date >> $log
 		
-		#Fold the data
-	    if (( $flyseye == 0 ))
-	    then
-			for ii in $num_dir
-		    do
-			   cd ${location}/${STOKES}/RSP${ii}
-			   echo cd ${location}/${STOKES}/RSP${ii} >> $log
-			   echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 
-	#		   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
-			   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
-			   prepfold_pid[$ii]=$!  
-			   echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
-			   sleep 5
-		    done
-		else
-		    for jjj in $beams
-		    do
+		# Fold data per requested Pulsar
+		for fold_pulsar in $PULSAR_LIST
+		do
+		    if (( $flyseye == 0 ))
+		    then
 				for ii in $num_dir
 			    do
-				   cd ${location}/${STOKES}/${jjj}/RSP${ii}
-				   echo cd ${location}/${STOKES}/${jjj}/RSP${ii} >> $log
-				   echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 
-	#			   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
-				   prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${PULSAR}_${OBSID}_RSP${ii}.prepout 2>&1 &
-				   kk=`echo "$ii * $jjj" | bc`
-			       prepfold_pid[$kk]=$!  
-				   echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
+				   cd ${location}/${STOKES}/RSP${ii}
+				   echo cd ${location}/${STOKES}/RSP${ii} >> $log
+				   echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+		#		   prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+				   prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+				   prepfold_pid[$ii]=$!  
+				   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
 				   sleep 5
 			    done
-		    done
-		fi # end if (( $flyseye == 0 ))
-		
-		echo cd ${location} >> $log
-		cd ${location}
-		
-		#Check when all DONE files are available, then all processes have exited
-	    if (( $flyseye == 0 ))
-	    then
-		   for ii in $num_dir
-		   do
-		      echo "Waiting for loop $ii prepfold to finish"
-		      wait ${prepfold_pid[ii]}
-		   done
-		else
-		    for jjj in $beams
-		    do
-				for ii in $num_dir
+			else
+			    for jjj in $beams
 			    do
-				   kk=`echo "$ii * $jjj" | bc`
-		           echo "Waiting for loop $ii $jjj beam prepfold to finish"
-		           wait ${prepfold_pid[kk]}
-	            done	
-		    done
-		fi
+					for ii in $num_dir
+				    do
+					   cd ${location}/${STOKES}/${jjj}/RSP${ii}
+					   echo cd ${location}/${STOKES}/${jjj}/RSP${ii} >> $log
+					   echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+		#			   prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}.sub[0-9]* >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+					   prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+					   kk=`echo "$ii * $jjj" | bc`
+				       prepfold_pid[$kk]=$!  
+					   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR}_${OBSID}_RSP${ii}.sub[0-9]* >> $log
+					   sleep 5
+				    done
+			    done
+			fi # end if (( $flyseye == 0 ))
+			
+			echo cd ${location} >> $log
+			cd ${location}
+			
+			#Check when all DONE files are available, then all processes have exited
+		    if (( $flyseye == 0 ))
+		    then
+			   for ii in $num_dir
+			   do
+			      echo "Waiting for loop $ii prepfold to finish"
+			      wait ${prepfold_pid[ii]}
+			   done
+			else
+			    for jjj in $beams
+			    do
+					for ii in $num_dir
+				    do
+					   kk=`echo "$ii * $jjj" | bc`
+			           echo "Waiting for loop $ii $jjj beam prepfold to finish"
+			           wait ${prepfold_pid[kk]}
+		            done	
+			    done
+			fi
+		done # finished loop over PULSAR_LIST
     fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
     
 #    if (( $flyseye == 0 ))
@@ -1074,48 +1096,42 @@ do
 		  date
 		  date >> $log
 
-	      if (( $flyseye == 0 ))
-          then
-	         cd ${location}/${STOKES}/RSPA
-	         echo cd ${location}/${STOKES}/RSPA >> $log
-	         echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${PULSAR}_${OBSID}_RSPA.prepout 
-	         prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${PULSAR}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSPA.prepout 2>&1 &
-		     prepfold_pid_all=$!  
-	         echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> $log
-	         cd ${location}
-	      else
-		     for jjj in $beams
-		     do
-		         cd ${location}/${STOKES}/${jjj}/RSPA
-		         echo cd ${location}/${STOKES}/${jjj}/RSPA >> $log
-		         echo prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${PULSAR}_${OBSID}_RSPA.prepout 
-		         prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${PULSAR}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${PULSAR}_${OBSID}_RSPA.prepout 2>&1 &
-			     prepfold_pid_all[$jjj]=$!  
-		         echo "Running: " prepfold -noxwin -psr ${PULSAR} -n 256 -fine -nopdsearch -o ${PULSAR}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> $log
+		  # Fold data per requested Pulsar
+		  index=1
+		  beam_index=1
+		  for fold_pulsar in $PULSAR_LIST
+		  do
+		      if (( $flyseye == 0 ))
+	          then
+		         cd ${location}/${STOKES}/RSPA
+		         echo cd ${location}/${STOKES}/RSPA >> $log
+		         echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
+		         prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
+		         index=$index
+			     prepfold_pid_all[$index]=$!  
+		         echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> $log
 		         cd ${location}
-		     done
-		  fi # end if (( $flyseye == 0 ))
+		         sleep 5
+		      else
+			     for jjj in $beams
+			     do
+			         cd ${location}/${STOKES}/${jjj}/RSPA
+			         echo cd ${location}/${STOKES}/${jjj}/RSPA >> $log
+			         echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
+			         prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
+				     prepfold_pid_all[$beam_index]=$!  
+			         (( beam_index = $beam_index + 1 )) 
+			         echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR}_${OBSID}_RSPA.sub[0-9]* >> $log
+			         cd ${location}
+			         sleep 5
+			     done
+			  fi # end if (( $flyseye == 0 ))
+			  (( index = $index + 1 ))
+		  done # end for fold_pulsar in $PULSAR_LIST
 	   fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
 #	fi 
 
-	
-	##Clean up the DONE file
-#    if (( $flyseye == 0 ))
-#    then
-#		for ii in $num_dir
-#	    do
-#	       rm -rf ${STOKES}/"RSP"$ii"/DONE" 
-#	    done
-#	else
-#		for jjj in $beams
-#		do
-#			for ii in $num_dir
-#		    do
-#		       rm -rf ${STOKES}/${jjj}/"RSP"$ii"/DONE" 
-#		    done
-#		done
-#	fi
-	
+		
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 	then
 		#Make a cumulative plot of the profiles
@@ -1158,32 +1174,37 @@ do
 		echo "Running convert on ps to pdf and png of the plots" >> $log
 		date
 		date >> $log
-	
-	    if (( $flyseye == 0 ))
-	    then
-			for ii in $num_dir
-			do
-			   echo convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf >> $log
-			   convert ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
-			   echo convert -rotate 90 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png >> $log
-			   convert -rotate 90 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png
-			   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png >> $log
-			   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png
-			done
-		else
-		    for jjj in $beams
-		    do
+
+	    index=1
+		beam_index=1
+		for fold_pulsar in $PULSAR_LIST
+		do	
+		    if (( $flyseye == 0 ))
+		    then
 				for ii in $num_dir
 				do
-				   echo convert ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf >> $log
-				   convert ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.pdf
-				   echo convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png >> $log
-				   convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.png
-				   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png >> $log
-				   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${PULSAR}_${OBSID}_RSP${ii}_PSR_${PULSAR}.pfd.th.png
+				   echo convert ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.pdf >> $log
+				   convert ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.pdf
+				   echo convert -rotate 90 ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.png >> $log
+				   convert -rotate 90 ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.png
+				   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.th.png >> $log
+				   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.th.png
 				done
-			done
-		fi
+			else
+			    for jjj in $beams
+			    do
+					for ii in $num_dir
+					do
+					   echo convert ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.pdf >> $log
+					   convert ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.pdf
+					   echo convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.png >> $log
+					   convert -rotate 90 ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.png
+					   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.th.png >> $log
+					   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSP${ii}/${fold_pulsar}_${OBSID}_RSP${ii}_PSR_${fold_pulsar}.pfd.th.png
+					done
+				done
+			fi
+	    done # end for fold_pulsar in $PULSAR_LIST
 	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 		
 	#RFI-Report
@@ -1297,50 +1318,63 @@ do
 	   echo "Waiting for prepfold on entire subband list to complete..." >> $log
 	   date 
 	   date >> $log
-	   if (( $flyseye == 0 ))
-	   then
-		   while [ $ii -ne $yy ]
-		   do
-		      if [ -e ${STOKES}/RSPA/DONE ]
-		      then
-		         echo "prepfold on the total list has completed!" 
-		         echo "prepfold on the total list has completed!" >> $log
-		         date
-		         date >> $log
-		         yy=1
-		      fi
-		      sleep 15
-		   done
-		   echo convert ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf >> $log
-		   convert ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf
-		   echo convert -rotate 90 ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png >> $log
-		   convert -rotate 90 ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png
-		   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.th.png >> $log
-		   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.th.png
-	   else
-		   while [ $ii -ne $yy ]
-		   do
-		      if [ -e ${STOKES}/${last_beam}/RSPA/DONE ]
-		      then
-		         echo "prepfold on the total list has completed!" 
-		         echo "prepfold on the total list has completed!" >> $log
-		         date
-		         date >> $log
-		         yy=1
-		      fi
-		      sleep 15
-		   done
-		   for jjj in $beams
-		   do
-			   echo convert ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf >> $log
-			   convert ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.pdf
-			   echo convert -rotate 90 ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png >> $log
-			   convert -rotate 90 ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.png
-			   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.th.png >> $log
-			   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.ps ${STOKES}/${jjj}/RSPA/${PULSAR}_${OBSID}_RSPA_PSR_${PULSAR}.pfd.th.png
-           done
-       fi # end if (( $flyseye == 0 ))
-       
+
+	   index=1
+	   beam_index=1
+	   for fold_pulsar in $PULSAR_LIST
+	   do
+		   if (( $flyseye == 0 ))
+		   then
+		      echo "Waiting for Pulsar #$index prepfold (all) to finish"
+		      wait ${prepfold_pid_all[$index]}
+		   
+#			   while [ $ii -ne $yy ]
+#			   do
+#			      if [ -e ${STOKES}/RSPA/DONE ]
+#			      then
+#			         echo "prepfold on the total list has completed!" 
+#			         echo "prepfold on the total list has completed!" >> $log
+#			         date
+#			         date >> $log
+#			         yy=1
+#			      fi
+#			      sleep 15
+#			   done
+			   echo convert ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf >> $log
+			   convert ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf
+			   echo convert -rotate 90 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png >> $log
+			   convert -rotate 90 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png
+			   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png >> $log
+			   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png
+		   else
+#			   while [ $ii -ne $yy ]
+#			   do
+#			      if [ -e ${STOKES}/${last_beam}/RSPA/DONE ]
+#			      then
+#			         echo "prepfold on the total list has completed!" 
+#			         echo "prepfold on the total list has completed!" >> $log
+#			         date
+#			         date >> $log
+#			         yy=1
+#			      fi
+#			      sleep 15
+#			   done
+			   for jjj in $beams
+			   do
+		           echo "Waiting for Pulsar #$index, beam #$beam_index prepfold (all) to finish"
+			       wait ${prepfold_pid_all[$beam_index]}
+			       
+				   echo convert ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf >> $log
+				   convert ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf
+				   echo convert -rotate 90 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png >> $log
+				   convert -rotate 90 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png
+				   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png >> $log
+				   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png
+				   (( beam_index = $beam_index + 1 ))
+	           done
+	       fi # end if (( $flyseye == 0 ))
+	       (( index = $index + 1 ))
+       done # end for fold_pulsar in $PULSAR_LIST
 	fi # end if [ $all -eq 1 ] || [ $all_pproc == 1 ]
 
 	#Rename the beam_? to their actual names based on the observation parset names
