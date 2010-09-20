@@ -9,15 +9,16 @@ USAGE1="\nUsage for Imaging: $0 [[-help IM]] \n"\
 "       -out template_output_file -project project_name [-stations stations_list]   \n"\
 "       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] \n"\
 "       [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] \n"\
-"       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [-multi] \n"
+"       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] \n"\
+"       [+multi] [+BF list_or_ALL] \n"
 
 USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       -in observation_list_file -inswitch BF -intype source_or_position \n"\
 "       -out template_output_file -project project_name [-st stations_list]   \n"\
 "       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] \n"\
 "       [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] \n"\
-"       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [-multi] \n"\
-"       [-IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
+"       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] \n"\
+"       [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
 "       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] \n"
 
 USAGE3="Options: \n"\
