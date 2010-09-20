@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.20
+VERSION=1.21
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose]\n\n"\
@@ -1135,37 +1135,40 @@ do
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 	then
 		#Make a cumulative plot of the profiles
-	    if (( $flyseye == 0 ))
-	    then
-	        cd ${location}/${STOKES}
-	        cd ${location}/${STOKES} >> $log
-			echo "Running plot summary script plot_profs8new.py in `pwd`"
-			echo "Running plot summary script plot_profs8new.py in `pwd`" >> $log
-			date
-			date >> $log
-			echo python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8new.py >> $log
-			python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8new.py >> $log 2>&1
-			echo convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf >> $log
-			convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf
-			echo rm profiles.ps >> $log
-			rm profiles.ps
-		else
-		    for jjj in $beams
-		    do
-		        cd ${location}/${STOKES}/${jjj}
-		        cd ${location}/${STOKES}/${jjj} >> $log
-				echo "Running plot summary script plot_profs8new.py in `pwd`"
-				echo "Running plot summary script plot_profs8new.py in `pwd`" >> $log
+		for fold_pulsar in $PULSAR_LIST
+		do
+		    if (( $flyseye == 0 ))
+		    then
+		        cd ${location}/${STOKES}
+		        cd ${location}/${STOKES} >> $log
+				echo "Running plot summary script plot_profs8multi.py in `pwd`"
+				echo "Running plot summary script plot_profs8multi.py in `pwd`" >> $log
 				date
 				date >> $log
-				echo python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8new.py >> $log
-				python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8new.py >> $log 2>&1
-				echo convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf >> $log
-				convert profiles.ps ${PULSAR}_${OBSID}_profiles.pdf
+				echo python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8multi.py -p ${fold_pulsar} >> $log
+				python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8multi.py -p ${fold_pulsar} >> $log 2>&1
+				echo convert profiles.ps ${fold_pulsar}_${OBSID}_profiles.pdf >> $log
+				convert profiles.ps ${fold_pulsar}_${OBSID}_profiles.pdf
 				echo rm profiles.ps >> $log
 				rm profiles.ps
-			done	
-		fi
+			else
+			    for jjj in $beams
+			    do
+			        cd ${location}/${STOKES}/${jjj}
+			        cd ${location}/${STOKES}/${jjj} >> $log
+					echo "Running plot summary script plot_profs8multi.py in `pwd`"
+					echo "Running plot summary script plot_profs8multi.py in `pwd`" >> $log
+					date
+					date >> $log
+					echo python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8multi.py -p ${fold_pulsar} >> $log
+					python ${LOFARSOFT}/release/share/pulsar/bin/plot_profs8multi.py -p ${fold_pulsar} >> $log 2>&1
+					echo convert profiles.ps ${fold_pulsar}_${OBSID}_profiles.pdf >> $log
+					convert profiles.ps ${fold_pulsar}_${OBSID}_profiles.pdf
+					echo rm profiles.ps >> $log
+					rm profiles.ps
+				done	
+			fi
+		done # end for fold_pulsar in $PULSAR_LIST
 	    echo cd ${location} >> $log
 	    cd ${location}
 		
