@@ -752,7 +752,7 @@ do
 #	then
 		for ii in $num_dir
 		do
-		   echo "Waiting for loop $ii bf2presto to finish"
+		   echo "Waiting for RSP$ii bf2presto to finish"
 		   wait ${bf2presto_pid[ii]}
 		done
 #    else
@@ -1069,7 +1069,7 @@ do
 		    then
 			   for ii in $num_dir
 			   do
-			      echo "Waiting for loop $ii prepfold to finish"
+			      echo "Waiting for RSP$ii prepfold to finish"
 			      wait ${prepfold_pid[ii]}
 			   done
 			else
@@ -1078,7 +1078,7 @@ do
 					for ii in $num_dir
 				    do
 					   kk=`echo "$ii * $jjj" | bc`
-			           echo "Waiting for loop $ii $jjj beam prepfold to finish"
+			           echo "Waiting for RSP$ii $jjj prepfold to finish"
 			           wait ${prepfold_pid[kk]}
 		            done	
 			    done
@@ -1243,7 +1243,7 @@ do
 	   then
 	      for ii in $num_dir
 	      do
-	         echo "Waiting for loop $ii subdyn to finish"
+	         echo "Waiting for RSP$ii subdyn to finish"
 	         wait ${subdyn_pid[ii]}
 	      done
 	   else
@@ -1251,7 +1251,7 @@ do
 	      do
 			 for jjj in $beams
 			 do
-		         echo "Waiting for loop $ii and $jjj subdyn to finish"
+		         echo "Waiting for RSP$ii and $jjj subdyn to finish"
 	             wait ${subdyn_pid_[ii][jjj]}
 	         done
 	      done
