@@ -58,7 +58,7 @@ fi
 # strip the actual ObsID and the Pulsar name from this line
 # create the run script for the shell script pipeline
 
-egrep "observationId|\(.BA\) " $infile | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/<.*Obs / /g' | sed 's/(.BA.*//g' | awk '{printf("pulp.sh -id L2010_0%s -p %s -o L2010_0%s_red -all -rfi\n", $1, $2, $1)}' > $outfile
+egrep "observationId|\(.BA\) " $infile | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/<.*Obs / /g' | sed 's/(.BA.*//g' | awk '{printf("pulp.sh -id L2010_%05d -p %s -o L2010_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
 
 cp $outfile $outfile.all
 
