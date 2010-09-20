@@ -311,7 +311,7 @@ build_package (lasa src/LASA)
 
 build_package (pulsar src/Pulsar)
 
-add_dependencies (pulsar cfitsio)
+add_dependencies (pulsar cfitsio wcstools)
 
 ##____________________________________________________________________
 ##                                                                  RM
