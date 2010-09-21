@@ -1,30 +1,21 @@
-## This is a template Python module.
-#  Use this template for each module in the Pypeline.
-#  Note that a script is not the same as a module, the difference can
-#  already be seen by the #! on the first line.
-#  For scripts (e.g. files that you want to execute from the commandline)
-#  you should use scripts/template.py instead.
+"""This module takes care of multi-file input for the pycr tools.
 
-"""Each module should have a documentation string describing it.
+With this module you are able to open multiple files and use operators on
+them to obtain data and metadata. These operators are ported from the 
+pycrtools, but the output of that module is combined such that one object
+of the correct dimension is possible.
 
-Style notes:
-For Python, PEP 8  has emerged as the style guide that most projects adhere to; it promotes a very readable and eye-pleasing coding style. Every Python developer should read it at some point; here are the most important points extracted for you:
+In addition to this it is possible to make an antenna selection, such that
+only data from some dipoles will be returned.
 
-* Use 4-space indentation, and no tabs. 4 spaces are a good compromise between small indentation (allows greater nesting depth) and large indentation (easier to read). Tabs introduce confusion, and are best left out.
+At the moment the antennaset (like "HBA", "LBA_OUTER") still has to be set
+manually.
 
-* Wrap lines so that they don't exceed 79 characters. This helps users with small displays and makes it possible to have several code files side-by-side on larger displays.
+The modules provides methods which work on a list of crfiles (open with pycrtools)
+to read data and metadata and set parameters. Also it provides a class which needs
+a list of filenames, antennaselection and antennaset and then uses the methods of the
+modules and then should from the outside work just like the pycrtools.
 
-* Use blank lines to separate functions and classes, and larger blocks of code inside functions.
-
-* When possible, put comments on a line of their own.
-
-* Use docstrings.
-
-* Use spaces around operators and after commas, but not directly inside bracketing constructs: a = f(1, 2) + g(3, 4).
-
-* Name your classes and functions consistently; the convention is to use CamelCase for classes and lower_case_with_underscores for functions and methods. Always use self as the name for the first method argument (see A First Look at Classes for more on classes and methods).
-
-* Don't use fancy encodings if your code is meant to be used in international environments. Plain ASCII works best in any case.
 """
 
 ## Imports
@@ -32,16 +23,28 @@ For Python, PEP 8  has emerged as the style guide that most projects adhere to; 
 #  "from module import *" as much as possible to prevent name clashes.
 import pycrtools as hf
 import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
 
 hf.trackHistory(False)
 # Examples
 class TBBdata:
-    """Class documentation"""
+    """This class provides an interface to multi-file Transient Buffer 
+    Board data"""
 
     def __init__(self,filenames,blocksize=1024,selection=None):
-        """Constructor"""
+        """Constructor
+
+        Open files.
+        
+        *filenames* Name of TBB hdf5 files to open
+        *blocksize* Size of 1 block in samples
+        *selection* Which antennas to select. 3 options:
+                    - list of Antenna IDs 
+                       (first 3 digits stationID 
+                        next 3 digits RSPid (=RCUid/8)
+                        next 3 digits RCUid)
+                    - list of antenna numbers in file
+                    - None (select all antennas)
+        """
         
         self.files=openfiles(filenames,blocksize)
         
@@ -54,8 +57,8 @@ class TBBdata:
         self.setAntennaset()
 
     def setAntennaset(self,antennaset=None):
-        """This should set the antennaset variable. If this can be obtained from the 
-        data file, this function should be changed, to set the default value.
+        """This should set the antennaset variable. If this can be obtained         from the data file, this function should be changed, to set the 
+        default value.
         
         *antennaset* Antennaset, e.g. "HBA, LBA_OUTER", default None
         """
@@ -77,24 +80,46 @@ class TBBdata:
 
 
     def __getitem__(self,keyword):
+        """This makes the get method available by using the normal bracket 
+        method."""
         return self.get(keyword)
 
     def get(self,keyword):
-        data=get(self.files,keyword,False)
-        if not self.selection:
+        """Get the values for the keyword for multiple files. Uses the 
+        modules get method on the files provided, unless the keyword is of
+        calibration metadata type, and then applies a 
+        selection. Returns a single object.
+        
+        Calibration metadata keywords:
+           
+         
+        A method to show which keywords are available should be added.
+        
+        *keyword* Variable (data or metadata) to be read. 
+        Example "antennaIDs" , "shift", "TIME"
+        """
+        metadatakeywords=["StationPhaseCalibration","CableDelays","RelativeAntennaPositions","ClockCorrection","StationPositions"]
+        if keyword in metadatakeywords: 
+            import metadata as md
+            data=md.get(keyword, self.get("antennaIDs"), self.antennaset, True)
             return data
         else:
-            return applySelection(self.selection,data)#get(self.files,keyword,False))
+            data=get(self.files,keyword,False)
+            if not self.selection:
+                return data
+            else:
+                return applySelection(self.selection,data)#get(self.files,keyword,False))
 
     def get_all_list(self,keyword):
-        """return the value for all dipoles, per file read
+        """Like the get method, but returns the value for all dipoles, 
+        per file read. Returns a list of objects.
         
         *keyword* Variable to read 
         """
         return get(self.files,keyword,True)
 
     def get_all(self,keyword):
-        """returns the value for all dipoles, not only selected
+        """Returns the values for all dipoles, not only the selected.
         
         *keyword* Variable to read
         """
@@ -102,9 +127,19 @@ class TBBdata:
 
 
     def set(self,keyword,value):
+        """Uses the set method of the module to set the value for all 
+        files"""
         set(self.files,keyword,value)
     
     def readdata(self,fxdata=None,block=-1):
+        """Read a block of data for the selected antennas. 
+        
+        *fxdata* hArray to write the data in. If not provided, it will
+                 return an array.
+        *block*  Block for which the data should be returned. If negative
+                 it will return the next block.
+        """
+        
         if not self.selection:
             retval = readFx(self.files,self.allfxdata,block)
             if not fxdata:
@@ -117,6 +152,10 @@ class TBBdata:
             return applySelection(self.selection,self.allfxdata,fxdata)
 
     def setSelection(self,selection):
+        """Set an antennaselection.
+        
+        *selection* list of Antenna IDs or antenna numbers in file.
+        """
         if not selection:
             self.selection=selection
         elif selection[0] > 1000:
@@ -126,6 +165,15 @@ class TBBdata:
             self.selection=selection
 
     def getCalibrator(self,antennaset=None):
+        """Returns  a calibrator object from the calibration class. 
+        This can be used to do a phase calibration on the fftdata.
+        For this the antennaset should have been specified or given as
+        a parameter.
+
+        *antennaset* Antennaset e.g. "HBA", "LBA_OUTER". If provided this
+        will also set this antennaset for the TBBdata object.
+        """
+
         if not antennaset:
             antennaset=self.antennaset
         import calibration as crCal
@@ -135,6 +183,10 @@ class TBBdata:
         return crCal.AntennaCalibration(self.files,antennaset,self.selection)
 
     def applyCalibrationShift(self,calibrator=None):
+        """Obtains a calibrator and sets a shift due to the clockoffsets such
+        that all the data starts at the same moment. Only needed for multi-station 
+        data.
+        """
         if not calibrator:
             calibrator=self.getCalibrator()
         
@@ -143,7 +195,17 @@ class TBBdata:
     
         
 def open(filenames,blocksize=1024,selection=None):
-    #import IO
+    """Open TBB hdf5 files. Returns a TBBdata object.
+
+    *filenames* List of names from the files to open
+    *blocksize* NR samples per data block (import for FFT resolution
+    *selection* Which antennas to select. 3 options:
+                - list of Antenna IDs 
+                   (first 3 digits stationID 
+                    next 3 digits RSPid (=RCUid/8)
+                    next 3 digits RCUid)
+                - list of antenna numbers in file
+    """
     return TBBdata(filenames,blocksize,selection)
 
 def openfiles(filenames,blocksize=1024):
@@ -151,10 +213,6 @@ def openfiles(filenames,blocksize=1024):
 
     *filenames* list of the files to open
 
-    Examples (also for doctests):
-
-    >>> filenames(1,2)
-    (1, 2)
     """
 
     files=[]
@@ -189,6 +247,19 @@ def openfiles(filenames,blocksize=1024):
     return files
 
 def get(files, keyword,return_as_list=True):
+    """ Get data or metadata for the specified keyword. If not to be returned as list
+    it tries to return is as 1 object. 
+    
+    If the value is the same for all files, this will be returned. 
+    If the value is an IntVec, FloatVec or an hArray where the first dimensions is 
+    the same as the number of selected antennas, an equal type object will be returned 
+    with the value for all the antennas.
+    If neither of these can be achieved it will return a list with values per file.
+
+    *files* List of crfiles
+    *keyword* Variable to return
+    *return_as_list* Return a list with a value per file.
+    """
     if return_as_list:
         ret=[]
         for i in range(len(files)):
@@ -232,6 +303,14 @@ def get(files, keyword,return_as_list=True):
     return ret
 
 def set(files, keyword, value):
+    """ Set the keyword with the value for all the files. Currently two options are 
+    supported:
+        - One value for all files, e.g. files.set("block",1024)
+        - A list with values per file.
+
+    Support for a hArray of Vector with values for all antennas should be added.
+
+    """
     if isinstance(value,list):
         for num,file in enumerate(files):
             file.set(keyword,value[num])
@@ -243,6 +322,12 @@ def set(files, keyword, value):
     return True
 
 def readFx(files,fxdata,block=-1):
+    """read a block of raw timeseries data for all (selected) antennas. 
+
+    *fxdata* Array in which to return the data
+    *block*  Block for which data should be read
+
+    """
     if block == -1:
         block=get(files,"block",True)
         for num,bl in enumerate(block):
@@ -263,6 +348,15 @@ def readFx(files,fxdata,block=-1):
     return True
 
 def applySelection(selection,array,rArray=None):
+    """ Select from the data only the applied selection
+
+    *selection* Number of antennas for which to return the data 
+                (NOT antennaIDs, the can be converted by antIDsToSelection)
+    *array*     Array on which to apply the selection
+    *rArray*    Array to return the selected data in.
+
+
+    """
     # Still needs a dimenstion check, so may need files after all
     if not rArray:
         returnArray=True
@@ -320,20 +414,6 @@ def antIDsToSelection(files,SelAntIDs):
             selection.append(num)
 
     return selection
-
-def example_function(a, b):
-    """This is a docstring, each function should have one.
-
-    *a* description of parameter a
-    *b* description of parameter b
-
-    Examples (also for doctests):
-
-    >>> example_function(1,2)
-    (1, 2)
-    """
-
-    return a, b
 
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
