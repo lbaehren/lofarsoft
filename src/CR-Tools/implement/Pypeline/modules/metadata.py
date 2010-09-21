@@ -5,7 +5,7 @@
 import numpy as np
 import struct
 import os
-import metadata as md
+import pycrtools as hf
 
 def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
     """Return metadata values, given the antennaIDs and the antennaset.
@@ -18,21 +18,24 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
 
     dim2=0
     if keyword is "StationPhaseCalibration":
-        functionname=md.getStationPhaseCalibration
+        functionname=getStationPhaseCalibration
     elif keyword is "CableDelays":
-        functionname=md.getCableDelays
+        functionname=getCableDelays
         dim2=1
     elif keyword is "RelativeAntennaPositions":
-        functionname=md.getRelativeAntennaPositions
+        functionname=getRelativeAntennaPositions
     elif keyword is "ClockCorrection":
-        functionname=md.getClockCorrection
+        functionname=getClockCorrection
         dim2=1
     elif keyword is "StationPositions":
-        functionname=md.getStationPositions
+        functionname=getStationPositions
     else:
         print "function not supported."
         return False
 
+    #import pycrtools as hf
+    if isinstance(antennaIDs,hf.IntArray):
+        antennaIDs=antennaIDs.vec()
     stationIDs=np.array(list(antennaIDs))/1000000
     rcuIDs=np.mod(antennaIDs,1000)
     allStIDs=np.unique(stationIDs)
@@ -58,7 +61,7 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
             for st in allStIDs:
                 mdata[stationIDs==st]=allValues[st]   
     else:    
-        import pycrtools as hf
+        #import pycrtools as hf
         if keyword not in ["StationPositions","ClockCorrection"]:
             if dim2==1:
                 mdata=hf.hArray(allValues[allStIDs[0]],antennaIDs.getDim())
@@ -130,7 +133,7 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
     else:
         print "Station phase calibration data not yet available for antennaset",antennaset,".Returning 1"
         if return_as_hArray:
-            import pycrtools as hf
+            #import pycrtools as hf
             complexdata=hf.hArray(complex,[96,512],fill=complex(1,0))    
         else:
             complexdata=np.zeros(shape=(96,512),dtype=complex)
@@ -153,7 +156,7 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
     else:
         print "Calibration data not yet available for station",station,"Returning 1"
         if return_as_hArray:
-            import pycrtools as hf
+            #import pycrtools as hf
             complexdata=hf.hArray(complex,[96,512],fill=complex(1,0))    
         else:
             complexdata=np.zeros(shape=(96,512),dtype=complex)
@@ -179,7 +182,7 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
 
     #
     if return_as_hArray:
-        import pycrtools as hf
+        #import pycrtools as hf
         data=hf.hArray(data,[512*96,2])
         realdata=hf.hArray(float,[512*96])
         imagdata=hf.hArray(float,[512*96])
@@ -236,7 +239,7 @@ def getCableDelays(station,antennaset,return_as_hArray=False):
     cabfile=open(cabfilename)
 
     if return_as_hArray:
-        import pycrtools as hf
+        #import pycrtools as hf
         cable_delays=hf.hArray(float,dimensions=[96])
     else:
         cable_delays=np.zeros(96)
@@ -337,7 +340,7 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
     hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
 
 
-    >>> md.getRelativeAntennaPositions("CS005","HBA",False)
+    >>> getRelativeAntennaPositions("CS005","HBA",False)
     array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
            [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
             [  1.28090000e+01,   2.88400000e+00,   1.00000000e-03],....
@@ -349,7 +352,7 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
     142
     >>> rcu_ids=np.mod(antenna_ids,1000)
     array([5, 8, 80])
-    >>> all_antenna_pos=md.getRelativeAntennaPositions(station_id,"LBA_INNER",False)
+    >>> all_antenna_pos=getRelativeAntennaPositions(station_id,"LBA_INNER",False)
     >>> used_antenna_pos=all_antenna_pos[rcu_ids]
     array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
            [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
@@ -407,7 +410,7 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
 
     # Return requested type
     if return_as_hArray:
-        import pycrtools as hf
+        #import pycrtools as hf
         antpos=hf.hArray(antpos,dimensions=[2*int(nrantennas),int(nrdir)])
     else:
         antpos=np.asarray(antpos).reshape(2*int(nrantennas),int(nrdir))
@@ -461,12 +464,12 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
     Examples:
     >>> import pycr_metadata as md
     >>>
-    >>> ant_pos=md.get_antenna_positions(142,"LBA_INNER",True)
+    >>> ant_pos=get_antenna_positions(142,"LBA_INNER",True)
     >>> ant_pos
     hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
 
 
-    >>> ant_pos=md.get_antenna_positions("CS005","HBA",False)
+    >>> ant_pos=get_antenna_positions("CS005","HBA",False)
     >>> ant_pos
     array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
            [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
@@ -479,7 +482,7 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
     142
     >>> rcu_ids=np.mod(antenna_ids,1000)
     array([5, 8, 80])
-    >>> all_antenna_pos=md.get_antenna_positions(station_id,"LBA_INNER",False)
+    >>> all_antenna_pos=get_antenna_positions(station_id,"LBA_INNER",False)
     >>> used_antenna_pos=all_antenna_pos[rcu_ids]
     array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
            [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
@@ -530,7 +533,7 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
     stationpos = [lon, lat, height]
     # Return requested type
     if return_as_hArray:
-        import pycrtools as hf
+        #import pycrtools as hf
         stationpos=hf.hArray(stationpos,3)
     else:
         stationpos=np.asarray(stationpos)
