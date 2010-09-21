@@ -82,8 +82,9 @@
  #LOPES-GT,simName,source,KRETA_ver,az_in(deg),errAz_in(deg),ze_in(deg),errZe_in(deg),coreN_in(m),coreE_in(m),errCore(m),Ne_in,Nmu_in,Nmu^tr_in,E_in(eV),errlgE
 */
 
-const static bool simulationDistances = false; //true;  // decide wether to use the lateral distances of simulation or of data
+const static bool simulationDistances = true; //true;  // decide wether to use the lateral distances of simulation or of data
 const static double gradeg=(180./TMath::Pi());
+const static double antennaHeightOffset = 12615.9; // used in REAS, for LOPES 30 EW (corresponds to height of antenna 1)
 
 int main (int argc, char *argv[])
 {
@@ -735,11 +736,14 @@ int main (int argc, char *argv[])
         double EWfield=0.,NSfield=0.,VEfield=0.;
         double timeREAS = 0.;
         double distS=0.,azSREAS=0.,azS=0.,azimuth=0.,zenith=0.;
+        double distX = 0., distY = 0., distZ = 0.;
+        double groundDist= 0., zShower = 0.;
         double sim2lopesField=(2.9979246e+10/31.); //convert to muV/m/MHz and divide by the band-width
         double distanceS=0., distanceSerr=0.,showerCoord=0.;
         double distanceR=0.;
 
-        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat";
+        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat";
+        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to74/maxamp_summary.dat";
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
@@ -753,6 +757,11 @@ int main (int argc, char *argv[])
         // get simulation azimuth and zenith form dictionary
         AzDictS = m_dictAz[Gt]; //in deg!
         ZeDictS = m_dictZe[Gt];
+        // direction used for lateral distance calculation
+        //values from KASCADE or Grande, so taken from the dict file //(Az=0 in the north! same as LOPES!)
+        azimuth = AzDictS/gradeg; 
+        zenith = ZeDictS/gradeg;            
+        
         //check that are the same!
         //cout<<"from dict file Az: "<<AzDictS<<"   ; zeS: " <<ZeDictS<<endl;
         //cout<<"from KA        Az: "<<Az*gradeg<<" ; zeS: " <<Ze*gradeg<<endl;
@@ -761,11 +770,17 @@ int main (int argc, char *argv[])
           reasFile.getline(buffer2,1024);
           istringstream iss2 (buffer2);
           if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {//in sim file:az in reas sistem
-            iss2>>NantS>>distS>>azSREAS>>NSfield>>EWfield>>VEfield>>timeREAS;
+            iss2>>NantS>>distS>>azSREAS>>NSfield>>EWfield>>VEfield>>timeREAS>>distX>>distY>>distZ;
+            
             azS=180.-(azSREAS*gradeg); //convert to LOPES coordinates
-            if(azS<0.){
-            azS = azS+360.; //azS in grad
-             }
+            
+            // preperationis for calculating antenna height in shower coordinates
+            distZ -= antennaHeightOffset; // substract offset of antenna Height in REAS 3 (defined at beginning of file)
+            groundDist = sqrt(distX*distX + distY*distY + distZ*distZ);
+            
+            if(azS<0.) {
+              azS = azS+360.; //azS in grad
+            }
             //cout<<Gt<<"-"<<m_dict[Gt]<<": summaryfile.dat az: "<<azSREAS*gradeg<<" and converted to LOPES: "<<azS<<endl;
             //look if antenna exists at all in data then separe EW and NS
             if (m_recPulses.find(NantS) != m_recPulses.end()) {
@@ -782,11 +797,6 @@ int main (int argc, char *argv[])
                 // EWfield=0.1;  // Steffen used 0.1 as minimum value for simulations
               }
               
-              // direction used for lateral distance calculation
-              //values from KASCADE or Grande, so taken from the dict file //(Az=0 in the north! same as LOPES!)
-              azimuth = AzDictS/gradeg; 
-              zenith = ZeDictS/gradeg;
-            
               if (m_recPulses[NantS].polarization == "EW") {
                 //cout<<"   xxxxxx   EW polarization   xxxxxx  "<<endl;
                 //define recEW map
@@ -808,20 +818,27 @@ int main (int argc, char *argv[])
                 }  
                 //cout<<"az sim converted : "<< azS << " az data LOPES antennas : " << azimuth*gradeg <<" ze LOPES "<< zenith*gradeg <<endl;
                 showerCoord=sqrt(1.0 - pow(cos((azS/gradeg)-azimuth),2)*pow(sin(zenith),2));
-                //showerCoord=sqrt(1.0 - pow(cos(azS-(AzL/gradeg)),2)*pow(sin((90.-ElL)/gradeg),2));
                 distanceS=0.01*distS*showerCoord;
                 //cout<<"shower coord system: "<<showerCoord<<endl;
                 //cout<<"sim       distance : "<<distanceS<<endl; 
-                if ((distanceS-distanceR)>(distanceS*0.05)) {
+                if ((distanceS-distanceR)>((distanceS+0.5)*0.05)) {
                   cout<<"WARNING: distance simulated EW channel:  "<<distanceS<<" distance from LOPES  "<<distanceR<<endl;
                   checkDistanceEW<<m_dict[Gt]<<"\t"<<NantS<<"\t"<<distanceS<<"\t"<<distanceR<<endl;
-                }
-                
+                }            
                 if (simulationDistances) 
                   simPropEW.dist =distanceS;
                 else  
                   simPropEW.dist =distanceR;
                 simPropEW.disterr = distanceSerr;
+                
+                // calculate antenna height (z) in shower coordinates
+                zShower = -0.01* groundDist * sin(zenith) * cos(azS/gradeg-azimuth);
+                if ( abs(zShower-m_recEW[NantS].distZ) > (abs(zShower*0.05)+0.5) ) {
+                  cout<<"WARNING: z_shower simulated EW channel:  "<<zShower<<"\t z_shower from LOPES  "<<m_recEW[NantS].distZ<<endl;
+                }
+                simPropEW.distZ = zShower;
+                simPropEW.distZerr = 0.;
+                
                 m_simEW[NantS] = simPropEW; //fill the sim map
               }
               if (m_recPulses[NantS].polarization == "NS") {
@@ -859,6 +876,14 @@ int main (int argc, char *argv[])
                   simPropNS.dist =distanceR;
                 simPropNS.disterr = distanceSerr;
           
+                // calculate antenna height (z) in shower coordinates
+                zShower = -0.01* groundDist * sin(zenith) * cos(azS/gradeg-azimuth);
+                if ( abs(zShower-m_recNS[NantS].distZ) > (abs(zShower*0.05)+0.5) ) {
+                  cout<<"WARNING: z_shower simulated EW channel:  "<<zShower<<"\t z_shower from LOPES  "<<m_recEW[NantS].distZ<<endl;
+                }
+                simPropNS.distZ = zShower;
+                simPropNS.distZerr = 0.;
+                
                 m_simNS[NantS] = simPropNS;//fill the sim map
               }
             }
