@@ -1,10 +1,10 @@
-#!/usr/bin/env python
 import glob, os, sys, getopt, re
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.patches as patches
 import matplotlib.path as path
+import time
 
 
 Nbins=7630 # corresponds usually to 10s
@@ -17,6 +17,10 @@ direxclmask=[]            # mask to exclude directories
 dirs = []                 # directories with *.sub??? files. They will either be found from the top-level directory
                           # or directly specified from the command line
 is_top_level_dir = False  # True, if we specify input dirs from the command line
+# if True then will use only those observations newer than some date
+is_from=False
+fromdate=""
+
 
 
 def usage (prg):
@@ -31,6 +35,7 @@ def usage (prg):
 	 --percents              - every bin in the histogram is normalized by the total number\n\
 				   of observations in _this_ bin\n\
          --excludedirs <value>   - mask to exclude directories\n\
+         -f, --from <YYYY-MM-DD> - use only observations since this date\n\
          -h, --help              - print this message\n" % (prg,)
 
 def parsecmdline (prg, argv):
@@ -41,7 +46,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "hn:t:", ["help", "nbins=", "histbins=", "createreports", "percents", "excludedirs="])
+                        opts, args = getopt.getopt (argv, "hn:t:f:", ["help", "nbins=", "histbins=", "createreports", "percents", "excludedirs=", "from="])
                         for opt, arg in opts:
                                 if opt in ("-h", "--help"):
                                         usage (prg)
@@ -69,6 +74,13 @@ def parsecmdline (prg, argv):
 					global direxclmask
 					direxclmask = arg.split(" ")
 
+	                        if opt in ("-f", "--from"):
+        	                        global is_from
+                	                is_from = True
+                        	        global fromdate
+                                	fromdate = arg
+
+
                         if not args:
                                 print "No top-level direcory or input directories!\n"
                                 usage (prg)
@@ -91,9 +103,20 @@ def parsecmdline (prg, argv):
 if __name__=="__main__":
 	parsecmdline (sys.argv[0].split("/")[-1], sys.argv[1:])
 
+	if is_from == True:
+        	fromdate_s = time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+		cmd="date +%Y-%m-%d"
+		nowdate=os.popen(cmd).readlines()[0][:-1]
+                c1 = time.strptime(nowdate, "%Y-%m-%d")
+                to_show=time.mktime(c1)-fromdate_s
+		to_show = int(to_show/86400.)
+
 	if is_top_level_dir:
 		# search for directories RSP? and write them to ".find" file
-		dirs = [dir[:-1] for dir in os.popen("find %s -type d -group pulsar -wholename \"*/RSP?*\" -print" % (top_level_dir,)).readlines()]
+		if is_from == False:
+			dirs = [dir[:-1] for dir in os.popen("find %s -type d -group pulsar -wholename \"*/RSP?*\" -print" % (top_level_dir,)).readlines()]
+		else:
+			dirs = [dir[:-1] for dir in os.popen("find %s -type d -group pulsar -ctime -%d -wholename \"*/RSP?*\" -print" % (top_level_dir,to_show)).readlines()]
 	currentdir = os.getcwd()
 
 	# exclude directories
@@ -113,6 +136,8 @@ if __name__=="__main__":
 	# running "subdyn.py" script to create a dynamic spectrum and the list of bad channels *.rfirep
 	Nsubfiles = {}
 	for d in dirs:
+		if not os.path.isdir(d):
+			continue	
 		os.chdir(d)
 		print d
 		rfireps=glob.glob('*.rfirep')
@@ -132,6 +157,8 @@ if __name__=="__main__":
 	freqs=np.empty(0)
 	# reading all *.rfirep files 
 	for d in dirs:
+		if not os.path.isdir(d):
+			continue	
 		rfireps=glob.glob(d + '/*.rfirep')
 		if len(rfireps) > 0:
 			rfirep=rfireps[0]
@@ -156,6 +183,8 @@ if __name__=="__main__":
 	number_of_obs=0
 	# reading all *.sub.inf files to get the range of frequencies used
 	for d in dirs:
+		if not os.path.isdir(d):
+			continue	
 		rfireps=glob.glob(d + '/*.rfirep')
 		if len(rfireps) > 0:
 			number_of_obs += 1
@@ -229,19 +258,22 @@ if __name__=="__main__":
 		ax.set_xlim(left[0]-(bins[1]-bins[0])/2., right[-1]+(bins[1]-bins[0])/2.)
 		ax.set_ylim(bottom.min(), top.max())
 #		ax.set_ylim(0., 100.)
-		plt.ylabel("Percent")
+		plt.ylabel("Fraction (%)")
 
 	print
+	if is_from == True:
+		print "Processed directories since %s" % (fromdate, )
 	print "Number of directories = ", len(dirs)
 	print "Number of processed directories = %d [number of obs: %d]" % (number_of_obs, number_of_obs/4)
 
 	print "Frequency span = %.4g MHz [%.4g - %.4g]" % (freqspan, freqs[0], freqs[-1])
 	print "Minimum frequency separation = %.4g MHz" % (freqbin,)
 	print "Number of bins to plot all frequencies separately = %.1f (current: %d)" % (float(freqspan)/freqbin, histbins)
-	print "Current histogram bin width = %.4g MHz" % (bins[1] - bins[0],)
+	print "Current histogram bin width = %.6f MHz" % (bins[1] - bins[0],)
 
 	# common part for both types of histograms
-	plt.title("Bad frequency channels over %d observations" % (number_of_obs/4,))
+#	plt.title("Bad frequency channels over %d observations" % (number_of_obs/4,))
+	plt.title("RFI summary after %d observations" % (number_of_obs/4,))
 	plt.xlabel("Frequency (MHz)")
 	plt.grid(True)
 
