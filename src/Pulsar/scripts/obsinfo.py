@@ -944,10 +944,26 @@ if __name__ == "__main__":
 			redout=os.popen(cmd).readlines()
 			if np.size(redout) > 0:
 				reddir=redout[0][:-1]
+				# getting first the name of the main pulsar (first in the command-line option)
+				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir, "*.log", cexec_egrep_string)
+				mainlog=os.popen(cmd).readlines()
+				if np.size(mainlog) > 0:
+					cmd="cat %s | grep id | head -n 1 2>/dev/null" % (mainlog[0][:-1],)
+					cmdline=os.popen(cmd).readlines()
+					if np.size(cmdline) > 0:
+						mainpsr="undefined"
+						param=cmdline[0][:-1].split(" ")
+						for k in np.arange(len(param)):
+        						if param[k] == "-p":
+                						mainpsr=param[k+1].split(",")[0]
+                						break
 				# RSP0
 				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) > 0:
-					cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.pfd*png", cexec_egrep_string)
+					if mainpsr == "undefined":
+						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.pfd*png", cexec_egrep_string)
+					else:
+						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", mainpsr + "*.pfd*png", cexec_egrep_string)
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
 						# copying png files to local directory
@@ -955,14 +971,20 @@ if __name__ == "__main__":
 						os.system(cmd)
 						profiles_array = np.append(profiles_array, status[0].split("/")[-1].split(".pfd")[0] + ".pfd")
 					# getting chi-squared
-					cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.prepout", cexec_egrep_string)
+					if mainpsr == "undefined":
+						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.prepout", cexec_egrep_string)
+					else:
+						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", mainpsr + "*.prepout", cexec_egrep_string)
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
 						chi_array = np.append(chi_array, status[0][:-1])
 				# RSPA
 				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) > 0:
-					cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", "*.pfd*png", cexec_egrep_string)
+					if mainpsr == "undefined":
+						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", "*.pfd*png", cexec_egrep_string)
+					else:
+						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", mainpsr + "*.pfd*png", cexec_egrep_string)
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
 						# copying png files to local directory
@@ -970,7 +992,10 @@ if __name__ == "__main__":
 						os.system(cmd)
 						profiles_array = np.append(profiles_array, status[0].split("/")[-1].split(".pfd")[0] + ".pfd")
 					# getting chi-squared
-					cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", "*.prepout", cexec_egrep_string)
+					if mainpsr == "undefined":
+						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", "*.prepout", cexec_egrep_string)
+					else:
+						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", mainpsr + "*.prepout", cexec_egrep_string)
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
 						chi_array = np.append(chi_array, status[0][:-1])
