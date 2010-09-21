@@ -16,8 +16,8 @@ include (CTest)
 ## ------------------------------------------------------------------------------
 ## User selectable options
 
-option (WCSTOOLS_BUILD_TOOLS "Build the applications?" OFF)
-option (WCSTOOLS_BUILD_LIBNED "Build the libned library?" OFF)
+option (WCSTOOLS_BUILD_TOOLS  "Build the applications?"   YES )
+option (WCSTOOLS_BUILD_LIBNED "Build the libned library?" NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
