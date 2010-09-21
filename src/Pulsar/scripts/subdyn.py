@@ -10,12 +10,17 @@ rfilimit = 30  # (in percents) if more, whole subband will be excluded
 tsamp=0.00131072  #  sampling interval (s)
 samples2show = 0 #  size of window to show in seconds (if 0, show the whole file(s))
 samples_offset = 0 # offset from the beginning to skip (if 0 , show the whole file(s))
-Nbins = 750 # number of bins to average
+Nbins = 7630 # number of bins to average (usually corresponds to ~10s)
 histbins = 100 # number of bins in the histogram
 xlow=-32768 # lowest sample value (for signed short)
 xhigh=32767 # hoghest sample value
 samplesize = 2 # 2 bytes, because we have 16-bit data
 fs=10 # fontsize
+is_statistics = False # if True prints statistics about large positive/negative samples
+# number of occasions when number of positive large peaks is larger than number of negative ones
+numposlarger=0
+# number of occasions when number of positive large peaks is smaller than number of negative ones
+numpossmaller=0
 
 def usage (prg):
         """ prints the usage info about the current program
@@ -23,12 +28,13 @@ def usage (prg):
         print "Program %s plots the dynamic spectrum based on raw subbands data\n" % (prg,)
         print "Usage: %s [-n, --nbins <value>] [-t, --threshold <value>]\n\
 			[--rfilimit <value>] [--excludeonly] [-h, --help] <*sub>\n\
-         -n, --nbins <value>     - number of samples to average (default: 750)\n\
+         -n, --nbins <value>     - number of samples to average (default: 7630)\n\
 	 -w, --win   <value>     - size of the window (in seconds) to show\n\
 	 -l, --offset  <value>   - offset from the beginning (in seconds)\n\
          -t, --threshold <value> - threshold (in sigma) to clip RFI (default: 6)\n\
 	 --excludeonly           - only exclude completely junk subbands\n\
 	 --rfilimit <value>      - percent of RFI per subband allowed not to exclude whole subband (default: 30)\n\
+         --statistics            - print info about fraction of large positive and negative samples\n\
 	 --saveonly              - only saves png file and exits\n\
          -h, --help     - print this message\n" % (prg,)
 
@@ -41,7 +47,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "hn:t:w:l:", ["help", "nbins=", "threshold=", "rfilimit=", "excludeonly", "saveonly", "win=", "offset="])
+                        opts, args = getopt.getopt (argv, "hn:t:w:l:", ["help", "nbins=", "threshold=", "rfilimit=", "excludeonly", "saveonly", "win=", "offset=", "statistics"])
                         for opt, arg in opts:
                                 if opt in ("-h", "--help"):
                                         usage (prg)
@@ -74,6 +80,10 @@ def parsecmdline (prg, argv):
 				if opt in ("-l", "--offset"):
 					global samples_offset
 					samples_offset = float(arg)
+
+                                if opt in ("--statistics"):
+					global is_statistics
+					is_statistics = True
 
                         if not args:
                                 print "No subband files!\n"
@@ -361,20 +371,40 @@ if __name__=="__main__":
 		# to exclude outliers we sort the values in Nbins interval first and then use only first half of it
 		mean[i] = [np.mean(np.sort(ndata[k*Nbins:(k+1)*Nbins])[0:Nbins/2]) for k in np.arange(0, int(size/Nbins), 1)]
 		rms[i] = [np.std(np.sort(ndata[k*Nbins:(k+1)*Nbins])[0:Nbins/2]) for k in np.arange(0, int(size/Nbins), 1)]
+		# getting statistics about fraction of positive/negative samples
+		if is_statistics == True:
+			condition=np.zeros(int(size/Nbins), dtype=bool)
+			lev = np.array([(spectrum[i][k]-mean[i][k])/rms[i][k] for k in np.arange(0, int(size/Nbins), 1)])
+			levsize=np.size(lev)
+			condition = condition | (lev > threshold)
+			pospeak = np.size(lev.compress(condition))
+			condition=np.zeros(int(size/Nbins), dtype=bool)
+			condition = condition | (lev < -threshold)
+			negpeak = np.size(lev.compress(condition))
+			if pospeak > negpeak:
+				numposlarger += 1
+			if pospeak < negpeak:
+				numpossmaller += 1
 
-		# check if all values in rms are zeros. If so, then exclude thsi subband
+			pospeak = float((pospeak * 100.)/levsize)
+			negpeak = float((negpeak * 100.)/levsize)
+#			print "Stat[%d]: [+%.1fs] = %.1f%%   [-%.1fs] = %.1f%%" % (i, threshold, pospeak, threshold, negpeak)
+
+		# check if all values in rms are zeros. If so, then exclude this subband
 		if np.size(np.trim_zeros(np.sort(rms[i]), 'bf')) != 0:
-			sig = np.trim_zeros(np.sort(rms[i]), 'bf')[0]
+#			sig = np.trim_zeros(np.sort(rms[i]), 'bf')[0]
 			# I should remove np.abs at some point, because it's not really correct. I am using it here
 			# to avoid really huge negative spikes
-			av = np.trim_zeros(np.sort(np.abs(mean[i])), 'bf')[0]
+#			av = np.trim_zeros(np.sort(np.abs(mean[i])), 'bf')[0]
 
-			levels[i] = [np.abs((float(k - av))/sig) for k in spectrum[i]]
+#			levels[i] = [np.abs((float(spectrum[i][k] - av))/sig) for k in np.arange(0, int(size/Nbins), 1)]
+			levels[i] = [np.abs((spectrum[i][k] - mean[i][k])/rms[i][k]) for k in np.arange(0, int(size/Nbins), 1)]
 			mask[i] = [(levels[i][k] > threshold and spectrum[i][k] or 0) for k in np.arange(0, int(size/Nbins), 1)]
 			clipped[i] = [(spectrum[i][k] - mask[i][k]) for k in np.arange(0, int(size/Nbins), 1)]
-
 			# are there many zeros?
-			rfi_fraction = (float(len(clipped[i]) - len(np.trim_zeros(clipped[i])))/len(clipped[i]))*100.
+			condition=np.zeros(int(size/Nbins), dtype=bool)
+			condition=condition | (levels[i] > threshold)
+			rfi_fraction = (float(np.size(clipped[i].compress(condition)))/np.size(clipped[i]))*100.
 		else:
 			rfi_fraction = 100.
 
@@ -387,6 +417,10 @@ if __name__=="__main__":
 
 		if is_saveonly == False: plot_update(spectrum)
 		
+	if is_statistics == True:
+		numposlarger = "%.1f" % (float(numposlarger)/nfiles, )
+		numpossmaller = "%.1f" % (float(numpossmaller)/nfiles, )
+		print "Number of pos>neg AND neg>pos occasions:  %s   %s" % (numposlarger, numpossmaller)
 	badchanfreqs = [cfreq + float(sb) * chanbw for sb in badbands]
 	rfirepname = subfiles[0].split(".sub")[0] + ".sub" + str(subband_offset) + "-" + str(subband_offset+nfiles-1) + ".rfirep"
 	np.savetxt("." + rfirepname, np.transpose((badbands, badchanfreqs)), fmt="%d\t\t%.6g")
