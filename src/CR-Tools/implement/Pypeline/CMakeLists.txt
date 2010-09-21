@@ -40,7 +40,7 @@ set (PYPELINE_SCRIPTS
   hfplot.py
   pycrinit.py
   )
-  
+
 foreach (FILE ${PYPELINE_CPP_FILES})
   # Variable substitutions and iterations
   add_custom_command (
@@ -95,7 +95,7 @@ target_link_libraries (hftools
   ${BOOST_LIBRARIES}
   ${PYTHON_LIBRARIES}
   ${FFTW3_LIBRARIES}
-  ${GSL_LIBRARIES}	
+  ${GSL_LIBRARIES}
   )
 
 ##to speed up computations use -g -O2 or -g0 -O3 if no debuggng is needed.
@@ -173,6 +173,7 @@ foreach(FILENAME ${PYPELINE_MODULES})
 
   add_custom_command(
     TARGET hftools
+    COMMAND ${CMAKE_COMMAND} -E remove ${DST}
     COMMAND ${CMAKE_COMMAND} -E create_symlink ${SRC} ${DST}
   )
 endforeach(FILENAME)
@@ -184,6 +185,7 @@ foreach(FILENAME ${PYPELINE_SCRIPTS})
 
   add_custom_command(
     TARGET hftools
+    COMMAND ${CMAKE_COMMAND} -E remove ${DST}
     COMMAND ${CMAKE_COMMAND} -E create_symlink ${SRC} ${DST}
   )
 endforeach(FILENAME)
