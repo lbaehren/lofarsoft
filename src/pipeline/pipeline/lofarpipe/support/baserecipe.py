@@ -141,20 +141,7 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
             raise PipelineRecipeFailed("%s failed", configblock)
         return outputs
 
-    def go(self):
-        """
-        This is where the work of the recipe gets done.
-        Subclasses should define their own go() method, but remember to call
-        this one to perform necessary initialisation.
-        """
-        # Every recipe needs a job identifier
-        if not self.inputs.has_key("job_name"):
-            raise PipelineException("Job undefined")
-
-        if not self.inputs.has_key("start_time"):
-            import datetime
-            self.inputs["start_time"] = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
-
+    def _read_config(self):
         # If a config file hasn't been specified, use the default
         if not self.inputs.has_key("config"):
             # Possible config files, in order of preference:
@@ -169,25 +156,46 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
             if not self.inputs.has_key("config"):
                 raise PipelineException("Configuration file not found")
 
-        self.logger.debug("Pipeline start time: %s" % self.inputs['start_time'])
-
-        self.config = ConfigParser({
+        config = ConfigParser({
             "job_name": self.inputs["job_name"],
             "start_time": self.inputs["start_time"],
             "cwd": os.getcwd()
         })
-        self.config.read(self.inputs["config"])
+        config.read(self.inputs["config"])
+        return config
 
+    def go(self):
+        """
+        This is where the work of the recipe gets done.
+        Subclasses should define their own go() method, but remember to call
+        this one to perform necessary initialisation.
+        """
+        # Every recipe needs a job identifier
+        if not self.inputs.has_key("job_name"):
+            raise PipelineException("Job undefined")
+
+        if not self.inputs.has_key("start_time"):
+            import datetime
+            self.inputs["start_time"] = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
+
+        self.logger.debug("Pipeline start time: %s" % self.inputs['start_time'])
+
+        # Config is passed in from spawning recipe. But if this is the start
+        # of a pipeline, it won't have one.
+        if not hasattr(self, "config"):
+            self.config = self._read_config()
+
+        # Ensure we have a runtime directory
         if not self.inputs.has_key('runtime_directory'):
             self.inputs["runtime_directory"] = self.config.get(
                 "DEFAULT", "runtime_directory"
             )
         else:
             self.config.set('DEFAULT', 'runtime_directory', self.inputs['runtime_directory'])
-
         if not os.access(self.inputs['runtime_directory'], os.F_OK):
             raise IOError, "Runtime directory doesn't exist"
 
+        # ...and task files, if applicable
         if not self.inputs.has_key("task_files"):
             try:
                 self.inputs["task_files"] = utilities.string_to_list(
@@ -195,7 +203,6 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
                 )
             except NoOptionError:
                 self.inputs["task_files"] = []
-
         self.task_definitions = ConfigParser(self.config.defaults())
         self.task_definitions.read(self.inputs["task_files"])
 
@@ -220,7 +227,7 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
             run_remote_command, **kwargs
         )
 
+        # Only configure handlers if our parent is the root logger.
+        # Otherwise, our parent should have done it for us.
         if isinstance(self.logger.parent, logging.RootLogger):
-            # Only configure handlers if our parent is the root logger.
-            # Otherwise, our parent should have done it for us.
             self._setup_logging()
