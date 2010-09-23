@@ -58,4 +58,19 @@ class StatefulRecipe(BaseRecipe):
         state = [self.inputs, self.state]
         cPickle.dump(state, statefile)
 
+    def go(self):
+        super(StatefulRecipe, self).go()
+        statefile = os.path.join(
+            self.config.get('layout', 'job_directory'),
+            'statefile'
+        )
+        try:
+            statefile = open(statefile, 'r')
+            self.inputs, self.state = cPickle.load(statefile)
+            statefile.close()
+            self.completed = list(reversed(self.state))
+        except (IOError, EOFError):
+            # Couldn't load state
+            self.completed = []
+
     run_task = stateful(BaseRecipe.run_task)
