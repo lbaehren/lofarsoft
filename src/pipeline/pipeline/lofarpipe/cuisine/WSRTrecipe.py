@@ -128,6 +128,8 @@ class WSRTrecipe(object):
         self.logger.info('recipe ' + name + ' started')
         try:
             status = self.go()
+            if not self.outputs.complete():
+                self.logger.warn("Note: recipe outputs are not complete")
         except Exception, e:
             self._log_error(e)
             self.outputs = None ## We're not generating any results we have
