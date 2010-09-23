@@ -6,7 +6,7 @@ import os, os.path, stat, glob, sys, getopt
 is_saveonly = False      # if True, script will save the dynamic spectrum in png file
 is_excludeonly = False   # if True, only completely bad subbands will be excluded
 threshold = 6 # threhold in sigmas to clip RFIs
-rfilimit = 30  # (in percents) if more, whole subband will be excluded
+rfilimit = 10  # (in percents) if more, whole subband will be excluded
 tsamp=0.00131072  #  sampling interval (s)
 samples2show = 0 #  size of window to show in seconds (if 0, show the whole file(s))
 samples_offset = 0 # offset from the beginning to skip (if 0 , show the whole file(s))
