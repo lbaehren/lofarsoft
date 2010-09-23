@@ -73,3 +73,5 @@ fi
 matched_string=`cat $matched_file | sort -k 4,4 | head -$nmax | awk '{print $1}' |  tr '\n' ',' | sed 's/,$//g'`
 echo $matched_string
 
+rm $matched_file
+
