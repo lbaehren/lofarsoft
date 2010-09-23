@@ -1,16 +1,18 @@
-#!/bin/ksh
+#!/bin/ksh 
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.22
+VERSION=1.23
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
-"      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces)\n"\
+"      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or\n"\
+"         specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation\n"\
 "         (i.e. single Pulsar: B2111+46) (i.e. multiple pulsars to fold:  B2111+46,B2106+44) \n"\
+"         (i.e. up to 3 brights pulsars to fold at location of FOV: position \n"\
 "      -o Output_Processing_Location ==> Specify the Output Processing Location \n"\
 "         (i.e. /net/sub5/lse013/data4/LOFAR_PULSAR_ARCHIVE_lse013/L2010_06296_red) \n"\
 "      [-all] ==> optional parameter perform folding on entire subband set in addition to N-splits (takes 11 extra min)\n"\
@@ -286,6 +288,36 @@ INCOHERENTSTOKES=`cat $PARSET | grep "OLAP.outputIncoherentStokes"  | head -1 | 
 COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
 CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
 SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
+nrBeams=`cat $PARSET | grep "Observation.nrBeams"  | head -1 | awk -F "= " '{print $2}'`
+
+if [[ $nrBeams > 1 ]] && [[ $PULSAR == "position" ]]
+then
+   echo "Unable to run pipeline based on input position of multiple beams;  single beam only"
+   exit 1
+fi
+
+# Pulsar = "position" indicates that the observation is based on a position setting;
+# figure out what the brightest/closest N Pulsars to the position (N=3)
+if [[ $PULSAR == "position" ]]
+then
+    pi=$(echo "scale=10; 4*a(1)" | bc -l)
+	RRA=`cat $PARSET | grep "Observation.Beam\[0\].angle1"  | head -1 | awk -F "= " '{print $2}'`
+	RDEC=`cat $PARSET | grep "Observation.Beam\[0\].angle2"  | head -1 | awk -F "= " '{print $2}'`
+	ANT_SHORT=`cat $PARSET | grep "Observation.antennaArray"  | head -1 | awk -F "= " '{print $2}'`
+    echo "Position $RRA $RDEC (radians) will be used to find a pulsar in the field"
+    RA_DEG=`echo "scale=10; $RRA / $pi * 180.0" | bc | awk '{printf("%3.9f\n",$1)}'`
+    DEC_DEG=`echo "scale=10; $RDEC / $pi * 180.0" | bc | awk '{printf("%3.9f\n",$1)}'`
+    echo "Position is $RA_DEG $DEC_DEG (deg)"
+    get_list=`pulsars_at_location.sh $RA_DEG $DEC_DEG $ANT_SHORT 3`
+    if [[ $get_list == "ERROR" ]] || [[ $get_list == "NONE" ]]
+    then
+       echo "ERROR: Unable to find Pulsar in FOV of pointing ($RA_DEG $DEC_DEG); unable to run the pipeline"
+       exit 1
+    else
+       PULSAR=$get_list
+       PULSAR_LIST=$get_list
+    fi
+fi
 
 is_psr_list=`echo $PULSAR_LIST | grep ","`
 if [[ $is_psr_list != "" ]]
@@ -300,8 +332,8 @@ else
    nfolds=1
 fi
 
-echo "PULSAR:" $PULSAR 
-echo "PULSAR:" $PULSAR >> $log
+echo "Main PULSAR:" $PULSAR 
+echo "Main PULSAR:" $PULSAR >> $log
 echo "ARRAY:" $ARRAY 
 echo "ARRAY:" $ARRAY >> $log
 echo "CHANNELS:" $CHAN 
@@ -1045,14 +1077,15 @@ do
 	
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 	then
-		echo "Starting folding for RSP-splits"
-		echo "Starting folding for RSP-splits" >> $log
-		date
-		date >> $log
 		
 		# Fold data per requested Pulsar
 		for fold_pulsar in $PULSAR_LIST
 		do
+			echo "Starting folding for RSP-splits for Pulsar $fold_pulsar"
+			echo "Starting folding for RSP-splits for Pulsar $fold_pulsar" >> $log
+			date
+			date >> $log
+
 		    if (( $flyseye == 0 ))
 		    then
 				for ii in $num_dir
