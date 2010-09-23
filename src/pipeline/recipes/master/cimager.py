@@ -21,7 +21,7 @@ from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.pipelinelogging import log_time, log_process_output
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.pipelinelogging import log_process_output
-from lofarpipe.support.remotecommand import ProcessLimiter
+from lofarpipe.support.remotecommand import ProcessLimiter, run_remote_command
 from lofarpipe.support.parset import Parset
 from lofarpipe.support.parset import get_parset
 from lofarpipe.support.parset import patched_parset
@@ -227,7 +227,8 @@ class cimager(BaseRecipe):
             engine_ppath = self.config.get('deploy', 'engine_ppath')
             engine_lpath = self.config.get('deploy', 'engine_lpath')
             try:
-                cimager_process = self.run_remote_command(
+                cimager_process = run_remote_command(
+                    self.config,
                     self.logger,
                     host,
                     command,

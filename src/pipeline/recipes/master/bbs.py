@@ -23,6 +23,7 @@ from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import gvds_iterator
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 from lofarpipe.support.pipelinelogging import log_process_output
+from lofarpipe.support.remotecommand import run_remote_command
 import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
 
@@ -259,7 +260,8 @@ class bbs(BaseRecipe):
         _monitor_process() for details.
         """
         try:
-            bbs_kernel_process = self.run_remote_command(
+            bbs_kernel_process = run_remote_command(
+                self.config,
                 self.logger,
                 host,
                 command,

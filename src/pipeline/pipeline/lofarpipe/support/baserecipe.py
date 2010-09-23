@@ -212,21 +212,6 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
             )
         ]
 
-        # Set up a local run_remote_command function, primed to use
-        # ssh/paramiko/mpirun, as per pipeline configurtion.
-        kwargs = {}
-        try:
-            kwargs['method'] = self.config.get('remote', 'method')
-        except:
-            pass
-        try:
-            kwargs['key_filename'] = self.config.get('remote', 'key_filename')
-        except:
-            pass
-        self.run_remote_command = partial(
-            run_remote_command, **kwargs
-        )
-
         # Only configure handlers if our parent is the root logger.
         # Otherwise, our parent should have done it for us.
         if isinstance(self.logger.parent, logging.RootLogger):

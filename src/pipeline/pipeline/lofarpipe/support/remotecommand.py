@@ -59,26 +59,33 @@ class ParamikoWrapper(object):
     def kill(self):
         self.chan.close()
 
-def run_remote_command(
-    logger, host, command, environment, arguments=None, method=None, key_filename=None
-):
+def run_remote_command(config, logger, host, command, env, arguments=None):
     """
     Run command on host, passing it arguments from the arguments list and
-    exporting key/value pairs from environment (a dictionary).
+    exporting key/value pairs from env(a dictionary).
 
     Returns an object with poll() and communicate() methods, similar to
     subprocess.Popen.
 
     This is a generic interface to potentially multiple ways of running
-    commands (SSH, mpirun, etc).
+    commands (SSH, mpirun, etc). The appropriate method is chosen from the
+    config block supplied (with SSH as a fallback).
     """
+    try:
+        method = config.get('remote', 'method')
+    except:
+        method = None
 
     if method=="paramiko":
-        return run_via_paramiko(logger, host, command, environment, arguments, key_filename)
+        try:
+            key_filename = config.get('remote', 'key_filename')
+        except:
+            key_filename = None
+        return run_via_paramiko(logger, host, command, env, arguments, key_filename)
     elif method=="mpirun":
-        return run_via_mpirun(logger, host, command, environment, arguments)
+        return run_via_mpirun(logger, host, command, env, arguments)
     else:
-        return run_via_ssh(logger, host, command, environment, arguments)
+        return run_via_ssh(logger, host, command, env, arguments)
 
 def run_via_mpirun(logger, host, command, environment, arguments):
     """
@@ -147,7 +154,8 @@ class RemoteCommandRecipeMixIn(object):
         """
         semaphore.acquire()
         try:
-            process = self.run_remote_command(
+            process = run_remote_command(
+                self.config,
                 self.logger,
                 host,
                 command,
