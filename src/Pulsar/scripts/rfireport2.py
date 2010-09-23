@@ -53,7 +53,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "", ["help", "nbins=", "freqbin=", "createreports", "percents", "excludedirs=", "checkdropouts", "lba", "hba", "flow", "fhigh"])
+                        opts, args = getopt.getopt (argv, "", ["help", "nbins=", "freqbin=", "createreports", "percents", "excludedirs=", "checkdropouts", "lba", "hba", "flow=", "fhigh="])
                         for opt, arg in opts:
                                 if opt in ("--help"):
                                         usage (prg)
