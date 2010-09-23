@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.21
+VERSION=1.22
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose]\n\n"\
@@ -396,7 +396,7 @@ then
    flyseye_tar=1
 fi
 
-if (( $transpose == 1 )) && (( $core > 1 ))
+if [[ $transpose == 1 ]] && [[ $COHERENTSTOKES == 'true' ]] && [[ $core > 1 ]]
 then
    core=1
    echo "WARNING: 2nd Transpose must have N cores=1;  resetting user-repcified core to 1."
@@ -733,7 +733,7 @@ do
 			for ii in $num_dir
 			do
 			  echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
-			  if (( $transpose == 0))
+			  if [[ $transpose == 0 ]] || [[ $STOKES == "incoherentstokes" ]]
 			  then
 			     echo bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
 			     bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
@@ -751,7 +751,7 @@ do
 			    cd ${location}/${STOKES}/"RSP"${ii}
 	
 		 	    echo 'Converting subbands: '`cat RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 
-		 	    if (( $transpose == 0))
+		 	    if [[ $transpose == 0 ]] || [[ $STOKES == "incoherentstokes" ]]
 			    then
 			       echo bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
 			       bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
