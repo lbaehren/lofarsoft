@@ -205,16 +205,15 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
             )
         ]
 
-        # We'll prime a run_remote_command function with the appropriate ssh
-        # information (ie, paramiko or ssh), so that other methods can refer
-        # to it if necessary.
+        # Set up a local run_remote_command function, primed to use
+        # ssh/paramiko/mpirun, as per pipeline configurtion.
         kwargs = {}
         try:
-            kwargs['method'] = self.config.get('ssh', 'method')
+            kwargs['method'] = self.config.get('remote', 'method')
         except:
             pass
         try:
-            kwargs['key_filename'] = self.config.get('ssh', 'key_filename')
+            kwargs['key_filename'] = self.config.get('remote', 'key_filename')
         except:
             pass
         self.run_remote_command = partial(

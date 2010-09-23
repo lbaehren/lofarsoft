@@ -15,6 +15,16 @@ import subprocess
 from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.utilities import spawn_process
 
+class ProcessLimiter(defaultdict):
+    """
+    Wrap a bounded semaphore, giving a convenient way to keep tabs on the
+    number of simultaneous jobs running on a given host.
+    """
+    def __init__(self, nproc):
+        super(ProcessLimiter, self).__init__(
+            lambda: BoundedSemaphore(int(nproc))
+        )
+
 class ParamikoWrapper(object):
     """
     Sends an SSH command to a host using paramiko, then emulates a Popen-like
@@ -49,12 +59,6 @@ class ParamikoWrapper(object):
     def kill(self):
         self.chan.close()
 
-class ProcessLimiter(defaultdict):
-    def __init__(self, nproc):
-        super(ProcessLimiter, self).__init__(
-            lambda: BoundedSemaphore(int(nproc))
-        )
-
 def run_remote_command(
     logger, host, command, environment, arguments=None, method=None, key_filename=None
 ):
@@ -71,8 +75,30 @@ def run_remote_command(
 
     if method=="paramiko":
         return run_via_paramiko(logger, host, command, environment, arguments, key_filename)
+    elif method=="mpirun":
+        return run_via_mpirun(logger, host, command, environment, arguments)
     else:
         return run_via_ssh(logger, host, command, environment, arguments)
+
+def run_via_mpirun(logger, host, command, environment, arguments):
+    """
+    Dispatch a remote command via mpirun.
+
+    Return a Popen object pointing at the MPI command, to which we add a kill
+    method for shutting down the connection if required.
+    """
+    logger.debug("Dispatching command to %s with mpirun" % host)
+    mpi_cmd = ["mpirun", "-host", host]
+    for key in environment.keys():
+        mpi_cmd.extend(["-x", key])
+    mpi_cmd.append("--")
+    mpi_cmd.extend(command.split()) # command is split into (python, script)
+    mpi_cmd.extend(str(arg) for arg in arguments)
+    env = os.environ
+    env.update(environment)
+    process = spawn_process(mpi_cmd, logger, env=env)
+    process.kill = lambda : os.kill(process.pid, signal.SIGKILL)
+    return process
 
 def run_via_ssh(logger, host, command, environment, arguments):
     """
@@ -81,7 +107,7 @@ def run_via_ssh(logger, host, command, environment, arguments):
     We return a Popen object pointing at the SSH session, to which we add a
     kill method for shutting down the connection if required.
     """
-    logger.debug("Dispatching command with ssh")
+    logger.debug("Dispatching command to %s with ssh" % host)
     ssh_cmd = ["ssh", "-n", "-tt", "-x", host, "--", "/bin/sh", "-c"]
 
     commandstring = ["%s=%s" % (key, value) for key, value in environment.items()]
@@ -98,7 +124,7 @@ def run_via_paramiko(logger, host, command, environment, arguments, key_filename
 
     We return an instance of ParamikoWrapper.
     """
-    logger.debug("Dispatching command with paramiko")
+    logger.debug("Dispatching command to %s with paramiko" % host)
     import paramiko
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
