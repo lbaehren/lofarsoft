@@ -33,7 +33,7 @@ def usage (prg):
 	 -l, --offset  <value>   - offset from the beginning (in seconds)\n\
          -t, --threshold <value> - threshold (in sigma) to clip RFI (default: 6)\n\
 	 --excludeonly           - only exclude completely junk subbands\n\
-	 --rfilimit <value>      - percent of RFI per subband allowed not to exclude whole subband (default: 30)\n\
+	 --rfilimit <value>      - percent of RFI per subband allowed not to exclude whole subband (default: 10)\n\
          --statistics            - print info about fraction of large positive and negative samples\n\
 	 --saveonly              - only saves png file and exits\n\
          -h, --help     - print this message\n" % (prg,)
