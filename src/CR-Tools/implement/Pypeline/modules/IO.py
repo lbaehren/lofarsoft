@@ -98,7 +98,7 @@ class TBBdata:
         *keyword* Variable (data or metadata) to be read. 
         Example "antennaIDs" , "shift", "TIME"
         """
-        metadatakeywords=["StationPhaseCalibration","CableDelays","RelativeAntennaPositions","ClockCorrection","StationPositions"]
+        metadatakeywords=["StationPhaseCalibration","CableDelays","RelativeAntennaPositions","AbsoluteAntennaPositions","ClockCorrection","StationPositions"]
         if keyword in metadatakeywords: 
             import metadata as md
             data=md.get(keyword, self.get("antennaIDs"), self.antennaset, True)

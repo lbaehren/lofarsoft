@@ -24,6 +24,8 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
         dim2=1
     elif keyword is "RelativeAntennaPositions":
         functionname=getRelativeAntennaPositions
+    elif keyword is "AbsoluteAntennaPositions":
+        functionname=getAbsoluteAntennaPositions
     elif keyword is "ClockCorrection":
         functionname=getClockCorrection
         dim2=1
@@ -36,6 +38,8 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
     #import pycrtools as hf
     if isinstance(antennaIDs,hf.IntArray):
         antennaIDs=antennaIDs.vec()
+    if isinstance(antennaIDs,list):
+        antennaIDs=hf.Vector(antennaIDs)
     stationIDs=np.array(list(antennaIDs))/1000000
     rcuIDs=np.mod(antennaIDs,1000)
     allStIDs=np.unique(stationIDs)
@@ -416,6 +420,159 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
         antpos=np.asarray(antpos).reshape(2*int(nrantennas),int(nrdir))
 
     return antpos
+
+def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
+    """Returns the antenna positions of all the antennas in the station
+    relative to the station center for the specified antennaset.
+    station can be the name or id of the station. Default returns as numpy
+    array, option to return as hArray.
+
+    *station*      Name or id of the station. e.g. "CS302" or 142
+    *antennaset*   Antennaset used for this station. Options:
+                   LBA_INNER
+                   LBA_OUTER
+                   LBA_X
+                   LBA_Y
+                   LBA_SPARSE0
+                   LBA_SPARSE1
+                   HBA_0
+                   HBA_1
+                   HBA
+    *return_as_hArray*  Return as hArray.
+
+    Examples:
+    >>> metadata.getRelativeAntennaPositions(142,"LBA_INNER",True)
+    hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
+
+
+    >>> getRelativeAntennaPositions("CS005","HBA",False)
+    array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
+           [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
+            [  1.28090000e+01,   2.88400000e+00,   1.00000000e-03],....
+
+
+    >>> antenna_ids=file["antennaIDs"]
+    [1420000005,142000008,142000080]
+    >>> station_id=antenna_ids[0]/1000000
+    142
+    >>> rcu_ids=np.mod(antenna_ids,1000)
+    array([5, 8, 80])
+    >>> all_antenna_pos=getRelativeAntennaPositions(station_id,"LBA_INNER",False)
+    >>> used_antenna_pos=all_antenna_pos[rcu_ids]
+    array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
+           [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
+           [  8.53000000e-01,   1.37240000e+01,  -3.00000000e-03]])
+
+    """
+
+    # Known antennasets
+    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE_EVEN', 'LBA_SPARSE_ODD', 'HBA_0', 'HBA_1', 'HBA']
+
+    # Check if requested antennaset is known
+    assert antennaset in names
+    
+    if "LBA" in antennaset:
+        antennatype="LBA"
+    elif "HBA" in antennaset:
+        antennatype="HBA"
+
+
+    # Check station id type
+    if isinstance(station, int):
+        # Convert a station id to a station name
+        station=idToStationName(station)
+
+    # Obtain filename of antenna positions
+    LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
+    filename=LOFARSOFT+"data/calibration/AntennaFields/"+station+"-AntennaField.conf"
+
+    # Open file
+    f = open(filename, 'r')
+
+    if station[0:2] != "CS":
+        if antennaset is "HBA_0" or antennaset is "HBA_1":
+            antennaset = "HBA"
+
+    # Find position of antennaset in file
+    str_line = ''
+    while antennatype != str_line.strip():
+        str_line = f.readline()
+        if len(str_line) == 0:
+            #end of file reached, no data available
+            assert False
+
+    # Skip name and station reference position
+    str_line = f.readline()
+    str_split=str_line.split()
+    stationX=float(str_split[2])
+    stationY=float(str_split[3])
+    stationZ=float(str_split[4])
+
+    str_line = f.readline()
+
+    # Get number of antennas and the number of directions
+    nrantennas = int(str_line.split()[0])
+    nrdir = int(str_line.split()[4])
+
+    antpos = []
+    for i in range(nrantennas):
+        line = f.readline().split()
+
+        # Odd numbered antennas
+        antpos.extend([float(line[0])+stationX,float(line[1])+stationY,float(line[2])+stationZ])
+
+        # Even numbered antennas
+        antpos.extend([float(line[3])+stationX,float(line[4])+stationY,float(line[5])+stationZ])
+
+    
+    # Make the appropriate selection
+    antpos=np.asarray(antpos).reshape(2*int(nrantennas),int(nrdir))
+    
+    if antennatype == "LBA":
+        # There are three types of feed
+        # H for HBA
+        # h for lbh
+        # l for lbl
+        feed={}
+        feed["CS"]={}
+        feed["CS"]["LBA_SPARSE_EVEN"]="24llhh"
+        feed["CS"]["LBA_SPARSE_ODD"]="24hhll"
+        feed["CS"]["LBA_X"]="48hl"
+        feed["CS"]["LBA_Y"]="48lh"
+        feed["CS"]["LBA_INNER"]="96h"
+        feed["CS"]["LBA_OUTER"]="96l"        
+        if station[0:2] == "CS":
+            feedsel=feed["CS"][antennaset]
+            nrset = int(feedsel.split('l')[0].split('h')[0].split('H')[0])
+            feeds=''
+            feedsel=feedsel[len(str(nrset)):]
+            for i in range(nrset):
+                feeds+=feedsel
+         
+        indexselection=[]
+        for i in range(len(feeds)):
+            if feeds[i]=='l':
+                # The 'l' feeds are the last 96 numbers of the total list 
+                indexselection.append(i+96)
+            elif feeds[i]=='h':
+                # The 'h' feeds are the first 96 numbers of the total list
+                indexselection.append(i)
+            else:
+                # This selection is not yet supported
+                assert False
+        antpos=antpos[indexselection]
+    
+
+
+    # Return requested type
+    if return_as_hArray:
+        #import pycrtools as hf
+        antpos=hf.hArray(antpos)        
+    #else:
+    #    antpos=np.asarray(antpos).reshape(2*int(nrantennas),int(nrdir))
+    
+    return antpos
+
 
 def getClockCorrection(station,antennaset="HBA",time=1278480000):
     """Get clock correction for superterp stations in seconds. Currently static values.
