@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/ksh
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
@@ -210,18 +210,23 @@ else
 	
 	#Check if case 1; else case 2
 	PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
+	short_id=`echo $OBSID | sed 's/L.....//g'`
 	
 	if [ ! -f /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0 ] 
 	then
-	   short_id=`echo $OBSID | sed 's/L.....//g'`
 	   new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
 	   if [[ $new_parset == "" ]]
 	   then
 	      new_parset=`find /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ -name RTCP-${short_id}.parset -print`
    	      if [[ $new_parset == "" ]]
 	      then
-	          echo "ERROR: Unable to find parset for $short_id in /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ directory"
-	          exit 1
+	          # Sept 23, 2010 another parset location added
+	          new_parset=/globalhome/lofarsystem/log/L${short_id}/L${short_id}.parset
+			  if [ ! -f $new_parset ] 
+			  then
+	             echo "ERROR: Unable to find parset for L$short_id in /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L${short_id} directory"
+	             exit 1
+	          fi
 	      else
 		      found_nof_parsets=`echo $new_parset | wc -l | awk '{print $1}'`
 		      if (( $found_nof_parsets !=  1 ))
@@ -452,20 +457,38 @@ do
 		all_num=`wc -l $master_list | awk '{print $1}'`
 	else
 		#Create subband lists
-		all_list=`ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
-	#XXX	all_list=`ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
-		ls /net/sub[456]/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
-	#XXX	ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
-		all_num=`wc -l $master_list | awk '{print $1}'`
+		if (( $transpose == 0 )) 
+		then		    
+			all_list=`ls /net/sub?/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
+		#XXX	all_list=`ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
+			ls /net/sub?/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
+		#XXX	ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
+	    else
+
+		    if [[ $STOKES == "incoherentstokes" ]]
+		    then
+		       fname="SB*_incoh-bf.raw"
+		    elif [[ $STOKES == "stokes" ]]
+		    then
+		       fname="B*_S*-bf.raw"
+		    else
+		       echo "ERROR: Unable to determin the file naming convension - not incoherent or coherent stokes" 
+		       exit 1
+		    fi
+
+			all_list=`ls /net/sub?/lse*/data?/${OBSID}/L${short_id}_${fname} | sort -t B -g -k 2`
+			ls /net/sub?/lse*/data?/${OBSID}/L${short_id}_${fname} | sort -t B -g -k 2 > $master_list
+	    fi
+	    
+        all_num=`wc -l $master_list | awk '{print $1}'`
+		echo "Found a total of $all_num SB ${STOKES} input datafiles to process" 
+		echo "Found a total of $all_num SB ${STOKES} input datafiles to process" >> $log
 		
-		echo "Found a total of $all_num SB MS ${STOKES} input datafiles to process" 
-		echo "Found a total of $all_num SB MS ${STOKES} input datafiles to process" >> $log
-		
-		if (( $transpose == 1 )) 
+		if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
         then
            all_num=`echo "$CHANPFRAME * $SUBSPPSET" | bc`
-  		   echo "2nd transpose has $all_num subbands in one MS file" 
-  		   echo "2nd transpose has $all_num subbands in one MS file" >> $log
+  		   echo "2nd transpose has $all_num subbands in one file" 
+  		   echo "2nd transpose has $all_num subbands in one file" >> $log
         fi
         
 		if [ $all_num -lt $core ]
