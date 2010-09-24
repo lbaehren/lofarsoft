@@ -47,16 +47,16 @@ do
 
        if [[ $antenna == "HBA" ]]
        then 
-         max_distance=2.25
+         max_distance=3.0
        elif [[ $antenna == "LBA" ]]
        then
-         max_distance=8.5
+         max_distance=9.0
        else
           echo "ERROR: Antenna setting of $antenna is not recognised"
           echo "ERROR"
        fi
 
-	   if (( $distance_deg < $max_distance ))
+	   if (( $distance_deg <= $max_distance ))
 	   then
 	      echo "$NAMEB $RA_CAT $DEC_CAT $FLUX_CAT near $obj at $distance_deg deg-separation" >> $matched_file
 	      matched=1
