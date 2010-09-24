@@ -11,7 +11,6 @@ import os
 import tempfile
 import errno
 import subprocess
-import threading
 
 import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
@@ -19,7 +18,6 @@ import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.remotecommand import ProcessLimiter
-from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.pipelinelogging import log_process_output
 
@@ -72,30 +70,22 @@ class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
         command = "python %s" % (
             self.__file__.replace('master', 'nodes').replace('new_vdsmaker', 'vdsmaker')
         )
-        with clusterlogger(self.logger) as (loghost, logport):
-            self.logger.debug("Logging to %s:%d" % (loghost, logport))
-            with utilities.log_time(self.logger):
-                vdsmaker_threads = []
-                vdsnames = []
-                for host, ms in data:
-                    vdsnames.append(
-                        "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms))
-                    )
-                    vdsmaker_threads.append(
-                        threading.Thread(
-                            target=self._dispatch_compute_job,
-                            args=(host, command, compute_nodes_lock[host],
-                                loghost, str(logport),
-                                ms,
-                                self.config.get('cluster', 'clusterdesc'),
-                                vdsnames[-1],
-                                self.inputs['makevds']
-                            )
-                        )
-                    )
-                [thread.start() for thread in vdsmaker_threads]
-                self.logger.info("Waiting for vdsmaker threads")
-                [thread.join() for thread in vdsmaker_threads]
+        job_args = []
+        vdsnames = []
+        for host, ms in data:
+            vdsnames.append(
+                "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms))
+            )
+            job_args.append(
+                [
+                    host, command, compute_nodes_lock[host],
+                    ms,
+                    self.config.get('cluster', 'clusterdesc'),
+                    vdsnames[-1],
+                    self.inputs['makevds']
+                ]
+            )
+        self._schedule_jobs(job_args)
 
         if self.error.isSet():
             self.logger.warn("Failed vdsmaker process detected")

@@ -1,6 +1,5 @@
 from __future__ import with_statement
 import os
-import threading
 
 import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
@@ -48,25 +47,17 @@ class sourcedb(BaseRecipe, RemoteCommandRecipeMixIn):
         compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
 
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
-        with clusterlogger(self.logger) as (loghost, logport):
-            with utilities.log_time(self.logger):
-                self.logger.debug("Logging to %s:%d" % (loghost, logport))
-                sourcedb_threads = []
-                for host, ms in data:
-                    sourcedb_threads.append(
-                        threading.Thread(
-                            target=self._dispatch_compute_job,
-                            args=(host, command, compute_nodes_lock[host],
-                                loghost, str(logport),
-                                self.inputs['executable'],
-                                ms,
-                                self.inputs['skymodel']
-                            )
-                        )
-                    )
-                [thread.start() for thread in sourcedb_threads]
-                self.logger.info("Waiting for sourcedb threads")
-                [thread.join() for thread in sourcedb_threads]
+        job_args = []
+        for host, ms in data:
+            job_args.append(
+                [
+                    host, command, compute_nodes_lock[host],
+                    self.inputs['executable'],
+                    ms,
+                    self.inputs['skymodel']
+                ]
+            )
+        self._schedule_jobs(job_args)
 
         if self.error.isSet():
             return 1

@@ -12,7 +12,6 @@ from contextlib import nested
 from collections import defaultdict
 
 import collections
-import threading
 import sys
 import os
 
@@ -20,7 +19,6 @@ import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
-from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.remotecommand import ProcessLimiter
 from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.parset import Parset
@@ -103,39 +101,30 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         command = "python %s" % (
             self.__file__.replace('master', 'nodes').replace('new_dppp', 'dppp')
         )
-        with nested(
-            clusterlogger(self.logger), utilities.log_time(self.logger)
-        ) as ((loghost, logport), unused):
-            self.logger.debug("Logging to %s:%d" % (loghost, logport))
-            dppp_threads = []
-            outnames = collections.defaultdict(list)
-            for host, ms in data:
-                outnames[host].append(
-                    os.path.join(
-                        self.inputs['working_directory'],
-                        self.inputs['job_name'],
-                        os.path.basename(ms) + self.inputs['suffix']
-                    )
+        outnames = collections.defaultdict(list)
+        job_args = []
+        for host, ms in data:
+            outnames[host].append(
+                os.path.join(
+                    self.inputs['working_directory'],
+                    self.inputs['job_name'],
+                    os.path.basename(ms) + self.inputs['suffix']
                 )
-                dppp_threads.append(
-                    threading.Thread(
-                        target=self._dispatch_compute_job,
-                        args=(host, command, compute_nodes_lock[host],
-                            loghost, logport,
-                            ms,
-                            outnames[host][-1],
-                            self.inputs['parset'],
-                            self.inputs['executable'],
-                            self.inputs['initscript'],
-                            self.inputs['data_start_time'],
-                            self.inputs['data_end_time'],
-                            self.inputs['nthreads'],
-                        )
-                    )
-                )
-            [thread.start() for thread in dppp_threads]
-            self.logger.info("Waiting for DPPP threads")
-            [thread.join() for thread in dppp_threads]
+            )
+            job_args.append(
+                [
+                    host, command, compute_nodes_lock[host],
+                    ms,
+                    outnames[host][-1],
+                    self.inputs['parset'],
+                    self.inputs['executable'],
+                    self.inputs['initscript'],
+                    self.inputs['data_start_time'],
+                    self.inputs['data_end_time'],
+                    self.inputs['nthreads'],
+                ]
+            )
+        self._schedule_jobs(job_args)
 
         #                                  Log number of fully flagged baselines
         # ----------------------------------------------------------------------

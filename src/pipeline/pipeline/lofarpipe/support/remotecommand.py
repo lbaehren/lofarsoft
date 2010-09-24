@@ -5,15 +5,18 @@
 #                                                      swinbank@transientskp.org
 # ------------------------------------------------------------------------------
 
+from __future__ import with_statement
 from collections import defaultdict
 from threading import BoundedSemaphore
 
 import os
 import signal
 import subprocess
+import threading
 
 from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.utilities import spawn_process
+from lofarpipe.support.clusterlogger import clusterlogger
 
 class ProcessLimiter(defaultdict):
     """
@@ -180,3 +183,20 @@ class RemoteCommandRecipeMixIn(object):
             )
             self.error.set()
         return process.returncode
+
+    def _schedule_jobs(self, job_args):
+        threadpool = []
+        with clusterlogger(self.logger) as (loghost, logport):
+            self.logger.debug("Logging to %s:%d" % (loghost, logport))
+            for argumentset in job_args:
+                argumentset.insert(3, loghost)
+                argumentset.insert(4, logport)
+                threadpool.append(
+                    threading.Thread(
+                        target=self._dispatch_compute_job,
+                        args=argumentset
+                    )
+                )
+            [thread.start() for thread in threadpool]
+            self.logger.info("Waiting for compute threads...")
+            [thread.join() for thread in threadpool]
