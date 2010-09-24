@@ -4,9 +4,19 @@
 #
 # Input: position ra and dec;  LOFAR antenna;  and maximum number of Pulsars to return
 # Output: string of pulsar names separated by "," of all the brightest Pulsars within the FOV of the input location (top N are taken;  max N is set by the user)
-# Output: (exit 1) when none are found
+# Output: ERROR or NONE when none are found
+
+USAGE="\nusage : pulsars_at_location.sh RA_DEGREES DEC_DEGREES LOFAR_ANTENNA NMAX\n\n"
 
 catalog=$LOFARSOFT/release/share/pulsar/data/PSR_catalog_NA.txt
+
+if [ $# -lt 4 ]                    # this script needs at least 4 args
+then
+   print "$USAGE"  
+   echo "ERROR: incorrect usage"
+   echo "ERROR"  
+   exit 
+fi
 
 ra=$1
 dec=$2
@@ -41,6 +51,7 @@ do
        then
           echo "ERROR: Unble to find skycoor executable;  try 'make pulsar' in $LOFARSOFT/build"
           echo "ERROR"
+          exit
        fi
        
 	   distance_deg=`skycoor -r $ra $dec $RA_CAT $DEC_CAT | awk '{print $1 / 3600}'`
@@ -54,6 +65,7 @@ do
        else
           echo "ERROR: Antenna setting of $antenna is not recognised"
           echo "ERROR"
+          exit
        fi
 
 	   if (( $distance_deg <= $max_distance ))
@@ -68,10 +80,11 @@ if (( $matched == 0 ))
 then
       echo "Position not matched to Pulsar Catalog"
       echo "NONE"
+      exit
 fi
 
 matched_string=`cat $matched_file | sort -k 4,4 | head -$nmax | awk '{print $1}' |  tr '\n' ',' | sed 's/,$//g'`
 echo $matched_string
 
 rm $matched_file
-
+exit
