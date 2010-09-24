@@ -23,6 +23,13 @@ dec=$2
 antenna=$3
 nmax=$4
 
+if [[ $antenna != "HBA" ]] && [[ $antenna != "LBA" ]]
+then 
+   echo "ERROR: Antenna setting of $antenna is not recognised"
+   echo "ERROR"
+   exit
+fi
+
 matched=0
 
 matched_string=""
@@ -62,10 +69,6 @@ do
        elif [[ $antenna == "LBA" ]]
        then
          max_distance=9.0
-       else
-          echo "ERROR: Antenna setting of $antenna is not recognised"
-          echo "ERROR"
-          exit
        fi
 
 	   if (( $distance_deg <= $max_distance ))
