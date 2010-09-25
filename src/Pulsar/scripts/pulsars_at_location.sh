@@ -51,6 +51,7 @@ do
 	   RA_CAT=`echo $line | awk '{print $6}'` 
 	   DEC_CAT=`echo $line | awk '{print $7}'` 
 	   FLUX_CAT=`echo $line | awk '{print $10}'` 
+	   DM_CAT=`echo $line | awk '{print $9}'` 
 
        check_executable=`which skycoor`
        status=$!
@@ -73,7 +74,7 @@ do
 
 	   if (( $distance_deg <= $max_distance ))
 	   then
-	      echo "$NAMEB $RA_CAT $DEC_CAT $FLUX_CAT near $obj at $distance_deg deg-separation" >> $matched_file
+	      echo "$NAMEB $RA_CAT $DEC_CAT $FLUX_CAT $DM_CAT near $obj at $distance_deg deg-separation" >> $matched_file
 	      matched=1
 	   fi
    fi
@@ -86,7 +87,14 @@ then
       exit
 fi
 
-matched_string=`cat $matched_file | sort -k 4,4 | head -$nmax | awk '{print $1}' |  tr '\n' ',' | sed 's/,$//g'`
+num_matched=`wc -l $matched_file | awk '{print $1}'`
+if (( $num_matched >= 20 ))
+then
+   matched_string=`grep -v "NA" $matched_file | awk '{if (($5 <= 80)) print}' | sort -n -r -k 4,4 | head -20 | sort -n -k 5,5 | head -$nmax | awk '{print $1}' |  tr '\n' ',' | sed 's/,$//g'`
+else
+   matched_string=`cat $matched_file | sort -n -r -k 4,4 | head -$nmax | awk '{print $1}' |  tr '\n' ',' | sed 's/,$//g'`
+fi
+
 echo $matched_string
 
 rm $matched_file
