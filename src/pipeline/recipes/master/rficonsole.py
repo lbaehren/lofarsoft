@@ -16,7 +16,7 @@ import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
-from lofarpipe.support.remotecommand import ProcessLimiter
+from lofarpipe.support.remotecommand import ComputeJob
 from lofarpipe.support.group_data import load_data_map
 
 class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
@@ -25,11 +25,6 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
             '--executable',
             default="/opt/LofIm/daily/lofar/bin/rficonsole",
             help="rficonsole executable"
-        ),
-        'nproc': ingredient.IntField(
-            '--nproc',
-            default=1,
-            help="Maximum number of simultaneous processes per compute node"
         ),
         'nthreads': ingredient.IntField(
             '--nthreads',
@@ -54,21 +49,18 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
         for host, file in data:
             hostlist[host].append(file)
 
-        #                               Limit number of process per compute node
-        # ----------------------------------------------------------------------
-        self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
-        compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
-
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
-        job_args = []
+        jobs = []
         for host, files in hostlist.iteritems():
-            args = [
-                host, command, compute_nodes_lock[host],
-                self.inputs['executable'], self.inputs['nthreads']
-            ]
-            args.extend(hostlist[host])
-            job_args.append(args)
-        self._schedule_jobs(job_args)
+            jobs.append(
+                ComputeJob(
+                    host, command,
+                    arguments=[
+                        self.inputs['executable'], self.inputs['nthreads']
+                    ] + hostlist[host]
+                )
+            )
+        self._schedule_jobs(jobs)
 
         if self.error.isSet():
             self.logger.warn("Failed rficonsole process detected")

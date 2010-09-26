@@ -18,16 +18,6 @@ from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.utilities import spawn_process
 from lofarpipe.support.clusterlogger import clusterlogger
 
-class ProcessLimiter(defaultdict):
-    """
-    Wrap a bounded semaphore, giving a convenient way to keep tabs on the
-    number of simultaneous jobs running on a given host.
-    """
-    def __init__(self, nproc):
-        super(ProcessLimiter, self).__init__(
-            lambda: BoundedSemaphore(int(nproc))
-        )
-
 class ParamikoWrapper(object):
     """
     Sends an SSH command to a host using paramiko, then emulates a Popen-like
@@ -144,57 +134,97 @@ def run_via_paramiko(logger, host, command, environment, arguments, key_filename
     commandstring.extend(str(arg) for arg in arguments)
     return ParamikoWrapper(client, " ".join(commandstring))
 
+class ProcessLimiter(defaultdict):
+    """
+    Wrap a bounded semaphore, giving a convenient way to keep tabs on the
+    number of simultaneous jobs running on a given host.
+    """
+    def __init__(self, nproc=None):
+        if nproc:
+            super(ProcessLimiter, self).__init__(
+                lambda: BoundedSemaphore(int(nproc))
+            )
+        else:
+            class Unlimited(object):
+                """
+                Dummy semaphore for the unlimited case.
+                Acquire and release always succeed.
+                """
+                def acquire(self):
+                    return True
+                def release(self):
+                    return True
+            super(ProcessLimiter, self).__init__(Unlimited)
+
+class ComputeJob(object):
+    """
+    Container for information about a job to be dispatched to a compute node.
+    """
+    def __init__(self, host, command, arguments=[]):
+        self.host = host
+        self.command = command
+        self.arguments = arguments
+
+    def dispatch(self, logger, config, limiter, loghost, logport, error):
+        """
+        Dispatch this job to the relevant compute node.
+
+        Note that error is an instance of threading.Event, which will be set
+        if the remote job fails for some reason.
+        """
+        limiter[self.host].acquire()
+        try:
+            process = run_remote_command(
+                config,
+                logger,
+                self.host,
+                self.command,
+                {
+                    "PYTHONPATH": config.get('deploy', 'engine_ppath'),
+                    "LD_LIBRARY_PATH": config.get('deploy', 'engine_lpath')
+                },
+                arguments=[loghost, logport] + self.arguments
+            )
+            sout, serr = process.communicate()
+            serr = serr.replace("Connection to %s closed.\r\n" % self.host, "")
+            log_process_output("SSH session", sout, serr, logger)
+        except Exception, e:
+            logger.exception("Failed to run remote process %s (%s)" % (self.command, str(e)))
+            error.set()
+        finally:
+            limiter[self.host].release()
+        if process.returncode != 0:
+            logger.error(
+                "Remote process %s failed (status: %d)" % (self.command, process.returncode)
+            )
+            error.set()
+        return process.returncode
+
 class RemoteCommandRecipeMixIn(object):
     """
     Mix-in for recipes to dispatch jobs using the remote command mechanism.
     """
-    def _dispatch_compute_job(
-        self, host, command, semaphore, *arguments
-    ):
+    def _schedule_jobs(self, jobs, max_per_node=None):
         """
-        Dispatch a command to be run on the given host.
-        Set the recipe's error Event if it does not return 0.
-        """
-        semaphore.acquire()
-        try:
-            process = run_remote_command(
-                self.config,
-                self.logger,
-                host,
-                command,
-                {
-                    "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
-                    "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
-                },
-                arguments=arguments
-            )
-            sout, serr = process.communicate()
-            serr = serr.replace("Connection to %s closed.\r\n" % host, "")
-            log_process_output("SSH session", sout, serr, self.logger)
-        except Exception, e:
-            self.logger.exception("Failed to run remote process %s (%s)" % (command, str(e)))
-            self.error.set()
-            return 1
-        finally:
-            semaphore.release()
-        if process.returncode != 0:
-            self.logger.error(
-                "Remote process %s failed (status: %d)" % (command, process.returncode)
-            )
-            self.error.set()
-        return process.returncode
+        Schedule a series of compute jobs.
 
-    def _schedule_jobs(self, job_args):
+        job_args is an interable, containing a series of lists of arguments,
+        each of which will be dispatched to the compute nodes.
+        """
         threadpool = []
+        limiter = ProcessLimiter(max_per_node)
+        if max_per_node:
+            self.logger.info("Limiting to %d simultaneous jobs/node" % max_per_node)
         with clusterlogger(self.logger) as (loghost, logport):
             self.logger.debug("Logging to %s:%d" % (loghost, logport))
-            for argumentset in job_args:
-                argumentset.insert(3, loghost)
-                argumentset.insert(4, logport)
+            for job in jobs:
                 threadpool.append(
                     threading.Thread(
-                        target=self._dispatch_compute_job,
-                        args=argumentset
+                        target=job.dispatch,
+                        args=(
+                            self.logger, self.config, limiter,
+                            loghost, logport, self.error
+                        )
                     )
                 )
             [thread.start() for thread in threadpool]

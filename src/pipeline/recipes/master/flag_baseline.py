@@ -15,7 +15,7 @@ import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.group_data import load_data_map
-from lofarpipe.support.remotecommand import ProcessLimiter
+from lofarpipe.support.remotecommand import ComputeJob
 
 class flag_baseline(BaseRecipe, RemoteCommandRecipeMixIn):
     """
@@ -60,22 +60,19 @@ class flag_baseline(BaseRecipe, RemoteCommandRecipeMixIn):
             self.logger.debug("Loading map from %s" % self.inputs['args'][0])
             data = load_data_map(self.inputs['args'][0])
 
-            #                           Limit number of process per compute node
-            # ------------------------------------------------------------------
-            self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
-            compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
-
             command = "python %s" % (self.__file__.replace('master', 'nodes'))
-            job_args = []
+            jobs = []
             for host, ms in data:
-                job_args.append(
-                    [
-                        host, command, compute_nodes_lock[host],
-                        ms,
-                        baseline_filename
-                    ]
+                jobs.append(
+                    ComputeJob(
+                        host, command,
+                        arguments=[
+                            ms,
+                            baseline_filename
+                        ]
+                    )
                 )
-            self._schedule_jobs(job_args)
+            self._schedule_jobs(jobs, max_per_node=self.inputs['nproc'])
 
         finally:
             os.unlink(baseline_filename)

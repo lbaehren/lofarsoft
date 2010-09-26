@@ -6,8 +6,7 @@ import tempfile
 
 from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
-from lofarpipe.support.ipython import LOFARTask
-from lofarpipe.support.remotecommand import ProcessLimiter
+from lofarpipe.support.remotecommand import ComputeJob
 from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.pipelinelogging import log_process_output
 import lofarpipe.support.utilities as utilities
@@ -76,21 +75,13 @@ class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
             self.logger.debug("Loading map from %s" % self.inputs['args'][0])
             data = load_data_map(self.inputs['args'][0])
 
-            #                           Limit number of process per compute node
-            # ------------------------------------------------------------------
-            self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
-            compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
-
             command = "python %s" % (self.__file__.replace('master', 'nodes'))
-            job_args = []
+            jobs = []
             for host, ms in data:
-                job_args.append(
-                    [
-                        host, command, compute_nodes_lock[host],
-                        ms, pdbfile
-                    ]
+                jobs.append(
+                    ComputeJob(host, command, arguments=[ms, pdbfile])
                 )
-            self._schedule_jobs(job_args)
+            self._schedule_jobs(jobs, max_per_node=self.inputs['nproc'])
 
         finally:
             self.logger.debug("Removing template parmdb")

@@ -19,7 +19,7 @@ import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
 from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
-from lofarpipe.support.remotecommand import ProcessLimiter
+from lofarpipe.support.remotecommand import ComputeJob
 from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.parset import Parset
 
@@ -91,10 +91,6 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         self.logger.debug("Loading map from %s" % self.inputs['args'])
         data = load_data_map(self.inputs['args'][0])
 
-        #                               Limit number of process per compute node
-        # ----------------------------------------------------------------------
-        self.logger.debug("Limit to %s processes/node" % self.inputs['nproc'])
-        compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
 
         #       We can use the same node script as the "old" IPython dppp recipe
         # ----------------------------------------------------------------------
@@ -102,7 +98,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
             self.__file__.replace('master', 'nodes').replace('new_dppp', 'dppp')
         )
         outnames = collections.defaultdict(list)
-        job_args = []
+        jobs = []
         for host, ms in data:
             outnames[host].append(
                 os.path.join(
@@ -111,20 +107,22 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
                     os.path.basename(ms) + self.inputs['suffix']
                 )
             )
-            job_args.append(
-                [
-                    host, command, compute_nodes_lock[host],
-                    ms,
-                    outnames[host][-1],
-                    self.inputs['parset'],
-                    self.inputs['executable'],
-                    self.inputs['initscript'],
-                    self.inputs['data_start_time'],
-                    self.inputs['data_end_time'],
-                    self.inputs['nthreads'],
-                ]
+            jobs.append(
+                ComputeJob(
+                    host, command,
+                    arguments=[
+                        ms,
+                        outnames[host][-1],
+                        self.inputs['parset'],
+                        self.inputs['executable'],
+                        self.inputs['initscript'],
+                        self.inputs['data_start_time'],
+                        self.inputs['data_end_time'],
+                        self.inputs['nthreads'],
+                    ]
+                )
             )
-        self._schedule_jobs(job_args)
+        self._schedule_jobs(jobs, max_per_node=self.inputs['nproc'])
 
         #                                  Log number of fully flagged baselines
         # ----------------------------------------------------------------------
