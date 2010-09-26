@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/ksh -x
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
@@ -285,10 +285,25 @@ MAGIC_NUM=`cat $PARSET | grep "OLAP.CNProc.integrationSteps" | awk -F "= " '{pri
 SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
 FLYSEYE=`cat $PARSET | grep "OLAP.PencilInfo.flysEye" | head -1 | awk -F "= " '{print $2}'`
 INCOHERENTSTOKES=`cat $PARSET | grep "OLAP.outputIncoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
-COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
+#COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
+COHERENTSTOKES=false
 CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
 SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
 nrBeams=`cat $PARSET | grep "Observation.nrBeams"  | head -1 | awk -F "= " '{print $2}'`
+
+if (( $transpose == 0 ))
+then
+   transpose_par=`cat $PARSET | grep "OLAP.BeamsAreTransposed"  | head -1 | awk -F "= " '{print $2}'`
+   if [[ $transpose_par != "True" ]] && [[ $transpose_par != "False" ]]
+   then
+      echo "There is no 2nd transpose parameter in the parset;  therefore assuming no transpose"
+   else
+      if [[ $transpose_par == "True" ]]
+      then 
+         transpose=1
+      fi
+   fi
+fi
 
 if [[ $nrBeams > 1 ]] && [[ $PULSAR == "position" ]]
 then
@@ -428,12 +443,7 @@ then
    flyseye_tar=1
 fi
 
-if [[ $transpose == 1 ]] && [[ $COHERENTSTOKES == 'true' ]] && [[ $core > 1 ]]
-then
-   core=1
-   echo "WARNING: 2nd Transpose must have N cores=1;  resetting user-repcified core to 1."
-   echo "WARNING: 2nd Transpose data processing takes a long time since processing is not split between cores."
-fi
+user_core=$core
 
 ###############################################################################
 # Main program loop over "incoherentstokes" and coherentstokes/"stokes" strings
@@ -442,6 +452,16 @@ for modes in $mode_str
 do
 
     STOKES=$modes
+
+	if [[ $transpose == 1 ]] && [[ $STOKES == 'stokes' ]] && [[ $user_core > 1 ]]
+	then
+	   core=1
+	   echo "WARNING: 2nd Transpose CoherentStokes must have N cores=1;  resetting user-specified core to 1."
+	   echo "WARNING: 2nd Transpose data processing takes a long time since processing is not split between cores."
+	else 
+	   core=$user_core
+	fi
+
     if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
     then
        mkdir -p ${STOKES}
@@ -499,12 +519,12 @@ do
 
 		    if [[ $STOKES == "incoherentstokes" ]]
 		    then
-		       fname="SB*_incoh-bf.raw"
+		       fname="SB*incoh*"
 		    elif [[ $STOKES == "stokes" ]]
 		    then
 		       fname="B*_S*-bf.raw"
 		    else
-		       echo "ERROR: Unable to determin the file naming convension - not incoherent or coherent stokes" 
+		       echo "ERROR: Unable to determine the file naming convension - not incoherent or coherent stokes" 
 		       exit 1
 		    fi
 

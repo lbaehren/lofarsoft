@@ -95,6 +95,13 @@ else
    matched_string=`cat $matched_file | sort -n -r -k 4,4 | head -$nmax | awk '{print $1}' |  tr '\n' ',' | sed 's/,$//g'`
 fi
 
+if [[ $matched_string == "" ]]
+then
+   echo "Position not matched to Pulsar Catalog"
+   matched_string="NONE"
+   exit
+fi
+
 echo $matched_string
 
 rm $matched_file
