@@ -1,4 +1,4 @@
-#!/bin/ksh -x
+#!/bin/ksh 
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
