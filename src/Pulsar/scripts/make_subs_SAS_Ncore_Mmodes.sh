@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.24
+VERSION=1.25
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose]\n\n"\
@@ -214,7 +214,7 @@ else
 	PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
 	short_id=`echo $OBSID | sed 's/L.....//g'`
 	
-	if [ ! -f /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0 ] 
+	if [ ! -f $PARSET ] 
 	then
 	   new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
 	   if [[ $new_parset == "" ]]
@@ -312,12 +312,14 @@ fi
 
 # Pulsar = "position" indicates that the observation is based on a position setting;
 # figure out what the brightest/closest N Pulsars to the position (N=3)
+ANT_SHORT=`cat $PARSET | grep "Observation.antennaArray"  | head -1 | awk -F "= " '{print $2}'`
+is_3c=`echo $PULSAR | grep -i 3C`
+is_bj=`echo $PULSAR | egrep -i "B|J"`
 if [[ $PULSAR == "position" ]]
 then
     pi=$(echo "scale=10; 4*a(1)" | bc -l)
 	RRA=`cat $PARSET | grep "Observation.Beam\[0\].angle1"  | head -1 | awk -F "= " '{print $2}'`
 	RDEC=`cat $PARSET | grep "Observation.Beam\[0\].angle2"  | head -1 | awk -F "= " '{print $2}'`
-	ANT_SHORT=`cat $PARSET | grep "Observation.antennaArray"  | head -1 | awk -F "= " '{print $2}'`
     echo "Position $RRA $RDEC (radians) will be used to find a pulsar in the field"
     RA_DEG=`echo "scale=10; $RRA / $pi * 180.0" | bc | awk '{printf("%3.9f\n",$1)}'`
     DEC_DEG=`echo "scale=10; $RDEC / $pi * 180.0" | bc | awk '{printf("%3.9f\n",$1)}'`
@@ -331,6 +333,28 @@ then
        PULSAR=$get_list
        PULSAR_LIST=$get_list
     fi
+elif [[ $is_3c != "" ]]
+then
+    if [[ ! -f $LOFARSOFT/release/share/pulsar/data/3cCatalog_psr$ANT_SHORT.txt ]]
+    then
+       echo "ERROR: Unable to find cross-match catalog $LOFARSOFT/release/share/pulsar/data/3cCatalog_psr$ANT_SHORT.txt"
+       echo "       Try performing an SVN update and 'make scripts_install' in $LOFARSOFT/build/pulsar"
+       exit 1
+    fi
+    matched_str=`grep "$PULSAR " $LOFARSOFT/release/share/pulsar/data/3cCatalog_psr$ANT_SHORT.txt | awk '{print $4}'`
+    if [[ $matched_str == "NONE" ]]
+    then
+       echo "ERROR: No known pulsars found in $ANT_SHORT FOV of $PULSAR;  unable to run the pipeline."
+       exit 1
+    else
+       PULSAR=`echo $matched_str | awk -v MAX=3 -F"," '{ for (i=1; i<=MAX; i++) printf "%s,", $i; printf "\n"; }' | sed 's/,,*$//g' | sed 's/,$//g'`
+       PULSAR_LIST=$PULSAR
+    fi
+elif [[ $is_bj == "" ]]
+then
+    echo "ERROR: Unble to process object '$PULSAR';  not a Pulsar name nor 3C object."
+    echo "       Try using '-p position' to set off the pipeline using the target location."
+    exit 1
 fi
 
 is_psr_list=`echo $PULSAR_LIST | grep ","`
