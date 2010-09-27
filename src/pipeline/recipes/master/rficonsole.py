@@ -26,6 +26,10 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
             default="/opt/LofIm/daily/lofar/bin/rficonsole",
             help="rficonsole executable"
         ),
+        'strategy': ingredient.FileField(
+            '--strategy',
+            help="RFI strategy (optional)"
+        ),
         'nthreads': ingredient.IntField(
             '--nthreads',
             default=1,
@@ -49,6 +53,10 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
         for host, file in data:
             hostlist[host].append(file)
 
+        if self.inputs.has_key("strategy"):
+            strategy = self.inputs["strategy"]
+        else:
+            strategy = None
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
         jobs = []
         for host, files in hostlist.iteritems():
@@ -56,7 +64,9 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
                 ComputeJob(
                     host, command,
                     arguments=[
-                        self.inputs['executable'], self.inputs['nthreads']
+                        self.inputs['executable'],
+                        self.inputs['nthreads'],
+                        strategy
                     ] + hostlist[host]
                 )
             )
