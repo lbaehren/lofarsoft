@@ -285,8 +285,8 @@ MAGIC_NUM=`cat $PARSET | grep "OLAP.CNProc.integrationSteps" | awk -F "= " '{pri
 SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
 FLYSEYE=`cat $PARSET | grep "OLAP.PencilInfo.flysEye" | head -1 | awk -F "= " '{print $2}'`
 INCOHERENTSTOKES=`cat $PARSET | grep "OLAP.outputIncoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
-#COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
-COHERENTSTOKES=false
+COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
+#COHERENTSTOKES=false
 CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
 SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
 nrBeams=`cat $PARSET | grep "Observation.nrBeams"  | head -1 | awk -F "= " '{print $2}'`
