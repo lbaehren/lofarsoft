@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.23
+VERSION=1.24
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose]\n\n"\
@@ -286,7 +286,6 @@ SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
 FLYSEYE=`cat $PARSET | grep "OLAP.PencilInfo.flysEye" | head -1 | awk -F "= " '{print $2}'`
 INCOHERENTSTOKES=`cat $PARSET | grep "OLAP.outputIncoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
 COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
-#COHERENTSTOKES=false
 CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
 SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
 nrBeams=`cat $PARSET | grep "Observation.nrBeams"  | head -1 | awk -F "= " '{print $2}'`
@@ -437,10 +436,13 @@ fi
 #Non-Flys Eye (flyseye=0);  Flys Eye (flyseye=1)
 flyseye=0
 flyseye_tar=0
-if [[ $FLYSEYE == 'true' ]]
+if [[ $COHERENTSTOKES == 'true' ]]
 then
-   flyseye=1
-   flyseye_tar=1
+	if [[ $FLYSEYE == 'true' ]]
+	then
+	   flyseye=1
+	   flyseye_tar=1
+	fi
 fi
 
 user_core=$core
