@@ -66,11 +66,20 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
                 mdata[stationIDs==st]=allValues[st]   
     else:    
         #import pycrtools as hf
-        if keyword not in ["StationPositions","ClockCorrection"]:
+        if keyword not in ["StationPositions","ClockCorrection","StationPhaseCalibration"]:
             if dim2==1:
-                mdata=hf.hArray(allValues[allStIDs[0]],antennaIDs.getDim())
+                mdata=hf.hArray(float,antennaIDs.getDim())
             else:
-                mdata=hf.hArray(allValues[allStIDs[0]],[antennaIDs.getDim(),allValues[allStIDs[0]].getDim()[1]])
+                mdata=hf.hArray(float,[antennaIDs.getDim(),allValues[allStIDs[0]].getDim()[1]])
+            for st in allStIDs:
+                for num, check in enumerate(stationIDs==st):
+                    if check:
+                        mdata[num]=allValues[st][int(rcuIDs[num])]
+        elif keyword is "StationPhaseCalibration":
+            if dim2==1:
+                mdata=hf.hArray(complex,antennaIDs.getDim())
+            else:
+                mdata=hf.hArray(complex,[antennaIDs.getDim(),allValues[allStIDs[0]].getDim()[1]])
             for st in allStIDs:
                 for num, check in enumerate(stationIDs==st):
                     if check:
@@ -79,7 +88,7 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
             if keyword == "ClockCorrection": #dim2==1
                 mdata=hf.hArray(float,antennaIDs.getDim(),fill=0)
             else:
-                mdata=hf.hArray(allValues[allStIDs[0]],[antennaIDs.getDim(),allValues[allStIDs[0]].getDim()[0]])
+                mdata=hf.hArray(float,[antennaIDs.getDim(),allValues[allStIDs[0]].getDim()[0]])
             for st in allStIDs:
                 for num, check in enumerate(stationIDs==st):
                     if check:
