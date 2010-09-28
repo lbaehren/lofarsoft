@@ -1278,13 +1278,13 @@ do
 	        ##################################################
 	        # Create the XML per beam
 	       
-	        if [ $INSWITCH == 1 ] && [ $skip = 0 ]
+	        if [ $INSWITCH == 1 ] && [ $skip == 0 ]
 	        then 
 	           if (( $beam_counter == 0 ))
 	           then
 	              sed -e "s/FILL IN OBSERVATION NAME/Obs $PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $middle >> $outfile
 	           fi
-	        elif [ $INSWITCH == 2 ]  && [ $skip = 0 ]
+	        elif [ $INSWITCH == 2 ]  && [ $skip == 0 ]
 	        then
 	           if (( $beam_counter == 0 ))
 	           then
@@ -1292,10 +1292,10 @@ do
 	           fi
 	        fi 
 		        
-	        if [ $INSWITCH == 1 ] && [ $skip = 0 ]
+	        if [ $INSWITCH == 1 ] && [ $skip == 0 ]
 	        then 
 	           sed -e "s/FILL IN OBSERVATION NAME/Obs $PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $beam_xml >> $outfile
-	        elif [ $INSWITCH == 2 ] && [ $skip = 0 ]
+	        elif [ $INSWITCH == 2 ] && [ $skip == 0 ]
 	        then
 	           sed -e "s/FILL IN OBSERVATION NAME/$OBJECT/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTEGRATION/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/BEAM NUMBER/$beam_counter/g" $beam_xml >> $outfile
 	        fi
