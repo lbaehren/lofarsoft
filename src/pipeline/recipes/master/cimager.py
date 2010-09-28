@@ -9,10 +9,12 @@ from __future__ import with_statement
 
 import os
 import sys
+import time
 import threading
 import collections
 import subprocess
 import tempfile
+import signal
 
 from pyrap.quanta import quantity
 
@@ -21,7 +23,9 @@ from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.pipelinelogging import log_time, log_process_output
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.pipelinelogging import log_process_output
-from lofarpipe.support.remotecommand import ProcessLimiter, run_remote_command
+from lofarpipe.support.remotecommand import ProcessLimiter
+from lofarpipe.support.remotecommand import run_remote_command
+from lofarpipe.support.remotecommand import threadwatcher
 from lofarpipe.support.parset import Parset
 from lofarpipe.support.parset import get_parset
 from lofarpipe.support.parset import patched_parset
@@ -144,9 +148,9 @@ class cimager(BaseRecipe):
                         )
                         for host, vds in data
                     ]
-                    [thread.start() for thread in imager_threads]
-                    self.logger.info("Waiting for imager threads")
-                    [thread.join() for thread in imager_threads]
+                self.killswitch = threading.Event()
+                signal.signal(signal.SIGTERM, self.killswitch.set)
+                threadwatcher(imager_threads, self.logger, self.killswitch)
 
         #                Check if we recorded a failing process before returning
         # ----------------------------------------------------------------------
@@ -227,6 +231,10 @@ class cimager(BaseRecipe):
             engine_ppath = self.config.get('deploy', 'engine_ppath')
             engine_lpath = self.config.get('deploy', 'engine_lpath')
             try:
+                if self.killswitch.isSet():
+                    self.logger.debug("Shutdown in progress: not starting cimager")
+                    self.error.set()
+                    return 1
                 cimager_process = run_remote_command(
                     self.config,
                     self.logger,
@@ -241,13 +249,18 @@ class cimager(BaseRecipe):
                         resultsdir, str(start_time), str(end_time)
                     )
                 )
+                while cimager_process.poll() == None:
+                    if self.killswitch.isSet():
+                        cimager_process.kill()
+                    else:
+                        time.sleep(1)
                 sout, serr = cimager_process.communicate()
                 serr = serr.replace("Connection to %s closed.\r\n" % host, "")
                 log_process_output("SSH session (cimager)", sout, serr, self.logger)
             except Exception, e:
                 self.logger.error(str(e))
                 self.error.set()
-            log_process_output("Remote cimager", sout, serr, self.logger)
+                return 1
 
             #                          Copy names of created images into outputs
             # ------------------------------------------------------------------

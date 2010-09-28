@@ -13,6 +13,7 @@ import os
 import signal
 import subprocess
 import threading
+import time
 
 from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.utilities import spawn_process
@@ -165,7 +166,7 @@ class ComputeJob(object):
         self.command = command
         self.arguments = arguments
 
-    def dispatch(self, logger, config, limiter, loghost, logport, error):
+    def dispatch(self, logger, config, limiter, loghost, logport, error, killswitch):
         """
         Dispatch this job to the relevant compute node.
 
@@ -174,6 +175,10 @@ class ComputeJob(object):
         """
         limiter[self.host].acquire()
         try:
+            if killswitch.isSet():
+                logger.debug("Shutdown in progress: not starting remote job")
+                error.set()
+                return 1
             process = run_remote_command(
                 config,
                 logger,
@@ -185,9 +190,18 @@ class ComputeJob(object):
                 },
                 arguments=[loghost, logport] + self.arguments
             )
+            # Wait for process to finish. In the meantime, if the killswitch
+            # is set (by an exception in the main thread), forcibly kill our
+            # job off.
+            while process.poll() == None:
+                if killswitch.isSet():
+                    process.kill()
+                else:
+                    time.sleep(1)
             sout, serr = process.communicate()
+
             serr = serr.replace("Connection to %s closed.\r\n" % self.host, "")
-            log_process_output("SSH session", sout, serr, logger)
+            log_process_output("Remote command", sout, serr, logger)
         except Exception, e:
             logger.exception("Failed to run remote process %s (%s)" % (self.command, str(e)))
             error.set()
@@ -199,6 +213,30 @@ class ComputeJob(object):
             )
             error.set()
         return process.returncode
+
+def threadwatcher(threadpool, logger, killswitch):
+    # If we receive a SIGTERM, shut down processing.
+    signal.signal(signal.SIGTERM, killswitch.set)
+    try:
+        # Start all the threads, but don't just join them, as that
+        # blocks all exceptions in the main thread. Instead, we wake
+        # up every second to handle exceptions.
+        [thread.start() for thread in threadpool]
+        logger.info("Waiting for compute threads...")
+
+        while True in [thread.isAlive() for thread in threadpool]:
+            time.sleep(1)
+    except:
+        # If something throws an exception (normally a
+        # KeyboardException, ctrl-c) set the kill switch to tell the
+        # comput threads to terminate, then wait for them.
+        logger.warn("Processing interrupted: shutting down")
+        killswitch.set()
+    finally:
+        # Always make sure everything has finished. Note that if an exception
+        # is thrown before all the threads have started, they will not all be
+        # alive (and hence not join()-able).
+        [thread.join() for thread in threadpool if thread.isAlive()]
 
 class RemoteCommandRecipeMixIn(object):
     """
@@ -213,6 +251,7 @@ class RemoteCommandRecipeMixIn(object):
         """
         threadpool = []
         limiter = ProcessLimiter(max_per_node)
+        killswitch = threading.Event()
         if max_per_node:
             self.logger.info("Limiting to %d simultaneous jobs/node" % max_per_node)
         with clusterlogger(self.logger) as (loghost, logport):
@@ -223,10 +262,8 @@ class RemoteCommandRecipeMixIn(object):
                         target=job.dispatch,
                         args=(
                             self.logger, self.config, limiter,
-                            loghost, logport, self.error
+                            loghost, logport, self.error, killswitch
                         )
                     )
                 )
-            [thread.start() for thread in threadpool]
-            self.logger.info("Waiting for compute threads...")
-            [thread.join() for thread in threadpool]
+            threadwatcher(threadpool, self.logger, killswitch)

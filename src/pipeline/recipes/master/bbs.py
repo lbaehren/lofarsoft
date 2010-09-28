@@ -187,6 +187,7 @@ class bbs(BaseRecipe):
                 # --------------------------------------------------------------
                 self.killswitch = threading.Event()
                 self.killswitch.clear()
+                signal.signal(signal.SIGTERM, self.killswitch.set)
 
                 #                           GlobalControl runs in its own thread
                 # --------------------------------------------------------------
@@ -331,23 +332,28 @@ class bbs(BaseRecipe):
         Name is an optional parameter used only for identification in logs.
         """
         while True:
-            returncode = process.poll()
-            if returncode == None:                       # Process still running
-                time.sleep(1)
-            elif returncode != 0:                               # Process broke!
-                self.logger.warn(
-                    "%s returned code %d; aborting run" % (name, returncode)
-                )
+            try:
+                returncode = process.poll()
+                if returncode == None:                   # Process still running
+                    time.sleep(1)
+                elif returncode != 0:                           # Process broke!
+                    self.logger.warn(
+                        "%s returned code %d; aborting run" % (name, returncode)
+                    )
+                    self.killswitch.set()
+                    break
+                else:                                   # Process exited cleanly
+                    self.logger.info("%s clean shutdown" % (name))
+                    break
+                if self.killswitch.isSet():        # Other process failed; abort
+                    self.logger.warn("Killing %s" % (name))
+                    process.kill()
+                    returncode = process.wait()
+                    break
+            except:
+                # An exception here is likely a ctrl-c or similar. Whatever it
+                # is, we bail out.
                 self.killswitch.set()
-                break
-            else:                                       # Process exited cleanly
-                self.logger.info("%s clean shutdown" % (name))
-                break
-            if self.killswitch.isSet():            # Other process failed; abort
-                self.logger.warn("Killing %s" % (name))
-                process.kill()
-                returncode = process.wait()
-                break
         return returncode
 
 if __name__ == '__main__':
