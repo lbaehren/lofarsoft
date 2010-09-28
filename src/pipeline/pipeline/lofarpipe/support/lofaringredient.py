@@ -53,10 +53,6 @@ class Field(object):
             self.help = ""
         if attrs.has_key("default"):
             self.default = attrs['default']
-            self.help+= " [Default: %s]" % str(self.default)
-        elif attrs.has_key("optional") and attrs["optional"] == True:
-            self.optional = True
-            self.help += " [Optional]"
 
     def is_valid(self, value):
         raise NotImplementedError
@@ -176,24 +172,17 @@ class LOFARingredient(dict):
         return [value.generate_option(key) for key, value in self._fields.iteritems()]
 
     def complete(self):
-        return not False in [
-            self.has_key(key) for key in self._fields.iterkeys()
-            if not hasattr(self._fields[key], "optional")
-        ]
+        return not False in [self.has_key(key) for key in self._fields.iterkeys()]
 
 class RecipeIngredientsMeta(type):
     def __init__(cls, name, bases, ns):
-        # Inputs are inherited from the superclass.
-        # Need to do some gymnastics here, as we don't want to update the
-        # superclass's _infields -- thus we replace it and copy the contents.
-        new_inputs = {}
-        if hasattr(cls, "_infields"):
-            new_inputs.update(cls._infields)
-        if ns.has_key("inputs"):
-            new_inputs.update(ns["inputs"])
-        cls._infields = new_inputs
+        # Inputs are inherited from the superclass...
+        if not hasattr(cls, "_infields"):
+            cls._infields = {}
+        if ns.has_key('inputs'):
+            cls._infields.update(ns['inputs'])
 
-        # Outputs are not inherited.
+        # Outputs are not.
         if ns.has_key('outputs'):
             cls._outfields = ns['outputs']
 
