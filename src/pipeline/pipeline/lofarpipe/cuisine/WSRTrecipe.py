@@ -49,12 +49,12 @@ class WSRTrecipe(object):
         self.optionparser.add_option(
             '-v', '--verbose',
             action="callback", callback=self.__setloglevel,
-            help="verbose [default=%default]"
+            help="verbose [Default: %default]"
         )
         self.optionparser.add_option(
             '-d', '--debug',
             action="callback", callback=self.__setloglevel,
-            help="debug [default=%default]"
+            help="debug [Default: %default]"
         )
 
         self.helptext = """LOFAR/WSRT pipeline framework"""
@@ -81,7 +81,7 @@ class WSRTrecipe(object):
         print self.helptext
         self.optionparser.print_help()
         print '\nOutputs:'
-        for k in self.outputs.keys():
+        for k in self._outfields.keys():
             print '  ' + k
 
     def main_init(self):
@@ -98,13 +98,13 @@ class WSRTrecipe(object):
         except IOError:
             logging.debug("Unable to open parset")
         (options, args) = self.optionparser.parse_args(opts)
-        for key, value in vars(options).iteritems():
-            if value is not None:
-                self.inputs[key] = value
-        self.inputs['args'] = args
         if options.help:
             return 1
         else:
+            for key, value in vars(options).iteritems():
+                if value is not None:
+                    self.inputs[key] = value
+            self.inputs['args'] = args
             return 0
 
     def main(self):
