@@ -69,6 +69,11 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         'mapfile': ingredient.StringField(
             '--mapfile',
             help="Output mapfile name"
+        ),
+        'clobber': ingredient.BoolField(
+            '--clobber',
+            help="Remove pre-existing output files",
+            default=False
         )
     }
 
@@ -119,6 +124,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
                         self.inputs['data_start_time'],
                         self.inputs['data_end_time'],
                         self.inputs['nthreads'],
+                        self.inputs['clobber']
                     ]
                 )
             )

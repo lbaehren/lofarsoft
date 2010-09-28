@@ -25,7 +25,7 @@ from lofarpipe.support.lofarexceptions import ExecutableMissing
 class dppp(LOFARnode):
     def run(
         self, infile, outfile, parset, executable, initscript,
-        start_time, end_time, nthreads
+        start_time, end_time, nthreads, clobber
     ):
         # Time execution of this job
         with log_time(self.logger):
@@ -34,6 +34,10 @@ class dppp(LOFARnode):
             else:
                 self.logger.error("%s does not exist" % (infile))
                 return 1
+
+            if clobber == "True":
+                self.logger.info("Checking for and removing previous output")
+                shutil.rmtree(outfile, ignore_errors=True)
 
             self.logger.debug("Time interval: %s %s" % (start_time, end_time))
 
