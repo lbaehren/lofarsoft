@@ -176,13 +176,17 @@ class LOFARingredient(dict):
 
 class RecipeIngredientsMeta(type):
     def __init__(cls, name, bases, ns):
-        # Inputs are inherited from the superclass...
-        if not hasattr(cls, "_infields"):
-            cls._infields = {}
-        if ns.has_key('inputs'):
-            cls._infields.update(ns['inputs'])
+        # Inputs are inherited from the superclass.
+        # Need to do some gymnastics here, as we don't want to update the
+        # superclass's _infields -- thus we replace it and copy the contents.
+        new_inputs = {}
+        if hasattr(cls, "_infields"):
+            new_inputs.update(cls._infields)
+        if ns.has_key("inputs"):
+            new_inputs.update(ns["inputs"])
+        cls._infields = new_inputs
 
-        # Outputs are not.
+        # Outputs are not inherited.
         if ns.has_key('outputs'):
             cls._outfields = ns['outputs']
 
