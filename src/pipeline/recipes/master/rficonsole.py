@@ -28,7 +28,8 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
         ),
         'strategy': ingredient.FileField(
             '--strategy',
-            help="RFI strategy (optional)"
+            help="RFI strategy",
+            optional=True
         ),
         'nthreads': ingredient.IntField(
             '--nthreads',

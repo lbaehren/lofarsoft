@@ -49,12 +49,12 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         'data_start_time': ingredient.StringField(
             '--data-start-time',
             default="None",
-            help="Start time to be passed to DPPP (optional)"
+            help="Start time to be passed to DPPP"
         ),
         'data_end_time': ingredient.StringField(
             '--data-end-time',
             default="None",
-            help="End time to be passed to DPPP (optional)"
+            help="End time to be passed to DPPP"
         ),
         'nproc': ingredient.IntField(
             '--nproc',

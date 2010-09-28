@@ -52,7 +52,11 @@ class Field(object):
         else:
             self.help = ""
         if attrs.has_key("default"):
+            self.help += " [Default: %s]" % str(attrs['default'])
             self.default = attrs['default']
+        elif attrs.has_key("optional") and attrs["optional"]:
+            self.optional = True
+            self.help += " [Optional]"
 
     def is_valid(self, value):
         raise NotImplementedError
@@ -172,7 +176,10 @@ class LOFARingredient(dict):
         return [value.generate_option(key) for key, value in self._fields.iteritems()]
 
     def complete(self):
-        return not False in [self.has_key(key) for key in self._fields.iterkeys()]
+        return not False in [
+            self.has_key(key) for key in self._fields.iterkeys()
+            if not hasattr(self._fields[key], "optional")
+        ]
 
 class RecipeIngredientsMeta(type):
     def __init__(cls, name, bases, ns):

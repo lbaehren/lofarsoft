@@ -212,6 +212,10 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
             )
         ]
 
+        # At this point, the recipe inputs must be complete. If not, exit.
+        if not self.inputs.complete():
+            raise PipelineException("Required inputs are not available")
+
         # Only configure handlers if our parent is the root logger.
         # Otherwise, our parent should have done it for us.
         if isinstance(self.logger.parent, logging.RootLogger):
