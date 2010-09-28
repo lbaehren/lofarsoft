@@ -185,25 +185,25 @@ fi
 
 ##################################################
 # Check required input/output settings;  exit if there are problems.
-if [ user_infile == 0 ]
+if [ $user_infile == 0 ]
 then
    echo "ERROR: Input file name is required with '-in' argument."
    exit 1
 fi
 
-if [ user_outfile == 0 ]
+if [ $user_outfile == 0 ]
 then
    echo "ERROR: Output file name is required with '-out' argument."
    exit 1
 fi
 
-if [ user_project == 0 ]
+if [ $user_project == 0 ]
 then
    echo "ERROR: Project name must be specified with '-project' argument and must match exactly with MOM."
    exit 1
 fi
 
-if [ user_intype == 0 ]
+if [ $user_intype == 0 ]
 then
    echo "ERROR: Input file type must be specified with '-intype position' or '-intype source'."
    exit 1
@@ -221,7 +221,7 @@ else
    fi
 fi
 
-if [ user_inswitch == 0 ]
+if [ $user_inswitch == 0 ]
 then
    echo "ERROR: Input switch '-inswitch IM' or '-inswitch BF' must be specified, to choose Imaging or BF based settings."
    exit 1
@@ -498,7 +498,7 @@ fi # end of input file column checks
 
 ##################################################
 # If LST was set by the user, then calculate the time difference 
-if (( $LST == 1 )) && (( user_start == 1 ))
+if (( $LST == 1 )) && (( $user_start == 1 ))
 then
     LST_DIFF=120
     # change the start time from LST to UT
@@ -793,7 +793,7 @@ do
 						   then
 						       ANT_SHORT=LBA
 						   else
-						      echo "ERROR: Antenna must be set to any of these three values: HBALow, HBSHigh or LBA"
+						      echo "ERROR: Antenna must be set to any of these three values: HBALow, HBAHigh or LBA"
 						      exit 1
 						   fi
 			           fi
