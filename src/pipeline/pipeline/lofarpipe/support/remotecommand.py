@@ -215,6 +215,11 @@ class ComputeJob(object):
         return process.returncode
 
 def threadwatcher(threadpool, logger, killswitch):
+    """
+    Start and watch a pool of threads. If an exception is thrown during
+    processing, set the killswitch (an instance of threading.Event) so that
+    all threads can shut down cleanly.
+    """
     # If we receive a SIGTERM, shut down processing.
     signal.signal(signal.SIGTERM, killswitch.set)
     try:
