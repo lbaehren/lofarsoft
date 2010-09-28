@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/ksh
 
 USAGE="\nusage : xml_pipeline_kickoff.sh -infile obs_finished.xml -prefix prefix [ -splits number ] \n\n"\
 "      -infile obs_finished.xml  ==> Specify the finished xml file name (i.e. Obs_B1254-10_HBA.xml) \n"\
@@ -55,10 +55,13 @@ fi
 # add a "\" to the end of the line containing observationId
 # paste the line with "\" and the next line together
 # grep for lines which only contain observationId
-# strip the actual ObsID and the Pulsar name from this line
+# strip the actual ObsID and the Pulsar name (or Position) from this line
 # create the run script for the shell script pipeline
 
-egrep "observationId|\(.BA\) " $infile | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/<.*Obs / /g' | sed 's/(.BA.*//g' | awk '{printf("pulp.sh -id L2010_%05d -p %s -o L2010_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
+# previous version to extract the OBSID and Target name
+#egrep "observationId|\(.BA" $infile | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/<.*Obs / /g' | sed 's/(.BA.*//g' | awk '{printf("pulp.sh -id L2010_%05d -p %s -o L2010_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
+
+egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/\</ \</g' | sed 's/\>/\> /g' | sed 's/(.*//g' | sed 's/\<.*\>//g' | awk '{ if ( $2 == "Pos" ) printf("pulp.sh -id L2010_%05d -p position -o L2010_%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2010_%05d -p %s -o L2010_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2010_%05d -p %s -o L2010_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
 
 cp $outfile $outfile.all
 
