@@ -1,4 +1,4 @@
-#!/bin/ksh -x
+#!/bin/ksh 
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
