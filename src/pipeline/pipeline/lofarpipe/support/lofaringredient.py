@@ -175,11 +175,15 @@ class LOFARingredient(dict):
     def make_options(self):
         return [value.generate_option(key) for key, value in self._fields.iteritems()]
 
-    def complete(self):
-        return not False in [
-            self.has_key(key) for key in self._fields.iterkeys()
-            if not hasattr(self._fields[key], "optional")
+    def missing(self):
+        return [
+            key for key in self._fields.iterkeys()
+            if not self.has_key(key)
+            and not hasattr(self._fields[key], "optional")
         ]
+
+    def complete(self):
+        return False if self.missing() else True
 
 class RecipeIngredientsMeta(type):
     def __init__(cls, name, bases, ns):
