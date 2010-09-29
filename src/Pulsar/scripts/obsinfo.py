@@ -39,6 +39,9 @@ is_update = False
 is_debug = False
 debugcounter=0
 
+# if True, then only db file will be read to calculate the statistics of observations
+is_stats = False
+
 # View of presenting info (usual (defaul), brief, plots, and mega)
 viewtype="usual"
 
@@ -350,6 +353,7 @@ class outputInfo:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=left>%s</td>" % (self.id, self.colspan, self.comment,)
 
+#	def Init(self, id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, comment, filestem_array, chi_array):
 	def Init(self, id, oi, storage_nodes, dirsizes, statusline, redlocation, comment, filestem_array, chi_array):
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
@@ -361,6 +365,7 @@ class outputInfo:
 		self.pointing = self.oi.pointing
 		self.statusline = statusline
 		self.redlocation = redlocation
+#		self.processed_dirsize = processed_dirsize
 		self.comment = comment
 		self.cs = len(storage_nodes)
 		if viewtype == "brief":
@@ -619,6 +624,7 @@ def usage (prg):
                                        the existent database, process obs that do not exist there, and add them to the database\n\
           -u, --update               - update db file only, new observations in /data? won't be added\n\
                                        This option can be used together with --from and --to to update only some observations\n\
+          --stats                    - to calculate the statistics of existent observations in the database\n\
           --debug                    - debug mode\n\
           -h, --help                 - print this message\n" % (prg, )
 
@@ -630,7 +636,7 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hs:f:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug"])
+		opts, args = getopt.getopt (argv, "hs:f:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats"])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -686,6 +692,9 @@ def parsecmd(prg, argv):
 			if opt in ("--debug"):
 				global is_debug
 				is_debug = True
+			if opt in ("--stats"):
+				global is_stats
+				is_stats = True
 
 	except getopt.GetoptError:
 		print "Wrong option!"
@@ -724,6 +733,62 @@ if __name__ == "__main__":
 			dbobsids = np.flipud(np.sort(obstable.keys(), kind='mergesort'))
 			for r in dbobsids:
 				obstable[r].update(storage_nodes)
+			# calculate statistics
+			if is_stats:
+				print
+				print "Current pulsar obs statistics:"
+				print "-------------------------------------------------------------------"
+				totDuration = 0.0
+				processedDuration = 0.0
+				Nprocessed = 0
+				Nistype = 0
+				Nistype_only = 0
+				Ncstype = 0
+				Ncstype_only = 0
+				Nfetype = 0
+				Nfetype_only = 0
+				Nimtype = 0
+				Nimtype_only = 0
+				totRawsize = 0.0   # size in TB of raw data
+				for r in dbobsids:
+					if obstable[r].comment == "" and obstable[r].oi.duration != "?":
+						totDuration += obstable[r].oi.dur	
+					if obstable[r].comment == "" and obstable[r].statusline != "x":
+						Nprocessed += 1
+						if obstable[r].oi.duration != "?":
+							processedDuration += obstable[r].oi.dur
+					if obstable[r].comment == "" and obstable[r].oi.istype == "+":
+						Nistype += 1
+						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+							Nistype_only += 1
+					if obstable[r].comment == "" and obstable[r].oi.cstype == "+":
+						Ncstype += 1
+						if obstable[r].oi.istype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+							Ncstype_only += 1
+					if obstable[r].comment == "" and obstable[r].oi.fetype == "+":
+						Nfetype += 1
+						if obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+							Nfetype_only += 1
+					if obstable[r].comment == "" and obstable[r].oi.imtype == "+":
+						Nimtype += 1
+						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+							Nimtype_only += 1
+					if obstable[r].comment == "":
+						totRawsize += float(obstable[r].totsize)
+
+				totDuration /= 3600.
+				processedDuration /= 3600.
+				totRawsize /= 1024.
+
+				print "Total number of observations [hours/days]: %d [%.1f/%.1f]" % (np.size(dbobsids),totDuration,totDuration/24.)
+				print "Number of processed observations [hours/days]: %d [%.1f/%.1f]" % (Nprocessed,processedDuration,processedDuration/24.)
+				print "Number of IS observations [only IS]: %d [%d]" % (Nistype, Nistype_only)
+				print "Number of CS observations [only CS]: %d [%d]" % (Ncstype, Ncstype_only)
+				print "Number of FE observations [only FE]: %d [%d]" % (Nfetype, Nfetype_only)
+				print "Number of IM observations [only IM]: %d [%d]" % (Nimtype, Nimtype_only)
+				print "Total size of raw data (TB): %.1f" % (totRawsize,)
+				print
+				sys.exit(0)
 
 	if not is_update:
 		# loop over the storage nodes and directories to get the list of all IDs
@@ -894,6 +959,7 @@ if __name__ == "__main__":
 		# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file
 		statusline="x"
 		redlocation="x"
+		processed_dirsize=0.0
 		for lse in storage_nodes:
 			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
 			if np.size(os.popen(cmd).readlines()) == 0:
@@ -904,6 +970,13 @@ if __name__ == "__main__":
 				reddir=redout[0][:-1]
 				statusline=lse
 				redlocation="%s/%s/%s%s" % ("/net", cexec_nodes[lse].split(":")[0], lse, reddir)
+				# getting the size of the processed data
+				cmd="cexec %s 'du -s -B 1 %s 2>/dev/null | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir, cexec_egrep_string)
+				status=os.popen(cmd).readlines()
+				if np.size(status) > 0:
+					status=status[0][:-1]
+					if status.isdigit() == True:
+							processed_dirsize = status / 1024. / 1024. / 1024.
 				# checking if final tar.gz file exists
 				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir, "*_plots.tar.gz", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) > 0:
@@ -1002,6 +1075,7 @@ if __name__ == "__main__":
 				break
 
 		# combining info
+#		out.Init(id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, "", profiles_array, chi_array)
 		out.Init(id, oi, storage_nodes, dirsizes, statusline, redlocation, "", profiles_array, chi_array)
 		obstable[id] = out
 		# printing the info line by line in debug mode
