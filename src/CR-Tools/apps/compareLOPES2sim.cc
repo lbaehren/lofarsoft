@@ -84,7 +84,11 @@
 
 const static bool simulationDistances = true; //true;  // decide wether to use the lateral distances of simulation or of data
 const static double gradeg=(180./TMath::Pi());
-const static double antennaHeightOffset = 12615.9; // used in REAS, for LOPES 30 EW (corresponds to height of antenna 1)
+const static double antennaHeightOffset = 12615.9 -8.17; // used in REAS, for LOPES 30 EW (corresponds to average antenna height)
+// time offset, because ground plane in REAS is defined as average of antenna heights, not as KASCADE height or 0
+const static double groundPlaneTimeOffset = 0.0817 * 3.33564; // height diff = 14 cm, conversion to ns
+const static double generalREAStimeOffset = 1.65; // general offset to avoid negative times with REAS (fine tuning by hand)
+
 
 int main (int argc, char *argv[])
 {
@@ -775,8 +779,12 @@ int main (int argc, char *argv[])
             azS=180.-(azSREAS*gradeg); //convert to LOPES coordinates
             
             // preperationis for calculating antenna height in shower coordinates
-            distZ -= antennaHeightOffset; // substract offset of antenna Height in REAS 3 (defined at beginning of file)
+            distZ -= antennaHeightOffset; // substract offset of antenna height in REAS 3 (defined at beginning of file)
             groundDist = sqrt(distX*distX + distY*distY + distZ*distZ);
+            
+            // convert time to ns and remove offset
+            timeREAS *= 1e9;
+            timeREAS += groundPlaneTimeOffset/cos(zenith) + generalREAStimeOffset;
             
             if(azS<0.) {
               azS = azS+360.; //azS in grad
@@ -807,8 +815,8 @@ int main (int argc, char *argv[])
                 simPropEW.antennaID = NantS; //antennaid vs antenna no?
                 simPropEW.height = EWfield;
                 //cout<<"EW Field  "<<EWfield<<endl;
-                simPropEW.heightError = 0.;
-                simPropEW.time = timeREAS*1e9; // pulse time in ns
+                simPropEW.heightError = 0.;                
+                simPropEW.time = timeREAS; // pulse time in ns
                 simPropEW.timeError = 0;
                 distanceR=m_recEW[NantS].dist;
                 // calculate simulation distance for consistency check
@@ -832,12 +840,36 @@ int main (int argc, char *argv[])
                 simPropEW.disterr = distanceSerr;
                 
                 // calculate antenna height (z) in shower coordinates
-                zShower = -0.01* groundDist * sin(zenith) * cos(azS/gradeg-azimuth);
+                //zShower = -0.01* groundDist * sin(zenith) * cos(azS/gradeg-azimuth); // wrong
+                //zShower = sqrt((groundDist*groundDist*1e-4) - (distanceS*distanceS)); // wrong sign
+                // Attention: x = x_lop, y = -y_lop, z = -z_lop ?
+                double xShower = -distX*sin(azimuth) - distY*cos(azimuth);
+                double yShower = distX*cos(azimuth)*cos(zenith) - distY*sin(azimuth)*cos(zenith) - distZ*sin(zenith);
+                zShower = distX*cos(azimuth)*sin(zenith) - distY*sin(azimuth)*sin(zenith) + distZ*cos(zenith);
+                xShower *= 1e-2;
+                yShower *= 1e-2;
+                zShower *= 1e-2; // conversion from cm to m
+                
                 if ( abs(zShower-m_recEW[NantS].distZ) > (abs(zShower*0.05)+0.5) ) {
                   cout<<"WARNING: z_shower simulated EW channel:  "<<zShower<<"\t z_shower from LOPES  "<<m_recEW[NantS].distZ<<endl;
+                  cout<<"az_sim= " << azimuth*gradeg << " \t az_lop= " << AzL << endl;
+                  cout<<"ze_sim= " << zenith*gradeg << " \t ze_lop= " << (90.-ElL) << endl;
+                  cout<<"x_sim = " << xShower << " \t x_lop = " << m_recEW[NantS].distX << endl;
+                  cout<<"y_sim = " << yShower << " \t y_lop = " << m_recEW[NantS].distY << endl;
+                  cout<<"z_sim = " << zShower << " \t z_lop = " << m_recEW[NantS].distZ << endl;
                 }
                 simPropEW.distZ = zShower;
                 simPropEW.distZerr = 0.;
+                
+                if (timeREAS + zShower*3.33564 < 0) {
+                  cout << "\nNegative time at event GT "<< Gt << " , antenna " << NantS << ", ground azimuth " << azS << " °:\n"
+                       << "zenith = " << zenith*180/3.1416 << " °\t azimuth = " << azimuth*180/3.1416 << " °\n"
+                       << "Ground distance = " << groundDist << " \t lateral distance = " << distanceS << "\n"
+                       << "Antenna height = " << distZ << " \t in shower coordinates = " << zShower << "\n"
+                       << "Pulse time = " << timeREAS << "\n"
+                       << "Geom. cor. = " << timeREAS + zShower*3.33564 << "\n\n\n"
+                       << endl;
+                }
                 
                 m_simEW[NantS] = simPropEW; //fill the sim map
               }
@@ -852,7 +884,7 @@ int main (int argc, char *argv[])
                 simPropNS.height = NSfield;
                 //cout<<"NS Field  "<<NSfield<<endl;
                 simPropNS.heightError = 0.;
-                simPropNS.time = timeREAS*1e9; // pulse time in ns
+                simPropNS.time = timeREAS; // pulse time in ns
                 simPropNS.timeError = 0;
                 distanceR=m_recNS[NantS].dist;
                 // calculate simulation distance for consistency check
@@ -877,7 +909,8 @@ int main (int argc, char *argv[])
                 simPropNS.disterr = distanceSerr;
           
                 // calculate antenna height (z) in shower coordinates
-                zShower = -0.01* groundDist * sin(zenith) * cos(azS/gradeg-azimuth);
+                zShower = distX*cos(azimuth)*sin(zenith) - distY*sin(azimuth)*sin(zenith) + distZ*cos(zenith);
+                zShower *= 1e-2; // conversion from cm to m
                 if ( abs(zShower-m_recNS[NantS].distZ) > (abs(zShower*0.05)+0.5) ) {
                   cout<<"WARNING: z_shower simulated EW channel:  "<<zShower<<"\t z_shower from LOPES  "<<m_recEW[NantS].distZ<<endl;
                 }

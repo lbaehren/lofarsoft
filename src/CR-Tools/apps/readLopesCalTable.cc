@@ -208,14 +208,14 @@ int main (int argc, char *argv[])
            cerr << "Error while retrieving data" << endl;
          } else {
            cout << "for antenna " << antennaIDs[j] << ": " << Darray_value << endl;
-           cout << "Shape of array: " << Darray_value.shape() << endl;
+           //cout << "Shape of array: " << Darray_value.shape() << endl;
         }
       } else if (fieldType == "Array<DComplex>") {
          if (!table.GetData(date, antennaIDs[j], fieldName, &Carray_value)) {
            cerr << "Error while retrieving data" << endl;
          } else {
            cout << "for antenna " << antennaIDs[j] << ": " << Carray_value << endl;
-           cout << "Shape of array: " << Carray_value.shape() << endl;
+           //cout << "Shape of array: " << Carray_value.shape() << endl;
         }
       } else { // if the type was not found, exit the program
           cerr << "\nThe field type '" << fieldType << "' is currently not supported.\n" << endl;

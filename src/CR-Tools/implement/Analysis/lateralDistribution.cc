@@ -616,7 +616,7 @@ namespace CR { // Namespace CR -- begin
       double offsetY = 40;
       if (fitSim)
         offsetY += 20;
-      //double offsetX = 50;
+      double offsetX = 20;
       timePro->SetFillColor(0);
       timePro->SetLineColor(4);
       timePro->SetMarkerColor(4);
@@ -631,7 +631,7 @@ namespace CR { // Namespace CR -- begin
       timePro->GetXaxis()->SetTitleSize(0.05);
       timePro->GetYaxis()->SetTitleSize(0.05);
       timePro->GetYaxis()->SetRangeUser(timeMin, timeMax + offsetY);
-      //timePro->GetXaxis()->SetRangeUser(mindist - offsetX, maxdist + offsetX);     
+      timePro->GetXaxis()->SetLimits(0, maxdist + offsetX);     
       
       TGraph2DErrors *timePro2D = 
         new TGraph2DErrors(ant, distance, zshower, timeValUnpro, distanceEr, zshowerEr, timeValUnproEr);
