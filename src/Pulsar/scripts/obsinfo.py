@@ -1066,7 +1066,7 @@ if __name__ == "__main__":
 				mainlog=os.popen(cmd).readlines()
 				mainpsr="undefined"
 				if np.size(mainlog) > 0:
-					cmd="cat %s | grep id | head -n 1 2>/dev/null" % (mainlog[0][:-1],)
+					cmd="cat %s 2>/dev/null | grep id | head -n 1" % (mainlog[0][:-1],)
 					cmdline=os.popen(cmd).readlines()
 					if np.size(cmdline) > 0:
 						param=cmdline[0][:-1].split(" ")
