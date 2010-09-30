@@ -1064,11 +1064,11 @@ if __name__ == "__main__":
 				# getting first the name of the main pulsar (first in the command-line option)
 				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir, "*.log", cexec_egrep_string)
 				mainlog=os.popen(cmd).readlines()
+				mainpsr="undefined"
 				if np.size(mainlog) > 0:
 					cmd="cat %s | grep id | head -n 1 2>/dev/null" % (mainlog[0][:-1],)
 					cmdline=os.popen(cmd).readlines()
 					if np.size(cmdline) > 0:
-						mainpsr="undefined"
 						param=cmdline[0][:-1].split(" ")
 						for k in np.arange(len(param)):
         						if param[k] == "-p":
