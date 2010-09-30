@@ -353,8 +353,7 @@ class outputInfo:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=left>%s</td>" % (self.id, self.colspan, self.comment,)
 
-#	def Init(self, id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, comment, filestem_array, chi_array):
-	def Init(self, id, oi, storage_nodes, dirsizes, statusline, redlocation, comment, filestem_array, chi_array):
+	def Init(self, id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, comment, filestem_array, chi_array):
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
 		self.oi = oi
@@ -365,7 +364,7 @@ class outputInfo:
 		self.pointing = self.oi.pointing
 		self.statusline = statusline
 		self.redlocation = redlocation
-#		self.processed_dirsize = processed_dirsize
+		self.processed_dirsize = processed_dirsize
 		self.comment = comment
 		self.cs = len(storage_nodes)
 		if viewtype == "brief":
@@ -721,6 +720,11 @@ if __name__ == "__main__":
 	cmd="mkdir -p %s" % (plotsdir, )
 	os.system(cmd)
 
+	# just make sure that rebuild and update switches are off
+	if is_stats:
+		is_rebuild = False
+		is_update = False	
+
 	if not is_rebuild:
 		if not os.path.exists(dumpfile):
 			print "Dumpfile \'%s\' does not exist! Use -r option to rebuild the database." % (dumpfile, )
@@ -749,14 +753,25 @@ if __name__ == "__main__":
 				Nfetype_only = 0
 				Nimtype = 0
 				Nimtype_only = 0
+				Nbftype = 0
+				Nbftype_only = 0
+				Nfdtype = 0
+				Nfdtype_only = 0
+				Niscsim = 0
+				Nisim = 0
+				Ncsim = 0
+				Ncsfe = 0
 				totRawsize = 0.0   # size in TB of raw data
+				totProcessedsize = 0.0   # size in TB of processed data
 				for r in dbobsids:
+					# getting the numbers and duration
 					if obstable[r].comment == "" and obstable[r].oi.duration != "?":
 						totDuration += obstable[r].oi.dur	
 					if obstable[r].comment == "" and obstable[r].statusline != "x":
 						Nprocessed += 1
 						if obstable[r].oi.duration != "?":
 							processedDuration += obstable[r].oi.dur
+					# getting the number of obs of different type
 					if obstable[r].comment == "" and obstable[r].oi.istype == "+":
 						Nistype += 1
 						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
@@ -773,20 +788,48 @@ if __name__ == "__main__":
 						Nimtype += 1
 						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
 							Nimtype_only += 1
+					if obstable[r].comment == "" and obstable[r].oi.bftype == "+":
+						Nbftype += 1
+						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+							Nbftype_only += 1
+					if obstable[r].comment == "" and obstable[r].oi.fdtype == "+":
+						Nfdtype += 1
+						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.imtype != "+":
+							Nfdtype_only += 1
+					# getting the number of some observing types' mixtures
+					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
+						Niscsim += 1
+					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+						Nisim += 1
+					if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
+						Ncsim += 1
+					if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
+						Ncsfe += 1
+					# getting the sizes
 					if obstable[r].comment == "":
 						totRawsize += float(obstable[r].totsize)
+					if obstable[r].comment == "":
+						totProcessedsize += float(obstable[r].processed_dirsize)
 
 				totDuration /= 3600.
 				processedDuration /= 3600.
 				totRawsize /= 1024.
+				totProcessedsize /= 1024.
 
 				print "Total number of observations [hours/days]: %d [%.1f/%.1f]" % (np.size(dbobsids),totDuration,totDuration/24.)
 				print "Number of processed observations [hours/days]: %d [%.1f/%.1f]" % (Nprocessed,processedDuration,processedDuration/24.)
 				print "Number of IS observations [only IS]: %d [%d]" % (Nistype, Nistype_only)
+				print "Number of IS+CS+IM observations only: %d" % (Niscsim,)
+				print "Number of IS+IM observations only: %d" % (Nisim,)
 				print "Number of CS observations [only CS]: %d [%d]" % (Ncstype, Ncstype_only)
+				print "Number of CS+IM observations only: %d" % (Ncsim,)
+				print "Number of CS+FE observations only: %d" % (Ncsfe,)
 				print "Number of FE observations [only FE]: %d [%d]" % (Nfetype, Nfetype_only)
 				print "Number of IM observations [only IM]: %d [%d]" % (Nimtype, Nimtype_only)
+				print "Number of BF observations [only BF]: %d [%d]" % (Nbftype, Nbftype_only)
+				print "Number of FD observations [only FD]: %d [%d]" % (Nfdtype, Nfdtype_only)
 				print "Total size of raw data (TB): %.1f" % (totRawsize,)
+				print "Total size of processed data (TB): %.1f" % (totProcessedsize,)
 				print
 				sys.exit(0)
 
@@ -1075,8 +1118,7 @@ if __name__ == "__main__":
 				break
 
 		# combining info
-#		out.Init(id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, "", profiles_array, chi_array)
-		out.Init(id, oi, storage_nodes, dirsizes, statusline, redlocation, "", profiles_array, chi_array)
+		out.Init(id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, "", profiles_array, chi_array)
 		obstable[id] = out
 		# printing the info line by line in debug mode
 		if is_debug:
