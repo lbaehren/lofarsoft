@@ -1,0 +1,101 @@
+This is the help page for the LOFAR Known Pulsar Pipeline (shell-script), also known as "pulp.sh".  The command line options and examples are listed below.  
+
+By default, the pipeline needs the LOFAR OBSID in the form of L<year>_OBSID where OBSID is 5-digits padded by zero's;  the output directory location is also required;  lastly, you must specify either the Pulsar name or a list of Pulsars or the word "position" in order for the pipeline to fold the data for the pulsar(s) in the FOV.  Additional optional switches are described below.  The pipeline uses 8 cores on a machine by default, splitting up the data into 8 sets of subbands (generally 248 subbands are split into 8 groups of 31 subbands each);  the split is adjustable using the "-core" argument; however, the split must be even, else an even split if found closest to the user-requested number of cores.   
+
+Also see the examples section below.
+
+usage : pulp.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help]
+
+      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) 
+      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or
+         specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation
+         (i.e. single Pulsar: B2111+46) (i.e. multiple pulsars to fold:  B2111+46,B2106+44) 
+         (i.e. up to 3 brights pulsars to fold at location of FOV: position)
+      -o Output_Processing_Location ==> Specify the Output Processing Location 
+         (i.e. /net/sub5/lse013/data4/LOFAR_PULSAR_ARCHIVE_lse013/L2010_06296_red) 
+      [-all] ==> optional parameter perform folding on entire subband set in addition to N-splits (takes 11 extra min)
+      [-all_pproc] ==> Post-Processing optional parameter to ONLY perform folding on entire subband set based on already-processed N-splits
+      [-rfi] ==> optional parameter perform Vlad's RFI checker and only use clean results (takes 7 extra min)
+      [-rfi_pproc] ==> Post-Processing optional parameter to perform Vlad's RFI checker on already-processed N-splits
+      [-C | -c] ==> optional parameter to switch on bf2presto COLLAPSE (Collapse all channels in MS to a single .sub file)
+      [-del] ==> optional parameter to delete the previous ENTIRE Output_Processing_Location if it exists (override previous results!)
+      [-core N] ==> optional parameter to change the number of cores (splits) used for processing (default = 8)
+      [-incoh_only] ==> optional parameter to process ONLY Incoherentstokes (even though coherentstokes data exist)
+      [-coh_only] ==> optional parameter to process ONLY Coherentstokes  (even though incoherentstokes data exist)
+      [-incoh_redo] ==> optional parameter to redo processing for Incoherentstokes (deletes previous incoh results!)
+      [-coh_redo] ==> optional parameter to redo processing for Coherentstokes (deletes previous coh results!)
+      [-transpose] ==> optional parameter to indicate the input data were run through the TAB 2nd transpose
+      [-help] ==> optional parameter which prints the usage and examples of how to run the pipeline
+
+
+Examples:
+=========
+1) Perform processing on OBSID L2010_20542 of Pulsar B0531+21 and put the results in the current location in the directory called L2010_20542_red
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_20542 
+
+2) Perform the same processing as above, but on three Pulsars B0531+21 and B0525+21 and B0540+23
+
+	> pulp.sh -p B0531+21,B0525+21,B0540+23 -o L2010_20542_red -id L2010_20542 
+
+3) Perform the same processing as above, but use the position of the pointing to process the data for all known pulsars within the FOV of the observation:
+
+	> pulp.sh -p position -o L2010_20542_red -id L2010_09550
+
+4) Perform the same processing as above, but use 4 cores/splits of subbands instead of the default 8 cores/splits:
+
+	> pulp.sh -p position -o L2010_20542_red -id L2010_09550 -core 4
+
+5) Perform the same processing as above using the position to fold known Pulsars; add the "All" processing switch which will fold the entire subband range instead of just the N splits of subbands.  This is better for weak sources, since it is easier to see results in the entire subband range.  Note, this is the same as asking for "-core 1" on the command line:
+
+	> pulp.sh -p position -o L2010_20542_red -id L2010_09550 -all
+	> pulp.sh -p position -o L2010_20542_red -id L2010_09550 -core 1
+
+6) Perform the same processing as above using the Pulsar name B0531+21 with the "-all" switch as well as the "-rfi" switch (calculating RFI statistics for the observation).  THIS IS THE MOST STANDARD MODE TO RUN THE PIPELINE:
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_09550 -all -rfi
+
+7) Re-do all the processing for the above, deleting the previous results if they exist:
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_09550 -all -rfi -del
+	
+8) Re-do just the incoherentstokes processing - deleting the previous results of just the incoherentstokes results if they exist:
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_09550 -incoh_redo	
+
+9) Re-do just the coherentstokes processing - deleting the previous results of just the coherentstokes results if they exist:
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_09550 -coh_redo	
+
+10) Perform just incoherentstokes processing for this observation, no matter whether coherent data also exists (do not process coherent data):
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_09550 -incoh_only	
+
+11) Perform just coherentstokes processing for this observation, no matter whether incoherent data also exists (do not process incoherent data):
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_09550 -coh_only	
+
+12) Say you have run the pipeline once, but without the "-all" switch;  now, you want to run the pipeline with the "-all" switch but without having to re-process the splits which have already been done.  You must specify the "-o output" location to be the directory where the previous pipeline results already exist.  You can use the -all post process switch called "-all_pproc":
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_09550 -all_pproc	
+
+13) Say you have run the pipeline once, but without the "-rfi" switch;  now, you want to run the pipeline with the "-rfi" switch but without having to re-process the steps already been done.  You can use the -rfi post process switch called "-rfi_pproc":
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_09550 -rfi_pproc	
+
+14) The two post processing switches can be used together on data which has already been processed by the pipeline and you just want to run the "-all" and "-rfi" pieces after the fact:
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_09550 -rfi_pproc	-all_pproc
+	
+15) The "-transpose" switch is only to be used on a handful of datasets which were taken using the 2nd transpose BEFORE the OBSID parameter was added indicating that the data were run through the 2nd transpose.  Using this switch on data run through the 2nd transpose which have the parset keyword set, is redundent:
+
+	> pulp.sh -p B0531+21 -o L2010_20542_red -id L2010_09550 -transpose
+	
+16) The "-help" option will print this page:
+
+	> pulp.sh -help
+
+
+
+
+

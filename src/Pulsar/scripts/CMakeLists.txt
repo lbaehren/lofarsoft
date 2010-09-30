@@ -17,6 +17,7 @@ add_custom_target (scripts_install
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/PSR_catalog.txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/PSR_catalog_NA.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/3cCatalog_RADEC.txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/3cCatalog_psrHBA.txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/3cCatalog_psrLBA.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/Combined_3C_PSR_catalog.txt ${CMAKE_INSTALL_PREFIX}/data/
+  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/pulp_help.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND chmod 755 ${CMAKE_INSTALL_PREFIX}/bin/*.py ${CMAKE_INSTALL_PREFIX}/bin/*.sh
   WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/scripts
   COMMENT "Install extra processing scripts and LOFAR inf file into ${CMAKE_INSTALL_PREFIX}/bin and ${CMAKE_INSTALL_PREFIX}/data..."

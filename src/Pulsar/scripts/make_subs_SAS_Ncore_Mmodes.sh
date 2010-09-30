@@ -4,10 +4,10 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.25
+VERSION=1.26
 
 #Check the usage
-USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose]\n\n"\
+USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
 "      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or\n"\
 "         specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation\n"\
@@ -26,9 +26,10 @@ USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Out
 "      [-coh_only] ==> optional parameter to process ONLY Coherentstokes  (even though incoherentstokes data exist)\n"\
 "      [-incoh_redo] ==> optional parameter to redo processing for Incoherentstokes (deletes previous incoh results!)\n"\
 "      [-coh_redo] ==> optional parameter to redo processing for Coherentstokes (deletes previous coh results!)\n"\
-"      [-transpose] ==> optional parameter to indicate the input data were run through the TAB 2nd transpose\n"
+"      [-transpose] ==> optional parameter to indicate the input data were run through the TAB 2nd transpose\n"\
+"      [-help] ==> optional parameter which prints the usage and examples of how to run the pipeline\n"
 
-if [ $# -lt 6 ]                    # this script needs at least 6 args, including -switches
+if [ $# -lt 1 ]                    # this script needs at least 6 args, including -switches
 then
    print "$USAGE"    
    exit 1
@@ -51,6 +52,7 @@ coh_only=0
 incoh_redo=0
 coh_redo=0
 transpose=0
+help=0
 input_string=$*
 while [ $# -gt 0 ]
 do
@@ -71,6 +73,9 @@ do
 	-incoh_redo)  incoh_redo=1;;
 	-coh_redo)    coh_redo=1;;
 	-transpose)   transpose=1;;
+	-help)   help=1 
+	         cat $LOFARSOFT/release/share/pulsar/data/pulp_help.txt
+	         exit 1;;
 	-*)
 	    echo >&2 \
 	    "$USAGE"
@@ -79,6 +84,12 @@ do
     esac
     shift
 done
+
+if [[ $help == 1 ]]
+then 
+   cat $LOFARSOFT/release/share/pulsar/data/pulp_help.txt
+   exit 1
+fi
 
 # Print the basic information about input parameters to STDOUT at start of pipeline run
 echo "Running make_subs_SAS_Ncore_Mmodes.sh with the following input arguments:"
