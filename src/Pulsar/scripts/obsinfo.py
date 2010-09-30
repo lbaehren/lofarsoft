@@ -596,7 +596,7 @@ def usage (prg):
 	print "Usage: %s [options]\n\
           -f, --from <date>          - list obs only _since_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
           -t, --to <date>            - list obs only _till_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
-          -s, --sort <mode>          - sort obs list. Default list is sorted by ObsID. Possible <mode>\n\
+          --sort <mode>              - sort obs list. Default list is sorted by ObsID. Possible <mode>\n\
                                        is \"time\" to sort by start obs time, \"size\" to sort by total\n\
                                        disk space occupied by _raw_ data, \"source\" to sort by\n\
                                        the pointing coords of the source, and \"obsid\" is to sort by ObsID (default)\n\
@@ -635,12 +635,12 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hs:f:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats"])
+		opts, args = getopt.getopt (argv, "hf:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats"])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
 				sys.exit()
-			if opt in ("-s", "--sort"):
+			if opt in ("--sort"):
 				global sortkind
 				sortkind = arg
 				if sortkind != "time" and sortkind != "size" and sortkind != "source" and sortkind != "obsid":
