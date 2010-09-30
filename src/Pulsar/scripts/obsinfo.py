@@ -338,6 +338,7 @@ class outputInfo:
 		self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 		self.comment = comment
 		self.totsize = 0.0
+		self.processed_dirsize = 0.0
 		self.pointing = "????_????"
 		self.cs = len(storage_nodes)
 		if viewtype == "brief":
@@ -1019,7 +1020,7 @@ if __name__ == "__main__":
 				if np.size(status) > 0:
 					status=status[0][:-1]
 					if status.isdigit() == True:
-							processed_dirsize = status / 1024. / 1024. / 1024.
+							processed_dirsize = float(status) / 1024. / 1024. / 1024.
 				# checking if final tar.gz file exists
 				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir, "*_plots.tar.gz", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) > 0:
