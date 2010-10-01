@@ -86,6 +86,7 @@ dumpfile="/home/%s/Lofar/dump.b" % (username, )
 # directories with parset files
 parset_logdir="/globalhome/lofarsystem/log/"
 parset_oldlogdir="/globalhome/lofarsystem/oldlog/"
+parset_newlogdir="/globalhome/lofarsystem/production/lofar-trunk/bgfen/log/"
 # name of the parset file
 parset="RTCP.parset.0"
 
@@ -625,6 +626,8 @@ def usage (prg):
           -u, --update               - update db file only, new observations in /data? won't be added\n\
                                        This option can be used together with --from and --to to update only some observations\n\
           --stats                    - to calculate the statistics of existent observations in the database\n\
+                                       can be used together with --from and --to options\n\
+          --dbfile <dbfile>          - database file with stored info about the observations\n\
           --debug                    - debug mode\n\
           -h, --help                 - print this message\n" % (prg, )
 
@@ -636,7 +639,7 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hf:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats"])
+		opts, args = getopt.getopt (argv, "hf:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats", "dbfile"])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -695,6 +698,9 @@ def parsecmd(prg, argv):
 			if opt in ("--stats"):
 				global is_stats
 				is_stats = True
+			if opt in ("--dbfile"):
+				global dumpfile
+				dumpfile = arg
 
 	except getopt.GetoptError:
 		print "Wrong option!"
@@ -738,7 +744,9 @@ if __name__ == "__main__":
 			dbobsids = np.flipud(np.sort(obstable.keys(), kind='mergesort'))
 			for r in dbobsids:
 				obstable[r].update(storage_nodes)
+			#
 			# calculate statistics
+			#
 			if is_stats:
 				obsids = dbobsids
 				# we also have to choose only those IDs within the desired time range
@@ -856,6 +864,9 @@ if __name__ == "__main__":
 				print "Total size of processed data (TB): %.1f" % (totProcessedsize,)
 				print
 				sys.exit(0)
+				#
+				########## end of statistics #############
+				# 
 
 	if not is_update:
 		# loop over the storage nodes and directories to get the list of all IDs
@@ -969,7 +980,17 @@ if __name__ == "__main__":
 		# suffix of ID, the sequence number of observation
         	id_suffix=id.split("_")[1]   
 
+		#
 		# checking first if the directory with the parset file exists
+		#
+		# There were several changes in the location of the parset files and its name, so we have to
+		# check all of them. There were:
+		# (0) OLDEST parset file: /globalhome/lofarsystem/oldlog/id/RTCP.parset.0   <-- parset_oldlogdir + id + parset  
+		# (1) OLD parset was here: /globalhome/lofarsystem/log/id/RTCP.parset.0     <-- parset_logdir + id + parset
+		# (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
+		# (3) 2nd transpose parset as of Aug 20, 2010 is here: 
+		#          /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L2010-MM-DD-DATE/RTCP-ID.parset
+		#
 		logdir=parset_logdir + id + "/"
 		if not os.path.exists(logdir):
 			# checking in the oldlog directory
@@ -983,11 +1004,18 @@ if __name__ == "__main__":
 					# it means we found the directory with parset file
 					logdir=os.popen(cmd).readlines()[0][:-1].split("RTCP-%s.parset" % (id_suffix,))[0]
 				else:
-					# no directory found
-					comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
-					out.setcomment(id, storage_nodes, comment)
-					obstable[id] = out
-					continue
+					# now checking the new parset directory
+					cmd="find %s -type f -name 'RTCP-%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_newlogdir, id_suffix)
+					logdir=os.popen(cmd).readlines()
+					if np.size(logdir) > 0:
+						# it means we found the directory with parset file
+						logdir=os.popen(cmd).readlines()[0][:-1].split("RTCP-%s.parset" % (id_suffix,))[0]
+					else:
+						# no directory found
+						comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
+						out.setcomment(id, storage_nodes, comment)
+						obstable[id] = out
+						continue
 
 		# get the full path for the parset file for the current ID
 		log=logdir + parset
