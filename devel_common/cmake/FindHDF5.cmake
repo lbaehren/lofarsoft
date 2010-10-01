@@ -46,16 +46,16 @@ if (NOT FIND_HDF5_CMAKE)
   ## Check for the header files
   
   find_path (HDF5_INCLUDES hdf5.h hdf5_hl.h
-    PATHS ${include_locations}
-    PATH_SUFFIXES hdf5
+    PATHS ${include_locations} /usr/local
+    PATH_SUFFIXES hdf5 hdf5/include
     NO_DEFAULT_PATH
     )
 
   ## search for individual header files
   
   find_path (HAVE_HDF5_HDF5_H hdf5.h
-    PATHS ${include_locations}
-    PATH_SUFFIXES hdf5
+    PATHS ${include_locations} /usr/local
+    PATH_SUFFIXES hdf5 hdf5/include
     NO_DEFAULT_PATH
     )
   
@@ -66,8 +66,8 @@ if (NOT FIND_HDF5_CMAKE)
     )
   
   find_path (HAVE_HDF5_HDF5_HL_H hdf5_hl.h
-    PATHS ${include_locations}
-    PATH_SUFFIXES hdf5
+    PATHS ${include_locations} /usr/local
+    PATH_SUFFIXES hdf5 hdf5/include
     NO_DEFAULT_PATH
     )
   
@@ -78,8 +78,8 @@ if (NOT FIND_HDF5_CMAKE)
   
   find_library (HDF5_HDF5_LIBRARY
     NAMES hdf5
-    PATHS ${lib_locations}
-    PATH_SUFFIXES hdf5
+    PATHS ${lib_locations} /usr/local
+    PATH_SUFFIXES hdf5 hdf5/lib
     NO_DEFAULT_PATH
     )
   
@@ -91,8 +91,8 @@ if (NOT FIND_HDF5_CMAKE)
   
   FIND_LIBRARY (HDF5_HDF5_HL_LIBRARY
     NAMES hdf5_hl
-    PATHS ${lib_locations}
-    PATH_SUFFIXES hdf5
+    PATHS ${lib_locations} /usr/local
+    PATH_SUFFIXES hdf5 hdf5/lib
     NO_DEFAULT_PATH
     )
   
@@ -104,8 +104,8 @@ if (NOT FIND_HDF5_CMAKE)
   
   FIND_LIBRARY (HDF5_HDF5_CPP_LIBRARY
     NAMES hdf5_cpp
-    PATHS ${lib_locations}
-    PATH_SUFFIXES hdf5
+    PATHS ${lib_locations} /usr/local
+    PATH_SUFFIXES hdf5 hdf5/lib
     NO_DEFAULT_PATH
     )
   
