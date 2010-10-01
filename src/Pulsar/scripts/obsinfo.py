@@ -740,11 +740,25 @@ if __name__ == "__main__":
 				obstable[r].update(storage_nodes)
 			# calculate statistics
 			if is_stats:
+				obsids = dbobsids
+				# we also have to choose only those IDs within the desired time range
+				# if --from and/or --to are specified
+				if is_from == True:
+					fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
+				if is_to == True:
+					tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d"))
+					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
+
 				print
 				print "Current pulsar obs statistics:"
-				print "-------------------------------------------------------------------"
+				if is_from == True or is_to == True:
+					print "[%s%s]" % (is_from and "from " + fromdate or (is_to and " till " + todate or ""), 
+                                                                              is_to and (is_from and " till " + todate or "") or "")
+				print "----------------------------------------------------------------------------------------------"
 				totDuration = 0.0
 				processedDuration = 0.0
+				nonIMonlyDuration = 0.0
 				Nprocessed = 0
 				Nistype = 0
 				Nistype_only = 0
@@ -764,7 +778,7 @@ if __name__ == "__main__":
 				Ncsfe = 0
 				totRawsize = 0.0   # size in TB of raw data
 				totProcessedsize = 0.0   # size in TB of processed data
-				for r in dbobsids:
+				for r in obsids:
 					# getting the numbers and duration
 					if obstable[r].comment == "" and obstable[r].oi.duration != "?":
 						totDuration += obstable[r].oi.dur	
@@ -789,6 +803,8 @@ if __name__ == "__main__":
 						Nimtype += 1
 						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
 							Nimtype_only += 1
+							if obstable[r].oi.duration != "?":
+								nonIMonlyDuration += obstable[r].oi.dur
 					if obstable[r].comment == "" and obstable[r].oi.bftype == "+":
 						Nbftype += 1
 						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
@@ -814,10 +830,12 @@ if __name__ == "__main__":
 
 				totDuration /= 3600.
 				processedDuration /= 3600.
+				nonIMonlyDuration /= 3600.
 				totRawsize /= 1024.
 				totProcessedsize /= 1024.
 
-				print "Total number of observations [hours/days]: %d [%.1f/%.1f]" % (np.size(dbobsids),totDuration,totDuration/24.)
+				print "Total number of observations [hours/days]: %d [%.1f/%.1f]" % (np.size(obsids),totDuration,totDuration/24.)
+				print "Number of observations w/o IM only [hours/days]: %d [%.1f/%.1f]" % (np.size(obsids)-Nimtype_only, totDuration-nonIMonlyDuration, (totDuration-nonIMonlyDuration)/24.)
 				print "Number of processed observations [hours/days]: %d [%.1f/%.1f]" % (Nprocessed,processedDuration,processedDuration/24.)
 				print "Number of IS observations [only IS]: %d [%d]" % (Nistype, Nistype_only)
 				print "Number of IS+CS+IM observations only: %d" % (Niscsim,)
