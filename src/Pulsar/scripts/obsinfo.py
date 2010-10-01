@@ -758,7 +758,7 @@ if __name__ == "__main__":
 				print "----------------------------------------------------------------------------------------------"
 				totDuration = 0.0
 				processedDuration = 0.0
-				nonIMonlyDuration = 0.0
+				IMonlyDuration = 0.0
 				Nprocessed = 0
 				Nistype = 0
 				Nistype_only = 0
@@ -777,7 +777,9 @@ if __name__ == "__main__":
 				Ncsim = 0
 				Ncsfe = 0
 				totRawsize = 0.0   # size in TB of raw data
+				IMonlyRawsize = 0.0 # size in TB of IM only raw data
 				totProcessedsize = 0.0   # size in TB of processed data
+
 				for r in obsids:
 					# getting the numbers and duration
 					if obstable[r].comment == "" and obstable[r].oi.duration != "?":
@@ -803,8 +805,9 @@ if __name__ == "__main__":
 						Nimtype += 1
 						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
 							Nimtype_only += 1
+							IMonlyRawsize += float(obstable[r].totsize)
 							if obstable[r].oi.duration != "?":
-								nonIMonlyDuration += obstable[r].oi.dur
+								IMonlyDuration += obstable[r].oi.dur
 					if obstable[r].comment == "" and obstable[r].oi.bftype == "+":
 						Nbftype += 1
 						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
@@ -830,12 +833,13 @@ if __name__ == "__main__":
 
 				totDuration /= 3600.
 				processedDuration /= 3600.
-				nonIMonlyDuration /= 3600.
+				IMonlyDuration /= 3600.
 				totRawsize /= 1024.
 				totProcessedsize /= 1024.
+				IMonlyRawsize /= 1024.
 
 				print "Total number of observations [hours/days]: %d [%.1f/%.1f]" % (np.size(obsids),totDuration,totDuration/24.)
-				print "Number of observations w/o IM only [hours/days]: %d [%.1f/%.1f]" % (np.size(obsids)-Nimtype_only, totDuration-nonIMonlyDuration, (totDuration-nonIMonlyDuration)/24.)
+				print "Number of observations w/o IM only [hours/days]: %d [%.1f/%.1f]" % (np.size(obsids)-Nimtype_only, totDuration-IMonlyDuration, (totDuration-IMonlyDuration)/24.)
 				print "Number of processed observations [hours/days]: %d [%.1f/%.1f]" % (Nprocessed,processedDuration,processedDuration/24.)
 				print "Number of IS observations [only IS]: %d [%d]" % (Nistype, Nistype_only)
 				print "Number of IS+CS+IM observations only: %d" % (Niscsim,)
@@ -848,6 +852,7 @@ if __name__ == "__main__":
 				print "Number of BF observations [only BF]: %d [%d]" % (Nbftype, Nbftype_only)
 				print "Number of FD observations [only FD]: %d [%d]" % (Nfdtype, Nfdtype_only)
 				print "Total size of raw data (TB): %.1f" % (totRawsize,)
+				print "Total size of raw data w/o IM only (TB): %.1f" % (totRawsize-IMonlyRawsize,)
 				print "Total size of processed data (TB): %.1f" % (totProcessedsize,)
 				print
 				sys.exit(0)
