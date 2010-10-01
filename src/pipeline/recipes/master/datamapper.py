@@ -5,6 +5,7 @@
 #                                                      swinbank@transientskp.org
 # ------------------------------------------------------------------------------
 
+import os.path
 from itertools import cycle
 from collections import defaultdict
 
@@ -45,7 +46,7 @@ class datamapper(BaseRecipe):
 
         data = defaultdict(list)
         for filename in self.inputs['args']:
-            subcluster = filename.split('/')[2]
+            subcluster = filename.split(os.path.sep)[2]
             try:
                 host = available_nodes[subcluster].next()
             except KeyError, key:

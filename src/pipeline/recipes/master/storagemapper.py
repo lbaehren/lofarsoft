@@ -5,6 +5,7 @@
 #                                                      swinbank@transientskp.org
 # ------------------------------------------------------------------------------
 
+import os.path
 from collections import defaultdict
 
 from lofarpipe.support.baserecipe import BaseRecipe
@@ -27,12 +28,13 @@ class storagemapper(BaseRecipe):
         self.logger.info("Starting storagemapper run")
         super(storagemapper, self).go()
 
-        #                     We just read the storage node name out of the path
+        #                          We read the storage node name out of the path
+        #     and append the local filename (ie, on the storage node) to the map
         # ----------------------------------------------------------------------
         data = defaultdict(list)
         for filename in self.inputs['args']:
-            host = filename.split('/')[3]
-            data[host].append(filename)
+            host = filename.split(os.path.sep)[3]
+            data[host].append(filename.split(host)[-1])
 
         #                                 Dump the generated mapping to a parset
         # ----------------------------------------------------------------------
