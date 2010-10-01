@@ -1,4 +1,4 @@
-This is the help page for the LOFAR Known Pulsar Pipeline (shell-script), also known as "pulp.sh".  The command line options and examples are listed below.  
+This is the help page for the LOFAR Known Pulsar Pipeline (shell-script), also known as "pulp.sh".  The command line options and examples are listed below.  The executable is a link to the most recent version of the pipeline (make_subs_SAS_Ncore_Mmodes.sh).
 
 By default, the pipeline needs the LOFAR OBSID in the form of L<year>_OBSID where OBSID is 5-digits padded by zero's;  the output directory location is also required;  lastly, you must specify either the Pulsar name or a list of Pulsars or the word "position" in order for the pipeline to fold the data for the pulsar(s) in the FOV.  Additional optional switches are described below.  The pipeline uses 8 cores on a machine by default, splitting up the data into 8 sets of subbands (generally 248 subbands are split into 8 groups of 31 subbands each);  the split is adjustable using the "-core" argument; however, the split must be even, else an even split if found closest to the user-requested number of cores.   
 
