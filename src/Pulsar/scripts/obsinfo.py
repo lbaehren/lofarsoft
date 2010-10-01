@@ -770,7 +770,7 @@ if __name__ == "__main__":
 				if is_from == True or is_to == True:
 					print "[%s%s]" % (is_from and "from " + fromdate or (is_to and " till " + todate or ""), 
                                                                               is_to and (is_from and " till " + todate or "") or "")
-				print "----------------------------------------------------------------------------------------------"
+				print "---------------------------------------------------------------------------"
 				totDuration = 0.0
 				processedDuration = 0.0
 				IMonlyDuration = 0.0
@@ -789,8 +789,16 @@ if __name__ == "__main__":
 				Nfdtype_only = 0
 				Niscsim = 0
 				Nisim = 0
+				Niscs = 0
 				Ncsim = 0
 				Ncsfe = 0
+				Nimfe = 0
+				Nisfe = 0
+				Niscsfe = 0
+				Nbfis = 0
+				Nbffe = 0
+				Nbfisfe = 0
+				Nbfiscsfe = 0
 				totRawsize = 0.0   # size in TB of raw data
 				IMonlyRawsize = 0.0 # size in TB of IM only raw data
 				totProcessedsize = 0.0   # size in TB of processed data
@@ -836,10 +844,26 @@ if __name__ == "__main__":
 						Niscsim += 1
 					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
 						Nisim += 1
+					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+						Niscs += 1
 					if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
 						Ncsim += 1
 					if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
 						Ncsfe += 1
+					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+						Nisfe += 1
+					if obstable[r].comment == "" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+						Nimfe += 1
+					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
+						Niscsfe += 1
+					if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.fetype != "+":
+						Nbfis += 1
+					if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+						Nbffe += 1
+					if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+						Nbfisfe += 1
+					if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+						Nbfiscsfe += 1
 					# getting the sizes
 					if obstable[r].comment == "":
 						totRawsize += float(obstable[r].totsize)
@@ -853,22 +877,32 @@ if __name__ == "__main__":
 				totProcessedsize /= 1024.
 				IMonlyRawsize /= 1024.
 
-				print "Total number of observations [hours/days]: %d [%.1f/%.1f]" % (np.size(obsids),totDuration,totDuration/24.)
-				print "Number of observations w/o IM only [hours/days]: %d [%.1f/%.1f]" % (np.size(obsids)-Nimtype_only, totDuration-IMonlyDuration, (totDuration-IMonlyDuration)/24.)
-				print "Number of processed observations [hours/days]: %d [%.1f/%.1f]" % (Nprocessed,processedDuration,processedDuration/24.)
-				print "Number of IS observations [only IS]: %d [%d]" % (Nistype, Nistype_only)
-				print "Number of IS+CS+IM observations only: %d" % (Niscsim,)
-				print "Number of IS+IM observations only: %d" % (Nisim,)
-				print "Number of CS observations [only CS]: %d [%d]" % (Ncstype, Ncstype_only)
-				print "Number of CS+IM observations only: %d" % (Ncsim,)
-				print "Number of CS+FE observations only: %d" % (Ncsfe,)
-				print "Number of FE observations [only FE]: %d [%d]" % (Nfetype, Nfetype_only)
-				print "Number of IM observations [only IM]: %d [%d]" % (Nimtype, Nimtype_only)
-				print "Number of BF observations [only BF]: %d [%d]" % (Nbftype, Nbftype_only)
-				print "Number of FD observations [only FD]: %d [%d]" % (Nfdtype, Nfdtype_only)
-				print "Total size of raw data (TB): %.1f" % (totRawsize,)
-				print "Total size of raw data w/o IM only (TB): %.1f" % (totRawsize-IMonlyRawsize,)
-				print "Total size of processed data (TB): %.1f" % (totProcessedsize,)
+				print "Total number of observations [hours / days]:         %d [%.1f / %.1f]" % (np.size(obsids),totDuration,totDuration/24.)
+				print "Number of observations w/o IM only [hours / days]:   %d [%.1f / %.1f]" % (np.size(obsids)-Nimtype_only, totDuration-IMonlyDuration, (totDuration-IMonlyDuration)/24.)
+				print "Number of processed observations [hours / days]:     %d [%.1f / %.1f]" % (Nprocessed,processedDuration,processedDuration/24.)
+				print
+				print "Number of IS observations [only IS]:       %d [%d]" % (Nistype, Nistype_only)
+				print "Number of IS+CS observations only:         %d" % (Niscs,)
+				print "Number of IS+IM observations only:         %d" % (Nisim,)
+				print "Number of IS+CS+IM observations only:      %d" % (Niscsim,)
+				print "Number of CS observations [only CS]:       %d [%d]" % (Ncstype, Ncstype_only)
+				print "Number of CS+IM observations only:         %d" % (Ncsim,)
+				print "Number of FE observations [only FE]:       %d [%d]" % (Nfetype, Nfetype_only)
+				print "Number of FE+CS observations only:         %d" % (Ncsfe,)
+				print "Number of FE+IS observations only:         %d" % (Nisfe,)
+				print "Number of FE+IM observations only:         %d" % (Nimfe,)
+				print "Number of FE+IS+CS observations only:      %d" % (Niscsfe,)
+				print "Number of IM observations [only IM]:       %d [%d]" % (Nimtype, Nimtype_only)
+				print "Number of BF observations [only BF]:       %d [%d]" % (Nbftype, Nbftype_only)
+				print "Number of BF+IS observations only:         %d" % (Nbfis,)
+				print "Number of BF+FE observations only:         %d" % (Nbffe,)
+				print "Number of BF+IS+FE observations only:      %d" % (Nbfisfe,)
+				print "Number of BF+IS+CS+FE observations only:   %d" % (Nbfiscsfe,)
+				print "Number of FD observations [only FD]:       %d [%d]" % (Nfdtype, Nfdtype_only)
+				print
+				print "Total size of raw data (TB):               %.1f" % (totRawsize,)
+				print "Total size of raw data w/o IM-only (TB):   %.1f" % (totRawsize-IMonlyRawsize,)
+				print "Total size of processed data (TB):         %.1f" % (totProcessedsize,)
 				print
 				sys.exit(0)
 				#
