@@ -296,10 +296,11 @@ class obsinfo:
         	if np.size(self.source)>0:
                 	# Source name exists in parset file
                 	self.source=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
-			if self.source[0] == "'":
-				self.source=self.source.split("'")[1]
-			if self.source[0] == "\"":
-				self.source=self.source.split("\"")[1]
+			if self.source != "":
+				if self.source[0] == "'":
+					self.source=self.source.split("'")[1]
+				if self.source[0] == "\"":
+					self.source=self.source.split("\"")[1]
         	else:
                 	self.source=""
 
