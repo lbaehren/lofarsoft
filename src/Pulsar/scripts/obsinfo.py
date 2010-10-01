@@ -998,18 +998,20 @@ if __name__ == "__main__":
 			if not os.path.exists(logdir):
 				# Due to new naming convention and location of the parset files, also looking for the parset file
 				# in any L2010-??-??_?????? directories	
-				cmd="find %s -type f -name 'RTCP-%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_logdir, id_suffix)
+				cmd="find %s -type f -name '*%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_logdir, id_suffix)
 				logdir=os.popen(cmd).readlines()
 				if np.size(logdir) > 0:
 					# it means we found the directory with parset file
-					logdir=os.popen(cmd).readlines()[0][:-1].split("RTCP-%s.parset" % (id_suffix,))[0]
+					logdir=os.popen("dirname %s" % (logdir[0][:-1],)).readlines()[0][:-1]
+					logdir = logdir + "/"
 				else:
 					# now checking the new parset directory
-					cmd="find %s -type f -name 'RTCP-%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_newlogdir, id_suffix)
+					cmd="find %s -type f -name '*%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_newlogdir, id_suffix)
 					logdir=os.popen(cmd).readlines()
 					if np.size(logdir) > 0:
 						# it means we found the directory with parset file
-						logdir=os.popen(cmd).readlines()[0][:-1].split("RTCP-%s.parset" % (id_suffix,))[0]
+						logdir=os.popen("dirname %s" % (logdir[0][:-1],)).readlines()[0][:-1]
+						logdir = logdir + "/"
 					else:
 						# no directory found
 						comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
@@ -1024,12 +1026,15 @@ if __name__ == "__main__":
 			log=logdir + id + ".parset"
 			if not os.path.exists(log):
 				# also checking that maybe the name of parset file has new naming convention, like "RTCP-<id_suffix>.parset"
+				# OR like L<id_suffix>.parset
 				log=logdir + "RTCP-" + id_suffix + ".parset"
 				if not os.path.exists(log):
-					comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
-					out.setcomment(id, storage_nodes, comment)
-					obstable[id] = out
-					continue
+					log=logdir + "L" + id_suffix + ".parset"
+					if not os.path.exists(log):
+						comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
+						out.setcomment(id, storage_nodes, comment)
+						obstable[id] = out
+						continue
 
 		# initializing the obsinfo class
 		oi=obsinfo(log)
