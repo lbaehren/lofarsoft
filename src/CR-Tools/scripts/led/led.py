@@ -82,7 +82,7 @@ class MplCanvas(FigureCanvasQTAgg):
 class ApplicationWindow(QtGui.QMainWindow):
     """Main application window."""
     
-    def __init__(self, station, buffersize, refresh, fade, rmin, rmax, username, antennaMode, nofChannels, distancePlot, inputFile, liveMode):
+    def __init__(self, station, buffersize, refresh, fade, rmin, rmax, username, antennaMode, nofChannels, distancePlot, inputFile, runningTime, liveMode):
         """Create a LOFAR Event Display window.
         
         It takes the following parameters: 
@@ -106,6 +106,7 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.distancePlot = distancePlot
         self.inputFile = inputFile
         self.liveMode = liveMode
+        self.runningTime = runningTime
 
         # This is ugly! constructor should always work!
         # commandline parameter checking should be done in option parser.
@@ -229,7 +230,7 @@ class ApplicationWindow(QtGui.QMainWindow):
             thisDateString = str(thisDate.year) + '-' + '%02d' % (thisDate.month) + '-' + '%02d' % (thisDate.day)
             self.process.start('./test/liveFeedFromLofarStation.sh', [self.station, thisDateString, self.username, self.antennaMode, str(self.nofChannels), str(typeOfFit)])
         else:
-            self.process.start('./test/feedToVHECRtest.sh',[self.inputFile, 
+            self.process.start('./test/feedToVHECRtest.sh',[self.inputFile, str(self.runningTime),
                                self.antennaMode, str(self.nofChannels), str(typeOfFit), self.station])
     def stopCommand(self):
         """Stop listening for incoming data"""
@@ -390,6 +391,8 @@ parser.add_option("--distance", action="store_true", dest="distancePlot", defaul
                   help="setting this option gives distance plot instead of direction plot")
 parser.add_option("--file", default='/Users/acorstanje/triggering/electricfence/fenceoff/2010-04-13_TRIGGER_mode2_restarted.dat',
                   type="string", dest="inputFile", help="input trigger file to feed through. Mutually exclusive with --live")
+parser.add_option("--runningtime", default=120, type="int", dest="runningTime", help="Clock time in which to feed the file through, assuming processing is fast enough.")                  
+                  
 parser.add_option("--live", action="store_true", dest="liveMode", default=False,
                   help="set flag to run in Live mode from given station")
                   
@@ -404,7 +407,7 @@ if options.station == '':
     
 # Create GUI
 App = QtGui.QApplication(sys.argv)
-aw = ApplicationWindow(options.station, options.buffersize, options.refresh, options.fade, options.rmin, options.rmax, options.username, options.antennaMode, options.nofChannels, options.distancePlot, options.inputFile, options.liveMode)
+aw = ApplicationWindow(options.station, options.buffersize, options.refresh, options.fade, options.rmin, options.rmax, options.username, options.antennaMode, options.nofChannels, options.distancePlot, options.inputFile, options.runningTime, options.liveMode)
 aw.show()
 
 # Start application event loop

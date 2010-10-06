@@ -2,10 +2,11 @@
 
 echo Running feedfile.py script, passing to VHECRtest:
 echo file $1
-echo antenna selection $2
-echo nof channels $3
-echo fit type $4
-echo station name $5
-echo antenna pos file $5\-AntennaArrays.conf
-./test/feedfile.py $1 | VHECRtest -S $2 -C $3 -D $4 -P $LOFARSOFT/data/calibration/AntennaArrays/$5\-AntennaArrays.conf
+echo running time $2
+echo antenna selection $3
+echo nof channels $4
+echo fit type $5
+echo station name $6
+echo antenna pos file $7\-AntennaArrays.conf
+./test/feedfile.py $1 $2 | VHECRtest -S $3 -C $4 -D $5 -P $LOFARSOFT/data/calibration/AntennaArrays/$6\-AntennaArrays.conf
 
