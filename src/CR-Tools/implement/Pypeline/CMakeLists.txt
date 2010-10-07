@@ -35,6 +35,7 @@ set (PYPELINE_CORE_MODULES
   vector.py
   harray.py
   help.py
+  tasks.py
   workspaces.py
   )
 

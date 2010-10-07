@@ -82,7 +82,7 @@ Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues
     if type(properties) in hAllArrayTypes:
         if Type==None: Type=basetype(properties)
         if name==None: name=properties.getKey("name")
-        if dimensions==None: dimensions=properties.getDim()
+        if dimensions==None: dimensions=properties.shape()
         if units==None: units=(properties.getUnitPrefix(),properties.getUnitName())
         par=properties.par.__list__()
     if Type==None: Type=float
@@ -102,7 +102,7 @@ Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues
     if not hasattr(ary,"par"): setattr(ary,"par",hArray_par())
     if type(dimensions)==int: ary.reshape([dimensions])
     elif (type(dimensions) in [list,tuple,IntVec]): ary.reshape(dimensions)
-    elif (type(dimensions) in hAllArrayTypes): ary.reshape(dimensions.getDim())
+    elif (type(dimensions) in hAllArrayTypes): ary.reshape(dimensions.shape())
     if type(par) == tuple: setattr(ary.par,par[0],par[1])
     if type(par) == list: map(lambda elem:setattr(ary.par,elem[0],elem[1]),par)
     if not (xvalues == None): ary.par.xvalues=xvalues
@@ -141,7 +141,7 @@ def hArray_newreference(self):
 
 def hArray_shape(self):
     """
-    self.getDim() -> [dim1,dim2,...,dimN] or len(self)
+    self.shape() -> [dim1,dim2,...,dimN] or len(self)
 
     Retrieves the dimensions of a multidimensonal array as  a list of
     integers.
@@ -155,7 +155,7 @@ def hArray_reshape(self, dimensions):
     unchanged. Raise ValueError otherwise.
     """
     N_new = reduce(lambda x, y : x*y, dimensions)
-    N_old = reduce(lambda x, y : x*y, self.getDim())
+    N_old = reduce(lambda x, y : x*y, self.shape())
 
     if N_new == N_old:
         apply(self.setDimensions,dimensions)
@@ -224,7 +224,6 @@ def hSliceToNormalValues(s,dim):
     if s3==None: s3=1
     return slice(s1,s2,s3)
 
-
 def hArray_vec(self):
     """
     array.vec() -> Vector([x1,x2,x3, ...])
@@ -280,6 +279,26 @@ def hArray_getitem(self,indexlist):
     self[n1,n2,n3]-> return Element with these indices
 
     Retrieves a copy of the array with the internal slices set to reflect ...
+    integers, or value if slice contains only one value.
+
+    Use array.reshape([dim1,dim2,...,dimN]) to set the dimensions.
+    """
+
+    ary=self.getSlicedArray(indexlist)
+    size=ary.getSize()
+
+    if size == 0:
+        raise IndexError("index out of bounds")
+    elif size == 1:
+        return ary.val()
+    else:
+        return ary
+
+def hArray_getSlicedArray(self,indexlist):
+    """
+    self[n1,n2,n3]-> return Element with these indices
+
+    Retrieves a copy of the array with the internal slices set to reflect ...
     integers.
 
     Use array.reshape([dim1,dim2,...,dimN]) to set the dimensions.
@@ -289,7 +308,7 @@ def hArray_getitem(self,indexlist):
     else: indexlist=[indexlist]
     ary=hArray(self)
     ary.par=self.par
-    dimensions=ary.getDim()
+    dimensions=ary.shape()
     subslice_start=0; subslice_end=-1;
 #   Now check if there is an ellipsis in the index list, which indicates looping.
     ellipsiscount=indexlist.count(Ellipsis)
@@ -306,8 +325,7 @@ def hArray_getitem(self,indexlist):
             else:
                 indexlist[ellipsislocation]=slice(0,None,None) # replace ellipsis with slice
     else:
-        print "Error: hArray_getitem - only one Ellipsis (...) allowed in index list"
-        return ary
+        raise IndexError("only one Ellipsis (...) allowed in index list")
     nindices=len(indexlist)
     subslice_level=nindices-1
     for i in range(nindices):
@@ -341,7 +359,7 @@ def hArray_getitem(self,indexlist):
             arycopy.copy(ary,hArray(lastelement),-1)
             return arycopy
         else:
-            print "Error: hArray_getitem - list of indices has to be at the position of the last index."
+            raise IndexError("list of indices has to be at the position of the last index.")
     else: # normal integer index
         ary.setSubSlice(lastelement,lastelement+1,subslice_level)
         ary.setSliceVector(Vector(int,nindices-1,fill=indexliststarts[0:-1]))
@@ -353,7 +371,7 @@ def hArray_setitem(self,dims,fill):
 
     """
     if (type(fill)) in hAllListTypes: fill=hArray(fill)
-    hFill(hArray_getitem(self,dims),fill)
+    hFill(hArray_getSlicedArray(self,dims),fill)
 
 def hArray_read(self,datafile,key):
     """
@@ -435,7 +453,7 @@ def hTranspose(self,ary):
     [2,6,10]
     [3,7,11]
     """
-    dim2=ary.getDim()[-2]
+    dim2=ary.shape()[-2]
     self.redistribute(ary[...],Vector(range(dim2)),Vector(int,dim2,fill=dim2))
 
 def ishArray(ary):
@@ -448,7 +466,7 @@ def ishArray(ary):
 
 def hArray_toNumpy(self):
     """Returns a copy of the array as a numpy.ndarray object with the correct dimensions."""
-    return np.asarray(self.vec()).reshape(self.getDim())
+    return np.asarray(self.vec()).reshape(self.shape())
 
 # Fourier Transforms
 setattr(FloatArray,"fft",hFFTCasa)
@@ -472,6 +490,7 @@ for v in hAllArrayTypes:
     setattr(v,"plot",hPlot_plot)
     setattr(v,"copy_resize",hArray_copy_resize)
     setattr(v,"newreference",hArray_newreference)
+    setattr(v,"getSlicedArray",hArray_getSlicedArray)
     setattr(v,"__getitem__",hArray_getitem)
     setattr(v,"__setitem__",hArray_setitem)
     setattr(v,"setUnit",hArray_setUnit)
@@ -532,7 +551,7 @@ def hArrayToPrintString(self,maxlen=5):
     if self.loopingMode(): loops="*"
     name=self.getKey("name");
     if name=="": name="hArray";
-    return name+"("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+    return name+"("+s+str(self.shape())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
 
 def hArray_repr(self,maxlen=8,long=True):
     loops=""
@@ -541,7 +560,7 @@ def hArray_repr(self,maxlen=8,long=True):
     if not name=="": name=', name="'+name+'"'
     s="hArray("+hTypeNamesDictionary[basetype(self)]
     if long:
-        s+=","+str(list(self.getDim()))+name+") # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+        s+=","+str(list(self.shape()))+name+") # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
     else:
         s+=")"
     return s

@@ -1047,7 +1047,7 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
 
 //! Creating a rudimentary Array class, that allows contiguous slicing
 
-HBool hArray_trackHistory_value(True);
+HBool hArray_trackHistory_value(False);
 
 void hArray_trackHistory(HBool on){
   hArray_trackHistory_value = on;

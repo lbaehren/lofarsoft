@@ -35,8 +35,6 @@ import numpy as np
 import metadata as md
 import IO 
 
-hf.trackHistory(False)
-
 ## Examples
 class AntennaCalibration():
     """Class documentation"""

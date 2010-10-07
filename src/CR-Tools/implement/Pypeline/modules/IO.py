@@ -24,7 +24,6 @@ modules and then should from the outside work just like the pycrtools.
 import pycrtools as hf
 import numpy as np
 
-hf.trackHistory(False)
 # Examples
 class TBBdata:
     """This class provides an interface to multi-file Transient Buffer 

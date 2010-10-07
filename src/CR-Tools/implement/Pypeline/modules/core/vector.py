@@ -102,6 +102,7 @@ def hVector_elem(self,n):
     self.elem(n) -> nth element the vector
 
     """
+    print n
     return self[n]
 
 def hVector_vec(self):
