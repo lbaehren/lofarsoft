@@ -27,8 +27,19 @@ set (PIPELINE_CPP_MODULE_FILES
   Bindings
   )
 
-set (PIPELINE_MODULES
-  pycrtools.py
+set (PYPELINE_CORE_MODULES
+  __init__.py
+  config.py
+  datareader.py
+  types.py
+  vector.py
+  harray.py
+  help.py
+  workspaces.py
+  )
+
+set (PYPELINE_MODULES
+  __init__.py
   metadata.py
   bfdata.py
   imager.py
@@ -223,20 +234,33 @@ endforeach (FILE)
 # Install Python C++ modules
 install (
   TARGETS hftools
-  LIBRARY DESTINATION lib/python
+  LIBRARY DESTINATION lib/python/pycrtools/core
   )
 
 # Create output directories
 add_custom_command(
   TARGET hftools
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${LUS_ROOT}/release/lib/python
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${LUS_ROOT}/release/lib/python/pycrtools
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${LUS_ROOT}/release/lib/python/pycrtools/core
   COMMAND ${CMAKE_COMMAND} -E make_directory ${LUS_ROOT}/release/bin/python
   )
+
+# Install Python core modules
+foreach(FILENAME ${PYPELINE_CORE_MODULES})
+  set(SRC "${CMAKE_CURRENT_SOURCE_DIR}/modules/core/${FILENAME}")
+  set(DST "${LUS_ROOT}/release/lib/python/pycrtools/core/${FILENAME}")
+
+  add_custom_command(
+    TARGET hftools
+    COMMAND ${CMAKE_COMMAND} -E remove ${DST}
+    COMMAND ${CMAKE_COMMAND} -E create_symlink ${SRC} ${DST}
+  )
+endforeach(FILENAME)
 
 # Install Python modules
 foreach(FILENAME ${PIPELINE_MODULES})
   set(SRC "${CMAKE_CURRENT_SOURCE_DIR}/modules/${FILENAME}")
-  set(DST "${LUS_ROOT}/release/lib/python/${FILENAME}")
+  set(DST "${LUS_ROOT}/release/lib/python/pycrtools/${FILENAME}")
 
   add_custom_command(
     TARGET hftools
