@@ -5325,8 +5325,8 @@ void HFPP_FUNC_NAME (const Iter pixel, const Iter pixel_end,
 #define HFPP_PARDEF_7 (HNumber)(incLat)()("incLon increment value for latitude (CDELT)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_8 (HNumber)(refX)()("refX reference x pixel (CRPIX)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_9 (HNumber)(refY)()("refY reference y pixel (CRPIX)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_10 (HNumber)(lonPole)()("Longitude of the pole in radians (LONPOLE)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_11 (HNumber)(latPole)()("Latitude of the pole in radians (LATPOLE)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_10 (HNumber)(lonPole)()("(LONPOLE)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_11 (HNumber)(latPole)()("(LATPOLE)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -5344,15 +5344,26 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
     )
 {
   // Check input
-  if (world_end-world != pixel_end-pixel)
+  const int Nin = std::distance(pixel, pixel_end);
+  const int Nout = std::distance(world, world_end);
+
+  if (Nout != Nin)
   {
     std::cerr<<"Error, in hPixel2World(): input and output vector not of same length."<<std::endl;
+    return;
+  }
+
+  if (Nin % 2 != 0)
+  {
+    std::cerr<<"Error, in hPixel2World(): input vector has invalid size."<<std::endl;
+    return;
   }
 
   casa::MDirection::Types type;
   if (casa::MDirection::getType(type, refcode) != true)
   {
     std::cerr<<"Error, in hPixel2World(): input reference type invalid."<<std::endl;
+    return;
   }
 
   casa::Projection::Type proj;
@@ -5360,11 +5371,21 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
   if (proj==casa::Projection::N_PROJ)
   {
     std::cerr<<"Error, in hPixel2World(): input projection type invalid."<<std::endl;
+    return;
   }
 
   // Get spatial direction coordinate system
   casa::Matrix<casa::Double> xform(2,2);
   xform = 0.0; xform.diagonal() = 1.0;
+
+  // std::cout<<"refLong "<<refLong<<std::endl;
+  // std::cout<<"refLat  "<<refLat<<std::endl;
+  // std::cout<<"incLong "<<incLong<<std::endl;
+  // std::cout<<"incLat  "<<incLat<<std::endl;
+  // std::cout<<"refX    "<<refX<<std::endl;
+  // std::cout<<"refY    "<<refY<<std::endl;
+  // std::cout<<"lonPole "<<lonPole<<std::endl;
+  // std::cout<<"latPole "<<latPole<<std::endl;
 
   casa::DirectionCoordinate dir(type,
       proj,
@@ -5376,7 +5397,17 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
       static_cast<casa::Double>(refX),
       static_cast<casa::Double>(refY),
       static_cast<casa::Double>(lonPole),
-      static_cast<casa::Double>(latPole));
+      static_cast<casa::Double>(latPole)
+      );
+
+  // std::cout<<casa::MDirection::showType(dir.directionType(true))<<"\t"<<dir.projection().name()<<std::endl;
+
+  // std::cout<<"worldAxisNames "<<  dir.worldAxisNames()<<std::endl;
+  // std::cout<<"worldAxisUnits "<<  dir.worldAxisUnits()<<std::endl;
+  // std::cout<<"referenceValue "<<  dir.referenceValue()<<std::endl;
+  // std::cout<<"increment "<<      dir.increment()     <<std::endl;
+  // std::cout<<"linearTransform "<< dir.linearTransform()<<std::endl;
+  // std::cout<<"referencePixel "<<  dir.referencePixel()<<std::endl;
 
   // Get iterators
   Iter world_it=world;
@@ -5400,6 +5431,8 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
     *world_it=static_cast<HNumber>(cworld[0]);
     ++world_it;
     *world_it=static_cast<HNumber>(cworld[1]);
+
+    // std::cout<<cpixel<<" "<<cworld<<" "<<*world_it<<std::endl;
 
     // Next pixel
     ++pixel_it;
