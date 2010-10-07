@@ -1,21 +1,13 @@
-"""CR-Tools from Python
+"""Accessing the CR-Tools DAL from Python
 """
 
 import numpy as np
-import warnings
 
 # Import everything from the C++ module
-from _core import *
+from _datareader import *
 
 # Import module for temporary access to metadata
 import metadata
-
-# Try to import everything from the HFL
-try:
-    import hfl
-    from hfl import *
-except ImportError:
-    warnings.warn('Could not import hfl module, algorithms from hfl will not be available.')
 
 ## -------------------------------------------------------------------------
 #  Datareader
@@ -38,7 +30,7 @@ class __extended_DataReader(__injector, DataReader):
     """Object used for access to HDF5 files via the CR-Tools DataReader
     class.
 
-    Normally created by calling dr = core.open(filename) the object *dr*
+    Normally created by calling dr = datareader.open(filename) the object *dr*
     allows for access to the data via it's *read* method.
 
     This class also provides a universal access mechanism to access metadata
@@ -112,7 +104,7 @@ class __extended_DataReader(__injector, DataReader):
 
         For the following usage:
 
-        dr = core.open('filename')
+        dr = datareader.open('filename')
         if 'parameter' in dr:
             print dr['parameter']
 

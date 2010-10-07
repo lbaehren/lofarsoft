@@ -58,7 +58,7 @@ namespace CR { // Namespace CR -- begin
 
       \date 2010/06/13
 
-      \test tcore_numpycasa.cc
+      \test tpycr_numpycasa.cc
     
       <h3>Prerequisite</h3>
     

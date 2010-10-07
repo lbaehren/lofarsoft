@@ -53,7 +53,8 @@ int main()
                  refcode, projection,
                  refLong, refLat,
                  incLong, incLat,
-                 refX, refY);
+                 refX, refY,
+                 0., 0.);
 
   // Convert world coordinates
   //status=worldToWorld(oworld.begin(), oworld.end(),

@@ -4,7 +4,7 @@ Accessing data
 
 The DataReader object is used for access to HDF5 files via the CR-Tools DataReader class.
 
-Normally created by calling dr = core.open(filename) the object *dr*
+Normally created by calling dr = datareader.open(filename) the object *dr*
 allows for access to the data via it's *read* method.
 
 This class also provides a universal access mechanism to access metadata

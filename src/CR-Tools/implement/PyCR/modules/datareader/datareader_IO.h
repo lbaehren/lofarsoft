@@ -45,7 +45,7 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \ingroup CR
-      \ingroup core
+      \ingroup PyCR
       
       \brief Python bindings for the Datareader classes
       

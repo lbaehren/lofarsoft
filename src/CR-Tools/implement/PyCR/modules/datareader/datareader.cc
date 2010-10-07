@@ -22,7 +22,7 @@
  ***************************************************************************/
 
 /*!
-  \file core.cc
+  \file datareader.cc
   \ingroup CR
   \ingroup pycr
   \brief Python bindings
@@ -30,17 +30,17 @@
 
 
 //#### because of abug in the DAL this needs to be ####
-//#########   done before #include "core.h    #########
+//#########   done before #include "datareader.h    #########
 #define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
 #include <num_util.h>
 
-#include "core.h"
+#include "datareader.h"
 
 
-#include "core_IO.h"
-#include "core_RFI.h"
+#include "datareader_IO.h"
+#include "datareader_RFI.h"
 
-BOOST_PYTHON_MODULE (_core)
+BOOST_PYTHON_MODULE (_datareader)
 {
   import_array();
   boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
@@ -67,3 +67,4 @@ BOOST_PYTHON_MODULE (_core)
     ;
 
 }
+

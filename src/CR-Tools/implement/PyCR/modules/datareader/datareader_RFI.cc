@@ -21,9 +21,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <PyCR/core/core_RFI.h>
+#include <PyCR/modules/datareader/datareader_RFI.h>
 
-#include <PyCR/core/core_numpycasa.h>
+#include <PyCR/modules/datareader/pycr_numpycasa.h>
 #include <Calibration/RFIMitigationPlugin.h>
 
 namespace CR { // Namespace CR -- begin

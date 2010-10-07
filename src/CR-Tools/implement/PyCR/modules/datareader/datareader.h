@@ -22,7 +22,7 @@
  ***************************************************************************/
 
 /*!
-  \file core.h
+  \file datareader.h
   \ingroup CR
   \ingroup pycr
   \brief Python bindings

@@ -21,9 +21,10 @@ file (GLOB hfl_headers *.h)
 ## ------------------------------------------------------------------------------
 ## Installation
 
-install (FILES ${hfl_headers}
-  DESTINATION include/hfl
-  )
+# Buggy so disabled for now
+#install (FILES ${hfl_headers}
+#  DESTINATION include/hfl
+#  )
 
 ## ------------------------------------------------------------------------------
 ## Tests

@@ -70,7 +70,8 @@ namespace hfl
           const std::string refcode, const std::string projection,
           const double refLong, const double refLat,
           const double incLong, const double incLat,
-          const double refX, const double refY
+          const double refX, const double refY,
+          const double lonPole, const double latPole
           )
       {
         // Check input
@@ -94,6 +95,15 @@ namespace hfl
           std::cerr<<"Error, in pixel2World(): input projection type invalid."<<std::endl;
         }
 
+        std::cout<<"refLong "<<refLong<<std::endl;
+        std::cout<<"refLat  "<<refLat<<std::endl;
+        std::cout<<"incLong "<<incLong<<std::endl;
+        std::cout<<"incLat  "<<incLat<<std::endl;
+        std::cout<<"refX    "<<refX<<std::endl;
+        std::cout<<"refY    "<<refY<<std::endl;
+        std::cout<<"lonPole "<<lonPole<<std::endl;
+        std::cout<<"latPole "<<latPole<<std::endl;
+
         // Get spatial direction coordinate system
         casa::Matrix<casa::Double> xform(2,2);
         xform = 0.0; xform.diagonal() = 1.0;
@@ -106,9 +116,18 @@ namespace hfl
             static_cast<casa::Double>(incLat),
             xform,
             static_cast<casa::Double>(refX),
-            static_cast<casa::Double>(refY));
+            static_cast<casa::Double>(refY),
+            static_cast<casa::Double>(lonPole),
+            static_cast<casa::Double>(latPole));
 
-        //        std::cout<<casa::MDirection::showType(dir.directionType())<<"\t"<<dir.projection().name()<<std::endl;
+        std::cout<<casa::MDirection::showType(dir.directionType(true))<<"\t"<<dir.projection().name()<<std::endl;
+
+        std::cout<<"worldAxisNames "<<  dir.worldAxisNames()<<std::endl;
+        std::cout<<"worldAxisUnits "<<  dir.worldAxisUnits()<<std::endl;
+        std::cout<<"referenceValue "<<  dir.referenceValue()<<std::endl;
+        std::cout<<"increment "<<      dir.increment()     <<std::endl;
+        std::cout<<"linearTransform "<< dir.linearTransform()<<std::endl;
+        std::cout<<"referencePixel "<<  dir.referencePixel()<<std::endl;
 
         // Get iterators
         DIter world_it=world;
@@ -132,6 +151,8 @@ namespace hfl
           *world_it=static_cast<double>(cworld[0]);
           ++world_it;
           *world_it=static_cast<double>(cworld[1]);
+
+          std::cout<<cpixel<<" "<<cworld<<" "<<*world_it<<std::endl;
 
           // Next pixel
           ++pixel_it;

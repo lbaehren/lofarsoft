@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <PyCR/core/core_numpycasa.h>
+#include <PyCR/modules/datareader/pycr_numpycasa.h>
 
 namespace CR { // Namespace CR -- begin
   namespace PYCR { // Namespace PYCR -- begin

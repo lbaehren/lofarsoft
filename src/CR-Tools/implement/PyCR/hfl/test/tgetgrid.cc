@@ -53,7 +53,8 @@ int main()
                  refcode, projection,
                  refLong, refLat,
                  incLong, incLat,
-                 refX, refY);
+                 refX, refY,
+                 0., 0.);
 
   status=world2Pixel(opixel.begin(), opixel.end(),
                  world.begin(), world.end(),

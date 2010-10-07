@@ -21,9 +21,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <PyCR/core/core_IO.h>
+#include <PyCR/modules/datareader/datareader_IO.h>
 
-#include <PyCR/core/core_numpycasa.h>
+#include <PyCR/modules/datareader/pycr_numpycasa.h>
 #include <IO/LopesEventIn.h>
 #include <IO/LOFAR_TBB.h>
 #include <Data/tbbctlIn.h>
