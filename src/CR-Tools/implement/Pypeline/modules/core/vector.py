@@ -97,53 +97,12 @@ def hVector_val(self):
     if len(self)==1: return self[0]
     else: return list(self)
 
-def hVector_setDim(self,dimensions_list):
-    """setDim([dim1,dim2,...,dimN])
-
-    Sets the dimensions of a multidimensonal array, using a list of
-    integers as input. Will resize the underlying vector, if necessary
-    (i.e., if size has changed). Apart from the size, this does not
-    change the underlying data structure, just keeps track on how the
-    data is internally organized.
-
-    Index ordering follows c(++) convention: the last index runs
-    fastest (i.e. in analogy with normal numbers, where also the last
-    digit implies the smallest increment).
-
-    Use array.getDim() to retrieve the dimension list.
-    """
-    newsize=multiply_list(dimensions_list) # dim1*dim2*...*dimN
-    if (not len(self)==newsize): self.resize(newsize)
-    self.dimension=dimensions_list
-    self.ndim=len(dimensions_list)
-    return self
-
-def hVector_getDim(self):
-    """
-    self.getDim() -> [dim1,dim2,...,dimN] or len(self)
-
-    Retrieves the dimensions of a multidimensonal array as  a list of
-    integers.
-
-    Use array.setDim([dim1,dim2,...,dimN]) to set the dimensions.
-    """
-    if self.ndim>0: return self.dimension
-    else: return len(self)
-
 def hVector_elem(self,n):
     """
-    self.elem(n) -> nth element of the first dimension of the array
+    self.elem(n) -> nth element the vector
 
     """
-    if self.ndim>1: # this actually is a multi-dim array
-        if type(n)==int: #select just one element
-            size=multiply_list(self.dimension[1:])
-            return self[n*size:(n+1)*size]
-        else:
-            print "elem: index unknown ..."
-            return self
-    else:
-        return self[n]
+    return self[n]
 
 def hVector_vec(self):
     """
@@ -186,7 +145,6 @@ def VecToString(self,maxlen=10):
     if veclen>maxlen:
         stringval+=",..."
     return stringval
-
 
 def VecToPrintString(self,maxlen=5):
     s=typename(basetype(self))+","
@@ -329,15 +287,10 @@ setattr(FloatVec,"fft",hFFTCasa)
 for v in hAllVectorTypes:
     setattr(v,"__repr__",VecToPrintString)
     setattr(v,"extendflat",extendflat)
-    setattr(v,"setDim",hVector_setDim)
-    setattr(v,"getDim",hVector_getDim)
-    setattr(v,"shape",hVector_getDim)
     setattr(v,"elem",hVector_elem)
     setattr(v,"val",hVector_val)
     setattr(v,"vec",hVector_vec)
     setattr(v,"list",hVector_list)
-    setattr(v,"dimension",[])
-    setattr(v,"ndim",0)
     for s in ["hResize","hNew"]:
         setattr(v,s[1:].lower(),eval(s))
 
@@ -355,7 +308,6 @@ for v in hComplexContainerTypes:
     for s in ["hConj","hCrossCorrelateComplex","hFFTCasa","hInvFFTw","hSaveInvFFTw","hFFTw","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex","hRFIDownsampling","hSetAmplitude"]:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
-
 
 for v in hNumericalContainerTypes:
     setattr(v,"__add__",Vec_add)
