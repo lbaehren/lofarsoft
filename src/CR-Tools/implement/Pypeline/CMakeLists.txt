@@ -4,15 +4,30 @@ message (STATUS "[CR-Tools] Adding implement/Pypeline ...")
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
 
-set (PYPELINE_PREPROCESSOR_DIR
+set (PIPELINE_PREPROCESSOR_DIR
   ${CMAKE_CURRENT_SOURCE_DIR}/preprocessor
   )
 
-set (PYPELINE_CPP_FILES
-  hftools
+set (PIPELINE_CPP_FILES
+  core
   )
 
-set (PYPELINE_MODULES
+set (PIPELINE_CPP_MODULE_PREFIX "m")
+
+set (PIPELINE_CPP_MODULE_FILES
+  Array
+  Vector
+  Math
+  FFT
+  Filter
+  Fitting
+  Imaging
+  IO
+  RF
+  Bindings
+  )
+
+set (PIPELINE_MODULES
   pycrtools.py
   metadata.py
   bfdata.py
@@ -24,7 +39,7 @@ set (PYPELINE_MODULES
   matching.py
   )
 
-set (PYPELINE_SCRIPTS
+set (PIPELINE_SCRIPTS
   test.py
   testfft.py
   testrfi.py
@@ -41,46 +56,82 @@ set (PYPELINE_SCRIPTS
   pycrinit.py
   )
 
-foreach (FILE ${PYPELINE_CPP_FILES})
-  # Variable substitutions and iterations
-  add_custom_command (
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.iter.cc
-    PRE_BUILD
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.cc
+##_______________________________________________________________________________
+## Perform Wrapper Preprocessing of module files
 
-    COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfiter.awk ${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.cc > ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.iter.cc
+foreach (FILE ${PIPELINE_CPP_MODULE_FILES})
+  ## ________________________________________________________________________
+  ##                                    Variable substitutions and iterations
+  add_custom_command (
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
+    PRE_BUILD
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.cc
+    COMMAND ${awk_executable} -f ${PIPELINE_PREPROCESSOR_DIR}/hfiter.awk ${CMAKE_CURRENT_SOURCE_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
+    COMMENT "Wrapper preprocessing module ${FILE}: Substituting variables and processing iterations"
     )
 
-  # Split off wrapper definitions
+  ## ________________________________________________________________________
+  ##                                            Split off wrapper definitions
   add_custom_command (
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.split.cc ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.def.h
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc
+#           ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.def.h
     PRE_BUILD
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.iter.cc
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
+    COMMAND ${awk_executable} -f ${PIPELINE_PREPROCESSOR_DIR}/hfsplit2h.awk ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc
+    COMMENT "Wrapper preprocessing module ${FILE}: Splitting off wrapper definitions"
+    )
+endforeach (FILE ${PIPELINE_CPP_MODULE_FILES})
 
-    COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfsplit2h.awk ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.iter.cc > ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.split.cc
+foreach (FILE ${PIPELINE_CPP_MODULE_FILES})
+  ## ________________________________________________________________________
+  ##                                                 execute gcc preprocessor
+  add_custom_command (
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.wpp.cc
+    PRE_BUILD
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc
+            ${CMAKE_CURRENT_SOURCE_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/core.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/${PIPELINE_CPP_MODULE_PREFIX}Module.h
+    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP -w  -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.wpp.cc
+    COMMENT "Wrapper preprocessing module ${FILE}: Executing wrapper preprocessor"
     )
 
-  # Execute gcc in preprocessor mode (and insert some newlines) - this file will be compiled and is quite instructive for debugging
+  ## ________________________________________________________________________
+  ##                                                      Inserting new lines
   add_custom_command (
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.cc
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.cc
     PRE_BUILD
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.split.cc
-
-    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP  -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.split.cc | ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.cc
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.wpp.cc
+    COMMAND ${awk_executable} -f ${PIPELINE_PREPROCESSOR_DIR}/hfinsert-newline.awk ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.wpp.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.cc
+    COMMENT "Wrapper preprocessing module ${FILE}: Finalizing wrapper preprocessing"
     )
-endforeach (FILE)
+
+endforeach (FILE ${PIPELINE_CPP_MODULE_FILES})
 
 ##_______________________________________________________________________________
 ## Create the library
 
-include_directories (${CR_SOURCE_DIR}/implement/Pypeline)
+include_directories (
+  ${CR_SOURCE_DIR}/implement/Pypeline
+  ${CMAKE_CURRENT_BINARY_DIR}
+  )
 
-foreach (FILE ${PYPELINE_CPP_FILES})
+# Core files
+foreach (FILE ${PIPELINE_CPP_FILES} )
   set (PREPROCESSED_FILES
     ${PREPROCESSED_FILES}
-    ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.cc
     )
-endforeach (FILE)
+endforeach (FILE ${PIPELINE_CPP_FILES})
+
+# Module files
+foreach (FILE ${PIPELINE_CPP_MODULE_FILES} )
+  set (PREPROCESSED_FILES
+    ${PREPROCESSED_FILES}
+    ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.cc
+    )
+endforeach (FILE ${PIPELINE_CPP_MODULE_FILES})
+
 
 add_library (hftools MODULE
   ${PREPROCESSED_FILES}
@@ -113,7 +164,7 @@ else (APPLE)
     PROPERTIES
     PREFIX ""
     SUFFIX .so
-    COMPILE_FLAGS "-DH_DEBUG_CPP -g -O2"
+    COMPILE_FLAGS "-DH_DEBUG_CPP -g -O2 -w" # TODO: inhibit warnings
     LINK_FLAGS "-fPIC -shared -Wl"
     )
 endif (APPLE)
@@ -121,33 +172,49 @@ endif (APPLE)
 ##_______________________________________________________________________________
 ## Create the documentation
 
-foreach (FILE ${PYPELINE_CPP_FILES})
-  # Generate the basic documentation strings that python help will use
-  add_custom_command (
-    TARGET hftools
-    POST_BUILD
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.iter.cc
+# Start with empty documentation files.
+add_custom_command (
+  TARGET hftools
+  POST_BUILD
+  COMMAND echo "" > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
+  COMMAND echo "" > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
 
-    COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetpydoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.iter.cc > ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.doc.py
-    )
+  COMMENT "Create documentation for python bindings"
+  )
 
-  # Generate basic documentation in text form
-  add_custom_command (
-    TARGET hftools
-    POST_BUILD
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.iter.cc
+foreach (FILE ${PIPELINE_CPP_MODULE_FILES})
+   # Generate the basic documentation strings that python help will use
+   add_custom_command (
+     TARGET hftools
+     POST_BUILD
+     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
 
-    COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetdoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.iter.cc > ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.doc.tex
-    )
+     COMMAND ${awk_executable} -f ${PIPELINE_PREPROCESSOR_DIR}/hfgetpydoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
 
-  # Generate a file that can be processed by doxygen
-  add_custom_command (
-    TARGET hftools
-    POST_BUILD
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.split.cc
+#     COMMENT "Generating python documentation for module ${FILE}"
+     )
 
-    COMMAND ${CMAKE_CXX_COMPILER} -E -C -P -DH_DEBUG_CPP  -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES} -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.split.cc | ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.doc.cc
-    )
+   # Generate basic documentation in text form
+   add_custom_command (
+     TARGET hftools
+     POST_BUILD
+     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
+
+     COMMAND ${awk_executable} -f ${PIPELINE_PREPROCESSOR_DIR}/hfgetdoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
+
+#     COMMENT "Generating text documentation for module ${FILE}"
+     )
+
+  # # Generate a file that can be processed by doxygen
+  # add_custom_command (
+  #   TARGET hftools
+  #   POST_BUILD
+  #   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc
+
+  #   COMMAND ${CMAKE_CXX_COMPILER} -w -E -C -P -DH_DEBUG_CPP  -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES} -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc | ${awk_executable} -f ${PIPELINE_PREPROCESSOR_DIR}/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/${PIPELINE_CPP_MODULE_PREFIX}${FILE}.doc.cc
+
+  #   COMMENT "Generating doxygen parsable documentation for module ${FILE}"
+  #   )
 endforeach (FILE)
 
 ##_______________________________________________________________________________
@@ -167,7 +234,7 @@ add_custom_command(
   )
 
 # Install Python modules
-foreach(FILENAME ${PYPELINE_MODULES})
+foreach(FILENAME ${PIPELINE_MODULES})
   set(SRC "${CMAKE_CURRENT_SOURCE_DIR}/modules/${FILENAME}")
   set(DST "${LUS_ROOT}/release/lib/python/${FILENAME}")
 
@@ -179,7 +246,7 @@ foreach(FILENAME ${PYPELINE_MODULES})
 endforeach(FILENAME)
 
 # Install Python scripts
-foreach(FILENAME ${PYPELINE_SCRIPTS})
+foreach(FILENAME ${PIPELINE_SCRIPTS})
   set(SRC "${CMAKE_CURRENT_SOURCE_DIR}/scripts/${FILENAME}")
   set(DST "${LUS_ROOT}/release/bin/python/${FILENAME}")
 
