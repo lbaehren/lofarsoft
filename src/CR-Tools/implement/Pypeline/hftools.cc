@@ -5325,6 +5325,8 @@ void HFPP_FUNC_NAME (const Iter pixel, const Iter pixel_end,
 #define HFPP_PARDEF_7 (HNumber)(incLat)()("incLon increment value for latitude (CDELT)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_8 (HNumber)(refX)()("refX reference x pixel (CRPIX)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_9 (HNumber)(refY)()("refY reference y pixel (CRPIX)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_10 (HNumber)(lonPole)()("Longitude of the pole in radians (LONPOLE)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_11 (HNumber)(latPole)()("Latitude of the pole in radians (LATPOLE)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -5337,7 +5339,8 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
     const string refcode, const string projection,
     const HNumber refLong, const HNumber refLat,
     const HNumber incLong, const HNumber incLat,
-    const HNumber refX, const HNumber refY
+    const HNumber refX, const HNumber refY,
+    const HNumber lonPole, const HNumber latPole
     )
 {
   // Check input
@@ -5371,7 +5374,9 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
       static_cast<casa::Double>(incLat),
       xform,
       static_cast<casa::Double>(refX),
-      static_cast<casa::Double>(refY));
+      static_cast<casa::Double>(refY),
+      static_cast<casa::Double>(lonPole),
+      static_cast<casa::Double>(latPole));
 
   // Get iterators
   Iter world_it=world;
@@ -5413,8 +5418,8 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
 #define HFPP_PARDEF_1 (HNumber)(ec)()("array with equatorial coordinates (ra, dec, ra, dec, ...) ")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(utc)()("UTC as Julian Day")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_3 (HNumber)(ut1_utc)()("difference UT1-UTC (as obtained from IERS bullitin A) if 0 a maximum error of 0.9 seconds is made.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_4 (HNumber)(L)()("longitude of telescope")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_5 (HNumber)(phi)()("latitude of telescope")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HNumber)(L)()("longitude of telescope in radians positive westwards")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HNumber)(phi)()("latitude of telescope in radians")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING

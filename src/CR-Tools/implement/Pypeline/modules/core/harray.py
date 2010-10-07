@@ -95,7 +95,18 @@ Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues
     else: # Create a new vector
         if type(Type) == np.ndarray and not dimensions:
             dimensions=Type.shape
-        vec=Vector(Type=Type)
+
+        if type(dimensions)==int:
+            size=dimensions
+        elif (type(dimensions) in [list,tuple,IntVec]):
+            size=reduce(lambda x,y : x*y, dimensions)
+        elif (type(dimensions) in hAllArrayTypes):
+            size=reduce(lambda x,y : x*y, dimensions.shape())
+        else:
+            size=-1
+
+        vec=Vector(Type=Type, size=size)
+
         ary=type2array(basetype(vec))
         ary.stored_vector=vec
         ary.setVector(ary.stored_vector)
@@ -289,7 +300,7 @@ def hArray_getitem(self,indexlist):
 
     if size == 0:
         raise IndexError("index out of bounds")
-    elif size == 1:
+    elif size == 1 and not ary.loopingMode():
         return ary.val()
     else:
         return ary

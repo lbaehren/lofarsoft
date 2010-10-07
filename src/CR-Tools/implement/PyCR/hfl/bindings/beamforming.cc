@@ -70,6 +70,11 @@ namespace hfl
       hfl::beamforming::geometricWeights(hfl::numpyBeginPtr< std::complex<double> >(weights), hfl::numpyEndPtr< std::complex<double> >(weights), hfl::numpyBeginPtr<double>(frequencies), hfl::numpyEndPtr<double>(frequencies), hfl::numpyBeginPtr<double>(antPositions), hfl::numpyEndPtr<double>(antPositions), hfl::numpyBeginPtr<double>(skyPositions), hfl::numpyEndPtr<double>(skyPositions), farfield);
     }
 
+    bool geometricWeightsFarField(boost::python::numeric::array weights, boost::python::numeric::array frequencies, boost::python::numeric::array antpos, boost::python::numeric::array skydir)
+    {
+      return hfl::beamforming::geometricWeightsFarField(hfl::numpyBeginPtr< std::complex<double> >(weights), hfl::numpyEndPtr< std::complex<double> >(weights), hfl::numpyBeginPtr<double>(frequencies), hfl::numpyEndPtr<double>(frequencies), hfl::numpyBeginPtr<double>(antpos), hfl::numpyEndPtr<double>(antpos), hfl::numpyBeginPtr<double>(skydir), hfl::numpyEndPtr<double>(skydir));
+    }
+
     } // End bindings
 } // End hfl
 
@@ -89,5 +94,6 @@ BOOST_PYTHON_MODULE(beamforming)
   def("geometricDelays", hfl::bindings::geometricDelays, "Calculates the time delay in seconds for signals received at\n      various antenna positions relative to a phase center from sources\n      located at certain 3D space coordinates in near or far field.\n\n      antennas and positions [antenna index runs fastest:\n      (ant1,pos1),(ant2,pos1),...] - length of vector has to be number of\n      antennas times positions.\n      a reference location (phase center) - vector of length number of\n      antennas times three.\n      towards a sky location, relative to phase center - vector of length\n      number of skypositions times three.\n      do near field calculation.\n\n*delays* Output vector containing the delays in seconds for all\n*delays_end* \n*antPositions* Cartesian antenna positions (Meters) relative to\n*antPositions_end* \n*skyPositions* Vector in Cartesian coordinates (Meters) pointing\n*skyPositions_end* \n*farfield* Calculate in farfield approximation if true, otherwise\n");
   def("geometricPhases", hfl::bindings::geometricPhases, "Calculates the phase gradients for signals received at various\n      antenna positions relative to a phase center from sources located at\n      certain 3D space coordinates in near or far field and for differentfrequencies.\n\n*phases* \n*phases_end* \n*frequencies* \n*frequencies_end* \n*antPositions* \n*antPositions_end* \n*skyPositions* \n*skyPositions_end* \n*farfield* \n");
   def("geometricWeights", hfl::bindings::geometricWeights, "Calculates the phase gradients as complex weights for signals\n      received at various antenna positions relative to a phase center from\n      sources located at certain 3D space coordinates in near or far field\n      and for different frequencies.\n\n*weights* \n*weights_end* \n*frequencies* \n*frequencies_end* \n*antPositions* \n*antPositions_end* \n*skyPositions* \n*skyPositions_end* \n*farfield* \n");
+  def("geometricWeightsFarField", hfl::bindings::geometricWeightsFarField, "Calculates the complex weights\n\n*weights* (array of complex)\n*weights_end* \n*frequencies* frequencies in Hz (array of double)\n*frequencies_end* \n*antpos* antenna position (array of length 3)\n*antpos_end* \n*skydir* sky direction (array of length 3)\n*skydir_end* \n");
 }
 

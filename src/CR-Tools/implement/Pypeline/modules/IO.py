@@ -273,6 +273,7 @@ def get(files, keyword,return_as_list=True):
             TotNrAnts=sum(NrAnts)
             shape=ret.getDim()
             shape[0]=TotNrAnts
+            ret.resize(reduce(lambda x,y : x*y, shape))
             ret.setDim(shape)
             StartAnt=0
             EndAnt=0

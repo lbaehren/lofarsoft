@@ -334,6 +334,62 @@ namespace hfl
           };
         };
       }
+
+    /*!
+      \brief Calculates the complex weights
+
+      \param weights (array of complex)
+      \param frequencies frequencies in Hz (array of double)
+      \param antpos antenna position (array of length 3)
+      \param skydir sky direction (array of length 3)
+     */
+    template <class CIter, class DIter>
+      bool geometricWeightsFarField(CIter weights, CIter weights_end,
+                          DIter frequencies, DIter frequencies_end,
+                          DIter antpos, DIter antpos_end,
+                          DIter skydir, DIter skydir_end
+                          )
+      {
+        // Variables
+        std::complex<double> phase;
+
+        // Get input sizes
+        const int Nw = std::distance(weights, weights_end);
+        const int Nf = std::distance(frequencies, frequencies_end);
+        const int Np = std::distance(antpos, antpos_end);
+        const int Ns = std::distance(skydir, skydir_end);
+
+        // Check if input arrays are of a correct size
+        if (Np != 3 || Ns != 3 || Nw != Nf) return false;
+
+        // Get iterators
+        CIter w=weights;
+        DIter f=frequencies;
+        DIter p=antpos;
+        DIter s=skydir;
+
+        // Calculate length of vector
+        const double distance = math::norm(s, s+3);
+
+        // Calculate delay
+        const double delay = - (*s * *p
+                + *(s+1) * *(p+1)
+                + *(s+2) * *(p+2))/distance/constants::LIGHT_SPEED;
+
+        // Loop over f and calculate w
+        for (int i=0; i<Nw; i++)
+        {
+          phase = std::complex<double>(0., 2 * M_PI * *f * delay);
+
+          *w = std::exp(phase);
+
+          f++;
+          w++;
+        }
+
+        // Succes
+        return true;
+      }
   } // End beamforming
 } // End hfl
 

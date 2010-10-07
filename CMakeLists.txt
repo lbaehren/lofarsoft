@@ -76,7 +76,7 @@ option (DAL_VERBOSE_CONFIGURE  "Verbose output during configuration?"         NO
 option (RM_ENABLE_ITPP       "Enable using IT++ library?"                  NO  )
 option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"             YES )
 
-option (TMF_ENABLE_PYTHON    "Build Python bindings for TMF library?"      NO)
+option (TMF_ENABLE_PYTHON    "Build Python bindings for TMF library?"      YES )
 
 ## Handle options
 
