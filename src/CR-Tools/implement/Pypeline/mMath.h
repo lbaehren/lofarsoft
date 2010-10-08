@@ -55,8 +55,6 @@ extern HComplex hAmplitudePhaseToComplex(HNumber amplitude, HNumber phase);
 extern HComplex hPhaseToComplex(HNumber phase);
 extern HNumber funcGaussian (HNumber x, HNumber sigma, HNumber mu);
 
-
-
 // ========================================================================
 //
 //  Generic templates for wrapper functionality
@@ -70,10 +68,7 @@ namespace PyCR { // Namespace PyCR -- begin
     template <class T> inline T square(T val);
     template <class T> inline T logSave(T val);
 
-    //inline HNumber hPhase(HNumber frequency, HNumber time) { ::hPhase(frequency, time);};
-
     template <class T> inline T hMedian(std::vector<T>& vec);
-
 
     template <class Iter, class S>
       void hMul2(const Iter vec1,const Iter vec1_end, S val)
@@ -85,6 +80,7 @@ namespace PyCR { // Namespace PyCR -- begin
         ++it;
       };
     }
+
     template <class Iter, class S>
       void hAdd2(const Iter vec1,const Iter vec1_end, S val)
     {
@@ -94,7 +90,9 @@ namespace PyCR { // Namespace PyCR -- begin
         *it = hfcast<T>(*it HFPP_OPERATOR_Add val);
         ++it;
       };
+
     }
+
     template <class Iter, class S>
       void hDiv2(const Iter vec1,const Iter vec1_end, S val)
     {
@@ -105,6 +103,7 @@ namespace PyCR { // Namespace PyCR -- begin
         ++it;
       };
     }
+
     template <class Iter, class S>
       void hSub2(const Iter vec1,const Iter vec1_end, S val)
     {
@@ -117,46 +116,54 @@ namespace PyCR { // Namespace PyCR -- begin
     }
 
     template <class Iter, class Iterin, class S>
-      void hMul2(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end,const S val)
+      void hMul2(const Iter vec,const Iter vec_end, const Iterin vec1,const Iterin vec1_end,const S val)
     {
       typedef IterValueType T;
-      Iter it=vec1;
-      while (it!=vec1_end) {
-        *it = hfcast<T>(*it HFPP_OPERATOR_Mul val);
-        ++it;
+      Iterin it1=vec1;
+      Iter itout=vec;
+      while (itout !=vec_end) {
+        *itout = hfcast<T>(*it1 HFPP_OPERATOR_Mul val);
+        ++it1; ++itout;
+        if (it1==vec1_end) it1=vec1;
       };
     }
 
     template <class Iter, class Iterin, class S>
-      void hAdd2(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end,const S val)
+      void hAdd2(const Iter vec,const Iter vec_end, const Iterin vec1,const Iterin vec1_end,const S val)
     {
       typedef IterValueType T;
-      Iter it=vec1;
-      while (it!=vec1_end) {
-        *it = hfcast<T>(*it HFPP_OPERATOR_Add val);
-        ++it;
+      Iterin it1=vec1;
+      Iter itout=vec;
+      while (itout !=vec_end) {
+        *itout = hfcast<T>(*it1 HFPP_OPERATOR_Add  val);
+        ++it1; ++itout;
+        if (it1==vec1_end) it1=vec1;
       };
     }
 
     template <class Iter, class Iterin, class S>
-      void hDiv2(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end,const S val)
+      void hDiv2(const Iter vec,const Iter vec_end, const Iterin vec1,const Iterin vec1_end,const S val)
     {
       typedef IterValueType T;
-      Iter it=vec1;
-      while (it!=vec1_end) {
-        *it = hfcast<T>(*it HFPP_OPERATOR_Div val);
-        ++it;
+      Iterin it1=vec1;
+      Iter itout=vec;
+      while (itout !=vec_end) {
+        *itout = hfcast<T>(*it1 HFPP_OPERATOR_Div  val);
+        ++it1; ++itout;
+        if (it1==vec1_end) it1=vec1;
       };
     }
 
     template <class Iter, class Iterin, class S>
-      void hSub2(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end,const S val)
+      void hSub2(const Iter vec,const Iter vec_end, const Iterin vec1,const Iterin vec1_end,const S val)
     {
       typedef IterValueType T;
-      Iter it=vec1;
-      while (it!=vec1_end) {
-        *it = hfcast<T>(*it HFPP_OPERATOR_Sub val);
-        ++it;
+      Iterin it1=vec1;
+      Iter itout=vec;
+      while (itout !=vec_end) {
+        *itout = hfcast<T>(*it1 HFPP_OPERATOR_Sub  val);
+        ++it1; ++itout;
+        if (it1==vec1_end) it1=vec1;
       };
     }
 
