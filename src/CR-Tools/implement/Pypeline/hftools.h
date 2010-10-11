@@ -100,6 +100,9 @@
 #include <gsl/gsl_bspline.h>
 #endif
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 using namespace std;
 

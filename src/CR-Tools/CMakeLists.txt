@@ -48,6 +48,7 @@ option (CR_WITH_GUI             "Build the graphical interface?"             NO 
 option (CR_WITH_PYPELINE        "Build the Pypeline library?"                YES )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
 option (CR_WITH_CASAPY          "Build Pyline library against CASApy?"       NO  )
+option (CR_WITH_OPENMP          "Enable OpenMP support?"                     NO  )
 
 ## ==============================================================================
 ##
@@ -193,6 +194,10 @@ if (CR_WITH_GLISH)
 else (CR_WITH_GLISH)
   list (APPEND cr_cmake_modules CASACORE)
 endif (CR_WITH_GLISH)
+
+if (CR_WITH_OPENMP)
+  list (APPEND cr_cmake_modules OpenMP)
+endif (CR_WITH_OPENMP)
 
 include_find_module (${cr_cmake_modules} ${CR_VERBOSE_CONFIGURE})
 

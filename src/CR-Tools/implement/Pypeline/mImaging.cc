@@ -811,3 +811,119 @@ void HFPP_FUNC_NAME (const Iter hc, const Iter hc_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Beamform image
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBeamformImage
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(image)()("Image")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(fftdata)()("FFT data")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(frequencies)()("Frequencies")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(antpos)()("Antenna positions")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(skypos)()("Sky positions")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class CIter, class Iter>
+void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
+    const CIter fftdata, const CIter fftdata_end,
+    const Iter frequencies, const Iter frequencies_end,
+    const Iter antpos, const Iter antpos_end,
+    const Iter skypos, const Iter skypos_end
+    )
+{
+  // Variables
+  HNumber norm = 0.0;
+  HNumber delay = 0.0;
+
+  // Inspect length of input arrays
+  const int Nimage = std::distance(image, image_end);
+  const int Nfftdata = std::distance(fftdata, fftdata_end);
+  const int Nfreq = std::distance(frequencies, frequencies_end);
+  const int Nantpos = std::distance(antpos, antpos_end);
+  const int Nskypos = std::distance(skypos, skypos_end);
+
+  // Get relevant numbers
+  const int Nantennae = Nantpos / 3;
+  const int Nskycoord = Nskypos / 3;
+
+  // Sanity checks
+  if (Nantpos != Nantennae * 3)
+  {
+    std::cerr<<"Antenna positions array has wrong size."<<std::endl;
+    return;
+  }
+  if (Nskypos != Nskycoord * 3)
+  {
+    std::cerr<<"Sky positions array has wrong size."<<std::endl;
+    return;
+  }
+  if (Nfftdata != Nfreq * Nantennae)
+  {
+    std::cerr<<"FFT data array has wrong size."<<std::endl;
+    return;
+  }
+  if (Nimage != Nskycoord * Nfreq)
+  {
+    std::cerr<<"Image array has wrong size."<<std::endl;
+    return;
+  }
+
+  // Get iterators
+  CIter it_im = image;
+  CIter it_im_inner = image;
+  CIter it_fft = fftdata;
+  Iter it_freq = frequencies;
+  Iter it_ant = antpos;
+  Iter it_sky = skypos;
+
+  // Loop over pixels (parallel on multi core systems if supported)
+#ifdef _OPENMP
+  std::cout<<"Running in parallel mode"<<std::endl;
+  #pragma omp parallel for private(delay, norm, it_im, it_im_inner, it_fft, it_freq, it_ant, it_sky)
+#else
+  std::cout<<"Running in serial mode"<<std::endl;
+#endif // _OPENMP
+  for (int i=0; i<Nskycoord; i++)
+  {
+    // Image iterator to start position
+    it_im = image;
+    it_im += i * Nfreq + 1;
+
+    // Sky coordinate iterator to start position
+    it_sky = skypos;
+    it_sky += i * 3;
+
+    // Loop over antennae
+    it_ant = antpos;
+    it_fft = fftdata;
+    for (int j=0; j<Nantennae; j++)
+    {
+      // Reset image iterator to first frequency of current pixel
+      it_im_inner = it_im;
+
+      // Calculate norm of sky vector
+      norm = PyCR::Array::hVectorLength(it_sky, it_sky+3);
+
+      // Calculate geometric delay (and increment iterator)
+      delay = hGeometricDelayFarField(it_ant, it_sky, norm);
+
+      // Loop over frequencies
+      it_freq = frequencies;
+      for (int k=0; k<Nfreq; k++)
+      {
+        // Multiply by geometric weight and add to image
+        *it_im_inner++ += *it_fft++ * exp(HComplex(0.0, CR::_2pi*(*it_freq++ * delay)));
+      }
+
+      // Next antenna position
+      it_ant+=3;
+    }
+  }
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+

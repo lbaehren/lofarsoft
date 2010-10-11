@@ -1,6 +1,14 @@
 
 message (STATUS "[CR-Tools] Adding implement/Pypeline ...")
 
+##-------------------------------------------------------------------------------
+## Optional dependencies
+if (CR_WITH_OPENMP AND OPENMP_FOUND)
+  message (STATUS "[CR-Tools] Adding OpenMP support to Pypeline.")
+  set (PYPELINE_CXX_FLAGS ${OpenMP_CXX_FLAGS})
+  set (PYPELINE_LINKER_FLAGS ${OpenMP_CXX_FLAGS})
+endif (CR_WITH_OPENMP AND OPENMP_FOUND)
+
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
 
@@ -104,7 +112,7 @@ foreach (FILE ${PYPELINE_CPP_MODULE_FILES})
             ${CMAKE_CURRENT_SOURCE_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.h
             ${CMAKE_CURRENT_SOURCE_DIR}/core.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${PYPELINE_CPP_MODULE_PREFIX}Module.h
-    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP -w  -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.wpp.cc
+    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP -w  -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${PYPELINE_CXX_FLAGS} ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.wpp.cc
     COMMENT "Wrapper preprocessing module ${FILE}: Executing wrapper preprocessor"
     )
 
@@ -168,16 +176,16 @@ if (APPLE)
     PROPERTIES
     PREFIX ""
     SUFFIX .so
-    COMPILE_FLAGS "-fpermissive -DH_DEBUG_CPP"
-    LINK_FLAGS "-fPIC -flat_namespace -Wl"
+    COMPILE_FLAGS "${PYPELINE_CXX_FLAGS} -fpermissive -DH_DEBUG_CPP"
+    LINK_FLAGS "${PYPELINE_LINKER_FLAGS} -fPIC -flat_namespace -Wl"
     )
 else (APPLE)
   set_target_properties (hftools
     PROPERTIES
     PREFIX ""
     SUFFIX .so
-    COMPILE_FLAGS "-DH_DEBUG_CPP -g -O2 -w" # TODO: inhibit warnings
-    LINK_FLAGS "-fPIC -shared -Wl"
+    COMPILE_FLAGS "${PYPELINE_CXX_FLAGS} -DH_DEBUG_CPP -g -O2 -w" # TODO: inhibit warnings
+    LINK_FLAGS "${PYPELINE_LINKER_FLAGS} -fPIC -shared -Wl"
     )
 endif (APPLE)
 
