@@ -40,9 +40,14 @@
 #include "core.h"
 #include "mImaging.h"
 
-#include "Math/VectorConversion.h" // TODO: To be moved
+#include "Math/VectorConversion.h"
 
 #include <tmf.h>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 
 // ========================================================================
 //
