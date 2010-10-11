@@ -308,7 +308,9 @@ template<class T> inline T hfcast(/*const*/ T v){return v;}
 
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
+#if H_OS64BIT
 template<>  inline HInteger hfcast<HInteger>(int v){return static_cast<HInteger>(v);}
+#endif
 template<>  inline HInteger hfcast<HInteger>(ptrdiff_t v){return static_cast<HInteger>(v);}
 template<>  inline HInteger hfcast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v));}
 template<>  inline HInteger hfcast<HInteger>(HComplex v){return static_cast<HInteger>(floor(real(v)));}
