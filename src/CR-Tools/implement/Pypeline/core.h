@@ -475,94 +475,106 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
   };
 }
 
-/*!
-  \brief Exception base class
- */
-class Exception
-{
-public:
+
+// ========================================================================
+//
+//  Exception classes
+//
+// ========================================================================
+
+namespace PyCR { // Namespace PyCR -- begin
+
+  /*!
+    \brief Exception base class
+  */
+  class Exception
+  {
+  public:
     Exception(std::string m)
-    {
-      message = m;
-    };
+      {
+        message = m;
+      };
 
     ~Exception(){};
 
     std::string message;
-};
+  };
 
-// Derived errors
-class ValueError: public Exception
-{
-public:
-    ValueError(std::string m) : Exception(m) {};
-};
+  // Derived errors
+  class ValueError: public Exception
+  {
+  public:
+  ValueError(std::string m) : Exception(m) {};
+  };
 
-class TypeError: public Exception
-{
-public:
-    TypeError(std::string m) : Exception(m) {};
-};
+  class TypeError: public Exception
+  {
+  public:
+  TypeError(std::string m) : Exception(m) {};
+  };
 
-//class IndexError: public Exception
-//{
-//public:
-//    IndexError(std::string m) : Exception(m) {};
-//};
+  class IndexError: public Exception
+  {
+  public:
+  IndexError(std::string m) : Exception(m) {};
+  };
 
-class KeyError: public Exception
-{
-public:
-    KeyError(std::string m) : Exception(m) {};
-};
+  class KeyError: public Exception
+  {
+  public:
+  KeyError(std::string m) : Exception(m) {};
+  };
 
-class MemoryError: public Exception
-{
-public:
-    MemoryError(std::string m) : Exception(m) {};
-};
+  class MemoryError: public Exception
+  {
+  public:
+  MemoryError(std::string m) : Exception(m) {};
+  };
 
-class ArithmeticError: public Exception
-{
-public:
-    ArithmeticError(std::string m) : Exception(m) {};
-};
+  class ArithmeticError: public Exception
+  {
+  public:
+  ArithmeticError(std::string m) : Exception(m) {};
+  };
 
-class EOFError: public Exception
-{
-public:
-    EOFError(std::string m) : Exception(m) {};
-};
+  class EOFError: public Exception
+  {
+  public:
+  EOFError(std::string m) : Exception(m) {};
+  };
 
-class FloatingPointError: public Exception
-{
-public:
-    FloatingPointError(std::string m) : Exception(m) {};
-};
+  class FloatingPointError: public Exception
+  {
+  public:
+  FloatingPointError(std::string m) : Exception(m) {};
+  };
 
-class OverflowError: public Exception
-{
-public:
-    OverflowError(std::string m) : Exception(m) {};
-};
+  class OverflowError: public Exception
+  {
+  public:
+  OverflowError(std::string m) : Exception(m) {};
+  };
 
-class ZeroDivisionError: public Exception
-{
-public:
-    ZeroDivisionError(std::string m) : Exception(m) {};
-};
+  class ZeroDivisionError: public Exception
+  {
+  public:
+  ZeroDivisionError(std::string m) : Exception(m) {};
+  };
 
-class NameError: public Exception
-{
-public:
-    NameError(std::string m) : Exception(m) {};
-};
+  class NameError: public Exception
+  {
+  public:
+  NameError(std::string m) : Exception(m) {};
+  };
 
-class NotImplementedError: public Exception
-{
-public:
-    NotImplementedError(std::string m) : Exception(m) {};
-};
+  class NotImplementedError: public Exception
+  {
+  public:
+  NotImplementedError(std::string m) : Exception(m) {};
+  };
+
+
+} // Namespace PyCR -- end
 
 #endif /* CR_PIPELINE_CORE_H */
 

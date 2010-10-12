@@ -37,6 +37,25 @@
 
 void hInit();
 
+namespace PyCR { // Namespace PyCR -- begin
+
+  // Exception translators
+  void translateException(Exception const& e);
+  void translateValueError(ValueError const& e);
+  void translateTypeError(TypeError const& e);
+  void translateIndexError(IndexError const& e);
+  void translateKeyError(KeyError const& e);
+  void translateMemoryError(MemoryError const& e);
+  void translateArithmeticError(ArithmeticError const& e);
+  void translateEOFError(EOFError const& e);
+  void translateFloatingPointError(FloatingPointError const& e);
+  void translateOverflowError(OverflowError const& e);
+  void translateZeroDivisionError(ZeroDivisionError const& e);
+  void translateNameError(NameError const& e);
+  void translateNotImplementedError(NotImplementedError const& e);
+
+} // Namespace PyCR -- end
+
 
 #endif /* CR_PIPELINE_BINDINGS_H */
 

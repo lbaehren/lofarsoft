@@ -66,7 +66,83 @@ void hInit(){
   PyCR::Fitting::hInit();
 }
 
+// ========================================================================
+//
+//  Exception translations
+//
+// ========================================================================
 
+namespace PyCR { // Namespace PyCR -- begin
+
+  // Exception translators
+  void translateException(Exception const& e)
+  {
+    PyErr_SetString(PyExc_Exception, e.message.c_str());
+  }
+
+  void translateValueError(ValueError const& e)
+  {
+    PyErr_SetString(PyExc_ValueError, e.message.c_str());
+  }
+
+  void translateTypeError(TypeError const& e)
+  {
+    PyErr_SetString(PyExc_TypeError, e.message.c_str());
+  }
+
+  void translateIndexError(IndexError const& e)
+  {
+    PyErr_SetString(PyExc_IndexError, e.message.c_str());
+  }
+
+  void translateKeyError(KeyError const& e)
+  {
+    PyErr_SetString(PyExc_KeyError, e.message.c_str());
+  }
+
+  void translateMemoryError(MemoryError const& e)
+  {
+    PyErr_SetString(PyExc_MemoryError, e.message.c_str());
+  }
+
+  void translateArithmeticError(ArithmeticError const& e)
+  {
+    PyErr_SetString(PyExc_ArithmeticError, e.message.c_str());
+  }
+
+  void translateEOFError(EOFError const& e)
+  {
+    PyErr_SetString(PyExc_EOFError, e.message.c_str());
+  }
+
+  void translateFloatingPointError(FloatingPointError const& e)
+  {
+    PyErr_SetString(PyExc_FloatingPointError, e.message.c_str());
+  }
+
+  void translateOverflowError(OverflowError const& e)
+  {
+    PyErr_SetString(PyExc_OverflowError, e.message.c_str());
+  }
+
+  void translateZeroDivisionError(ZeroDivisionError const& e)
+  {
+    PyErr_SetString(PyExc_ZeroDivisionError, e.message.c_str());
+  }
+
+  void translateNameError(NameError const& e)
+  {
+    PyErr_SetString(PyExc_NameError, e.message.c_str());
+  }
+
+  void translateNotImplementedError(NotImplementedError const& e)
+  {
+    PyErr_SetString(PyExc_NotImplementedError, e.message.c_str());
+  }
+
+
+
+} // Namespace PyCR -- end
 
 // ========================================================================
 //
@@ -82,71 +158,6 @@ void hInit(){
 
 //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(hArray_setDimensions_overloads,setDimensions<HNumber>,1,2)
 
-// Exception translators
-void translateException(Exception const& e)
-{
-  PyErr_SetString(PyExc_Exception, e.message.c_str());
-}
-
-void translateValueError(ValueError const& e)
-{
-  PyErr_SetString(PyExc_ValueError, e.message.c_str());
-}
-
-void translateTypeError(TypeError const& e)
-{
-  PyErr_SetString(PyExc_TypeError, e.message.c_str());
-}
-
-//void translateIndexError(IndexError const& e)
-//{
-//  PyErr_SetString(PyExc_IndexError, e.message.c_str());
-//}
-
-void translateKeyError(KeyError const& e)
-{
-  PyErr_SetString(PyExc_KeyError, e.message.c_str());
-}
-
-void translateMemoryError(MemoryError const& e)
-{
-  PyErr_SetString(PyExc_MemoryError, e.message.c_str());
-}
-
-void translateArithmeticError(ArithmeticError const& e)
-{
-  PyErr_SetString(PyExc_ArithmeticError, e.message.c_str());
-}
-
-void translateEOFError(EOFError const& e)
-{
-  PyErr_SetString(PyExc_EOFError, e.message.c_str());
-}
-
-void translateFloatingPointError(FloatingPointError const& e)
-{
-  PyErr_SetString(PyExc_FloatingPointError, e.message.c_str());
-}
-
-void translateOverflowError(OverflowError const& e)
-{
-  PyErr_SetString(PyExc_OverflowError, e.message.c_str());
-}
-
-void translateZeroDivisionError(ZeroDivisionError const& e)
-{
-  PyErr_SetString(PyExc_ZeroDivisionError, e.message.c_str());
-}
-
-void translateNameError(NameError const& e)
-{
-  PyErr_SetString(PyExc_NameError, e.message.c_str());
-}
-
-void translateNotImplementedError(NotImplementedError const& e)
-{
-  PyErr_SetString(PyExc_NotImplementedError, e.message.c_str());
-}
 
 BOOST_PYTHON_MODULE(hftools)
 {
@@ -155,19 +166,19 @@ BOOST_PYTHON_MODULE(hftools)
 // ________________________________________________________________________
 //                                                    Exception translation
 
-  register_exception_translator<Exception>(translateException);
-  register_exception_translator<ValueError>(translateValueError);
-  register_exception_translator<TypeError>(translateTypeError);
-//  register_exception_translator<IndexError>(translateIndexError);
-  register_exception_translator<KeyError>(translateKeyError);
-  register_exception_translator<MemoryError>(translateMemoryError);
-  register_exception_translator<ArithmeticError>(translateArithmeticError);
-  register_exception_translator<EOFError>(translateEOFError);
-  register_exception_translator<FloatingPointError>(translateFloatingPointError);
-  register_exception_translator<OverflowError>(translateOverflowError);
-  register_exception_translator<ZeroDivisionError>(translateZeroDivisionError);
-  register_exception_translator<NameError>(translateNameError);
-  register_exception_translator<NotImplementedError>(translateNotImplementedError);
+  register_exception_translator<PyCR::Exception>(PyCR::translateException);
+  register_exception_translator<PyCR::ValueError>(PyCR::translateValueError);
+  register_exception_translator<PyCR::TypeError>(PyCR::translateTypeError);
+//  register_exception_translator<PyCR::IndexError>(PyCR::translateIndexError);
+  register_exception_translator<PyCR::KeyError>(PyCR::translateKeyError);
+  register_exception_translator<PyCR::MemoryError>(PyCR::translateMemoryError);
+  register_exception_translator<PyCR::ArithmeticError>(PyCR::translateArithmeticError);
+  register_exception_translator<PyCR::EOFError>(PyCR::translateEOFError);
+  register_exception_translator<PyCR::FloatingPointError>(PyCR::translateFloatingPointError);
+  register_exception_translator<PyCR::OverflowError>(PyCR::translateOverflowError);
+  register_exception_translator<PyCR::ZeroDivisionError>(PyCR::translateZeroDivisionError);
+  register_exception_translator<PyCR::NameError>(PyCR::translateNameError);
+  register_exception_translator<PyCR::NotImplementedError>(PyCR::translateNotImplementedError);
 
 // ________________________________________________________________________
 //                                                       Core functionality

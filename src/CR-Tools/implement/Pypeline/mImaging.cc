@@ -858,25 +858,25 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   // Sanity checks
   if (Nantpos != Nantennae * 3)
   {
-    throw ValueError("Antenna positions array has wrong size.");
+    throw PyCR::ValueError("Antenna positions array has wrong size.");
 //    std::cerr<<"Antenna positions array has wrong size."<<std::endl;
     return;
   }
   if (Nskypos != Nskycoord * 3)
   {
-    throw ValueError("Sky positions array has wrong size.");
+    throw PyCR::ValueError("Sky positions array has wrong size.");
 //    std::cerr<<"Sky positions array has wrong size."<<std::endl;
     return;
   }
   if (Nfftdata != Nfreq * Nantennae)
   {
-    throw ValueError("FFT data array has wrong size.");
+    throw PyCR::ValueError("FFT data array has wrong size.");
 //    std::cerr<<"FFT data array has wrong size."<<std::endl;
     return;
   }
   if (Nimage != Nskycoord * Nfreq)
   {
-    throw ValueError("Image array has wrong size.");
+    throw PyCR::ValueError("Image array has wrong size.");
 //    std::cerr<<"Image array has wrong size."<<std::endl;
     return;
   }
@@ -935,4 +935,3 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
