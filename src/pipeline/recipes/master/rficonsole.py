@@ -33,7 +33,7 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
         ),
         'nthreads': ingredient.IntField(
             '--nthreads',
-            default=1,
+            default=8,
             help="Number of threads per rficonsole process"
         ),
     }
