@@ -10,6 +10,7 @@ from collections import defaultdict
 
 from lofarpipe.support.baserecipe import BaseRecipe
 from lofarpipe.support.parset import Parset
+from lofarpipe.support.utilities import create_directory
 import lofarpipe.support.lofaringredient as ingredient
 
 class storagemapper(BaseRecipe):
@@ -42,6 +43,7 @@ class storagemapper(BaseRecipe):
         for host, filenames in data.iteritems():
             parset.addStringVector(host, filenames)
 
+        create_directory(os.path.dirname(self.inputs['mapfile']))
         parset.writeFile(self.inputs['mapfile'])
         self.outputs['mapfile'] = self.inputs['mapfile']
 
