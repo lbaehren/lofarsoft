@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.26
+VERSION=1.27
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help]\n\n"\
@@ -264,8 +264,6 @@ fi # end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 #STOKES=incoherentstokes
 #STOKES=stokes
 ###COLLAPSE=              #To collapse put "-C" here
-
-#alias bf2presto=/home/hassall/bin/bf2presto-working
 
 ######################
 # DON'T CHANGE BELOW #
@@ -822,12 +820,18 @@ do
 			for ii in $num_dir
 			do
 			  echo 'Converting subbands: '`cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}/RSP$ii"/bf2presto_RSP"$ii".out" 2>&1 
-			  if [[ $transpose == 0 ]] || [[ $STOKES == "incoherentstokes" ]]
+#			  if [[ $transpose == 0 ]] || [[ $STOKES == "incoherentstokes" ]]
+			  if [[ $transpose == 0 ]] 
 			  then
 			     echo bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
 			     bf2presto8 ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
 			     bf2presto_pid[$ii]=$!  
-			  else
+			  elif [[ $transpose == 1 ]] && [[ $STOKES == "incoherentstokes" ]]
+              then
+			     echo bf2presto8 ${COLLAPSE} -t -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
+			     bf2presto8 ${COLLAPSE} -t -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
+			     bf2presto_pid[$ii]=$!  
+              else # [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
 			     echo bf2presto8 ${COLLAPSE} -T ${all_num} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
 			     bf2presto8 ${COLLAPSE} -T ${all_num} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${PULSAR}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
 			     bf2presto_pid[$ii]=$!  
@@ -840,15 +844,21 @@ do
 			    cd ${location}/${STOKES}/"RSP"${ii}
 	
 		 	    echo 'Converting subbands: '`cat RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 
-		 	    if [[ $transpose == 0 ]] || [[ $STOKES == "incoherentstokes" ]]
+#		 	    if [[ $transpose == 0 ]] || [[ $STOKES == "incoherentstokes" ]]
+		 	    if [[ $transpose == 0 ]] 
 			    then
 			       echo bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
 			       bf2presto8 ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
 			       bf2presto_pid[$ii]=$!  
-			    else
+			    elif [[ $transpose == 1 ]] && [[ $STOKES == "incoherentstokes" ]]
+                then
+			       echo bf2presto8 ${COLLAPSE} -t -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+			       bf2presto8 ${COLLAPSE} -t -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+			       bf2presto_pid[$ii]=$!
+                else #    # [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
 			       echo bf2presto8 ${COLLAPSE} -T ${all_num} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
 			       bf2presto8 ${COLLAPSE} -T ${all_num} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
-			       bf2presto_pid[$ii]=$!  
+			       bf2presto_pid[$ii]=$!
 			    fi
 	#			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
 	#		    echo bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID} `cat SB_master.list` >> $log
