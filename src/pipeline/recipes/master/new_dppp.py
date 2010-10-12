@@ -44,7 +44,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         ),
         'working_directory': ingredient.StringField(
             '-w', '--working-directory',
-            help="Working directory used on compute nodes"
+            help="Working directory used on output nodes"
         ),
         'data_start_time': ingredient.StringField(
             '--data-start-time',
@@ -59,7 +59,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         'nproc': ingredient.IntField(
             '--nproc',
             default=8,
-            help="Maximum number of simultaneous processes per compute node"
+            help="Maximum number of simultaneous processes per output node"
         ),
         'nthreads': ingredient.IntField(
             '--nthreads',
@@ -91,7 +91,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         # ----------------------------------------------------------------------
         self.logger.searchpatterns["fullyflagged"] = "Fully flagged baselines"
 
-        #                           Load file <-> compute node mapping from disk
+        #                            Load file <-> output node mapping from disk
         # ----------------------------------------------------------------------
         self.logger.debug("Loading map from %s" % self.inputs['args'])
         data = load_data_map(self.inputs['args'][0])
@@ -109,7 +109,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
                 os.path.join(
                     self.inputs['working_directory'],
                     self.inputs['job_name'],
-                    os.path.basename(ms) + self.inputs['suffix']
+                    os.path.basename(ms.rstrip('/')) + self.inputs['suffix']
                 )
             )
             jobs.append(
