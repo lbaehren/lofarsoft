@@ -98,7 +98,9 @@ def run_via_mpirun(logger, host, command, environment, arguments):
     env = os.environ
     env.update(environment)
     process = spawn_process(mpi_cmd, logger, env=env)
-    process.kill = lambda : os.kill(process.pid, signal.SIGKILL)
+    # mpirun should be killed with a SIGTERM to enable it to shut down the
+    # remote command.
+    process.kill = lambda : os.kill(process.pid, signal.SIGTERM)
     return process
 
 def run_via_ssh(logger, host, command, environment, arguments):
