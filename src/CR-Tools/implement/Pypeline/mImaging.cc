@@ -858,22 +858,26 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   // Sanity checks
   if (Nantpos != Nantennae * 3)
   {
-    std::cerr<<"Antenna positions array has wrong size."<<std::endl;
+    throw ValueError("Antenna positions array has wrong size.");
+//    std::cerr<<"Antenna positions array has wrong size."<<std::endl;
     return;
   }
   if (Nskypos != Nskycoord * 3)
   {
-    std::cerr<<"Sky positions array has wrong size."<<std::endl;
+    throw ValueError("Sky positions array has wrong size.");
+//    std::cerr<<"Sky positions array has wrong size."<<std::endl;
     return;
   }
   if (Nfftdata != Nfreq * Nantennae)
   {
-    std::cerr<<"FFT data array has wrong size."<<std::endl;
+    throw ValueError("FFT data array has wrong size.");
+//    std::cerr<<"FFT data array has wrong size."<<std::endl;
     return;
   }
   if (Nimage != Nskycoord * Nfreq)
   {
-    std::cerr<<"Image array has wrong size."<<std::endl;
+    throw ValueError("Image array has wrong size.");
+//    std::cerr<<"Image array has wrong size."<<std::endl;
     return;
   }
 
