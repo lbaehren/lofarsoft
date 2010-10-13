@@ -36,6 +36,16 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
             default=8,
             help="Number of threads per rficonsole process"
         ),
+        'nproc': ingredient.IntField(
+            '--nproc',
+            default=1,
+            help="Maximum number of simultaneous processes per node"
+        ),
+        'nms': ingredient.IntField(
+            '--nms',
+            default=1,
+            help="Maximum number of MeasurementSets processed by a single rficonsole process"
+        ),
     }
 
     def go(self):
@@ -47,12 +57,15 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
         self.logger.debug("Loading map from %s" % self.inputs['args'])
         data = load_data_map(self.inputs['args'][0])
 
-        #      We'll dispatch a single rficonsole job to each node, asking it to
-        #                                    process all the data for that node.
+        #        Jobs being dispatched to each host are arranged in a dict. Each
+        #            entry in the dict is a list of list of filnames to process.
         # ----------------------------------------------------------------------
-        hostlist = defaultdict(list)
-        for host, file in data:
-            hostlist[host].append(file)
+        hostlist = defaultdict(lambda: list([[]]))
+        for host, filename in data:
+            if len(hostlist[host][-1] < self.inputs['nms']):
+                hostlist[host][-1].append(filename)
+            else:
+                hostlist[host].append([filename])
 
         if self.inputs.has_key("strategy"):
             strategy = self.inputs["strategy"]
@@ -60,18 +73,19 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
             strategy = None
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
         jobs = []
-        for host, files in hostlist.iteritems():
-            jobs.append(
-                ComputeJob(
-                    host, command,
-                    arguments=[
-                        self.inputs['executable'],
-                        self.inputs['nthreads'],
-                        strategy
-                    ] + hostlist[host]
+        for host, file_lists in hostlist.iteritems():
+            for file_list in file_lists:
+                jobs.append(
+                    ComputeJob(
+                        host, command,
+                        arguments=[
+                            self.inputs['executable'],
+                            self.inputs['nthreads'],
+                            strategy
+                        ] + file_list
+                    )
                 )
-            )
-        self._schedule_jobs(jobs)
+        self._schedule_jobs(jobs, max_per_node=self.inputs['nproc'])
 
         if self.error.isSet():
             self.logger.warn("Failed rficonsole process detected")
