@@ -6,6 +6,7 @@
 # ------------------------------------------------------------------------------
 
 from __future__ import with_statement
+from contextlib import contextmanager
 
 import os
 import sys
@@ -39,14 +40,16 @@ class ParsetTypeField(ingredient.StringField):
         else:
             return False
 
+@contextmanager
 def make_cimager_parset(
-    logger, template, template_type, dataset, frequency,
-    ms_dir_type, ms_dir_ra, ms_dir_dec, restore
+    logger, template, template_type, dataset, frequency, ms_dir_type,
+    ms_dir_ra, ms_dir_dec, restore, parset_directory, convert_exec
 ):
+    logger.warn(template_type)
     if template_type == "mwimager":
         try:
             with patched_parset(
-                template_parset,
+                template,
                 {
                     'dataset': dataset,
                     'Images.frequency': frequency,
@@ -56,9 +59,8 @@ def make_cimager_parset(
                     'restore': restore # cimager bug: non-restored image unusable
                 }
             ) as cimager_parset:
-                logger.debug("Converting parset for %s" % vds)
                 fd, converted_parset = tempfile.mkstemp(
-                    dir=self.config.get("layout", "parset_directory")
+                    dir=parset_directory
                 )
                 convert_process = spawn_process(
                     [convert_exec, cimager_parset, converted_parset],
@@ -81,7 +83,7 @@ def make_cimager_parset(
             raise
 
     elif template_type == "cimager":
-        input_parset = Parset(template_parset)
+        input_parset = Parset(template)
         image_names = input_parset.getStringVector('Cimager.Images.Names')
         patch_dictionary = {
             'Cimager.dataset': dataset,
@@ -90,7 +92,9 @@ def make_cimager_parset(
         for image_name in image_names:
             patch_dictionary['Cimager.Images.%s.frequency' % image_name] = frequency
             patch_dictionary['Cimager.Images.%s.direction' % image_name] = "[%s,%s,%s]" % (ms_dir_ra,ms_dir_dec,ms_dir_type)
-        with patched_parset(template_parset, patch_dictionary) as cimager_parset:
+        with patched_parset(
+            template, patch_dictionary, parset_directory
+        ) as cimager_parset:
             yield cimager_parset
 
 
@@ -255,14 +259,16 @@ class cimager(BaseRecipe):
             ]
             with make_cimager_parset(
                 self.logger,
-                self.inputs['parset_type'],
                 template_parset,
+                self.inputs['parset_type'],
                 vds_data.getString("FileName"),
                 str(frequency_range),
                 vds_data.getString("Extra.FieldDirectionType"),
                 vds_data.getStringVector("Extra.FieldDirectionRa")[0],
                 vds_data.getStringVector("Extra.FieldDirectionDec")[0],
-                'True' # cimager bug: non-restored image unusable
+                'True', # cimager bug: non-restored image unusable
+                self.config.get("layout", "parset_directory"),
+                self.inputs['convert_exec']
             ) as cimager_parset:
                 #                            Run cimager process on compute node
                 # --------------------------------------------------------------
