@@ -41,9 +41,16 @@ def Vector(Type=float,size=-1,fill=None):
     will contain only [1,2]. Vector([1,2,3],size=2,fill=4) will give
     [4,4].
     """
-    
+
     vtype=Type
-    if type(size) in hListAndArrayTypes: size=len(size)
+    # Check the 'type' parameter
+    if type(size) in hListAndArrayTypes:
+        size=len(size)
+    elif type(size)==type(1):
+        size=size
+    else:
+        raise TypeError("size must be a list or vector or a scalar of type integer")
+
     if (type(vtype) in hAllArrayTypes):  # hArrayClass
         vtype=basetype(Type)
         vec=Vector(Type.vec())
