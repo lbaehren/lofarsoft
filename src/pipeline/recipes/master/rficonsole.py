@@ -41,9 +41,9 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
             default=1,
             help="Maximum number of simultaneous processes per node"
         ),
-        'nms': ingredient.IntField(
-            '--nms',
-            default=1,
+        'nmeasurementsets': ingredient.IntField(
+            '--nmeasurementsets',
+            optional=True,
             help="Maximum number of MeasurementSets processed by a single rficonsole process"
         ),
     }
@@ -62,10 +62,13 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
         # ----------------------------------------------------------------------
         hostlist = defaultdict(lambda: list([[]]))
         for host, filename in data:
-            if len(hostlist[host][-1] < self.inputs['nms']):
-                hostlist[host][-1].append(filename)
+            if self.inputs.has_key('nmeasurementsets'):
+                if len(hostlist[host][-1]) < self.inputs['nmeasurementsets']:
+                    hostlist[host][-1].append(filename)
+                else:
+                    hostlist[host].append([filename])
             else:
-                hostlist[host].append([filename])
+                hostlist[host][-1].append(filename)
 
         if self.inputs.has_key("strategy"):
             strategy = self.inputs["strategy"]
