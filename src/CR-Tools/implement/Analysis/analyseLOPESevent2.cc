@@ -1160,7 +1160,7 @@ namespace CR { // Namespace CR -- begin
         
         // amplitude correction (all formulas are normalized to height of noise)
         if (snr < 2)       
-          it->second.height = (0.4628 + 0.2491*snr) * noise;
+          it->second.height = (0.4628 + 0.2491*pow(snr,2.349)) * noise;
         else
           it->second.height = sqrt(snr*snr - 1) * noise;
           
