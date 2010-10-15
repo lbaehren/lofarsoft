@@ -22,7 +22,7 @@ set (PYPELINE_CPP_FILES
 
 set (PYPELINE_CPP_MODULE_PREFIX "m")
 
-set (PYPELINE_CPP_MODULE_FILES
+set (PYPELINE_CPP_MODULES
   Array
   Vector
   Math
@@ -35,7 +35,7 @@ set (PYPELINE_CPP_MODULE_FILES
   Bindings
   )
 
-set (PYPELINE_CORE_MODULES
+set (PYPELINE_PY_CORE_MODULES
   __init__.py
   config.py
   datareader.py
@@ -47,7 +47,7 @@ set (PYPELINE_CORE_MODULES
   workspaces.py
   )
 
-set (PYPELINE_MODULES
+set (PYPELINE_PY_MODULES
   __init__.py
   metadata.py
   bfdata.py
@@ -59,7 +59,7 @@ set (PYPELINE_MODULES
   matching.py
   )
 
-set (PYPELINE_SCRIPTS
+set (PYPELINE_PY_SCRIPTS
   test.py
   testfft.py
   testrfi.py
@@ -79,7 +79,7 @@ set (PYPELINE_SCRIPTS
 ##_______________________________________________________________________________
 ## Perform Wrapper Preprocessing of module files
 
-foreach (FILE ${PYPELINE_CPP_MODULE_FILES})
+foreach (FILE ${PYPELINE_CPP_MODULES})
   ## ________________________________________________________________________
   ##                                    Variable substitutions and iterations
   add_custom_command (
@@ -94,22 +94,21 @@ foreach (FILE ${PYPELINE_CPP_MODULE_FILES})
   ##                                            Split off wrapper definitions
   add_custom_command (
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc
-#           ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.def.h
     PRE_BUILD
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
     COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfsplit2h.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc
     COMMAND ${PYPELINE_PREPROCESSOR_DIR}/hfCheckInterfaceChange.sh ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}
     COMMENT "Wrapper preprocessing module ${FILE}: Splitting off wrapper definitions"
     )
-endforeach (FILE ${PYPELINE_CPP_MODULE_FILES})
+endforeach (FILE ${PYPELINE_CPP_MODULES})
 
-foreach (FILE ${PYPELINE_CPP_MODULE_FILES})
+foreach (FILE ${PYPELINE_CPP_MODULES})
 
   ## ________________________________________________________________________
   ##                           Check all header files for the bindings module
   if (FILE STREQUAL "Bindings")
-    set (PYPELINE_CPP_MODULE_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${PYPELINE_CPP_MODULE_PREFIX}*.h")
-    set (PYPELINE_CPP_MODULE_WRAPPER_HEADER_FILES "${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}*.def.h")
+    file (GLOB PYPELINE_CPP_MODULE_HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/${PYPELINE_CPP_MODULE_PREFIX}*.h)
+    file (GLOB PYPELINE_CPP_MODULE_WRAPPER_HEADER_FILES ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}*.def.h)
   else (FILE STREQUAL "Bindings")
     set (PYPELINE_CPP_MODULE_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.h")
     set (PYPELINE_CPP_MODULE_WRAPPER_HEADER_FILES "${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.def.h")
@@ -139,7 +138,7 @@ foreach (FILE ${PYPELINE_CPP_MODULE_FILES})
     COMMENT "Wrapper preprocessing module ${FILE}: Finalizing wrapper preprocessing"
     )
 
-endforeach (FILE ${PYPELINE_CPP_MODULE_FILES})
+endforeach (FILE ${PYPELINE_CPP_MODULES})
 
 ##_______________________________________________________________________________
 ## Create the library
@@ -158,12 +157,12 @@ foreach (FILE ${PYPELINE_CPP_FILES} )
 endforeach (FILE ${PYPELINE_CPP_FILES})
 
 # Module files
-foreach (FILE ${PYPELINE_CPP_MODULE_FILES} )
+foreach (FILE ${PYPELINE_CPP_MODULES} )
   set (PREPROCESSED_FILES
     ${PREPROCESSED_FILES}
     ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.cc
     )
-endforeach (FILE ${PYPELINE_CPP_MODULE_FILES})
+endforeach (FILE ${PYPELINE_CPP_MODULES})
 
 
 add_library (hftools MODULE
@@ -215,7 +214,7 @@ add_custom_command (
   COMMENT "Create documentation for python bindings"
   )
 
-foreach (FILE ${PYPELINE_CPP_MODULE_FILES})
+foreach (FILE ${PYPELINE_CPP_MODULES})
    # Generate the basic documentation strings that python help will use
    add_custom_command (
      TARGET hftools
@@ -268,7 +267,7 @@ add_custom_command(
   )
 
 # Install Python core modules
-foreach(FILENAME ${PYPELINE_CORE_MODULES})
+foreach(FILENAME ${PYPELINE_PY_CORE_MODULES})
   set(SRC "${CMAKE_CURRENT_SOURCE_DIR}/modules/core/${FILENAME}")
   set(DST "${LUS_ROOT}/release/lib/python/pycrtools/core/${FILENAME}")
 
@@ -280,7 +279,7 @@ foreach(FILENAME ${PYPELINE_CORE_MODULES})
 endforeach(FILENAME)
 
 # Install Python modules
-foreach(FILENAME ${PYPELINE_MODULES})
+foreach(FILENAME ${PYPELINE_PY_MODULES})
   set(SRC "${CMAKE_CURRENT_SOURCE_DIR}/modules/${FILENAME}")
   set(DST "${LUS_ROOT}/release/lib/python/pycrtools/${FILENAME}")
 
@@ -292,7 +291,7 @@ foreach(FILENAME ${PYPELINE_MODULES})
 endforeach(FILENAME)
 
 # Install Python scripts
-foreach(FILENAME ${PYPELINE_SCRIPTS})
+foreach(FILENAME ${PYPELINE_PY_SCRIPTS})
   set(SRC "${CMAKE_CURRENT_SOURCE_DIR}/scripts/${FILENAME}")
   set(DST "${LUS_ROOT}/release/bin/python/${FILENAME}")
 
