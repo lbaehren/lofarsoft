@@ -62,16 +62,16 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
         # ----------------------------------------------------------------------
         hostlist = defaultdict(lambda: list([[]]))
         for host, filename in data:
-            if self.inputs.has_key('nmeasurementsets'):
-                if len(hostlist[host][-1]) < self.inputs['nmeasurementsets']:
-                    hostlist[host][-1].append(filename)
-                else:
-                    hostlist[host].append([filename])
+            if (
+                self.inputs.has_key('nmeasurementsets') and
+                len(hostlist[host][-1]) >= self.inputs['nmeasurementsets']
+            ):
+                hostlist[host].append([filename])
             else:
                 hostlist[host][-1].append(filename)
 
-        if self.inputs.has_key("strategy"):
-            strategy = self.inputs["strategy"]
+        if self.inputs.has_key('strategy'):
+            strategy = self.inputs['strategy']
         else:
             strategy = None
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
