@@ -980,7 +980,7 @@ namespace CR { // Namespace CR -- begin
               if (rawData)
                 plotter.AddLabels("time t [#gms]", "counts",label);
               else
-                plotter.AddLabels("time t [#gms]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
+                plotter.AddLabels("time t [#gms]", "field strength [#gmV/m/MHz]",label);
             }
 
             // Plot (upsampled) trace
@@ -1022,7 +1022,7 @@ namespace CR { // Namespace CR -- begin
           if (rawData)
             plotter.AddLabels("time t [#gms]", "counts",label);
           else
-            plotter.AddLabels("time t [#gms]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
+            plotter.AddLabels("time t [#gms]", "field strength [#gmV/m/MHz]",label);
         }
 
         // Create the plots looping through antennas
@@ -1051,7 +1051,7 @@ namespace CR { // Namespace CR -- begin
     try {
       SimplePlot plotter;                            // define plotter
       Vector<Double> xaxis;                        // xaxis
-      double xmax,xmin,ymin=0,ymax=0;                // Plotrange
+      double xmax=0,xmin=0,ymin=0,ymax=0;                // Plotrange
       int color = 3;                                // starting color
 
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
@@ -1069,8 +1069,11 @@ namespace CR { // Namespace CR -- begin
       xaxis = dr->frequencyValues();
 
       // Get the spectra after all treatment and calculate the absolute value
-      // do a logarithmic plot
-      Matrix<Double> yValues ( log10( amplitude(GetData(dr)) ) );
+      // do a logarithmic plot in dB
+      Matrix<Double> yValues ( log10( amplitude(GetData(dr)) ));
+      for (unsigned int i = 0; i < yValues.ncolumn(); ++i)
+        for (unsigned int j = 0; j < yValues.nrow(); ++j)
+           yValues(j, i) *= 10.;
 
       // Define plotrange for not upsampled and upsampled data
       Slice plotRange = calculateSpectrumRange(xaxis);
@@ -1083,7 +1086,7 @@ namespace CR { // Namespace CR -- begin
       xmax = max(xaxis(plotRange));
 
       // find the minimal and maximal y values for the plot
-      for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
+      for (unsigned int i = 0; i < antennaSelection.nelements(); ++i)
         if (antennaSelection(i)) {                // consider only selected antennas
           if ( ymin > min(yValues.column(i)(plotRange)) ) {
             ymin = min(yValues.column(i)(plotRange));
@@ -1100,7 +1103,7 @@ namespace CR { // Namespace CR -- begin
       // set up label for plots and filename
       string plotfilename;
       string label;
-      uInt gtdate;
+      uInt gtdate=0;
       stringstream gtlabel, antennanumber;
       // Get the AntennaIDs for labeling
       dr->headerRecord().get("Date",gtdate);
@@ -1148,7 +1151,7 @@ namespace CR { // Namespace CR -- begin
       plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
       // Add labels 
-      plotter.AddLabels("frequency f [MHz]", "lg amplitude",label);
+      plotter.AddLabels("frequency [MHz]", "amplitude [dB]",label);
       label = "GT " + gtlabel.str() + " - " + antennanumber.str() +" Antennas";
 
       // Plot spectrum
@@ -1193,7 +1196,7 @@ namespace CR { // Namespace CR -- begin
             // Initialize the plot giving xmin, xmax, ymin and ymax
             plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
-            plotter.AddLabels("frequency f [MHz]", "lg amplitude",label);
+            plotter.AddLabels("frequency [MHz]", "amplitude [dB]",label);
 
             // Plot spectrum
             plotter.PlotLine(xaxis(plotRange),yValues.column(i)(plotRange),color,1);
@@ -1217,7 +1220,8 @@ namespace CR { // Namespace CR -- begin
         cout <<"Plotting the spectrum of all antennas to file: "
              << plotfilename << endl;
 
-       // Add labels 
+        // Add labels 
+        antennanumber.str("");
         antennanumber << ntrue(antennaSelection);
         label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
 
@@ -1225,7 +1229,7 @@ namespace CR { // Namespace CR -- begin
         plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
         // Add labels 
-        plotter.AddLabels("frequency f [MHz]", "lg amplitude",label);
+        plotter.AddLabels("frequency [MHz]", "amplitude [dB]",label);
 
         antennanumber << ntrue(antennaSelection);
         label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
