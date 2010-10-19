@@ -1,11 +1,11 @@
 
-Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help IM]] 
+Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]] 
        -in observation_list_file -inswitch IM -intype source_or_position 
        -out template_output_file -project project_name [-stations stations_list]   
        [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] 
        [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] 
        [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode]  
-       [+multi] [+BF list_or_ALL] 
+       [+multi] [+IS|+CS|+FD|+BF list_or_ALL]
 
        REQUIRED Input Parameters:
        -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
@@ -22,7 +22,10 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help IM]]
        [[-subsHBA subband_range]] ==> The subband range (default = '200..447') 
        [[-subsLBA subband_range]] ==> The subband range (default = '154..401') 
        [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
-       [[+BF list_or_ALL]] ==> Turn on Beam-Formed with IM observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[+IS list_or_ALL]] ==> Turn on incoherentStokesData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[+CS list_or_ALL]] ==> Turn on coherentStokesData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[+FD list_or_ALL]] ==> Turn on filteredData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[+BF list_or_ALL]] ==> Turn on beamformedData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
        [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)
        [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
          
@@ -159,12 +162,12 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help IM]]
          EXAMPLE runs:
          > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml 
          > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype position -project MSSS -out output.xml 
-         > multi-templatesNbeams -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -subsLBA 10..45 +BF 6,7
+         > multi-templatesNbeams -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -subsLBA 10..45 +IS 6,7
          > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001
          > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 
          > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 +IM 2,4,6
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 +multi
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +BF ALL +multi
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +IS ALL +CS ALL +multi
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..401  
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004

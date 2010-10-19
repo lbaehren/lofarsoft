@@ -2,7 +2,7 @@
 Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]] 
        -in observation_list_file -inswitch BF -intype source_or_position 
        -out template_output_file -project project_name [-stations stations_list]   
-       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] 
+       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] [-IS list_or_ALL] [+IS|+CS|+FD|+BF list_or_ALL]
        [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] 
        [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] 
        [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] 
@@ -28,6 +28,14 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) 
        [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
        [[+IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[-IS list_or_ALL]] ==> Turn OFF incoherentStokesData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+                               By default, IS (incoherentstokes) is turned on;  use flag to turn off IS for all or certain rows.
+                               If you turn IS (incoherentstokes) off then, you must turn on +CS or +FD or +BF!
+       [[+IS list_or_ALL]] ==> Turn on incoherentStokesData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+                               By default, IS (incoherentstokes) is turned on;  use flag only to specify certain rows turned on.
+       [[+CS list_or_ALL]] ==> Turn on coherentStokesData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[+FD list_or_ALL]] ==> Turn on filteredData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[+BF list_or_ALL]] ==> Turn on beamformedData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
        [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One (default), Dual, Joined)
        [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
          
@@ -135,13 +143,13 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
 
          EXAMPLE runs:
          > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml 
-         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -subsLBA 10..45 +IM 6,7
+         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -subsLBA 10..45 +IM 6,7 +CS 6,7
          > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001
-         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 
+         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 -IS 4,5 +CS 4,5
          > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 +IM 2,4,6
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 +multi
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +IM ALL +multi
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 +FD all
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..401  
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -project LEA032 +IM ALL 
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004

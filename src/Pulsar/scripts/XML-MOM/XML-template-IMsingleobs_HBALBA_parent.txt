@@ -12,10 +12,10 @@
         <instrument>Interferometer</instrument>
         <userSpecification>
             <correlatedData>true</correlatedData>
-            <filteredData>false</filteredData>
-            <beamformedData>false</beamformedData>
-            <coherentStokesData>false</coherentStokesData>
-            <incoherentStokesData>INCOHERENTSTOKES</incoherentStokesData>
+            <filteredData>FD_TF</filteredData>
+            <beamformedData>BF_TF</beamformedData>
+            <coherentStokesData>CS_TF</coherentStokesData>
+            <incoherentStokesData>IS_TF</incoherentStokesData>
             <antenna>ANTENNA SETTING</antenna>
             <clock mode="200 MHz"/>
             <instrumentFilter>INSTRUMENT FILTER MHz</instrumentFilter>

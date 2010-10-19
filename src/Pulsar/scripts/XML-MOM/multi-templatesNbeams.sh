@@ -10,12 +10,12 @@ USAGE1="\nUsage for Imaging: $0 [[-help IM]] \n"\
 "       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] \n"\
 "       [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] \n"\
-"       [+multi] [+BF list_or_ALL] \n"
+"       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] \n"
 
 USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       -in observation_list_file -inswitch BF -intype source_or_position \n"\
 "       -out template_output_file -project project_name [-st stations_list]   \n"\
-"       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] \n"\
+"       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] [-IS list_or_ALL] [+IS|+CS|+FD|+BF list_or_ALL] \n"\
 "       [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] \n"\
 "       [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
@@ -38,8 +38,12 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) \n"\
 "         [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
-"         [[+IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
-"         [[+BF list_or_ALL]] ==> Turn on BF with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[-IS list_or_ALL]] ==> Turn OFF incoherentStokesData [set to ON by default];  'ALL' or row-number-list '2,4,5' (rows start at #1);  must use +CS|+FD|+BF switches when IS is turned off for all rows \n"\
+"         [[+IM list_or_ALL]] ==> Turn on Imaging (correlatedData) with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[+IS list_or_ALL]] ==> Turn on incoherentStokesData [Standard] with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[+CS list_or_ALL]] ==> Turn on coherentStokesData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[+FD list_or_ALL]] ==> Turn on filteredData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
+"         [[+BF list_or_ALL]] ==> Turn on beamformedData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One (default), Dual, Joined)\n"\
 "         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, Sparse Even, Sparse Odd, X, Y)\n"
 
@@ -104,6 +108,14 @@ INTEGRATION=3
 user_integration=0
 IM=0
 IM_LIST=""
+IS=0
+IS_LIST=""
+ISNOT=0
+ISNOT_LIST=""
+CS=0
+CS_LIST=""
+FD=0
+FD_LIST=""
 BF=0
 BF_LIST=""
 modeHBA="Dual"
@@ -137,6 +149,10 @@ do
      -stations)          STATIONS=$2; user_stations=1; shift;;
      -project)           PROJECT=$2; user_project=1; shift;;
      +IM)                IM=1; IM_LIST=$2; shift;;
+     +IS)                IS=1; IS_LIST=$2; shift;;
+     -IS)                ISNOT=1; ISNOT_LIST=$2; shift;;
+     +CS)                CS=1; CS_LIST=$2; shift;;
+     +FD)                FD=1; FD_LIST=$2; shift;;
      +BF)                BF=1; BF_LIST=$2; shift;;
      -integration)       INTEGRATION=$2; user_integration=1; shift;;
      -help)              HELP=$2; user_help=1; shift;;
@@ -576,8 +592,100 @@ then
 fi
 
 ##################################################
-# For IM processing, check if +BF was turned on;  create the bf number list
-if [ $BF == 1 ] && [ $INSWITCH == 2 ]
+# For BF processing, check if +IS|+CS|+BF|+FD was turned on;  create the bf number list
+if [ $ISNOT == 1 ] && [ $INSWITCH == 1 ]
+then
+   if [ $CS == 0 ]  && [ $FD == 0 ] && [ $BF == 0 ]
+   then
+      echo "ERROR: Incoherentstokes (-IS) is turned off, but +CS|+FD|+BF are not turned on."
+      echo "       You must turn on at least one of the BF modes for observations: +IS|+CS|+FD|+BF"
+      exit 1
+   fi
+fi
+if [ $IS == 0 ] && [ $INSWITCH == 1 ]
+then
+   IS=1
+   IS_TF=true
+   $IS_LIST=="ALL"
+fi
+
+if [ $ISNOT == 1 ] && [ $INSWITCH == 1 ]
+then
+   if [ $ISNOT_LIST == "ALL" ]  || [ $ISNOT_LIST == "all" ]
+   then
+      # create the full range of row numbers for the Image data
+      tmp=""
+      ii=1
+      while (( $ii <= $num_lines ))
+      do
+         tmp="$tmp $ii"
+         ((ii += 1))
+      done
+      ISNOT_LIST=$tmp
+   else 
+      # change the commas to spaces for the row numbers which need Image data
+      tmp=`echo $ISNOT_LIST | sed 's/,/ /g'`
+      ISNOT_LIST=$tmp
+   fi
+fi
+if [ $IS == 1 ] 
+then
+   if [ $IS_LIST == "ALL" ]  || [ $IS_LIST == "all" ]
+   then
+      # create the full range of row numbers for the Image data
+      tmp=""
+      ii=1
+      while (( $ii <= $num_lines ))
+      do
+         tmp="$tmp $ii"
+         ((ii += 1))
+      done
+      IS_LIST=$tmp
+   else 
+      # change the commas to spaces for the row numbers which need Image data
+      tmp=`echo $IS_LIST | sed 's/,/ /g'`
+      IS_LIST=$tmp
+   fi
+fi
+if [ $CS == 1 ] 
+then
+   if [ $CS_LIST == "ALL" ]  || [ $CS_LIST == "all" ]
+   then
+      # create the full range of row numbers for the Image data
+      tmp=""
+      ii=1
+      while (( $ii <= $num_lines ))
+      do
+         tmp="$tmp $ii"
+         ((ii += 1))
+      done
+      CS_LIST=$tmp
+   else 
+      # change the commas to spaces for the row numbers which need Image data
+      tmp=`echo $CS_LIST | sed 's/,/ /g'`
+      CS_LIST=$tmp
+   fi
+fi
+if [ $FD == 1 ] 
+then
+   if [ $FD_LIST == "ALL" ]  || [ $FD_LIST == "all" ]
+   then
+      # create the full range of row numbers for the Image data
+      tmp=""
+      ii=1
+      while (( $ii <= $num_lines ))
+      do
+         tmp="$tmp $ii"
+         ((ii += 1))
+      done
+      FD_LIST=$tmp
+   else 
+      # change the commas to spaces for the row numbers which need Image data
+      tmp=`echo $FD_LIST | sed 's/,/ /g'`
+      FD_LIST=$tmp
+   fi
+fi
+if [ $BF == 1 ] 
 then
    if [ $BF_LIST == "ALL" ]  || [ $BF_LIST == "all" ]
    then
@@ -1247,14 +1355,90 @@ do
 			   done
 			fi
 
+            # when BF, turn on/off Incoherentstokes, coherent, beam-formed, filtered-data modes
+			if [ $INSWITCH = 1 ]
+			then
+			    IS_TF=true
+			    if [[ "$IS_LIST" != "" ]]
+			    then 
+				   for jj in $IS_LIST
+				   do 
+				      if (( $counter == $jj ))
+				      then
+				         echo "Beam-Formed Incoherentstokes turned on (TRUE) for this Observation"
+				         IS_TF=true
+				      fi
+				   done			    
+			    fi
+			    
+			    if (( $ISNOT == 1 ))
+			    then 
+			        IS_TF=false
+				    if [[ "$ISNOT_LIST" != "" ]]
+				    then 
+					   for jj in $ISNOT_LIST
+					   do 
+					      if (( $counter == $jj ))
+					      then
+					         echo "Beam-Formed Incoherentstokes turned OFF (false) for this Observation"
+					         IS_TF=false
+					      fi
+					   done			    
+				    fi
+				fi
+			fi
+
+            # when Imaging, can only turn ON additional BF-related modes
+			if [ $INSWITCH = 2 ]
+			then
+			    IS_TF=false
+			    if (( $IS == 1 )) 
+				then
+				   for jj in $IS_LIST
+				   do 
+				      if (( $counter == $jj ))
+				      then
+				         echo "Beam-Formed Incoherentstokes turned on (TRUE) for this Observation"
+				         IS_TF=true
+				      fi
+				   done
+				fi
+			fi
+						
+			CS_TF=false
+			if (( $CS == 1 )) 
+			then
+			   for jj in $CS_LIST
+			   do 
+			      if (( $counter == $jj ))
+			      then
+			         echo "Beam-Formed Coherentstokes turned on (TRUE) for this Observation"
+			         CS_TF=true
+			      fi
+			   done
+			fi
+
+			FD_TF=false
+			if (( $CS == 1 )) 
+			then
+			   for jj in $FD_LIST
+			   do 
+			      if (( $counter == $jj ))
+			      then
+			         echo "Beam-Formed Filtered-Data turned on (TRUE) for this Observation"
+			         FD_TF=true
+			      fi
+			   done
+			fi
+
 			BF_TF=false
-			if (( $BF == 1 )) 
+			if (( $CS == 1 )) 
 			then
 			   for jj in $BF_LIST
 			   do 
 			      if (( $counter == $jj ))
 			      then
-			         echo "Beam-Formed turned on (TRUE) for this Imaging Observation"
+			         echo "Beam-Formed (beam-formed data BF) turned on (TRUE) for this Observation"
 			         BF_TF=true
 			      fi
 			   done
@@ -1282,13 +1466,13 @@ do
 	        then 
 	           if (( $beam_counter == 0 ))
 	           then
-	              sed -e "s/FILL IN OBSERVATION NAME/Obs $PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $middle >> $outfile
+	              sed -e "s/FILL IN OBSERVATION NAME/Obs $PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $middle >> $outfile
 	           fi
 	        elif [ $INSWITCH == 2 ]  && [ $skip == 0 ]
 	        then
 	           if (( $beam_counter == 0 ))
 	           then
-	              sed -e "s/FILL IN OBSERVATION NAME/$OBJECT/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTEGRATION/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/INCOHERENTSTOKES/$BF_TF/g" $middle >> $outfile
+	              sed -e "s/FILL IN OBSERVATION NAME/$OBJECT/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTEGRATION/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" $middle >> $outfile
 	           fi
 	        fi 
 		        
