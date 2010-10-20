@@ -52,6 +52,8 @@ class bbs(LOFARnode):
                 "BBDB.Name": db_name,
                 "BBDB.User": db_user,
                 "BBDB.Host": db_host,
+                "ParmLog": "",
+                "ParmLoglevel": "",
                 "ParmDB.Sky": os.path.join(infile, "sky"),
                 "ParmDB.Instrument": os.path.join(infile, "instrument")
             }.iteritems():
