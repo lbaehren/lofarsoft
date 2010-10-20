@@ -147,7 +147,7 @@
      \endcode
      The script will check if there is a recent enough version of CMake available
      <li>Run \e make for the package/module in question, e.g. for the
-     <a href="group__DAL.html">Data Access Library</a>
+     <a href="group___d_a_l.html">Data Access Library</a>
      \code
      cd $LOFARSOFT/build
      make dal
@@ -174,7 +174,7 @@
      </tr>
      <tr valign="top">
 	<td bgcolor="dddddd">\b dal</td>
-     	<td bgcolor="eeeeee">The <a href="group__DAL.html">Data Access Library</a>
+     	<td bgcolor="eeeeee">The <a href="group___d_a_l.html">Data Access Library</a>
 	(DAL).</td>
      </tr>
      <tr valign="top">
