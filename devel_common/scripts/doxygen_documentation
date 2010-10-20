@@ -18,7 +18,7 @@ target_lofardocs=
 ## update working copy of the code and build documentation
 
 cd $lofarsoft/build
-./boostrap
+./bootstrap
 make update
 make doc
 
