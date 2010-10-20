@@ -3,7 +3,7 @@
 ## Variables to be adjusted to the local setup
 
 lofarsoft=
-target_lofarsoft=
+target_lofarsoft=/var/www/doxygen
 
 lofardocs=
 target_lofardocs=
@@ -14,6 +14,10 @@ target_lofardocs=
 ##_______________________________________________________________________________
 ##                                 Generate Doxygen documentation for source code
 
+## Define LOFARSOFT environment variable
+
+cd $lofarsoft
+export LOFARSOFT=`pwd`
 
 ## update working copy of the code and build documentation
 
@@ -23,6 +27,8 @@ make update
 make doc
 
 ## move documentation to target directory
+
+echo "-- Move documentation to target directory ..."
 
 cd $lofarsoft/doc
 rm -rf $target_lofarsoft
@@ -41,13 +47,22 @@ make ICD
 make ICD
 make ICD
 
-## Move generated documents to server directory
+## Compress Postscript files
 
 cd $lofardocs/ICD
 
 FILES=`ls LOFAR*ICD*.ps`
 
 for FILE in $FILES ; { 
+    echo "-- Compressing file $FILE ..."
     gzip $FILE ;
-    mv $FILE.gz $target_lofardocs ;
+}
+
+## Move generated documents to server directory
+
+FILES=`ls LOFAR*ICD*.ps.gz LOFAR*ICD*.pdf`
+
+for FILE in $FILES ; {
+    echo "-- Moving file $FILE to server directory ..." ;
+    mv $FILE $target_lofardocs ;
 }
