@@ -47,9 +47,9 @@ include (FindBoost)
 
 if (NOT HAVE_ARMADILLO OR ARMADILLO_FORCE_BUILD)
   
-  set (ARMADILLO_VERSION "0.9.2")
+  set (ARMADILLO_VERSION "0.9.90")
   set (ARMADILLO_TAR_ARCHIVE "armadillo-${ARMADILLO_VERSION}.tar.gz")
-  set (ARMADILLO_URL "/${ARMADILLO_TAR_ARCHIVE}")
+  set (ARMADILLO_URL "http://downloads.sourceforge.net/project/arma/${ARMADILLO_TAR_ARCHIVE}")
 
   ##__________________________________________________________________
   ## Build the project
@@ -58,25 +58,17 @@ if (NOT HAVE_ARMADILLO OR ARMADILLO_FORCE_BUILD)
   
   find_file (have_armadillo_tgz ${ARMADILLO_TAR_ARCHIVE} ${ARMADILLO_SOURCE_DIR})
   
-  if (have_armadillo_tgz)
-    ExternalProject_Add (armadillo
-      PREFIX ${ARMADILLO_BINARY_DIR}
-      DOWNLOAD_DIR ${ARMADILLO_BINARY_DIR}/download
-      SOURCE_DIR ${ARMADILLO_BINARY_DIR}/source
-      URL ${have_armadillo_tgz}
-      URL_MD5 1339cbb67b72d8aeab9d611c6f0e6c8c
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${USG_INSTALL_PREFIX}
-      )
-  else (have_armadillo_tgz)
-    ExternalProject_Add (armadillo
-      PREFIX ${ARMADILLO_BINARY_DIR}
-      DOWNLOAD_DIR ${ARMADILLO_BINARY_DIR}/download
-      SOURCE_DIR ${ARMADILLO_BINARY_DIR}/source
-      URL ${ARMADILLO_URL}
-      URL_MD5 1339cbb67b72d8aeab9d611c6f0e6c8c
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${USG_INSTALL_PREFIX}
-      )
-  endif (have_armadillo_tgz)
+  if (NOT have_armadillo_tgz)
+    set (have_armadillo_tgz ${ARMADILLO_URL})
+  endif (NOT have_armadillo_tgz)
+  
+  ExternalProject_Add (armadillo
+    PREFIX ${ARMADILLO_BINARY_DIR}
+    DOWNLOAD_DIR ${ARMADILLO_BINARY_DIR}/download
+    SOURCE_DIR ${ARMADILLO_BINARY_DIR}/source
+    URL ${have_armadillo_tgz}
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${USG_INSTALL_PREFIX}
+    )
   
   ## <-- end build condition ----------------------------------------------------->
   
