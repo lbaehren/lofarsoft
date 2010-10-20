@@ -322,9 +322,12 @@ class cimager(BaseRecipe):
                 ] = "[ %s,%s,%s ]" % (ms_dir_ra, ms_dir_dec, ms_dir_type)
                 for key in subset:
                     patch_dictionary[key] = subset[key].get()
+            input_parset.subtractSubset('Cimager.Images.image')
+            for key in input_parset:
+                patch_dictionary[key] = input_parset[key].get()
             patch_dictionary['Cimager.Images.Names'] = "[ %s ]" % ", ".join(image_names)
             return patch_parset(
-                parset, patch_dictionary,
+                None, patch_dictionary,
                 self.config.get("layout", "parset_directory")
             )
 
