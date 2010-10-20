@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.27
+VERSION=1.28
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help]\n\n"\
@@ -336,8 +336,10 @@ then
     get_list=`pulsars_at_location.sh $RA_DEG $DEC_DEG $ANT_SHORT 3`
     if [[ $get_list == "ERROR" ]] || [[ $get_list == "NONE" ]]
     then
-       echo "ERROR: Unable to find Pulsar in FOV of pointing ($RA_DEG $DEC_DEG); unable to run the pipeline"
-       exit 1
+       echo "WARNING: Unable to find Pulsar in FOV of pointing ($RA_DEG $DEC_DEG); this is a partial pipeline run."
+       echo "WARNING: Unable to find Pulsar in FOV of pointing ($RA_DEG $DEC_DEG); this is a partial pipeline run." >> $log
+       PULSAR="NONE"
+       PULSAR_LIST="NONE"
     else
        PULSAR=$get_list
        PULSAR_LIST=$get_list
@@ -353,17 +355,22 @@ then
     matched_str=`grep "$PULSAR " $LOFARSOFT/release/share/pulsar/data/3cCatalog_psr$ANT_SHORT.txt | awk '{print $4}'`
     if [[ $matched_str == "NONE" ]]
     then
-       echo "ERROR: No known pulsars found in $ANT_SHORT FOV of $PULSAR;  unable to run the pipeline."
-       exit 1
+       echo "WARNING: No known pulsars found in $ANT_SHORT FOV of $PULSAR;  this is a partial pipeline run."
+       echo "WARNING: No known pulsars found in $ANT_SHORT FOV of $PULSAR;  this is a partial pipeline run." >> $log
+       PULSAR="NONE"
+       PULSAR_LIST="NONE"
     else
        PULSAR=`echo $matched_str | awk -v MAX=3 -F"," '{ for (i=1; i<=MAX; i++) printf "%s,", $i; printf "\n"; }' | sed 's/,,*$//g' | sed 's/,$//g'`
        PULSAR_LIST=$PULSAR
     fi
 elif [[ $is_bj == "" ]]
 then
-    echo "ERROR: Unble to process object '$PULSAR';  not a Pulsar name nor 3C object."
+    echo "WARNING: Unble to process object '$PULSAR';  not a Pulsar name nor 3C object."
     echo "       Try using '-p position' to set off the pipeline using the target location."
-    exit 1
+    echo "WARNING: Unble to process object '$PULSAR';  not a Pulsar name nor 3C object."    >> $log
+    echo "       Try using '-p position' to set off the pipeline using the target location."   >> $log
+    PULSAR="NONE"
+    PULSAR_LIST="NONE"
 fi
 
 is_psr_list=`echo $PULSAR_LIST | grep ","`
@@ -459,10 +466,11 @@ then
    echo "Incoherentstokes (only) mode for processing."
    echo "Incoherentstokes (only) mode for processing." >> $log
 else
-   mode_str="incoherentstokes"
-   nmodes=1
-   echo "WARNING: Unable to determine stokes type from parset, using Incoherentstokes (only) mode for processing."
-   echo "WARNING: Unable to determine stokes type from parset, using Incoherentstokes (only) mode for processing." >> $log
+   echo "ERROR: Unable to determine stokes type from parset, Incoherentstokes or Coherentstokes must be True for processing."
+   echo "ERROR: Unable to determine stokes type from parset, Incoherentstokes or Coherentstokes must be True for processing." >> $log
+   echo "       This Pulsar Pipeline is unable to run on the requested dataset."
+   echo "       This Pulsar Pipeline is unable to run on the requested dataset." >> $log
+   exit 1
 fi
 
 
@@ -890,10 +898,24 @@ do
 	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
 	# Calculating the number of samples to be passed to inf-file
+	split_files=`echo $all_num $CHAN | awk '{print $1 * $2}'`
 	if (( $flyseye == 0 ))
 	then
+	    # check the file sizes to be sure all sub files are the same
+	    file_size_check=`ls -l ${location}/${STOKES}/RSP0/${PULSAR}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort | uniq -c | head -1 | awk '{print $1}'`
+	    if (( $file_size_check != $split_files ))
+	    then
+	       echo "WARNING: RSP0/SubXXXX files are not all the same size;  raw data and processing is suspect to problems."
+	       echo "WARNING: RSP0/SubXXXX files are not all the same size;  raw data and processing is suspect to problems." >> $log
+	    fi
 		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/${PULSAR}_${OBSID}_RSP0.sub0000 | awk '{print $5 / 2}' -`
 	else
+	    file_size_check=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort | uniq -c | head -1 | awk '{print $1}'`
+	    if (( $file_size_check != $split_files ))
+	    then
+	       echo "WARNING: RSP0/SubXXXX files are not all the same size;  raw data and processing is suspect to problems."
+	       echo "WARNING: RSP0/SubXXXX files are not all the same size;  raw data and processing is suspect to problems." >> $log
+	    fi
 		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR}_${OBSID}_RSP0.sub0000 | awk '{print $5 / 2}' -`
 	fi
 	
@@ -1142,7 +1164,7 @@ do
 	fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
 #    fi # end if (( $flyseye == 0 ))
 	
-	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $PULSAR != "NONE" ]]
 	then
 		
 		# Fold data per requested Pulsar
@@ -1207,10 +1229,10 @@ do
 			    done
 			fi
 		done # finished loop over PULSAR_LIST
-    fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+    fi # end if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $PULSAR != "NONE" ]]
     
-#    if (( $flyseye == 0 ))
-#    then
+    if [[ $PULSAR != "NONE" ]]
+    then
 	   #When the first folding task finishes, start the folding for the "all" directory
 	   if [ $all == 1 ] || [ $all_pproc == 1 ]
 	   then
@@ -1252,10 +1274,10 @@ do
 			  (( index = $index + 1 ))
 		  done # end for fold_pulsar in $PULSAR_LIST
 	   fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
-#	fi 
+	fi # end if [[ $PULSAR != "NONE" ]]
 
 		
-	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $PULSAR != "NONE" ]]
 	then
 		#Make a cumulative plot of the profiles
 		for fold_pulsar in $PULSAR_LIST
@@ -1331,7 +1353,7 @@ do
 				done
 			fi
 	    done # end for fold_pulsar in $PULSAR_LIST
-	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+	fi # end if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $PULSAR != "NONE" ]]
 		
 	#RFI-Report
 	if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
@@ -1436,72 +1458,75 @@ do
 	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 		
 	#Wait for the all prepfold to finish
-	if [ $all -eq 1 ] || [ $all_pproc == 1 ]
+	if [[ $PULSAR != "NONE" ]]
 	then
-	   ii=1
-	   yy=0
-	   echo "Waiting for prepfold on entire subband list to complete..." 
-	   echo "Waiting for prepfold on entire subband list to complete..." >> $log
-	   date 
-	   date >> $log
-
-	   index=1
-	   beam_index=1
-	   for fold_pulsar in $PULSAR_LIST
-	   do
-		   if (( $flyseye == 0 ))
-		   then
-		      echo "Waiting for Pulsar #$index prepfold (all) to finish"
-		      wait ${prepfold_pid_all[$index]}
-		   
-#			   while [ $ii -ne $yy ]
-#			   do
-#			      if [ -e ${STOKES}/RSPA/DONE ]
-#			      then
-#			         echo "prepfold on the total list has completed!" 
-#			         echo "prepfold on the total list has completed!" >> $log
-#			         date
-#			         date >> $log
-#			         yy=1
-#			      fi
-#			      sleep 15
-#			   done
-			   echo convert ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf >> $log
-			   convert ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf
-			   echo convert -rotate 90 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png >> $log
-			   convert -rotate 90 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png
-			   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png >> $log
-			   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png
-		   else
-#			   while [ $ii -ne $yy ]
-#			   do
-#			      if [ -e ${STOKES}/${last_beam}/RSPA/DONE ]
-#			      then
-#			         echo "prepfold on the total list has completed!" 
-#			         echo "prepfold on the total list has completed!" >> $log
-#			         date
-#			         date >> $log
-#			         yy=1
-#			      fi
-#			      sleep 15
-#			   done
-			   for jjj in $beams
-			   do
-		           echo "Waiting for Pulsar #$index, beam #$beam_index prepfold (all) to finish"
-			       wait ${prepfold_pid_all[$beam_index]}
-			       
-				   echo convert ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf >> $log
-				   convert ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf
-				   echo convert -rotate 90 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png >> $log
-				   convert -rotate 90 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png
-				   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png >> $log
-				   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png
-				   (( beam_index = $beam_index + 1 ))
-	           done
-	       fi # end if (( $flyseye == 0 ))
-	       (( index = $index + 1 ))
-       done # end for fold_pulsar in $PULSAR_LIST
-	fi # end if [ $all -eq 1 ] || [ $all_pproc == 1 ]
+		if [ $all -eq 1 ] || [ $all_pproc == 1 ]
+		then
+		   ii=1
+		   yy=0
+		   echo "Waiting for prepfold on entire subband list to complete..." 
+		   echo "Waiting for prepfold on entire subband list to complete..." >> $log
+		   date 
+		   date >> $log
+	
+		   index=1
+		   beam_index=1
+		   for fold_pulsar in $PULSAR_LIST
+		   do
+			   if (( $flyseye == 0 ))
+			   then
+			      echo "Waiting for Pulsar #$index prepfold (all) to finish"
+			      wait ${prepfold_pid_all[$index]}
+			   
+	#			   while [ $ii -ne $yy ]
+	#			   do
+	#			      if [ -e ${STOKES}/RSPA/DONE ]
+	#			      then
+	#			         echo "prepfold on the total list has completed!" 
+	#			         echo "prepfold on the total list has completed!" >> $log
+	#			         date
+	#			         date >> $log
+	#			         yy=1
+	#			      fi
+	#			      sleep 15
+	#			   done
+				   echo convert ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf >> $log
+				   convert ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf
+				   echo convert -rotate 90 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png >> $log
+				   convert -rotate 90 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png
+				   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png >> $log
+				   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png
+			   else
+	#			   while [ $ii -ne $yy ]
+	#			   do
+	#			      if [ -e ${STOKES}/${last_beam}/RSPA/DONE ]
+	#			      then
+	#			         echo "prepfold on the total list has completed!" 
+	#			         echo "prepfold on the total list has completed!" >> $log
+	#			         date
+	#			         date >> $log
+	#			         yy=1
+	#			      fi
+	#			      sleep 15
+	#			   done
+				   for jjj in $beams
+				   do
+			           echo "Waiting for Pulsar #$index, beam #$beam_index prepfold (all) to finish"
+				       wait ${prepfold_pid_all[$beam_index]}
+				       
+					   echo convert ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf >> $log
+					   convert ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf
+					   echo convert -rotate 90 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png >> $log
+					   convert -rotate 90 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png
+					   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png >> $log
+					   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png
+					   (( beam_index = $beam_index + 1 ))
+		           done
+		       fi # end if (( $flyseye == 0 ))
+		       (( index = $index + 1 ))
+	       done # end for fold_pulsar in $PULSAR_LIST
+		fi # end if [ $all -eq 1 ] || [ $all_pproc == 1 ]
+    fi # end if [[ $PULSAR != "NONE" ]]
 
 	#Rename the beam_? to their actual names based on the observation parset names
     if [ $flyseye == 1 ] && [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] 
@@ -1525,7 +1550,7 @@ echo "Creating tar file of plots"
 echo "Creating tar file of plots" >> $log
 date
 date >> $log
-if [ $flyseye_tar == 0 ] 
+if [[ $flyseye_tar == 0 ]] && [[ $PULSAR != "NONE" ]]
 then
    if [ $rfi == 1 ]  || [ $rfi_pproc == 1 ]
    then
@@ -1533,13 +1558,29 @@ then
    else
       tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf"
    fi
-elif [ $flyseye_tar == 1 ] 
+elif [[ $flyseye_tar == 1 ]] && [[ $PULSAR != "NONE" ]]
 then  
    if [ $rfi == 1 ]  || [ $rfi_pproc == 1 ]
    then
       tar_list="*/*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf */*/*.rfirep"
    else
       tar_list="*/*/*profiles.pdf */*/RSP*/*pfd.ps */*/RSP*/*pfd.pdf */*/RSP*/*pfd.png */*/RSP*/*pfd.th.png */*/RSP*/*pfd.bestprof */*/RSP*/*.sub.inf"
+   fi
+elif [[ $flyseye_tar == 0 ]] && [[ $PULSAR == "NONE" ]]
+then
+   if [ $rfi == 1 ]  || [ $rfi_pproc == 1 ]
+   then
+      tar_list="*/RSP*/*.sub.inf */*.rfirep"
+   else
+      tar_list="*/RSP*/*.sub.inf"
+   fi
+elif [[ $flyseye_tar == 1 ]] && [[ $PULSAR == "NONE" ]]
+then
+   if [ $rfi == 1 ]  || [ $rfi_pproc == 1 ]
+   then
+      tar_list="*/*/RSP*/*.sub.inf */*/*.rfirep"
+   else
+      tar_list="*/*/RSP*/*.sub.inf"
    fi
 fi
 echo 'tar cvzf ${PULSAR}_${OBSID}_plots.tar.gz  $tar_list' >> $log
