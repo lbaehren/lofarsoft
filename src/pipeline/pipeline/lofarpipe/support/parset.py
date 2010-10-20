@@ -53,11 +53,15 @@ class Parset(parameterset):
             self.keys
         )
 
-    def makeSubset(self, baseKey):
+    def makeSubset(self, baseKey, prefix=None):
         newps = Parset()
-        for key, value in self.iteritems():
+        for key in self.keys:
             if key[:len(baseKey)] == baseKey:
-                newps.add(key, value)
+                if prefix:
+                    newkey = key.replace(baseKey, prefix)
+                else:
+                    newkey = key
+                newps.add(newkey, self[key].get())
         return newps
 
     def addStringVector(self, key, vector):

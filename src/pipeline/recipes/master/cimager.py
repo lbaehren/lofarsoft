@@ -29,7 +29,7 @@ from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.remotecommand import threadwatcher
 from lofarpipe.support.parset import Parset
 from lofarpipe.support.parset import get_parset
-from lofarpipe.support.parset import patched_parset
+from lofarpipe.support.parset import patched_parset, patch_parset
 from lofarpipe.support.utilities import spawn_process
 from lofarpipe.support.lofarexceptions import PipelineException
 
@@ -39,64 +39,6 @@ class ParsetTypeField(ingredient.StringField):
             return True
         else:
             return False
-
-@contextmanager
-def make_cimager_parset(
-    logger, template, template_type, dataset, frequency, ms_dir_type,
-    ms_dir_ra, ms_dir_dec, restore, parset_directory, convert_exec
-):
-    logger.warn(template_type)
-    if template_type == "mwimager":
-        try:
-            with patched_parset(
-                template,
-                {
-                    'dataset': dataset,
-                    'Images.frequency': frequency,
-                    'msDirType': ms_dir_type,
-                    'msDirRa': ms_dir_ra,
-                    'msDirDec': ms_dir_dec,
-                    'restore': restore # cimager bug: non-restored image unusable
-                }
-            ) as cimager_parset:
-                fd, converted_parset = tempfile.mkstemp(
-                    dir=parset_directory
-                )
-                convert_process = spawn_process(
-                    [convert_exec, cimager_parset, converted_parset],
-                    logger
-                )
-                os.close(fd)
-                sout, serr = convert_process.communicate()
-                log_process_output(convert_exec, sout, serr, logger)
-                if convert_process.returncode != 0:
-                    raise subprocess.CalledProcessError(
-                        convert_process.returncode, convert_exec
-                    )
-                yield converted_parset
-                os.unlink(converted_parset)
-        except OSError, e:
-            logger.error("Failed to spawn convertimagerparset (%s)" % str(e))
-            raise
-        except subprocess.CalledProcessError, e:
-            self.logger.error(str(e))
-            raise
-
-    elif template_type == "cimager":
-        input_parset = Parset(template)
-        image_names = input_parset.getStringVector('Cimager.Images.Names')
-        patch_dictionary = {
-            'Cimager.dataset': dataset,
-            'Cimager.restore': restore
-        }
-        for image_name in image_names:
-            patch_dictionary['Cimager.Images.%s.frequency' % image_name] = frequency
-            patch_dictionary['Cimager.Images.%s.direction' % image_name] = "[%s,%s,%s]" % (ms_dir_ra,ms_dir_dec,ms_dir_type)
-        with patched_parset(
-            template, patch_dictionary, parset_directory
-        ) as cimager_parset:
-            yield cimager_parset
-
 
 
 class cimager(BaseRecipe):
@@ -257,18 +199,14 @@ class cimager(BaseRecipe):
                 vds_data.getDoubleVector("StartFreqs")[0],
                 vds_data.getDoubleVector("EndFreqs")[-1]
             ]
-            with make_cimager_parset(
-                self.logger,
-                template_parset,
-                self.inputs['parset_type'],
+            with self.__get_cimager_parset(
+                os.path.basename(vds_data.getString('FileName')).split('.')[0],
                 vds_data.getString("FileName"),
                 str(frequency_range),
                 vds_data.getString("Extra.FieldDirectionType"),
                 vds_data.getStringVector("Extra.FieldDirectionRa")[0],
                 vds_data.getStringVector("Extra.FieldDirectionDec")[0],
                 'True', # cimager bug: non-restored image unusable
-                self.config.get("layout", "parset_directory"),
-                self.inputs['convert_exec']
             ) as cimager_parset:
                 #                            Run cimager process on compute node
                 # --------------------------------------------------------------
@@ -321,6 +259,78 @@ class cimager(BaseRecipe):
             )
             self.error.set()
         return cimager_process.returncode
+
+        @contextmanager
+        def __get_cimager_parset(
+            self, name, dataset, frequency, ms_dir_type,
+            ms_dir_ra, ms_dir_dec, restore
+        ):
+            def convert_mwimager_parset(parset):
+                try:
+                    with patched_parset(
+                        template,
+                        {
+                            'dataset': dataset,
+                            'Images.frequency': frequency,
+                            'msDirType': ms_dir_type,
+                            'msDirRa': ms_dir_ra,
+                            'msDirDec': ms_dir_dec,
+                            'restore': restore # cimager bug: non-restored image unusable
+                        }
+                    ) as cimager_parset:
+                        fd, converted_parset = tempfile.mkstemp(
+                            dir=parset_directory
+                        )
+                        convert_process = spawn_process(
+                            [convert_exec, cimager_parset, converted_parset],
+                            logger
+                        )
+                        os.close(fd)
+                        sout, serr = convert_process.communicate()
+                        log_process_output(convert_exec, sout, serr, logger)
+                        if convert_process.returncode != 0:
+                            raise subprocess.CalledProcessError(
+                                convert_process.returncode, convert_exec
+                            )
+                        return converted_parset
+                except OSError, e:
+                    logger.error("Failed to spawn convertimagerparset (%s)" % str(e))
+                    raise
+                except subprocess.CalledProcessError, e:
+                    self.logger.error(str(e))
+                    raise
+
+            def populate_cimager_parset(parset):
+                input_parset = Parset(template)
+                patch_dictionary = {
+                    'Cimager.dataset': dataset,
+                    'Cimager.restore': restore
+                }
+                image_names = []
+                for image_name in input_parset.getStringVector('Cimager.Images.Names'):
+                    image_names.append("%s_$s" % (image_name, name))
+                    subset = input_parset.makeSubset(
+                        "Cimager.Images.%s" % image_name,
+                        "Cimager.Images.%s" % image_names[-1]
+                    )
+                    input_parset.subtractSubset(
+                        "Cimager.Images.%s" % image_name
+                    )
+                    for key in subset:
+                        patch_dictionary[key] = subset[key].get()
+                patch_dictionary['Cimager.Images.Names'].addStringVector(image_names)
+                return patch_parset(template, patch_dictionary, parset_directory)
+
+            if self.inputs['parset_type'] == "mwimager":
+                cimager_parset = convert_mwimager_parset(parset)
+            elif self.inputs['parset_type'] == "cimager":
+                cimager_parset = populate_cimager_parset(parset)
+
+            try:
+                yield cimager_parset
+            finally:
+                os.unlink(cimager_parset)
+
 
 if __name__ == '__main__':
     sys.exit(cimager().main())
