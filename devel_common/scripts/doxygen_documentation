@@ -1,0 +1,20 @@
+#!/bin/sh
+
+## Variables to be adjusted to the local setup
+
+lofarsoft=
+targetdir=
+
+## === Do not edit below this point =============================================
+
+## update working copy of the code and build documentation
+
+cd $lofarsoft/build
+make update
+make doc
+
+## move documentation to target directory
+
+cd $lofarsoft/doc
+rm -rf $targetdir
+mv html $targetdir
