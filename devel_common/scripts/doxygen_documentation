@@ -3,18 +3,51 @@
 ## Variables to be adjusted to the local setup
 
 lofarsoft=
-targetdir=
+target_lofarsoft=
+
+lofardocs=
+target_lofardocs=
 
 ## === Do not edit below this point =============================================
+
+
+##_______________________________________________________________________________
+##                                 Generate Doxygen documentation for source code
+
 
 ## update working copy of the code and build documentation
 
 cd $lofarsoft/build
+./boostrap
 make update
 make doc
 
 ## move documentation to target directory
 
 cd $lofarsoft/doc
-rm -rf $targetdir
-mv html $targetdir
+rm -rf $target_lofarsoft
+mv html $target_lofarsoft
+
+
+##_______________________________________________________________________________
+##                                          Generate documents from LaTeX sources
+
+
+## Build ICDs from LaTeX sources
+
+cd $lofardocs/build
+cmake ..
+make ICD
+make ICD
+make ICD
+
+## Move generated documents to server directory
+
+cd $lofardocs/ICD
+
+FILES=`ls LOFAR*ICD*.ps`
+
+for FILE in $FILES ; { 
+    gzip $FILE ;
+    mv $FILE.gz $target_lofardocs ;
+}
