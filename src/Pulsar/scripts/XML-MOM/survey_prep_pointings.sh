@@ -66,6 +66,11 @@ echo "multi-templatesNbeams.sh -in $tmp $args"
 multi-templatesNbeams.sh -in $tmp $args
 status=$?
 
-echo "Exit status was: $status"
-
 rm $tmp
+
+if (( $status != 0 ))
+then
+   echo "ERROR: There was an error either passing input arguments or running the multi-templatesNbeams.sh script."
+   exit 1
+fi
+
