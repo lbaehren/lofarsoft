@@ -46,9 +46,9 @@ tar -xzf html.tgz
 
 cd $lofardocs/build
 cmake ..
-make ICD
-make ICD
-make ICD
+make -j2 ICD
+make -j2 ICD
+make -j2 ICD
 
 ## Compress Postscript files
 
