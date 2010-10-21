@@ -1,4 +1,4 @@
-#!/bin/ksh -x
+#!/bin/ksh 
 
 
 USAGE="\nusage : survey_prep_pointings.sh pointing_range pointings_file xml_script_options \n\n"\
