@@ -33,7 +33,7 @@ echo "-- Packing generated documentation ..."
 cd $lofarsoft/doc/html
 tar -czf $target_lofarsoft/html.tgz *
 
-echo "-- Copy documentation to target directory ..."
+echo "--[`date`] Copy documentation to target directory ..."
 
 cd $target_lofarsoft
 tar -xzf html.tgz
@@ -41,6 +41,12 @@ tar -xzf html.tgz
 ##_______________________________________________________________________________
 ##                                          Generate documents from LaTeX sources
 
+## Update working copy
+
+echo "--[`date`] Updating working copy ..."
+
+cd $lofardocs
+svn up
 
 ## Build ICDs from LaTeX sources
 
