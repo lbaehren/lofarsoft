@@ -1,0 +1,80 @@
+#!/bin/sh
+
+## -----------------------------------------------------------------------------
+## Backups of the code repository (/var/svn-repos)
+
+nofFiles=`ls var_svn*.tgz | wc -l`
+files=`ls -r var_svn*.tgz`
+nofStoredFiles=24
+
+echo "-- Number of backup files = $nofFiles"
+
+numFile=1
+for FILE in $files 
+{
+    ## extract file information
+    fileSize=`ls -l $FILE | awk '{print $5}'`
+    fileDate=`ls -l $FILE | awk '{print $6}'`
+    fileTime=`ls -l $FILE | awk '{print $7}'`
+    echo "$fileDate  $fileTime  $fileSize  $FILE" >> data
+	## trim down the number of kept files
+    if [ $numFile -gt $nofStoredFiles ] ; then
+	echo "-- Removing file $FILE ..."
+        rm -f $FILE
+    fi
+    ## increment the counter
+    numFile=$(($numFile + 1))
+}
+
+## -----------------------------------------------------------------------------
+## Backups /var/www/wiki
+
+nofFiles=`ls var_www*.tgz | wc -l`
+files=`ls -r var_www*.tgz`
+nofStoredFiles=10
+
+echo "-- Number of backup files = $nofFiles"
+
+numFile=1
+for FILE in $files 
+{
+    ## extract file information
+    fileSize=`ls -l $FILE | awk '{print $5}'`
+    fileDate=`ls -l $FILE | awk '{print $6}'`
+    fileTime=`ls -l $FILE | awk '{print $7}'`
+    echo "$fileDate  $fileTime  $fileSize  $FILE" >> data
+	## trim down the number of kept files
+    if [ $numFile -gt $nofStoredFiles ] ; then
+	echo "-- Removing file $FILE ..."
+        rm -f $FILE
+    fi
+    ## increment the counter
+    numFile=$(($numFile + 1))
+}
+
+## -----------------------------------------------------------------------------
+## Backups of /etc
+
+nofFiles=`ls etc*.tgz | wc -l`
+files=`ls -r etc*.tgz`
+nofStoredFiles=12
+
+echo "-- Number of backup files = $nofFiles"
+
+numFile=1
+for FILE in $files 
+{
+    ## extract file information
+    fileSize=`ls -l $FILE | awk '{print $5}'`
+    fileDate=`ls -l $FILE | awk '{print $6}'`
+    fileTime=`ls -l $FILE | awk '{print $7}'`
+    echo "$fileDate  $fileTime  $fileSize  $FILE" >> data
+	## trim down the number of kept files
+    if [ $numFile -gt $nofStoredFiles ] ; then
+	echo "-- Removing file $FILE ..."
+        rm -f $FILE
+    fi
+    ## increment the counter
+    numFile=$(($numFile + 1))
+}
+
