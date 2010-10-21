@@ -28,12 +28,15 @@ make doc
 
 ## move documentation to target directory
 
-echo "-- Move documentation to target directory ..."
+echo "-- Packing generated documentation ..."
 
-cd $lofarsoft/doc
-rm -rf $target_lofarsoft
-mv html $target_lofarsoft
+cd $lofarsoft/doc/html
+tar -czf $target_lofarsoft/html.tgz *
 
+echo "-- Copy documentation to target directory ..."
+
+cd $target_lofarsoft
+tar -xzf html.tgz
 
 ##_______________________________________________________________________________
 ##                                          Generate documents from LaTeX sources
