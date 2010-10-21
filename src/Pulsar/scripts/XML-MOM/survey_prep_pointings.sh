@@ -33,7 +33,7 @@ do
     shift
 done
 
-echo $args
+#echo $args
 
 #temporary file
 outfile=$prefix"_PipeExec"
