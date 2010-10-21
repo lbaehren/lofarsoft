@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/ksh
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -305,7 +305,7 @@ echo "Your input file $infile contains $ncols columns"
 
 if [ $INSWITCH == 1 ] # BF
 then
-	if (( $ncols == 8 ))
+	if (( $ncols >= 8 ))
 	then
 	   if (( $user_subbands_hba != 0 ))
 	   then
@@ -318,7 +318,7 @@ then
 	      user_subbands_hba=0
 	   fi
     fi
-	if (( $ncols == 7 ))
+	if (( $ncols >= 7 ))
 	then
 	   if (( $user_gap != 0 ))
 	   then
@@ -366,7 +366,7 @@ then
 	   fi
 	fi
 	
-	if (( $ncols >= 2 ))
+	if (( (( $ncols >= 2 )) && (( $INTYPE == 1 )) )) || (( $ncols >= 3 )) && (( $INTYPE == 2 ))
 	then
 	   if (( $user_antenna == 1 ))
 	   then
@@ -378,14 +378,14 @@ then
 	if (( $ncols == 1 ))
 	then
 	   type=4
-	elif (( $ncols != 1 )) && (( $ncols != 2 )) && (( $ncols != 4 )) && (( $ncols != 7 )) && (( $ncols != 8 ))
+	elif (( $ncols == 6 )) 
 	then
-	   echo "ERROR: Input file must have 8, 7, 4, 2, or 1 columns;  your file contains $ncols columns which is not allowed."
+	   echo "ERROR: Your file contains $ncols columns which is not allowed (1,2,3,4,5,7,8,9 columns allowed)."
 	   echo "       Please refer to the script usage for input file options (type > $0) by itself."
 	   exit 1
 	fi
 	
-	if (( $ncols <= 4 )) 
+	if (( (( $ncols <= 4 )) && (( $INTYPE == 1 )) )) || (( (( $ncols <= 5 )) && (( $INTYPE == 2 )) ))
 	then
 	   # check that the user has specified required input
 	   if (( $user_start == 0 )) 
@@ -403,7 +403,7 @@ then
 	   fi
 	fi
 	
-	if (( $ncols == 1 )) 
+	if (( (( $ncols == 1 )) && (( $INTYPE == 1 )) )) || (( (( $ncols == 2 )) && (( $INTYPE == 2 )) ))
 	then
        # set the default antenna to HBA for BF when user has not specified one
 	   if [[ $user_antenna == 0 ]]
@@ -606,7 +606,7 @@ if [ $IS == 0 ] && [ $INSWITCH == 1 ]
 then
    IS=1
    IS_TF=true
-   $IS_LIST=="ALL"
+   IS_LIST="ALL"
 fi
 
 if [ $ISNOT == 1 ] && [ $INSWITCH == 1 ]
@@ -782,106 +782,173 @@ do
             then
 				ncols_beam=`echo $line | awk -F" " '{print NF}'`
                # only have source/pos and possibly subband info
+				    
+		        if (( $INTYPE == 1))
+		        then
+			       OBJECT=`echo $line | awk '{print $1}'`
+			       
+				   if (( $ncols_beam == 2 ))
+				   then
+				       SUBBANDS=`echo $line | awk '{print $2}'`
+				       SUBBANDS_SET=1
+				   fi
+			    else
+			       RA_DEG=`echo $line | awk '{print $1}'`
+			       DEC_DEG=`echo $line | awk '{print $2}'`
+				   if (( $ncols_beam == 3 ))
+				   then
+				       SUBBANDS=`echo $line | awk '{print $3}'`
+				       SUBBANDS_SET=1
+				   fi
+			    fi
+			    
 			    if [ $INSWITCH == 1 ] # BF
 			    then				    
-				    PULSAR=`echo $line | awk '{print $1}'`
-				    OBJECT=$PULSAR
-				    
-				    if (( $ncols_beam == 2 ))
-				    then
-				        SUBBANDS=`echo $line | awk '{print $2}'`
-				        SUBBANDS_SET=1
-				    fi
-                 else
-			        if (( $INTYPE == 1))
-			        then
-				       OBJECT=`echo $line | awk '{print $1}'`
-				       
-					   if (( $ncols_beam == 2 ))
-					   then
-					       SUBBANDS=`echo $line | awk '{print $2}'`
-					       SUBBANDS_SET=1
-					   fi
-				    else
-				       RA_DEG=`echo $line | awk '{print $1}'`
-				       DEC_DEG=`echo $line | awk '{print $2}'`
-					   if (( $ncols_beam == 3 ))
-					   then
-					       SUBBANDS=`echo $line | awk '{print $3}'`
-					       SUBBANDS_SET=1
-					   fi
-				    fi
-                 fi
+				    PULSAR=$OBJECT
+                fi
             else # when beam == 1
 		        # For BF data, check which columns are in the dataset
 			    if [ $INSWITCH == 1 ] # BF
 			    then
-				    PULSAR=`echo $line | awk '{print $1}'`
-				    OBJECT=$PULSAR
-				    
-				    if (( $ncols >= 2 ))
-				    then
-				        ANTENNA=`echo $line | awk '{print $2}'`
-						if [[ $ANTENNA != "HBA" ]] && [[ $ANTENNA != "LBA" ]]
-						then 
-						   echo "ERROR: ANTENNA setting $ANTENNA is unrecognized (must be 'HBA' or 'LBA')."
-						   exit 1
-						fi
-				    fi
-			
-				    if (( $ncols == 2 ))
-				    then
-						if [[ $ANTENNA == "HBA" ]] 
-						then 
-					        CHAN_SUBS=$CHAN_SUBS_HBA
-					        STEPS=$STEPS_HBA
-						else
-					        CHAN_SUBS=$CHAN_SUBS_LBA
-					        STEPS=$STEPS_LBA
-						fi
-				    fi
-			
-				    if (( $ncols >= 4 ))
-				    then
-				        CHAN_SUBS=`echo $line | awk '{print $3}'`
-				        STEPS=`echo $line | awk '{print $4}'`
-				    fi
-			
-				    if (( $ncols >= 7 ))
-				    then
-				        START=`echo $line | awk '{print $5}'`
-				        TIME=`echo $line | awk '{print $6}'`
-				        STATIONS=`echo $line | awk '{print $7}'`                
-			
-					    if (( $LST == 1 ))
+			        if (( $INTYPE == 1))
+			        then
+	
+					    PULSAR=`echo $line | awk '{print $1}'`
+					    OBJECT=$PULSAR
+					    
+					    if (( $ncols >= 2 ))
 					    then
-				           LST_DIFF=120
-					       # change the start time from LST to UT
-					       #new_start=`date -j -v +$LST_DIFF"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
-					       #echo "new start is $new_start"
-					       #START=$new_start
-					       #previous_start=$new_start
-					    else 
-					       LST_DIFF=0
+					        ANTENNA=`echo $line | awk '{print $2}'`
+							if [[ $ANTENNA != "HBA" ]] && [[ $ANTENNA != "LBA" ]]
+							then 
+							   echo "ERROR: ANTENNA setting $ANTENNA is unrecognized (must be 'HBA' or 'LBA')."
+							   exit 1
+							fi
 					    fi
-				    fi
-		
-				    if (( $ncols == 8 ))
-				    then
-				        SUBBANDS=`echo $line | awk '{print $8}'`
-				        SUBBANDS_SET=1
-				    fi
-				    
-				    if [[ $ANTENNA == "HBA" ]]
-				    then
-				        ANT_SHORT=HBA
-				    elif [[ $ANTENNA == "LBA" ]]
-				    then
-				        ANT_SHORT=LBA
-				    else
-				       echo "ERROR: Antenna must be set to any of these three values: HBA or LBA"
-				       exit 1
-				    fi
+				
+					    if (( $ncols == 2 ))
+					    then
+							if [[ $ANTENNA == "HBA" ]] 
+							then 
+						        CHAN_SUBS=$CHAN_SUBS_HBA
+						        STEPS=$STEPS_HBA
+							else
+						        CHAN_SUBS=$CHAN_SUBS_LBA
+						        STEPS=$STEPS_LBA
+							fi
+					    fi
+				
+					    if (( $ncols >= 4 ))
+					    then
+					        CHAN_SUBS=`echo $line | awk '{print $3}'`
+					        STEPS=`echo $line | awk '{print $4}'`
+					    fi
+				
+					    if (( $ncols >= 7 ))
+					    then
+					        START=`echo $line | awk '{print $5}'`
+					        TIME=`echo $line | awk '{print $6}'`
+					        STATIONS=`echo $line | awk '{print $7}'`                
+				
+						    if (( $LST == 1 ))
+						    then
+					           LST_DIFF=120
+						       # change the start time from LST to UT
+						       #new_start=`date -j -v +$LST_DIFF"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+						       #echo "new start is $new_start"
+						       #START=$new_start
+						       #previous_start=$new_start
+						    else 
+						       LST_DIFF=0
+						    fi
+					    fi
+			
+					    if (( $ncols == 8 ))
+					    then
+					        SUBBANDS=`echo $line | awk '{print $8}'`
+					        SUBBANDS_SET=1
+					    fi
+					    
+					    if [[ $ANTENNA == "HBA" ]]
+					    then
+					        ANT_SHORT=HBA
+					    elif [[ $ANTENNA == "LBA" ]]
+					    then
+					        ANT_SHORT=LBA
+					    else
+					       echo "ERROR: Antenna must be set to any of these three values: HBA or LBA"
+					       exit 1
+					    fi
+					# when input table contains ra and dec values
+					else
+				        RA_DEG=`echo $line | awk '{print $1}'`
+				        DEC_DEG=`echo $line | awk '{print $2}'`
+
+					    if (( $ncols >= 3 ))
+					    then
+					        ANTENNA=`echo $line | awk '{print $3}'`
+							if [[ $ANTENNA != "HBA" ]] && [[ $ANTENNA != "LBA" ]]
+							then 
+							   echo "ERROR: ANTENNA setting $ANTENNA is unrecognized (must be 'HBA' or 'LBA')."
+							   exit 1
+							fi
+					    fi
+				
+					    if (( $ncols == 3 ))
+					    then
+							if [[ $ANTENNA == "HBA" ]] 
+							then 
+						        CHAN_SUBS=$CHAN_SUBS_HBA
+						        STEPS=$STEPS_HBA
+							else
+						        CHAN_SUBS=$CHAN_SUBS_LBA
+						        STEPS=$STEPS_LBA
+							fi
+					    fi
+				
+					    if (( $ncols >= 5 ))
+					    then
+					        CHAN_SUBS=`echo $line | awk '{print $4}'`
+					        STEPS=`echo $line | awk '{print $5}'`
+					    fi
+				
+					    if (( $ncols >= 8 ))
+					    then
+					        START=`echo $line | awk '{print $6}'`
+					        TIME=`echo $line | awk '{print $7}'`
+					        STATIONS=`echo $line | awk '{print $8}'`                
+				
+						    if (( $LST == 1 ))
+						    then
+					           LST_DIFF=120
+						       # change the start time from LST to UT
+						       #new_start=`date -j -v +$LST_DIFF"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+						       #echo "new start is $new_start"
+						       #START=$new_start
+						       #previous_start=$new_start
+						    else 
+						       LST_DIFF=0
+						    fi
+					    fi
+			
+					    if (( $ncols == 9 ))
+					    then
+					        SUBBANDS=`echo $line | awk '{print $9}'`
+					        SUBBANDS_SET=1
+					    fi
+					    
+					    if [[ $ANTENNA == "HBA" ]]
+					    then
+					        ANT_SHORT=HBA
+					    elif [[ $ANTENNA == "LBA" ]]
+					    then
+					        ANT_SHORT=LBA
+					    else
+					       echo "ERROR: Antenna must be set to any of these three values: HBA or LBA"
+					       exit 1
+					    fi
+			
+					fi
 		        else # IM
 			        # when input table contains object-names
 			        if (( $INTYPE == 1))
@@ -1310,10 +1377,12 @@ do
 			   if [ $nbeams == 1 ]
 			   then
 			      OBJECT="Pos $RA_DEG $DEC_DEG"
+			      PULSAR="Pos $RA_DEG $DEC_DEG"
 			      OBJECT_LONG="Pos $RA_DEG $DEC_DEG ($ANTENNA)"
 			      OBJECT_LONG_BEAM="Pos $RA_DEG $DEC_DEG ($ANTENNA)"
 			   else
 			      OBJECT="Pos $RA_DEG $DEC_DEG"
+			      PULSAR="Pos $RA_DEG $DEC_DEG"
 			      OBJECT_LONG="Pos $RA_DEG $DEC_DEG ($ANTENNA) Multi-Beam"
 			      OBJECT_LONG_BEAM="Pos $RA_DEG $DEC_DEG ($ANTENNA) Multi-Beam #$beam"
 			   fi
@@ -1466,7 +1535,7 @@ do
 	        then 
 	           if (( $beam_counter == 0 ))
 	           then
-	              sed -e "s/FILL IN OBSERVATION NAME/Obs $PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $middle >> $outfile
+	              sed -e "s/FILL IN OBSERVATION NAME/$PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $middle >> $outfile
 	           fi
 	        elif [ $INSWITCH == 2 ]  && [ $skip == 0 ]
 	        then
@@ -1478,7 +1547,7 @@ do
 		        
 	        if [ $INSWITCH == 1 ] && [ $skip == 0 ]
 	        then 
-	           sed -e "s/FILL IN OBSERVATION NAME/Obs $PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $beam_xml >> $outfile
+	           sed -e "s/FILL IN OBSERVATION NAME/$PULSAR ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" $beam_xml >> $outfile
 	        elif [ $INSWITCH == 2 ] && [ $skip == 0 ]
 	        then
 	           sed -e "s/FILL IN OBSERVATION NAME/$OBJECT/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTEGRATION/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/BEAM NUMBER/$beam_counter/g" $beam_xml >> $outfile
