@@ -56,9 +56,7 @@ tmp=/tmp/$$survey.txt
 # add a ; to the end of all lines except beam 06
 # append lines with ;
 
-#grep -v "#" $infile | grep "_[0-9]" | awk '{print $1 " " $4 " " $5}' | sed '/_0[0-5]/s/$/ ;/g' | sed -e :a -e '/;$/N; s/;\n/ ; /; ta' > $tmp
-
-head -90 $infile | grep -v "#" | grep "_[0-9]" | awk '{print $1 " " $4 " " $5}' | sed '/_0[0-5]/s/$/ ;/g' | sed -e :a -e '/;$/N; s/;\n/ ; /; ta' | sed -n "$min_range,$max_range p" | sed 's/LOFAR_HBA....._.. //g' > $tmp
+grep -v "#" $infile | grep "_[0-9]" | awk '{print $1 " " $4 " " $5}' | sed '/_0[0-5]/s/$/ ;/g' | sed -e :a -e '/;$/N; s/;\n/ ; /; ta' | sed -n "$min_range,$max_range p" | sed 's/LOFAR_HBA....._.. //g' > $tmp
 
 # run the xml script with the tmp file as input and rest of the arguments
 echo "Running command:"
