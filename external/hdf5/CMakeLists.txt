@@ -12,6 +12,13 @@ project (HDF5)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
 
+## Package information
+set (HDF5_VERSION_MINOR   8)
+set (HDF5_VERSION_RELEASE 5)
+set (HDF5_VERSION        "1.${HDF5_VERSION_MINOR}.${HDF5_VERSION_RELEASE}" )
+set (HDF5_SOURCE_ARCHIVE "hdf5-${HDF5_VERSION}.tar.gz" )
+set (HDF5_URL            "ftp://ftp.hdfgroup.org/HDF5/current/src/${HDF5_SOURCE_ARCHIVE}" )
+
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
 ## installation can be found. In order to handle this properly, we use the CMake
@@ -66,16 +73,16 @@ if (HDF5_MAJOR_VERSION LESS 1)
   set (HDF5_FORCE_BUILD TRUE)
 else (HDF5_MAJOR_VERSION LESS 1)
   ## Check for major version
-  if (HDF5_MINOR_VERSION LESS 8)
+  if (HDF5_MINOR_VERSION LESS ${HDF5_VERSION_MINOR})
     message (STATUS "HDF5 installation found - minor version too small!")
     set (HDF5_FORCE_BUILD TRUE)
-  else (HDF5_MINOR_VERSION LESS 8)
+  else (HDF5_MINOR_VERSION LESS ${HDF5_VERSION_MINOR})
     ## Check for release version
-    if (HDF5_RELEASE_VERSION LESS 3)
+    if (HDF5_RELEASE_VERSION LESS ${HDF5_VERSION_RELEASE})
       message (STATUS "HDF5 installation found - release version too small!")
       set (HDF5_FORCE_BUILD TRUE)
-    endif (HDF5_RELEASE_VERSION LESS 3)
-  endif (HDF5_MINOR_VERSION LESS 8)
+    endif (HDF5_RELEASE_VERSION LESS ${HDF5_VERSION_RELEASE})
+  endif (HDF5_MINOR_VERSION LESS ${HDF5_VERSION_MINOR})
 endif (HDF5_MAJOR_VERSION LESS 1)
 
 ## Run an additional check to see whether we are on a Debian system
@@ -88,11 +95,6 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   
   include (ExternalProject)
 
-  set (HDF5_VERSION     "1.8.3")
-  set (HDF5_DIRECTORY   "hdf5-${HDF5_VERSION}")
-  set (HDF5_TAR_ARCHIVE "${HDF5_DIRECTORY}.tar.gz")
-  set (HDF5_URL "${USG_DOWNLOAD}/software/${HDF5_TAR_ARCHIVE}")
-  
   ##__________________________________________________________________
   ## Configuration parameters
 
@@ -129,21 +131,25 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   ##__________________________________________________________________
   ## Build the project
 
-  find_file (have_hdf5_tgz ${HDF5_TAR_ARCHIVE} ${HDF5_SOURCE_DIR})
-
-  if (NOT have_hdf5_tgz)
-    set (have_hdf5_tgz ${HDF5_URL})
-  endif (NOT have_hdf5_tgz)
+  ## Locate source file to build from
   
-  ExternalProject_Add (hdf5
-    PREFIX ${HDF5_BINARY_DIR}
-    DOWNLOAD_DIR ${HDF5_BINARY_DIR}/download
-    SOURCE_DIR ${HDF5_BINARY_DIR}/source
-    URL ${have_hdf5_tgz}
-    URL_MD5 5ce228d860bf9e797ca40ab1a823c380
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${HDF5_BINARY_DIR}/source/configure --prefix=${USG_INSTALL_PREFIX} --bindir=${USG_INSTALL_PREFIX}/bin --includedir=${USG_INSTALL_PREFIX}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_fortran} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
+  find_file (HAVE_HDF5_SOURCE ${HDF5_SOURCE_ARCHIVE}
+    PATHS ${HDF5_SOURCE_DIR}
     )
+  
+  if (NOT HAVE_HDF5_SOURCE)
+    set (HAVE_HDF5_SOURCE ${HDF5_URL})
+  endif (NOT HAVE_HDF5_SOURCE)
+  
+    ExternalProject_Add (hdf5
+      PREFIX ${HDF5_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${HAVE_HDF5_SOURCE}
+      URL_MD5 85d1cea1de32019bf85e484ce83f8bd9
+      CONFIGURE_COMMAND ${HDF5_BINARY_DIR}/source/configure --prefix=${USG_INSTALL_PREFIX} --bindir=${USG_INSTALL_PREFIX}/bin --includedir=${USG_INSTALL_PREFIX}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_fortran} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
+      INSTALL_COMMAND make install
+      )
   
   ##__________________________________________________________________
   ## Custom target wrapping the standard configure/build chain

@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) <year>                                                  *
- *   <author> (<mail>)                                                     *
+ *   Copyright (C) 2010                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,9 +21,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <<newModule>/<newClass>.h>
+#include <Stokes.h>
 
-namespace <newNamespace> { // Namespace <newNamespace> -- begin
+namespace DAL { // Namespace DAL -- begin
   
   // ============================================================================
   //
@@ -31,14 +31,14 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //
   // ============================================================================
   
-  <newClass>::<newClass> ()
+  Stokes::Stokes ()
   {;}
   
   /*!
-    \param other -- Another HDF5Property object from which to create this new
+    \param other -- Another Stokes object from which to create this new
            one.
   */
-  <newClass>::<newClass> (<newClass> const &other)
+  Stokes::Stokes (Stokes const &other)
   {
     copy (other);
   }
@@ -49,12 +49,12 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //
   // ============================================================================
   
-  <newClass>::~<newClass> ()
+  Stokes::~Stokes ()
   {
     destroy();
   }
   
-  void <newClass>::destroy ()
+  void Stokes::destroy ()
   {;}
   
   // ============================================================================
@@ -67,9 +67,9 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //                                                                    operator=
   
   /*!
-    \param other -- Another <newClass> object from which to make a copy.
+    \param other -- Another Stokes object from which to make a copy.
   */
-  <newClass>& <newClass>::operator= (<newClass> const &other)
+  Stokes& Stokes::operator= (Stokes const &other)
   {
     if (this != &other) {
       destroy ();
@@ -81,7 +81,7 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //_____________________________________________________________________________
   //                                                                         copy
   
-  void <newClass>::copy (<newClass> const &other)
+  void Stokes::copy (Stokes const &other)
   {;}
 
   // ============================================================================
@@ -96,9 +96,9 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   /*!
     \param os -- Output stream to which the summary is written.
   */
-  void <newClass>::summary (std::ostream &os)
+  void Stokes::summary (std::ostream &os)
   {
-    os << "[<newClass>] Summary of internal parameters." << std::endl;
+    os << "[Stokes] Summary of internal parameters." << std::endl;
   }
   
   // ============================================================================
@@ -107,6 +107,9 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //
   // ============================================================================
   
-  
+  void Stokes::init (Stokes::Component const &component)
+  {
+    component_p = component;
+  }
 
-} // Namespace <newNamespace> -- end
+} // Namespace DAL -- end

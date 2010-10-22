@@ -10,6 +10,7 @@ target_lofardocs=
 
 ## === Do not edit below this point =============================================
 
+export PATH=$PATH:/usr/bin:/usr/local/bin:/opt/local/bin
 
 ##_______________________________________________________________________________
 ##                                 Generate Doxygen documentation for source code

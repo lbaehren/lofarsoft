@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) <year>                                                  *
- *   <author> <<mail>>                                                     *
+ *   <author> (<mail>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -73,18 +73,13 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     
     // === Operators ============================================================
     
-    /*!
-      \brief Overloading of the copy operator
-      
-      \param other -- Another <newClass> object from which to make a copy.
-    */
+    //! Overloading of the copy operator
     <newClass>& operator= (<newClass> const &other); 
     
     // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class
-      
       \return className -- The name of the class, <newClass>.
     */
     inline std::string className () const {
