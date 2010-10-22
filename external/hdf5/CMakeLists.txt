@@ -16,7 +16,7 @@ cmake_minimum_required (VERSION 2.8)
 set (HDF5_VERSION_MINOR   8)
 set (HDF5_VERSION_RELEASE 5)
 set (HDF5_VERSION        "1.${HDF5_VERSION_MINOR}.${HDF5_VERSION_RELEASE}" )
-set (HDF5_SOURCE_ARCHIVE "hdf5-${HDF5_VERSION}.tar" )
+set (HDF5_SOURCE_ARCHIVE "hdf5-${HDF5_VERSION}.tar.gz" )
 set (HDF5_URL            "http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-${HDF5_VERSION}/src/${HDF5_SOURCE_ARCHIVE}" )
 
 ## -----------------------------------------------------------------------------
