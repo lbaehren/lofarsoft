@@ -12,8 +12,10 @@ timestamps.
 """
 
 import os
-import pycr as cr
+#import pycr as cr
+import pycrtools as hf
 import numpy as np
+
 
 
 def matchfiles(dirs, sortstring, coinctime, mincoinc):
@@ -45,8 +47,8 @@ def matchfiles(dirs, sortstring, coinctime, mincoinc):
         fd.close()
         times[dirIndex] = list()
         for file in files[dirIndex]:
-            dr = cr.open(file.strip(),'LOFAR_TBB')
-            ddate = dr["date"] + dr["sample_number"][0]/200e6
+            dr = hf.crfile( file.strip() )
+            ddate = dr["date"] + dr["SAMPLE_NUMBER"][0]/200e6
             times[dirIndex].append(ddate) 
             del dr
 
