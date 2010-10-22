@@ -5,7 +5,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
        [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] 
        [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] 
        [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode]  
-       [+multi] [+IS|+CS|+FD|+BF list_or_ALL]
+       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol]
 
        REQUIRED Input Parameters:
        -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
@@ -28,6 +28,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
        [[+BF list_or_ALL]] ==> Turn on beamformedData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
        [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)
        [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
+       [[-namecol]] ==> The first column in the input file contains an additional column which will be used as the Obs Name in MOM
          
        For help on Beam_formed input format and options, use '-help BF' switch
 
@@ -92,6 +93,22 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          70.498  +1.728      
          217.17   -1.623     
 
+      5) Example input file has "NameColumn" and object name (NOTE: the NameColumn must be 1st)!
+         "NameColumn" can be added to ANY of the above data tables, but it must always be the 1st column.
+         Example Type V input file using source names:
+         # namecol        object                                     
+         LOFAR_HBA00001   3C99                         
+         LOFAR_HBA00002   3C327                    
+         LOFAR_HBA00003   372.1              
+         LOFAR_HBA00004   3C14                        
+
+         Example Type V input file using ra dec positions:
+         # namecol    ra     dec                                        
+         LOFAR_HBA00001   13.98   +68.487                           
+         LOFAR_HBA00002   13.98   +68.487                     
+         LOFAR_HBA00004   13.98   +68.487                     
+         LOFAR_HBA00005   55.76   +18.546              
+
 
       Input File Options (MULTIPLE BEAMS): 
          Multiple Beams are designated by the ";" separator on the same input line.  Any of the 
@@ -132,7 +149,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
 
       3) Example input file with pointing and antenna specification; lines 2 and 3 contain multiple beams:
          Example Type III input file using source names:
-         # object       antenna
+         # object       antenna  ; object_beamN
          3C99           LBA 
          3C99           HBALow   ;    3C14   
          3C327          HBALow   ;    3C14    ;    3C327
@@ -146,17 +163,33 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          
       4) Example input file with just the pointing input; lines 2 and 3 contain multiple beams:
          Example Type IV input file using source names:
-         # object      
+         # object      ; object_beamN
          3C99   
          3C327  ;  3C99  ; 3C99
          372.1  ;  3C99  ; 3C327 ; 3C327
                   
          Example Type IV input file using ra dec positions:
-         # ra     dec        
+         # ra     dec     ; ra_beamN dec_beamN  
          13.98   +68.487     
          70.498  +1.728   ;  13.98   +68.487
          217.17   -1.623  ;  13.98   +68.487  ;    70.498  +1.728
 
+
+      5) Example input file has "NameColumn" and object name (NOTE: the NameColumn must be 1st)!
+         "NameColumn" can be added to ANY of the above data tables, but it must always be the 1st column.
+         Example Type V input file using source names and mutiple beams:
+         # namecol        object   ; object_beamN                                  
+         LOFAR_HBA00001   3C99                         
+         LOFAR_HBA00002   3C327                    
+         LOFAR_HBA00003   372.1    ;  3C99  ; 3C99          
+         LOFAR_HBA00004   3C14     ;  3C99  ; 3C327 ; 3C327                   
+
+         Example Type V input file using ra dec positions:
+         # namecol    ra     dec              ; ra_beamN dec_beamN                          
+         LOFAR_HBA00001   13.98   +68.487                           
+         LOFAR_HBA00002   13.98   +68.487                     
+         LOFAR_HBA00004   13.98   +68.487     ;  13.98   +68.487                
+         LOFAR_HBA00005   55.76   +18.546     ;  13.98   +68.487     ;    70.498  +1.728    
          
 
          EXAMPLE runs:
@@ -167,7 +200,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 
          > multi-templatesNbeams.sh -in obs.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 +IM 2,4,6
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 +multi
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +IS ALL +CS ALL +multi
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +IS ALL +CS ALL +multi -namecol
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..401  
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
