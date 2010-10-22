@@ -56,7 +56,10 @@ tmp=/tmp/$$survey.txt
 # add a ; to the end of all lines except beam 06
 # append lines with ;
 
-grep -v "#" $infile | grep "_[0-9]" | awk '{print $1 " " $4 " " $5}' | sed '/_0[0-5]/s/$/ ;/g' | sed -e :a -e '/;$/N; s/;\n/ ; /; ta' | sed -n "$min_range,$max_range p" | sed 's/LOFAR_HBA....._.. //g' > $tmp
+# 1st version does not name the NAMECOL in results:
+# grep -v "#" $infile | grep "_[0-9]" | awk '{print $1 " " $4 " " $5}' | sed '/_0[0-5]/s/$/ ;/g' | sed -e :a -e '/;$/N; s/;\n/ ; /; ta' | sed -n "$min_range,$max_range p" | sed 's/LOFAR_HBA....._.. //g' > $tmp
+# 2nd version does have the NAMECOL in 1st beam results:
+grep -v "#" $infile | grep "_[0-9]" | awk '{print $1 " " $4 " " $5}' | sed '/_0[0-5]/s/$/ ;/g' | sed -e :a -e '/;$/N; s/;\n/ ; /; ta' | sed -n "$min_range,$max_range p" | sed 's/LOFAR_HBA....._0[1-9] //g' | sed 's/_00//g' > $tmp
 
 # run the xml script with the tmp file as input and rest of the arguments
 echo "Running command:"
