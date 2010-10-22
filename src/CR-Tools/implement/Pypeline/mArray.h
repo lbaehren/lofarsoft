@@ -305,7 +305,10 @@ when the shared copy is deleted) - even if the shared copied object is
 still around.
 
  */
-template <class T> hArray<T> & hArray<T>::shared_copy(){hArray<T> * ary_p=new hArray<T>(storage_p); return *ary_p;}
+template <class T> hArray<T> & hArray<T>::shared_copy(){
+  hArray<T> * ary_p=new hArray<T>(storage_p);
+  return *ary_p;
+}
 
 template <class T> void hArray<T>::delVector(){
   if (storage_p==NULL) return; //Check if vector was deleted elsewhere
@@ -675,7 +678,10 @@ template <class T> hArray<T> & hArray<T>::loopOn(){
 \brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector).
 
  */
-template <class T> hArray<T> & hArray<T>::all(){setSlice(0,-1); return *this;}
+template <class T> hArray<T> & hArray<T>::all(){
+  setSlice(0,-1);
+  return *this;
+}
 
 /*!
 \brief Sets the array to looping mode (i.e. the next function will loop over all slices in the vector).
@@ -1005,45 +1011,41 @@ namespace PyCR { // Namespace PyCR -- begin
 
   namespace Array { // Namespace Array -- begin
 
-    template <class Iter> IterValueType
-      hProduct (const Iter vec,const Iter vec_end)
-      {
-        typedef IterValueType T;
-        T prod=1.0;
-        Iter it=vec;
-        while (it!=vec_end) {prod *= *it; ++it;};
-        return prod;
-      }
+    template <class Iter> IterValueType hProduct (const Iter vec,const Iter vec_end)
+    {
+      typedef IterValueType T;
+      T prod=1.0;
+      Iter it=vec;
+      while (it!=vec_end) {prod *= *it; ++it;};
+      return prod;
+    }
 
-    template <class Iter>
-      HNumber hVectorLength (const Iter vec, const Iter vec_end)
-      {
-        HNumber sum=0;
-        Iter it=vec;
-        while (it!=vec_end) {sum += (*it) * (*it); ++it;};
-        return sqrt(sum);
-      }
+    template <class Iter> HNumber hVectorLength (const Iter vec, const Iter vec_end)
+    {
+      HNumber sum=0;
+      Iter it=vec;
+      while (it!=vec_end) {sum += (*it) * (*it); ++it;};
+      return sqrt(sum);
+    }
 
-    template <class Iter>
-      void hNormalize (const Iter vec, const Iter vec_end)
-      {
-        HNumber norm=hVectorLength(vec,vec_end);
-        Iter it=vec;
-        while (it!=vec_end) {*it=(*it)/norm; ++it;};
-      }
+    template <class Iter> void hNormalize (const Iter vec, const Iter vec_end)
+    {
+      HNumber norm=hVectorLength(vec,vec_end);
+      Iter it=vec;
+      while (it!=vec_end) {*it=(*it)/norm; ++it;};
+    }
 
-    template <class Iter>
-      IterValueType hMulSum (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
-      {
-        typedef IterValueType T;
-        T sum=hfnull<T>();
-        Iter it1=vec1,it2=vec2;
-        while (it1!=vec1_end && it2!=vec2_end) {
-          sum+=(*it1) * (*it2);
-          ++it1; ++it2;
-        };
-        return sum;
-      }
+    template <class Iter> IterValueType hMulSum (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+    {
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      Iter it1=vec1,it2=vec2;
+      while (it1!=vec1_end && it2!=vec2_end) {
+        sum+=(*it1) * (*it2);
+        ++it1; ++it2;
+      };
+      return sum;
+    }
 
   } // Namespace Array -- end
 

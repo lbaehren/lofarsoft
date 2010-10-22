@@ -299,8 +299,8 @@ long int hSum(const long int*, long int*);
 #define hfmax(a,b) (((b)<(a))?(a):(b))
 #define hfmin(a,b) (((b)>(a))?(a):(b))
 
-#define hfeven(a)  (a%2==0)
-#define hfodd(a)  (a%2!=0)
+#define hfeven(a)  ((a)%2==0)
+#define hfodd(a)  ((a)%2!=0)
 
 
 

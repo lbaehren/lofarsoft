@@ -73,10 +73,13 @@ namespace PyCR { // Namespace PyCR -- begin
     template <class Iter, class S>
       void hMul2(const Iter vec1,const Iter vec1_end, S val)
     {
+      // Declaration of variables
       typedef IterValueType T;
       Iter it=vec1;
+
+      // Vector operation
       while (it!=vec1_end) {
-        *it = hfcast<T>(*it HFPP_OPERATOR_Mul val);
+        *it = hfcast<T>(*it * val);
         ++it;
       };
     }
@@ -84,22 +87,32 @@ namespace PyCR { // Namespace PyCR -- begin
     template <class Iter, class S>
       void hAdd2(const Iter vec1,const Iter vec1_end, S val)
     {
+      // Declaration of variables
       typedef IterValueType T;
       Iter it=vec1;
+
+      // Vector operation
       while (it!=vec1_end) {
-        *it = hfcast<T>(*it HFPP_OPERATOR_Add val);
+        *it = hfcast<T>(*it + val);
         ++it;
       };
-
     }
 
     template <class Iter, class S>
       void hDiv2(const Iter vec1,const Iter vec1_end, S val)
     {
+      // Declaration of variables
       typedef IterValueType T;
       Iter it=vec1;
+
+      // Sanity check
+      if (abs(val) < A_LOW_NUMBER) {
+        throw PyCR::ValueError("Division by zero");
+      }
+
+      // Vector operation
       while (it!=vec1_end) {
-        *it = hfcast<T>(*it HFPP_OPERATOR_Div val);
+        *it = hfcast<T>(*it / val);
         ++it;
       };
     }
@@ -107,10 +120,13 @@ namespace PyCR { // Namespace PyCR -- begin
     template <class Iter, class S>
       void hSub2(const Iter vec1,const Iter vec1_end, S val)
     {
+      // Declaration of variables
       typedef IterValueType T;
       Iter it=vec1;
+
+      // Vector operation
       while (it!=vec1_end) {
-        *it = hfcast<T>(*it HFPP_OPERATOR_Sub val);
+        *it = hfcast<T>(*it - val);
         ++it;
       };
     }
@@ -118,11 +134,21 @@ namespace PyCR { // Namespace PyCR -- begin
     template <class Iter, class Iterin, class S>
       void hMul2(const Iter vec,const Iter vec_end, const Iterin vec1,const Iterin vec1_end,const S val)
     {
+      // Declaration of variables
       typedef IterValueType T;
       Iterin it1=vec1;
       Iter itout=vec;
+      HInteger lenOut = vec_end - vec;
+      HInteger lenIn = vec1_end - vec1;
+
+      // Sanity check
+      if (lenOut != lenIn) {
+        throw PyCR::ValueError("Input and output vectors are not of equal length.");
+      }
+
+      // Vector operation
       while (itout !=vec_end) {
-        *itout = hfcast<T>(*it1 HFPP_OPERATOR_Mul val);
+        *itout = hfcast<T>(*it1 * val);
         ++it1; ++itout;
         if (it1==vec1_end) it1=vec1;
       };
@@ -131,11 +157,21 @@ namespace PyCR { // Namespace PyCR -- begin
     template <class Iter, class Iterin, class S>
       void hAdd2(const Iter vec,const Iter vec_end, const Iterin vec1,const Iterin vec1_end,const S val)
     {
+      // Declaration of variables
       typedef IterValueType T;
       Iterin it1=vec1;
       Iter itout=vec;
+      HInteger lenOut = vec_end - vec;
+      HInteger lenIn = vec1_end - vec1;
+
+      // Sanity check
+      if (lenOut != lenIn) {
+        throw PyCR::ValueError("Input and output vectors are not of equal length.");
+      }
+
+      // Vector operation
       while (itout !=vec_end) {
-        *itout = hfcast<T>(*it1 HFPP_OPERATOR_Add  val);
+        *itout = hfcast<T>(*it1 + val);
         ++it1; ++itout;
         if (it1==vec1_end) it1=vec1;
       };
@@ -144,11 +180,24 @@ namespace PyCR { // Namespace PyCR -- begin
     template <class Iter, class Iterin, class S>
       void hDiv2(const Iter vec,const Iter vec_end, const Iterin vec1,const Iterin vec1_end,const S val)
     {
+      // Declaration of variables
       typedef IterValueType T;
       Iterin it1=vec1;
       Iter itout=vec;
+      HInteger lenOut = vec_end - vec;
+      HInteger lenIn = vec1_end - vec1;
+
+      // Sanity check
+      if (lenOut != lenIn) {
+        throw PyCR::ValueError("Input and output vectors are not of equal length.");
+      }
+      if (abs(val) < A_LOW_NUMBER) {
+        throw PyCR::ValueError("Division by zero");
+      }
+
+      // Vector operation
       while (itout !=vec_end) {
-        *itout = hfcast<T>(*it1 HFPP_OPERATOR_Div  val);
+        *itout = hfcast<T>(*it1 / val);
         ++it1; ++itout;
         if (it1==vec1_end) it1=vec1;
       };
@@ -157,11 +206,21 @@ namespace PyCR { // Namespace PyCR -- begin
     template <class Iter, class Iterin, class S>
       void hSub2(const Iter vec,const Iter vec_end, const Iterin vec1,const Iterin vec1_end,const S val)
     {
+      // Declaration of variables
       typedef IterValueType T;
       Iterin it1=vec1;
       Iter itout=vec;
+      HInteger lenOut = vec_end - vec;
+      HInteger lenIn = vec1_end - vec1;
+
+      // Sanity check
+      if (lenOut != lenIn) {
+        throw PyCR::ValueError("Input and output vectors are not of equal length.");
+      }
+
+      // Vector operation
       while (itout !=vec_end) {
-        *itout = hfcast<T>(*it1 HFPP_OPERATOR_Sub  val);
+        *itout = hfcast<T>(*it1 - val);
         ++it1; ++itout;
         if (it1==vec1_end) it1=vec1;
       };

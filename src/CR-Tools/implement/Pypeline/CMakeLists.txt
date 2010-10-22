@@ -196,7 +196,7 @@ else (APPLE)
     PROPERTIES
     PREFIX ""
     SUFFIX .so
-    COMPILE_FLAGS "${PYPELINE_CXX_FLAGS} -DH_DEBUG_CPP -g -O2 -w" # TODO: inhibit warnings
+    COMPILE_FLAGS "${PYPELINE_CXX_FLAGS} -DH_DEBUG_CPP -g -O2 -w"
     LINK_FLAGS "${PYPELINE_LINKER_FLAGS} -fPIC -shared -Wl"
     )
 endif (APPLE)

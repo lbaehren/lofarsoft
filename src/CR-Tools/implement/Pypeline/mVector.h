@@ -40,36 +40,70 @@ namespace PyCR { // Namespace PyCR -- begin
 
 
     template <class Iter, class IterIn>
-      void hCopy(const Iter vecout, const Iter vecout_end, const IterIn vecin, const IterIn vecin_end)
+      void hCopy(const Iter vecout, const Iter vecout_end,
+                 const IterIn vecin, const IterIn vecin_end)
     {
+      // Declaration of variables
       typedef IterValueType T;
       Iter itout(vecout);
       IterIn itin(vecin);
-      if (itin >= vecin_end) return;
+      HInteger lenIn = std::distance(vecin,vecin_end);
+      HInteger lenOut = std::distance(vecout,vecout_end);
+
+      // Sanity check
+      if (lenIn <=0) {
+        throw PyCR::ValueError("Illegal size of input vector.");
+        return;
+      }
+      if (lenIn > lenOut) {
+        throw PyCR::ValueError("Input vector is larger than output vector.");
+        return;
+      }
+      if (lenIn < lenOut) {
+        cout << "Warning: Input vector is smaller than output vector: looping over input vector." << endl;
+      }
+
+      // Copying of data
       while (itout != vecout_end) {
         *itout=hfcast<T>(*itin);
-        ++itin; ++itout;
-        if (itin==vecin_end) itin=vecin;
+        ++itin;
+        ++itout;
+        if (itin==vecin_end)
+          itin=vecin;
       };
     }
 
     template <class Iter, class Iterin, class IterI>
-      void hCopy(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end, const IterI index, const IterI index_end, const HInteger number_of_elements)
+      void hCopy(const Iter vecout, const Iter vecout_end,
+                 const Iterin vecin, const Iterin vecin_end,
+                 const IterI index, const IterI index_end,
+                 const HInteger number_of_elements)
     {
+      // Declaration of variables
       typedef IterValueType T;
       Iter itout(vecout);
       IterI itidx(index);
       Iterin itin;
       HInteger count(number_of_elements);
-      if ((index >= index_end) || count==0) return;
-      if (vecin >= vecin_end) return;
-      if (count<0) count=(vecout_end-vecout);
-      while (itout != vecout_end) {
+
+      // Sanity check
+      if ((index >= index_end) || (count==0))
+        return;
+      if (vecin >= vecin_end)
+        return;
+      if ((count<0) || (count > (vecout_end-vecout)))
+        count=(vecout_end-vecout);
+
+      // Copying of data
+      while ((itout != vecout_end) && (count > 0)) {
         itin = vecin + *itidx;
-        if (itin < vecin_end) *itout=hfcast<T>(*itin);
-        --count; if (count==0) return;
-        ++itidx; ++itout;
-        if (itidx==index_end) itidx=index;
+        if ((itin >= vecin) && (itin < vecin_end))
+          *itout=hfcast<T>(*itin);
+        --count;
+        ++itidx;
+        ++itout;
+        if (itidx==index_end)
+          itidx=index;
       };
     }
 

@@ -80,10 +80,6 @@ HString hgetFileExtension(HString filename){
 }
 
 
-//========================================================================
-//$SECTION:              I/O Function (DataReader)
-//========================================================================
-
 //$DOCSTRING: Print a brief summary of the file contents and current settings.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileSummary

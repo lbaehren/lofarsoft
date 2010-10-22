@@ -79,26 +79,43 @@
 
 */
 template <class Iter>
-void HFPP_FUNC_NAME(const Iter ccm,const Iter ccm_end, const Iter fftdata,const Iter fftdata_end, const HInteger nfreq)
+void HFPP_FUNC_NAME(const Iter ccm, const Iter ccm_end,
+                    const Iter fftdata,const Iter fftdata_end,
+                    const HInteger nfreq)
 {
+  // Declaration of variables
   Iter it(ccm);
   Iter it1_start(fftdata);
   Iter it1_end(fftdata+nfreq);
   Iter it1(it1_start);
   Iter it2(it1_end);
-  if (it1>=fftdata_end) return;
-  if (it2>=fftdata_end) return;
-  while (it!=ccm_end) {
-    *it+=(*it1)*conj(*it2);
+
+  // Sanity check
+  if (nfreq <= 0) {
+    throw PyCR::ValueError("nfreq must be larger than 1");
+    return;
+  }
+  if ((it1 < fftdata) || (it1 >= fftdata_end)) {
+    throw PyCR::ValueError("Start iterator outside vector range");
+    return;
+  }
+  if ((it2 < fftdata) || (it2 >= fftdata_end)) {
+    throw PyCR::ValueError("Start iterator outside vector range");
+    return;
+  }
+
+  // Implementation cross-correlation
+  while (it != ccm_end) {
+    *it += (*it1) * conj(*it2);
     ++it; ++it1; ++it2;
-    if (it1==it1_end) {
-      if (it2>=fftdata_end) {
-	it1_start+=nfreq;
-	it1_end+=nfreq;
-	if (it1_end>=fftdata_end) return;
-	it2=it1_end;
+    if (it1 == it1_end) {
+      if (it2 >= fftdata_end) {
+	it1_start += nfreq;
+	it1_end += nfreq;
+	if (it1_end >= fftdata_end) return;
+	it2 = it1_end;
       };
-      it1=it1_start;
+      it1 = it1_start;
     };
   };
 }
@@ -240,7 +257,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
   CasaVector<HNumber> filter = hanning_filter.weights();
   HNumber * it_f(filter.cbegin());
   if (falling) it_f+=width;
-  while (it_v != vec_end) {
+  while ((it_v != vec_end) && (it_f != filter.cend())) {
     *it_v = (typename Iter::value_type) (*it_f)*height+offset;
     it_v++; it_f++;
   };

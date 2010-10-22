@@ -129,17 +129,33 @@ gsl_vector * STL2GSL(const Iter vec, const Iter vec_end) {
 See also: LinearFit
 */
 template <class Iter, class IterI>
-void HFPP_FUNC_NAME(
-		    const Iter vecout, const Iter vecout_end,
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 		    const Iter xvec, const Iter xvec_end,
 		    const IterI powers, const IterI powers_end
 		       )
 {
+  // Decaration of variables
   Iter itout(vecout), itx(xvec);
   IterI itn(powers);
-  if (powers_end<=powers) return;
-  if (vecout_end<=vecout) return;
-  if (xvec_end<=xvec) return;
+  HInteger lenOut = vecout_end - vecout;
+  HInteger lenX   = xvec_end - xvec;;
+  HInteger lenPow = powers_end - powers;
+
+  // Sanity check
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Illegal size of output vector.");
+    return;
+  }
+  if (lenX <= 0) {
+    throw PyCR::ValueError("Illegal size of x vector.");
+    return;
+  }
+  if (lenPow <= 0) {
+    throw PyCR::ValueError("Illegal size of power vector.");
+    return;
+  }
+
+  // Implementation
   while ((itout != vecout_end) && (itx != xvec_end)) {
     switch (*itn) {
     case 0:
@@ -192,30 +208,29 @@ void HFPP_FUNC_NAME(
 		    const HInteger Ncoeffs
 		       )
 {
-  ////gsl_bspline_workspace *bw=(gsl_bspline_workspace*)bwipointer;
-  ////const HInteger Ncoeffs=bw->n;      /* nbreak = ncoeffs + 2 - k = ncoeffs - 2 since k = 4 */
   Iter itout(vecout), itout_end(vecout_end-Ncoeffs+1), itx(xvec);
   gsl_bspline_workspace *bw=gsl_bspline_alloc(4, Ncoeffs-2);
-  //  gsl_bspline_knots_uniform(*xvec, *(xvec_end-1), bw);
   gsl_bspline_knots_uniform(xmin, xmax, bw);
-  //  gsl_vector *B = gsl_vector_alloc(Ncoeffs);
   gsl_vector *B = STL2GSL(itout, itout+Ncoeffs);
-  //  HInteger i;
-  //HNumber Bj;
-  if (vecout_end<=vecout) return;
-  if (xvec_end<=xvec) return;
+  HInteger lenOut = vecout_end - vecout;
+  HInteger lenX   = xvec_end - xvec;
+
+  // Sanity check
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Illegal size of output vector.");
+    return;
+  }
+  if (lenX <= 0) {
+    throw PyCR::ValueError("Illegal size of x vector.");
+    return;
+  }
+
+  // Implementation
   while ((itout < itout_end) && (itx != xvec_end)) {
-    //    B = STL2GSL(itout, itout+Ncoeffs);
     gsl_bspline_eval(*itx, B, bw);
-    // for (i=0; i<Ncoeffs; i++) {
-    //   Bj=gsl_vector_get(B, i);
-    //   *(itout+i)=Bj;
-    // };
     itout+=Ncoeffs; ++itx; B->data=&(*itout);
-    //Bj=gsl_vector_get(B, j)1    delete B;
   };
   gsl_bspline_free(bw);
-  //  gsl_vector_free(B);
   delete B;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -243,15 +258,35 @@ void HFPP_FUNC_NAME(
 		    const Iter coeffs, const Iter coeffs_end
 		    )
 {
+  // Declaration of variables
   HInteger Ncoeffs(coeffs_end-coeffs);      /* nbreak = ncoeffs + 2 - k = ncoeffs - 2 since k = 4 */
   Iter itout(vecout), itx(xvec), itx_end(itx+Ncoeffs);
   Iter coeffs2(coeffs),  coeffs_end2(coeffs_end);
-  if (vecout_end<=vecout) return;
-  if (xvec_end<=xvec) return;
+  HInteger lenOut    = vecout_end - vecout;
+  HInteger lenX      = xvec_end - xvec;
+  HInteger lenCoeffs = coeffs_end - coeffs;
+
+  // Sanity check
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Illegal size of output vector.");
+    return;
+  }
+  if (lenX <= 0) {
+    throw PyCR::ValueError("Illegal size of x vector.");
+    return;
+  }
+  if (lenCoeffs <= 0) {
+    throw PyCR::ValueError("Illegal size of coefficients vector.");
+    return;
+  }
+  if (lenCoeffs*lenOut != lenX) {
+    throw PyCR::ValueError("vector sizes do not match: Vector lengths should be l(x) = l(coeffs)*l(out).");
+    return;
+  }
+
+  // Implementation
   while ((itout < vecout_end) && (itx_end < xvec_end)) {
     *itout=PyCR::Array::hMulSum(itx,itx_end,coeffs2,coeffs_end2);
-    //    *itout=PyCR::Array::hMulSum(&(*itx),&(*itx_end),&(*coeffs2),&(*coeffs_end2));
-    //    PyCR::Array::hMulSum(itx,itx_end,coeffs2,coeffs_end2,*itout);
     ++itout; itx=itx_end; itx_end+=Ncoeffs;
   };
 }
@@ -288,11 +323,41 @@ void HFPP_FUNC_NAME(
 		    const IterI powers, const IterI powers_end
 		       )
 {
+  // Declaration of variables
   Iter itout(vecout), itx(xvec);
   IterI itn(powers); Iter itc(coeff);
-  if (powers_end<=powers) return;
-  if (vecout_end<=vecout) return;
-  if (xvec_end<=xvec) return;
+  HInteger lenOut   = vecout_end - vecout;
+  HInteger lenX     = xvec_end - xvec;
+  HInteger lenCoeff = coeff_end - coeff;
+  HInteger lenPow   = powers_end - powers;
+
+  // Sanity check
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Illegal size of output vector.");
+    return;
+  }
+  if (lenX <= 0) {
+    throw PyCR::ValueError("Illegal size of x vector.");
+    return;
+  }
+  if (lenOut != lenX) {
+    throw PyCR::ValueError("Output vector has different size than x vector.");
+    return;
+  }
+  if (lenCoeff <= 0) {
+    throw PyCR::ValueError("Illegal size of coefficients vector.");
+    return;
+  }
+  if (lenPow <= 0) {
+    throw PyCR::ValueError("Illegal size of power vector.");
+    return;
+  }
+  if (lenPow != lenCoeff) {
+    throw PyCR::ValueError("Power vector has different size than coefficients vector.");
+    return;
+  }
+
+  // Implementation
   while ((itout != vecout_end) && (itx != xvec_end)) {
     switch (*itn) {
     case 0:
@@ -339,11 +404,37 @@ void HFPP_FUNC_NAME(
 		    const Iter vecin, const Iter vecin_end
 		    )
 {
+  // Declaration of variables
   Iter itout(vecout), itin(vecin);
-  while ((itout != vecout_end) && (itin != vecin_end)) {
-    *itout = 1/((*itin) * (*itin));
-    ++itout; ++itin;
-  };
+  HInteger lenOut = vecout_end - vecout;
+  HInteger lenIn  = vecin_end - vecin;
+
+  // Sanity check
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Illegal size of output vector.");
+    return;
+  }
+  if (lenIn <= 0) {
+    throw PyCR::ValueError("Illegal size of input vector.");
+    return;
+  }
+  if (lenIn != lenOut) {
+    throw PyCR::ValueError("Output vector has different size than input vector.");
+    return;
+  }
+
+  // Implementation
+  try {
+    while ((itout != vecout_end) && (itin != vecin_end)) {
+      *itout = 1/((*itin) * (*itin));
+      ++itout; ++itin;
+    };
+  }
+  catch (HNumber i) { // IterValueType does not seem to work???
+    if (abs(i) < A_LOW_NUMBER) {
+      throw PyCR::ZeroDivisionError("Division by zero");
+    }
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -378,19 +469,25 @@ HNumber HFPP_FUNC_NAME(
 {
   HInteger Ndata(yvec_end-yvec);  // Number of data points to fit
   HInteger Ncoeff(vecout_end-vecout);
+  HInteger lenX = xvec_end-xvec;
+  HInteger lenW = wvec_end-wvec;
+  HInteger lenCov = veccov_end - veccov;
   HInteger error;
   double chisq;
   gsl_matrix *X, *cov;
   gsl_vector *y, *w, *c;
-  if ((wvec_end-wvec)!=Ndata) {
+  if (lenW != Ndata) {
+    throw PyCR::ValueError("Weight vector has different size than data vector.");
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": weights vector has wrong size! len(wvec)=" << (wvec_end-wvec)  <<  ", should be = " << Ndata << ". Ndata=" << Ndata);
     return -1.0;
   };
-  if ((xvec_end-xvec)!=(Ndata*Ncoeff)) {
+  if (lenX != (Ndata*Ncoeff)) {
+    throw PyCR::ValueError("X vector size does not match: Vector length should be l(x) = l(coeff)*l(data).");
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": X input matrix vector has wrong size! len(xvec)=" << (xvec_end-xvec)  <<  ", should be = " << Ndata*Ncoeff << ". Ndata=" << Ndata << ", Ncoeff=" << Ncoeff);
     return -1.0;
   };
-  if ((veccov_end-veccov)!=(Ncoeff*Ncoeff)) {
+  if (lenCov != (Ncoeff*Ncoeff)) {
+    throw PyCR::ValueError("vector sizes do not match: Vector lengths should be l(cov) = l(coeff)*l(coeff).");
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Covariance matrix vector has wrong size! len(veccov)=" << (veccov_end-veccov)  <<  ", should be = " << Ncoeff*Ncoeff << ". Ncoeff=" << Ncoeff);
     return -1.0;
   };
@@ -447,17 +544,22 @@ HNumber HFPP_FUNC_NAME(
 		    const HInteger ndata
 		    )
 {
+  HInteger lenX = xvec_end - xvec;
+  HInteger lenCov = veccov_end - veccov;
   HInteger Ndata(yvec_end-yvec);  // Number of data points to fit
   HInteger Ncoeff(vecout_end-vecout);
   HInteger error;
   double chisq;
   gsl_matrix *X, *cov;
   gsl_vector *y, *c;
-  if ((xvec_end-xvec)!=(Ndata*Ncoeff)) {
+
+  if (lenX != (Ndata*Ncoeff)) {
+    throw PyCR::ValueError("vector sizes do not match: Vector lengths should be l(x) = l(coeffs)*l(data).");
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": X input matrix vector has wrong size! len(xvec)=" << (xvec_end-xvec)  <<  ", should be = " << Ndata*Ncoeff << ". Ndata=" << Ndata << ", Ncoeff=" << Ncoeff);
     return -1.0;
   };
-  if ((veccov_end-veccov)!=(Ncoeff*Ncoeff)) {
+  if (lenCov != (Ncoeff*Ncoeff)) {
+    throw PyCR::ValueError("vector sizes do not match: Vector lengths should be l(cov) = l(coeffs)*l(coeffs).");
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Covariance matrix vector has wrong size! len(veccov)=" << (veccov_end-veccov)  <<  ", should be = " << Ncoeff*Ncoeff << ". Ncoeff=" << Ncoeff);
     return -1.0;
   };
@@ -518,6 +620,8 @@ HNumber HFPP_FUNC_NAME(
 {
   HInteger Ndata(yvec_end-yvec);  // Number of data points to fit
   HInteger Ncoeffs(vecout_end-vecout);
+  HInteger lenXMatrix = xmatrix_end - xmatrix;
+  HInteger lenCov = veccov_end - veccov;
   HInteger Nbreak(Ncoeffs-2);      /* nbreak = ncoeffs + 2 - k = ncoeffs - 2 since k = 4 */
   HInteger error;
   double chisq;
@@ -525,11 +629,13 @@ HNumber HFPP_FUNC_NAME(
   gsl_vector *y, *c;
 
 
-  if ((xmatrix_end-xmatrix)!=(Ndata*Ncoeffs)) {
+  if (lenXMatrix != (Ndata*Ncoeffs)) {
+    throw PyCR::ValueError("vector sizes do not match: Vector lengths should be l(xMatrix) = l(coeffs)*l(data).");
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": X input matrix vector has wrong size! len(xmatrix)=" << (xmatrix_end-xmatrix)  <<  ", should be = " << Ndata*Ncoeffs << ". Ndata=" << Ndata << ", Ncoeffs=" << Ncoeffs);
     return -1.0;
   };
-  if ((veccov_end-veccov)!=(Ncoeffs*Ncoeffs)) {
+  if (lenCov != (Ncoeffs*Ncoeffs)) {
+    throw PyCR::ValueError("vector sizes do not match: Vector lengths should be l(cov) = l(coeffs)*l(coeffs).");
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Covariance matrix vector has wrong size! len(veccov)=" << (veccov_end-veccov)  <<  ", should be = " << Ncoeffs*Ncoeffs << ". Ncoeffs=" << Ncoeffs);
     return -1.0;
   };

@@ -101,64 +101,6 @@ inline T HFPP_FUNC_NAME(T val)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Returns the interferometer phase in radians for a given frequency and time.
-//$COPY_TO HFILE START ---------------------------------------------------
-#define HFPP_FUNC_NAME hPhase
-//------------------------------------------------------------------------
-#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(frequency)()("Frequency in Hz")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_1 (HNumber)(time)()("Time in seconds")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-//$COPY_TO END --------------------------------------------------
-/*!
- \brief $DOCSTRING
- $PARDOCSTRING
-*/
-HNumber HFPP_FUNC_NAME(HNumber frequency, HNumber time)
-{
-  return CR::_2pi*frequency*time;
-}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-
-
-//$DOCSTRING: Coverts a real phase and amplitude to a complex number
-//$COPY_TO HFILE START ---------------------------------------------------
-#define HFPP_FUNC_NAME hAmplitudePhaseToComplex
-//------------------------------------------------------------------------
-#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNCDEF  (HComplex)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(amplitude)()("Amplitude of complex number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_1 (HNumber)(phase)()("Phase of complex number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-//$COPY_TO END --------------------------------------------------
-/*!
- \brief $DOCSTRING
- $PARDOCSTRING
-*/
-HComplex HFPP_FUNC_NAME(HNumber amplitude, HNumber phase)
-{
-  return amplitude*exp(HComplex(0.0,phase));
-}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-//$DOCSTRING: Coverts a real phase to a complex number (with amplitude of unity)
-//$COPY_TO HFILE START ---------------------------------------------------
-#define HFPP_FUNC_NAME hPhaseToComplex
-//------------------------------------------------------------------------
-#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNCDEF  (HComplex)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(phase)()("Phase of complex number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-//$COPY_TO END --------------------------------------------------
-/*!
- \brief $DOCSTRING
- $PARDOCSTRING
-*/
-HComplex HFPP_FUNC_NAME(HNumber phase)
-{
-  return exp(HComplex(0.0,phase));
-}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
 
 //$DOCSTRING: Implementation of the Gauss function.
 //$COPY_TO HFILE START ---------------------------------------------------
@@ -344,8 +286,18 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 template <class Iter>
 void h{$MFUNC!CAPS}2(const Iter vecout,const Iter vecout_end, const Iter vecin,const Iter vecin_end)
 {
+  // Declaration of variables
   Iter itin=vecin;
   Iter itout=vecout;
+  HInteger lenIn = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenIn != lenOut) {
+    throw PyCR::ValueError("In- and output vectors are not of equal length.");
+  }
+
+  // Vector operation
   while ((itin!=vecin_end) && (itout !=vecout_end)) {
     *itout=$MFUNC(*itin);
     ++itin; ++itout;
@@ -406,8 +358,18 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 template <class IterOut, class IterIn>
 void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterIn vecin, const IterIn vecin_end)
 {
+  // Declaration of variables
   IterIn itin=vecin;
   IterOut itout=vecout;
+  HInteger lenIn = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenIn != lenOut) {
+    throw PyCR::ValueError("In- and output vectors are not of equal length.");
+  }
+
+  // Vector operation
   while ((itin != vecin_end) && (itout != vecout_end)) {
     *itout=$MFUNC(*itin);
     ++itin; ++itout;
@@ -450,9 +412,21 @@ void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterI
 template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,const Iter vec2_end)
 {
+  // Declaration of variables
   typedef IterValueType T;
   Iterin it1=vec1;
   Iter it2=vec2;
+  HInteger len1 = vec1_end - vec1;
+  HInteger len2 = vec2_end - vec2;
+
+  // Sanity check
+  if (len1 < len2) {
+    cout << "Warning: input vector is smaller than output vector: looping over input vector" << endl;
+  } else if (len1 > len2) {
+    throw PyCR::ValueError("Input vector is larger than output vector.");
+  }
+
+  // Vector operation
   while (it2!=vec2_end) {
     *it2 =  hfcast<T>(*it1 HFPP_OPERATOR_$MFUNC (*it2));
     ++it1; ++it2;
@@ -488,9 +462,21 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end)
 {
+  // Declaration of variables
   typedef IterValueType T;
   Iter it1=vec1;
   Iterin it2=vec2;
+  HInteger len1 = vec1_end - vec1;
+  HInteger len2 = vec2_end - vec2;
+
+  // Sanity check
+  if (len2 < len1) {
+    cout << "Warning: 2nd vector is smaller than 1st vector: looping over 2nd vector" << endl;
+  } else if (len2 > len1) {
+    throw PyCR::ValueError("2nd vector is larger than 1st vector.");
+  }
+
+  // Vector operation
   while (it1!=vec1_end) {
     *it1 =  hfcast<T>(*it1 HFPP_OPERATOR_$MFUNC (*it2));
     ++it1; ++it2;
@@ -540,11 +526,29 @@ void h{$MFUNC}2(const Iter vec1,const Iter vec1_end, S val)
 template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
 {
+  // Declaration of variables
   typedef IterValueType T;
   Iterin1 it1=vec1;
   Iterin2 it2=vec2;
   Iter itout=vec;
-  while ((it1!=vec1_end)  && (itout !=vec_end)) {
+
+  HInteger lenOut = vec_end - vec;
+  HInteger len1 = vec1_end - vec1;
+  HInteger len2 = vec2_end - vec2;
+
+  // Sanity check
+  if (lenOut != len1) {
+    throw PyCR::ValueError("Size of output vector differs from size of 1st operand vector.");
+  } else {
+    if (len2 < len1) {
+      cout << "Warning: 2nd operand vector is smaller than 1st operand vector: looping over 2nd operand vector." << endl;
+    } else if (len2 > len1) {
+      throw PyCR::ValueError("2nd operand vector is larger than 1st operand vector.");
+    }
+  }
+
+  // Vector operation
+  while ((it1 != vec1_end) && (itout != vec_end)) {
     *itout = hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
     ++it1; ++it2; ++itout;
     if (it2==vec2_end) it2=vec2;
@@ -578,10 +582,28 @@ To loop over the second argument (i.e., vec1) use hMulAdd2, hDivAdd2, HSubAdd2, 
 template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
 {
+  // Declaration of variables
   typedef IterValueType T;
   Iterin1 it1=vec1;
   Iterin2 it2=vec2;
   Iter itout=vec;
+
+  HInteger lenOut = vec_end - vec;
+  HInteger len1 = vec1_end - vec1;
+  HInteger len2 = vec2_end - vec2;
+
+  // Sanity check
+  if (lenOut != len1) {
+    throw PyCR::ValueError("Size of output vector differs from size of 1st operand vector.");
+  } else {
+    if (len2 < len1) {
+      cout << "Warning: 2nd operand vector is smaller than 1st operand vector: looping over 2nd operand vector." << endl;
+    } else if (len2 > len1) {
+      throw PyCR::ValueError("2nd operand vector is larger than 1st operand vector.");
+    }
+  }
+
+  // Vector operation
   while ((it1!=vec1_end)  && (itout !=vec_end)) {
     *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
     ++it1; ++it2; ++itout;
@@ -616,10 +638,28 @@ To loop over the first argument (i.e., vec) use hMulAdd, hDivAdd, HSubAdd, hAddA
 template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
 {
+  // Declaration of variables
   typedef IterValueType T;
   Iterin1 it1=vec1;
   Iterin2 it2=vec2;
   Iter itout=vec;
+
+  HInteger lenOut = vec_end - vec;
+  HInteger len1 = vec1_end - vec1;
+  HInteger len2 = vec2_end - vec2;
+
+  // Sanity check
+  if (lenOut != len1) {
+    throw PyCR::ValueError("Size of output vector differs from size of 1st operand vector.");
+  } else {
+    if (len2 < len1) {
+      cout << "Warning: 2nd operand vector is smaller than 1st operand vector: looping over 2nd operand vector." << endl;
+    } else if (len2 > len1) {
+      throw PyCR::ValueError("2nd operand vector is larger than 1st operand vector.");
+    }
+  }
+
+  // Vector operation
   while ((it1!=vec1_end)) {
     *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
     ++it1; ++it2; ++itout;
@@ -707,8 +747,20 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 		    const Iter vecpar, const Iter vecpar_end) {
+  // Declaration of variables
   Iter it = vec;
   Iter it_par = vecpar;
+  HInteger lenIO  = vec_end - vec;
+  HInteger lenPar = vecpar_end - vecpar;
+
+  // Sanity check
+  if (lenPar < lenIO) {
+    cout << "Size of parameter vector is smaller than size of input/output vector: looping over parameter vector." << endl;
+  } else if (lenPar > lenIO) {
+    throw PyCR::ValueError("Size of parameter vector is larger than size of input/output vector.");
+  }
+
+  // Vector operation
   while (it != vec_end) {
     *it = $MFUNC!LOW(*it, *it_par);
     ++it; ++it_par;
@@ -739,8 +791,20 @@ template <class Iter>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 		    const Iter vecin, const Iter vecin_end,
 		    const HNumber scalar) {
+  // Declaration of variables
   Iter it_in = vecin;
   Iter it_out = vecout;
+  HInteger lenIn = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenIn < lenOut) {
+    cout << "Input vector is smaller than output vector: looping over input vector." << endl;
+  } else if (lenIn > lenOut) {
+    throw PyCR::ValueError("Input vector is larger than output vector.");
+  }
+
+  // Vector operation
   while ((it_in != vecin_end) && (it_out != vecout_end)) {
     *it_out = $MFUNC!LOW(*it_in, scalar);
     ++it_out; ++it_in;
@@ -772,9 +836,26 @@ template <class Iter>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 		    const Iter vecin, const Iter vecin_end,
 		    const Iter vecpar, const Iter vecpar_end) {
+  // Declaration of variables
   Iter it_in = vecin;
   Iter it_out = vecout;
   Iter it_par = vecpar;
+  HInteger lenIn = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+  HInteger lenPar = vecpar_end - vecpar;
+
+  // Sanity check
+  if (lenIn != lenOut) {
+    throw PyCR::ValueError("Input and output vectors are not of the same size.");
+  } else {
+    if (lenPar < lenIn) {
+      cout << "Size of parameter vector is smaller than size of input vector: looping over parameter vector." << endl;
+    } else if (lenPar > lenIn) {
+      throw PyCR::ValueError("Size of parameter vector is larger than size of input vector.");
+    }
+  }
+
+  // Vector operation
   while ((it_in != vecin_end) && (it_out != vecout_end)) {
     *it_out = $MFUNC!LOW(*it_in, *it_par);
     ++it_in; ++it_out; ++it_par;
@@ -793,6 +874,43 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 //
 // ========================================================================
 
+//$DOCSTRING: Returns the interferometer phase in radians for a given frequency and time.
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME hPhase
+//------------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(frequency)()("Frequency in Hz")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HNumber)(time)()("Time in seconds")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+HNumber HFPP_FUNC_NAME(HNumber frequency, HNumber time)
+{
+  return CR::_2pi*frequency*time;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Coverts a real phase to a complex number (with amplitude of unity)
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME hPhaseToComplex
+//------------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HComplex)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(phase)()("Phase of complex number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+HComplex HFPP_FUNC_NAME(HNumber phase)
+{
+  return exp(HComplex(0.0,phase));
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 //$DOCSTRING: Coverts a vector of real phase to a vector of corresponding complex numbers (with amplitude of unity).
@@ -816,9 +934,22 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 template <class Iter1,class Iter2>
 void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 phasevec, const Iter2 phasevec_end)
 {
+  // Declaraion of variables
   Iter1 it1=vec;
   Iter2 it2=phasevec;
-  if (it2>=phasevec_end) return;
+  HInteger lenOut = vec_end - vec;
+  HInteger lenPhase = phasevec_end - phasevec;
+
+  // Sanity check
+  if (lenPhase < lenOut) {
+    cout << "Size of phase vector is smaller than output vector: looping over phase vector." << endl;
+  } else if (lenPhase > lenOut) {
+    throw PyCR::ValueError("Phase vector is larger than output vector.");
+  } else if (lenPhase <= 0) {
+    throw PyCR::ValueError("Illegal size of phase vector");
+  }
+
+  // Vector operation
   while (it1!=vec_end) {
     *it1=hPhaseToComplex(*it2);
     ++it1;
@@ -826,6 +957,27 @@ void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 phasevec,
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Coverts a real phase and amplitude to a complex number
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME hAmplitudePhaseToComplex
+//------------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HComplex)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(amplitude)()("Amplitude of complex number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HNumber)(phase)()("Phase of complex number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+HComplex HFPP_FUNC_NAME(HNumber amplitude, HNumber phase)
+{
+  return amplitude*exp(HComplex(0.0,phase));
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Coverts a vector of real phases and amplitudes to a vector of corresponding complex numbers.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -846,10 +998,27 @@ void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 phasevec,
 
 */
 template <class Iter1,class Iter2>
-void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 ampphase, const Iter2 ampphase_end)
+void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end,
+                     const Iter2 ampphase, const Iter2 ampphase_end)
 {
+  // Variables
   Iter1 it1=vec;
   Iter2 it2=ampphase;
+  HInteger lenOut = vec_end - vec;
+  HInteger lenAP = ampphase_end - ampphase;
+
+  // Sanity check
+  if (hfodd(lenAP)) {
+    throw PyCR::ValueError("AmplitudePhase vector has wrong size. Total number of elements is not even.");
+    return;
+  } else {
+    if (lenAP/2 < lenOut) {
+      cout << "Size of AmplitudePhase vector is smaller than output vector: looping over AmplitudePhase vector." << endl;
+    } else if (lenAP/2 > lenOut) {
+      throw PyCR::ValueError("AmplitudePhase vector is too large for output vector.");
+    }
+  }
+
   if (it2+1>=ampphase_end) return;
   while (it1!=vec_end) {
     *it1=hAmplitudePhaseToComplex(*it2,*it2+1);
@@ -915,8 +1084,21 @@ void  HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec2_end)
 {
+  // Declaration of variables
   Iter it1=vec1;
   Iter it2=vec2;
+  HInteger len1 = vec1_end - vec1;
+  HInteger len2 = vec2_end - vec2;
+
+  // Sanity check
+  if (len2 < len1) {
+    cout << "Size of second vector is smaller than output vector: looping over second vector." << endl;
+  } else if (len2 > len1) {
+    throw PyCR::ValueError("Second vector is larger than output vector.");
+    return;
+  }
+
+  // Vector operation
   while (it1!=vec1_end) {
     *it1 *= conj(*it2);
     ++it1; ++it2;
@@ -962,10 +1144,28 @@ complex numbers:
 template <class Iter, class IterIn>
 void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end, const IterIn vecin, const IterIn vecin_end)
 {
+  // Declaration of variables
   IterIn itin(vecin);
   Iter itout(vecout);
-  if (itout >= vecout_end) return;
-  if (itin >= vecin_end) return;
+  HInteger lenIn = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenIn < 0) {
+    throw PyCR::ValueError("Illegal size of input vector (<=0).");
+    return;
+  }
+  if (lenOut < 0) {
+    throw PyCR::ValueError("Illegal size of output vector (<=0).");
+    return;
+  }
+  if (lenIn < lenOut) {
+    cout << "Size of input vector is smaller than output vector: looping over input vector." << endl;
+  } else if (lenIn > lenOut) {
+    throw PyCR::ValueError("Input vector is larger than output vector.");
+  }
+
+  // Vector operation
   while (itout != vecout_end) {
     *itout=(IterValueType)$MFUNC(*itin);
     ++itin; ++itout;
@@ -1004,8 +1204,17 @@ complex numbers:
 template <class Iter>
 void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end)
 {
+  // Declaration of variables
   Iter itout(vecout);
-  if (itout >= vecout_end) return;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Illegal size of input/output vector (<=0).");
+    return;
+  }
+
+  // Vector operation
   while (itout != vecout_end) {
     *itout=$MFUNC(*itout);
     ++itout;
@@ -1038,12 +1247,36 @@ void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end)
 template <class IterOut, class IterIn>
 void HFPP_FUNC_NAME (const IterOut vecout,const IterOut vecout_end, const IterIn vecin, const IterIn vecin_end)
 {
+  // Declaration of variables
   IterIn itin(vecin);
   IterOut itout(vecout);
-  if (itout >= vecout_end) return;
-  if (itin >= vecin_end) return;
+  HInteger lenIn = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenIn <= 0) {
+    throw PyCR::ValueError("Illegal size of input vector (<=0).");
+    return;
+  }
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Illegal size of output vector (<=0).");
+    return;
+  }
+  if (lenIn < lenOut) {
+    cout << "Size of input vector is smaller than output vector: looping over input vector." << endl;
+  } else if (lenIn > lenOut) {
+    throw PyCR::ValueError("Input vector is larger than output vector.");
+  }
+
+  // Vector operation
   while (itout != vecout_end) {
-    *itout *= (*itin)/abs(*itout);
+    try {
+      *itout *= (*itin)/abs(*itout);
+    }
+    catch (typename IterOut::value_type i) {
+      if (abs(i) < A_LOW_NUMBER)
+        cerr << "Division by zero" << endl;
+    }
     ++itin; ++itout;
     if (itin == vecin_end) itin=vecin;
   };
@@ -1069,10 +1302,25 @@ void HFPP_FUNC_NAME (const IterOut vecout,const IterOut vecout_end, const IterIn
 template <class IterOut, class Iter>
 void HFPP_FUNC_NAME (const IterOut vecout,const IterOut vecout_end, Iter amp)
 {
+  // Declaration of variables
   IterOut itout(vecout);
-  if (itout >= vecout_end) return;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Illegal size of output vector (<=0).");
+    return;
+  }
+
+  // Vector operation
   while (itout != vecout_end) {
-    *itout *= amp/abs(*itout);
+    try {
+      *itout *= amp/abs(*itout);
+    }
+    catch (typename IterOut::value_type i){
+      if (abs(i) < A_LOW_NUMBER)
+        cerr << "Division by zero" << endl;
+    }
     ++itout;
   };
 }
@@ -1120,7 +1368,10 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
   typedef IterValueType T;
   T sum=hfnull<T>();
   Iter it=vec;
-  while (it!=vec_end) {sum+=*it; ++it;};
+  while (it!=vec_end) {
+    sum+=*it;
+    ++it;
+  };
   return sum;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1142,7 +1393,10 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
   typedef IterValueType T;
   T sum=hfnull<T>();
   Iter it=vec;
-  while (it!=vec_end) {sum+=abs(*it); ++it;};
+  while (it!=vec_end) {
+    sum+=abs(*it);
+    ++it;
+  };
   return sum;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1156,7 +1410,7 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
- $PARDOCSTRING
+  $PARDOCSTRING
 */
 template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
@@ -1164,7 +1418,10 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
   typedef IterValueType T;
   T sum=hfnull<T>();
   Iter it=vec;
-  while (it!=vec_end) {sum+=(*it)*(*it); ++it;};
+  while (it!=vec_end) {
+    sum+=(*it)*(*it);
+    ++it;
+  };
   return sum;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1209,12 +1466,19 @@ template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vecin1, const Iter vecin1_end,
 			      const Iter vecin2, const Iter vecin2_end)
 {
+  // Declaration of variables
   IterValueType dotProduct(0.);
-  if ( (vecin1_end-vecin1) == (vecin2_end-vecin2)) {
-    dotProduct = hMulSum(vecin1, vecin1_end, vecin2, vecin2_end);
-  } else {
-    printf("ERROR: Input vectors are not of equal length.");
+  HInteger len1 = vecin1_end - vecin1;
+  HInteger len2 = vecin2_end - vecin2;
+
+  // Sanity check
+  if (len1 != len2) {
+    throw PyCR::ValueError("Input vectors not of equal size.");
+    return 0.;
   }
+
+  // Vector operation
+  dotProduct = hMulSum(vecin1, vecin1_end, vecin2, vecin2_end);
 
   return dotProduct;
 }
@@ -1243,17 +1507,32 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
 		     const Iter vecin1, const Iter vecin1_end,
 		     const Iter vecin2, const Iter vecin2_end)
 {
-  uint dimout = vecout_end - vecout;
-  uint dimin1 = vecin1_end - vecin1;
-  uint dimin2 = vecin2_end - vecin2;
-  Iter itout(vecout), itin1(vecin1), itin2(vecin2);
-  if ((dimout==3) && (dimin1==3) && (dimin2==3)) {
-    *(itout)   = *(itin1+1) * *(itin2+2) - *(itin1+2) * *(itin2+1);
-    *(itout+1) = *(itin1+2) * *(itin2)   - *(itin1)   * *(itin2+2);
-    *(itout+2) = *(itin1)   * *(itin2+1) - *(itin1+1) * *(itin2);
-  } else {
-    printf("ERROR: At least one of the input and/or output vectors is not 3-dimensional.");
+  // Declaration of variables
+  Iter itout(vecout);
+  Iter itin1(vecin1);
+  Iter itin2(vecin2);
+  HInteger lenIn1 = vecin1_end - vecin1;
+  HInteger lenIn2 = vecin2_end - vecin2;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenIn1 != 3) {
+    throw PyCR::ValueError("First input vector is not of length 3.");
+    return;
   }
+  if (lenIn2 != 3) {
+    throw PyCR::ValueError("Second input vector is not of length 3.");
+    return;
+  }
+  if (lenOut != 3) {
+    throw PyCR::ValueError("Output vector is not of length 3.");
+    return;
+  }
+
+  // Vector operation
+  *(itout)   = *(itin1+1) * *(itin2+2) - *(itin1+2) * *(itin2+1);
+  *(itout+1) = *(itin1+2) * *(itin2)   - *(itin1)   * *(itin2+2);
+  *(itout+2) = *(itin1)   * *(itin2+1) - *(itin1+1) * *(itin2);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1266,7 +1545,6 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
 //
 // ========================================================================
 
-// Maybe better to put in separate module
 
 //========================================================================
 //$SECTION:           Statistics Functions
@@ -1319,8 +1597,19 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType minim
 template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
-  HNumber mean=hSum(vec,vec_end);
-  if (vec_end>vec) mean/=(vec_end-vec);
+  // Declaration of variables
+  HNumber mean = hSum(vec,vec_end);
+  HInteger len = vec_end - vec;
+
+  // Sanity check
+  if (len <= 0) {
+    throw PyCR::ValueError("Size of vector is <= 0.");
+    return 0.;
+  }
+
+  // Vector operation
+  mean /= len;
+
   return mean;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1340,8 +1629,19 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
+  // Declaration of variables
   HNumber mean=hSumAbs(vec,vec_end);
-  if (vec_end>vec) mean/=(vec_end-vec);
+  HInteger len = vec_end - vec;
+
+  // Sanity check
+  if (len <= 0) {
+    throw PyCR::ValueError("Size of vector is <= 0.");
+    return 0.;
+  }
+
+  // Vector operation
+  mean /= len;
+
   return mean;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1361,8 +1661,19 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
+  // Declaration of variables
   HNumber mean=hSumSquare(vec,vec_end);
-  if (vec_end>vec) mean/=(vec_end-vec);
+  HInteger len = vec_end - vec;
+
+  // Sanity check
+  if (len <= 0) {
+    throw PyCR::ValueError("Size of vector is <= 0.");
+    return 0.;
+  }
+
+  // Vector operation
+  mean /= len;
+
   return mean;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1464,8 +1775,10 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType m
     sum += scrt * scrt;
     ++it;
   };
-  if (len>1) return sqrt(sum / (len-1));
-  else return sqrt(sum);
+  if (len>1)
+    return sqrt(sum / (len-1));
+  else
+    return sqrt(sum);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1493,15 +1806,19 @@ HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, const IterValueType 
   Iter it(vec);
   IterValueType sum(0),extremum(*it);
   HInteger n(0);
-  while (it<vec_end) {
+  while (it != vec_end) {
     if (*it HFPP_OPERATOR_$MFUNC extremum) extremum = *it;
     if (*it HFPP_OPERATOR_$MFUNC threshold) {
       sum += *it; ++n;
     };
     ++it;
   };
-  if (n>0) return sum/n;
-  else return extremum;
+
+  if (n > 0) {
+    return sum/n;
+  } else {
+    return extremum;
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1530,8 +1847,13 @@ HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, const IterValueType 
 template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, HNumber mean, HNumber rms, HNumber nsigma)
 {
-  if (nsigma>=0) return hMeanLessThanThreshold(vec,vec_end,(IterValueType)(mean+nsigma*rms));
-  else return hMeanGreaterThanThreshold(vec,vec_end,(IterValueType)(mean+nsigma*rms));
+  IterValueType threshold = mean + nsigma * rms;
+
+  if (nsigma >= 0) {
+    return hMeanLessThanThreshold(vec, vec_end, threshold);
+  } else {
+    return hMeanGreaterThanThreshold(vec, vec_end, threshold);
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1562,8 +1884,23 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
   typedef IterValueType T;
   T sum(hfnull<T>());
   Iter it(vec);
-  while (it!=vec_end) {sum+=1.0/(*it); ++it;};
-  return (vec_end-vec)/sum;
+
+  while (it!=vec_end) {
+    try {
+      sum+=1.0/(*it);
+    }
+    catch (T i) {
+      if (abs(i) < A_LOW_NUMBER)
+        cerr << "Division by zero" << endl;
+    }
+    ++it;
+  };
+
+  if (sum > 0.) {
+    return (vec_end-vec)/sum;
+  } else {
+    return 0.;
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1613,11 +1950,22 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 			 const IterValueType lower_limit,
 			 const IterValueType upper_limit)
 {
-  Iter itin=vecin;
+  // Declaration of variables
+  Iter itin = vecin;
   typename vector<HInteger>::iterator itout=vecout;
-  while (itin<vecin_end) {
+  HInteger lenIn = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenIn != lenOut) {
+    throw PyCR::ValueError("Input and output vectors are not of the same size.");
+    return 0.;
+  }
+
+  // Function operation
+  while (itin != vecin_end) {
     if ({$MFUNC}(*itin,lower_limit,upper_limit)) {
-      if (itout < vecout_end) {
+      if (itout != vecout_end) {
 	*itout=(itin-vecin);
 	++itout;
       };
@@ -1654,11 +2002,22 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 			 const IterValueType threshold
 			 )
 {
+  // Declaration of variables
   Iter itin=vecin;
   typename vector<HInteger>::iterator itout=vecout;
-  while (itin<vecin_end) {
+  HInteger lenIn = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenIn != lenOut) {
+    throw PyCR::ValueError("Input and output vectors are not of the same size.");
+    return 0.;
+  }
+
+  // Function operation
+  while (itin != vecin_end) {
     if (*itin HFPP_OPERATOR_$MFUNC threshold) {
-      if (itout < vecout_end) {
+      if (itout != vecout_end) {
 	*itout=(itin-vecin);
 	++itout;
       };
@@ -1689,11 +2048,22 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 			 const IterValueType threshold
 			 )
 {
+  // Declaration of variables
   Iter itin=vecin;
   typename vector<HInteger>::iterator itout=vecout;
-  while (itin<vecin_end) {
+  HInteger lenIn = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+
+  // Sanity check
+  if (lenIn != lenOut) {
+    throw PyCR::ValueError("Input and output vectors are not of the same size.");
+    return 0.;
+  }
+
+  // Function operation
+  while (itin != vecin_end) {
     if (abs(*itin) HFPP_OPERATOR_$MFUNC threshold) {
-      if (itout < vecout_end) {
+      if (itout != vecout_end) {
 	*itout=(itin-vecin);
 	++itout;
       };
@@ -1791,25 +2161,33 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
 */
 
 template <class Iter>
-void HFPP_FUNC_NAME (const Iter vecout,
-		     const Iter vecout_end,
-		     const Iter vecin,
-		     const Iter vecin_end
-		     )
+void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
+		     const Iter vecin, const Iter vecin_end)
 {
-  if (vecout>=vecout_end) return; //If size 0 do nothing
-  if (vecin>=vecin_end) return; //If size 0 do nothing
-  HInteger ilen=(vecin_end-vecin);
-  HInteger olen=(vecout_end-vecout);
-  HNumber blen=max(((HNumber)ilen)/((HNumber)olen),1.0);
+  // Declaration of variables
+  HInteger lenIn = vecin_end-vecin;
+  HInteger lenOut = vecout_end-vecout;
+  HNumber blen;
   HInteger nblock(1);
-  //use max to avoid infinite loops if output vector is too large
   Iter it1=vecin, it2;
   Iter itout=vecout, itout_end=vecout_end-1;
+
+  // Sanity check
+  if (lenIn <= 0) {
+    throw PyCR::ValueError("Size of input vector <= 0.");
+    return;
+  }
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Size of output vector <= 0.");
+    return;
+  }
+
+  blen = max((((HNumber)lenIn)/((HNumber)lenOut)),1.0);
+  //use max to avoid infinite loops if output vector is too large
   //only produce the first N-1 blocks in the output vector
   while ((it1<vecin_end) && (itout<itout_end)) {
     //    it2=min(it1+blen,vecin_end);
-    it2=vecin+hfmin((HInteger)(nblock*blen),ilen);
+    it2=vecin+hfmin((HInteger)(nblock*blen),lenIn);
     *itout=hMean(it1,it2);
     it1=it2;
     ++itout; ++nblock;
@@ -1821,7 +2199,7 @@ void HFPP_FUNC_NAME (const Iter vecout,
 
 
 
-//$DOCSTRING: Downsample the input vector by a cetain factor and return a new vector.
+//$DOCSTRING: Downsample the input vector by a certain factor and return a new vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDownsample
 //-----------------------------------------------------------------------
@@ -1880,19 +2258,25 @@ v.interpolate2psubpiece(0.,10.) #-> [0,1,2,3,4,5,6,7,8,9]
 */
 
 template <class Iter>
-void HFPP_FUNC_NAME (const Iter vec,
-		     const Iter vec_end,
+void HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
 		     const IterValueType startvalue,
 		     const IterValueType endvalue
 		     )
 {
-  HInteger count(0), len(vec_end-vec);
-  if (len==1) {*vec=startvalue; return;};
-  HNumber slope((endvalue-startvalue)/(len-1));
+  HInteger count(0);
+  HInteger len = vec_end - vec;
   Iter it(vec);
-  while (it<vec_end) {
-    *it=(IterValueType)(startvalue+count*slope);
-    ++it; ++count;
+  HNumber slope = 0.;
+
+  if ( len == 1) {
+    *vec=startvalue;
+    return;
+  } else if (len > 1) {
+    slope = (endvalue-startvalue)/(len-1);
+    while (it != vec_end) {
+      *it=(IterValueType)(startvalue + count*slope);
+      ++it; ++count;
+    }
   }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1926,13 +2310,20 @@ void HFPP_FUNC_NAME (const Iter vec,
 		     const IterValueType endvalue
 		     )
 {
-  HInteger count(0), len(vec_end-vec);
-  if (len==1) {*vec=startvalue; return;};
-  HNumber slope((endvalue-startvalue)/len);
+  HInteger count(0);
+  HInteger len = vec_end - vec;
   Iter it(vec);
-  while (it<vec_end) {
-    *it=(IterValueType)(startvalue+count*slope);
-    ++it; ++count;
+  HNumber slope = 0.;
+
+  if (len==1) {
+    *vec = startvalue;
+    return;
+  } else if (len > 1) {
+    slope = (endvalue-startvalue)/len;
+    while (it != vec_end) {
+      *it=(IterValueType)(startvalue + count*slope);
+      ++it; ++count;
+    }
   }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1944,7 +2335,7 @@ void HFPP_FUNC_NAME (const Iter vec,
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecout)()("Downsampled output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecrms)()("Output vector containgin the RMS in each bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecrms)()("Output vector containing the RMS in each bin.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 
 //$COPY_TO END --------------------------------------------------
@@ -1963,28 +2354,40 @@ void HFPP_FUNC_NAME (const Iter vec,
 */
 
 template <class Iter>
-void HFPP_FUNC_NAME (const Iter vecout,
-		     const Iter vecout_end,
-		     const Iter vecrms,
-		     const Iter vecrms_end,
-		     const Iter vecin,
-		     const Iter vecin_end
-		     )
+void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
+		     const Iter vecrms, const Iter vecrms_end,
+		     const Iter vecin,  const Iter vecin_end)
 {
-  if (vecout>=vecout_end) return; //If size 0 do nothing
-  if (vecin>=vecin_end) return; //If size 0 do nothing
-  if (vecrms>=vecrms_end) return; //If size 0 do nothing
-  HInteger ilen(vecin_end-vecin);
-  HInteger olen(vecout_end-vecout);
-  HNumber blen=max(((HNumber)ilen)/((HNumber)olen),1.0);
+  // Declaration of variables
+  HInteger lenIn  = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+  HInteger lenRMS = vecrms_end - vecrms;
+  HNumber blen = 0.;
   HInteger nblock(1);
-  //use max to avoid infinite loops if output vector is too large
   Iter it1(vecin), it2;
   Iter itrms(vecrms);
   Iter itout(vecout), itout_end(vecout_end-1);
+
+  // Sanity check
+  if (lenIn <= 0) {
+    throw PyCR::ValueError("Size of input vector <= 0.");
+    return;
+  }
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Size of output vector <= 0.");
+    return;
+  }
+  if (lenRMS <= 0) {
+    throw PyCR::ValueError("Size of rms vector <= 0.");
+    return;
+  }
+
+  // Function implementation
+  blen = max((((HNumber)lenIn)/((HNumber)lenOut)),1.0);
+  //use max to avoid infinite loops if output vector is too large
   //only produce the first N-1 blocks in the output vector
   while ((it1<vecin_end) && (itout<itout_end) && (itrms<vecrms_end)) {
-    it2=vecin+hfmin((HInteger)(nblock*blen),ilen);
+    it2=vecin+hfmin((HInteger)(nblock*blen),lenIn);
     *itout=hMean(it1,it2);
     *itrms=hStdDev(it1,it2,*itout);
     it1=it2;
@@ -1994,6 +2397,7 @@ void HFPP_FUNC_NAME (const Iter vecout,
   *itrms=hStdDev(it2,vecin_end,*itout);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Upsample the input vector to a larger output vector by linear interpolation.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -2023,16 +2427,25 @@ void HFPP_FUNC_NAME (const Iter vecout,
 		     const Iter vecin_end
 		     )
 {
-  if (vecout>=vecout_end) return; //If size 0 do nothing
-  if (vecin>=vecin_end) return; //If size 0 do nothing
-  HInteger ilen(vecin_end-vecin);
-  HInteger olen(vecout_end-vecout);
-  HNumber blen(max(olen/(ilen-1.0),1.0));
+  // Declaration of variables
+  HInteger lenIn  = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+  HNumber blen = 0.;
   HInteger count(1);
+  Iter it1(vecout), it2(vecout),  itin(vecin), itin_end(vecin_end-2);
+
+  if (lenIn <= 1) {
+    throw PyCR::ValueError("Size of input vector should be > 1.");
+  }
+  if (lenOut < lenIn) {
+    throw PyCR::ValueError("Size of output vector < size of input vector.");
+  }
+
+  blen = max(lenOut/(lenIn-1.0),1.0);
   //use max to avoid infinite loops if input vector is too large
-  Iter it1(vecout), it2(it1+((HInteger)blen)),  itin(vecin), itin_end(vecin_end-2);
+  it2 = it1 + (HInteger)blen;
   //only produce the first N-1 blocks in the input vector
-  while ((it2<vecout_end) && (itin<itin_end)) {
+  while ((it2 < vecout_end) && (itin < itin_end)) {
     hInterpolate2PSubpiece(it1,it2,*itin,*(itin+1));
     ++count; it1=it2; it2=vecout+(HInteger)(count*blen); ++itin;
   }
@@ -2069,30 +2482,43 @@ void HFPP_FUNC_NAME (const Iter vecout,
 */
 
 template <class Iter>
-void HFPP_FUNC_NAME (const Iter vecout,
-		     const Iter vecout_end,
-		     const Iter vecrms,
-		     const Iter vecrms_end,
-		     const Iter vecin,
-		     const Iter vecin_end,
+void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
+		     const Iter vecrms, const Iter vecrms_end,
+		     const Iter vecin,  const Iter vecin_end,
 		     HNumber nsigma
 		     )
 {
-  if (vecout>=vecout_end) return; //If size 0 do nothing
-  if (vecin>=vecin_end) return; //If size 0 do nothing
-  if (vecrms>=vecrms_end) return; //If size 0 do nothing
-  HInteger ilen(vecin_end-vecin);
-  HInteger olen(vecout_end-vecout);
-  HNumber blen=max(((HNumber)ilen)/((HNumber)olen),1.0);
+  // Declaration of variables
+  HInteger lenIn  = vecin_end - vecin;
+  HInteger lenOut = vecout_end - vecout;
+  HInteger lenRMS = vecrms_end - vecrms;
+  HNumber blen = 0.;
   HInteger nblock(1);
-  //use max to avoid infinite loops if output vector is too large
-  Iter it1(vecin), it2;
+  Iter it1(vecin), it2(vecin);
   Iter itrms(vecrms);
   Iter itout(vecout), itout_end(vecout_end-1);
+  HNumber mean = 0.;
+
+  // Sanity check
+  if (lenIn <= 0) {
+    throw PyCR::ValueError("Size of input vector <= 0.");
+    return;
+  }
+  if (lenOut <= 0) {
+    throw PyCR::ValueError("Size of output vector <= 0.");
+    return;
+  }
+  if (lenRMS <= 0) {
+    throw PyCR::ValueError("Size of rms vector <= 0.");
+    return;
+  }
+
+  // Function implementation
+  blen = max(((HNumber)lenIn)/((HNumber)lenOut),1.0);
+  //use max to avoid infinite loops if output vector is too large
   //only produce the first N-1 blocks in the output vector
-  HNumber mean;
   while ((it1<vecin_end) && (itout<itout_end) && (itrms<vecrms_end)) {
-    it2=vecin+hfmin((HInteger)(nblock*blen),ilen);
+    it2=vecin+hfmin((HInteger)(nblock*blen),lenIn);
     mean=hMean(it1,it2);
     *itrms=hStdDev(it1,it2,mean);
     *itout=hMeanThreshold(it1,it2,mean,*itrms,nsigma);
@@ -2141,8 +2567,15 @@ HInteger HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
   if (value_n>=hfcast<HNumber>(*it2)) return maxpos;
   posguess=(value_n-hfcast<HNumber>(*it1))/(hfcast<HNumber>(*it2)-hfcast<HNumber>(*it1))*maxpos;
   it0=vec+posguess;
-  if (it0<it1) return hfcast<HInteger>(it1-vec); //Error, Non monotonic
-  if (it0>=it2) return hfcast<HInteger>(it2-vec); //Error, Non monotonic
+
+  if (it0 < it1) {
+    throw PyCR::ValueError("Not a monotonically increasing vector.");
+    return hfcast<HInteger>(it1-vec);
+  }
+  if (it0 >= it2) {
+    throw PyCR::ValueError("Not a monotonically increasing vector.");
+    return hfcast<HInteger>(it2-vec);
+  }
   //  cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
   while (!((value_n < hfcast<HNumber>(*(it0+1))) && (value_n >= hfcast<HNumber>(*it0)))) {
     if (value_n > hfcast<HNumber>(*it0)) {
@@ -2157,8 +2590,14 @@ HInteger HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
     it0=vec+posguess;
     ++niter;
     //cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
-    if (it0<it1) return it1-vec; //Error, Non monotonic
-    if (it0>it2) return it2-vec; //Error, Non monotonic
+    if (it0 < it1) {
+      throw PyCR::ValueError("Not a monotonically increasing vector.");
+      return it1-vec;
+    }
+    if (it0 > it2) {
+      throw PyCR::ValueError("Not a monotonically increasing vector.");
+      return it2-vec;
+    }
   };
   return posguess;
 }
@@ -2182,6 +2621,11 @@ HInteger HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
  //template <class T>
 
 std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
+  // Sanity Check
+  if (wlen <= 0) {
+    throw PyCR::ValueError("Length of weight vector should be > 0.");
+  }
+
   std::vector<HNumber> weights(wlen,1.0/wlen);
   return weights;
 }
@@ -2208,6 +2652,11 @@ hRunningAverage.
  //template <class T>
 
 std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
+  // Sanity check
+  if (wlen <= 0) {
+    throw PyCR::ValueError("Length of weight vector should be > 0.");
+  }
+
   std::vector<HNumber> weights(wlen,0.0);
   HInteger i,middle=wlen/2;
   HNumber f,sum=0.0;
@@ -2218,7 +2667,12 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
     sum+=f;
   };
   //Normalize to unity
-  for (i=0; i<wlen; i++) weights[i]=weights[i]/sum;
+  if (abs(sum) < A_LOW_NUMBER) {
+    for (i=0; i<wlen; i++) weights[i] /= sum;
+  } else {
+    throw PyCR::ZeroDivisionError("Sum value is 0.");
+  }
+
   return weights;
 }
 
@@ -2240,6 +2694,11 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 
 
 std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
+  // Sanity check
+  if (wlen <= 0) {
+    throw PyCR::ValueError("Length of weight vector should be > 0.");
+  }
+
   vector<HNumber> weights(wlen,0.0);
   HInteger i,middle=wlen/2;
   HNumber f,sum=0.0;
@@ -2250,7 +2709,12 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
     sum+=f;
   };
   //Normalize to unity
-  for (i=0; i<wlen; i++) weights[i]=weights[i]/sum;
+  if (abs(sum) < A_LOW_NUMBER) {
+    for (i=0; i<wlen; i++) weights[i] /= sum;
+  } else {
+    throw PyCR::ZeroDivisionError("Sum value is 0.");
+  }
+
   return weights;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"

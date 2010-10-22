@@ -110,13 +110,19 @@ See also: hFill, hCopy
 template <class Iter, class IterI, class T>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const T val)
 {
+  // Sanity check
+  if (index >= index_end) return;
+
+  // Variables
   Iter it;
   IterI itidx(index);
   IterValueType val_t=hfcast<IterValueType>(val);
-  if (index >= index_end) return;
+
   while (itidx != index_end) {
     it = vec + *itidx;
-    if (it < vec_end && it >= vec) *it=val_t;
+    if ((it < vec_end) && (it >= vec)) {
+      *it=val_t;
+    }
     ++itidx;
   };
 }
@@ -179,9 +185,12 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
 {
   HString s=("[");
   Iter it(vec), maxit;
-  if (maxlen>=0) maxit=(vec+hfmin(maxlen,vec_end-vec));
-  else maxit=vec_end;
-  if (vec<vec_end) s+=hf2string(*it);
+  if (maxlen>=0)
+    maxit=(vec+hfmin(maxlen,vec_end-vec));
+  else
+    maxit=vec_end;
+  if (vec<vec_end)
+    s+=hf2string(*it);
   ++it;
   while (it<maxit) {
     s+=","+hf2string(*it);
@@ -539,7 +548,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   $PARDOCSTRING
 
   If the index vector is shorter than the output vector, the (indexed
-  part of the) input vector will be copied mutliple times until the
+  part of the) input vector will be copied multiple times until the
   output vector is filled.  Use vec.resize first if you want to ensure
   that both vectors have the same size.
 
@@ -581,11 +590,20 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger offset, HInteger stride)
 {
+  // Variables
   Iter it(vec+offset);
   Iter itin(invec);
-  while ((itin!=invec_end)&&(it <vec_end)) {
-    *it=*itin;
-    ++itin; it+=stride;
+
+  // Sanity check
+  if (stride < 0) {
+    throw PyCR::ValueError("Negative value for stride parameter is not allowed");
+  }
+
+  // Redistribute
+  while ((itin != invec_end) && (it < vec_end)) {
+    *it = *itin;
+    ++itin;
+    it += stride;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"

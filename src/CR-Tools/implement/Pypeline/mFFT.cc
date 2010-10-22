@@ -93,19 +93,26 @@ template <class Iter>
 void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 		    const Iter data_in,  const Iter data_in_end)
 {
-  int N(data_in_end - data_in);
-  int Nout(data_out_end - data_out);
-  if (N!=Nout) {
-    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) <<": input and output vector have different sizes! N=" << N << " Nout=" << Nout);
+  // Declaration of variables
+  int lenIn  = data_in_end - data_in;
+  int lenOut = data_out_end - data_out;
+  fftw_plan p;
+
+  // Sanity check
+  if (lenIn != lenOut) {
+    throw PyCR::ValueError("In- and output vectors do not have the same size.");
+    // ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) <<": input and output vector have different sizes! N=" << lenIn << " Nout=" << lenOut);
     return;
   };
-  fftw_plan p;
-  p = fftw_plan_dft_1d(N, (fftw_complex*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_FORWARD, FFTW_ESTIMATE);
+
+  // Implementation
+  p = fftw_plan_dft_1d(lenIn, (fftw_complex*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_FORWARD, FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
   fftw_cleanup();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply a backward FFT on a complex vector and return it in a second (scrambles input vector)
@@ -141,19 +148,26 @@ template <class Iter>
 void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 		    const Iter data_in,  const Iter data_in_end)
 {
-  int N(data_in_end - data_in);
-  int Nout(data_out_end - data_out);
-  if (N!=Nout) {
-    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) <<": input and output vector have different sizes! N=" << N << " Nout=" << Nout);
+  // Declaration of variables
+  int lenIn  = data_in_end - data_in;
+  int lenOut = data_out_end - data_out;
+  fftw_plan p;
+
+  // Sanity check
+  if (lenIn != lenOut) {
+    throw PyCR::ValueError("In- and output vectors do not have the same size.");
+    // ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) <<": input and output vector have different sizes! N=" << lenIn << " Nout=" << lenOut);
     return;
   };
-  fftw_plan p;
-  p = fftw_plan_dft_1d(N, (fftw_complex*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_BACKWARD, FFTW_ESTIMATE);
+
+  // Implementation
+  p = fftw_plan_dft_1d(lenIn, (fftw_complex*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_BACKWARD, FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
   fftw_cleanup();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply a backward FFT on a complex vector and return it properly scaled and without scrambling the input vector
@@ -192,23 +206,30 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 		    const Iter data_in,  const Iter data_in_end,
 		    const HInteger nyquistZone)
 {
-  int N(data_in_end - data_in);
-  int Nout(data_out_end - data_out);
-  if (N!=Nout) {
-    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) <<": input and output vector have different sizes! N=" << N << " Nout=" << Nout);
+  // Declaration of variables
+  int lenIn  = data_in_end - data_in;
+  int lenOut = data_out_end - data_out;
+  fftw_plan p;
+  vector<IterValueType> scratchfft(lenIn);
+
+  // Sanity check
+  if (lenIn != lenOut) {
+    throw PyCR::ValueError("In- and output vectors do not have the same size.");
+    // ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) <<": input and output vector have different sizes! N=" << lenIn << " Nout=" << lenOut);
     return;
   };
-  fftw_plan p;
-  vector<IterValueType> scratchfft(N);
+
+  // Implementation
   PyCR::Vector::hCopy(scratchfft.begin(),scratchfft.end(), data_in,  data_in_end);
   hNyquistSwap(scratchfft,nyquistZone);
-  p = fftw_plan_dft_1d(N, (fftw_complex*) &scratchfft[0], (fftw_complex*) &(*data_out), FFTW_BACKWARD, FFTW_ESTIMATE);
+  p = fftw_plan_dft_1d(lenIn, (fftw_complex*) &scratchfft[0], (fftw_complex*) &(*data_out), FFTW_BACKWARD, FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
-  PyCR::Math::hDiv2(data_out,data_out_end,(IterValueType)N);
+  PyCR::Math::hDiv2(data_out,data_out_end,(IterValueType)lenIn);
   fftw_destroy_plan(p);
   fftw_cleanup();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Reorders the elements in a complex vector that was created by a FFT according to its Nyquistzone, such that frequencies always increase from left to right
@@ -284,23 +305,27 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 		    const Iter  data_in,  const Iter  data_in_end,
 		    const HInteger nyquistZone)
 {
-  int Nin(data_in_end - data_in);
-  int N(data_out_end - data_out);
-  if (Nin != (N/2+1)) {
-    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": input and output vector have wrong sizes! N(out)=" << N  << " N(in)=" << Nin<< " (should be = " << N/2+1 << ")");
+  // Declaration of variables
+  int lenIn = data_in_end - data_in;
+  int lenOut = data_out_end - data_out;
+  vector<IterValueType> scratchfft(lenOut);
+  fftw_plan p;
+
+  // Sanity check
+  if (lenIn != (lenOut/2+1)) {
+    throw PyCR::ValueError("Input or output vector has the wrong size. This should be: N(in) = N(out)/2+1.");
+    //ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": input and output vector have wrong sizes! N(out)=" << N  << " N(in)=" << Nin<< " (should be = " << N/2+1 << ")");
     return;
   };
 
-  vector<IterValueType> scratchfft(N);
+  // Implementation
   PyCR::Vector::hCopy(scratchfft.begin(),scratchfft.end(), data_in,  data_in_end);
   hNyquistSwap(scratchfft,nyquistZone);
-
-  fftw_plan p;
-  p = fftw_plan_dft_c2r_1d(N, (fftw_complex*) &(scratchfft[0]), (double*) &(*data_out), FFTW_ESTIMATE);
+  p = fftw_plan_dft_c2r_1d(lenOut, (fftw_complex*) &(scratchfft[0]), (double*) &(*data_out), FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
   fftw_cleanup();
-  PyCR::Math::hDiv2(data_out,data_out_end,(HNumber)N);
+  PyCR::Math::hDiv2(data_out,data_out_end,(HNumber)lenOut);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -337,14 +362,20 @@ template <class IterOut,class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 		    const IterIn  data_in,  const IterIn  data_in_end)
 {
-  int N(data_in_end - data_in);
-  int Nout(data_out_end - data_out);
-  if (Nout != (N/2+1)) {
-    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": input and output vector have wrong sizes! N(in)=" << N  << " N(out)=" << Nout<< " (should be = " << N/2+1 << ")");
+  // Declaration of variables
+  int lenIn = data_in_end - data_in;
+  int lenOut = data_out_end - data_out;
+  fftw_plan p;
+
+  // Sanity check
+  if (lenOut != (lenIn/2+1)) {
+    throw PyCR::ValueError("Input or output vector has the wrong size. This should be: N(out) = N(in)/2+1.");
+    //ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": input and output vector have wrong sizes! N(in)=" << lenIn << " N(out)=" << lenOut << " (should be = " << lenIn/2+1 << ")");
     return;
   };
-  fftw_plan p;
-  p = fftw_plan_dft_r2c_1d(N, (double*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_ESTIMATE);
+
+  // Implementation
+  p = fftw_plan_dft_r2c_1d(lenIn, (double*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
   fftw_cleanup();
@@ -384,14 +415,20 @@ template <class IterOut,class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 		    const IterIn  data_in,  const IterIn  data_in_end)
 {
-  int Nin(data_in_end - data_in);
-  int N(data_out_end - data_out);
-  if (Nin != (N/2+1)) {
-    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": input and output vector have wrong sizes! N(out)=" << N  << " N(in)=" << Nin<< " (should be = " << N/2+1 << ")");
+  // Declaration of variables
+  int lenIn = data_in_end - data_in;
+  int lenOut = data_out_end - data_out;
+  fftw_plan p;
+
+  // Sanity check
+  if (lenIn != (lenOut/2+1)) {
+    throw PyCR::ValueError("Input or output vector has the wrong size. This should be: N(in) = N(out)/2+1.");
+    // ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": input and output vector have wrong sizes! N(out)=" << lenOut << " N(in)=" << lenIn << " (should be = " << lenOut/2+1 << ")");
     return;
   };
-  fftw_plan p;
-  p = fftw_plan_dft_c2r_1d(N, (fftw_complex*) &(*data_in), (double*) &(*data_out), FFTW_ESTIMATE);
+
+  // Implementation
+  p = fftw_plan_dft_c2r_1d(lenOut, (fftw_complex*) &(*data_in), (double*) &(*data_out), FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
   fftw_cleanup();
@@ -421,6 +458,7 @@ template <class IterOut, class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 		    const IterIn  data_in,  const IterIn  data_in_end,
 		    const HInteger nyquistZone) {
+  // Declaration of variables
   uint channel;
   uint blocksize(data_in_end - data_in);
   uint fftLength(blocksize/2+1);
@@ -429,13 +467,21 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   IPosition shape_out(1,fftLength);
   casa::FFTServer<Double,DComplex> fftserver(shape_in, casa::FFTEnums::REALTOCOMPLEX);
 
-  //  Vector<Double> cvec_in(shape_in, reinterpret_cast<Double*>(&(*data_in)), casa::SHARE);
   Vector<Double> cvec_in(shape_in, 0.);
   Vector<DComplex> cvec_out(shape_out, 0.);
 
   IterIn it_in = data_in;
   IterOut it_out = data_out;
   Vector<Double>::iterator it_vin=cvec_in.begin();
+
+  // Sanity check
+  if (fftLength != (data_out_end - data_out)) {
+    throw PyCR::ValueError("Input or output vector has the wrong size. This should be: N(out) = N(in)/2+1.");
+    return;
+  }
+
+  // Implementation
+
   // make copy of input vector since fft will also modify the order of the input data.
   while ((it_in != data_in_end) && (it_vin != cvec_in.end())) {
     *it_vin  = *it_in;
@@ -497,6 +543,7 @@ template <class IterOut, class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 		    const IterIn data_in,   const IterIn data_in_end,
 		    const HInteger nyquistZone) {
+  // Declaration of variables
   uint channel;
   uint blocksize(data_out_end - data_out);
   uint fftLength(blocksize/2+1);
@@ -509,9 +556,11 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   Vector<Double> cvec_out(shape_out, 0.);
 
   if ((data_in_end - data_in) != (int)fftLength) {
-    cerr << "[invfft] Bad input: len(data_in) != fftLength" << endl;
-    cerr << "  len(data_in) = " << (data_in_end - data_in) << endl;
-    cerr << "  fftLength    = " << fftLength << endl;
+    throw PyCR::ValueError("Input or output vector has the wrong size. This should be: N(in) = N(out)/2+1.");
+    // cerr << "[invfft] Bad input: len(data_in) != fftLength" << endl;
+    // cerr << "  len(data_in) = " << (data_in_end - data_in) << endl;
+    // cerr << "  fftLength    = " << fftLength << endl;
+    return;
   };
 
   try {

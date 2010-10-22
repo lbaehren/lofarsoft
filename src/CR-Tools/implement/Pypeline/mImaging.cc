@@ -109,14 +109,13 @@ Available Coordinate Types are:
 
 template <class Iter>
 bool HFPP_FUNC_NAME  (Iter source,
-		    CR::CoordinateType::Types const &sourceCoordinate,
-		    Iter target,
-		    CR::CoordinateType::Types const &targetCoordinate,
-		    bool anglesInDegrees
-		    )
+                      CR::CoordinateType::Types const &sourceCoordinate,
+                      Iter target,
+                      CR::CoordinateType::Types const &targetCoordinate,
+                      bool anglesInDegrees
+                      )
 {
-  return CR::convertVector(
-			   *target,
+  return CR::convertVector(*target,
 			   *(target+1),
 			   *(target+2),
 			   targetCoordinate,
@@ -177,8 +176,7 @@ Example:
 
 */
 template <class IterC>
-void HFPP_FUNC_NAME(
-		    const IterC image, const IterC image_end,
+void HFPP_FUNC_NAME(const IterC image, const IterC image_end,
 		    const IterC ccm,const IterC ccm_end,
 		    const IterC weights,const IterC weights_end,
 		    const HInteger nofAntennas,
@@ -194,8 +192,19 @@ void HFPP_FUNC_NAME(
   IterC it_w2_end = it_w1_start+nofAntennas*nfreq;
   IterC it_w1(it_w1_start); //start at antenna 0
   IterC it_w2(it_w1_end); //start at antenna 1
-  if (it_ccm>=ccm_end) return;
-  if (it_w1>=weights_end) return;
+  HInteger lenImage = image_end - image;
+  HInteger lenCCM = ccm_end - ccm;
+  HInteger lenWeights = weights_end - weights;
+
+  if (lenCCM <= 0) {
+    throw PyCR::ValueError("Incorrect size for ccm vector.");
+    return;
+  }
+  if (lenWeights <= 0) {
+    throw PyCR::ValueError("Incorrect size for weight vector.");
+    return;
+  }
+
   while (it_im_start<image_end) {
     *it_im+=(*it_ccm) * (*it_w1)*conj(*it_w2);
     ++it_w1; ++it_w2; ++it_ccm; ++it_im;
@@ -255,13 +264,30 @@ void HFPP_FUNC_NAME(
 
 */
 template <class Iter>
-void  HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const Iter frequencies, const Iter frequencies_end, const Iter delays, const Iter delays_end)
+void  HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
+                     const Iter frequencies, const Iter frequencies_end,
+                     const Iter delays, const Iter delays_end)
 {
   Iter it1=vec;
   Iter it2=frequencies;
   Iter it3=delays;
-  if (it2>=frequencies_end) return;
-  if (it3>=delays_end) return;
+  HInteger lenVec = vec_end - vec;
+  HInteger lenFreq = frequencies_end - frequencies;
+  HInteger lenDelay = delays_end - delays;
+
+  if (lenVec <= 0) {
+    throw PyCR::ValueError("Incorrect size of output vector.");
+    return;
+  }
+  if (lenFreq <= 0) {
+    throw PyCR::ValueError("Incorrect size of frequencies vector.");
+    return;
+  }
+  if (lenDelay <= 0) {
+    throw PyCR::ValueError("Incorrect size of delays vector.");
+    return;
+  }
+
   while (it1!=vec_end) {
     *it1=hPhase(*it2,*it3);
     ++it1;
@@ -369,23 +395,35 @@ for j in range(29,30):
 */
 
 template <class Iter>
-void HFPP_FUNC_NAME (const Iter delays,
-		     const Iter delays_end,
-		     const Iter antPositions,
-		     const Iter antPositions_end,
-		     const Iter skyPositions,
-		     const Iter skyPositions_end,
+void HFPP_FUNC_NAME (const Iter delays, const Iter delays_end,
+		     const Iter antPositions, const Iter antPositions_end,
+		     const Iter skyPositions, const Iter skyPositions_end,
 		     const bool farfield
 		     )
 {
+  // Declaration of variables
   HNumber distance;
-  Iter
-    ant=antPositions,
-    sky=skyPositions,
-    del=delays,
-    ant_end=antPositions_end-2,
-    sky_end=skyPositions_end-2;
+  Iter ant=antPositions;
+  Iter sky=skyPositions;
+  Iter del=delays;
+  Iter ant_end=antPositions_end-2;
+  Iter sky_end=skyPositions_end-2;
+  HInteger lenDelay = delays_end - delays;
+  HInteger lenAnt = antPositions_end - antPositions;
+  HInteger lenSky = skyPositions_end - skyPositions;
 
+  // Sanity check
+  if (lenDelay <= 0) {
+    throw PyCR::ValueError("Incorrect size of delays vector.");
+  }
+  if ((lenAnt <= 0) || (lenAnt%3 != 0)) {
+    throw PyCR::ValueError("Incorrect size of antenna position vector.");
+  }
+  if ((lenSky <= 0) || (lenSky%3 != 0)) {
+    throw PyCR::ValueError("Incorrect size of sky position vector.");
+  }
+
+  // Implementation
   if (farfield) {
     while (del < delays_end) {
       distance = PyCR::Array::hVectorLength(sky,sky+3);
@@ -429,26 +467,41 @@ void HFPP_FUNC_NAME (const Iter delays,
 */
 
 template <class Iter>
-void HFPP_FUNC_NAME (const Iter phases,
-		     const Iter phases_end,
-		     const Iter frequencies,
-		     const Iter frequencies_end,
-		     const Iter antPositions,
-		     const Iter antPositions_end,
-		     const Iter skyPositions,
-		     const Iter skyPositions_end,
+void HFPP_FUNC_NAME (const Iter phases, const Iter phases_end,
+		     const Iter frequencies, const Iter frequencies_end,
+		     const Iter antPositions, const Iter antPositions_end,
+		     const Iter skyPositions, const Iter skyPositions_end,
 		     const bool farfield
 		     )
 {
-  HNumber distance;
-  Iter
-    ant,
-    freq,
-    sky=skyPositions,
-    phase=phases,
-    ant_end=antPositions_end-2,
-    sky_end=skyPositions_end-2;
+  // Declaration of variables
+  HNumber distance=0.;
+  Iter ant=antPositions;
+  Iter freq=frequencies;
+  Iter sky=skyPositions;
+  Iter phase=phases;
+  Iter ant_end=antPositions_end-2;
+  Iter sky_end=skyPositions_end-2;
+  HInteger lenPhases = phases_end - phases;
+  HInteger lenFreq = frequencies_end - frequencies;
+  HInteger lenAnt = antPositions_end - antPositions;
+  HInteger lenSky = skyPositions_end - skyPositions;
 
+  // Sanity check
+  if (lenPhases <= 0) {
+    throw PyCR::ValueError("Incorrect size of phase vector.");
+  }
+  if (lenFreq <= 0) {
+    throw PyCR::ValueError("Incorrect size of frequency vector.");
+  }
+  if ((lenAnt <=0) || (lenAnt%3 != 0)) {
+    throw PyCR::ValueError("Incorrect size of antenna position vector.");
+  }
+  if ((lenSky <= 0) || (lenSky%3 != 0)) {
+    throw PyCR::ValueError("Incorrect size of sky position vector.");
+  }
+
+  // Implementation
   if (farfield) {
     while (sky < sky_end && phase < phases_end) {
       distance = PyCR::Array::hVectorLength(sky,sky+3);
@@ -500,26 +553,42 @@ void HFPP_FUNC_NAME (const Iter phases,
 */
 
 template <class CIter, class Iter>
-void HFPP_FUNC_NAME (const CIter weights,
-		     const CIter weights_end,
-		     const Iter frequencies,
-		     const Iter frequencies_end,
-		     const Iter antPositions,
-		     const Iter antPositions_end,
-		     const Iter skyPositions,
-		     const Iter skyPositions_end,
+void HFPP_FUNC_NAME (const CIter weights, const CIter weights_end,
+		     const Iter frequencies, const Iter frequencies_end,
+		     const Iter antPositions, const Iter antPositions_end,
+		     const Iter skyPositions, const Iter skyPositions_end,
 		     const bool farfield
 		     )
 {
+  // Declaration of variables
   HNumber distance;
-  Iter
-    ant,
-    freq,
-    sky=skyPositions,
-    ant_end=antPositions_end-2,
-    sky_end=skyPositions_end-2;
+  Iter ant=antPositions;
+  Iter freq=frequencies;
+  Iter sky=skyPositions;
+  Iter ant_end=antPositions_end-2;
+  Iter sky_end=skyPositions_end-2;
   CIter weight=weights;
 
+  HInteger lenWeight = weights_end - weights;
+  HInteger lenFreq = frequencies_end - frequencies;
+  HInteger lenAnt = antPositions_end - antPositions;
+  HInteger lenSky = skyPositions_end - skyPositions;
+
+  // Sanity check
+  if (lenWeight <=0) {
+    throw PyCR::ValueError("Incorrect size of weight vector.");
+  }
+  if (lenFreq <= 0) {
+    throw PyCR::ValueError("Incorrect size of frequency vector.");
+  }
+  if ((lenAnt <=0) || (lenAnt%3 != 0)) {
+    throw PyCR::ValueError("Incorrect size of antenna position vector.");
+  }
+  if ((lenSky <= 0) || (lenSky%3 != 0)) {
+    throw PyCR::ValueError("Incorrect size of sky position vector.");
+  }
+
+  // Implementation
   if (farfield) {
     while (sky < sky_end && weight < weights_end) {
       distance = PyCR::Array::hVectorLength(sky,sky+3);
@@ -576,22 +645,27 @@ void HFPP_FUNC_NAME (const CIter weights,
 
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter pixel, const Iter pixel_end,
-    const Iter world, const Iter world_end,
-    const string refcode, const string projection,
-    const HNumber refLong, const HNumber refLat,
-    const HNumber incLong, const HNumber incLat,
-    const HNumber refX, const HNumber refY
+                     const Iter world, const Iter world_end,
+                     const string refcode, const string projection,
+                     const HNumber refLong, const HNumber refLat,
+                     const HNumber incLong, const HNumber incLat,
+                     const HNumber refX, const HNumber refY
     )
 {
+  HInteger lenWorld = world_end - world;
+  HInteger lenPixel = pixel_end - pixel;
+
   // Check input
-  if (world_end-world != pixel_end-pixel)
+  if (lenPixel != lenWorld)
   {
+    throw PyCR::ValueError("Size of pixel and world coordinate vectors are not the same.");
     std::cerr<<"Error, in world2Pixel(): input and output vector not of same length."<<std::endl;
   }
 
   casa::MDirection::Types type;
   if (casa::MDirection::getType(type, refcode) != true)
   {
+    throw PyCR::TypeError("Invalid input reference type.");
     std::cerr<<"Error, in world2Pixel(): input reference type invalid."<<std::endl;
   }
 
@@ -599,6 +673,7 @@ void HFPP_FUNC_NAME (const Iter pixel, const Iter pixel_end,
   proj=casa::Projection::type(static_cast<casa::String>(projection));
   if (proj==casa::Projection::N_PROJ)
   {
+    throw PyCR::ValueError("Invalid projection type.");
     std::cerr<<"Error, in world2Pixel(): input projection type invalid."<<std::endl;
   }
 
@@ -673,23 +748,27 @@ void HFPP_FUNC_NAME (const Iter pixel, const Iter pixel_end,
 
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
-    const Iter pixel, const Iter pixel_end,
-    const string refcode, const string projection,
-    const HNumber refLong, const HNumber refLat,
-    const HNumber incLong, const HNumber incLat,
-    const HNumber refX, const HNumber refY,
-    const HNumber lonPole, const HNumber latPole
+                     const Iter pixel, const Iter pixel_end,
+                     const string refcode, const string projection,
+                     const HNumber refLong, const HNumber refLat,
+                     const HNumber incLong, const HNumber incLat,
+                     const HNumber refX, const HNumber refY,
+                     const HNumber lonPole, const HNumber latPole
     )
 {
+  HInteger lenWorld = world_end - world;
+  HInteger lenPixel = pixel_end - pixel;
+
   // Check input
-  if (world_end-world != pixel_end-pixel)
-  {
+  if (lenPixel != lenWorld) {
+    throw PyCR::ValueError("Size of pixel and world coordinate vectors are not the same.");
     std::cerr<<"Error, in hPixel2World(): input and output vector not of same length."<<std::endl;
   }
 
   casa::MDirection::Types type;
   if (casa::MDirection::getType(type, refcode) != true)
   {
+    throw PyCR::TypeError("Invalid input reference type.");
     std::cerr<<"Error, in hPixel2World(): input reference type invalid."<<std::endl;
   }
 
@@ -697,6 +776,7 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
   proj=casa::Projection::type(static_cast<casa::String>(projection));
   if (proj==casa::Projection::N_PROJ)
   {
+    throw PyCR::ValueError("Invalid projection type.");
     std::cerr<<"Error, in hPixel2World(): input projection type invalid."<<std::endl;
   }
 
@@ -768,9 +848,9 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
 
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter hc, const Iter hc_end,
-    const Iter ec, const Iter ec_end,
-    const HNumber utc, const HNumber ut1_utc,
-    const HNumber L, const HNumber phi)
+                     const Iter ec, const Iter ec_end,
+                     const HNumber utc, const HNumber ut1_utc,
+                     const HNumber L, const HNumber phi)
 {
   // Constants
   const int SECONDS_PER_DAY = 24 * 3600;
@@ -790,6 +870,22 @@ void HFPP_FUNC_NAME (const Iter hc, const Iter hc_end,
   // Get iterators
   Iter hc_it=hc;
   Iter ec_it=ec;
+
+  // Sanity check
+  HInteger lenHC = std::distance(hc,hc_end);
+  HInteger lenEC = std::distance(ec,ec_end);
+  if ((lenHC <= 0) && (lenHC%2 != 0)) {
+    throw PyCR::ValueError("Incorrect size of horizontal coordinates vector.");
+    return;
+  }
+  if ((lenEC <= 0) && (lenEC%2 != 0)) {
+    throw PyCR::ValueError("Incorrect size of equatorial coordinates vector.");
+    return;
+  }
+  if (lenHC != lenEC) {
+    throw PyCR::ValueError("Size of horizontal and equatorial coordinates vectors should be the same.");
+    return;
+  }
 
   while (hc_it!=hc_end && ec_it!=ec_end)
   {

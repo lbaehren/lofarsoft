@@ -97,8 +97,23 @@ spectrum[...].spectralpower(cplxfft[...])
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
 {
+  // Declaration of variables
   Iterin itin(vecin);
   Iter itout(vecout);
+  HInteger lenIn = std::distance(vecin,vecin_end);
+  HInteger lenOut = std::distance(vecout,vecout_end);
+
+  // Sanity check
+  if (lenIn <= 0) {
+    throw PyCR::ValueError("Incorrect size of input vector.");
+    return;
+  }
+  if (lenOut != lenIn) {
+    throw PyCR::ValueError("Incorrect size of output vector. Should be equal to size of input vector");
+    return;
+  }
+
+  // Calculation of spectral power
   while ((itin != vecin_end) && (itout != vecout_end)) {
     *itout+=sqrt(real((*itin)*conj(*itin)));
     ++itin; ++itout;
@@ -161,7 +176,8 @@ void HFPP_FUNC_NAME (Iter amplitudeVec, Iter amplitudeVec_end,
   uint amplitudeVecSize = amplitudeVec_end - amplitudeVec;
   uint rmsVecSize = rmsVec_end - rmsVec;
   if (amplitudeVecSize != rmsVecSize) {
-    cout << "ERROR: Output vectors are not of the specified size." << endl;
+    throw PyCR::ValueError("Output vectors are not of the same size.");
+    cout << "ERROR: Output vectors are not of the same size." << endl;
   }
 
   // === Create correct vector types =========================
@@ -214,6 +230,7 @@ void hRFIBaselineFitting(Iter fitVec, Iter fitVec_end,
   uint amplitudeVecSize = amplitudeVec_end - amplitudeVec;
   uint rmsVecSize = rmsVec_end - rmsVec;
   if (amplitudeVecSize != rmsVecSize) {
+    throw PyCR::ValueError("Input vectors are not of the same size.");
     cout << "ERROR: Input vectors are not of the same size." << endl;
     exit(0);
   }
@@ -268,6 +285,7 @@ void hRFIFlagging(IterI flagVec, IterI flagVec_end,
   uint flagVecSize = flagVec_end - flagVec;
   if ((fitVecSize != fullSize) ||
       (flagVecSize != fullSize)) {
+    throw PyCR::ValueError("Input vectors are not of the same size.");
     cout << "ERROR: Input vectors are not of the same size." << endl;
     exit(0);
   }
@@ -323,6 +341,7 @@ void hRFIMitigation(IterN mitigatedSpectrumVec, IterN mitigatedSpectrumVec_end,
   if ((fitVecSize != fullSize) ||
       (flagVecSize != fullSize) ||
       (mitigatedSpectrumVecSize != fullSize)) {
+    throw PyCR::ValueError("Input and output vectors are not of the same size.");
     cout << "ERROR: Input and output vectors are not of the same size." << endl;
     exit(0);
   }
