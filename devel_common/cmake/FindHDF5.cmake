@@ -205,9 +205,13 @@ if (NOT FIND_HDF5_CMAKE)
       endif (var_compiled AND var_exit)
       
     endif (HAVE_HDF5 AND HAVE_TESTHDF5VERSION)
-    
-  endif (HAVE_H5PUBLIC_H)
 
+  endif (HAVE_H5PUBLIC_H)
+  
+  ## Construct full version string
+  
+  set (HDF5_VERSION "${HDF5_MAJOR_VERSION}.${HDF5_MINOR_VERSION}.${HDF5_RELEASE_VERSION}")
+    
   ##_____________________________________________________________________________
   ## HDF5 compiled with parallel IO support?
 
@@ -255,6 +259,7 @@ if (NOT FIND_HDF5_CMAKE)
     HDF5_INCLUDES
     HDF5_LIBRARIES
     HAVE_H5PUBLIC_H
+    HDF5_VERSION
     HDF5_MAJOR_VERSION
     HDF5_MINOR_VERSION
     HDF5_RELEASE_VERSION
