@@ -16,8 +16,8 @@ cmake_minimum_required (VERSION 2.8)
 set (HDF5_VERSION_MINOR   8)
 set (HDF5_VERSION_RELEASE 5)
 set (HDF5_VERSION        "1.${HDF5_VERSION_MINOR}.${HDF5_VERSION_RELEASE}" )
-set (HDF5_SOURCE_ARCHIVE "hdf5-${HDF5_VERSION}.tar.gz" )
-set (HDF5_URL            "ftp://ftp.hdfgroup.org/HDF5/current/src/${HDF5_SOURCE_ARCHIVE}" )
+set (HDF5_SOURCE_ARCHIVE "hdf5-${HDF5_VERSION}.tar" )
+set (HDF5_URL            "http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-${HDF5_VERSION}/src/${HDF5_SOURCE_ARCHIVE}" )
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
@@ -146,7 +146,6 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
       DOWNLOAD_DIR download
       SOURCE_DIR source
       URL ${HAVE_HDF5_SOURCE}
-      URL_MD5 85d1cea1de32019bf85e484ce83f8bd9
       CONFIGURE_COMMAND ${HDF5_BINARY_DIR}/source/configure --prefix=${USG_INSTALL_PREFIX} --bindir=${USG_INSTALL_PREFIX}/bin --includedir=${USG_INSTALL_PREFIX}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_fortran} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
       INSTALL_COMMAND make install
       )
