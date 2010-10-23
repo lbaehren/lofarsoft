@@ -167,7 +167,10 @@ class LOFARingredient(dict):
             field = self._fields[key]
             converted_value = field.coerce(value)
             if not field.is_valid(converted_value):
-                raise TypeError("%s has invalid type for %s" % (str(value), key))
+                raise TypeError(
+                    "%s is an invalid value for %s %s" %
+                    (str(value), type(field).__name__, key)
+                )
         else:
             raise TypeError("Ingredient %s not defined" % key)
         super(LOFARingredient, self).__setitem__(key, converted_value)
