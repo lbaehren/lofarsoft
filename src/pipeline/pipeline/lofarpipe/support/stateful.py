@@ -11,6 +11,7 @@ import os.path
 import cPickle
 
 from lofarpipe.support.baserecipe import BaseRecipe
+from lofarpipe.support.lofarexceptions import PipelineException
 
 def stateful(run_task):
     @wraps(run_task)
@@ -66,8 +67,18 @@ class StatefulRecipe(BaseRecipe):
         )
         try:
             statefile = open(statefile, 'r')
-            self.inputs, self.state = cPickle.load(statefile)
+            inputs, self.state = cPickle.load(statefile)
             statefile.close()
+
+            # What's the correct thing to do if inputs differ from the saved
+            # state? start_time will always change.
+            for key, value in inputs.iteritems():
+                if key != "start_time" and self.inputs[key] != value:
+                    raise PipelineException(
+                        "Input %s (%s) differs from saved state (%s)" %
+                        (key, str(self.inputs[key]), inputs[key])
+                    )
+
             self.completed = list(reversed(self.state))
         except (IOError, EOFError):
             # Couldn't load state

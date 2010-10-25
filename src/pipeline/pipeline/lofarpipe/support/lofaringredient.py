@@ -188,6 +188,12 @@ class LOFARingredient(dict):
     def complete(self):
         return False if self.missing() else True
 
+    def update(self, args, **kwargs):
+        for key, value in args.iteritems():
+            self[key] = value
+        for key, value in kwargs.iteritems():
+            self[key] = value
+
 class RecipeIngredientsMeta(type):
     def __init__(cls, name, bases, ns):
         # Inputs are inherited from the superclass.
