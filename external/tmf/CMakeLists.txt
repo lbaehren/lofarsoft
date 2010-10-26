@@ -11,7 +11,7 @@ cmake_minimum_required (VERSION 2.8)
 ## find script
 
 option (TMF_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
-option (TMF_VERBOSE_CONFIGURE "Be verbose during configuration?"       YES )
+option (TMF_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO  )
 option (TMF_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
 
 ## ------------------------------------------------------------------------------
@@ -35,7 +35,9 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
-set (TMF_FIND_QUIETLY YES )
+if (NOT TMF_VERBOSE_CONFIGURE)
+  set (TMF_FIND_QUIETLY YES )
+endif (NOT TMF_VERBOSE_CONFIGURE)
 
 include (FindTMF)
 
@@ -49,15 +51,23 @@ if (NOT HAVE_TMF OR TMF_FORCE_BUILD)
   include (ExternalProject)
 
   ##__________________________________________________________________
+  ## Tools needed to build modules
+
+  find_program (tar_executable       tar       PATHS ${bin_locations})
+
+  ##__________________________________________________________________
   ## Configure and build the project
 
   find_file (have_tmf_tgz tmf-1.4.2.tar.gz ${TMF_SOURCE_DIR})
+  find_file (have_tmf_cmake tmf_cmake.tar.gz ${TMF_SOURCE_DIR})
   
   if (have_tmf_tgz)
     ExternalProject_Add (tmf
       PREFIX ${TMF_BINARY_DIR}
       URL ${have_tmf_tgz}
+      PATCH_COMMAND ${tar_executable} -xzf ${have_tmf_cmake}
       CMAKE_ARGS -D CMAKE_INSTALL_PREFIX=${USG_INSTALL_PREFIX}
+                 -D USG_ROOT=${USG_ROOT}
       )
   else (have_tmf_tgz)
     message (WARNING "[Tmf] Unable to build project - no sources found!")

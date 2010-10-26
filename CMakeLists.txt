@@ -56,7 +56,7 @@ option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
 
 option (CR_WITH_DAL             "Build and use the Data Access Library?"   YES )
 option (CR_WITH_GLISH           "Support for Glish applications?"          NO  )
-option (CR_WITH_PYCR            "Support for Python applications?"         YES )
+option (CR_WITH_PYCR            "Support for Python applications?"         NO )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"         YES )
 option (CR_WITH_GUI             "Build the graphical interface?"           NO  )
 option (CR_WITH_PYPELINE        "Build the Pypeline library?"              YES )
@@ -75,8 +75,6 @@ option (DAL_VERBOSE_CONFIGURE  "Verbose output during configuration?"         NO
 
 option (RM_ENABLE_ITPP       "Enable using IT++ library?"                  NO  )
 option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"             YES )
-
-option (TMF_ENABLE_PYTHON    "Build Python bindings for TMF library?"      YES )
 
 ## Handle options
 
