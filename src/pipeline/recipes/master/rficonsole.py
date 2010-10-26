@@ -31,6 +31,16 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
             help="RFI strategy",
             optional=True
         ),
+        'indirect_read': ingredient.BoolField(
+            '--indirect-read',
+            default=False,
+            help="Indirect baseline reader: re-write MS for efficiency"
+        ),
+        'working_dir': ingredient.StringField(
+            '--working-dir',
+            default='/tmp',
+            help="Store temporary products under this root"
+        ),
         'nthreads': ingredient.IntField(
             '--nthreads',
             default=8,
@@ -74,6 +84,7 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
             strategy = self.inputs['strategy']
         else:
             strategy = None
+
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
         jobs = []
         for host, file_lists in hostlist.iteritems():
@@ -84,7 +95,9 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
                         arguments=[
                             self.inputs['executable'],
                             self.inputs['nthreads'],
-                            strategy
+                            strategy,
+                            self.inputs['indirect_read'],
+                            self.inputs['working_dir']
                         ] + file_list
                     )
                 )

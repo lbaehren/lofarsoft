@@ -19,7 +19,7 @@ from lofarpipe.support.lofarexceptions import ExecutableMissing
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 
 class rficonsole(LOFARnode):
-    def run(self, executable, nthreads, strategy, *infiles):
+    def run(self, executable, nthreads, strategy, indirect, wd, *infiles):
         with log_time(self.logger):
             self.logger.info("Processing %s" % " ".join(infiles))
 
@@ -27,10 +27,12 @@ class rficonsole(LOFARnode):
                 if not os.access(executable, os.X_OK):
                     raise ExecutableMissing(executable)
 
-                working_dir = tempfile.mkdtemp()
+                working_dir = tempfile.mkdtemp(dir=wd)
                 cmd = [executable, "-j", nthreads]
                 if os.path.exists(strategy):
                     cmd.extend(["-strategy", strategy])
+                if indirect == "True":
+                    cmd.extend(["-indirect-read"])
                 cmd.extend(infiles)
                 with CatchLog4CPlus(
                     working_dir,
