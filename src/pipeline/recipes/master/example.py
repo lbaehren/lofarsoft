@@ -1,14 +1,21 @@
-import subprocess, sys
+import sys
+import subprocess
 
-from lofarpipe.support.lofarrecipe import LOFARrecipe
+from lofarpipe.support.baserecipe import BaseRecipe
+from lofarpipe.support.lofaringredient import ExecField, StringField
+from lofarpipe.support.pipelinelogging import log_process_output
 
-class example(LOFARrecipe):
+class example(BaseRecipe):
     inputs = {
-        'executable': ingredients.ExecField(
-            '--executable'
-            help="Command to run"
+        'executable': ExecField(
+            '--executable',
+            help="Command to run",
             default="/bin/ls"
         )
+    }
+
+    outputs = {
+        'stdout': StringField()
     }
 
     def go(self):
@@ -17,20 +24,29 @@ class example(LOFARrecipe):
 
         self.logger.info("This is a log message")
 
-        return 0
+        my_process = subprocess.Popen(
+            [
+                self.inputs['executable']
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        sout, serr = my_process.communicate()
+        self.outputs['stdout'] = sout
+        log_process_output(
+            self.inputs['executable'],
+            sout,
+            serr,
+            self.logger
+        )
 
-#        execute = [self.inputs['executable']]
-#        execute.extend(self.inputs['args'])
-#
-#        my_process = subprocess.Popen(execute, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#        sout, serr = my_process.communicate()
-#        self.logger.info("stdout: " + sout)
-#        self.logger.info("stderr: " + serr)
-#
-#        if my_process.returncode == 0:
-#            return 0
-#        else:
-#            return 1
+        if my_process.returncode == 0:
+            return 0
+        else:
+            self.logger.warn(
+                "Return code (%d) is not 0." % my_process.returncode
+            )
+            return 1
 
 
 if __name__ == '__main__':
