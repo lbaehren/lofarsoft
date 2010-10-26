@@ -3,6 +3,7 @@
 
 import pdb
 import pycrtools as cr
+from pycrtools.interfaces import IO
 from pytmf import deg2rad, rad2deg
 
 def casaRefcodes(**kwargs):
@@ -171,19 +172,42 @@ class CoordinateGrid(object):
         else:
             raise ValueError("Conversion of world coordinates to AzEl not yet implemented for "+self.refcode+" coordinate system")
 
-class Imager():
+class Imager(object):
     """Imager for LOFAR TBB data.
     """
-    def __init__(self, grid):
+    def __init__(self, **imparam):
         """Constructor.
         """
-        pass
+        
+        # Generate grid
+        self.grid = CoordinateGrid(**imparam)
 
-    def addImage(self, image, fftdata):
+    def addImage(self, image, io, startblock, nblocks, antennae):
         """Beamform fftdata and add to image.
         
         *image* 3d array of dimensions  x-pixel, y-pixel, frequency
         *fftdata* 2d array with fft data of dimensions antenna, frequency
         """
-        pass
+
+        # Check input
+        if not isinstance(io, IO):
+            raise ValueError("Parameter *io* does is not of the correct interface type *IO*")
+
+        # Select antennae
+        io.setAntennaSelection(antennae)
+
+        # Get antenna positions
+        antpos = io.getAntennaPosition()
+
+        for block in range(startblock, startblock+nblocks):
+
+            print "processing block:", block
+
+            # Get FFT data for current block
+            fftdata = io.getFFTData(block)
+
+            # Call beamformer
+            cr.hBeamformImage(image, fftdata, frequencies, antpos, self.grid.cartesian)
+
+        return image
 

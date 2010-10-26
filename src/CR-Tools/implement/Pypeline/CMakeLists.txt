@@ -52,6 +52,7 @@ set (PYPELINE_PY_MODULES
   metadata.py
   bfdata.py
   imager.py
+  interfaces.py
   calibration.py
   IO.py
   srcfind.py

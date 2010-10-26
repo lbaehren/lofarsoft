@@ -1,7 +1,7 @@
-"""Base class for data IO.
+"""This module contains standardised interface classes.
 """
 
-class IOBase(object):
+class IO(object):
     """Base class for data IO.
     """
 
@@ -23,7 +23,7 @@ class IOBase(object):
         It raises a ValueError if antenna selection cannot be set
         to requested value (e.g. specified antenna not in file).
         """
-        pass
+        raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
     def setFrequencySelection(self, frequencies):
         """Sets the frequency selection used in subsequent calls to
@@ -38,7 +38,7 @@ class IOBase(object):
         to requested values (e.g. specified frequency is not
         available for this blocksize.)
         """
-        pass
+        raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
     
     def setFrequenceRange(self, fmin, fmax):
         """Sets the frequency selection used in subsequent calls to
@@ -54,7 +54,7 @@ class IOBase(object):
         It raises a ValueError if frequency selection cannot be set
         to requested values (e.g. all frequencies out of range)
         """
-        pass
+        raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
     def getFrequencies(self):
         """Returns the frequencies that are appicable to the FFT data
@@ -66,7 +66,7 @@ class IOBase(object):
         This method returns a FloatVector with the selected frequencies
         in Hz.
         """
-        pass
+        raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
     def getAntennaPositions(self):
         """Returns antenna positions for selected antennas, or all
@@ -82,7 +82,7 @@ class IOBase(object):
         So that if `a` is the returned array `a[i]` is an array of
         length 3 with positions (x,y,z) of antenna i.
         """
-        pass
+        raise NotImplementedError
 
     def getFFTData(self, block):
         """Returns FFT data for selected antennas.
@@ -97,7 +97,7 @@ class IOBase(object):
         So that if `a` is the returned array `a[i]` is an array of
         length (number of frequencies) of antenna i.
         """
-        pass
+        raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
     def getTimeseriesData(self, block):
         """Returns timeseries data for selected antennas.
@@ -111,7 +111,7 @@ class IOBase(object):
         So that if `a` is the returned array `a[i]` is an array of
         length blocksize of antenna i.
         """
-        pass
+        raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
     def getReferencePosition(self):
         """Returns reference position used for antenna position 
@@ -125,5 +125,5 @@ class IOBase(object):
         position of the center used for the antenna position coordinate
         system. 
         """
-        pass
+        raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
