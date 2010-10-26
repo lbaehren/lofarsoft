@@ -8,7 +8,7 @@ hand.
 """
 from __future__ import with_statement
 import sys, os
-from lofarpipe.support.control import MAC_control
+from lofarpipe.support.mac import MAC_control
 from lofarpipe.support.utilities import log_time
 
 class sip(MAC_control):
@@ -20,6 +20,6 @@ class sip(MAC_control):
             # Or as command line arguments
             datafiles = self.inputs['args']
             datafiles = self.run_task("ndppp", datafiles)
-       
+
 if __name__ == '__main__':
     sys.exit(sip().main())
