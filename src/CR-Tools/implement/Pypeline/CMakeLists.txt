@@ -98,9 +98,16 @@ foreach (FILE ${PYPELINE_CPP_MODULES})
     PRE_BUILD
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
     COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfsplit2h.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc
-    COMMAND ${PYPELINE_PREPROCESSOR_DIR}/hfCheckInterfaceChange.sh ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}
     COMMENT "Wrapper preprocessing module ${FILE}: Splitting off wrapper definitions"
     )
+
+  add_custom_command (
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.def.h
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc
+    COMMAND ${PYPELINE_PREPROCESSOR_DIR}/hfCheckInterfaceChange.sh ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}
+    COMMENT "Wrapper preprocessing module ${FILE}: Checking interfaces of wrappers"
+    )
+
 endforeach (FILE ${PYPELINE_CPP_MODULES})
 
 foreach (FILE ${PYPELINE_CPP_MODULES})

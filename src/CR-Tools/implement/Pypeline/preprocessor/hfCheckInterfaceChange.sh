@@ -6,19 +6,17 @@
 # This is needed in order not to regenerate the python bindings if the
 # interface is not changed.
 
-if test -f $1.def.h.new ; then
-#    echo "$1.def.h.new exists"
+if test -f $1.def.h.latest ; then
+#    echo "$1.def.h.latest exists"
     if test -f $1.def.h ; then
 #	echo "$1.def.h exists"
-	if test "`diff $1.def.h.new $1.def.h|wc -l`" -ne "0" ; then
+	if test "`diff $1.def.h.latest $1.def.h|wc -l`" -ne "0" ; then
 #	    echo "differences found!"
-	    mv $1.def.h.new $1.def.h
-	else
-#	    echo "no differences found"
-	    rm $1.def.h.new
+	    cp $1.def.h.latest $1.def.h
 	fi
     else
 #	echo "Creating $1.def.h"
-	mv $1.def.h.new $1.def.h
+	cp $1.def.h.latest $1.def.h
     fi
 fi
+

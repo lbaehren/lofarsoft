@@ -7,7 +7,7 @@ BEGIN{FS="[ :=]+";WRITETOFILE=0}
     print "//$ --- Splitting off code to file " $2 "=\"" $3 "\""}
 /^ *[/]* *\$COPY_TO +[A-Z]+ +START:*/ {
     COPYTOFILE=1;
-    FILE=FILENAMES[$2]".new";
+    FILE=FILENAMES[$2]".latest";
     print "//==================================================================================" > FILE
     print "// ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk" >> FILE
     print "//==================================================================================" >> FILE
@@ -17,6 +17,6 @@ BEGIN{FS="[ :=]+";WRITETOFILE=0}
     next
 }
 /^ *[/]* *\$COPY_TO +END/ {COPYTOFILE=0;next}
-/^ *[/]* *\$COPY_TO +[A-Z]+:/ {FILE0=FILENAMES[$2]; sub(" *[/]* *\\$COPY_TO +[A-Z]+: *",""); print >> FILE0".new"}
+/^ *[/]* *\$COPY_TO +[A-Z]+:/ {FILE0=FILENAMES[$2]; sub(" *[/]* *\\$COPY_TO +[A-Z]+: *",""); print >> FILE0".latest"}
 (COPYTOFILE) {print $0 >> FILE}
 {print}
