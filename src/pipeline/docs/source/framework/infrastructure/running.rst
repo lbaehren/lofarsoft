@@ -37,7 +37,8 @@ directory. For example:
 
 On startup, the framework will first search for a file named ``pipeline.cfg``
 in your current working directory, before falling back to ``~/.pipeline.cfg``.
-The user can also specify a configuration file on the command line.
+The user can also specify a configuration file on the command line. See the
+:ref:`config-file` section for full details on the configuration system.
 
 With the configuration file in place, it is now possible to run the example
 recipe. **Note** that all pipeline runs must be supplied with a job identifier
