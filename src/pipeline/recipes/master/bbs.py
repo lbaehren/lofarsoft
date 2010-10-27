@@ -106,7 +106,9 @@ class bbs(BaseRecipe):
         # ----------------------------------------------------------------------
         self.logger.debug("Building VDS file describing all data for BBS")
         vds_file = os.path.join(
-            self.config.get("layout", "vds_directory"), "bbs.gvds"
+            self.config.get("layout", "job_directory"),
+            "vds",
+            "bbs.gvds"
         )
         self.run_task('vdsmaker', self.inputs['args'], gvds=vds_file, unlink="False")
         self.logger.debug("BBS GVDS is %s" % (vds_file,))
@@ -115,7 +117,6 @@ class bbs(BaseRecipe):
         #      Iterate over groups of subbands divided up for convenient cluster
         #          procesing -- ie, no more than nproc subbands per compute node
         # ----------------------------------------------------------------------
-        self.logger.debug("Building VDS file describing all data for BBS")
         for to_process in gvds_iterator(vds_file, int(self.inputs["nproc"])):
             #               to_process is a list of (host, filename, vds) tuples
             # ------------------------------------------------------------------

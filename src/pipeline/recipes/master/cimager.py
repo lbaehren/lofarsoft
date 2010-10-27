@@ -96,7 +96,9 @@ class cimager(BaseRecipe):
         # ----------------------------------------------------------------------
         self.logger.debug("Building VDS file describing all data for cimager")
         gvds_file = os.path.join(
-            self.config.get("layout", "vds_directory"), "cimager.gvds"
+            self.config.get("layout", "job_directory"),
+            "vds",
+            "cimager.gvds"
         )
         self.run_task('vdsmaker', self.inputs['args'], gvds=gvds_file, unlink="False")
         self.logger.debug("cimager GVDS is %s" % (gvds_file,))
