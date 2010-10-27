@@ -278,7 +278,7 @@ class cimager(BaseRecipe):
                     }
                 ) as cimager_parset:
                     fd, converted_parset = tempfile.mkstemp(
-                        dir=self.config.get("layout", "parset_directory")
+                        dir=self.config.get("layout", "job_directory")
                     )
                     convert_process = spawn_process(
                         [
@@ -330,7 +330,7 @@ class cimager(BaseRecipe):
             patch_dictionary['Cimager.Images.Names'] = "[ %s ]" % ", ".join(image_names)
             return patch_parset(
                 None, patch_dictionary,
-                self.config.get("layout", "parset_directory")
+                self.config.get("layout", "job_directory")
             )
 
         try:

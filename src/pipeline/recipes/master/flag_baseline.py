@@ -46,7 +46,7 @@ class flag_baseline(BaseRecipe, RemoteCommandRecipeMixIn):
         #       Serialise list of baselines to disk for compute nodes to pick up
         # ----------------------------------------------------------------------
         fd, baseline_filename = mkstemp(
-            dir=self.config.get("layout", "parset_directory")
+            dir=self.config.get("layout", "job_directory")
         )
         baseline_file = os.fdopen(fd, "w")
         dump(self.inputs["baselines"], baseline_file)

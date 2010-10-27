@@ -50,7 +50,7 @@ class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
 
         self.logger.info("Generating template parmdb")
         pdbdir = tempfile.mkdtemp(
-            dir=self.config.get("layout", "parset_directory")
+            dir=self.config.get("layout", "job_directory")
         )
         pdbfile = os.path.join(pdbdir, 'instrument')
 
