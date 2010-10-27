@@ -206,11 +206,14 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
         self.task_definitions = ConfigParser(self.config.defaults())
         self.task_definitions.read(self.inputs["task_files"])
 
-        self.recipe_path = [
-            os.path.join(root, 'master') for root in utilities.string_to_list(
-                self.config.get('DEFAULT', "recipe_directories")
-            )
-        ]
+        try:
+            self.recipe_path = [
+                os.path.join(root, 'master') for root in utilities.string_to_list(
+                    self.config.get('DEFAULT', "recipe_directories")
+                )
+            ]
+        except NoOptionError:
+            self.recipe_path = []
 
         # At this point, the recipe inputs must be complete. If not, exit.
         if not self.inputs.complete():
