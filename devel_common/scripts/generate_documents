@@ -19,12 +19,14 @@ echo "--[`date`] Updating working copy ..."
 cd $lofardocs
 svn up
 
-## Build ICDs from LaTeX sources
+## Build ICDs from LaTeX sources (run multiple time to get all the references right)
 
 cd $lofardocs/build
 cmake ..
 
-make ICD ICD ICD
+make -j2 ICD
+make -j2 ICD
+make -j2 ICD
 
 ## Compress Postscript files
 
