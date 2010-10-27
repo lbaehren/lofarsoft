@@ -1,8 +1,8 @@
 .. _recipe-docs:
 
-*******
-Recipes
-*******
+*******************
+Basic recipe design
+*******************
 
 A pipeline is composed of a hierarchical tree of so-called *recipes*. Each
 recipe takes a list of inputs, performs some processing on them, and

@@ -1,7 +1,7 @@
 .. _infrastructure-setup:
 
 ************************
-Infrastructure and Setup
+Infrastructure and setup
 ************************
 
 This section describes how to set up and start using the pipeline system. We

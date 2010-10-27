@@ -1,7 +1,7 @@
 .. _framework-overview:
 
 **********************
-Overview of a Pipeline
+Overview of a pipeline
 **********************
 
 Before plunging into the nitty-gritty of all the various components that make
