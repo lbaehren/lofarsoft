@@ -50,7 +50,7 @@ libraries of pre-defined tasks for whatever applications they find necessary.
 Control
 =======
 
-The *control* recipe is a specialist type of a normal recipe. The fundamentals
+The *control* recipe is a special type of a normal recipe. The fundamentals
 are the same; however, it contains some additional "housekeeping" logic which
 may be useful for starting a pipeline. For instance, the control recipe can
 configure a logging system for the pipeline, and may be used to interface with
@@ -61,13 +61,12 @@ LOFAR's MAC/SAS control system.
 Cluster Layout
 ==============
 
-The pipeline framework makes the assumption that it will run on a cluster
-comprised of a "head node" and a number of "compute nodes". The pipeline
-control logic runs on the head node, and may perform less compute-intensive
-jobs here. When required, jobs are dispatched over the network to the compute
-nodes: the head node may then wait and receive the results before continuing.
-Job definition and parameters may be pushed to the compute nodes directly from
-the head using :ref:`ipython-blurb`; however, for bandwidth and latency
-reasons, large data files should be written to and read from shared NFS
-mounts.
+The control recipe runs on the so called "head node". The head node acts as
+the coordination point for all pipeline activity. As and when required, the
+head can dispatch compute-intensive jobs to other nodes on a cluster. Various
+mechanisms are provided for queueing and dispatching jobs and collecting their
+results.
 
+Complex cluster layouts may be descibred by a "clusterdesc" file, as used by
+:ref:`distproc`. The framework understands these files natively, whether or
+not the distproc system itself is in use.

@@ -1,15 +1,16 @@
 .. _framework-dependencies:
 
-************
-Dependencies
-************
+*******************
+External components
+*******************
 
 The LOFAR pipeline system is built using the `Python
-<http://www.python.org/>`_ programming language. It builds upon the following
-libraries and tools. The short descriptions given here should serve as
-background material for those who simply wish to use the framework: directly
-interacting with these components should rarely be necessary. Developers, of
-course, will wish to learn in detail about all of these libraries.
+<http://www.python.org/>`_ programming language. Certain features build upon
+the following libraries and tools. The short descriptions given here should
+serve as background material for those who simply wish to use the framework:
+directly interacting with these components should rarely be necessary.
+Developers, of course, will wish to learn in detail about all of these
+libraries.
 
 Cuisine
 =======
@@ -45,10 +46,10 @@ IPython
 `IPython <http://ipython.scipy.org>`_, billed as "an enhanced interactive
 Python", also provides a comprehensive and easy-to-use suite of tools for
 parallel processing across a cluster of compute nodes using Python. This
-capability is extensively exploited in the pipeline system.
+capability is may be used for writing recipes in the pipeline system.
 
-The parallel computing capabilities are only available in the latest
-(post-0.9) releases of IPython. The reader may wish to refer to the `IPython
+The parallel computing capabilities are only available in recent (post-0.9)
+releases of IPython. The reader may wish to refer to the `IPython
 documentation <http://ipython.scipy.org/doc/>`_ for more information, or, for
 a summary of the capabilities of the system, to the `Notes on IPython
 <http://www.lofar.org/operations/lib/exe/fetch.php?media=software:tkp_notes_on_ipython.pdf>`_

@@ -2,4 +2,4 @@
 VDS file creation
 =================
 
-.. literalinclude:: ../../../../../recipes/master/vdsmaker.py
+.. literalinclude:: ../../../../../recipes/master/new_vdsmaker.py

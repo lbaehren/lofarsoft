@@ -4,4 +4,4 @@
 DPPP
 ====
 
-.. literalinclude:: ../../../../../recipes/master/dppp.py
+.. literalinclude:: ../../../../../recipes/master/new_dppp.py

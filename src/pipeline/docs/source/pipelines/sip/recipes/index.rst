@@ -11,11 +11,7 @@ be familiar with the :ref:`recipe-docs` section.
     :maxdepth: 1
 
     sip
+    bbs
     dppp
-    colmaker
     vdsmaker
     vdsreader
-    bbs
-    mwimager
-    sextractor
-

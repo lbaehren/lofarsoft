@@ -1,7 +1,7 @@
 .. _framework-quickstart:
 
-Quickstart
-==========
+CEP Quickstart
+==============
 
 This section provides some quick notes on getting started with the pipeline
 system. More details are available in subsequent sections of this chapter.

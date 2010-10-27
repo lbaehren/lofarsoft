@@ -19,9 +19,9 @@ various components of the framework and how they fit together.
    :maxdepth: 2
 
    framework/overview/index.rst
+   framework/infrastructure/index.rst
    framework/recipe/index.rst
    framework/parallel/index.rst
-   framework/infrastructure/index.rst
    framework/dependencies/index.rst
 
 Pipeline Specific Documenation
