@@ -1,12 +1,12 @@
 .. _sip-quickstart:
 
-==========
-Quickstart
-==========
+==============
+CEP Quickstart
+==============
 
-This brief guide should take you from scratch to an operational **imaging
-pipeline**. It is still under development, and corrections (preferably in the
-form of patches) are very welcome.
+This brief guide should take you from scratch to an operational imaging
+pipeline running on LOFAR CEP. It is still under development, and corrections
+(preferably in the form of patches) are very welcome.
 
 This guide assumes you already have a working installation of the pipeline
 framework; please see the :ref:`framework documentation

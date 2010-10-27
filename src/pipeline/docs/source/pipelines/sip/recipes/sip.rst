@@ -2,12 +2,17 @@
 The SIP recipe
 ==============
 
-The SIP recipe -- ``sip.py`` -- demonstrates the basic functions of an
-imaging pipeline. In turn, it runs ``DPPP`` (data compression and flagging),
-``BBS`` (calibration), ``MWimager`` (imaging) and a custom-developed source
-finding step. The logs of all these steps are collected and stored centrally,
-images (in ``CASA`` format) are made available, and results of the source
-finding are stored in a central database.
+There is no single SIP recipe: an imaging pipeline should be composed of
+components as required. However, various examples are available to help.
+
+``sip.py``
+----------
+
+This recipe demonstrates the basic functionality of an imaging pipeline. In
+turn, it runs ``DPPP`` (data compression and flagging), ``BBS`` (calibration),
+``MWimager`` (imaging) and a custom-developed source finding step. The logs of
+all these steps are collected and stored centrally, images (in ``CASA``
+format) are made available.
 
 This should form a model for how a pipeline can be constructed. However, it
 does not contain logic for routines such as the "major cycle" (whereby
@@ -15,7 +20,11 @@ does not contain logic for routines such as the "major cycle" (whereby
 calibration). Such logic should be straightforward to add based on this
 framework.
 
-``sip.py``
-----------
+.. literalinclude:: ../../../../../examples/definition/sip2/sip.py
 
-.. literalinclude:: ../../../../../examples/definition/sip/sip.py
+``tasks.cfg``
+-------------
+
+This task file defines the tasks referred to in the above example.
+
+.. literalinclude:: ../../../../../examples/definition/sip2/tasks.cfg

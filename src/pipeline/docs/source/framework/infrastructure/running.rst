@@ -57,3 +57,85 @@ then be executed as follows:
   stdout = [ls output elided]
 
 Congratulations: you have run your first LOFAR pipeline!
+
+A pipeline
+----------
+
+To turn this simple recipe into a fully-functional pipeline is simply a matter
+of wrapping it in a pipeline definition derived from the :class:`control`
+class. The :meth:`cook_recipe` method can then be used to run the recipe. Note
+that it needs to be provided with appropriate input and output objects. An
+appropriate pipeline definition might be:
+
+.. code-block:: python
+
+  import sys
+
+  from lofarpipe.support.control import control
+  from lofarpipe.support.lofaringredient import LOFARinput, LOFARoutput
+
+  class pipeline(control):
+      def pipeline_logic(self):
+          recipe_inputs = LOFARinput(self.inputs)
+          recipe_outputs = LOFARoutput()
+          recipe_inputs['executable'] == '/bin/true'
+          self.cook_recipe('example', recipe_inputs, recipe_outputs)
+
+  if __name__ == "__main__":
+      sys.exit(pipeline().main())
+
+In order to make it clear where to find the ``example`` recipe, we also need
+to edit ``pipeline.cfg``, adding a ``recipe_directories`` directive to the
+``DEFAULT`` section:
+
+.. code-block:: none
+
+    recipe_directories = [/opt/pipeline/recipes]
+
+Saving the above definition in ``pipeline.py``, we now have:
+
+.. code-block:: bash
+
+  $ python pipeline.py -j test_job -d
+  2010-10-27 18:17:31 INFO    pipeline: LOFAR Pipeline (pipeline) starting.
+  2010-10-27 18:17:31 INFO    pipeline.example: recipe example started
+  2010-10-27 18:17:31 INFO    pipeline.example: Starting example recipe run
+  2010-10-27 18:17:31 DEBUG   pipeline.example: Pipeline start time: 2010-10-27T16:17:31
+  2010-10-27 18:17:31 INFO    pipeline.example: This is a log message
+  2010-10-27 18:17:31 INFO    pipeline.example: recipe example completed
+  2010-10-27 18:17:31 INFO    pipeline: recipe pipeline completed
+  Results:
+
+Tasks
+-----
+
+Declaring the full inputs and outputs for a recipe every time it is run can be
+a chore, expecially when the same set of parameters are used frequently.
+Therefore, we introduce the concept of a "task": the combination of a recipe
+and a set of standard paramters.
+
+First, we define a task file in our ``pipeline.cfg`` ``DEFAULT`` section.:
+
+.. code-block:: none
+
+  task_files = [/home/username/tasks.cfg]
+
+Then define the task, specifying the recipe and any additional parameters, in
+that file:
+
+.. code-block:: none
+
+  [run_true]
+  recipe = example
+  executable = /bin/true
+
+Our pipeline definition can now be much simpler:
+
+.. code-block:: python
+
+  class pipeline(control):
+      def pipeline_logic(self):
+          self.run_task('run_true')
+
+  if __name__ == "__main__":
+      sys.exit(pipeline().main())

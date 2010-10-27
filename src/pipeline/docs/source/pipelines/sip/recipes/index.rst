@@ -11,6 +11,7 @@ be familiar with the :ref:`recipe-docs` section.
     :maxdepth: 1
 
     sip
+    rficonsole
     bbs
     dppp
     vdsmaker
