@@ -47,8 +47,8 @@ for easy access.
 As with recipes, it is anticipated that users will build up their own
 libraries of pre-defined tasks for whatever applications they find necessary.
 
-Control
-=======
+Control recipes and pipeline definition
+=======================================
 
 The *control* recipe is a special type of a normal recipe. The fundamentals
 are the same; however, it contains some additional "housekeeping" logic which
@@ -56,9 +56,11 @@ may be useful for starting a pipeline. For instance, the control recipe can
 configure a logging system for the pipeline, and may be used to interface with
 LOFAR's MAC/SAS control system.
 
+Often, a control recipe is referred to as a "pipeline definition".
+
 .. _cluster-layout:
 
-Cluster Layout
+Cluster layout
 ==============
 
 The control recipe runs on the so called "head node". The head node acts as
@@ -70,3 +72,20 @@ results.
 Complex cluster layouts may be descibred by a "clusterdesc" file, as used by
 :ref:`distproc`. The framework understands these files natively, whether or
 not the distproc system itself is in use.
+
+.. _pipeline-jobs:
+
+Pipeline jobs
+=============
+
+Once a pipeline has been descibed as above, it will often be used multiple
+times -- for exanmple, to process multiple independent datasets. Each pipeline
+run is associated with a "job identifier" which can be used to keep track of
+these independent pipeline runs. Their results, logs, configuration and so on
+can therefore be conveniently kept separate. The job identifier is a free-form
+string: the user can choose whatever descriptive name is convenient.
+
+The same job can be run multiple times: this might be convenient when a
+previous attempt failed part way through due to a hardware fault, for example.
+In this case, data is filed by job identifier combined with the pipeline start
+time.

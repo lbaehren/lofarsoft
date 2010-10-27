@@ -30,12 +30,15 @@ the cluster head node (as specified in your pipeline configuration; see
 :ref:`infrastructure-setup`). The :ref:`parallelisation-docs` section will
 show how this recipe can be extended to run in parallel across a cluster.
 
+.. _basic-recipe:
+
 A basic recipe
 --------------
 
-.. literalinclude:: ../../../../recipes/master/dummy_echo.py
+.. literalinclude:: ../../../../recipes/master/example.py
    :linenos:
 
+**The following text needs updating to match the recipe shown!**
 
 This example recipe simple spawns a simple shell script and collects its
 results. When run independently of the pipeline system, the script outputs:

@@ -65,4 +65,5 @@ contents of this directory are conveniently accessible:
   $ sudo cp -r ~/pipeline_framework/recipes /opt/pipeline
 
 At this point, the basic framework code should be installed. The next step is
-likely to be to compose a pipeline from the various available recipes.
+to start running simple recipes: see the :ref:`running-basic` section for
+details.

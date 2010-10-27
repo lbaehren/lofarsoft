@@ -22,5 +22,6 @@ the standards that our pipeline system will rely on.
 
    quickstart.rst
    installation.rst
+   running.rst
    layout.rst
    configuration.rst
