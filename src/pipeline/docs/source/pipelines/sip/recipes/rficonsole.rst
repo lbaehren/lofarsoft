@@ -5,12 +5,15 @@ rficonsole
 ==========
 
 The rficonsole recipe runs the rficonsole executable (flagger) across one or
-more MeasurementSets.
+more MeasurementSets. It uses the :class:`RemoteCommandMixIn` system (Section
+:ref:`builtin-parallel`) for distribution over multiple compute nodes.
 
 Inputs
 ------
 
 Excepts to a receive a mapfile as its only argument.
+
+The following options are accepted:
 
 ``executable`` (``ExecField``, default: ``/opt/LofIm/daily/lofar/bin/rficonsole``)
     The name of the executable to use.

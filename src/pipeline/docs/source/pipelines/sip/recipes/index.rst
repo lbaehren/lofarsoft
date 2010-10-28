@@ -13,9 +13,11 @@ be familiar with the :ref:`recipe-docs` section.
     sip
     datamapper
     storagemapper
+    dppp
     rficonsole
     bbs
+    sourcedb
+    parmdb
     cimager
-    dppp
     vdsmaker
     vdsreader
