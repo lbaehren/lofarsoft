@@ -207,6 +207,7 @@ class ComputeJob(object):
         except Exception, e:
             logger.exception("Failed to run remote process %s (%s)" % (self.command, str(e)))
             error.set()
+            return 1
         finally:
             limiter[self.host].release()
         if process.returncode != 0:
