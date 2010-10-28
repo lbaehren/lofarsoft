@@ -13,6 +13,7 @@ be familiar with the :ref:`recipe-docs` section.
     sip
     rficonsole
     bbs
+    cimager
     dppp
     vdsmaker
     vdsreader

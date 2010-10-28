@@ -1,3 +1,5 @@
+.. _parallelisation-ip:
+
 ============================
 Parallelisation with IPython
 ============================
