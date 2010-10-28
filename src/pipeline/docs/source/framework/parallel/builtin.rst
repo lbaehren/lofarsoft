@@ -70,8 +70,12 @@ example:
 Note that you can continue to access the pipeline logger (as ``self.logger``)
 within the node script, as shown.
 
-Parallel recipes
-================
+It is important to realise that the node script must actually be accessible on
+the node(s) which plan to run it! This is normally achieved by having all
+pipeline components NFS mounted under a standard path.
+
+Spawning remote commands
+========================
 
 Next, we will explore how to invoke such a node script from a recipe.
 
@@ -89,7 +93,7 @@ on the recipe. This is an instance of :class:`threading.Event` from the Python
 standard library. After job executing, the recipe can use this flag to check
 for problems.
 
-Thus, a simple parallel recipe could be:
+Thus, a simple recipe could be:
 
 .. code-block:: python
 
@@ -110,7 +114,9 @@ Thus, a simple parallel recipe could be:
               return 0
 
 Note that we have used the convention on file naming described above to derive
-the name of the node script to run based on the name of the recipe.
+the name of the node script to run based on the name of the recipe. Note that
+the relevant path is that under which the file will be accessible *on the
+node*.
 
 Before running the recipe, check that your ``pipeline.cfg`` contains the
 ``engine_ppath`` and ``engine_lpath`` directives (see the :ref:`config-file`
@@ -132,3 +138,67 @@ By default, remote commands are dispatched by SSH. You should ensure that it
 is possible for the user running the pipeline to log into the relevant
 machines in a non-interactive way (eg, using SSH keys, an agent, etc),
 otherwise the pipeline will be unable to proceed.
+
+Distribution
+============
+
+The above recipe obviously only sent one job to a remote machine. However, the
+:meth:`_schedule_jobs` method can accept a list of many jobs. In addition, it
+takes a further argument -- ``max_per_node`` -- which specifies the maximum
+number of jobs that will be run on a given host at the same time. This is
+useful if each job is memory and/or compute intensive, and there are many to
+be run per host: starting them all simultanously will lead to degraded
+performance and (in the worst case) may cause the machine to run out of
+memory.
+
+Given some list of hosts and the corresponding job parameters, then, we can
+schedule them as follows:
+
+.. code-block:: python
+
+  # joblist is a list of (host, job argument) tuples
+  jobs = []
+  command = 'python /path/to/node/script'
+  for host, job_parameters in joblist:
+      jobs.append(
+          ComputeJob(host, command, arguments=job_parameters)
+       )
+  self._schedule_jobs(jobs, max_per_node=8)
+
+Of course, this leaves the outstanding quesion of how to generate ``joblist``.
+Often, the jobs to be dispatched by a recipe will involve running the same
+routine over a number of different input files in parallel. Usually, those
+input files are accessible from only some nodes in the cluster. Some
+deterministic system (see the next section!) is used to allocate each data file
+to an appropriate node, and this is saved on disk as a so-called "mapfile".
+For example, a mapfile from a processing run on the LOFAR CEP cluster might
+look like:
+
+.. code-block:: none
+
+  lce001=[ /data/scratch/swinbank/L2010_20852_1/L20852_SB000-uv.MS.dppp, /data/scratch/swinbank/L2010_20852_1/L20852_SB009-uv.MS.dppp, /data/scratch/swinban k/L2010_20852_1/L20852_SB018-uv.MS.dppp, /data/scratch/swinbank/L2010_20852_1/L20852_SB027-uv.MS.dppp ] lce002=[ /data/scratch/swinbank/L2010_20852_1/L20852_SB001-uv.MS.dppp, /data/scratch/swinbank/L2010_20852_1/L20852_SB010-uv.MS.dppp, /data/scratch/swinban k/L2010_20852_1/L20852_SB019-uv.MS.dppp ]
+  lce003=[ /data/scratch/swinbank/L2010_20852_1/L20852_SB002-uv.MS.dppp, /data/scratch/swinbank/L2010_20852_1/L20852_SB011-uv.MS.dppp, /data/scratch/swinban k/L2010_20852_1/L20852_SB020-uv.MS.dppp ]
+  lce004=[ /data/scratch/swinbank/L2010_20852_1/L20852_SB003-uv.MS.dppp, /data/scratch/swinbank/L2010_20852_1/L20852_SB012-uv.MS.dppp, /data/scratch/swinban k/L2010_20852_1/L20852_SB021-uv.MS.dppp ]
+  lce005=[ /data/scratch/swinbank/L2010_20852_1/L20852_SB004-uv.MS.dppp, /data/scratch/swinbank/L2010_20852_1/L20852_SB013-uv.MS.dppp, /data/scratch/swinban k/L2010_20852_1/L20852_SB022-uv.MS.dppp ]
+  lce006=[ /data/scratch/swinbank/L2010_20852_1/L20852_SB005-uv.MS.dppp, /data/scratch/swinbank/L2010_20852_1/L20852_SB014-uv.MS.dppp, /data/scratch/swinban k/L2010_20852_1/L20852_SB023-uv.MS.dppp ]
+  lce007=[ /data/scratch/swinbank/L2010_20852_1/L20852_SB006-uv.MS.dppp, /data/scratch/swinbank/L2010_20852_1/L20852_SB015-uv.MS.dppp, /data/scratch/swinban k/L2010_20852_1/L20852_SB024-uv.MS.dppp ]
+  lce008=[ /data/scratch/swinbank/L2010_20852_1/L20852_SB007-uv.MS.dppp, /data/scratch/swinbank/L2010_20852_1/L20852_SB016-uv.MS.dppp, /data/scratch/swinban k/L2010_20852_1/L20852_SB025-uv.MS.dppp ]
+  lce009=[ /data/scratch/swinbank/L2010_20852_1/L20852_SB008-uv.MS.dppp, /data/scratch/swinbank/L2010_20852_1/L20852_SB017-uv.MS.dppp, /data/scratch/swinban k/L2010_20852_1/L20852_SB026-uv.MS.dppp ]
+  lce010=[ /data/scratch/swinbank/L2010_20852_1/L20852_SB028-uv.MS.dppp ]
+
+This is, conveniently, the in the standard LOFAR parameterset format. The name
+of such a file can be supplied to a recipe (often it is given as an argument,
+rather than an option. It is then available as ``inputs['args']``).
+
+The function :func:`lofarpipe.support.group_data.load_data_map` can
+conveniently read such a file, returning a list of ``(host, filename)``
+tuples which can be easily iterated over and combined with a standard set of
+arguments to generate a series of :class:`ComputeJob` objects which can be
+dispatched as above. For example, see the :ref:`recipe-rficonsole` recipe,
+which takes exactly this approach.
+
+The final part of the puzzle is how best to generate an appropriate mapfile
+describing your data. Exactly how this can be managed will be specific to your
+particular system. The :ref:`recipe-datamapper` and
+:ref:`recipe-storagemapper` recipes demonstrate how this can be done in LOFAR
+CEP.

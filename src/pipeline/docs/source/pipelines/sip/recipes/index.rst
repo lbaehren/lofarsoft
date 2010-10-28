@@ -11,6 +11,8 @@ be familiar with the :ref:`recipe-docs` section.
     :maxdepth: 1
 
     sip
+    datamapper
+    storagemapper
     rficonsole
     bbs
     cimager
