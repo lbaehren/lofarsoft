@@ -89,10 +89,6 @@ class bbs(BaseRecipe):
         )
     }
 
-    outputs = {
-        'data': ingredient.ListField()
-    }
-
     def go(self):
         self.logger.info("Starting BBS run")
         super(bbs, self).go()
@@ -250,7 +246,6 @@ class bbs(BaseRecipe):
                     # ----------------------------------------------------------
                     return 1
 
-        self.outputs['data'] = self.inputs['args']
         return 0
 
     def _run_bbs_kernel(self, host, command, env, *arguments):
