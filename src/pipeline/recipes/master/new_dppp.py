@@ -40,7 +40,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         'suffix': ingredient.StringField(
             '--suffix',
             default=".dppp",
-            help="Suffix to add to trimmed data (default: .dppp)"
+            help="Suffix to add to output file (default: .dppp)"
         ),
         'working_directory': ingredient.StringField(
             '-w', '--working-directory',
