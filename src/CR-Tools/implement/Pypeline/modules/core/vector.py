@@ -46,7 +46,7 @@ def Vector(Type=float,size=-1,fill=None):
     # Check the 'type' parameter
     if type(size) in hListAndArrayTypes:
         size=len(size)
-    elif type(size)==type(1):
+    elif isinstance(size, int) or isinstance(size, long):
         size=size
     else:
         raise TypeError("size must be a list or vector or a scalar of type integer")
