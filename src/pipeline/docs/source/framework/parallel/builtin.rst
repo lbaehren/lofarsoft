@@ -34,6 +34,12 @@ be used to build rather more elaborate systems: see, for example, the
 :ref:`recipe-cimager` recipe, which pre-processes separate input files for
 each job.
 
+Recipes and the corresponding node scripts are saved in one of the
+``recipe_directories`` defined in the pipeline :ref:`config-file`. By
+convention, they are stored in directories named ``master`` and ``nodes``
+respectively, and with the same filename. Thus, ``master/example.py`` for the
+recipe name, and ``nodes/example.py`` for the corresponding node script.
+
 Node scripts
 ============
 
@@ -50,14 +56,14 @@ example:
   import sys
   from lofarpipe.support.lofarnode import LOFARnode
 
-  class parallel_example(LOFARnode):
+  class example_parallel(LOFARnode):
       def run(self, *args):
           for arg in args:
               self.logger.info("Received %s as argument" % arg)
           return 0
 
   if __name__ == "__main__":
-      sys.exit(parallel_example(sys.argv[1], sys.argv[2]).run_with_logging(*sys.argv[3:]))
+      sys.exit(example_parallel(sys.argv[1], sys.argv[2]).run_with_logging(*sys.argv[3:]))
 
 Note that you can continue to access the pipeline logger (as ``self.logger``)
 within the node script, as shown.
@@ -90,14 +96,37 @@ Thus, a simple parallel recipe could be:
   from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
   from lofarpipe.support.remotecommand import ComputeJob
 
-  class parallel_example(BaseRecipe, RemoteCommandRecipeMixIn):
+  class example_parallel(BaseRecipe, RemoteCommandRecipeMixIn):
       def go(self):
-          super(parallel_example, self).go()
+          super(example_parallel, self).go()
           node_command = "python %s" % (self.__file__.replace("master", "nodes"))
-          job = ComputeJob(hostname, node_command, arguments=[])
+          job = ComputeJob(hostname, node_command, arguments=["example_argument"])
           self._schedule_jobs([job])
           if self.error.isSet():
               return 1
-          else
+          else:
               return 0
 
+Note that we have used the convention on file naming described above to derive
+the name of the node script to run based on the name of the recipe.
+
+Before running the recipe, check that your ``pipeline.cfg`` contains the
+``engine_ppath`` and ``engine_lpath`` directives (see the :ref:`config-file`
+section). Then it can be executed as follows:
+
+.. code-block:: bash
+
+  $ python example_parallel.py -j foo -d
+  2010-10-28 14:14:18 DEBUG   example_parallel: Logging to 127.0.1.1:52584
+  2010-10-28 14:14:18 DEBUG   example_parallel: Dispatching command to localhost with ssh
+  2010-10-28 14:14:18 INFO    example_parallel: Waiting for compute threads...
+  2010-10-28 14:14:18 INFO    node.heastro1.example_parallel: Received example_argument as argument
+  2010-10-28 14:14:21 INFO    example_parallel: recipe example_parallel completed
+  Results:
+
+(Note that ``heastro1`` is the name of the remote host in this case).
+
+By default, remote commands are dispatched by SSH. You should ensure that it
+is possible for the user running the pipeline to log into the relevant
+machines in a non-interactive way (eg, using SSH keys, an agent, etc),
+otherwise the pipeline will be unable to proceed.
