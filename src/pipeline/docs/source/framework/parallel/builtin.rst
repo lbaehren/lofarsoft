@@ -37,8 +37,10 @@ each job.
 Recipes and the corresponding node scripts are saved in one of the
 ``recipe_directories`` defined in the pipeline :ref:`config-file`. By
 convention, they are stored in directories named ``master`` and ``nodes``
-respectively, and with the same filename. Thus, ``master/example.py`` for the
-recipe name, and ``nodes/example.py`` for the corresponding node script.
+respectively, and with the same filename. Thus, ``master/example_parallel.py``
+for the recipe name, and ``nodes/example_parallel.py`` for the corresponding
+node script. Indeed, the scripts below are available under those names in the
+pipeline framework source tree.
 
 Node scripts
 ============
