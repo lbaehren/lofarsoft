@@ -1,3 +1,10 @@
+#                                                         LOFAR IMAGING PIPELINE
+#
+#                                                                 Example recipe
+#                                                            John Swinbank, 2010
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
 import sys
 import subprocess
 
