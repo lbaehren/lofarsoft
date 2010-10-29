@@ -288,7 +288,7 @@ if (CR_WITH_GUI)
 endif (CR_WITH_GUI)
 
 if (CR_WITH_PYPELINE)
-  add_dependencies (cr tmf)
+  add_dependencies (cr tmf sphinx)
 endif (CR_WITH_PYPELINE)
 
 if (HAVE_ROOT AND CR_WITH_STARTOOLS)
