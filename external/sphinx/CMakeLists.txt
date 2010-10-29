@@ -82,8 +82,6 @@ if (NOT HAVE_SPHINX OR SPHINX_FORCE_BUILD)
 
   find_file (have_sphinx_tgz ${SPHINX_TAR_ARCHIVE} ${SPHINX_SOURCE_DIR})
 
-  message (STATUS "${PYTHON_EXECUTABLE} ${SPHINX_BINARY_DIR}/setup.py install --home=${USG_INSTALL_PREFIX}")
-
   if (have_sphinx_tgz)
     ExternalProject_Add (sphinx
       PREFIX ${SPHINX_BINARY_DIR}
