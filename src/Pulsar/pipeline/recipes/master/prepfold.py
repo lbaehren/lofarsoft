@@ -1,4 +1,10 @@
-#!/usr/bin/env python
+#                                                          LOFAR PULSAR PIPELINE
+#
+#                                        Executed data folding (prepfold) recipe
+#                                                          Ken Anderson, 2009-10
+#                                                            k.r.anderson@uva.nl
+# ------------------------------------------------------------------------------
+
 from __future__ import with_statement
 
 import sys, os, logging 
@@ -13,78 +19,85 @@ from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
 import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarnode import run_node
-
+import lofarpipe.support.lofaringredient as ingredient
 
 class prepfold(LOFARrecipe):
-    def __init__(self):
-        super(prepfold, self).__init__()
-        self.optionparser.add_option(
-            '--executable', 
-            dest='executable',
-            default='/home/kanderson/LOFAR/lofarsoft/release/share/pulsar/bin/bf2presto'
-            )
 
-        # pipeline job args
+    """
+    Provides a convenient, pipeline-based mechanism of running bf2presto
+    on a dataset.
 
-        self.optionparser.add_option(
+    """
+
+    inputs = {
+        'executable' : ingredient.ExecField(
+            '--executable',
+            dest="executable",
+            help="prepfold executable",
+            default="/home/kanderson/LOFAR/lofarsoft/release/share/pulsar/bin/prepfold"
+            ),
+        'obsid' : ingredient.StringField(
             '--obsid',
             dest="obsid",
-            help="LOFAR observation id."
-            )
-
-        self.optionparser.add_option(
+            help="Observation identifier"
+            ),
+        'pulsar' : ingredient.StringField(
             '--pulsar',
             dest="pulsar",
-            help="LOFAR observation pulsar name"
-            )
-
-        self.optionparser.add_option(
+            help="Pulsar name"
+            ),
+        'filefactor' : ingredient.IntField(
             '--filefactor',
             dest="filefactor",
-            help="Number of RSP groups"
-            )
-
-        # prepfold cmd args
-
-        self.optionparser.add_option(
+            help="factor by which obsid subbands will be RSP split.",
+            default=8
+            ),
+        'arch' : ingredient.StringField(
+            '--arch',
+            dest="arch",
+            help="Destination output Pulsar Archive, string like 'arch134'",
+            ),
+        'nopdsearch' : ingredient.BoolField(
+            '--nopdsearch',
+            dest="nopdsearch",
+            help="Show but do not search over p-dot.",
+            default=True
+            ),
+        'noxwin' : ingredient.BoolField(
             '--noxwin',
             dest="noxwin",
-            help="No plots on-screen, only postscript files"
-            )    
-
-        self.optionparser.add_option(
+            help="No plots on-screen, only postscript files",
+            default=True
+            ),
+        'fine': ingredient.BoolField(
             '--fine',
             dest="fine",
-            help="A finer gridding in the p/pdot plane (for well known p and pdot)"
-            )
-
-        self.optionparser.add_option(
+            help="Fine gridding in the p/pdot plane (for well known p and pdot)",
+            default=True
+            ),
+        'nperstokes' : ingredient.IntField(
             '--nperstokes',
-             dest="nperstokes",
-            help="Number of Samples per Stokes Integration. Pulp default 256"
+            dest="nperstokes",
+            help="Number of Samples per Stokes Integration. Pulp default 256",
+            default=256
             )
+        }
 
-        self.optionparser.add_option(
-            '--nopdseaarch',
-            dest="nopdsearch",
-            help="how but do not search over p-dot."
-            )
+    outputs = {
+        'data': ingredient.ListField()
+    }
 
 
     def go(self):
+        super(prepfold, self).go()
 
         filefactor = self.inputs['filefactor']
         obsid      = self.inputs['obsid']
-        
-        try:
-            self.__checkIn()
-        except RuntimeError,msg:
-            self.logger.info("prepfold runtime checkin failed."+msg)
-            raise RuntimeError,msg
+        arch       = self.inputs['arch']
+        pulsar     = self.inputs['pulsar']
+        userEnv    = self.__buildUserEnv() # push to compute node
 
-        self.logger.info("Starting prepfold run")
-
-        super(prepfold, self).go()
+        self.logger.info("Starting prepfold run on "+obsid+" ...")
 
         # start ipengines ...
 
@@ -92,8 +105,10 @@ class prepfold(LOFARrecipe):
         targets = mec.get_ids()[0]
 
         mec.execute("import RSPlist",targets=[targets])
-        mec.execute("rsps = RSPlist.RSPS(\"%s\",\"%d\")" % (obsid,filefactor),targets=[targets])
+        mec.execute("rsps = RSPlist.RSPS(\"%s\",\"%s\",\"%d\",\"%s\",\"%s\")" \
+                        % (obsid,pulsar,filefactor,arch, userEnv),targets=[targets])
         mec.execute("rls = rsps.RSPLists()",targets=[targets])
+
         rspLists = mec.pull("rls",targets=[targets])
         mec.push_function(dict(run_prepfold=run_node))
 
@@ -109,12 +124,16 @@ class prepfold(LOFARrecipe):
             for rspGroup in rspLists[0]:                
                 self.logger.info("rspGroup in process ... RSP"+str(rspCount)+":")
                 task = LOFARTask(
-                "result = run_prepfold(inputs, infiles, rspCount)",
+                "result = run_prepfold(inputs, infiles, obsid, pulsar, arch, userEnv, rspCount)",
                 push=dict(
                         recipename = self.name,
                         nodepath   = os.path.dirname(self.__file__.replace('master', 'nodes')),
-                        inputs     = self.inputs,
+                        inputs     = dict(self.inputs),
                         infiles    = rspGroup,
+                        obsid      = obsid,
+                        arch       = arch,
+                        pulsar     = pulsar,
+                        userEnv    = userEnv,
                         rspCount   = rspCount,
                         loghost    = loghost,
                         logport    = logport
@@ -123,9 +142,42 @@ class prepfold(LOFARrecipe):
                 self.logger.info("Scheduling processing of %s" % ("RSP"+str(rspCount)))
                 tasks.append((tc.run(task),rspGroup))
                 rspCount += 1
-                # Wait for all jobs to finish
+
+            # ____________________________________ #
+            #   RSPA job appending to task list ... #
+
+            rspGroup = self.__ravelRspLists(rspLists)
+
+            self.logger.info("rspGroup in process ... RSPA:")
+
+            task = LOFARTask(
+            "result = run_prepfold(inputs, infiles, obsid, pulsar, arch, userEnv, rspCount)",
+            push=dict(
+                    recipename = self.name,
+                    nodepath   = os.path.dirname(self.__file__.replace('master', 'nodes')),
+                    inputs     = dict(self.inputs),
+                    infiles    = rspGroup,
+                    obsid      = obsid,
+                    pulsar     = pulsar,
+                    arch       = arch,
+                    userEnv    = userEnv,
+                    rspCount   = "A",
+                    loghost    = loghost,
+                    logport    = logport
+                    )
+            )
+
+            # ____________________________________ #
+            #   RSPA job appended   ...            #
+
+            self.logger.info("Scheduling processing of %s" % ("RSPA"))
+
+            # pending job, task client (tc) blocks until completion.
+            
+            tasks.append((tc.run(task),rspGroup))
 
             self.logger.info("Waiting for all prepfold tasks to complete")
+
             tc.barrier([task for task, rspGroup in tasks])
             failure = False
             for task, rspGroup in tasks:
@@ -140,17 +192,40 @@ class prepfold(LOFARrecipe):
         return 0
 
 
-    def __checkIn(self):
-        # check for required inputs...
-        if not self.inputs["obsid"]:
-            self.logger.debug("RuntimeError: no obsid found.")
-            self.logger.debug("RuntimeError: Reinstantiate with --obsid=")
-            raise RuntimeError("No obsid value found.\nReinstantiate with --obsid=")
-        if not self.inputs["pulsar"]:
-            self.logger.debug("RuntimeError: no pulsar found.")
-            self.logger.debug("RuntimeError: Reinstantiate with --pulsar=")
-            raise RuntimeError("No pulsar name.\nReinstantiate with --pulsar=")
-        return
+    def __ravelRspLists(self,rspLists):
+
+        """ receives a <filefactor> folded RSP list, returns a the
+        the full flat list of subband data.
+        """
+
+        fullList = []
+        for group in rspLists:
+            for file in group:
+                fullList.append(file)
+
+        return fullList
+
+
+    def __buildUserEnv(self):
+        """
+        User environment must be pushed to the compute nodes.
+        
+        Environment variables needed:
+        $LOFARSOFT
+        $TEMPO
+        $PRESTO
+        
+        These are stringified, pushed through to pulpEnv via RSPS call to pulpEnv,
+        and unpacked in the pulpEnv module.
+        
+        """
+        
+        userEnv  = "LOFARSOFT = "+os.environ["LOFARSOFT"]
+        userEnv += ":TEMPO = "   +os.environ["TEMPO"]
+        userEnv += ":PRESTO ="   +os.environ["PRESTO"]
+
+        return userEnv
+
 
 
 if (__name__ == '__main__'):

@@ -1,29 +1,35 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
-#                                   Sbband directory build (buildPulsArch) recipe
+#                                    Initialize prepfold run (prepareInf) recipe
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
-
 from __future__ import with_statement
-import sys, os
+
+import sys, os, logging 
+from subprocess import check_call, CalledProcessError
+from contextlib import closing
+from collections import defaultdict
 
 # Local helpers
-import lofarpipe.support.utilities as utilities
-from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.ipython import LOFARTask
+from lofarpipe.support.lofarrecipe import LOFARrecipe
 from lofarpipe.support.clusterlogger import clusterlogger
+from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
+import lofarpipe.support.utilities as utilities
 from lofarpipe.support.lofarnode import run_node
 import lofarpipe.support.lofaringredient as ingredient
 
-import bf2Pars, RSPlist
 
+class prepareInf(LOFARrecipe):
 
-class buildPulsArch(LOFARrecipe):
     """
-    Provides a convenient, pipeline-based mechanism of running bf2presto
-    on a dataset.
+    This recipe will build the "all" RSP directory for the given obsid.
+    This is only done when filefactor is not equal to 1, which will not 
+    be nominal (4 or 8 RSP splits will be nominal).  To this end, some
+    fiddling to build a directory for the full set of subband data and then 
+    add one job to the prepfold job queue.
 
     """
     inputs = {
@@ -39,8 +45,8 @@ class buildPulsArch(LOFARrecipe):
         ),
         'filefactor' : ingredient.IntField(
             '--filefactor',
-             dest="filefactor",
-             help="factor by which obsid subbands will be RSP split."
+            dest="filefactor",
+            help="factor by which obsid subbands will be RSP split."
         ),
         'arch' : ingredient.StringField(
             '--arch',
@@ -55,38 +61,31 @@ class buildPulsArch(LOFARrecipe):
 
 
     def go(self):
-        super(buildPulsArch, self).go()
+        super(prepareInf, self).go()
 
-        self.logger.info("Building Pulsar Archive for obsid" + self.inputs['obsid'])
+        self.logger.info("...building RSPA (RSP All) for obsid " + self.inputs['obsid'])
 
         obsid      = self.inputs['obsid']
         pulsar     = self.inputs['pulsar']
-        filefactor = self.inputs['filefactor']
         arch       = self.inputs['arch']
-        userEnv    = self.__buildUserEnv() # push to compute node
+        filefactor = self.inputs['filefactor']
+        uEnv       = self.__buildUserEnv()
 
         # clusterlogger context manager accepts networked logging from compute nodes.
-        # Need only one engine (..._ids()[0]) for this job.
+        # Need only one engine, get_ids()[0], to do the job.
 
         tc, mec = self._get_cluster()
         targets = mec.get_ids()[0]
-
-        self.logger.info("import buildRSPS")
-        mec.execute("import buildRSPS", targets=[targets])
-
-        self.logger.info("Instantiating buildRSPS.buildRSPS() constructor ...")
-
-        mec.execute("rsps = buildRSPS.buildRSPS(\"%s\",\"%s\",%d,\"%s\",\"%s\")" \
-                        % (obsid,pulsar,filefactor,arch,userEnv), targets=[targets])
-
-        self.logger.info("rsps = buildRSPS.buildRSPS(\"%s\",\"%s\",%d,\"%s\",\"%s\")" \
-                             % (obsid,pulsar,filefactor,arch,userEnv))
-
-        self.logger.info("calling makeLists method ...")
-        mec.execute("rsps.makeLists()",targets=[targets])
+        self.logger.info("Importing prepInfFiles ...")
+        mec.execute("import prepInfFiles", targets=[targets])
+        self.logger.info("Instatiating PrepInfFiles")
+        mec.execute("infFiles = prepInfFiles.PrepInfFiles(\"%s\",\"%s\",%d,\"%s\",\"%s\")" \
+                        % (obsid,pulsar,filefactor,arch,uEnv), targets=[targets])
+        self.logger.info("Calling ...buildListsAndLinks()")
+        mec.execute("infFiles.buildListsAndLinks()",targets=[targets])
+        self.logger.info("Obsid directory, RSPA, is populated.")
 
         return
-
 
 
     def __buildUserEnv(self):
