@@ -1,3 +1,10 @@
+#                                                          LOFAR PULSAR PIPELINE
+#
+#                                        Data conversion Node (bf2presto) recipe
+#                                                          Ken Anderson, 2009-10
+#                                                            k.r.anderson@uva.nl
+# ------------------------------------------------------------------------------
+
 # Python standard library
 from __future__ import with_statement
 
@@ -10,41 +17,43 @@ from lofarpipe.support.utilities import log_time
 from lofarpipe.support.lofarexceptions import ExecutableMissing
 
 import bf2Pars
+import pulpEnv
 
-#arch   = '/net/sub5/lse013/data4/PULSAR_ARCHIVE'
-arch   = '/net/sub5/lse015/data4/PULSAR_ARCHIVE'
-stokes = 'incoherentstokes'
 
 class bf2presto(LOFARnode):
-    def run(self, inputs, infiles, rspN):
+    def run(self, inputs, infiles, uEnv, rspN):
 
         self.inputs = inputs
-        self.obsid  = self.inputs['obsid']
-        self.pulsar = self.inputs['pulsar']
         self.infiles= infiles
         self.rspN   = rspN
-        self.stokes = stokes
-        self.arch   = arch
-        self.filefactor = self.inputs['filefactor']
+        
+        obsid  = self.inputs['obsid']
+        pulsar = self.inputs['pulsar']
+        arch   = self.inputs['arch']
+        uEnv   = uEnv
+
+        obsEnv = pulpEnv.PulpEnv(obsid,pulsar,arch,uEnv) # environment
+
+        self.obsid  = obsEnv.obsid
+        self.pulsar = obsEnv.pulsar
+        self.stokes = obsEnv.stokes
+        self.pArch  = obsEnv.archPaths[arch]
 
         with log_time(self.logger):
             self.logger.info("Building bf2presto command line...")
             try: 
-                bf2_cmd = self.__buildcmd()
+                bf2_cmd = self.__buildcmd(obsEnv)
             except KeyError, err: 
                 self.logger.debug("caught exception on __buildcmd()")
                 self.logger.debug(Exception)
                 self.logger.debug(err)
                 raise KeyError, err
             self.logger.info('done buildcmd: RSP'+str(self.rspN))
-            #self.logger.info(bf2_cmd)
+
             try:
                 self.logger.info("Running bf2presto: RSP"+str(self.rspN))
-                #self.logger.debug(('Executing: %s' % bf2_cmd))
                 bfproc = Popen(bf2_cmd, stdout=PIPE, stderr=PIPE)
                 (sout, serr,) = bfproc.communicate()
-                #self.logger.info(('bf2presto stdout: ' + sout))
-                #self.logger.info(('bf2presto stderr: ' + serr))
                 result = 0
             except CalledProcessError,e:
                 self.logger.exception('Call to bf2presto failed')
@@ -60,39 +69,41 @@ class bf2presto(LOFARnode):
             return result
 
 
-    def __buildcmd(self):
+    def __buildcmd(self, obsEnv):
         """
         build the full bf2presto command line
         """
         self.logger.debug("@ bf2presto.__buildcmd()")
         bf2_cmd   = [self.inputs['executable']]
-        bf2_flags = bf2Pars.bf2Pars(self.obsid,self.pulsar)
+        bf2_flags = bf2Pars.bf2Pars(obsEnv)
 
         try:
-            bf2_flags.readParset()
+            bf2_flags.readBFpars()
         except Exception, err:
-            self.logger.debug("problem on readParset")
-            
-        if self.inputs["subbase"]:
-            bf2_cmd.extend([('-f ' + self.inputs["subbase"])])
-            self.logger.debug("Got subbase value. Extending cmd ...")
+            self.logger.debug("Call to readParset() raised an exception")
 
-        if self.inputs["aveblocks"]:
-            bf2_cmd.extend([('-A ' + self.inputs["aveblocks"])])
-            self.logger.debug("Got aveblocks value. Extending cmd ...")
+        if bf2_flags.transpose2:
+            self.logger.debug("Observation parset indicates 2nd transpose.")
+            bf2_cmd.extend([('-t')])
 
-        if self.inputs["collapse"] != "False":
+        if self.inputs["collapse"] != False:
             self.logger.debug("Collapse switch, -C: on")
-            bf2_cmd.extend([('-C ' + self.inputs["collapse"])])
+            bf2_cmd.extend([('-C')])
 
-        if self.inputs["nsigmas"] != "False":
-            bf2_cmd.extend([('-r ' + self.inputs["nsigmas"])])
-            self.logger.debug("Got nsigmas:"+self.inputs['nsigmas'])
+        if self.inputs["collapse"] == False:
+            self.logger.debug("Collapse switch off.")
+            self.logger.debug("No command extension.")
+
+        if self.inputs["nsigmas"] != 7:
+            self.logger.debug("Got nsigmas:"+ str(self.inputs['nsigmas']))
             self.logger.debug("Extending cmd ...")
+            bf2_cmd.extend([('-r ' + str(self.inputs["nsigmas"]))])
 
         bfRootOut = self.__buildOutRoot()
 
         bf2_cmd.extend([
+                ('-A 10'),
+                ('-f 0'),
                 ('-c ' + bf2_flags.channels),
                 ('-n 16'),
                 ('-N ' + str(bf2_flags.Nsamples)),
@@ -108,7 +119,7 @@ class bf2presto(LOFARnode):
 
     def __buildOutRoot(self):
         outRoot = os.path.join(
-            self.arch,
+            self.pArch,
             self.obsid,
             self.stokes,
             "RSP"+str(self.rspN),

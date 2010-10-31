@@ -1,31 +1,37 @@
+#                                                          LOFAR PULSAR PIPELINE
+#
+#                                            Data Folding Node (prepfold) recipe
+#                                                          Ken Anderson, 2009-10
+#                                                            k.r.anderson@uva.nl
+# ------------------------------------------------------------------------------
+
 # Python standard library
+
 from __future__ import with_statement
 from contextlib import closing
 from subprocess import Popen, check_call, CalledProcessError, PIPE, STDOUT
 
 from lofarpipe.support.lofarnode import LOFARnode
-from lofarpipe.support.utilities import patch_parset, create_directory, log_time, read_initscript
+from lofarpipe.support.utilities import log_time
 from lofarpipe.support.lofarexceptions import ExecutableMissing
 
-
-#arch   = '/net/sub5/lse013/data4/PULSAR_ARCHIVE'
-arch   = '/net/sub5/lse015/data4/PULSAR_ARCHIVE'
-stokes = 'incoherentstokes'
-
 from os.path import splitext
-import os
-import glob
+import os, glob
 
+import pulpEnv
 
 class prepfold(LOFARnode):
-    def run(self, inputs, infiles,  rspN):
+    def run(self, inputs, infiles, obsid, pulsar, arch, userEnv, rspN):
+
+        obsEnv = pulpEnv.PulpEnv(obsid, pulsar, arch, userEnv) 
+
         self.inputs     = inputs
         self.infiles    = infiles
-        self.rspN       = rspN
-        self.obsid      = self.inputs['obsid']
-        self.pulsar     = self.inputs['pulsar']
-        self.stokes     = stokes
-        self.pulsArch   = arch
+        self.rspN       = str(rspN)         # int or "A" for RSPA
+        self.obsid      = obsEnv.obsid
+        self.pulsar     = obsEnv.pulsar
+        self.stokes     = obsEnv.stokes
+        self.pulsArch   = obsEnv.pArchive
         self.executable = self.inputs['executable']
         
         with log_time(self.logger):
@@ -34,7 +40,7 @@ class prepfold(LOFARnode):
             except:
                 raise ExecutableMissing(self.executable)
 
-            self.logger.debug("Moving to RSP" + str(self.rspN))
+            self.logger.debug("Moving to RSP" + self.rspN)
             self.logger.debug("As working directory for prepfold ...")
 
              #                                                #
@@ -44,7 +50,7 @@ class prepfold(LOFARnode):
             curDir = os.getcwd()
             newDir = os.path.dirname(self.__buildOutRoot())
             os.chdir(newDir)
-            self.logger.debug("In RSP"+str(self.rspN)+" directory NOW")
+            self.logger.debug("In RSP"+ self.rspN +" directory NOW")
             self.logger.debug(os.getcwd())
             
             ###  prepfold_cmd = self.__buildListCmd()
@@ -67,8 +73,8 @@ class prepfold(LOFARnode):
 
                 #check_call(prepfold_cmd)
 
-                env = {'TEMPO': "/home/kanderson/LOFAR/lofarsoft/release/share/pulsar/bin",
-                       'PATH': "/home/kanderson/LOFAR/lofarsoft/release/share/pulsar/bin"
+                env = {'TEMPO': obsEnv.TEMPO,
+                       'PATH' : obsEnv.TEMPO
                        }
 
                 preproc = Popen(prepfold_cmd, cwd=prepfold_cwd, stdout=PIPE, stderr=PIPE, env=env)
@@ -106,7 +112,7 @@ class prepfold(LOFARnode):
 
     def convertPlots(self):
         """
-        Method called by this node recipe will work on the asigned
+        Method called by this node recipe will work on the assigned
         RSP directory.  Method will convert prepfold-generated pfd.ps
         files to .pdf, .png and also produce the thumbnail png file.
         
@@ -183,15 +189,15 @@ class prepfold(LOFARnode):
         prepfold_cmd.extend([(self.pulsar)])
         self.logger.debug("prepfold command extended: -psr "+self.pulsar)
 
-        if self.inputs['noxwin'] == 'True':
+        if self.inputs['noxwin'] == True:
             prepfold_cmd.extend([('-noxwin')])
             self.logger.debug("prepfold command extended: -noxwin")
 
-        if self.inputs['fine']== 'True':
+        if self.inputs['fine']== True:
             prepfold_cmd.extend([('-fine')])
             self.logger.debug("prepfold command extended: -fine")
 
-        if self.inputs['nopdsearch']== 'True':
+        if self.inputs['nopdsearch']== True:
             prepfold_cmd.extend([('-nopdsearch')])
             self.logger.debug("prepfold command extended: -nopdsearch")
 
@@ -237,15 +243,15 @@ class prepfold(LOFARnode):
         prepfold_cmd.extend([(self.pulsar)])
         self.logger.debug("prepfold command extended: -psr "+self.pulsar)
 
-        if self.inputs['noxwin'] == 'True':
+        if self.inputs['noxwin'] == True:
             prepfold_cmd.extend([('-noxwin')])
             self.logger.debug("prepfold command extended: -noxwin")
 
-        if self.inputs['fine']== 'True':
+        if self.inputs['fine']== True:
             prepfold_cmd.extend([('-fine')])
             self.logger.debug("prepfold command extended: -fine")
 
-        if self.inputs['nopdsearch']== 'True':
+        if self.inputs['nopdsearch']== True:
             prepfold_cmd.extend([('-nopdsearch')])
             self.logger.debug("prepfold command extended: -nopdsearch")
 
@@ -275,12 +281,11 @@ class prepfold(LOFARnode):
 
         """ build the output root for prepfold -o option"""
 
-        n = str(self.rspN)
         outRootPath = os.path.join(self.pulsArch,
                                    self.obsid,
                                    self.stokes,
-                                   "RSP"+str(n),
-                                   self.pulsar+"_"+self.obsid+"_"+"RSP"+n
+                                   "RSP"+self.rspN,
+                                   self.pulsar+"_"+self.obsid+"_"+"RSP"+self.rspN
                                    )
         return outRootPath
 
@@ -292,8 +297,8 @@ class prepfold(LOFARnode):
         build file list and out root locally for operation within an RSP
         directory.
         """
-        n = str(self.rspN)
-        outRootName = self.pulsar+"_"+self.obsid+"_"+"RSP"+n
+
+        outRootName = self.pulsar+"_"+self.obsid+"_"+"RSP"+self.rspN
         return outRootName
 
         # ------------------- #
@@ -306,7 +311,7 @@ class prepfold(LOFARnode):
         """
 
         prepPath = os.path.dirname(outRoot)
-        self.logger.debug("RSP"+str(self.rspN)+" prepfold outfile path:")
+        self.logger.debug("RSP"+ self.rspN +" prepfold outfile path:")
         self.logger.debug(prepPath)
 
         allFiles = os.listdir(prepPath)
