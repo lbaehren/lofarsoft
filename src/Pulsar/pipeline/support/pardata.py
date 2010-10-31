@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+#                                                          LOFAR PULSAR PIPELINE
+#
+#                                             Pulsar.pipeline.support.pardata.py
+#                                                          Ken Anderson, 2009-10
+#                                                            k.r.anderson@uva.nl
+# ------------------------------------------------------------------------------
+
 import string
 from os.path import expanduser
 
@@ -30,10 +37,26 @@ class ParData:
             if line.startswith("Observation.bandFilter"):
                 self.bandFilter = self.__getParVal(line)
                 continue
-            if line.startswith("Observation.subbandList"):
-                self.subbandFirst = float(self.__getParVal(line).split("..")[0][1:])
-                self.subbandLast  = float(self.__getParVal(line).split("..")[1][:-1])
+            if line.startswith("Observation.Beam[0].subbandList") or \
+                    line.startswith("Observation.subbandList"):
+
+                # for either ".." ranges, or a CSV list
+
+                try:
+                    self.subbandFirst = float(self.__getParVal(line).split("..")[0][1:])
+                except: 
+                    self.subbandFirst = float(self.__getParVal(line)[1:4])               
+                try:
+                    self.subbandLast = float(self.__getParVal(line).split("..")[1][:-1])
+                except:
+                    self.subbandLast = float(line[-5:-2])
                 continue
+
+#             if line.startswith("Observation.subbandList"):
+#                 self.subbandFirst = float(self.__getParVal(line).split("..")[0][1:])
+#                 self.subbandLast  = float(self.__getParVal(line).split("..")[1][:-1])
+#                 continue
+
             if line.startswith("Observation.channelsPerSubband"):
                 self.channelsPerSubband = self.__getParVal(line)
                 continue
@@ -48,6 +71,7 @@ class ParData:
                 self.pulsarsrc = self.__getParVal(line)
                 continue
             else: continue
+
 
     def __getParVal(self, line):
         return line.split("=")[-1].strip()
