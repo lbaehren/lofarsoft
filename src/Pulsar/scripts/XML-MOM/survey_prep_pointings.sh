@@ -3,7 +3,7 @@
 
 USAGE="\nusage : survey_prep_pointings.sh pointing_range pointings_file xml_script_options \n\n"\
 "      pointing_range  ==> Specify the range of pointing numbers from file;\n"\
-"                          Can be a range, a comma-separated list or single number (i.e. 75-139) \n"\
+"                          Can be a range, a comma-separated list or single number:\n"\
 "                          (i.e. 75-139)   (i.e. 77,139,189,190)      (i.e. 75)  \n"\
 "      pointings_file  ==> Input pointings table (i.e. LOFAR_HBA_pointings_cluster7_101021.txt) \n"\
 "      xml_script_options  ==> All required arguments to run the multi-templatesNbeams.sh script (except -in infile) \n"\
