@@ -2,7 +2,9 @@
 
 
 USAGE="\nusage : survey_prep_pointings.sh pointing_range pointings_file xml_script_options \n\n"\
-"      pointing_range  ==> Specify the range of pointing numbers from file (i.e. 75-139) \n"\
+"      pointing_range  ==> Specify the range of pointing numbers from file;\n"\
+"                          Can be a range, a comma-separated list or single number (i.e. 75-139) \n"\
+"                          (i.e. 75-139)   (i.e. 77,139,189,190)      (i.e. 75)  \n"\
 "      pointings_file  ==> Input pointings table (i.e. LOFAR_HBA_pointings_cluster7_101021.txt) \n"\
 "      xml_script_options  ==> All required arguments to run the multi-templatesNbeams.sh script (except -in infile) \n"\
 "\n"\
@@ -10,7 +12,10 @@ USAGE="\nusage : survey_prep_pointings.sh pointing_range pointings_file xml_scri
 "      survey_prep_pointings.sh 75-139 LOFAR_HBA_catalog_cluster7_101031.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001,CS002 -antenna HBA +multi -namecol \n"\
 "\n"\
 "      Example using row list:\n"\
-"      survey_prep_pointings.sh 75,79,93,106 LOFAR_HBA_catalog_cluster7_101031.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001,CS002 -antenna HBA +multi -namecol \n"
+"      survey_prep_pointings.sh 75,79,93,106 LOFAR_HBA_catalog_cluster7_101031.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001,CS002 -antenna HBA +multi -namecol \n"\
+"\n"\
+"      Example using a single row:\n"\
+"      survey_prep_pointings.sh 75 LOFAR_HBA_catalog_cluster7_101031.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001,CS002 -antenna HBA +multi -namecol \n"
 
 
 range=""
