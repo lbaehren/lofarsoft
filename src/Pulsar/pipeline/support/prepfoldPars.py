@@ -1,5 +1,12 @@
 #! /usr/bin/env python
 
+#                                                          LOFAR PULSAR PIPELINE
+#
+#                                        Pulsar.pipeline.support.prepfoldPars.py
+#                                                          Ken Anderson, 2009-10
+#                                                            k.r.anderson@uva.nl
+# ------------------------------------------------------------------------------
+
 from os.path import join
 
 
