@@ -1192,108 +1192,112 @@ do
 	        ##################################################
 	        # Calculate start/stop related values
 	        # Break up into time less than one minute or >= one minute
-			if (( $TIME < 1 )) && (( $TIME > 0 ))
-			then
-		 	    #calculate the start/stop time if set by the user as input (assume 1 min for times less than 1 min)
-				if (( $user_start == 1 ))
+            if (( $beam == 1 ))
+            then
+
+				if (( $TIME < 1 )) && (( $TIME > 0 ))
 				then
-				    START=$previous_start
-				    tot_time=`echo "1 + $GAP" | bc"`
+			 	    #calculate the start/stop time if set by the user as input (assume 1 min for times less than 1 min)
+					if (( $user_start == 1 ))
+					then
+					    START=$previous_start
+					    tot_time=`echo "1 + $GAP" | bc"`
+					   
+						if [[ $system_typ == "Darwin" ]]
+						then
+					          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+						else
+		                                  tmp_start=`echo "$START" | sed 's/T/ /'`
+		                                  tmp=`date -d "$tmp_start" "+%s"`
+		                                  new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
+						  #new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
+					          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+						fi
+					elif (( $LST == 1 ))
+					then
+					    tot_time=$LST_DIFF
+					   
+						if [[ $system_typ == "Darwin" ]]
+						then
+					          START=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+						else
+		                                  tmp_start=`echo "$START" | sed 's/T/ /'`
+		                                  tmp=`date -d "$tmp_start" "+%s"`
+		                                  new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
+						  # new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
+					          START=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+						fi
+					fi
+		
+				   # change decimal minutes into seconds
+				   TIME=`echo $TIME | awk '{print ($1 * 60)}'`
+				   if (( $TIME > 0 )) && (( $TIME <= 10 )) 
+				   then
+				      DURATION=`echo "PT0"$TIME"S"`	
+				   else 
+				      DURATION=`echo "PT"$TIME"S"`	
+				   fi	
 				   
-					if [[ $system_typ == "Darwin" ]]
+		        elif (( $TIME >= 1 ))
+		        then
+			 	    #calculate the start/stop time if set by the user as input (assume 1 min for times less than 1 min)
+					if (( $user_start == 1 ))
 					then
-				          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
-					else
-	                                  tmp_start=`echo "$START" | sed 's/T/ /'`
-	                                  tmp=`date -d "$tmp_start" "+%s"`
-	                                  new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
-					  #new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
-				          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
-					fi
-				elif (( $LST == 1 ))
-				then
-				    tot_time=$LST_DIFF
-				   
-					if [[ $system_typ == "Darwin" ]]
+					    START=$previous_start
+					    tot_time=`echo "$TIME + $GAP" | bc`
+					   			   
+						if [[ $system_typ == "Darwin" ]]
+						then
+					          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+						else
+		                                  tmp_start=`echo "$START" | sed 's/T/ /'`
+		                                  tmp=`date -d "$tmp_start" "+%s"`
+		                                  new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
+			  			  #new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
+					          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+						fi
+					elif (( $LST == 1 ))
 					then
-				          START=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
-					else
-	                                  tmp_start=`echo "$START" | sed 's/T/ /'`
-	                                  tmp=`date -d "$tmp_start" "+%s"`
-	                                  new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
-					  # new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
-				          START=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+					    tot_time=$LST_DIFF
+					   
+						if [[ $system_typ == "Darwin" ]]
+						then
+					          START=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+						else
+		                                  tmp_start=`echo "$START" | sed 's/T/ /'`
+		                                  tmp=`date -d "$tmp_start" "+%s"`
+		                                  new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
+						  #new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
+					          START=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+						fi
 					fi
-				fi
-	
-			   # change decimal minutes into seconds
-			   TIME=`echo $TIME | awk '{print ($1 * 60)}'`
-			   if (( $TIME > 0 )) && (( $TIME <= 10 )) 
-			   then
-			      DURATION=`echo "PT0"$TIME"S"`	
-			   else 
-			      DURATION=`echo "PT"$TIME"S"`	
-			   fi	
-			   
-	        elif (( $TIME >= 1 ))
-	        then
-		 	    #calculate the start/stop time if set by the user as input (assume 1 min for times less than 1 min)
-				if (( $user_start == 1 ))
-				then
-				    START=$previous_start
-				    tot_time=`echo "$TIME + $GAP" | bc`
-				   			   
-					if [[ $system_typ == "Darwin" ]]
+		
+					if (( $TIME > 0 )) && (( $TIME <= 10 ))
 					then
-				          previous_start=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
-					else
-	                                  tmp_start=`echo "$START" | sed 's/T/ /'`
-	                                  tmp=`date -d "$tmp_start" "+%s"`
-	                                  new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
-		  			  #new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`
-				          previous_start=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
-					fi
-				elif (( $LST == 1 ))
-				then
-				    tot_time=$LST_DIFF
-				   
-					if [[ $system_typ == "Darwin" ]]
+					   DURATION=`echo "PT0"$TIME"M"`
+					elif (( $TIME >= 10 ))
 					then
-				          START=`date -j -v +$tot_time"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+					   DURATION=`echo "PT"$TIME"M"`
 					else
-	                                  tmp_start=`echo "$START" | sed 's/T/ /'`
-	                                  tmp=`date -d "$tmp_start" "+%s"`
-	                                  new_date_seconds=`echo "$tmp + $tot_time * 60" | bc` 
-					  #new_date_seconds=`echo "date -d \"$START\" \"+%s\" + $tot_time * 60" | bc`  
-				          START=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
+					   echo "ERROR: duration value ($TIME) is not understood"
+					   continue
 					fi
-				fi
-	
-				if (( $TIME > 0 )) && (( $TIME <= 10 ))
-				then
-				   DURATION=`echo "PT0"$TIME"M"`
-				elif (( $TIME >= 10 ))
-				then
-				   DURATION=`echo "PT"$TIME"M"`
 				else
-				   echo "ERROR: duration value ($TIME) is not understood"
-				   continue
+					   echo "ERROR: duration value ($TIME) is not understood"
+					   continue
+			    fi
+		
+				if [[ $system_typ == "Darwin" ]]
+				then
+				      END=`date -j -v +$TIME"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
+				else
+		              tmp_start=`echo "$START" | sed 's/T/ /'`
+		              tmp=`date -d "$tmp_start" "+%s"`
+				      new_date_seconds=`echo "$tmp + $TIME * 60" | bc` 
+		  	              END=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
 				fi
-			else
-				   echo "ERROR: duration value ($TIME) is not understood"
-				   continue
-		    fi
-	
-			if [[ $system_typ == "Darwin" ]]
-			then
-			      END=`date -j -v +$TIME"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
-			else
-	              tmp_start=`echo "$START" | sed 's/T/ /'`
-	              tmp=`date -d "$tmp_start" "+%s"`
-			      new_date_seconds=`echo "$tmp + $TIME * 60" | bc` 
-	  	              END=`date -d @$new_date_seconds "+%Y-%m-%dT%H:%M:%S"`
-			fi
-	
+	        fi # end if (( $beam == 1 ))
+	        
 	        ##################################################
 	        # Antenna related setttings, depending on input
 		    if [ $ANTENNA == "HBAHigh" ]
