@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/ksh
 
 
 USAGE="\nusage : survey_prep_pointings.sh pointing_range pointings_file xml_script_options \n\n"\
@@ -7,7 +7,7 @@ USAGE="\nusage : survey_prep_pointings.sh pointing_range pointings_file xml_scri
 "      xml_script_options  ==> All required arguments to run the multi-templatesNbeams.sh script (except -in infile) \n"\
 "\n"\
 "      Example:\n"\
-"      survey_prep_pointings.sh 75-139 LOFAR_HBA_pointings_cluster7_101021.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001,CS002 -antenna HBA +multi \n"
+"      survey_prep_pointings.sh 75-139 LOFAR_HBA_catalog_cluster7_101031.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001,CS002 -antenna HBA +multi -namecol \n"
 
 
 range=""
