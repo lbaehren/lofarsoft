@@ -1,21 +1,25 @@
 #! /usr/bin/env python
 
-from os.path import join, isfile
-from os import walk
+#                                                          LOFAR PULSAR PIPELINE
+#
+#                                             Pulsar.pipeline.support.bf2Pars.py
+#                                                          Ken Anderson, 2009-10
+#                                                            k.r.anderson@uva.nl
+# ------------------------------------------------------------------------------
 
-#arch       = '/net/sub5/lse013/data4/PULSAR_ARCHIVE/'
-arch       = '/net/sub5/lse015/data4/PULSAR_ARCHIVE/'
-parsetPath = '/globalhome/lofarsystem/log/'
-oParsetName= 'RTCP.parset.0'
-stokes     = 'incoherentstokes'
+
+import os
+
+import pulpEnv
 
 class bf2Pars():
+
     """ Class presents bf2presto command line arguments and other parameters
     as instance variables.  Values are stringified for cli.
     
     NOTE: output files from bf2presto are named like,
 
-    <target_name>_<obsid>_RSP[i].sub[nnn],
+    <target_name>_<obsid>_RSP[i].sub[0-9][nnn],
     
     though this is dependent upon the of number input subbands.
     
@@ -37,11 +41,13 @@ class bf2Pars():
     bf2presto produces the name extensions during channelization.
 
     """
+
     __module__ = __name__
 
-    def __init__(self, obsid, target):
-        self.obsid    = obsid
-        self.target   = target
+    def __init__(self, env ):
+        self.obsid  = env.obsid
+        self.pulsar = env.pulsar
+        self.arch   = env.arch
 
         # cmd line args, switches, flags, ...
         self.sb_base  = '1'         # -f  base Subband number
@@ -54,50 +60,16 @@ class bf2Pars():
 
         # parset, output file path
 
-        self.RSP         = 'RSP'              # Caller must an RSP number (1,2,3, ... etc)
-        self.stokes      = stokes
-        self.arch_base   = arch
-        self.parsetPath  = parsetPath
-        self.parsetName  = oParsetName
+        self.stokes      = env.stokes
+        self.arch_base   = env.archPaths[self.arch] # archive @ lse018/data4
+        self.parsetPath  = env.parsetPath
+        self.parsetName  = env.parsetName
+        self.transpose2  = env.transpose2
 
-        # output_base will be the full "head" of archive path, i.e. everything but
-        # the file extension.
-
-        # Caller must an RSP number (1,2,3, ... etc)
-        output_path  = join(self.arch_base, self.obsid, self.stokes, self.RSP)
-        self.headout = join(output_path, self.target + '_' + self.obsid + '_' + self.RSP)
-        self.testParset()
+        self.readBFpars()
 
 
-    def testParset(self):
-        """
-        test for parset location type
-
-        old location style
-
-        /globalhome/lofarsystem/log/<obsid>/RTCP.parset.0
-        
-        new location style,
-
-        /globalhome/lofarsystem/log/L<yyy-mm-dd>_<hhmmss>/RTCP-09874.parset
-
-        where hhmmss is the time of file write on day, <yyyy-mm-dd>
-
-        """
-
-        nominalParsetFile = join(self.parsetPath, self.obsid, self.parsetName)
-
-        if isfile(nominalParsetFile):
-            print "Found nominal parset file."
-            self.parsetName = nominalParsetFile
-        else:
-            print "searching for alternate parset..."
-            parsetTuple     = self.__findParsetFile()
-            self.parsetName = join(parsetTuple[0],parsetTuple[1])
-        return
-
-
-    def readParset(self):
+    def readBFpars(self):
         """
 
         Read a LOFAR observation parset file for the passed LOFAR obsid.
@@ -108,25 +80,39 @@ class bf2Pars():
 
         Parameters grabbed from  parsets:
 
-           Observation.bandFilter -- currently not used.
+           Observation.bandFilter        -- currently not used.
            Observation.channelsPerSubband
            OLAP.Stokes.integrationSteps
            OLAP.CNProc.integrationSteps
+           OLAP.BeamsAreTransposed       -- 2nd transpose, 'True' or 'False'
 
         TBD:
         ===
 
         -- New parameters for new processing modes
 
-        NBEAMS           'OLAP.storageStationNames'
-        FLYSEYE          'OLAP.PencilInfo.flysEye'
         INCOHERENTSTOKES 'OLAP.outputIncoherentStokes'
         COHERENTSTOKES   'OLAP.outputCoherentStokes'
+        2ND TRANSPOSE    'OLAP.BeamsAreTransposed'
+        STOKES_TYPE      'OLAP.outputIncoherentStokes'
+        FLYSEYE          'OLAP.PencilInfo.flysEye'
+        NBEAMS           'OLAP.storageStationNames'
 
         """
 
         pars = open(self.parsetName).readlines()
         for line in pars:
+
+            if ('OLAP.BeamsAreTransposed' in line):
+                self.transpose2 = line.split('=')[1].strip()
+                continue
+            else: self.transpose2 = False
+
+            if ('OLAP.outputIncoherentStokes' in line):
+                incoherentstokes = line.split('=')[1].strip()
+                if incoherentstokes == 'True':
+                    self.stokes = 'incoherentstokes'
+
             if ('Observation.bandFilter' in line):
                 self.array = line.split('=')[1].split('_')[0].strip()
                 continue
@@ -157,32 +143,10 @@ class bf2Pars():
         return
 
 
-    def __findParsetFile(self):
-        """
-        Hunt down the parset for a given obsid.
-        Host site is
+        # ------------------------------------------- #
 
-        /globalhome/lofarsystem/log/
 
-        which is self.parsetPath
+    def __setEnvironment(self):
 
-        Ivocation of this method necessarily implies that "nominalparsetFile"
-        did not exist, and this obsid has a "new form" parset file.
-
-        """
-
-        parsetFile   = None
-        parsetLogDir = None
-
-        searchPath = self.parsetPath
-        for root, dir, files in walk(searchPath,topdown=False):
-            for file in files:
-                if file == "RTCP-"+self.obsid.split("_")[1]+".parset":
-                    parsetLogDir = root
-                    parsetFile   = file
-                    break
-                continue
-            if parsetFile and parsetLogDir:
-                break
-            else: continue
-        return (parsetLogDir, parsetFile)
+        obsEnv = pulpEnv.PulpEnv(self.obsid,self.pulsar,self.arch,self.userEnv)
+        return obsEnv
