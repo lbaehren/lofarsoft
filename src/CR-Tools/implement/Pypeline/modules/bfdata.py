@@ -2,6 +2,14 @@ import struct
 import numpy as np
 import os
 
+def sb2str(sb):
+    if sb<10:
+       return '00'+str(sb)
+    elif sb<100:
+       return '0'+str(sb)
+    else:
+       return str(sb)
+
 def get_stokes_data(file, block, channels, samples, nrstations=1, type="StokesI"):
     """Get a lofar datablock from stokes (I or IQUV) raw data format. 
     Returns a array of data(stations,channels,samples,nrstokes).
@@ -111,7 +119,7 @@ def get_rawvoltage_data(file, block, channels, samples, nrstations=1, nrpol=2):
     
     
     # return sequence number as uint, and data as nparray
-    return np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrpol,2)[:,:,0:samples,:,:]
+    return np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrpol,2)[:,:,0:samples|2,:,:]
 
 
 
@@ -542,7 +550,8 @@ def get_parameters(obsid, useFilename=False):
     parameters["filtereddata"]=allparameters["OLAP.outputFilteredData"]=='true'
     parameters["flyseyes"]=allparameters["OLAP.PencilInfo.flysEye"]=='true' 
     parameters["stokestype"]=allparameters["OLAP.Stokes.which"]
-
+    if "Observation.Beam[0].target" in allparameters.keys():
+        parameters["target"]=allparameters["Observation.Beam[0].target"]
     # Get file names
     year=parameters['starttime'].split('-')[0].replace('\'','')
 
@@ -646,3 +655,200 @@ def get_parameters(obsid, useFilename=False):
     return parameters
 
 
+def get_parameters_new(obsid, useFilename=False):
+    """Get the most important observation parameters. Returns a dictionary with these parameters.
+    *obsid*        Observation id, f.e. L2010_08834 or D2009_16234. Only works on lofar cluster.
+    *useFilename*  If set to true, obsid is filename of the parset.
+    """
+    if useFilename:
+        parsetfilename=obsid
+    else:
+        # What is the observation number? This determines the filename
+        if '_' in obsid:
+           obsnr=obsid.split('_')[1]
+        else:
+           obsnr=obsid.strip('L')
+        
+        # Name of the parset file
+        parsetfilename='/globalhome/lofarsystem/production/lofar/bgfen/log/L'+obsnr+'/L'+obsnr+'.parset'
+        if not os.path.isfile(parsetfilename):
+            parsetfilename='/globalhome/lofarsystem/log/'+obsid+'/RTCP.parset.0'   
+
+ 
+    # Open the file
+    parsetfile=open(parsetfilename,'r')
+    parsetfile.seek(0)
+    # Read in the parameters from the parset file
+    allparameters={}
+    for line in parsetfile:
+        str2 = line.split(None,2)
+        if len(str2)>=3:
+            allparameters[str2[0]] = str2[2].strip('\n')
+        else:
+            allparameters[str2[0]] = "UNDEFINED"
+
+    # Link the important parameters
+    parameters={}
+    parameters["channels"]=int(allparameters["Observation.channelsPerSubband"])
+    parameters["samples"]=int(allparameters["OLAP.CNProc.integrationSteps"])
+    parameters["namemask"]=allparameters["Observation.MSNameMask"]
+    parameters["stationnames"]=allparameters["OLAP.storageStationNames"]
+    parameters["storagenodes"]=allparameters["Observation.VirtualInstrument.storageNodeList"].strip('[]').split(',')
+    parameters["storagenodes"].sort()
+    SBspernode=allparameters["OLAP.storageNodeList"].strip('[]').split(',')
+    for i in range(len(SBspernode)):
+        SBspernode[i]=int(SBspernode[i].split('*')[0])
+    parameters["SBspernode"]=SBspernode
+    parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
+    parameters["subbands"]=allparameters["Observation.subbandList"]
+    #parameters["subbandsperMS"]=allparameters["OLAP.StorageProc.subbandsPerMS"]
+    #parameters["antennaset"]=allparameters["Observation.antennaSet"]
+    parameters["filterselection"]=allparameters["Observation.bandFilter"]
+    parameters["clockfrequency"]=allparameters["Observation.sampleClock"]
+    obsid2=allparameters["Observation.ObsID"]
+    while len(obsid2) < 5:
+        obsid2 = '0' + obsid2
+    parameters["obsid"]=obsid2
+    parameters["starttime"]=allparameters["Observation.startTime"]
+    parameters["stoptime"]=allparameters["Observation.stopTime"]
+    parameters["coherentstokes"]=allparameters["OLAP.outputCoherentStokes"]=='true'
+    parameters["incoherentstokes"]=allparameters["OLAP.outputIncoherentStokes"]=='true'
+    parameters["beamformeddata"]=allparameters["OLAP.outputBeamFormedData"]=='true'
+    parameters["correlateddata"]=allparameters["OLAP.outputCorrelatedData"]=='true'
+    parameters["filtereddata"]=allparameters["OLAP.outputFilteredData"]=='true'
+    parameters["flyseyes"]=allparameters["OLAP.PencilInfo.flysEye"]=='true' 
+    parameters["stokestype"]=allparameters["OLAP.Stokes.which"]
+    if "Observation.Beam[0].target" in allparameters.keys():
+        parameters["target"]=allparameters["Observation.Beam[0].target"]
+    # Get file names
+    year=parameters['starttime'].split('-')[0].replace('\'','')
+
+    subcluster={}
+    subcluster["lse001"]="sub1"
+    subcluster["lse002"]="sub1"
+    subcluster["lse003"]="sub1"
+    subcluster["lse004"]="sub2"
+    subcluster["lse005"]="sub2"
+    subcluster["lse006"]="sub2"
+    subcluster["lse007"]="sub3"
+    subcluster["lse008"]="sub3"
+    subcluster["lse009"]="sub3"
+    subcluster["lse010"]="sub4"
+    subcluster["lse011"]="sub4"
+    subcluster["lse012"]="sub4"
+    subcluster["lse013"]="sub5"
+    subcluster["lse014"]="sub5"
+    subcluster["lse015"]="sub5"
+    subcluster["lse016"]="sub6"
+    subcluster["lse017"]="sub6"
+    subcluster["lse018"]="sub6"
+    subcluster["lse019"]="sub7"
+    subcluster["lse020"]="sub7"
+    subcluster["lse021"]="sub7"
+    subcluster["lse022"]="sub8"
+    subcluster["lse023"]="sub8"
+    subcluster["lse024"]="sub8"
+   
+    names=[]
+    datatype=[] 
+    if parameters["coherentstokes"]:
+        sb=0
+        for i in range(min(len(parameters["storagenodes"]),len(parameters["SBspernode"]))):
+            node=parameters["storagenodes"][i]
+            nrpernode=parameters["SBspernode"][i]
+            mask=parameters["namemask"]
+            for j in range(int(nrpernode)):
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',sb2str(sb))
+                name=name+'.stokes'
+                names.append(name)
+                sb+=1
+        
+    if parameters["incoherentstokes"]:
+        sb=0
+        for i in range(len(parameters["storagenodes"])):
+            node=parameters["storagenodes"][i]
+            nrpernode=parameters["SBspernode"][i]
+            mask=parameters["namemask"].strip('.MS')
+            for j in range(int(nrpernode)):
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}_${MSNUMBER}',year+'_'+parameters['obsid']).replace('/SB${SUBBAND}','/L'+parameters['obsid']+'_SB'+sb2str(sb))
+                name=name+'_bf.incoherentstokes'
+                names.append(name)
+                sb+=1
+
+    if parameters["beamformeddata"]:
+        sb=0
+        for i in range(min(len(parameters["storagenodes"]),len(parameters["SBspernode"]))):
+            node=parameters["storagenodes"][i]
+            nrpernode=parameters["SBspernode"][i]
+            mask=parameters["namemask"]
+            for j in range(int(nrpernode)):
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',sb2str(sb))
+                name=name+'.beams'
+                names.append(name)
+                sb+=1
+
+
+    if parameters["correlateddata"]:
+        sb=0
+        for i in range(len(parameters["storagenodes"])):
+            node=parameters["storagenodes"][i]
+            nrpernode=parameters["SBspernode"][i]
+            mask=parameters["namemask"]
+            for j in range(int(nrpernode)):
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',sb2str(sb))
+                name=name+'.MS'
+                names.append(name)
+                sb+=1
+
+
+    if parameters["filtereddata"]:
+        sb=0
+        for i in range(len(parameters["storagenodes"])):
+            node=parameters["storagenodes"][i]
+            nrpernode=parameters["SBspernode"][i]
+            mask=parameters["namemask"]
+            for j in range(int(nrpernode)):
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',sb2str(sb))
+                name=name+'.unknown'
+                names.append(name)
+                sb+=1
+
+    parameters["files"]=names
+
+    return parameters
+
+
+def get_all_parameters_new(obsid, useFilename=False):
+    """Get the most important observation parameters. Returns a dictionary with these parameters.
+    *obsid*        Observation id, f.e. L2010_08834 or D2009_16234. Only works on lofar cluster.
+    *useFilename*  If set to true, obsid is filename of the parset.
+    """
+    if useFilename:
+        parsetfilename=obsid
+    else:
+        # What is the observation number? This determines the filename
+        obsnr=obsid.split('_')[1]
+        
+        # Name of the parset file
+        parsetfilename='/globalhome/lofarsystem/production/lofar/bgfen/log/L'+obsnr+'/L'+obsnr+'.parset'
+        if not os.path.isfile(parsetfilename):
+            parsetfilename='/globalhome/lofarsystem/log/'+obsid+'/RTCP.parset.0'   
+
+ 
+    # Open the file
+    parsetfile=open(parsetfilename,'r')
+    parsetfile.seek(0)
+    # Read in the parameters from the parset file
+    allparameters={}
+    for line in parsetfile:
+        str2 = line.split(None,2)
+        if len(str2)>=3:
+            allparameters[str2[0]] = str2[2].strip('\n')
+        else:
+            allparameters[str2[0]] = "UNDEFINED"
+    return allparameters
