@@ -298,6 +298,7 @@ COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk 
 CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
 SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
 nrBeams=`cat $PARSET | grep "Observation.nrBeams"  | head -1 | awk -F "= " '{print $2}'`
+nSubbands=`cat $PARSET | grep "Observation.subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
 
 if (( $transpose == 0 ))
 then
@@ -333,7 +334,7 @@ then
     RA_DEG=`echo "scale=10; $RRA / $pi * 180.0" | bc | awk '{printf("%3.9f\n",$1)}'`
     DEC_DEG=`echo "scale=10; $RDEC / $pi * 180.0" | bc | awk '{printf("%3.9f\n",$1)}'`
     echo "Position is $RA_DEG $DEC_DEG (deg)"
-    get_list=`pulsars_at_location.sh $RA_DEG $DEC_DEG $ANT_SHORT 3`
+    get_list=`pulsars_at_location.sh $RA_DEG $DEC_DEG $ANT_SHORT 3 | tail -1`
     if [[ $get_list == "ERROR" ]] || [[ $get_list == "NONE" ]]
     then
        echo "WARNING: Unable to find Pulsar in FOV of pointing ($RA_DEG $DEC_DEG); this is a partial pipeline run."
@@ -398,6 +399,8 @@ echo "Number of Channels per Frame:" $CHANPFRAME
 echo "Number of Channels per Frame:" $CHANPFRAME >> $log
 echo "Number of Subbands per Pset:" $SUBSPPSET 
 echo "Number of Subbands per Pset:" $SUBSPPSET >> $log
+echo "Number of Subbands:" $nSubbands 
+echo "Number of Subbands:" $nSubbands >> $log
 echo "Incoherentstokes set to:" $INCOHERENTSTOKES
 echo "Incoherentstokes set to:" $INCOHERENTSTOKES >> $log
 echo "Coherentstokes set to:" $COHERENTSTOKES
@@ -581,7 +584,7 @@ do
 		
 		if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
         then
-           all_num=`echo "$CHANPFRAME * $SUBSPPSET" | bc`
+           all_num=$nSubbands
   		   echo "2nd transpose has $all_num subbands in one file" 
   		   echo "2nd transpose has $all_num subbands in one file" >> $log
         fi
