@@ -299,6 +299,8 @@ CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= 
 SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
 nrBeams=`cat $PARSET | grep "Observation.nrBeams"  | head -1 | awk -F "= " '{print $2}'`
 nSubbands=`cat $PARSET | grep "Observation.subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
+date_obs=`grep Observation.startTime *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
+date_seconds=`date -d "$date_obs"  "+%s"` 
 
 if (( $transpose == 0 ))
 then
@@ -499,6 +501,20 @@ do
 
     STOKES=$modes
 
+	if [[ $transpose == 1 ]] && [[ $STOKES == 'incoherentstokes' ]] 
+	then
+       date1_Sept20=`date -d "2010-09-20 00:00:00" "+%s"`
+       date2_Oct26=`date -d "2010-10-26 00:00:00" "+%s"`
+       
+       if (( $date_seconds < $date1_Sept20 ))
+       then
+           transpose=0
+       elif (( $date_seconds > $date2_Oct26 ))
+       then 
+           transpose=0
+       fi
+    fi
+
 	if [[ $transpose == 1 ]] && [[ $STOKES == 'stokes' ]] && [[ $user_core > 1 ]]
 	then
 	   core=1
@@ -555,11 +571,11 @@ do
 		all_num=`wc -l $master_list | awk '{print $1}'`
 	else
 		#Create subband lists
-		if (( $transpose == 0 )) 
+		if [[ $transpose == 0 ]] 
 		then		    
-			all_list=`ls /net/sub?/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
+			all_list=`ls /net/sub?/lse*/data?/${OBSID}/*${STOKES} | sort -t B -g -k 2`
 		#XXX	all_list=`ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
-			ls /net/sub?/lse*/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
+			ls /net/sub?/lse*/data?/${OBSID}/*${STOKES} | sort -t B -g -k 2 > $master_list
 		#XXX	ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
 	    else
 
@@ -911,7 +927,7 @@ do
 	       echo "WARNING: RSP0/SubXXXX files are not all the same size;  raw data and processing is suspect to problems."
 	       echo "WARNING: RSP0/SubXXXX files are not all the same size;  raw data and processing is suspect to problems." >> $log
 	    fi
-		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/${PULSAR}_${OBSID}_RSP0.sub0000 | awk '{print $5 / 2}' -`
+		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/${PULSAR}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort -n | uniq -c | sort -n -r | head -1 | awk '{print $2 / 2 }' -`
 	else
 	    file_size_check=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort | uniq -c | head -1 | awk '{print $1}'`
 	    if (( $file_size_check != $split_files ))
@@ -919,7 +935,7 @@ do
 	       echo "WARNING: RSP0/SubXXXX files are not all the same size;  raw data and processing is suspect to problems."
 	       echo "WARNING: RSP0/SubXXXX files are not all the same size;  raw data and processing is suspect to problems." >> $log
 	    fi
-		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR}_${OBSID}_RSP0.sub0000 | awk '{print $5 / 2}' -`
+		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort -n | uniq -c | sort -n -r | head -1 | awk '{print $2 / 2 }' -`
 	fi
 	
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
