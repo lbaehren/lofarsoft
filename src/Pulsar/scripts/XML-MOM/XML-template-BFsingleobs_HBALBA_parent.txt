@@ -28,8 +28,8 @@
                 <pencilRingSize>0</pencilRingSize>
                 <pencilBeamList>
                     <pencilBeam>
-                        <angle1>RA</angle1>
-                        <angle2>DEC</angle2>
+                        <angle1>0.0</angle1>
+                        <angle2>0.0</angle2>
                     </pencilBeam>
                 </pencilBeamList>
             </pencilBeams>
