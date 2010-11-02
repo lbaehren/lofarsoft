@@ -25,6 +25,17 @@ userright = -100
 
 cexec_egrep_string="egrep -v \'\\*\\*\\*\\*\\*\' |egrep -v \'\\-\\-\\-\\-\\-\'"
 
+# define the master list of RFI (i.e. freq bins that >=50% of time corrupted by RFI)
+rfi_master_freqs = []
+rfi_master_widths = []
+# thereshold used to see if the bin is >=threshold of time corrupted by RFI
+rfi_master_threshold = 50.0
+# the name of the RFI master file
+rfi_master_file = "/home/kondratiev/PWG/rfi-report/master.rfi"
+rfi_tmp_file = "/home/kondratiev/PWG/rfi-report/.rfi"
+# if True then create the RFI master list (only when --percents option is used)
+is_make_rfi_master_list = False
+
 
 def usage (prg):
         """ Create report files and plots the 'bad chan' histogram
@@ -37,6 +48,8 @@ def usage (prg):
          --createreports         - run first subdyn.py for every dataset under the top-level directory\n\
 	 --percents              - every bin in the histogram is normalized by the total number\n\
 				   of observations in _this_ bin\n\
+         --rfimaster <value>     - create RFI master list, where value if the threshold percentile for bin\n\
+                                   to be considered as RFI-corrupted. Use only with --percents option\n\
          --excludedirs <value>   - mask to exclude directories\n\
          --checkdropouts         - checking the channels for drop-outs\n\
          --lba                   - will use only for LBA datasets and sets the histogram range to 10-90 MHz (default is 10-240 MHz)\n\
@@ -53,7 +66,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "", ["help", "nbins=", "freqbin=", "createreports", "percents", "excludedirs=", "checkdropouts", "lba", "hba", "flow=", "fhigh="])
+                        opts, args = getopt.getopt (argv, "", ["help", "nbins=", "freqbin=", "createreports", "percents", "excludedirs=", "checkdropouts", "lba", "hba", "flow=", "fhigh=", "rfimaster="])
                         for opt, arg in opts:
                                 if opt in ("--help"):
                                         usage (prg)
@@ -101,6 +114,13 @@ def parsecmdline (prg, argv):
                                         global userright
                                         userright = float(arg)
 
+                                if opt in ("--rfimaster"):
+                                        global is_make_rfi_master_list
+                                        is_make_rfi_master_list = True
+					global rfi_master_threshold
+					rfi_master_threshold = float(arg)
+
+
                         if not args:
                                 print "No top-level directory!\n"
                                 usage (prg)
@@ -131,6 +151,13 @@ if __name__=="__main__":
 		if userleft > userright:
 			print "User settings of flow and fhigh are bad!"
 			sys.exit(0)
+
+	if is_make_rfi_master_list == True and is_percents == False:
+		print "Use --rfimaster option only together with --percents option!"
+		sys.exit(0)
+	if rfi_master_threshold<0.0 or rfi_master_threshold>=100.0:
+		print "The RFI threshold (in %) should be between [0:100)"
+		sys.exit(0)
 
 	# search for incoherentstokes directories
 	dirs = []
@@ -291,6 +318,25 @@ if __name__=="__main__":
 					bintotal = bintotal + Nobsperchan[fr]
 			if bintotal != 0:
 				ydata[w] = (float(ydata[w]) / bintotal) * 100.
+				# create the master list of RFI
+				if is_make_rfi_master_list == True:
+					if ydata[w] >= rfi_master_threshold:
+						# if corrupted channels are adjacent
+						if np.size(rfi_master_freqs) != 0:
+							if rfi_master_freqs[-1] + rfi_master_widths[-1]/2. == bins[w]:
+								master_freq = rfi_master_freqs[-1] + freqbin/2.
+								master_width = rfi_master_widths[-1] + freqbin
+								rfi_master_freqs[-1] = master_freq
+								rfi_master_widths[-1] = master_width
+							else:
+					        		master_freq = bins[w] + (bins[w+1] - bins[w])/2.	
+								rfi_master_freqs = np.append(rfi_master_freqs, master_freq)
+								rfi_master_widths = np.append(rfi_master_widths, freqbin)
+						else:
+							master_freq = bins[w] + (bins[w+1] - bins[w])/2.
+							rfi_master_freqs = np.append(rfi_master_freqs, master_freq)
+							rfi_master_widths = np.append(rfi_master_widths, freqbin)
+						
 #				print "%.4f\t - %d [%d]\t %.2f" % ((bins[w+1]+bins[w])/2.,ydata[w], bintotal, (float(ydata[w]) / bintotal) * 100.)
 #				ydata[w] = (float(ydata[w]) / bintotal) * 100.
 
@@ -326,6 +372,14 @@ if __name__=="__main__":
 	print "Frequency span = %.4g MHz [%.4g - %.4g]" % (freqspan, histleft, histright)
 	print "Minimum frequency separation = %.4g MHz" % (freqbin,)
 	print "Current histogram bin width = %.4g MHz" % (bins[1] - bins[0],)
+
+	# writing frequencies to RFI master file
+        np.savetxt(rfi_tmp_file, np.transpose((rfi_master_freqs, rfi_master_widths)), fmt="%.6f\t%.6g")
+        master_id = open (rfi_master_file, 'w')
+        master_id.write("# Freq (MHz)	Width (MHz)\n")
+        master_id.close()
+        os.system("cat " + rfi_tmp_file + " >> " + rfi_master_file)
+        os.system("rm -f " + rfi_tmp_file)
 
 	# common part for both types of histograms
 #	plt.title("Bad frequency channels over %d observations" % (number_of_obs,))
