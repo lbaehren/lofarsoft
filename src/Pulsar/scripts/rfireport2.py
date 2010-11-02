@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 import glob, os, sys, getopt, re
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import matplotlib.patches as patches
-import matplotlib.path as path
 
 import infodata as inf
 
 Nbins=7630 # corresponds usually to 10s
+is_saveonly = False       # if True, script will save the dynamic spectrum in png file
 is_createreports = False  # True, if we want to create *.rfirep files first
 is_percents = False       # True, if to plot histogram with normalized bins
 is_dir_to_exclude = False # True, if there are dirs to exclude
@@ -25,24 +22,29 @@ userright = -100
 
 cexec_egrep_string="egrep -v \'\\*\\*\\*\\*\\*\' |egrep -v \'\\-\\-\\-\\-\\-\'"
 
+# setting the user name
+username=os.environ['USER']
 # define the master list of RFI (i.e. freq bins that >=50% of time corrupted by RFI)
 rfi_master_freqs = []
 rfi_master_widths = []
 # thereshold used to see if the bin is >=threshold of time corrupted by RFI
 rfi_master_threshold = 50.0
 # the name of the RFI master file
-rfi_master_file = "/home/kondratiev/PWG/rfi-report/master.rfi"
-rfi_tmp_file = "/home/kondratiev/PWG/rfi-report/.rfi"
+rfi_master_file = "/home/%s/master.rfi" % (username,)
+rfi_tmp_file = "/home/%s/.rfi" % (username,)
 # if True then create the RFI master list (only when --percents option is used)
 is_make_rfi_master_list = False
 
+# default name of the png-file for --saveonly option
+pngname = "/home/%s/rfireport2.png" % (username,)
 
 def usage (prg):
         """ Create report files and plots the 'bad chan' histogram
         """
         print "Program %s creates the RFI report files and plots summary histogram\n" % (prg,)
         print "Usage: %s [--nbins <value>] [--freqbin <value>] [--lba] [--hba] [--flow] [--fhigh]\n\
-                         [--createreports] [--percents] [--excludedirs <value>] [--help] <input top-level dirs>\n\
+                         [--createreports] [--percents] [--excludedirs <value>] [--saveonly <value>]\n\
+                         [--rfimaster <value>] [--masterfile <value>] [--help] <input top-level dirs>\n\
          --nbins <value>         - number of samples to average (default: 7630)\n\
          --freqbin <value>       - size of the histogram bin in MHz (default is the width of subband, ~195 kHz)\n\
          --createreports         - run first subdyn.py for every dataset under the top-level directory\n\
@@ -50,12 +52,14 @@ def usage (prg):
 				   of observations in _this_ bin\n\
          --rfimaster <value>     - create RFI master list, where value if the threshold percentile for bin\n\
                                    to be considered as RFI-corrupted. Use only with --percents option\n\
+         --masterfile <value>    - output file with RFI master list, default - 'master.rfi' in HOME directory\n\
          --excludedirs <value>   - mask to exclude directories\n\
          --checkdropouts         - checking the channels for drop-outs\n\
          --lba                   - will use only for LBA datasets and sets the histogram range to 10-90 MHz (default is 10-240 MHz)\n\
          --hba                   - only HBA datasets will be considered, histogram range: 110-240 MHz\n\
          --flow                  - sets the lowest freq value for the histogram, does not affect checking for LBA or HBA obs\n\
          --fhigh                 - sets the highest freq for the histogram\n\
+         --saveonly <png-file>   - only saves png file and exits\n\
          --help                  - print this message\n" % (prg,)
 
 def parsecmdline (prg, argv):
@@ -66,7 +70,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "", ["help", "nbins=", "freqbin=", "createreports", "percents", "excludedirs=", "checkdropouts", "lba", "hba", "flow=", "fhigh=", "rfimaster="])
+                        opts, args = getopt.getopt (argv, "", ["help", "nbins=", "freqbin=", "createreports", "percents", "excludedirs=", "checkdropouts", "lba", "hba", "flow=", "fhigh=", "rfimaster=", "masterfile=", "saveonly="])
                         for opt, arg in opts:
                                 if opt in ("--help"):
                                         usage (prg)
@@ -120,6 +124,16 @@ def parsecmdline (prg, argv):
 					global rfi_master_threshold
 					rfi_master_threshold = float(arg)
 
+                                if opt in ("--masterfile"):
+                                        global rfi_master_file
+                                        rfi_master_file = arg
+
+                                if opt in ("--saveonly"):
+                                        global is_saveonly
+                                        is_saveonly = True
+					global pngname
+					pngname = arg
+
 
                         if not args:
                                 print "No top-level directory!\n"
@@ -136,6 +150,18 @@ def parsecmdline (prg, argv):
 
 if __name__=="__main__":
 	parsecmdline (sys.argv[0].split("/")[-1], sys.argv[1:])
+
+        if is_saveonly:
+                import matplotlib
+                matplotlib.use("Agg")
+        else:
+                import matplotlib
+
+	import matplotlib.pyplot as plt
+	import matplotlib.ticker as ticker
+	import matplotlib.patches as patches
+	import matplotlib.path as path
+
 	if histleft > histright:
 		print "You can't set both --lba and --hba simultaneously!"
 		sys.exit(0)
@@ -386,5 +412,8 @@ if __name__=="__main__":
 	plt.title("RFI summary after %d observations" % (number_of_obs,))
 	plt.xlabel("Frequency (MHz)")
 	plt.grid(True)
-
-	plt.show()
+	
+        if is_saveonly:
+                plt.savefig(pngname)
+	else:
+		plt.show()
