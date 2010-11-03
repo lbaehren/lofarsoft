@@ -2,12 +2,12 @@
 import numpy as np
 import array as ar
 import os, os.path, stat, glob, sys, getopt
+import infodata as inf
 
 is_saveonly = False      # if True, script will save the dynamic spectrum in png file
 is_excludeonly = False   # if True, only completely bad subbands will be excluded
 threshold = 6 # threhold in sigmas to clip RFIs
 rfilimit = 10  # (in percents) if more, whole subband will be excluded
-tsamp=0.00131072  #  sampling interval (s)
 samples2show = 0 #  size of window to show in seconds (if 0, show the whole file(s))
 samples_offset = 0 # offset from the beginning to skip (if 0 , show the whole file(s))
 Nbins = 7630 # number of bins to average (usually corresponds to ~10s)
@@ -110,13 +110,22 @@ def setup_plot(x, title, colormap):
 	cbar = fig.colorbar (cax, orientation='horizontal', spacing='uniform', pad=0.1)
         def printsub (x, pos=None): return '%d' % (subband_offset + x)
 	ax.yaxis.set_major_formatter(ticker.FuncFormatter(printsub))
+	for label in ax.get_yticklabels(): label.set_fontsize(fs)
+	plt.xlabel ("Time (s)", fontsize=fs)
+	plt.ylabel ("Frequency Channels", fontsize=fs)
+	fig.suptitle (title, fontsize=fs, y=0.94)
+
+	axr = plt.twinx()
+	axr.yaxis.tick_right()
+	axr.yaxis.set_label_position("right")
+	axr.set_ylim(ymin=cfreq-chanbw/2., ymax=cfreq+totalbw-chanbw/2.)
+	for label in axr.get_yticklabels(): label.set_fontsize(fs)
+	plt.ylabel("Frequency (MHz)", fontsize=fs, rotation=-90)
+
 	def printtime (x, pos=None): return '%1.0f'%(float(samples_offset)*tsamp + float(x) * tsamp * Nbins)
 	ax.xaxis.set_major_formatter(ticker.FuncFormatter(printtime))
 	for label in ax.get_xticklabels(): label.set_fontsize(fs)
-	for label in ax.get_yticklabels(): label.set_fontsize(fs)
-	plt.xlabel ("Time (s)", fontsize=fs)
-	plt.ylabel ("Subband", fontsize=fs)
-	fig.suptitle (title, fontsize=fs, y=0.94)
+
 	plt.draw()
 
 def plot_update(x):
@@ -305,15 +314,13 @@ if __name__=="__main__":
 	# maximum size
 	size=max(sizes)
 
-	# reading inf-file to get info about sampling interval
-	inffile = subfiles[0].split(".sub")[0] + ".sub.inf"
-	for line in open(inffile):
-		if line.startswith(" Width of each time series bin"):
-			tsamp = float(line.split("=")[-1].strip())
-		if line.startswith(" Central freq of low channel"):
-			cfreq = float(line.split("=")[-1].strip())
-		if line.startswith(" Channel bandwidth"):
-			chanbw = float(line.split("=")[-1].strip())
+        # reading inf-file to get corresponding info
+        inffile = subfiles[0].split(".sub")[0] + ".sub.inf"
+        id = inf.infodata(inffile)
+        cfreq = id.lofreq
+        chanbw = id.chan_width
+	totalbw = id.BW
+	tsamp = id.dt
 
 	# handle offset from the beginning
 	if samples_offset > 0:
