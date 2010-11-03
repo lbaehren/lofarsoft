@@ -1,10 +1,10 @@
-#!/bin/ksh 
+#!/bin/ksh
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=1.30
+VERSION=1.31
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help]\n\n"\
@@ -34,6 +34,8 @@ then
    print "$USAGE"    
    exit 1
 fi
+
+#alias bf2presto8=/home/hassall/lofarsoft/release/share/pulsar/bin/bf2presto8
 
 #Get the input arguments
 OBSID=""
@@ -883,8 +885,8 @@ do
 			       bf2presto8 ${COLLAPSE} -t -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
 			       bf2presto_pid[$ii]=$!
                 else #    # [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
-			       echo bf2presto8 ${COLLAPSE} -T ${all_num} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
-			       bf2presto8 ${COLLAPSE} -T ${all_num} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+			       echo bf2presto8 ${COLLAPSE} -T ${all_num} -M -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+			       bf2presto8 ${COLLAPSE} -T ${all_num} -M -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
 			       bf2presto_pid[$ii]=$!
 			    fi
 	#			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
@@ -1387,16 +1389,16 @@ do
 	      then
 	         echo cd ${location}/${STOKES}/RSP${ii} >> $log
 	         cd ${location}/${STOKES}/RSP${ii}
-	         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  >> $log
-	         python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0??? &
+	         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
+	         python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
 	         subdyn_pid[$ii]=$!
 	      else
 			 for jjj in $beams
 			 do
 		         echo cd ${location}/${STOKES}/${jjj}/RSP${ii} >> $log
 		         cd ${location}/${STOKES}/${jjj}/RSP${ii}
-		         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0???  >> $log
-		         python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub0??? &
+		         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
+		         python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
 		         subdyn_pid[$ii][$jjj]=$!	
 	         done      
           fi
