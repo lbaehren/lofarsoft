@@ -1127,8 +1127,10 @@ do
 		             min_range=1
 		             max_range=$split_subs
 		          else
-		             min_range=`echo "$max_range + 1" | bc`
-		             max_range=`echo "$min_range + $split_subs - 1" | bc`
+#		             min_range=`echo "$max_range + 1" | bc`
+#		             max_range=`echo "$min_range + $split_subs - 1" | bc`
+		             min_range=1
+		             max_range=$split_subs
 		          fi
 		          SUBBANDS=`echo $SUBBANDS_ORIG | cut -d"," -f$min_range-$max_range`
             fi
