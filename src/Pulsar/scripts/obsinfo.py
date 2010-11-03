@@ -51,6 +51,8 @@ username=os.environ['USER']
 webserver="%s@10.87.2.95" % (username, )
 plotsdir="/home/%s/Lofar/plots" % (username, )
 webplotsdir="public_html/lofar/plots"
+# if False, then do not rsync plots to external webserver
+is_torsync = True
 
 # file used in debug mode to write iteration number in main loop
 debugfile="/home/%s/.obsinfo_debug" % (username, )
@@ -634,6 +636,7 @@ def usage (prg):
                                        This option can be used together with --from and --to to update only some observations\n\
           --stats                    - to calculate the statistics of existent observations in the database\n\
                                        can be used together with --from and --to options\n\
+          --norsync                  - don't rsync plots to external webserver when \"mega\" or \"plots\" view mode is used\n\
           --dbfile <dbfile>          - database file with stored info about the observations\n\
           --debug                    - debug mode\n\
           -h, --help                 - print this message\n" % (prg, )
@@ -646,7 +649,7 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hf:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats", "dbfile="])
+		opts, args = getopt.getopt (argv, "hf:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats", "dbfile=", "norsync"])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -708,6 +711,9 @@ def parsecmd(prg, argv):
 			if opt in ("--dbfile"):
 				global dumpfile
 				dumpfile = arg
+			if opt in ("--norsync"):
+				global is_torsync
+				is_torsync = False
 
 	except getopt.GetoptError:
 		print "Wrong option!"
@@ -1232,11 +1238,12 @@ if __name__ == "__main__":
 	dfdescr.close()
 
 	# uploading the png files to webserver
-	if viewtype == 'plots' or viewtype == 'mega':
-		cmd="ssh %s mkdir -p %s" % (webserver, webplotsdir)	
-		os.system(cmd)
-		cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (plotsdir, webserver, webplotsdir)
-		os.system(cmd)
+	if is_torsync:
+		if viewtype == 'plots' or viewtype == 'mega':
+			cmd="ssh %s mkdir -p %s" % (webserver, webplotsdir)	
+			os.system(cmd)
+			cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (plotsdir, webserver, webplotsdir)
+			os.system(cmd)
 
 	# copying to another list to keep the old one
 	obskeys = np.flipud(np.sort(obstable.keys(), kind='mergesort'))
