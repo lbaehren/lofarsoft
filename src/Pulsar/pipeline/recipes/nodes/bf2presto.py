@@ -1,6 +1,6 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
-#                                        Data conversion Node (bf2presto) recipe
+#                            Beam-formed data conversion Node (bf2presto) recipe
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
