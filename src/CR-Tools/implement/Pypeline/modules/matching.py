@@ -16,8 +16,6 @@ import os
 import pycrtools as hf
 import numpy as np
 
-
-
 def matchfiles(dirs, sortstring, coinctime, mincoinc):
     """
     Match the datafiles from different stations together. It will print out 
@@ -48,7 +46,7 @@ def matchfiles(dirs, sortstring, coinctime, mincoinc):
         times[dirIndex] = list()
         for file in files[dirIndex]:
             dr = hf.crfile( file.strip() )
-            ddate = dr["date"] + dr["SAMPLE_NUMBER"][0]/200e6
+            ddate = dr["date"] + dr["SAMPLE_NUMBER"][0]/200.0e6
             times[dirIndex].append(ddate) 
             del dr
 
@@ -101,7 +99,7 @@ def readtriggers(filename):
       antennaIDs[i] = int(str_line.split()[0])
       dates[i] = int(str_line.split()[2])
       samplenumers[i] = int(str_line.split()[3])
-      dDates[i] = float(dates[i]) + float(samplenumers[i])/200e6
+      dDates[i] = float(dates[i]) + float(samplenumers[i])/200.0e6
     fd.close()
 
     return (antennaIDs, dDates, dates, samplenumers)
@@ -160,7 +158,7 @@ def matchTriggerfileToTime(ddate, triggerfile, coinctime=1e-5):
       outDDates = np.zeros((0))
       outdates = np.zeros((0), int)
       outSNs = np.zeros((0), int)
-    difftimes = (outdates-ddate)+outSNs/200e6
+    difftimes = (outdates-ddate)+outSNs/200.0e6
 
     return (outIDs, outDDates, difftimes, outdates, outSNs) 
 
