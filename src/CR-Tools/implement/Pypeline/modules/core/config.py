@@ -6,8 +6,8 @@ import os
 from hftools import *
 
 LOFARSOFT=os.environ["LOFARSOFT"]
-PYCRBIN=LOFARSOFT+"/release/bin/python"
-PYCR=LOFARSOFT+"/src/CR-Tools/implement/Pypeline/scripts"
+PYCRBIN=LOFARSOFT+"/release/bin/python/"
+PYCR=LOFARSOFT+"/src/CR-Tools/implement/Pypeline/scripts/"
 
 pydocpyfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.py"
 pydoctxtfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.tex"

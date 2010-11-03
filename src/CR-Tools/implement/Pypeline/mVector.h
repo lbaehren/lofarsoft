@@ -73,6 +73,37 @@ namespace PyCR { // Namespace PyCR -- begin
       };
     }
 
+    template <class Iter>
+      void hRedistribute(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger offset, HInteger stride)
+      {
+	// Variables
+	Iter it(vec+offset);
+	Iter itin(invec);
+	// Sanity check
+	if (stride < 0) {
+	  throw PyCR::ValueError("Negative value for stride parameter is not allowed");
+	}
+	// Redistribute
+	while ((itin != invec_end) && (it < vec_end)) {
+	  *it = *itin;
+	  ++itin;
+	  it += stride;
+	};
+      }
+
+    template <class Iter>
+      void hTranspose(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger ncolumns)
+      {
+	// Variables
+	Iter it(invec),itend(it+ncolumns);
+	HInteger nrows=(invec_end-invec)/ncolumns;
+	HInteger i(0);
+	while (itend<=invec_end) {
+	  PyCR::Vector::hRedistribute(vec,vec_end,it,itend,i,nrows);
+	  ++i; it=itend; itend+=ncolumns;
+	};
+      }
+
     template <class Iter, class Iterin, class IterI>
       void hCopy(const Iter vecout, const Iter vecout_end,
                  const Iterin vecin, const Iterin vecin_end,

@@ -53,8 +53,8 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/Pypeli
 //Defines datatypes to iterate wrappers over
 #define HFPP_REAL_NUMERIC_TYPES (HInteger)(HNumber)
 #define HFPP_STRING_TYPES (HString)
-#define HFPP_NUMERIC_TYPES HFPP_REAL_NUMERIC_TYPES (HComplex)
-#define HFPP_STRING_TYPES (HString)
+#define HFPP_COMPLEX_TYPES (HComplex)
+#define HFPP_NUMERIC_TYPES HFPP_REAL_NUMERIC_TYPES HFPP_COMPLEX_TYPES 
 #define HFPP_LOGICAL_TYPES (HBool)
 #define HFPP_POINTER_TYPES (HPointer)
 #define HFPP_NON_NUMERIC_TYPES HFPP_STRING_TYPES HFPP_POINTER_TYPES

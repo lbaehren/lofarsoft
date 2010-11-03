@@ -14,6 +14,7 @@ from help import *
 from types import *
 from vector import *
 from harray import *
+from plot import *
 
 # Import datareader class overloaded methods
 from datareader import *

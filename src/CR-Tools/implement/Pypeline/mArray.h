@@ -1047,6 +1047,32 @@ namespace PyCR { // Namespace PyCR -- begin
       return sum;
     }
 
+    template <class Iter> IterValueType hDiffSum (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+    {
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      Iter it1=vec1,it2=vec2;
+      while ((it1!=vec1_end) && (it2!=vec2_end)) {
+        sum+=(*it1) - (*it2);
+        ++it1; ++it2;
+      };
+      return sum;
+    }
+
+    template <class Iter> IterValueType hDiffSquaredSum (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+    {
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      T val;
+      Iter it1=vec1,it2=vec2;
+      while ((it1!=vec1_end) && (it2!=vec2_end)) {
+	val=(*it1) - (*it2);
+        sum+=val*val;
+        ++it1; ++it2;
+      };
+      return sum;
+    }
+
   } // Namespace Array -- end
 
 } // Namespace PyCR -- end

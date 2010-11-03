@@ -21,10 +21,28 @@ into the array starting at any location
 - added hMulAdd2 which will loop over the second rather than the 1st
 parameter in looping mode
 
-2010-08-26 - Heino Falcke - rev 5751+:
+2010-08-26 - Heino Falcke - rev 5765:
 - added hFlip to reverse the order of elements in a vector
 
 2010-08-26 - Sander ter Veen - rev 5836 +
 - Corrected hMulAdd2
 - Added IO and calibration module
-- Added pipeline_start.py script for the first basic steps using these modules
+- Added pipeline_start.py script for the first basic steps using these
+modules
+
+2010-11-03 - Heino Falcke - rev 6227
+- Added hTranspose - to transpose a vector on the c++ level
+- adapted hArray_tranpose to use hTranspose
+- Added Functions hDiffSum and hDiffSquaredSum to caluclated the (sum
+of the (squared)) differences of two vectors
+- changed hFill to allow filling one vector with a second vector of
+different type
+- hArrays can now be created with a copy from another vector of
+different type (use the "copy=other_array"  or  "fill=other_array" keywords)
+- added hDoubleFFT, hDoubleFFTPhase, hDoubleFFTPhaseMul to do a double
+FFT based on Arthur's numpy example
+- testDoubleFFT.py shows an example testing the douple FFT
+- created a separate plot.py module in core, as this was not working
+properly in the new structure
+- moved the list of hftools function to be added as methods to harrays
+and vectors to  type.py

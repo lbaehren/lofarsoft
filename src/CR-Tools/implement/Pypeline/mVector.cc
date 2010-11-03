@@ -89,6 +89,40 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const T fill_value)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+//$DOCSTRING: Fills a vector with the content of another vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFill
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec)()("Vector to fill")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(fill_vec)()("Vector of values to fill it with")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hFill(vec,[0,1,2]) -> [0,1,2,0,1,2,...]
+  vec.fill([0,1,2]) -> [0,1,2,0,1,2,...]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+If fill_vec is shorther than vec, the procedure will wrap around and
+start from the beginning of fill_vec again. Hence, in this case
+fill_vec will appear repeated multiple times in vec.
+
+*/
+template <class Iter, class IterT>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterT fill_vec, const IterT fill_vec_end)
+{
+  Iter it1=vec;
+  IterT it2=fill_vec;
+  if (it2==fill_vec_end) return;
+  while (it1!=vec_end) {
+    *it1=hfcast<IterValueType>(*it2);
+    ++it1;++it2;
+    if (it2==fill_vec_end) it2=fill_vec;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 //$DOCSTRING: Sets certain elements specified in an indexlist to a constant value.
@@ -127,9 +161,6 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-
-
 
 
 //-----------------------------------------------------------------------
@@ -254,44 +285,6 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  IterValueType star
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Fills a vector with the content of another vector.
-//$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hFill
-//-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
-#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to fill")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(fill_vec)()("Vector of values to fill it with")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-//$COPY_TO END --------------------------------------------------
-/*!
-  hFill(vec,[0,1,2]) -> [0,1,2,0,1,2,...]
-  vec.fill([0,1,2]) -> [0,1,2,0,1,2,...]
-
-  \brief $DOCSTRING
-  $PARDOCSTRING
-
-If fill_vec is shorther than vec, the procedure will wrap around and
-start from the beginning of fill_vec again. Hence, in this case
-fill_vec will appear repeated multiple times in vec.
-
-*/
-template <class Iter>
-void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter fill_vec, const Iter fill_vec_end)
-{
-  Iter it1=vec;
-  Iter it2=fill_vec;
-  if (it2==vec_end) return;
-  while (it1!=vec_end) {
-    *it1=*it2;
-    ++it1;++it2;
-    if (it2==fill_vec_end) it2=fill_vec;
-  };
-}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-
-
-
 //$DOCSTRING: Combines two vectors into one where the elements of the vectors follow each other alternating between the input vectors. Equivalent to python "zip".
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hZipper
@@ -331,8 +324,6 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter vecA, const It
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-
 
 
 //$DOCSTRING: Make and return a new vector of the same size and type as the input vector.
@@ -379,6 +370,7 @@ void HFPP_FUNC_NAME (std::vector<T> & vec, HInteger newsize)
   vec.resize(newsize);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Resize a vector to a new length and fill new elements in vector with a specific value.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -590,21 +582,49 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger offset, HInteger stride)
 {
-  // Variables
-  Iter it(vec+offset);
-  Iter itin(invec);
+  PyCR::Vector::hRedistribute(vec,vec_end,invec,invec_end,offset,stride);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-  // Sanity check
-  if (stride < 0) {
-    throw PyCR::ValueError("Negative value for stride parameter is not allowed");
-  }
+//$DOCSTRING: Transposes the values in one vector given a certain 2D shape and return result in a second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hTranspose
+//-----------------------------------------------------------------------
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(invec)()("Input Vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(ncolumns)()("Number of columns in input vector (i.e., width of a row, or the last and fastest running index)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+Usage:
+  invec=[0,1,2,3,4,5]; ncolumns=2
+  hTranspose(outvec,invec,ncolumns) -> outvec = [0,2,4,1,3,5]
 
-  // Redistribute
-  while ((itin != invec_end) && (it < vec_end)) {
-    *it = *itin;
-    ++itin;
-    it += stride;
-  };
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Operation will stop whenever the end of one of the input vector is reached.
+
+  >>  x=hArray(range(6),[3,2])
+  >>  y=hArray(int,[2,3],fill=-1)
+
+  >>  x.mprint()
+  [0,1]
+  [2,3]
+  [4,5]
+
+  >>  hTranspose(y,x,2)
+  >>  y.mprint()
+
+  [0,2,4]
+  [1,3,5]
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger ncolumns)
+{
+  PyCR::Vector::hTranspose(vec,vec_end,invec,invec_end,ncolumns);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

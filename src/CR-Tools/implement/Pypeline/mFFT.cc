@@ -475,7 +475,7 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   Vector<Double>::iterator it_vin=cvec_in.begin();
 
   // Sanity check
-  if (fftLength != (data_out_end - data_out)) {
+  if (fftLength != (uint)(data_out_end - data_out)) {
     throw PyCR::ValueError("Input or output vector has the wrong size. This should be: N(out) = N(in)/2+1.");
     return;
   }
@@ -648,4 +648,247 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 	      nyquistZone);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Multiplies a transposed complex FFT matrix with an appropriate phase factor needed to calculate a second FFT with higher spectral resolution
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDoubleFFTPhaseMul
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Complex input vector containing the Fourier-transformed and transposed data that was read in with a certain block length, stride, and offset.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(original_size)()("Original data size of the time series.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(blocklen)()("The block length for individual data blocks that were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(nblocks)()("How many blocks were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(offset)()("How many blocks were skipped before the first block was read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Description of the data input vector:
+-------------------------------------
+
+This is how the data is to be provided and dealt with:
+
+First, the time series data is read in as n=nblocks of length l=blocklength each, i.e. giving a vector:
+
+original data -> [B1-1,B1-2,..,B1-l, --STRIDE Blocks to be left out--, B2-1,B2-2,..,B2-l, --STRIDE Blocks to be left out--, ...,  Bn-1,Bn-2,..,Bn-l] 
+
+-> [B1-1,B1-2,..,B1-l, B2-1,B2-2,..,B2-l,  ...,  Bn-1,Bn-2,..,Bn-l]
+
+(B2-3 means: 2nd block, and 3rd sample within the block) 
+
+It is possible to leave out m=stride blocks in between, so that only a fraction 1/(stride+1) of data is read in.
+
+The next step is to transpose the data into a matrix, giving:
+
+Mb=  [
+     [B1-1,B2-1,..,Bn-1],
+     [B1-2,B2-2,..,Bn-2],
+             ...
+     [B1-l,B2-l,..,Bn-l]
+     ]
+
+Hence this matrix is incomplete since it is missing OFFSET times a
+similar matrix on top (e.g., when one was starting to reading not from
+the first block, but the 2nd, 3rd etc.) and STRIDE-OFFSET matrices at
+the end.
+
+For calrity: the full matrix would look have looked like (for the example of OFFSET=1 and STRIDE=2 above) 
+
+Mabc=[
+     [A1-1,A2-1,..,An-1],
+     [A1-2,A2-2,..,An-2],
+             ...
+     [A1-l,A2-l,..,An-l],
+
+     [B1-1,B2-1,..,Bn-1],
+     [B1-2,B2-2,..,Bn-2],
+             ...
+     [B1-l,B2-l,..,Bn-l]]
+
+     [C1-1,C2-1,..,Cn-1],
+     [C1-2,C2-2,..,Cn-2],
+             ...
+     [C1-l,C2-l,..,Cn-l]
+     ]
+
+The next step is now to take the FFT over rows above and mutliply by
+the phase factor calculated in this function.  Finally, the data is
+transposed a 2nd time, the FFT is taken again over rows and the result
+is tranposed a last time, giving a spectrum with gaps corresponding to
+the stride above. The matrixes Ma, Mb, Mc need then to be glued together.
+  
+*/
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger original_size,  const HInteger blocklen, const HInteger nblocks, const HInteger offset)
+{
+  HInteger len=vec_end-vec;
+  if (len!=(blocklen*nblocks)) {
+    throw PyCR::ValueError("Input vector has not the dimension blocklen * nblocks.");
+    return;
+  };
+
+  HComplex phase_fraction=HComplex(0.0,-CR::_2pi/original_size);
+  Iter it=vec;
+  HInteger row=offset*blocklen, col=0;
+  while (it!=vec_end) {
+    *it *= exp(phase_fraction*row*col);
+    ++it; ++col;
+    if (col == nblocks) {++row; col=0;};
+  };
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Returns a vector with phases to be multiplied (after exponentiation) with a transposed complex FFT matrix to calculate a second FFT with higher spectral resolution
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDoubleFFTPhase
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Output vector containing the phases to be applied to a similar matrix with Fourier-transformed and transposed data that was read in with a certain blocklength, stride, and offset.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(original_size)()("Original data size of the time series.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(blocklen)()("The block length for individual data blocks that were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(nblocks)()("How many blocks were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(offset)()("How many blocks were skipped before the first block was read in (smaller or equal to stride).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  See hDoubleFFTPhaseMul for a detailed description.
+*/
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger original_size,  const HInteger blocklen, const HInteger nblocks, const HInteger offset)
+{
+  HInteger len=vec_end-vec;
+  if (len!=(blocklen*nblocks)) {
+    throw PyCR::ValueError("Input vector has not the dimension blocklen * nblocks.");
+    return;
+  };
+
+  HComplex phase_fraction=HComplex(0.0,-CR::_2pi/original_size);
+  Iter it=vec;
+  HInteger row=offset*blocklen, col=0;
+  while (it<vec_end) {
+    *it = phase_fraction*row*col;
+    ++it; ++col;
+    if (col == nblocks) {
+      ++row; col=0;
+    };
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Multiplies a transposed complex FFT matrix with an appropriate phase factor needed to calculate a second FFT with higher spectral resolution
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDoubleFFT
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vecout)()("Complex output of spectrum (potentially containing gaps) - same size as input vector and must not be the same vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vecin)()("Complex input vector containing the Fourier-transformed and transposed data that was read in with a certain block length, stride, and offset. NOTE: the input vector will be overwritten and is used as a temporary scratch vector!")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(original_size)()("Original data size of the time series.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(blocklen)()("The block length for individual data blocks that were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(nblocks)()("How many blocks were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HInteger)(offset)()("How many blocks were skipped before the first block was read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Description of the data input vector:
+-------------------------------------
+
+This is how the data is to be provided and dealt with:
+
+First, the time series data is read in as n=nblocks of length l=blocklength each, i.e. giving a vector:
+
+original data -> [B1-1,B1-2,..,B1-l, --STRIDE Blocks to be left out--, B2-1,B2-2,..,B2-l, --STRIDE Blocks to be left out--, ...,  Bn-1,Bn-2,..,Bn-l] 
+
+-> [B1-1,B1-2,..,B1-l, B2-1,B2-2,..,B2-l,  ...,  Bn-1,Bn-2,..,Bn-l]
+
+(B2-3 means: 2nd block, and 3rd sample within the block) 
+
+It is possible to leave out m=stride blocks in between, so that only a fraction 1/(stride+1) of data is read in.
+
+The next step is to transpose the data into a matrix, giving:
+
+Mb=  [
+     [B1-1,B2-1,..,Bn-1],
+     [B1-2,B2-2,..,Bn-2],
+             ...
+     [B1-l,B2-l,..,Bn-l]
+     ]
+
+Hence this matrix is incomplete since it is missing OFFSET times a
+similar matrix on top (e.g., when one was starting to reading not from
+the first block, but the 2nd, 3rd etc.) and STRIDE-OFFSET matrices at
+the end.
+
+For calrity: the full matrix would look have looked like (for the example of OFFSET=1 and STRIDE=2 above) 
+
+Mabc=[
+     [A1-1,A2-1,..,An-1],
+     [A1-2,A2-2,..,An-2],
+             ...
+     [A1-l,A2-l,..,An-l],
+
+     [B1-1,B2-1,..,Bn-1],
+     [B1-2,B2-2,..,Bn-2],
+             ...
+     [B1-l,B2-l,..,Bn-l]]
+
+     [C1-1,C2-1,..,Cn-1],
+     [C1-2,C2-2,..,Cn-2],
+             ...
+     [C1-l,C2-l,..,Cn-l]
+     ]
+
+The next step is now to take the FFT over rows above and mutliply by
+the phase factor calculated in this function.  Finally, the data is
+transposed a 2nd time, the FFT is taken again over rows and the result
+is tranposed a last time, giving a spectrum with gaps corresponding to
+the stride above. The matrixes Ma, Mb, Mc need then to be glued together.
+  
+*/
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,const Iter vecin_end, const HInteger original_size,  const HInteger blocklen, const HInteger nblocks, const HInteger offset)
+{
+  if ((vecin_end-vecin)!=(blocklen*nblocks) || (vecout_end-vecout)!=(blocklen*nblocks)) {
+    throw PyCR::ValueError("Input vector has not the dimension blocklen * nblocks.");
+    return;
+  };
+  //First transpose
+  PyCR::Vector::hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
+  //FFT over rows
+  Iter it1(vecout), it2(vecout+nblocks);
+  while (it2 <= vecout_end){
+    hFFTw(it1,it2,it1,it2);
+    it1=it2; it2+=nblocks;
+  };
+  //Multiply with phase factor
+  hDoubleFFTPhaseMul(vecout,vecout_end,original_size,blocklen,nblocks,offset);
+  //Second transpose
+  PyCR::Vector::hTranspose(vecin,vecin_end,vecout,vecout_end,nblocks);
+  //And FFT over rows
+  it1=vecin; it2=vecin+blocklen;
+  while (it2 <= vecin_end){
+    hFFTw(it1,it2,it1,it2);
+    it1=it2; it2+=blocklen;
+  };
+  //Final transpose
+  PyCR::Vector::hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//#define HFPP_PARDEF_4 (HInteger)(stride)()("How many blocks were skiped in the original data between two blocks that are now sequentially in memory.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+
+  /*  Iter it1=vec;
+  Iter it2=vec+blocklen;
+  //First do an in-place FFT on the data
+  */
 

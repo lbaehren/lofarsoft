@@ -12,8 +12,7 @@ from vector import *
 #  hArray Class Methods/Attributes
 #======================================================================
 
-def hArray(
-Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None):
+def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None):
     """
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
@@ -95,7 +94,6 @@ Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues
     else: # Create a new vector
         if type(Type) == np.ndarray and not dimensions:
             dimensions=Type.shape
-
         if type(dimensions)==int:
             size=dimensions
         elif (type(dimensions) in [list,tuple,IntVec]):
@@ -104,9 +102,7 @@ Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues
             size=reduce(lambda x,y : x*y, dimensions.shape())
         else:
             size=-1
-
         vec=Vector(Type=Type, size=size)
-
         ary=type2array(basetype(vec))
         ary.stored_vector=vec
         ary.setVector(ary.stored_vector)
@@ -128,6 +124,26 @@ Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues
         else: ary.fill(fill)
     if type(name)==str: ary.setKey("name",name);
     return ary
+
+def hArrayToPrintString(self,maxlen=5):
+    s=typename(basetype(self))+", "
+    loops=""
+    if self.loopingMode(): loops="*"
+    name=self.getKey("name");
+    if name=="": name="hArray";
+    return name+"("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+
+def hArray_repr(self,maxlen=8,long=True):
+    loops=""
+    if self.loopingMode(): loops="*"
+    name=self.getKey("name")
+    if not name=="": name=', name="'+name+'"'
+    s="hArray("+hTypeNamesDictionary[basetype(self)]
+    if long:
+        s+=","+str(list(self.getDim()))+name+") # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+    else:
+        s+=")"
+    return s
 
 def hArray_none(self):
     """
@@ -165,13 +181,10 @@ def hArray_reshape(self, dimensions):
     """Reshape array to new dimensions if total number of elements is left
     unchanged. Raise ValueError otherwise.
     """
-    N_new = reduce(lambda x, y : x*y, dimensions)
-    N_old = reduce(lambda x, y : x*y, self.shape())
-
-    if N_new == N_old:
+    if reduce(lambda x, y : x*y, dimensions) == self.getSize():
         apply(self.setDimensions,dimensions)
     else:
-        raise ValueError("total size of new array must be unchanged")
+        raise ValueError("Total size of new array must not be changed.")
 
 def hArray_return_slice_start(val):
     """ Reduces a slice to its start value"""
@@ -276,6 +289,7 @@ def hArray_val(self):
     otherwise return a python list.
     """
     return self.vec().val()
+
 
 def hArray_copy_resize(self,ary):
     """
@@ -436,36 +450,74 @@ def hArray_setUnit(self,*arg):
     self.setUnit_(*arg)
     return self
 
-def hTranspose(self,ary):
+def hArray_mprint(self):
+    """ary.mprint() - > print the array in matrix style"""
+    self[...].pprint(-1)
+
+def hArray_transpose(self,ary=None):
     """
-    Usage: aryT.transpose(ary)
+    Usage: 
+    aryT=ary.transpose() -> return newly created transposed array from ary
+    aryT.transpose(ary) -> aryT contains transposed array data from ary (aryT will be reshaped if necessary)
+    
+    Transpose the current matrix (i.e. interchange the two lowest
+    dimensions). This is always a copying operation, either a new
+    array is created or data is copied to the array from the array
+    being provided as argument. The output array will be reshaped if
+    necesary.  This is a simple interface to the function
+    hRedistribute and is not well suited to deal with slicing and
+    looping.
 
-    Transpose a 2-dimensional array into another 2-dimensional
-    array. This is a simple interface to the function hRedistribute
-    and is not well suited to deal with slicing and looping.
+    Note: vec.transpose = hArray_transpose (and not teh c++ function
+    hTranspose). This function (hArray_transpose) is a python
+    interface to hTranspose that also changes the shape of the array
+    (which is something the c++ function cannot do by design of the
+    hftools).
 
-    See also: hRedistribute.
+    See also: hRedistribute, hTranspose
 
     Example:
 
     >> ary=hArray(int,[3,4],fill=range(12))
-    >> ary[...].pprint(-1)
+    >> ary.mprint()
 
     [0,1,2,3]
     [4,5,6,7]
     [8,9,10,11]
 
     >> aryT=hArray(int,[4,3])
-    >> hTranspose(aryT,ary)
-    >> aryT[...].pprint(-1)
+    >> hArray_transpose(aryT,ary)
+    >> aryT.mprint()
 
     [0,4,8]
     [1,5,9]
     [2,6,10]
     [3,7,11]
+
+    or
+
+    >> aryT.transpose(ary)
+    >> aryT.mprint()
+
+    or simply
+        
+    >> ary.transpose().mprint()
+
     """
-    dim2=ary.shape()[-2]
-    self.redistribute(ary[...],Vector(range(dim2)),Vector(int,dim2,fill=dim2))
+    if ary==None:
+        ary=self.new()
+        dim=self.shape(); ncols=dim[-1]; nrows=dim[-2];
+        dim=dim[:-2]+[ncols,nrows]
+        ary.reshape(dim)
+        hTranspose(ary,self,ncols)
+        return ary
+    else:
+        dim=ary.shape(); ncols=dim[-1]; nrows=dim[-2];
+        dim=dim[:-2]+[ncols,nrows]
+        self.reshape(dim)
+        hTranspose(self,ary,ncols)
+        return self
+
 
 def ishArray(ary):
     """
@@ -474,6 +526,7 @@ def ishArray(ary):
     Returns true if the argument is one of the hArray arrays, i.e. those listed in hAllVectorTypes.
     """
     return type(ary) in hAllArrayTypes
+
 
 def hArray_toNumpy(self):
     """Returns a copy of the array as a numpy.ndarray object with the correct dimensions."""
@@ -496,9 +549,8 @@ for v in hAllArrayTypes:
     setattr(v,"none",hArray_none)
     setattr(v,"read",hArray_read)
     setattr(v,"list",hArray_list)
-    setattr(v,"transpose",hTranspose)
-    setattr(v,"plt",plt)
-    setattr(v,"plot",hPlot_plot)
+    setattr(v,"mprint",hArray_mprint)
+    setattr(v,"transpose",hArray_transpose)
     setattr(v,"copy_resize",hArray_copy_resize)
     setattr(v,"newreference",hArray_newreference)
     setattr(v,"getSlicedArray",hArray_getSlicedArray)
@@ -507,19 +559,19 @@ for v in hAllArrayTypes:
     setattr(v,"setUnit",hArray_setUnit)
 
 for v in hAllContainerTypes:
-    for s in ["hFill","hSet","hFlip","hCopy","hSort","hZipper","hReadDump","hWriteDump","hRedistribute","hPPrint","hPrettyString"]:
+    for s in hAllContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
-        else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
+        else: print "Warning hAllContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hRealContainerTypes:
-    for s in ["hMean","hMeanAbs","hMeanSquare","hStdDev","hMeanThreshold","hMeanInverse","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hNegate","hVectorLength","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hSaveInvFFTw","hGetHanningFilter","hApplyHanningFilter","hGetHanningFilterHalf","hSpectralPower","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hBSplineFitXValues","hBSpline","hBSplineFit","hErrorsToWeights","hPolynomial"]:
+    for s in hRealContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
-        else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
+        else: print "Warning hRealContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hComplexContainerTypes:
-    for s in ["hConj","hCrossCorrelateComplex","hFFTCasa","hInvFFTw","hSaveInvFFTw","hFFTw","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex","hRFIDownsampling","hSetAmplitude"]:
+    for s in hComplexContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
-        else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
+        else: print "Warning hComplexContainerTypes(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hNumericalContainerTypes:
     setattr(v,"__add__",Vec_add)
@@ -531,9 +583,9 @@ for v in hNumericalContainerTypes:
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
     v.phase = hArg
-    for s in ["hFillRange","hAbs","hMax","hMaxPos","hMin","hMinPos","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hArg","hImag","hNorm","hReal","hCos","hCosh","hExp","hLog","hLog10","hLogSave","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSumAbs","hSumSquare","hMulSum","hRandom","hSortMedian","hMedian","hFindLowerBound","hCrossProduct","hFmod","hMulAdd2","hDivAdd2","hSubAdd2","hAddAdd2"]:
+    for s in hNumericalContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
-        else: print "Warning: function ",s," is not defined. Likely due to a missing library in hftools.cc."
+        else: print "Warning hNumericalContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 #======================================================================
 #  Pretty Printing
@@ -575,105 +627,3 @@ def hArray_repr(self,maxlen=8,long=True):
     else:
         s+=")"
     return s
-
-#======================================================================
-#  Define Plotting functions for vectors and arrays
-#======================================================================
-
-def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None):
-    """
-    array[0].plot(self,xvalues=vec,xlabel="x",ylabel="y",title="Title",clf=True,logplot="xy") -> plot the array (loglog)
-
-    Method of arrays. Plots the current slice. If the array is in
-    looping mode, multiple curves are plotted in one windows.
-
-    You can set the plotting parameters also as attributes to the .par
-    class of the array, e.g., "array.par.xvalues=x_vector; array.plot()"
-
-    Parameters:
-
-    xvalues: an array with corresponding x values, if "None" numbers
-    from 0 to length of the array are used
-
-    xlabel: the x-axis label, if not specified, use the "name" keyword
-    of the xvalues array - units will be added automatically
-
-    ylabel: the y-axis label, if not specified, use the "name" keyword
-    of the array - units will be added automatically
-
-    xlim: tuple with minimum and maximum limits for the x-axis
-
-    ylim: tuple with minimum and maximum limits for the y-axis
-
-    legend: plots a legen taking a tuple of strings for each plotted
-    line as input, e.g. legend=("A","B",...)
-
-    title: a title for the plot
-
-    clf: if True (default) clear the screen beforehand (use False to
-    compose plots with multiple lines from different arrays.
-
-    logplot: can be used to make loglog or semilog plots:
-            "x" ->semilog in x
-            "y" ->semilog in y
-            "xy"->loglog plot
-    """
-    if xvalues==None:
-        if hasattr(self.par,"xvalues"): xvalues=self.par.xvalues
-        else: xvalues=hArray(range(len(self.vec())))
-    xunit=xvalues.getUnit().replace("\\mu","$\\mu$")
-    if not xunit=="": xunit=" ["+xunit+"]"
-    yunit=self.getUnit().replace("\\mu","$\\mu$")
-    if not yunit=="": yunit=" ["+yunit+"]"
-    if xlabel==None: xlabel=xvalues.getKey("name")
-    if ylabel==None: ylabel=self.getKey("name")
-    var="clf"; dflt=True; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
-    var="xlabel"; dflt=""; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
-    var="ylabel"; dflt=""; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
-    var="xlim"; dflt=None; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
-    var="ylim"; dflt=None; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
-    var="legend"; dflt=None; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
-    var="title"; dflt=""; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        elif hasattr(self.par,"filename"): exec(var+"=self.par.filename")
-        else: exec("var=dflt")
-    var="logplot"; dflt=""; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
-    if clf: self.plt.clf()
-    if logplot=="x": _plot=self.plt.semilogx
-    elif logplot=="y": _plot=self.plt.semilogy
-    elif (logplot=="xy") | (logplot=="yx"): _plot=self.plt.loglog
-    else: _plot=self.plt.plot
-    iterate=True;
-    while (iterate):
-        _plot(xvalues.vec(),self.vec())
-        xvalues.next()
-        iterate=self.next().doLoopAgain()
-    self.plt.ylabel(ylabel+yunit)
-    self.plt.xlabel(xlabel+xunit)
-    if not xlim==None: self.plt.xlim(*xlim)
-    if not ylim==None: self.plt.ylim(*ylim)
-    if not legend==None: self.plt.legend(legend)
-    if not ((title=="") | (title==None)): self.plt.title(title)
-
