@@ -7,10 +7,8 @@
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
-
 import os
 
-import pulpEnv
 
 class bf2Pars():
 
@@ -40,6 +38,8 @@ class bf2Pars():
     so, in this case, output_base = 'incoherentstokes/RSP0/B0329+54_L2010_06160_RSP0'
     bf2presto produces the name extensions during channelization.
 
+    Constructor receives a pulp environment object (an instance of PulpEnv()).
+
     """
 
     __module__ = __name__
@@ -60,8 +60,8 @@ class bf2Pars():
 
         # parset, output file path
 
-        self.stokes      = env.stokes
-        self.arch_base   = env.archPaths[self.arch] # archive @ lse018/data4
+        self.stokes      = env.stokes       # 1 of 'incoherentstokes' or 'raw'
+        self.arch_base   = env.pArchive     # archive @ lse018/data4
         self.parsetPath  = env.parsetPath
         self.parsetName  = env.parsetName
         self.transpose2  = env.transpose2
@@ -103,10 +103,10 @@ class bf2Pars():
         pars = open(self.parsetName).readlines()
         for line in pars:
 
-            if ('OLAP.BeamsAreTransposed' in line):
-                self.transpose2 = line.split('=')[1].strip()
-                continue
-            else: self.transpose2 = False
+#             if ('OLAP.BeamsAreTransposed' in line):
+#                 self.transpose2 = line.split('=')[1].strip()
+#                 continue
+#             else: self.transpose2 = False
 
             if ('OLAP.outputIncoherentStokes' in line):
                 incoherentstokes = line.split('=')[1].strip()
@@ -141,12 +141,3 @@ class bf2Pars():
             print "Parameter: ",key, "\t= ",self.__dict__[key]
         print "---------------------"
         return
-
-
-        # ------------------------------------------- #
-
-
-    def __setEnvironment(self):
-
-        obsEnv = pulpEnv.PulpEnv(self.obsid,self.pulsar,self.arch,self.userEnv)
-        return obsEnv

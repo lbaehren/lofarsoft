@@ -11,10 +11,9 @@ import os
 import gzip
 import pulpEnv
 
+
 parts        = ['data1', 'data2', 'data3', 'data4']
 nodes        = ['lse013', 'lse014', 'lse015']
-logLocation  = '/globalhome/lofarsystem/log'
-logfilename  = 'run.Storage.R00.log'
 
 
 class DISTError(IOError):
@@ -42,28 +41,38 @@ class RSPS():
     ]
     etc.
 
-    If the caller switches readlog argument to False, the searchNodes() function assumes nominal
-    data delivery of 248 subbands, 0-247.  These lists are meant to contain (usually)
-    about 62 subband files, a number chosen for presto post-processing, which imposes
-    an arbitrary limit of 1024 directory files.  16 channels/subband on 62 subbands
-    delivers 992 files to the output directory, within presto limits.
+    If the caller switches readlog argument to False, the searchNodes() function 
+    assumes nominal data delivery of 248 subbands, 0-247.  These lists are meant
+    to contain (usually) about 62 subband files, a number chosen for presto
+    post-processing, which imposes an arbitrary limit of 1024 directory files.
+    Hexadecimal channelization (16 chan/subband) on 62 subbands produces 992 files
+    to the output directory, within presto limits.
 
-    N.B. There are hazards within: this assumes bands low to high are deposited and ordered on the
-    cluster, such that first subbands --> lse013, 2nd subbands --> lse014, 3rd subbands --> lse15.
+    N.B. There are hazards within: this assumes bands low to high are deposited
+    and ordered on the cluster, such that
+
+    first subbands --> lse013, 2nd subbands --> lse014, 3rd subbands --> lse15.
+
     This has been the nominally data delivery pattern, but could easily change and this function
     should be made robust under changing delivery conditions.  It is not robust now.
+
+    -- readlog parameter is now set for default False.  The logfile as has been known,
+    has disasppeared, and records of storage writes have been incorporated into a much larger
+    and more complicated log file, 
+
+    
     """
 
-    def __init__(self, obsid, pulsar, filefactor, arch, uEnv, readlog=True):
+    def __init__(self, obsid, pulsar, filefactor, arch, uEnv, readlog=False):
 
         obsEnv = pulpEnv.PulpEnv(obsid,pulsar,arch,uEnv)
         
         self.obsid      = obsEnv.obsid
         self.readlog    = readlog
         self.filefactor = int(filefactor)
-        self.arch       = obsEnv.archPaths[arch]
+        self.arch       = obsEnv.pArchive
         self.subnet     = obsEnv.subnet
-        self.logfilepath= os.path.join(logLocation,self.obsid,logfilename)
+        self.logfilepath= obsEnv.logfilepath
 
 
     def RSPLists(self):

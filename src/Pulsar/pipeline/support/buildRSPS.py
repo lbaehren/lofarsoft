@@ -27,10 +27,13 @@ class buildRSPS():
         self.obsid     = obsEnv.obsid
         self.pulsar    = obsEnv.pulsar
         self.stokes    = obsEnv.stokes
-        self.pArchive  = obsEnv.archPaths[arch]
-        self.obsidPath = os.path.join(self.pArchive,self.obsid)
-        self.stokesPath= os.path.join(self.obsidPath,self.stokes)
+        self.pArchive  = obsEnv.pArchive
+        self.obsidPath = obsEnv.obsidPath
+        self.stokesPath= obsEnv.stokesPath
         self.filefactor= filefactor
+
+        print self.obsidPath
+        print self.stokesPath
 
 
     def makeLists(self):
@@ -54,9 +57,11 @@ class buildRSPS():
         else: 
             os.mkdir(self.pArchive)
 
-        if   os.path.isdir(self.obsidPath):
-             shutil.rmtree(self.obsidPath)
-             os.makedirs(self.stokesPath)
+        if os.path.isdir(self.obsidPath):
+            print self.obsidPath
+            shutil.rmtree(self.obsidPath)
+            os.makedirs(self.stokesPath)
+
         else:os.makedirs(self.stokesPath)
 
         for i in range(self.filefactor):

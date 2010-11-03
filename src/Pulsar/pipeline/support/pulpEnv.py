@@ -20,9 +20,9 @@ class PulpEnv:
     Builds an environment object for a given user and obseration.
 
     archPaths sets up a dict  for pulp pipeline processing archive.
-    Nominally called, PULP_PULSAR_ARCHIVE
+    Nominally called, PULP__ARCHIVE.
 
-    Attributes made available through this environment class:
+    Attributes made available through the pulp environment class (PulpEnv)
 
     self.obsid        :: LOFAR observation ID, like L<YYYY>_<nnnnn>
     self.pulsar       :: Name of targeted pulsar
@@ -39,6 +39,10 @@ class PulpEnv:
     self.stokes       :: either 'incoherent' or ...
     self.archPaths    :: Possible Pulsar Processing Archives
     self.pArchive     :: User selected PULP PULSAR ARCHIVE
+    self.oldLogName   :: old log type: 'run.Storage.R00.log' !! gone.
+    self.logfilepath  :: full path of log file.
+    self.obsidPath    :: full path to obsid output.
+    self.stokesPath   :: full path,  <obsidPath>/[incoherent,raw]/
 
     'arch' will be a string of the form (see archPaths below)
 
@@ -69,10 +73,12 @@ class PulpEnv:
         self.parsetPath    = '/globalhome/lofarsystem/log/'
         self.logLocation   = '/globalhome/lofarsystem/log/'
         self.oldParsetName = 'RTCP.parset.0'
+        self.oldLogName    = 'run.Storage.R00.log'
+        self.logfilepath   = os.path.join(self.logLocation,obsid,self.oldLogName)
         self.stokes        = 'incoherentstokes'  #  default stokes type
         self.defaultInf    = os.path.join(self.LOFARSOFT,
                                           'release/share/pulsar/data/lofar_default.inf'
-                                          )                                         
+                                          )                        
 
         # The following method calls will populated attributes,
 
@@ -83,9 +89,9 @@ class PulpEnv:
         self.__readParset()
 
 
-        if self.transpose2:
-            self.transpose2  = True
-        else: self.tranpose2 = False
+#         if self.transpose2:
+#             self.transpose2  = True
+#         else: self.tranpose2 = False
 
         try:
             self.TEMPO  = self.environ["TEMPO"]
@@ -96,6 +102,8 @@ class PulpEnv:
         except KeyError, err:
             raise KeyError, "$PRESTO not defined"
 
+        self.obsidPath  = os.path.join(self.pArchive,self.obsid)
+        self.stokesPath = os.path.join(self.obsidPath,self.stokes)
 
     # ------------- private helper methods ------------------ #
 
@@ -193,14 +201,15 @@ class PulpEnv:
         """
 
         pars = open(self.parsetName).readlines()
-        self.transpose2 = False
+
         self.stokes     = False
         self.parTarget  = False
+        self.transpose2 = False
 
         for line in pars:
-            if ('OLAP.BeamsAreTransposed' in line):
-                self.transpose2 = line.split('=')[1].strip()
-                continue
+#             if ('OLAP.BeamsAreTransposed' in line):
+#                 self.transpose2 = line.split('=')[1].strip()
+#                 continue
             if ('OLAP.outputIncoherentStokes' in line):
                 incoherentstokes = line.split('=')[1].strip()
                 if incoherentstokes == 'true':
