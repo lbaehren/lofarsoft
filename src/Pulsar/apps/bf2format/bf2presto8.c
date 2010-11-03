@@ -15,6 +15,7 @@ be "floatswapped" (line 119). Same applies for convert_collapse() too.*/
 
 char OUTNAME[248] = "PULSAR_OBS";
 int BASESUBBAND = 0;
+int FLYS_EYE = 0;
 int BEAMS = 1;
 int CHANNELS = 1;
 int STOKES = 1;	
@@ -59,11 +60,12 @@ void usage(){
   puts("-L <parset>\tuse fiLterbank format (8/32 bit, 1 beam, stokes I, no collapse), with header info from <parset>");
   puts("-n\tNumber of Samples per Stokes Integration (Default = 1)");
   puts("-N\tNumber of Samples in block (Default = 768)");
+  puts("-M\tFly's eye mode flag");
   puts("-o\tOutput Name(Default = PULSAR_OBS)");
   puts("-s\tNumber of Stokes Parameters (Default = 1)");
   puts("-S\tStokes Parameter to write out (Default = StokesI):\n\t 0 = StokesI\n\t 1 = StokesQ\n\t 2 = StokesU\n\t 3 = StokesV");
   puts("-r\tData further than <r>*sigma from the mean will be clipped (Default = 7)");
-  puts("-t\t INCOHERENT data in Second Transpose mode");
+  puts("-t\tINCOHERENT data in Second Transpose mode");
   puts("-T <number of subbands>\t COHERENT data in Second Transpose mode");
 }
 
@@ -388,7 +390,7 @@ void secondTranspose( FILE **inputfiles, int beamnr)
     if (x == NUM_BLOCKGROUPS) break; // switch so you can choose only to read in x blocks
     unsigned num = 0;
     unsigned i,f,n_simult_files, sub;
-    char buf[1024];
+    char buf[1024], buf2[1024];
     int index=0;
 
     /* read data */
@@ -404,15 +406,15 @@ void secondTranspose( FILE **inputfiles, int beamnr)
       for( chan = 0; chan < CHANNELS; chan++ ){
 	FILE *outputfile[CHANNELS]; 
 	sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
-	if ( BEAMS > 1 ) {
-	  sprintf(buf, "beam_%d/%s", beamnr, buf ); /* prepend beam name */
+	if ( BEAMS > 1 || FLYS_EYE == 1 ) {
+	  sprintf(buf2, "beam_%d/%s", beamnr, buf ); /* prepend beam name */
 	} 
-	fprintf(stderr,"SUBBAND: %d CHANNEL %d BLOCK: %d -> %s\n", sub, chan, x, buf);
+	fprintf(stderr,"SUBBAND: %d CHANNEL %d BLOCK: %d -> %s\n", sub, chan, x, buf2);
 	index++;
 	if( x == 0 ){
-	  outputfile[chan] = fopen( buf, "wb" );
+	  outputfile[chan] = fopen( buf2, "wb" );
 	} else {
-	  outputfile[chan] = fopen( buf, "ab" );
+	  outputfile[chan] = fopen( buf2, "ab" );
 	}
 	double average = 0;
 	double rms = 0;
@@ -538,7 +540,7 @@ void secondTranspose_inc( FILE **inputfiles, FILE **outputfile, int beamnr, int 
   struct stokesdata_struct {
     unsigned	sequence_number;
     char        pad[508];
-    float	samples[BEAMS][STOKES][SAMPLES|2][CHANNELS];
+    float	samples[BEAMS][STOKES][CHANNELS][SAMPLES|2];
   };
   
   struct stokesdata_struct *stokesdata;
@@ -578,10 +580,10 @@ void secondTranspose_inc( FILE **inputfiles, FILE **outputfile, int beamnr, int 
 	
 	for( t = 0; t < SAMPLES; t++ ){ 
 	  //first pass to compute statistics
-	  floatSwap( &stokesdata[i].samples[beamnr][s][t][chan]);
-	  if( !isnan(stokesdata[i].samples[beamnr][s][t][chan]) ){
-	   average += stokesdata[i].samples[beamnr][s][t][chan]; 
-	   rms += stokesdata[i].samples[beamnr][s][t][chan]*stokesdata[i].samples[beamnr][s][t][chan];
+	  floatSwap( &stokesdata[i].samples[beamnr][s][chan][t]);
+	  if( !isnan(stokesdata[i].samples[beamnr][s][chan][t]) ){
+	   average += stokesdata[i].samples[beamnr][s][chan][t]; 
+	   rms += stokesdata[i].samples[beamnr][s][chan][t]*stokesdata[i].samples[beamnr][s][chan][t];
 	   validsamples++;
 	  }
 	}	 
@@ -608,12 +610,13 @@ void secondTranspose_inc( FILE **inputfiles, FILE **outputfile, int beamnr, int 
 	signed short shvalue;
 	signed char ivalue;
 	
+	//printf("%d %d\n",stokesdata[i].sequence_number, prev_seqnr);
 	/* detect gaps and write zeros here*/
 	if( prev_seqnr + 1 != stokesdata[i].sequence_number ) {
 	  fprintf(stderr,"gap between sequence numbers %d and %d.\n", prev_seqnr, stokesdata[i].sequence_number );
 	  
 	  //corrupted sequence number, write block of zeros and move to next number
-	  if( stokesdata[i].sequence_number - prev_seqnr > 100){
+	  if( stokesdata[i].sequence_number - prev_seqnr > 1000){
 	    fprintf(stderr,"skipping corrupted sequence number: %d.\n", stokesdata[i].sequence_number );
 	    for( t=0; t < SAMPLES; t++){
 	      shvalue =0;
@@ -642,7 +645,7 @@ void secondTranspose_inc( FILE **inputfiles, FILE **outputfile, int beamnr, int 
 	  
 	  //write data
 	  for( t = 0; t < SAMPLES; t++ ){
-	    value = floor((stokesdata[i].samples[beamnr][s][t][chan]-offset)*scale);
+	    value = floor((stokesdata[i].samples[beamnr][s][chan][t]-offset)*scale);
 	    if( isnan(value)) {
 	      value = 0;
 	      nul_samples++;
@@ -994,10 +997,10 @@ void convert_collapse( FILE *input, FILE **outputfile, int beamnr )
 int main( int argc, char **argv ) {
   float avr;
   int f,b,c,y,n_outfiles,n_infiles;
-  char buf[1024];
+  char buf[1024],buf2[1024];
   int i=0;
 
-  while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:T:t8hCF")) != -1)
+  while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:T:t8hCFM")) != -1)
     {
       i++;
       switch (c)
@@ -1009,6 +1012,11 @@ int main( int argc, char **argv ) {
 	  }
 	  break;
 	  
+	case 'M':
+	  FLYS_EYE= 1;
+	  puts("FLY'S EYE MODE");
+	  break;
+
 	case 'B':
 	  if (sscanf(optarg, "%d", &NUM_BLOCKGROUPS) != 1) {
 	    fprintf(stderr,"ERROR: Number of BlockGroups to convert = %s\n", optarg);
@@ -1153,7 +1161,7 @@ int main( int argc, char **argv ) {
   fprintf(stderr, "Stokes Parameter: %d\n",STOKES_SWITCH);
   
   /* make beam dirs*/ 
-  if( BEAMS > 1 ) {
+  if( BEAMS > 1 || FLYS_EYE ==1 ) {
     for( b = 0; b < BEAMS; b++ ) {
       sprintf( buf, "beam_%d", b );
       mkdir( buf, 0775 );
@@ -1218,17 +1226,17 @@ int main( int argc, char **argv ) {
       for( f = 0; f < n_infiles; f++ ) { /* loop over input files */
 	for ( c = 0; c < n_outfiles; c++ ) { /* make CHANNEL output files */
 	  sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
-	  if ( BEAMS > 1  ) {
-	    sprintf(buf, "beam_%d/%s", b, buf ); /* prepend beam name */
+	  if ( BEAMS > 1 || FLYS_EYE == 1 ) {
+	    sprintf(buf2, "beam_%d/%s", b, buf ); /* prepend beam name */
 	  } else {
-	    sprintf(buf, "%s", buf);
+	    sprintf(buf2, "%s", buf);
 	  }
-	  fprintf(stderr,"%s -> %s\n", argv[optind+f], buf); 
+	  fprintf(stderr,"%s -> %s\n", argv[optind+f], buf2); 
 	  /*open file */
 	  index++;
-	  outputfile[c] = fopen( buf, "wb" );
+	  outputfile[c] = fopen( buf2, "wb" );
 	  if( !outputfile[c] ) {
-	    perror( buf );
+	    perror( buf2 );
 	    exit(1);
 	  }
 	}
@@ -1245,17 +1253,17 @@ int main( int argc, char **argv ) {
       for( f = 0; f < n_infiles; f++ ) { /* loop over input files */
 	for ( c = 0; c < n_outfiles; c++ ) { /* make CHANNEL output files */
 	  sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
-	  if ( BEAMS > 1  ) {
-	    sprintf(buf, "beam_%d/%s", b, buf ); /* prepend beam name */
+	  if ( BEAMS > 1 || FLYS_EYE==1 ) {
+	    sprintf(buf2, "beam_%d/%s", b, buf ); /* prepend beam name */
 	  } else {
-	    sprintf(buf, "%s", buf);
+	    sprintf(buf2, "%s", buf);
 	  }
-	  fprintf(stderr,"%s -> %s\n", argv[optind+f], buf); 
+	  fprintf(stderr,"%s -> %s\n", argv[optind+f], buf2); 
 	  /* open file */
 	  index++;
-	  outputfile[c] = fopen( buf, "wb" );
+	  outputfile[c] = fopen( buf2, "wb" );
 	  if( !outputfile[c] ) {
-	    perror( buf );
+	    perror( buf2 );
 	    exit(1);
 	  }
 	}
