@@ -112,7 +112,7 @@ def setup_plot(x, title, colormap):
 	ax.yaxis.set_major_formatter(ticker.FuncFormatter(printsub))
 	for label in ax.get_yticklabels(): label.set_fontsize(fs)
 	plt.xlabel ("Time (s)", fontsize=fs)
-	plt.ylabel ("Frequency Channels", fontsize=fs)
+	plt.ylabel ("Channels", fontsize=fs)
 	fig.suptitle (title, fontsize=fs, y=0.94)
 
 	axr = plt.twinx()
