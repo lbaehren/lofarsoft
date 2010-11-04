@@ -1110,10 +1110,23 @@ static int read_subbands(FILE * infiles[], int numfiles, short *subbanddata)
 {
    int ii, jj, index, numread = 0;
 
+   double run_avg = 0; // (Vishal's addition 17/08/10) //
+ 
    for (ii = 0; ii < numfiles; ii++) {
       index = ii * SUBSBLOCKLEN;
+      run_avg = 0;
+
       numread = chkfread(subbanddata + index, sizeof(short),
                          SUBSBLOCKLEN, infiles[ii]);
+      if(cmd->runavgint==1){	
+	     for(jj=0 ; jj < numread ; jj++)
+	     run_avg += (float)subbanddata[jj+index];
+
+      	     run_avg /= numread;
+
+	     for(jj=0 ; jj < numread ; jj++)
+             subbanddata[jj+index] = (float)subbanddata[jj+index] - run_avg;
+       }    	
       for (jj = numread; jj < SUBSBLOCKLEN; jj++)
          subbanddata[index + jj] = 0.0;
    }
