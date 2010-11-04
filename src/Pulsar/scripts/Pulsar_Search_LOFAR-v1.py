@@ -311,7 +311,7 @@ if __name__ == "__main__":
         rfi_time = timed_execute(cmd,1)
 	rfp.write("RFI masking Time : %.2f\n" % (rfi_time))
         totime += rfi_time
-	maskfile=outfile+"_output.mask"
+	maskfile=outfile+"_rfifind.mask"
 	
 	print "\nMASK FILE : %s\n" % (maskfile)
 
@@ -334,10 +334,7 @@ if __name__ == "__main__":
 			for jj in range(0,((totdm/1000)+1)):
         	              if((totdm - jj*1000)>1000): # Because prepsubband can handle only 1000 dm values
 
-                	          cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms \
-					    1000 -downsamp %d -o %s %s >> %s " % (maskfile, \
-                        	            ddplan.lodm+ddplan.dmstep*jj*1000 ,ddplan.dmstep,ddplan.downsamp, \
-                                	    prepsubbandout,infile, prepsubbandout + ".log")
+                	          cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms 1000 -downsamp %d -o %s %s >> %s " % (maskfile, ddplan.lodm+ddplan.dmstep*jj*1000 ,ddplan.dmstep,ddplan.downsamp, prepsubbandout,infile, prepsubbandout + ".log")
 
 			      	  prepsubband_time = timed_execute(cmd,1)
 
@@ -352,10 +349,7 @@ if __name__ == "__main__":
 
 		 	      else:
 
-        	                  cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d \
-					    -downsamp %d -o %s %s >> %s " % (maskfile, \
-                	                    ddplan.lodm+ddplan.dmstep*jj*1000,ddplan.dmstep,totdm - jj*1000, \
-					    ddplan.downsamp,prepsubbandout,infile, prepsubbandout+ ".log")
+        	                  cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (maskfile, ddplan.lodm+ddplan.dmstep*jj*1000,ddplan.dmstep,totdm - jj*1000, ddplan.downsamp,prepsubbandout,infile, prepsubbandout+ ".log")
 
 	  			  prepsubband_time = timed_execute(cmd,1)
 
@@ -383,11 +377,7 @@ if __name__ == "__main__":
         	        for jj in range(0,((totdm/blk)+1)):
                 	      if((totdm - jj*blk)>blk): # Because prepsubband can handle only 1000 dm values
 
-                        	  cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask \
-					     %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % \
-                                	    (np + 1,maskfile, \
-	                                    ddplan.lodm+ddplan.dmstep*jj*blk ,ddplan.dmstep,blk,ddplan.downsamp, \
-        	                            prepsubbandout, infile, prepsubbandout + ".log")
+                        	  cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1,maskfile, ddplan.lodm+ddplan.dmstep*jj*blk ,ddplan.dmstep,blk,ddplan.downsamp, prepsubbandout, infile, prepsubbandout + ".log")
 
                 	          prepsubband_time = timed_execute(cmd,1)
                         	  tot_prep_time += prepsubband_time
@@ -402,11 +392,7 @@ if __name__ == "__main__":
 
 	                      else:
 
-        	                  cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s \
-					    -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o \
-					    %s %s >> %s " % (np + 1, maskfile, \
-                	                    ddplan.lodm+ddplan.dmstep*jj*blk,ddplan.dmstep,totdm - jj*blk, \
-					    ddplan.downsamp,prepsubbandout, infile, prepsubbandout + ".log")
+        	                  cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1, maskfile, ddplan.lodm+ddplan.dmstep*jj*blk,ddplan.dmstep,totdm - jj*blk, ddplan.downsamp,prepsubbandout, infile, prepsubbandout + ".log")
 
 	                          prepsubband_time = timed_execute(cmd,1)
         	                  tot_prep_time += prepsubband_time
@@ -499,7 +485,7 @@ if __name__ == "__main__":
 	fp.close()
 
 #    The actual path of the psr_cats should be specified here. 
-    bright_catalog = @os.environ["LOFARSOFT"] + "/release/share/pulsar/data/psr_cats.txt"
+    	bright_catalog = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/psr_cats.txt"
 	fp = open(bright_catalog,"r")
 	realpsr = fp.read().split("\n")
 	fp.close()	
