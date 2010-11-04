@@ -1489,6 +1489,48 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Calculate the chi-squared of two vectors, i.e., (v1,i-v2,i)**2/v2,i
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hChiSquared
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hDiffSquaredSum(Vector([a,b,c,...]),Vector([x,y,z,...]) -> (a-x)**2 + (b-y)**2 + (c-z)**2 + ....
+
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+{
+  return PyCR::Array::hChiSquared(vec1, vec1_end, vec2, vec2_end);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculate the mean chi-squared of two vectors, i.e., mean((v1,i-v2,i)**2/v2,i)
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMeanChiSquared
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector (observed values)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector (expected values) - must not be zero")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hDiffSquaredSum(Vector([a,b,c,...]),Vector([x,y,z,...]) -> (a-x)**2 + (b-y)**2 + (c-z)**2 + ....
+
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+{
+  return PyCR::Array::hMeanChiSquared(vec1, vec1_end, vec2, vec2_end);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Dot product of two vectors
 //$COPY_TO HFILE START --------------------------------------------------

@@ -30,10 +30,10 @@ parameter in looping mode
 - Added pipeline_start.py script for the first basic steps using these
 modules
 
-2010-11-03 - Heino Falcke - rev 6227
+2010-11-03 - Heino Falcke - rev 6228
 - Added hTranspose - to transpose a vector on the c++ level
-- adapted hArray_tranpose to use hTranspose
-- Added Functions hDiffSum and hDiffSquaredSum to caluclated the (sum
+- adapted hArray_tranpose to use hTranspose with hArrays
+- Added Functions hDiffSum and hDiffSquaredSum to caluclate the (sum
 of the (squared)) differences of two vectors
 - changed hFill to allow filling one vector with a second vector of
 different type

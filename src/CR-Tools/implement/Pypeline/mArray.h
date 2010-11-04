@@ -1073,6 +1073,34 @@ namespace PyCR { // Namespace PyCR -- begin
       return sum;
     }
 
+    template <class Iter> IterValueType hChiSquared(const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+    {
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      T val;
+      Iter it1=vec1,it2=vec2;
+      while ((it1!=vec1_end) && (it2!=vec2_end)) {
+	val=(*it1) - (*it2);
+        sum+=val*val/(*it2);
+        ++it1; ++it2;
+      };
+      return sum;
+    }
+
+    template <class Iter> IterValueType hMeanChiSquared(const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+    {
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      T val;
+      Iter it1=vec1,it2=vec2;
+      while ((it1!=vec1_end) && (it2!=vec2_end)) {
+	val=(*it1) - (*it2);
+        sum+=val*val/(*it2);
+        ++it1; ++it2;
+      };
+      return sum/(vec2_end-vec2);
+    }
+
   } // Namespace Array -- end
 
 } // Namespace PyCR -- end

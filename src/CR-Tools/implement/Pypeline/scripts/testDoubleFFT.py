@@ -67,7 +67,7 @@ aT[...].fftw(aT[...])
 
 
 # We'll multiply the result of the FFT-by-columns by Phi_ik = exp( - j 2pi/N (i*k))
-aT.doublefftphasemul(bigFFTblocksize,rowBlocksize,columnBlocksize,0)
+aT.doublefftphasemul(bigFFTblocksize,columnBlocksize,rowBlocksize,0)
 
 #Do the second transpose and fft again
 a.transpose(aT) 
@@ -77,13 +77,15 @@ a[...].fftw(a[...]) # should be the same as fftOverRows
 aT.transpose(a)
 print "Done."
 print "Do double fft in one c++ function:"
-bT.doublefft(b,bigFFTblocksize,rowBlocksize,columnBlocksize,0)
+bT.doublefft(b,bigFFTblocksize,columnBlocksize,rowBlocksize,0)
 
 #And plot the absolute values
 print "Plot Values."
 
 aT.abs()
 aT.log()
+bT.abs()
+bT.log()
 bigFFT.abs()
 bigFFT.log()
 
@@ -92,6 +94,7 @@ bigFFT.reshape([bigFFTblocksize])
 
 aT.plot()
 bigFFT.plot(clf=False)
+bT.plot(clf=False)
 print "Done plotting."
 
 print "Difference in abs log between full and double FFT:",abs(bigFFT.diffsquaredsum(aT)[0])
