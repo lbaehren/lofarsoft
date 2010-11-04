@@ -75,6 +75,8 @@ typedef struct s_Cmdline {
   char maskfileP;
   char* maskfile;
   int maskfileC;
+  /***** -runavg: Running mean subtraction from the .dat file */
+  int runavgint;
   /***** uninterpreted command line parameters */
   int argc;
   /*@null*/char **argv;
