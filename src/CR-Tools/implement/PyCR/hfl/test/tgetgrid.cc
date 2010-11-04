@@ -21,6 +21,8 @@ int main()
   const double incLat=1.0;
   const double refX=1.0;
   const double refY=1.0;
+  const double lonPole = 0.0;
+  const double latPole = 0.0;
 
   double status=true;
 
@@ -54,7 +56,7 @@ int main()
                  refLong, refLat,
                  incLong, incLat,
                  refX, refY,
-                 0., 0.);
+                 lonPole, latPole);
 
   status=world2Pixel(opixel.begin(), opixel.end(),
                  world.begin(), world.end(),
