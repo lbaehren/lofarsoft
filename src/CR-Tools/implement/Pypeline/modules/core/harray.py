@@ -179,12 +179,16 @@ def hArray_shape(self):
 
 def hArray_reshape(self, dimensions):
     """Reshape array to new dimensions if total number of elements is left
-    unchanged. Raise ValueError otherwise.
+    unchanged. 
     """
-    if reduce(lambda x, y : x*y, dimensions) == self.getSize():
-        apply(self.setDimensions,dimensions)
-    else:
-        raise ValueError("Total size of new array must not be changed.")
+    apply(self.setDimensions,dimensions)
+    
+#   Raise ValueError otherwise. No, it is perfectly legal to rechange the vector if you want to ...
+#
+#    if reduce(lambda x, y : x*y, dimensions) == self.getSize():
+#        
+#    else:
+#        raise ValueError("Total size of new array must not be changed.")
 
 def hArray_return_slice_start(val):
     """ Reduces a slice to its start value"""
@@ -398,17 +402,37 @@ def hArray_setitem(self,dims,fill):
     if (type(fill)) in hAllListTypes: fill=hArray(fill)
     hFill(hArray_getSlicedArray(self,dims),fill)
 
-def hArray_read(self,datafile,key):
+def hArray_read(self,datafile,key,blocks=-1):
     """
-    array.read(file,"Time") -> read key Data Array "Time" from file into array.
+    array.read(file,"Time",blocks=-1) -> read key Data Array "Time" from file into array.
 
     Will also set the attributes par.file and par.filename of the array and
     make a history entry.
+
+    blocks: this allows you to specify the block to be read in. If
+    specified as a list, the read operation will loop over the array
+    (if ellipses are used).
     """
     self.par.filename=datafile.filename
     self.addHistory("read","Reading data from file "+self.par.filename)
-    self.par.file=datafile.read(key,self)
+    if type(blocks)==int: blocks=Vector([blocks])
+    if type(blocks) in [list,tuple]: blocks=Vector(blocks)
+    self.par.file=self
+    datafile.read(key,self,blocks)
     return self
+
+"""   if blocks==None:
+        self.par.file=datafile.read(key,self)
+    el
+        datafile["block"]=blocks
+        self.par.file=datafile.read(key,self)
+    else:
+        iterate=True
+        while iterate:
+            self.par.file=datafile.read(key,self)
+            self.next()
+"""
+
 
 def hArray_setPar(self,key,value):
     """

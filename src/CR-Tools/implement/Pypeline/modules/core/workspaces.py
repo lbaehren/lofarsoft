@@ -1,6 +1,9 @@
 """Provides a flexible data container class.
 """
 
+#import pdb
+#pdb.set_trace()
+
 from pycrtools.core import *
 
 CRWorkSpaceList = []

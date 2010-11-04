@@ -39,6 +39,7 @@
 // ========================================================================
 
 #include "core.h"
+#include "mVector.h"
 #include "mIO.h"
 
 
@@ -341,6 +342,147 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+//$DOCSTRING: Read a specified block of data from a Datareader object into a vector, where the size should be pre-allocated.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFileRead
+//-----------------------------------------------------------------------
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 2 // Use the third parameter as the master array for looping and history informations
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object, opened e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_UNMUTABLE_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HString)(Datatype)()("Name of the data column to be retrieved (e.g., FFT, Fx,Time, Frequency...)")(HFPP_PAR_IS_UNMUTABLE_SCALAR)()(HFPP_PASS_AS_VALUE) //UNMUTABLE_SCALAR: will not be converted to a vector when used in looping mode.
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(block)()("block number to read - read current block if negative")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+
+Example:
+
+filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+datafile=crfile(filename)
+datafile["blocksize"]=10
+f=hArray(float,[10])
+f.read(datafile,"Fx")
+f.pprint(-1)
+
+>> [29,29,35,27,9,-8,-45,-74,-92,-109]
+
+datafile["blocksize"]=2
+x=hArray(float,[5,2])
+hFileRead(datafile,"Fx",x[...],Vector(range(2)))
+x.mprint()
+>> [29,29]   # blck 0
+   [35,27]   # blck 1
+   [29,29]   # blck 0
+   [35,27]   # blck 1
+   [29,29]   # blck 0
+
+Note, that here block 0,1 and one are read in 2-3 times, since the
+array was longer then the block list specified! This is the default
+behaviour of looping arrays.
+
+You may only read the data into a section of your array:
+
+x[1].read(datafile,"Fx",3)
+x.mprint()
+
+>> [29,29]
+   [-45,-74]
+   [29,29]
+   [35,27]
+   [29,29]
+
+Now, we sneaked the 4th block (block 3) into the second row (index 1).
+
+Finally, you can also read the data into an array of different type
+(but that is slightly slower as scratch arrays are created for every
+row that is being read) 
+
+c=hArray(complex,[5,2])
+c[...].read(datafile,"Fx",Vector([0,1,2,3]))
+c.mprint()
+>> [(29,0),(29,0)]
+   [(35,0),(27,0)]
+   [(9,0),(-8,0)]
+   [(-45,0),(-74,0)]
+   [(29,0),(29,0)]   # here we have block 0 again ....
+*/
+
+template <class Iter>
+void HFPP_FUNC_NAME(
+		    CRDataReader &dr,
+		    HString Datatype,
+		    const Iter vec, const Iter vec_end,
+		    HInteger block
+		    )
+{
+
+  //Create a DataReader Pointer from an integer variable
+  DataReader *drp=&dr;
+  typedef IterValueType T;
+
+  //Check whether it is non-NULL.
+  if (drp==Null_p){
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": pointer to FileObject is NULL, DataReader not found.");
+    return;
+  };
+  if (block>=0) {drp->setBlock((uint)block);};
+
+  //------TIME------------------------------
+  if (Datatype=="Time") {
+    casa::IPosition shape(1,vec_end-vec); //tell casa the size of the vector
+    if (typeid(*vec) == typeid(double)) {
+      double * storage = reinterpret_cast<double*>(&(*vec));
+      CasaVector<double> casavec(shape,storage,casa::SHARE);
+      drp->timeValues(casavec);
+    }  else {
+      CasaVector<double> casavec(shape);
+      drp->timeValues(casavec);
+      aipsvec2stdit(casavec,vec,vec_end);
+    };
+    //------FREQUENCY------------------------------
+  } else if (Datatype=="Frequency") {
+    CasaVector<double> val = drp->frequencyValues();
+    aipsvec2stdit(val,vec,vec_end);
+  }
+//..........................................................................................
+//Conversion from aips to stl using shared memory space
+//..........................................................................................
+#define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD,SIZE)				\
+  if (typeid(T)==typeid(TYPESTL)) {	_H_NL_			\
+    casa::IPosition shape(2);				_H_NL_		\
+    shape(0)=drp->SIZE (); shape(1)=drp->nofSelectedAntennas();	_H_NL_\
+    if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(0) << " antennas times " << shape(1) << " data points (= " << shape(0)*shape(1) <<")!"); return;}; _H_NL_ \
+    casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(*vec)),casa::SHARE); _H_NL_\
+    drp->FIELD (casamtrx);						_H_NL_\
+  } else {								_H_NL_\
+    casa::IPosition shape(2);				_H_NL_		\
+    shape(0)=drp->SIZE (); shape(1)=drp->nofSelectedAntennas();	_H_NL_\
+    vector<TYPESTL> tmpvec(shape(0)*shape(1)); \
+    casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(tmpvec[0])),casa::SHARE); _H_NL_\
+    drp->FIELD (casamtrx);						_H_NL_\
+    PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin(),tmpvec.end());\
+  }
+
+//..........................................................................................
+
+  //------FX----------------------------TYPESTL,TYPECASA,FIELD,SIZE
+  else if (Datatype=="Fx") {HFPP_REPEAT(HNumber,double,fx,blocksize);}
+  //------VOLTAGE------------------------------
+  else if (Datatype=="Voltage") {HFPP_REPEAT(HNumber,double,voltage,blocksize);}
+  //------FFT------------------------------
+  else if (Datatype=="FFT") {HFPP_REPEAT(HComplex,CasaComplex,fft,fftLength);}
+  //------CALFFT------------------------------
+  else if (Datatype=="CalFFT") {HFPP_REPEAT(HComplex,CasaComplex,calfft,fftLength);}
+  else {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype=" << Datatype << " is unknown.");
+  };
+  return;
+}
+#undef HFPP_REPEAT
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileRead
@@ -379,63 +521,9 @@ CRDataReader & HFPP_FUNC_NAME(
 		    const Iter vec, const Iter vec_end
 		    )
 {
-
-  //Create a DataReader Pointer from an integer variable
-  DataReader *drp=&dr;
-  typedef IterValueType T;
-
-  //Check whether it is non-NULL.
-  if (drp==Null_p){
-    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": pointer to FileObject is NULL, DataReader not found.");
-    return dr;
-  };
-
-  //------TIME------------------------------
-  if (Datatype=="Time") {
-    casa::IPosition shape(1,vec_end-vec); //tell casa the size of the vector
-    if (typeid(*vec) == typeid(double)) {
-      double * storage = reinterpret_cast<double*>(&(*vec));
-      CasaVector<double> casavec(shape,storage,casa::SHARE);
-      drp->timeValues(casavec);
-    }  else {
-      CasaVector<double> casavec(shape);
-      drp->timeValues(casavec);
-      aipsvec2stdit(casavec,vec,vec_end);
-    };
-    //------FREQUENCY------------------------------
-  } else if (Datatype=="Frequency") {
-    CasaVector<double> val = drp->frequencyValues();
-    aipsvec2stdit(val,vec,vec_end);
-  }
-//..........................................................................................
-//Conversion from aips to stl using shared memory space
-//..........................................................................................
-#define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD,SIZE)				\
-  if (typeid(T)==typeid(TYPESTL)) {	_H_NL_			\
-    casa::IPosition shape(2);				_H_NL_		\
-    shape(0)=drp->SIZE (); shape(1)=drp->nofSelectedAntennas();	_H_NL_\
-    if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(0) << " antennas times " << shape(1) << " data points (= " << shape(0)*shape(1) <<")!"); return dr;}; _H_NL_ \
-    casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(*vec)),casa::SHARE); _H_NL_\
-    drp->FIELD (casamtrx);						_H_NL_\
-  } else {								_H_NL_\
-    cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; _H_NL_\
-  }
-//..........................................................................................
-
-  //------FX----------------------------TYPESTL,TYPECASA,FIELD,SIZE
-  else if (Datatype=="Fx") {HFPP_REPEAT(HNumber,double,fx,blocksize);}
-  //------VOLTAGE------------------------------
-  else if (Datatype=="Voltage") {HFPP_REPEAT(HNumber,double,voltage,blocksize);}
-  //------FFT------------------------------
-  else if (Datatype=="FFT") {HFPP_REPEAT(HComplex,CasaComplex,fft,fftLength);}
-  //------CALFFT------------------------------
-  else if (Datatype=="CalFFT") {HFPP_REPEAT(HComplex,CasaComplex,calfft,fftLength);}
-  else {
-    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype=" << Datatype << " is unknown.");
-  };
+  hFileRead(dr,Datatype,vec,vec_end,-1);
   return dr;
 }
-#undef HFPP_REPEAT
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //------------------------------------------------------------------------

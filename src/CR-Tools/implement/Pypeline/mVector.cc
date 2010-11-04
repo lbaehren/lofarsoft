@@ -492,7 +492,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   Iterin itin(vecin);
   while ((itin != vecin_end) && (itout != vecout_end)) {
     *itout=hfcast<T>(*itin);
-    ++itin; ++itout;
+     ++itin; ++itout;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"

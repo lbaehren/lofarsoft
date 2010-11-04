@@ -2,6 +2,7 @@
 """
 
 from hftools import *
+from config import *
 from harray import *
 
 #------------------------------------------------------------------------
@@ -12,7 +13,7 @@ def DataReader_repr(self):
     if hasattr(self,"filename"):
         return "crfile('"+self.filename+"')"
     else:
-        return "Unknonw DataReaderObject"
+        return "DataReaderObject(filename unknown)"
 
 def DataReader_getHeaderVariables(self):
     """

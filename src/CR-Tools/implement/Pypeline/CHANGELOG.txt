@@ -46,3 +46,23 @@ FFT based on Arthur's numpy example
 properly in the new structure
 - moved the list of hftools function to be added as methods to harrays
 and vectors to  type.py
+
+2010-11-04: Pypeline - Heino Falcke - rev 6230
+- Interchanged the arguments blocklen and nblocks for doubleFFT to be
+in the same order as used for defining the corresponding matrix
+- added  hChiSquared and hMeanChiSquared functions
+
+2010-11-04: Pypeline - Heino Falcke - rev 6231
+- changed the .read method to allow providing a block or even a list
+of block numbers that are to be read sequentially into a matrix
+- .read can now also read into array of different type (e.g. read Fx
+data into complex arrays right away)
+- fixed bugs that became obvious when running the tutorial (which is
+slightly updated - figureless version only)
+- deleted some unnecessary error messages in the hftools (if it
+doesn't crash or hang it is not an error but a feature ...!)
+- updated the preprocessor and added a keyword
+HFPP_PAR_IS_UNMUTABLE_SCALAR in the wrapper definition which  ensures
+that a parameter is not turned into a vector when called in looping mode
+
+

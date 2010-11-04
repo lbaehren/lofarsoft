@@ -138,13 +138,6 @@ namespace PyCR { // Namespace PyCR -- begin
       typedef IterValueType T;
       Iterin it1=vec1;
       Iter itout=vec;
-      HInteger lenOut = vec_end - vec;
-      HInteger lenIn = vec1_end - vec1;
-
-      // Sanity check
-      if (lenOut != lenIn) {
-        throw PyCR::ValueError("Input and output vectors are not of equal length.");
-      }
 
       // Vector operation
       while (itout !=vec_end) {
@@ -161,13 +154,6 @@ namespace PyCR { // Namespace PyCR -- begin
       typedef IterValueType T;
       Iterin it1=vec1;
       Iter itout=vec;
-      HInteger lenOut = vec_end - vec;
-      HInteger lenIn = vec1_end - vec1;
-
-      // Sanity check
-      if (lenOut != lenIn) {
-        throw PyCR::ValueError("Input and output vectors are not of equal length.");
-      }
 
       // Vector operation
       while (itout !=vec_end) {
@@ -184,13 +170,7 @@ namespace PyCR { // Namespace PyCR -- begin
       typedef IterValueType T;
       Iterin it1=vec1;
       Iter itout=vec;
-      HInteger lenOut = vec_end - vec;
-      HInteger lenIn = vec1_end - vec1;
 
-      // Sanity check
-      if (lenOut != lenIn) {
-        throw PyCR::ValueError("Input and output vectors are not of equal length.");
-      }
       if (abs(val) < A_LOW_NUMBER) {
         throw PyCR::ValueError("Division by zero");
       }
@@ -210,13 +190,6 @@ namespace PyCR { // Namespace PyCR -- begin
       typedef IterValueType T;
       Iterin it1=vec1;
       Iter itout=vec;
-      HInteger lenOut = vec_end - vec;
-      HInteger lenIn = vec1_end - vec1;
-
-      // Sanity check
-      if (lenOut != lenIn) {
-        throw PyCR::ValueError("Input and output vectors are not of equal length.");
-      }
 
       // Vector operation
       while (itout !=vec_end) {
@@ -230,10 +203,6 @@ namespace PyCR { // Namespace PyCR -- begin
   } // Namespace Math -- end
 
 } // Namespace PyCR -- end
-
-
-
-
 
 
 

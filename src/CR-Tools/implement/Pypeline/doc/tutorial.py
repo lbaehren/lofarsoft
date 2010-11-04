@@ -1,3 +1,7 @@
+#! /usr/bin/env python
+
+from pycrtools import *
+
 def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)
     else: print " ",var,"=>",eval(var)
@@ -26,13 +30,13 @@ Version History:
  -    2010-03-24 - added hArray description (HF)
 
 The library makes use of algotithms and code developed by Andreas
-Horneffer, Lars B"ahren, Martin vd Akker, Heino Falcke, ...
+Horneffer, Lars B"ahren, Martin vd Akker, Heino Falcke, ...  "
 
 To create a PDF version of the tutorial.py script use
 
 ./prettypy tutorial.py
 
-in the $LOFARSOFT/src/CR-Tools/implement/Pypeline directory.
+in the $LOFARSOFT/src/CR-Tools/implement/Pypeline/doc directory.
 
 %%MERGE: toc
 
@@ -291,7 +295,7 @@ Following basic python rules, the STL vector will persist in memory as
 long as there is a python reference to it. If you destroy v also the
 c++ memory will disappear. Hence, if you keep a pointer to the vector
 in c++ and try to work on it after the python object was destroyed,
-your programme may crash. That's why by default memory management is
+your programme may crash. That is why by default memory management is
 done ONLY on one side, namely the python side!
 
 To illustrate how Python deals with references, consider the following
@@ -469,14 +473,14 @@ element determines the type), an STL vector, or another hArray.
 Dimensions are given as a list of the form [dim1,dim2,dim3, ...]. The
 size of the underlying vector will automatically be resized to
 dim1*dim2*dim3* ... to be able to contain all elements. Alternatively,
-one can provide another array, who's dimensions will be copied.
+one can provide another array, who's dimensions will be copied.  '
 
 The array can be filled with an initialization values that can be
 either a single value, a list, a tuple, or an STL vector of the same
 type.
 
 """
-v=Vector(range(10))
+v=Vector(range(9))
 
 a=hArray(v,[3,3])
 
@@ -633,18 +637,9 @@ you want to have are reference to a slice only.
 In contrast, a.vec(), without slicing, will give you a reference to
 the underlying vector.
 
-Similarly,
-
-"""
-a[0,1].vec()
-"""
-
-will access a slice consisting of a single element (returned as a
-vector). To obtain it as a scalar value, use
-
-"""
-a[0,1].val()
-"""
+For convenience a[0,1] will return the value, rather than a one
+element slice. That behaviour changed from earlier versions and is a
+bit inconsistent ...
 
 One may wonder, why one has to use the extra methods vec and val to
 access the data. The reason is that slicing on its own will return an
@@ -692,8 +687,9 @@ gives all but the last slice of the first index.
 
 It is possible to provide a list of indices as the last index to copy parts of the array. 
 
+#a[[0,2,3]] 
 """
-a[[0,2,3]] 
+print "ERROR! a[[0,2,3]]  does not work - error in harray.py  hArray_getSlicedArray -raise IndexError"
 """
 
 This will return a new array containing the first third and fourth
@@ -854,7 +850,7 @@ Now, since this is still a bit too much work, you can actually apply
 (most of) the available vector methods to multiple slices at once, by
 just applying it to an array in looping mode.
 
-As an example, let's calculate the mean value of each slice at the to
+As an example, let us calculate the mean value of each slice at the to
 level of our example array, which is simply:
 
 """
@@ -1069,7 +1065,7 @@ History tracking can be switched off with
 (++) Opening and Closing a CR Data File
 ---------------------------------------
 
-Let's see how we can open a file. First define a filename, e.g.:
+Let us see how we can open a file. First define a filename, e.g.:
 
 """
 filename_sun=LOFARSOFT+"/data/lopes/example.event"
@@ -1145,7 +1141,7 @@ datafile[key] is equivalent to datafile.get(key).
 datafile["blocksize"]
 """
 
-Just for fun let's define a number of variables that contain essential
+Just for fun let us define a number of variables that contain essential
 parameters (we will later actually use different ones which are
 automatically stored in the datafile object).
 
@@ -1287,7 +1283,7 @@ p_("fxdata")
 
 and voila the vector is filled with time series data from the data
 file. Note that we had to use the .vec method for the array, since
-datafile.read does not yet accept arrays (since it can't handle c++
+datafile.read does not yet accept arrays (since it cannot handle c++
 iterators).
 
 Now, you can access the individual antennas as single vectors through
@@ -1313,7 +1309,7 @@ keyword with the word "empty", i.e. times=datafile["emptyTime"].)
 In the square bracket notation python will actually set the name and
 units of the data accordingly.
 
-So, let's have the time axis in microseconds, by using setUnit
+So, let us have the time axis in microseconds, by using setUnit
 
 """
 times.setUnit("\\mu","")
@@ -1347,6 +1343,55 @@ Alternatively you can use the method
 >> avspectrum.craveragespectrum(datafile)
 
 which does this automatically.
+
+
+(+++) Reading different blocks of data
+---------------------------------------
+
+NB: There is the advanced possibility to specify during a read
+operation a list/vector of blocks to be read in, while using the array
+looping mechanism (e.g., to fill the rows of a matrix).
+
+First the usual, boring ond-block read:
+"""
+filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+datafile=crfile(filename)
+datafile["blocksize"]=10
+f=hArray(float,[10])
+f.read(datafile,"Fx")
+f.pprint(-1)
+"""
+Then we read 
+"""
+datafile["blocksize"]=2
+x=hArray(float,[5,2])
+hFileRead(datafile,"Fx",x[...],Vector([0,1]))
+x.mprint()
+"""
+Note, that here block 0,1 and one are read in 2-3 times, since the
+array was longer then the block list specified! This is the default
+behaviour of looping arrays. Also, here you need to specify the list
+of blocks as a vector (not an array and not a list), since in this
+example we call the slightly less flexible c++ interface function
+directly. The .read method to hArray is slightly more relaxed here
+(see below).
+
+Alternatively, you may want to only read the data into a section of
+your array:
+"""
+x[1].read(datafile,"Fx",3)
+x.mprint()
+"""
+Now, we sneaked the 4th block (block 3) into the second row (index 1).
+
+Finally, you can also read the data into an array of different type
+(but that is slightly slower as scratch arrays are created for every
+row that is being read) 
+"""
+c=hArray(complex,[5,2])
+c[...].read(datafile,"Fx",[0,1,2,3])
+c.mprint()
+"""
 
 (+) Basic Plotting
 ------------------
@@ -1641,7 +1686,7 @@ python function is available, that does the quality checking for you
 and returns a list with failed antennas and their properties.
 
 """
-badantennalist=CRQualityCheck(qualitycriteria,datafile,dataarray,verbose=False)
+badantennalist=CRQualityCheck(qualitycriteria,datafile=datafile,dataarray=dataarray,verbose=False)
 
 p_("badantennalist[0]")
 """
@@ -1668,7 +1713,7 @@ then 0-100 MHz, and the second is 100-200 MHz.
 !!!TO BE EDITED: use hFFTw and hNyquistSwap instead for better
    performance!
 
-So, let's do the transform: 
+So, let us do the transform: 
 
 """
 fftdata=hArray(complex,[nofSelectedAntennas,fftlength],name="FFT(E)")
@@ -1690,7 +1735,7 @@ fxinvdata[...].invfftcasa(fftdata[...],1)
 
 To get the spectral power from the FFTed vector, we have to square the
 complex data and convert it to floats. This can be done using the
-complex function "norm" (unusual name, but that's what is used in c++).
+complex function "norm" (unusual name, but that is what is used in c++).
 
 """
 spectrum=hArray(float,dimensions=fftdata,name="E-field Spectrum")
@@ -1731,7 +1776,7 @@ second Nyquist domain)
 sun_fft[...].fftcasa(sun_efield[...],2)
 """
 
-We will now try to make a crosscorrelation of the data. Let's start by
+We will now try to make a crosscorrelation of the data. Let us start by
 making a complex scratch vector to hold an intermediate data product
 which is a copy of the FFT vector.
 
@@ -1894,7 +1939,7 @@ And indeed now most of the antennas show a lag peaking around 0, with
 the exception of two antennas (whick likely experienced an additional
 two-sample shift).
 
-So, let's transform back into time and see the final, shifted time
+So, let us transform back into time and see the final, shifted time
 series.
 
 """

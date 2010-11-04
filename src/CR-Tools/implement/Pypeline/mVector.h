@@ -47,21 +47,29 @@ namespace PyCR { // Namespace PyCR -- begin
       typedef IterValueType T;
       Iter itout(vecout);
       IterIn itin(vecin);
-      HInteger lenIn = std::distance(vecin,vecin_end);
-      HInteger lenOut = std::distance(vecout,vecout_end);
 
-      // Sanity check
-      if (lenIn <=0) {
-        throw PyCR::ValueError("Illegal size of input vector.");
+      // Sanity check - but how should this error happen in a Python code ...?
+      if ((vecout > vecout_end) || (vecin > vecin_end)) {
+        throw PyCR::ValueError("Negative size of vector.");
         return;
       }
+
+      /* None of this is needed! Since it is an intended feature that the two vectors need not be of the same length!
+
+      HInteger lenIn = std::distance(vecin,vecin_end);Vec
+      HInteger lenOut = std::distance(vecout,vecout_end);
+
+
+      //Why do you call this an error? This is a feature ...!
       if (lenIn > lenOut) {
-        throw PyCR::ValueError("Input vector is larger than output vector.");
-        return;
+        cout << "Warning: Input vector is smaller than output vector: looping over input vector." << endl;
+	//throw PyCR::ValueError("Input vector is larger than output vector.");
+        //return;
       }
       if (lenIn < lenOut) {
         cout << "Warning: Input vector is smaller than output vector: looping over input vector." << endl;
       }
+      */
 
       // Copying of data
       while (itout != vecout_end) {
