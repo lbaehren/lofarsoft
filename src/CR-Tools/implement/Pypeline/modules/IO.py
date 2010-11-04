@@ -219,6 +219,7 @@ def openfiles(filenames,blocksize=1024):
         files.append(hf.crfile(filename))
     
     times=get(files,"TIME",False)
+    print 'these are the time from OLD: ', times
     tmin=times.min()
     tmax=times.max()
     #time stamp cannot be handled by integer function

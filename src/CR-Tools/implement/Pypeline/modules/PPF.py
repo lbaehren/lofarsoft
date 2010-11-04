@@ -43,7 +43,7 @@ class PPF():
         weights=hf.hArray(float,[16,1024])
         weights.readdump(weights_filename)
 
-        if weights[0,0].val()==0.0:
+        if weights[0,0]==0.0:
             print "Obtaining Kaiser coefficient from file"
             # Reading of weights failed
             f=open(hf.LOFARSOFT+'/src/CR-Tools/data/Coeffs16384Kaiser-quant.dat')
