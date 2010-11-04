@@ -14,9 +14,15 @@ export PATH=$PATH:/usr/bin:/usr/local/bin:/opt/local/bin
 
 ## Update working copy
 
+echo "--[`date`] Cleaning up working copy ..."
+
+cd $lofardocs
+rm -rf build ICD ADD
+
 echo "--[`date`] Updating working copy ..."
 
 cd $lofardocs
+svn cleanup
 svn up
 
 ## Build ICDs from LaTeX sources (run multiple time to get all the references right)
@@ -24,9 +30,8 @@ svn up
 cd $lofardocs/build
 cmake ..
 
-make -j2 ICD
-make -j2 ICD
-make -j2 ICD
+cd $lofardocs/build
+make && make && make
 
 ## Compress Postscript files
 
@@ -40,6 +45,8 @@ for FILE in $FILES ; {
 }
 
 ## Move generated documents to server directory
+
+cd $lofardocs/ICD
 
 FILES=`ls LOFAR*ICD*.ps.gz LOFAR*ICD*.pdf`
 
