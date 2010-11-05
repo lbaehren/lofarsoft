@@ -5,6 +5,9 @@
 #
 # Author : Vishal Gajjar (22 Aug 2010) 
 # Email : gajjar@ncra.tifr.res.in
+#
+# Vlad, Nov 4, 2010
+# - wrong indent fixed and "@" character removed in line 491
 #-------------------------------------------------------------------------------------------#
 
 import os, sys, glob
