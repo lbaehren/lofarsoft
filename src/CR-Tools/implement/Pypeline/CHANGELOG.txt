@@ -6,8 +6,8 @@ tracking in arrays on or off
 - changed downsample routines to work with fractional block sizes
 - changed RFI routines to check for too large number of bins (so
 smaller blocksizes will also work)
- 
-2010-06-01:  
+
+2010-06-01:
 - added convenience function hInvFFTwSave to do a save fft (hftools.cc, testcr2.py)
 - added hMinPos, hMaxPos - returning position of maxium or minimum (hftools.cc,testcr2.py)
 - added calculation of time delays with cross-correlation from CR data (testcr2.py)
@@ -65,4 +65,5 @@ doesn't crash or hang it is not an error but a feature ...!)
 HFPP_PAR_IS_UNMUTABLE_SCALAR in the wrapper definition which  ensures
 that a parameter is not turned into a vector when called in looping mode
 
-
+2010-11-05 - Martin van den Akker
+- Module gets rebuild if *any* of the header files changes.
