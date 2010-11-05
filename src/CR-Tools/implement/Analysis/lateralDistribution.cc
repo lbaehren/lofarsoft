@@ -196,8 +196,8 @@ namespace CR { // Namespace CR -- begin
 
       TGraphErrors *latPro = new TGraphErrors (ant, distance,fieldStr,distanceEr,fieldStrEr);
       latPro->SetFillColor(0);
-      latPro->SetLineColor(4);
-      latPro->SetMarkerColor(4);
+      latPro->SetLineColor(4); // normally blue (4), in comparison to simulation black (1)
+      latPro->SetMarkerColor(4); // normally blue (4), in comparison to simulation black (1)
       latPro->SetMarkerStyle(kFullCircle);
       latPro->SetMarkerSize(1.1);
       stringstream label;
@@ -214,9 +214,9 @@ namespace CR { // Namespace CR -- begin
       
 
       TGraphErrors *latProSim = new TGraphErrors (ant, distanceSim,fieldStrSim,distanceErSim,fieldStrErSim);
-      latProSim->SetFillColor(2);
-      latProSim->SetLineColor(2);
-      latProSim->SetMarkerColor(2);
+      latProSim->SetFillColor(0);
+      latProSim->SetLineColor(2); // red (2) for iron, blue (4) for proton
+      latProSim->SetMarkerColor(2); // red (2) for iron, blue (4) for proton
       latProSim->SetMarkerStyle(kFullSquare);
       latProSim->SetMarkerSize(1.1);
  
@@ -365,6 +365,7 @@ namespace CR { // Namespace CR -- begin
           fitfuncExpS->SetParameter(1,100);
           fitfuncExpS->SetFillStyle(0);
           fitfuncExpS->SetLineWidth(2);
+          fitfuncExpS->SetLineColor(2); // red (2) for iron, blue (4) for proton
 
           latProSim->Fit(fitfuncExpS, "R");
           ptstatsS->Draw();
