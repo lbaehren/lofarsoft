@@ -24,7 +24,7 @@ class vdsmaker(LOFARnode):
             if os.path.exists(infile):
                 self.logger.info("Processing %s" % (infile))
             else:
-                self.logger.error("%s does not exist" % (infile))
+                self.logger.error("Dataset %s does not exist" % (infile))
                 return 1
 
             try:

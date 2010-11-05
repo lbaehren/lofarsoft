@@ -9,6 +9,7 @@ from __future__ import with_statement
 from collections import defaultdict
 from threading import BoundedSemaphore
 
+import re
 import os
 import signal
 import subprocess
@@ -94,7 +95,7 @@ def run_via_mpirun(logger, host, command, environment, arguments):
         mpi_cmd.extend(["-x", key])
     mpi_cmd.append("--")
     mpi_cmd.extend(command.split()) # command is split into (python, script)
-    mpi_cmd.extend(str(arg) for arg in arguments)
+    mpi_cmd.extend(re.escape(str(arg)) for arg in arguments)
     env = os.environ
     env.update(environment)
     process = spawn_process(mpi_cmd, logger, env=env)
@@ -115,7 +116,7 @@ def run_via_ssh(logger, host, command, environment, arguments):
 
     commandstring = ["%s=%s" % (key, value) for key, value in environment.items()]
     commandstring.append(command)
-    commandstring.extend(str(arg) for arg in arguments)
+    commandstring.extend(re.escape(str(arg)) for arg in arguments)
     ssh_cmd.append('"' + " ".join(commandstring) + '"')
     process = spawn_process(ssh_cmd, logger)
     process.kill = lambda : os.kill(process.pid, signal.SIGKILL)
@@ -134,7 +135,7 @@ def run_via_paramiko(logger, host, command, environment, arguments, key_filename
     client.connect(host, key_filename=key_filename)
     commandstring = ["%s=%s" % (key, value) for key, value in environment.items()]
     commandstring.append(command)
-    commandstring.extend(str(arg) for arg in arguments)
+    commandstring.extend(re.escape(str(arg)) for arg in arguments)
     return ParamikoWrapper(client, " ".join(commandstring))
 
 class ProcessLimiter(defaultdict):
