@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import time
 from pycrtools import *
 trackHistory(True)
 
@@ -7,8 +8,8 @@ trackHistory(True)
 #Input section
 #------------------------------------------------------------------------
 filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
-filename=filename_lopes_test
-filename=filename_lofar_onesecond
+#filename=filename_lopes_test
+#filename=filename_lofar_onesecond
 #------------------------------------------------------------------------
 #Creating Workspaces
 #------------------------------------------------------------------------
@@ -28,7 +29,7 @@ if ws["datafile"]["Observatory"]=='LOFAR':
     ws["numax"]=82 #MHz
 ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")  
 ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256)#256) #fittype="POLY" or "BSPLINE"
-lif ws["datafile"]["Observatory"]=='LOPES':
+if ws["datafile"]["Observatory"]=='LOPES':
     ws["numin"]=43 #MHz
     ws["numax"]=73 #MHz
 

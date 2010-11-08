@@ -62,7 +62,9 @@ print 'from ', caldata.currentBlock
 print '\n\n'
 
 print 'we can also ask to get back various quantities ourselves'
-freqData,timeData, allfrequencies=caldata.getFFTData()
+freqData=caldata.getFFTData()
+timeData=caldata.timeData
+allfrequencies=caldata.allFreqData
 print 'which can be plotted in the usual way'
 print freqData, '\n', timeData, '\n', allfrequencies
 print '\n\n\n'

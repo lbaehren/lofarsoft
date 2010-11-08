@@ -204,6 +204,7 @@ fmin=None, fmax=None):
 	    startBlock=0
 	self.startBlock = startBlock
 	self.currentBlock = startBlock
+	
 	# initialises files, including setting shifts, blockSize etc
 	self.initFiles()
     	
@@ -361,7 +362,7 @@ fmin=None, fmax=None):
 	if self.fftMethod=='NONE':
 	    # we are not returning fft data!
 	    self.freqData=None
-	    self.tempFreqData=None
+	    self.allFreqData=None
 	    self.opDim=[self.nAntennas, self.blockSize]
 	else:
 	    self.fftSize = self.blockSize/2+1
@@ -372,13 +373,13 @@ fmin=None, fmax=None):
 		
 	    if (self.genFFTArray):
 	    	if self.selectFrequencies:
-		    self.tempFreqData = cr.hArray(complex, [self.nAntennas, self.fftSize])
+		    self.allFreqData = cr.hArray(complex, [self.nAntennas, self.fftSize])
 		    self.freqData = cr.hArray(complex, [self.nAntennas, self.nSelectedFrequencies])
 		else:
-		    self.tempFreqData=None
+		    self.allFreqData=None
 		    self.freqData = cr.hArray(complex, [self.nAntennas, self.fftSize])
 	    else:
-	    	self.tempFreqData = None
+	    	self.allFreqData = None
 		self.freqData=None
 	
 	self.initialised=True
@@ -548,7 +549,14 @@ or fftMethod == 'NONE':
 	self.setReturnedFrequencies()
 	if self.antennaSelection:
 	    self.initialise()
-	
+    
+    def getFrequencies(self):
+    	"""
+	Returns a hArray object of frequencies corresponding
+	to the returned data
+	"""
+	return cr.hArray(self.frequencies)
+    
     def setReturnedFrequencies(self):
     	"""
 	generates a vector giving the centre frequencies of the
@@ -561,13 +569,15 @@ or fftMethod == 'NONE':
 	    f2=(self.nyquistZone-1)*self.sampleFrequency
 	    print 'check it! ', f2,f1,self.fftSize, 1.
 	    df=(f2-f1)/(self.fftSize-1.)
-	    frequencies=range(f1+df/2.,f2,df)
+	    x=range(self.fftSize)
+	    frequencies=iof.frange(f1,f2+df/2.,df)
 	else:
 	    f1=(self.nyquistZone-1)*self.sampleFrequency
 	    f2=self.nyquistZone*self.sampleFrequency
 	    df=(f2-f1)/(self.fftSize-1)
-	    frequencies=range(f1+df/2.,f2,df)
-    	if self.selectFrequencies:
+	    frequencies=iof.frange(f1,f2+df/2.,df)
+    	
+	if self.selectFrequencies:
 	    self.frequencies=[]
 	    for index in self.frequencyIndices:
 	    	self.frequencies.append(frequencies[index])
@@ -948,7 +958,7 @@ tempFreqData.getDim() == [self.nAntennas, self.fftSize]:
 	    	    print 'incorrect temp freq specification'
 		    tempFreqData=None
 	    elif self.selectFrequencies:
-	    	tempFreqData=self.tempFreqData
+	    	tempFreqData=self.allFreqData
 	    else:
 		tempFreqData=self.freqData
 	  ### handles final frequency data ###
@@ -1035,7 +1045,7 @@ finalFreqData.getDim() == self.getOPDim()):
 	else:
 	    finalFreqData=freqData
 	    
-    	return finalFreqData, timeData, freqData
+    	return finalFreqData
 
     def getSelectedData(self, timeData, starti, crfile, selection):
     	"""
@@ -1095,7 +1105,11 @@ finalFreqData.getDim() == self.getOPDim()):
 	    	    timeData[start:end].read(self.crfiles[i],"Fx")
 	    	start = end
 	    	
- 
+# needs to be able to read [blah] blocks ahead in an internal buffer
+# run RFI flagger per block or what?
+# run it ove whole block???
+
+
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
 #  as a selftest for the module.
