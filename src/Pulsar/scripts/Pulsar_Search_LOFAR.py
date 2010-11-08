@@ -8,16 +8,18 @@
 #
 # Vlad, Nov 4, 2010
 # + wrong indent fixed and "@" character removed in line 491
+# + updated mpi Presto programs (with added -runavg option) checked in to USG
 #
-# Vlad, Nov 5, 2010
+# Vlad, Nov 5-6, 2010
 # + name of log-files changed
 # + single-pulse is running together with periodicity search (with no plot creating)
-#   and then runs on *.singlepulse files to create the plot
+#   and then runs on *.singlepulse files to create the plots for several DM ranges
 # + bring all possibly tunable parameters to the beginning of the script
 # + add working directory option (make default as /dev/shm) 
 # + make tarballs of all logs and other files, plus creating png and move them to
 #   the output directory, remove everything in scratch dir
-# + read master.rfi and run zapbirds
+# + read master.rfi and zap corresponding freq channels
+# + birdies' file and run zapbirds
 # + zapping first freq channel in each subband (it's junk there)
 # + parallelization (search + prepfold), separate log files
 #
@@ -34,8 +36,10 @@ import infodata as inf
 from math import pi
 
 # some tunable parameters
+hwired_ddplan_id      = "shallow"
 bright_catalog        = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/psr_cats.txt"   # Catalog of brightest pulsars
 rfi_master_file       = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/master.rfi"     # Master list of frequent RFIs
+birdies_file          = ""   # List of birdies to zap in FFTs. If empty, the generic one will be created (with 50 & 100 Hz harmonics)
 candlist_file         = "candidates.txt"  # ASCII list of all folded candidates
 blk                   = 1000   # largest number of DMs to be read by mpiprepsubband
 dm_tolerance          = 3      # tolerance in DM when comparing candidates with known strong PSRs
@@ -54,6 +58,11 @@ lo_accel_flo          = 1.0    # Hz
 numhits_to_fold       = 2      # Number of DMs with a detection needed to fold
 low_DM_cutoff         = 1.0    # Lowest DM to consider as a "real" pulsar
 waittime              = 5      # in sec. Interval to check for searching scripts to finish
+### Description of the DDplans ###
+ddplans_heap = {"shallow" : [], "auto" : []}
+# "shallow" is for the 1st Pulsar Shallow survey
+# description of DDplans is given in the beginning of __main__ function
+# Add more plans here and there
 ###################################################################################################
 
 def get_baryv(ra, dec, mjd, T, obs="LOFAR"):
@@ -184,6 +193,30 @@ def does_pulsar_exist (psrname, realcand):
 			return True
 	return False
 
+# function that creates the generic birdies file
+def create_birdies_file (dir, name):
+	bname = dir + name
+        fid = open(bname, "w")
+	line="# Freq\t\tWidth\n#--------------------\n50.0\t\t0.05\n100.0\t\t0.10\n"
+        fid.write(line)
+	fid.close()
+	return bname
+
+# function that checks what freq channels fall into RFI range
+# and return the range string for rfifind
+def get_zapchan_range (freq, width, lofq, chan_width, bandwidth):
+	start_freq=freq-width/2.
+	end_freq=start_freq+width
+	if start_freq < lofq-chan_width/2.: 
+		start_freq=lofq-chan_width/2.
+	if end_freq > lofq-chan_width/2.+bandwidth: 
+		end_freq = lofq-chan_width/2.+bandwidth
+	first_zap = int((start_freq-lofq+chan_width/2.)/chan_width)
+	n_zap = int((end_freq - start_freq + 0.75*chan_width)/chan_width)
+	end_zap=first_zap+n_zap-1
+	# the range in rfifind is specified by ":"
+	return "%d:%d" % (first_zap, end_zap)
+
 # function to get the folding parameters for prepfold
 def get_folding_options(cand):
 	"""
@@ -231,8 +264,8 @@ def create_search_script(name):
 	batchfile.write(" echo $stem.dat >> $log\n")
 	batchfile.write(" echo \"realfft $stem.dat >> $log\" >> $log\n")
 	batchfile.write(" realfft $stem.dat >> $log\n")
-	batchfile.write(" echo \"zapbirds -zap -zapfile %s -baryv %.6g $stem.fft >> $log\" >> $log\n" % (rfi_master_file, baryv))
-	batchfile.write(" zapbirds -zap -zapfile %s -baryv %.6g $stem.fft >> $log\n" % (rfi_master_file, baryv))
+	batchfile.write(" echo \"zapbirds -zap -zapfile %s -baryv %.6g $stem.fft >> $log\" >> $log\n" % (birdies_file, baryv))
+	batchfile.write(" zapbirds -zap -zapfile %s -baryv %.6g $stem.fft >> $log\n" % (birdies_file, baryv))
 	batchfile.write(" echo \"rednoise $stem.fft >> $log\" >> $log\n")
 	batchfile.write(" rednoise $stem.fft >> $log\n")
 	batchfile.write(" mv $stem\"_red.fft\" $stem.fft\n")
@@ -326,6 +359,14 @@ def run_searching (scratchdir, outfile, search_script, waittime):
 #                                                     M A I N
 #########################################################################################################################
 if __name__ == "__main__":
+	### Description of the DDplans ###
+	# for 1st pulsar shallow survey with Lofar
+	#                                         LODM    DMSTEP NDM/call   #calls NCHAN DOWNSAMP
+	ddplans_heap["shallow"].append(dedisp_plan(0.00,   0.02, 7720,       1,    560,     1))
+	ddplans_heap["shallow"].append(dedisp_plan(154.4,  0.05, 2655,       1,    560,     2))
+	ddplans_heap["shallow"].append(dedisp_plan(287.15, 0.1,  2635,       1,    560,     4))
+	ddplans_heap["shallow"].append(dedisp_plan(550.65, 0.2,  2247,       1,    560,     8))
+	###
 	
 	parser = optparse.OptionParser()
 
@@ -438,6 +479,7 @@ if __name__ == "__main__":
         lofq = id.lofreq   # central freq of the lowest channel
 	bandwidth = id.BW  # total BW
         chan = id.numchan  # number of channels
+	chan_width = id.chan_width  # width of the channel
 	samptime = id.dt   # sampling interval
 	mjd = id.epoch     # MJD
 	dur = id.N * id.dt # duration of obs
@@ -455,6 +497,16 @@ if __name__ == "__main__":
 		print "Can't find the RFI master list: %s" % (rfi_master_file)
 		sys.exit(1)
 
+	birdies_comment=""
+	if birdies_file == "": # not specified, so will generate the basic one with 50 and 100 Hz 
+		birdies_comment=" (generic with 50 & 100 Hz harmonics)"
+		# create generic birdies file
+		birdies_file = create_birdies_file (scratchdir, "generic.zaplist")
+	else:
+		if not os.path.exists(birdies_file):
+			print "Can't find the birdies zaplist: %s" % (birdies_file)
+			sys.exit(1)
+
 
 	# Printing some info about the dataset and in/out directories
 	print
@@ -470,12 +522,10 @@ if __name__ == "__main__":
 	print "INF FILE : %s" % (inffile[0])
 	print "PULSAR CATALOG : %s" % (bright_catalog)
 	print "RFI MASTER FILE : %s" % (rfi_master_file)
+	print "BIRDIES' FILE : %s%s" % (birdies_file, birdies_comment) 
 	print "ZAP EVERY %d'th CHANNEL" % (zapeveryN)
 	print
 
-	# Dictionary of DDplans
-	# currently, only one for the Pulsar Shallow survey. (have to check and correct them (hardwired) below)
-        ddplans_heap = {"shallow" : [], "auto" : []}
 	ddplans = []   # chosen set of DDplans
  
 	if ddplanflag == 0:
@@ -515,11 +565,7 @@ if __name__ == "__main__":
 	if ddplanflag == 1: 
 	# This is for hardcoded DDplan for RSPA with HBA. Cant be used with mpiprepsubband  
 		print "Hardwired values of the DDplan will be used\n"
-		ddplans_heap["shallow"].append(dedisp_plan(0.00,   0.02, 7720, 1, chan, 1))
-		ddplans_heap["shallow"].append(dedisp_plan(154.4,  0.05, 2655, 1, chan, 2))
-		ddplans_heap["shallow"].append(dedisp_plan(287.15, 0.1,  2635, 1, chan, 4))
-		ddplans_heap["shallow"].append(dedisp_plan(550.65, 0.2,  2247, 1, chan, 8))
-		ddplans = ddplans_heap["shallow"]
+		ddplans = ddplans_heap[hwired_ddplan_id]
 
 	if mpiflag == 1:
 		np = ncores - 1 
@@ -531,7 +577,6 @@ if __name__ == "__main__":
         		 leftdm = (int(leftdm/np) + 1)*np
 	        NDM = leftdm + int(NDM/blk)*blk
         	print "\nThe Num DM will be adjusted to %d to be divisible by (%d - 1) nodes" % (NDM, ncores)
-
 	HIDM = LODM + NDM*DMSTEP
 
 	if ddplanflag == 2:
@@ -549,8 +594,23 @@ if __name__ == "__main__":
 	rfp.write("\n")
 	
         # rfifind (block ~2.6s)
+	# create a string of channels to zap
+	# zap every 16'th channel
 	zapchans=range(0,chan,zapeveryN)
 	zapstring=",".join(["%d" % (f) for f in zapchans])
+	# read rfi_master_file
+	rfi_center_freq, rfi_width = numpy.loadtxt(rfi_master_file, dtype=float, usecols=(0,1), comments='#', unpack=True)
+	# zap channels from rfi_master_file
+	master_zapchans=[]
+	for (fr, wi) in zip (rfi_center_freq, rfi_width):	
+		# checking first that at least part of the RFI freq lies within our bandwidth
+		if (fr-wi/2. >= lofq-chan_width/2. and fr-wi/2. <  lofq-chan_width/2.+bandwidth) or \
+                   (fr+wi/2. >  lofq-chan_width/2. and fr+wi/2. <= lofq-chan_width/2.+bandwidth):
+			master_zapchans.append(get_zapchan_range(fr, wi, lofq, chan_width, bandwidth))
+	if numpy.size(master_zapchans) != 0:
+		master_zapchans_str=",".join(master_zapchans)
+		zapstring=master_zapchans_str+","+zapstring
+	# running rfifind
         cmd="rfifind -blocks %d -zapchan %s -o %s %s > %s" % (rfifind_blocks, zapstring, outfile, infile, outfile+"_rfifind.log")
         print "Running RFI excision..."
 	rfi_time = timed_execute(cmd,1)
