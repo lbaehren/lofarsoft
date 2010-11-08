@@ -16,6 +16,7 @@ from vector import *
 from harray import *
 #from plot import *
 from math import *
+import time
 
 # Import datareader class overloaded methods
 from datareader import *

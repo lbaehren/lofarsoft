@@ -304,7 +304,16 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(double,PyFloat_AsDouble,ReferenceTime)
     HFPP_REPEAT(double,PyFloat_AsDouble,SampleFrequency)
     HFPP_REPEAT(int,PyInt_AsLong,Shift)
-    if ((key=="selectedAntennas") || (key2=="SelectedAntennas")) {
+    if ((key=="shift") || (key2=="Shift")) {
+      vector<HInteger> stlvec(PyList2STLIntVec(pyob));
+      drp->setShift(stlvec);
+    } else  if ((key=="selectedAntennas") || (key2=="SelectedAntennas")) {
+      vector<uint> stlvec(PyList2STLuIntVec(pyob));
+      uint * storage = &(stlvec[0]);
+      casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
+      CasaVector<uint> casavec(shape,storage,casa::SHARE);
+      drp->setSelectedAntennas(casavec,false);
+    } else if ((key=="selectedAntennasID") || (key2=="SelectedAntennasID")) {
       vector<uint> stlvec(PyList2STLuIntVec(pyob));
       uint * storage = &(stlvec[0]);
       casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
@@ -329,6 +338,7 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(int,PyInt_AsLong,Shift)
     HFPP_REPEAT(int,XX,ShiftVector)
     HFPP_REPEAT(uint,XX,SelectedAntennas)
+    HFPP_REPEAT(uint,XX,SelectedAntennasID)
 #undef HFPP_REPEAT
 		     + "help";
       if (key!="help") {
@@ -352,6 +362,7 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 #define HFPP_PARDEF_1 (HString)(Datatype)()("Name of the data column to be retrieved (e.g., FFT, Fx,Time, Frequency...)")(HFPP_PAR_IS_UNMUTABLE_SCALAR)()(HFPP_PASS_AS_VALUE) //UNMUTABLE_SCALAR: will not be converted to a vector when used in looping mode.
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_3 (HInteger)(block)()("block number to read - read current block if negative")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(antenna)()("antenna number to read - read all if negative")(HFPP_PAR_IS_UNMUTABLE_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
@@ -414,21 +425,21 @@ void HFPP_FUNC_NAME(
 		    CRDataReader &dr,
 		    HString Datatype,
 		    const Iter vec, const Iter vec_end,
-		    HInteger block
+		    HInteger block,
+		    HInteger antenna
 		    )
 {
 
   //Create a DataReader Pointer from an integer variable
   DataReader *drp=&dr;
   typedef IterValueType T;
-
+  
   //Check whether it is non-NULL.
   if (drp==Null_p){
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": pointer to FileObject is NULL, DataReader not found.");
     return;
   };
   if (block>=0) {drp->setBlock((uint)block);};
-
   //------TIME------------------------------
   if (Datatype=="Time") {
     casa::IPosition shape(1,vec_end-vec); //tell casa the size of the vector
@@ -449,20 +460,26 @@ void HFPP_FUNC_NAME(
 //..........................................................................................
 //Conversion from aips to stl using shared memory space
 //..........................................................................................
+
+//Note there is an ugly patch to select antennas since the DataReader still doesn't work
 #define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD,SIZE)				\
-  if (typeid(T)==typeid(TYPESTL)) {	_H_NL_			\
+  if ((typeid(T)==typeid(TYPESTL)) && (antenna<0)) {	_H_NL_		\
     casa::IPosition shape(2);				_H_NL_		\
     shape(0)=drp->SIZE (); shape(1)=drp->nofSelectedAntennas();	_H_NL_\
-    if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(0) << " antennas times " << shape(1) << " data points (= " << shape(0)*shape(1) <<")!"); return;}; _H_NL_ \
+    if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(1) << " antennas times " << shape(0) << " data points (= " << shape(0)*shape(1) <<")!"); throw PyCR::ValueError("Incorrect size of read input vector."); return;}; _H_NL_ \
     casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(*vec)),casa::SHARE); _H_NL_\
     drp->FIELD (casamtrx);						_H_NL_\
   } else {								_H_NL_\
     casa::IPosition shape(2);				_H_NL_		\
-    shape(0)=drp->SIZE (); shape(1)=drp->nofSelectedAntennas();	_H_NL_\
-    vector<TYPESTL> tmpvec(shape(0)*shape(1)); \
+    HInteger selantennas(drp->nofSelectedAntennas());_H_NL_\
+    shape(0)=drp->SIZE (); shape(1)=selantennas;	_H_NL_\
+    vector<TYPESTL> tmpvec(shape(0)*shape(1)); _H_NL_\
     casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(tmpvec[0])),casa::SHARE); _H_NL_\
+    if (antenna>=0) {shape(1)=1; if (antenna>=selantennas) antenna=(selantennas-1);};_H_NL_\
+    if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(1) << " antennas times " << shape(0) << " data points (= " << shape(0)*shape(1) <<")!");throw PyCR::ValueError("Incorrect size of read input vector."); return;}; _H_NL_ \
     drp->FIELD (casamtrx);						_H_NL_\
-    PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin(),tmpvec.end());\
+  if (antenna>=0) {PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin()+antenna*shape(0),tmpvec.begin()+(antenna+1)*shape(0));}_H_NL_\ 
+  else {PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin(),tmpvec.end());}_H_NL_\
   }
 
 //..........................................................................................
@@ -500,18 +517,6 @@ void HFPP_FUNC_NAME(
  \brief $DOCSTRING
  $PARDOCSTRING
 
-Example on how to use this with the Python wrapper
-
-file=hFileOpen("data/lofar/RS307C-readfullsecond.h5")
-file=hFileOpen("/Users/falcke/LOFAR/usg/data/lopes/test.event")
-
-#offsets=IntVec()
-idata=IntVec()
-hReadFile(file,"Fx",idata)
-hCloseFile(file)
-
-The data will then be in the vector idata. You can covert that to a
-Python list with [].extend(idata)
 */
 
 template <class Iter>
@@ -521,7 +526,40 @@ CRDataReader & HFPP_FUNC_NAME(
 		    const Iter vec, const Iter vec_end
 		    )
 {
-  hFileRead(dr,Datatype,vec,vec_end,-1);
+  hFileRead(dr,Datatype,vec,vec_end,-1,-1);
+  return dr;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Read data from a Datareader object into a vector, where the size should be pre-allocated.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFileRead
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY  //HFPP_CLASS_hARRAYALL is missing due to a deficiency of hfppnew to deal with pass as reference
+#define HFPP_PYTHON_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY
+#define HFPP_FUNC_KEEP_RETURN_TYPE_FIXED HFPP_TRUE //return a single DataReader object and not a vector thereof for array operations
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 2 // Use the third parameter as the master array for looping and history informations
+#define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object, opened e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HString)(Datatype)()("Name of the data column to be retrieved (e.g., FFT, Fx,Time, Frequency...)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(block)()("block number to read - read current block if negative")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+
+*/
+
+template <class Iter>
+CRDataReader & HFPP_FUNC_NAME(
+		    CRDataReader &dr,
+		    HString Datatype,
+		    const Iter vec, const Iter vec_end, 
+		    const HInteger block
+		    )
+{
+  hFileRead(dr,Datatype,vec,vec_end,block,-1);
   return dr;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -665,7 +703,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //-----------------------------------------------------------------------
-//$DOCSTRING: Read a single vector from a file which was dumped in binary format
+//$DOCSTRING: Read a single vector from a file which was dumped in (machine-dependent) binary format
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hReadDump
 //-----------------------------------------------------------------------
@@ -698,6 +736,50 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   char * v2 = reinterpret_cast<char*>(&(*vec_end));
   fstream outfile(filename.c_str(), ios::in | ios::binary);
   outfile.read(v1, (HInteger)(v2-v1));
+  outfile.close();
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Read a section (block) of a single vector from a file which was dumped in (machine-dependent) binary format
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hReadDump
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to write File to. The vector needs to have the length corresponding to the file size.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(block)()("The block number to read (zero-based index), the block length is determined by the vector length.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  vec.readdump(filename) -> reads dumped vector from file
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Related functions:
+  hReadDump, hWriteDump
+
+Example:
+ x=hArray(range(10))
+ x.writedump("test.dat")
+ v=hArray(int,10)
+ v.readdump("test.dat")
+ v.pprint()
+ >> [0,1,2,3,4,5,6,7,8,9]
+
+#Now read the third block (of length 3) into the start of the vector
+ v[0:3].readdump("test.dat",2)
+ v.pprint()
+ >> [6,7,8,3,4,5,6,7,8,9]
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInteger block) {
+  char * v1 = reinterpret_cast<char*>(&(*vec));
+  char * v2 = reinterpret_cast<char*>(&(*vec_end));
+  HInteger clen(v2-v1);
+  ifstream outfile(filename.c_str(), ios::in | ios::binary);
+  outfile.seekg(clen*block);
+  outfile.read(v1, clen);
   outfile.close();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"

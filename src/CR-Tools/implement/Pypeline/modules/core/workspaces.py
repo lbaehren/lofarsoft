@@ -125,9 +125,9 @@ class CRAverageSpectrumWorkSpace(CRWorkSpace):
     def __init__(self,parent=None,modulename=None,**keywords):
         self.parameters=["datafile","max_nblocks","nblocks"] # Create those parameters first and in this order
         CRWorkSpace.__init__(self,parent=parent,modulename=modulename,**keywords)
-    def default_datafile(self):
-        """DataReader object to read the data from."""
-        return crfile(DEFAULTDATAFILE)
+#    def default_datafile(self):
+#        """DataReader object to read the data from."""
+#        return crfile(DEFAULTDATAFILE)
     def default_nblocks(self):
         """Number of blocks to average, take all blocks by default."""
         return min(self["datafile"].filesize/self["datafile"].blocksize,self["max_nblocks"])
@@ -493,13 +493,13 @@ def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywo
     if not ws["logfit"]:
         factor.copy(ws["height_ends"][0])
         factor *= 1000.0
-    baseline[...,0:numin_i].gethanningfilterhalf(Vector(factor),Vector(ws["height_ends"][0]),Vector(bool,ws["nofAntennas"],fill=True))
+    baseline[...,0:numin_i].gethanningfilterhalf(Vector(factor),Vector([ws["height_ends"][0]]),Vector(bool,ws["nofAntennas"],fill=True))
     #Right end
     ws["height_ends"][1,...].copy(baseline[...,numax_i-2])
     if not ws["logfit"]:
         factor.copy(ws["height_ends"][1])
         factor *= 1000.0
-    baseline[...,numax_i-1:].gethanningfilterhalf(Vector(factor),Vector(ws["height_ends"][1]),Vector(bool,ws["nofAntennas"],fill=False))
+    baseline[...,numax_i-1:].gethanningfilterhalf(Vector(factor),Vector([ws["height_ends"][1]]),Vector(bool,ws["nofAntennas"],fill=False))
     if ws["logfit"]: baseline.exp()
     if ws["verbose"]:
         print time.clock()-ws["t0"],"s: Done CalcBaseline."
@@ -648,7 +648,7 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
     t0 = 2.971839 - The cpu starting time of the processingin seconds, used for benchmarking.
     doplot = True - Make plots during processing to inspect data.
     """
-    ws=CRsetWorkSpace(ws,"AverageSpectrum",**keywords)
+    ws=CRsetWorkSpace(ws,"AverageSpectrum",datafile=datafile,**keywords)
     if ws["verbose"]:
         maxcount=len(ws["blocks"])
         print time.clock()-ws["t0"],"s: Calculating",maxcount,"blocks of size",datafile.blocksize

@@ -402,7 +402,7 @@ def hArray_setitem(self,dims,fill):
     if (type(fill)) in hAllListTypes: fill=hArray(fill)
     hFill(hArray_getSlicedArray(self,dims),fill)
 
-def hArray_read(self,datafile,key,blocks=-1):
+def hArray_read(self,datafile,key,blocks=-1,antenna=-1):
     """
     array.read(file,"Time",blocks=-1) -> read key Data Array "Time" from file into array.
 
@@ -418,7 +418,7 @@ def hArray_read(self,datafile,key,blocks=-1):
     if type(blocks)==int: blocks=Vector([blocks])
     if type(blocks) in [list,tuple]: blocks=Vector(blocks)
     self.par.file=self
-    datafile.read(key,self,blocks)
+    datafile.read(key,self,blocks,antenna)
     return self
 
 """   if blocks==None:

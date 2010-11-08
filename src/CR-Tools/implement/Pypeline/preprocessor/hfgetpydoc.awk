@@ -59,5 +59,5 @@ BEGIN{npar=0}
     next
 }
 
-(adddoxygendoc) {doxydoc = doxydoc $0}
+(adddoxygendoc) {doxydoc = doxydoc $0 "\n"}
 

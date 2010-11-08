@@ -112,6 +112,22 @@ namespace PyCR { // Namespace PyCR -- begin
 	};
       }
 
+    template <class Iter>
+      void hTranspose(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger nrows, HInteger ncolumns)
+      {
+	// Variables
+	HInteger size=(invec_end-invec)/(ncolumns*nrows),block=ncolumns*size;
+	Iter start(invec);
+	Iter iti(start),itiend(iti+size);
+	Iter ito(vec),itoend(ito+size);
+	while (itoend<=vec_end) {
+	  hCopy(ito,itoend,iti,itiend);
+	  ito=itoend; itoend+=size;
+	  iti+=block; if (iti >= invec_end) {start+=size; iti=start;};
+	  itiend=iti+size;
+	};
+      }
+
     template <class Iter, class Iterin, class IterI>
       void hCopy(const Iter vecout, const Iter vecout_end,
                  const Iterin vecin, const Iterin vecin_end,

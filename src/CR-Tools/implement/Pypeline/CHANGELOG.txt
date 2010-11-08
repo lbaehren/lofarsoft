@@ -67,3 +67,12 @@ that a parameter is not turned into a vector when called in looping mode
 
 2010-11-05 - Martin van den Akker
 - Module gets rebuild if *any* of the header files changes.
+
+2010-11-08: Pypeline - Heino Falcke - rev 6257
+- .read method allows so specify a block AND a single antenna
+selection (
+- changed DoubleFFT to allow for blocks to be stored on disk (example
+not yet finished!)
+- several bug fixes
+- got testrfi3.py to work again (testrfi2.py doesn't)
+

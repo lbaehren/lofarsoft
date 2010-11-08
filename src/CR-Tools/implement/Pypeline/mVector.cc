@@ -203,7 +203,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HString)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HInteger)(maxlen)()("Maximum length to output.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HInteger)(maxlen)()("Maximum length to output (all if negative).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   hPrettyString(vec,3) -> [vec_0,vec_1,vec_3,...]
@@ -252,6 +252,27 @@ template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
 {
   cout << hPrettyString(vec,vec_end,maxlen) << endl;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Prints the entire contents of a vector as a pretty string
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hPPrint
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hPrettyString(vec) -> '[vec_0,vec_1,vec_3,...]'
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
+{
+  cout << hPrettyString(vec,vec_end,-1) << endl;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -586,7 +607,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const It
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Transposes the values in one vector given a certain 2D shape and return result in a second vector
+//$DOCSTRING: Transposes the values in one vector given a certain 2D shape (lowest indices only)  and return result in a second vector
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hTranspose
 //-----------------------------------------------------------------------
@@ -625,6 +646,50 @@ template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger ncolumns)
 {
   PyCR::Vector::hTranspose(vec,vec_end,invec,invec_end,ncolumns);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Transposes the values in one vector given a certain 2D shape and return result in a second vector (can be applied to higher dimensions as well).
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hTranspose
+//-----------------------------------------------------------------------
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(invec)()("Input Vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nrows)()("Number of rows in input vector (i.e., width of a column, or the slower running index)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(ncolumns)()("Number of columns in input vector (i.e., width of a row, or the faster running index)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+Usage:
+  invec=[0,1,2,3,4,5]; ncolumns=2
+  hTranspose(outvec,invec,ncolumns) -> outvec = [0,2,4,1,3,5]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Operation will stop whenever the end of one of the input vector is reached.
+
+  >>  x=hArray(range(6),[3,2])
+  >>  y=hArray(int,[2,3],fill=-1)
+
+  >>  x.mprint()
+  [0,1]
+  [2,3]
+  [4,5]
+
+  >>  hTranspose(y,x,2)
+  >>  y.mprint()
+
+  [0,2,4]
+  [1,3,5]
+
+*/
+ 
+template <class Iter>
+void hTranspose(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger nrows, HInteger ncolumns)
+{
+  PyCR::Vector::hTranspose(vec,vec_end,invec,invec_end,nrows,ncolumns);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

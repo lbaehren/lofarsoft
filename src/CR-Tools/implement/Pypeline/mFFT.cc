@@ -850,7 +850,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
   hDoubleFFTPhaseMul(vecout,vecout_end,full_size,nblocks,blocklen,offset);
   //Second transpose
   PyCR::Vector::hTranspose(vecin,vecin_end,vecout,vecout_end,nblocks);
-  //And FFT over rows
+  /*  //And FFT over rows
   it1=vecin; it2=vecin+blocklen;
   while (it2 <= vecin_end){
     hFFTw(it1,it2,it1,it2);
@@ -858,8 +858,8 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
   };
   //Final transpose
   PyCR::Vector::hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
+  */
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
