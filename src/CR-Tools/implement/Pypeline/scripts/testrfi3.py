@@ -76,20 +76,20 @@ if ws["doplot"]:
     raw_input("Plotted clean spectrum - press Enter to continue...")
 
 #--------------------------------------------------------------------------------
-# The following is an example how one can use the above for cleaning of a single times series block
+print "The following is an example how one can use the above for cleaning of a single times series block."
 #--------------------------------------------------------------------------------
 
-print "Here we stop, since the data file we used as an example disappeared ...."
-
-"""
 print "First let's see where there is a block sith spiky data and use the quality checking for that...."
 ws["qualitycriteria"]={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
-ws["flaglist"]=CRQualityCheck(ws["qualitycriteria"],datafile=ws["datafile"],blocklist=[577,578,579],dataarray=None,blocksize=ws["blocksize"],nsigma=5,verbose=True)
-
+#ws["flaglist"]=CRQualityCheck(ws["qualitycriteria"],datafile=ws["datafile"],blocklist=[577,578,579],dataarray=None,blocksize=ws["blocksize"],nsigma=5,verbose=True)
+#faulty_antenna=10
+ws["flaglist"]=CRQualityCheck(ws["qualitycriteria"],datafile=ws["datafile"],blocklist=[0,1,2],dataarray=None,blocksize=ws["blocksize"],nsigma=5,verbose=True)
+faulty_antenna=0
 
 print "Now doing RFI suppression and back transformation for a single block"
 ws["baseline"].crcalcbaseline(ws["frequency"],ws["numin_i"],ws["numax_i"],ws["coeffs"],ws,doplot=False)
-ws["datafile"]["block"]=578
+ws["datafile"]["block"]=1
+#ws["datafile"]["block"]=578
 
 if ws["verbose"]: print time.clock()-ws["t0"],"s: Reading in block #578 and invfft dirty spectrum"
 rfitime=ws["datafile"]["Time"]
@@ -127,12 +127,12 @@ phaseonly *= (clean[0,2000:5000].stddev()/phaseonly[0,2000:5000].stddev()).val()
 #phaseonly /= ws["datafile"]["blocksize"]
 
 if ws["doplot"]: 
-    rfitime-=rfitime[0].val()
-    dirty[10].plot(xvalues=rfitime)
-    clean[10].plot(xvalues=rfitime,clf=False)
-    phaseonly[10].plot(clf=False,xvalues=rfitime,legend=["dirty","full clean","phase = 0"])
+    rfitime-=rfitime[0]
+    dirty[faulty_antenna].plot(xvalues=rfitime)
+    clean[faulty_antenna].plot(xvalues=rfitime,clf=False)
+    phaseonly[faulty_antenna].plot(clf=False,xvalues=rfitime,legend=["dirty","full clean","phase = 0"])
     plt.savefig("testrfi2-timeseries.pdf",format="pdf")
-"""
+
 
 #--------------------------------------------------------------------------------
 #End of Calculations
