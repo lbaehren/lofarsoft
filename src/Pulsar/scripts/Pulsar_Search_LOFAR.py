@@ -361,13 +361,16 @@ def run_searching (scratchdir, outfile, search_script, waittime):
 if __name__ == "__main__":
 	### Description of the DDplans ###
 	# for 1st pulsar shallow survey with Lofar
+	# DDplan.py -f 142.376708984375 -b 6.8359375 -n 560 -t 0.00032768 -d 500
 	#                                         LODM    DMSTEP NDM/call   #calls NCHAN DOWNSAMP
-	ddplans_heap["shallow"].append(dedisp_plan(0.00,   0.02, 7720,       1,    560,     1))
-	ddplans_heap["shallow"].append(dedisp_plan(154.4,  0.05, 2655,       1,    560,     2))
-	ddplans_heap["shallow"].append(dedisp_plan(287.15, 0.1,  2635,       1,    560,     4))
-	ddplans_heap["shallow"].append(dedisp_plan(550.65, 0.2,  2247,       1,    560,     8))
+	ddplans_heap["shallow"].append(dedisp_plan(0.00,   0.03, 1044,       1,    560,     1))
+	ddplans_heap["shallow"].append(dedisp_plan(31.32,  0.05, 380,        1,    560,     2))
+	ddplans_heap["shallow"].append(dedisp_plan(50.32,  0.1,  449,        1,    560,     4))
+	ddplans_heap["shallow"].append(dedisp_plan(95.22,  0.2,  463,        1,    560,     8))
+	ddplans_heap["shallow"].append(dedisp_plan(187.82, 0.5,  445,        1,    560,    16))
+	ddplans_heap["shallow"].append(dedisp_plan(410.32, 1.0,  90,         1,    560,    32))
 	###
-	
+
 	parser = optparse.OptionParser()
 
 	parser.add_option('--ddplan',dest='ddplanflag', metavar='0/1/2',
