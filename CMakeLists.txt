@@ -110,6 +110,7 @@ find_program (tar_executable        tar     PATHS ${bin_locations})
 find_program (wget_executable       wget    PATHS ${bin_locations})
 
 set (BLITZ_FIND_QUIETLY           YES )
+set (GIT_FIND_QUIETLY             YES )
 set (OPENGL_FIND_QUIETLY          YES )
 set (ROOT_FIND_QUIETLY            YES )
 set (VERSION_CONTROL_FIND_QUIETLY YES )
