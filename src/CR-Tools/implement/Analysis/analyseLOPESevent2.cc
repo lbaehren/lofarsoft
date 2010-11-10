@@ -314,7 +314,7 @@ namespace CR { // Namespace CR -- begin
         // Plot of upsampled antenna traces (seperated) 
         if (SinglePlots)
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true,
-                                              getUpsamplingExponent(),false);
+                                              getUpsamplingExponent(),false,true);
                                               
         // calculate the maxima (only if CC-beam was reconstructed successfully and its time is ok):
         // calculate noise as mean of local maxima of the envelope in time range of -10.5 to -0.5 µs before CC center)      

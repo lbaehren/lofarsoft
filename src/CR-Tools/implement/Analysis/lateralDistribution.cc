@@ -241,7 +241,7 @@ namespace CR { // Namespace CR -- begin
         latProSim->Draw("SAME P");
 
       /* statistic box of fit */
-      TPaveStats *ptstats = new TPaveStats(0.62,0.84,0.98,0.99,"brNDC");
+      TPaveStats *ptstats = new TPaveStats(0.54,0.84,0.98,0.99,"brNDC");
       ptstats->SetName("Data");
       ptstats->SetBorderSize(2);
       ptstats->SetTextAlign(12);
@@ -253,7 +253,7 @@ namespace CR { // Namespace CR -- begin
       ptstats->SetParent(latPro->GetListOfFunctions());
 
       /* statistic box of fit SIMULATIONS */
-      TPaveStats *ptstatsS = new TPaveStats(0.62,0.69,0.98,0.84,"brNDC");
+      TPaveStats *ptstatsS = new TPaveStats(0.54,0.69,0.98,0.84,"brNDC");
       ptstatsS->SetName("Simulation");
       ptstatsS->SetBorderSize(2);
       ptstatsS->SetTextAlign(12);
@@ -268,7 +268,7 @@ namespace CR { // Namespace CR -- begin
 
       /* statistic box of EAS parameter */
       // TPaveStats *easstats = new TPaveStats(0.45,0.78,0.62,0.99,"brNDC");
-      TPaveStats *easstats = new TPaveStats(0.45,0.84,0.62,0.99,"brNDC");
+      TPaveStats *easstats = new TPaveStats(0.37,0.84,0.54,0.99,"brNDC");
       easstats->SetBorderSize(2);
       easstats->SetTextAlign(12);
       easstats->SetFillColor(0);
@@ -307,11 +307,11 @@ namespace CR { // Namespace CR -- begin
       if (ant >= 3) {
         // define names for statistics
         if (index1 != "") {
-          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index1;
-          R0Name = "R_{0}- " + index1;
+          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index1 + " [#muV/m/MHz]";
+          R0Name = "R_{0}- " + index1 + " [m]";
         } else {
-          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}";
-          R0Name = "R_{0}";
+          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "} [#muV/m/MHz]";
+          R0Name = "R_{0} [m]";
         }
       
         // fit exponential
@@ -686,7 +686,7 @@ namespace CR { // Namespace CR -- begin
         timeProSim->Draw("SAME P");
 
       /* statistic box of fit */
-      TPaveStats *ptstats = new TPaveStats(0.62,0.84,0.98,0.99,"brNDC");
+      TPaveStats *ptstats = new TPaveStats(0.6,0.84,0.98,0.99,"brNDC");
       ptstats->SetName("stats");
       ptstats->SetBorderSize(2);
       ptstats->SetTextAlign(12);
@@ -698,7 +698,7 @@ namespace CR { // Namespace CR -- begin
       ptstats->SetParent(timePro->GetListOfFunctions());
 
       /* statistic box of fit SIMULATIONS */
-      TPaveStats *ptstatsS = new TPaveStats(0.62,0.69,0.98,0.84,"brNDC");
+      TPaveStats *ptstatsS = new TPaveStats(0.6,0.69,0.98,0.84,"brNDC");
       ptstatsS->SetName("Simulation");
       ptstatsS->SetBorderSize(2);
       ptstatsS->SetTextAlign(12);
@@ -712,7 +712,7 @@ namespace CR { // Namespace CR -- begin
       }
 
       /* statistic box of EAS parameter */
-      TPaveStats *easstats = new TPaveStats(0.45,0.84,0.62,0.99,"brNDC");
+      TPaveStats *easstats = new TPaveStats(0.43,0.84,0.6,0.99,"brNDC");
       easstats->SetBorderSize(2);
       easstats->SetTextAlign(12);
       easstats->SetFillColor(0);
@@ -747,17 +747,17 @@ namespace CR { // Namespace CR -- begin
       string curvNameS = "";
       string offsetNameS = "";
       if (index1 != "") {
-        curvName = "r_{curv}- " + index1;
+        curvName = "r_{c}- " + index1 + " [m]";
         offsetName = "offset- " + index1;
       } else {
-        curvName = "r_{curv}";
+        curvName = "r_{c} [m]";
         offsetName = "offset";
       }
       if (index2 != "") {
-        curvNameS = "r_{curv}- " + index2;
+        curvNameS = "r_{c}- " + index2 + " [m]";
         offsetNameS = "offset- " + index2;
       } else {
-        curvNameS = "r_{curv}";
+        curvNameS = "r_{c} [m]";
         offsetNameS = "offset";
       }
       
@@ -766,37 +766,37 @@ namespace CR { // Namespace CR -- begin
         // spherical fit (1 and 2 dimensional)
         TF1 *fitFunc;
         TF2 *fitFunc2D;
-        fitFunc=new TF1("fitFunc","[0]+3.335640952*(sqrt([1]**2+x**2)-[1])",0,1000);
-        fitFunc2D=new TF2("fitFunc2D","[0]+3.335640952*(sqrt(([1]-y)**2+x**2)-[1])",0,1000,-200,200);
-        fitFunc->SetParName(0,offsetName.c_str());
-        fitFunc->SetParName(1,curvName.c_str());
-        fitFunc2D->SetParName(0,offsetName.c_str());
-        fitFunc2D->SetParName(1,curvName.c_str());
-        fitFunc->FixParameter(0,0);
-        fitFunc2D->FixParameter(0,0);
+        fitFunc=new TF1("fitFunc","3.335640952*(sqrt([0]**2+x**2)-[0])",0,1000);
+        fitFunc2D=new TF2("fitFunc2D","3.335640952*(sqrt(([0]-y)**2+x**2)-[0])",0,1000,-200,200);
+        //fitFunc->SetParName(0,offsetName.c_str());
+        fitFunc->SetParName(0,curvName.c_str());
+        //fitFunc2D->SetParName(0,offsetName.c_str());
+        fitFunc2D->SetParName(0,curvName.c_str());
+        //fitFunc->FixParameter(0,0);
+        //fitFunc2D->FixParameter(0,0);
         //fitFunc->FixParameter(1,1e9/lightspeed); // = 3.335640952
-        fitFunc2D->SetParameter(1,1000);
+        fitFunc2D->SetParameter(0,1000);
         //fitFunc->GetXaxis()->SetRange(0,1000);
         fitFunc->SetFillStyle(0);
         fitFunc->SetLineWidth(2);
 
         cout << "------------------------------"<<endl;
         timePro2D->Fit(fitFunc2D, "", "");
-        fitFunc->SetParameter(1,fitFunc2D->GetParameter(1));
+        fitFunc->SetParameter(0,fitFunc2D->GetParameter(0));
         timePro->Fit(fitFunc, "");
         ptstats->Draw();
 
         // write fit results to record with other results
-        erg.define("latTime_offset",fitFunc2D->GetParameter(0));
-        erg.define("latTime_R_curv",fitFunc2D->GetParameter(1));
+        erg.define("latTime_offset",0.);
+        erg.define("latTime_R_curv",fitFunc2D->GetParameter(0));
         erg.define("latTime_latOffset",0.);
-        erg.define("latTime_sigoffset",fitFunc2D->GetParError(0));
-        erg.define("latTime_sigR_curv",fitFunc2D->GetParError(1));
+        erg.define("latTime_sigoffset",0.);
+        erg.define("latTime_sigR_curv",fitFunc2D->GetParError(0));
         erg.define("latTime_siglatOffset",0.);
         erg.define("latTime_chi2NDF",fitFunc2D->GetChisquare()/double(fitFunc2D->GetNDF()));
         cout << "Results of spherical fit (data)"
-             << "R_curv     = " << fitFunc2D->GetParameter(1) << "\t +/- " << fitFunc2D->GetParError(1) << "\t m\n"
-             << "t offset   = " << fitFunc2D->GetParameter(0) << "\t +/- " << fitFunc2D->GetParError(0) << "\t ns\n"
+             << "R_curv     = " << fitFunc2D->GetParameter(0) << "\t +/- " << fitFunc2D->GetParError(0) << "\t m\n"
+             //<< "t offset   = " << fitFunc2D->GetParameter(0) << "\t +/- " << fitFunc2D->GetParError(0) << "\t ns\n"
              << "Chi^2  = " << fitFunc2D->GetChisquare() << "\t NDF " << fitFunc2D->GetNDF() << "\n"
              //<< "Curvature radius of CC-beam (to compare) = " << erg.asDouble("Distance") << " m\n"
              << endl;
@@ -805,16 +805,16 @@ namespace CR { // Namespace CR -- begin
           cout << "-------- SIMULATIONS ---------"<<endl;          
           TF1 *fitFuncS;
           TF2 *fitFuncS2D;
-          fitFuncS=new TF1("fitFuncS","[0]+3.335640952*(sqrt([1]**2+x**2)-[1])",0,1000);
-          fitFuncS2D=new TF2("fitFuncS2D","[0]+3.335640952*(sqrt(([1]-y)**2+x**2)-[1])",0,1000,-200,200);
-          fitFuncS->SetParName(0,offsetName.c_str());
-          fitFuncS->SetParName(1,curvName.c_str());
-          fitFuncS2D->SetParName(0,offsetName.c_str());
-          fitFuncS2D->SetParName(1,curvName.c_str());
-          fitFuncS->FixParameter(0,0);
-          fitFuncS2D->FixParameter(0,0);
+          fitFuncS=new TF1("fitFuncS","3.335640952*(sqrt([0]**2+x**2)-[0])",0,1000);
+          fitFuncS2D=new TF2("fitFuncS2D","3.335640952*(sqrt(([0]-y)**2+x**2)-[0])",0,1000,-200,200);
+          //fitFuncS->SetParName(0,offsetName.c_str());
+          fitFuncS->SetParName(0,curvName.c_str());
+          //fitFuncS2D->SetParName(0,offsetName.c_str());
+          fitFuncS2D->SetParName(0,curvName.c_str());
+          //fitFuncS->FixParameter(0,0);
+          //fitFuncS2D->FixParameter(0,0);
           //fitFuncS->FixParameter(1,1e9/lightspeed); // = 3.335640952
-          fitFuncS2D->SetParameter(1,1000);
+          fitFuncS2D->SetParameter(0,1000);
           //fitFuncS->GetXaxis()->SetRange(0,1000);
           fitFuncS->SetFillStyle(0);
           fitFuncS->SetLineWidth(2);
@@ -851,12 +851,12 @@ namespace CR { // Namespace CR -- begin
         
         // fit parabola (one dimensional
         TF1 *fitFunc2;
-        fitFunc2=new TF1("fitFunc2","[0]+3.335640952*(sqrt([1]**2+x**2)-[1])",0,1000);
+        fitFunc2=new TF1("fitFunc2","3.335640952*(sqrt([0]**2+x**2)-[0])",0,1000);
         //fitFunc2=new TF1("fitFunc2","[0]+3.335640952*(x**2/(2*[1]))",0,1000);
-        fitFunc2->SetParName(0,offsetName.c_str());
-        fitFunc2->SetParName(1,curvName.c_str());
-        fitFunc2->FixParameter(0,0);
-        fitFunc2->SetParameter(1,1000);
+        //fitFunc2->SetParName(0,offsetName.c_str());
+        fitFunc2->SetParName(0,curvName.c_str());
+        //fitFunc2->FixParameter(0,0);
+        fitFunc2->SetParameter(0,1000);
         fitFunc2->SetFillStyle(0);
         fitFunc2->SetLineWidth(2);
 
@@ -865,16 +865,16 @@ namespace CR { // Namespace CR -- begin
         ptstats->Draw();
 
         // write fit results to record with other results
-        erg.define("latTimePar_offset",fitFunc2->GetParameter(0));
-        erg.define("latTimePar_R_curv",fitFunc2->GetParameter(1));
+        erg.define("latTimePar_offset",0.);
+        erg.define("latTimePar_R_curv",fitFunc2->GetParameter(0));
         erg.define("latTimePar_latOffset",0.);
-        erg.define("latTimePar_sigoffset",fitFunc2->GetParError(0));
-        erg.define("latTimePar_sigR_curv",fitFunc2->GetParError(1));
+        erg.define("latTimePar_sigoffset",0.);
+        erg.define("latTimePar_sigR_curv",fitFunc2->GetParError(0));
         erg.define("latTimePar_siglatOffset",0.);
         erg.define("latTimePar_chi2NDF",fitFunc2->GetChisquare()/double(fitFunc2->GetNDF()));
         cout << "Results of parabolic fit (data)"
-             << "R_curv     = " << fitFunc2->GetParameter(1) << "\t +/- " << fitFunc2->GetParError(1) << "\t m\n"
-             << "t offset   = " << fitFunc2->GetParameter(0) << "\t +/- " << fitFunc2->GetParError(0) << "\t ns\n"
+             << "R_curv     = " << fitFunc2->GetParameter(0) << "\t +/- " << fitFunc2->GetParError(0) << "\t m\n"
+             //<< "t offset   = " << fitFunc2->GetParameter(0) << "\t +/- " << fitFunc2->GetParError(0) << "\t ns\n"
              // << "lat offset = " << fitFunc2->GetParameter(3) << "\t +/- " << fitFunc2->GetParError(3) << "\t m\n"
              << "Chi^2  = " << fitFunc2->GetChisquare() << "\t NDF " << fitFunc2->GetNDF() << "\n"
              //<< "Curvature radius of CC-beam (to compare) = " << erg.asDouble("Distance") << " m\n"
@@ -883,11 +883,11 @@ namespace CR { // Namespace CR -- begin
         if (fitSim) {
           cout << "-------- SIMULATIONS ---------"<<endl;
           TF1 *fitFunc2S;
-          fitFunc2S=new TF1("fitFunc2S","[0]+3.335640952*(sqrt([1]**2+x**2)-[1])",0,1000);
-          fitFunc2S->SetParName(0,offsetNameS.c_str());
-          fitFunc2S->SetParName(1,curvNameS.c_str());
-          fitFunc2S->FixParameter(0,0);
-          fitFunc2S->SetParameter(1,1000);
+          fitFunc2S=new TF1("fitFunc2S","3.335640952*(sqrt([0]**2+x**2)-[0])",0,1000);
+          //fitFunc2S->SetParName(0,offsetNameS.c_str());
+          fitFunc2S->SetParName(0,curvNameS.c_str());
+          //fitFunc2S->FixParameter(0,0);
+          fitFunc2S->SetParameter(0,1000);
           fitFunc2S->SetFillStyle(0);
           fitFunc2S->SetLineWidth(2);
 
@@ -896,16 +896,16 @@ namespace CR { // Namespace CR -- begin
           ptstatsS->Draw();
 
           // write fit results to record with other results
-          erg.define("latTimePar_offset_sim",fitFunc2S->GetParameter(0));
-          erg.define("latTimePar_R_curv_sim",fitFunc2S->GetParameter(1));
+          erg.define("latTimePar_offset_sim",0.);
+          erg.define("latTimePar_R_curv_sim",fitFunc2S->GetParameter(0));
           erg.define("latTimePar_latOffset_sim",0.);
-          erg.define("latTimePar_sigoffset_sim",fitFunc2S->GetParError(0));
-          erg.define("latTimePar_sigR_curv_sim",fitFunc2S->GetParError(1));
+          erg.define("latTimePar_sigoffset_sim",0.);
+          erg.define("latTimePar_sigR_curv_sim",fitFunc2S->GetParError(0));
           erg.define("latTimePar_siglatOffset_sim",0.);
           erg.define("latTimePar_chi2NDF_sim",fitFunc2S->GetChisquare()/double(fitFunc2S->GetNDF()));
           cout << "Results of parabolic fit (SIMULATION)"
-              << "R_curv     = " << fitFunc2S->GetParameter(1) << "\t +/- " << fitFunc2S->GetParError(1) << "\t m\n"
-              << "t offset   = " << fitFunc2S->GetParameter(0) << "\t +/- " << fitFunc2S->GetParError(0) << "\t ns\n"
+              << "R_curv     = " << fitFunc2S->GetParameter(0) << "\t +/- " << fitFunc2S->GetParError(0) << "\t m\n"
+              //<< "t offset   = " << fitFunc2S->GetParameter(0) << "\t +/- " << fitFunc2S->GetParError(0) << "\t ns\n"
               // << "lat offset = " << fitFunc2S->GetParameter(3) << "\t +/- " << fitFunc2S->GetParError(3) << "\t m\n"
               << "Chi^2  = " << fitFunc2S->GetChisquare() << "\t NDF " << fitFunc2S->GetNDF() << "\n"
               //<< "Curvature radius of CC-beam (to compare) = " << erg.asDouble("Distance") << " m\n"
