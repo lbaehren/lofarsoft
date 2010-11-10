@@ -834,16 +834,58 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
 #define HFPP_FUNC_NAME hEquatorial2Horizontal
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(hc)()("array with horizontal coordiates (alt, az, alt, az, ...)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(ec)()("array with equatorial coordinates (ra, dec, ra, dec, ...) ")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(hc)()("array with horizontal coordiates in radians (alt, az, alt, az, ...) altitude positive eastwards from north.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(ec)()("array with equatorial coordinates in radians (ra, dec, ra, dec, ...) ")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(utc)()("UTC as Julian Day")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_3 (HNumber)(ut1_utc)()("difference UT1-UTC (as obtained from IERS bullitin A) if 0 a maximum error of 0.9 seconds is made.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_4 (HNumber)(L)()("longitude of telescope")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_5 (HNumber)(phi)()("latitude of telescope")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HNumber)(L)()("longitude of telescope in radians (L observer's longitude (positive east, negative west of Greenwhich)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HNumber)(phi)()("latitude of telescope in radians")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+Example::
+
+    from pytmf import *
+    import pycrtools as cr
+    
+    print """Calculating azimuth and elevation of the Crab nebula:
+    (ra, dec) = (5 34 31.97, +22 00 52.0)
+    as seen by LOFAR (core station 2)
+    (lon, lat) = (6.869837540, 52.915122495)
+    on UTC 2010-11-04T5:34:16
+    """
+    
+    alpha = hms2rad(5, 34, 31.97); # Right assention
+    delta = dms2rad(22, 0, 52.0); # Declination
+    
+    L = deg2rad(6.869837540); # Longitude of telescope
+    phi = deg2rad(52.915122495); # Latitude of telescope
+    
+    utc = gregoriandate2jd(2010, 11, 4. + ((5. + 34. / 60. + 16. / 3600.) / 24.)) # Obstime 
+    
+    print "Input:"
+    print "alpha", rad2deg(alpha), "delta", rad2deg(delta)
+    print "L", rad2deg(L), "phi", rad2deg(phi)
+    print "utc", utc
+    print ""
+    
+    # Make input and output arrays for conversion
+    equatorial = cr.hArray([alpha, delta])
+    horizontal = equatorial.new()
+    
+    # Convert all coordinates in the input array
+    # assumes difference between UTC and UT is 0 (hence ut1_utc=0.)
+    cr.hEquatorial2Horizontal(horizontal, equatorial, utc, 0., L, phi)
+    
+    # Print the result
+    print "Result:"
+    print "A", rad2deg(horizontal[0]), "h", rad2deg(horizontal[1])
+    print "Expected result:"
+    print "A", -109.18470278, "h", 41.0800365834
+    print ""
+
 */
 
 template <class Iter>
@@ -852,17 +894,14 @@ void HFPP_FUNC_NAME (const Iter hc, const Iter hc_end,
                      const HNumber utc, const HNumber ut1_utc,
                      const HNumber L, const HNumber phi)
 {
-  // Constants
-  const int SECONDS_PER_DAY = 24 * 3600;
-
   // Variables
   HNumber alpha, delta, A, h, H;
 
   // Calculate Terestrial Time (TT)
-  const HNumber tt = utc + tmf::tt_utc(utc) / SECONDS_PER_DAY;
+  const HNumber tt = utc + tmf::tt_utc(utc) / tmf::SECONDS_PER_DAY;
 
   // Calculate Universal Time (UT1)
-  const HNumber ut1 = utc + ut1_utc / SECONDS_PER_DAY;
+  const HNumber ut1 = utc + ut1_utc / tmf::SECONDS_PER_DAY;
 
   // Calculate Local Apparant Sidereal Time (LAST)
   const HNumber theta_L = tmf::last(ut1, tt, L);
@@ -955,25 +994,21 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   if (Nantpos != Nantennae * 3)
   {
     throw PyCR::ValueError("Antenna positions array has wrong size.");
-//    std::cerr<<"Antenna positions array has wrong size."<<std::endl;
     return;
   }
   if (Nskypos != Nskycoord * 3)
   {
     throw PyCR::ValueError("Sky positions array has wrong size.");
-//    std::cerr<<"Sky positions array has wrong size."<<std::endl;
     return;
   }
   if (Nfftdata != Nfreq * Nantennae)
   {
     throw PyCR::ValueError("FFT data array has wrong size.");
-//    std::cerr<<"FFT data array has wrong size."<<std::endl;
     return;
   }
   if (Nimage != Nskycoord * Nfreq)
   {
     throw PyCR::ValueError("Image array has wrong size.");
-//    std::cerr<<"Image array has wrong size."<<std::endl;
     return;
   }
 
@@ -992,7 +1027,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 #else
   std::cout<<"Running in serial mode"<<std::endl;
 #endif // _OPENMP
-  for (int i=0; i<Nskycoord; i++)
+  for (int i=0; i<Nskycoord; ++i)
   {
     // Image iterator to start position
     it_im = image;
@@ -1005,20 +1040,22 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
     // Loop over antennae
     it_ant = antpos;
     it_fft = fftdata;
-    for (int j=0; j<Nantennae; j++)
+    for (int j=Nantennae; j!=0; --j)
     {
       // Reset image iterator to first frequency of current pixel
       it_im_inner = it_im;
 
       // Calculate norm of sky vector
-      norm = PyCR::Array::hVectorLength(it_sky, it_sky+3);
+      norm = sqrt(*it_sky * *it_sky +
+                  *(it_sky+1) * *(it_sky+1) +
+                  *(it_sky+2) * *(it_sky+2));
 
       // Calculate geometric delay (and increment iterator)
       delay = hGeometricDelayFarField(it_ant, it_sky, norm);
 
       // Loop over frequencies
       it_freq = frequencies;
-      for (int k=0; k<Nfreq; k++)
+      for (int k=Nfreq; k!=0; --k)
       {
         // Multiply by geometric weight and add to image
         *it_im_inner++ += *it_fft++ * exp(HComplex(0.0, CR::_2pi*(*it_freq++ * delay)));

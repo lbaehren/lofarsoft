@@ -58,7 +58,7 @@ if (NOT HAVE_TMF OR TMF_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project
 
-  find_file (have_tmf_tgz tmf-1.4.2.tar.gz ${TMF_SOURCE_DIR})
+  find_file (have_tmf_tgz tmf-1.4.3.tar.gz ${TMF_SOURCE_DIR})
   find_file (have_tmf_cmake tmf_cmake.tar.gz ${TMF_SOURCE_DIR})
   
   if (have_tmf_tgz)
