@@ -305,7 +305,7 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(double,PyFloat_AsDouble,SampleFrequency)
     HFPP_REPEAT(int,PyInt_AsLong,Shift)
     if ((key=="shift") || (key2=="Shift")) {
-      vector<HInteger> stlvec(PyList2STLIntVec(pyob));
+      vector<int> stlvec(PyList2STLInt32Vec(pyob));
       drp->setShift(stlvec);
     } else  if ((key=="selectedAntennas") || (key2=="SelectedAntennas")) {
       vector<uint> stlvec(PyList2STLuIntVec(pyob));
@@ -408,7 +408,7 @@ Now, we sneaked the 4th block (block 3) into the second row (index 1).
 
 Finally, you can also read the data into an array of different type
 (but that is slightly slower as scratch arrays are created for every
-row that is being read) 
+row that is being read)
 
 c=hArray(complex,[5,2])
 c[...].read(datafile,"Fx",Vector([0,1,2,3]))
@@ -433,7 +433,7 @@ void HFPP_FUNC_NAME(
   //Create a DataReader Pointer from an integer variable
   DataReader *drp=&dr;
   typedef IterValueType T;
-  
+
   //Check whether it is non-NULL.
   if (drp==Null_p){
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": pointer to FileObject is NULL, DataReader not found.");
@@ -478,7 +478,7 @@ void HFPP_FUNC_NAME(
     if (antenna>=0) {shape(1)=1; if (antenna>=selantennas) antenna=(selantennas-1);};_H_NL_\
     if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(1) << " antennas times " << shape(0) << " data points (= " << shape(0)*shape(1) <<")!");throw PyCR::ValueError("Incorrect size of read input vector."); return;}; _H_NL_ \
     drp->FIELD (casamtrx);						_H_NL_\
-  if (antenna>=0) {PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin()+antenna*shape(0),tmpvec.begin()+(antenna+1)*shape(0));}_H_NL_\ 
+  if (antenna>=0) {PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin()+antenna*shape(0),tmpvec.begin()+(antenna+1)*shape(0));}_H_NL_\
   else {PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin(),tmpvec.end());}_H_NL_\
   }
 
@@ -555,7 +555,7 @@ template <class Iter>
 CRDataReader & HFPP_FUNC_NAME(
 		    CRDataReader &dr,
 		    HString Datatype,
-		    const Iter vec, const Iter vec_end, 
+		    const Iter vec, const Iter vec_end,
 		    const HInteger block
 		    )
 {
