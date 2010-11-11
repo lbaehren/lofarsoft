@@ -7,6 +7,7 @@
 
 import os
 from optparse import make_option
+from UserDict import DictMixin
 
 from lofarpipe.cuisine.ingredient import WSRTingredient
 from lofarpipe.support.utilities import string_to_list, is_iterable
@@ -154,13 +155,31 @@ class FileList(ListField):
 #                                so that will almost always the case by default.
 # ------------------------------------------------------------------------------
 
-class LOFARingredient(dict):
+class LOFARingredient(DictMixin):
     def __init__(self, fields):
         self._fields = fields
 
-        for key, value in self._fields.iteritems():
-            if hasattr(value, "default"):
-                self[key] = value.default
+    def keys(self):
+        return self._fields.keys()
+
+    def __getitem__(self, key):
+        # If we don't have the value for this key, but we do have a field with
+        # a valid default, return that.
+        if (
+            not self.has_key(key) and
+            self._fields.has_key(key) and
+            hasattr(self._fields[key], "default"
+        ):
+            field = self._fields[key]
+            value = field.coerce(field.default)
+            if not field.is_valid(value):
+                raise TypeError(
+                    "%s is an invalid value for %s %s" %
+                    (str(value), type(field).__name__, key)
+                )
+        else:
+            value = super(LOFARingredient, self).__getitem__(key)
+        return value
 
     def __setitem__(self, key, value):
         if key in self._fields:
