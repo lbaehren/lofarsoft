@@ -660,6 +660,7 @@ if __name__ == "__main__":
         cmd="rfifind -blocks %d -zapchan %s -o %s %s > %s" % (rfifind_blocks, zapstring, outfile, infile, outfile+"_rfifind.log")
         print "Running RFI excision..."
 	if is_skip_rfifind:  # skipping rfifind
+		print "skipped"
 		rfi_time = 0
 	else:
 		rfi_time = timed_execute(cmd,1)
@@ -766,21 +767,24 @@ if __name__ == "__main__":
 
 	# running the search here only when dedispersion skipped from the cmdline
 	if is_skip_dedispersion and not is_sift_n_fold_only:
-		totdm = 0
+		print "Running (mpi)prepsubband ... skipped"
+		print "Searching ..."
 		for ddplan in ddplans:
 			for passnum in range(ddplan.numpasses):
 				for dmstr in ddplan.dmlist[passnum]:
 					dmstrs.append(dmstr)
-			totdm += ddplan.dmsperpass * ddplan.numpasses
 		search_time = run_searching (scratchdir, outfile, search_script, waittime)
 		totime += search_time
-		print "Search time: %.2f seconds" % (search_time)
-		rfp.write ("Search time for %d DM trials (s) : %.2f\n" % (totdm, search_time))
+		print "Total search time (s) : %.2f" % (search_time)
+		rfp.write ("Total search time (s) : %.2f\n" % (search_time))
 
+	if is_sift_n_fold_only:
+		print "Running (mpi)prepsubband ... skipped"
+		print "Running searching ... skipped"
 
+	# Generating single-pulse plot
+	print "Generating single-pulse plots ..."
 	if not is_sift_n_fold_only:
-		# Generating single-pulse plot
-		print "Generating single-pulse plots ..."
 #		spfiles=glob.glob(outfile + "_DM*.singlepulse")
 #		cmd="single_pulse_search.py --threshold %f %s" % (singlepulse_plot_SNR, " ".join(spfiles))
 		basedmb = outfile+"_DM"
@@ -811,6 +815,8 @@ if __name__ == "__main__":
 		totime += sp_time
 		print "Total time to make single-pulse plots (s) : %.2f" % (sp_time)
 		rfp.write("Total time to make single-pulse plots (s) : %.2f\n" % (sp_time))
+	else:
+		print "skipped"
 	
 	#
 	# Following will sort out the candidates 
