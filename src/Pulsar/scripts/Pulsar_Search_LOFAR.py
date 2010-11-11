@@ -10,7 +10,7 @@
 # + wrong indent fixed and "@" character removed in line 491
 # + updated mpi Presto programs (with added -runavg option) checked in to USG
 #
-# Vlad, Nov 5-6, 2010
+# Vlad, Nov 5-7, 2010
 # + name of log-files changed
 # + single-pulse is running together with periodicity search (with no plot creating)
 #   and then runs on *.singlepulse files to create the plots for several DM ranges
@@ -22,6 +22,7 @@
 # + birdies' file and run zapbirds
 # + zapping first freq channel in each subband (it's junk there)
 # + parallelization (search + prepfold), separate log files
+# + added hi_accel_search and corresponding cmd option
 #
 # Todo:
 # ~ -numout ??? (not sure it's really that important now)
@@ -36,33 +37,57 @@ import infodata as inf
 from math import pi
 
 # some tunable parameters
-hwired_ddplan_id      = "shallow"
-bright_catalog        = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/psr_cats.txt"   # Catalog of brightest pulsars
-rfi_master_file       = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/master.rfi"     # Master list of frequent RFIs
-birdies_file          = ""   # List of birdies to zap in FFTs. If empty, the generic one will be created (with 50 & 100 Hz harmonics)
-candlist_file         = "candidates.txt"  # ASCII list of all folded candidates
-blk                   = 1000   # largest number of DMs to be read by mpiprepsubband
-dm_tolerance          = 3      # tolerance in DM when comparing candidates with known strong PSRs
-period_tolerance      = 0.0005 # tolerance in P when comparing candidates with known strong PSRs
-max_psr_harm          = 10     # maximum harmonic of known pulsars to consider when comparing with candidates
-rfifind_blocks        = 2048   # number of blocks to integratea (for rfifind), usually ~2.6 s
-singlepulse_threshold = 5.0    # threshold SNR for candidate determination
-singlepulse_plot_SNR  = 5.5    # threshold SNR for singlepulse plot
-singlepulse_maxwidth  = 0.1    # max pulse width in seconds
-to_prepfold_sigma     = 6.0    # incoherent sum significance to fold candidates
-max_lo_cands_to_fold  = 20     # Never fold more than this many lo-accel candidates
-lo_accel_numharm      = 16     # max harmonics
-lo_accel_sigma        = 2.0    # threshold gaussian significance
-lo_accel_zmax         = 0      # bins
-lo_accel_flo          = 1.0    # Hz
-numhits_to_fold       = 2      # Number of DMs with a detection needed to fold
-low_DM_cutoff         = 1.0    # Lowest DM to consider as a "real" pulsar
-waittime              = 5      # in sec. Interval to check for searching scripts to finish
+hwired_ddplan_id       = "shallow"  # DDplan ID, Description of DDplan(s) set and/check below
+is_run_hi_accel_search = True    # if False, only lo_accel search will be run
+bright_catalog         = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/psr_cats.txt"   # Catalog of brightest pulsars
+rfi_master_file        = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/master.rfi"     # Master list of frequent RFIs
+birdies_file           = ""      # List of birdies to zap in FFTs. If empty, the generic one will be created (with 50 & 100 Hz harmonics)
+lo_acc_candlist_file   = "candidates_lo_accel.txt"  # ASCII list of lo-accel candidates
+hi_acc_candlist_file   = "candidates_hi_accel.txt"  # ASCII list of hi-accel candidates
+blk                    = 1000    # largest number of DMs to be read by mpiprepsubband
+dm_tolerance           = 3       # tolerance in DM when comparing candidates with known strong PSRs
+period_tolerance       = 0.0005  # (s) - tolerance in P when comparing candidates with known strong normal PSRs
+ms_period_tolerance    = 0.00001 # (s) - tolerance in P when comparing candidates with known strong mPSRs (P<30ms)
+max_psr_harm           = 10      # maximum harmonic of known pulsars to consider when comparing with candidates
+rfifind_blocks         = 2048    # number of blocks to integratea (for rfifind), usually ~2.6 s
+singlepulse_threshold  = 5.0     # threshold SNR for candidate determination
+singlepulse_plot_SNR   = 5.5     # threshold SNR for singlepulse plot
+singlepulse_maxwidth   = 0.1     # max pulse width in seconds
+to_prepfold_sigma      = 6.0     # incoherent sum significance to fold candidates
+max_lo_cands_to_fold   = 20      # Never fold more than this many lo-accel candidates
+lo_accel_numharm       = 16      # max harmonics
+lo_accel_sigma         = 2.0     # threshold gaussian significance
+lo_accel_zmax          = 0       # bins
+lo_accel_flo           = 1.0     # Hz
+max_hi_cands_to_fold   = 10      # Never fold more than this many hi-accel candidates
+hi_accel_numharm       = 8       # max harmonics
+hi_accel_sigma         = 3.0     # threshold gaussian significance
+hi_accel_zmax          = 50      # bins
+hi_accel_flo           = 0.1     # Hz
+numhits_to_fold        = 2       # Number of DMs with a detection needed to fold
+low_DM_cutoff          = 1.0     # Lowest DM to consider as a "real" pulsar
+waittime               = 5       # in sec. Interval to check for searching scripts to finish
 ### Description of the DDplans ###
-ddplans_heap = {"shallow" : [], "auto" : []}
+#
 # "shallow" is for the 1st Pulsar Shallow survey
-# description of DDplans is given in the beginning of __main__ function
-# Add more plans here and there
+# my run: DDplan.py -f 142.376708984375 -b 6.8359375 -n 560 -t 0.00032768 -d 500.0 -r 0.5 
+#                              LODM   DMSTEP NDM/call   #calls NCHAN DOWNSAMP
+ddplans_heap = {"shallow" : [ [0.00,   0.03, 1044,       1,    560,     1],
+                              [31.32,  0.05, 380,        1,    560,     2], 
+                              [50.32,  0.1,  449,        1,    560,     4],
+                              [95.22,  0.2,  463,        1,    560,     8],
+                              [187.82, 0.5,  445,        1,    560,    16],
+                              [410.32, 1.0,  90,         1,    560,    32]
+                            ]
+               }
+#
+# Sifting specific parameters (don't touch without good reason!)
+sifting.sigma_threshold = to_prepfold_sigma-1.0  # incoherent power threshold (sigma)
+sifting.c_pow_threshold = 100.0                  # coherent power threshold
+sifting.r_err           = 1.1    # Fourier bin tolerence for candidate equivalence
+sifting.short_period    = 0.0005 # Shortest period candidates to consider (s)
+sifting.long_period     = 15.0   # Longest period candidates to consider (s)
+sifting.harm_pow_cutoff = 8.0    # Power required in at least one harmonic
 ###################################################################################################
 
 def get_baryv(ra, dec, mjd, T, obs="LOFAR"):
@@ -271,6 +296,11 @@ def create_search_script(name):
 	batchfile.write(" mv $stem\"_red.fft\" $stem.fft\n")
 	batchfile.write(" echo \"accelsearch -numharm %d -sigma %f -zmax %d -flo %f $stem.fft >> $log\" >> $log\n" % (lo_accel_numharm, lo_accel_sigma, lo_accel_zmax, lo_accel_flo))
 	batchfile.write(" accelsearch -numharm %d -sigma %f -zmax %d -flo %f $stem.fft >> $log\n" % (lo_accel_numharm, lo_accel_sigma, lo_accel_zmax, lo_accel_flo))
+	# running hi-accel search
+	if is_run_hi_accel_search:
+		batchfile.write(" echo \"accelsearch -numharm %d -sigma %f -zmax %d -flo %f $stem.fft >> $log\" >> $log\n" % (hi_accel_numharm, hi_accel_sigma, hi_accel_zmax, hi_accel_flo))
+		batchfile.write(" accelsearch -numharm %d -sigma %f -zmax %d -flo %f $stem.fft >> $log\n" % (hi_accel_numharm, hi_accel_sigma, hi_accel_zmax, hi_accel_flo))
+	###
 	batchfile.write(" echo \"single_pulse_search.py --noplot --maxwidth %f --threshold %f $stem.dat >> $log\" >> $log\n" % (singlepulse_maxwidth, singlepulse_threshold))
 	batchfile.write(" single_pulse_search.py --noplot --maxwidth %f --threshold %f $stem.dat >> $log\n" % (singlepulse_maxwidth, singlepulse_threshold))
 	batchfile.write(" rm -f $stem.dat $stem.fft\n")
@@ -359,18 +389,6 @@ def run_searching (scratchdir, outfile, search_script, waittime):
 #                                                     M A I N
 #########################################################################################################################
 if __name__ == "__main__":
-	### Description of the DDplans ###
-	# for 1st pulsar shallow survey with Lofar
-	# DDplan.py -f 142.376708984375 -b 6.8359375 -n 560 -t 0.00032768 -d 500
-	#                                         LODM    DMSTEP NDM/call   #calls NCHAN DOWNSAMP
-	ddplans_heap["shallow"].append(dedisp_plan(0.00,   0.03, 1044,       1,    560,     1))
-	ddplans_heap["shallow"].append(dedisp_plan(31.32,  0.05, 380,        1,    560,     2))
-	ddplans_heap["shallow"].append(dedisp_plan(50.32,  0.1,  449,        1,    560,     4))
-	ddplans_heap["shallow"].append(dedisp_plan(95.22,  0.2,  463,        1,    560,     8))
-	ddplans_heap["shallow"].append(dedisp_plan(187.82, 0.5,  445,        1,    560,    16))
-	ddplans_heap["shallow"].append(dedisp_plan(410.32, 1.0,  90,         1,    560,    32))
-	###
-
 	parser = optparse.OptionParser()
 
 	parser.add_option('--ddplan',dest='ddplanflag', metavar='0/1/2',
@@ -389,6 +407,8 @@ if __name__ == "__main__":
 	parser.add_option('--zapeveryN',dest='zapeveryN',metavar='ZAP_EVERY_Nth_CHANNEL',
                 help='Rfifind will zap every N\'th channel, default - every 16th',
                 default=16, type='int')	
+	parser.add_option('--no-hi-accel', action="store_false", dest="is_run_hi_accel_search",
+                help='Do not run hi-accel searching. Default is both lo-accel and hi-accel', default=True)          
 	parser.add_option('--lodm',dest='lodm',metavar='LO_DM',
                 help='low dm vlaue for quick DM search, only used when ddplan = 2, default = 0.0',
 		default=0, type='float')
@@ -562,13 +582,18 @@ if __name__ == "__main__":
 	# Here test3 array has all the important information which will be passed on 
 	# to dedisp_plan to make suitable variables (i.e. ddplan.lodm etc...)
 		for ii in test3:
-                    ddplans_heap["auto"].append(dedisp_plan(float(ii[0]), float(ii[2]), float(ii[4]), 1, chan, float(ii[3])))
-		ddplans = ddplans_heap["auto"]
+                    ddplans = [dedisp_plan(float(ii[0]), float(ii[2]), float(ii[4]), 1, chan, float(ii[3]))]
  
 	if ddplanflag == 1: 
 	# This is for hardcoded DDplan for RSPA with HBA. Cant be used with mpiprepsubband  
 		print "Hardwired values of the DDplan will be used\n"
-		ddplans = ddplans_heap[hwired_ddplan_id]
+		for ipass in numpy.arange(0, len(ddplans_heap[hwired_ddplan_id])):
+			ddplans.append(dedisp_plan(ddplans_heap[hwired_ddplan_id][ipass][0], \
+                                                   ddplans_heap[hwired_ddplan_id][ipass][1], \
+                                                   ddplans_heap[hwired_ddplan_id][ipass][2], \
+                                                   ddplans_heap[hwired_ddplan_id][ipass][3], \
+                                                   ddplans_heap[hwired_ddplan_id][ipass][4], \
+                                                   ddplans_heap[hwired_ddplan_id][ipass][5]))
 
 	if mpiflag == 1:
 		np = ncores - 1 
@@ -586,9 +611,9 @@ if __name__ == "__main__":
 		print "Quick DM search with DM range [%g - %g] and DM step = %g" % (LODM, HIDM, DMSTEP)	
 		ddplans = [dedisp_plan(LODM, DMSTEP, NDM, 1, chan, DOWNSAMP)]
 
-	print "\nLODM DMSTEP DMPERPASS DOWNSAMP NUMPASS"
+	print "\n%-7s %-6s %-9s %-8s %-7s" % ("LODM", "DMSTEP", "DMPERPASS", "DOWNSAMP", "NUMPASS")
         for ddplan in ddplans:
-                 print "%-4g %-6g %-9d %-8d %-7d" % (ddplan.lodm, ddplan.dmstep, ddplan.dmsperpass, ddplan.downsamp, ddplan.numpasses)
+                 print "%-7.2f %-6.2f %-9d %-8d %-7d" % (ddplan.lodm, ddplan.dmstep, ddplan.dmsperpass, ddplan.downsamp, ddplan.numpasses)
 	print
 
 	# Open file that keeps timing info of each processing step
@@ -753,8 +778,7 @@ if __name__ == "__main__":
 	#
 	# Following will sort out the candidates 
 	#
-	# read_candidate will generate collective information about found candidate in 
-	# in all ACCEL files.    	
+	# read_candidate will generate collective information about lo-accel and hi-accel cands
 	start_sifting_time = time.time()
 	lo_accel_cands = sifting.read_candidates(glob.glob(scratchdir + "*ACCEL_%d" % (lo_accel_zmax)))
 	# Remove candidates with same period and low significance. 
@@ -764,7 +788,19 @@ if __name__ == "__main__":
 		lo_accel_cands = sifting.remove_DM_problems(lo_accel_cands, numhits_to_fold, dmstrs, low_DM_cutoff)
 	if len(lo_accel_cands):
 		lo_accel_cands.sort(sifting.cmp_sigma)
-		sifting.write_candlist(lo_accel_cands,scratchdir+candlist_file)
+		sifting.write_candlist(lo_accel_cands,scratchdir+lo_acc_candlist_file)
+
+	# if running hi-accel search
+	if is_run_hi_accel_search:
+		hi_accel_cands = sifting.read_candidates(glob.glob(scratchdir + "*ACCEL_%d" % (hi_accel_zmax)))
+		if len(hi_accel_cands):
+			hi_accel_cands = sifting.remove_duplicate_candidates(hi_accel_cands) 
+		if len(hi_accel_cands):
+			hi_accel_cands = sifting.remove_DM_problems(hi_accel_cands, numhits_to_fold, dmstrs, low_DM_cutoff)
+		if len(hi_accel_cands):
+			hi_accel_cands.sort(sifting.cmp_sigma)
+			sifting.write_candlist(hi_accel_cands,scratchdir+hi_acc_candlist_file)
+
 	end_sifting_time = time.time()
 	sifting_time = end_sifting_time - start_sifting_time
 	totime += sifting_time
@@ -780,11 +816,20 @@ if __name__ == "__main__":
 
 	start_fold_time = time.time()
 	folded_cands = []
+	cands_folded = 0
 	for cand in lo_accel_cands:
-		if numpy.size(folded_cands) == max_lo_cands_to_fold:
+		if cands_folded == max_lo_cands_to_fold:
 			break
 		elif cand.sigma > to_prepfold_sigma:
 			folded_cands.append(cand) 
+	# if running hi-accel search
+	if is_run_hi_accel_search:
+		cands_folded = 0
+		for cand in hi_accel_cands:
+			if cands_folded == max_hi_cands_to_fold:
+				break
+			elif cand.sigma > to_prepfold_sigma:
+				folded_cands.append(cand) 
 	nfolded=numpy.size(folded_cands)
 
 	# Make a fold script and run it in parallel using 'ncores' cores
@@ -802,7 +847,7 @@ if __name__ == "__main__":
 		else:
 			foldblock=int(nfolded/(ncores-core))
 		foldslice=folded_cands[start_block:start_block+foldblock]	
-		foldgroup=["%d:%s.cand:%.2f:%s:%s" % (ff.candnum, ff.filename, ff.DM, outfile+"_DM%s" % (ff.DMstr), get_folding_options(ff)) for ff in foldslice]
+		foldgroup=["%d:%s.cand:%.2f:%s:%s" % (ff.candnum, ff.filename, ff.DM, outfile+"_DM%s_Z%s" % (ff.DMstr, ff.filename.split("_")[-1]), get_folding_options(ff)) for ff in foldslice]
 		cmd="%s%s %s %d %s &" % (scratchdir, fold_script, scratchdir, core, " ".join(foldgroup))
 		print "Starting folding on core %d for %d candidates ..." % (core, foldblock)
 		os.system(cmd)	
@@ -834,12 +879,18 @@ if __name__ == "__main__":
 	# This part is to find out in all the candidates found, how many of them are known to be strong pulsars. 
 	# In addition to that it also calculates the radial distances to these PSRs from the given data field
 	# center. The Candidate DM and true pulsar DM will be compared withing range of 1 (dm_tolerance) 
-	# and period will be consider in the range of 0.5 msec (period_tolerance)
+	# and period will be consider in the range of 0.5 ms for normal PSRs (period_tolerance)
+	# and 0.01 ms for mPSRs (ms_period_tolerance)
 	realcand = []    # list of known pulsars found
 	harmcand = []    # list of all (up to 10th) harmonics of known pulsars
 	normalcand = []  # list of other candidates
 
-	for cand in lo_accel_cands:
+	accel_cands = lo_accel_cands
+        # if running hi-accel search, merging hi-accel candidates as well
+        if is_run_hi_accel_search:
+		accel_cands.append(hi_accel_cands)
+
+	for cand in accel_cands:
 		is_normalcand = True
 		is_pulsar_found = False
 		# loop on list of known brightest pulsars
@@ -849,7 +900,8 @@ if __name__ == "__main__":
 				# For harmonic search actual candidate period will be compared upto 
 				# 10th (max_psr_harm) Harmonic of known pulsar period
 				for harm in range(1, max_psr_harm):
-					if  abs(cand.p - rPeriod[kk]/harm) < period_tolerance:
+					if  (cand.p >= 0.03 and abs(cand.p - rPeriod[kk]/harm) < period_tolerance) or \
+					    (cand.p <  0.03 and abs(cand.p - rPeriod[kk]/harm) < ms_period_tolerance):
 						harmcand.append([harm, psrname[kk], rPeriod[kk], rDM[kk], cand.p, cand.DM, cand.sigma])
 						if not is_pulsar_found:
 							is_pulsar_found = True
@@ -889,10 +941,10 @@ if __name__ == "__main__":
 
 	# This will write the detail report file containing information about detection and 
 	# radial distances of the PSR detected. 
-	str = "\nDetected pulsars: %d" % (numpy.size(realcand))
+	str = "\nDetected pulsars: %d" % (len(realcand))
 	rfp.write(str+"\n")
 	print str
-	if numpy.size(realcand) != 0:
+	if len(realcand) != 0:
 		str = "PSR\t\tP(s)\t\tDM(pc/cm3)\ts400(mJy)\tOffset(deg)"
 		rfp.write(str+"\n")
 		print str
@@ -904,10 +956,10 @@ if __name__ == "__main__":
 			print str
 
 	# Reporting about the harmonics of the known bright pulsars
-	str = "\nHarmonics detected: %d" % (numpy.size(harmcand))
+	str = "\nHarmonics detected: %d" % (len(harmcand))
 	rfp.write(str+"\n")
 	print str
-	if numpy.size(harmcand) != 0:
+	if len(harmcand) != 0:
 		str = "%-10s   %-10s   %-13s   %-11s   %-19s   %-16s   %-8s" % ("Harm_Num", "PSR", "Detected P(s)", "Delta P(ms)", "Detected DM(pc/cm3)", "Delta DM(pc/cm3)", "Sigma")
 		rfp.write(str+"\n")
 		print str
@@ -919,10 +971,10 @@ if __name__ == "__main__":
 			print str
 	
 	# Reporting about normal candidates
-	str = "\nUnidentified Pulsating Objects (UPOs): %d" % (numpy.size(normalcand))
+	str = "\nUnidentified Pulsating Objects (UPOs): %d" % (len(normalcand))
 	rfp.write(str+"\n")
 	print str
-	if numpy.size(normalcand) != 0:
+	if len(normalcand) != 0:
 		str = "#\tDetected P(s)\tDetected DM(pc/cm3)\tSigma"
 		rfp.write(str+"\n")
 		print str
@@ -953,6 +1005,10 @@ if __name__ == "__main__":
                      "*.pfd",
                      "*.pfd.bestprof",
                      "*.log"]
+        # if running hi-accel search then add extra suffixes and globs
+        if is_run_hi_accel_search:
+		tar_suffixes.append(["_ACCEL_%d.tgz"%hi_accel_zmax, "_ACCEL_%d.cand.tgz"%hi_accel_zmax])
+		tar_globs.append(["*_ACCEL_%d"%hi_accel_zmax, "*_ACCEL_%d.cand"%hi_accel_zmax])
 	for (tar_suffix, tar_glob) in zip(tar_suffixes, tar_globs):
         	tf = tarfile.open(outfile+tar_suffix, "w:gz")
 		for infile in glob.glob(scratchdir + tar_glob):
@@ -965,7 +1021,11 @@ if __name__ == "__main__":
 	sys.stdout.flush()
 
 	# Copy all the important files to the output directory
-	cmd = "rsync -avxP %s*rfifind.[bimors]* %s*.tgz %s*.ps.gz %s*.png %s*.exectime %s*.report %s %s" % (scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir+candlist_file, outdir)
+	if is_run_hi_accel_search:
+		cmd = "rsync -avxP %s*rfifind.[bimors]* %s*.tgz %s*.ps.gz %s*.png %s*.exectime %s*.report %s %s %s" % (scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir+lo_acc_candlist_file, scratchdir+hi_acc_candlist_file, outdir)
+	else:
+		cmd = "rsync -avxP %s*rfifind.[bimors]* %s*.tgz %s*.ps.gz %s*.png %s*.exectime %s*.report %s %s" % (scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir+lo_acc_candlist_file, outdir)
+	
 	os.system(cmd)
 	# Remove all the stuff in the scratchdir directory
 	cmd = "rm -rf %s" % (scratchdir)
