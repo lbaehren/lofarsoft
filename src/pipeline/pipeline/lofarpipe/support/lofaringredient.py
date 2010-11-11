@@ -158,15 +158,13 @@ class FileList(ListField):
 class LOFARingredient(DictMixin):
     def __init__(self, fields):
         self._fields = fields
-
-    def keys(self):
-        return self._fields.keys()
+        self._values = {}
 
     def __getitem__(self, key):
         # If we don't have the value for this key, but we do have a field with
         # a valid default, return that.
         if (
-            not self.has_key(key) and
+            not self._values.has_key(key) and
             self._fields.has_key(key) and
             hasattr(self._fields[key], "default"
         ):
@@ -178,7 +176,7 @@ class LOFARingredient(DictMixin):
                     (str(value), type(field).__name__, key)
                 )
         else:
-            value = super(LOFARingredient, self).__getitem__(key)
+            value = self._values[key]
         return value
 
     def __setitem__(self, key, value):
@@ -190,9 +188,12 @@ class LOFARingredient(DictMixin):
                     "%s is an invalid value for %s %s" %
                     (str(value), type(field).__name__, key)
                 )
+            self._values[key] = converted_value
         else:
             raise TypeError("Ingredient %s not defined" % key)
-        super(LOFARingredient, self).__setitem__(key, converted_value)
+
+    def keys(self):
+        return self._fields.keys()
 
     def make_options(self):
         return [value.generate_option(key) for key, value in self._fields.iteritems()]
@@ -200,7 +201,7 @@ class LOFARingredient(DictMixin):
     def missing(self):
         return [
             key for key in self._fields.iterkeys()
-            if not self.has_key(key)
+            if not self._values.has_key(key)
             and not hasattr(self._fields[key], "optional")
         ]
 
@@ -209,9 +210,9 @@ class LOFARingredient(DictMixin):
 
     def update(self, args, **kwargs):
         for key, value in args.iteritems():
-            self[key] = value
+            self._values[key] = value
         for key, value in kwargs.iteritems():
-            self[key] = value
+            self._values[key] = value
 
 class RecipeIngredientsMeta(type):
     def __init__(cls, name, bases, ns):
