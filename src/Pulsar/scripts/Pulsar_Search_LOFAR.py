@@ -39,6 +39,11 @@ from math import pi
 # some tunable parameters
 hwired_ddplan_id       = "shallow"  # DDplan ID, Description of DDplan(s) set and/check below
 is_run_hi_accel_search = True    # if False, only lo_accel search will be run
+is_skip_rfifind        = False   # if True, then rfifind will be skipped. However, (mpi)prepsubband still expect the RFI mask in the
+                                 # scratch directory
+is_skip_dedispersion   = False   # if True, then skip all (mpi)prepsubband calls. Only searching will be done on all *.dat files
+                                 # currently available in the scratch directory
+is_sift_n_fold_only    = False   # if True, the will only run sift and fold on the cand files available in the scratch dir
 bright_catalog         = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/psr_cats.txt"   # Catalog of brightest pulsars
 rfi_master_file        = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/master.rfi"     # Master list of frequent RFIs
 birdies_file           = ""      # List of birdies to zap in FFTs. If empty, the generic one will be created (with 50 & 100 Hz harmonics)
@@ -409,6 +414,12 @@ if __name__ == "__main__":
                 default=16, type='int')	
 	parser.add_option('--no-hi-accel', action="store_false", dest="is_run_hi_accel_search",
                 help='Do not run hi-accel searching. Default is both lo-accel and hi-accel', default=True)          
+	parser.add_option('--skip-rfifind', action="store_true", dest="is_skip_rfifind",
+                help='Skip running rfifind. However (mpi)prepsubband still expects rfi-mask file in the scratch directory', default=False)          
+	parser.add_option('--skip-dedispersion', action="store_true", dest="is_skip_dedispersion",
+                help='Skip running (mpi)prepsubband. Only searching will be done on all available *.dat files', default=False)          
+	parser.add_option('--sift-and-fold-only', action="store_true", dest="is_sift_n_fold_only",
+                help='Skipping everything except sifting and folding the candidates', default=False)          
 	parser.add_option('--lodm',dest='lodm',metavar='LO_DM',
                 help='low dm vlaue for quick DM search, only used when ddplan = 2, default = 0.0',
 		default=0, type='float')
@@ -454,6 +465,13 @@ if __name__ == "__main__":
 	mpiflag = options.mpiflag	
 	ncores = options.np
 	zapeveryN = options.zapeveryN
+	is_run_hi_accel_search = options.is_run_hi_accel_search
+	is_skip_rfifind = options.is_skip_rfifind
+	is_skip_dedispersion = options.is_skip_dedispersion
+	is_sift_n_fold_only = options.is_sift_n_fold_only
+	if is_sift_n_fold_only:
+		is_skip_rfifind = True
+		is_skip_dedispersion = True
 
 	# Inpath, outpath, and scratchpath can have / at the end or it can be without it. 
         # In both the cases it will process the script
@@ -641,7 +659,10 @@ if __name__ == "__main__":
 	# running rfifind
         cmd="rfifind -blocks %d -zapchan %s -o %s %s > %s" % (rfifind_blocks, zapstring, outfile, infile, outfile+"_rfifind.log")
         print "Running RFI excision..."
-	rfi_time = timed_execute(cmd,1)
+	if is_skip_rfifind:  # skipping rfifind
+		rfi_time = 0
+	else:
+		rfi_time = timed_execute(cmd,1)
 	rfp.write("RFI masking time (s) : %.2f\n" % (rfi_time))
         totime += rfi_time
 	maskfile=outfile+"_rfifind.mask"
@@ -661,119 +682,135 @@ if __name__ == "__main__":
 	tot_prep_time = 0
 	tot_search_time = 0
 
-	if mpiflag != 1:
-		for ddplan in ddplans:
-			for passnum in range(ddplan.numpasses):
-				for dmstr in ddplan.dmlist[passnum]:
-					dmstrs.append(dmstr)
-			print "Running prepsubband ...."
-			totdm = ddplan.dmsperpass * ddplan.numpasses
+	# only running this part if it's not skipped from the commmand line
+	if not is_skip_dedispersion:
+		if mpiflag != 1:
+			for ddplan in ddplans:
+				for passnum in range(ddplan.numpasses):
+					for dmstr in ddplan.dmlist[passnum]:
+						dmstrs.append(dmstr)
+				print "Running prepsubband ...."
+				totdm = ddplan.dmsperpass * ddplan.numpasses
  	
-			for jj in range(0, int(totdm/blk)+1):
-				dm_start = ddplan.lodm + ddplan.dmstep * jj * blk
-				if (totdm - jj*blk) > blk: # Because prepsubband can handle only 1000 dm values
-					dm_end = dm_start + ddplan.dmstep * blk
-					print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
-					cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (maskfile, dm_start, ddplan.dmstep, blk, ddplan.downsamp, outfile,infile, outfile + "_prepsubband.log")
-					prepsubband_time = timed_execute(cmd,1)
-					tot_prep_time += prepsubband_time	
-					print "Prepsubband time: %.2f seconds" % (prepsubband_time)
-					rfp.write("prepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
-					totime += prepsubband_time
-				else: # last chunk of the DMs
-					dm_end = ddplan.lodm + ddplan.dmstep * totdm
-					print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
-					cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (maskfile, dm_start, ddplan.dmstep, totdm - jj*blk, ddplan.downsamp,outfile,infile, outfile+"_prepsubband.log")
-					prepsubband_time = timed_execute(cmd,1)
-					tot_prep_time += prepsubband_time
-					print "Prepsubband time: %.2f seconds" % (prepsubband_time)
-					rfp.write("prepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
-					totime += prepsubband_time
+				for jj in range(0, int(totdm/blk)+1):
+					dm_start = ddplan.lodm + ddplan.dmstep * jj * blk
+					if (totdm - jj*blk) > blk: # Because prepsubband can handle only 1000 dm values
+						dm_end = dm_start + ddplan.dmstep * blk
+						print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+						cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (maskfile, dm_start, ddplan.dmstep, blk, ddplan.downsamp, outfile,infile, outfile + "_prepsubband.log")
+						prepsubband_time = timed_execute(cmd,1)
+						tot_prep_time += prepsubband_time	
+						print "Prepsubband time: %.2f seconds" % (prepsubband_time)
+						rfp.write("prepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
+						totime += prepsubband_time
+					else: # last chunk of the DMs
+						dm_end = ddplan.lodm + ddplan.dmstep * totdm
+						print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+						cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (maskfile, dm_start, ddplan.dmstep, totdm - jj*blk, ddplan.downsamp,outfile,infile, outfile+"_prepsubband.log")
+						prepsubband_time = timed_execute(cmd,1)
+						tot_prep_time += prepsubband_time
+						print "Prepsubband time: %.2f seconds" % (prepsubband_time)
+						rfp.write("prepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
+						totime += prepsubband_time
 
-				# and run searching...
-				search_time = run_searching (scratchdir, outfile, search_script, waittime)
-				tot_search_time += search_time
-				totime += search_time
-				print "Search time: %.2f seconds" % (search_time)
-				rfp.write ("Search time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, search_time))
+					# and run searching...
+					search_time = run_searching (scratchdir, outfile, search_script, waittime)
+					tot_search_time += search_time
+					totime += search_time
+					print "Search time: %.2f seconds" % (search_time)
+					rfp.write ("Search time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, search_time))
 
-	# For mpi prepsubband to work the number of DM should be divisible by number of nodes/cores - 1 that can be used.
-	# Here for given number of DMs, it will round off to the nearest value where it matches with the number divisible
-	if mpiflag == 1:
+		# For mpi prepsubband to work the number of DM should be divisible by number of nodes/cores - 1 that can be used.
+		# Here for given number of DMs, it will round off to the nearest value where it matches with the number divisible
+		if mpiflag == 1:
+			for ddplan in ddplans:
+				for passnum in range(ddplan.numpasses):
+					for dmstr in ddplan.dmlist[passnum]:
+						dmstrs.append(dmstr)
+				print "Running mpiprepsubband ...."
+				totdm = ddplan.dmsperpass * ddplan.numpasses
+
+				for jj in range(0, int(totdm/blk)+1):
+					dm_start = ddplan.lodm + ddplan.dmstep * jj * blk
+					if (totdm - jj*blk) > blk: # Because prepsubband can handle only 1000 dm values
+						dm_end = dm_start + ddplan.dmstep * blk
+						print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+						cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1, maskfile, dm_start, ddplan.dmstep, blk, ddplan.downsamp, outfile, infile, outfile+"_prepsubband.log")
+						prepsubband_time = timed_execute(cmd,1)
+						tot_prep_time += prepsubband_time
+						print "MPI Prepsubband time: %.2f seconds" % (prepsubband_time)
+						rfp.write("mpiprepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
+						totime += prepsubband_time
+					else:
+						dm_end = ddplan.lodm + ddplan.dmstep * totdm
+						print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+						cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1, maskfile, dm_start, ddplan.dmstep, totdm - jj*blk, ddplan.downsamp, outfile, infile, outfile+"_prepsubband.log")
+						prepsubband_time = timed_execute(cmd,1)
+						tot_prep_time += prepsubband_time
+						print "MPI Prepsubband time: %.2f seconds" % (prepsubband_time)
+						rfp.write("mpiprepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
+						totime += prepsubband_time
+
+					# and run searching...
+					search_time = run_searching (scratchdir, outfile, search_script, waittime)
+					tot_search_time += search_time
+					totime += search_time
+					print "Search time: %.2f seconds" % (search_time)
+					rfp.write ("Search time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, search_time))
+
+		print "Total prepsubband time (s) : %.2f" % (tot_prep_time)
+		rfp.write("Total prepsubband time (s) : %.2f\n" % (tot_prep_time))
+		print "Total search time (s) : %.2f" % (tot_search_time)
+		rfp.write("Total search time (s) : %.2f\n" % (tot_search_time))
+		print
+
+	# running the search here only when dedispersion skipped from the cmdline
+	if is_skip_dedispersion and not is_sift_n_fold_only:
+		totdm = 0
 		for ddplan in ddplans:
 			for passnum in range(ddplan.numpasses):
 				for dmstr in ddplan.dmlist[passnum]:
 					dmstrs.append(dmstr)
-			print "Running mpiprepsubband ...."
-			totdm = ddplan.dmsperpass * ddplan.numpasses
-
-			for jj in range(0, int(totdm/blk)+1):
-				dm_start = ddplan.lodm + ddplan.dmstep * jj * blk
-				if (totdm - jj*blk) > blk: # Because prepsubband can handle only 1000 dm values
-					dm_end = dm_start + ddplan.dmstep * blk
-					print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
-					cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1, maskfile, dm_start, ddplan.dmstep, blk, ddplan.downsamp, outfile, infile, outfile+"_prepsubband.log")
-					prepsubband_time = timed_execute(cmd,1)
-					tot_prep_time += prepsubband_time
-					print "MPI Prepsubband time: %.2f seconds" % (prepsubband_time)
-					rfp.write("mpiprepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
-					totime += prepsubband_time
-				else:
-					dm_end = ddplan.lodm + ddplan.dmstep * totdm
-					print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
-					cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1, maskfile, dm_start, ddplan.dmstep, totdm - jj*blk, ddplan.downsamp, outfile, infile, outfile+"_prepsubband.log")
-					prepsubband_time = timed_execute(cmd,1)
-					tot_prep_time += prepsubband_time
-					print "MPI Prepsubband time: %.2f seconds" % (prepsubband_time)
-					rfp.write("mpiprepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
-					totime += prepsubband_time
-
-				# and run searching...
-				search_time = run_searching (scratchdir, outfile, search_script, waittime)
-				tot_search_time += search_time
-				totime += search_time
-				print "Search time: %.2f seconds" % (search_time)
-				rfp.write ("Search time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, search_time))
-
-	print "Total prepsubband time (s) : %.2f" % (tot_prep_time)
-	rfp.write("Total prepsubband time (s) : %.2f\n" % (tot_prep_time))
-	print "Total search time (s) : %.2f" % (tot_search_time)
-	rfp.write("Total search time (s) : %.2f\n" % (tot_search_time))
-	print
+			totdm += ddplan.dmsperpass * ddplan.numpasses
+		search_time = run_searching (scratchdir, outfile, search_script, waittime)
+		totime += search_time
+		print "Search time: %.2f seconds" % (search_time)
+		rfp.write ("Search time for %d DM trials (s) : %.2f\n" % (totdm, search_time))
 
 
-	# Generating single-pulse plot
-	print "Generating single-pulse plots ..."
-#	spfiles=glob.glob(outfile + "_DM*.singlepulse")
-#	cmd="single_pulse_search.py --threshold %f %s" % (singlepulse_plot_SNR, " ".join(spfiles))
-	basedmb = outfile+"_DM"
-	basedme = ".singlepulse "
-	sp_time = 0
-	# The following will make plots for DM ranges:
-	#    0-30, 20-110, 100-310, 300-1000+, 0-1000+
-	dmglobs = [basedmb+"[0-9].[0-9][0-9]"+basedme +
-		basedmb+"[012][0-9].[0-9][0-9]"+basedme,
-		basedmb+"[2-9][0-9].[0-9][0-9]"+basedme +
-		basedmb+"10[0-9].[0-9][0-9]"+basedme,
-		basedmb+"[12][0-9][0-9].[0-9][0-9]"+basedme +
-		basedmb+"30[0-9].[0-9][0-9]"+basedme,
-		basedmb+"[3-9][0-9][0-9].[0-9][0-9]"+basedme +
-		basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme,
-		basedmb+"[0-9].[0-9][0-9]"+basedme +
-		basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme]
-	dmrangestrs = ["0-30", "20-110", "100-310", "300-1000+", "0-1000+"]
-	psname = outfile+"_singlepulse.ps"
-	for dmglob, dmrangestr in zip(dmglobs, dmrangestrs):
-		try: # we need this in case there are not many DMs to make all plots
-			cmd = 'single_pulse_search.py --threshold %f -g "%s"' % (singlepulse_plot_SNR, dmglob)
-			sp_time += timed_execute(cmd,1)
-			try:
-				os.rename(psname, outfile+"_DMs%s_singlepulse.ps"%dmrangestr)
-        		except: pass
-		except: pass
-	totime += sp_time
-	print "Total time to make single-pulse plots (s) : %.2f" % (sp_time)
-	rfp.write("Total time to make single-pulse plots (s) : %.2f\n" % (sp_time))
+	if not is_sift_n_fold_only:
+		# Generating single-pulse plot
+		print "Generating single-pulse plots ..."
+#		spfiles=glob.glob(outfile + "_DM*.singlepulse")
+#		cmd="single_pulse_search.py --threshold %f %s" % (singlepulse_plot_SNR, " ".join(spfiles))
+		basedmb = outfile+"_DM"
+		basedme = ".singlepulse "
+		sp_time = 0
+		# The following will make plots for DM ranges:
+		#    0-30, 20-110, 100-310, 300-1000+, 0-1000+
+		dmglobs = [basedmb+"[0-9].[0-9][0-9]"+basedme +
+			basedmb+"[012][0-9].[0-9][0-9]"+basedme,
+			basedmb+"[2-9][0-9].[0-9][0-9]"+basedme +
+			basedmb+"10[0-9].[0-9][0-9]"+basedme,
+			basedmb+"[12][0-9][0-9].[0-9][0-9]"+basedme +
+			basedmb+"30[0-9].[0-9][0-9]"+basedme,
+			basedmb+"[3-9][0-9][0-9].[0-9][0-9]"+basedme +
+			basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme,
+			basedmb+"[0-9].[0-9][0-9]"+basedme +
+			basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme]
+		dmrangestrs = ["0-30", "20-110", "100-310", "300-1000+", "0-1000+"]
+		psname = outfile+"_singlepulse.ps"
+		for dmglob, dmrangestr in zip(dmglobs, dmrangestrs):
+			try: # we need this in case there are not many DMs to make all plots
+				cmd = 'single_pulse_search.py --threshold %f -g "%s"' % (singlepulse_plot_SNR, dmglob)
+				sp_time += timed_execute(cmd,1)
+				try:
+					os.rename(psname, outfile+"_DMs%s_singlepulse.ps"%dmrangestr)
+        			except: pass
+			except: pass
+		totime += sp_time
+		print "Total time to make single-pulse plots (s) : %.2f" % (sp_time)
+		rfp.write("Total time to make single-pulse plots (s) : %.2f\n" % (sp_time))
 	
 	#
 	# Following will sort out the candidates 
