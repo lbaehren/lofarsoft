@@ -2936,5 +2936,60 @@ void HFPP_FUNC_NAME (const DataIter odata,
 							weights.begin(),
 							weights.end());
 }
+
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates the square of the absolute value and add to output vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hAbsSquareAdd
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HNumber)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vecin)()("Input vector containing complex values. (Looping parameter)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  The fact that the result is added to the output vector allows one to
+  call the function multiple times and get a summed spectrum. If you
+  need it only once, just fill the vector with zeros.
+
+  The number of loops (if used with an hArray) is here determined by
+  the second parameter!
+
+Example:
+spectrum=hArray(float,[1,128])
+cplxfft=hArray(complex,[10,128],fill=1+0j)
+spectrum[...].spectralpower(cplxfft[...])
+*/
+template <class Iter, class Iterin>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
+{
+  // Declaration of variables
+  Iterin itin(vecin);
+  Iter itout(vecout);
+  HInteger lenIn = std::distance(vecin,vecin_end);
+  HInteger lenOut = std::distance(vecout,vecout_end);
+
+  // Sanity check
+  if (lenIn <= 0) {
+    throw PyCR::ValueError("Incorrect size of input vector.");
+    return;
+  }
+  if (lenOut != lenIn) {
+    throw PyCR::ValueError("Incorrect size of output vector. Should be equal to size of input vector");
+    return;
+  }
+
+  // Calculation of spectral power
+  while ((itin != vecin_end) && (itout != vecout_end)) {
+    *itout+=real((*itin)*conj(*itin));
+    ++itin; ++itout;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 

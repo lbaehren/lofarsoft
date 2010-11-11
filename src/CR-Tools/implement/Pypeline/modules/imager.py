@@ -2,9 +2,10 @@
 """
 
 import pdb
+from datetime import datetime
 import pycrtools as cr
 from pycrtools.interfaces import IO
-from pytmf import deg2rad, rad2deg
+from pytmf import deg2rad, rad2deg, gregoriandate2jd
 
 def casaRefcodes(**kwargs):
     """Get CASA reference code and projection from standard WCS parameter
@@ -63,13 +64,15 @@ class CoordinateGrid(object):
             (e.g. 1, 1, 2, 2, ..., naxis1, naxis2)
     *world* array of length N with corresponding world coordinates
             (e.g. J2000, AzEl) in radians
+    *j2000* array of length N with corresponding J2000 coordinates in radians
+            (equal to world if grid type is J2000)
     *azel* array of length N * 3 with corresponding azimuth, elevation,
             distance coordinates in radians
     *cartesian* array of length N * 3 with corresponding local Cartesian
                 coordinates in meters
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, obstime=None, ut1_utc=0., L=None, phi=None, **kwargs):
         """Creates a coordinate grid according to specified WCS parameters
         given as keyword arguments or as dictionary (using **imparam where
         imparam is a dictionary of image parameters, e.g. a FITS header).
@@ -118,6 +121,22 @@ class CoordinateGrid(object):
             self.lonpole=deg2rad(self.lonpole)
             self.latpole=deg2rad(self.latpole)
 
+            print "CRVAL1", self.crval1
+            print "CRVAL2", self.crval2
+
+        self.obstime = obstime
+        self.ut1_utc = ut1_utc
+        self.L = L
+        self.phi = phi
+
+        # If conversion from J2000 to AZEL is required check if all
+        # required parameters are provided
+        if self.refcode != 'AZEL' and None in [obstime, L, phi]:
+            raise ValueError("Conversion from J2000 to AZEL required but do not have telescope position and observation time.")
+        elif self.refcode != 'AZEL' and not isinstance(obstime, datetime):
+            # Assume obstime is UNIX timestamp and convert to datetime object
+            self.obstime = datetime.utcfromtimestamp(obstime)
+
         # Total number of pixels
         self.npix=self.naxis1*self.naxis2
 
@@ -138,9 +157,13 @@ class CoordinateGrid(object):
             self.cdelt2, self.crpix1, self.crpix2, self.lonpole,
             self.latpole)
         
+        # Generate (intermediate) J2000 coordinates
+        print "Calculating J2000 coordinates"
+        self.__calculateJ2000()
+
         # Generate Cartesian coordinates for beamforming
         print "Calculating AzEl coordinates"
-        self.getAzEl()
+        self.__calculateAzEl()
 
         print "Calculating Cartesian coordinates"
         self.cartesian=self.azel.new()
@@ -148,7 +171,17 @@ class CoordinateGrid(object):
         cr.hCoordinateConvert(self.azel[...], cr.CoordinateTypes.AzElRadius,
             self.cartesian[...], cr.CoordinateTypes.Cartesian, False)
 
-    def getAzEl(self):
+    def __calculateJ2000(self):
+        """Get corresponding J2000 coordinates.
+        """
+        if self.refcode == 'J2000':
+            self.j2000 = self.world
+        elif self.refcode == 'AZEL':
+            self.j2000 = None
+        else:
+            raise ValueError("Conversion of world coordinates to J2000 not yet implemented for "+self.refcode+" coordinate system")
+
+    def __calculateAzEl(self):
         """Get Azimuth/Elevation/Distance coordinates corresponding to world
         coordinates.
         """
@@ -159,18 +192,27 @@ class CoordinateGrid(object):
         # specifed by refcode
         if self.refcode == 'AZEL':
             self.world.reshape((self.npix,2))
-#            self.azel=cr.hArray(float, dimensions=[self.npix,3])
             self.azel[...,0:2]=self.world[...]
             self.azel[...,2:3]=1.
-#            pdb.set_trace()
-
-#            # World coordinates are already in AzEl, just add distance
-#            for i in range(self.npix):
-#                self.azel[i,0]=self.world[2*i] # Azimuth
-#                self.azel[i,1]=self.world[2*i+1] # Elevation
-#                self.azel[i,2]=1. # Distance
         else:
-            raise ValueError("Conversion of world coordinates to AzEl not yet implemented for "+self.refcode+" coordinate system")
+            # Convert from J2000 to AZEL
+            temp = self.j2000.new()
+
+            # Get time in Julian days
+            Y = self.obstime.year
+            M = self.obstime.month
+            D = float(self.obstime.day)
+            h = float(self.obstime.hour)
+            m = float(self.obstime.minute)
+            s = float(self.obstime.second) + float(self.obstime.microsecond) * 1.e-6
+
+            self.utc = gregoriandate2jd(Y, M, D + ((h + m / 60. + s / 3600.) / 24.))
+
+            cr.hEquatorial2Horizontal(temp, self.j2000, self.utc, self.ut1_utc, self.L, self.phi)
+
+            temp.reshape((self.npix,2))
+            self.azel[...,0:2]=temp[...]
+            self.azel[...,2:3]=1.
 
 class Imager(object):
     """Imager for LOFAR TBB data.
