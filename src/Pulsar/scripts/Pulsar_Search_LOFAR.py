@@ -569,41 +569,31 @@ if __name__ == "__main__":
 
 	ddplans = []   # chosen set of DDplans
  
+	# running DDlan.py  in auto mode
 	if ddplanflag == 0:
-		outddfile = scratchdir + "DDplan.out"
-		cmd = "DDplan.py -f %s -b %s -n %s -t %f -r 0.2 -o %s > %s" % (lofq+(bandwidth/2), bandwidth, chan, samptime, scratchdir + "DDplan.eps", outddfile)
+		outddfile = scratchdir + "DDplan.log"
+		cmd = "DDplan.py -f %s -b %s -n %s -t %f -r %f -o %s > %s" % (lofq+(bandwidth/2), bandwidth, chan, samptime, samptime, scratchdir + "DDplan.ps", outddfile)
 		timed_execute(cmd,1)
    
 		fp = open(outddfile,"r")
-		data = fp.read().split("\n")
+		lines = fp.read().split("\n")
+		fp.close()
 
-		# This is to take direct plan by runing DDplan.py command and using the output to do prepsubband
+		# This is to take direct plan by runing DDplan.py command and using the output to do (mpi)prepsubband
 		# The order in which arg are passed ==> lodm  dmstep  dms/call  num_calls  num_sub  downsamp
-		# these lists will separate the ddplan details and read the importain parts of it. It cant be used 
-		# with mpiprepsubband		
-		test1 = []
-		test2 = []
-		test3 = []
-		for ii in range(0,len(data)-1):
-			for jj in data[ii].split(' '):
-				if(jj != '' ):
-					test1.append(jj)
-			test2.append(test1)
-			test1 = []
-		for ii in range(0,len(test2)-1):
-			if(test2[ii] ==  ['Low', 'DM', 'High', 'DM', 'dDM', 'DownSamp', '#DMs', 'WorkFract']):
-			# This reads all the raws with the corresponding DM values to make ddplan
-				for jj in range(ii+1,len(test2)-1):       
-					if(test2[jj] != []):
-						test3.append(test2[jj])
+		ddplan_calls = []  # array of sub-arrays of DDplan values for all separate calls
+		for ii in range(0, len(lines)):
+			if 'WorkFract' in lines[ii]:
+				start_line = ii + 1
+				break
+		for ii in range(start_line, len(lines)):
+			if lines[ii] == '': break
+			ddplan_calls.append(lines[ii].split())
+		for call in ddplan_calls:
+			ddplans.append(dedisp_plan(float(call[0]), float(call[2]), float(call[4]), 1, chan, float(call[3])))
 
-	# Here test3 array has all the important information which will be passed on 
-	# to dedisp_plan to make suitable variables (i.e. ddplan.lodm etc...)
-		for ii in test3:
-                    ddplans = [dedisp_plan(float(ii[0]), float(ii[2]), float(ii[4]), 1, chan, float(ii[3]))]
- 
-	if ddplanflag == 1: 
 	# This is for hardcoded DDplan for RSPA with HBA. Cant be used with mpiprepsubband  
+	if ddplanflag == 1: 
 		print "Hardwired values of the DDplan will be used\n"
 		for ipass in numpy.arange(0, len(ddplans_heap[hwired_ddplan_id])):
 			ddplans.append(dedisp_plan(ddplans_heap[hwired_ddplan_id][ipass][0], \
@@ -613,6 +603,7 @@ if __name__ == "__main__":
                                                    ddplans_heap[hwired_ddplan_id][ipass][4], \
                                                    ddplans_heap[hwired_ddplan_id][ipass][5]))
 
+	# Adjusting the total # of DM trials in case of MPI
 	if mpiflag == 1:
 		np = ncores - 1 
 		# As mpiprepsubband can not take more than 1000 dm at a time numdm will be divided in blks 
@@ -625,14 +616,17 @@ if __name__ == "__main__":
         	print "\nThe Num DM will be adjusted to %d to be divisible by (%d - 1) nodes" % (NDM, ncores)
 	HIDM = LODM + NDM*DMSTEP
 
+	# User-specified values for low, high DMs and DM step
 	if ddplanflag == 2:
 		print "Quick DM search with DM range [%g - %g] and DM step = %g" % (LODM, HIDM, DMSTEP)	
 		ddplans = [dedisp_plan(LODM, DMSTEP, NDM, 1, chan, DOWNSAMP)]
 
+	# printinf the DM plan to be used
 	print "\n%-7s %-6s %-9s %-8s %-7s" % ("LODM", "DMSTEP", "DMPERPASS", "DOWNSAMP", "NUMPASS")
         for ddplan in ddplans:
                  print "%-7.2f %-6.2f %-9d %-8d %-7d" % (ddplan.lodm, ddplan.dmstep, ddplan.dmsperpass, ddplan.downsamp, ddplan.numpasses)
 	print
+
 
 	# Open file that keeps timing info of each processing step
 	exectime_file = outfile + ".exectime"
