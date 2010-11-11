@@ -589,6 +589,9 @@ if __name__ == "__main__":
 		for ii in range(start_line, len(lines)):
 			if lines[ii] == '': break
 			ddplan_calls.append(lines[ii].split())
+		if len(ddplan_calls) == 0:  # something that should not happen
+			print "Error while running DDplan.py or reading the DDplan"
+			sys.exit(1)
 		for call in ddplan_calls:
 			ddplans.append(dedisp_plan(float(call[0]), float(call[2]), float(call[4]), 1, chan, float(call[3])))
 
