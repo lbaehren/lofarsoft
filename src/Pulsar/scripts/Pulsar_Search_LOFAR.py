@@ -38,12 +38,6 @@ from math import pi
 
 # some tunable parameters
 hwired_ddplan_id       = "shallow"  # DDplan ID, Description of DDplan(s) set and/check below
-is_run_hi_accel_search = True    # if False, only lo_accel search will be run
-is_skip_rfifind        = False   # if True, then rfifind will be skipped. However, (mpi)prepsubband still expect the RFI mask in the
-                                 # scratch directory
-is_skip_dedispersion   = False   # if True, then skip all (mpi)prepsubband calls. Only searching will be done on all *.dat files
-                                 # currently available in the scratch directory
-is_sift_n_fold_only    = False   # if True, the will only run sift and fold on the cand files available in the scratch dir
 bright_catalog         = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/psr_cats.txt"   # Catalog of brightest pulsars
 rfi_master_file        = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/master.rfi"     # Master list of frequent RFIs
 birdies_file           = ""      # List of birdies to zap in FFTs. If empty, the generic one will be created (with 50 & 100 Hz harmonics)
@@ -394,8 +388,11 @@ def run_searching (scratchdir, outfile, search_script, waittime):
 #                                                     M A I N
 #########################################################################################################################
 if __name__ == "__main__":
-	parser = optparse.OptionParser()
 
+	#
+	# Parsing the command line options
+	#
+	parser = optparse.OptionParser()
 	parser.add_option('--ddplan',dest='ddplanflag', metavar='0/1/2',
           	help="DDplan flag,  0: To run DDplan script and determine ddplan from it," 
 		     "1: To use the hardwired DDplan, 2: For quick DM search",
@@ -454,6 +451,7 @@ if __name__ == "__main__":
 		print "DDplan usage is incorrect. Choose the correct one"
 		sys.exit(1)
 
+	# Assigning options variable to global ones
 	inpath = options.inpath
 	outpath = options.outpath	
 	scratchpath = options.scratchpath
@@ -781,39 +779,34 @@ if __name__ == "__main__":
 
 	# Generating single-pulse plot
 	print "Generating single-pulse plots ..."
-	if not is_sift_n_fold_only:
-#		spfiles=glob.glob(outfile + "_DM*.singlepulse")
-#		cmd="single_pulse_search.py --threshold %f %s" % (singlepulse_plot_SNR, " ".join(spfiles))
-		basedmb = outfile+"_DM"
-		basedme = ".singlepulse "
-		sp_time = 0
-		# The following will make plots for DM ranges:
-		#    0-30, 20-110, 100-310, 300-1000+, 0-1000+
-		dmglobs = [basedmb+"[0-9].[0-9][0-9]"+basedme +
-			basedmb+"[012][0-9].[0-9][0-9]"+basedme,
-			basedmb+"[2-9][0-9].[0-9][0-9]"+basedme +
-			basedmb+"10[0-9].[0-9][0-9]"+basedme,
-			basedmb+"[12][0-9][0-9].[0-9][0-9]"+basedme +
-			basedmb+"30[0-9].[0-9][0-9]"+basedme,
-			basedmb+"[3-9][0-9][0-9].[0-9][0-9]"+basedme +
-			basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme,
-			basedmb+"[0-9].[0-9][0-9]"+basedme +
-			basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme]
-		dmrangestrs = ["0-30", "20-110", "100-310", "300-1000+", "0-1000+"]
-		psname = outfile+"_singlepulse.ps"
-		for dmglob, dmrangestr in zip(dmglobs, dmrangestrs):
-			try: # we need this in case there are not many DMs to make all plots
-				cmd = 'single_pulse_search.py --threshold %f -g "%s"' % (singlepulse_plot_SNR, dmglob)
-				sp_time += timed_execute(cmd,1)
-				try:
-					os.rename(psname, outfile+"_DMs%s_singlepulse.ps"%dmrangestr)
-        			except: pass
-			except: pass
-		totime += sp_time
-		print "Total time to make single-pulse plots (s) : %.2f" % (sp_time)
-		rfp.write("Total time to make single-pulse plots (s) : %.2f\n" % (sp_time))
-	else:
-		print "skipped"
+	basedmb = outfile+"_DM"
+	basedme = ".singlepulse "
+	sp_time = 0
+	# The following will make plots for DM ranges:
+	#    0-30, 20-110, 100-310, 300-1000+, 0-1000+
+	dmglobs = [basedmb+"[0-9].[0-9][0-9]"+basedme +
+		basedmb+"[012][0-9].[0-9][0-9]"+basedme,
+		basedmb+"[2-9][0-9].[0-9][0-9]"+basedme +
+		basedmb+"10[0-9].[0-9][0-9]"+basedme,
+		basedmb+"[12][0-9][0-9].[0-9][0-9]"+basedme +
+		basedmb+"30[0-9].[0-9][0-9]"+basedme,
+		basedmb+"[3-9][0-9][0-9].[0-9][0-9]"+basedme +
+		basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme,
+		basedmb+"[0-9].[0-9][0-9]"+basedme +
+		basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme]
+	dmrangestrs = ["0-30", "20-110", "100-310", "300-1000+", "0-1000+"]
+	psname = outfile+"_singlepulse.ps"
+	for dmglob, dmrangestr in zip(dmglobs, dmrangestrs):
+		try: # we need this in case there are not many DMs to make all plots
+			cmd = 'single_pulse_search.py --threshold %f -g "%s"' % (singlepulse_plot_SNR, dmglob)
+			sp_time += timed_execute(cmd,1)
+			try:
+				os.rename(psname, outfile+"_DMs%s_singlepulse.ps"%dmrangestr)
+       			except: pass
+		except: pass
+	totime += sp_time
+	print "Total time to make single-pulse plots (s) : %.2f" % (sp_time)
+	rfp.write("Total time to make single-pulse plots (s) : %.2f\n" % (sp_time))
 	
 	#
 	# Following will sort out the candidates 
