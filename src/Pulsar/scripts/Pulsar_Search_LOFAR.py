@@ -595,7 +595,7 @@ if __name__ == "__main__":
 
 	# This is for hardcoded DDplan for RSPA with HBA. Cant be used with mpiprepsubband  
 	if ddplanflag == 1: 
-		print "Hardwired values of the DDplan will be used\n"
+		print "Hardwired values of the DDplan will be used"
 		for ipass in numpy.arange(0, len(ddplans_heap[hwired_ddplan_id])):
 			ddplans.append(dedisp_plan(ddplans_heap[hwired_ddplan_id][ipass][0], \
                                                    ddplans_heap[hwired_ddplan_id][ipass][1], \
