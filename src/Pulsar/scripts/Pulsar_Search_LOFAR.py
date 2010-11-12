@@ -681,18 +681,19 @@ if __name__ == "__main__":
 	# only running this part if it's not skipped from the commmand line
 	if not is_skip_dedispersion:
 		if mpiflag != 1:
+			print "\nRunning prepsubband ...."
 			for ddplan in ddplans:
 				for passnum in range(ddplan.numpasses):
 					for dmstr in ddplan.dmlist[passnum]:
 						dmstrs.append(dmstr)
-				print "Running prepsubband ...."
+				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm+totdm*ddplan.dmstep)
 				totdm = ddplan.dmsperpass * ddplan.numpasses
  	
 				for jj in range(0, int(totdm/blk)+1):
 					dm_start = ddplan.lodm + ddplan.dmstep * jj * blk
 					if (totdm - jj*blk) > blk: # Because prepsubband can handle only 1000 dm values
 						dm_end = dm_start + ddplan.dmstep * blk
-						print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+						print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 						cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (maskfile, dm_start, ddplan.dmstep, blk, ddplan.downsamp, outfile,infile, outfile + "_prepsubband.log")
 						prepsubband_time = timed_execute(cmd,1)
 						tot_prep_time += prepsubband_time	
@@ -701,7 +702,7 @@ if __name__ == "__main__":
 						totime += prepsubband_time
 					else: # last chunk of the DMs
 						dm_end = ddplan.lodm + ddplan.dmstep * totdm
-						print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+						print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 						cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (maskfile, dm_start, ddplan.dmstep, totdm - jj*blk, ddplan.downsamp,outfile,infile, outfile+"_prepsubband.log")
 						prepsubband_time = timed_execute(cmd,1)
 						tot_prep_time += prepsubband_time
@@ -719,18 +720,19 @@ if __name__ == "__main__":
 		# For mpi prepsubband to work the number of DM should be divisible by number of nodes/cores - 1 that can be used.
 		# Here for given number of DMs, it will round off to the nearest value where it matches with the number divisible
 		if mpiflag == 1:
+			print "\nRunning mpiprepsubband ...."
 			for ddplan in ddplans:
 				for passnum in range(ddplan.numpasses):
 					for dmstr in ddplan.dmlist[passnum]:
 						dmstrs.append(dmstr)
-				print "Running mpiprepsubband ...."
+				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm+totdm*ddplan.dmstep)
 				totdm = ddplan.dmsperpass * ddplan.numpasses
 
 				for jj in range(0, int(totdm/blk)+1):
 					dm_start = ddplan.lodm + ddplan.dmstep * jj * blk
 					if (totdm - jj*blk) > blk: # Because prepsubband can handle only 1000 dm values
 						dm_end = dm_start + ddplan.dmstep * blk
-						print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+						print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 						cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1, maskfile, dm_start, ddplan.dmstep, blk, ddplan.downsamp, outfile, infile, outfile+"_prepsubband.log")
 						prepsubband_time = timed_execute(cmd,1)
 						tot_prep_time += prepsubband_time
@@ -739,7 +741,7 @@ if __name__ == "__main__":
 						totime += prepsubband_time
 					else:
 						dm_end = ddplan.lodm + ddplan.dmstep * totdm
-						print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+						print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 						cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1, maskfile, dm_start, ddplan.dmstep, totdm - jj*blk, ddplan.downsamp, outfile, infile, outfile+"_prepsubband.log")
 						prepsubband_time = timed_execute(cmd,1)
 						tot_prep_time += prepsubband_time
@@ -762,7 +764,7 @@ if __name__ == "__main__":
 
 	# running the search here only when dedispersion skipped from the cmdline
 	if is_skip_dedispersion and not is_sift_n_fold_only:
-		print "Running (mpi)prepsubband ... skipped"
+		print "\nRunning (mpi)prepsubband ... skipped"
 		print "Searching ..."
 		for ddplan in ddplans:
 			for passnum in range(ddplan.numpasses):
@@ -774,7 +776,7 @@ if __name__ == "__main__":
 		rfp.write ("Total search time (s) : %.2f\n" % (search_time))
 
 	if is_sift_n_fold_only:
-		print "Running (mpi)prepsubband ... skipped"
+		print "\nRunning (mpi)prepsubband ... skipped"
 		print "Running searching ... skipped"
 
 	# Generating single-pulse plot
