@@ -581,7 +581,7 @@ if __name__ == "__main__":
 	print "SAMPLING TIME : %f" % (samptime)
 	print "MJD : %f" % (mjd)
 	print "DURATION : %f" % (dur)
-	print "INPUT File/s :  %s" % (infile)
+	print "INPUT File(s) :  %s" % (infile)
 	print "SCRATCH Dir : %s" % (scratchdir)
 	print "OUTPUT Dir : %s" % (outdir)
 	print "INF FILE : %s" % (inffile[0])
