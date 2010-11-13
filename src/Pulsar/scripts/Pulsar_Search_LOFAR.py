@@ -706,8 +706,8 @@ if __name__ == "__main__":
 				for passnum in range(ddplan.numpasses):
 					for dmstr in ddplan.dmlist[passnum]:
 						dmstrs.append(dmstr)
-				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm + totdm * ddplan.dmstep)
 				totdm = ddplan.dmsperpass * ddplan.numpasses
+				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm + totdm * ddplan.dmstep)
  	
 				# loop over the blocks of DMs if the total #DMs in this pass > blk (1000)
 				niter = (totdm % blk == 0 and int(totdm/blk) or int(totdm/blk) + 1) # number of iterations
@@ -742,8 +742,8 @@ if __name__ == "__main__":
 				for passnum in range(ddplan.numpasses):
 					for dmstr in ddplan.dmlist[passnum]:
 						dmstrs.append(dmstr)
-				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm+totdm*ddplan.dmstep)
 				totdm = ddplan.dmsperpass * ddplan.numpasses
+				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm+totdm*ddplan.dmstep)
 
 				# loop over the blocks of DMs if the total #DMs in this pass > blk (1000)
 				niter = (totdm % blk == 0 and int(totdm/blk) or int(totdm/blk) + 1) # number of iterations
