@@ -679,6 +679,8 @@ if __name__ == "__main__":
 		rfi_time = 0
 	else:
 		rfi_time = timed_execute(cmd,1)
+
+	print "RFI masking time (s) : %.2f   [%.1f h]" % (rfi_time, rfi_time/3600.))
 	rfp.write("RFI masking time (s) : %.2f   [%.1f h]\n" % (rfi_time, rfi_time/3600.))
         totime += rfi_time
 	maskfile=outfile+"_rfifind.mask"
