@@ -679,7 +679,7 @@ if __name__ == "__main__":
 		rfi_time = 0
 	else:
 		rfi_time = timed_execute(cmd,1)
-	rfp.write("RFI masking time (s) : %.2f\n" % (rfi_time))
+	rfp.write("RFI masking time (s) : %.2f   [%.1f h]\n" % (rfi_time, rfi_time/3600.))
         totime += rfi_time
 	maskfile=outfile+"_rfifind.mask"
 	
@@ -723,16 +723,16 @@ if __name__ == "__main__":
 					print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 					prepsubband_time = timed_execute(cmd,1)
 					tot_prep_time += prepsubband_time
-					print "Prepsubband time: %.2f seconds" % (prepsubband_time)
-					rfp.write("prepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
+					print "Prepsubband time (s) : %.2f   [%.1f h]" % (prepsubband_time, prepsubband_time/3600.)
+					rfp.write("prepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f   [%.1f h]\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time, prepsubband_time/3600.))
 					totime += prepsubband_time
 
 					# and run searching...
 					search_time = run_searching (scratchdir, outfile, search_script, waittime)
 					tot_search_time += search_time
 					totime += search_time
-					print "Search time: %.2f seconds" % (search_time)
-					rfp.write ("Search time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, search_time))
+					print "Search time (s) : %.2f   [%.1f h]" % (search_time, search_time/3600.)
+					rfp.write ("Search time for DM range [%g-%g) and DM step = %g (s) : %.2f   [%.1f h]\n" % (dm_start, dm_end, ddplan.dmstep, search_time, search_time/3600.))
 
 		# For mpi prepsubband to work the number of DM should be divisible by number of nodes/cores - 1 that can be used.
 		# Here for given number of DMs, it will round off to the nearest value where it matches with the number divisible
@@ -759,21 +759,21 @@ if __name__ == "__main__":
 					print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 					prepsubband_time = timed_execute(cmd,1)
 					tot_prep_time += prepsubband_time
-					print "MPI Prepsubband time: %.2f seconds" % (prepsubband_time)
-					rfp.write("mpiprepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
+					print "MPI Prepsubband time (s) : %.2f   [%.1f h]" % (prepsubband_time, prepsubband_time/3600.)
+					rfp.write("mpiprepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f   [%.1f h]\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time, prepsubband_time/3600.))
 					totime += prepsubband_time
 
 					# and run searching...
 					search_time = run_searching (scratchdir, outfile, search_script, waittime)
 					tot_search_time += search_time
 					totime += search_time
-					print "Search time: %.2f seconds" % (search_time)
-					rfp.write ("Search time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, search_time))
+					print "Search time (s) : %.2f   [%.1f h]" % (search_time, search_time/3600.)
+					rfp.write ("Search time for DM range [%g-%g) and DM step = %g (s) : %.2f   [%.1f h]\n" % (dm_start, dm_end, ddplan.dmstep, search_time, search_time/3600.))
 
-		print "Total prepsubband time (s) : %.2f" % (tot_prep_time)
-		rfp.write("Total prepsubband time (s) : %.2f\n" % (tot_prep_time))
-		print "Total search time (s) : %.2f" % (tot_search_time)
-		rfp.write("Total search time (s) : %.2f\n" % (tot_search_time))
+		print "Total prepsubband time (s) : %.2f   [%.1f h]" % (tot_prep_time, tot_prep_time/3600.)
+		rfp.write("Total prepsubband time (s) : %.2f   [%.1f h]\n" % (tot_prep_time, tot_prep_time/3600.))
+		print "Total search time (s) : %.2f   [%.1f h]" % (tot_search_time, tot_search_time/3600.)
+		rfp.write("Total search time (s) : %.2f   [%.1f h]\n" % (tot_search_time, tot_search_time/3600.))
 		print
 
 	# running the search here only when dedispersion skipped from the cmdline
@@ -786,8 +786,8 @@ if __name__ == "__main__":
 					dmstrs.append(dmstr)
 		search_time = run_searching (scratchdir, outfile, search_script, waittime)
 		totime += search_time
-		print "Total search time (s) : %.2f" % (search_time)
-		rfp.write ("Total search time (s) : %.2f\n" % (search_time))
+		print "Total search time (s) : %.2f   [%.1f h]" % (search_time, search_time/3600.)
+		rfp.write ("Total search time (s) : %.2f   [%.1f h]\n" % (search_time, search_time/3600.))
 
 	if is_sift_n_fold_only:
 		print "\nRunning (mpi)prepsubband ... skipped"
@@ -821,8 +821,8 @@ if __name__ == "__main__":
        			except: pass
 		except: pass
 	totime += sp_time
-	print "Total time to make single-pulse plots (s) : %.2f" % (sp_time)
-	rfp.write("Total time to make single-pulse plots (s) : %.2f\n" % (sp_time))
+	print "Total time to make single-pulse plots (s) : %.2f   [%.1f h]" % (sp_time, sp_time/3600.)
+	rfp.write("Total time to make single-pulse plots (s) : %.2f   [%.1f h]\n" % (sp_time, sp_time/3600.))
 	
 	#
 	# Following will sort out the candidates 
@@ -853,8 +853,8 @@ if __name__ == "__main__":
 	end_sifting_time = time.time()
 	sifting_time = end_sifting_time - start_sifting_time
 	totime += sifting_time
-	print "Sifting the candidates time (s) : %.2f" % (sifting_time)
-	rfp.write("Sifting the candidates time (s) : %.2f\n" % (sifting_time))
+	print "Sifting the candidates time (s) : %.2f   [%.1f h]" % (sifting_time, sifting_time/3600.)
+	rfp.write("Sifting the candidates time (s) : %.2f   [%.1f h]\n" % (sifting_time, sifting_time/3600.))
 
 	#
 	# Fold the best candidates
@@ -919,8 +919,8 @@ if __name__ == "__main__":
 	end_fold_time = time.time()
 	prepfold_time = end_fold_time - start_fold_time
 	totime += prepfold_time
-	print "Fold time: %.2f seconds" % (prepfold_time)
-	rfp.write("Total prepfold time (s) : %.2f\n" % (prepfold_time))	
+	print "Fold time (s) : %.2f   [%.1f h]" % (prepfold_time, prepfold_time/3600.)
+	rfp.write("Total prepfold time (s) : %.2f   [%.1f h]\n" % (prepfold_time, prepfold_time/3600.))	
 
 	# Read the pulsar catalog
 	psrname, rRA, rDEC = numpy.loadtxt(bright_catalog, dtype=str, usecols=(1,3,4), comments='#', unpack=True)
@@ -980,7 +980,7 @@ if __name__ == "__main__":
 		cmd="gzip -f %s" % (psfile)
 		totime += timed_execute(cmd,1)
 
-        rfp.write("Total runtime (s) : %.2f\n" % (totime))
+        rfp.write("Total runtime (s) : %.2f   [%.1f h]\n" % (totime, totime/3600.))
 	rfp.close()
 
 	#
