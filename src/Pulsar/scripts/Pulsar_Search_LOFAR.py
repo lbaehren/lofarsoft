@@ -34,7 +34,7 @@ import presto, sifting
 import tarfile
 import psr_utils as pu
 import infodata as inf
-from math import pi
+import math
 
 # some tunable parameters
 hwired_ddplan_id       = "shallow"  # DDplan ID, Description of DDplan(s) set and/check below
@@ -170,7 +170,7 @@ def RA_to_rad(RA):
     RA_S = float(RA[2])
   
     deg = (RA_H + RA_M/60 + RA_S/3600)*15
-    rad = deg*pi/180.0
+    rad = deg * math.pi / 180.0
     return rad
   
 def DEC_to_rad(DEC):
@@ -183,7 +183,7 @@ def DEC_to_rad(DEC):
     DEC_S = float(DEC[2])
    
     deg = (DEC_H + DEC_M/60 + DEC_S/3600)
-    rad = deg*pi/180.0
+    rad = deg * math.pi / 180.0
     return rad
 
 
@@ -191,7 +191,7 @@ def rad_to_deg(rad):
     """
     deg_to_rad : converts radian to deg
     """
-    deg = rad*180/pi
+    deg = rad * 180 / math.pi
     return deg
 
 # function to be used when sorting the list of found known pulsars
@@ -222,24 +222,21 @@ def does_pulsar_exist (psrname, realcand):
 # more than 1 iterations should be arranged. Value of blk should already be divisible by (ncores - 1)
 def adjust_ddplan (ddplans, blk, ncores):
 	np = ncores - 1
-	newddplans = ddplans # making a copy of DDplan and will correct it
 	for pp in range(0, len(ddplans)):
-		if pp != 0:
-			newddplans[pp].lodm = newddplans[pp-1].lodm + newddplans[pp-1].dmsperpass * newddplans[pp-1].dmstep
 		totdm = ddplans[pp].dmsperpass * ddplans[pp].numpasses
 		hidm = ddplans[pp].lodm + totdm * ddplans[pp].dmstep 
-		dmrange = hidm - newddplans[pp].lodm
-		ndms = int (dmrange / ddplans[pp].dmstep)
-		if dmrange % ddplans[pp].dmstep != 0:
-			ndms += 1
+		if pp != 0:
+			ddplans[pp].lodm = ddplans[pp-1].lodm + ddplans[pp-1].dmsperpass * ddplans[pp-1].dmstep
+		dmrange = hidm - ddplans[pp].lodm
+		ndms = int (math.ceil(dmrange / ddplans[pp].dmstep))
 		niter = int(ndms/blk) # number of iterations
 		leftdm = ndms % blk   # leftover number of DMs
 		if leftdm % np != 0:
 			leftdm = (int(leftdm/np) + 1) * np
 		ndms = niter * blk + leftdm
-		newddplans[pp].dmsperpass = ndms
-		newddplans[pp].numpasses = 1
-	return newddplans
+		ddplans[pp].dmsperpass = ndms
+		ddplans[pp].numpasses = 1
+	return ddplans
 
 # function that creates the generic birdies file
 def create_birdies_file (dir, name):
