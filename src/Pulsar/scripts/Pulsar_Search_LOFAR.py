@@ -217,6 +217,30 @@ def does_pulsar_exist (psrname, realcand):
 			return True
 	return False
 
+# function that adjusts DDplan in order that number of DMs in each pass
+# will be divisible by (ncores - 1). Also should take care of if number of DMs > blk, then
+# more than 1 iterations should be arranged. Value of blk should already be divisible by (ncores - 1)
+def adjust_ddplan (ddplans, blk, ncores):
+	np = ncores - 1
+	newddplans = ddplans # making a copy of DDplan and will correct it
+	for pp in range(0, len(ddplans)):
+		if pp != 0:
+			newddplans[pp].lodm = newddplans[pp-1].lodm + newddplans[pp-1].dmsperpass * newddplans[pp-1].dmstep
+		totdm = ddplans[pp].dmsperpass * ddplans[pp].numpasses
+		hidm = ddplans[pp].lodm + totdm * ddplans[pp].dmstep 
+		dmrange = hidm - newddplans[pp].lodm
+		ndms = int (dmrange / ddplans[pp].dmstep)
+		if dmrange % ddplans[pp].dmstep != 0:
+			ndms += 1
+		niter = int(ndms/blk) # number of iterations
+		leftdm = ndms % blk   # leftover number of DMs
+		if leftdm % np != 0:
+			leftdm = (int(leftdm/np) + 1) * np
+		ndms = niter * blk + leftdm
+		newddplans[pp].dmsperpass = ndms
+		newddplans[pp].numpasses = 1
+	return newddplans
+
 # function that creates the generic birdies file
 def create_birdies_file (dir, name):
 	bname = dir + name
@@ -371,15 +395,16 @@ def run_searching (scratchdir, outfile, search_script, waittime):
 		nprocess += 1
 	# waiting for searching scripts to finish
 	# checking the presence "*.done" files that indicate that script instance has finished
-	cmd="/bin/bash -c \"ls -1 %s%s 2>/dev/null | wc -l\"" % (scratchdir, "core?.done")
-	while (1):
-		nfinish = int(os.popen(cmd).readlines()[0][:-1])
-		if nfinish == nprocess:
-			cmd="rm -f %s" % (scratchdir+"core?.done")
-			os.system(cmd)
-			print "Finished."
-			break
-		time.sleep(waittime)
+	if nprocess != 0:
+		cmd="/bin/bash -c \"ls -1 %s%s 2>/dev/null | wc -l\"" % (scratchdir, "core?.done")
+		while (1):
+			nfinish = int(os.popen(cmd).readlines()[0][:-1])
+			if nfinish == nprocess:
+				cmd="rm -f %s" % (scratchdir+"core?.done")
+				os.system(cmd)
+				print "Finished."
+				break
+			time.sleep(waittime)
 	end_search_time = time.time()
 	search_time = end_search_time - start_search_time
 	return search_time
@@ -470,6 +495,10 @@ if __name__ == "__main__":
 	if is_sift_n_fold_only:
 		is_skip_rfifind = True
 		is_skip_dedispersion = True
+	# adjusting the block value if using MPI, to have it divisible by (ncores - 1)
+	if mpiflag == 1:
+		np = ncores - 1 
+	        blk = int(blk/np) * np
 
 	# Inpath, outpath, and scratchpath can have / at the end or it can be without it. 
         # In both the cases it will process the script
@@ -569,6 +598,7 @@ if __name__ == "__main__":
  
 	# running DDlan.py  in auto mode
 	if ddplanflag == 0:
+		print "Auto run of DDplan.py ..."
 		outddfile = scratchdir + "DDplan.log"
 		cmd = "DDplan.py -f %s -b %s -n %s -t %f -r %f -o %s > %s" % (lofq+(bandwidth/2), bandwidth, chan, samptime, samptime, scratchdir + "DDplan.ps", outddfile)
 		timed_execute(cmd,1)
@@ -604,30 +634,23 @@ if __name__ == "__main__":
                                                    ddplans_heap[hwired_ddplan_id][ipass][4], \
                                                    ddplans_heap[hwired_ddplan_id][ipass][5]))
 
-	# Adjusting the total # of DM trials in case of MPI
-	if mpiflag == 1:
-		np = ncores - 1 
-		# As mpiprepsubband can not take more than 1000 dm at a time numdm will be divided in blks 
-		# which should be divisible by np
-	        blk = (int(blk/np))*np
-        	leftdm = NDM % blk
-	        if((leftdm % np) != 0):
-        		 leftdm = (int(leftdm/np) + 1)*np
-	        NDM = leftdm + int(NDM/blk)*blk
-        	print "\nThe Num DM will be adjusted to %d to be divisible by (%d - 1) nodes" % (NDM, ncores)
-	HIDM = LODM + NDM*DMSTEP
-
 	# User-specified values for low, high DMs and DM step
 	if ddplanflag == 2:
 		print "Quick DM search with DM range [%g - %g] and DM step = %g" % (LODM, HIDM, DMSTEP)	
 		ddplans = [dedisp_plan(LODM, DMSTEP, NDM, 1, chan, DOWNSAMP)]
 
-	# printinf the DM plan to be used
+	# Adjusting DDplan when using MPI
+	# This is necessary due to mpiprepssuband can not run more than 1000 DMs simultaneously and
+	# number of DMs should be divisible by (ncores - 1)
+	if mpiflag == 1:
+		print "DDplan will be adjusted in order to #DMs in each pass to be divisible by (%d - 1) nodes" % (ncores)
+		ddplans = adjust_ddplan (ddplans, blk, ncores)
+
+	# printing the DM plan to be used
 	print "\n%-7s %-6s %-9s %-8s %-7s" % ("LODM", "DMSTEP", "DMPERPASS", "DOWNSAMP", "NUMPASS")
         for ddplan in ddplans:
                  print "%-7.2f %-6.2f %-9d %-8d %-7d" % (ddplan.lodm, ddplan.dmstep, ddplan.dmsperpass, ddplan.downsamp, ddplan.numpasses)
 	print
-
 
 	# Open file that keeps timing info of each processing step
 	exectime_file = outfile + ".exectime"
@@ -686,29 +709,26 @@ if __name__ == "__main__":
 				for passnum in range(ddplan.numpasses):
 					for dmstr in ddplan.dmlist[passnum]:
 						dmstrs.append(dmstr)
-				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm+totdm*ddplan.dmstep)
+				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm + totdm * ddplan.dmstep)
 				totdm = ddplan.dmsperpass * ddplan.numpasses
  	
-				for jj in range(0, int(totdm/blk)+1):
+				# loop over the blocks of DMs if the total #DMs in this pass > blk (1000)
+				niter = (totdm % blk == 0 and int(totdm/blk) or int(totdm/blk) + 1) # number of iterations
+				for jj in range(0, niter):
 					dm_start = ddplan.lodm + ddplan.dmstep * jj * blk
-					if (totdm - jj*blk) > blk: # Because prepsubband can handle only 1000 dm values
+					if (totdm - jj*blk) >= blk: # Because prepsubband can handle only 1000 dm values
 						dm_end = dm_start + ddplan.dmstep * blk
-						print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 						cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (maskfile, dm_start, ddplan.dmstep, blk, ddplan.downsamp, outfile,infile, outfile + "_prepsubband.log")
-						prepsubband_time = timed_execute(cmd,1)
-						tot_prep_time += prepsubband_time	
-						print "Prepsubband time: %.2f seconds" % (prepsubband_time)
-						rfp.write("prepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
-						totime += prepsubband_time
 					else: # last chunk of the DMs
 						dm_end = ddplan.lodm + ddplan.dmstep * totdm
-						print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 						cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (maskfile, dm_start, ddplan.dmstep, totdm - jj*blk, ddplan.downsamp,outfile,infile, outfile+"_prepsubband.log")
-						prepsubband_time = timed_execute(cmd,1)
-						tot_prep_time += prepsubband_time
-						print "Prepsubband time: %.2f seconds" % (prepsubband_time)
-						rfp.write("prepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
-						totime += prepsubband_time
+
+					print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+					prepsubband_time = timed_execute(cmd,1)
+					tot_prep_time += prepsubband_time
+					print "Prepsubband time: %.2f seconds" % (prepsubband_time)
+					rfp.write("prepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
+					totime += prepsubband_time
 
 					# and run searching...
 					search_time = run_searching (scratchdir, outfile, search_script, waittime)
@@ -728,26 +748,23 @@ if __name__ == "__main__":
 				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm+totdm*ddplan.dmstep)
 				totdm = ddplan.dmsperpass * ddplan.numpasses
 
-				for jj in range(0, int(totdm/blk)+1):
+				# loop over the blocks of DMs if the total #DMs in this pass > blk (1000)
+				niter = (totdm % blk == 0 and int(totdm/blk) or int(totdm/blk) + 1) # number of iterations
+				for jj in range(0, niter):
 					dm_start = ddplan.lodm + ddplan.dmstep * jj * blk
-					if (totdm - jj*blk) > blk: # Because prepsubband can handle only 1000 dm values
+					if (totdm - jj*blk) >= blk: # Because prepsubband can handle only 1000 dm values
 						dm_end = dm_start + ddplan.dmstep * blk
-						print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 						cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1, maskfile, dm_start, ddplan.dmstep, blk, ddplan.downsamp, outfile, infile, outfile+"_prepsubband.log")
-						prepsubband_time = timed_execute(cmd,1)
-						tot_prep_time += prepsubband_time
-						print "MPI Prepsubband time: %.2f seconds" % (prepsubband_time)
-						rfp.write("mpiprepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
-						totime += prepsubband_time
 					else:
 						dm_end = ddplan.lodm + ddplan.dmstep * totdm
-						print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 						cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1, maskfile, dm_start, ddplan.dmstep, totdm - jj*blk, ddplan.downsamp, outfile, infile, outfile+"_prepsubband.log")
-						prepsubband_time = timed_execute(cmd,1)
-						tot_prep_time += prepsubband_time
-						print "MPI Prepsubband time: %.2f seconds" % (prepsubband_time)
-						rfp.write("mpiprepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
-						totime += prepsubband_time
+
+					print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+					prepsubband_time = timed_execute(cmd,1)
+					tot_prep_time += prepsubband_time
+					print "MPI Prepsubband time: %.2f seconds" % (prepsubband_time)
+					rfp.write("mpiprepsubband time for DM range [%g-%g) and DM step = %g (s) : %.2f\n" % (dm_start, dm_end, ddplan.dmstep, prepsubband_time))
+					totime += prepsubband_time
 
 					# and run searching...
 					search_time = run_searching (scratchdir, outfile, search_script, waittime)
@@ -892,15 +909,16 @@ if __name__ == "__main__":
 		nprocess += 1
 	# waiting for folding scripts to finish
 	# checking the presence "fold_core*.done" files that indicate that script instance has finished
-	cmd="/bin/bash -c \"ls -1 %s%s 2>/dev/null | wc -l\"" % (scratchdir, "fold_core?.done")
-	while (1):
-		nfinish = int(os.popen(cmd).readlines()[0][:-1])
-		if nfinish == nprocess:
-			cmd="rm -f %s" % (scratchdir+"fold_core?.done")
-			os.system(cmd)
-			print "Finished."
-			break
-		time.sleep(waittime)
+	if nprocess != 0:
+		cmd="/bin/bash -c \"ls -1 %s%s 2>/dev/null | wc -l\"" % (scratchdir, "fold_core?.done")
+		while (1):
+			nfinish = int(os.popen(cmd).readlines()[0][:-1])
+			if nfinish == nprocess:
+				cmd="rm -f %s" % (scratchdir+"fold_core?.done")
+				os.system(cmd)
+				print "Finished."
+				break
+			time.sleep(waittime)
 	end_fold_time = time.time()
 	prepfold_time = end_fold_time - start_fold_time
 	totime += prepfold_time
