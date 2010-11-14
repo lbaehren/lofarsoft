@@ -454,8 +454,8 @@ if __name__ == "__main__":
 	parser.add_option('--mpi',dest='mpiflag',metavar='MPI_FLAG',
                 help='To use mpiprepsubband instead of normal prepsubband MPI_FLAG shouble be 1. default = 0 NOTE : mpiprepsubband will not work with --ddplan 0 or 1',
                 default=0,type='int')
-	parser.add_option('--np',dest='np',metavar='NUMBER_OF_PORT',
-                help='Number of port to be used with mpiprepsubband. default = 8.',
+	parser.add_option('--np',dest='np',metavar='NUMBER_OF_CORES',
+                help='Number of cores to be used with (mpi)prepsubband and searching and folding steps. default = 8.',
                 default=8, type='int')	
 
 	options, args = parser.parse_args()
