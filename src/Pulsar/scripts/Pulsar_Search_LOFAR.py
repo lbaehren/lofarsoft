@@ -451,8 +451,8 @@ if __name__ == "__main__":
 	parser.add_option('--downsamp',dest='downsamp',metavar='DOWNSAMPLE',
                 help='Down sample the input data for quick DM search, only used when ddplan = 2, default = 1',
                 default=1, type='float')
-	parser.add_option('--mpi', action="store_true", dest="mpiflag",
-                help='To use mpiprepsubband instead of normal prepsubband', default=False)          
+	parser.add_option('--no-mpi', action="store_false", dest="mpiflag",
+                help='To use regular prepsubband instead of mpiprepsubband', default=True)          
 	parser.add_option('--np',dest='np',metavar='NUMBER_OF_CORES',
                 help='Number of cores to be used with (mpi)prepsubband and searching and folding steps. default = 8.',
                 default=8, type='int')	
