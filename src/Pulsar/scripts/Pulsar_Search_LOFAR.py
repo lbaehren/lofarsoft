@@ -446,14 +446,13 @@ if __name__ == "__main__":
                 help='dm step for quick DM search, only used when ddplan = 2, default = 1',
                 default=1, type='float')
 	parser.add_option('--ndm',dest='ndm',metavar='Num_DM',
-                help='Number of DMs for quick DM search, only used when ddplan = 2, default = 150 Note: with mpi this number will be adjusted to be divisible by np',
+                help='Number of DMs for quick DM search, only used when ddplan = 2, default = 150. Note: with mpi this number will be adjusted to be divisible by (np - 1)',
                 default=150, type='float')
 	parser.add_option('--downsamp',dest='downsamp',metavar='DOWNSAMPLE',
                 help='Down sample the input data for quick DM search, only used when ddplan = 2, default = 1',
                 default=1, type='float')
-	parser.add_option('--mpi',dest='mpiflag',metavar='MPI_FLAG',
-                help='To use mpiprepsubband instead of normal prepsubband MPI_FLAG shouble be 1. default = 0 NOTE : mpiprepsubband will not work with --ddplan 0 or 1',
-                default=0,type='int')
+	parser.add_option('--mpi', action="store_true", dest="mpiflag",
+                help='To use mpiprepsubband instead of normal prepsubband', default=False)          
 	parser.add_option('--np',dest='np',metavar='NUMBER_OF_CORES',
                 help='Number of cores to be used with (mpi)prepsubband and searching and folding steps. default = 8.',
                 default=8, type='int')	
@@ -493,7 +492,7 @@ if __name__ == "__main__":
 		is_skip_rfifind = True
 		is_skip_dedispersion = True
 	# adjusting the block value if using MPI, to have it divisible by (ncores - 1)
-	if mpiflag == 1:
+	if mpiflag:
 		np = ncores - 1 
 	        blk = int(blk/np) * np
 
@@ -639,7 +638,7 @@ if __name__ == "__main__":
 	# Adjusting DDplan when using MPI
 	# This is necessary due to mpiprepssuband can not run more than 1000 DMs simultaneously and
 	# number of DMs should be divisible by (ncores - 1)
-	if mpiflag == 1:
+	if mpiflag:
 		print "DDplan will be adjusted in order to #DMs in each pass to be divisible by (%d - 1) nodes" % (ncores)
 		ddplans = adjust_ddplan (ddplans, blk, ncores)
 
@@ -702,7 +701,7 @@ if __name__ == "__main__":
 
 	# only running this part if it's not skipped from the commmand line
 	if not is_skip_dedispersion:
-		if mpiflag != 1:
+		if not mpiflag:
 			print "\nRunning prepsubband ...."
 			for ddplan in ddplans:
 				for passnum in range(ddplan.numpasses):
@@ -738,7 +737,7 @@ if __name__ == "__main__":
 
 		# For mpi prepsubband to work the number of DM should be divisible by number of nodes/cores - 1 that can be used.
 		# Here for given number of DMs, it will round off to the nearest value where it matches with the number divisible
-		if mpiflag == 1:
+		if mpiflag:
 			print "\nRunning mpiprepsubband ...."
 			for ddplan in ddplans:
 				for passnum in range(ddplan.numpasses):
