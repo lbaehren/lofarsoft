@@ -797,7 +797,13 @@ if __name__ == "__main__":
 
 	# Generating single-pulse plot
 	print "Generating single-pulse plots ..."
-	basedmb = outfile+"_DM"
+	# before generating plots we have to cd to the scratch directory
+	# and after go back to the current directory
+	# Otherwise the default name of the ps-file could be ".p" rather than *.ps"
+	currentdir=os.getcwd()
+	os.chdir(scratchdir)
+
+	basedmb = basename+"_DM"
 	basedme = ".singlepulse "
 	sp_time = 0
 	# The following will make plots for DM ranges:
@@ -813,16 +819,18 @@ if __name__ == "__main__":
 		basedmb+"[0-9].[0-9][0-9]"+basedme +
 		basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme]
 	dmrangestrs = ["0-30", "20-110", "100-310", "300-1000+", "0-1000+"]
-	psname = outfile+"_singlepulse.ps"
+	psname = basename+"_singlepulse.ps"
 	for dmglob, dmrangestr in zip(dmglobs, dmrangestrs):
 		try: # we need this in case there are not many DMs to make all plots
 			cmd = 'single_pulse_search.py --threshold %f -g "%s"' % (singlepulse_plot_SNR, dmglob)
 			sp_time += timed_execute(cmd,1)
 			try:
-				os.rename(psname, outfile+"_DMs%s_singlepulse.ps"%dmrangestr)
+				os.rename(psname, basename+"_DMs%s_singlepulse.ps"%dmrangestr)
        			except: pass
 		except: pass
 	totime += sp_time
+	# cd back to the current directory
+	os.chdir(currentdir)
 	print "Total time to make single-pulse plots (s) : %.2f   [%.1f h]" % (sp_time, sp_time/3600.)
 	rfp.write("Total time to make single-pulse plots (s) : %.2f   [%.1f h]\n" % (sp_time, sp_time/3600.))
 	
