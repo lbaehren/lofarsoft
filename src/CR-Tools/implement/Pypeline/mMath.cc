@@ -421,7 +421,9 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
 
   // Sanity check
   if (len1 < len2) {
+#ifdef WARNINGS
     cout << "Warning: input vector is smaller than output vector: looping over input vector" << endl;
+#endif
   } else if (len1 > len2) {
     throw PyCR::ValueError("Input vector is larger than output vector.");
   }
@@ -471,7 +473,9 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
 
   // Sanity check
   if (len2 < len1) {
+#ifdef WARNINGS
     cout << "Warning: 2nd vector is smaller than 1st vector: looping over 2nd vector" << endl;
+#endif
   } else if (len2 > len1) {
     throw PyCR::ValueError("2nd vector is larger than 1st vector.");
   }
@@ -541,7 +545,9 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
     throw PyCR::ValueError("Size of output vector differs from size of 1st operand vector.");
   } else {
     if (len2 < len1) {
+#ifdef WARNINGS
       cout << "Warning: 2nd operand vector is smaller than 1st operand vector: looping over 2nd operand vector." << endl;
+#endif
     } else if (len2 > len1) {
       throw PyCR::ValueError("2nd operand vector is larger than 1st operand vector.");
     }
@@ -597,7 +603,9 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
     throw PyCR::ValueError("Size of output vector differs from size of 1st operand vector.");
   } else {
     if (len2 < len1) {
+#ifdef WARNINGS
       cout << "Warning: 2nd operand vector is smaller than 1st operand vector: looping over 2nd operand vector." << endl;
+#endif
     } else if (len2 > len1) {
       throw PyCR::ValueError("2nd operand vector is larger than 1st operand vector.");
     }
@@ -653,7 +661,9 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
     throw PyCR::ValueError("Size of output vector differs from size of 1st operand vector.");
   } else {
     if (len2 < len1) {
+#ifdef WARNINGS
       cout << "Warning: 2nd operand vector is smaller than 1st operand vector: looping over 2nd operand vector." << endl;
+#endif
     } else if (len2 > len1) {
       throw PyCR::ValueError("2nd operand vector is larger than 1st operand vector.");
     }
