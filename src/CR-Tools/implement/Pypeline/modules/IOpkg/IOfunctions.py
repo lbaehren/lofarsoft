@@ -1,5 +1,5 @@
 
-
+import numpy as np
 import pycrtools as cr
 
 ################################################################################################
@@ -84,7 +84,7 @@ def get(files, keyword,return_as_list=True):
         for i in range(len(files)):
             ret.append(files[i][keyword])
     else:
-        ret=files[0][keyword]
+	ret=files[0][keyword]
         if isinstance(ret,(cr.IntVec,cr.FloatVec)) and len(ret)==files[0]["nofSelectedAntennas"]:
                 for i in range(1,len(files)):
                     ret.extend(files[i][keyword])
@@ -256,6 +256,242 @@ def frange(start, end=None, inc=None):
         L.append(next)
         
     return L
+
+
+
+def getSpecWeights(cal):
+    """
+	
+    Searches the data for 'bad' RFI channels and gets rid of them.
+    Also generates a suggested matrix of weights for all channels, as
+    would be used for generating an image.
+    """
+    maxBlocks=10
+    if maxBlocks > cal.nBlocks:
+        maxBlocks=cal.nBlocks
+    
+    # saves original info
+    orig_block=cal.currentBlock
+    orig_cal_method=cal.calMethod
+    cal.calMethod=False
+    
+    ws=cr.CRMainWorkSpace(filename=cal.fileList, doplot=False,verbose=False,modulename="ws")
+    
+    ws["blocksize"]=cal.blockSize
+    ws["max_nblocks"]=3
+    ws["ncoeffs"]=12
+    ws["numin"]= min(cal.frequencies)/1e6 #MHz
+    ws["numax"]= max(cal.frequencies)/1e6 #MHz
+    
+    # determines how many blocks to average over
+    avgspec=cr.hArray(float,cal.getOPDim(),fill=0.)
+    
+    makeAverageSpectrum(cal, maxBlocks, avgspec)
+	
+    # initialises arrays
+    fitcoeffs=cr.hArray(float,[cal.nAntennas, ws["ncoeffs"]])
+    meanrms=cr.hArray(float,[cal.nAntennas])
+    
+    # frequency values of returned frequencies
+    frequency=cal.frequencies
+    ws["frequency"]=frequency
+    meanrms[...]=fitcoeffs[...].crfitbaseline(ws["frequency"],avgspec[...],ws)
+	
+
+def makeAverageSpectrum(cal, maxblocks, avgspec):
+    """
+    makes an average spectrum as returned by the crfile
+    
+    *cal*
+    calData object
+    
+    *avgspec*
+    hArray of correct size for whatever is returned by the crfile
+    
+    *maxblocks*
+    integer the number of blocks to average over
+    """
+     # initialises array
+    
+    this_spec=cr.hArray(complex,avgspec.getDim())
+    
+    # makes an average spectrum
+    for i in range(maxBlocks):
+        this_spec=cal.getFFTData()
+        this_spec.square(this_spec)
+        this_spec.abs(this_spec)
+	avgspec.add(avgspec,this_spec)
+	
+    avgspec.div(float(maxBlocks))
+
+def getInterpolatedCalTable(phaseTable, fullFreqs, selectedAntennas, selectedFrequencies):
+    """
+    Interpolates the SattionCalibration table for the desired frequencies
+    
+    phaseTable must be a hArray of dimensions [all_antennas x 
+    all_frequencies], as returned by the metadata call
+    md.get("StationPhaseCalibration"") for the selected RCUs.
+    
+    fullFreqs is also a hArray of values of those frequencies in the full call table
+    
+    selectedAntennas are the indices of the full antenna range (normal vector)
+    
+    selectedFrequencies are the floating values of the selected frequencies (normal vector)
+    """
+	
+    # calculates the magnitude and phase from the full call table
+    
+    
+    # initialises an array to hold the new cal table for the returned data
+    nWantedFreqs=len(selectedFrequencies)
+    nWantedAnts=len(selectedAntennas)
+#    wantedCalTable=cr.hArray(complex,[nWantedAnts,nWantedFreqs])
+    # uses numpy to perform a linear interpolation
+    # gets dimensions of cal table
+    nGivenFreqs=phaseTable.getDim()
+    nGivenAnts=nGivenFreqs[0]
+    nGivenFreqs=nGivenFreqs[1]
+    pt=phaseTable.toNumpy()
+    npwantedtable=np.zeros((nWantedAnts, nWantedFreqs))
+    for i in range(nWantedAnts):
+    	wys=NPgetLinInterpolationCoefs(fullFreqs,pt[i],np.array(selectedFrequencies))
+    	npwantedtable[i]=wys
+    wantedCalTable=cr.hArray(npwantedtable)
+    return wantedCalTable
+
+def NPgetLinInterpolationCoefs(xs, npys, npwxs):
+    """
+    Does a numpy interpolation - gets a vector of given xs and ys,
+    and takes a vector of 'wanted xs' for which the corresponding
+    y-values must be returned. The inerpolation is linear.
+    """
+    dx=xs[1]-xs[0]
+    nvals=len(xs)
+    i1s=np.array((npwxs-xs[0])/dx, dtype=int)
+    a=np.where(i1s<0)
+    i1s[a[:]]=0
+    a=np.where(i1s > nvals-2)
+    i1s[a[:]]=nvals-2
+    i2s=i1s+1
+    npxs=np.array(xs)
+    coefs2=(npxs[i1s[:]]-npwxs)/dx
+    coefs1=1.-coefs2
+    wys=coefs1*npys[i1s[:]]+coefs2*npys[i2s[:]]
+    return wys
+    
+
+def HgetLinInterpolationCoefs(values, vvector):
+    """
+    returns a vector of coefficients of the form
+    [[index_1, weight_1], [index_2, weight_2]]
+    
+    It assumes that the values in vvector are ordered linearly
+    with equal spacing, though they can be either increasing or
+    decreasing
+    """
+    
+    nvals=len(vvector)
+    dval=vvector[1]-vvector[0]
+    # note that this will round down:
+    
+    if1=cr.hArray(float, [values.getSize()])
+    if1.copy(values)
+    if1.sub(vvector[0])
+    if1.div(dval)
+    i1=cr.hArray(int, [if1.getSize()])
+    i2=cr.hArray(int, [if1.getSize()])
+    i1.copy(if1)
+    i2.copy(i1)
+    i2.add(1)
+    
+    indicies=cr.hArray(int,i1.getDim())
+    cr.hFindLessThan(indicies,i1,0)
+    i1[indicies].fill(0)
+    i2[indicies].fill(1)
+    
+    
+    cr.hFindGreaterThan(indicies, i1, nvals-2)
+    i1[indicies].fill(nvals-2)
+    i2[indicies].fill(nvals-1)
+    
+    coefs1=cr.hArray(float,i1.getDim())
+    coefs2=cr.hArray(float,i2.getDim())
+    
+    coefs1.copy(values)
+    hvvector=cr.hArray(vvector)
+    
+    hvvector[i2[...]]
+    coefs1.sub(hvvector[i2])
+    coefs1.div(dval)
+    
+    coefs2.fill(1.)
+    coefs2.sub(coefs1)
+    return i1,i2,coefs1,coefs2
+
+
+def getLinInterpolationCoefs(value,vvector):
+    """
+    returns a vector of coefficients of the form
+    [[index_1, weight_1], [index_2, weight_2]]
+    
+    It assumes that the values in vvector are ordered linearly
+    with equal spacing, though they can be either increasing or
+    decreasing
+    """
+    
+    nvals=len(vvector)
+    dval=vvector[1]-vvector[0]
+    # note that this will round down:
+    i1=int((value-vvector[0])/dval)
+    
+    if i1 < 0:
+    	i1=0
+	i2=1
+    elif i1 >= nvals-1:
+    	i1=nvals-2
+	i2=nvals-1
+    else:
+    	i2=i1+1
+    
+    # coef 1 and coef 2 better add up to 1!
+    coef1=(value-vvector[i2])/dval
+    coef2=(value-vvector[i1])/dval
+    
+    return [[i1,coef1], [i2,coef2]]
+
+def getLinInterpolationCoefsUnequal(value, vvector):
+    """
+    returns a vector of coefficients of the form
+    [[index_1, weight_1], [index_2, weight_2]]
+    
+    DOES NOT WORK
+    """
+    
+    nvals=len(vvector)
+    if vvector[1]>vvector[0]:
+    	di=1
+	starti=0
+    else:
+    	di=-1
+	starti=nvals-1
+    
+    if value < vvector[starti]:
+    	# value is out of range by being too small
+    	i1=starti
+	i2=starti+di
+    elif value > vector[starti+(nvals-1)*di]:
+    	# value is out of range by being too large
+    	i2=starti+(nvals-1)*di
+	i1=starti+(nvals-2)*di
+    else:
+    	# value in range!
+	for i in range(vvector):
+    	    index=starti+i*di
+	    if vvector[index] > value:
+	    	i2=index
+		i1=index-di
+	    	break;
+
 
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples

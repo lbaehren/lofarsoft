@@ -13,7 +13,9 @@ filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 #------------------------------------------------------------------------
 #Creating Workspaces
 #------------------------------------------------------------------------
-ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")  
+ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")
+
+# note that the number of bins (e.g. nbins=256) is the number of bins after spline fitting
 ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256)#256) #fittype="POLY" or "BSPLINE"
 ws.makeAverageSpectrum(ws)
 
@@ -31,24 +33,30 @@ if ws["datafile"]["Observatory"]=='LOPES':
     ws["numin"]=43 #MHz
     ws["numax"]=73 #MHz
 
-
 #------------------------------------------------------------------------
 #Begin Calculations
 #------------------------------------------------------------------------
 
+print 'workspace frequencies are: ', ws["frequency"]
+
 """
-Calculate a spectrum averaged over all blocks
+Calculate a spectrum averaged over all blocks (fft and sum)
 """
 ws["spectrum"].craveragespectrum(ws["datafile"],ws)
 
 """
-Fit a polynomial to baseline of the (binned) average spectrum and return the coefficients.
+Fit a polynomial/spline (as specified) to baseline of the (binned) average spectrum and return the coefficients.
 """
 ws["meanrms"]=ws["coeffs"].crfitbaseline(ws["frequency"],ws["spectrum"],ws)
 
 """
 Calculcate the baseline from the coefficients on the actual frequency grid.
 """
+print ws["frequency"]
+print ws["numin_i"]
+print ws["numax_i"]
+print ws["coeffs"]
+
 ws["baseline"].crcalcbaseline(ws["frequency"],ws["numin_i"],ws["numax_i"],ws["coeffs"],ws)
 
 if ws["verbose"]: print time.clock()-ws["t0"],"s: Applying gain calibration - flattening spectrum."

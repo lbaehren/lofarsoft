@@ -63,7 +63,7 @@ class AntennaCalibration():
         self.antennaset=antennaset
         self.totalCalibrationtemp=IO.get(files,"emptyFFT",False)
         self.totalShift=IO.get(files,"shift",False).new()
-
+    	
         nyquistZone=IO.get(files,"nyquistZone",True)
         if "HBA" in antennaset and 1 in nyquistZone:
             if IO.get(files,"sampleFrequency") > 180000000.0:
@@ -114,7 +114,7 @@ class AntennaCalibration():
         
         self.CalcShift()
         self.CalcDelay()
-
+ 
     def CalcShift(self):
         """Calculate the shift"""
         # Add that Cable Time delay is also optionally applied
@@ -170,21 +170,7 @@ class AntennaCalibration():
 
         
         return True
-       
-def example_function(a, b):
-    """This is a docstring, each function should have one.
-
-    *a* description of parameter a
-    *b* description of parameter b
-
-    Examples (also for doctests):
-
-    >>> example_function(1,2)
-    (1, 2)
-    """
-
-    return a, b
-
+	
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
 #  as a selftest for the module.

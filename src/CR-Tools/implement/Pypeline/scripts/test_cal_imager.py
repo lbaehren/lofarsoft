@@ -35,10 +35,10 @@ nfreq=nfend-nfstart
 
 # open datafile object
 crfile=cal.calData(filenames, antennaset, blockSize=blocksize, antennaSelection=selection, startBlock = startblock)
-
+crfile.initialise()
 # since some antennas may not be available, this is safest
 selection=crfile.antennaSelection
-nantennas=int(crfile.getOPDim()[0])
+nantennas=crfile.getOPDim()[0]
 # OR
 
 
@@ -104,26 +104,30 @@ for block in range(startblock, startblock+nblocks):
 
 print "Image complete, storing to disk."
 
+# set to true if you want to check image-writing
+write_image=False
+
+if write_image:
 # Get image as numpy.ndarray
-npimage = image.toNumpy()#.transpose()
-npimage = np.square(np.abs(npimage)).sum(axis=2)
+    npimage = image.toNumpy()#.transpose()
+    npimage = np.square(np.abs(npimage)).sum(axis=2)
 
 # Save image as FITS
-hdu = pyfits.PrimaryHDU(npimage)
+    hdu = pyfits.PrimaryHDU(npimage)
 
 # Write WCS parameters to header
-hdr = hdu.header
+    hdr = hdu.header
 
 # Workaround for bug in casaviewer
-imparam['CTYPE1']='??LN-STG'
-imparam['CTYPE2']='??LT-STG'
-keys = imparam.keys()
-keys.sort()
-for key in keys:
-    hdr.update(key, imparam[key])
+    imparam['CTYPE1']='??LN-STG'
+    imparam['CTYPE2']='??LT-STG'
+    keys = imparam.keys()
+    keys.sort()
+    for key in keys:
+    	hdr.update(key, imparam[key])
 
 # Check if file exists and overwrite if so
-if os.path.isfile('output.fits'):
-    os.remove('output.fits')
-hdu.writeto('output.fits')
+    if os.path.isfile('output.fits'):
+    	os.remove('output.fits')
+    hdu.writeto('output.fits')
 
