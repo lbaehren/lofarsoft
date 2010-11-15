@@ -868,6 +868,106 @@ if __name__ == "__main__":
 	print "Sifting the candidates time (s) : %.2f   [%.1f h]" % (sifting_time, sifting_time/3600.)
 	rfp.write("Sifting the candidates time (s) : %.2f   [%.1f h]\n" % (sifting_time, sifting_time/3600.))
 
+	# Read the pulsar catalog
+	psrname, rRA, rDEC = numpy.loadtxt(bright_catalog, dtype=str, usecols=(1,3,4), comments='#', unpack=True)
+	rPeriod, rDM, s400 = numpy.loadtxt(bright_catalog, dtype=float, usecols=(5,6,7), comments='#', unpack=True)
+
+	# This part is to find out in all the candidates found, how many of them are known to be strong pulsars. 
+	# In addition to that it also calculates the radial distances to these PSRs from the given data field
+	# center. The Candidate DM and true pulsar DM will be compared withing range of 1 (dm_tolerance) 
+	# and period will be consider in the range of 0.5 ms for normal PSRs (period_tolerance)
+	# and 0.01 ms for mPSRs (ms_period_tolerance)
+	realcand = []    # list of known pulsars found
+	harmcand = []    # list of all (up to 10th) harmonics of known pulsars
+	normalcand = []  # list of other candidates
+
+	accel_cands = lo_accel_cands
+        # if running hi-accel search, merging hi-accel candidates as well
+        if is_run_hi_accel_search:
+		accel_cands.append(hi_accel_cands)
+
+	for cand in accel_cands:
+		is_normalcand = True
+		is_pulsar_found = False
+		# loop on list of known brightest pulsars
+		for kk in numpy.arange(numpy.size(psrname)):
+			# If the DMs are in +/- 5 range and periods are in +/- 0.5 msec range
+			if abs(cand.DM - rDM[kk]) < dm_tolerance:
+				# For harmonic search actual candidate period will be compared upto 
+				# 10th (max_psr_harm) Harmonic of known pulsar period
+				for harm in range(1, max_psr_harm):
+					if  (cand.p >= 0.03 and abs(cand.p - rPeriod[kk]/harm) < period_tolerance) or \
+					    (cand.p <  0.03 and abs(cand.p - rPeriod[kk]/harm) < ms_period_tolerance):
+						harmcand.append([harm, psrname[kk], rPeriod[kk], rDM[kk], cand.p, cand.DM, cand.sigma])
+						if not is_pulsar_found:
+							is_pulsar_found = True
+							is_normalcand = False
+							# check first if this pulsar was picked up already by another candidate
+							if not does_pulsar_exist(psrname[kk], realcand):
+								radial_offset = radial_distance(RA, DEC, rRA[kk], rDEC[kk])
+								realcand.append([psrname[kk], rPeriod[kk], rDM[kk], s400[kk], radial_offset])
+			if is_pulsar_found: # move to another candidate
+				break
+
+		# If the candidate is not a known strong pulsar
+		if is_normalcand:
+			normalcand.append([cand.p, cand.DM, cand.sigma])	
+
+	#
+	# Writing the Candidates Info to the REPORT file
+	#
+	report_file = outfile + ".report"
+        candrep = open(report_file, "w")
+
+	# This will write the detail report file containing information about detection and 
+	# radial distances of the PSR detected. 
+	str = "\nDetected pulsars: %d" % (len(realcand))
+	candrep.write(str+"\n")
+	print str
+	if len(realcand) != 0:
+		str = "PSR\t\tP(s)\t\tDM(pc/cm3)\ts400(mJy)\tOffset(deg)"
+		candrep.write(str+"\n")
+		print str
+		# sorting by radial offset
+		realcand.sort(psr_compare)
+		for ii in realcand:
+			str = "%s\t%f\t%g\t\t%g\t\t%.1f" % (ii[0], ii[1], ii[2], ii[3], ii[4])
+			candrep.write(str+"\n")
+			print str
+
+	# Reporting about the harmonics of the known bright pulsars
+	str = "\nHarmonics detected: %d" % (len(harmcand))
+	candrep.write(str+"\n")
+	print str
+	if len(harmcand) != 0:
+		str = "%-10s   %-10s   %-13s   %-11s   %-19s   %-16s   %-8s" % ("Harm_Num", "PSR", "Detected P(s)", "Delta P(ms)", "Detected DM(pc/cm3)", "Delta DM(pc/cm3)", "Sigma")
+		candrep.write(str+"\n")
+		print str
+		# sorting by Sigma
+		harmcand.sort(harm_compare, reverse=True)
+		for ii in harmcand:
+			str = "%-10d   %-10s   %-13g   %-11.3f   %-19g   %-16.3f   %-8.2f" % (ii[0], ii[1], ii[4], (ii[4]-ii[2]/ii[0])*1000., ii[5], (ii[5]-ii[3]), ii[6])
+			candrep.write(str+"\n")
+			print str
+	
+	# Reporting about normal candidates
+	str = "\nUnidentified Pulsating Objects (UPOs): %d" % (len(normalcand))
+	candrep.write(str+"\n")
+	print str
+	if len(normalcand) != 0:
+		str = "#\tDetected P(s)\tDetected DM(pc/cm3)\tSigma"
+		candrep.write(str+"\n")
+		print str
+		# sorting by Sigma
+		normalcand.sort(upo_compare, reverse=True)
+		counter = 0
+		for ii in normalcand:
+			str = "%d\t%f\t%.2f\t\t\t%.2f" % (counter, ii[0], ii[1], ii[2]) 
+			candrep.write(str+"\n")
+			print str
+			counter += 1
+	candrep.close()
+
 	#
 	# Fold the best candidates
 	#
@@ -936,52 +1036,6 @@ if __name__ == "__main__":
 	print "Fold time (s) : %.2f   [%.1f h]" % (prepfold_time, prepfold_time/3600.)
 	rfp.write("Total prepfold time (s) : %.2f   [%.1f h]\n" % (prepfold_time, prepfold_time/3600.))	
 
-	# Read the pulsar catalog
-	psrname, rRA, rDEC = numpy.loadtxt(bright_catalog, dtype=str, usecols=(1,3,4), comments='#', unpack=True)
-	rPeriod, rDM, s400 = numpy.loadtxt(bright_catalog, dtype=float, usecols=(5,6,7), comments='#', unpack=True)
-
-	# This part is to find out in all the candidates found, how many of them are known to be strong pulsars. 
-	# In addition to that it also calculates the radial distances to these PSRs from the given data field
-	# center. The Candidate DM and true pulsar DM will be compared withing range of 1 (dm_tolerance) 
-	# and period will be consider in the range of 0.5 ms for normal PSRs (period_tolerance)
-	# and 0.01 ms for mPSRs (ms_period_tolerance)
-	realcand = []    # list of known pulsars found
-	harmcand = []    # list of all (up to 10th) harmonics of known pulsars
-	normalcand = []  # list of other candidates
-
-	accel_cands = lo_accel_cands
-        # if running hi-accel search, merging hi-accel candidates as well
-        if is_run_hi_accel_search:
-		accel_cands.append(hi_accel_cands)
-
-	for cand in accel_cands:
-		is_normalcand = True
-		is_pulsar_found = False
-		# loop on list of known brightest pulsars
-		for kk in numpy.arange(numpy.size(psrname)):
-			# If the DMs are in +/- 5 range and periods are in +/- 0.5 msec range
-			if abs(cand.DM - rDM[kk]) < dm_tolerance:
-				# For harmonic search actual candidate period will be compared upto 
-				# 10th (max_psr_harm) Harmonic of known pulsar period
-				for harm in range(1, max_psr_harm):
-					if  (cand.p >= 0.03 and abs(cand.p - rPeriod[kk]/harm) < period_tolerance) or \
-					    (cand.p <  0.03 and abs(cand.p - rPeriod[kk]/harm) < ms_period_tolerance):
-						harmcand.append([harm, psrname[kk], rPeriod[kk], rDM[kk], cand.p, cand.DM, cand.sigma])
-						if not is_pulsar_found:
-							is_pulsar_found = True
-							is_normalcand = False
-							# check first if this pulsar was picked up already by another candidate
-							if not does_pulsar_exist(psrname[kk], realcand):
-								radial_offset = radial_distance(RA, DEC, rRA[kk], rDEC[kk])
-								realcand.append([psrname[kk], rPeriod[kk], rDM[kk], s400[kk], radial_offset])
-			if is_pulsar_found: # move to another candidate
-				break
-
-		# If the candidate is not a known strong pulsar
-		if is_normalcand:
-			normalcand.append([cand.p, cand.DM, cand.sigma])	
-	
-
 	# Now step through the .ps files and convert them to .png and gzip them
 	# Also, creating tarballs of results and copy them to the OUTPUT directory
 	psfiles = glob.glob(scratchdir + "*.ps")
@@ -994,66 +1048,11 @@ if __name__ == "__main__":
 		cmd="gzip -f %s" % (psfile)
 		totime += timed_execute(cmd,1)
 
+	print "Total runtime (s) : %.2f   [%.1f h]" % (totime, totime/3600.)
         rfp.write("Total runtime (s) : %.2f   [%.1f h]\n" % (totime, totime/3600.))
 	rfp.close()
 
-	#
-	# Writing the Candidates Info to the REPORT file
-	#
-	report_file = outfile + ".report"
-        rfp = open(report_file,"w")
-
-	# This will write the detail report file containing information about detection and 
-	# radial distances of the PSR detected. 
-	str = "\nDetected pulsars: %d" % (len(realcand))
-	rfp.write(str+"\n")
-	print str
-	if len(realcand) != 0:
-		str = "PSR\t\tP(s)\t\tDM(pc/cm3)\ts400(mJy)\tOffset(deg)"
-		rfp.write(str+"\n")
-		print str
-		# sorting by radial offset
-		realcand.sort(psr_compare)
-		for ii in realcand:
-			str = "%s\t%f\t%g\t\t%g\t\t%.1f" % (ii[0], ii[1], ii[2], ii[3], ii[4])
-			rfp.write(str+"\n")
-			print str
-
-	# Reporting about the harmonics of the known bright pulsars
-	str = "\nHarmonics detected: %d" % (len(harmcand))
-	rfp.write(str+"\n")
-	print str
-	if len(harmcand) != 0:
-		str = "%-10s   %-10s   %-13s   %-11s   %-19s   %-16s   %-8s" % ("Harm_Num", "PSR", "Detected P(s)", "Delta P(ms)", "Detected DM(pc/cm3)", "Delta DM(pc/cm3)", "Sigma")
-		rfp.write(str+"\n")
-		print str
-		# sorting by Sigma
-		harmcand.sort(harm_compare, reverse=True)
-		for ii in harmcand:
-			str = "%-10d   %-10s   %-13g   %-11.3f   %-19g   %-16.3f   %-8.2f" % (ii[0], ii[1], ii[4], (ii[4]-ii[2]/ii[0])*1000., ii[5], (ii[5]-ii[3]), ii[6])
-			rfp.write(str+"\n")
-			print str
-	
-	# Reporting about normal candidates
-	str = "\nUnidentified Pulsating Objects (UPOs): %d" % (len(normalcand))
-	rfp.write(str+"\n")
-	print str
-	if len(normalcand) != 0:
-		str = "#\tDetected P(s)\tDetected DM(pc/cm3)\tSigma"
-		rfp.write(str+"\n")
-		print str
-		# sorting by Sigma
-		normalcand.sort(upo_compare, reverse=True)
-		counter = 0
-		for ii in normalcand:
-			str = "%d\t%f\t%.2f\t\t\t%.2f" % (counter, ii[0], ii[1], ii[2]) 
-			rfp.write(str+"\n")
-			print str
-			counter += 1
-	rfp.close()
-
-
-
+	print "\nArchiving ..."
 	# Tar up the results files
 	tar_suffixes = ["_ACCEL_%d.tgz"%lo_accel_zmax, 
                         "_ACCEL_%d.cand.tgz"%lo_accel_zmax, 
@@ -1080,7 +1079,7 @@ if __name__ == "__main__":
 	tf.close()
 
 	print
-	print "Rsync'ing the results to the output dir..."
+	print "Rsync'ing the results to the output dir ..."
 	print
 	sys.stdout.flush()
 
