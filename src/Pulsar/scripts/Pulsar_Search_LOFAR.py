@@ -882,6 +882,7 @@ if __name__ == "__main__":
 		if cands_folded == max_lo_cands_to_fold:
 			break
 		elif cand.sigma > to_prepfold_sigma:
+			cands_folded += 1
 			folded_cands.append(cand) 
 	# if running hi-accel search
 	if is_run_hi_accel_search:
@@ -890,6 +891,7 @@ if __name__ == "__main__":
 			if cands_folded == max_hi_cands_to_fold:
 				break
 			elif cand.sigma > to_prepfold_sigma:
+				cands_folded += 1
 				folded_cands.append(cand) 
 	nfolded=numpy.size(folded_cands)
 
