@@ -838,6 +838,7 @@ if __name__ == "__main__":
 	# Following will sort out the candidates 
 	#
 	# read_candidate will generate collective information about lo-accel and hi-accel cands
+	print "Sifting lo-accel candidates ..."
 	start_sifting_time = time.time()
 	lo_accel_cands = sifting.read_candidates(glob.glob(scratchdir + "*ACCEL_%d" % (lo_accel_zmax)))
 	# Remove candidates with same period and low significance. 
@@ -851,6 +852,7 @@ if __name__ == "__main__":
 
 	# if running hi-accel search
 	if is_run_hi_accel_search:
+		print "Sifting hi-accel candidates ..."
 		hi_accel_cands = sifting.read_candidates(glob.glob(scratchdir + "*ACCEL_%d" % (hi_accel_zmax)))
 		if len(hi_accel_cands):
 			hi_accel_cands = sifting.remove_duplicate_candidates(hi_accel_cands) 
