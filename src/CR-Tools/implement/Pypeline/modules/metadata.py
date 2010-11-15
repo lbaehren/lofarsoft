@@ -26,6 +26,8 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
         functionname=getRelativeAntennaPositions
     elif keyword is "AbsoluteAntennaPositions":
         functionname=getAbsoluteAntennaPositions
+    elif keyword is "AntennaPositions":
+        functionname=getAntennaPositions
     elif keyword is "ClockCorrection":
         functionname=getClockCorrection
         dim2=1
@@ -435,6 +437,8 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
 
     return antpos
 
+
+
 def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
     """Returns the antenna positions of all the antennas in the station
     relative to the station center for the specified antennaset.
@@ -588,6 +592,39 @@ def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
     return antpos
 
 
+
+def getAntennaPositions(station,antennaset,return_as_hArray=False):
+    """Returns the antenna positions of all the antennas in the station
+    relative to the center of the CS002 LBA-field for the specified antennaset.
+    station can be the name or id of the station. Default returns as numpy
+    array, option to return as hArray.
+
+    *station*      Name or id of the station. e.g. "CS302" or 142
+    *antennaset*   Antennaset used for this station. Options:
+                   LBA_INNER
+                   LBA_OUTER
+                   LBA_X
+                   LBA_Y
+                   LBA_SPARSE0
+                   LBA_SPARSE1
+                   HBA_0
+                   HBA_1
+                   HBA
+    *return_as_hArray*  Return as hArray.
+
+    """
+
+    itrfpos=getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=True)
+    lonlatCS002=hf.hArray([6.869837540*np.pi/180.,52.91512249*np.pi/180.]) # 49.344
+    ITRFCS002=hf.hArray([3826577.09500000,461022.916010,5064892.767])
+    returnpos=convert_ITRF_to_local(itrfpos,refpos=ITRFCS002,reflonlat=lonlatCS002)
+    
+    if not return_as_hArray:
+        returnpos=returnpos.toNumpy()
+
+    return returnpos
+    
+
 def getClockCorrection(station,antennaset="HBA",time=1278480000):
     """Get clock correction for superterp stations in seconds. Currently static values.
 
@@ -711,6 +748,28 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
 
     return stationpos
 
+
+
+
+def convert_ITRF_to_local(itrfpos,refpos,reflonlat):
+    from numpy import sin
+    from numpy import cos
+    
+    lon=reflonlat[0]
+    lat=reflonlat[1]
+    Arg0=hf.hArray([-sin(lon),-sin(lat)*cos(lon),cos(lat)*cos(lon)])
+    Arg1=hf.hArray([cos(lon),-sin(lat)*sin(lon),cos(lat)*sin(lon)])
+    Arg2=hf.hArray([0.0,cos(lat),sin(lat)])
+    
+    itrfpos.sub(refpos)
+    
+    returnpos=hf.hArray(float,itrfpos.shape())
+
+    returnpos[...].muladd(Arg0,itrfpos[...,0])
+    returnpos[...].muladd(Arg1,itrfpos[...,1])
+    returnpos[...].muladd(Arg2,itrfpos[...,2])
+
+    return returnpos
 
 if __name__=='__main__':
     import doctest
