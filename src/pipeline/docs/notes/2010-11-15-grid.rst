@@ -107,6 +107,19 @@ Introduction to LOFAR Pipeline Software
     implement a simple mechanism based on passing pickled Python objects over
     a TCP stream shortly).
 
+- Results
+
+  - Broadly speaking, the imaging pipeline picks data up from the storage
+    nodes and processes it, writing results onto scratch disks on the compute
+    nodes.
+  - Intermediate data products are kept on the compute nodes -- for example,
+    output from NDPPP will be processed by BBS and the imager on the same
+    node, thus minimising data transport.
+  - The resulting images will usually be copied to a shared storage location
+    for collection/archiving.
+  - If required, a copying step for intermediate data products could also be
+    added.
+
 - Dependencies
 
   - The system makes extensive use of the Python standard library
