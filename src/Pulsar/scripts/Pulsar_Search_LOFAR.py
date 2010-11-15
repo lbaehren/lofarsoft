@@ -222,21 +222,25 @@ def does_pulsar_exist (psrname, realcand):
 # more than 1 iterations should be arranged. Value of blk should already be divisible by (ncores - 1)
 def adjust_ddplan (ddplans, blk, ncores):
 	np = ncores - 1
+	adjusted_ddplans = []
 	for pp in range(0, len(ddplans)):
 		totdm = ddplans[pp].dmsperpass * ddplans[pp].numpasses
 		hidm = ddplans[pp].lodm + totdm * ddplans[pp].dmstep 
 		if pp != 0:
-			ddplans[pp].lodm = ddplans[pp-1].lodm + ddplans[pp-1].dmsperpass * ddplans[pp-1].dmstep
-		dmrange = hidm - ddplans[pp].lodm
+			lodm = ddplans[pp-1].lodm + ddplans[pp-1].dmsperpass * ddplans[pp-1].dmstep
+		else:
+			lodm = ddplans[pp].lodm
+		dmrange = hidm - lodm
 		ndms = int (math.ceil(dmrange / ddplans[pp].dmstep))
 		niter = int(ndms/blk) # number of iterations
 		leftdm = ndms % blk   # leftover number of DMs
 		if leftdm % np != 0:
 			leftdm = (int(leftdm/np) + 1) * np
 		ndms = niter * blk + leftdm
-		ddplans[pp].dmsperpass = ndms
-		ddplans[pp].numpasses = 1
-	return ddplans
+		# we need to init a new dedisp_plan (rather than correct the old one) 
+		# because we should also correct the list of DMs inside the DDplan class
+		adjusted_ddplans.append(dedisp_plan(lodm, ddplans[pp].dmstep, ndms, 1, ddplans[pp].numsub, ddplans[pp].downsamp))
+	return adjusted_ddplans
 
 # function that creates the generic birdies file
 def create_birdies_file (dir, name):
