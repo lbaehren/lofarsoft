@@ -2762,9 +2762,9 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
   };
   //Normalize to unity
   if (abs(sum) < A_LOW_NUMBER) {
-    for (i=0; i<wlen; i++) weights[i] /= sum;
-  } else {
     throw PyCR::ZeroDivisionError("Sum value is 0.");
+  } else {
+    for (i=0; i<wlen; i++) weights[i] /= sum;
   }
 
   return weights;
@@ -2804,9 +2804,9 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
   };
   //Normalize to unity
   if (abs(sum) < A_LOW_NUMBER) {
-    for (i=0; i<wlen; i++) weights[i] /= sum;
-  } else {
     throw PyCR::ZeroDivisionError("Sum value is 0.");
+  } else {
+    for (i=0; i<wlen; i++) weights[i] /= sum;
   }
 
   return weights;
