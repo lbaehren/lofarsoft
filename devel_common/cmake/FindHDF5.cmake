@@ -233,6 +233,11 @@ if (NOT FIND_HDF5_CMAKE)
   set( HDF5_IS_PARALLEL ${HDF5_IS_PARALLEL} CACHE BOOL
     "HDF5 library compiled with parallel IO support" )
   
+  ##_____________________________________________________________________________
+  ## HDF5 tools
+
+  find_program (H5CHECK_EXECUTABLE h5check ${bin_locations} )
+  find_program (H5STAT_EXECUTABLE  h5stat  ${bin_locations} )
   
   ##_____________________________________________________________________________
   ## Feedback
