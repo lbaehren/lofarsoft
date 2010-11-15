@@ -217,6 +217,13 @@ def does_pulsar_exist (psrname, realcand):
 			return True
 	return False
 
+# function that checks that the same harmonic of the same pulsar is already in the list of harmonics found
+def does_harm_exist (harm, psrname, harmcand):
+	for el in harmcand:
+		if (el[0] == harm and el[1] == psrname):
+			return True
+	return False
+
 # function that adjusts DDplan in order that number of DMs in each pass
 # will be divisible by (ncores - 1). Also should take care of if number of DMs > blk, then
 # more than 1 iterations should be arranged. Value of blk should already be divisible by (ncores - 1)
@@ -831,6 +838,7 @@ if __name__ == "__main__":
 	totime += sp_time
 	# cd back to the current directory
 	os.chdir(currentdir)
+	print
 	print "Total time to make single-pulse plots (s) : %.2f   [%.1f h]" % (sp_time, sp_time/3600.)
 	rfp.write("Total time to make single-pulse plots (s) : %.2f   [%.1f h]\n" % (sp_time, sp_time/3600.))
 	
@@ -838,6 +846,7 @@ if __name__ == "__main__":
 	# Following will sort out the candidates 
 	#
 	# read_candidate will generate collective information about lo-accel and hi-accel cands
+	print
 	print "Sifting lo-accel candidates ..."
 	start_sifting_time = time.time()
 	lo_accel_cands = sifting.read_candidates(glob.glob(scratchdir + "*ACCEL_%d" % (lo_accel_zmax)))
@@ -881,10 +890,10 @@ if __name__ == "__main__":
 	harmcand = []    # list of all (up to 10th) harmonics of known pulsars
 	normalcand = []  # list of other candidates
 
-	accel_cands = lo_accel_cands
+	accel_cands = lo_accel_cands[:]
         # if running hi-accel search, merging hi-accel candidates as well
         if is_run_hi_accel_search:
-		accel_cands.append(hi_accel_cands)
+		accel_cands += hi_accel_cands
 
 	for cand in accel_cands:
 		is_normalcand = True
@@ -898,7 +907,8 @@ if __name__ == "__main__":
 				for harm in range(1, max_psr_harm):
 					if  (cand.p >= 0.03 and abs(cand.p - rPeriod[kk]/harm) < period_tolerance) or \
 					    (cand.p <  0.03 and abs(cand.p - rPeriod[kk]/harm) < ms_period_tolerance):
-						harmcand.append([harm, psrname[kk], rPeriod[kk], rDM[kk], cand.p, cand.DM, cand.sigma])
+						if not does_harm_exit(harm, psrname[kk], harmcand):
+							harmcand.append([harm, psrname[kk], rPeriod[kk], rDM[kk], cand.p, cand.DM, cand.sigma])
 						if not is_pulsar_found:
 							is_pulsar_found = True
 							is_normalcand = False
@@ -916,8 +926,10 @@ if __name__ == "__main__":
 	#
 	# Writing the Candidates Info to the REPORT file
 	#
-	report_file = outfile + ".report"
-        candrep = open(report_file, "w")
+	candrep_file = outfile + ".report"
+        candrep = open(candrep_file, "w")
+	print 
+	print "=== Candidates Report === [ %s ]" % (basename + ".report")
 
 	# This will write the detail report file containing information about detection and 
 	# radial distances of the PSR detected. 
@@ -951,6 +963,7 @@ if __name__ == "__main__":
 			print str
 	
 	# Reporting about normal candidates
+	upos_to_print=20
 	str = "\nUnidentified Pulsating Objects (UPOs): %d" % (len(normalcand))
 	candrep.write(str+"\n")
 	print str
@@ -964,8 +977,11 @@ if __name__ == "__main__":
 		for ii in normalcand:
 			str = "%d\t%f\t%.2f\t\t\t%.2f" % (counter, ii[0], ii[1], ii[2]) 
 			candrep.write(str+"\n")
-			print str
+			if counter < upos_to_print:
+				print str
 			counter += 1
+	print "..."
+	print "Only %d best candidates are printed. The rest is in the *.report file" % (upos_to_print)
 	candrep.close()
 
 	#
@@ -1052,7 +1068,8 @@ if __name__ == "__main__":
         rfp.write("Total runtime (s) : %.2f   [%.1f h]\n" % (totime, totime/3600.))
 	rfp.close()
 
-	print "\nArchiving ..."
+	print
+	print "Archiving ..."
 	# Tar up the results files
 	tar_suffixes = ["_ACCEL_%d.tgz"%lo_accel_zmax, 
                         "_ACCEL_%d.cand.tgz"%lo_accel_zmax, 
