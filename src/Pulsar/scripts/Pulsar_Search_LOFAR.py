@@ -647,6 +647,12 @@ if __name__ == "__main__":
         for ddplan in ddplans:
                  print "%-7.2f %-6.2f %-9d %-8d %-7d" % (ddplan.lodm, ddplan.dmstep, ddplan.dmsperpass, ddplan.downsamp, ddplan.numpasses)
 	print
+	# Forming the list of all DMs (to be used later in sifting step)
+	dmstrs = []
+	for ddplan in ddplans:
+		for passnum in range(ddplan.numpasses):
+			for dmstr in ddplan.dmlist[passnum]:
+				dmstrs.append(dmstr)
 
 	# Open file that keeps timing info of each processing step
 	exectime_file = outfile + ".exectime"
@@ -695,7 +701,6 @@ if __name__ == "__main__":
 	print "Creating search script: %s" % (search_script)
 	create_search_script(scratchdir+search_script)
 
-	dmstrs = []
 	tot_prep_time = 0
 	tot_search_time = 0
 
@@ -704,9 +709,6 @@ if __name__ == "__main__":
 		if not mpiflag:
 			print "\nRunning prepsubband ...."
 			for ddplan in ddplans:
-				for passnum in range(ddplan.numpasses):
-					for dmstr in ddplan.dmlist[passnum]:
-						dmstrs.append(dmstr)
 				totdm = ddplan.dmsperpass * ddplan.numpasses
 				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm + totdm * ddplan.dmstep)
  	
@@ -740,9 +742,6 @@ if __name__ == "__main__":
 		if mpiflag:
 			print "\nRunning mpiprepsubband ...."
 			for ddplan in ddplans:
-				for passnum in range(ddplan.numpasses):
-					for dmstr in ddplan.dmlist[passnum]:
-						dmstrs.append(dmstr)
 				totdm = ddplan.dmsperpass * ddplan.numpasses
 				print "Pass for DM range: [%g-%g)" % (ddplan.lodm, ddplan.lodm+totdm*ddplan.dmstep)
 
@@ -781,10 +780,6 @@ if __name__ == "__main__":
 	if is_skip_dedispersion and not is_sift_n_fold_only:
 		print "\nRunning (mpi)prepsubband ... skipped"
 		print "Searching ..."
-		for ddplan in ddplans:
-			for passnum in range(ddplan.numpasses):
-				for dmstr in ddplan.dmlist[passnum]:
-					dmstrs.append(dmstr)
 		search_time = run_searching (scratchdir, outfile, search_script, waittime)
 		totime += search_time
 		print "Total search time (s) : %.2f   [%.1f h]" % (search_time, search_time/3600.)
@@ -816,6 +811,8 @@ if __name__ == "__main__":
 		basedmb+"[3-9][0-9][0-9].[0-9][0-9]"+basedme +
 		basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme,
 		basedmb+"[0-9].[0-9][0-9]"+basedme +
+		basedmb+"[0-9][0-9].[0-9][0-9]"+basedme +
+		basedmb+"[0-9][0-9][0-9].[0-9][0-9]"+basedme +
 		basedmb+"1[0-9][0-9][0-9].[0-9][0-9]"+basedme]
 	dmrangestrs = ["0-30", "20-110", "100-310", "300-1000+", "0-1000+"]
 	psname = basename+"_singlepulse.ps"
