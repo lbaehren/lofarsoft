@@ -76,3 +76,7 @@ not yet finished!)
 - several bug fixes
 - got testrfi3.py to work again (testrfi2.py doesn't)
 
+2010-11-15 - Pypeline - Sander ter Veen - rev 6304
+- Added "AntennaPositions" keyword to IO.py. This gives the antennapositions in the local coordinate relative to the CS002 core.
+
+
