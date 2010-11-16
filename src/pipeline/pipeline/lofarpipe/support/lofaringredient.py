@@ -166,7 +166,7 @@ class LOFARingredient(DictMixin):
         if (
             not self._values.has_key(key) and
             self._fields.has_key(key) and
-            hasattr(self._fields[key], "default"
+            hasattr(self._fields[key], "default")
         ):
             field = self._fields[key]
             value = field.coerce(field.default)
@@ -175,8 +175,10 @@ class LOFARingredient(DictMixin):
                     "%s is an invalid value for %s %s" %
                     (str(value), type(field).__name__, key)
                 )
-        else:
+        elif self._values.has_key(key):
             value = self._values[key]
+        else:
+            raise KeyError(key)
         return value
 
     def __setitem__(self, key, value):
@@ -193,7 +195,13 @@ class LOFARingredient(DictMixin):
             raise TypeError("Ingredient %s not defined" % key)
 
     def keys(self):
-        return self._fields.keys()
+        # We want to return a list of everything we have a value for. That's
+        # everything in _values, plus things in _fields which have a default.
+        return list(
+            set(self._values.keys()).union(
+                set(k for k, v in self._fields.items() if hasattr(v, "default"))
+            )
+        )
 
     def make_options(self):
         return [value.generate_option(key) for key, value in self._fields.iteritems()]
@@ -203,6 +211,7 @@ class LOFARingredient(DictMixin):
             key for key in self._fields.iterkeys()
             if not self._values.has_key(key)
             and not hasattr(self._fields[key], "optional")
+            and not hasattr(self._fields[key], "default")
         ]
 
     def complete(self):
