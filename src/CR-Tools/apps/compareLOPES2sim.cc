@@ -355,6 +355,8 @@ int main (int argc, char *argv[])
     int NCCbeamAntennas_NS = 0, NlateralAntennas_NS = 0; // antennas used for CC beam and lateral distribution
     int NCCbeamAntennas_VE = 0, NlateralAntennas_VE = 0; // antennas used for CC beam and lateral distribution
     double latMeanDist=0, latMeanDist_NS=0, latMeanDist_VE=0;                 // mean distance of the antennas in the lateral distribution
+    double latMinDist=0, latMinDist_NS=0, latMinDist_VE=0;                 // minimum distance of the antennas in the lateral distribution
+    double latMaxDist=0, latMaxDist_NS=0, latMaxDist_VE=0;                 // maximum distance of the antennas in the lateral distribution
     double latMeanDistCC=0, latMeanDistCC_NS=0, latMeanDistCC_VE=0;             // mean distance of the antennas used for the CC beam
     double ratioDiffSign=0, ratioDiffSign_NS=0, ratioDiffSign_VE=0;
     double ratioDiffSignEnv=0, ratioDiffSignEnv_NS=0, ratioDiffSignEnv_VE=0;
@@ -478,6 +480,8 @@ int main (int argc, char *argv[])
       recTree->SetBranchAddress("weightedTotSign_EW",&weightedTotSign);
       recTree->SetBranchAddress("weightedTotSignEnv_EW",&weightedTotSignEnv);
       recTree->SetBranchAddress("latMeanDist_EW",&latMeanDist);
+      recTree->SetBranchAddress("latMinDist_EW",&latMinDist);
+      recTree->SetBranchAddress("latMaxDist_EW",&latMaxDist);
       recTree->SetBranchAddress("NlateralAntennas_EW",&NlateralAntennas);
       
       outtree->Branch("AzL_EW",&AzL,"AzL_EW/D");
@@ -502,6 +506,8 @@ int main (int argc, char *argv[])
       outtree->Branch("weightedTotSign_EW",&weightedTotSign,"weightedTotSign_EW/D");
       outtree->Branch("weightedTotSignEnv_EW",&weightedTotSignEnv,"weightedTotSignEnv_EW/D");
       outtree->Branch("latMeanDist_EW",&latMeanDist,"latMeanDist_EW/D");
+      outtree->Branch("latMinDist_EW",&latMinDist,"latMinDist_EW/D");
+      outtree->Branch("latMaxDist_EW",&latMaxDist,"latMaxDist_EW/D");
       outtree->Branch("NlateralAntennas_EW",&NlateralAntennas,"NlateralAntennas_EW/I");
       
       outtree->Branch("latTimeRcurv_EW",&latTimeRcurv_EW,"latTimeRcurv_EW/D");
@@ -564,6 +570,8 @@ int main (int argc, char *argv[])
       recTree->SetBranchAddress("weightedTotSign_NS",&weightedTotSign_NS);
       recTree->SetBranchAddress("weightedTotSignEnv_NS",&weightedTotSignEnv_NS);
       recTree->SetBranchAddress("latMeanDist_NS",&latMeanDist_NS);
+      recTree->SetBranchAddress("latMinDist_NS",&latMinDist_NS);
+      recTree->SetBranchAddress("latMaxDist_NS",&latMaxDist_NS);
       recTree->SetBranchAddress("NlateralAntennas_NS",&NlateralAntennas_NS);
       
       outtree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
@@ -588,6 +596,8 @@ int main (int argc, char *argv[])
       outtree->Branch("weightedTotSign_NS",&weightedTotSign_NS,"weightedTotSign_NS/D");
       outtree->Branch("weightedTotSignEnv_NS",&weightedTotSignEnv_NS,"weightedTotSignEnv_NS/D");
       outtree->Branch("latMeanDist_NS",&latMeanDist_NS,"latMeanDist_NS/D");
+      outtree->Branch("latMinDist_NS",&latMinDist_NS,"latMinDist_NS/D");
+      outtree->Branch("latMaxDist_NS",&latMaxDist_NS,"latMaxDist_NS/D");
       outtree->Branch("NlateralAntennas_NS",&NlateralAntennas_NS,"NlateralAntennas_NS/I");
       
       outtree->Branch("latTimeRcurv_NS",&latTimeRcurv_NS,"latTimeRcurv_NS/D");
@@ -650,6 +660,8 @@ int main (int argc, char *argv[])
       recTree->SetBranchAddress("weightedTotSign_VE",&weightedTotSign_VE);
       recTree->SetBranchAddress("weightedTotSignEnv_VE",&weightedTotSignEnv_VE);
       recTree->SetBranchAddress("latMeanDist_VE",&latMeanDist_VE);
+      recTree->SetBranchAddress("latMinDist_VE",&latMinDist_VE);
+      recTree->SetBranchAddress("latMaxDist_VE",&latMaxDist_VE);
       recTree->SetBranchAddress("NlateralAntennas_VE",&NlateralAntennas_VE);
        
       outtree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
@@ -674,6 +686,8 @@ int main (int argc, char *argv[])
       outtree->Branch("weightedTotSign_VE",&weightedTotSign_VE,"weightedTotSign_VE/D");
       outtree->Branch("weightedTotSignEnv_VE",&weightedTotSignEnv_VE,"weightedTotSignEnv_VE/D");
       outtree->Branch("latMeanDist_VE",&latMeanDist_VE,"latMeanDist_VE/D");
+      outtree->Branch("latMinDist_VE",&latMinDist_VE,"latMinDist_VE/D");
+      outtree->Branch("latMaxDist_VE",&latMaxDist_VE,"latMaxDist_VE/D");
       outtree->Branch("NlateralAntennas_VE",&NlateralAntennas_VE,"NlateralAntennas_VE/I");
       
       outtree->Branch("latTimeRcurv_VE",&latTimeRcurv_VE,"latTimeRcurv_VE/D");
@@ -882,6 +896,9 @@ int main (int argc, char *argv[])
         // read Xmax value
         Xmax_sim = reasXmaxFromREAS(reasLogFile);
         cout << "\nXmax (simulation) = " << Xmax_sim << " g/cm^2" << endl;
+        if (Xmax_sim < 200)
+          cout << "\nWARNING: Xmax for simulation " << m_dict[Gt] << " , GT = " << Gt << " too low!\n" << endl;
+
 	
         // get simulation azimuth and zenith form dictionary
         AzDictS = m_dictAz[Gt]; //in deg!
