@@ -97,7 +97,7 @@ class FloatField(Field):
 
 class FileField(Field):
     def is_valid(self, value):
-        return os.path.exists(value)
+        return os.path.exists(str(value))
 
 class ExecField(Field):
     def is_valid(self, value):
@@ -105,11 +105,11 @@ class ExecField(Field):
 
 class DirectoryField(Field):
     def is_valid(self, value):
-        return os.path.isdir(value)
+        return os.path.isdir(str(value))
 
     def coerce(self, value):
         try:
-            os.makedirs(value)
+            os.makedirs(str(value))
         except:
             pass
         finally:
