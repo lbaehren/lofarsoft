@@ -274,6 +274,11 @@ else (DAL_PYTHON_BINDINGS)
 endif (DAL_PYTHON_BINDINGS)
 
 ##____________________________________________________________________
+##                                          Transmogrify Library (TMF)
+
+build_package (tmf src/TMF)
+
+##____________________________________________________________________
 ##                                                            CR-Tools
 
 build_package (cr src/CR-Tools)
@@ -289,7 +294,7 @@ if (CR_WITH_GUI)
 endif (CR_WITH_GUI)
 
 if (CR_WITH_PYPELINE)
-  add_dependencies (cr tmf sphinx)
+  add_dependencies (cr tmf)
 endif (CR_WITH_PYPELINE)
 
 if (HAVE_ROOT AND CR_WITH_STARTOOLS)
