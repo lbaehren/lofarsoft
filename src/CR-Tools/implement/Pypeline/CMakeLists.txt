@@ -42,6 +42,8 @@ if (PYPELINE_WITH_OPTIMIZATION)
 
     include (OptimizeForArchitecture)
     OptimizeForArchitecture()
+
+    set (PYPELINE_CXX_FLAGS "${PYPELINE_CXX_FLAGS} -ftree-vectorize")
   endif (PYPELINE_WITH_CPU_OPTIMIZATION)
 endif (PYPELINE_WITH_OPTIMIZATION)
 
