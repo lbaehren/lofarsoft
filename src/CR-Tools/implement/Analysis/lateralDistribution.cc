@@ -307,7 +307,7 @@ namespace CR { // Namespace CR -- begin
       if (ant >= 3) {
         // define names for statistics
         if (index1 != "") {
-          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index1 + " [#muV/m/MHz]";
+          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index1 + " [uV/m/MHz]";
           R0Name = "R_{0}- " + index1 + " [m]";
         } else {
           epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "} [#muV/m/MHz]";
@@ -345,16 +345,16 @@ namespace CR { // Namespace CR -- begin
              << "R_0    = " << fitfuncExp->GetParameter(1) << "\t +/- " << fitfuncExp->GetParError(1) << "\t m\n"
              << "Chi^2  = " << fitfuncExp->GetChisquare() << "\t NDF " << fitfuncExp->GetNDF() << "\n"
              << endl;
-         
+        
         if (fitSim) {        
           cout << "-------- SIMULATIONS ---------"<<endl;
           // define names for statistics
           if (index2 != "") {
-            epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index2;
-            R0Name = "R_{0}- " + index2;
+            epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index2 + " [uV/m/MHz]";
+            R0Name = "R_{0}- " + index2 + " [m]";
           } else {
-            epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}";
-            R0Name = "R_{0}";
+            epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}" + "} [#muV/m/MHz]";
+            R0Name = "R_{0} [m]";
           }
           TF1 *fitfuncExpS;
           fitfuncExpS=new TF1("fitfuncExpS",fitFunction.c_str(),0.,maxdist*1.1);
@@ -385,15 +385,18 @@ namespace CR { // Namespace CR -- begin
               << "R_0sim    = " << fitfuncExpS->GetParameter(1) << "\t +/- " << fitfuncExpS->GetParError(1) << "\t m\n"
               << "Chi^2_sim  = " << fitfuncExpS->GetChisquare() << "\t NDF " << fitfuncExpS->GetNDF() << "\n"
               << endl;
-          delete fitfuncExpS;
+          //fitfuncExpS->Delete();
         }
 
         // write plot to file
-        stringstream plotNameStream;
+        stringstream plotNameStream("");
         plotNameStream << filePrefix << Gt << ".eps";
         cout << "\nCreating plot: " << plotNameStream.str() << endl;
         c1->Print(plotNameStream.str().c_str());
-        
+	plotNameStream.str("");
+        plotNameStream << filePrefix << Gt << ".root";
+        c1->Print(plotNameStream.str().c_str());
+	
         // calculate expectet value from fitted function and relative deviation for each point.residual  
         if (false) {
           double angleToCore[Nant],angleToCoreErr[Nant],deviation[Nant],deviationErr[Nant];           
@@ -451,6 +454,9 @@ namespace CR { // Namespace CR -- begin
           plotNameStream.str("");
           plotNameStream << filePrefix << "dev-" << Gt << ".eps";
           cout << "\nCreating plot: " << plotNameStream.str() << endl;
+          c1->Print(plotNameStream.str().c_str());
+	  plotNameStream.str("");
+          plotNameStream << filePrefix << "dev-" << Gt << ".root";
           c1->Print(plotNameStream.str().c_str());
           latDev->Delete();
           //delete latDev;
@@ -560,6 +566,9 @@ namespace CR { // Namespace CR -- begin
           distanceErSim[ant] = pulsesSim[antID[ant]].disterr;
           timeValUnproSim[ant] = pulsesSim[antID[ant]].time;
           timeValUnproErSim[ant] = pulsesSim[antID[ant]].timeError;
+          // the 2D fit needs a defined error != 0
+          if (timeValUnproErSim[ant] == 0)
+            timeValUnproErSim[ant] = 1.;
           zshowerSim[ant] = pulsesSim[antID[ant]].distZ;
           zshowerErSim[ant] = pulsesSim[antID[ant]].distZerr;
         }
@@ -808,9 +817,9 @@ namespace CR { // Namespace CR -- begin
           fitFuncS=new TF1("fitFuncS","3.335640952*(sqrt([0]**2+x**2)-[0])",0,1000);
           fitFuncS2D=new TF2("fitFuncS2D","3.335640952*(sqrt(([0]-y)**2+x**2)-[0])",0,1000,-200,200);
           //fitFuncS->SetParName(0,offsetName.c_str());
-          fitFuncS->SetParName(0,curvName.c_str());
+          fitFuncS->SetParName(0,curvNameS.c_str());
           //fitFuncS2D->SetParName(0,offsetName.c_str());
-          fitFuncS2D->SetParName(0,curvName.c_str());
+          fitFuncS2D->SetParName(0,curvNameS.c_str());
           //fitFuncS->FixParameter(0,0);
           //fitFuncS2D->FixParameter(0,0);
           //fitFuncS->FixParameter(1,1e9/lightspeed); // = 3.335640952
@@ -826,16 +835,16 @@ namespace CR { // Namespace CR -- begin
           ptstatsS->Draw();
 
           // write fit results to record with other results
-          erg.define("latTime_offset_sim",fitFuncS2D->GetParameter(0));
-          erg.define("latTime_R_curv_sim",fitFuncS2D->GetParameter(1));
+          erg.define("latTime_offset_sim",0.);
+          erg.define("latTime_R_curv_sim",fitFuncS2D->GetParameter(0));
           erg.define("latTime_latOffset_sim",0.);
-          erg.define("latTime_sigoffset_sim",fitFuncS2D->GetParError(0));
-          erg.define("latTime_sigR_curv_sim",fitFuncS2D->GetParError(1));
+          erg.define("latTime_sigoffset_sim",0.);
+          erg.define("latTime_sigR_curv_sim",fitFuncS2D->GetParError(0));
           erg.define("latTime_siglatOffset_sim",0.);
           erg.define("latTime_chi2NDF_sim",fitFuncS2D->GetChisquare()/double(fitFuncS2D->GetNDF()));
           cout << "Results of spherical fit (SIMULATION)"
-              << "R_curv     = " << fitFuncS2D->GetParameter(1) << "\t +/- " << fitFuncS2D->GetParError(1) << "\t m\n"
-              << "t offset   = " << fitFuncS2D->GetParameter(0) << "\t +/- " << fitFuncS2D->GetParError(0) << "\t ns\n"
+              << "R_curv     = " << fitFuncS2D->GetParameter(0) << "\t +/- " << fitFuncS2D->GetParError(0) << "\t m\n"
+              //<< "t offset   = " << fitFuncS2D->GetParameter(0) << "\t +/- " << fitFuncS2D->GetParError(0) << "\t ns\n"
               // << "lat offset = " << fitFuncS->GetParameter(3) << "\t +/- " << fitFuncS->GetParError(3) << "\t m\n"
               << "Chi^2  = " << fitFuncS2D->GetChisquare() << "\t NDF " << fitFuncS2D->GetNDF() << "\n"
               //<< "Curvature radius of CC-beam (to compare) = " << erg.asDouble("Distance") << " m\n"
@@ -846,6 +855,9 @@ namespace CR { // Namespace CR -- begin
         stringstream plotNameStream("");
         plotNameStream << filePrefix << "sphere-" << Gt <<".eps";
         cout << "\nCreating plot: " << plotNameStream.str() << endl;
+        c1->Print(plotNameStream.str().c_str());
+        plotNameStream.str("");
+        plotNameStream << filePrefix << "sphere-" << Gt <<".root";
         c1->Print(plotNameStream.str().c_str());
         fitFunc->Delete();
         
@@ -915,8 +927,11 @@ namespace CR { // Namespace CR -- begin
         // write plot to file
         plotNameStream.str("");
         plotNameStream << filePrefix << "parabo-" << Gt <<".eps";
-        cout << "\nCreating plot: " << plotNameStream.str() << endl;
-        c1->Print(plotNameStream.str().c_str());
+        //cout << "\nCreating plot: " << plotNameStream.str() << endl;
+        //c1->Print(plotNameStream.str().c_str()); // do not create plot, because it is identical to the first one
+        plotNameStream.str("");
+        plotNameStream << filePrefix << "parabo-" << Gt <<".root";
+        //c1->Print(plotNameStream.str().c_str());
         fitFunc2->Delete();
       } else {
         cout<<"No fit was done, because less than 3 antennas are 'good':\n";

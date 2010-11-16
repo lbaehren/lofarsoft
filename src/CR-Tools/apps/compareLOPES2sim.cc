@@ -21,18 +21,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include<cstdlib>
-#include<iostream>
-#include<fstream>
-#include<string>
-#include<sstream>
-#include<time.h>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <time.h>
 
-#include<TFile.h>
-#include<TTree.h>
-#include<TMath.h>
-#include<TCut.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TMath.h>
+#include <TCut.h>
 #include <Rtypes.h>
+
+#include <boost/lexical_cast.hpp>
 
 #include <crtools.h>
 #include <Analysis/lateralDistribution.h>
@@ -84,10 +86,56 @@
 
 const static bool simulationDistances = true; //true;  // decide wether to use the lateral distances of simulation or of data
 const static double gradeg=(180./TMath::Pi());
-const static double antennaHeightOffset = 12615.9 -8.17; // used in REAS, for LOPES 30 EW (corresponds to average antenna height)
+//const static double antennaHeightOffset = 12615.9 -8.17; // used in REAS, for Steffen's events (corresponds to average antenna height)
+const static double antennaHeightOffset = 11000+14; // height of antenna 1 used for REAS
 // time offset, because ground plane in REAS is defined as average of antenna heights, not as KASCADE height or 0
-const static double groundPlaneTimeOffset = 0.0817 * 3.33564; // height diff = 14 cm, conversion to ns
-const static double generalREAStimeOffset = 1.65; // general offset to avoid negative times with REAS (fine tuning by hand)
+const static double groundPlaneTimeOffset = 0;
+//const static double groundPlaneTimeOffset = 0.0817 * 3.33564; // height diff = 14 cm, conversion to ns
+const static double generalREAStimeOffset = 2.4; // general offset to avoid negative times with REAS (fine tuned by hand)
+
+
+/*
+  Function to read Xmax of CORSIKA shower used for REAS input from .reas file
+*/
+double reasXmaxFromREAS(string filename)
+{
+  double Xmax = 0;
+  
+  cout << "\nReading Xmax from file: " << filename << endl;
+  
+  // parse .reas file line by line and search for "DepthOfShowerMaximum = ...  ; ..."
+  ifstream file(filename.c_str());
+  if(file.is_open()) {
+    while(!file.eof()) {
+      string line;
+      getline(file, line);
+      if(line.find_first_of("=") != string::npos) {
+        string varName = line.substr(0, line.find_first_of("="));
+        // look for comments when reading the value
+        string value("");
+        if(line.find_first_of(";") != string::npos)
+          value = line.substr(line.find_first_of("=") + 1, line.find_first_of(";")-line.find_first_of("=")-1);
+        else  
+          value = line.substr(line.find_first_of("=") + 1, line.length());
+          
+        //cout << varName << " = " << value << endl;
+
+        if (varName.find("DepthOfShowerMaximum") != string::npos) {
+          stringstream tempstream(value);
+          tempstream >> Xmax;       
+          break; // no need to read further lines
+        }  
+      }    
+    }
+  } else {
+    cerr << "\nError: Cannot open file: "<< filename  << endl;
+    return 0;
+  }
+  
+  file.close();
+  
+  return Xmax;
+}
 
 
 int main (int argc, char *argv[])
@@ -106,6 +154,7 @@ int main (int argc, char *argv[])
     // check arguments
     string resultsName1(""), resultsName2(""), simDictName(""), simPath("");
     // simPath e.g. = /lxdata/d2lx68/huege/lopeseventsR3i
+    // or /data/d1lp4/LOPES/simFrank_p_ew_K 
     string index1(""), index2("");  // name indices for lateral distribution
     string outPrefix("simANDrec_fitvalue");  // prefix for output filename
     for (int i=1; i < argc; ++i) {
@@ -276,25 +325,41 @@ int main (int argc, char *argv[])
     double AzL, ElL, AzL_NS, ElL_NS, AzL_VE, ElL_VE;                       // Azimuth and Elevation
     double distanceResult = 0, distanceResult_NS = 0, distanceResult_VE = 0;       // distance = radius of curvature
     // values for lateral distribution of arrival times
-    double latTimeRcurv = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
-    double latTimeSigRcurv = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
-    double latTimeOffset = 0, latTimeOffset_NS = 0, latTimeOffset_VE = 0;
-    double latTimeSigOffset = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
-    double latTimeChi2NDF = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
+    double latTimeRcurv_EW = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
+    double latTimeSigRcurv_EW = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
+    double latTimeOffset_EW = 0, latTimeOffset_NS = 0, latTimeOffset_VE = 0;
+    double latTimeSigOffset_EW = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
+    double latTimeChi2NDF_EW = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
+    double latTimeRcurv_sim_EW = 0, latTimeRcurv_sim_NS = 0, latTimeRcurv_sim_VE = 0;
+    double latTimeSigRcurv_sim_EW = 0, latTimeSigRcurv_sim_NS = 0, latTimeSigRcurv_sim_VE = 0;
+    double latTimeOffset_sim_EW = 0, latTimeOffset_sim_NS = 0, latTimeOffset_sim_VE = 0;
+    double latTimeSigOffset_sim_EW = 0, latTimeSigOffset_sim_NS = 0, latTimeSigOffset_sim_VE = 0;
+    double latTimeChi2NDF_sim_EW = 0, latTimeChi2NDF_sim_NS = 0, latTimeChi2NDF_sim_VE = 0;
   
-    //bool goodEW = false, goodNS = false, goodVE = false;                // true if reconstruction worked
-    double rmsCCbeam, rmsCCbeam_NS, rmsCCbeam_VE;                        // rms values of the beams in remote region
-    double rmsXbeam, rmsXbeam_NS, rmsXbeam_VE;
-    double rmsPbeam, rmsPbeam_NS, rmsPbeam_VE;
+    double latTimeParRcurv_EW = 0, latTimeParRcurv_NS = 0, latTimeParRcurv_VE = 0;
+    double latTimeParSigRcurv_EW = 0, latTimeParSigRcurv_NS = 0, latTimeParSigRcurv_VE = 0;
+    double latTimeParOffset_EW = 0, latTimeParOffset_NS = 0, latTimeParOffset_VE = 0;
+    double latTimeParSigOffset_EW = 0, latTimeParSigOffset_NS = 0, latTimeParSigOffset_VE = 0;
+    double latTimeParChi2NDF_EW = 0, latTimeParChi2NDF_NS = 0, latTimeParChi2NDF_VE = 0;
+    double latTimeParRcurv_sim_EW = 0, latTimeParRcurv_sim_NS = 0, latTimeParRcurv_sim_VE = 0;
+    double latTimeParSigRcurv_sim_EW = 0, latTimeParSigRcurv_sim_NS = 0, latTimeParSigRcurv_sim_VE = 0;
+    double latTimeParOffset_sim_EW = 0, latTimeParOffset_sim_NS = 0, latTimeParOffset_sim_VE = 0;
+    double latTimeParSigOffset_sim_EW = 0, latTimeParSigOffset_sim_NS = 0, latTimeParSigOffset_sim_VE = 0;
+    double latTimeParChi2NDF_sim_EW = 0, latTimeParChi2NDF_sim_NS = 0, latTimeParChi2NDF_sim_VE = 0;
+    
+    //bool goodEW = false=0, goodNS = false=0, goodVE = false=0;                // true if reconstruction worked
+    double rmsCCbeam=0, rmsCCbeam_NS=0, rmsCCbeam_VE=0;                        // rms values of the beams in remote region
+    double rmsXbeam=0, rmsXbeam_NS=0, rmsXbeam_VE=0;
+    double rmsPbeam=0, rmsPbeam_NS=0, rmsPbeam_VE=0;
     int NCCbeamAntennas = 0, NlateralAntennas = 0; // antennas used for CC beam and lateral distribution
     int NCCbeamAntennas_NS = 0, NlateralAntennas_NS = 0; // antennas used for CC beam and lateral distribution
     int NCCbeamAntennas_VE = 0, NlateralAntennas_VE = 0; // antennas used for CC beam and lateral distribution
-    double latMeanDist, latMeanDist_NS, latMeanDist_VE;                 // mean distance of the antennas in the lateral distribution
-    double latMeanDistCC, latMeanDistCC_NS, latMeanDistCC_VE;             // mean distance of the antennas used for the CC beam
-    double ratioDiffSign, ratioDiffSign_NS, ratioDiffSign_VE;
-    double ratioDiffSignEnv, ratioDiffSignEnv_NS, ratioDiffSignEnv_VE;
-    double weightedTotSign,weightedTotSign_NS,weightedTotSign_VE;
-    double weightedTotSignEnv,weightedTotSignEnv_NS,weightedTotSignEnv_VE;
+    double latMeanDist=0, latMeanDist_NS=0, latMeanDist_VE=0;                 // mean distance of the antennas in the lateral distribution
+    double latMeanDistCC=0, latMeanDistCC_NS=0, latMeanDistCC_VE=0;             // mean distance of the antennas used for the CC beam
+    double ratioDiffSign=0, ratioDiffSign_NS=0, ratioDiffSign_VE=0;
+    double ratioDiffSignEnv=0, ratioDiffSignEnv_NS=0, ratioDiffSignEnv_VE=0;
+    double weightedTotSign=0,weightedTotSign_NS=0,weightedTotSign_VE=0;
+    double weightedTotSignEnv=0,weightedTotSignEnv_NS=0,weightedTotSignEnv_VE=0;
     
     // results of lateral distribution fit
     double R_0_EW = 0, sigR_0_EW = 0, eps_EW = 0, sigeps_EW = 0, chi2NDF_EW = 0; 
@@ -303,6 +368,8 @@ int main (int argc, char *argv[])
     double R_0_sim_NS = 0, sigR_0_sim_NS = 0, eps_sim_NS = 0, sigeps_sim_NS = 0, chi2NDF_sim_NS = 0; 
     double R_0_VE = 0, sigR_0_VE = 0, eps_VE = 0, sigeps_VE = 0, chi2NDF_VE = 0; 
     double R_0_sim_VE = 0, sigR_0_sim_VE = 0, eps_sim_VE = 0, sigeps_sim_VE = 0, chi2NDF_sim_VE = 0; 
+    
+    double Xmax_sim = 0;
     
     recTree->SetBranchAddress("Gt", &Gt);
     recTree->SetBranchAddress("Xc",&Xc);
@@ -381,7 +448,7 @@ int main (int argc, char *argv[])
     outtree->Branch("KRETAver",&KRETAver,"KRETAver/C");
     outtree->Branch("EfieldMaxAbs",&EfieldMaxAbs,"EfieldMaxAbs/D");
     outtree->Branch("EfieldAvgAbs",&EfieldAvgAbs,"EfieldAvgAbs/D");
-
+    outtree->Branch("Xmax_sim", &Xmax_sim, "Xmax_sim/D");
 
     // look for existing EW branches
     TObjArray* existingBranches = recTree->GetListOfBranches();
@@ -412,11 +479,6 @@ int main (int argc, char *argv[])
       recTree->SetBranchAddress("weightedTotSignEnv_EW",&weightedTotSignEnv);
       recTree->SetBranchAddress("latMeanDist_EW",&latMeanDist);
       recTree->SetBranchAddress("NlateralAntennas_EW",&NlateralAntennas);
-      recTree->SetBranchAddress("latTimeRcurv_EW",&latTimeRcurv);
-      recTree->SetBranchAddress("latTimeSigRcurv_EW",&latTimeSigRcurv);
-      recTree->SetBranchAddress("latTimeOffset_EW",&latTimeOffset);
-      recTree->SetBranchAddress("latTimeSigOffset_EW",&latTimeSigOffset);
-      recTree->SetBranchAddress("latTimeChi2NDF_EW",&latTimeChi2NDF);
       
       outtree->Branch("AzL_EW",&AzL,"AzL_EW/D");
       outtree->Branch("ElL_EW",&ElL,"ElL_EW/D");
@@ -440,12 +502,30 @@ int main (int argc, char *argv[])
       outtree->Branch("weightedTotSign_EW",&weightedTotSign,"weightedTotSign_EW/D");
       outtree->Branch("weightedTotSignEnv_EW",&weightedTotSignEnv,"weightedTotSignEnv_EW/D");
       outtree->Branch("latMeanDist_EW",&latMeanDist,"latMeanDist_EW/D");
-      //outtree->Branch("NlateralAntennas_EW",&NlateralAntennas,"NlateralAntennas_EW/I");
-      outtree->Branch("latTimeRcurv_EW",&latTimeRcurv,"latTimeRcurv_EW/D");
-      outtree->Branch("latTimeSigRcurv_EW",&latTimeSigRcurv,"latTimeSigRcurv_EW/D");
-      outtree->Branch("latTimeOffset_EW",&latTimeOffset,"latTimeOffset_EW/D");
-      outtree->Branch("latTimeSigOffset_EW",&latTimeSigOffset,"latTimeSigOffset_EW/D");
-      outtree->Branch("latTimeChi2NDF_EW",&latTimeChi2NDF,"latTimeChi2NDF_EW/D");
+      outtree->Branch("NlateralAntennas_EW",&NlateralAntennas,"NlateralAntennas_EW/I");
+      
+      outtree->Branch("latTimeRcurv_EW",&latTimeRcurv_EW,"latTimeRcurv_EW/D");
+      outtree->Branch("latTimeSigRcurv_EW",&latTimeSigRcurv_EW,"latTimeSigRcurv_EW/D");
+      outtree->Branch("latTimeOffset_EW",&latTimeOffset_EW,"latTimeOffset_EW/D");
+      outtree->Branch("latTimeSigOffset_EW",&latTimeSigOffset_EW,"latTimeSigOffset_EW/D");
+      outtree->Branch("latTimeChi2NDF_EW",&latTimeChi2NDF_EW,"latTimeChi2NDF_EW/D");
+      outtree->Branch("latTimeRcurv_sim_EW",&latTimeRcurv_sim_EW,"latTimeRcurv_sim_EW/D");
+      outtree->Branch("latTimeSigRcurv_sim_EW",&latTimeSigRcurv_sim_EW,"latTimeSigRcurv_sim_EW/D");
+      outtree->Branch("latTimeOffset_sim_EW",&latTimeOffset_sim_EW,"latTimeOffset_sim_EW/D");
+      outtree->Branch("latTimeSigOffset_sim_EW",&latTimeSigOffset_sim_EW,"latTimeSigOffset_sim_EW/D");
+      outtree->Branch("latTimeChi2NDF_sim_EW",&latTimeChi2NDF_sim_EW,"latTimeChi2NDF_sim_EW/D");
+      
+      outtree->Branch("latTimeParRcurv_EW",&latTimeParRcurv_EW,"latTimeParRcurv_EW/D");
+      outtree->Branch("latTimeParSigRcurv_EW",&latTimeParSigRcurv_EW,"latTimeParSigRcurv_EW/D");
+      outtree->Branch("latTimeParOffset_EW",&latTimeParOffset_EW,"latTimeParOffset_EW/D");
+      outtree->Branch("latTimeParSigOffset_EW",&latTimeParSigOffset_EW,"latTimeParSigOffset_EW/D");
+      outtree->Branch("latTimeParChi2NDF_EW",&latTimeParChi2NDF_EW,"latTimeParChi2NDF_EW/D");
+      outtree->Branch("latTimeParRcurv_sim_EW",&latTimeParRcurv_sim_EW,"latTimeParRcurv_sim_EW/D");
+      outtree->Branch("latTimeParSigRcurv_sim_EW",&latTimeParSigRcurv_sim_EW,"latTimeParSigRcurv_sim_EW/D");
+      outtree->Branch("latTimeParOffset_sim_EW",&latTimeParOffset_sim_EW,"latTimeParOffset_sim_EW/D");
+      outtree->Branch("latTimeParSigOffset_sim_EW",&latTimeParSigOffset_sim_EW,"latTimeParSigOffset_sim_EW/D");
+      outtree->Branch("latTimeParChi2NDF_sim_EW",&latTimeParChi2NDF_sim_EW,"latTimeParChi2NDF_sim_EW/D");
+      
       outtree->Branch("R_0_EW",&R_0_EW,"R_0_EW/D");
       outtree->Branch("sigR_0_EW",&sigR_0_EW,"sigR_0_EW/D");
       outtree->Branch("eps_EW",&eps_EW,"eps_EW/D");
@@ -485,11 +565,6 @@ int main (int argc, char *argv[])
       recTree->SetBranchAddress("weightedTotSignEnv_NS",&weightedTotSignEnv_NS);
       recTree->SetBranchAddress("latMeanDist_NS",&latMeanDist_NS);
       recTree->SetBranchAddress("NlateralAntennas_NS",&NlateralAntennas_NS);
-      recTree->SetBranchAddress("latTimeRcurv_NS",&latTimeRcurv_NS);
-      recTree->SetBranchAddress("latTimeSigRcurv_NS",&latTimeSigRcurv_NS);
-      recTree->SetBranchAddress("latTimeOffset_NS",&latTimeOffset_NS);
-      recTree->SetBranchAddress("latTimeSigOffset_NS",&latTimeSigOffset_NS);
-      recTree->SetBranchAddress("latTimeChi2NDF_NS",&latTimeChi2NDF_NS);
       
       outtree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
       outtree->Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
@@ -513,12 +588,30 @@ int main (int argc, char *argv[])
       outtree->Branch("weightedTotSign_NS",&weightedTotSign_NS,"weightedTotSign_NS/D");
       outtree->Branch("weightedTotSignEnv_NS",&weightedTotSignEnv_NS,"weightedTotSignEnv_NS/D");
       outtree->Branch("latMeanDist_NS",&latMeanDist_NS,"latMeanDist_NS/D");
-      //outtree->Branch("NlateralAntennas_NS",&NlateralAntennas_NS,"NlateralAntennas_NS/I");
+      outtree->Branch("NlateralAntennas_NS",&NlateralAntennas_NS,"NlateralAntennas_NS/I");
+      
       outtree->Branch("latTimeRcurv_NS",&latTimeRcurv_NS,"latTimeRcurv_NS/D");
       outtree->Branch("latTimeSigRcurv_NS",&latTimeSigRcurv_NS,"latTimeSigRcurv_NS/D");
       outtree->Branch("latTimeOffset_NS",&latTimeOffset_NS,"latTimeOffset_NS/D");
       outtree->Branch("latTimeSigOffset_NS",&latTimeSigOffset_NS,"latTimeSigOffset_NS/D");
       outtree->Branch("latTimeChi2NDF_NS",&latTimeChi2NDF_NS,"latTimeChi2NDF_NS/D");
+      outtree->Branch("latTimeRcurv_sim_NS",&latTimeRcurv_sim_NS,"latTimeRcurv_sim_NS/D");
+      outtree->Branch("latTimeSigRcurv_sim_NS",&latTimeSigRcurv_sim_NS,"latTimeSigRcurv_sim_NS/D");
+      outtree->Branch("latTimeOffset_sim_NS",&latTimeOffset_sim_NS,"latTimeOffset_sim_NS/D");
+      outtree->Branch("latTimeSigOffset_sim_NS",&latTimeSigOffset_sim_NS,"latTimeSigOffset_sim_NS/D");
+      outtree->Branch("latTimeChi2NDF_sim_NS",&latTimeChi2NDF_sim_NS,"latTimeChi2NDF_sim_NS/D");
+      
+      outtree->Branch("latTimeParRcurv_NS",&latTimeParRcurv_NS,"latTimeParRcurv_NS/D");
+      outtree->Branch("latTimeParSigRcurv_NS",&latTimeParSigRcurv_NS,"latTimeParSigRcurv_NS/D");
+      outtree->Branch("latTimeParOffset_NS",&latTimeParOffset_NS,"latTimeParOffset_NS/D");
+      outtree->Branch("latTimeParSigOffset_NS",&latTimeParSigOffset_NS,"latTimeParSigOffset_NS/D");
+      outtree->Branch("latTimeParChi2NDF_NS",&latTimeParChi2NDF_NS,"latTimeParChi2NDF_NS/D");
+      outtree->Branch("latTimeParRcurv_sim_NS",&latTimeParRcurv_sim_NS,"latTimeParRcurv_sim_NS/D");
+      outtree->Branch("latTimeParSigRcurv_sim_NS",&latTimeParSigRcurv_sim_NS,"latTimeParSigRcurv_sim_NS/D");
+      outtree->Branch("latTimeParOffset_sim_NS",&latTimeParOffset_sim_NS,"latTimeParOffset_sim_NS/D");
+      outtree->Branch("latTimeParSigOffset_sim_NS",&latTimeParSigOffset_sim_NS,"latTimeParSigOffset_sim_NS/D");
+      outtree->Branch("latTimeParChi2NDF_sim_NS",&latTimeParChi2NDF_sim_NS,"latTimeParChi2NDF_sim_NS/D");
+      
       outtree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
       outtree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
       outtree->Branch("eps_NS",&eps_NS,"eps_NS/D");
@@ -558,12 +651,7 @@ int main (int argc, char *argv[])
       recTree->SetBranchAddress("weightedTotSignEnv_VE",&weightedTotSignEnv_VE);
       recTree->SetBranchAddress("latMeanDist_VE",&latMeanDist_VE);
       recTree->SetBranchAddress("NlateralAntennas_VE",&NlateralAntennas_VE);
-      recTree->SetBranchAddress("latTimeRcurv_VE",&latTimeRcurv_VE);
-      recTree->SetBranchAddress("latTimeSigRcurv_VE",&latTimeSigRcurv_VE);
-      recTree->SetBranchAddress("latTimeOffset_VE",&latTimeOffset_VE);
-      recTree->SetBranchAddress("latTimeSigOffset_VE",&latTimeSigOffset_VE);
-      recTree->SetBranchAddress("latTimeChi2NDF_VE",&latTimeChi2NDF_VE);
-      
+       
       outtree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
       outtree->Branch("ElL_VE",&ElL_VE,"ElL_VE/D");
       outtree->Branch("Distance_VE",&distanceResult_VE,"Distance_VE/D");        // radius of curvature
@@ -586,12 +674,30 @@ int main (int argc, char *argv[])
       outtree->Branch("weightedTotSign_VE",&weightedTotSign_VE,"weightedTotSign_VE/D");
       outtree->Branch("weightedTotSignEnv_VE",&weightedTotSignEnv_VE,"weightedTotSignEnv_VE/D");
       outtree->Branch("latMeanDist_VE",&latMeanDist_VE,"latMeanDist_VE/D");
-      //outtree->Branch("NlateralAntennas_VE",&NlateralAntennas_VE,"NlateralAntennas_VE/I");
+      outtree->Branch("NlateralAntennas_VE",&NlateralAntennas_VE,"NlateralAntennas_VE/I");
+      
       outtree->Branch("latTimeRcurv_VE",&latTimeRcurv_VE,"latTimeRcurv_VE/D");
       outtree->Branch("latTimeSigRcurv_VE",&latTimeSigRcurv_VE,"latTimeSigRcurv_VE/D");
       outtree->Branch("latTimeOffset_VE",&latTimeOffset_VE,"latTimeOffset_VE/D");
       outtree->Branch("latTimeSigOffset_VE",&latTimeSigOffset_VE,"latTimeSigOffset_VE/D");
       outtree->Branch("latTimeChi2NDF_VE",&latTimeChi2NDF_VE,"latTimeChi2NDF_VE/D");
+      outtree->Branch("latTimeRcurv_sim_VE",&latTimeRcurv_sim_VE,"latTimeRcurv_sim_VE/D");
+      outtree->Branch("latTimeSigRcurv_sim_VE",&latTimeSigRcurv_sim_VE,"latTimeSigRcurv_sim_VE/D");
+      outtree->Branch("latTimeOffset_sim_VE",&latTimeOffset_sim_VE,"latTimeOffset_sim_VE/D");
+      outtree->Branch("latTimeSigOffset_sim_VE",&latTimeSigOffset_sim_VE,"latTimeSigOffset_sim_VE/D");
+      outtree->Branch("latTimeChi2NDF_sim_VE",&latTimeChi2NDF_sim_VE,"latTimeChi2NDF_sim_VE/D");
+      
+      outtree->Branch("latTimeParRcurv_VE",&latTimeParRcurv_VE,"latTimeParRcurv_VE/D");
+      outtree->Branch("latTimeParSigRcurv_VE",&latTimeParSigRcurv_VE,"latTimeParSigRcurv_VE/D");
+      outtree->Branch("latTimeParOffset_VE",&latTimeParOffset_VE,"latTimeParOffset_VE/D");
+      outtree->Branch("latTimeParSigOffset_VE",&latTimeParSigOffset_VE,"latTimeParSigOffset_VE/D");
+      outtree->Branch("latTimeParChi2NDF_VE",&latTimeParChi2NDF_VE,"latTimeParChi2NDF_VE/D");
+      outtree->Branch("latTimeParRcurv_sim_VE",&latTimeParRcurv_sim_VE,"latTimeParRcurv_sim_VE/D");
+      outtree->Branch("latTimeParSigRcurv_sim_VE",&latTimeParSigRcurv_sim_VE,"latTimeParSigRcurv_sim_VE/D");
+      outtree->Branch("latTimeParOffset_sim_VE",&latTimeParOffset_sim_VE,"latTimeParOffset_sim_VE/D");
+      outtree->Branch("latTimeParSigOffset_sim_VE",&latTimeParSigOffset_sim_VE,"latTimeParSigOffset_sim_VE/D");
+      outtree->Branch("latTimeParChi2NDF_sim_VE",&latTimeParChi2NDF_sim_VE,"latTimeParChi2NDF_sim_VE/D");
+      
       outtree->Branch("R_0_VE",&R_0_VE,"R_0_VE/D");
       outtree->Branch("sigR_0_VE",&sigR_0_VE,"sigR_0_VE/D");
       outtree->Branch("eps_VE",&eps_VE,"eps_VE/D");
@@ -665,6 +771,12 @@ int main (int argc, char *argv[])
     ofstream checkDistanceNS("checkDistance_NS.dat");
     checkDistanceEW<<"# id      Ant    dist sim    dist lopes  "<<endl;
     checkDistanceNS<<"# id      Ant    dist sim    dist lopes  "<<endl;
+    
+    // deviation of antenna coordinates
+    double meanDevX = 0;
+    double meanDevY = 0;
+    double meanDevZ = 0;
+    int meanDevCounter = 0;
     
     int dat2counter = 0; // counter for second root file
     for(int i=0; i<entries; ++i) { //loop on the events
@@ -746,18 +858,31 @@ int main (int argc, char *argv[])
         double distanceS=0., distanceSerr=0.,showerCoord=0.;
         double distanceR=0.;
 
+        // continue with next event, if no simulated event is available
+        if (m_dict.find(Gt)==m_dict.end()) {
+          cout << "No simulated event for Gt: " <<Gt<< endl;
+          continue;
+        }
+
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat";
         string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to74/maxamp_summary.dat";
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
+        string reasLogFile = simPath+"/"+m_dict[Gt]+ ".reas";
+        
         ifstream reasFile(reasFileName.c_str());
         if (!reasFile.is_open()) {
           cerr << "Error canot open REAS file: " << reasFileName << endl;
-          cerr << "No simulated event for Gt: " <<Gt<< endl;
-          //return 1;     
-          continue;
-        }
+          return 1;     
+        } else {
+	  cout << "Reading simulation for GT: " << Gt << "\n" << endl;
+	}
+	
+        // read Xmax value
+        Xmax_sim = reasXmaxFromREAS(reasLogFile);
+        cout << "\nXmax (simulation) = " << Xmax_sim << " g/cm^2" << endl;
+	
         // get simulation azimuth and zenith form dictionary
         AzDictS = m_dictAz[Gt]; //in deg!
         ZeDictS = m_dictZe[Gt];
@@ -850,6 +975,8 @@ int main (int argc, char *argv[])
                 yShower *= 1e-2;
                 zShower *= 1e-2; // conversion from cm to m
                 
+                
+                
                 if ( abs(zShower-m_recEW[NantS].distZ) > (abs(zShower*0.05)+0.5) ) {
                   cout<<"WARNING: z_shower simulated EW channel:  "<<zShower<<"\t z_shower from LOPES  "<<m_recEW[NantS].distZ<<endl;
                   cout<<"az_sim= " << azimuth*gradeg << " \t az_lop= " << AzL << endl;
@@ -860,6 +987,12 @@ int main (int argc, char *argv[])
                 }
                 simPropEW.distZ = zShower;
                 simPropEW.distZerr = 0.;
+                
+                // calculate mean deviation of shower coordinates
+                meanDevX += (xShower-m_recEW[NantS].distX);
+                meanDevY += (yShower-m_recEW[NantS].distY);
+                meanDevZ += (zShower-m_recEW[NantS].distZ);
+                ++meanDevCounter;
                 
                 if (timeREAS + zShower*3.33564 < 0) {
                   cout << "\nNegative time at event GT "<< Gt << " , antenna " << NantS << ", ground azimuth " << azS << " °:\n"
@@ -932,6 +1065,30 @@ int main (int argc, char *argv[])
       R_0_VE = 0, sigR_0_VE = 0, eps_VE = 0, sigeps_VE = 0, chi2NDF_VE = 0; 
       R_0_sim_VE = 0, sigR_0_sim_VE = 0, eps_sim_VE = 0, sigeps_sim_VE = 0, chi2NDF_sim_VE = 0; 
 
+      latTimeRcurv_EW = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
+      latTimeSigRcurv_EW = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
+      latTimeOffset_EW = 0, latTimeOffset_NS = 0, latTimeOffset_VE = 0;
+      latTimeSigOffset_EW = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
+      latTimeChi2NDF_EW = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
+      
+      latTimeRcurv_sim_EW = 0, latTimeRcurv_sim_NS = 0, latTimeRcurv_sim_VE = 0;
+      latTimeSigRcurv_sim_EW = 0, latTimeSigRcurv_sim_NS = 0, latTimeSigRcurv_sim_VE = 0;
+      latTimeOffset_sim_EW = 0, latTimeOffset_sim_NS = 0, latTimeOffset_sim_VE = 0;
+      latTimeSigOffset_sim_EW = 0, latTimeSigOffset_sim_NS = 0, latTimeSigOffset_sim_VE = 0;
+      latTimeChi2NDF_sim_EW = 0, latTimeChi2NDF_sim_NS = 0, latTimeChi2NDF_sim_VE = 0;
+      
+      latTimeParRcurv_EW = 0, latTimeParRcurv_NS = 0, latTimeParRcurv_VE = 0;
+      latTimeParSigRcurv_EW = 0, latTimeParSigRcurv_NS = 0, latTimeParSigRcurv_VE = 0;
+      latTimeParOffset_EW = 0, latTimeParOffset_NS = 0, latTimeParOffset_VE = 0;
+      latTimeParSigOffset_EW = 0, latTimeParSigOffset_NS = 0, latTimeParSigOffset_VE = 0;
+      latTimeParChi2NDF_EW = 0, latTimeParChi2NDF_NS = 0, latTimeParChi2NDF_VE = 0;
+      
+      latTimeParRcurv_sim_EW = 0, latTimeParRcurv_sim_NS = 0, latTimeParRcurv_sim_VE = 0;
+      latTimeParSigRcurv_sim_EW = 0, latTimeParSigRcurv_sim_NS = 0, latTimeParSigRcurv_sim_VE = 0;
+      latTimeParOffset_sim_EW = 0, latTimeParOffset_sim_NS = 0, latTimeParOffset_sim_VE = 0;
+      latTimeParSigOffset_sim_EW = 0, latTimeParSigOffset_sim_NS = 0, latTimeParSigOffset_sim_VE = 0;
+      latTimeParChi2NDF_sim_EW = 0, latTimeParChi2NDF_sim_NS = 0, latTimeParChi2NDF_sim_VE = 0;
+
       CR::lateralDistribution lateralFitter;
       string plotPrefix = "";
       if(m_recEW.size()>=4) {        
@@ -953,7 +1110,7 @@ int main (int argc, char *argv[])
         sigeps_sim_EW = ergew.asDouble("sigeps_sim");
         sigR_0_sim_EW = ergew.asDouble("sigR_0_sim");
         chi2NDF_sim_EW = ergew.asDouble("chi2NDF_sim");
-
+        
         //write info of the fit into file
         outputEW <<m_dict[Gt]<<"\t"<<eps_EW<<"\t"<<sigeps_EW<<"\t"<<R_0_EW<<"\t"<<sigR_0_EW<<"\t"<<chi2NDF_EW<<"\t"<<eps_sim_EW<<"\t"<<sigeps_sim_EW<<"\t"<<R_0_sim_EW<<"\t"<<sigR_0_sim_EW<<"\t"<<chi2NDF_sim_EW<<endl;			
         
@@ -962,6 +1119,28 @@ int main (int argc, char *argv[])
                                                                  Gt,AzL,90.-ElL,
                                                                  CCcenter,
                                                                  index1, index2);        
+                                                                 
+        latTimeRcurv_EW = ergTimeew.asDouble("latTime_R_curv");
+        latTimeSigRcurv_EW = ergTimeew.asDouble("latTime_sigR_curv");
+        latTimeOffset_EW = ergTimeew.asDouble("latTime_offset");
+        latTimeSigOffset_EW = ergTimeew.asDouble("latTime_sigoffset");
+        latTimeChi2NDF_EW = ergTimeew.asDouble("latTime_chi2NDF");
+        latTimeParRcurv_EW = ergTimeew.asDouble("latTimePar_R_curv");
+        latTimeParSigRcurv_EW = ergTimeew.asDouble("latTimePar_sigR_curv");
+        latTimeParOffset_EW = ergTimeew.asDouble("latTimePar_offset");
+        latTimeParSigOffset_EW = ergTimeew.asDouble("latTimePar_sigoffset");
+        latTimeParChi2NDF_EW = ergTimeew.asDouble("latTimePar_chi2NDF");                                                                
+        
+        latTimeRcurv_sim_EW = ergTimeew.asDouble("latTime_R_curv_sim");
+        latTimeSigRcurv_sim_EW = ergTimeew.asDouble("latTime_sigR_curv_sim");
+        latTimeOffset_sim_EW = ergTimeew.asDouble("latTime_offset_sim");
+        latTimeSigOffset_sim_EW = ergTimeew.asDouble("latTime_sigoffset_sim");
+        latTimeChi2NDF_sim_EW = ergTimeew.asDouble("latTime_chi2NDF_sim");
+        latTimeParRcurv_sim_EW = ergTimeew.asDouble("latTimePar_R_curv_sim");
+        latTimeParSigRcurv_sim_EW = ergTimeew.asDouble("latTimePar_sigR_curv_sim");
+        latTimeParOffset_sim_EW = ergTimeew.asDouble("latTimePar_offset_sim");
+        latTimeParSigOffset_sim_EW = ergTimeew.asDouble("latTimePar_sigoffset_sim");
+        latTimeParChi2NDF_sim_EW = ergTimeew.asDouble("latTimePar_chi2NDF_sim");             
       }
       if ((hasNS) && (m_recNS.size()>=4)) {
         if (simDictName!="") 
@@ -991,7 +1170,28 @@ int main (int argc, char *argv[])
                                                                  Gt,AzL,90.-ElL,
                                                                  CCcenter_NS,
                                                                  index1, index2);
+                                                                                                                                
+        latTimeRcurv_NS = ergTimens.asDouble("latTime_R_curv");
+        latTimeSigRcurv_NS = ergTimens.asDouble("latTime_sigR_curv");
+        latTimeOffset_NS = ergTimens.asDouble("latTime_offset");
+        latTimeSigOffset_NS = ergTimens.asDouble("latTime_sigoffset");
+        latTimeChi2NDF_NS = ergTimens.asDouble("latTime_chi2NDF");
+        latTimeParRcurv_NS = ergTimens.asDouble("latTimePar_R_curv");
+        latTimeParSigRcurv_NS = ergTimens.asDouble("latTimePar_sigR_curv");
+        latTimeParOffset_NS = ergTimens.asDouble("latTimePar_offset");
+        latTimeParSigOffset_NS = ergTimens.asDouble("latTimePar_sigoffset");
+        latTimeParChi2NDF_NS = ergTimens.asDouble("latTimePar_chi2NDF");       
         
+        latTimeRcurv_sim_NS = ergTimens.asDouble("latTime_R_curv_sim");
+        latTimeSigRcurv_sim_NS = ergTimens.asDouble("latTime_sigR_curv_sim");
+        latTimeOffset_sim_NS = ergTimens.asDouble("latTime_offset_sim");
+        latTimeSigOffset_sim_NS = ergTimens.asDouble("latTime_sigoffset_sim");
+        latTimeChi2NDF_sim_NS = ergTimens.asDouble("latTime_chi2NDF_sim");
+        latTimeParRcurv_sim_NS = ergTimens.asDouble("latTimePar_R_curv_sim");
+        latTimeParSigRcurv_sim_NS = ergTimens.asDouble("latTimePar_sigR_curv_sim");
+        latTimeParOffset_sim_NS = ergTimens.asDouble("latTimePar_offset_sim");
+        latTimeParSigOffset_sim_NS = ergTimens.asDouble("latTimePar_sigoffset_sim");
+        latTimeParChi2NDF_sim_NS = ergTimens.asDouble("latTimePar_chi2NDF_sim");       
       }
       
       // Fill information in root file
@@ -1004,6 +1204,13 @@ int main (int argc, char *argv[])
     outputNS.close();
     recRoot->Close();
     rootOutfile->Close();
+    
+    // Mean deviation of antenna position in shower coordinates:
+   meanDevX /= double(meanDevCounter);
+   meanDevY /= double(meanDevCounter);
+   meanDevZ /= double(meanDevCounter);
+   //cout << "\nMean deviation of antenna position in shower coordinates (is ought to be small):\n"
+   //     << "x: " << meanDevX << "\t y:" << meanDevY << "\t z:" << meanDevZ << endl;
   } catch (AipsError x) {
     cerr << "compareLOPES2sim: " << x.getMesg() << endl;
   }
