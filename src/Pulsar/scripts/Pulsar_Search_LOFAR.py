@@ -23,6 +23,7 @@
 # + zapping first freq channel in each subband (it's junk there)
 # + parallelization (search + prepfold), separate log files
 # + added hi_accel_search and corresponding cmd option
+# + added a few options to control execution of different steps in the pipeline
 #
 # Todo:
 # ~ -numout ??? (not sure it's really that important now)
@@ -37,6 +38,8 @@ import infodata as inf
 import math
 
 # some tunable parameters
+is_fold_dat            = False   # if True then dat-files will be used to fold the candidates (maybe should put this as cmd option)
+                                 # dat-files will be kept in the scratchdir until the end when the whole scratchdir will be removed
 hwired_ddplan_id       = "shallow"  # DDplan ID, Description of DDplan(s) set and/check below
 bright_catalog         = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/psr_cats.txt"   # Catalog of brightest pulsars
 rfi_master_file        = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/master.rfi"     # Master list of frequent RFIs
@@ -64,6 +67,7 @@ hi_accel_sigma         = 3.0     # threshold gaussian significance
 hi_accel_zmax          = 50      # bins
 hi_accel_flo           = 0.1     # Hz
 numhits_to_fold        = 2       # Number of DMs with a detection needed to fold
+extra_prepfold_options = ""      # Extra options that can be passed to prepfold command to fold candidates (e.g. -nosearch)
 low_DM_cutoff          = 1.0     # Lowest DM to consider as a "real" pulsar
 waittime               = 5       # in sec. Interval to check for searching scripts to finish
 ### Description of the DDplans ###
@@ -306,7 +310,7 @@ def get_folding_options(cand):
 	return otheropts
 	
 # function to create general search script to exploit the parallelization
-def create_search_script(name):
+def create_search_script(name, is_fold_dat):
 	batchfile = open(name,"w")
 	batchfile.write("#!/bin/bash\n#\n")
 	batchfile.write("outdir=$1\n")
@@ -334,7 +338,10 @@ def create_search_script(name):
 	###
 	batchfile.write(" echo \"single_pulse_search.py --noplot --maxwidth %f --threshold %f $stem.dat >> $log\" >> $log\n" % (singlepulse_maxwidth, singlepulse_threshold))
 	batchfile.write(" single_pulse_search.py --noplot --maxwidth %f --threshold %f $stem.dat >> $log\n" % (singlepulse_maxwidth, singlepulse_threshold))
-	batchfile.write(" rm -f $stem.dat $stem.fft\n")
+	if is_fold_dat:  # keeping the dat-files
+		batchfile.write(" rm -f $stem.fft\n")
+	else:
+		batchfile.write(" rm -f $stem.dat $stem.fft\n")
 	batchfile.write("done\n")
 	batchfile.write("date >> $log\n")
 	batchfile.write("touch $end\n")
@@ -344,8 +351,8 @@ def create_search_script(name):
 	os.system(cmd)
 
 # function to create general script to fold the candidates
-def create_fold_script(name, maskfile, infile):
-	batchfile = open(name,"w")
+def create_fold_script(scratchdir, name, maskfile, extra_prepfold_options, basename, infile):
+	batchfile = open(scratchdir+name,"w")
 	batchfile.write("#!/bin/bash\n#\n")
 	batchfile.write("outdir=$1\n")
 	batchfile.write("shift\n")
@@ -360,17 +367,18 @@ def create_fold_script(name, maskfile, infile):
 	batchfile.write(" dm=`echo $params | cut -d : -f 3`\n")
 	batchfile.write(" outfile=`echo $params | cut -d : -f 4`\n")
 	batchfile.write(" options=`echo $params | cut -d : -f 5 | sed s/\_/\ /g -`\n")
-	batchfile.write(" echo \"prepfold -noxwin -mask %s -runavg -accelcand $accelcand -accelfile $accelfile -dm $dm -o $outfile $options %s >> $log\" >> $log\n" % (maskfile, infile))
-	batchfile.write(" prepfold -noxwin -mask %s -runavg -accelcand $accelcand -accelfile $accelfile -dm $dm -o $outfile $options %s >> $log\n" % (maskfile, infile))
-
-#	batchfile.write(" echo \"prepfold -mask %s -runavg -p $period -dm $dm -noxwin -nosearch -o %s %s >> $log\" >> $log\n" % (maskfile, outfile, infile))
-#	batchfile.write(" prepfold -mask %s -runavg -p $period -dm $dm -noxwin -nosearch -o %s %s >> $log\n" % (maskfile, outfile, infile))
+	if is_fold_dat:  # if dat-files are kept, then using as input the corresponding dat-file
+		batchfile.write(" echo \"prepfold -noxwin -mask %s -runavg -accelcand $accelcand -accelfile $accelfile -dm $dm -o $outfile $options %s %s%s_DM$dm.dat >> $log\" >> $log\n" % (maskfile, extra_prepfold_options, scratchdir, basename))
+		batchfile.write(" prepfold -noxwin -mask %s -runavg -accelcand $accelcand -accelfile $accelfile -dm $dm -o $outfile $options %s %s%s_DM$dm.dat >> $log\n" % (maskfile, extra_prepfold_options, scratchdir, basename))
+	else:
+		batchfile.write(" echo \"prepfold -noxwin -mask %s -runavg -accelcand $accelcand -accelfile $accelfile -dm $dm -o $outfile $options %s %s >> $log\" >> $log\n" % (maskfile, extra_prepfold_options, infile))
+		batchfile.write(" prepfold -noxwin -mask %s -runavg -accelcand $accelcand -accelfile $accelfile -dm $dm -o $outfile $options %s %s >> $log\n" % (maskfile, extra_prepfold_options, infile))
 	batchfile.write("done\n")
 	batchfile.write("date >> $log\n")
 	batchfile.write("touch $end\n")
 	batchfile.close()
 	# make it executable
-	cmd="chmod +x %s" % (name)
+	cmd="chmod +x %s" % (scratchdir+name)
 	os.system(cmd)
 
 # function that is the common searching block to be executed after each mpirun
@@ -710,7 +718,7 @@ if __name__ == "__main__":
 	# Make a search script and run searching in parallel using 'ncores' cores
 	search_script = "psrsearch.sh"
 	print "Creating search script: %s" % (search_script)
-	create_search_script(scratchdir+search_script)
+	create_search_script(scratchdir+search_script, is_fold_dat)
 
 	tot_prep_time = 0
 	tot_search_time = 0
@@ -1015,7 +1023,7 @@ if __name__ == "__main__":
 	print "Folding best %d candidates ..." % (nfolded)
 	fold_script = "psrfold.sh"
 	print "Creating fold script: %s" % (fold_script)
-	create_fold_script(scratchdir+fold_script, maskfile, infile)
+	create_fold_script(scratchdir, fold_script, maskfile, extra_prepfold_options, basename, infile)
 	start_block=0
 	nprocess=0  # number of started background processes
 	for core in numpy.arange(0, ncores):
@@ -1026,7 +1034,7 @@ if __name__ == "__main__":
 		else:
 			foldblock=int(nfolded/(ncores-core))
 		foldslice=folded_cands[start_block:start_block+foldblock]	
-		foldgroup=["%d:%s.cand:%.2f:%s:%s" % (ff.candnum, ff.filename, ff.DM, outfile+"_DM%s_Z%s" % (ff.DMstr, ff.filename.split("_")[-1]), get_folding_options(ff)) for ff in foldslice]
+		foldgroup=["%d:%s.cand:%s:%s:%s" % (ff.candnum, ff.filename, ff.DMstr, outfile+"_DM%s_Z%s" % (ff.DMstr, ff.filename.split("_")[-1]), get_folding_options(ff)) for ff in foldslice]
 		cmd="%s%s %s %d %s &" % (scratchdir, fold_script, scratchdir, core, " ".join(foldgroup))
 		print "Starting folding on core %d for %d candidates ..." % (core, foldblock)
 		os.system(cmd)	
