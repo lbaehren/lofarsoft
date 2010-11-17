@@ -915,7 +915,7 @@ if __name__ == "__main__":
 				for harm in range(1, max_psr_harm):
 					if  (cand.p >= 0.03 and abs(cand.p - rPeriod[kk]/harm) < period_tolerance) or \
 					    (cand.p <  0.03 and abs(cand.p - rPeriod[kk]/harm) < ms_period_tolerance):
-						if not does_harm_exit(harm, psrname[kk], harmcand):
+						if not does_harm_exist(harm, psrname[kk], harmcand):
 							harmcand.append([harm, psrname[kk], rPeriod[kk], rDM[kk], cand.p, cand.DM, cand.sigma])
 						if not is_pulsar_found:
 							is_pulsar_found = True
