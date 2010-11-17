@@ -362,6 +362,7 @@ def create_fold_script(scratchdir, name, maskfile, extra_prepfold_options, basen
 	batchfile.write("end=\"$outdir/fold_core$core.done\"\n")
 	batchfile.write("date >> $log\n")
 	batchfile.write("for params in $*; do\n")
+	batchfile.write(" echo >> $log\n")
 	batchfile.write(" accelcand=`echo $params | cut -d : -f 1`\n")
 	batchfile.write(" accelfile=`echo $params | cut -d : -f 2`\n")
 	batchfile.write(" dm=`echo $params | cut -d : -f 3`\n")
@@ -373,6 +374,7 @@ def create_fold_script(scratchdir, name, maskfile, extra_prepfold_options, basen
 	else:
 		batchfile.write(" echo \"prepfold -noxwin -mask %s -runavg -accelcand $accelcand -accelfile $accelfile -dm $dm -o $outfile $options %s %s >> $log\" >> $log\n" % (maskfile, extra_prepfold_options, infile))
 		batchfile.write(" prepfold -noxwin -mask %s -runavg -accelcand $accelcand -accelfile $accelfile -dm $dm -o $outfile $options %s %s >> $log\n" % (maskfile, extra_prepfold_options, infile))
+	batchfile.write(" echo >> $log\n")
 	batchfile.write("done\n")
 	batchfile.write("date >> $log\n")
 	batchfile.write("touch $end\n")
