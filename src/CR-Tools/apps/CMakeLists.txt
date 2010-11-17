@@ -305,6 +305,29 @@ if (HAVE_CASACORE AND HAVE_DAL)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
 ##_______________________________________________________________________________
+##                                                                  imagefromfits
+
+if (HAVE_CASACORE AND HAVE_DAL)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (imagefromfits imagefromfits.cc)
+    ## linker instructions
+    target_link_libraries (imagefromfits 
+      cr
+      ${HAVE_LIBZ}
+      ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps imagefromfits)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable imagefromfits.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL)
+
+##_______________________________________________________________________________
 ##                                                                     checkimage
 
 if (HAVE_CASACORE AND HAVE_DAL)
@@ -549,6 +572,8 @@ if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
   list (APPEND cr_apps tbbTriggerAnalysis)
   
 endif (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
+
+
 
 
 ## -------------------------------------------------------------------
