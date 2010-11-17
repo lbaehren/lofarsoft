@@ -325,27 +325,33 @@ int main (int argc, char *argv[])
     double AzL, ElL, AzL_NS, ElL_NS, AzL_VE, ElL_VE;                       // Azimuth and Elevation
     double distanceResult = 0, distanceResult_NS = 0, distanceResult_VE = 0;       // distance = radius of curvature
     // values for lateral distribution of arrival times
-    double latTimeRcurv_EW = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
-    double latTimeSigRcurv_EW = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
-    double latTimeOffset_EW = 0, latTimeOffset_NS = 0, latTimeOffset_VE = 0;
-    double latTimeSigOffset_EW = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
-    double latTimeChi2NDF_EW = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
-    double latTimeRcurv_sim_EW = 0, latTimeRcurv_sim_NS = 0, latTimeRcurv_sim_VE = 0;
-    double latTimeSigRcurv_sim_EW = 0, latTimeSigRcurv_sim_NS = 0, latTimeSigRcurv_sim_VE = 0;
-    double latTimeOffset_sim_EW = 0, latTimeOffset_sim_NS = 0, latTimeOffset_sim_VE = 0;
-    double latTimeSigOffset_sim_EW = 0, latTimeSigOffset_sim_NS = 0, latTimeSigOffset_sim_VE = 0;
-    double latTimeChi2NDF_sim_EW = 0, latTimeChi2NDF_sim_NS = 0, latTimeChi2NDF_sim_VE = 0;
-  
-    double latTimeParRcurv_EW = 0, latTimeParRcurv_NS = 0, latTimeParRcurv_VE = 0;
-    double latTimeParSigRcurv_EW = 0, latTimeParSigRcurv_NS = 0, latTimeParSigRcurv_VE = 0;
-    double latTimeParOffset_EW = 0, latTimeParOffset_NS = 0, latTimeParOffset_VE = 0;
-    double latTimeParSigOffset_EW = 0, latTimeParSigOffset_NS = 0, latTimeParSigOffset_VE = 0;
-    double latTimeParChi2NDF_EW = 0, latTimeParChi2NDF_NS = 0, latTimeParChi2NDF_VE = 0;
-    double latTimeParRcurv_sim_EW = 0, latTimeParRcurv_sim_NS = 0, latTimeParRcurv_sim_VE = 0;
-    double latTimeParSigRcurv_sim_EW = 0, latTimeParSigRcurv_sim_NS = 0, latTimeParSigRcurv_sim_VE = 0;
-    double latTimeParOffset_sim_EW = 0, latTimeParOffset_sim_NS = 0, latTimeParOffset_sim_VE = 0;
-    double latTimeParSigOffset_sim_EW = 0, latTimeParSigOffset_sim_NS = 0, latTimeParSigOffset_sim_VE = 0;
-    double latTimeParChi2NDF_sim_EW = 0, latTimeParChi2NDF_sim_NS = 0, latTimeParChi2NDF_sim_VE = 0;
+    double latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
+    double latTimeSphere1DSigRcurv_EW = 0, latTimeSphere1DSigRcurv_NS = 0, latTimeSphere1DSigRcurv_VE = 0;
+    double latTimeSphere1DChi2NDF_EW = 0, latTimeSphere1DChi2NDF_NS = 0, latTimeSphere1DChi2NDF_VE = 0;
+    double latTimeSphere2DRcurv_EW = 0, latTimeSphere2DRcurv_NS = 0, latTimeSphere2DRcurv_VE = 0;
+    double latTimeSphere2DSigRcurv_EW = 0, latTimeSphere2DSigRcurv_NS = 0, latTimeSphere2DSigRcurv_VE = 0;
+    double latTimeSphere2DChi2NDF_EW = 0, latTimeSphere2DChi2NDF_NS = 0, latTimeSphere2DChi2NDF_VE = 0;
+    
+    double latTimeSphere1DRcurv_sim_EW = 0, latTimeSphere1DRcurv_sim_NS = 0, latTimeSphere1DRcurv_sim_VE = 0;
+    double latTimeSphere1DSigRcurv_sim_EW = 0, latTimeSphere1DSigRcurv_sim_NS = 0, latTimeSphere1DSigRcurv_sim_VE = 0;
+    double latTimeSphere1DChi2NDF_sim_EW = 0, latTimeSphere1DChi2NDF_sim_NS = 0, latTimeSphere1DChi2NDF_sim_VE = 0;
+    double latTimeSphere2DRcurv_sim_EW = 0, latTimeSphere2DRcurv_sim_NS = 0, latTimeSphere2DRcurv_sim_VE = 0;
+    double latTimeSphere2DSigRcurv_sim_EW = 0, latTimeSphere2DSigRcurv_sim_NS = 0, latTimeSphere2DSigRcurv_sim_VE = 0;
+    double latTimeSphere2DChi2NDF_sim_EW = 0, latTimeSphere2DChi2NDF_sim_NS = 0, latTimeSphere2DChi2NDF_sim_VE = 0;
+    
+    double latTimeCone1DRho_EW = 0, latTimeCone1DRho_NS = 0, latTimeCone1DRho_VE = 0;
+    double latTimeCone1DSigRho_EW = 0, latTimeCone1DSigRho_NS = 0, latTimeCone1DSigRho_VE = 0;
+    double latTimeCone1DChi2NDF_EW = 0, latTimeCone1DChi2NDF_NS = 0, latTimeCone1DChi2NDF_VE = 0;
+    double latTimeCone2DRho_EW = 0, latTimeCone2DRho_NS = 0, latTimeCone2DRho_VE = 0;
+    double latTimeCone2DSigRho_EW = 0, latTimeCone2DSigRho_NS = 0, latTimeCone2DSigRho_VE = 0;
+    double latTimeCone2DChi2NDF_EW = 0, latTimeCone2DChi2NDF_NS = 0, latTimeCone2DChi2NDF_VE = 0;
+ 
+    double latTimeCone1DRho_sim_EW = 0, latTimeCone1DRho_sim_NS = 0, latTimeCone1DRho_sim_VE = 0;
+    double latTimeCone1DSigRho_sim_EW = 0, latTimeCone1DSigRho_sim_NS = 0, latTimeCone1DSigRho_sim_VE = 0;
+    double latTimeCone1DChi2NDF_sim_EW = 0, latTimeCone1DChi2NDF_sim_NS = 0, latTimeCone1DChi2NDF_sim_VE = 0;
+    double latTimeCone2DRho_sim_EW = 0, latTimeCone2DRho_sim_NS = 0, latTimeCone2DRho_sim_VE = 0;
+    double latTimeCone2DSigRho_sim_EW = 0, latTimeCone2DSigRho_sim_NS = 0, latTimeCone2DSigRho_sim_VE = 0;
+    double latTimeCone2DChi2NDF_sim_EW = 0, latTimeCone2DChi2NDF_sim_NS = 0, latTimeCone2DChi2NDF_sim_VE = 0;
     
     //bool goodEW = false=0, goodNS = false=0, goodVE = false=0;                // true if reconstruction worked
     double rmsCCbeam=0, rmsCCbeam_NS=0, rmsCCbeam_VE=0;                        // rms values of the beams in remote region
@@ -510,27 +516,33 @@ int main (int argc, char *argv[])
       outtree->Branch("latMaxDist_EW",&latMaxDist,"latMaxDist_EW/D");
       outtree->Branch("NlateralAntennas_EW",&NlateralAntennas,"NlateralAntennas_EW/I");
       
-      outtree->Branch("latTimeRcurv_EW",&latTimeRcurv_EW,"latTimeRcurv_EW/D");
-      outtree->Branch("latTimeSigRcurv_EW",&latTimeSigRcurv_EW,"latTimeSigRcurv_EW/D");
-      outtree->Branch("latTimeOffset_EW",&latTimeOffset_EW,"latTimeOffset_EW/D");
-      outtree->Branch("latTimeSigOffset_EW",&latTimeSigOffset_EW,"latTimeSigOffset_EW/D");
-      outtree->Branch("latTimeChi2NDF_EW",&latTimeChi2NDF_EW,"latTimeChi2NDF_EW/D");
-      outtree->Branch("latTimeRcurv_sim_EW",&latTimeRcurv_sim_EW,"latTimeRcurv_sim_EW/D");
-      outtree->Branch("latTimeSigRcurv_sim_EW",&latTimeSigRcurv_sim_EW,"latTimeSigRcurv_sim_EW/D");
-      outtree->Branch("latTimeOffset_sim_EW",&latTimeOffset_sim_EW,"latTimeOffset_sim_EW/D");
-      outtree->Branch("latTimeSigOffset_sim_EW",&latTimeSigOffset_sim_EW,"latTimeSigOffset_sim_EW/D");
-      outtree->Branch("latTimeChi2NDF_sim_EW",&latTimeChi2NDF_sim_EW,"latTimeChi2NDF_sim_EW/D");
+      outtree->Branch("latTimeSphere1DRcurv_EW",&latTimeSphere1DRcurv_EW,"latTimeSphere1DRcurv_EW/D");
+      outtree->Branch("latTimeSphere1DSigRcurv_EW",&latTimeSphere1DSigRcurv_EW,"latTimeSphere1DSigRcurv_EW/D");
+      outtree->Branch("latTimeSphere1DChi2NDF_EW",&latTimeSphere1DChi2NDF_EW,"latTimeSphere1DChi2NDF_EW/D");
+      outtree->Branch("latTimeSphere2DRcurv_EW",&latTimeSphere2DRcurv_EW,"latTimeSphere2DRcurv_EW/D");
+      outtree->Branch("latTimeSphere2DSigRcurv_EW",&latTimeSphere2DSigRcurv_EW,"latTimeSphere2DSigRcurv_EW/D");
+      outtree->Branch("latTimeSphere2DChi2NDF_EW",&latTimeSphere2DChi2NDF_EW,"latTimeSphere2DChi2NDF_EW/D");
       
-      outtree->Branch("latTimeParRcurv_EW",&latTimeParRcurv_EW,"latTimeParRcurv_EW/D");
-      outtree->Branch("latTimeParSigRcurv_EW",&latTimeParSigRcurv_EW,"latTimeParSigRcurv_EW/D");
-      outtree->Branch("latTimeParOffset_EW",&latTimeParOffset_EW,"latTimeParOffset_EW/D");
-      outtree->Branch("latTimeParSigOffset_EW",&latTimeParSigOffset_EW,"latTimeParSigOffset_EW/D");
-      outtree->Branch("latTimeParChi2NDF_EW",&latTimeParChi2NDF_EW,"latTimeParChi2NDF_EW/D");
-      outtree->Branch("latTimeParRcurv_sim_EW",&latTimeParRcurv_sim_EW,"latTimeParRcurv_sim_EW/D");
-      outtree->Branch("latTimeParSigRcurv_sim_EW",&latTimeParSigRcurv_sim_EW,"latTimeParSigRcurv_sim_EW/D");
-      outtree->Branch("latTimeParOffset_sim_EW",&latTimeParOffset_sim_EW,"latTimeParOffset_sim_EW/D");
-      outtree->Branch("latTimeParSigOffset_sim_EW",&latTimeParSigOffset_sim_EW,"latTimeParSigOffset_sim_EW/D");
-      outtree->Branch("latTimeParChi2NDF_sim_EW",&latTimeParChi2NDF_sim_EW,"latTimeParChi2NDF_sim_EW/D");
+      outtree->Branch("latTimeSphere1DRcurv_sim_EW",&latTimeSphere1DRcurv_sim_EW,"latTimeSphere1DRcurv_sim_EW/D");
+      outtree->Branch("latTimeSphere1DSigRcurv_sim_EW",&latTimeSphere1DSigRcurv_sim_EW,"latTimeSphere1DSigRcurv_sim_EW/D");
+      outtree->Branch("latTimeSphere1DChi2NDF_sim_EW",&latTimeSphere1DChi2NDF_sim_EW,"latTimeSphere1DChi2NDF_sim_EW/D");      
+      outtree->Branch("latTimeSphere2DRcurv_sim_EW",&latTimeSphere2DRcurv_sim_EW,"latTimeSphere2DRcurv_sim_EW/D");
+      outtree->Branch("latTimeSphere2DSigRcurv_sim_EW",&latTimeSphere2DSigRcurv_sim_EW,"latTimeSphere2DSigRcurv_sim_EW/D");
+      outtree->Branch("latTimeSphere2DChi2NDF_sim_EW",&latTimeSphere2DChi2NDF_sim_EW,"latTimeSphere2DChi2NDF_sim_EW/D");
+      
+      outtree->Branch("latTimeCone1DRho_EW",&latTimeCone1DRho_EW,"latTimeCone1DRho_EW/D");
+      outtree->Branch("latTimeCone1DSigRho_EW",&latTimeCone1DSigRho_EW,"latTimeCone1DSigRho_EW/D");
+      outtree->Branch("latTimeCone1DChi2NDF_EW",&latTimeCone1DChi2NDF_EW,"latTimeCone1DChi2NDF_EW/D");
+      outtree->Branch("latTimeCone2DRho_EW",&latTimeCone2DRho_EW,"latTimeCone2DRho_EW/D");
+      outtree->Branch("latTimeCone2DSigRho_EW",&latTimeCone2DSigRho_EW,"latTimeCone2DSigRho_EW/D");
+      outtree->Branch("latTimeCone2DChi2NDF_EW",&latTimeCone2DChi2NDF_EW,"latTimeCone2DChi2NDF_EW/D");
+      
+      outtree->Branch("latTimeCone1DRho_sim_EW",&latTimeCone1DRho_sim_EW,"latTimeCone1DRho_sim_EW/D");
+      outtree->Branch("latTimeCone1DSigRho_sim_EW",&latTimeCone1DSigRho_sim_EW,"latTimeCone1DSigRho_sim_EW/D");
+      outtree->Branch("latTimeCone1DChi2NDF_sim_EW",&latTimeCone1DChi2NDF_sim_EW,"latTimeCone1DChi2NDF_sim_EW/D");      
+      outtree->Branch("latTimeCone2DRho_sim_EW",&latTimeCone2DRho_sim_EW,"latTimeCone2DRho_sim_EW/D");
+      outtree->Branch("latTimeCone2DSigRho_sim_EW",&latTimeCone2DSigRho_sim_EW,"latTimeCone2DSigRho_sim_EW/D");
+      outtree->Branch("latTimeCone2DChi2NDF_sim_EW",&latTimeCone2DChi2NDF_sim_EW,"latTimeCone2DChi2NDF_sim_EW/D");
       
       outtree->Branch("R_0_EW",&R_0_EW,"R_0_EW/D");
       outtree->Branch("sigR_0_EW",&sigR_0_EW,"sigR_0_EW/D");
@@ -599,28 +611,34 @@ int main (int argc, char *argv[])
       outtree->Branch("latMinDist_NS",&latMinDist_NS,"latMinDist_NS/D");
       outtree->Branch("latMaxDist_NS",&latMaxDist_NS,"latMaxDist_NS/D");
       outtree->Branch("NlateralAntennas_NS",&NlateralAntennas_NS,"NlateralAntennas_NS/I");
+         
+      outtree->Branch("latTimeSphere1DRcurv_NS",&latTimeSphere1DRcurv_NS,"latTimeSphere1DRcurv_NS/D");
+      outtree->Branch("latTimeSphere1DSigRcurv_NS",&latTimeSphere1DSigRcurv_NS,"latTimeSphere1DSigRcurv_NS/D");
+      outtree->Branch("latTimeSphere1DChi2NDF_NS",&latTimeSphere1DChi2NDF_NS,"latTimeSphere1DChi2NDF_NS/D");
+      outtree->Branch("latTimeSphere2DRcurv_NS",&latTimeSphere2DRcurv_NS,"latTimeSphere2DRcurv_NS/D");
+      outtree->Branch("latTimeSphere2DSigRcurv_NS",&latTimeSphere2DSigRcurv_NS,"latTimeSphere2DSigRcurv_NS/D");
+      outtree->Branch("latTimeSphere2DChi2NDF_NS",&latTimeSphere2DChi2NDF_NS,"latTimeSphere2DChi2NDF_NS/D");
       
-      outtree->Branch("latTimeRcurv_NS",&latTimeRcurv_NS,"latTimeRcurv_NS/D");
-      outtree->Branch("latTimeSigRcurv_NS",&latTimeSigRcurv_NS,"latTimeSigRcurv_NS/D");
-      outtree->Branch("latTimeOffset_NS",&latTimeOffset_NS,"latTimeOffset_NS/D");
-      outtree->Branch("latTimeSigOffset_NS",&latTimeSigOffset_NS,"latTimeSigOffset_NS/D");
-      outtree->Branch("latTimeChi2NDF_NS",&latTimeChi2NDF_NS,"latTimeChi2NDF_NS/D");
-      outtree->Branch("latTimeRcurv_sim_NS",&latTimeRcurv_sim_NS,"latTimeRcurv_sim_NS/D");
-      outtree->Branch("latTimeSigRcurv_sim_NS",&latTimeSigRcurv_sim_NS,"latTimeSigRcurv_sim_NS/D");
-      outtree->Branch("latTimeOffset_sim_NS",&latTimeOffset_sim_NS,"latTimeOffset_sim_NS/D");
-      outtree->Branch("latTimeSigOffset_sim_NS",&latTimeSigOffset_sim_NS,"latTimeSigOffset_sim_NS/D");
-      outtree->Branch("latTimeChi2NDF_sim_NS",&latTimeChi2NDF_sim_NS,"latTimeChi2NDF_sim_NS/D");
+      outtree->Branch("latTimeSphere1DRcurv_sim_NS",&latTimeSphere1DRcurv_sim_NS,"latTimeSphere1DRcurv_sim_NS/D");
+      outtree->Branch("latTimeSphere1DSigRcurv_sim_NS",&latTimeSphere1DSigRcurv_sim_NS,"latTimeSphere1DSigRcurv_sim_NS/D");
+      outtree->Branch("latTimeSphere1DChi2NDF_sim_NS",&latTimeSphere1DChi2NDF_sim_NS,"latTimeSphere1DChi2NDF_sim_NS/D");      
+      outtree->Branch("latTimeSphere2DRcurv_sim_NS",&latTimeSphere2DRcurv_sim_NS,"latTimeSphere2DRcurv_sim_NS/D");
+      outtree->Branch("latTimeSphere2DSigRcurv_sim_NS",&latTimeSphere2DSigRcurv_sim_NS,"latTimeSphere2DSigRcurv_sim_NS/D");
+      outtree->Branch("latTimeSphere2DChi2NDF_sim_NS",&latTimeSphere2DChi2NDF_sim_NS,"latTimeSphere2DChi2NDF_sim_NS/D");
       
-      outtree->Branch("latTimeParRcurv_NS",&latTimeParRcurv_NS,"latTimeParRcurv_NS/D");
-      outtree->Branch("latTimeParSigRcurv_NS",&latTimeParSigRcurv_NS,"latTimeParSigRcurv_NS/D");
-      outtree->Branch("latTimeParOffset_NS",&latTimeParOffset_NS,"latTimeParOffset_NS/D");
-      outtree->Branch("latTimeParSigOffset_NS",&latTimeParSigOffset_NS,"latTimeParSigOffset_NS/D");
-      outtree->Branch("latTimeParChi2NDF_NS",&latTimeParChi2NDF_NS,"latTimeParChi2NDF_NS/D");
-      outtree->Branch("latTimeParRcurv_sim_NS",&latTimeParRcurv_sim_NS,"latTimeParRcurv_sim_NS/D");
-      outtree->Branch("latTimeParSigRcurv_sim_NS",&latTimeParSigRcurv_sim_NS,"latTimeParSigRcurv_sim_NS/D");
-      outtree->Branch("latTimeParOffset_sim_NS",&latTimeParOffset_sim_NS,"latTimeParOffset_sim_NS/D");
-      outtree->Branch("latTimeParSigOffset_sim_NS",&latTimeParSigOffset_sim_NS,"latTimeParSigOffset_sim_NS/D");
-      outtree->Branch("latTimeParChi2NDF_sim_NS",&latTimeParChi2NDF_sim_NS,"latTimeParChi2NDF_sim_NS/D");
+      outtree->Branch("latTimeCone1DRho_NS",&latTimeCone1DRho_NS,"latTimeCone1DRho_NS/D");
+      outtree->Branch("latTimeCone1DSigRho_NS",&latTimeCone1DSigRho_NS,"latTimeCone1DSigRho_NS/D");
+      outtree->Branch("latTimeCone1DChi2NDF_NS",&latTimeCone1DChi2NDF_NS,"latTimeCone1DChi2NDF_NS/D");
+      outtree->Branch("latTimeCone2DRho_NS",&latTimeCone2DRho_NS,"latTimeCone2DRho_NS/D");
+      outtree->Branch("latTimeCone2DSigRho_NS",&latTimeCone2DSigRho_NS,"latTimeCone2DSigRho_NS/D");
+      outtree->Branch("latTimeCone2DChi2NDF_NS",&latTimeCone2DChi2NDF_NS,"latTimeCone2DChi2NDF_NS/D");
+      
+      outtree->Branch("latTimeCone1DRho_sim_NS",&latTimeCone1DRho_sim_NS,"latTimeCone1DRho_sim_NS/D");
+      outtree->Branch("latTimeCone1DSigRho_sim_NS",&latTimeCone1DSigRho_sim_NS,"latTimeCone1DSigRho_sim_NS/D");
+      outtree->Branch("latTimeCone1DChi2NDF_sim_NS",&latTimeCone1DChi2NDF_sim_NS,"latTimeCone1DChi2NDF_sim_NS/D");      
+      outtree->Branch("latTimeCone2DRho_sim_NS",&latTimeCone2DRho_sim_NS,"latTimeCone2DRho_sim_NS/D");
+      outtree->Branch("latTimeCone2DSigRho_sim_NS",&latTimeCone2DSigRho_sim_NS,"latTimeCone2DSigRho_sim_NS/D");
+      outtree->Branch("latTimeCone2DChi2NDF_sim_NS",&latTimeCone2DChi2NDF_sim_NS,"latTimeCone2DChi2NDF_sim_NS/D");
       
       outtree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
       outtree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
@@ -689,28 +707,34 @@ int main (int argc, char *argv[])
       outtree->Branch("latMinDist_VE",&latMinDist_VE,"latMinDist_VE/D");
       outtree->Branch("latMaxDist_VE",&latMaxDist_VE,"latMaxDist_VE/D");
       outtree->Branch("NlateralAntennas_VE",&NlateralAntennas_VE,"NlateralAntennas_VE/I");
+            
+      outtree->Branch("latTimeSphere1DRcurv_VE",&latTimeSphere1DRcurv_VE,"latTimeSphere1DRcurv_VE/D");
+      outtree->Branch("latTimeSphere1DSigRcurv_VE",&latTimeSphere1DSigRcurv_VE,"latTimeSphere1DSigRcurv_VE/D");
+      outtree->Branch("latTimeSphere1DChi2NDF_VE",&latTimeSphere1DChi2NDF_VE,"latTimeSphere1DChi2NDF_VE/D");
+      outtree->Branch("latTimeSphere2DRcurv_VE",&latTimeSphere2DRcurv_VE,"latTimeSphere2DRcurv_VE/D");
+      outtree->Branch("latTimeSphere2DSigRcurv_VE",&latTimeSphere2DSigRcurv_VE,"latTimeSphere2DSigRcurv_VE/D");
+      outtree->Branch("latTimeSphere2DChi2NDF_VE",&latTimeSphere2DChi2NDF_VE,"latTimeSphere2DChi2NDF_VE/D");
       
-      outtree->Branch("latTimeRcurv_VE",&latTimeRcurv_VE,"latTimeRcurv_VE/D");
-      outtree->Branch("latTimeSigRcurv_VE",&latTimeSigRcurv_VE,"latTimeSigRcurv_VE/D");
-      outtree->Branch("latTimeOffset_VE",&latTimeOffset_VE,"latTimeOffset_VE/D");
-      outtree->Branch("latTimeSigOffset_VE",&latTimeSigOffset_VE,"latTimeSigOffset_VE/D");
-      outtree->Branch("latTimeChi2NDF_VE",&latTimeChi2NDF_VE,"latTimeChi2NDF_VE/D");
-      outtree->Branch("latTimeRcurv_sim_VE",&latTimeRcurv_sim_VE,"latTimeRcurv_sim_VE/D");
-      outtree->Branch("latTimeSigRcurv_sim_VE",&latTimeSigRcurv_sim_VE,"latTimeSigRcurv_sim_VE/D");
-      outtree->Branch("latTimeOffset_sim_VE",&latTimeOffset_sim_VE,"latTimeOffset_sim_VE/D");
-      outtree->Branch("latTimeSigOffset_sim_VE",&latTimeSigOffset_sim_VE,"latTimeSigOffset_sim_VE/D");
-      outtree->Branch("latTimeChi2NDF_sim_VE",&latTimeChi2NDF_sim_VE,"latTimeChi2NDF_sim_VE/D");
+      outtree->Branch("latTimeSphere1DRcurv_sim_VE",&latTimeSphere1DRcurv_sim_VE,"latTimeSphere1DRcurv_sim_VE/D");
+      outtree->Branch("latTimeSphere1DSigRcurv_sim_VE",&latTimeSphere1DSigRcurv_sim_VE,"latTimeSphere1DSigRcurv_sim_VE/D");
+      outtree->Branch("latTimeSphere1DChi2NDF_sim_VE",&latTimeSphere1DChi2NDF_sim_VE,"latTimeSphere1DChi2NDF_sim_VE/D");      
+      outtree->Branch("latTimeSphere2DRcurv_sim_VE",&latTimeSphere2DRcurv_sim_VE,"latTimeSphere2DRcurv_sim_VE/D");
+      outtree->Branch("latTimeSphere2DSigRcurv_sim_VE",&latTimeSphere2DSigRcurv_sim_VE,"latTimeSphere2DSigRcurv_sim_VE/D");
+      outtree->Branch("latTimeSphere2DChi2NDF_sim_VE",&latTimeSphere2DChi2NDF_sim_VE,"latTimeSphere2DChi2NDF_sim_VE/D");
       
-      outtree->Branch("latTimeParRcurv_VE",&latTimeParRcurv_VE,"latTimeParRcurv_VE/D");
-      outtree->Branch("latTimeParSigRcurv_VE",&latTimeParSigRcurv_VE,"latTimeParSigRcurv_VE/D");
-      outtree->Branch("latTimeParOffset_VE",&latTimeParOffset_VE,"latTimeParOffset_VE/D");
-      outtree->Branch("latTimeParSigOffset_VE",&latTimeParSigOffset_VE,"latTimeParSigOffset_VE/D");
-      outtree->Branch("latTimeParChi2NDF_VE",&latTimeParChi2NDF_VE,"latTimeParChi2NDF_VE/D");
-      outtree->Branch("latTimeParRcurv_sim_VE",&latTimeParRcurv_sim_VE,"latTimeParRcurv_sim_VE/D");
-      outtree->Branch("latTimeParSigRcurv_sim_VE",&latTimeParSigRcurv_sim_VE,"latTimeParSigRcurv_sim_VE/D");
-      outtree->Branch("latTimeParOffset_sim_VE",&latTimeParOffset_sim_VE,"latTimeParOffset_sim_VE/D");
-      outtree->Branch("latTimeParSigOffset_sim_VE",&latTimeParSigOffset_sim_VE,"latTimeParSigOffset_sim_VE/D");
-      outtree->Branch("latTimeParChi2NDF_sim_VE",&latTimeParChi2NDF_sim_VE,"latTimeParChi2NDF_sim_VE/D");
+      outtree->Branch("latTimeCone1DRho_VE",&latTimeCone1DRho_VE,"latTimeCone1DRho_VE/D");
+      outtree->Branch("latTimeCone1DSigRho_VE",&latTimeCone1DSigRho_VE,"latTimeCone1DSigRho_VE/D");
+      outtree->Branch("latTimeCone1DChi2NDF_VE",&latTimeCone1DChi2NDF_VE,"latTimeCone1DChi2NDF_VE/D");
+      outtree->Branch("latTimeCone2DRho_VE",&latTimeCone2DRho_VE,"latTimeCone2DRho_VE/D");
+      outtree->Branch("latTimeCone2DSigRho_VE",&latTimeCone2DSigRho_VE,"latTimeCone2DSigRho_VE/D");
+      outtree->Branch("latTimeCone2DChi2NDF_VE",&latTimeCone2DChi2NDF_VE,"latTimeCone2DChi2NDF_VE/D");
+      
+      outtree->Branch("latTimeCone1DRho_sim_VE",&latTimeCone1DRho_sim_VE,"latTimeCone1DRho_sim_VE/D");
+      outtree->Branch("latTimeCone1DSigRho_sim_VE",&latTimeCone1DSigRho_sim_VE,"latTimeCone1DSigRho_sim_VE/D");
+      outtree->Branch("latTimeCone1DChi2NDF_sim_VE",&latTimeCone1DChi2NDF_sim_VE,"latTimeCone1DChi2NDF_sim_VE/D");      
+      outtree->Branch("latTimeCone2DRho_sim_VE",&latTimeCone2DRho_sim_VE,"latTimeCone2DRho_sim_VE/D");
+      outtree->Branch("latTimeCone2DSigRho_sim_VE",&latTimeCone2DSigRho_sim_VE,"latTimeCone2DSigRho_sim_VE/D");
+      outtree->Branch("latTimeCone2DChi2NDF_sim_VE",&latTimeCone2DChi2NDF_sim_VE,"latTimeCone2DChi2NDF_sim_VE/D");
       
       outtree->Branch("R_0_VE",&R_0_VE,"R_0_VE/D");
       outtree->Branch("sigR_0_VE",&sigR_0_VE,"sigR_0_VE/D");
@@ -1082,29 +1106,33 @@ int main (int argc, char *argv[])
       R_0_VE = 0, sigR_0_VE = 0, eps_VE = 0, sigeps_VE = 0, chi2NDF_VE = 0; 
       R_0_sim_VE = 0, sigR_0_sim_VE = 0, eps_sim_VE = 0, sigeps_sim_VE = 0, chi2NDF_sim_VE = 0; 
 
-      latTimeRcurv_EW = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
-      latTimeSigRcurv_EW = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
-      latTimeOffset_EW = 0, latTimeOffset_NS = 0, latTimeOffset_VE = 0;
-      latTimeSigOffset_EW = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
-      latTimeChi2NDF_EW = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
-      
-      latTimeRcurv_sim_EW = 0, latTimeRcurv_sim_NS = 0, latTimeRcurv_sim_VE = 0;
-      latTimeSigRcurv_sim_EW = 0, latTimeSigRcurv_sim_NS = 0, latTimeSigRcurv_sim_VE = 0;
-      latTimeOffset_sim_EW = 0, latTimeOffset_sim_NS = 0, latTimeOffset_sim_VE = 0;
-      latTimeSigOffset_sim_EW = 0, latTimeSigOffset_sim_NS = 0, latTimeSigOffset_sim_VE = 0;
-      latTimeChi2NDF_sim_EW = 0, latTimeChi2NDF_sim_NS = 0, latTimeChi2NDF_sim_VE = 0;
-      
-      latTimeParRcurv_EW = 0, latTimeParRcurv_NS = 0, latTimeParRcurv_VE = 0;
-      latTimeParSigRcurv_EW = 0, latTimeParSigRcurv_NS = 0, latTimeParSigRcurv_VE = 0;
-      latTimeParOffset_EW = 0, latTimeParOffset_NS = 0, latTimeParOffset_VE = 0;
-      latTimeParSigOffset_EW = 0, latTimeParSigOffset_NS = 0, latTimeParSigOffset_VE = 0;
-      latTimeParChi2NDF_EW = 0, latTimeParChi2NDF_NS = 0, latTimeParChi2NDF_VE = 0;
-      
-      latTimeParRcurv_sim_EW = 0, latTimeParRcurv_sim_NS = 0, latTimeParRcurv_sim_VE = 0;
-      latTimeParSigRcurv_sim_EW = 0, latTimeParSigRcurv_sim_NS = 0, latTimeParSigRcurv_sim_VE = 0;
-      latTimeParOffset_sim_EW = 0, latTimeParOffset_sim_NS = 0, latTimeParOffset_sim_VE = 0;
-      latTimeParSigOffset_sim_EW = 0, latTimeParSigOffset_sim_NS = 0, latTimeParSigOffset_sim_VE = 0;
-      latTimeParChi2NDF_sim_EW = 0, latTimeParChi2NDF_sim_NS = 0, latTimeParChi2NDF_sim_VE = 0;
+      latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
+      latTimeSphere1DSigRcurv_EW = 0, latTimeSphere1DSigRcurv_NS = 0, latTimeSphere1DSigRcurv_VE = 0;
+      latTimeSphere1DChi2NDF_EW = 0, latTimeSphere1DChi2NDF_NS = 0, latTimeSphere1DChi2NDF_VE = 0;
+      latTimeSphere2DRcurv_EW = 0, latTimeSphere2DRcurv_NS = 0, latTimeSphere2DRcurv_VE = 0;
+      latTimeSphere2DSigRcurv_EW = 0, latTimeSphere2DSigRcurv_NS = 0, latTimeSphere2DSigRcurv_VE = 0;
+      latTimeSphere2DChi2NDF_EW = 0, latTimeSphere2DChi2NDF_NS = 0, latTimeSphere2DChi2NDF_VE = 0;
+    
+      latTimeSphere1DRcurv_sim_EW = 0, latTimeSphere1DRcurv_sim_NS = 0, latTimeSphere1DRcurv_sim_VE = 0;
+      latTimeSphere1DSigRcurv_sim_EW = 0, latTimeSphere1DSigRcurv_sim_NS = 0, latTimeSphere1DSigRcurv_sim_VE = 0;
+      latTimeSphere1DChi2NDF_sim_EW = 0, latTimeSphere1DChi2NDF_sim_NS = 0, latTimeSphere1DChi2NDF_sim_VE = 0;
+      latTimeSphere2DRcurv_sim_EW = 0, latTimeSphere2DRcurv_sim_NS = 0, latTimeSphere2DRcurv_sim_VE = 0;
+      latTimeSphere2DSigRcurv_sim_EW = 0, latTimeSphere2DSigRcurv_sim_NS = 0, latTimeSphere2DSigRcurv_sim_VE = 0;
+      latTimeSphere2DChi2NDF_sim_EW = 0, latTimeSphere2DChi2NDF_sim_NS = 0, latTimeSphere2DChi2NDF_sim_VE = 0;
+    
+      latTimeCone1DRho_EW = 0, latTimeCone1DRho_NS = 0, latTimeCone1DRho_VE = 0;
+      latTimeCone1DSigRho_EW = 0, latTimeCone1DSigRho_NS = 0, latTimeCone1DSigRho_VE = 0;
+      latTimeCone1DChi2NDF_EW = 0, latTimeCone1DChi2NDF_NS = 0, latTimeCone1DChi2NDF_VE = 0;
+      latTimeCone2DRho_EW = 0, latTimeCone2DRho_NS = 0, latTimeCone2DRho_VE = 0;
+      latTimeCone2DSigRho_EW = 0, latTimeCone2DSigRho_NS = 0, latTimeCone2DSigRho_VE = 0;
+      latTimeCone2DChi2NDF_EW = 0, latTimeCone2DChi2NDF_NS = 0, latTimeCone2DChi2NDF_VE = 0;
+ 
+      latTimeCone1DRho_sim_EW = 0, latTimeCone1DRho_sim_NS = 0, latTimeCone1DRho_sim_VE = 0;
+      latTimeCone1DSigRho_sim_EW = 0, latTimeCone1DSigRho_sim_NS = 0, latTimeCone1DSigRho_sim_VE = 0;
+      latTimeCone1DChi2NDF_sim_EW = 0, latTimeCone1DChi2NDF_sim_NS = 0, latTimeCone1DChi2NDF_sim_VE = 0;
+      latTimeCone2DRho_sim_EW = 0, latTimeCone2DRho_sim_NS = 0, latTimeCone2DRho_sim_VE = 0;
+      latTimeCone2DSigRho_sim_EW = 0, latTimeCone2DSigRho_sim_NS = 0, latTimeCone2DSigRho_sim_VE = 0;
+      latTimeCone2DChi2NDF_sim_EW = 0, latTimeCone2DChi2NDF_sim_NS = 0, latTimeCone2DChi2NDF_sim_VE = 0;
 
       CR::lateralDistribution lateralFitter;
       string plotPrefix = "";
@@ -1113,102 +1141,114 @@ int main (int argc, char *argv[])
           plotPrefix = "lateral-EW-"+m_dict[Gt]+"-";
         else 
           plotPrefix = "lateral-EW-";
-        Record ergew = lateralFitter.fitLateralDistribution(plotPrefix,
+        Record ergEW = lateralFitter.fitLateralDistribution(plotPrefix,
                                                             m_recEW,m_simEW,
                                                             Gt,AzL,90.-ElL,
                                                             index1, index2);
-        eps_EW = ergew.asDouble("eps");
-        R_0_EW = ergew.asDouble("R_0");
-        sigeps_EW = ergew.asDouble("sigeps");
-        sigR_0_EW = ergew.asDouble("sigR_0");
-        chi2NDF_EW = ergew.asDouble("chi2NDF");
-        eps_sim_EW = ergew.asDouble("eps_sim");
-        R_0_sim_EW = ergew.asDouble("R_0_sim");
-        sigeps_sim_EW = ergew.asDouble("sigeps_sim");
-        sigR_0_sim_EW = ergew.asDouble("sigR_0_sim");
-        chi2NDF_sim_EW = ergew.asDouble("chi2NDF_sim");
+        eps_EW = ergEW.asDouble("eps");
+        R_0_EW = ergEW.asDouble("R_0");
+        sigeps_EW = ergEW.asDouble("sigeps");
+        sigR_0_EW = ergEW.asDouble("sigR_0");
+        chi2NDF_EW = ergEW.asDouble("chi2NDF");
+        eps_sim_EW = ergEW.asDouble("eps_sim");
+        R_0_sim_EW = ergEW.asDouble("R_0_sim");
+        sigeps_sim_EW = ergEW.asDouble("sigeps_sim");
+        sigR_0_sim_EW = ergEW.asDouble("sigR_0_sim");
+        chi2NDF_sim_EW = ergEW.asDouble("chi2NDF_sim");
         
         //write info of the fit into file
         outputEW <<m_dict[Gt]<<"\t"<<eps_EW<<"\t"<<sigeps_EW<<"\t"<<R_0_EW<<"\t"<<sigR_0_EW<<"\t"<<chi2NDF_EW<<"\t"<<eps_sim_EW<<"\t"<<sigeps_sim_EW<<"\t"<<R_0_sim_EW<<"\t"<<sigR_0_sim_EW<<"\t"<<chi2NDF_sim_EW<<endl;			
         
-        Record ergTimeew = lateralFitter.lateralTimeDistribution(plotPrefix,
+        Record ergTimeEW = lateralFitter.lateralTimeDistribution(plotPrefix,
                                                                  m_recEW,m_simEW,
                                                                  Gt,AzL,90.-ElL,
                                                                  CCcenter,
                                                                  index1, index2);        
                                                                  
-        latTimeRcurv_EW = ergTimeew.asDouble("latTime_R_curv");
-        latTimeSigRcurv_EW = ergTimeew.asDouble("latTime_sigR_curv");
-        latTimeOffset_EW = ergTimeew.asDouble("latTime_offset");
-        latTimeSigOffset_EW = ergTimeew.asDouble("latTime_sigoffset");
-        latTimeChi2NDF_EW = ergTimeew.asDouble("latTime_chi2NDF");
-        latTimeParRcurv_EW = ergTimeew.asDouble("latTimePar_R_curv");
-        latTimeParSigRcurv_EW = ergTimeew.asDouble("latTimePar_sigR_curv");
-        latTimeParOffset_EW = ergTimeew.asDouble("latTimePar_offset");
-        latTimeParSigOffset_EW = ergTimeew.asDouble("latTimePar_sigoffset");
-        latTimeParChi2NDF_EW = ergTimeew.asDouble("latTimePar_chi2NDF");                                                                
+        latTimeSphere1DRcurv_EW = ergTimeEW.asDouble("latTime1D_Rcurv");
+        latTimeSphere1DSigRcurv_EW = ergTimeEW.asDouble("latTime1D_sigRcurv");
+        latTimeSphere1DChi2NDF_EW = ergTimeEW.asDouble("latTime1D_chi2NDF");
+        latTimeSphere2DRcurv_EW = ergTimeEW.asDouble("latTime2D_Rcurv");
+        latTimeSphere2DSigRcurv_EW = ergTimeEW.asDouble("latTime2D_sigRcurv");
+        latTimeSphere2DChi2NDF_EW = ergTimeEW.asDouble("latTime2D_chi2NDF");
         
-        latTimeRcurv_sim_EW = ergTimeew.asDouble("latTime_R_curv_sim");
-        latTimeSigRcurv_sim_EW = ergTimeew.asDouble("latTime_sigR_curv_sim");
-        latTimeOffset_sim_EW = ergTimeew.asDouble("latTime_offset_sim");
-        latTimeSigOffset_sim_EW = ergTimeew.asDouble("latTime_sigoffset_sim");
-        latTimeChi2NDF_sim_EW = ergTimeew.asDouble("latTime_chi2NDF_sim");
-        latTimeParRcurv_sim_EW = ergTimeew.asDouble("latTimePar_R_curv_sim");
-        latTimeParSigRcurv_sim_EW = ergTimeew.asDouble("latTimePar_sigR_curv_sim");
-        latTimeParOffset_sim_EW = ergTimeew.asDouble("latTimePar_offset_sim");
-        latTimeParSigOffset_sim_EW = ergTimeew.asDouble("latTimePar_sigoffset_sim");
-        latTimeParChi2NDF_sim_EW = ergTimeew.asDouble("latTimePar_chi2NDF_sim");             
+        latTimeSphere1DRcurv_sim_EW = ergTimeEW.asDouble("latTime1D_Rcurv_sim");
+        latTimeSphere1DSigRcurv_sim_EW = ergTimeEW.asDouble("latTime1D_sigRcurv_sim");
+        latTimeSphere1DChi2NDF_sim_EW = ergTimeEW.asDouble("latTime1D_chi2NDF_sim");
+        latTimeSphere2DRcurv_sim_EW = ergTimeEW.asDouble("latTime2D_Rcurv_sim");
+        latTimeSphere2DSigRcurv_sim_EW = ergTimeEW.asDouble("latTime2D_sigRcurv_sim");
+        latTimeSphere2DChi2NDF_sim_EW = ergTimeEW.asDouble("latTime2D_chi2NDF_sim");
+                                                                 
+        latTimeCone1DRho_EW = ergTimeEW.asDouble("latTime1D_ConeRho");
+        latTimeCone1DSigRho_EW = ergTimeEW.asDouble("latTime1D_sigConeRho");
+        latTimeCone1DChi2NDF_EW = ergTimeEW.asDouble("latTime1D_Conechi2NDF");
+        latTimeCone2DRho_EW = ergTimeEW.asDouble("latTime2D_ConeRho");
+        latTimeCone2DSigRho_EW = ergTimeEW.asDouble("latTime2D_sigConeRho");
+        latTimeCone2DChi2NDF_EW = ergTimeEW.asDouble("latTime2D_Conechi2NDF");
+        
+        latTimeCone1DRho_sim_EW = ergTimeEW.asDouble("latTime1D_ConeRho_sim");
+        latTimeCone1DSigRho_sim_EW = ergTimeEW.asDouble("latTime1D_sigConeRho_sim");
+        latTimeCone1DChi2NDF_sim_EW = ergTimeEW.asDouble("latTime1D_Conechi2NDF_sim");
+        latTimeCone2DRho_sim_EW = ergTimeEW.asDouble("latTime2D_ConeRho_sim");
+        latTimeCone2DSigRho_sim_EW = ergTimeEW.asDouble("latTime2D_sigConeRho_sim");
+        latTimeCone2DChi2NDF_sim_EW = ergTimeEW.asDouble("latTime2D_Conechi2NDF_sim");
       }
       if ((hasNS) && (m_recNS.size()>=4)) {
         if (simDictName!="") 
           plotPrefix = "lateral-NS-"+m_dict[Gt]+"-";
         else 
           plotPrefix = "lateral-NS-";
-        Record ergns = lateralFitter.fitLateralDistribution(plotPrefix,
+        Record ergNS = lateralFitter.fitLateralDistribution(plotPrefix,
                                                             m_recNS,m_simNS,
                                                             Gt,AzL,90.-ElL,
                                                             index1, index2);
-        eps_NS = ergns.asDouble("eps");
-        R_0_NS = ergns.asDouble("R_0");
-        sigeps_NS = ergns.asDouble("sigeps");
-        sigR_0_NS = ergns.asDouble("sigR_0");
-        chi2NDF_NS = ergns.asDouble("chi2NDF");
-        eps_sim_NS = ergns.asDouble("eps_sim");
-        R_0_sim_NS = ergns.asDouble("R_0_sim");
-        sigeps_sim_NS = ergns.asDouble("sigeps_sim");
-        sigR_0_sim_NS = ergns.asDouble("sigR_0_sim");
-        chi2NDF_sim_NS = ergns.asDouble("chi2NDF_sim");
+        eps_NS = ergNS.asDouble("eps");
+        R_0_NS = ergNS.asDouble("R_0");
+        sigeps_NS = ergNS.asDouble("sigeps");
+        sigR_0_NS = ergNS.asDouble("sigR_0");
+        chi2NDF_NS = ergNS.asDouble("chi2NDF");
+        eps_sim_NS = ergNS.asDouble("eps_sim");
+        R_0_sim_NS = ergNS.asDouble("R_0_sim");
+        sigeps_sim_NS = ergNS.asDouble("sigeps_sim");
+        sigR_0_sim_NS = ergNS.asDouble("sigR_0_sim");
+        chi2NDF_sim_NS = ergNS.asDouble("chi2NDF_sim");
 
         //write info of the fit into file
         outputEW <<m_dict[Gt]<<"\t"<<eps_NS<<"\t"<<sigeps_NS<<"\t"<<R_0_NS<<"\t"<<sigR_0_NS<<"\t"<<chi2NDF_NS<<"\t"<<eps_sim_NS<<"\t"<<sigeps_sim_NS<<"\t"<<R_0_sim_NS<<"\t"<<sigR_0_sim_NS<<"\t"<<chi2NDF_sim_NS<<endl; 
         
-        Record ergTimens = lateralFitter.lateralTimeDistribution(plotPrefix,
+        Record ergTimeNS = lateralFitter.lateralTimeDistribution(plotPrefix,
                                                                  m_recNS,m_simNS,
                                                                  Gt,AzL,90.-ElL,
                                                                  CCcenter_NS,
                                                                  index1, index2);
-                                                                                                                                
-        latTimeRcurv_NS = ergTimens.asDouble("latTime_R_curv");
-        latTimeSigRcurv_NS = ergTimens.asDouble("latTime_sigR_curv");
-        latTimeOffset_NS = ergTimens.asDouble("latTime_offset");
-        latTimeSigOffset_NS = ergTimens.asDouble("latTime_sigoffset");
-        latTimeChi2NDF_NS = ergTimens.asDouble("latTime_chi2NDF");
-        latTimeParRcurv_NS = ergTimens.asDouble("latTimePar_R_curv");
-        latTimeParSigRcurv_NS = ergTimens.asDouble("latTimePar_sigR_curv");
-        latTimeParOffset_NS = ergTimens.asDouble("latTimePar_offset");
-        latTimeParSigOffset_NS = ergTimens.asDouble("latTimePar_sigoffset");
-        latTimeParChi2NDF_NS = ergTimens.asDouble("latTimePar_chi2NDF");       
+                                                                                                                                                                                                 
+        latTimeSphere1DRcurv_NS = ergTimeNS.asDouble("latTime1D_Rcurv");
+        latTimeSphere1DSigRcurv_NS = ergTimeNS.asDouble("latTime1D_sigRcurv");
+        latTimeSphere1DChi2NDF_NS = ergTimeNS.asDouble("latTime1D_chi2NDF");
+        latTimeSphere2DRcurv_NS = ergTimeNS.asDouble("latTime2D_Rcurv");
+        latTimeSphere2DSigRcurv_NS = ergTimeNS.asDouble("latTime2D_sigRcurv");
+        latTimeSphere2DChi2NDF_NS = ergTimeNS.asDouble("latTime2D_chi2NDF");
         
-        latTimeRcurv_sim_NS = ergTimens.asDouble("latTime_R_curv_sim");
-        latTimeSigRcurv_sim_NS = ergTimens.asDouble("latTime_sigR_curv_sim");
-        latTimeOffset_sim_NS = ergTimens.asDouble("latTime_offset_sim");
-        latTimeSigOffset_sim_NS = ergTimens.asDouble("latTime_sigoffset_sim");
-        latTimeChi2NDF_sim_NS = ergTimens.asDouble("latTime_chi2NDF_sim");
-        latTimeParRcurv_sim_NS = ergTimens.asDouble("latTimePar_R_curv_sim");
-        latTimeParSigRcurv_sim_NS = ergTimens.asDouble("latTimePar_sigR_curv_sim");
-        latTimeParOffset_sim_NS = ergTimens.asDouble("latTimePar_offset_sim");
-        latTimeParSigOffset_sim_NS = ergTimens.asDouble("latTimePar_sigoffset_sim");
-        latTimeParChi2NDF_sim_NS = ergTimens.asDouble("latTimePar_chi2NDF_sim");       
+        latTimeSphere1DRcurv_sim_NS = ergTimeNS.asDouble("latTime1D_Rcurv_sim");
+        latTimeSphere1DSigRcurv_sim_NS = ergTimeNS.asDouble("latTime1D_sigRcurv_sim");
+        latTimeSphere1DChi2NDF_sim_NS = ergTimeNS.asDouble("latTime1D_chi2NDF_sim");
+        latTimeSphere2DRcurv_sim_NS = ergTimeNS.asDouble("latTime2D_Rcurv_sim");
+        latTimeSphere2DSigRcurv_sim_NS = ergTimeNS.asDouble("latTime2D_sigRcurv_sim");
+        latTimeSphere2DChi2NDF_sim_NS = ergTimeNS.asDouble("latTime2D_chi2NDF_sim");
+                                                                 
+        latTimeCone1DRho_NS = ergTimeNS.asDouble("latTime1D_ConeRho");
+        latTimeCone1DSigRho_NS = ergTimeNS.asDouble("latTime1D_sigConeRho");
+        latTimeCone1DChi2NDF_NS = ergTimeNS.asDouble("latTime1D_Conechi2NDF");
+        latTimeCone2DRho_NS = ergTimeNS.asDouble("latTime2D_ConeRho");
+        latTimeCone2DSigRho_NS = ergTimeNS.asDouble("latTime2D_sigConeRho");
+        latTimeCone2DChi2NDF_NS = ergTimeNS.asDouble("latTime2D_Conechi2NDF");
+        
+        latTimeCone1DRho_sim_NS = ergTimeNS.asDouble("latTime1D_ConeRho_sim");
+        latTimeCone1DSigRho_sim_NS = ergTimeNS.asDouble("latTime1D_sigConeRho_sim");
+        latTimeCone1DChi2NDF_sim_NS = ergTimeNS.asDouble("latTime1D_Conechi2NDF_sim");
+        latTimeCone2DRho_sim_NS = ergTimeNS.asDouble("latTime2D_ConeRho_sim");
+        latTimeCone2DSigRho_sim_NS = ergTimeNS.asDouble("latTime2D_sigConeRho_sim");
+        latTimeCone2DChi2NDF_sim_NS = ergTimeNS.asDouble("latTime2D_Conechi2NDF_sim");
       }
       
       // Fill information in root file

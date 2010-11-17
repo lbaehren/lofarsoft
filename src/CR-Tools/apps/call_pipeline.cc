@@ -1472,16 +1472,19 @@ int main (int argc, char *argv[])
   double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;             // Epsilon from lateral distribution exponential fit
   double chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;                                // Chi^2/NDF of lateral distribution exponential fit
   // values for lateral distribution of arrival times
-  double latTimeRcurv = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
-  double latTimeSigRcurv = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
-  double latTimeOffset = 0, latTimeOffset_NS = 0, latTimeOffset_VE = 0;
-  double latTimeSigOffset = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
-  double latTimeChi2NDF = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
-  double latTimeParRcurv = 0, latTimeParRcurv_NS = 0, latTimeParRcurv_VE = 0;
-  double latTimeParSigRcurv = 0, latTimeParSigRcurv_NS = 0, latTimeParSigRcurv_VE = 0;
-  double latTimeParOffset = 0, latTimeParOffset_NS = 0, latTimeParOffset_VE = 0;
-  double latTimeParSigOffset = 0, latTimeParSigOffset_NS = 0, latTimeParSigOffset_VE = 0;
-  double latTimeParChi2NDF = 0, latTimeParChi2NDF_NS = 0, latTimeParChi2NDF_VE = 0;
+  double latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
+  double latTimeSphere1DSigRcurv_EW = 0, latTimeSphere1DSigRcurv_NS = 0, latTimeSphere1DSigRcurv_VE = 0;
+  double latTimeSphere1DChi2NDF_EW = 0, latTimeSphere1DChi2NDF_NS = 0, latTimeSphere1DChi2NDF_VE = 0;
+  double latTimeSphere2DRcurv_EW = 0, latTimeSphere2DRcurv_NS = 0, latTimeSphere2DRcurv_VE = 0;
+  double latTimeSphere2DSigRcurv_EW = 0, latTimeSphere2DSigRcurv_NS = 0, latTimeSphere2DSigRcurv_VE = 0;
+  double latTimeSphere2DChi2NDF_EW = 0, latTimeSphere2DChi2NDF_NS = 0, latTimeSphere2DChi2NDF_VE = 0;
+  
+  double latTimeCone1DRho_EW = 0, latTimeCone1DRho_NS = 0, latTimeCone1DRho_VE = 0;
+  double latTimeCone1DSigRho_EW = 0, latTimeCone1DSigRho_NS = 0, latTimeCone1DSigRho_VE = 0;
+  double latTimeCone1DChi2NDF_EW = 0, latTimeCone1DChi2NDF_NS = 0, latTimeCone1DChi2NDF_VE = 0;
+  double latTimeCone2DRho_EW = 0, latTimeCone2DRho_NS = 0, latTimeCone2DRho_VE = 0;
+  double latTimeCone2DSigRho_EW = 0, latTimeCone2DSigRho_NS = 0, latTimeCone2DSigRho_VE = 0;
+  double latTimeCone2DChi2NDF_EW = 0, latTimeCone2DChi2NDF_NS = 0, latTimeCone2DChi2NDF_VE = 0;
     
   map <int,PulseProperties> rawPulsesMap;                // pulse properties of pules in raw data traces
   map <int,PulseProperties> calibPulsesMap;              // pulse properties of pules in calibrated data traces
@@ -1775,16 +1778,19 @@ int main (int argc, char *argv[])
           roottree->Branch("NlateralAntennas",&NlateralAntennas,"NlateralAntennas/I");
         }
         if (config["lateralTimeDistribution"]->bValue()) {
-          roottree->Branch("latTimeRcurv",&latTimeRcurv,"latTimeRcurv/D");
-          roottree->Branch("latTimeSigRcurv",&latTimeSigRcurv,"latTimeSigRcurv/D");
-          roottree->Branch("latTimeOffset",&latTimeOffset,"latTimeOffset/D");
-          roottree->Branch("latTimeSigOffset",&latTimeSigOffset,"latTimeSigOffset/D");
-          roottree->Branch("latTimeChi2NDF",&latTimeChi2NDF,"latTimeChi2NDF/D");
-          roottree->Branch("latTimeParRcurv",&latTimeParRcurv,"latTimeParRcurv/D");
-          roottree->Branch("latTimeParSigRcurv",&latTimeParSigRcurv,"latTimeParSigRcurv/D");
-          roottree->Branch("latTimeParOffset",&latTimeParOffset,"latTimeParOffset/D");
-          roottree->Branch("latTimeParSigOffset",&latTimeParSigOffset,"latTimeParSigOffset/D");
-          roottree->Branch("latTimeParChi2NDF",&latTimeParChi2NDF,"latTimeParChi2NDF/D");
+          roottree->Branch("latTimeSphere1DRcurv",&latTimeSphere1DRcurv_EW,"latTimeSphere1DRcurv/D");
+          roottree->Branch("latTimeSphere1DSigRcurv",&latTimeSphere1DSigRcurv_EW,"latTimeSphere1DSigRcurv/D");
+          roottree->Branch("latTimeSphere1DChi2NDF",&latTimeSphere1DChi2NDF_EW,"latTimeSphere1DChi2NDF/D");
+          roottree->Branch("latTimeSphere2DRcurv",&latTimeSphere2DRcurv_EW,"latTimeSphere2DRcurv/D");
+          roottree->Branch("latTimeSphere2DSigRcurv",&latTimeSphere2DSigRcurv_EW,"latTimeSphere2DSigRcurv/D");
+          roottree->Branch("latTimeSphere2DChi2NDF",&latTimeSphere2DChi2NDF_EW,"latTimeSphere2DChi2NDF/D");
+          
+          roottree->Branch("latTimeCone1DRho",&latTimeCone1DRho_EW,"latTimeCone1DRho/D");
+          roottree->Branch("latTimeCone1DSigRho",&latTimeCone1DSigRho_EW,"latTimeCone1DSigRho/D");
+          roottree->Branch("latTimeCone1DChi2NDF",&latTimeCone1DChi2NDF_EW,"latTimeCone1DChi2NDF/D");
+          roottree->Branch("latTimeCone2DRho",&latTimeCone2DRho_EW,"latTimeCone2DRho/D");
+          roottree->Branch("latTimeCone2DSigRho",&latTimeCone2DSigRho_EW,"latTimeCone2DSigRho/D");
+          roottree->Branch("latTimeCone2DChi2NDF",&latTimeCone2DChi2NDF_EW,"latTimeCone2DChi2NDF/D");
         }
       }
       if ( (config["polarization"]->sValue() == "EW") || (config["polarization"]->sValue() == "BOTH") || (config["polarization"]->sValue() == "THREE") ) {
@@ -1828,16 +1834,19 @@ int main (int argc, char *argv[])
           roottree->Branch("NlateralAntennas_EW",&NlateralAntennas,"NlateralAntennas_EW/I");
         }
         if (config["lateralTimeDistribution"]->bValue()) {
-          roottree->Branch("latTimeRcurv_EW",&latTimeRcurv,"latTimeRcurv_EW/D");
-          roottree->Branch("latTimeSigRcurv_EW",&latTimeSigRcurv,"latTimeSigRcurv_EW/D");
-          roottree->Branch("latTimeOffset_EW",&latTimeOffset,"latTimeOffset_EW/D");
-          roottree->Branch("latTimeSigOffset_EW",&latTimeSigOffset,"latTimeSigOffset_EW/D");
-          roottree->Branch("latTimeChi2NDF_EW",&latTimeChi2NDF,"latTimeChi2NDF_EW/D");
-          roottree->Branch("latTimeParRcurv_EW",&latTimeParRcurv,"latTimeParRcurv_EW/D");
-          roottree->Branch("latTimeParSigRcurv_EW",&latTimeParSigRcurv,"latTimeParSigRcurv_EW/D");
-          roottree->Branch("latTimeParOffset_EW",&latTimeParOffset,"latTimeParOffset_EW/D");
-          roottree->Branch("latTimeParSigOffset_EW",&latTimeParSigOffset,"latTimeParSigOffset_EW/D");
-          roottree->Branch("latTimeParChi2NDF_EW",&latTimeParChi2NDF,"latTimeParChi2NDF_EW/D");
+          roottree->Branch("latTimeSphere1DRcurv_EW",&latTimeSphere1DRcurv_EW,"latTimeSphere1DRcurv_EW/D");
+          roottree->Branch("latTimeSphere1DSigRcurv_EW",&latTimeSphere1DSigRcurv_EW,"latTimeSphere1DSigRcurv_EW/D");
+          roottree->Branch("latTimeSphere1DChi2NDF_EW",&latTimeSphere1DChi2NDF_EW,"latTimeSphere1DChi2NDF_EW/D");
+          roottree->Branch("latTimeSphere2DRcurv_EW",&latTimeSphere2DRcurv_EW,"latTimeSphere2DRcurv_EW/D");
+          roottree->Branch("latTimeSphere2DSigRcurv_EW",&latTimeSphere2DSigRcurv_EW,"latTimeSphere2DSigRcurv_EW/D");
+          roottree->Branch("latTimeSphere2DChi2NDF_EW",&latTimeSphere2DChi2NDF_EW,"latTimeSphere2DChi2NDF_EW/D");
+          
+          roottree->Branch("latTimeCone1DRho_EW",&latTimeCone1DRho_EW,"latTimeCone1DRho_EW/D");
+          roottree->Branch("latTimeCone1DSigRho_EW",&latTimeCone1DSigRho_EW,"latTimeCone1DSigRho_EW/D");
+          roottree->Branch("latTimeCone1DChi2NDF_EW",&latTimeCone1DChi2NDF_EW,"latTimeCone1DChi2NDF_EW/D");
+          roottree->Branch("latTimeCone2DRho_EW",&latTimeCone2DRho_EW,"latTimeCone2DRho_EW/D");
+          roottree->Branch("latTimeCone2DSigRho_EW",&latTimeCone2DSigRho_EW,"latTimeCone2DSigRho_EW/D");
+          roottree->Branch("latTimeCone2DChi2NDF_EW",&latTimeCone2DChi2NDF_EW,"latTimeCone2DChi2NDF_EW/D");
         }
       }
       if ( (config["polarization"]->sValue() == "NS") || (config["polarization"]->sValue() == "BOTH") || (config["polarization"]->sValue() == "THREE") ) {
@@ -1880,16 +1889,19 @@ int main (int argc, char *argv[])
           roottree->Branch("NlateralAntennas_NS",&NlateralAntennas_NS,"NlateralAntennas_NS/I");
         }
         if (config["lateralTimeDistribution"]->bValue()) {
-          roottree->Branch("latTimeRcurv_NS",&latTimeRcurv_NS,"latTimeRcurv_NS/D");
-          roottree->Branch("latTimeSigRcurv_NS",&latTimeSigRcurv_NS,"latTimeSigRcurv_NS/D");
-          roottree->Branch("latTimeOffset_NS",&latTimeOffset_NS,"latTimeOffset_NS/D");
-          roottree->Branch("latTimeSigOffset_NS",&latTimeSigOffset_NS,"latTimeSigOffset_NS/D");
-          roottree->Branch("latTimeChi2NDF_NS",&latTimeChi2NDF_NS,"latTimeChi2NDF_NS/D");
-          roottree->Branch("latTimeParRcurv_NS",&latTimeParRcurv_NS,"latTimeParRcurv_NS/D");
-          roottree->Branch("latTimeParSigRcurv_NS",&latTimeParSigRcurv_NS,"latTimeParSigRcurv_NS/D");
-          roottree->Branch("latTimeParOffset_NS",&latTimeParOffset_NS,"latTimeParOffset_NS/D");
-          roottree->Branch("latTimeParSigOffset_NS",&latTimeParSigOffset_NS,"latTimeParSigOffset_NS/D");
-          roottree->Branch("latTimeParChi2NDF_NS",&latTimeParChi2NDF_NS,"latTimeParChi2NDF_NS/D");
+          roottree->Branch("latTimeSphere1DRcurv_NS",&latTimeSphere1DRcurv_NS,"latTimeSphere1DRcurv_NS/D");
+          roottree->Branch("latTimeSphere1DSigRcurv_NS",&latTimeSphere1DSigRcurv_NS,"latTimeSphere1DSigRcurv_NS/D");
+          roottree->Branch("latTimeSphere1DChi2NDF_NS",&latTimeSphere1DChi2NDF_NS,"latTimeSphere1DChi2NDF_NS/D");
+          roottree->Branch("latTimeSphere2DRcurv_NS",&latTimeSphere2DRcurv_NS,"latTimeSphere2DRcurv_NS/D");
+          roottree->Branch("latTimeSphere2DSigRcurv_NS",&latTimeSphere2DSigRcurv_NS,"latTimeSphere2DSigRcurv_NS/D");
+          roottree->Branch("latTimeSphere2DChi2NDF_NS",&latTimeSphere2DChi2NDF_NS,"latTimeSphere2DChi2NDF_NS/D");
+          
+          roottree->Branch("latTimeCone1DRho_NS",&latTimeCone1DRho_NS,"latTimeCone1DRho_NS/D");
+          roottree->Branch("latTimeCone1DSigRho_NS",&latTimeCone1DSigRho_NS,"latTimeCone1DSigRho_NS/D");
+          roottree->Branch("latTimeCone1DChi2NDF_NS",&latTimeCone1DChi2NDF_NS,"latTimeCone1DChi2NDF_NS/D");
+          roottree->Branch("latTimeCone2DRho_NS",&latTimeCone2DRho_NS,"latTimeCone2DRho_NS/D");
+          roottree->Branch("latTimeCone2DSigRho_NS",&latTimeCone2DSigRho_NS,"latTimeCone2DSigRho_NS/D");
+          roottree->Branch("latTimeCone2DChi2NDF_NS",&latTimeCone2DChi2NDF_NS,"latTimeCone2DChi2NDF_NS/D");
         }
       }
       if ( (config["polarization"]->sValue() == "VE") || (config["polarization"]->sValue() == "THREE") ) {
@@ -1932,16 +1944,19 @@ int main (int argc, char *argv[])
           roottree->Branch("NlateralAntennas_VE",&NlateralAntennas_VE,"NlateralAntennas_VE/I");
         }
         if (config["lateralTimeDistribution"]->bValue()) {
-          roottree->Branch("latTimeRcurv_VE",&latTimeRcurv_VE,"latTimeRcurv_VE/D");
-          roottree->Branch("latTimeSigRcurv_VE",&latTimeSigRcurv_VE,"latTimeSigRcurv_VE/D");
-          roottree->Branch("latTimeOffset_VE",&latTimeOffset_VE,"latTimeOffset_VE/D");
-          roottree->Branch("latTimeSigOffset_VE",&latTimeSigOffset_VE,"latTimeSigOffset_VE/D");
-          roottree->Branch("latTimeChi2NDF_VE",&latTimeChi2NDF_VE,"latTimeChi2NDF_VE/D");
-          roottree->Branch("latTimeParRcurv_VE",&latTimeParRcurv_VE,"latTimeParRcurv_VE/D");
-          roottree->Branch("latTimeParSigRcurv_VE",&latTimeParSigRcurv_VE,"latTimeParSigRcurv_VE/D");
-          roottree->Branch("latTimeParOffset_VE",&latTimeParOffset_VE,"latTimeParOffset_VE/D");
-          roottree->Branch("latTimeParSigOffset_VE",&latTimeParSigOffset_VE,"latTimeParSigOffset_VE/D");
-          roottree->Branch("latTimeParChi2NDF_VE",&latTimeParChi2NDF_VE,"latTimeParChi2NDF_VE/D");
+          roottree->Branch("latTimeSphere1DRcurv_VE",&latTimeSphere1DRcurv_VE,"latTimeSphere1DRcurv_VE/D");
+          roottree->Branch("latTimeSphere1DSigRcurv_VE",&latTimeSphere1DSigRcurv_VE,"latTimeSphere1DSigRcurv_VE/D");
+          roottree->Branch("latTimeSphere1DChi2NDF_VE",&latTimeSphere1DChi2NDF_VE,"latTimeSphere1DChi2NDF_VE/D");
+          roottree->Branch("latTimeSphere2DRcurv_VE",&latTimeSphere2DRcurv_VE,"latTimeSphere2DRcurv_VE/D");
+          roottree->Branch("latTimeSphere2DSigRcurv_VE",&latTimeSphere2DSigRcurv_VE,"latTimeSphere2DSigRcurv_VE/D");
+          roottree->Branch("latTimeSphere2DChi2NDF_VE",&latTimeSphere2DChi2NDF_VE,"latTimeSphere2DChi2NDF_VE/D");
+          
+          roottree->Branch("latTimeCone1DRho_VE",&latTimeCone1DRho_VE,"latTimeCone1DRho_VE/D");
+          roottree->Branch("latTimeCone1DSigRho_VE",&latTimeCone1DSigRho_VE,"latTimeCone1DSigRho_VE/D");
+          roottree->Branch("latTimeCone1DChi2NDF_VE",&latTimeCone1DChi2NDF_VE,"latTimeCone1DChi2NDF_VE/D");
+          roottree->Branch("latTimeCone2DRho_VE",&latTimeCone2DRho_VE,"latTimeCone2DRho_VE/D");
+          roottree->Branch("latTimeCone2DSigRho_VE",&latTimeCone2DSigRho_VE,"latTimeCone2DSigRho_VE/D");
+          roottree->Branch("latTimeCone2DChi2NDF_VE",&latTimeCone2DChi2NDF_VE,"latTimeCone2DChi2NDF_VE/D");
         }
       }
     } 
@@ -2049,16 +2064,21 @@ int main (int argc, char *argv[])
       R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;
       chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;
-      latTimeRcurv = 0, latTimeRcurv_NS = 0, latTimeRcurv_VE = 0;
-      latTimeSigRcurv = 0, latTimeSigRcurv_NS = 0, latTimeSigRcurv_VE = 0;
-      latTimeOffset = 0, latTimeOffset_NS = 0, latTimeOffset_VE = 0;
-      latTimeSigOffset = 0, latTimeSigOffset_NS = 0, latTimeSigOffset_VE = 0;
-      latTimeChi2NDF = 0, latTimeChi2NDF_NS = 0, latTimeChi2NDF_VE = 0;
-      latTimeParRcurv = 0, latTimeParRcurv_NS = 0, latTimeParRcurv_VE = 0;
-      latTimeParSigRcurv = 0, latTimeParSigRcurv_NS = 0, latTimeParSigRcurv_VE = 0;
-      latTimeParOffset = 0, latTimeParOffset_NS = 0, latTimeParOffset_VE = 0;
-      latTimeParSigOffset = 0, latTimeParSigOffset_NS = 0, latTimeParSigOffset_VE = 0;
-      latTimeParChi2NDF = 0, latTimeParChi2NDF_NS = 0, latTimeParChi2NDF_VE = 0;
+      
+      latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
+      latTimeSphere1DSigRcurv_EW = 0, latTimeSphere1DSigRcurv_NS = 0, latTimeSphere1DSigRcurv_VE = 0;
+      latTimeSphere1DChi2NDF_EW = 0, latTimeSphere1DChi2NDF_NS = 0, latTimeSphere1DChi2NDF_VE = 0;
+      latTimeSphere2DRcurv_EW = 0, latTimeSphere2DRcurv_NS = 0, latTimeSphere2DRcurv_VE = 0;
+      latTimeSphere2DSigRcurv_EW = 0, latTimeSphere2DSigRcurv_NS = 0, latTimeSphere2DSigRcurv_VE = 0;
+      latTimeSphere2DChi2NDF_EW = 0, latTimeSphere2DChi2NDF_NS = 0, latTimeSphere2DChi2NDF_VE = 0;
+    
+      latTimeCone1DRho_EW = 0, latTimeCone1DRho_NS = 0, latTimeCone1DRho_VE = 0;
+      latTimeCone1DSigRho_EW = 0, latTimeCone1DSigRho_NS = 0, latTimeCone1DSigRho_VE = 0;
+      latTimeCone1DChi2NDF_EW = 0, latTimeCone1DChi2NDF_NS = 0, latTimeCone1DChi2NDF_VE = 0;
+      latTimeCone2DRho_EW = 0, latTimeCone2DRho_NS = 0, latTimeCone2DRho_VE = 0;
+      latTimeCone2DSigRho_EW = 0, latTimeCone2DSigRho_NS = 0, latTimeCone2DSigRho_VE = 0;
+      latTimeCone2DChi2NDF_EW = 0, latTimeCone2DChi2NDF_NS = 0, latTimeCone2DChi2NDF_VE = 0;
+      
       rmsCCbeam = 0, rmsXbeam = 0, rmsPbeam = 0 ;
       rmsCCbeam_NS = 0, rmsXbeam_NS = 0, rmsPbeam_NS = 0;
       rmsCCbeam_VE = 0, rmsXbeam_VE = 0, rmsPbeam_VE = 0;
@@ -2259,16 +2279,20 @@ int main (int argc, char *argv[])
                                                               calibPulsesMap, map <int, PulseProperties>(),
                                                               gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
                                                               results.asDouble("CCcenter"),"","");
-              latTimeRcurv = latTimeResults.asDouble("latTime_R_curv");
-              latTimeSigRcurv = latTimeResults.asDouble("latTime_sigR_curv");
-              latTimeOffset = latTimeResults.asDouble("latTime_offset");
-              latTimeSigOffset = latTimeResults.asDouble("latTime_sigoffset");
-              latTimeChi2NDF = latTimeResults.asDouble("latTime_chi2NDF");
-              latTimeParRcurv = latTimeResults.asDouble("latTimePar_R_curv");
-              latTimeParSigRcurv = latTimeResults.asDouble("latTimePar_sigR_curv");
-              latTimeParOffset = latTimeResults.asDouble("latTimePar_offset");
-              latTimeParSigOffset = latTimeResults.asDouble("latTimePar_sigoffset");
-              latTimeParChi2NDF = latTimeResults.asDouble("latTimePar_chi2NDF");
+                                                                      
+              latTimeSphere1DRcurv_EW = latTimeResults.asDouble("latTime1D_Rcurv");
+              latTimeSphere1DSigRcurv_EW = latTimeResults.asDouble("latTime1D_sigRcurv");
+              latTimeSphere1DChi2NDF_EW = latTimeResults.asDouble("latTime1D_chi2NDF");
+              latTimeSphere2DRcurv_EW = latTimeResults.asDouble("latTime2D_Rcurv");
+              latTimeSphere2DSigRcurv_EW = latTimeResults.asDouble("latTime2D_sigRcurv");
+              latTimeSphere2DChi2NDF_EW = latTimeResults.asDouble("latTime2D_chi2NDF");
+                                                                      
+              latTimeCone1DRho_EW = latTimeResults.asDouble("latTime1D_ConeRho");
+              latTimeCone1DSigRho_EW = latTimeResults.asDouble("latTime1D_sigConeRho");
+              latTimeCone1DChi2NDF_EW = latTimeResults.asDouble("latTime1D_Conechi2NDF");
+              latTimeCone2DRho_EW = latTimeResults.asDouble("latTime2D_ConeRho");
+              latTimeCone2DSigRho_EW = latTimeResults.asDouble("latTime2D_sigConeRho");
+              latTimeCone2DChi2NDF_EW = latTimeResults.asDouble("latTime2D_Conechi2NDF");
             }  
 
             // getting necessary data to plot [added: mfranc]
@@ -2404,16 +2428,20 @@ int main (int argc, char *argv[])
                                                               newPulses, map <int, PulseProperties>(),
                                                               gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
                                                               results.asDouble("CCcenter"),"","");
-              latTimeRcurv_NS = latTimeResults.asDouble("latTime_R_curv");
-              latTimeSigRcurv_NS = latTimeResults.asDouble("latTime_sigR_curv");
-              latTimeOffset_NS = latTimeResults.asDouble("latTime_offset");
-              latTimeSigOffset_NS = latTimeResults.asDouble("latTime_sigoffset");
-              latTimeChi2NDF_NS = latTimeResults.asDouble("latTime_chi2NDF");
-              latTimeParRcurv_NS = latTimeResults.asDouble("latTimePar_R_curv");
-              latTimeParSigRcurv_NS = latTimeResults.asDouble("latTimePar_sigR_curv");
-              latTimeParOffset_NS = latTimeResults.asDouble("latTimePar_offset");
-              latTimeParSigOffset_NS = latTimeResults.asDouble("latTimePar_sigoffset");
-              latTimeParChi2NDF_NS = latTimeResults.asDouble("latTimePar_chi2NDF");
+                                                                      
+              latTimeSphere1DRcurv_NS = latTimeResults.asDouble("latTime1D_Rcurv");
+              latTimeSphere1DSigRcurv_NS = latTimeResults.asDouble("latTime1D_sigRcurv");
+              latTimeSphere1DChi2NDF_NS = latTimeResults.asDouble("latTime1D_chi2NDF");
+              latTimeSphere2DRcurv_NS = latTimeResults.asDouble("latTime2D_Rcurv");
+              latTimeSphere2DSigRcurv_NS = latTimeResults.asDouble("latTime2D_sigRcurv");
+              latTimeSphere2DChi2NDF_NS = latTimeResults.asDouble("latTime2D_chi2NDF");
+                                                                      
+              latTimeCone1DRho_NS = latTimeResults.asDouble("latTime1D_ConeRho");
+              latTimeCone1DSigRho_NS = latTimeResults.asDouble("latTime1D_sigConeRho");
+              latTimeCone1DChi2NDF_NS = latTimeResults.asDouble("latTime1D_Conechi2NDF");
+              latTimeCone2DRho_NS = latTimeResults.asDouble("latTime2D_ConeRho");
+              latTimeCone2DSigRho_NS = latTimeResults.asDouble("latTime2D_sigConeRho");
+              latTimeCone2DChi2NDF_NS = latTimeResults.asDouble("latTime2D_Conechi2NDF");
             }  
 
             // insert calibrated pulse properties here, for eventual changes during the lateral distribution
@@ -2552,16 +2580,20 @@ int main (int argc, char *argv[])
                                                               newPulses, map <int, PulseProperties>(),
                                                               gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
                                                               results.asDouble("CCcenter"),"","");
-              latTimeRcurv_VE = latTimeResults.asDouble("latTime_R_curv");
-              latTimeSigRcurv_VE = latTimeResults.asDouble("latTime_sigR_curv");
-              latTimeOffset_VE = latTimeResults.asDouble("latTime_offset");
-              latTimeSigOffset_VE = latTimeResults.asDouble("latTime_sigoffset");
-              latTimeChi2NDF_VE = latTimeResults.asDouble("latTime_chi2NDF");               
-              latTimeParRcurv_VE = latTimeResults.asDouble("latTimePar_R_curv");
-              latTimeParSigRcurv_VE = latTimeResults.asDouble("latTimePar_sigR_curv");
-              latTimeParOffset_VE = latTimeResults.asDouble("latTimePar_offset");
-              latTimeParSigOffset_VE = latTimeResults.asDouble("latTimePar_sigoffset");
-              latTimeParChi2NDF_VE = latTimeResults.asDouble("latTimePar_chi2NDF");               
+                                                                      
+              latTimeSphere1DRcurv_VE = latTimeResults.asDouble("latTime1D_Rcurv");
+              latTimeSphere1DSigRcurv_VE = latTimeResults.asDouble("latTime1D_sigRcurv");
+              latTimeSphere1DChi2NDF_VE = latTimeResults.asDouble("latTime1D_chi2NDF");
+              latTimeSphere2DRcurv_VE = latTimeResults.asDouble("latTime2D_Rcurv");
+              latTimeSphere2DSigRcurv_VE = latTimeResults.asDouble("latTime2D_sigRcurv");
+              latTimeSphere2DChi2NDF_VE = latTimeResults.asDouble("latTime2D_chi2NDF");
+                                                                      
+              latTimeCone1DRho_VE = latTimeResults.asDouble("latTime1D_ConeRho");
+              latTimeCone1DSigRho_VE = latTimeResults.asDouble("latTime1D_sigConeRho");
+              latTimeCone1DChi2NDF_VE = latTimeResults.asDouble("latTime1D_Conechi2NDF");
+              latTimeCone2DRho_VE = latTimeResults.asDouble("latTime2D_ConeRho");
+              latTimeCone2DSigRho_VE = latTimeResults.asDouble("latTime2D_sigConeRho");
+              latTimeCone2DChi2NDF_VE = latTimeResults.asDouble("latTime2D_Conechi2NDF");
             }  
 
             // insert calibrated pulse properties here, for eventual changes during the lateral distribution
