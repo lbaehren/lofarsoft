@@ -360,6 +360,11 @@ def create_fold_script(scratchdir, name, maskfile, extra_prepfold_options, basen
 	batchfile.write("shift\n")
 	batchfile.write("log=\"$outdir/prepfold_core$core.log\"\n")
 	batchfile.write("end=\"$outdir/fold_core$core.done\"\n")
+	batchfile.write("workdir=\"%s.$core\"\n" % (scratchdir))
+	batchfile.write("curdir=`pwd`\n")
+	batchfile.write("mkdir -p $workdir\n")
+	batchfile.write("cd $workdir\n")       # we need this temp working dir to have different places for resid2.tmp files
+					       # produced by prepfold
 	batchfile.write("date >> $log\n")
 	batchfile.write("for params in $*; do\n")
 	batchfile.write(" echo >> $log\n")
@@ -376,6 +381,8 @@ def create_fold_script(scratchdir, name, maskfile, extra_prepfold_options, basen
 		batchfile.write(" prepfold -noxwin -mask %s -runavg -accelcand $accelcand -accelfile $accelfile -dm $dm -o $outfile $options %s %s >> $log\n" % (maskfile, extra_prepfold_options, infile))
 	batchfile.write(" echo >> $log\n")
 	batchfile.write("done\n")
+	batchfile.write("cd $curdir\n")
+	batchfile.write("rm -rf $workdir\n")
 	batchfile.write("date >> $log\n")
 	batchfile.write("touch $end\n")
 	batchfile.close()
@@ -1040,7 +1047,7 @@ if __name__ == "__main__":
 		cmd="%s%s %s %d %s &" % (scratchdir, fold_script, scratchdir, core, " ".join(foldgroup))
 		print "Starting folding on core %d for %d candidates ..." % (core, foldblock)
 		os.system(cmd)	
-		time.sleep(30)  # wait 30 sec before to start next script (in order not to mess with resid2.tmp)
+		time.sleep(5)  # wait 5 sec before to start next script (in order not to mess with resid2.tmp)
 		nfolded -= foldblock
 		start_block += foldblock
 		nprocess += 1
