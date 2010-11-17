@@ -73,7 +73,6 @@ set (PYPELINE_CPP_FILES
 set (PYPELINE_CPP_MODULE_PREFIX "m")
 
 set (PYPELINE_CPP_MODULES
-  Array
   Vector
   Math
   FFT
@@ -82,6 +81,7 @@ set (PYPELINE_CPP_MODULES
   Imaging
   IO
   RF
+  Array
   Bindings
   )
 

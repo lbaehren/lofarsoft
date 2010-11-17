@@ -4,6 +4,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+#import pdb
+#pdb.set_trace()
+
 from hftools import *
 from types import *
 from vector import *
@@ -332,7 +335,6 @@ def hArray_getSlicedArray(self,indexlist):
 
     Use array.reshape([dim1,dim2,...,dimN]) to set the dimensions.
     """
-
     if type(indexlist)==tuple: indexlist=list(indexlist)
     else: indexlist=[indexlist]
     ary=hArray(self)

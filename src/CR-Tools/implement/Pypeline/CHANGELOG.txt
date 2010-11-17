@@ -93,3 +93,18 @@ constant), this should allow moving fucntions from .h file back to the
 - removed the obsolete SLICED types from hfppnew.h 
 - deleted a number of warnings in mMath
 - fixed a few bugs here and there (e.g., inconsistent hApplyFilter declaration)
+- introduced HFPP_FUNC_IS_INLINE to indicate that a function is
+defined as inline
+- introduced HFPP_CLASS_STDIT as a type of Wrapper to be
+genenerated. This is used for forward declarations and essentially now
+assumes that by default all vector functions are defined using
+templated iterators (which they de facto already are by convention so
+far)
+
+2010-11-17: Pypeline - Heino Falcke - rev 6340
+- found a number of bugs
+- added short doc string to python wrapper
+- rearranged some parts of the software (moving code from .h to .cc
+files)
+
+ 

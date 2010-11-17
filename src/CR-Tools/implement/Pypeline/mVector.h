@@ -161,13 +161,8 @@ namespace PyCR { // Namespace PyCR -- begin
           itidx=index;
       };
     }
-
-
   } // Namespace Vector -- end
-
 } // Namespace PyCR -- end
-
-
 
 // ________________________________________________________________________
 //                                    Add declarations of wrapper functions

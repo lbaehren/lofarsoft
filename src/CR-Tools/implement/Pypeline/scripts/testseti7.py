@@ -47,7 +47,7 @@ delta_frequency=(end_frequency-start_frequency)/(speclen-1.0)
 delta_band=(end_frequency-start_frequency)/stride*2
 subfrequencies=hArray(float,[subspeclen],name="Frequency",units=("M","Hz"))
 frequencies=hArray(float,[subspeclen/2],name="Frequency",units=("M","Hz"))
-subfrequencies=hArray(frequencies.vec(),[nsubsubspectra,subsubspeclen],name="Frequency",units=("M","Hz"))
+subsubfrequencies=hArray(frequencies.vec(),[nsubsubspectra,subsubspeclen],name="Frequency",units=("M","Hz"))
 
 
 print "Frequency Resolution:",delta_frequency,"Hz"
@@ -149,6 +149,7 @@ def findpeaks(subpower,threshold=7):
     datamean=hArray(subpower[...].meaninverse())
     datathreshold = hArray(subpower[...].stddevbelow(datamean.vec()))
     datathreshold *= threshold
+    datathreshold += datamean
     npeaks=datapeaks[...].findgreaterthan(subpower[...],datathreshold.vec())
     return npeaks
     
@@ -164,7 +165,7 @@ def rp(offset,sub=-1,clf=True):
     frequencies.fillrange((start_frequency+offset*delta_band)/10**6,delta_frequency/10**6)
     if sub>=0:
         sub=min(sub,nsubsubspectra-1)
-        subpower[sub].plot(xvalues=subfrequencies[sub],clf=clf)
+        subpower[sub].plot(xvalues=subsubfrequencies[sub],clf=clf)
     else:
         power.plot(clf=clf)
 

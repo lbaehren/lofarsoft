@@ -217,6 +217,7 @@ BOOST_PYTHON_MODULE(hftools)
 // ________________________________________________________________________
 //                                                                    Array
 
+
   HFPP_hARRAY_BOOST_PYTHON_WRAPPER(HNumber,FloatArray);
   HFPP_hARRAY_BOOST_PYTHON_WRAPPER(HInteger,IntArray);
   HFPP_hARRAY_BOOST_PYTHON_WRAPPER(HComplex,ComplexArray);
@@ -225,7 +226,7 @@ BOOST_PYTHON_MODULE(hftools)
 
   def("trackHistory",&hArray_trackHistory);
 
-#include "../../../../build/cr/implement/Pypeline/mArray.def.h"
+  //#include "../../../../build/cr/implement/Pypeline/mArray.def.h"
 
 // ________________________________________________________________________
 //                                                                   Vector

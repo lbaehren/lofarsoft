@@ -192,7 +192,6 @@ void HFPP_FUNC_NAME(const IterC image, const IterC image_end,
   IterC it_w2_end = it_w1_start+nofAntennas*nfreq;
   IterC it_w1(it_w1_start); //start at antenna 0
   IterC it_w2(it_w1_end); //start at antenna 1
-  HInteger lenImage = image_end - image;
   HInteger lenCCM = ccm_end - ccm;
   HInteger lenWeights = weights_end - weights;
 
@@ -426,7 +425,7 @@ void HFPP_FUNC_NAME (const Iter delays, const Iter delays_end,
   // Implementation
   if (farfield) {
     while (del < delays_end) {
-      distance = PyCR::Array::hVectorLength(sky,sky+3);
+      distance = hVectorLength(sky,sky+3);
       *del=hGeometricDelayFarField(ant,sky,distance);
       ++del;
       ant+=3; if (ant>=ant_end) {
@@ -436,7 +435,7 @@ void HFPP_FUNC_NAME (const Iter delays, const Iter delays_end,
     };
   } else {
     while (del < delays_end) {
-      distance = PyCR::Array::hVectorLength(sky,sky+3);
+      distance = hVectorLength(sky,sky+3);
       *del=hGeometricDelayNearField(ant,sky,distance);
       ++del;
       ant+=3; if (ant>=ant_end) {
@@ -504,7 +503,7 @@ void HFPP_FUNC_NAME (const Iter phases, const Iter phases_end,
   // Implementation
   if (farfield) {
     while (sky < sky_end && phase < phases_end) {
-      distance = PyCR::Array::hVectorLength(sky,sky+3);
+      distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && phase < phases_end) {
 	freq=frequencies;
@@ -518,7 +517,7 @@ void HFPP_FUNC_NAME (const Iter phases, const Iter phases_end,
     };
   } else {
     while (sky < sky_end && phase < phases_end) {
-      distance = PyCR::Array::hVectorLength(sky,sky+3);
+      distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && phase < phases_end) {
 	freq=frequencies;
@@ -591,7 +590,7 @@ void HFPP_FUNC_NAME (const CIter weights, const CIter weights_end,
   // Implementation
   if (farfield) {
     while (sky < sky_end && weight < weights_end) {
-      distance = PyCR::Array::hVectorLength(sky,sky+3);
+      distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && weight < weights_end) {
 	freq=frequencies;
@@ -605,7 +604,7 @@ void HFPP_FUNC_NAME (const CIter weights, const CIter weights_end,
     };
   } else {
     while (sky < sky_end && weight < weights_end) {
-      distance = PyCR::Array::hVectorLength(sky,sky+3);
+      distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && weight < weights_end) {
 	freq=frequencies;

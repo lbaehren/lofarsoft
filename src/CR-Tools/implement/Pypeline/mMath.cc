@@ -64,10 +64,11 @@ using namespace casa;
 
 //$DOCSTRING: Returns the squared value of the parameter.
 //$COPY_TO HFILE START ---------------------------------------------------
-#define HFPP_CLASS_STDIT  ///TEMPORARY FIX TO TEST FORWARD DECLARATION
+//#define HFPP_CLASS_STDIT  ///TEMPORARY FIX TO TEST FORWARD DECLARATION
 #define HFPP_FUNC_NAME square
 //------------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNC_IS_INLINE HFPP_TRUE
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED)(val)()("Value to be squared")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -76,7 +77,7 @@ using namespace casa;
  $PARDOCSTRING
 */
 template <class T>
-/*inline*/ T square(const T val)
+inline T square(const T val)
 {
   return val*val;
 }
@@ -87,6 +88,7 @@ template <class T>
 #define HFPP_FUNC_NAME logSave
 //------------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNC_IS_INLINE HFPP_TRUE
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED)(val)()("Numerical input value.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -95,7 +97,7 @@ template <class T>
  $PARDOCSTRING
 */
 template <class T>
-/*inline*/ T HFPP_FUNC_NAME(const T val)
+inline T HFPP_FUNC_NAME(const T val)
 {
   if (val>0) return log(val);
   else return A_LOW_NUMBER;
@@ -107,6 +109,7 @@ template <class T>
 #define HFPP_FUNC_NAME sqrtAbs
 //------------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNC_IS_INLINE HFPP_TRUE
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED)(val)()("Numerical input value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -119,7 +122,7 @@ Example:
 sqrtAbs(-4) -> 2
 */
 template <class T>
-/*inline*/ T HFPP_FUNC_NAME(const T val){return sqrt(abs(val));}
+inline T HFPP_FUNC_NAME(const T val){return sqrt(abs(val));}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Implementation of the Gauss function.
@@ -1123,7 +1126,7 @@ void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end, const IterIn vecin,
 #define HFPP_FUNC_NAME h{$MFUNC!CAPS}
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (Complex)(vecout)()("Complex in and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HComplex)(vecout)()("Complex in and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   vec2.$MFUNC(vec1) -> vec2 = [$MFUNC(vec1_0), $MFUNC(vec1_1), ... , $MFUNC(vec1_n)]
@@ -1294,6 +1297,31 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Multiplies all elements in the vector with each other and return the result
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hProduct
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+ $PARDOCSTRING
+
+ hProduct(vec) -> vec[0]*vec[1]*vec[2]* ... * vec[N]
+
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
+{
+  typedef IterValueType T;
+  T prod=1.0;
+  Iter it=vec;
+  while (it!=vec_end) {prod *= *it; ++it;};
+  return prod;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Performs a sum over the values in a vector and returns the value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSum
@@ -1386,7 +1414,14 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
 template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
 {
-  return PyCR::Array::hMulSum(vec1, vec1_end, vec2, vec2_end);
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      Iter it1=vec1,it2=vec2;
+      while (it1!=vec1_end && it2!=vec2_end) {
+        sum+=(*it1) * (*it2);
+        ++it1; ++it2;
+      };
+      return sum;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1407,7 +1442,14 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
 {
-  return PyCR::Array::hDiffSum(vec1, vec1_end, vec2, vec2_end);
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      Iter it1=vec1,it2=vec2;
+      while ((it1!=vec1_end) && (it2!=vec2_end)) {
+        sum+=(*it1) - (*it2);
+        ++it1; ++it2;
+      };
+      return sum;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1428,7 +1470,16 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
 {
-  return PyCR::Array::hDiffSquaredSum(vec1, vec1_end, vec2, vec2_end);
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      T val;
+      Iter it1=vec1,it2=vec2;
+      while ((it1!=vec1_end) && (it2!=vec2_end)) {
+	val=(*it1) - (*it2);
+        sum+=val*val;
+        ++it1; ++it2;
+      };
+      return sum;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1449,7 +1500,16 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
 {
-  return PyCR::Array::hMeanDiffSquaredSum(vec1, vec1_end, vec2, vec2_end);
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      T val;
+      Iter it1=vec1,it2=vec2;
+      while ((it1!=vec1_end) && (it2!=vec2_end)) {
+	val=(*it1) - (*it2);
+        sum+=val*val;
+        ++it1; ++it2;
+      };
+      return sum/hfmin(vec1_end-vec1,vec2_end-vec2);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1470,7 +1530,16 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
 {
-  return PyCR::Array::hChiSquared(vec1, vec1_end, vec2, vec2_end);
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      T val;
+      Iter it1=vec1,it2=vec2;
+      while ((it1!=vec1_end) && (it2!=vec2_end)) {
+	val=(*it1) - (*it2);
+        sum+=val*val/(*it2);
+        ++it1; ++it2;
+      };
+      return sum;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1491,7 +1560,16 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
 {
-  return PyCR::Array::hMeanChiSquared(vec1, vec1_end, vec2, vec2_end);
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      T val;
+      Iter it1=vec1,it2=vec2;
+      while ((it1!=vec1_end) && (it2!=vec2_end)) {
+	val=(*it1) - (*it2);
+        sum+=val*val/(*it2);
+        ++it1; ++it2;
+      };
+      return sum/(vec2_end-vec2);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1804,7 +1882,7 @@ T HFPP_FUNC_NAME(std::vector<T> & vec)
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -1837,7 +1915,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType m
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -1873,7 +1951,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType m
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -1952,7 +2030,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, const IterValueType 
 #define HFPP_FUNC_NAME hMeanThreshold
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
-#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(mean)()("The mean of the values in the input vector provided as input.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HNumber)(rms)()("The rms value of the vector - also calculated beforehand.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)

@@ -25,6 +25,7 @@
 
 #include "core.h"
 #include "mArray.h"
+#include "mVector.h"
 #include "mMath.h"
 #include "mModule.h"
 

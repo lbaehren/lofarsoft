@@ -96,7 +96,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const T fill_value)
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec)()("Vector to fill")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(fill_vec)()("Vector of values to fill it with")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(fillvec)()("Vector of values to fill it with")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   hFill(vec,[0,1,2]) -> [0,1,2,0,1,2,...]
@@ -105,21 +105,21 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const T fill_value)
   \brief $DOCSTRING
   $PARDOCSTRING
 
-If fill_vec is shorther than vec, the procedure will wrap around and
-start from the beginning of fill_vec again. Hence, in this case
-fill_vec will appear repeated multiple times in vec.
+If fillvec is shorther than vec, the procedure will wrap around and
+start from the beginning of fillvec again. Hence, in this case
+fillvec will appear repeated multiple times in vec.
 
 */
 template <class Iter, class IterT>
-void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterT fill_vec, const IterT fill_vec_end)
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterT fillvec, const IterT fillvec_end)
 {
-  if ((fill_vec<=fill_vec_end) || (vec<=vec_end)) return;
+  if ((fillvec_end<=fillvec) || (vec_end<=vec)) return;
   Iter it1=vec;
-  IterT it2=fill_vec;
+  IterT it2=fillvec;
   while (it1!=vec_end) {
     *it1=hfcast<IterValueType>(*it2);
     ++it1;++it2;
-    if (it2==fill_vec_end) it2=fill_vec;
+    if (it2==fillvec_end) it2=fillvec;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -337,8 +337,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  IterValueType star
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-
-//$DOCSTRING: Combines two vectors into one where the elements of the vectors follow each other alternating between the input vectors. Equivalent to python "zip".
+//$DOCSTRING: Combines two vectors into one where the elements of the vectors follow each other alternating between the input vectors. Equivalent to python 'zip'.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hZipper
 //-----------------------------------------------------------------------
@@ -725,3 +724,47 @@ void hTranspose(const Iter vec,const Iter vec_end, const Iter invec,const Iter i
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2))).
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hVectorLength
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+HNumber hVectorLength (const Iter vec, const Iter vec_end)
+{
+  HNumber sum=0;
+  Iter it=vec;
+  while (it!=vec_end) {sum += (*it) * (*it); ++it;};
+  return sqrt(sum);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+//$DOCSTRING: Normalizes a vector to length unity.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hNormalize
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
+{
+  HNumber norm=hVectorLength(vec,vec_end);
+  Iter it=vec;
+  while (it!=vec_end) {*it=(*it)/norm; ++it;};
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"

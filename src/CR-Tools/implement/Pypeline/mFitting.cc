@@ -286,7 +286,7 @@ void HFPP_FUNC_NAME(
 
   // Implementation
   while ((itout < vecout_end) && (itx_end < xvec_end)) {
-    *itout=PyCR::Array::hMulSum(itx,itx_end,coeffs2,coeffs_end2);
+    *itout=hMulSum(itx,itx_end,coeffs2,coeffs_end2);
     ++itout; itx=itx_end; itx_end+=Ncoeffs;
   };
 }
