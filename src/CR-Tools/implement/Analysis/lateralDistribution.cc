@@ -868,7 +868,7 @@ namespace CR { // Namespace CR -- begin
         erg.define("latTime1D_Conechi2NDF",fitFuncCone->GetChisquare()/double(fitFuncCone->GetNDF()));
         erg.define("latTime2D_ConeRho",fitFuncCone2D->GetParameter(0));
         erg.define("latTime2D_sigConeRho",fitFuncCone2D->GetParError(0));
-        erg.define("latTime2D_chi2NDF",fitFuncCone2D->GetChisquare()/double(fitFuncCone2D->GetNDF()));
+        erg.define("latTime2D_Conechi2NDF",fitFuncCone2D->GetChisquare()/double(fitFuncCone2D->GetNDF()));
         cout << "\nResults of cone fit (data)\n"
              << "Rho   (1D) = " << fitFuncCone->GetParameter(0)*180./3.14159 
              << "\t +/- " << fitFuncCone->GetParError(0)*180./3.14159 << " °\n"
