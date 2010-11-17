@@ -553,14 +553,21 @@ def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
         # l for lbl
         feed={}
         feed["CS"]={}
+        feed["RS"]={}
         feed["CS"]["LBA_SPARSE_EVEN"]="24llhh"
         feed["CS"]["LBA_SPARSE_ODD"]="24hhll"
         feed["CS"]["LBA_X"]="48hl"
         feed["CS"]["LBA_Y"]="48lh"
         feed["CS"]["LBA_INNER"]="96h"
-        feed["CS"]["LBA_OUTER"]="96l"        
-        if station[0:2] == "CS":
-            feedsel=feed["CS"][antennaset]
+        feed["CS"]["LBA_OUTER"]="96l"
+        feed["RS"]["LBA_SPARSE_EVEN"]="24llhh"
+        feed["RS"]["LBA_SPARSE_ODD"]="24hhll"
+        feed["RS"]["LBA_X"]="48hl"
+        feed["RS"]["LBA_Y"]="48lh"
+        feed["RS"]["LBA_INNER"]="96h"
+        feed["RS"]["LBA_OUTER"]="96l"
+        if station[0:2] == "CS" or "RS":
+            feedsel=feed[station[0:2]][antennaset]
             nrset = int(feedsel.split('l')[0].split('h')[0].split('H')[0])
             feeds=''
             feedsel=feedsel[len(str(nrset)):]

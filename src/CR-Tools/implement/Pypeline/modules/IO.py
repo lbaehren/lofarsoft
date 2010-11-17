@@ -11,10 +11,67 @@ only data from some dipoles will be returned.
 At the moment the antennaset (like "HBA", "LBA_OUTER") still has to be set
 manually.
 
-The modules provides methods which work on a list of crfiles (open with pycrtools)
-to read data and metadata and set parameters. Also it provides a class which needs
-a list of filenames, antennaselection and antennaset and then uses the methods of the
-modules and then should from the outside work just like the pycrtools.
+The modules provides methods which work on a list of crfiles (opened with 
+pycrtools) to read data and metadata and set parameters. Also it provides 
+a class which needs a list of filenames, antennaselection and antennaset 
+and then uses the methods of the modules and then should from the outside 
+work just like the pycrtools.
+
+Example:
+
+import IO
+import os
+(or new version, which didn't work for me yet)
+#from pycrtools import IO
+
+# Get list of files
+datadir=os.environ['LOFARSOFT']+'/data/lofar/trigger-2010-02-11/'
+tempfilenames=os.listdir(datadir)
+filenames=[]
+for file in tempfilenames:
+    if '.h5' in file:
+        filenames.append(datadir+file)
+
+# Open files
+crfile=IO.open(filenames)
+
+# Set the antennaset (Needed for antenna positions)
+crfile.setAntennaset('LBA_OUTER')
+
+# Set a selection of dipoles
+# All dipoles
+crfile.setSelection(None)
+# Selected by antenna ID
+crfile.setSelection([128002016,128004036])
+# Selected by sequence number in file
+crfile.setSelection([5,20])
+
+# Obtain keywords like the antenna IDs
+crfile['AntennaIDs']
+
+# Obtain antenna positions, this is possible in three systems
+# Relative to array centre
+crfile["RelativeAntennaPositions"]
+
+# In the ITRF frame
+crfile["AbsoluteAntennaPositions"]
+
+# In a local frame w.r.t. CS002LBA center
+crfile["AntennaPositions"]
+
+# Read in data
+# Make an array first
+fxdata=crfile["emptyFx"]
+
+block=5
+crfile.readdata(fxdata,block)
+
+# For all available keywords check
+crfile.keywords
+ 
+# For more info check start_pipeline.py in the scripts directory
+
+
 
 """
 
@@ -23,6 +80,9 @@ modules and then should from the outside work just like the pycrtools.
 #  "from module import *" as much as possible to prevent name clashes.
 import pycrtools as hf
 import numpy as np
+import os
+metadatakeywords=["StationPhaseCalibration","CableDelays","RelativeAntennaPositions","AbsoluteAntennaPositions","ClockCorrection","StationPositions","AntennaPositions"]
+
 
 # Examples
 class TBBdata:
@@ -54,6 +114,10 @@ class TBBdata:
         #self.antennaset=antennaset
         
         self.setAntennaset()
+
+        self.keywords=self.files[0].keywords
+        self.keywords.extend(metadatakeywords)
+        #self.keywords.extend(["StationPhaseCalibration","CableDelays","RelativeAntennaPositions","AbsoluteAntennaPositions","ClockCorrection","StationPositions","AntennaPositions"])
 
     def setAntennaset(self,antennaset=None):
         """This should set the antennaset variable. If this can be obtained         from the data file, this function should be changed, to set the 
@@ -97,7 +161,7 @@ class TBBdata:
         *keyword* Variable (data or metadata) to be read. 
         Example "antennaIDs" , "shift", "TIME"
         """
-        metadatakeywords=["StationPhaseCalibration","CableDelays","RelativeAntennaPositions","AbsoluteAntennaPositions","ClockCorrection","StationPositions","AntennaPositions"]
+        #metadatakeywords=["StationPhaseCalibration","CableDelays","RelativeAntennaPositions","AbsoluteAntennaPositions","ClockCorrection","StationPositions","AntennaPositions"]
         if keyword in metadatakeywords: 
             import metadata as md
             data=md.get(keyword, self.get("antennaIDs"), self.antennaset, True)
@@ -214,9 +278,18 @@ def openfiles(filenames,blocksize=1024):
 
     """
 
-    files=[]
+    if not isinstance(filenames,list):
+        filenames=[filenames]
+
+    files=[]    
     for filename in filenames:
-        files.append(hf.crfile(filename))
+        if os.path.isfile(filename):
+            files.append(hf.crfile(filename))
+        else:
+            print "File",filename,"could not be opened. Trying next file ..."
+    
+    #Check if any files could be opened
+    assert len(files) > 0
     
     times=get(files,"TIME",False)
     print 'these are the time from OLD: ', times
