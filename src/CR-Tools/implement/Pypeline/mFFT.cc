@@ -761,7 +761,7 @@ full data -> [B1-1,B1-2,..,B1-l, --STRIDE-1 Blocks to be left out--, B2-1,B2-2,.
 
 It is possible to leave out m=stride-1 blocks in between, so that only a fraction 1/(stride+1) of data is read in.
 
-The next step is to transpose the data into a matrix, giving:
+The next step is to transpose the data into a matrix, giving (B1-2 reads data block 1, sample number 2):
 
 Mb=  [
      [B1-1,B2-1,..,Bn-1],
@@ -775,18 +775,18 @@ similar matrix on top (e.g., when one was starting to reading not from
 the first block, but the 2nd, 3rd etc.) and STRIDE-1-OFFSET matrices at
 the end.
 
-For clarity: the full matrix would look have looked like (for the example of OFFSET=1 and STRIDE=3 above) 
+For clarity: the full matrix would look have looked like (for the example of OFFSET=1 and STRIDE=3 above ... even tough stride is better a power of two!) 
 
 Mabc=[
-     [A1-1,A2-1,..,An-1],
-     [A1-2,A2-2,..,An-2],
-             ...
-     [A1-l,A2-l,..,An-l],
+     [A1-1,A2-1,..,An-1],       I
+     [A1-2,A2-2,..,An-2],       I
+             ...                I  cdataT
+     [A1-l,A2-l,..,An-l],       I 
 
      [B1-1,B2-1,..,Bn-1],
      [B1-2,B2-2,..,Bn-2],
              ...
-     [B1-l,B2-l,..,Bn-l]]
+     [B1-l,B2-l,..,Bn-l],
 
      [C1-1,C2-1,..,Cn-1],
      [C1-2,C2-2,..,Cn-2],
@@ -796,9 +796,46 @@ Mabc=[
 
 The next step is now to take the FFT over rows above and mutliply by
 the phase factor calculated in this function.  Finally, the data is
-transposed a 2nd time, the FFT is taken again over rows and the result
-is tranposed a last time, giving a spectrum with gaps corresponding to
-the stride above. The matrixes Ma, Mb, Mc need then to be glued together.
+transposed a 2nd time.
+
+Note: Here the function DoubleFFT1 ends (i.e. with the transpose of
+the blocks above. This is done to allow for rearranging the blocks in
+case they were written to disk. Afterwards DoubleFFT2 picks up again.
+
+The matrix then looks like (if the blocks were merged, which is
+essentially also a transpose...)
+
+Mabc2=[
+     [A1-1,A1-2,..,A1-l,B1-1,..,B1-l,C1-1,..,C1-l],     I   tmpspec
+     [A2-1,A2-2,..,A2-l,B2-1,..,B2-l,C2-1,..,C2-l],     I
+     ...
+     now take only n/stride rows per memory chunk
+     ...
+     [An-1,An-2,..,An-l,Bn-1,..,Bn-l,Cn-1,..,Cn-l],
+     ]
+
+where one now needs to split the matrix again (after n/stride rows each) to
+work with the same memory size.
+
+In a second step (DoubleFFT2), the FFT is taken a second time (again
+over what are then the rows above) and the result is tranposed a last time,
+giving the final spectrum (with gaps, if the blocks are not properly rearranged again).
+
+Mfinal=[
+     [A1-1,A2-1,..,An-1],      (specT: only first nblock_section columns)
+     [A1-2,A2-2,..,An-2],       specT2: only first blocklen rows and 
+             ...                        nblock_section columns 
+     [A1-l,A2-l,..,An-l],
+     [B1-1,B2-1,..,Bn-1],
+     [B1-2,B2-2,..,Bn-2],
+             ...
+     [B1-l,B2-l,..,Bn-l]]
+     [C1-1,C2-1,..,Cn-1],
+     [C1-2,C2-2,..,Cn-2],
+             ...
+     [C1-l,C2-l,..,Cn-l]
+     ]
+
 
 Example:
 
@@ -850,7 +887,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
   hDoubleFFTPhaseMul(vecout,vecout_end,full_size,nblocks,blocklen,offset);
   //Second transpose
   PyCR::Vector::hTranspose(vecin,vecin_end,vecout,vecout_end,nblocks);
-  /*  //And FFT over rows
+  //And FFT over rows
   it1=vecin; it2=vecin+blocklen;
   while (it2 <= vecin_end){
     hFFTw(it1,it2,it1,it2);
@@ -858,15 +895,94 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
   };
   //Final transpose
   PyCR::Vector::hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
-  */
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Performs two subsequent FFTs to obtain a spectrum with higher resolution, allowing one to operate only on a fraction of the data in memory
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDoubleFFT1
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vecout)()("Complex output of spectrum (potentially containing gaps) - same size as input vector and must not be the same vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vecin)()("Complex input vector containing the Fourier-transformed and transposed data that was read in with a certain block length, stride, and offset. NOTE: the input vector will be overwritten and is used as a temporary scratch vector!")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(full_size)()("Full data size of the time series.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(nblocks)()("How many blocks were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(blocklen)()("The block length for individual data blocks that were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HInteger)(offset)()("How many blocks were skipped before the first block was read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
 
-//#define HFPP_PARDEF_4 (HInteger)(stride)()("How many blocks were skiped in the full data between two blocks that are now sequentially in memory.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+See DoubleFFT for description!
 
-  /*  Iter it1=vec;
-  Iter it2=vec+blocklen;
-  //First do an in-place FFT on the data
-  */
+NOTE: here is output is in the input vector "vecin" - vecout is just a scratch vector
+*/
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,const Iter vecin_end, const HInteger full_size,  const HInteger nblocks, const HInteger blocklen, const HInteger offset)
+{
+  if ((vecin_end-vecin)!=(blocklen*nblocks) || (vecout_end-vecout)!=(blocklen*nblocks)) {
+    throw PyCR::ValueError("Input vector has not the dimension blocklen * nblocks.");
+    return;
+  };
+  //First transpose
+  PyCR::Vector::hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
+  //FFT over rows
+  Iter it1(vecout), it2(vecout+nblocks);
+  while (it2 <= vecout_end){
+    hFFTw(it1,it2,it1,it2);
+    it1=it2; it2+=nblocks;
+  };
+  //Multiply with phase factor
+  hDoubleFFTPhaseMul(vecout,vecout_end,full_size,nblocks,blocklen,offset);
+  //2nd tranpsoe
+  PyCR::Vector::hTranspose(vecin,vecin_end,vecout,vecout_end,nblocks);
+
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Performs two subsequent FFTs to obtain a spectrum with higher resolution, allowing one to operate only on a fraction of the data in memory
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDoubleFFT2
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vecout)()("Complex output of spectrum - same size as input vector and must not be the same vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vecin)()("Complex input vector obtianed from DoubleFFT1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nblocks)()("How many blocks were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(blocklen)()("The block length for individual data blocks that were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See DoubleFFT for description!
+
+    cdataT[offset].doublefft(cdata[offset],fullsize,nblocks,blocklen,offset) 
+
+    is the same as:
+
+    cdataT[offset].doublefft1(cdata[offset],fullsize,nblocks,blocklen,offset)
+    cdataT[offset].doublefft2(cdata[offset],nblocks,blocklen)
+
+    but result is in cdata (and not cdataT)
+*/
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,const Iter vecin_end, const HInteger nblocks, const HInteger blocklen)
+{
+  if ((vecin_end-vecin)!=(blocklen*nblocks) || (vecout_end-vecout)!=(blocklen*nblocks)) {
+    throw PyCR::ValueError("Input vector has not the dimension blocklen * nblocks.");
+    return;
+  };
+  //FFT over rows -> 2nd transpose
+  Iter iti1(vecin),  iti2(vecin+blocklen);
+  while ((iti2 <= vecin_end)){
+    hFFTw(iti1,iti2,iti1,iti2);
+    iti1=iti2; iti2+=blocklen;
+  };
+  //Final transpose
+  PyCR::Vector::hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

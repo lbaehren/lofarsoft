@@ -113,9 +113,9 @@ fill_vec will appear repeated multiple times in vec.
 template <class Iter, class IterT>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterT fill_vec, const IterT fill_vec_end)
 {
+  if ((fill_vec<=fill_vec_end) || (vec<=vec_end)) return;
   Iter it1=vec;
   IterT it2=fill_vec;
-  if (it2==fill_vec_end) return;
   while (it1!=vec_end) {
     *it1=hfcast<IterValueType>(*it2);
     ++it1;++it2;
@@ -179,7 +179,39 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  The order of the elements in the vector will be reversed.
+  The order of the elements in the vector will be reversed. Same as hReverse.
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
+{
+  Iter it1(vec),it2(vec_end-1);
+  typename Iter::value_type tmp;
+  while (it2 >= it1) {
+    tmp=*it1;
+    *it1=*it2;
+    *it2=tmp;
+    ++it1; --it2;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Will reverse the order of elements in a vector, such the data will run from right to left rather than left to right.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hReverse
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input and output vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  vec = [a_0,a_1,....,a_n-1,a_n]
+  vec.reverse() ->  [a_n,a_n-1,a_n-2,...,a_0]
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  The order of the elements in the vector will be reversed (same as hFlip).
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)

@@ -70,13 +70,26 @@ that a parameter is not turned into a vector when called in looping mode
 
 2010-11-08: Pypeline - Heino Falcke - rev 6257
 - .read method allows so specify a block AND a single antenna
-selection (
+selection 
 - changed DoubleFFT to allow for blocks to be stored on disk (example
 not yet finished!)
 - several bug fixes
 - got testrfi3.py to work again (testrfi2.py doesn't)
+- reinserted import plot
+-- modified readdump to allow reading in a chunk of data only 
+
+2010-11-08: Pypeline - Heino Falcke - rev 6257
+++ modified readdump to allow reading in a chunk of data only (already
+in revision 6257)
 
 2010-11-15 - Pypeline - Sander ter Veen - rev 6304
 - Added "AntennaPositions" keyword to IO.py. This gives the antennapositions in the local coordinate relative to the CS002 core.
 
-
+2010-11-17: Pypeline - Heino Falcke - rev 6332
+- modified preprocessor to produce forward declarations of functions
+(this assumes all non pass-as-reference parameters are defined as
+constant), this should allow moving fucntions from .h file back to the
+.cc file
+- removed the obsolete SLICED types from hfppnew.h 
+- deleted a number of warnings in mMath
+- fixed a few bugs here and there (e.g., inconsistent hApplyFilter declaration)

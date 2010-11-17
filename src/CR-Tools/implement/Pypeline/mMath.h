@@ -47,13 +47,15 @@ enum hWEIGHTS {WEIGHTS_FLAT,WEIGHTS_LINEAR,WEIGHTS_GAUSSIAN};
 #define OutsideOrEqual(x,lower,upper) ((x <= lower) || (x >= upper))
 
 
-extern vector<HNumber> hWeights(HInteger wlen, hWEIGHTS wtype);
 
-extern HNumber hPhase(HNumber frequency, HNumber time);
+extern vector<HNumber> hWeights(const HInteger wlen, const hWEIGHTS wtype);
 
-extern HComplex hAmplitudePhaseToComplex(HNumber amplitude, HNumber phase);
-extern HComplex hPhaseToComplex(HNumber phase);
-extern HNumber funcGaussian (HNumber x, HNumber sigma, HNumber mu);
+extern HNumber hPhase(const HNumber frequency, const HNumber time);
+
+extern HComplex hAmplitudePhaseToComplex(const HNumber amplitude, const HNumber phase);
+extern HComplex hPhaseToComplex(const HNumber phase);
+extern HNumber funcGaussian (const HNumber x, const HNumber sigma, const HNumber mu);
+
 
 // ========================================================================
 //

@@ -64,6 +64,7 @@ using namespace casa;
 
 //$DOCSTRING: Returns the squared value of the parameter.
 //$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_CLASS_STDIT  ///TEMPORARY FIX TO TEST FORWARD DECLARATION
 #define HFPP_FUNC_NAME square
 //------------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
@@ -75,7 +76,7 @@ using namespace casa;
  $PARDOCSTRING
 */
 template <class T>
-inline T square(T val)
+/*inline*/ T square(const T val)
 {
   return val*val;
 }
@@ -87,20 +88,39 @@ inline T square(T val)
 //------------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED)(val)()("Value to be squared")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED)(val)()("Numerical input value.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
  $PARDOCSTRING
 */
 template <class T>
-inline T HFPP_FUNC_NAME(T val)
+/*inline*/ T HFPP_FUNC_NAME(const T val)
 {
   if (val>0) return log(val);
   else return A_LOW_NUMBER;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Returns the square root of the absolute of a nummber
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME sqrtAbs
+//------------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED)(val)()("Numerical input value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+
+Example:
+
+sqrtAbs(-4) -> 2
+*/
+template <class T>
+/*inline*/ T HFPP_FUNC_NAME(const T val){return sqrt(abs(val));}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Implementation of the Gauss function.
 //$COPY_TO HFILE START ---------------------------------------------------
@@ -116,9 +136,9 @@ inline T HFPP_FUNC_NAME(T val)
  \brief $DOCSTRING
  $PARDOCSTRING
 */
-HNumber funcGaussian (HNumber x,
-                      HNumber sigma,
-                      HNumber mu)
+HNumber funcGaussian (const HNumber x,
+                      const HNumber sigma,
+                      const HNumber mu)
 {
   return exp(-(x-mu)*(x-mu)/(2*sigma*sigma))/(sigma*sqrt(2*casa::C::pi));
 };
@@ -199,13 +219,13 @@ HInteger HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 {
   Iter it(vec);
   IterValueType val=*it;
-  HInteger i(0),ipos(0);
+  HInteger ipos(0);
   while (it!=vec_end) {
     if (*it > val) {
       val=*it;
-      ipos=i;
+      ipos=(it-vec);
     };
-    ++it;++i;
+    ++it;
   };
   return ipos;
 }
@@ -219,8 +239,8 @@ HInteger HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
-  vec.maxpos() -> i # position of maximum value
+Usage:
+  vec.maxpos() -> i # position of minimum value
 
   \brief $DOCSTRING
   $PARDOCSTRING
@@ -230,20 +250,20 @@ HInteger HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 {
   Iter it(vec);
   IterValueType val=*it;
-  HInteger i(0),ipos(0);
+  HInteger ipos(0);
   while (it!=vec_end) {
     if (*it < val) {
       val=*it;
-      ipos=i;
+      ipos=(it-vec);
     };
-    ++it;++i;
+    ++it;
   };
   return ipos;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //========================================================================
-//$ITERATE MFUNC abs,cos,cosh,exp,log,log10,logSave,sin,sinh,sqrt,square,tan,tanh
+//$ITERATE MFUNC abs,cos,cosh,exp,log,log10,logSave,sqrtAbs,sin,sinh,sqrt,square,tan,tanh
 //========================================================================
 
 //$DOCSTRING: Take the $MFUNC of all the elements in the vector.
@@ -289,13 +309,10 @@ void h{$MFUNC!CAPS}2(const Iter vecout,const Iter vecout_end, const Iter vecin,c
   // Declaration of variables
   Iter itin=vecin;
   Iter itout=vecout;
-  HInteger lenIn = vecin_end - vecin;
-  HInteger lenOut = vecout_end - vecout;
 
-  // Sanity check
-  if (lenIn != lenOut) {
-    throw PyCR::ValueError("In- and output vectors are not of equal length.");
-  }
+  //NOTE: In principle one should not check both iterators every time,
+  // but do one check in the beginning and then take the shorter
+  // vector length
 
   // Vector operation
   while ((itin!=vecin_end) && (itout !=vecout_end)) {
@@ -304,7 +321,6 @@ void h{$MFUNC!CAPS}2(const Iter vecout,const Iter vecout_end, const Iter vecin,c
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
 //$ENDITERATE
 
 
@@ -361,13 +377,6 @@ void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterI
   // Declaration of variables
   IterIn itin=vecin;
   IterOut itout=vecout;
-  HInteger lenIn = vecin_end - vecin;
-  HInteger lenOut = vecout_end - vecout;
-
-  // Sanity check
-  if (lenIn != lenOut) {
-    throw PyCR::ValueError("In- and output vectors are not of equal length.");
-  }
 
   // Vector operation
   while ((itin != vecin_end) && (itout != vecout_end)) {
@@ -378,8 +387,6 @@ void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterI
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$ENDITERATE
-
-
 
 //========================================================================
 //$ITERATE MFUNC Mul,Add,Div,Sub
@@ -403,7 +410,6 @@ void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterI
   \brief $DOCSTRING
   $PARDOCSTRING
 
-
   Alternative usages are:
 
   hMul(vecA,vecB) = vecA.mul(vecB)  etc.
@@ -416,17 +422,6 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
   typedef IterValueType T;
   Iterin it1=vec1;
   Iter it2=vec2;
-  HInteger len1 = vec1_end - vec1;
-  HInteger len2 = vec2_end - vec2;
-
-  // Sanity check
-  if (len1 < len2) {
-#ifdef WARNINGS
-    cout << "Warning: input vector is smaller than output vector: looping over input vector" << endl;
-#endif
-  } else if (len1 > len2) {
-    throw PyCR::ValueError("Input vector is larger than output vector.");
-  }
 
   // Vector operation
   while (it2!=vec2_end) {
@@ -468,17 +463,6 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
   typedef IterValueType T;
   Iter it1=vec1;
   Iterin it2=vec2;
-  HInteger len1 = vec1_end - vec1;
-  HInteger len2 = vec2_end - vec2;
-
-  // Sanity check
-  if (len2 < len1) {
-#ifdef WARNINGS
-    cout << "Warning: 2nd vector is smaller than 1st vector: looping over 2nd vector" << endl;
-#endif
-  } else if (len2 > len1) {
-    throw PyCR::ValueError("2nd vector is larger than 1st vector.");
-  }
 
   // Vector operation
   while (it1!=vec1_end) {
@@ -504,14 +488,14 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
   $PARDOCSTRING
 */
 template <class Iter, class S>
-void h{$MFUNC}2(const Iter vec1,const Iter vec1_end, S val)
+void h{$MFUNC}2(const Iter vec1,const Iter vec1_end, const S val)
 {
   PyCR::Math::h{$MFUNC}2(vec1, vec1_end, val);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, which is returned in the first vector.
+//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, which is returned in the first vector. If the second operand vector is shorter it will be applied multiple times.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h$MFUNC
 //-----------------------------------------------------------------------
@@ -536,23 +520,6 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   Iterin2 it2=vec2;
   Iter itout=vec;
 
-  HInteger lenOut = vec_end - vec;
-  HInteger len1 = vec1_end - vec1;
-  HInteger len2 = vec2_end - vec2;
-
-  // Sanity check
-  if (lenOut != len1) {
-    throw PyCR::ValueError("Size of output vector differs from size of 1st operand vector.");
-  } else {
-    if (len2 < len1) {
-#ifdef WARNINGS
-      cout << "Warning: 2nd operand vector is smaller than 1st operand vector: looping over 2nd operand vector." << endl;
-#endif
-    } else if (len2 > len1) {
-      throw PyCR::ValueError("2nd operand vector is larger than 1st operand vector.");
-    }
-  }
-
   // Vector operation
   while ((it1 != vec1_end) && (itout != vec_end)) {
     *itout = hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
@@ -563,7 +530,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different type. Looping will be done over the first argument, i.e. the input/output vector.
+//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different type. Looping will be done over the first argument, i.e. the input/output vector. If the second operand vector is shorter it will be applied multiple times.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h{$MFUNC}Add
 //-----------------------------------------------------------------------
@@ -594,23 +561,6 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   Iterin2 it2=vec2;
   Iter itout=vec;
 
-  HInteger lenOut = vec_end - vec;
-  HInteger len1 = vec1_end - vec1;
-  HInteger len2 = vec2_end - vec2;
-
-  // Sanity check
-  if (lenOut != len1) {
-    throw PyCR::ValueError("Size of output vector differs from size of 1st operand vector.");
-  } else {
-    if (len2 < len1) {
-#ifdef WARNINGS
-      cout << "Warning: 2nd operand vector is smaller than 1st operand vector: looping over 2nd operand vector." << endl;
-#endif
-    } else if (len2 > len1) {
-      throw PyCR::ValueError("2nd operand vector is larger than 1st operand vector.");
-    }
-  }
-
   // Vector operation
   while ((it1!=vec1_end)  && (itout !=vec_end)) {
     *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
@@ -621,7 +571,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different type. Looping will be done over the first argument, i.e. the input/output vector.
+//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different type. Looping will be done over the first argument, i.e. the input/output vector. If the second operand vector is shorter it will be applied multiple times.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h{$MFUNC}Add2
 //-----------------------------------------------------------------------
@@ -652,25 +602,8 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   Iterin2 it2=vec2;
   Iter itout=vec;
 
-  HInteger lenOut = vec_end - vec;
-  HInteger len1 = vec1_end - vec1;
-  HInteger len2 = vec2_end - vec2;
-
-  // Sanity check
-  if (lenOut != len1) {
-    throw PyCR::ValueError("Size of output vector differs from size of 1st operand vector.");
-  } else {
-    if (len2 < len1) {
-#ifdef WARNINGS
-      cout << "Warning: 2nd operand vector is smaller than 1st operand vector: looping over 2nd operand vector." << endl;
-#endif
-    } else if (len2 > len1) {
-      throw PyCR::ValueError("2nd operand vector is larger than 1st operand vector.");
-    }
-  }
-
   // Vector operation
-  while ((it1!=vec1_end)) {
+  while ((it1!=vec1_end) && (itout!=vec_end)) {
     *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
     ++it1; ++it2; ++itout;
 	if (itout==vec_end) itout=vec;
@@ -897,7 +830,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
  \brief $DOCSTRING
  $PARDOCSTRING
 */
-HNumber HFPP_FUNC_NAME(HNumber frequency, HNumber time)
+HNumber HFPP_FUNC_NAME(const HNumber frequency, const HNumber time)
 {
   return CR::_2pi*frequency*time;
 }
@@ -916,7 +849,7 @@ HNumber HFPP_FUNC_NAME(HNumber frequency, HNumber time)
  \brief $DOCSTRING
  $PARDOCSTRING
 */
-HComplex HFPP_FUNC_NAME(HNumber phase)
+HComplex HFPP_FUNC_NAME(const HNumber phase)
 {
   return exp(HComplex(0.0,phase));
 }
@@ -982,7 +915,7 @@ void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 phasevec,
  \brief $DOCSTRING
  $PARDOCSTRING
 */
-HComplex HFPP_FUNC_NAME(HNumber amplitude, HNumber phase)
+HComplex HFPP_FUNC_NAME(const HNumber amplitude, const HNumber phase)
 {
   return amplitude*exp(HComplex(0.0,phase));
 }
@@ -1499,6 +1432,27 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Mean of the piecewise subtraction of the elements in a vector and summing of the square of the results
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMeanDiffSquaredSum
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hMeanDiffSquaredSum(Vector([a,b,c,...]),Vector([x,y,z,...]) -> ((a-x)**2 + (b-y)**2 + (c-z)**2 + ....)/N
+
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+{
+  return PyCR::Array::hMeanDiffSquaredSum(vec1, vec1_end, vec2, vec2_end);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Calculate the chi-squared of two vectors, i.e., (v1,i-v2,i)**2/v2,i
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hChiSquared
@@ -1508,7 +1462,7 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hDiffSquaredSum(Vector([a,b,c,...]),Vector([x,y,z,...]) -> (a-x)**2 + (b-y)**2 + (c-z)**2 + ....
+  hChiSquared(Vector([a,b,c,...]),Vector([x,y,z,...]) -> (a-x)**2/x + (b-y)**2/y + (c-z)**2/z + ....
 
   \brief $DOCSTRING
  $PARDOCSTRING
@@ -1529,7 +1483,7 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector (expected values) - must not be zero")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hDiffSquaredSum(Vector([a,b,c,...]),Vector([x,y,z,...]) -> (a-x)**2 + (b-y)**2 + (c-z)**2 + ....
+  hChiSquared(Vector([a,b,c,...]),Vector([x,y,z,...]) -> ((a-x)**2/x + (b-y)**2/y + (c-z)**2/z + ....)/N
 
   \brief $DOCSTRING
  $PARDOCSTRING
@@ -1876,6 +1830,79 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType m
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Calculates the standard deviation using only the values below the mean value.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hStdDevBelow
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType mean)
+{
+  typedef IterValueType T;
+  HNumber scrt,sum=0.0;
+  HInteger len=(0);
+  Iter it=vec;
+  while (it<vec_end) {
+    if (*it <= mean) {
+      scrt = *it - mean;
+      sum += scrt * scrt;
+      ++len;
+    };
+    ++it;
+  };
+  if (len>1)
+    return sqrt(sum / (len-1));
+  else
+    return sqrt(sum);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates the standard deviation using only the values below the mean value.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hStdDevAbove
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType mean)
+{
+  typedef IterValueType T;
+  HNumber scrt,sum=0.0;
+  HInteger len=(0);
+  Iter it=vec;
+  while (it<vec_end) {
+    if (*it >= mean) {
+      scrt = *it - mean;
+      sum += scrt * scrt;
+      ++len;
+    };
+    ++it;
+  };
+  if (len>1)
+    return sqrt(sum / (len-1));
+  else
+    return sqrt(sum);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 
 //========================================================================
 //$ITERATE MFUNC GreaterThan,GreaterEqual,LessThan,LessEqual
@@ -1964,7 +1991,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, HNumber mean, HNumbe
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  vec.meaninvers() -> N/sum(1/vec_0+1/vec_1+...+1/vec_N)
+  vec.meaninverse() -> N/sum(1/vec_0+1/vec_1+...+1/vec_N)
 
   This is useful to calculate the mean value of very spiky data. Large
   spikes will appear as zero and hence will not have a strong effect
@@ -2047,12 +2074,10 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
   // Declaration of variables
   Iter itin = vecin;
   typename vector<HInteger>::iterator itout=vecout;
-  HInteger lenIn = vecin_end - vecin;
-  HInteger lenOut = vecout_end - vecout;
 
   // Sanity check
-  if (lenIn != lenOut) {
-    throw PyCR::ValueError("Input and output vectors are not of the same size.");
+  if (((vecin_end - vecin)<0) || ((vecout_end - vecout)<0)) {
+    throw PyCR::ValueError("Illegal input our output vector size.");
     return 0.;
   }
 
@@ -2099,14 +2124,6 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
   // Declaration of variables
   Iter itin=vecin;
   typename vector<HInteger>::iterator itout=vecout;
-  HInteger lenIn = vecin_end - vecin;
-  HInteger lenOut = vecout_end - vecout;
-
-  // Sanity check
-  if (lenIn != lenOut) {
-    throw PyCR::ValueError("Input and output vectors are not of the same size.");
-    return 0.;
-  }
 
   // Function operation
   while (itin != vecin_end) {
@@ -2766,7 +2783,6 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
   } else {
     for (i=0; i<wlen; i++) weights[i] /= sum;
   }
-
   return weights;
 }
 
@@ -2830,18 +2846,19 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-vector<HNumber> HFPP_FUNC_NAME (HInteger wlen, hWEIGHTS wtype){
+vector<HNumber> HFPP_FUNC_NAME (const HInteger wlen, const hWEIGHTS wtype){
   vector<HNumber> weights;
-  if (wlen<1) wlen=1;
+  HInteger wlen2(wlen);
+  if (wlen2<1) wlen2=1;
   switch (wtype) {
   case WEIGHTS_LINEAR:
-    weights=hLinearWeights(wlen);
+    weights=hLinearWeights(wlen2);
     break;
   case WEIGHTS_GAUSSIAN:
-    weights=hGaussianWeights(wlen);
+    weights=hGaussianWeights(wlen2);
     break;
   default: //  WEIGHTS_FLAT:
-    weights=hFlatWeights(wlen);
+    weights=hFlatWeights(wlen2);
   };
   return weights;
 }
@@ -2935,8 +2952,8 @@ void HFPP_FUNC_NAME (const DataIter odata,
 		     const DataIter odata_end,
 		     const DataIter idata,
 		     const DataIter idata_end,
-		     HInteger wlen,
-		     hWEIGHTS wtype)
+		     const HInteger wlen,
+		     const hWEIGHTS wtype)
 {
   vector<HNumber> weights = hWeights(wlen, wtype);
   hRunningAverage<DataIter, vector<HNumber>::iterator> (odata,
@@ -2946,7 +2963,6 @@ void HFPP_FUNC_NAME (const DataIter odata,
 							weights.begin(),
 							weights.end());
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Calculates the square of the absolute value and add to output vector
@@ -2981,18 +2997,6 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   // Declaration of variables
   Iterin itin(vecin);
   Iter itout(vecout);
-  HInteger lenIn = std::distance(vecin,vecin_end);
-  HInteger lenOut = std::distance(vecout,vecout_end);
-
-  // Sanity check
-  if (lenIn <= 0) {
-    throw PyCR::ValueError("Incorrect size of input vector.");
-    return;
-  }
-  if (lenOut != lenIn) {
-    throw PyCR::ValueError("Incorrect size of output vector. Should be equal to size of input vector");
-    return;
-  }
 
   // Calculation of spectral power
   while ((itin != vecin_end) && (itout != vecout_end)) {
@@ -3001,5 +3005,3 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-

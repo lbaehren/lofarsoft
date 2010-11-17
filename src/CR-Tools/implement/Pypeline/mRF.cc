@@ -100,16 +100,10 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   // Declaration of variables
   Iterin itin(vecin);
   Iter itout(vecout);
-  HInteger lenIn = std::distance(vecin,vecin_end);
-  HInteger lenOut = std::distance(vecout,vecout_end);
 
   // Sanity check
-  if (lenIn <= 0) {
+  if ((vecin_end<vecin) || (vecout_end<vecout)) {
     throw PyCR::ValueError("Incorrect size of input vector.");
-    return;
-  }
-  if (lenOut != lenIn) {
-    throw PyCR::ValueError("Incorrect size of output vector. Should be equal to size of input vector");
     return;
   }
 

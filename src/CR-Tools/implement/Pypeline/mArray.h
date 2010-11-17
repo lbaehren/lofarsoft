@@ -1011,14 +1011,6 @@ namespace PyCR { // Namespace PyCR -- begin
 
   namespace Array { // Namespace Array -- begin
 
-    template <class Iter> IterValueType hProduct (const Iter vec,const Iter vec_end)
-    {
-      typedef IterValueType T;
-      T prod=1.0;
-      Iter it=vec;
-      while (it!=vec_end) {prod *= *it; ++it;};
-      return prod;
-    }
 
     template <class Iter> HNumber hVectorLength (const Iter vec, const Iter vec_end)
     {
@@ -1071,6 +1063,20 @@ namespace PyCR { // Namespace PyCR -- begin
         ++it1; ++it2;
       };
       return sum;
+    }
+
+    template <class Iter> IterValueType hMeanDiffSquaredSum (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+    {
+      typedef IterValueType T;
+      T sum=hfnull<T>();
+      T val;
+      Iter it1=vec1,it2=vec2;
+      while ((it1!=vec1_end) && (it2!=vec2_end)) {
+	val=(*it1) - (*it2);
+        sum+=val*val;
+        ++it1; ++it2;
+      };
+      return sum/hfmin(vec1_end-vec1,vec2_end-vec2);
     }
 
     template <class Iter> IterValueType hChiSquared(const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)

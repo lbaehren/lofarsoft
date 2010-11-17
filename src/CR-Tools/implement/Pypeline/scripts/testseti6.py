@@ -20,12 +20,15 @@ tmpfileext=".dat"
 filename= LOFARSOFT+"/data/lofar/CS302C-B0T6:01:48.h5"
 fullsize=256*128
 nblocks=128
-stride=2
+stride=4
 #------------------------------------------------------------------------
 full_blocklen=fullsize/nblocks # block length of data when read in
 blocklen=full_blocklen/stride
+blocklen_section=blocklen/stride
 nsubblocks=stride*nblocks
 nblocks_section=nblocks/stride
+subspeclen=blocklen*nblocks
+
 
 t0=time.clock(); print "Setting up."
 #Open file
@@ -37,11 +40,13 @@ cdata=hArray(complex,[nblocks,blocklen]) # creating input and work array
 cdataT=hArray(complex,[blocklen,nblocks]) # creating output array with transposed axis
 
 tmpspecT=hArray(complex,[stride,nblocks_section,blocklen]) 
+#tmpspec=hArray(complex,[nblocks_section,stride,blocklen]) 
 tmpspec=hArray(complex,[nblocks_section,full_blocklen]) 
 
 specT=hArray(complex,[full_blocklen,nblocks_section]) 
-#spec=hArray(complex,[stride,full_blocklen,nblocks_section]) 
-
+specT2=hArray(complex,[stride,blocklen,nblocks_section]) 
+spec=hArray(complex,[blocklen,nblocks]) 
+allspec=hArray(complex,[stride,subspeclen]) 
 
 bigfft=hArray(complex,[fullsize]) 
 print "Time:",time.clock()-t0,"s for set-up."
@@ -61,28 +66,39 @@ for offset in range(stride):
     blocks=range(offset,nsubblocks,stride)
     cdata[...].read(datafile,"Fx",blocks,antenna)
     print "Time:",time.clock()-t0,"s for reading."
-    cdataT.doublefft(cdata,fullsize,nblocks,blocklen,offset)
+    cdataT.doublefft1(cdata,fullsize,nblocks,blocklen,offset)
     print "Time:",time.clock()-t0,"s for reading + FFT."
     ofile=tmpfilename+str(offset)+"a"+tmpfileext
     ofiles+=[ofile]
-    cdataT.writedump(ofile)
+    cdata.writedump(ofile)  # output of doublefft1 is in cdata ...
     
 #Now sort the different blocks together (which requires a transpose over passes/strides)
 ofiles2=[]
 for offset in range(stride):
     tmpspecT[...].readdump(Vector(ofiles),Vector(int,stride,fill=offset))
+    #This transpose it to make sure the blocks are properly interleaved
     hTranspose(tmpspec,tmpspecT,stride,nblocks_section)
-#    tmpspec.reshape([nblocks_section,full_blocklen]) 
-    tmpspec[...].fftw(tmpspec[...])
-    specT.transpose(tmpspec)
+    specT.doublefft2(tmpspec,nblocks_section,full_blocklen)
     ofile=tmpfilename+str(offset)+"b"+tmpfileext
     specT.writedump(ofile)
     ofiles2+=[ofile]
 
+ofiles3=[]
+for offset in range(stride):
+    specT2[...].readdump(Vector(ofiles2),Vector(int,stride,fill=offset))
+    #This transpose it to make sure the blocks are properly interleaved
+    hTranspose(spec,specT2,stride,blocklen)
+    ofile=tmpfilename+"spec_"+str(offset)+tmpfileext
+    spec.writedump(ofile)
+    ofiles3+=[ofile]
+
+for offset in range(stride):
+    allspec[...].readdump(Vector(ofiles3),Vector(int,stride,fill=offset))
 
 print "Time:",time.clock()-t0,"s for resorting, 2nd FFT, and 3rd transpose."
 
-#spec.abs()
-#bigfft.abs()
-#spec.plot(logplot="y")
-#bigfft.plot(logplot="y",clf=False)
+allspec.abs()
+bigfft.abs()
+allspec.plot(logplot="y")
+bigfft.plot(logplot="y",clf=False)
+print "Mean difference between full and blockwise FFT:", allspec.meandiffsquaredsum(bigfft)

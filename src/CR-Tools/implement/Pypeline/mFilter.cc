@@ -271,20 +271,20 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 #define HFPP_FUNC_NAME hApplyFilter
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(data)()("Vector containing the data on which the filter will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(filter)()("Vector containing the filter.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(data)()("Vector containing the data on which the filter will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(filter)()("Vector containing the filter.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
 template <class Iter, class IterFilter>
-void HFPP_FUNC_NAME(const Iter data, const Iter data_end, const IterFilter filter, IterFilter filter_end){
+void HFPP_FUNC_NAME(const Iter data, const Iter data_end, const IterFilter filter, const IterFilter filter_end){
   Iter       it_d = data;
   IterFilter it_f = filter;
 
   while ((it_d != data_end) && (it_f != filter_end)) {
-    *it_d *= (IterValueType) *it_f;
+    *it_d *= hfcast<IterValueType>(*it_f);
     it_d++; it_f++;
   }
 }

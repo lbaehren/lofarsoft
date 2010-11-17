@@ -113,7 +113,7 @@ void HFPP_FUNC_NAME(CRDataReader & dr) {
  $PARDOCSTRING
 */
 
-CRDataReader & HFPP_FUNC_NAME(HString Filename) {
+CRDataReader & HFPP_FUNC_NAME(const HString Filename) {
 
   bool opened;
 
@@ -157,13 +157,14 @@ CRDataReader & HFPP_FUNC_NAME(HString Filename) {
  \brief $DOCSTRING
  $PARDOCSTRING
 */
-HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
+HPyObject HFPP_FUNC_NAME(CRDataReader &dr, const HString key)
 {
+  HString key1(key);
   HString key2(key);
   key2[0]=(unsigned char)toupper((int)key2[0]);
-  key[0]=(unsigned char)tolower((int)key[0]);
+  key1[0]=(unsigned char)tolower((int)key1[0]);
   DataReader *drp=&dr;
-#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key== #KEY) || (key2== #KEY)) {_H_NL_ TYPE result(drp->KEY ()); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key1== #KEY) || (key2== #KEY)) {_H_NL_ TYPE result(drp->KEY ()); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
     HFPP_REPEAT(uint,uint,nofAntennas)
     HFPP_REPEAT(uint,uint,nofSelectedChannels)
     HFPP_REPEAT(uint,uint,nofSelectedAntennas)
@@ -177,7 +178,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
     HFPP_REPEAT(double,double,sampleFrequency)
     HFPP_REPEAT(uint,uint,nofBaselines)
 #undef HFPP_REPEAT
-#define HFPP_REPEAT(TYPE,TYPE2,KEY) if ((key== #KEY) || (key2== #KEY)) {_H_NL_ CasaVector<TYPE> casavec(drp->KEY ()); _H_NL_ std::vector<TYPE2> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
+#define HFPP_REPEAT(TYPE,TYPE2,KEY) if ((key1== #KEY) || (key2== #KEY)) {_H_NL_ CasaVector<TYPE> casavec(drp->KEY ()); _H_NL_ std::vector<TYPE2> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
     HFPP_REPEAT(uint,HInteger,antennas)
     HFPP_REPEAT(uint,HInteger,selectedAntennas)
     HFPP_REPEAT(uint,HInteger,selectedChannels)
@@ -190,7 +191,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 
 // --- Reading data from the headerrecord in a scalar---
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  \
-      if ((key== #KEY) || (key2== #KEY)) {_H_NL_\
+      if ((key1== #KEY) || (key2== #KEY)) {_H_NL_\
 	if (drp->headerRecord().isDefined(#KEY)) {	_H_NL_	\
 	TYPE result;  _H_NL_\
 	drp->headerRecord().get(#KEY,result); _H_NL_\
@@ -211,7 +212,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 #undef HFPP_REPEAT
 
 // --- Reading data from the headerrecord in a vector ---
-#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key== #KEY) || (key2== #KEY)) {_H_NL_	\
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if ((key1== #KEY) || (key2== #KEY)) {_H_NL_	\
       if (drp->headerRecord().isDefined(#KEY)) {  _H_NL_		\
       CasaVector<TYPE> casavec;  _H_NL_\
       drp->headerRecord().get(#KEY,casavec); _H_NL_\
@@ -265,8 +266,8 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 //------------------------------------------------------------------------
 #undef HFPP_REPEAT
 		     + "keywords, help";
-      if ((key!="help") && (key!="keywords")) cout << "Unknown keyword " << key <<"!"<<endl;
-      if (key!="keywords") cout  << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << " - available keywords: "<< result <<endl;
+      if ((key1!="help") && (key1!="keywords")) cout << "Unknown keyword " << key1 <<"!"<<endl;
+      if (key1!="keywords") cout  << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << " - available keywords: "<< result <<endl;
       HPyObject pyob(result);
       return pyob;
     };
@@ -288,13 +289,14 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
  \brief $DOCSTRING
  $PARDOCSTRING
 */
-bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
+bool HFPP_FUNC_NAME(CRDataReader &dr, const HString key, const HPyObjectPtr pyob)
 {
   DataReader *drp=&dr;
+  HString key1(key);
   HString key2(key);
   key2[0]=(unsigned char)toupper((int)key2[0]);
-  key[0]=(unsigned char)tolower((int)key[0]);
-#define HFPP_REPEAT(TYPE,TYPE2,KEY) if ((key== #KEY) || (key2==#KEY)) {TYPE input(TYPE2 (pyob)); drp->set##KEY (input);} else
+  key1[0]=(unsigned char)tolower((int)key1[0]);
+#define HFPP_REPEAT(TYPE,TYPE2,KEY) if ((key1== #KEY) || (key2==#KEY)) {TYPE input(TYPE2 (pyob)); drp->set##KEY (input);} else
   HFPP_REPEAT(uint,PyInt_AsLong,Block)
     HFPP_REPEAT(uint,PyInt_AsLong,Blocksize)
     HFPP_REPEAT(uint,PyInt_AsLong,StartBlock)
@@ -304,22 +306,22 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(double,PyFloat_AsDouble,ReferenceTime)
     HFPP_REPEAT(double,PyFloat_AsDouble,SampleFrequency)
     HFPP_REPEAT(int,PyInt_AsLong,Shift)
-    if ((key=="shift") || (key2=="Shift")) {
+    if ((key1=="shift") || (key2=="Shift")) {
       vector<int> stlvec(PyList2STLInt32Vec(pyob));
       drp->setShift(stlvec);
-    } else  if ((key=="selectedAntennas") || (key2=="SelectedAntennas")) {
+    } else  if ((key1=="selectedAntennas") || (key2=="SelectedAntennas")) {
       vector<uint> stlvec(PyList2STLuIntVec(pyob));
       uint * storage = &(stlvec[0]);
       casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
       CasaVector<uint> casavec(shape,storage,casa::SHARE);
       drp->setSelectedAntennas(casavec,false);
-    } else if ((key=="selectedAntennasID") || (key2=="SelectedAntennasID")) {
+    } else if ((key1=="selectedAntennasID") || (key2=="SelectedAntennasID")) {
       vector<uint> stlvec(PyList2STLuIntVec(pyob));
       uint * storage = &(stlvec[0]);
       casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
       CasaVector<uint> casavec(shape,storage,casa::SHARE);
       drp->setSelectedAntennas(casavec);
-    } else if ((key=="shiftVector") || (key=="ShiftVector")) {
+    } else if ((key1=="shiftVector") || (key2=="ShiftVector")) {
       vector<int> stlvec(PyList2STLInt32Vec(pyob));
       drp->setShift(stlvec);
     } else
@@ -341,8 +343,8 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(uint,XX,SelectedAntennasID)
 #undef HFPP_REPEAT
 		     + "help";
-      if (key!="help") {
-	cout << "Unknown keyword " << key <<"!"<<endl;
+      if (key1!="help") {
+	cout << "Unknown keyword " << key1 <<"!"<<endl;
 	return false;
       };
       cout  << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << " - available keywords: "<< txt <<endl;
@@ -423,15 +425,16 @@ c.mprint()
 template <class Iter>
 void HFPP_FUNC_NAME(
 		    CRDataReader &dr,
-		    HString Datatype,
+		    const HString Datatype,
 		    const Iter vec, const Iter vec_end,
-		    HInteger block,
-		    HInteger antenna
+		    const HInteger block,
+		    const HInteger antenna
 		    )
 {
 
   //Create a DataReader Pointer from an integer variable
   DataReader *drp=&dr;
+  HInteger selantenna(antenna);
   typedef IterValueType T;
 
   //Check whether it is non-NULL.
@@ -463,7 +466,7 @@ void HFPP_FUNC_NAME(
 
 //Note there is an ugly patch to select antennas since the DataReader still doesn't work
 #define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD,SIZE)				\
-  if ((typeid(T)==typeid(TYPESTL)) && (antenna<0)) {	_H_NL_		\
+  if ((typeid(T)==typeid(TYPESTL)) && (selantenna<0)) {	_H_NL_		\
     casa::IPosition shape(2);				_H_NL_		\
     shape(0)=drp->SIZE (); shape(1)=drp->nofSelectedAntennas();	_H_NL_\
     if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(1) << " antennas times " << shape(0) << " data points (= " << shape(0)*shape(1) <<")!"); throw PyCR::ValueError("Incorrect size of read input vector."); return;}; _H_NL_ \
@@ -475,10 +478,10 @@ void HFPP_FUNC_NAME(
     shape(0)=drp->SIZE (); shape(1)=selantennas;	_H_NL_\
     vector<TYPESTL> tmpvec(shape(0)*shape(1)); _H_NL_\
     casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(tmpvec[0])),casa::SHARE); _H_NL_\
-    if (antenna>=0) {shape(1)=1; if (antenna>=selantennas) antenna=(selantennas-1);};_H_NL_\
+    if (selantenna>=0) {shape(1)=1; if (selantenna>=selantennas) selantenna=(selantennas-1);};_H_NL_\
     if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(1) << " antennas times " << shape(0) << " data points (= " << shape(0)*shape(1) <<")!");throw PyCR::ValueError("Incorrect size of read input vector."); return;}; _H_NL_ \
     drp->FIELD (casamtrx);						_H_NL_\
-  if (antenna>=0) {PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin()+antenna*shape(0),tmpvec.begin()+(antenna+1)*shape(0));}_H_NL_\
+  if (selantenna>=0) {PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin()+selantenna*shape(0),tmpvec.begin()+(selantenna+1)*shape(0));}_H_NL_\
   else {PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin(),tmpvec.end());}_H_NL_\
   }
 
@@ -522,7 +525,7 @@ void HFPP_FUNC_NAME(
 template <class Iter>
 CRDataReader & HFPP_FUNC_NAME(
 		    CRDataReader &dr,
-		    HString Datatype,
+		    const HString Datatype,
 		    const Iter vec, const Iter vec_end
 		    )
 {
@@ -554,7 +557,7 @@ CRDataReader & HFPP_FUNC_NAME(
 template <class Iter>
 CRDataReader & HFPP_FUNC_NAME(
 		    CRDataReader &dr,
-		    HString Datatype,
+		    const HString Datatype,
 		    const Iter vec, const Iter vec_end,
 		    const HInteger block
 		    )
@@ -585,7 +588,7 @@ antennaIDs=hFileGetParameter(file,"AntennaIDs")
 x=hCalTable("~/LOFAR/usg/data/lopes/LOPES-CalTable","Positions",obsdate,list(antennaIDs))
 
 */
-HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob) {
+HPyObjectPtr HFPP_FUNC_NAME(const HString filename, const HString keyword, const HInteger date, const HPyObjectPtr pyob) {
   CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
   HInteger i,ant,size;
   casa::Vector<Double> tmpvec;
@@ -634,7 +637,7 @@ antennaIDs=hFileGetParameter(file,"AntennaIDs")
 vec=hCalTablePositions("~/LOFAR/usg/data/lopes/LOPES-CalTable",obsdate,list(antennaIDs))
 
 */
-vector<HNumber> HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob) {
+vector<HNumber> HFPP_FUNC_NAME(const HString filename, const HString keyword, const HInteger date, const HPyObjectPtr pyob) {
   CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
   /*  cout << "summary:" << CTRead.summary() << endl;
   uint t = time();
@@ -751,7 +754,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 #define HFPP_PARDEF_2 (HInteger)(block)()("The block number to read (zero-based index), the block length is determined by the vector length.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  vec.readdump(filename) -> reads dumped vector from file
+  vec.readdump(filename,block) -> reads a specfic block from file (blocklength determined by len(vec))
 
   \brief $DOCSTRING
   $PARDOCSTRING
@@ -760,10 +763,10 @@ Related functions:
   hReadDump, hWriteDump
 
 Example:
- x=hArray(range(10))
+ x=hArray(range(20))
  x.writedump("test.dat")
  v=hArray(int,10)
- v.readdump("test.dat")
+ v.readdump("test.dat",0)
  v.pprint()
  >> [0,1,2,3,4,5,6,7,8,9]
 

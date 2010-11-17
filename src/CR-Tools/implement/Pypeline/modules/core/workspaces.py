@@ -645,7 +645,7 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
     verbose = True - Print progress information during processing.
     fx = hArray(float) - Array to hold the x-values of the raw time series data. (work vector)
     fft = hArray(complex) - Array to hold the FFTed x-values (i.e. complex spectrum) of the raw time series data. (work vector)
-    t0 = 2.971839 - The cpu starting time of the processingin seconds, used for benchmarking.
+    t0 = 2.971839 - The cpu starting time of the processing in seconds, used for benchmarking.
     doplot = True - Make plots during processing to inspect data.
     """
     ws=CRsetWorkSpace(ws,"AverageSpectrum",datafile=datafile,**keywords)

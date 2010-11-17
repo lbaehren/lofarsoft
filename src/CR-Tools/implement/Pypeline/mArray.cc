@@ -94,7 +94,11 @@ void hArray_trackHistory(HBool on){
 template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
-  return PyCR::Array::hProduct (vec, vec_end);
+  typedef IterValueType T;
+  T prod=1.0;
+  Iter it=vec;
+  while (it!=vec_end) {prod *= *it; ++it;};
+  return prod;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
