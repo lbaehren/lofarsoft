@@ -1038,7 +1038,7 @@ if __name__ == "__main__":
 		cmd="%s%s %s %d %s &" % (scratchdir, fold_script, scratchdir, core, " ".join(foldgroup))
 		print "Starting folding on core %d for %d candidates ..." % (core, foldblock)
 		os.system(cmd)	
-		time.sleep(5)  # wait 5 sec before to start next script (in order not to mess with resid2.tmp)
+		time.sleep(30)  # wait 30 sec before to start next script (in order not to mess with resid2.tmp)
 		nfolded -= foldblock
 		start_block += foldblock
 		nprocess += 1
