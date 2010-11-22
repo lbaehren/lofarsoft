@@ -40,6 +40,8 @@ import math
 # some tunable parameters
 is_fold_dat            = False   # if True then dat-files will be used to fold the candidates (maybe should put this as cmd option)
                                  # dat-files will be kept in the scratchdir until the end when the whole scratchdir will be removed
+is_fold_known_psrs     = True    # if False, then all candidates that were selected to be harmonics of known psrs will be folded
+                                 # on top of others (though among these others, these harmonics can also be)
 hwired_ddplan_id       = "shallow"  # DDplan ID, Description of DDplan(s) set and/check below
 bright_catalog         = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/psr_cats.txt"   # Catalog of brightest pulsars
 rfi_master_file        = os.environ["LOFARSOFT"] + "/release/share/pulsar/data/master.rfi"     # Master list of frequent RFIs
@@ -381,6 +383,7 @@ def create_fold_script(scratchdir, name, maskfile, extra_prepfold_options, basen
 		batchfile.write(" prepfold -noxwin -mask %s -runavg -accelcand $accelcand -accelfile $accelfile -dm $dm -o $outfile $options %s %s >> $log\n" % (maskfile, extra_prepfold_options, infile))
 	batchfile.write(" echo >> $log\n")
 	batchfile.write("done\n")
+	batchfile.write("mv -f * %s\n" % (scratchdir))
 	batchfile.write("cd $curdir\n")
 	batchfile.write("rm -rf $workdir\n")
 	batchfile.write("date >> $log\n")
@@ -751,7 +754,7 @@ if __name__ == "__main__":
 						dm_end = ddplan.lodm + ddplan.dmstep * totdm
 						cmd = "prepsubband -mask %s -runavg -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (maskfile, dm_start, ddplan.dmstep, totdm - jj*blk, ddplan.downsamp,outfile,infile, outfile+"_prepsubband.log")
 
-					print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+					print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 					prepsubband_time = timed_execute(cmd,1)
 					tot_prep_time += prepsubband_time
 					print "Prepsubband time (s) : %.2f   [%.1f h]" % (prepsubband_time, prepsubband_time/3600.)
@@ -784,7 +787,7 @@ if __name__ == "__main__":
 						dm_end = ddplan.lodm + ddplan.dmstep * totdm
 						cmd = "mpirun --mca btl ^openib -np %d mpiprepsubband -runavg -mask %s -noclip -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s >> %s " % (np + 1, maskfile, dm_start, ddplan.dmstep, totdm - jj*blk, ddplan.downsamp, outfile, infile, outfile+"_prepsubband.log")
 
-					print "Iteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
+					print "\nIteration: %d  DM range: [%g-%g)" % (jj, dm_start, dm_end)
 					prepsubband_time = timed_execute(cmd,1)
 					tot_prep_time += prepsubband_time
 					print "MPI Prepsubband time (s) : %.2f   [%.1f h]" % (prepsubband_time, prepsubband_time/3600.)
@@ -906,6 +909,7 @@ if __name__ == "__main__":
 	realcand = []    # list of known pulsars found
 	harmcand = []    # list of all (up to 10th) harmonics of known pulsars
 	normalcand = []  # list of other candidates
+	folded_cands = []
 
 	accel_cands = lo_accel_cands[:]
         # if running hi-accel search, merging hi-accel candidates as well
@@ -926,6 +930,8 @@ if __name__ == "__main__":
 					    (cand.p <  0.03 and abs(cand.p - rPeriod[kk]/harm) < ms_period_tolerance):
 						if not does_harm_exist(harm, psrname[kk], harmcand):
 							harmcand.append([harm, psrname[kk], rPeriod[kk], rDM[kk], cand.p, cand.DM, cand.sigma])
+							if is_fold_known_psrs: # added candidate to folded list 
+								folded_cands.append(cand)
 						if not is_pulsar_found:
 							is_pulsar_found = True
 							is_normalcand = False
@@ -1009,7 +1015,6 @@ if __name__ == "__main__":
 	totime += timed_execute(cmd,1)	
 
 	start_fold_time = time.time()
-	folded_cands = []
 	cands_folded = 0
 	for cand in lo_accel_cands:
 		if cands_folded == max_lo_cands_to_fold:
@@ -1030,6 +1035,8 @@ if __name__ == "__main__":
 
 	# Make a fold script and run it in parallel using 'ncores' cores
 	print "Folding best %d candidates ..." % (nfolded)
+	if is_fold_known_psrs:
+		print "   including %d harmonics of possibly known pulsars" % (len(harmcand))
 	fold_script = "psrfold.sh"
 	print "Creating fold script: %s" % (fold_script)
 	create_fold_script(scratchdir, fold_script, maskfile, extra_prepfold_options, basename, infile)
@@ -1043,7 +1050,7 @@ if __name__ == "__main__":
 		else:
 			foldblock=int(nfolded/(ncores-core))
 		foldslice=folded_cands[start_block:start_block+foldblock]	
-		foldgroup=["%d:%s.cand:%s:%s:%s" % (ff.candnum, ff.filename, ff.DMstr, outfile+"_DM%s_Z%s" % (ff.DMstr, ff.filename.split("_")[-1]), get_folding_options(ff)) for ff in foldslice]
+		foldgroup=["%d:%s.cand:%s:%s:%s" % (ff.candnum, ff.filename, ff.DMstr, basename+"_DM%s_Z%s" % (ff.DMstr, ff.filename.split("_")[-1]), get_folding_options(ff)) for ff in foldslice]
 		cmd="%s%s %s %d %s &" % (scratchdir, fold_script, scratchdir, core, " ".join(foldgroup))
 		print "Starting folding on core %d for %d candidates ..." % (core, foldblock)
 		os.system(cmd)	
@@ -1119,9 +1126,9 @@ if __name__ == "__main__":
 
 	# Copy all the important files to the output directory
 	if is_run_hi_accel_search:
-		cmd = "rsync -avxP %s*rfifind.[bimors]* %s*.tgz %s*.ps.gz %s*.png %s*.exectime %s*.report %s %s %s" % (scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir+lo_acc_candlist_file, scratchdir+hi_acc_candlist_file, outdir)
+		cmd = "rsync -avxP %s*rfifind.[bimors]* %s*.tgz %s*.ps.gz %s*.png %s*.exectime %s*.report %s*.sh %s %s %s" % (scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir+lo_acc_candlist_file, scratchdir+hi_acc_candlist_file, outdir)
 	else:
-		cmd = "rsync -avxP %s*rfifind.[bimors]* %s*.tgz %s*.ps.gz %s*.png %s*.exectime %s*.report %s %s" % (scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir+lo_acc_candlist_file, outdir)
+		cmd = "rsync -avxP %s*rfifind.[bimors]* %s*.tgz %s*.ps.gz %s*.png %s*.exectime %s*.report %s*.sh %s %s" % (scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir, scratchdir+lo_acc_candlist_file, outdir)
 	
 	os.system(cmd)
 	# Remove all the stuff in the scratchdir directory
