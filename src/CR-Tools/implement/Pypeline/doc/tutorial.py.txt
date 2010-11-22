@@ -46,9 +46,10 @@ Table of Contents
 5.3.  Plotting Using the hArray Plotting Method
 6.  CR Pipeline Modules
 6.1.  Quality Checking of Time Series Data
-6.2.  Fourier Transforms (FFT) & Cross Correlation
-6.3.  Coordinates
+6.2.  Finding peaks in a vector
+6.3.  Fourier Transforms (FFT) & Cross Correlation
 6.4.  Coordinates
+6.5.  Coordinates
 7.  Appendix: Listing of all Functions:
 
 
@@ -647,9 +648,9 @@ vectors.
 
 
 Where this becomes important is when selecting certain elements in an
-array, e.g. based on its values. For, example, the the "Find" methods
+array, e.g. based on its values. For, example, the the 'Find' methods
 will return a list of indices of elements for which a particular
-condition is true. Most commonly used may be the methods "hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual".
+condition is true. Most commonly used may be the methods 'hFindGreaterThan','hFindGreaterEqual','hFindGreaterThanAbs','hFindGreaterEqualAbs','hFindLessThan','hFindLessEqual','hFindLessThanAbs','hFindLessEqualAbs','hFindBetween','hFindBetweenOrEqual','hFindOutside','hFindOutsideOrEqual'.
 
 Assume, we want to have a list of all the elements of a that are
 between the values (but excluding) 0 and 10 and perform an operation
@@ -895,7 +896,7 @@ algorithm will then loop over all elements in the lists.
 Numerical arrays allow one to set a (single) unit for the data. With
 setUnit(prefix, unit_name) one can specify the name of the unit and
 the scale factor, which is specified as a string being one of
-"f","p","n","micro","m","c","d","","h","k","M","G","T","P","E","Z".
+'f','p','n','micro','m','c','d','','h','k','M','G','T','P','E','Z'.
 
 >>> a.setUnit("M","Hz")
 
@@ -923,7 +924,7 @@ can store keywords and values in the array. This is done with
 
 The keywords can be arbitrary strings ann the values also arbirtrary
 strings. Thus numbers need to be converted to strings and back. The
-keyword "name" is special in the sense that it is a default key, that
+keyword 'name' is special in the sense that it is a default key, that
 is recognized by a number of other modules (including the __repr__
 method governing array output) to briefly describe the data.
 
@@ -988,7 +989,7 @@ destroyed), whenever the crfile object is deleted, e.g. with "file=0".
 
 Now we need to access the meta data in the file. This is can be done
 in multiple ways. One way is by using the get method. This method
-actually calls the function "hFileGetParameter" defined in the c++
+actually calls the function 'hFileGetParameter' defined in the c++
 code.
 
 Which observatory did we actually use?
@@ -1087,8 +1088,8 @@ attributes to the file object.
 
 They will be updated whenever you do a file.set(key,value), however,
 assigning a new value to the attribute will NOT automatically change
-the parameter in the file. For this, you have to use the the "set"
-method, which is an implementation of the "hFileSetParameter"
+the parameter in the file. For this, you have to use the the 'set'
+method, which is an implementation of the 'hFileSetParameter'
 function. E.g. changing the blocksize we already did before. This is
 simply
 
@@ -1134,7 +1135,7 @@ do
 ---------------------
 
 The next step is to actually read in data. This is done with the read
-method (accessing "hFileRead"). The data is read flatly into a 1D
+method (accessing 'hFileRead'). The data is read flatly into a 1D
 vector. This is also true if multiple antennas are read out at
 once. Here simply the data from the antennas follow each other.
 
@@ -1151,17 +1152,17 @@ Voltage and setting the Unit to counts.
 This is now a large vector filled with zeros.
 
 Now we can read in the raw time series data, either using
-"datafile.read" and a keyword, or actually better, use the read method
+'datafile.read' and a keyword, or actually better, use the read method
 of arrays, as they then store filename and history information in the
 array.
 
 
-Currently implemented keywords for reading data fields are: "Fx",
-"Voltage", "FFT", "CalFFT","Time", "Frequency" (and "TimeLag").
+Currently implemented keywords for reading data fields are: 'Fx',
+'Voltage', 'FFT', 'CalFFT','Time', 'Frequency' (and 'TimeLag').
 
 So, let us read in the raw time series data, i.e. the electric field
 in the antenna as digitized by the ADC. This is provided by the
-keyword "Fx" (means f(x) ).
+keyword 'Fx' (means f(x) ).
 
 >>> fxdata.read(datafile,"Fx")
     fxdata => hArray(float,[16, 2048], name="E-Field") # len=32768, slice=[0:32768], vec -> [16.0,17.0,10.0,18.0,17.0,6.0,16.0,17.0,...]
@@ -1184,7 +1185,7 @@ example, to get the x-Axis we create a second vector
 >>> times=datafile["Time"]
 (Note: you can also create an empty array with the same properties and
 dimensions, but without reading data into the array, by preceding the
-keyword with the word "empty", i.e. times=datafile["emptyTime"].)
+keyword with the word 'empty', i.e. times=datafile['emptyTime'].)
 
 In the square bracket notation python will actually set the name and
 units of the data accordingly.
@@ -1226,7 +1227,7 @@ NB: There is the advanced possibility to specify during a read
 operation a list/vector of blocks to be read in, while using the array
 looping mechanism (e.g., to fill the rows of a matrix).
 
-First the usual, boring ond-block read:
+First the usual, boring one-block read:
 >>> filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 >>> datafile=crfile(filename)
   Opening LOFAR File=/Users/falcke/LOFAR/usg/data/lofar/rw_20080701_162002_0109.h5
@@ -1549,54 +1550,40 @@ Finally, we do not want to do this manually all the time. So, a little
 python function is available, that does the quality checking for you
 and returns a list with failed antennas and their properties.
 
->>> badantennalist=CRQualityCheck(qualitycriteria,datafile=datafile,dataarray=dataarray,verbose=False)
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=     0, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=     1, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=     2, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=     3, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=     4, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=     5, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=     6, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=    23, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=    24, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=    25, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=    26, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=    27, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=    28, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=    29, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
-  
-  ERROR in file /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/mIO.split.cc line 483: hFileRead: Input vector size 33024 does not match expected size of 65536 antennas times 1 data points (= 65536)!
-  Block=    30, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.31   ['rms']
+>>> badantennalist=CRQualityCheck(qualitycriteria,datafile=datafile,dataarray=dataarray,blocksize=blocksize,verbose=False)
+  Block=     0, Antenna   0: mean=  6.59, rms= 141.7, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=     1, Antenna   0: mean=  6.63, rms= 138.8, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=     2, Antenna   0: mean=  6.62, rms= 141.4, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=     3, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=     4, Antenna   0: mean=  6.61, rms= 140.9, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=     5, Antenna   0: mean=  6.60, rms= 137.5, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=     6, Antenna   0: mean=  6.62, rms= 143.1, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=     7, Antenna   0: mean=  6.62, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=     8, Antenna   0: mean=  6.63, rms= 135.0, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=     9, Antenna   0: mean=  6.63, rms= 146.0, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    10, Antenna   0: mean=  6.63, rms= 140.9, npeaks=    1, spikyness=   4.29   ['rms', 'spikyness']
+  Block=    11, Antenna   0: mean=  6.60, rms= 142.4, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    12, Antenna   0: mean=  6.61, rms= 143.0, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    13, Antenna   0: mean=  6.61, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    14, Antenna   0: mean=  6.59, rms= 143.3, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    46, Antenna   0: mean=  6.61, rms= 142.5, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    47, Antenna   0: mean=  6.60, rms= 136.7, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    48, Antenna   0: mean=  6.59, rms= 141.1, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    49, Antenna   0: mean=  6.60, rms= 138.7, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    50, Antenna   0: mean=  6.63, rms= 143.8, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    51, Antenna   0: mean=  6.59, rms= 139.5, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    52, Antenna   0: mean=  6.58, rms= 141.5, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    53, Antenna   0: mean=  6.64, rms= 145.5, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    54, Antenna   0: mean=  6.61, rms= 143.1, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    55, Antenna   0: mean=  6.60, rms= 145.5, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    56, Antenna   0: mean=  6.62, rms= 135.0, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    57, Antenna   0: mean=  6.60, rms= 146.0, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    58, Antenna   0: mean=  6.60, rms= 143.3, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    59, Antenna   0: mean=  6.60, rms= 135.8, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    60, Antenna   0: mean=  6.59, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
+  Block=    61, Antenna   0: mean=  6.64, rms= 135.6, npeaks=    0, spikyness=  -0.22   ['rms']
 
-    badantennalist[0] => [0, 0, (6.5902071220930232, 135.73426914391993, 0, -0.3121436369968591), ['rms']]
+    badantennalist[0] => [0, 0, (6.5949006782945734, 141.70452128542746, 0, -0.22157938815373929), ['rms']]
 
 (first the antenna number, then the block, then a list with the mean,
 rms, npeaks, and spikyness, and finally the failed fields)
@@ -1604,7 +1591,50 @@ rms, npeaks, and spikyness, and finally the failed fields)
 Note, that this function can be called with "file=None". In this case
 the data provided in the datararray will be used.
 
-6.2.  Fourier Transforms (FFT) & Cross Correlation
+6.2.  Finding peaks in a vector
+--------------------------------
+
+First we make a test time series data set for 4 antennas.
+
+>>> data=hArray(float,[4,512],name='Random series with peaks')
+and fill it with randome data that have arbitrary offsets.
+>>> data.random(-1024,1024); data[...] += Vector([-128.,256., 385.,-50.])
+The we put some peaks at location 2-3, 32, and 64-67 in each of the 4 data sets.
+>>> for i in range(4): data[i,[2,3,32,64,65,67],...]=Vector([4096.,5097,-4096,4096,5099,3096])
+Now, we reverse-engineer and try finding all 5 sigma peaks
+>>> nsigma=5
+First make a scratch array that will contain the locations of the
+peaks.  A location is actually a 'slice' in the array, i.e. given by
+its beginning and ending position (plus one). The length of the return
+array must be pre-allocated and should be long enough to contain all
+peaks (at maximum as long as the input array).
+>>> datapeaks=hArray(int,[4,5,2],name="Location of peaks")
+Now, retrieve the mean and rms of the array to set the thresholds above and below which one considers a peak to be significant.
+>>> datamean=data[...].mean()
+>>> datathreshold2 = data[...].stddev(datamean)
+>>> datathreshold2 *= nsigma
+>>> datathreshold1 = datathreshold2*(-1)
+>>> datathreshold1 += datamean
+>>> datathreshold2 += datamean
+Finally, determine input parameters for the search algorithm.
+>>> maxgap=Vector(int,len(datamean),fill=10)
+The gap vector tells the algorithm how many samples can be between two
+values that are above threshold, so that the two peaks are considered as one.
+>>> minlength=Vector(int,len(datamean),fill=1)
+A minimum length can be specified to exclude peaks that consists of only a single or a few values (no relevant here, so set to 1, i.e. all peaks are relevant). Then call
+
+hFindSequenceOutside (or Between, GreatererThan, LessEqual ...)
+>>> npeaks=datapeaks[...].findsequenceoutside(data[...],datathreshold1,datathreshold2,maxgap,minlength)
+The return value is the number of pekas found (in each row of the data set).
+    npeaks => Vec(int,4)=[3,3,3,3]
+An the slices are actually contained in the return vector.
+    datapeaks.mprint() =>[2,4,32,33,64,68,0,0,0,0]
+  [2,4,32,33,64,68,0,0,0,0]
+  [2,4,32,33,64,68,0,0,0,0]
+  [2,4,32,33,64,68,0,0,0,0]
+   None
+
+6.3.  Fourier Transforms (FFT) & Cross Correlation
 -------------------------------------------------
 
 We can make a FFT of a float vector. This function will only return
@@ -1716,7 +1746,7 @@ conveniently provided by our cr file object.
 Note, plotting crosscorr[0].plot() will give the autocorrelation of
 the first antenna (which we used as reference antenna in this example).
 
-6.3.  Coordinates
+6.4.  Coordinates
 ---------------
 
 We also have access to a few functions dealing with astronomical
@@ -1740,7 +1770,7 @@ yielding the following output vector:
     cartesian => hArray(float,[1, 3]) # len=3, slice=[0:3], vec -> [0.0308144266055,-0.882409725042,0.469471562786]
 
 
-6.4.  Coordinates
+6.5.  Coordinates
 ---------------
 
 For doing actual beamforming we need to know the antenna
@@ -1758,7 +1788,6 @@ position from the antenna locations so that our phase center lies at
 
 >>> phase_center=hArray(antenna_positions[0].vec())
 >>> antenna_positions -= phase_center
-  Warning: 2nd vector is smaller than 1st vector: looping over 2nd vector
 
 Now we read in instrumental delays for each antenna in a similar way
 and store it for later use.
@@ -1857,27 +1886,20 @@ data in antenna one (which was our reference antenna).
   Class:  <type 'function'>
   
   
-  SECTION: Array functionality
-  --------------------------------------------------
-  hProduct(vec)          - Multiplies all elements in the vector with each 
-                           other and return the result
-   
-  hVectorLength(vec)     - Returns the lengths or norm of a vector (i.e. 
-                           Sqrt(Sum_i(xi*+2))).
-   
-  hNormalize(vec)        - Normalizes a vector to length unity.
-   
-  
   SECTION: Vector functions
   --------------------------------------------------
   hFill(vec, fill_value) - Fills a vector with a constant value.
    
-  hFill(vec, fill_vec)   - Fills a vector with the content of another vector.
+  hFill(vec, fillvec)    - Fills a vector with the content of another vector.
    
   hSet(vec, indexlist, val) - Sets certain elements specified in an indexlist 
                            to a constant value.
    
   hFlip(vec)             - Will reverse the order of elements in a vector, such 
+                           the data will run from right to left rather than 
+                           left to right.
+   
+  hReverse(vec)          - Will reverse the order of elements in a vector, such 
                            the data will run from right to left rather than 
                            left to right.
    
@@ -1887,13 +1909,16 @@ data in antenna one (which was our reference antenna).
   hPPrint(vec, maxlen)   - Prints the contents of a vector (up to a maximum 
                            length) as a pretty string
    
+  hPPrint(vec)           - Prints the entire contents of a vector as a pretty 
+                           string
+   
   hFillRange(vec, start, increment) - Fills a vector with a series of values 
                            starting at a start value and then increasing by an 
                            increment until it is filled
    
   hZipper(vec, vecA, vecB) - Combines two vectors into one where the elements 
                            of the vectors follow each other alternating between 
-                           the input vectors. Equivalent to python 
+                           the input vectors. Equivalent to python 'zip'.
    
   hNew(vec)              - Make and return a new vector of the same size and 
                            type as the input vector.
@@ -1927,8 +1952,18 @@ data in antenna one (which was our reference antenna).
                            transpose operation
    
   hTranspose(vec, invec, ncolumns) - Transposes the values in one vector given 
-                           a certain 2D shape and return result in a second 
-                           vector
+                           a certain 2D shape (lowest indices only)  and return 
+                           result in a second vector
+   
+  hTranspose(vec, invec, nrows, ncolumns) - Transposes the values in one vector 
+                           given a certain 2D shape and return result in a 
+                           second vector (can be applied to higher dimensions 
+                           as well).
+   
+  hVectorLength(vec)     - Returns the lengths or norm of a vector (i.e. 
+                           Sqrt(Sum_i(xi*+2))).
+   
+  hNormalize(vec)        - Normalizes a vector to length unity.
    
   
   SECTION: Math functions
@@ -1938,6 +1973,8 @@ data in antenna one (which was our reference antenna).
   logSave(val)           - Returns the natural logarithm of the value if the 
                            value is larger than zero, otherwise return a low 
                            number.
+   
+  sqrtAbs(val)           - Returns the square root of the absolute of a nummber
    
   funcGaussian(x, sigma, mu) - Implementation of the Gauss function.
    
@@ -1967,6 +2004,11 @@ data in antenna one (which was our reference antenna).
   hLogSave(vec)          - Take the logSave of all the elements in the vector.
    
   hLogSave(vecout, vecin) - Take the logSave of all the elements in the vector 
+                           and return results in a second vector.
+   
+  hSqrtAbs(vec)          - Take the sqrtAbs of all the elements in the vector.
+   
+  hSqrtAbs(vecout, vecin) - Take the sqrtAbs of all the elements in the vector 
                            and return results in a second vector.
    
   hSin(vec)              - Take the sin of all the elements in the vector.
@@ -2057,21 +2099,31 @@ data in antenna one (which was our reference antenna).
                            first vector.
    
   hSub(vec, vec1, vec2)  - Performs a sub between the last two vectors, which 
-                           is returned in the first vector.
+                           is returned in the first vector. If the second 
+                           operand vector is shorter it will be applied 
+                           multiple times.
    
   hSubAdd(vec, vec1, vec2) - Performs a sub between the last two vectors, and 
                            add the result to the first vector which can be of 
                            different type. Looping will be done over the first 
-                           argument, i.e. the input/output vector.
+                           argument, i.e. the input/output vector. If the 
+                           second operand vector is shorter it will be applied 
+                           multiple times.
    
   hSubAdd2(vec, vec1, vec2) - Performs a sub between the last two vectors, and 
                            add the result to the first vector which can be of 
                            different type. Looping will be done over the first 
-                           argument, i.e. the input/output vector.
+                           argument, i.e. the input/output vector. If the 
+                           second operand vector is shorter it will be applied 
+                           multiple times.
    
   hSub(vec, vec1, scalar1) - Performs a sub between the vector and a scalar, 
                            where the result is returned in the first vector 
                            (with automatic casting).
+   
+  hSubSelf(vec, val)     - Performs a sub operation (i.e., val +/-* vec) in 
+                           place between a scalar and a vector, where the 
+                           scalar is the first argument.
    
   hMulTo(vec1, vec2)     - Performs a Mul between the two vectors, which is 
                            returned in the second vector. If the first vector 
@@ -2086,21 +2138,31 @@ data in antenna one (which was our reference antenna).
                            first vector.
    
   hMul(vec, vec1, vec2)  - Performs a mul between the last two vectors, which 
-                           is returned in the first vector.
+                           is returned in the first vector. If the second 
+                           operand vector is shorter it will be applied 
+                           multiple times.
    
   hMulAdd(vec, vec1, vec2) - Performs a mul between the last two vectors, and 
                            add the result to the first vector which can be of 
                            different type. Looping will be done over the first 
-                           argument, i.e. the input/output vector.
+                           argument, i.e. the input/output vector. If the 
+                           second operand vector is shorter it will be applied 
+                           multiple times.
    
   hMulAdd2(vec, vec1, vec2) - Performs a mul between the last two vectors, and 
                            add the result to the first vector which can be of 
                            different type. Looping will be done over the first 
-                           argument, i.e. the input/output vector.
+                           argument, i.e. the input/output vector. If the 
+                           second operand vector is shorter it will be applied 
+                           multiple times.
    
   hMul(vec, vec1, scalar1) - Performs a mul between the vector and a scalar, 
                            where the result is returned in the first vector 
                            (with automatic casting).
+   
+  hMulSelf(vec, val)     - Performs a mul operation (i.e., val +/-* vec) in 
+                           place between a scalar and a vector, where the 
+                           scalar is the first argument.
    
   hAddTo(vec1, vec2)     - Performs a Add between the two vectors, which is 
                            returned in the second vector. If the first vector 
@@ -2115,21 +2177,31 @@ data in antenna one (which was our reference antenna).
                            first vector.
    
   hAdd(vec, vec1, vec2)  - Performs a add between the last two vectors, which 
-                           is returned in the first vector.
+                           is returned in the first vector. If the second 
+                           operand vector is shorter it will be applied 
+                           multiple times.
    
   hAddAdd(vec, vec1, vec2) - Performs a add between the last two vectors, and 
                            add the result to the first vector which can be of 
                            different type. Looping will be done over the first 
-                           argument, i.e. the input/output vector.
+                           argument, i.e. the input/output vector. If the 
+                           second operand vector is shorter it will be applied 
+                           multiple times.
    
   hAddAdd2(vec, vec1, vec2) - Performs a add between the last two vectors, and 
                            add the result to the first vector which can be of 
                            different type. Looping will be done over the first 
-                           argument, i.e. the input/output vector.
+                           argument, i.e. the input/output vector. If the 
+                           second operand vector is shorter it will be applied 
+                           multiple times.
    
   hAdd(vec, vec1, scalar1) - Performs a add between the vector and a scalar, 
                            where the result is returned in the first vector 
                            (with automatic casting).
+   
+  hAddSelf(vec, val)     - Performs a add operation (i.e., val +/-* vec) in 
+                           place between a scalar and a vector, where the 
+                           scalar is the first argument.
    
   hDivTo(vec1, vec2)     - Performs a Div between the two vectors, which is 
                            returned in the second vector. If the first vector 
@@ -2144,21 +2216,31 @@ data in antenna one (which was our reference antenna).
                            first vector.
    
   hDiv(vec, vec1, vec2)  - Performs a div between the last two vectors, which 
-                           is returned in the first vector.
+                           is returned in the first vector. If the second 
+                           operand vector is shorter it will be applied 
+                           multiple times.
    
   hDivAdd(vec, vec1, vec2) - Performs a div between the last two vectors, and 
                            add the result to the first vector which can be of 
                            different type. Looping will be done over the first 
-                           argument, i.e. the input/output vector.
+                           argument, i.e. the input/output vector. If the 
+                           second operand vector is shorter it will be applied 
+                           multiple times.
    
   hDivAdd2(vec, vec1, vec2) - Performs a div between the last two vectors, and 
                            add the result to the first vector which can be of 
                            different type. Looping will be done over the first 
-                           argument, i.e. the input/output vector.
+                           argument, i.e. the input/output vector. If the 
+                           second operand vector is shorter it will be applied 
+                           multiple times.
    
   hDiv(vec, vec1, scalar1) - Performs a div between the vector and a scalar, 
                            where the result is returned in the first vector 
                            (with automatic casting).
+   
+  hDivSelf(vec, val)     - Performs a div operation (i.e., val +/-* vec) in 
+                           place between a scalar and a vector, where the 
+                           scalar is the first argument.
    
   hFmod(vec, param)      - Perform a fmod with a scalar parameter on the 
                            elements of a numeric vector and return the result 
@@ -2234,6 +2316,9 @@ data in antenna one (which was our reference antenna).
                            place, i.e. the input vector is also the output 
                            vector.
    
+  hProduct(vec)          - Multiplies all elements in the vector with each 
+                           other and return the result
+   
   hSum(vec)              - Performs a sum over the values in a vector and 
                            returns the value.
    
@@ -2251,6 +2336,10 @@ data in antenna one (which was our reference antenna).
    
   hDiffSquaredSum(vec1, vec2) - Piecewise subtraction of the elements in a 
                            vector and summing of the square of the results
+   
+  hMeanDiffSquaredSum(vec1, vec2) - Mean of the piecewise subtraction of the 
+                           elements in a vector and summing of the square of 
+                           the results
    
   hChiSquared(vec1, vec2) - Calculate the chi-squared of two vectors, i.e., 
                            (v1,i-v2,i)**2/v2,i
@@ -2287,6 +2376,12 @@ data in antenna one (which was our reference antenna).
   hStdDev(vec, mean)     - Calculates the standard deviation around a mean 
                            value.
    
+  hStdDevBelow(vec, mean) - Calculates the standard deviation using only the 
+                           values below the mean value.
+   
+  hStdDevAbove(vec, mean) - Calculates the standard deviation using only the 
+                           values below the mean value.
+   
   hMeanLessEqualThreshold(vec, threshold) - Calculates the mean of all values 
                            which are LessEqual a certain threshold value
    
@@ -2310,32 +2405,79 @@ data in antenna one (which was our reference antenna).
   hStdDev(vec)           - Calculates the standard deviation of a vector of 
                            values.
    
+  hFind(vec, value)      - Find the first sample that equals the input values 
+                           and return its position. Return -1 if not found.
+   
+  hFindOutsideOrEqual(vec, lower_limit, upper_limit) - Find the first sample 
+                           that is OutsideOrEqual the two input values and 
+                           return its position. Return -1 if not found.
+   
   hFindOutsideOrEqual(vecout, vec, lower_limit, upper_limit) - Find the samples 
                            that are OutsideOrEqual upper and lower threshold 
                            values and returns the number of samples found and 
                            the positions of the samples in a second vector.
+   
+  hFindSequenceOutsideOrEqual(vecout, vecin, lower_limit, upper_limit, maxgap, 
+                           minlength) - Find and return a list containing slice 
+                           indices (i.e., beginning and end+1 position) of 
+                           sequences of (almost) consecutive values in a vector 
+                           which are OutsideOrEqual the two threshold values
+   
+  hFindBetween(vec, lower_limit, upper_limit) - Find the first sample that is 
+                           Between the two input values and return its 
+                           position. Return -1 if not found.
    
   hFindBetween(vecout, vec, lower_limit, upper_limit) - Find the samples that 
                            are Between upper and lower threshold values and 
                            returns the number of samples found and the 
                            positions of the samples in a second vector.
    
+  hFindSequenceBetween(vecout, vecin, lower_limit, upper_limit, maxgap, 
+                           minlength) - Find and return a list containing slice 
+                           indices (i.e., beginning and end+1 position) of 
+                           sequences of (almost) consecutive values in a vector 
+                           which are Between the two threshold values
+   
+  hFindBetweenOrEqual(vec, lower_limit, upper_limit) - Find the first sample 
+                           that is BetweenOrEqual the two input values and 
+                           return its position. Return -1 if not found.
+   
   hFindBetweenOrEqual(vecout, vec, lower_limit, upper_limit) - Find the samples 
                            that are BetweenOrEqual upper and lower threshold 
                            values and returns the number of samples found and 
                            the positions of the samples in a second vector.
+   
+  hFindSequenceBetweenOrEqual(vecout, vecin, lower_limit, upper_limit, maxgap, 
+                           minlength) - Find and return a list containing slice 
+                           indices (i.e., beginning and end+1 position) of 
+                           sequences of (almost) consecutive values in a vector 
+                           which are BetweenOrEqual the two threshold values
+   
+  hFindOutside(vec, lower_limit, upper_limit) - Find the first sample that is 
+                           Outside the two input values and return its 
+                           position. Return -1 if not found.
    
   hFindOutside(vecout, vec, lower_limit, upper_limit) - Find the samples that 
                            are Outside upper and lower threshold values and 
                            returns the number of samples found and the 
                            positions of the samples in a second vector.
    
+  hFindSequenceOutside(vecout, vecin, lower_limit, upper_limit, maxgap, 
+                           minlength) - Find and return a list containing slice 
+                           indices (i.e., beginning and end+1 position) of 
+                           sequences of (almost) consecutive values in a vector 
+                           which are Outside the two threshold values
+   
+  hFindLessEqual(vec, threshold) - Find the first sample that is LessEqual the 
+                           threshold value and return its position. Return -1 
+                           if not found.
+   
   hFindLessEqual(vecout, vec, threshold) - Find the samples that are LessEqual 
                            a certain threshold value and returns the number of 
                            samples found and the positions of the samples in a 
                            second vector.
    
-  hFindLessEqualAbs(vecout, vecin, threshold) - Find the samples whose absolute 
+  hFindLessEqualAbs(vecout, vecin, threshold) - Find the samples whose ABSOLUTE 
                            values are LessEqual a certain threshold value and 
                            returns the number of samples found and the 
                            positions of the samples in a second vector.
@@ -2348,13 +2490,23 @@ data in antenna one (which was our reference antenna).
                            are LessEqual a certain threshold value and returns 
                            the number of samples found.
    
+  hFindSequenceLessEqual(vecout, vecin, threshold, maxgap, minlength) - Find 
+                           and return a list containing slice indices (i.e., 
+                           beginning and end+1 position) of sequences of 
+                           (almost) consecutive values in a vector which are 
+                           LessEqual a threshold value
+   
+  hFindGreaterThan(vec, threshold) - Find the first sample that is GreaterThan 
+                           the threshold value and return its position. Return 
+                           -1 if not found.
+   
   hFindGreaterThan(vecout, vec, threshold) - Find the samples that are 
                            GreaterThan a certain threshold value and returns 
                            the number of samples found and the positions of the 
                            samples in a second vector.
    
   hFindGreaterThanAbs(vecout, vecin, threshold) - Find the samples whose 
-                           absolute values are GreaterThan a certain threshold 
+                           ABSOLUTE values are GreaterThan a certain threshold 
                            value and returns the number of samples found and 
                            the positions of the samples in a second vector.
    
@@ -2366,13 +2518,23 @@ data in antenna one (which was our reference antenna).
                            are GreaterThan a certain threshold value and 
                            returns the number of samples found.
    
+  hFindSequenceGreaterThan(vecout, vecin, threshold, maxgap, minlength) - Find 
+                           and return a list containing slice indices (i.e., 
+                           beginning and end+1 position) of sequences of 
+                           (almost) consecutive values in a vector which are 
+                           GreaterThan a threshold value
+   
+  hFindGreaterEqual(vec, threshold) - Find the first sample that is 
+                           GreaterEqual the threshold value and return its 
+                           position. Return -1 if not found.
+   
   hFindGreaterEqual(vecout, vec, threshold) - Find the samples that are 
                            GreaterEqual a certain threshold value and returns 
                            the number of samples found and the positions of the 
                            samples in a second vector.
    
   hFindGreaterEqualAbs(vecout, vecin, threshold) - Find the samples whose 
-                           absolute values are GreaterEqual a certain threshold 
+                           ABSOLUTE values are GreaterEqual a certain threshold 
                            value and returns the number of samples found and 
                            the positions of the samples in a second vector.
    
@@ -2384,12 +2546,22 @@ data in antenna one (which was our reference antenna).
                            values are GreaterEqual a certain threshold value 
                            and returns the number of samples found.
    
+  hFindSequenceGreaterEqual(vecout, vecin, threshold, maxgap, minlength) - Find 
+                           and return a list containing slice indices (i.e., 
+                           beginning and end+1 position) of sequences of 
+                           (almost) consecutive values in a vector which are 
+                           GreaterEqual a threshold value
+   
+  hFindLessThan(vec, threshold) - Find the first sample that is LessThan the 
+                           threshold value and return its position. Return -1 
+                           if not found.
+   
   hFindLessThan(vecout, vec, threshold) - Find the samples that are LessThan a 
                            certain threshold value and returns the number of 
                            samples found and the positions of the samples in a 
                            second vector.
    
-  hFindLessThanAbs(vecout, vecin, threshold) - Find the samples whose absolute 
+  hFindLessThanAbs(vecout, vecin, threshold) - Find the samples whose ABSOLUTE 
                            values are LessThan a certain threshold value and 
                            returns the number of samples found and the 
                            positions of the samples in a second vector.
@@ -2401,6 +2573,12 @@ data in antenna one (which was our reference antenna).
   hCountLessThanAbs(vec, threshold) - Find the samples whose absolute values 
                            are LessThan a certain threshold value and returns 
                            the number of samples found.
+   
+  hFindSequenceLessThan(vecout, vecin, threshold, maxgap, minlength) - Find and 
+                           return a list containing slice indices (i.e., 
+                           beginning and end+1 position) of sequences of 
+                           (almost) consecutive values in a vector which are 
+                           LessThan a threshold value
    
   hDownsample(vecout, vecin) - Downsample the input vector to a smaller output 
                            vector.
@@ -2453,6 +2631,9 @@ data in antenna one (which was our reference antenna).
   hRunningAverage(odata, idata, wlen, wtype) - Overloaded function to 
                            automatically calculate weights.
    
+  hAbsSquareAdd(outvec, vecin) - Calculates the square of the absolute value 
+                           and add to output vector
+   
   
   SECTION: FFT functions
   --------------------------------------------------
@@ -2503,6 +2684,16 @@ data in antenna one (which was our reference antenna).
                            two subsequent FFTs to obtain a spectrum with higher 
                            resolution, allowing one to operate only on a 
                            fraction of the data in memory
+   
+  hDoubleFFT1(vecout, vecin, full_size, nblocks, blocklen, offset) - Performs 
+                           two subsequent FFTs to obtain a spectrum with higher 
+                           resolution, allowing one to operate only on a 
+                           fraction of the data in memory
+   
+  hDoubleFFT2(vecout, vecin, nblocks, blocklen) - Performs two subsequent FFTs 
+                           to obtain a spectrum with higher resolution, 
+                           allowing one to operate only on a fraction of the 
+                           data in memory
    
   
   SECTION: Filtering functions
@@ -2647,13 +2838,16 @@ data in antenna one (which was our reference antenna).
   hFileSetParameter(dr, keyword, pyob) - Set parameters in a data file with a 
                            Python object as input.
    
-  hFileRead(dr, Datatype, vec, block) - Read a specified block of data from a 
-                           Datareader object into a vector, where the size 
-                           should be pre-allocated.
+  hFileRead(dr, Datatype, vec, block, antenna) - Read a specified block of data 
+                           from a Datareader object into a vector, where the 
+                           size should be pre-allocated.
    
   hFileRead(dr, Datatype, vec) - Read data from a Datareader object (pointer in 
                            iptr) into a vector, where the size should be 
                            pre-allocated.
+   
+  hFileRead(dr, Datatype, vec, block) - Read data from a Datareader object into 
+                           a vector, where the size should be pre-allocated.
    
   hCalTable(filename, keyword, date, pyob) - Return a list of antenna positions 
                            from the CalTables - this is a test.
@@ -2666,7 +2860,11 @@ data in antenna one (which was our reference antenna).
                            (machine dependent)
    
   hReadDump(vec, filename) - Read a single vector from a file which was dumped 
-                           in binary format
+                           in (machine-dependent) binary format
+   
+  hReadDump(vec, filename, block) - Read a section (block) of a single vector 
+                           from a file which was dumped in (machine-dependent) 
+                           binary format
    
   
   SECTION: Functions for Radio Frequency data analysis
@@ -2694,5 +2892,8 @@ data in antenna one (which was our reference antenna).
                            part of the RFI mitigation: remove the flagged 
                            regions from the spectrum
    
+  
+  SECTION: Array functionality
+  --------------------------------------------------
   
 

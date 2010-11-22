@@ -3,6 +3,7 @@
 
 #import pdb
 #pdb.set_trace()
+
 import time
 
 from pycrtools.core import *
@@ -754,7 +755,7 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,maxblocksi
 
     verbose - sets whether or not to print additional information
     """
-#Initialize some parameters
+    #Initialize some parameters
     if not datafile==None:
         nAntennas=datafile.get("nofSelectedAntennas")
         selected_antennas=datafile.get("selectedAntennas")
@@ -767,6 +768,9 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,maxblocksi
         if blocklist==None:
             blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
         if dataarray==None: dataarray=hArray(float,[nAntennas,blocksize])
+        elif not len(dataarray)==(nAntennas*blocksize):
+            print "CRQualityCheck: Data array provided does not match specified blocksize."
+            return
     else:
         nAntennas=dataarray.getDim()[0]
         blocksize=dataarray.getDim()[1]

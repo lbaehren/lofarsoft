@@ -13,7 +13,7 @@ from harray import *
 #  Define Plotting functions for vectors and arrays
 #======================================================================
 
-def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None):
+def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,**plotargs):
     """
     array[0].plot(self,xvalues=vec,xlabel="x",ylabel="y",title="Title",clf=True,logplot="xy") -> plot the array (loglog)
 
@@ -50,6 +50,9 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
             "x" ->semilog in x
             "y" ->semilog in y
             "xy"->loglog plot
+
+    plotarg1=..., plotarg2=...: you can add any plotting paramter that is understood by .plot of scipy, e.g.
+            color="green", linestyle="dashed"
     """
     if xvalues==None:
         if hasattr(self.par,"xvalues"): xvalues=self.par.xvalues
@@ -101,7 +104,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     else: _plot=self.plt.plot
     iterate=True;
     while (iterate):
-        _plot(xvalues.vec(),self.vec())
+        _plot(xvalues.vec(),self.vec(),**plotargs)
         xvalues.next()
         iterate=self.next().doLoopAgain()
     self.plt.ylabel(ylabel+yunit)
@@ -116,3 +119,5 @@ for v in hAllArrayTypes:
     setattr(v,"plot",hPlot_plot)
 
 
+def plotconst(y,xvalues):
+    return hArray([y,y],xvalues=hArray([xvalues.vec()[0],xvalues.vec()[-1]]))

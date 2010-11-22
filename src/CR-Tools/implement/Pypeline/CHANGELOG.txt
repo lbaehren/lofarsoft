@@ -106,5 +106,23 @@ far)
 - added short doc string to python wrapper
 - rearranged some parts of the software (moving code from .h to .cc
 files)
+-added testseti7.py
+
+2010-11-22: Pypeline - Heino Falcke - rev 6350
+- Added function hFindSequenceGreaterThan etc. to find sequences of
+data that is above (or below) a certain value - useful for identifying
+peaks in the data
+- Added documentation about hFindSequence to tutorial
+- Fixed a few inconsistencies in hFileRead to now allow using looping
+- fixed bugs in the tutorial (no idea how they got there)
+- hArray.plot() now also passes normal scipy plotting keywords to
+plt.plot() like color="red"
+- added philosophy and history of pycrtool presentation to doc directory for reading
+
 
  
+------------------------------------------------------------------------ 
+TODO
+------------------------------------------------------------------------
+- indexing an hArray with a list does not work anymore
+- add highlighting of subsections to .ploty (see testseti7.py)

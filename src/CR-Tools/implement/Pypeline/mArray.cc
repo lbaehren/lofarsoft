@@ -4,6 +4,7 @@
  *  Copyright (c) 2010                                                    *
  *                                                                        *
  *  Martin van den Akker <martinva@astro.ru.nl>                           *
+ *  Heino Falcke <h.falcke@astro.ru.nl>                                   *     
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -253,7 +254,7 @@ template <class T> std::vector<T> & hArray<T>::getVector(){
 }
 
 /*!
-\brief Retrieve the stored vector (returned as reference, hence no copy is made).
+\brief Retrieve the dimensions of the array (returned as reference, hence no copy is made).
  */
 template <class T> std::vector<HInteger> & hArray<T>::getDimensions(){
   if (storage_p==NULL) {static vector<HInteger> v; return v;} //Check if vector was deleted elsewhere

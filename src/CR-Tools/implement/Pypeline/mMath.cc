@@ -4,6 +4,7 @@
  *  Copyright (c) 2010                                                    *
  *                                                                        *
  *  Martin van den Akker <martinva@astro.ru.nl>                           *
+ *  Heino Falcke <h.falcke@astro.ru.nl>                                   *     
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -655,6 +656,44 @@ void h{$MFUNC}2(const Iter vec,const Iter vec_end,  const Iterin vec1,const Iter
     *itout = hfcast<T>(*it1 HFPP_OPERATOR_$MFUNC scalar);
     ++it1; ++itout;
     if (it1==vec1_end) it1=vec1;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Performs a $MFUNC!LOW operation (i.e., val +/-* vec) in place between a scalar and a vector, where the scalar is the first argument.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC}Self
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(val)()("Scalar value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  h$MFUNC(vec,val) -> vec = val $MFUNC!LOW vec
+  vec.$MFUNC(val) -> vec = val $MFUNC!LOW vec
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Doesn't really make sense for add and mul, but is useful to get the inverse of a vector.
+
+Example:
+vec=Vector([1.,2.,4.])
+vec.divself(1) -> [1.0,0.5,0.25]
+
+See also: hMulSelf, hDivSelf, HSubSelf, hAddSelf.
+*/
+template <class Iter, class S>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const S val)
+{
+  // Declaration of variables
+  Iter it(vec);
+  typedef IterValueType T;
+  if (it>vec_end) {return;}
+  while (it!=vec_end) {
+    *it = hfcast<T>(val) HFPP_OPERATOR_$MFUNC (*it);
+    ++it;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1715,7 +1754,8 @@ template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType minimum, const IterValueType maximum)
 {
   Iter it=vec;
-  IterValueType scale=(maximum-minimum)/RAND_MAX;
+  HNumber scale(abs(maximum-minimum));
+  scale /= RAND_MAX;
   while (it!=vec_end) {
     *it=rand()*scale+minimum;
     ++it;
@@ -2093,9 +2133,12 @@ HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, HNumber mean, HNumbe
   This is useful to calculate the mean value of very spiky data. Large
   spikes will appear as zero and hence will not have a strong effect
   on the average (or the sum) if only a small number of channels are
-  affected. while a single very large spike could well dominate the
-  normal average.
-*/
+  affected, while a single very large spike could well dominate the
+  normal average. Only works well if all values are positive (or
+  negative). If th mean is around zero it becomes unstable, of
+  course.
+
+ */
 template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
 {
@@ -2109,15 +2152,16 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
     }
     catch (T i) {
       if (abs(i) < A_LOW_NUMBER)
-        cerr << "Division by zero" << endl;
+        cerr << "hMeanInverse: Division by zero at location " << (it-vec) << endl;
     }
     ++it;
   };
 
-  if (sum > 0.) {
+  if (abs(sum) > A_LOW_NUMBER) {
     return (vec_end-vec)/sum;
   } else {
-    return 0.;
+    if (sum>0) return A_HIGH_NUMBER;// sign(sum)*(vec_end-vec)/A_LOW_NUMBER;
+    else return -A_HIGH_NUMBER;//(vec_end-vec)/A_LOW_NUMBER;
   }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -2142,16 +2186,94 @@ HNumber hStdDev (const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Find the first sample that equals the input values and return its position. Return -1 if not found.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFind
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector to search through.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(value)()("Value to search for.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
+			 const IterValueType value)
+{
+  // Declaration of variables
+  Iter itin(vecin);
+  // Sanity check
+  if (vecin_end < vecin) {
+    throw PyCR::ValueError("Illegal input our output vector size.");
+    return -1;
+  }
+
+  while (itin != vecin_end) {
+    if (*itin == value) {return itin-vecin;}
+    ++itin;
+  };
+  return -1;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+// ========================================================================
+//
+//$Section:  Find & Seach
+//
+// ========================================================================
+
 
 //========================================================================
 //$ITERATE MFUNC Between,BetweenOrEqual,Outside,OutsideOrEqual
 //========================================================================
 
+//$DOCSTRING: Find the first sample that is $MFUNC the two input values and return its position. Return -1 if not found.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFind{$MFUNC}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector to search through.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(lower_limit)()("Lower limit to search for.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(upper_limit)()("Upper limit to search for.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
+			 const IterValueType lower_limit, const IterValueType upper_limit)
+{
+  // Declaration of variables
+  Iter itin(vecin);
+  // Sanity check
+  if (vecin_end < vecin) {
+    throw PyCR::ValueError("Illegal input our output vector size.");
+    return -1;
+  }
+
+  while (itin != vecin_end) {
+    if ({$MFUNC}(*itin,lower_limit,upper_limit)) {return itin-vecin;}
+    ++itin;
+  };
+  return -1;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Find the samples that are $MFUNC upper and lower threshold values and returns the number of samples found and the positions of the samples in a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFind{$MFUNC}
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in input vector which are between the limits.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -2161,6 +2283,9 @@ HNumber hStdDev (const Iter vec,const Iter vec_end)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+See also: find, findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
+
 */
 template <class Iter>
 HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
@@ -2191,6 +2316,95 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
   return (itout-vecout);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Find and return a list containing slice indices (i.e., beginning and end+1 position) of sequences of (almost) consecutive values in a vector which are {$MFUNC} the two threshold values
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFindSequence{$MFUNC}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of 3 tuples of position, length, and mean value for each sequence found.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(lower_limit)()("Threshold value - lower_limit if values $MFUNC this, they can belong to a sequence.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HFPP_TEMPLATED_TYPE)(upper_limit)()("Threshold value - upper-limit if values are $MFUNC this, they can belong to a sequence.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(maxgap)()("The maximum gap (in between sample numbers) between two samples to still belong to one sequence. 0=no gaps allowed, i.e. consecutive.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HInteger)(minlength)()("The minimum length of a sequence.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: find, findsequencegreaterthan, findsequencegreaterequal, findsequencelessthan, findsequencelessequal, findsequencebetween, findsequenceoutside, findsequenceoutsideorequal, findsequencebetweenorequal 
+
+Example:
+
+#Make a test time series data set for 4 antennas and some peaks at various locations
+data=hArray(float,[4,512],name="Random series with peaks")
+data.random(-1024,1024); data[...] += Vector([-128.,256., 385.,-50.])
+for i in range(4): data[i,[2,3,32,64,65,67],...]=Vector([4096.,5097,-4096,4096,5099,3096])
+
+nsigma=5
+datapeaks=hArray(int,[4,256,2],name="Location of peaks")
+datamean=data[...].mean()
+datathreshold2 = data[...].stddev(datamean)
+datathreshold2 *= nsigma
+datathreshold1 = datathreshold2*(-1)
+datathreshold1 += datamean
+datathreshold2 += datamean
+
+maxgap=Vector(int,len(datamean),fill=10)
+minlength=Vector(int,len(datamean),fill=1)
+npeaks=datapeaks[...].findsequenceoutside(data[...],datathreshold1,datathreshold2,maxgap,minlength)
+npeaks -> Vec(int,4)=[3,3,3,3]
+datapeaks -> hArray(int,[4, 256, 2], name="Location of peaks") # len=2048, slice=[0:512], vec -> [2,4,32,33,64,68,0,0,...]
+
+*/
+template <class Iter, class IterI>
+HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
+			 const Iter vecin , const Iter vecin_end,
+			 const IterValueType lower_limit,
+			 const IterValueType upper_limit,
+			 const HInteger maxgap,
+			 const HInteger minlength
+			 )
+{
+  Iter itlast(vecin), itfirst(vecin), itnow(vecin);
+  IterI itout(vecout);
+  HInteger nsequence(0);
+  HBool sequenceon(false);
+  if ((itnow>=vecin_end) || (itout+1>=vecout_end)) return 0;
+  while (itnow < vecin_end) {
+    if ({$MFUNC}(*itnow,lower_limit,upper_limit)) {
+      if (!sequenceon) {sequenceon=true; itfirst=itnow;}; //Start of new sequence
+      ++itnow;
+      itlast=itnow; //continue old sequence
+    } else {
+      ++itnow;
+      if (sequenceon) {
+	if ((itnow-itlast)>maxgap) { //end of sequence
+	  sequenceon=false; 
+	  if (itlast-itfirst>=minlength) {//Previous sequence long enough, start new sequence and advance output vector
+	    *itout=(itfirst-vecin); ++itout; //Store result, begin
+	    if (itout!=vecout_end) {*itout=(itlast-vecin); ++nsequence; ++itout;}; //Store result, begin
+	    if (itout==vecout_end) return nsequence; //Sorry, end of output vector, return
+	  };
+	};
+      };
+    };
+  };
+  //Include last sequence if necessary
+  if (sequenceon && (itlast-itfirst>=minlength)) {
+    *itout=(itfirst-vecin); ++itout; //Store result, begin
+    if (itout!=vecout_end) {*itout=(itlast-vecin); ++nsequence; ++itout;}; //Store result, begin
+    if (itout==vecout_end) return nsequence; //Sorry, end of output vector, return
+  };
+  return nsequence;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$ENDITERATE
 
 
@@ -2198,11 +2412,46 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 //$ITERATE MFUNC GreaterThan,GreaterEqual,LessThan,LessEqual
 //========================================================================
 
+//$DOCSTRING: Find the first sample that is $MFUNC the threshold value and return its position. Return -1 if not found.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFind{$MFUNC}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector to search through.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("Threshold value to search for.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
+			 const IterValueType threshold)
+{
+  // Declaration of variables
+  Iter itin(vecin);
+  // Sanity check
+  if (vecin_end < vecin) {
+    throw PyCR::ValueError("Illegal input our output vector size.");
+    return -1;
+  }
+
+  while (itin != vecin_end) {
+    if (*itin HFPP_OPERATOR_$MFUNC threshold) {return itin-vecin;}
+    ++itin;
+  };
+  return -1;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Find the samples that are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFind{$MFUNC}
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in the input vector which satisfy the threshold condition.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -2211,6 +2460,8 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+See also: find, findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
 */
 template <class Iter>
 HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
@@ -2236,11 +2487,11 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Find the samples whose absolute values are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
+//$DOCSTRING: Find the samples whose ABSOLUTE values are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFind{$MFUNC}Abs
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in input vector which are above threshold")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -2287,7 +2538,7 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCount{$MFUNC}
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2313,7 +2564,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCount{$MFUNC}Abs
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2335,15 +2586,94 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Find and return a list containing slice indices (i.e., beginning and end+1 position) of sequences of (almost) consecutive values in a vector which are {$MFUNC} a threshold value
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFindSequence{$MFUNC}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of 3 tuples of position, length, and mean value for each sequence found.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(threshold)()("Threshold value - if values are $MFUNC this, they can belong to a sequence.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(maxgap)()("The maximum gap (in between sample numbers) between two samples to still belong to one sequence. 0=no gaps allowed, i.e. consecutive.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(minlength)()("The minimum length of a sequence.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: find, findsequencegreaterthan, findsequencegreaterequal, findsequencelessthan, findsequencelessequal, findsequencebetween, findsequenceoutside, findsequenceoutsideorequal, findsequencebetweenorequal 
+
+Example:
+
+#Make a test time series data set for 4 antennas and some peaks at various locations
+data=hArray(float,[4,512],name="Random series with peaks")
+data.random(0,1024); data[...] += Vector([128.,256., 385.,50.])
+for i in range(4): data[i,[2,3,32,64,65,67],...]=Vector([4096.,5097,4096,4096,5099,3096])
+
+datapeaks=hArray(int,[4,256,2],name="Location of peaks")
+datamean=data[...].mean()
+datathreshold = data[...].stddev(datamean)
+datathreshold *= 5
+datathreshold += datamean
+
+maxgap=Vector(int,len(datamean),fill=10)
+minlength=Vector(int,len(datamean),fill=1)
+npeaks=datapeaks[...].findsequencegreaterthan(data[...],datathreshold,maxgap,minlength)
+npeaks -> Vec(int,4)=[3,3,3,3]
+datapeaks -> hArray(int,[4, 256, 2], name="Location of peaks") # len=2048, slice=[0:512], vec -> [2,4,32,33,64,68,0,0,...]
+
+*/
+template <class Iter, class IterI>
+HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
+			 const Iter vecin , const Iter vecin_end,
+			 const IterValueType threshold,
+			 const HInteger maxgap,
+			 const HInteger minlength
+			 )
+{
+  Iter itlast(vecin), itfirst(vecin), itnow(vecin);
+  IterI itout(vecout);
+  HInteger nsequence(0);
+  HBool sequenceon(false);
+  if ((itnow>=vecin_end) || (itout+1>=vecout_end)) return 0;
+  while (itnow < vecin_end) {
+    if (*itnow HFPP_OPERATOR_$MFUNC threshold) {
+      if (!sequenceon) {sequenceon=true; itfirst=itnow;}; //Start of new sequence
+      ++itnow;
+      itlast=itnow; //continue old sequence
+    } else {
+      ++itnow;
+      if (sequenceon) {
+	if ((itnow-itlast)>maxgap) { //end of sequence
+	  sequenceon=false; 
+	  if (itlast-itfirst>=minlength) {//Previous sequence long enough, start new sequence and advance output vector
+	    *itout=(itfirst-vecin); ++itout; //Store result, begin
+	    if (itout!=vecout_end) {*itout=(itlast-vecin); ++nsequence; ++itout;}; //Store result, begin
+	    if (itout==vecout_end) return nsequence; //Sorry, end of output vector, return
+	  };
+	};
+      };
+    };
+  };
+  //Include last sequence if necessary
+  if (sequenceon && (itlast-itfirst>=minlength)) {
+    *itout=(itfirst-vecin); ++itout; //Store result, begin
+    if (itout!=vecout_end) {*itout=(itlast-vecin); ++nsequence; ++itout;}; //Store result, begin
+    if (itout==vecout_end) return nsequence; //Sorry, end of output vector, return
+  };
+  return nsequence;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$ENDITERATE
-
-
 
 
 
 // ========================================================================
 //
-//  Statistics
+//$Section: Statistics
 //
 // ========================================================================
 

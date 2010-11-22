@@ -293,7 +293,11 @@ casa::Int hSum(casa::Int* const&, casa::Int* const&);
 long int hSum(const long int*, long int*);
 #endif
 
-#define A_LOW_NUMBER 1.0e-32
+#define A_LOW_NUMBER 1.0e-290
+#define A_HIGH_NUMBER 1.0e290
+
+//Smallest DOUBLE value: -1.79769E+308
+//Largest DOUBLE value: 1.79769E+308
 
 
 #define hfmax(a,b) (((b)<(a))?(a):(b))

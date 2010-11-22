@@ -143,18 +143,20 @@ for nchunk in range(min(nchunks,maxchunks)):
     print "Time:",time.clock()-t0,"s for resorting, 2nd FFT, and 3rd transpose."
 print "End of all chunks."
 
-datapeaks=hArray(int,[nsubsubspectra,subsubspeclen/16],name="Idexlist of Peaks")
 
 def findpeaks(subpower,threshold=7):
-    datamean=hArray(subpower[...].meaninverse())
-    datathreshold = hArray(subpower[...].stddevbelow(datamean.vec()))
+    datamean=subpower[...].meaninverse()
+    datathreshold = subpower[...].stddevbelow(datamean)
     datathreshold *= threshold
     datathreshold += datamean
-    npeaks=datapeaks[...].findgreaterthan(subpower[...],datathreshold.vec())
-    return npeaks
+    maxgap=Vector(int,len(datamean),fill=0)
+    minlength=Vector(int,len(datamean),fill=1)
+    npeaks=datapeaks[...].findsequencegreaterthan(subpower[...],datathreshold,maxgap,minlength)
+    return (npeaks,datathreshold)
     
-def rp(offset,sub=-1,clf=True):
+def rp(offset,sub=-1,clf=True,markpeaks=False):
     """Basic plotting of a part of the specturm"""
+    global subspeclen,start_frequency,delta_frequency,delta_band,ofiles3,nsubsubspectra,subsubfrequencies
     if (sub==-1) & (subspeclen>524288):
         print "Spectrum too large, plotting subspectrum #0"
         sub=0
@@ -166,6 +168,11 @@ def rp(offset,sub=-1,clf=True):
     if sub>=0:
         sub=min(sub,nsubsubspectra-1)
         subpower[sub].plot(xvalues=subsubfrequencies[sub],clf=clf)
+        if markpeaks:
+            plotconst(datathreshold[sub],subsubfrequencies[sub]).plot(clf=False,color="green")
+            for n in range(npeaks[sub]):
+                s=slice(datapeaks2[sub,n,0],datapeaks2[sub,n,1]+1)
+                subpower.getSlicedArray((sub,s)).plot(xvalues=subsubfrequencies.getSlicedArray((sub,s)),clf=False,color="red")
     else:
         power.plot(clf=clf)
 
@@ -173,6 +180,20 @@ if maxchunks==0:
     print "maxchunks==0 - > Reading spectrum from file."  
     power.readdump("spectrum.dat")
 #for i in range(stride): rp(i)
+
+datapeaks=hArray(int,[nsubsubspectra,subsubspeclen/16],name="Slicelist of Peaks")
+datapeaks2=hArray(datapeaks.vec(),[nsubsubspectra,subsubspeclen/32,2])
+datamean=hArray(subpower[...].meaninverse())
+datathreshold = hArray(subpower[...].stddevbelow(datamean.vec()))
+maxgap=Vector(int,len(datamean),fill=10)
+minlength=Vector(int,len(datamean),fill=1)
+
+(npeaks,datathreshold)=findpeaks(subpower)
+rp(0,0)
+
+
+#peakedbands
+#=npeaks.
 
 
 #rp 0,151

@@ -297,6 +297,20 @@ def hArray_val(self):
     """
     return self.vec().val()
 
+def hArray_toslice(self):
+    """Usage: ary.toslice() -> slice(ary1,ary2,ary3)
+
+    Returns the first one, two or three numbers of a vector or array as a Python
+    slice specifier. This can then be used to index/slice another array.
+
+    Example:
+    >> ary1=hArray([0,3])
+    >> ary2=hArray([0,1,2,3,4,5])
+    >> ary2[ary1.toslice()]
+
+    =>   hArray(int,[6]) # len=6, slice=[0:3], vec -> [0,1,2]
+    """
+    return slice(*(self.vec()[0:3]))
 
 def hArray_copy_resize(self,ary):
     """
@@ -306,22 +320,23 @@ def hArray_copy_resize(self,ary):
     ary.copy(self)
     return ary
 
-def hArray_getitem(self,indexlist):
+def hArray_getitem(self,indexlist,asvec=False):
     """
-    self[n1,n2,n3]-> return Element with these indices
+    ary[n1,n2,n3]-> return Element with these indices
 
     Retrieves a copy of the array with the internal slices set to reflect ...
     integers, or value if slice contains only one value.
 
+    To avoid getting a single value instead of a vector, when indexing
+    one element, one has to use  ary.getSlicedArray(n1,n2,...).
+
     Use array.reshape([dim1,dim2,...,dimN]) to set the dimensions.
     """
-
     ary=self.getSlicedArray(indexlist)
     size=ary.getSize()
-
     if size == 0:
         raise IndexError("index out of bounds")
-    elif size == 1 and not ary.loopingMode():
+    elif size == 1 and not ary.loopingMode() and not asvec:
         return ary.val()
     else:
         return ary
@@ -404,29 +419,29 @@ def hArray_setitem(self,dims,fill):
     if (type(fill)) in hAllListTypes: fill=hArray(fill)
     hFill(hArray_getSlicedArray(self,dims),fill)
 
-def hArray_read(self,datafile,key,blocks=-1,antenna=-1):
+def hArray_read(self,datafile,key,block=-1,antenna=-1):
     """
-    array.read(file,"Time",blocks=-1) -> read key Data Array "Time" from file into array.
+    array.read(file,"Time",block=-1) -> read key Data Array "Time" from file into array.
 
     Will also set the attributes par.file and par.filename of the array and
     make a history entry.
 
-    blocks: this allows you to specify the block to be read in. If
+    block: this allows you to specify the block to be read in. If
     specified as a list, the read operation will loop over the array
     (if ellipses are used).
     """
     self.par.filename=datafile.filename
     self.addHistory("read","Reading data from file "+self.par.filename)
-    if type(blocks)==int: blocks=Vector([blocks])
-    if type(blocks) in [list,tuple]: blocks=Vector(blocks)
+    if type(block)==int: block=Vector([block])
+    if type(block) in [list,tuple]: block=Vector(block)
     self.par.file=self
-    datafile.read(key,self,blocks,antenna)
+    datafile.read(key,self,block,antenna)
     return self
 
-"""   if blocks==None:
+"""   if block==None:
         self.par.file=datafile.read(key,self)
     el
-        datafile["block"]=blocks
+        datafile["block"]=block
         self.par.file=datafile.read(key,self)
     else:
         iterate=True
@@ -560,6 +575,8 @@ def hArray_toNumpy(self):
 
 # Fourier Transforms
 setattr(FloatArray,"fft",hFFTCasa)
+
+setattr(IntArray,"toslice",hArray_toslice)
 
 for v in hAllArrayTypes:
     setattr(v,"__repr__",hArray_repr)

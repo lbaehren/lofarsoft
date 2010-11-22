@@ -710,9 +710,9 @@ vectors.
 
 
 Where this becomes important is when selecting certain elements in an
-array, e.g. based on its values. For, example, the the "Find" methods
+array, e.g. based on its values. For, example, the the 'Find' methods
 will return a list of indices of elements for which a particular
-condition is true. Most commonly used may be the methods "hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual".
+condition is true. Most commonly used may be the methods 'hFindGreaterThan','hFindGreaterEqual','hFindGreaterThanAbs','hFindGreaterEqualAbs','hFindLessThan','hFindLessEqual','hFindLessThanAbs','hFindLessEqualAbs','hFindBetween','hFindBetweenOrEqual','hFindOutside','hFindOutsideOrEqual'.
 
 Assume, we want to have a list of all the elements of a that are
 between the values (but excluding) 0 and 10 and perform an operation
@@ -990,7 +990,7 @@ algorithm will then loop over all elements in the lists.
 Numerical arrays allow one to set a (single) unit for the data. With
 setUnit(prefix, unit_name) one can specify the name of the unit and
 the scale factor, which is specified as a string being one of
-"f","p","n","micro","m","c","d","","h","k","M","G","T","P","E","Z".
+'f','p','n','micro','m','c','d','','h','k','M','G','T','P','E','Z'.
 
 """
 a.setUnit("M","Hz")
@@ -1026,7 +1026,7 @@ a.setKey("name","TestArray")
 
 The keywords can be arbitrary strings ann the values also arbirtrary
 strings. Thus numbers need to be converted to strings and back. The
-keyword "name" is special in the sense that it is a default key, that
+keyword 'name' is special in the sense that it is a default key, that
 is recognized by a number of other modules (including the __repr__
 method governing array output) to briefly describe the data.
 
@@ -1104,7 +1104,7 @@ destroyed), whenever the crfile object is deleted, e.g. with "file=0".
 
 Now we need to access the meta data in the file. This is can be done
 in multiple ways. One way is by using the get method. This method
-actually calls the function "hFileGetParameter" defined in the c++
+actually calls the function 'hFileGetParameter' defined in the c++
 code.
 
 Which observatory did we actually use?
@@ -1179,15 +1179,15 @@ for kw in datafile.keywords: p_("datafile."+kw)
 
 They will be updated whenever you do a file.set(key,value), however,
 assigning a new value to the attribute will NOT automatically change
-the parameter in the file. For this, you have to use the the "set"
-method, which is an implementation of the "hFileSetParameter"
+the parameter in the file. For this, you have to use the the 'set'
+method, which is an implementation of the 'hFileSetParameter'
 function. E.g. changing the blocksize we already did before. This is
 simply
 
 """
 datafile.set("blocksize",2048);
 #%SKIP
-""""
+"""
 
 again the list of implemented keywords is visible with using
 
@@ -1244,7 +1244,7 @@ datafile.set("block",0).set("selectedAntennas",range(nAntennas))
 ---------------------
 
 The next step is to actually read in data. This is done with the read
-method (accessing "hFileRead"). The data is read flatly into a 1D
+method (accessing 'hFileRead'). The data is read flatly into a 1D
 vector. This is also true if multiple antennas are read out at
 once. Here simply the data from the antennas follow each other.
 
@@ -1263,17 +1263,17 @@ fxdata=hArray(float,[nofSelectedAntennas,blocksize],name="E-Field").setUnit("","
 This is now a large vector filled with zeros.
 
 Now we can read in the raw time series data, either using
-"datafile.read" and a keyword, or actually better, use the read method
+'datafile.read' and a keyword, or actually better, use the read method
 of arrays, as they then store filename and history information in the
 array.
 
 
-Currently implemented keywords for reading data fields are: "Fx",
-"Voltage", "FFT", "CalFFT","Time", "Frequency" (and "TimeLag").
+Currently implemented keywords for reading data fields are: 'Fx',
+'Voltage', 'FFT', 'CalFFT','Time', 'Frequency' (and 'TimeLag').
 
 So, let us read in the raw time series data, i.e. the electric field
 in the antenna as digitized by the ADC. This is provided by the
-keyword "Fx" (means f(x) ).
+keyword 'Fx' (means f(x) ).
 
 """
 fxdata.read(datafile,"Fx")
@@ -1304,7 +1304,7 @@ times=datafile["Time"]
 """
 (Note: you can also create an empty array with the same properties and
 dimensions, but without reading data into the array, by preceding the
-keyword with the word "empty", i.e. times=datafile["emptyTime"].)
+keyword with the word 'empty', i.e. times=datafile['emptyTime'].)
 
 In the square bracket notation python will actually set the name and
 units of the data accordingly.
@@ -1352,7 +1352,7 @@ NB: There is the advanced possibility to specify during a read
 operation a list/vector of blocks to be read in, while using the array
 looping mechanism (e.g., to fill the rows of a matrix).
 
-First the usual, boring ond-block read:
+First the usual, boring one-block read:
 """
 filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 datafile=crfile(filename)
@@ -1686,7 +1686,7 @@ python function is available, that does the quality checking for you
 and returns a list with failed antennas and their properties.
 
 """
-badantennalist=CRQualityCheck(qualitycriteria,datafile=datafile,dataarray=dataarray,verbose=False)
+badantennalist=CRQualityCheck(qualitycriteria,datafile=datafile,dataarray=dataarray,blocksize=blocksize,verbose=False)
 
 p_("badantennalist[0]")
 """
@@ -1696,6 +1696,67 @@ rms, npeaks, and spikyness, and finally the failed fields)
 
 Note, that this function can be called with "file=None". In this case
 the data provided in the datararray will be used.
+
+(++) Finding peaks in a vector
+--------------------------------
+
+First we make a test time series data set for 4 antennas.
+
+"""
+data=hArray(float,[4,512],name='Random series with peaks')
+"""
+and fill it with randome data that have arbitrary offsets.
+"""
+data.random(-1024,1024); data[...] += Vector([-128.,256., 385.,-50.])
+"""
+The we put some peaks at location 2-3, 32, and 64-67 in each of the 4 data sets.
+"""
+for i in range(4): data[i,[2,3,32,64,65,67],...]=Vector([4096.,5097,-4096,4096,5099,3096])
+"""
+Now, we reverse-engineer and try finding all 5 sigma peaks
+"""
+nsigma=5
+"""
+First make a scratch array that will contain the locations of the
+peaks.  A location is actually a 'slice' in the array, i.e. given by
+its beginning and ending position (plus one). The length of the return
+array must be pre-allocated and should be long enough to contain all
+peaks (at maximum as long as the input array).
+"""
+datapeaks=hArray(int,[4,5,2],name="Location of peaks")
+"""
+Now, retrieve the mean and rms of the array to set the thresholds above and below which one considers a peak to be significant.
+"""
+datamean=data[...].mean()
+datathreshold2 = data[...].stddev(datamean)
+datathreshold2 *= nsigma
+datathreshold1 = datathreshold2*(-1)
+datathreshold1 += datamean
+datathreshold2 += datamean
+"""
+Finally, determine input parameters for the search algorithm.
+"""
+maxgap=Vector(int,len(datamean),fill=10)
+"""
+The gap vector tells the algorithm how many samples can be between two
+values that are above threshold, so that the two peaks are considered as one.
+"""
+minlength=Vector(int,len(datamean),fill=1)
+"""
+A minimum length can be specified to exclude peaks that consists of only a single or a few values (no relevant here, so set to 1, i.e. all peaks are relevant). Then call
+
+hFindSequenceOutside (or Between, GreatererThan, LessEqual ...)
+"""
+npeaks=datapeaks[...].findsequenceoutside(data[...],datathreshold1,datathreshold2,maxgap,minlength)
+"""
+The return value is the number of pekas found (in each row of the data set).
+"""
+p_("npeaks")
+"""
+An the slices are actually contained in the return vector.
+"""
+p_("datapeaks.mprint()")
+"""
 
 (++) Fourier Transforms (FFT) & Cross Correlation
 -------------------------------------------------
@@ -1866,7 +1927,7 @@ position from the antenna locations so that our phase center lies at
 """
 phase_center=hArray(antenna_positions[0].vec())
 antenna_positions -= phase_center
-""""
+"""
 
 Now we read in instrumental delays for each antenna in a similar way
 and store it for later use.

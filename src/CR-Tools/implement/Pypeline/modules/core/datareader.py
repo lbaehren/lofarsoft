@@ -9,6 +9,24 @@ from harray import *
 # cr DataReader Class
 #------------------------------------------------------------------------
 
+def DataReader_read(self,key,aryvec,block=-1,antenna=-1):
+    """
+    Usage:
+    
+    datafile.read(ary,"Time",block=-1,antenna=-1)
+    -> read key Data Array 'Time' from file and current block for all antennas into array 'ary'.
+
+    aryvec: can be an array or a vector to contain the data
+    
+    blocks: this allows you to specify the block to be read in. If
+    specified as a list, the read operation will loop over the array
+    (if ellipses are used).
+
+    antenna: allows you to select (a single) antenna to read. -1 means all.
+    """
+    hFileRead(self,key,aryvec,block,antenna)
+    return self
+
 def DataReader_repr(self):
     if hasattr(self,"filename"):
         return "crfile('"+self.filename+"')"
@@ -110,7 +128,9 @@ def hgetCalData(datafile,keyword):
     elif keyword=="Delay": return hArray(result,dimensions=[datafile["nofAntennas"]])
     else: return
 
-DataReader.read=hFileRead
+
+
+DataReader.read=DataReader_read
 DataReader.set=DataReader_set
 DataReader.__setitem__=DataReader_setitem
 DataReader.__getitem__=DataReader_getitem
