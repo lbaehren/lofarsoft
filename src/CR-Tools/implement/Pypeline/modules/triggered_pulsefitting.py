@@ -39,8 +39,8 @@ def simplexPositionFit(cr_fft, antenna_positions, start_position, ant_indices,
   cartesian=azel.new()
   delays=hArray(float,dimensions=[crfile["nofAntennas"]])
   weights=hArray(complex,dimensions=[crfile["fftLength"]],name="Complex Weights")
-  phases=hArray(float,dimensions=[crfile["fftLength"],name="Phases",xvalues=crfile["frequencyValues"]) 
-  shifted_fft=hArray(complex,dimensions=[crfile["fftLength"])
+  phases=hArray(float,dimensions=[crfile["fftLength"]],name="Phases",xvalues=crfile["frequencyValues"]) 
+  shifted_fft=hArray(complex,dimensions=[crfile["fftLength"]])
   beamformed_fft=hArray(complex,dimensions=[crfile["fftLength"]])
   beamformed_efield=hArray(float,dimensions=cr_time)
   beamformed_efield_smoothed=hArray(float,dimensions=cr_time)
@@ -107,7 +107,11 @@ def triggerMessageFit(crfile, triggerMessageFile, fittype='bruteForce'):  # crfi
   # -> use IO, metadata (sub)modules
   nofAntennas = crfile["nofAntennas"]
   match_positions = crfile["RelativeAntennaPositions"].toNumpy().reshape(3 * nofAntennas)
+  print mTdiffs
+  print len(mTdiffs)
+#  print match_positions
   print match_positions
+  print len(match_positions)
   if (fittype=='linearFit'):
     (radaz, radel) = sfind.directionForHorizontalArray(match_positions, mTdiffs)
   elif (fittype=='bruteForce'):
@@ -130,9 +134,9 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   #dr = cr.open(filename,'LOFAR_TBB')
   crfile = IO.open([filename])
   crfile.setAntennaset(antennaset)
-  
-  
-  if (crfile["samplefrequency"] != 200e6):
+    
+  if (crfile["sampleFrequency"] != 200e6):
+    print crfile["sampleFrequency"]
     raise ValueError, "Can only process events taken with 200MHz samplingrate."
   #Get the trigger message data
   trigData = triggerMessageFit(crfile, triggerMessageFile)
@@ -160,14 +164,19 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
 # ???  dr.read("Frequency",cr_freqs)  
   
   # cr_efield = np.empty((ants, blocksize))
-  cr_efield = crfile["Fx"]
+  cr_efield = crfile["Fx"] # creates new array as well (?)
+  cr_fft = crfile["emptyFFT"]
 #  dr.read("Fx",cr_efield)
 
-  antenna_positions = dr["antenna_position"]
+  antenna_positions = crfile["RelativeAntennaPositions"]
   #Now calculate the foruier-transform of the data
-  cr_fft = np.empty( (ants, fftlength), dtype=complex )
-  for ant in range(ants):
-    status =  cr.forwardFFTW(cr_fft[ant], cr_efield[ant])
+  
+  #    fftdata[...].fftcasa(fxdata[...], nyquistZone)
+  cr_fft[...].fftw(cr_efield[...]) 
+  #cr_fft = np.empty( (ants, fftlength), dtype=complex )
+  
+#  for ant in range(ants):
+#    status =  cr.forwardFFTW(cr_fft[ant], cr_efield[ant])
   if (FarField):
     start_position = [trigData[0], trigData[1]]
   else:
