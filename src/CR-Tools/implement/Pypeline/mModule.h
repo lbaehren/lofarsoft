@@ -24,7 +24,6 @@
 #define CR_PIPELINE_MODULE_H
 
 #include "core.h"
-#include "mArray.h"
 
 #include <Pypeline/hfppnew.h>
 

@@ -493,7 +493,16 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
 template <class Iter, class S>
 void h{$MFUNC}2(const Iter vec1,const Iter vec1_end, const S val)
 {
-  PyCR::Math::h{$MFUNC}2(vec1, vec1_end, val);
+  h{$MFUNC}2(vec1, vec1_end, val);
+      // Declaration of variables
+      typedef IterValueType T;
+      Iter it=vec1;
+
+      // Vector operation
+      while (it!=vec1_end) {
+        *it = hfcast<T>(*it HFPP_OPERATOR_$MFUNC val);
+        ++it;
+      };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -633,10 +642,20 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter, class Iterin1,  class S>
-void h{$MFUNC}2(const Iter vec,const Iter vec_end,  const Iterin1 vec1,const Iterin1 vec1_end, const S scalar1)
+template <class Iter, class Iterin,  class S>
+void h{$MFUNC}2(const Iter vec,const Iter vec_end,  const Iterin vec1,const Iterin vec1_end, const S scalar)
 {
-  PyCR::Math::h{$MFUNC}2(vec, vec_end, vec1, vec1_end, scalar1);
+  // Declaration of variables
+  typedef IterValueType T;
+  Iterin it1=vec1;
+  Iter itout=vec;
+
+  // Vector operation
+  while (itout !=vec_end) {
+    *itout = hfcast<T>(*it1 HFPP_OPERATOR_$MFUNC scalar);
+    ++it1; ++itout;
+    if (it1==vec1_end) it1=vec1;
+  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

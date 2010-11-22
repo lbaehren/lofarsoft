@@ -39,22 +39,6 @@ using namespace std;
 
 typedef CR::CoordinateType::Types CRCoordinateType;
 
-
-// ========================================================================
-//  Imaging functions
-// ========================================================================
-
-namespace PyCR { // Namespace PyCR -- begin
-
-  namespace Imaging { // Namespace Imaging -- begin
-
-
-
-  } // Namespace Imaging -- end
-
-} // Namespace PyCR -- end
-
-
 // ========================================================================
 //  Wrapper declarations
 // ========================================================================

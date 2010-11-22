@@ -73,15 +73,15 @@ set (PYPELINE_CPP_FILES
 set (PYPELINE_CPP_MODULE_PREFIX "m")
 
 set (PYPELINE_CPP_MODULES
-  Vector
   Math
+  Array
+  Vector
   FFT
   Filter
   Fitting
   Imaging
   IO
   RF
-  Array
   Bindings
   )
 

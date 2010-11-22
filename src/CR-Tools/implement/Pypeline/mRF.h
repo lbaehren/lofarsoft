@@ -30,22 +30,6 @@
 
 using namespace std;
 
-// ========================================================================
-//
-//  Generic templates for wrapper functionality
-//
-// ========================================================================
-
-namespace PyCR { // Namespace PyCR -- begin
-
-  namespace RF { // Namespace RF -- begin
-
-
-
-  } // Namespace RF -- end
-
-} // Namespace PyCR -- end
-
 
 // ========================================================================
 //  Wrapper declarations

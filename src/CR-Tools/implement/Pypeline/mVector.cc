@@ -572,7 +572,25 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
 {
-  PyCR::Vector::hCopy(vecout, vecout_end, vecin, vecin_end);
+  // Declaration of variables
+  typedef IterValueType T;
+  Iter itout(vecout);
+  Iterin itin(vecin);
+
+  // Sanity check - but how should this error happen in a Python code ...?
+  if ((vecout > vecout_end) || (vecin > vecin_end)) {
+    throw PyCR::ValueError("Negative size of vector.");
+    return;
+  }
+
+  // Copying of data
+  while (itout != vecout_end) {
+    *itout=hfcast<T>(*itin);
+    ++itin;
+    ++itout;
+    if (itin==vecin_end)
+      itin=vecin;
+  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -605,7 +623,32 @@ See also: hFindGreaterThan, etc..
 template <class Iter, class Iterin, class IterI>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end, const IterI index, const IterI index_end, const HInteger number_of_elements)
 {
-  PyCR::Vector::hCopy(vecout,  vecout_end,  vecin,  vecin_end,  index,  index_end,  number_of_elements);
+  // Declaration of variables
+  typedef IterValueType T;
+  Iter itout(vecout);
+  IterI itidx(index);
+  Iterin itin;
+  HInteger count(number_of_elements);
+
+  // Sanity check
+  if ((index >= index_end) || (count==0))
+    return;
+  if (vecin >= vecin_end)
+    return;
+  if ((count<0) || (count > (vecout_end-vecout)))
+    count=(vecout_end-vecout);
+
+  // Copying of data
+  while ((itout != vecout_end) && (count > 0)) {
+    itin = vecin + *itidx;
+    if ((itin >= vecin) && (itin < vecin_end))
+      *itout=hfcast<T>(*itin);
+    --count;
+    ++itidx;
+    ++itout;
+    if (itidx==index_end)
+      itidx=index;
+  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -634,7 +677,19 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger offset, HInteger stride)
 {
-  PyCR::Vector::hRedistribute(vec,vec_end,invec,invec_end,offset,stride);
+  // Variables
+  Iter it(vec+offset);
+  Iter itin(invec);
+  // Sanity check
+  if (stride < 0) {
+    throw PyCR::ValueError("Negative value for stride parameter is not allowed");
+  }
+  // Redistribute
+  while ((itin != invec_end) && (it < vec_end)) {
+    *it = *itin;
+    ++itin;
+    it += stride;
+  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -676,7 +731,16 @@ Usage:
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger ncolumns)
 {
-  PyCR::Vector::hTranspose(vec,vec_end,invec,invec_end,ncolumns);
+  // Variables
+  Iter it(invec),itend(it+ncolumns);
+  HInteger nrows=(invec_end-invec)/ncolumns;
+  HInteger i(0);
+  while (itend<=invec_end) {
+    hRedistribute(vec,vec_end,it,itend,i,nrows);
+    ++i;
+    it=itend;
+    itend+=ncolumns;
+  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -716,11 +780,27 @@ Usage:
   [1,3,5]
 
 */
- 
+
 template <class Iter>
 void hTranspose(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger nrows, HInteger ncolumns)
 {
-  PyCR::Vector::hTranspose(vec,vec_end,invec,invec_end,nrows,ncolumns);
+  // Variables
+  HInteger size=(invec_end-invec)/(ncolumns*nrows),block=ncolumns*size;
+  Iter start(invec);
+  Iter iti(start),itiend(iti+size);
+  Iter ito(vec),itoend(ito+size);
+
+  while (itoend<=vec_end) {
+    hCopy(ito,itoend,iti,itiend);
+    ito=itoend; itoend+=size;
+    iti+=block;
+    if (iti >= invec_end) {
+      start+=size;
+      iti=start;
+    };
+    itiend=iti+size;
+  };
+
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

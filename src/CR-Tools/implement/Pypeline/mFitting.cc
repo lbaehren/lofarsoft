@@ -60,7 +60,7 @@
 //--------------------
 
 //!initialize functions of the library
-void PyCR::Fitting::hInit(){
+void hInitFitting(){
 #ifdef HAVE_GSL
   gsl_set_error_handler_off ();
 #else

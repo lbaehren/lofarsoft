@@ -65,17 +65,6 @@ vector<HNumber> hCalTableVector(HString filename, HString keyword, HInteger date
 
 template<class T> inline T hfcast(CR::DataReader v);
 
-namespace PyCR { // Namespace PyCR -- begin
-
-  namespace IO { // Namespace IO -- begin
-
-
-
-  } // Namespace IO -- end
-
-} // Namespace PyCR -- end
-
-
 
 // ________________________________________________________________________
 //                                    Add declarations of wrapper functions

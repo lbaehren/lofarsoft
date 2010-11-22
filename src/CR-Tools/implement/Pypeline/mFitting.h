@@ -29,21 +29,10 @@
 using namespace std;
 
 // ========================================================================
-//
-//  Generic templates and function declarations for wrapper functionality
-//
+//  Function definition
 // ========================================================================
 
-namespace PyCR { // Namespace PyCR -- begin
-
-  namespace Fitting { // Namespace Fitting -- begin
-
-    void hInit();
-
-  } // Namespace Fitting -- end
-
-} // Namespace PyCR -- end
-
+void hInitFitting();
 
 
 // ========================================================================

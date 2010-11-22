@@ -115,20 +115,30 @@ void HFPP_FUNC_NAME(CRDataReader & dr) {
 
 CRDataReader & HFPP_FUNC_NAME(const HString Filename) {
 
-  bool opened;
+  bool opened = false;
 
   //Create the a pointer to the DataReader object and store the pointer
-  CR::DataReader* drp;
+  CR::DataReader* drp = NULL;
+
   HString Filetype = hgetFiletype(Filename);
 
   if (Filetype=="LOPESEvent") {
     CR::LopesEventIn* lep = new CR::LopesEventIn;
     opened=lep->attachFile(Filename);
-    drp=lep;
+    if (opened == false) {
+      throw PyCR::IOError("Unable to open file.");
+    } else {
+      drp=lep;
+    }
     cout << "Opening LOPES File="<<Filename<<endl; drp->summary();
   } else if (Filetype=="LOFAR_TBB") {
     drp = new CR::LOFAR_TBB(Filename,1024);
-    opened=drp!=NULL;
+    if (drp == NULL) {
+      opened = false;
+      throw PyCR::IOError("Unable to open file.");
+    } else {
+      opened = true;
+    }
     cout << "Opening LOFAR File="<<Filename<<endl; drp->summary();
   } else {
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Unknown Filetype = " << Filetype  << ", Filename=" << Filename);
@@ -481,8 +491,8 @@ void HFPP_FUNC_NAME(
     if (selantenna>=0) {shape(1)=1; if (selantenna>=selantennas) selantenna=(selantennas-1);};_H_NL_\
     if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(1) << " antennas times " << shape(0) << " data points (= " << shape(0)*shape(1) <<")!");throw PyCR::ValueError("Incorrect size of read input vector."); return;}; _H_NL_ \
     drp->FIELD (casamtrx);						_H_NL_\
-  if (selantenna>=0) {PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin()+selantenna*shape(0),tmpvec.begin()+(selantenna+1)*shape(0));}_H_NL_\
-  else {PyCR::Vector::hCopy(vec,vec_end,tmpvec.begin(),tmpvec.end());}_H_NL_\
+  if (selantenna>=0) {hCopy(vec,vec_end,tmpvec.begin()+selantenna*shape(0),tmpvec.begin()+(selantenna+1)*shape(0));}_H_NL_\
+  else {hCopy(vec,vec_end,tmpvec.begin(),tmpvec.end());}_H_NL_\
   }
 
 //..........................................................................................
@@ -592,7 +602,7 @@ HPyObjectPtr HFPP_FUNC_NAME(const HString filename, const HString keyword, const
   CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
   HInteger i,ant,size;
   casa::Vector<Double> tmpvec;
-  Double tmpval;
+  Double tmpval=0.;
   HPyObjectPtr list=PyList_New(0),tuple;
   if (CTRead != NULL && PyList_Check(pyob)) {  //Check if CalTable was opened ... and Python object is a list
     size=PyList_Size(pyob);

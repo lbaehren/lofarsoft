@@ -63,7 +63,7 @@
 
 //!initialize functions of the library
 void hInit(){
-  PyCR::Fitting::hInit();
+  hInitFitting();
 }
 
 // ========================================================================
@@ -88,11 +88,6 @@ namespace PyCR { // Namespace PyCR -- begin
   void translateTypeError(TypeError const& e)
   {
     PyErr_SetString(PyExc_TypeError, e.message.c_str());
-  }
-
-  void translateIndexError(IndexError const& e)
-  {
-    PyErr_SetString(PyExc_IndexError, e.message.c_str());
   }
 
   void translateKeyError(KeyError const& e)
@@ -140,7 +135,10 @@ namespace PyCR { // Namespace PyCR -- begin
     PyErr_SetString(PyExc_NotImplementedError, e.message.c_str());
   }
 
-
+  void translateIOError(IOError const& e)
+  {
+    PyErr_SetString(PyExc_IOError, e.message.c_str());
+  }
 
 } // Namespace PyCR -- end
 
@@ -169,7 +167,6 @@ BOOST_PYTHON_MODULE(hftools)
   register_exception_translator<PyCR::Exception>(PyCR::translateException);
   register_exception_translator<PyCR::ValueError>(PyCR::translateValueError);
   register_exception_translator<PyCR::TypeError>(PyCR::translateTypeError);
-//  register_exception_translator<PyCR::IndexError>(PyCR::translateIndexError);
   register_exception_translator<PyCR::KeyError>(PyCR::translateKeyError);
   register_exception_translator<PyCR::MemoryError>(PyCR::translateMemoryError);
   register_exception_translator<PyCR::ArithmeticError>(PyCR::translateArithmeticError);
@@ -179,6 +176,7 @@ BOOST_PYTHON_MODULE(hftools)
   register_exception_translator<PyCR::ZeroDivisionError>(PyCR::translateZeroDivisionError);
   register_exception_translator<PyCR::NameError>(PyCR::translateNameError);
   register_exception_translator<PyCR::NotImplementedError>(PyCR::translateNotImplementedError);
+  register_exception_translator<PyCR::IOError>(PyCR::translateIOError);
 
 // ________________________________________________________________________
 //                                                       Core functionality

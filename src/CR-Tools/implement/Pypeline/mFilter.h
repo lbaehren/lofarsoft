@@ -29,21 +29,6 @@
 using namespace std;
 
 // ========================================================================
-//  Filter functions
-// ========================================================================
-
-namespace PyCR { // Namespace PyCR -- begin
-
-  namespace Filter { // Namespace Filter -- begin
-
-
-
-  } // Namespace Filter -- end
-
-} // Namespace PyCR -- end
-
-
-// ========================================================================
 //  Wrapper declarations
 // ========================================================================
 

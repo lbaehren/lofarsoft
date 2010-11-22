@@ -220,11 +220,11 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   };
 
   // Implementation
-  PyCR::Vector::hCopy(scratchfft.begin(),scratchfft.end(), data_in,  data_in_end);
+  hCopy(scratchfft.begin(),scratchfft.end(), data_in,  data_in_end);
   hNyquistSwap(scratchfft,nyquistZone);
   p = fftw_plan_dft_1d(lenIn, (fftw_complex*) &scratchfft[0], (fftw_complex*) &(*data_out), FFTW_BACKWARD, FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
-  PyCR::Math::hDiv2(data_out,data_out_end,(IterValueType)lenIn);
+  hDiv2(data_out,data_out_end,(IterValueType)lenIn);
   fftw_destroy_plan(p);
   fftw_cleanup();
 }
@@ -319,13 +319,13 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   };
 
   // Implementation
-  PyCR::Vector::hCopy(scratchfft.begin(),scratchfft.end(), data_in,  data_in_end);
+  hCopy(scratchfft.begin(),scratchfft.end(), data_in,  data_in_end);
   hNyquistSwap(scratchfft,nyquistZone);
   p = fftw_plan_dft_c2r_1d(lenOut, (fftw_complex*) &(scratchfft[0]), (double*) &(*data_out), FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
   fftw_cleanup();
-  PyCR::Math::hDiv2(data_out,data_out_end,(HNumber)lenOut);
+  hDiv2(data_out,data_out_end,(HNumber)lenOut);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -753,11 +753,11 @@ This is how the data is to be provided and dealt with:
 
 First, the time series data is read in as n=nblocks of length l=blocklength each, i.e. giving a vector:
 
-full data -> [B1-1,B1-2,..,B1-l, --STRIDE-1 Blocks to be left out--, B2-1,B2-2,..,B2-l, --STRIDE-1 Blocks to be left out--, ...,  Bn-1,Bn-2,..,Bn-l] 
+full data -> [B1-1,B1-2,..,B1-l, --STRIDE-1 Blocks to be left out--, B2-1,B2-2,..,B2-l, --STRIDE-1 Blocks to be left out--, ...,  Bn-1,Bn-2,..,Bn-l]
 
 -> [B1-1,B1-2,..,B1-l, B2-1,B2-2,..,B2-l,  ...,  Bn-1,Bn-2,..,Bn-l]
 
-(B2-3 means: 2nd block, and 3rd sample within the block) 
+(B2-3 means: 2nd block, and 3rd sample within the block)
 
 It is possible to leave out m=stride-1 blocks in between, so that only a fraction 1/(stride+1) of data is read in.
 
@@ -775,13 +775,13 @@ similar matrix on top (e.g., when one was starting to reading not from
 the first block, but the 2nd, 3rd etc.) and STRIDE-1-OFFSET matrices at
 the end.
 
-For clarity: the full matrix would look have looked like (for the example of OFFSET=1 and STRIDE=3 above ... even tough stride is better a power of two!) 
+For clarity: the full matrix would look have looked like (for the example of OFFSET=1 and STRIDE=3 above ... even tough stride is better a power of two!)
 
 Mabc=[
      [A1-1,A2-1,..,An-1],       I
      [A1-2,A2-2,..,An-2],       I
              ...                I  cdataT
-     [A1-l,A2-l,..,An-l],       I 
+     [A1-l,A2-l,..,An-l],       I
 
      [B1-1,B2-1,..,Bn-1],
      [B1-2,B2-2,..,Bn-2],
@@ -823,8 +823,8 @@ giving the final spectrum (with gaps, if the blocks are not properly rearranged 
 
 Mfinal=[
      [A1-1,A2-1,..,An-1],      (specT: only first nblock_section columns)
-     [A1-2,A2-2,..,An-2],       specT2: only first blocklen rows and 
-             ...                        nblock_section columns 
+     [A1-2,A2-2,..,An-2],       specT2: only first blocklen rows and
+             ...                        nblock_section columns
      [A1-l,A2-l,..,An-l],
      [B1-1,B2-1,..,Bn-1],
      [B1-2,B2-2,..,Bn-2],
@@ -840,9 +840,9 @@ Mfinal=[
 Example:
 
 #Input parameters
-ncolumns = 128                
+ncolumns = 128
 nrows = 1024  # = bigFFTblocksize / ncolumns
-bigFFTblocksize = ncolumns*nrows     
+bigFFTblocksize = ncolumns*nrows
 
 #Prepare some vectors
 a=hArray(complex,[nrows, ncolumns])
@@ -858,14 +858,14 @@ bigFFT.fftw(a)
 aT=hArray(a).transpose()
 aT[...].fftw(aT[...])
 aT.doublefftphasemul(bigFFTblocksize,nrows,ncolumns,0)
-a.transpose(aT) 
-a[...].fftw(a[...]) 
+a.transpose(aT)
+a[...].fftw(a[...])
 aT.transpose(a)
 
 #Do the steps just above in one go
 bT.doublefft(b,bigFFTblocksize,nrows,ncolumns,0)
 
--> bigFFT, aT, & bT all contain the same spectra  
+-> bigFFT, aT, & bT all contain the same spectra
 
 */
 template <class Iter>
@@ -876,7 +876,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
     return;
   };
   //First transpose
-  PyCR::Vector::hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
+  hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
   //FFT over rows
   Iter it1(vecout), it2(vecout+nblocks);
   while (it2 <= vecout_end){
@@ -886,7 +886,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
   //Multiply with phase factor
   hDoubleFFTPhaseMul(vecout,vecout_end,full_size,nblocks,blocklen,offset);
   //Second transpose
-  PyCR::Vector::hTranspose(vecin,vecin_end,vecout,vecout_end,nblocks);
+  hTranspose(vecin,vecin_end,vecout,vecout_end,nblocks);
   //And FFT over rows
   it1=vecin; it2=vecin+blocklen;
   while (it2 <= vecin_end){
@@ -894,7 +894,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
     it1=it2; it2+=blocklen;
   };
   //Final transpose
-  PyCR::Vector::hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
+  hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -927,7 +927,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
     return;
   };
   //First transpose
-  PyCR::Vector::hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
+  hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
   //FFT over rows
   Iter it1(vecout), it2(vecout+nblocks);
   while (it2 <= vecout_end){
@@ -937,7 +937,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
   //Multiply with phase factor
   hDoubleFFTPhaseMul(vecout,vecout_end,full_size,nblocks,blocklen,offset);
   //2nd tranpsoe
-  PyCR::Vector::hTranspose(vecin,vecin_end,vecout,vecout_end,nblocks);
+  hTranspose(vecin,vecin_end,vecout,vecout_end,nblocks);
 
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -959,7 +959,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
 
 See DoubleFFT for description!
 
-    cdataT[offset].doublefft(cdata[offset],fullsize,nblocks,blocklen,offset) 
+    cdataT[offset].doublefft(cdata[offset],fullsize,nblocks,blocklen,offset)
 
     is the same as:
 
@@ -982,7 +982,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
     iti1=iti2; iti2+=blocklen;
   };
   //Final transpose
-  PyCR::Vector::hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
+  hTranspose(vecout,vecout_end,vecin,vecin_end,blocklen);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

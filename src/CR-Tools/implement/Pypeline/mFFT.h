@@ -29,24 +29,6 @@
 using namespace std;
 
 // ========================================================================
-//
-//  Generic templates for wrapper functionality
-//
-// ========================================================================
-
-namespace PyCR { // Namespace PyCR -- begin
-
-  namespace FFT { // Namespace FFT -- begin
-
-
-
-  } // Namespace FFT -- end
-
-} // Namespace PyCR -- end
-
-
-
-// ========================================================================
 //  Wrapper declarations
 // ========================================================================
 

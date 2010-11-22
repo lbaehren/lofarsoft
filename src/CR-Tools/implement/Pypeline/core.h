@@ -491,9 +491,9 @@ namespace PyCR { // Namespace PyCR -- begin
   {
   public:
     Exception(std::string m)
-      {
-        message = m;
-      };
+    {
+      message = m;
+    };
 
     ~Exception(){};
 
@@ -504,75 +504,74 @@ namespace PyCR { // Namespace PyCR -- begin
   class ValueError: public Exception
   {
   public:
-  ValueError(std::string m) : Exception(m) {};
+    ValueError(std::string m) : Exception(m) {};
   };
 
   class TypeError: public Exception
   {
   public:
-  TypeError(std::string m) : Exception(m) {};
-  };
-
-  class IndexError: public Exception
-  {
-  public:
-  IndexError(std::string m) : Exception(m) {};
+    TypeError(std::string m) : Exception(m) {};
   };
 
   class KeyError: public Exception
   {
   public:
-  KeyError(std::string m) : Exception(m) {};
+    KeyError(std::string m) : Exception(m) {};
   };
 
   class MemoryError: public Exception
   {
   public:
-  MemoryError(std::string m) : Exception(m) {};
+    MemoryError(std::string m) : Exception(m) {};
   };
 
   class ArithmeticError: public Exception
   {
   public:
-  ArithmeticError(std::string m) : Exception(m) {};
+    ArithmeticError(std::string m) : Exception(m) {};
   };
 
   class EOFError: public Exception
   {
   public:
-  EOFError(std::string m) : Exception(m) {};
+    EOFError(std::string m) : Exception(m) {};
   };
 
   class FloatingPointError: public Exception
   {
   public:
-  FloatingPointError(std::string m) : Exception(m) {};
+    FloatingPointError(std::string m) : Exception(m) {};
   };
 
   class OverflowError: public Exception
   {
   public:
-  OverflowError(std::string m) : Exception(m) {};
+    OverflowError(std::string m) : Exception(m) {};
   };
 
   class ZeroDivisionError: public Exception
   {
   public:
-  ZeroDivisionError(std::string m) : Exception(m) {};
+    ZeroDivisionError(std::string m) : Exception(m) {};
   };
 
   class NameError: public Exception
   {
   public:
-  NameError(std::string m) : Exception(m) {};
+    NameError(std::string m) : Exception(m) {};
   };
 
   class NotImplementedError: public Exception
   {
   public:
-  NotImplementedError(std::string m) : Exception(m) {};
+    NotImplementedError(std::string m) : Exception(m) {};
   };
 
+  class IOError: public Exception
+  {
+  public:
+    IOError(std::string m): Exception(m) {};
+  };
 
 } // Namespace PyCR -- end
 
