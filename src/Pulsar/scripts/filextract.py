@@ -163,7 +163,7 @@ x = np.fromfile(infile, dtype=dtype, count=nchans*window)
 infile.close()
 
 # writing raw GP data
-outfile = gpfile.split(".fil")[0] + "_gp" + "%05d.fil" % (gpnumber,)
+outfile = gpfile.split("/")[-1].split(".fil")[0] + "_gp" + "%05d.fil" % (gpnumber,)
 ofile=open(outfile, "wb")
 ofile.write(newhdr)
 x.tofile(ofile)
