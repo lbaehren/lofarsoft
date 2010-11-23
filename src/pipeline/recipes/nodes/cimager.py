@@ -16,12 +16,12 @@ from pyrap.quanta import quantity
 from pyrap.tables import table
 
 from lofarpipe.support.pipelinelogging import CatchLog4CXX
-from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.lofarnode import LOFARnodeTCP
 from lofarpipe.support.utilities import log_time
 from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.parset import Parset, patch_parset, get_parset
 
-class cimager(LOFARnode):
+class cimager(LOFARnodeTCP):
     #                 Handles running a single cimager process on a compute node
     # --------------------------------------------------------------------------
     def run(self, imager_exec, vds, parset, resultsdir, start_time, end_time):
@@ -134,5 +134,5 @@ if __name__ == "__main__":
     #   If invoked directly, parse command line arguments for logger information
     #                        and pass the rest to the run() method defined above
     # --------------------------------------------------------------------------
-    loghost, logport = sys.argv[1:3]
-    sys.exit(cimager(loghost, logport).run_with_logging(*sys.argv[3:]))
+    jobid, jobhost, jobport = sys.argv[1:4]
+    sys.exit(cimager(jobid, jobhost, jobport).run_with_stored_arguments())

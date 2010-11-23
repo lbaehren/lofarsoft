@@ -113,10 +113,6 @@ class cimager(BaseRecipe):
             vds  = parset.getString("Part%d.Name" % part)
             data.append((host, vds))
 
-        #                               Limit number of process per compute node
-        # ----------------------------------------------------------------------
-        compute_nodes_lock = ProcessLimiter(self.inputs['nproc'])
-
         #                                 Divide data into timesteps for imaging
         #          timesteps is a list of (start, end, results directory) tuples
         # ----------------------------------------------------------------------
@@ -143,28 +139,42 @@ class cimager(BaseRecipe):
         #                          Run each cimager process in a separate thread
         # ----------------------------------------------------------------------
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
-        with clusterlogger(self.logger) as (loghost, logport):
-            self.logger.debug("Logging to %s:%d" % (loghost, logport))
-            with log_time(self.logger):
-                for label, timestep in enumerate(timesteps):
-                    self.logger.info("Processing timestep %d" % label)
-                    start_time, end_time, resultsdir = timestep
-                    imager_threads = [
-                        threading.Thread(
-                            target=self._dispatch_compute_job,
-                            args=(host, command, compute_nodes_lock[host],
-                                loghost, str(logport),
-                                vds,
-                                resultsdir,
-                                start_time,
-                                end_time
-                            )
-                        )
-                        for host, vds in data
-                    ]
-                self.killswitch = threading.Event()
-                signal.signal(signal.SIGTERM, self.killswitch.set)
-                threadwatcher(imager_threads, self.logger, self.killswitch)
+        for label, timestep in enumerate(timesteps):
+            self.logger.info("Processing timestep %d" % label)
+            jobs = []
+            parsets = []
+            start_time, end_time, resultsdir = timestep
+            for host, vds in data:
+                parsets.append(
+                    self.__get_parset(
+                        os.path.basename(vds_data.getString('FileName')).split('.')[0],
+                        vds_data.getString("FileName"),
+                        str(frequency_range),
+                        vds_data.getString("Extra.FieldDirectionType"),
+                        vds_data.getStringVector("Extra.FieldDirectionRa")[0],
+                        vds_data.getStringVector("Extra.FieldDirectionDec")[0],
+                        'True', # cimager bug: non-restored image unusable
+                    )
+                )
+                jobs.append(
+                    ComputeJob(
+                        host, command,
+                        arguments=[
+                            self.inputs['imager_exec'],
+                            vds,
+                            parsets[-1],
+                            resultsdir,
+                            start_time,
+                            end_time
+                        ]
+                    )
+                )
+                self._schedule_jobs(jobs, max_per_node=self.inputs['nproc'])
+                for parset in parsets:
+                    parset = Parset(parset)
+                    image_names = parset.getStringVector("Cimager.Images.Names")
+                    self.outputs['images'].extend(image_names)
+                [os.unlink(parset) for parset in parsets]
 
         #                Check if we recorded a failing process before returning
         # ----------------------------------------------------------------------
@@ -174,92 +184,6 @@ class cimager(BaseRecipe):
         else:
             return 0
 
-    def _dispatch_compute_job(
-        self, host, command, semaphore, loghost, logport,
-        vds, resultsdir, start_time, end_time
-    ):
-        """
-        Run cimager on host for the data described in vds using the template
-        parset provided.
-
-        We use a semaphore to limit the number of simultaneous processes per
-        node.
-        """
-        # The cimager parset is generated here, rather than on the node, so that
-        #               we can scrape it to discover the image names produced(!)
-        # ----------------------------------------------------------------------
-        semaphore.acquire()
-        try:
-            #        Patch information required for imaging into template parset
-            # ------------------------------------------------------------------
-            self.logger.debug("Creating parset for %s" % vds)
-            vds_data = Parset(vds)
-            frequency_range = [
-                vds_data.getDoubleVector("StartFreqs")[0],
-                vds_data.getDoubleVector("EndFreqs")[-1]
-            ]
-            with self.__get_parset(
-                os.path.basename(vds_data.getString('FileName')).split('.')[0],
-                vds_data.getString("FileName"),
-                str(frequency_range),
-                vds_data.getString("Extra.FieldDirectionType"),
-                vds_data.getStringVector("Extra.FieldDirectionRa")[0],
-                vds_data.getStringVector("Extra.FieldDirectionDec")[0],
-                'True', # cimager bug: non-restored image unusable
-            ) as cimager_parset:
-                #                            Run cimager process on compute node
-                # --------------------------------------------------------------
-                engine_ppath = self.config.get('deploy', 'engine_ppath')
-                engine_lpath = self.config.get('deploy', 'engine_lpath')
-
-                if self.killswitch.isSet():
-                    self.logger.debug("Shutdown in progress: not starting cimager")
-                    self.error.set()
-                    return 1
-
-                cimager_process = run_remote_command(
-                    self.config,
-                    self.logger,
-                    host,
-                    command,
-                    {
-                        "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
-                        "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
-                    },
-                    arguments=(
-                        loghost, str(logport), self.inputs['imager_exec'], vds,
-                        cimager_parset, resultsdir, str(start_time), str(end_time)
-                    )
-                )
-                while cimager_process.poll() == None:
-                    if self.killswitch.isSet():
-                        cimager_process.kill()
-                    else:
-                        time.sleep(1)
-                sout, serr = cimager_process.communicate()
-                serr = serr.replace("Connection to %s closed.\r\n" % host, "")
-                log_process_output("SSH session (cimager)", sout, serr, self.logger)
-
-                #                      Copy names of created images into outputs
-                # --------------------------------------------------------------
-                parset = Parset(cimager_parset)
-                image_names = parset.getStringVector("Cimager.Images.Names")
-                self.outputs['images'].extend(image_names)
-        except Exception, e:
-            self.logger.error(str(e))
-            self.error.set()
-            return 1
-        finally:
-            semaphore.release()
-
-        if cimager_process.returncode != 0:
-            self.logger.error(
-                "cimager failed: returned %d" % cimager_process.returncode
-            )
-            self.error.set()
-        return cimager_process.returncode
-
-    @contextmanager
     def __get_parset(
         self, name, dataset, frequency, ms_dir_type,
         ms_dir_ra, ms_dir_dec, restore
@@ -342,11 +266,7 @@ class cimager(BaseRecipe):
             self.logger.exception("Failed to generate imager parset")
             raise
 
-        try:
-            yield cimager_parset
-        finally:
-            os.unlink(cimager_parset)
-
+        return cimager_parset
 
 if __name__ == '__main__':
     sys.exit(cimager().main())
