@@ -13,9 +13,9 @@ import sys
 from lofarpipe.support.lofarexceptions import ExecutableMissing
 from lofarpipe.support.utilities import create_directory, log_time
 from lofarpipe.support.utilities import catch_segfaults
-from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.lofarnode import LOFARnodeTCP
 
-class vdsmaker(LOFARnode):
+class vdsmaker(LOFARnodeTCP):
     """
     Make a VDS file for the input MS in a specificed location.
     """
@@ -32,6 +32,7 @@ class vdsmaker(LOFARnode):
                     raise ExecutableMissing(executable)
                 cmd = [executable, clusterdesc, infile, outfile]
                 result = catch_segfaults(cmd, None, None, self.logger).returncode
+                self.outputs["result"] = result
             except ExecutableMissing, e:
                 self.logger.error("%s not found" % (e.args[0]))
                 return 1
@@ -45,5 +46,5 @@ if __name__ == "__main__":
     #   If invoked directly, parse command line arguments for logger information
     #                        and pass the rest to the run() method defined above
     # --------------------------------------------------------------------------
-    loghost, logport = sys.argv[1:3]
-    sys.exit(vdsmaker(loghost, logport).run_with_logging(*sys.argv[3:]))
+    jobid, jobhost, jobport = sys.argv[1:4]
+    sys.exit(vdsmaker(jobid, jobhost, jobport).run_with_stored_arguments())

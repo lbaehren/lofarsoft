@@ -12,13 +12,12 @@ from threading import BoundedSemaphore
 import re
 import os
 import signal
-import subprocess
 import threading
 import time
 
 from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.utilities import spawn_process
-from lofarpipe.support.clusterlogger import clusterlogger
+from lofarpipe.support.jobserver import job_dispatcher
 
 class ParamikoWrapper(object):
     """
@@ -168,14 +167,17 @@ class ComputeJob(object):
         self.host = host
         self.command = command
         self.arguments = arguments
+        self.results = {}
 
-    def dispatch(self, logger, config, limiter, loghost, logport, error, killswitch):
+    def dispatch(self, logger, config, limiter, id, jobhost, jobport, error, killswitch):
+
         """
         Dispatch this job to the relevant compute node.
 
         Note that error is an instance of threading.Event, which will be set
         if the remote job fails for some reason.
         """
+        self.id = id
         limiter[self.host].acquire()
         try:
             if killswitch.isSet():
@@ -191,7 +193,7 @@ class ComputeJob(object):
                     "PYTHONPATH": config.get('deploy', 'engine_ppath'),
                     "LD_LIBRARY_PATH": config.get('deploy', 'engine_lpath')
                 },
-                arguments=[loghost, logport] + self.arguments
+                arguments=[id, jobhost, jobport]
             )
             # Wait for process to finish. In the meantime, if the killswitch
             # is set (by an exception in the main thread), forcibly kill our
@@ -259,20 +261,25 @@ class RemoteCommandRecipeMixIn(object):
         each of which will be dispatched to the compute nodes.
         """
         threadpool = []
+        jobpool = {}
         limiter = ProcessLimiter(max_per_node)
         killswitch = threading.Event()
+
         if max_per_node:
             self.logger.info("Limiting to %d simultaneous jobs/node" % max_per_node)
-        with clusterlogger(self.logger) as (loghost, logport):
-            self.logger.debug("Logging to %s:%d" % (loghost, logport))
-            for job in jobs:
+
+        with job_dispatcher(self.logger, jobpool, self.error) as (jobhost, jobport):
+            self.logger.debug("Job dispatcher at %s:%d" % (jobhost, jobport))
+            for id, job in enumerate(jobs):
+                jobpool[id] = job
                 threadpool.append(
                     threading.Thread(
                         target=job.dispatch,
                         args=(
-                            self.logger, self.config, limiter,
-                            loghost, logport, self.error, killswitch
+                            self.logger, self.config, limiter, id,
+                            jobhost, jobport, self.error, killswitch
                         )
                     )
                 )
             threadwatcher(threadpool, self.logger, killswitch)
+        return jobpool
