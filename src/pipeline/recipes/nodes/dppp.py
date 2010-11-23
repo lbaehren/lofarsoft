@@ -47,7 +47,7 @@ class dppp(LOFARnodeTCP):
             env = read_initscript(initscript)
             if nthreads == "None": nthreads = 1
             self.logger.debug("Using %s threads for NDPPP" % nthreads)
-            env['OMP_NUM_THREADS'] = nthreads
+            env['OMP_NUM_THREADS'] = str(nthreads)
 
             #    If the input and output filenames are the same, DPPP should not
             #       write a new MS, but rather update the existing one in-place.
@@ -103,6 +103,9 @@ class dppp(LOFARnodeTCP):
             except CalledProcessError, e:
                 #        CalledProcessError isn't properly propagated by IPython
                 # --------------------------------------------------------------
+                self.logger.error(str(e))
+                return 1
+            except Exception, e:
                 self.logger.error(str(e))
                 return 1
             finally:
