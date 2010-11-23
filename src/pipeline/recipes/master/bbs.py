@@ -24,6 +24,7 @@ from lofarpipe.support.group_data import gvds_iterator
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.remotecommand import run_remote_command
+from lofarpipe.support.remotecommand import ComputeJob
 import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
 
@@ -199,6 +200,11 @@ class bbs(BaseRecipe):
 
                 #      We run BBS KernelControl on each compute node by directly
                 #                             invoking the node script using SSH
+                #      Note that we use a job_server to send out job details and
+                #           collect logging information, so we define a bunch of
+                #    ComputeJobs. However, we need more control than the generic
+                #     ComputeJob.dispatch method supplies, so we'll control them
+                #                                          with our own threads.
                 # --------------------------------------------------------------
                 command = "python %s" % (self.__file__.replace('master', 'nodes'))
                 env = {
@@ -206,37 +212,42 @@ class bbs(BaseRecipe):
                     "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
                     "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
                 }
-                with clusterlogger(self.logger) as (loghost, logport):
-                    self.logger.debug("Logging to %s:%d" % (loghost, logport))
-                    with utilities.log_time(self.logger):
-                        #               Each SSH process runs in its own thread
-                        # -----------------------------------------------------
-                        bbs_kernels = [
+                jobpool = {}
+                bbs_kernels = []
+                with job_server(self.logger, jobpool, self.error) as (jobhost, jobport):
+                    self.logger.debug("Job server at %s:%d" % (jobhost, jobport)
+                    for job_id, details in to_process:
+                        host, file, vds = details
+                        jobpool[job_id] = ComputeJob(
+                            host, command,
+                            arguments=[
+                                self.inputs['kernel_exec'],
+                                self.inputs['initscript'],
+                                file,
+                                self.inputs['key'],
+                                self.inputs['db_name'],
+                                self.inputs['db_user'],
+                                self.inputs['db_host']
+                            ]
+                        )
+                        bbs_kernels.append(
                             threading.Thread(
                                 target=self._run_bbs_kernel,
-                                args=(host, command,
-                                    env,
-                                    loghost, str(logport),
-                                    self.inputs['kernel_exec'],
-                                    self.inputs['initscript'],
-                                    file,
-                                    self.inputs['key'],
-                                    self.inputs['db_name'],
-                                    self.inputs['db_user'],
-                                    self.inputs['db_host']
+                                args=(host, command, env, job_id,
+                                    jobhost, str(jobport)
                                 )
                             )
-                            for host, file, vds in to_process
-                        ]
-                        self.logger.info("Starting %d threads" % len(bbs_kernels))
-                        [thread.start() for thread in bbs_kernels]
-                        self.logger.debug("Waiting for all kernels to complete")
-                        [thread.join() for thread in bbs_kernels]
+                        )
+                    self.logger.info("Starting %d threads" % len(bbs_kernels))
+                    [thread.start() for thread in bbs_kernels]
+                    self.logger.debug("Waiting for all kernels to complete")
+                    [thread.join() for thread in bbs_kernels]
 
-                    #         When GlobalControl finishes, our work here is done
-                    # ----------------------------------------------------------
-                    self.logger.info("Waiting for GlobalControl thread")
-                    bbs_control.join()
+
+                #         When GlobalControl finishes, our work here is done
+                # ----------------------------------------------------------
+                self.logger.info("Waiting for GlobalControl thread")
+                bbs_control.join()
             finally:
                 os.unlink(bbs_parset)
                 shutil.rmtree(vds_dir)
