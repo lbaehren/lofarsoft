@@ -5,13 +5,13 @@ import os.path
 import tempfile
 import sys
 
-from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.lofarnode import LOFARnodeTCP
 from lofarpipe.support.utilities import log_time
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 from lofarpipe.support.utilities import catch_segfaults
 
 
-class sourcedb(LOFARnode):
+class sourcedb(LOFARnodeTCP):
     def run(self, executable, infile, catalogue):
         with log_time(self.logger):
             if os.path.exists(infile):
@@ -48,5 +48,5 @@ if __name__ == "__main__":
     #   If invoked directly, parse command line arguments for logger information
     #                        and pass the rest to the run() method defined above
     # --------------------------------------------------------------------------
-    loghost, logport = sys.argv[1:3]
-    sys.exit(sourcedb(loghost, logport).run_with_logging(*sys.argv[3:]))
+    jobid, jobhost, jobport = sys.argv[1:4]
+    sys.exit(vdsmaker(jobid, jobhost, jobport).run_with_stored_arguments())

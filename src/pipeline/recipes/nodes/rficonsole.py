@@ -14,11 +14,11 @@ import tempfile
 
 from lofarpipe.support.pipelinelogging import log_time
 from lofarpipe.support.utilities import catch_segfaults
-from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.lofarnode import LOFARnodeTCP
 from lofarpipe.support.lofarexceptions import ExecutableMissing
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 
-class rficonsole(LOFARnode):
+class rficonsole(LOFARnodeTCP):
     def run(self, executable, nthreads, strategy, indirect, wd, *infiles):
         with log_time(self.logger):
             self.logger.info("Processing %s" % " ".join(infiles))
@@ -58,5 +58,5 @@ if __name__ == "__main__":
     #   If invoked directly, parse command line arguments for logger information
     #                        and pass the rest to the run() method defined above
     # --------------------------------------------------------------------------
-    loghost, logport = sys.argv[1:3]
-    sys.exit(rficonsole(loghost, logport).run_with_logging(*sys.argv[3:]))
+    jobid, jobhost, jobport = sys.argv[1:4]
+    sys.exit(rficonsole(jobid, jobhost, jobport).run_with_stored_arguments())

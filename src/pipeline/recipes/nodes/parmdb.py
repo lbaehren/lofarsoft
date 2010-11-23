@@ -1,10 +1,10 @@
 from __future__ import with_statement
-from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.lofarnode import LOFARnodeTCP
 from lofarpipe.support.utilities import log_time
 import shutil, os.path
 import sys
 
-class parmdb(LOFARnode):
+class parmdb(LOFARnodeTCP):
     def run(self, infile, pdb):
         with log_time(self.logger):
             if os.path.exists(infile):
@@ -27,5 +27,5 @@ if __name__ == "__main__":
     #   If invoked directly, parse command line arguments for logger information
     #                        and pass the rest to the run() method defined above
     # --------------------------------------------------------------------------
-    loghost, logport = sys.argv[1:3]
-    sys.exit(parmdb(loghost, logport).run_with_logging(*sys.argv[3:]))
+    jobid, jobhost, jobport = sys.argv[1:4]
+    sys.exit(parmdb(jobid, jobhost, jobport).run_with_stored_arguments())

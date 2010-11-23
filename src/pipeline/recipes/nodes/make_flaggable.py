@@ -9,11 +9,11 @@ import os.path
 import sys
 import imp
 
-from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.lofarnode import LOFARnodeTCP
 from lofarpipe.support.utilities import log_time
 
 
-class make_flaggable(LOFARnode):
+class make_flaggable(LOFARnodeTCP):
     def run(self, infile, makeFLAGwritable):
         with log_time(self.logger):
             if os.path.exists(infile):
@@ -41,5 +41,5 @@ if __name__ == "__main__":
     #   If invoked directly, parse command line arguments for logger information
     #                        and pass the rest to the run() method defined above
     # --------------------------------------------------------------------------
-    loghost, logport = sys.argv[1:3]
-    sys.exit(make_flaggable(loghost, logport).run_with_logging(*sys.argv[3:]))
+    jobid, jobhost, jobport = sys.argv[1:4]
+    sys.exit(make_flaggable(jobid, jobhost, jobport).run_with_stored_arguments())

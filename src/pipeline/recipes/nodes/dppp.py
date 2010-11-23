@@ -19,10 +19,10 @@ from lofarpipe.support.utilities import patch_parset
 from lofarpipe.support.utilities import read_initscript
 from lofarpipe.support.utilities import create_directory
 from lofarpipe.support.utilities import catch_segfaults
-from lofarpipe.support.lofarnode import LOFARnode
+from lofarpipe.support.lofarnode import LOFARnodeTCP
 from lofarpipe.support.lofarexceptions import ExecutableMissing
 
-class dppp(LOFARnode):
+class dppp(LOFARnodeTCP):
     def run(
         self, infile, outfile, parset, executable, initscript,
         start_time, end_time, nthreads, clobber
@@ -115,5 +115,5 @@ if __name__ == "__main__":
     #   If invoked directly, parse command line arguments for logger information
     #                        and pass the rest to the run() method defined above
     # --------------------------------------------------------------------------
-    loghost, logport = sys.argv[1:3]
-    sys.exit(dppp(loghost, logport).run_with_logging(*sys.argv[3:]))
+    jobid, jobhost, jobport = sys.argv[1:4]
+    sys.exit(dppp(jobid, jobhost, jobport).run_with_stored_arguments())
