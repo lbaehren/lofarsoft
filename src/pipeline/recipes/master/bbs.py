@@ -25,6 +25,7 @@ from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.remotecommand import ComputeJob
+from lofarpipe.support.jobserver import job_server
 import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
 
@@ -215,8 +216,8 @@ class bbs(BaseRecipe):
                 jobpool = {}
                 bbs_kernels = []
                 with job_server(self.logger, jobpool, self.error) as (jobhost, jobport):
-                    self.logger.debug("Job server at %s:%d" % (jobhost, jobport)
-                    for job_id, details in to_process:
+                    self.logger.debug("Job server at %s:%d" % (jobhost, jobport))
+                    for job_id, details in enumerate(to_process):
                         host, file, vds = details
                         jobpool[job_id] = ComputeJob(
                             host, command,

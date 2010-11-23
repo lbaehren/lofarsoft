@@ -49,4 +49,4 @@ if __name__ == "__main__":
     #                        and pass the rest to the run() method defined above
     # --------------------------------------------------------------------------
     jobid, jobhost, jobport = sys.argv[1:4]
-    sys.exit(vdsmaker(jobid, jobhost, jobport).run_with_stored_arguments())
+    sys.exit(sourcedb(jobid, jobhost, jobport).run_with_stored_arguments())
