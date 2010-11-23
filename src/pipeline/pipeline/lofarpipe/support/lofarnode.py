@@ -66,10 +66,10 @@ class LOFARnodeTCP(LOFARnode):
     This node script will receive instructions via TCP from a
     jobserver.JobSocketReceiver.
     """
-    def __init__(self, jobid, jobhost, jobport):
-        self.jobid, self.jobhost, self.jobport = int(jobid), jobhost, int(jobport)
+    def __init__(self, job_id, host, port):
+        self.job_id, self.host, self.port = int(jobid), jobhost, int(jobport)
         self.__fetch_arguments()
-        super(LOFARnodeTCP, self).__init__(self.loghost, self.logport)
+        super(LOFARnodeTCP, self).__init__(self.host, self.port)
 
     def run_with_stored_arguments(self):
         """
@@ -85,24 +85,22 @@ class LOFARnodeTCP(LOFARnode):
         run this job.
         """
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.jobhost, self.jobport))
-        message = "GET %d" % self.jobid
+        s.connect((self.host, self.port))
+        message = "GET %d" % self.job_id
         s.send(struct.pack(">L", len(message)) + message)
         chunk = s.recv(4)
         slen = struct.unpack(">L", chunk)[0]
         chunk = s.recv(slen)
         while len(chunk) < slen:
             chunk += s.recv(slen - len(chunk))
-        arguments = pickle.loads(chunk)
-        self.loghost, self.logport = arguments[0], int(arguments[1])
-        self.arguments = arguments[2:]
+        self.arguments = pickle.loads(chunk)
 
     def __send_results(self):
         """
         Send the contents of self.outputs to the originating job dispatch
         server.
         """
-        message = "PUT %d %s" % (self.jobid, pickle.dumps(self.outputs))
+        message = "PUT %d %s" % (self.job_id, pickle.dumps(self.outputs))
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.jobhost, int(self.jobport)))
+        s.connect((self.host, int(self.port)))
         s.send(struct.pack(">L", len(message)) + message)

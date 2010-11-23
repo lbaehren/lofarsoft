@@ -13,6 +13,8 @@ import threading
 import struct
 import socket
 import select
+import logging
+import Queue
 import SocketServer
 import cPickle as pickle
 
@@ -22,14 +24,22 @@ from lofarpipe.support.utilities import spawn_process
 
 class JobStreamHandler(SocketServer.StreamRequestHandler):
     """
-    Networked job dispatcher/receiver.
+    Networked job server.
 
     This will listen for:
 
-    GET <jobid>           -- reply with a list of all job arguments
-    PUT <jobid> <results> -- receive and unpickle job results
+    * GET <jobid>           -- reply with a list of all job arguments
+    * PUT <jobid> <results> -- receive and unpickle job results
+    * Pickled log records
+
+    Log records are logs using whatever local logger is supploed to the
+    SocketReceiver.
     """
     def handle(self):
+        """
+        Each request is expected to be a 4-bute length followed by either a
+        GET/PUT request or a pickled LogRecord.
+        """
         while True:
             chunk = self.request.recv(4)
             try:
@@ -39,18 +49,23 @@ class JobStreamHandler(SocketServer.StreamRequestHandler):
             chunk = self.connection.recv(slen)
             while len(chunk) < slen:
                 chunk = chunk + self.connection.recv(slen - len(chunk))
-            input = chunk.split(" ", 2)
-            if input[0] == "GET":
-                self.send_arguments(int(input[1]))
-            elif input[0] == "PUT":
-                self.read_results(input[1], input[2])
-            else:
+            input_msg = chunk.split(" ", 2)
+            try:
+                # Can we handle this message type?
+                if input_msg[0] == "GET":
+                    self.send_arguments(int(input_msg[1]))
+                elif input_msg[0] == "PUT":
+                    self.read_results(input_msg[1], input_msg[2])
+                else:
+                    self.handle_log_record(chunk)
+            except:
+                # Otherwise, fail.
                 self.server.error.set()
                 self.server.logger.error("Protocol error; received %s" % chunk)
                 self.server.logger.error("Aborting.")
 
     def send_arguments(self, job_id):
-        args = [self.server.loghost, self.server.logport] + self.server.jobpool[int(job_id)].arguments
+        args = self.server.jobpool[int(job_id)].arguments
         pickled_args = pickle.dumps(args)
         length = struct.pack(">L", len(pickled_args))
         self.request.send(length + pickled_args)
@@ -60,14 +75,30 @@ class JobStreamHandler(SocketServer.StreamRequestHandler):
         results = pickle.loads(pickled_results)
         self.server.jobpool[job_id].results = results
 
+    def handle_log_record(self, chunk):
+        record = logging.makeLogRecord(pickle.loads(chunk))
+        self.server.queue.put_nowait(record)
+
 class JobSocketReceiver(SocketServer.ThreadingTCPServer):
     """
-    Simple TCP socket-based job dispatch and results collection.
+    Simple TCP socket-based job dispatch and results collection as well as
+    network logging.
     """
-    def __init__(self, logger, jobpool, error, loghost, logport, port=0, handler=JobStreamHandler):
-        SocketServer.ThreadingTCPServer.__init__(self, (socket.gethostname(), port), handler)
+    def __init__(
+        self,
+        logger,
+        jobpool,
+        error,
+        host=None,
+        port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        handler=JobStreamHandler
+    ):
+        if not host:
+            host = socket.gethostname()
+        SocketServer.ThreadingTCPServer.__init__(self, (host, port), handler)
         self.abort = False
         self.timeout = 1
+        self.queue = Queue.Queue()
         self.logger = logger
         self.jobpool = jobpool
         self.error = error
@@ -75,6 +106,11 @@ class JobSocketReceiver(SocketServer.ThreadingTCPServer):
         self.logport = logport
 
     def start(self):
+        # Log messages are received in one thread, and appended to an instance
+        # of Queue.Queue. Another thread picks messages off the queue and
+        # sends them to the log handlers. We keep the latter thread running
+        # until the queue is empty, thereby avoiding the problem of falling
+        # out of the logger threads before all log messages have been handled.
         def loop_in_thread():
             while True:
                 rd, wr, ex = select.select(
@@ -85,28 +121,43 @@ class JobSocketReceiver(SocketServer.ThreadingTCPServer):
                 elif self.abort:
                     break
 
+        def log_from_queue():
+            while True:
+                try:
+                    record = self.queue.get(True, 1)
+                    # Manually check the level against the pipeline's root logger.
+                    # Not sure this should be necessary, but it seems to work...
+                    if self.logger.isEnabledFor(record.levelno):
+                        self.logger.handle(record)
+                except Queue.Empty:
+                    if self.abort:
+                        break
+
         self.runthread = threading.Thread(target=loop_in_thread)
+        self.logthread = threading.Thread(target=log_from_queue)
         self.runthread.start()
+        self.logthread.start()
 
     def stop(self):
         self.abort = True
         self.runthread.join()
+        self.logthread.join()
         self.server_close()
 
 @contextmanager
-def job_dispatcher(logger, jobpool, error):
+def job_server(logger, jobpool, error):
     """
     Provides a context in which job dispatch is available.
 
     Yields a host name & port which clients can connect to for job details.
     """
-    with clusterlogger(logger) as (loghost, logport):
-        logger.debug("Logging to %s:%d" % (loghost, logport))
-        jobserver = JobSocketReceiver(logger, jobpool, error, loghost, logport)
-        jobserver.start()
-        try:
-            yield jobserver.server_address
-        except KeyboardInterrupt:
-            jobserver.stop()
-            raise
+    jobserver = JobSocketReceiver(logger, jobpool, error, port=0)
+    logger.debug("Job server at %s:%d" % (loghost, logport))
+    jobserver.start()
+    try:
+        yield jobserver.server_address
+    except KeyboardInterrupt:
         jobserver.stop()
+        raise
+    jobserver.stop()
+    [handler.flush() for handler in logger.handlers]

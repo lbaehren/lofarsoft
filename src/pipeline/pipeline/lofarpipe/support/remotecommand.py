@@ -17,7 +17,7 @@ import time
 
 from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.utilities import spawn_process
-from lofarpipe.support.jobserver import job_dispatcher
+from lofarpipe.support.jobserver import job_server
 
 class ParamikoWrapper(object):
     """
@@ -268,15 +268,15 @@ class RemoteCommandRecipeMixIn(object):
         if max_per_node:
             self.logger.info("Limiting to %d simultaneous jobs/node" % max_per_node)
 
-        with job_dispatcher(self.logger, jobpool, self.error) as (jobhost, jobport):
+        with job_server(self.logger, jobpool, self.error) as (jobhost, jobport):
             self.logger.debug("Job dispatcher at %s:%d" % (jobhost, jobport))
-            for id, job in enumerate(jobs):
-                jobpool[id] = job
+            for job_id, job in enumerate(jobs):
+                jobpool[job_id] = job
                 threadpool.append(
                     threading.Thread(
                         target=job.dispatch,
                         args=(
-                            self.logger, self.config, limiter, id,
+                            self.logger, self.config, limiter, job_id,
                             jobhost, jobport, self.error, killswitch
                         )
                     )
