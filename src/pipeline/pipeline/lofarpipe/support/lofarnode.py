@@ -76,7 +76,9 @@ class LOFARnodeTCP(LOFARnode):
         After fetching arguments remotely, use them to run the standard
         run_with_logging() method.
         """
-        return self.run_with_logging(*self.arguments)
+        returnvalue = self.run_with_logging(*self.arguments)
+        self.__send_results()
+        return returnvalue
 
     def __fetch_arguments(self):
         """
