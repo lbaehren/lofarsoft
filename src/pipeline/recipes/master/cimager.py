@@ -32,6 +32,8 @@ from lofarpipe.support.parset import get_parset
 from lofarpipe.support.parset import patched_parset, patch_parset
 from lofarpipe.support.utilities import spawn_process
 from lofarpipe.support.lofarexceptions import PipelineException
+from lofarpipe.support.remotecommand import ComputeJob
+from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 
 class ParsetTypeField(ingredient.StringField):
     def is_valid(self, value):
@@ -41,7 +43,7 @@ class ParsetTypeField(ingredient.StringField):
             return False
 
 
-class cimager(BaseRecipe):
+class cimager(BaseRecipe, RemoteCommandRecipeMixIn):
     """
     Provides a convenient, pipeline-based mechanism of running the cimager on
     a dataset.
@@ -145,6 +147,11 @@ class cimager(BaseRecipe):
             parsets = []
             start_time, end_time, resultsdir = timestep
             for host, vds in data:
+                vds_data = Parset(vds)
+                frequency_range = [
+                    vds_data.getDoubleVector("StartFreqs")[0],
+                    vds_data.getDoubleVector("EndFreqs")[-1]
+                ]
                 parsets.append(
                     self.__get_parset(
                         os.path.basename(vds_data.getString('FileName')).split('.')[0],
@@ -169,12 +176,12 @@ class cimager(BaseRecipe):
                         ]
                     )
                 )
-                self._schedule_jobs(jobs, max_per_node=self.inputs['nproc'])
-                for parset in parsets:
-                    parset = Parset(parset)
-                    image_names = parset.getStringVector("Cimager.Images.Names")
-                    self.outputs['images'].extend(image_names)
-                [os.unlink(parset) for parset in parsets]
+            self._schedule_jobs(jobs, max_per_node=self.inputs['nproc'])
+            for parset in parsets:
+                parset = Parset(parset)
+                image_names = parset.getStringVector("Cimager.Images.Names")
+                self.outputs['images'].extend(image_names)
+            [os.unlink(parset) for parset in parsets]
 
         #                Check if we recorded a failing process before returning
         # ----------------------------------------------------------------------
