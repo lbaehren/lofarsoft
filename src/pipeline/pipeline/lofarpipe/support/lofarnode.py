@@ -67,7 +67,7 @@ class LOFARnodeTCP(LOFARnode):
     jobserver.JobSocketReceiver.
     """
     def __init__(self, job_id, host, port):
-        self.job_id, self.host, self.port = int(jobid), jobhost, int(jobport)
+        self.job_id, self.host, self.port = int(job_id), host, int(port)
         self.__fetch_arguments()
         super(LOFARnodeTCP, self).__init__(self.host, self.port)
 

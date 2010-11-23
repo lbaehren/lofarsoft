@@ -14,12 +14,12 @@ import struct
 import socket
 import select
 import logging
+import logging.handlers
 import Queue
 import SocketServer
 import cPickle as pickle
 
 from lofarpipe.support.pipelinelogging import log_process_output
-from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.utilities import spawn_process
 
 class JobStreamHandler(SocketServer.StreamRequestHandler):
@@ -102,8 +102,6 @@ class JobSocketReceiver(SocketServer.ThreadingTCPServer):
         self.logger = logger
         self.jobpool = jobpool
         self.error = error
-        self.loghost = loghost
-        self.logport = logport
 
     def start(self):
         # Log messages are received in one thread, and appended to an instance
@@ -152,7 +150,6 @@ def job_server(logger, jobpool, error):
     Yields a host name & port which clients can connect to for job details.
     """
     jobserver = JobSocketReceiver(logger, jobpool, error, port=0)
-    logger.debug("Job server at %s:%d" % (loghost, logport))
     jobserver.start()
     try:
         yield jobserver.server_address
