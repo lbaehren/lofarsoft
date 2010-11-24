@@ -28,9 +28,12 @@ class rficonsole(LOFARnodeTCP):
                     raise ExecutableMissing(executable)
 
                 working_dir = tempfile.mkdtemp(dir=wd)
-                cmd = [executable, "-j", nthreads]
-                if os.path.exists(strategy):
-                    cmd.extend(["-strategy", strategy])
+                cmd = [executable, "-j", str(nthreads)]
+                if strategy:
+                    if os.path.exists(strategy):
+                        cmd.extend(["-strategy", strategy])
+                    else:
+                        raise Exception("Strategy definition not available")
                 if indirect == "True":
                     cmd.extend(["-indirect-read"])
                 cmd.extend(infiles)
