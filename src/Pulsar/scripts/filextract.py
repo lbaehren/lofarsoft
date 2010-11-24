@@ -173,9 +173,9 @@ infile.close()
 
 # writing raw GP data
 if not is_sigma:
-	outfile = gpfile.split("/")[-1].split(".fil")[0] + "_gp" + "%05d" + ".fil" % (gpnumber,)
+	outfile = gpfile.split("/")[-1].split(".fil")[0] + "_gp%05d.fil" % (gpnumber,)
 else:
-	outfile = gpfile.split("/")[-1].split(".fil")[0] + "_gp" + "%05d" + "_sigma" + "%05.1f" + ".fil" % (gpnumber, sigma)
+	outfile = gpfile.split("/")[-1].split(".fil")[0] + "_gp%05d_sigma%05.1f.fil" % (gpnumber, sigma)
 ofile=open(outfile, "wb")
 ofile.write(newhdr)
 x.tofile(ofile)
