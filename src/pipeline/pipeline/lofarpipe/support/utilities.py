@@ -224,7 +224,7 @@ def catch_segfaults(cmd, cwd, env, logger, max=1, cleanup=lambda: None):
     If it segfaults, retry upto max times.
     """
     tries = 0
-    while tries < max+1:
+    while tries <= max:
         if tries > 0:
             logger.debug("Retrying...")
         logger.debug("Running: %s" % (' '.join(cmd),))
@@ -242,4 +242,7 @@ def catch_segfaults(cmd, cwd, env, logger, max=1, cleanup=lambda: None):
             raise CalledProcessError(
                 process.returncode, cmd[0]
             )
+    if tries > max:
+        logger.error("Too many segfaults from %s; aborted" % (cmd[0]))
+        raise CalledProcessError(process.returncode, cmd[0])
     return process
