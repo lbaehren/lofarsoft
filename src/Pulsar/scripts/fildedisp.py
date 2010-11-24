@@ -246,7 +246,7 @@ else:
 
 ts = (ts-tsmean)/tssigma
 
-gpnumber = file.split("_gp")[1].split(".fil")[0].split("_sigma")[0]
+gpnumber = int(file.split("_gp")[1].split(".fil")[0].split("_sigma")[0])
 
 decimdata=np.zeros((tdsize, fdsize), dtype=np.float32)
 decimdedisp=np.zeros((tdsize, fdsize), dtype=np.float32)
