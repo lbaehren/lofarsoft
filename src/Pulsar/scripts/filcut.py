@@ -142,14 +142,14 @@ indices = [i for i in np.arange(len(sample)) if sigma[i] > threshold and downfac
 counter = 0
 for s in sample7:
 	print "%d: %d sigma = %.3f   sample = %d   width = %d" % (counter, indices[counter], sigma[indices[counter]], s, downfact[indices[counter]])
-	cmd = "filextract.py -w %d -s %d -n %d --fcntr %s --chbw %s %s" % (size, s, indices[counter], fc, chbw, " ".join(infiles))
+	cmd = "filextract.py -w %d --sample %d -n %d --fcntr %s --chbw %s --sigma %f %s" % (size, s, indices[counter], fc, chbw, sigma[indices[counter]], " ".join(infiles))
 	os.system(cmd)	
 	counter += 1
 
 # make plot for every GP >threshold
 print "making plots ..."
 for ind in indices:
-	mask = "*_gp%05d.fil" % (ind,)
+	mask = "*_gp%05d_sigma*.fil" % (ind,)
 	print "%d sigma = %.3f" % (ind, sigma[ind])
 	gps = glob.glob (mask)	
 	cmd = "fildedisp.py --dm %f --width %d --fd %d --td %d --gpsigma %f --fcntr %s --chbw %s %s --cliplevel %f --zoomtime %d %s" % (is_dm and dm or dms[ind], downfact[ind], fdf, tdf, sigma[ind], fc, chbw, is_saveonly and "--saveonly" or "", clip_level, zoomtime, gps[0]) 

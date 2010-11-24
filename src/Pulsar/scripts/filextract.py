@@ -16,12 +16,13 @@ Return value is None
 	"""
 	print "Program %s extracts raw data for GPs" % (prg, )
 	print "Usage: %s [options] <*.fil>\n\
-               [-s, --sample <GP sample>]\n\
+               [--sample <GP sample>]\n\
                [-t, --time <GP time in seconds>]\n\
                [-w, --window <window around GP in samples> (default = 512)]\n\
                [-n, --number <GP number to be used to form outfile name>]\n\
                [-f, --fcntr <center frequency of the highest channel (to substitute the header value>]\n\
                [-c, --chbw <channel width (to substitute the header value)>]\n\
+               [--sigma <GP sigma (only used to specify a name of outfile. If not given then won't be used)>]\n\
                [-h, --help]" % (prg, )
 
 def parsecmdline(prg, argv):
@@ -34,7 +35,7 @@ Return value is None
 		sys.exit()
 	else:
 		try:
-			opts, args = getopt.getopt (argv, "ht:s:w:n:f:c:", ["help", "time=", "sample=", "window=", "number=", "fcntr=", "chbw="])
+			opts, args = getopt.getopt (argv, "ht:w:n:f:c:", ["help", "time=", "sample=", "window=", "number=", "fcntr=", "chbw=", "sigma="])
 			for opt, arg in opts:
 				if opt in ("-h", "--help"):
 					usage(prg)
@@ -42,7 +43,7 @@ Return value is None
 				if opt in ("-t", "--time"):
 					global gptime
 					gptime = float(arg)
-				if opt in ("-s", "--sample"):
+				if opt in ("--sample"):
 					global gpsample
 					gpsample = long(arg)
 				if opt in ("-w", "--window"):
@@ -57,6 +58,11 @@ Return value is None
                                 if opt in ("--chbw"):
                                         global chbw
                                         chbw = float(arg)
+                                if opt in ("--sigma"):
+                                        global sigma
+                                        sigma = float(arg)
+					global is_sigma
+					is_sigma = True
 
 			# defining global variable here with the list of input fil files
 			global infiles
@@ -69,7 +75,7 @@ Return value is None
 
 if __name__ == "__main__":
 	# default time of GP and sample of GP
-	global gptime, gpsample, window, gpnumber, fc, chbw
+	global gptime, gpsample, window, gpnumber, fc, chbw, sigma, is_sigma
 	gptime = gpsample = -1
 	# default value of samples around GP to extract
 	window = 512
@@ -79,6 +85,9 @@ if __name__ == "__main__":
 	fc = -100
 	# default value for channel bandwidth (read from header)
 	chbw = 0
+	# default sigma value
+	sigma = 0.0
+	is_sigma = False
 
 
 	parsecmdline (sys.argv[0].split("/")[-1], sys.argv[1:])
@@ -163,7 +172,10 @@ x = np.fromfile(infile, dtype=dtype, count=nchans*window)
 infile.close()
 
 # writing raw GP data
-outfile = gpfile.split("/")[-1].split(".fil")[0] + "_gp" + "%05d.fil" % (gpnumber,)
+if not is_sigma:
+	outfile = gpfile.split("/")[-1].split(".fil")[0] + "_gp" + "%05d" + ".fil" % (gpnumber,)
+else:
+	outfile = gpfile.split("/")[-1].split(".fil")[0] + "_gp" + "%05d" + "_sigma" + "%05.1f" + ".fil" % (gpnumber, sigma)
 ofile=open(outfile, "wb")
 ofile.write(newhdr)
 x.tofile(ofile)
