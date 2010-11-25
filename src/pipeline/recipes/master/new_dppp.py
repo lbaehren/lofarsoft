@@ -46,6 +46,7 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
             '-w', '--working-directory',
             help="Working directory used on output nodes"
         ),
+        # NB times are read from vds file as string
         'data_start_time': ingredient.StringField(
             '--data-start-time',
             default="None",
