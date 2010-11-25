@@ -10,7 +10,7 @@ if (wget_executable)
     COMMAND ${wget_executable} -c ${USG_DOWNLOAD}/datasets/usg_data_test.tgz
     COMMAND tar -xvzf usg_data_test.tgz
     COMMAND rm -f usg_data_test.tgz
-    WORKING_DIRECTORY ${USG_DATA}
+    WORKING_DIRECTORY ${LUS_DATA_DIR}
     COMMENT "Retrieving test data-sets ..."
     )
 else (wget_executable)
@@ -19,7 +19,7 @@ else (wget_executable)
       COMMAND ${curl_executable} ${USG_DOWNLOAD}/datasets/usg_data_test.tgz -o usg_data_test.tgz -C -
       COMMAND tar -xvzf usg_data_test.tgz
       COMMAND rm -f usg_data_test.tgz
-      WORKING_DIRECTORY ${USG_DATA}
+      WORKING_DIRECTORY ${LUS_DATA_DIR}
       COMMENT "Retrieving test data-sets ..."
       )
   else (curl_executable)

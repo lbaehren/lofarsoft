@@ -108,7 +108,7 @@ if (NOT USG_CMAKE_CONFIG)
       )
 
     ## (Test) data
-    set (USG_DATA ${LUS_ROOT}/data CACHE PATH
+    set (LUS_DATA_DIR ${LUS_ROOT}/data CACHE PATH
       "USG data area"
       FORCE
       )
