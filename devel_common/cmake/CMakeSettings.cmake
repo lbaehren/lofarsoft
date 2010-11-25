@@ -15,7 +15,7 @@
 ##                           unnecessary passes through the instructions.
 ##  USG_LIB_LOCATIONS     -- 
 ##  USG_INCLUDE_LOCATIONS -- 
-##  USG_INSTALL_PREFIX    -- Prefix marking the location at which the finished
+##  LUS_INSTALL_PREFIX    -- Prefix marking the location at which the finished
 ##                           software components will be installed
 ##  USG_VARIANTS_FILE     -- Variants file containing host-specific overrides
 ##                           to the common configuration settings/presets.
@@ -60,7 +60,7 @@ if (NOT USG_CMAKE_CONFIG)
     ## Augment CMake module path
 
     set (CMAKE_MODULE_PATH ${LUS_ROOT}/devel_common/cmake CACHE PATH
-      "USG cmake modules"
+      "LUS CMake modules"
       FORCE)
 
     ## Sources for external packages
@@ -79,11 +79,16 @@ if (NOT USG_CMAKE_CONFIG)
 
     ## Installation area
 
-    set (USG_INSTALL_PREFIX ${LUS_ROOT}/release CACHE PATH
-      "USG default install area"
+    set (LUS_RELEASE_DIR ${LUS_ROOT}/release CACHE PATH
+      "LUS installation area"
       FORCE
       )
-    set (CMAKE_INSTALL_PREFIX ${LUS_ROOT}/release CACHE PATH
+
+    set (LUS_INSTALL_PREFIX ${LUS_RELEASE_DIR} CACHE PATH
+      "LUS installation area"
+      FORCE
+      )
+    set (CMAKE_INSTALL_PREFIX ${LUS_RELEASE_DIR} CACHE PATH
       "CMake installation area" 
       FORCE
       )
@@ -120,13 +125,13 @@ if (NOT USG_CMAKE_CONFIG)
       FORCE
       )
     ## Directories inside the release directory
-    if (USG_INSTALL_PREFIX)
+    if (LUS_INSTALL_PREFIX)
       execute_process (
 	COMMAND mkdir -p lib
 	COMMAND ln -s lib lib64
-	WORKING_DIRECTORY ${USG_INSTALL_PREFIX}
+	WORKING_DIRECTORY ${LUS_INSTALL_PREFIX}
 	)
-    endif (USG_INSTALL_PREFIX)
+    endif (LUS_INSTALL_PREFIX)
   else (LUS_ROOT)
     message (SEND_ERROR "LUS_ROOT is undefined!")
   endif (LUS_ROOT)
@@ -135,7 +140,7 @@ if (NOT USG_CMAKE_CONFIG)
   ## generic search locations
 
   set (search_locations
-    ${USG_INSTALL_PREFIX}
+    ${LUS_INSTALL_PREFIX}
     /opt
     /opt/local
     /sw
@@ -154,7 +159,7 @@ if (NOT USG_CMAKE_CONFIG)
   ## locations in which to look for applications/binaries
   
   set (bin_locations
-    ${USG_INSTALL_PREFIX}/bin
+    ${LUS_INSTALL_PREFIX}/bin
     /opt/local/bin
     /sw/bin
     /usr/bin
@@ -170,7 +175,7 @@ if (NOT USG_CMAKE_CONFIG)
   ## locations in which to look for header files
   
   set (include_locations
-    ${USG_INSTALL_PREFIX}/include
+    ${LUS_INSTALL_PREFIX}/include
     /opt/include
     /opt/local/include
     /sw/include
@@ -190,8 +195,8 @@ if (NOT USG_CMAKE_CONFIG)
   ## locations in which to look for libraries
   
   set (lib_locations
-    ${USG_INSTALL_PREFIX}/lib
-    ${USG_INSTALL_PREFIX}/lib64
+    ${LUS_LIBRARY_DIR}
+    ${LUS_INSTALL_PREFIX}/lib64
     /opt/lib
     /opt/local/lib
     /sw/lib
