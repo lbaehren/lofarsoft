@@ -80,7 +80,7 @@ if (UNIX)
 	## define target for individual Fink package
 	add_custom_target (fink-${fink_package}
 	  COMMAND ${fink_executable} install ${fink_package}
-	  WORKING_DIRECTORY ${USG_BUILD}
+	  WORKING_DIRECTORY ${LUS_BUILD_DIR}
 	  COMMENT "Installating Fink package ${fink_package} ..."
 	  )
 	## target dependencies
@@ -90,7 +90,7 @@ if (UNIX)
       ## Master target to install all of the above Fink packages
       add_custom_target (fink-packages
 	COMMAND ${fink_executable} remove hdf5 hdf5-shlibs
-	WORKING_DIRECTORY ${USG_BUILD}
+	WORKING_DIRECTORY ${LUS_BUILD_DIR}
 	COMMENT "Installating Fink packages ..."
 	)
       add_dependencies (fink-packages ${fink-packages-depends})

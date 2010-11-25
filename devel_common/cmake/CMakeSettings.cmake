@@ -20,36 +20,61 @@
 ##  USG_VARIANTS_FILE     -- Variants file containing host-specific overrides
 ##                           to the common configuration settings/presets.
 ##
+##  Th directory structure and the corresponding CMake variables are given below:
+##
+##  .               LUS_ROOT(_DIR)      = ${LOFARSOFT}
+##  |-- release     LUS_RELEASE_DIR     = LUS_INSTALL_PREFIX
+##  |-- build       LUS_BUILD_DIR
+##  `-- external    LUS_EXTERNAL_DIR
+## 
 
 if (NOT USG_CMAKE_CONFIG)
 
-  ##________________________________________________________
+  ##__________________________________________________________________
   ## Check if LUS_ROOT is defined
 
   if (NOT LUS_ROOT)
+
     message (STATUS "[USG CMake] LUS_ROOT undefined; trying to locate it...")
-    ## try to find the root directory based on the location of the release
-    ## directory
-    find_path (USG_INSTALL_PREFIX release/release_area.txt
-      $ENV{LOFARSOFT}
+
+    ## Try to locate the top-level directory based on a) the CMake configuration
+    ## files expected to be there or b) the boostrap script
+
+    find_path (LUS_ROOT CMakeOptions.cmake build/bootstrap
       ${CMAKE_CURRENT_SOURCE_DIR}/..
       ${CMAKE_CURRENT_SOURCE_DIR}/../..
       ${CMAKE_CURRENT_SOURCE_DIR}/../../..
-      NO_DEFAULT_PATH
+      HINT
+      $ENV{LOFARSOFT}
       )
-    ## convert the relative path to an absolute one
-    get_filename_component (LUS_ROOT ${USG_INSTALL_PREFIX} ABSOLUTE)
-  endif (NOT LUS_ROOT)
 
-  ## Second pass: check once more if LUS_ROOT is defined
+  endif (NOT LUS_ROOT)
+  
+  ##__________________________________________________________________
+  ## Define secondary LUS CMake variables
   
   if (LUS_ROOT)
-    ## This addition to the module path needs to go into the cache,
-    ## because otherwise it will be gone at the next time CMake is run
+
+    ## Augment CMake module path
     set (CMAKE_MODULE_PATH ${LUS_ROOT}/devel_common/cmake CACHE PATH
       "USG cmake modules"
       FORCE)
-    ## installation location
+
+    ## Sources for external packages
+
+    set (LUS_EXTERNAL_DIR ${LUS_ROOT}/external CACHE PATH
+      "Sources for external packages"
+      FORCE
+      )
+
+    ## Build directory
+
+    set (LUS_BUILD_DIR ${LUS_ROOT}/build CACHE PATH
+      "Build directory"
+      FORCE
+      )
+
+    ## Installation area
     set (USG_INSTALL_PREFIX ${LUS_ROOT}/release CACHE PATH
       "USG default install area"
       FORCE

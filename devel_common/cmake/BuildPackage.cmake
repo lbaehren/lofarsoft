@@ -32,7 +32,7 @@ macro (build_package _packageName _packageSource)
   ## Locate common options
 
   find_file (LUS_CMAKE_OPTIONS CMakeOptions.cmake
-    PATHS ${USG_BUILD}
+    PATHS ${LUS_BUILD_DIR}
     )
 
   ## get components of the path to the package's source code
@@ -41,9 +41,9 @@ macro (build_package _packageName _packageSource)
   ## feedback
   if (${_packageLocation} STREQUAL "external")
     message (STATUS "Adding external package ${_packageName} ...")
-    set (_packageBuildLocation ${USG_BUILD}/external/${_packageName})
+    set (_packageBuildLocation ${LUS_BUILD_DIR}/external/${_packageName})
   else (${_packageLocation} STREQUAL "external")
-    set (_packageBuildLocation ${USG_BUILD}/${_packageName})
+    set (_packageBuildLocation ${LUS_BUILD_DIR}/${_packageName})
   endif (${_packageLocation} STREQUAL "external")
 
   ## create the directory within which the build is performed

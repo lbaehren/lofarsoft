@@ -28,9 +28,6 @@ find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
 if (LUS_ROOT)
   ## load custom modules
   include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  ## define custom variables
-  set (USG_BUILD ${LUS_ROOT}/build)
-  set (USG_EXTERNAL ${LUS_ROOT}/external)
 else (LUS_ROOT)
   set (LUS_ROOT ${PROJECT_SOURCE_DIR})
 endif (LUS_ROOT)
@@ -137,7 +134,7 @@ add_custom_target (clean-build
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeOptions.cmake
   COMMAND rm -rf CMakeFiles
-  WORKING_DIRECTORY ${USG_BUILD}
+  WORKING_DIRECTORY ${LUS_BUILD_DIR}
   COMMENT "Cleaning up build directory ..."
 )
 
@@ -182,7 +179,7 @@ add_custom_target (clean-src
 
 configure_file (
   ${LUS_ROOT}/devel_common/scripts/build_package.sh.in
-  ${USG_BUILD}/build_package.sh
+  ${LUS_BUILD_DIR}/build_package.sh
   )
 
 set (packages_external

@@ -74,7 +74,7 @@ endforeach (external_package armadillo)
 ## Packages which are only available on Mac OS X
 
 if (APPLE)
-  add_subdirectory (${USG_EXTERNAL}/fink)
+  add_subdirectory (${LUS_EXTERNAL_DIR}/fink)
 endif (APPLE)
 
 ##____________________________________________________________________
