@@ -122,7 +122,7 @@ class cimager(BaseRecipe, RemoteCommandRecipeMixIn):
         results_dir = self.inputs['results_dir']
         if self.inputs['timestep'] == 0:
             self.logger.info("No timestep specified; imaging all data")
-            timesteps = [("None", "None", results_dir)]
+            timesteps = [(None, None, results_dir)]
         else:
             self.logger.info("Using timestep of %s s" % self.inputs['timestep'])
             gvds = get_parset(gvds_file)
@@ -132,7 +132,7 @@ class cimager(BaseRecipe, RemoteCommandRecipeMixIn):
             while start_time < end_time:
                 timesteps.append(
                     (
-                        str(start_time), str(start_time+step),
+                        start_time, start_time+step,
                         os.path.join(results_dir, str(start_time))
                     )
                 )

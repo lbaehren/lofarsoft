@@ -30,7 +30,7 @@ class cimager(LOFARnodeTCP):
         #            parset:                                imager configuration
         #        resultsdir:                         place resulting images here
         #        start_time:                        )    time range to be imaged
-        #          end_time:                        ) in seconds (may be "None")
+        #          end_time:                        )   in seconds (may be None)
         # ----------------------------------------------------------------------
         with log_time(self.logger):
             self.logger.info("Processing %s" % (vds,))
@@ -53,11 +53,11 @@ class cimager(LOFARnodeTCP):
                 #                                  input MS and only image that.
                 # --------------------------------------------------------------
                 query = []
-                if start_time != "None":
+                if start_time:
                     self.logger.debug("Start time is %s" % start_time)
                     start_time = quantity(float(start_time), 's')
                     query.append("TIME > %f" % start_time.get('s').get_value())
-                if end_time != "None":
+                if end_time:
                     self.logger.debug("End time is %s" % end_time)
                     end_time = quantity(float(end_time), 's')
                     query.append("TIME < %f" % end_time.get('s').get_value())
