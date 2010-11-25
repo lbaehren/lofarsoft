@@ -81,7 +81,7 @@ if (NOT HAVE_QT OR QT_FORCE_BUILD)
       URL ${have_qt_tgz}
       URL_MD5 eb651ee4b157c01696aa56777fc6e0e5
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${QT_BINARY_DIR}/configure --prefix=${USG_INSTALL_DIR}
+      CONFIGURE_COMMAND ${QT_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   else (have_qt_tgz)
     ExternalProject_Add (qt
@@ -91,7 +91,7 @@ if (NOT HAVE_QT OR QT_FORCE_BUILD)
       URL ${QT_URL}
       URL_MD5 eb651ee4b157c01696aa56777fc6e0e5
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${QT_BINARY_DIR}/configure --prefix=${USG_INSTALL_DIR}
+      CONFIGURE_COMMAND ${QT_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   endif (have_qt_tgz)
 
