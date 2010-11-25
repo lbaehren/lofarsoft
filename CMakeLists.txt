@@ -20,8 +20,8 @@ cmake_policy (VERSION 2.8)
 
 find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
-  ${LUS_SOURCE_DIR}
-  ${LUS_SOURCE_DIR}/..
+  ${PROJECT_SOURCE_DIR}
+  ${PROJECT_SOURCE_DIR}/..
   $ENV{LOFARSOFT}
   )
 
@@ -32,7 +32,7 @@ if (LUS_ROOT)
   set (USG_BUILD ${LUS_ROOT}/build)
   set (USG_EXTERNAL ${LUS_ROOT}/external)
 else (LUS_ROOT)
-  set (LUS_ROOT ${LUS_SOURCE_DIR})
+  set (LUS_ROOT ${PROJECT_SOURCE_DIR})
 endif (LUS_ROOT)
 
 ## ==============================================================================
@@ -86,7 +86,7 @@ endif (LUS_ENABLE_TESTING)
 ## Create common options file
 
 configure_file (
-  ${LUS_SOURCE_DIR}/CMakeOptions.cmake
+  ${PROJECT_SOURCE_DIR}/CMakeOptions.cmake
   ${LUS_BINARY_DIR}/CMakeOptions.cmake
   )
 
