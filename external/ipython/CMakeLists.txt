@@ -101,7 +101,7 @@ if (NOT HAVE_IPYTHON OR IPYTHON_FORCE_BUILD)
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${IPYTHON_BINARY_DIR}/setup.py --help
       BUILD_COMMAND ${PYTHON_EXECUTABLE} ${IPYTHON_BINARY_DIR}/setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${IPYTHON_BINARY_DIR}/setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${IPYTHON_BINARY_DIR}/setup.py install --prefix= --home=${LUS_INSTALL_PREFIX}
       )
   else (have_ipython_tgz)
     message (WARNING "[IPython] Unable to build project - missing source!")

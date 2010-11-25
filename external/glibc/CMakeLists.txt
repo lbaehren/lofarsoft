@@ -53,7 +53,7 @@ if (NOT HAVE_GLIBC OR GLIBC_FORCE_BUILD)
       DOWNLOAD_DIR ${GLIBC_BINARY_DIR}
       SOURCE_DIR ${GLIBC_BINARY_DIR}
       URL ${have_glibc_tgz}
-      CONFIGURE_COMMAND ${GLIBC_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${GLIBC_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   else (have_glibc_tgz)
     ExternalProject_Add (glibc
@@ -61,7 +61,7 @@ if (NOT HAVE_GLIBC OR GLIBC_FORCE_BUILD)
       DOWNLOAD_DIR ${GLIBC_BINARY_DIR}
       SOURCE_DIR ${GLIBC_BINARY_DIR}
       URL http://ftp.gnu.org/gnu/glibc/glibc-${glibc_version}.tar.gz
-      CONFIGURE_COMMAND ${GLIBC_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${GLIBC_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   endif (have_glibc_tgz)
   

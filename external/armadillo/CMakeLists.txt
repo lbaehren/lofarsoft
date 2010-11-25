@@ -67,7 +67,7 @@ if (NOT HAVE_ARMADILLO OR ARMADILLO_FORCE_BUILD)
     DOWNLOAD_DIR ${ARMADILLO_BINARY_DIR}/download
     SOURCE_DIR ${ARMADILLO_BINARY_DIR}/source
     URL ${have_armadillo_tgz}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${USG_INSTALL_PREFIX}
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
     )
   
   ## <-- end build condition ----------------------------------------------------->

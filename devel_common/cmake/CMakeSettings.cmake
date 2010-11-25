@@ -175,7 +175,7 @@ if (NOT USG_CMAKE_CONFIG)
   ## locations in which to look for header files
   
   set (include_locations
-    ${LUS_INSTALL_PREFIX}/include
+    ${LUS_INCLUDE_DIR}
     /opt/include
     /opt/local/include
     /sw/include

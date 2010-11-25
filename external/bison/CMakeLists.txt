@@ -75,7 +75,7 @@ if (NOT HAVE_BISON OR BISON_FORCE_BUILD)
       SOURCE_DIR ${BISON_BINARY_DIR}
       URL ${BISON_SOURCE}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${BISON_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${BISON_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   else (BISON_SOURCE)
     message (WARNING "[Bison] Unable to build project - missing source!")

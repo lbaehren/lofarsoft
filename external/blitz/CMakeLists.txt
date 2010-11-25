@@ -61,7 +61,7 @@ if (NOT HAVE_BLITZ OR BLITZ_FORCE_BUILD)
       URL ${have_blitz_tgz}
       URL_MD5 031df2816c73e2d3bd6d667bbac19eca
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${BLITZ_BINARY_DIR}/blitz/configure --prefix=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${BLITZ_BINARY_DIR}/blitz/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   else (have_blitz_tgz)
     status (WARNING "[Blitz++] Unable to build project - no sources found!")

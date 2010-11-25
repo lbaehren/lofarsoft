@@ -61,7 +61,7 @@ if (NOT HAVE_FFTW3 OR FFTW3_FORCE_BUILD)
     URL ${have_fftw3_tgz}
     URL_MD5 b616e5c91218cc778b5aa735fefb61ae
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${FFTW3_BINARY_DIR}/source/configure --prefix=${USG_INSTALL_PREFIX}
+    CONFIGURE_COMMAND ${FFTW3_BINARY_DIR}/source/configure --prefix=${LUS_INSTALL_PREFIX}
     )
   
   ## <-- end build condition ----------------------------------------------------->

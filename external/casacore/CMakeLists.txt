@@ -61,7 +61,7 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
       URL ${have_casacore_tgz}
       URL_MD5 b9205c8edec69b12685fd55084076986
       PATCH_COMMAND ${tar_executable} -xzf ${have_casacore_cmake}
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${USG_INSTALL_PREFIX}
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${LUS_INSTALL_PREFIX}
       )
   else (have_casacore_tgz)
     ExternalProject_Add (casacore
@@ -70,7 +70,7 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
       SOURCE_DIR ${CASACORE_BINARY_DIR}/source
       URL http://casacore.googlecode.com/svn/trunk casacore
       PATCH_COMMAND ${tar_executable} -xzf ${have_casacore_cmake}
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${USG_INSTALL_PREFIX}
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${LUS_INSTALL_PREFIX}
       )
   endif (have_casacore_tgz)
   

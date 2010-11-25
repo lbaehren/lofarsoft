@@ -146,7 +146,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
       DOWNLOAD_DIR download
       SOURCE_DIR source
       URL ${HAVE_HDF5_SOURCE}
-      CONFIGURE_COMMAND ${HDF5_BINARY_DIR}/source/configure --prefix=${USG_INSTALL_PREFIX} --bindir=${USG_INSTALL_PREFIX}/bin --includedir=${USG_INSTALL_PREFIX}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_fortran} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
+      CONFIGURE_COMMAND ${HDF5_BINARY_DIR}/source/configure --prefix=${LUS_INSTALL_PREFIX} --bindir=${LUS_INSTALL_PREFIX}/bin --includedir=${LUS_INCLUDE_DIR}/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_fortran} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
       INSTALL_COMMAND make install
       )
   

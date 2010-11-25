@@ -67,7 +67,7 @@ if (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)
       URL ${have_flex_tgz}
       URL_MD5 201d3f38758d95436cbc64903386de0b
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${FLEX_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${FLEX_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   else (have_flex_tgz)
     message (WARNING "[Flex] Unable to build project - missing source!")
