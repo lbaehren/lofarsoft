@@ -16,6 +16,8 @@ fs=10 # fontsize for plotting
 dm=56.8  # default value of DM
 # if True, then creates .png file
 is_saveonly = False
+# if True then opens interactive Xwindow
+is_plotselect = False
 # Central freq and channel bandwidth (default is to read them from header)
 fc=-100
 chbw=0
@@ -47,6 +49,7 @@ Return value is None
         print "Program %s creates diagnostic plot for selected fil-file with pulse" % (prg, )
         print "Usage: %s [options] <fil-file>\n\
                [--saveonly] - saves plots to .png rather than plots the first one in Xwindow\n\
+               [--plotselect] - opens interactive Xwindow, so by pressing the 'S' one can save the plot\n\
                [--dm <value of DM for dedispersion, default = 56.8]\n\
                [--fcntr <value of central freq in MHz, if header value is wrong>]\n\
                [--chbw <value of channel bandwidth in MHz, if header value is wrong>]\n\
@@ -71,7 +74,7 @@ Return value is None
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "h", ["help", "saveonly", "dm=", "fcntr=", "chbw=", "td=", "fd=", "gpsigma=", "cliplevel=", "offset=", "zoomtime=", "width=", "scaling="])
+                        opts, args = getopt.getopt (argv, "h", ["help", "saveonly", "dm=", "fcntr=", "chbw=", "td=", "fd=", "gpsigma=", "cliplevel=", "offset=", "zoomtime=", "width=", "scaling=", "plotselect"])
                         for opt, arg in opts:
                                 if opt in ("-h", "--help"):
                                         usage(prg)
@@ -116,6 +119,9 @@ Return value is None
                                 if opt in ("--scaling"):
                                         global plot_scaling
                                         plot_scaling = arg
+                                if opt in ("--plotselect"):
+                                        global is_plotselect
+                                        is_plotselect = True
 
                         # defining global variable here with the list of input fil files
                         global infiles
@@ -133,16 +139,37 @@ def getdelay (dm, freq):
 	deltat = (10000. * dm / 2.41) * (1. / (freq * freq))
 	return deltat
 
+def plot_help():
+        """ prints the info about keys available for usage
+        """
+        print
+        print "Press following keys"
+        print " s/S       - to save the plot to png file and quit"
+        print " space/q/Q - quit without saving"
+        print "   ?       - print this help"
+        print
 
+def press(event):
+        """ event handler for pressed keys
+        """
+        if event.key == 's' or event.key == 'S': 
+		plt.savefig(pngname)
+		plt.close()
+        if event.key == 'q' or event.key == 'Q' or event.key == ' ': plt.close()
+        if event.key == '?': plot_help()
+
+
+################################################################################################################ 
 if __name__ == "__main__":
         parsecmdline (sys.argv[0].split("/")[-1], sys.argv[1:])
 
 	file = infiles[0]
+	global pngname
+	pngname = file.split("/")[-1].split(".fil")[0] + ".png"
  
 	if is_saveonly:
 		import matplotlib
 		matplotlib.use('Agg')
-		pngname = file.split(".fil")[0] + ".png"
 	else:
 		import matplotlib
 
@@ -294,14 +321,21 @@ if fdf != 1 and tdf != 1:
 nsmooth=int(fdsize/25)
 smoothspectrum=[np.array(spectrum[j:j+nsmooth]).mean() for j in np.arange(fdsize-nsmooth)]
 
+
+###### Graph part ######
+
 # dimensions of the central plot
 left = 0.30
 bottom = 0.08
 width = 0.39
 height = 0.55
 
+if is_plotselect:
+	plt.ion() # interactive plotting
 fig = plt.figure()
-title="GP #" + str(gpnumber) + "\n" + "Start MJD " + str(gpmjd)
+if is_plotselect:
+	fig.canvas.mpl_connect('key_press_event', press) # open keyboard events handler
+	plot_help()
 
 # First plot (dispersion broadening)
 ax = plt.axes([0.74, 0.137, 0.2, 0.743])
