@@ -145,7 +145,7 @@ def plot_help():
         print
         print "Press following keys"
         print " s/S       - to save the plot to png file and quit"
-        print " space/q/Q - quit without saving"
+        print " space/q/Q - quit without saving, corresponding fil-file will be removed"
         print "   ?       - print this help"
         print
 
@@ -154,8 +154,12 @@ def press(event):
         """
         if event.key == 's' or event.key == 'S': 
 		plt.savefig(pngname)
+		print "saving to '%s' ..." % (pngname,)	
 		plt.close()
-        if event.key == 'q' or event.key == 'Q' or event.key == ' ': plt.close()
+        if event.key == 'q' or event.key == 'Q' or event.key == ' ': 
+		os.system("rm -f %s" % (file,))
+		print "removing '%s' ..." % (file,)
+		plt.close()
         if event.key == '?': plot_help()
 
 
@@ -163,6 +167,7 @@ def press(event):
 if __name__ == "__main__":
         parsecmdline (sys.argv[0].split("/")[-1], sys.argv[1:])
 
+	global file
 	file = infiles[0]
 	global pngname
 	pngname = file.split("/")[-1].split(".fil")[0] + ".png"
