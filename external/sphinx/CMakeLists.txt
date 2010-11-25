@@ -92,7 +92,7 @@ if (NOT HAVE_SPHINX OR SPHINX_FORCE_BUILD)
       URL_MD5 d4067e42e75525ecf108ece471ce97bb
       CONFIGURE_COMMAND echo "No configuration needed"
       BUILD_COMMAND echo "Not building anything"
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${SPHINX_BINARY_DIR}/source/setup.py install --home=${USG_INSTALL_PREFIX}
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${SPHINX_BINARY_DIR}/source/setup.py install --home=${LUS_INSTALL_PREFIX}
       )
   else (have_sphinx_tgz)
     message (WARNING "[Sphinx] Unable to build project - missing source!")

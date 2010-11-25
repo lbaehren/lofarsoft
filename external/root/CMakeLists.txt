@@ -61,7 +61,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD OR svn_executable)
     DOWNLOAD_DIR ${ROOT_BINARY_DIR}/root
     SOURCE_DIR ${ROOT_BINARY_DIR}/root
     SVN_REPOSITORY http://root.cern.ch/svn/root/trunk
-    CONFIGURE_COMMAND ${ROOT_BINARY_DIR}/root/configure ${root_architecture} --prefix=${USG_INSTALL_PREFIX}
+    CONFIGURE_COMMAND ${ROOT_BINARY_DIR}/root/configure ${root_architecture} --prefix=${LUS_INSTALL_PREFIX}
     )
   
   ## <-- end build condition ----------------------------------------------------->

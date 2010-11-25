@@ -115,7 +115,7 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND cp ${NUMPY_BINARY_DIR}/site.cfg ${NUMPY_BINARY_DIR}/source
       BUILD_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/source/setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/source/setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/source/setup.py install --prefix= --home=${LUS_INSTALL_PREFIX}
       )
   else (have_numpy_tgz)
     message (WARNING "[NumPy] Unable to build project - missing source!")

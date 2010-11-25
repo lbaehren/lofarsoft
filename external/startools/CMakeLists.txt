@@ -137,11 +137,11 @@ endif (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES)
 ## we install into "release". Otherwise we use the "include" and "lib" directories
 ## within the package directory itself.
 
-if (USG_INSTALL_PREFIX)
-  set (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX}) 
-else (USG_INSTALL_PREFIX)
+if (LUS_INSTALL_PREFIX)
+  set (CMAKE_INSTALL_PREFIX ${LUS_INSTALL_PREFIX}) 
+else (LUS_INSTALL_PREFIX)
   set (CMAKE_INSTALL_PREFIX ${StarTools_SOURCE_DIR})
-endif (USG_INSTALL_PREFIX)
+endif (LUS_INSTALL_PREFIX)
 
 ## No relinking and full RPATH for the install tree
 

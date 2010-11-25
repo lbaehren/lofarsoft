@@ -53,7 +53,7 @@ if (NOT HAVE_TEXINFO OR TEXINFO_FORCE_BUILD)
       DOWNLOAD_DIR ${TEXINFO_BINARY_DIR}
       SOURCE_DIR ${TEXINFO_BINARY_DIR}
       URL ${have_texinfo_tgz}
-      CONFIGURE_COMMAND ${TEXINFO_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${TEXINFO_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   else (have_texinfo_tgz)
     ExternalProject_Add (texinfo
@@ -61,7 +61,7 @@ if (NOT HAVE_TEXINFO OR TEXINFO_FORCE_BUILD)
       DOWNLOAD_DIR ${TEXINFO_BINARY_DIR}
       SOURCE_DIR ${TEXINFO_BINARY_DIR}
       URL http://ftp.gnu.org/gnu/texinfo/texinfo-${texinfo_version}.tar.gz
-      CONFIGURE_COMMAND ${TEXINFO_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${TEXINFO_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   endif (have_texinfo_tgz)
   

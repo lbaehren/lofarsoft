@@ -77,7 +77,7 @@ if (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
       SOURCE_DIR ${SWIG_BINARY_DIR}/source
       URL ${have_swig_tgz}
       URL_MD5 2df766c9e03e02811b1ab4bba1c7b9cc
-      CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/source/configure --prefix=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/source/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   else (have_swig_tgz)
     status (WARNING "[Swig] Unable to build project - no sources found!")

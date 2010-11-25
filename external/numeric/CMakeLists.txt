@@ -60,7 +60,7 @@ if (NOT HAVE_NUMERIC OR NUMERIC_FORCE_BUILD)
       URL_MD5 2ae672656e06716a149acb048cca3093
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${NUMERIC_BINARY_DIR}/setup.py build
-      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${NUMERIC_BINARY_DIR}/setup.py install --home=${USG_INSTALL_PREFIX}
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${NUMERIC_BINARY_DIR}/setup.py install --home=${LUS_INSTALL_PREFIX}
       )
   else (have_numeric_tgz)
     status (WARNING "[Numeric] Unable to build project - no sources found!")

@@ -50,7 +50,7 @@ if (NOT HAVE_PIL OR PIL_FORCE_BUILD)
       SOURCE_DIR ${PIL_BINARY_DIR}/source
       URL ${have_pil_tgz}
       URL_MD5 828350a6952d6dc1be1b9cacddede056
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${USG_INSTALL_PREFIX}
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
       )
     ## Pre-configure of configuration scripts
     ExternalProject_Add_Step (pil pil_preconfig

@@ -93,7 +93,7 @@ if (NOT HAVE_PYFITS OR PYFITS_FORCE_BUILD)
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/source/setup.py --help
       BUILD_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/source/setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/source/setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/source/setup.py install --prefix= --home=${LUS_INSTALL_PREFIX}
       )
   else (have_pyfits_tgz)
     message (WARNING "[PyFITS] Unable to build project - missing source!")

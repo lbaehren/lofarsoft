@@ -59,6 +59,6 @@ set (BUILD_TEST ON CACHE BOOL "Build test programs?")
 ## CMake internal variables
 
 set (CMAKE_FIND_LIBRARY_PREFIXES "lib" CACHE STRING "Library prefixes" FORCE)
-set (CMAKE_INSTALL_PREFIX       ${USG_INSTALL_PREFIX}  CACHE  PATH  "Installation prefix" FORCE) 
-set (CMAKE_INSTALL_EXEC_PREFIX  ${USG_INSTALL_PREFIX}  CACHE  PATH  "Installation prefix" FORCE)
-set (PYTHON_INSTDIR             ${USG_INSTALL_PREFIX}/lib/python CACHE PATH "Python prefix" FORCE)
+set (CMAKE_INSTALL_PREFIX       ${LUS_INSTALL_PREFIX}  CACHE  PATH  "Installation prefix" FORCE) 
+set (CMAKE_INSTALL_EXEC_PREFIX  ${LUS_INSTALL_PREFIX}  CACHE  PATH  "Installation prefix" FORCE)
+set (PYTHON_INSTDIR             ${LUS_INSTALL_PREFIX}/lib/python CACHE PATH "Python prefix" FORCE)

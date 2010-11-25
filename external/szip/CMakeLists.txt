@@ -65,7 +65,7 @@ if (NOT HAVE_SZIP OR SZIP_FORCE_BUILD)
       SOURCE_DIR ${SZIP_BINARY_DIR}/source
       URL ${have_szip_tgz}
       URL_MD5 1e0621efa66c2e1b07d7659703df5ea8
-      CONFIGURE_COMMAND ${SZIP_BINARY_DIR}/source/configure --prefix=${USG_INSTALL_PREFIX} --includedir=${USG_INSTALL_PREFIX}/include/szip
+      CONFIGURE_COMMAND ${SZIP_BINARY_DIR}/source/configure --prefix=${LUS_INSTALL_PREFIX} --includedir=${LUS_INSTALL_PREFIX}/include/szip
       )
   else (have_szip_tgz)
     message (WARNING "[Szip] Unable to build project - missing source!")
