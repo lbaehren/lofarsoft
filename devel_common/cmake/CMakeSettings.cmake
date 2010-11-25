@@ -22,10 +22,12 @@
 ##
 ##  Th directory structure and the corresponding CMake variables are given below:
 ##
-##  .               LUS_ROOT(_DIR)      = ${LOFARSOFT}
-##  |-- release     LUS_RELEASE_DIR     = LUS_INSTALL_PREFIX
-##  |-- build       LUS_BUILD_DIR
-##  `-- external    LUS_EXTERNAL_DIR
+##  .                    LUS_ROOT(_DIR)      = ${LOFARSOFT}
+##  |-- release          LUS_RELEASE_DIR     = LUS_INSTALL_PREFIX
+##  |   |-- include      LUS_INCLUDE_DIR
+##  |   `-- lib          LUS_LIBRARY_DIR
+##  |-- build            LUS_BUILD_DIR
+##  `-- external         LUS_EXTERNAL_DIR
 ## 
 
 if (NOT USG_CMAKE_CONFIG)
@@ -56,6 +58,7 @@ if (NOT USG_CMAKE_CONFIG)
   if (LUS_ROOT)
 
     ## Augment CMake module path
+
     set (CMAKE_MODULE_PATH ${LUS_ROOT}/devel_common/cmake CACHE PATH
       "USG cmake modules"
       FORCE)
@@ -75,6 +78,7 @@ if (NOT USG_CMAKE_CONFIG)
       )
 
     ## Installation area
+
     set (USG_INSTALL_PREFIX ${LUS_ROOT}/release CACHE PATH
       "USG default install area"
       FORCE
@@ -83,11 +87,26 @@ if (NOT USG_CMAKE_CONFIG)
       "CMake installation area" 
       FORCE
       )
-    ## header files
-    include_directories (${LUS_ROOT}/release/include CACHE PATH
-      "USG include area"
+
+    ## Location of installed header files
+
+    set (LUS_INCLUDE_DIR ${LUS_ROOT}/release/include CACHE PATH
+      "Location of installed header files"
       FORCE
       )
+
+    include_directories (${LUS_INCLUDE_DIR} CACHE PATH
+      "Location of installed header files"
+      FORCE
+      )
+
+    ## Location of installed libraries
+
+    set (LUS_LIBRARY_DIR ${LUS_ROOT}/release/lib CACHE PATH
+      "Location of installed libraries"
+      FORCE
+      )
+
     ## (Test) data
     set (USG_DATA ${LUS_ROOT}/data CACHE PATH
       "USG data area"
