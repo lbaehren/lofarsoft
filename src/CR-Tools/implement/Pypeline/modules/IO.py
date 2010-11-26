@@ -105,6 +105,7 @@ class TBBdata:
                     - None (select all antennas)
         """
         
+        self.new_selection_method=False
         self.files=openfiles(filenames,blocksize)
         
         self.setSelection(selection)
@@ -114,7 +115,6 @@ class TBBdata:
         #self.antennaset=antennaset
         
         self.setAntennaset()
-
         self.keywords=self.files[0].keywords
         self.keywords.extend(metadatakeywords)
         #self.keywords.extend(["StationPhaseCalibration","CableDelays","RelativeAntennaPositions","AbsoluteAntennaPositions","ClockCorrection","StationPositions","AntennaPositions"])
@@ -202,7 +202,8 @@ class TBBdata:
         *block*  Block for which the data should be returned. If negative
                  it will return the next block.
         """
-        
+        if self.new_selection_method:
+            return readVoltage(self.files,fxdata,block)
         if not self.selection:
             retval = readFx(self.files,self.allfxdata,block)
             if not fxdata:
@@ -213,6 +214,18 @@ class TBBdata:
         else:
             readFx(self.files,self.allfxdata,block)
             return applySelection(self.selection,self.allfxdata,fxdata)
+
+    def readdata2(self,fxdata=None,block=-1):
+        """Read a block of data for the selected antennas. 
+        
+        *fxdata* hArray to write the data in. If not provided, it will
+                 return an array.
+        *block*  Block for which the data should be returned. If negative
+                 it will return the next block.
+        """
+
+        return readVoltage(self.files,fxdata,block)
+
 
     def setSelection(self,selection):
         """Set an antennaselection.
@@ -226,6 +239,26 @@ class TBBdata:
             self.selection=antIDsToSelection(self.files,selection)
         else:
             self.selection=selection
+
+        if self.new_selection_method:
+            self.enableFastSelection()
+
+        
+    def enableFastSelection(self):
+        if self.selection:
+            selVec=hf.Vector(self.selection)
+            selVec2=np.array(self.selection)
+            selForFile=hf.Vector(self.selection)
+            antsPerFile=self.get_all_list("nofAntennas")
+            startAnt=0
+            endAnt=0
+            self.new_selection_method=True
+            for filenr in range(len(self.files)):
+                startAnt=endAnt
+                endAnt+=antsPerFile[filenr]
+                nrSel=selForFile.findbetweenorequal(selVec,startAnt,endAnt-1)
+                self.files[filenr].set("selectedAntennas",list(selVec2[list(selForFile[0:nrSel])]-startAnt))
+
 
     def getCalibrator(self,antennaset=None):
         """Returns  a calibrator object from the calibration class. 
@@ -302,7 +335,7 @@ def openfiles(filenames,blocksize=1024):
     for i in range(len(files)):
         files[i]["blocksize"]=blocksize
         shifts.append(files[i]["SAMPLE_NUMBER"])
-        shifts[i].muladd(files[i]["TIME"]-tmin,hf.Vector(int,files[i]["nofSelectedAntennas"],int(files[i]["sampleFrequency"])))
+        shifts[i].muladd(files[i]["TIME"]-tmin,hf.Vector(int,files[i]["nofAntennas"],int(files[i]["sampleFrequency"])))
 
 # search for maximum in shifts
     shiftmax=0
@@ -339,11 +372,11 @@ def get(files, keyword,return_as_list=True):
             ret.append(files[i][keyword])
     else:
         ret=files[0][keyword]
-        if isinstance(ret,(hf.IntVec,hf.FloatVec)) and len(ret)==files[0]["nofSelectedAntennas"]:
+        if isinstance(ret,(hf.IntVec,hf.FloatVec)) and ( len(ret)==files[0]["nofAntennas"] or len(ret)==files[0]["nofSelectedAntennas"]):
                 for i in range(1,len(files)):
                     ret.extend(files[i][keyword])
-        elif isinstance(ret,(hf.IntArray,hf.FloatArray,hf.ComplexArray)) and ret.getDim()[0] == files[0]["nofSelectedAntennas"]:
-            NrAnts=get(files,"nofSelectedAntennas")
+        elif isinstance(ret,(hf.IntArray,hf.FloatArray,hf.ComplexArray)) and ( ret.getDim()[0] == files[0]["nofAntennas"] or ret.getDim()[0] == files[0]["nofSelectedAntennas"]):
+            NrAnts=get(files,"nofAntennas")
             TotNrAnts=sum(NrAnts)
             shape=ret.getDim()
             shape[0]=TotNrAnts
@@ -409,7 +442,7 @@ def readFx(files,fxdata,block=-1):
 
     set(files,"block",block)
      
-    selAnts=get(files,"nofSelectedAntennas")
+    selAnts=get(files,"nofAntennas")
     antBeg=0
     antEnd=0
     for num,nrA in enumerate(selAnts):
@@ -420,6 +453,34 @@ def readFx(files,fxdata,block=-1):
 
     #fxdata.setSlice(0,antEnd*dim[1])
     return True
+
+def readVoltage(files,fxdata,block=-1):
+    """read a block of voltage data for the selected antennas. 
+
+    *fxdata* Array in which to return the data
+    *block*  Block for which data should be read
+
+    """
+    if block == -1:
+        block=get(files,"block",True)
+        for num,bl in enumerate(block):
+            block[num]=bl+1
+
+    set(files,"block",block)
+     
+    selAnts=get(files,"nofSelectedAntennas")
+    antBeg=0
+    antEnd=0
+    for num,nrA in enumerate(selAnts):
+        
+        antBeg=antEnd
+        antEnd+=nrA
+        #fxdata.setSlice([antBeg*dim[1],antEnd*dim[1]])
+        fxdata[antBeg:antEnd].read(files[num],"Voltage")
+
+    #fxdata.setSlice(0,antEnd*dim[1])
+    return True
+
 
 def applySelection(selection,array,rArray=None):
     """ Select from the data only the applied selection
