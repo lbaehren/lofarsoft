@@ -147,6 +147,11 @@ class TBBdata:
         method."""
         return self.get(keyword)
 
+    def __setitem__(self,keyword,value):
+        """This makes the set method available by using the normal bracket 
+        method."""
+        self.set(keyword,value)
+
     def get(self,keyword):
         """Get the values for the keyword for multiple files. Uses the 
         modules get method on the files provided, unless the keyword is of
