@@ -82,7 +82,7 @@ import pycrtools as hf
 import numpy as np
 import os
 metadatakeywords=["StationPhaseCalibration","CableDelays","RelativeAntennaPositions","AbsoluteAntennaPositions","ClockCorrection","StationPositions","AntennaPositions"]
-
+noselectionkeywords=["increment","frequencyRange","frequencyValues","selectedChannels"]
 
 # Examples
 class TBBdata:
@@ -168,7 +168,7 @@ class TBBdata:
             return data
         else:
             data=get(self.files,keyword,False)
-            if not self.selection:
+            if not self.selection or keyword in noselectionkeywords or ( keyword == "selectedAntennas" and self.new_selection_method ):
                 return data
             else:
                 return applySelection(self.selection,data)#get(self.files,keyword,False))
