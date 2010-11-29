@@ -93,5 +93,5 @@ set_target_properties (_py2fbdsm
 ## ==============================================================================
 
 install (TARGETS _cbdsm _pytesselate _py2fbdsm
-  DESTINATION lib/python
+  DESTINATION lib/python/bdsm
   )
