@@ -479,17 +479,9 @@ namespace CR { // Namespace CR -- begin
   */
   casa::Matrix<double> LOFAR_TBB::fx ()
   {
-    unsigned int sizeSelection = selectedAntennas_p.size();
-    casa::Vector<int> start (sizeSelection);
     casa::Matrix<double> data;
-
-    for (uint n(0); n<sizeSelection; ++n) {
-      start(n) = iterator_p[selectedAntennas_p(n)].position();
-    }
-
-    DAL::TBB_Timeseries::readData (data,
-				   start,
-				   blocksize_p);
+    
+    fx(data);
 
     return data;
   }
@@ -503,10 +495,11 @@ namespace CR { // Namespace CR -- begin
   */
   void LOFAR_TBB::fx (casa::Matrix<double> &data)
   {
-   casa::Vector<int> start (nofStreams_p);
+    unsigned int sizeSelection = selectedAntennas_p.size();
+    casa::Vector<int> start (sizeSelection);
 
-    for (uint n(0); n<nofStreams_p; ++n) {
-      start(n) = iterator_p[n].position();
+    for (uint n(0); n<sizeSelection; ++n) {
+      start(n) = iterator_p[selectedAntennas_p(n)].position();
     }
 
     DAL::TBB_Timeseries::readData (data,
