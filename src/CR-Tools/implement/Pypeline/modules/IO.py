@@ -192,7 +192,12 @@ class TBBdata:
     def set(self,keyword,value):
         """Uses the set method of the module to set the value for all 
         files"""
+        
         set(self.files,keyword,value)
+        if keyword == "blocksize":
+            print "Adjusting internal allfxdata array"
+            self.allfxdata=get(self.files,"emptyFx",False)
+
     
     def readdata(self,fxdata=None,block=-1):
         """Read a block of data for the selected antennas. 
@@ -245,6 +250,11 @@ class TBBdata:
 
         
     def enableFastSelection(self):
+        """This function enables selection of dipoles in the files,
+        to read out only the data that is actually used. This is 
+        experimental and has to be tested to work. There is one problem
+        that at least 1 dipole has to be selected for each file.
+        """
         if self.selection:
             selVec=hf.Vector(self.selection)
             selVec2=np.array(self.selection)
@@ -472,7 +482,6 @@ def readVoltage(files,fxdata,block=-1):
     antBeg=0
     antEnd=0
     for num,nrA in enumerate(selAnts):
-        
         antBeg=antEnd
         antEnd+=nrA
         #fxdata.setSlice([antBeg*dim[1],antEnd*dim[1]])
