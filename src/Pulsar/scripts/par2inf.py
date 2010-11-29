@@ -7,10 +7,12 @@ from optparse import OptionParser
 class pardata:
     def __init__(self, filenm):
         for line in open(filenm):
-            if line.startswith("Observation.Beam[0].angle1"):
+            beam_ang1 = "Observation.Beam[%s].angle1" % (options.beamnumber)
+            beam_ang2 = "Observation.Beam[%s].angle2" % (options.beamnumber)
+            if line.startswith(beam_ang1):
                 self.rar = line.split("=")[-1].strip()
                 continue
-            if line.startswith("Observation.Beam[0].angle2"):
+            if line.startswith(beam_ang2):
                 self.decr = line.split("=")[-1].strip()
                 continue
             if line.startswith("Observation.sampleClock"):
@@ -197,8 +199,17 @@ parser.add_option("-N", "--nsamples", action="store", type="int",
 		  dest="nsamples", help="The number of samples to be included in the inf file")
 parser.add_option("-r", "--repeat",action="store",type="int",dest="repeat",
                   help="If producing multiple inf files how many times to repeat\n the number of subbands requested with -n option")
-
+parser.add_option("-B", "--beamnumber", action="store", type="int",
+		  dest="beamnumber", help="The beam number to extract the subband range from the parset")
+		  
 (options, args) = parser.parse_args()
+
+# Set the default Beam Number to 0
+if ( options.beamnumber ):
+    print "Using user input beam number %d"%(options.beamnumber)
+else:
+    options.beamnumber = 0
+    print "Using default beam number %d"%(options.beamnumber)
 
 filename = args[len(args)-1]
 defaultfile="%s/release/share/pulsar/data/lofar_default.inf"%os.environ['LOFARSOFT']
@@ -240,6 +251,7 @@ if (options.user):
 # Checking if number of samples is given
 if (options.nsamples):
     id.N = options.nsamples
+
 
 #  Calculate the RA and Dec of the source
 rad = float(par.rar) * 180.0 / math.pi
