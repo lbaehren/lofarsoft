@@ -18,7 +18,7 @@ Also, each island object of img.islands list has the source object island.source
 from image import *
 from islands import *
 import mylogger
-import output_fbdsm_files as opf
+#import output_fbdsm_files as opf
 
 nsrc = Int(doc="Number of sources in the image")
 source_id = Int(doc="Source number of a gaussian")
@@ -56,8 +56,8 @@ class Op_gaul2srl(Op):
         img.source = sources
         img.nsrc = src_index+1
         mylog.info("Grouped " + str(img.ngaus) + " gaussians into " + str(img.nsrc) + " sources")
-
-        if img.opts.output_fbdsm: opf.write_fbdsm_gaul(img)
+        print "Grouped " + str(img.ngaus) + " gaussians into " + str(img.nsrc) + " sources"
+        #if img.opts.output_fbdsm: opf.write_fbdsm_gaul(img)
 
 ##################################################################################################
 

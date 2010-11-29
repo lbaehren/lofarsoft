@@ -215,6 +215,7 @@ class Op_spectralindex(Op):
 ####################################################################################
     def rms_spectrum(self, img, image):
         from rmsimage import Op_rmsimage
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"SpectIndex")
 
         nchan = image.shape[0]
         rms_map = img.opts.rms_map
@@ -323,6 +324,7 @@ class Op_spectralindex(Op):
       import functions as func
       from const import fwsig
       import math
+      mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"SpectIndex")
 
       isl = img.islands[src.island_id]
       para = []; epara = []; mompara = []; 

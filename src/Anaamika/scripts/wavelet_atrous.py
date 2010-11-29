@@ -62,7 +62,7 @@ class Op_wavelet_atrous(Op):
     
           im_old=resid
           for j in range(1,jmax+1):
-            mean, rms, cmean, std = _cbdsm.bstat(im_old, None, img.opts.kappa_clip)
+            mean, rms, cmean, std = _cbdsm.bstat(im_old, N.isnan(im_old), img.opts.kappa_clip)
             im_new=self.atrous(im_old,filter[lpf]['vec'],lpf,j,std)
             w=im_old-im_new
             im_old=im_new

@@ -10,7 +10,7 @@ from socket import gethostname
 import commands
 import time
 
-log_notes = True  # &^$%!&#$&^#$&&^
+log_notes = False  # &^$%!&#$&^#$&&^
 
 hostname = gethostname()
 dum, user = commands.getstatusoutput('whoami') 
@@ -24,7 +24,7 @@ logger.setLevel(logging.DEBUG)
 
 fh = logging.FileHandler(logfilename)
 fh.setLevel(logging.DEBUG)
-fmt1 = logging.Formatter('PyBDSM>  %(asctime)s %(name)s:: %(levelname)s: %(message)s', datefmt='%a %d-%m-%Y %H:%M:%S')
+fmt1 = logging.Formatter('%(asctime)s %(name)s:: %(levelname)s: %(message)s', datefmt='%a %d-%m-%Y %H:%M:%S')
 fh.setFormatter(fmt1)
 logger.addHandler(fh)
 
@@ -34,7 +34,7 @@ if log_notes:
   ch.setLevel(logging.INFO)
 else:
   ch.setLevel(logging.WARNING)
-fmt2 = logging.Formatter('PyBDSM log>  %(name)s:: %(levelname)s: %(message)s')
+fmt2 = logging.Formatter('%(name)s:: %(levelname)s: %(message)s')
 ch.setFormatter(fmt2)
 logger.addHandler(ch)
 

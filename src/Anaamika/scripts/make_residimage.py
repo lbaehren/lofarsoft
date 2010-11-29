@@ -14,6 +14,10 @@ Image.resid_gaus = NArray(doc="Residual image calculated from " \
                                 "extracted gaussians")
 Image.resid_shap = NArray(doc="Residual image calculated from " \
                                 "shapelet coefficient")
+Image.model_gaus = NArray(doc="Model image calculated from " \
+                                "extracted gaussians")
+Image.model_shap = NArray(doc="Model image calculated from " \
+                                "shapelet coefficient")
 
 class Op_make_residimage(Op):
     """Creates an image from the fitted gaussians
@@ -48,8 +52,10 @@ class Op_make_residimage(Op):
             fimg[bbox] += func.gaussian_fcn(g, x_ax, y_ax)
 
         img.resid_gaus = img.ch0 - fimg
-        pyfits.writeto(img.imagename + '.resid_gaus.fits', N.transpose(img.resid_gaus), img.header, clobber=True)
-        mylog.info('%s %s' % ('Wrote ', img.imagename+'.resid_gaus.fits'))
+        img.model_gaus = fimg
+        if img.opts.savefits_residim: 
+            pyfits.writeto(img.imagename + '.resid_gaus.fits', N.transpose(img.resid_gaus), img.header, clobber=True)
+            mylog.info('%s %s' % ('Wrote ', img.imagename+'.resid_gaus.fits'))
 
         ### residual rms and mean per island
         for isl in img.islands:
@@ -77,8 +83,10 @@ class Op_make_residimage(Op):
                 fimg[isl.bbox] += image_recons
            
             img.resid_shap = img.ch0 - fimg
-            pyfits.writeto(img.imagename + '.resid_shap.fits', N.transpose(img.resid_shap), img.header, clobber=True)
-            mylog.info('%s %s' % ('Wrote ', img.imagename+'.resid_shap.fits'))
+            img.model_shap = fimg
+            if img.opts.savefits_residim: 
+                pyfits.writeto(img.imagename + '.resid_shap.fits', N.transpose(img.resid_shap), img.header, clobber=True)
+                mylog.info('%s %s' % ('Wrote ', img.imagename+'.resid_shap.fits'))
 
             ### shapelet residual rms and mean per island
             for isl in img.islands:

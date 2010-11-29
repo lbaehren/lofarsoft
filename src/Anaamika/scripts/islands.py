@@ -16,7 +16,7 @@ import scipy.ndimage as nd
 from image import *
 import mylogger
 import pyfits
-import output_fbdsm_files as opf
+#import output_fbdsm_files as opf
 
 nisl = Int(doc="Total number of islands detected")
 
@@ -37,12 +37,13 @@ class Op_islands(Op):
 
         img.nisl = len(img.islands)
 
-        mylog.info('%s %i' % ("Number of islands found : ", len(img.islands)))
-
+        mylog.info('%s %i' % ("Number of islands found :", len(img.islands)))
+        print '%s %i' % ("Number of islands found :", len(img.islands))
+        
         for i, isl in enumerate(img.islands):
             isl.island_id = i
 
-        if opts.output_fbdsm: opf.write_fbdsm_islands(img)
+        #if opts.output_fbdsm: opf.write_fbdsm_islands(img)
 
         return img
 

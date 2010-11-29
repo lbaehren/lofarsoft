@@ -11,7 +11,8 @@ import fbdsm_fitstable_stuff as stuff
 class Op_outlist(Op):
     """Write out list of gaussians
 
-    Currently 3 output formats are supported:
+    Currently 4 output formats are supported:
+    - BBS list
     - fbdsm gaussian list
     - star list
     - kvis annotations
@@ -19,12 +20,77 @@ class Op_outlist(Op):
     All output lists are generated atm.
     """
     def __call__(self, img):
-        self.write_gaul(img)
-        self.write_star(img)
-        self.write_kvis_ann(img)
-        self.write_gaul_FITS(img)
+        if img.opts.output_all:
+            self.write_bbs(img)
+            self.write_gaul(img)
+            self.write_star(img)
+            self.write_kvis_ann(img)
+            self.write_gaul_FITS(img)
 
         return img
+
+    def write_bbs(self, img):
+        """ Writes the gaussian list as a bbs-readable file"""
+        import numpy as N
+        from const import fwsig
+
+        fname = img.imagename + '.sky_in'
+        if img.opts.spectralindex_do: 
+          freq = "%.5e" % img.freq0
+        else:
+          freq = "%.5e" % img.cfreq
+        f = open(fname, 'w')
+        str1 = "# (Name, Type, Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+", SpectralIndexDegree='0', " \
+              + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n "
+        f.write(str1)
+
+        sep = ', '
+        sname = img.imagename.split('.')[0]
+        str_src = []
+        total_flux = []
+        bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
+        bm_deg = img.pix2beam(bm_pix)
+        print bm_deg
+        for g in img.gaussians():
+          src = sname + '_' + str(g.gaus_num)
+          ra, dec = g.centre_sky
+          ra = ra2hhmmss(ra)
+          sra = str(ra[0]).zfill(2)+':'+str(ra[1]).zfill(2)+':'+str("%.3f" % (ra[2])).zfill(6)
+          dec= dec2ddmmss(dec)
+          decsign = ('-' if dec[3] < 0 else '+')
+          sdec = decsign+str(dec[0]).zfill(2)+'.'+str(dec[1]).zfill(2)+'.'+str("%.3f" % (dec[2])).zfill(6)
+          total_flux.append(g.total_flux)
+          total = str("%.3e" % (g.total_flux))
+          pol = '0.0, 0.0, 0.0, '
+          deconv = g.deconv_size_sky
+          if deconv[0] == 0.: deconv[0] = bm_deg[0]
+          if deconv[1] == 0.: deconv[1] = bm_deg[1]
+          if deconv[0] <= bm_deg[0] and deconv[1] <= bm_deg[1]:
+              stype = 'POINT'
+              deconv[0] = bm_deg[0]
+              deconv[1] = bm_deg[1]
+          else:
+              stype = 'GAUSSIAN'
+          deconv1 = str("%.5e" % (deconv[0])) 
+          deconv2 = str("%.5e" % (deconv[1])) 
+          deconv3 = str("%.5e" % (deconv[2])) 
+          deconvstr = deconv1 + ', ' + deconv2 + ', ' + deconv3
+          specin = '-0.8'
+          if img.opts.spectralindex_do: 
+            specin = g.spin1[1]
+            total = str("%.3e" % (g.spin1[0]))
+
+
+          str_src.append(src + sep + stype + sep + sra + sep + sdec + sep + total + sep + pol + \
+                          freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
+
+        # sort by flux (largest -> smallest)
+        flux_indx = range(len(str_src))
+        flux_indx.sort(lambda x,y: cmp(total_flux[x],total_flux[y]), reverse=True)
+        for i in flux_indx:
+          f.write(str_src[i])
+        f.close()
+
 
     def write_gaul(self, img):
         fname = img.imagename + '.gaul'
@@ -127,7 +193,7 @@ def ra2hhmmss(deg):
     x, mm = modf(x*60)
     ss = x*60
 
-    return (hh, mm, ss)
+    return (int(hh), int(mm), ss)
 
 def dec2ddmmss(deg):
     """Convert DEC coordinate (in degrees) to DD MM SS"""
@@ -138,7 +204,7 @@ def dec2ddmmss(deg):
     x, ma = modf(x*60)
     sa = x*60
 
-    return (dd, ma, sa, sign)
+    return (int(dd), int(ma), sa, sign)
 
 def pybdsm2fbdsm(img):
     import functions as func

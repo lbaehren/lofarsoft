@@ -27,6 +27,7 @@ Image.minpix_coord = Tuple(Int(), Int(),
                            doc="Coordinates of minimal pixel in the image")
 Image.max_value = Float(doc="Maximal pixel in the image")
 Image.min_value = Float(doc="Minimal pixel in the image")
+Image.cfreq = Float(doc="Frequency in the header")
 
 Image.omega = Float(doc="Solid angle covered by the image")
 confused = String(doc = 'confused image or not')
@@ -85,13 +86,32 @@ class Op_preprocess(Op):
 
         ### max/min pixel value & coordinates
         shape = image.shape[0:2]
-        max_idx = image.argmax()
-        min_idx = image.argmin()
+        if img.blankpix == 0:
+          max_idx = image.argmax()
+          min_idx = image.argmin()
+        else:
+          max_idx = N.nanargmax(image)
+          min_idx = N.nanargmin(image)
 
         img.maxpix_coord = N.unravel_index(max_idx, shape)
         img.minpix_coord = N.unravel_index(min_idx, shape)
         img.max_value    = image.flat[max_idx]
         img.min_value    = image.flat[min_idx]
+
+        ### Freq in header
+        nax = img.header['naxis']
+        found  = False 
+        if nax > 2:
+          for i in range(nax):
+            s = str(i+1)
+            if img.header['ctype'+s][0:4] == 'FREQ':
+              found = True
+              crval, cdelt, crpix = img.header['CRVAL'+s], img.header['CDELT'+s], img.header['CRPIX'+s]
+              ff = crval+cdelt*(1.-crpix)
+        if found: 
+          img.cfreq = ff
+        else:
+          img.cfreq = 50.0e6
 
         ### Solid angle of the image
         cdelt = (img.header['cdelt1'], img.header['cdelt2'])
@@ -104,7 +124,7 @@ class Op_preprocess(Op):
           if n <= 0: 
             n = 1
             mylog.warning('No pixels in image > 5sigma.')
-            mylog.warning('Either clipped rms is wrong or the image is pure gaussian noise ? ')
+            mylog.warning('Either clipped rms is wrong or the image is pure gaussian noise? ')
             mylog.info('Taking number of pixels above 5-sigma as 1.')
           opts.bmpersrc_th = N.product(shape)/((alpha_sourcecounts-1.)*n)
           mylog.info('%s %6.2f' % ('Estimated bmpersrc_th = ', opts.bmpersrc_th))

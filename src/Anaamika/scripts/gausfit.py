@@ -40,6 +40,7 @@ class Op_gausfit(Op):
     def __call__(self, img):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gausfit   ")
         opts = img.opts
+        print "Fitting islands with Gaussians..."
         for idx, isl in enumerate(img.islands):
           if opts.verbose_fitting:
             print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active)
@@ -76,7 +77,7 @@ class Op_gausfit(Op):
                 g.gaus_num = n
             isl.ngaus = m
         img.ngaus = n
-
+        print "Found %i Gaussians" % (n, )
         return img
 
     def fit_island(self, isl, opts, img):
@@ -457,6 +458,8 @@ class Gaussian(object):
     centre_pixE = List(Float())
     size_sky   = List(Float(), doc="Shape of the gaussian FWHM, BPA, arcsec")
     size_skyE  = List(Float())
+    deconv_size_sky = List(Float(), doc="Deconvolved shape of the gaussian FWHM, BPA, arcsec")
+    deconv_size_skyE = List(Float())
     size_pix   = List(Float(), doc="Shape of the gaussian FWHM, pixel units")
     size_pixE  = List(Float())
 
@@ -482,7 +485,7 @@ class Gaussian(object):
         self.peak_flux = p[0]
         self.centre_pix = p[1:3]
         size = p[3:6]
-        size = func.corrected_size(size)
+        size = func.corrected_size(size)  # gives fwhm and P.A.
         self.size_pix = size
         self.size_sky = img.pix2beam(size)
         bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
@@ -504,6 +507,9 @@ class Gaussian(object):
         self.size_pixE = errors[3:6]
         self.size_skyE = img.pix2beam(errors[3:6])
 
+        gaus_dc = func.deconv(bm_pix, size)
+        self.deconv_size_sky = img.pix2beam(gaus_dc)
+        self.deconv_size_skyE  = [0., 0., 0.]
 
 ### Insert attributes into Island class
 from islands import Island

@@ -41,9 +41,8 @@ class Op_loadFITS(Op):
 
         if pols[0] != 'I':
           mylog.error("First entry of pols has to be I")
-          import sys
-          sys.exit()
-
+          raise RuntimeError("First entry of pols has to be I")
+        
         for pol in pols:
             if pol == 'I':
                 fits_file=img.opts.fits_name
@@ -62,11 +61,11 @@ class Op_loadFITS(Op):
                   break
 
             mylog.info("Opened "+fits_file)
-            #fits.info()
+            print "Opened "+fits_file
 
             if len(fits) != 1:
-                print "WARNING: only the primary extent will be considered"
-
+                mylog.warning("Mutliple extentions found. Only the primary extention will be considered")
+                
             data = fits[0].data
             hdr = fits[0].header
             fits.close()
@@ -95,12 +94,13 @@ class Op_loadFITS(Op):
                 data = N.array(data, order='C',
                                dtype=data.dtype.newbyteorder('='))
                 mylog.info("Final image size : "+str(data.shape))
-
+                print "Image size in pixels : "+str(data.shape)
+                
                 img.image = data
                 img.header = hdr
             else:
                 # Make sure all polarisations have the same shape as I
-                if data.data.transpose(*axes).shape != img.image.shape:
+                if data.transpose(*axes).shape != img.image.shape:
                     img.opts.polarisation_do = False
                     mylog.warning('Shape of one or more of Q, U, V images does not match that of I. Polarisation module disabled.')
                     break
@@ -182,13 +182,56 @@ class Op_loadFITS(Op):
             return (bmaj, bmin, bpa)
 
         ### determine beam shape
+        found_in_history = False
         if img.opts.beam is not None:
             beam = img.opts.beam
-        else:
+        else:          
             try:
                 beam = (hdr['bmaj'], hdr['bmin'], hdr['bpa'])
             except:
-                raise RuntimeError("FITS file error: no beam information")
+                history = hdr.get_history()
+                bmaj = None
+                bmin = None
+                bpa = None
+                for h in history:
+                    bmajindx = h.find('BMAJ')
+                    bminindx = h.find('BMIN')
+                    bpaindx = h.find('BPA')
+                    if bmajindx != -1:
+                        bmaj_list = h[bmajindx+5:].split(' ')
+                        for bmaj_list_element in bmaj_list:
+                            try:
+                                bmaj = float(bmaj_list_element)
+                                break
+                            except:
+                                pass
+                    if bminindx != -1:
+                        bmin_list = h[bminindx+5:].split(' ')
+                        for bmin_list_element in bmin_list:
+                            try:
+                                bmin = float(bmin_list_element)
+                                break
+                            except:
+                                pass
+                    if bpaindx != -1:
+                        bpa_list = h[bpaindx+4:].split(' ')
+                        for bpa_list_element in bpa_list:
+                            try:
+                                bpa = float(bpa_list_element)
+                                break
+                            except:
+                                pass
+                    if bmaj != None and bmin != None and bpa != None:
+                        if bmaj > 1.0:
+                            bmaj = bmaj/3600.0
+                            bmin = bmin/3600.0
+                        beam = (bmaj, bmin, bpa)
+                        found_in_history = True
+                        print "BMAJ, BMIN, and/or BPA keywords not found in header"
+                        print "  Using beam parameters found in header history"
+                        break
+                if found_in_history == False:
+                    raise RuntimeError("FITS file error: no beam information found in header")
 
         ### convert beam into pixels and make sure it's asymmetric
         pbeam = beam2pix(beam)
@@ -202,6 +245,7 @@ class Op_loadFITS(Op):
         img.pix2coord = pix2coord
         img.beam = beam
         img.pixel_beam = pbeam
-
+        img.opts.beam = beam
+        print "Using beam = (" + str(bmaj) +", " + str(bmin) + ", " + str(bpa) + ") deg"
 
 

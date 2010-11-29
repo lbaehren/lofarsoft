@@ -70,7 +70,7 @@ class Op_rmsimage(Op):
 
           ## if rms map is insignificant, or rms_map==False use const value
           if opts.rms_map is False:
-            mylog.info('Background rms, mean images are constant, equals clipped values.')
+            mylog.info('Background rms image set to (constant) clipped value.')
             rms[:]  = crmss[ipol]
           if opts.mean_map != 'map':
             val = 0.0

@@ -86,16 +86,17 @@ class Opts(object):
                                 "while creating fittedimage")
     check_outsideuniv = Bool(False, doc="Check for pixels outside the universe (takes time)")
 
-    shapelet_do    = Bool(True, doc="Decompose island into shapelets (True/False)")
+    shapelet_do    = Bool(False, doc="Decompose island into shapelets (True/False)")
     shapelet_basis = Enum("cartesian", "polar", 
                           doc="basis set for shapelet decomposition.")
     shapelet_fitmode = Enum("fit", None,
                        doc="Calculate shapelet coeff.s by fitting (fit) or \
                        integrating (None)")
 
-    polarisation_do = Bool(True, doc="Find polarization properties (True/False)")
+    polarisation_do = Bool(False, doc="Find polarization properties (True/False)")
     rm_do = Bool(False, doc="Find rotation measure properties (True/False)")
-
+    psf_vary_do =  Bool(False, doc="Calculate PSF variation across image (True/False)")
+                       
     collapse_mode = Enum('average', 'single', doc="Average channels or take single channel to \
                         perform source detection on")
     collapse_ch0 = Int(0, doc="Number of the channel for source extraction, if collapse_mode='single'")
@@ -103,6 +104,7 @@ class Opts(object):
     collapse_wt = Enum('unity', 'rms', doc="Average channels with weights=1 or 1/rms_clip^2 if \
                         collapse_mode='average'")
 
+    savefits_residim  = Bool(False, doc="Save residual image as fits file")
     savefits_rmsim  = Bool(False, doc="Save background rms image as fits file")
     savefits_meanim = Bool(False, doc="Save background mean image as fits file")
     savefits_rankim = Bool(False, doc="Save island rank image as fits file")
@@ -140,8 +142,8 @@ class Opts(object):
     psf_tess_sc = String('s', doc = "(s)imple/(c)omplicated - normal or approximate (fuzzy); default=s")
     psf_tess_fuzzy = Float(0.05, doc = "Fraction of overlap for fuzzy tesselation; default=0.05")
 
-    print_timing   = Bool(True, doc="print basic timing information")
-    verbose_fitting= Bool(True, doc="print out extra information " \
+    print_timing   = Bool(False, doc="print basic timing information")
+    verbose_fitting= Bool(False, doc="print out extra information " \
                               "during fitting")
     debug_figs_1   = Bool(False, doc='Plot gaussian fit images for each source for each channel for spectralindex')
     debug_figs_2   = Bool(False, doc='Plot gaussian fit parameter plots for each source as a fn of channel')
@@ -151,8 +153,9 @@ class Opts(object):
     debug_figs_6   = Bool(False, doc='Plot images for inigaus_nobeam')
     debug_figs_7   = Bool(False, doc='Plot images for psf_vary')
 
-    output_fbdsm   = Bool(False, doc="write out fBDSM format output files or not, for use in Anaamika")
-    fbdsm_scratch  = String('/Users/mohan/anaamika/image/', doc="scratch directory for storing fBDSM files")
+    output_all     = Bool(False, doc="write out BBS, gaul, star, kvis output files or not")
+    #output_fbdsm   = Bool(False, doc="write out fBDSM format output files or not, for use in Anaamika")
+    #fbdsm_scratch  = String('/Users/mohan/anaamika/image/', doc="scratch directory for storing fBDSM files")
 
 
     def __init__(self, values=None):
