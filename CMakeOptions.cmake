@@ -14,21 +14,21 @@ set (LUS_ENABLE_DASHBOARD ${LUS_ENABLE_DASHBOARD} CACHE BOOL
 
 ## === System description =======================================================
 
-option (HAVE_OPENMP ${OPENMP_FOUND} CACHE BOOL
+set (HAVE_OPENMP ${OPENMP_FOUND} CACHE BOOL
   "Does the compiler support OpenMP?")
 
 ## === Anaamika =================================================================
 
-option (ANAAMIKA_ENABLE_SCIPY ${ANAAMIKA_ENABLE_SCIPY} CACHE BOOL
+set (ANAAMIKA_ENABLE_SCIPY ${ANAAMIKA_ENABLE_SCIPY} CACHE BOOL
   "Build SciPy as interactive environment?"                           )
-option (ANAAMIKA_ENABLE_FBDSM ${ANAAMIKA_ENABLE_FBDSM} CACHE BOOL
+set (ANAAMIKA_ENABLE_FBDSM ${ANAAMIKA_ENABLE_FBDSM} CACHE BOOL
   "Build Fortran-based version of BDSM?"                              )
-option (ANAAMIKA_ENABLE_PYBDSM ${ANAAMIKA_ENABLE_PYBDSM} CACHE BOOL
+set (ANAAMIKA_ENABLE_PYBDSM ${ANAAMIKA_ENABLE_PYBDSM} CACHE BOOL
   "Build Python-enabled version of BDSM?"                             )
 
 ## === CR-Tools =================================================================
 
-option (CR_WITH_DAL ${CR_WITH_DAL} CACHE BOOL
+set (CR_WITH_DAL ${CR_WITH_DAL} CACHE BOOL
   "Build and use the Data Access Library?"                            )
 set (CR_WITH_GLISH ${CR_WITH_GLISH} CACHE BOOL
   "Support for Glish applications?"                                   )
