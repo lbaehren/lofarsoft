@@ -3,7 +3,7 @@
 ## Project description
 
 ## Name of the project
-project (BDSM Fortran C)
+project (BDSM Fortran C CXX)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
