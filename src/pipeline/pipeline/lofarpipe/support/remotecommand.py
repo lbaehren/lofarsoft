@@ -94,7 +94,7 @@ def run_via_mpirun(logger, host, command, environment, arguments):
         mpi_cmd.extend(["-x", key])
     mpi_cmd.append("--")
     mpi_cmd.extend(command.split()) # command is split into (python, script)
-    mpi_cmd.extend(re.escape(str(arg)) for arg in arguments)
+    mpi_cmd.extend(str(arg) for arg in arguments)
     env = os.environ
     env.update(environment)
     process = spawn_process(mpi_cmd, logger, env=env)
