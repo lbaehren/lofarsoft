@@ -246,6 +246,6 @@ class Op_loadFITS(Op):
         img.beam = beam
         img.pixel_beam = pbeam
         img.opts.beam = beam
-        print "Using beam = (" + str(bmaj) +", " + str(bmin) + ", " + str(bpa) + ") deg"
+        print "Using beam = (" + str(beam[0]) +", " + str(beam[1]) + ", " + str(beam[2]) + ") deg"
 
 
