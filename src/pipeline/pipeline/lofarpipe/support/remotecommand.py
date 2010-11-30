@@ -19,6 +19,10 @@ from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.utilities import spawn_process
 from lofarpipe.support.jobserver import job_server
 
+# By default, Linux allocates lots more memory than we need(?) for a new stack
+# frame. When multiplexing lots of threads, that will cause memory issues.
+threading.stack_size(1048576)
+
 class ParamikoWrapper(object):
     """
     Sends an SSH command to a host using paramiko, then emulates a Popen-like
