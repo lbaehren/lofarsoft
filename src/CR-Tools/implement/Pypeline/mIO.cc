@@ -365,6 +365,31 @@ bool HFPP_FUNC_NAME(CRDataReader &dr, const HString key, const HPyObjectPtr pyob
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+//Copy of the hCopy function - duplicated here, since I am too lazy to turn the templated functions into an .h file that could be included here and be used with, e.g. CASA pointers
+
+template <class Iter, class Iterin>
+void uglycopy(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
+{
+  // Declaration of variables
+  typedef IterValueType T;
+  Iter itout(vecout);
+  Iterin itin(vecin);
+
+  // Sanity check - but how should this error happen in a Python code ...?
+  if ((vecout > vecout_end) || (vecin > vecin_end)) {
+    throw PyCR::ValueError("Negative size of vector.");
+    return;
+  }
+
+  // Copying of data
+  while (itout != vecout_end) {
+    *itout=hfcast<T>(*itin);
+    ++itin; ++itout;
+    if (itin==vecin_end) itin=vecin;
+  };
+}
+
+
 //$DOCSTRING: Read a specified block of data from a Datareader object into a vector, where the size should be pre-allocated.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileRead
@@ -445,7 +470,6 @@ void HFPP_FUNC_NAME(
 
   //Create a DataReader Pointer from an integer variable
   DataReader *drp=&dr;
-  HInteger selantenna(antenna);
   typedef IterValueType T;
 
   //Check whether it is non-NULL.
@@ -454,6 +478,14 @@ void HFPP_FUNC_NAME(
     return;
   };
   if (block>=0) {drp->setBlock((uint)block);};
+  if (antenna>=0) { //Select a single antenna - in a bit complicated way
+    vector<uint> stlvec; stlvec.push_back((uint)antenna);
+    uint * storage = &(stlvec[0]);
+    casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
+    CasaVector<uint> casavec(shape,storage,casa::SHARE);
+    drp->setSelectedAntennas(casavec,false);
+  };
+
   //------TIME------------------------------
   if (Datatype=="Time") {
     casa::IPosition shape(1,vec_end-vec); //tell casa the size of the vector
@@ -472,33 +504,10 @@ void HFPP_FUNC_NAME(
     aipsvec2stdit(val,vec,vec_end);
   }
 //..........................................................................................
-//Conversion from aips to stl using shared memory space
-//..........................................................................................
 
-//Note there is an ugly patch to select antennas since the DataReader still doesn't work
-#define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD,SIZE)				\
-  if ((typeid(T)==typeid(TYPESTL)) && (selantenna<0)) {	_H_NL_		\
-    casa::IPosition shape(2);				_H_NL_		\
-    shape(0)=drp->SIZE (); shape(1)=drp->nofSelectedAntennas();	_H_NL_\
-    if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(1) << " antennas times " << shape(0) << " data points (= " << shape(0)*shape(1) <<")!"); throw PyCR::ValueError("Incorrect size of read input vector."); return;}; _H_NL_ \
-    casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(*vec)),casa::SHARE); _H_NL_\
-    drp->FIELD (casamtrx);						_H_NL_\
-  } else {								_H_NL_\
-    casa::IPosition shape(2);				_H_NL_		\
-    HInteger selantennas(drp->nofSelectedAntennas());_H_NL_\
-    shape(0)=drp->SIZE (); shape(1)=selantennas;	_H_NL_\
-    vector<TYPESTL> tmpvec(shape(0)*shape(1)); _H_NL_\
-    casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(tmpvec[0])),casa::SHARE); _H_NL_\
-    if (selantenna>=0) {shape(1)=1; if (selantenna>=selantennas) selantenna=(selantennas-1);};_H_NL_\
-    if (shape(0)*shape(1) != vec_end-vec) {ERROR( BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Input vector size " << vec_end-vec << " does not match expected size of " << shape(1) << " antennas times " << shape(0) << " data points (= " << shape(0)*shape(1) <<")!");throw PyCR::ValueError("Incorrect size of read input vector."); return;}; _H_NL_ \
-    drp->FIELD (casamtrx);						_H_NL_\
-  if (selantenna>=0) {hCopy(vec,vec_end,tmpvec.begin()+selantenna*shape(0),tmpvec.begin()+(selantenna+1)*shape(0));}_H_NL_\
-  else {hCopy(vec,vec_end,tmpvec.begin(),tmpvec.end());}_H_NL_\
-  }
+#define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD,SIZE) CasaMatrix<TYPECASA> val=drp->FIELD(); _H_NL_ uglycopy(vec,vec_end,val.cbegin(),val.cend())
 
-//..........................................................................................
-
-  //------FX----------------------------TYPESTL,TYPECASA,FIELD,SIZE
+  //------Fx----------------------------TYPESTL,TYPECASA,FIELD,SIZE
   else if (Datatype=="Fx") {HFPP_REPEAT(HNumber,double,fx,blocksize);}
   //------VOLTAGE------------------------------
   else if (Datatype=="Voltage") {HFPP_REPEAT(HNumber,double,voltage,blocksize);}

@@ -13,7 +13,7 @@ from harray import *
 #  Define Plotting functions for vectors and arrays
 #======================================================================
 
-def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,**plotargs):
+def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,**plotargs):
     """
     array[0].plot(self,xvalues=vec,xlabel="x",ylabel="y",title="Title",clf=True,logplot="xy") -> plot the array (loglog)
 
@@ -97,16 +97,34 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
         else: exec("var=dflt")
+    var="highlightcolor"; dflt=("red"); val=eval(var);
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec("var=dflt")
+    var="nhighlight"; dflt=[1]; val=eval(var);
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec("var=dflt")
+    var="highlight"; dflt=None; val=eval(var);
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec("var=dflt")
+    if type(val)==str: val=(str)
     if clf: self.plt.clf()
     if logplot=="x": _plot=self.plt.semilogx
     elif logplot=="y": _plot=self.plt.semilogy
     elif (logplot=="xy") | (logplot=="yx"): _plot=self.plt.loglog
     else: _plot=self.plt.plot
-    iterate=True;
+    iterate=True; loop=0
     while (iterate):
         _plot(xvalues.vec(),self.vec(),**plotargs)
+        if not highlight==None:
+            for n in range(nhighlight[loop]): #how many sections are to be highlighted?
+                slc=slice(highlight[n,0],highlight[n,1]+1)
+                _plot(xvalues.vec()[slc],self.vec()[slc],color=highlightcolor)
         xvalues.next()
         iterate=self.next().doLoopAgain()
+        loop+=1;
     self.plt.ylabel(ylabel+yunit)
     self.plt.xlabel(xlabel+xunit)
     if not xlim==None: self.plt.xlim(*xlim)

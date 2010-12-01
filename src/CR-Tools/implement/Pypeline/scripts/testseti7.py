@@ -188,9 +188,10 @@ datathreshold = hArray(subpower[...].stddevbelow(datamean.vec()))
 maxgap=Vector(int,len(datamean),fill=10)
 minlength=Vector(int,len(datamean),fill=1)
 
+"""
 (npeaks,datathreshold)=findpeaks(subpower)
 rp(0,0)
-
+"""
 
 #peakedbands
 #=npeaks.

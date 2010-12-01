@@ -1,0 +1,209 @@
+<23	(version "0.24-beta2")
+<23	(version "0.24-beta2")
+>10	eval None
+<13	(return nil)
+>11	eval False
+<13	(return nil)
+>10	eval True
+<11	(return t)
+>7	eval 3
+<11	(return 3)
+>7	eval 0
+<11	(return 0)
+>8	eval -3
+<12	(return -3)
+>9	eval 3.0
+<13	(return 3.0)
+>9	eval 0.0
+<13	(return 0.0)
+>10	eval -3.0
+<14	(return -3.0)
+>8	eval ''
+<12	(return "")
+>9	eval 'a'
+<13	(return "a")
+>11	eval 'byz'
+<15	(return "byz")
+>12	eval "c'bz"
+<16	(return "c'bz")
+>11	eval 'd"z'
+<16	(return "d\"z")
+>13	eval 'e\\bz'
+<17	(return "e\\bz")
+>14	eval 'f\x08z'
+<16	(return "f\bz")
+>14	eval 'g\x0cz'
+<16	(return "g\fz")
+>12	eval 'h\nz'
+<16	(return "h\nz")
+>12	eval 'i\rz'
+<16	(return "i\rz")
+>14	eval 'j\r\nz'
+<18	(return "j\r\nz")
+>12	eval 'k\tz'
+<16	(return "k\tz")
+>14	eval 'l\x1bz'
+<18	(return "l\033z")
+>10	eval u'p'
+<13	(return "p")
+>12	eval u'qyz'
+<15	(return "qyz")
+>19	eval u'r\xeav\xe9'
+<60	(return (decode-coding-string "r\303\252v\303\251" 'utf-8))
+>18	eval u's\u2014z!'
+<57	(return (decode-coding-string "s\342\200\224z!" 'utf-8))
+>8	eval ()
+<12	(return [])
+>10	eval (0,)
+<13	(return [0])
+>12	eval (0.0,)
+<15	(return [0.0])
+>12	eval ('a',)
+<15	(return ["a"])
+>19	eval (0, 0.0, 'a')
+<21	(return [0 0.0 "a"])
+>8	eval []
+<14	(return 'nil)
+>9	eval [0]
+<14	(return '(0))
+>11	eval [0.0]
+<16	(return '(0.0))
+>11	eval ['a']
+<16	(return '("a"))
+>19	eval [0, 0.0, 'a']
+<22	(return '(0 0.0 "a"))
+>10	eval None
+<13	(return nil)
+>15	eval lisp['t']
+<12	(return 't)
+>19	eval lisp['ab_cd']
+<16	(return 'ab_cd)
+>19	eval lisp['ab-cd']
+<16	(return 'ab-cd)
+>20	eval lisp['lambda']
+<17	(return 'lambda)
+>10	eval None
+<13	(return nil)
+>15	eval lisp['t']
+<12	(return 't)
+>19	eval lisp['ab-cd']
+<16	(return 'ab-cd)
+>9	eval ord
+<30	(return (pymacs-defun 0 nil))
+>14	eval object()
+<27	(return (pymacs-python 1))
+>11	eval 3 + 5
+<11	(return 8)
+<23	(version "0.24-beta2")
+<23	(version "0.24-beta2")
+>10	eval None
+<13	(return nil)
+>11	eval False
+<13	(return nil)
+>10	eval True
+<11	(return t)
+>7	eval 3
+<11	(return 3)
+>7	eval 0
+<11	(return 0)
+>8	eval -3
+<12	(return -3)
+>9	eval 3.0
+<13	(return 3.0)
+>9	eval 0.0
+<13	(return 0.0)
+>10	eval -3.0
+<14	(return -3.0)
+>8	eval ''
+<12	(return "")
+>9	eval 'a'
+<13	(return "a")
+>11	eval 'byz'
+<15	(return "byz")
+>12	eval "c'bz"
+<16	(return "c'bz")
+>11	eval 'd"z'
+<16	(return "d\"z")
+>13	eval 'e\\bz'
+<17	(return "e\\bz")
+>14	eval 'f\x08z'
+<16	(return "f\bz")
+>14	eval 'g\x0cz'
+<16	(return "g\fz")
+>12	eval 'h\nz'
+<16	(return "h\nz")
+>12	eval 'i\rz'
+<16	(return "i\rz")
+>14	eval 'j\r\nz'
+<18	(return "j\r\nz")
+>12	eval 'k\tz'
+<16	(return "k\tz")
+>14	eval 'l\x1bz'
+<18	(return "l\033z")
+>10	eval u'p'
+<13	(return "p")
+>12	eval u'qyz'
+<15	(return "qyz")
+>19	eval u'r\xeav\xe9'
+<60	(return (decode-coding-string "r\303\252v\303\251" 'utf-8))
+>18	eval u's\u2014z!'
+<57	(return (decode-coding-string "s\342\200\224z!" 'utf-8))
+>8	eval ()
+<12	(return [])
+>10	eval (0,)
+<13	(return [0])
+>12	eval (0.0,)
+<15	(return [0.0])
+>12	eval ('a',)
+<15	(return ["a"])
+>19	eval (0, 0.0, 'a')
+<21	(return [0 0.0 "a"])
+>8	eval []
+<14	(return 'nil)
+>9	eval [0]
+<14	(return '(0))
+>11	eval [0.0]
+<16	(return '(0.0))
+>11	eval ['a']
+<16	(return '("a"))
+>19	eval [0, 0.0, 'a']
+<22	(return '(0 0.0 "a"))
+>10	eval None
+<13	(return nil)
+>15	eval lisp['t']
+<12	(return 't)
+>19	eval lisp['ab_cd']
+<16	(return 'ab_cd)
+>19	eval lisp['ab-cd']
+<16	(return 'ab-cd)
+>20	eval lisp['lambda']
+<17	(return 'lambda)
+>10	eval None
+<13	(return nil)
+>15	eval lisp['t']
+<12	(return 't)
+>19	eval lisp['ab-cd']
+<16	(return 'ab-cd)
+>9	eval ord
+<30	(return (pymacs-defun 0 nil))
+>14	eval object()
+<27	(return (pymacs-python 1))
+>11	eval 3 + 5
+<11	(return 8)
+>19	exec def f(): pass
+<13	(return nil)
+>25	eval lisp.apply(f, None)
+<40	(eval (apply (pymacs-defun 2 nil) nil))
+>17	eval python[2]()
+<13	(return nil)
+>12	return None
+<13	(return nil)
+>43	eval lisp('(pymacs-eval "repr(2L**111)")')
+<45	(eval (progn (pymacs-eval "repr(2L**111)")))
+>19	eval repr(2L**111)
+<47	(return "2596148429267413814265248164610048L")
+>45	return "2596148429267413814265248164610048L"
+<47	(return "2596148429267413814265248164610048L")
+>26	exec import os
+import sys
+<13	(return nil)

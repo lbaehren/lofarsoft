@@ -1,0 +1,9 @@
+#
+cd $LOFARSOFT/build
+rm */CMakeCache.txt 
+rm */*/CMakeCache.txt 
+rm */*/*/CMakeCache.txt 
+rm */*/*/*/CMakeCache.txt 
+./bootstrap
+make dal
+make cr

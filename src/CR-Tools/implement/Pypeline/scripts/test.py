@@ -1,4 +1,9 @@
 #! /usr/bin/env python
+dr = crfile(LOFARSOFT+'/data/lofar/trigger-2010-04-15/triggered-pulse-2010-04-15-RS205.h5')
+allfx = dr["Fx"]
+hFileSetParameter(dr,'SelectedAntennas', [0,1,10,54,60] )
+selfx = dr["Fx"]
+selVol = dr["Voltage"]
 
 from pycrtools import *
 

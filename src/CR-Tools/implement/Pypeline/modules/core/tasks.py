@@ -1,7 +1,7 @@
 """Tasks
 """
 
-class Parameter():
+class CRParameters():
     """A parameter base class.
     """
     def __init__(self, value=None, description=None):
@@ -13,7 +13,7 @@ class Parameter():
     def __repr__(self):
         return repr(self.value)
 
-class Task():
+class CRTask():
     """A base class for creating tasks.
     """
 
