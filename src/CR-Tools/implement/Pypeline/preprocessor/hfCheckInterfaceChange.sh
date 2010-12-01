@@ -18,5 +18,8 @@ if test -f $1.def.h.latest ; then
 #	echo "Creating $1.def.h"
 	cp $1.def.h.latest $1.def.h
     fi
+else
+    touch $1.def.h.latest
+    touch $1.def.h
 fi
 
