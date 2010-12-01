@@ -16,13 +16,13 @@ import matching as match
 #datafiles = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs003/*'
 #datafiles = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs005/*'
 #datafiles = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/*'
-datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-12*'
+datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-21*'
 
 #-------
 #triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs003.dat'
 #triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs005.dat'
 #triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs006.dat'
-triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-20_TRIGGER.dat'
+triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER.dat'
 #-------
 sortstring = 'sort -rn --field-separator="-" --key=18'
 outfile = 'test-triggerfits-out.txt'
@@ -67,7 +67,7 @@ for fileind in range(nofiles):
       outfd.write(outstring)
       outfd.flush()
     except (ZeroDivisionError, IndexError):
-      pass
+      print 'Error!'
   else:
     print 'file \'',files[fileind].strip(),'\' does not exist!'    
 outfd.close()

@@ -25,7 +25,7 @@ rad2deg = 180./np.pi
 
 #------------------------------------------------------------ simplexPositionFit
 def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
-                       cr_freqs, FarField=False, blocksize=-1):
+                       cr_freqs, FarField=True, blocksize=-1):
   if not FarField:
       print 'Warning: only FarField == True is implemented!'
   ants = cr_fft.shape()[0]
@@ -39,7 +39,7 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
   cartesian=azel.new()
   delays=hArray(float,dimensions=[crfile["nofAntennas"]])
   weights=hArray(complex,dimensions=[crfile["fftLength"]],name="Complex Weights")
-  freqs = hArray(float, dimensions=[crfile["fftLength"]], xvalues=crfile["frequencyValues"])
+  freqs = hArray(crfile["frequencyValues"]) # a FloatVec comes out, so put it into hArray
   phases=hArray(float,dimensions=[crfile["fftLength"]],name="Phases",xvalues=crfile["frequencyValues"]) 
   shifted_fft=hArray(complex,dimensions=[crfile["fftLength"]])
   beamformed_fft=hArray(complex,dimensions=[crfile["fftLength"]])
@@ -76,11 +76,11 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
 #      cr.geometricDelays(delays, antenna_positions, cartesian, FarField)
 #      cr.complexWeights(weights, delays, cr_freqs)        
 #      shifted_fft = cr_fft*weights        
-      beamformed_fft = shifted_fft[ant_indices[0]]  
+      beamformed_fft.fill(0.0) # = shifted_fft[ant_indices[0]]  
 #      beamformed_fft = shifted_fft[ant_indices[0]]
-      for n in ant_indices[1:]:
+      #for n in ant_indices[1:]:
 #       beamformed_fft += shifted_fft[n]
-        shifted_fft[n].addto(beamformed_fft)
+      shifted_fft[...].addto(beamformed_fft)
 
       hInvFFTw(beamformed_efield,beamformed_fft)
       beamformed_efield.abs() # make absolute value!
@@ -102,6 +102,8 @@ def triggerMessageFit(crfile, triggerMessageFile, fittype='bruteForce'):  # crfi
   fileSamplenum = crfile["SAMPLE_NUMBER"][0]                  # assuming start sample nr. is the same for all antennas
   ddate = fileDate + fileSamplenum / 200.0e6             
   (mIDs, mdDates, mTdiffs, mTriggerDates, mSampleNums) = match.matchTriggerfileToTime((ddate+0.00033024),triggerMessageFile)
+  if len(mIDs) == 0:
+      print 'NO TRIGGERS FOUND'
   #get the position for that
   #match_positions = np.reshape(dr["antenna_position"][mIDs],(len(mIDs)*3))
   # !!! GET antenna positions for the correct station. How do you know the station? 
@@ -133,6 +135,7 @@ def triggerMessageFit(crfile, triggerMessageFile, fittype='bruteForce'):  # crfi
 def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   #Open the file, 
   #dr = cr.open(filename,'LOFAR_TBB')
+  import pdb; pdb.set_trace()
   crfile = IO.open([filename])
   crfile.setAntennaset(antennaset)
     
