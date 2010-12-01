@@ -2,6 +2,13 @@
 message (STATUS "[CR-Tools] Adding implement/Pypeline ...")
 
 ##-------------------------------------------------------------------------------
+## Find libraries
+include (FindPython)
+include (FindBoost)
+include (FindNumpy)
+include (FindNumUtil)
+
+##-------------------------------------------------------------------------------
 ## Compiler options
 
 option (PYPELINE_WITH_COMPILER_WARNINGS "Compile Pypeline with compiler warnings enabled." ON)
@@ -82,6 +89,7 @@ set (PYPELINE_CPP_MODULES
   Imaging
   IO
   RF
+  Numpy
   Bindings
   )
 
@@ -140,8 +148,9 @@ foreach (FILE ${PYPELINE_CPP_MODULES})
             ${PYPELINE_CPP_MODULE_WRAPPER_HEADER_FILES}
             ${CMAKE_CURRENT_SOURCE_DIR}/core.h
 	    ${CMAKE_CURRENT_SOURCE_DIR}/hfppnew.h
+	    ${CMAKE_CURRENT_SOURCE_DIR}/numpy_ptr.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${PYPELINE_CPP_MODULE_PREFIX}Module.h
-    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP -w  -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${PYPELINE_CPP_FLAGS} ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.wpp.cc
+    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP -w -I${CMAKE_CURRENT_SOURCE_DIR} -I${NUMPY_INCLUDES} -I${NUM_UTIL_INCLUDES} -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${PYPELINE_CPP_FLAGS} ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.wpp.cc
     COMMENT "Wrapper preprocessing module ${FILE}: Executing wrapper preprocessor"
     )
 
@@ -163,6 +172,8 @@ endforeach (FILE ${PYPELINE_CPP_MODULES})
 include_directories (
   ${CR_SOURCE_DIR}/implement/Pypeline
   ${CMAKE_CURRENT_BINARY_DIR}
+  ${NUMPY_INCLUDES}
+  ${NUM_UTIL_INCLUDES}
   )
 
 # Core files
@@ -196,6 +207,7 @@ target_link_libraries (hftools
   ${PYTHON_LIBRARIES}
   ${FFTW3_LIBRARIES}
   ${GSL_LIBRARIES}
+  ${NUM_UTIL_LIBRARIES}
   )
 
 ##to speed up computations use -g -O2 or -g0 -O3 if no debuggng is needed.

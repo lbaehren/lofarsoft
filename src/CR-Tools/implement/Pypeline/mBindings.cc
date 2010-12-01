@@ -39,6 +39,12 @@
 //
 // ========================================================================
 
+#include <boost/python/numeric.hpp>
+
+#define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
+#include "num_util.h"
+#include "numpy_ptr.h"
+
 #include "core.h"
 #include "mArray.h"
 #include "mVector.h"
@@ -49,6 +55,7 @@
 #include "mImaging.h"
 #include "mIO.h"
 #include "mRF.h"
+#include "mNumpy.h"
 
 
 // ========================================================================
@@ -157,10 +164,12 @@ namespace PyCR { // Namespace PyCR -- begin
 
 //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(hArray_setDimensions_overloads,setDimensions<HNumber>,1,2)
 
-
 BOOST_PYTHON_MODULE(hftools)
 {
-  using namespace boost::python;
+   import_array();
+   boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+
+   using namespace boost::python;
 
 // ________________________________________________________________________
 //                                                    Exception translation
@@ -306,6 +315,11 @@ BOOST_PYTHON_MODULE(hftools)
 //                                                                       RF
 
 #include "../../../../build/cr/implement/Pypeline/mRF.def.h"
+
+// ________________________________________________________________________
+//                                                                  Numpy
+
+#include "../../../../build/cr/implement/Pypeline/mNumpy.def.h"
 
 }
 
