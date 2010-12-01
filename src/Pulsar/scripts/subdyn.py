@@ -417,8 +417,11 @@ if __name__=="__main__":
 
 		if rfi_fraction >= rfilimit:  # bad subband  
 			clipped[i] = np.zeros(int(size/Nbins))
-			badbands.append(i)
-			print "subband %d will be excluded (rfi fraction = %.2f%%)" % (i+subband_offset, rfi_fraction)
+			if sizes[i] != 0:
+				badbands.append(i)
+				print "subband %d will be excluded (rfi fraction = %.2f%%)" % (i+subband_offset, rfi_fraction)
+			else:
+				print "subband %d will be excluded (blanked)" % (i+subband_offset,)
 		else:
 			clipindices[i] = np.where(levels[i] > threshold)[0]
 
