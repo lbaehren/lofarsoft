@@ -494,7 +494,6 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
 template <class Iter, class S>
 void h{$MFUNC}2(const Iter vec1,const Iter vec1_end, const S val)
 {
-  h{$MFUNC}2(vec1, vec1_end, val);
       // Declaration of variables
       typedef IterValueType T;
       Iter it=vec1;
