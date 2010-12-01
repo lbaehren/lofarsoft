@@ -169,6 +169,8 @@ class TBBdata:
             import metadata as md
             data=md.get(keyword, self.get("antennaIDs"), self.antennaset, True)
             return data
+        elif keyword is "maxblocknr":
+            return ((self["shift"]-self["Filesize"])/(-self["blocksize"])).min()
         else:
             data=get(self.files,keyword,False)
             if not self.selection or keyword in noselectionkeywords or ( keyword == "selectedAntennas" and self.new_selection_method ):
@@ -484,12 +486,12 @@ def applySelection(selection,array,rArray=None):
         if len(dim)>=2:
             dim[0]=len(selection)
             if not rArray:
-                rArray=hf.hArray(copy=array,dimensions=dim,fill=0,units=("","a.u."))
+                rArray=hf.hArray(copy=array,dimensions=dim,fill=0)
             rArray[range(dim[0]),...].copy(array[selection,...])
         else:
             dim=len(selection)
             if not rArray:
-                rArray=hf.hArray(copy=array,dimensions=dim,fill=0,units=("","a.u."))
+                rArray=hf.hArray(copy=array,dimensions=dim,fill=0)
             rArray[...].copy(array[selection][...])
         
         if returnArray:
