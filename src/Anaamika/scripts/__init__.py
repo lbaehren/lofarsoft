@@ -6,6 +6,7 @@ execute chain of operations properly.
 """
 
 from FITS import Op_loadFITS
+#from read_image import Op_readimage
 from preprocess import Op_preprocess
 from rmsimage import Op_rmsimage
 from threshold import Op_threshold
@@ -22,7 +23,8 @@ from wavelet_atrous import Op_wavelet_atrous
 #from psf_vary import Op_psf_vary # this module is not in current USG repository, and _pytesselate.so does not import
 import mylogger 
 
-fits_chain = [Op_loadFITS(),
+fits_chain = [#Op_readimage(),
+              Op_loadFITS(),
               Op_collapse(),
               Op_preprocess(),
               Op_rmsimage(),
@@ -83,7 +85,7 @@ def execute(chain, opts):
     return img
 
 
-def process_image(input_file, beam=None, do_pol=False, do_spec=True, do_shapelets=False, isl_thresh=3.0, pix_thresh=5.0, collapse_mode='average', collapse_wt='rms', threshold_method=None, use_rms_map=None, use_mean_map='default', rms_box=None, extended=False, gaussian_maxsize=10.0):
+def process_image(input_file, beam=None, do_pol=False, do_spec=False, do_shapelets=False, isl_thresh=3.0, pix_thresh=5.0, collapse_mode='average', collapse_wt='rms', threshold_method=None, use_rms_map=None, use_mean_map='default', rms_box=None, extended=False, gaussian_maxsize=10.0):
     """
     Run a standard analysis on an image and returns the associated Image object.
 
@@ -125,7 +127,7 @@ def process_image(input_file, beam=None, do_pol=False, do_spec=True, do_shapelet
         use_rms_map = False # ignore rms map, which may be biased by extended emission        
     
     # Build options dictionary
-    opts = {'fits_name':input_file, 'collapse_mode':collapse_mode , 'collapse_wt':collapse_wt, 'thresh':threshold_method, 'thresh_isl':isl_thresh, 'thresh_pix':pix_thresh, 'polarisation_do':do_pol, 'spectralindex_do':do_spec, 'shapelet_do':do_shapelets, 'rms_map':use_rms_map, 'mean_map':use_mean_map, 'rms_box':rms_box, 'flag_maxsize_bm':gaussian_maxsize}
+    opts = {'fits_name':input_file, 'beam': beam, 'collapse_mode':collapse_mode , 'collapse_wt':collapse_wt, 'thresh':threshold_method, 'thresh_isl':isl_thresh, 'thresh_pix':pix_thresh, 'polarisation_do':do_pol, 'spectralindex_do':do_spec, 'shapelet_do':do_shapelets, 'rms_map':use_rms_map, 'mean_map':use_mean_map, 'rms_box':rms_box, 'flag_maxsize_bm':gaussian_maxsize}
 
     # Run execute with the default fits_chain and given options
     img = execute(fits_chain, opts)

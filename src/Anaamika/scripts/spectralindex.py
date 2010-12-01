@@ -94,6 +94,11 @@ class Op_spectralindex(Op):
             src.case = str(case)
             para, epara, q_spec, spin_para = self.msource(img, src, rms_spec, avimage, casepara, nchan)
 
+      else:
+          img.opts.spectralindex_do = False
+          mylog.warning('Only one spectral channel found. Spectral index module disabled.')
+
+
 ####################################################################################
     def flagchans_rmschan(self, crms, zeroflags, iniflags, cutoff):
         """ Calculate clipped rms (r1) of the rms as fn of channel, crms, with zeroflags 

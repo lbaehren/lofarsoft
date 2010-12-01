@@ -11,9 +11,9 @@ in non-native format, so we have to convert it before usage.
 import numpy as N
 from image import *
 import mylogger 
+import pyfits
 
 Image.imagename = String(doc="Identifier name for output files")
-Image.filename = String(doc="Name of input file without FITS extension")
 
 class Op_loadFITS(Op):
     """FITS file loader
@@ -22,8 +22,6 @@ class Op_loadFITS(Op):
     wcslib machinery for it.
     """
     def __call__(self, img):
-        import pyfits
-
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"LoadFits  ")
 
         #if img.opts.fits_name is None:
@@ -40,8 +38,8 @@ class Op_loadFITS(Op):
             pols=['I'] # assume I is always present
 
         if pols[0] != 'I':
-          mylog.error("First entry of pols has to be I")
-          raise RuntimeError("First entry of pols has to be I")
+            mylog.error("First entry of pols has to be I")
+            raise RuntimeError("First entry of pols has to be I")
         
         for pol in pols:
             if pol == 'I':
