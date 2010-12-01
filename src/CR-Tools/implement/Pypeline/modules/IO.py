@@ -19,10 +19,8 @@ work just like the pycrtools.
 
 Example:
 
-import IO
 import os
-(or new version, which didn't work for me yet)
-#from pycrtools import IO
+from pycrtools import IO
 
 # Get list of files
 datadir=os.environ['LOFARSOFT']+'/data/lofar/trigger-2010-02-11/'
@@ -213,7 +211,7 @@ class TBBdata:
                  it will return the next block.
         """
         if self.new_selection_method:
-            return readVoltage(self.files,fxdata,block)
+            return readFx(self.files,fxdata,block)
         if not self.selection:
             retval = readFx(self.files,self.allfxdata,block)
             if not fxdata:
@@ -224,18 +222,6 @@ class TBBdata:
         else:
             readFx(self.files,self.allfxdata,block)
             return applySelection(self.selection,self.allfxdata,fxdata)
-
-    def readdata2(self,fxdata=None,block=-1):
-        """Read a block of data for the selected antennas. 
-        
-        *fxdata* hArray to write the data in. If not provided, it will
-                 return an array.
-        *block*  Block for which the data should be returned. If negative
-                 it will return the next block.
-        """
-
-        return readVoltage(self.files,fxdata,block)
-
 
     def setSelection(self,selection):
         """Set an antennaselection.
@@ -457,32 +443,6 @@ def readFx(files,fxdata,block=-1):
 
     set(files,"block",block)
      
-    selAnts=get(files,"nofAntennas")
-    antBeg=0
-    antEnd=0
-    for num,nrA in enumerate(selAnts):
-        antBeg=antEnd
-        antEnd+=nrA
-        #fxdata.setSlice([antBeg*dim[1],antEnd*dim[1]])
-        fxdata[antBeg:antEnd].read(files[num],"Fx")
-
-    #fxdata.setSlice(0,antEnd*dim[1])
-    return True
-
-def readVoltage(files,fxdata,block=-1):
-    """read a block of voltage data for the selected antennas. 
-
-    *fxdata* Array in which to return the data
-    *block*  Block for which data should be read
-
-    """
-    if block == -1:
-        block=get(files,"block",True)
-        for num,bl in enumerate(block):
-            block[num]=bl+1
-
-    set(files,"block",block)
-     
     selAnts=get(files,"nofSelectedAntennas")
     antBeg=0
     antEnd=0
@@ -490,7 +450,7 @@ def readVoltage(files,fxdata,block=-1):
         antBeg=antEnd
         antEnd+=nrA
         #fxdata.setSlice([antBeg*dim[1],antEnd*dim[1]])
-        fxdata[antBeg:antEnd].read(files[num],"Voltage")
+        fxdata[antBeg:antEnd].read(files[num],"Fx")
 
     #fxdata.setSlice(0,antEnd*dim[1])
     return True
@@ -524,12 +484,12 @@ def applySelection(selection,array,rArray=None):
         if len(dim)>=2:
             dim[0]=len(selection)
             if not rArray:
-                rArray=hf.hArray(copy=array,dimensions=dim,fill=0)
+                rArray=hf.hArray(copy=array,dimensions=dim,fill=0,units=("","a.u."))
             rArray[range(dim[0]),...].copy(array[selection,...])
         else:
             dim=len(selection)
             if not rArray:
-                rArray=hf.hArray(copy=array,dimensions=dim,fill=0)
+                rArray=hf.hArray(copy=array,dimensions=dim,fill=0,units=("","a.u."))
             rArray[...].copy(array[selection][...])
         
         if returnArray:
