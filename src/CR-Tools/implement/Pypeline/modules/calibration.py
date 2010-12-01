@@ -128,7 +128,8 @@ class AntennaCalibration():
         self.totalDelays.sub(self.ClockPhaseDelays,self.CablePhaseDelays)
         phases=self.totalDelays.new() 
         phases.delaytophase(self.frequencyValues,self.totalDelays)
-        self.totalCalibrationtemp.phasetocomplex(phases)        
+        phases.negate()
+        self.totalCalibrationtemp.phasetocomplex(phases)
         self.totalCalibrationtemp.mul(self.StationCalibration)
         self.totalCalibration=IO.applySelection(self.selection,self.totalCalibrationtemp)
 
