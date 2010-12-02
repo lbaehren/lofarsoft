@@ -94,17 +94,17 @@ class bbs(BaseRecipe):
             '--nproc',
             help="Maximum number of simultaneous processes per compute node",
             default=8
-        )
+        ),
         'makesourcedb': ingredient.ExecField(
             '--makesourcedb',
             help="makesourcedb executable",
             default="/opt/LofIm/daily/lofar/bin/makesourcedb"
-        )
+        ),
         'parmdbm': ingredient.ExecField(
             '--parmdbm',
             help="parmdbm executable",
             default="/opt/LofIm/daily/lofar/bin/parmdbm"
-        )
+        ),
         'skymodel': ingredient.FileField(
             '-s', '--skymodel',
             dest="skymodel",
@@ -129,8 +129,8 @@ class bbs(BaseRecipe):
         inputs['executable'] = self.inputs['makesourcedb']
         inputs['skymodel'] = self.inputs['skymodel']
         outputs = LOFARoutput(self.inputs)
-        if self.cook_recipe('makesourcedb', inputs, outputs):
-            self.logger.warn("makesourcedb reports failure")
+        if self.cook_recipe('sourcedb', inputs, outputs):
+            self.logger.warn("sourcedb reports failure")
             return 1
 
         #              Build a GVDS file describing all the data to be processed
@@ -143,11 +143,12 @@ class bbs(BaseRecipe):
         )
         inputs = LOFARinput(self.inputs)
         inputs['args'] = self.inputs['args']
-        inputs['gvds'] = gvds_file
+        inputs['gvds'] = vds_file
         inputs['unlink'] = False
         inputs['makevds'] = self.inputs['makevds']
         inputs['combinevds'] = self.inputs['combinevds']
         inputs['nproc'] = self.inputs['nproc']
+        inputs['directory'] = os.path.dirname(vds_file)
         outputs = LOFARoutput(self.inputs)
         if self.cook_recipe('new_vdsmaker', inputs, outputs):
             self.logger.warn("new_vdsmaker reports failure")

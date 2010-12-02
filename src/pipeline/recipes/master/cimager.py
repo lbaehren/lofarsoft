@@ -83,7 +83,7 @@ class cimager(BaseRecipe, RemoteCommandRecipeMixIn):
             '--parset-type',
             default="mwimager",
             help="cimager or mwimager"
-        )
+        ),
         'makevds': ingredient.ExecField(
             '--makevds',
             help="makevds executable",
@@ -93,7 +93,7 @@ class cimager(BaseRecipe, RemoteCommandRecipeMixIn):
             '--comebinevds',
             help="combinevds executable",
             default="/opt/LofIm/daily/lofar/bin/combinevds"
-        ),
+        )
     }
 
     outputs = {
@@ -120,6 +120,7 @@ class cimager(BaseRecipe, RemoteCommandRecipeMixIn):
         inputs['makevds'] = self.inputs['makevds']
         inputs['combinevds'] = self.inputs['combinevds']
         inputs['nproc'] = self.inputs['nproc']
+        inputs['directory'] = os.path.dirname(gvds_file)
         outputs = LOFARoutput(self.inputs)
         if self.cook_recipe('new_vdsmaker', inputs, outputs):
             self.logger.warn("new_vdsmaker reports failure")
