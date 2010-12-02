@@ -4,7 +4,7 @@
  *  Copyright (c) 2010                                                    *
  *                                                                        *
  *  Martin van den Akker <martinva@astro.ru.nl>                           *
- *  Heino Falcke <h.falcke@astro.ru.nl>                                   *     
+ *  Heino Falcke <h.falcke@astro.ru.nl>                                   *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -513,11 +513,25 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter2 vec2,const 
   typedef IterValueType T;
   Iter it1(vec1);
   Iter2 it2(vec2);
-  while (it1!=vec1_end) {
-    *it1=hfcast<T>(*it2);
-    ++it1; ++it2;
-    if (it2==vec2_end) it2=vec2;
-  };
+  HInteger lenIn = std::distance(vec2, vec2_end);
+  HInteger lenOut = std::distance(vec1, vec1_end);
+
+  if (lenOut <= lenIn) {
+    // Fast method: without looping
+    while (it1 != vec1_end) {
+      *it1=hfcast<T>(*it2);
+      ++it1; ++it2;
+    }
+  } else {
+    // Slower method: with looping
+    while (it1 != vec1_end) {
+      *it1=hfcast<T>(*it2);
+      ++it1; ++it2;
+      if (it2==vec2_end)
+        it2=vec2;
+    }
+  }
+
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 //$DOCSTRING: Copies and converts a vector to a vector of another type and resizes the output vector.
@@ -577,21 +591,26 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   typedef IterValueType T;
   Iter itout(vecout);
   Iterin itin(vecin);
+  HInteger lenIn  = std::distance(vecin, vecin_end);
+  HInteger lenOut = std::distance(vecout, vecout_end);
 
-  // Sanity check - but how should this error happen in a Python code ...?
-  if ((vecout > vecout_end) || (vecin > vecin_end)) {
-    throw PyCR::ValueError("Negative size of vector.");
-    return;
+  if (lenIn < lenOut) {
+    // Fast copying (no looping required)
+    while (itout != vecout_end) {
+      *itout=hfcast<T>(*itin);
+      ++itin;
+      ++itout;
+    }
+  } else {
+    // Coping with looping (including extra check for end of input vector)
+    while (itout != vecout_end) {
+      *itout=hfcast<T>(*itin);
+      ++itin;
+      ++itout;
+      if (itin==vecin_end)
+        itin=vecin;
+    }
   }
-
-  // Copying of data
-  while (itout != vecout_end) {
-    *itout=hfcast<T>(*itin);
-    ++itin;
-    ++itout;
-    if (itin==vecin_end)
-      itin=vecin;
-  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -631,13 +650,15 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   Iterin itin;
   HInteger count(number_of_elements);
 
+  HInteger lenOut = std::distance(vecout, vecout_end);
+
   // Sanity check
   if ((index >= index_end) || (count==0))
     return;
   if (vecin >= vecin_end)
     return;
-  if ((count<0) || (count > (vecout_end-vecout)))
-    count=(vecout_end-vecout);
+  if ((count<0) || (count > lenOut))
+    count = lenOut;
 
   // Copying of data
   while ((itout != vecout_end) && (count > 0)) {
@@ -681,6 +702,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const It
   // Variables
   Iter it(vec+offset);
   Iter itin(invec);
+
   // Sanity check
   if (stride < 0) {
     throw PyCR::ValueError("Negative value for stride parameter is not allowed");
