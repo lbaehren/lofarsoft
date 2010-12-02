@@ -53,7 +53,13 @@ class rficonsole(LOFARnodeTCP):
                 self.logger.exception(e)
                 return 1
             finally:
-                shutil.rmtree(working_dir)
+                # Try and clean up the working directory, but don't worry if
+                # it fails -- it might not have been greated before throwing
+                # the exception
+                try:
+                    shutil.rmtree(working_dir)
+                except:
+                    pass
 
             return 0
 
