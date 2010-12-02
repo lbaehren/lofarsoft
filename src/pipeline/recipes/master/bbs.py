@@ -26,6 +26,7 @@ from lofarpipe.support.pipelinelogging import log_process_output
 from lofarpipe.support.remotecommand import run_remote_command
 from lofarpipe.support.remotecommand import ComputeJob
 from lofarpipe.support.jobserver import job_server
+from lofarpipe.support.lofaringredient import LOFARoutput, LOFARinput
 import lofarpipe.support.utilities as utilities
 import lofarpipe.support.lofaringredient as ingredient
 
@@ -79,6 +80,11 @@ class bbs(BaseRecipe):
             dest="db_name",
             help="Database name"
         ),
+        'makevds': ingredient.ExecField(
+            '--makevds',
+            help="makevds executable",
+            default="/opt/LofIm/daily/lofar/bin/makevds"
+        ),
         'combinevds': ingredient.ExecField(
             '--combinevds',
             help="combinevds executable",
@@ -89,6 +95,21 @@ class bbs(BaseRecipe):
             help="Maximum number of simultaneous processes per compute node",
             default=8
         )
+        'makesourcedb': ingredient.ExecField(
+            '--makesourcedb',
+            help="makesourcedb executable",
+            default="/opt/LofIm/daily/lofar/bin/makesourcedb"
+        )
+        'parmdbm': ingredient.ExecField(
+            '--parmdbm',
+            help="parmdbm executable",
+            default="/opt/LofIm/daily/lofar/bin/parmdbm"
+        )
+        'skymodel': ingredient.FileField(
+            '-s', '--skymodel',
+            dest="skymodel",
+            help="Input sky catalogue"
+        )
     }
 
     def go(self):
@@ -97,8 +118,20 @@ class bbs(BaseRecipe):
 
         #             Generate source and parameter databases for all input data
         # ----------------------------------------------------------------------
-        self.run_task("parmdb", self.inputs['args'])
-        self.run_task("sourcedb", self.inputs['args'])
+        inputs = LOFARinput(self.inputs)
+        inputs['args'] = self.inputs['args']
+        inputs['executable'] = self.inputs['parmdbm']
+        outputs = LOFARoutput(self.inputs)
+        if self.cook_recipe('parmdb', inputs, outputs):
+            self.logger.warn("parmdb reports failure")
+            return 1
+        inputs['args'] = self.inputs['args']
+        inputs['executable'] = self.inputs['makesourcedb']
+        inputs['skymodel'] = self.inputs['skymodel']
+        outputs = LOFARoutput(self.inputs)
+        if self.cook_recipe('makesourcedb', inputs, outputs):
+            self.logger.warn("makesourcedb reports failure")
+            return 1
 
         #              Build a GVDS file describing all the data to be processed
         # ----------------------------------------------------------------------
@@ -108,7 +141,17 @@ class bbs(BaseRecipe):
             "vds",
             "bbs.gvds"
         )
-        self.run_task('vdsmaker', self.inputs['args'], gvds=vds_file, unlink="False")
+        inputs = LOFARinput(self.inputs)
+        inputs['args'] = self.inputs['args']
+        inputs['gvds'] = gvds_file
+        inputs['unlink'] = False
+        inputs['makevds'] = self.inputs['makevds']
+        inputs['combinevds'] = self.inputs['combinevds']
+        inputs['nproc'] = self.inputs['nproc']
+        outputs = LOFARoutput(self.inputs)
+        if self.cook_recipe('new_vdsmaker', inputs, outputs):
+            self.logger.warn("new_vdsmaker reports failure")
+            return 1
         self.logger.debug("BBS GVDS is %s" % (vds_file,))
 
 

@@ -34,6 +34,7 @@ from lofarpipe.support.utilities import spawn_process
 from lofarpipe.support.lofarexceptions import PipelineException
 from lofarpipe.support.remotecommand import ComputeJob
 from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
+from lofarpipe.support.lofaringredient import LOFARoutput, LOFARinput
 
 class ParsetTypeField(ingredient.StringField):
     def is_valid(self, value):
@@ -83,6 +84,16 @@ class cimager(BaseRecipe, RemoteCommandRecipeMixIn):
             default="mwimager",
             help="cimager or mwimager"
         )
+        'makevds': ingredient.ExecField(
+            '--makevds',
+            help="makevds executable",
+            default="/opt/LofIm/daily/lofar/bin/makevds"
+        ),
+        'combinevds': ingredient.ExecField(
+            '--comebinevds',
+            help="combinevds executable",
+            default="/opt/LofIm/daily/lofar/bin/combinevds"
+        ),
     }
 
     outputs = {
@@ -102,7 +113,17 @@ class cimager(BaseRecipe, RemoteCommandRecipeMixIn):
             "vds",
             "cimager.gvds"
         )
-        self.run_task('vdsmaker', self.inputs['args'], gvds=gvds_file, unlink="False")
+        inputs = LOFARinput(self.inputs)
+        inputs['args'] = self.inputs['args']
+        inputs['gvds'] = gvds_file
+        inputs['unlink'] = False
+        inputs['makevds'] = self.inputs['makevds']
+        inputs['combinevds'] = self.inputs['combinevds']
+        inputs['nproc'] = self.inputs['nproc']
+        outputs = LOFARoutput(self.inputs)
+        if self.cook_recipe('new_vdsmaker', inputs, outputs):
+            self.logger.warn("new_vdsmaker reports failure")
+            return 1
         self.logger.debug("cimager GVDS is %s" % (gvds_file,))
 
         #                            Read data for processing from the GVDS file
