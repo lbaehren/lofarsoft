@@ -5,7 +5,7 @@ message (STATUS "[CR-Tools] Adding implement/Pypeline ...")
 ## Find libraries
 include (FindPython)
 include (FindBoost)
-include (FindNumpy)
+include (FindNumPy)
 include (FindNumUtil)
 
 ##-------------------------------------------------------------------------------
