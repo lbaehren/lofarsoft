@@ -93,7 +93,7 @@ def run_via_mpirun(logger, host, command, environment, arguments):
     method for shutting down the connection if required.
     """
     logger.debug("Dispatching command to %s with mpirun" % host)
-    mpi_cmd = ["mpirun", "-host", host]
+    mpi_cmd = ["/usr/bin/mpirun", "-host", host]
     for key in environment.keys():
         mpi_cmd.extend(["-x", key])
     mpi_cmd.append("--")
