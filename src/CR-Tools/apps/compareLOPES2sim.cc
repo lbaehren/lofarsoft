@@ -84,13 +84,21 @@
  #LOPES-GT,simName,source,KRETA_ver,az_in(deg),errAz_in(deg),ze_in(deg),errZe_in(deg),coreN_in(m),coreE_in(m),errCore(m),Ne_in,Nmu_in,Nmu^tr_in,E_in(eV),errlgE
 */
 
-const static bool simulationDistances = true; //true;  // decide wether to use the lateral distances of simulation or of data
+const static bool simulationDistances = true;  // decide wether to use the lateral distances of simulation or of data
+const static bool onlyEW = true;  // plot only EW polarization
+
 const static double gradeg=(180./TMath::Pi());
 //const static double antennaHeightOffset = 12615.9 -8.17; // used in REAS, for Steffen's events (corresponds to average antenna height)
-const static double antennaHeightOffset = 11000+14; // height of antenna 1 used for REAS
+
+// offset from KASCADE plane seems not to be neccessary for new REAS simulations
+//const static double antennaHeightOffset = 11000+14; // height of antenna 1 used for REAS for LOPES 30
+//const static double antennaHeightOffset = 11000+17.13; // height of antenna 1 used for REAS for LOPES Dual
+//const static double antennaHeightOffset = 11000-129.13; // height of antenna 1 used for REAS for LOPES Dual
+const static double antennaHeightOffset = 11000; // height of antenna 1 used for REAS for LOPES Dual
 // time offset, because ground plane in REAS is defined as average of antenna heights, not as KASCADE height or 0
 const static double groundPlaneTimeOffset = 0;
 //const static double groundPlaneTimeOffset = 0.0817 * 3.33564; // height diff = 14 cm, conversion to ns
+// new value: tuned to minimize chi2 of cone fit for KASCADE events (2.4 ns seems to be best)
 const static double generalREAStimeOffset = 2.4; // general offset to avoid negative times with REAS (fine tuned by hand)
 
 
@@ -119,6 +127,9 @@ double reasXmaxFromREAS(string filename)
           value = line.substr(line.find_first_of("=") + 1, line.length());
           
         //cout << varName << " = " << value << endl;
+        //if (varName.find("PrimaryParticleEnergy") != string::npos) {
+        //  cout << "Primary energy (simulation) = " << value << endl;
+        //}  
 
         if (varName.find("DepthOfShowerMaximum") != string::npos) {
           stringstream tempstream(value);
@@ -353,6 +364,11 @@ int main (int argc, char *argv[])
     double latTimeCone2DSigRho_sim_EW = 0, latTimeCone2DSigRho_sim_NS = 0, latTimeCone2DSigRho_sim_VE = 0;
     double latTimeCone2DChi2NDF_sim_EW = 0, latTimeCone2DChi2NDF_sim_NS = 0, latTimeCone2DChi2NDF_sim_VE = 0;
     
+    double latTimeCone1DOffset_sim_EW = 0, latTimeCone1DOffset_sim_NS = 0, latTimeCone1DOffset_sim_VE = 0;
+    double latTimeCone1DSigOffset_sim_EW = 0, latTimeCone1DSigOffset_sim_NS = 0, latTimeCone1DSigOffset_sim_VE = 0;
+    double latTimeCone2DOffset_sim_EW = 0, latTimeCone2DOffset_sim_NS = 0, latTimeCone2DOffset_sim_VE = 0;
+    double latTimeCone2DSigOffset_sim_EW = 0, latTimeCone2DSigOffset_sim_NS = 0, latTimeCone2DSigOffset_sim_VE = 0;
+    
     //bool goodEW = false=0, goodNS = false=0, goodVE = false=0;                // true if reconstruction worked
     double rmsCCbeam=0, rmsCCbeam_NS=0, rmsCCbeam_VE=0;                        // rms values of the beams in remote region
     double rmsXbeam=0, rmsXbeam_NS=0, rmsXbeam_VE=0;
@@ -544,6 +560,11 @@ int main (int argc, char *argv[])
       outtree->Branch("latTimeCone2DSigRho_sim_EW",&latTimeCone2DSigRho_sim_EW,"latTimeCone2DSigRho_sim_EW/D");
       outtree->Branch("latTimeCone2DChi2NDF_sim_EW",&latTimeCone2DChi2NDF_sim_EW,"latTimeCone2DChi2NDF_sim_EW/D");
       
+      outtree->Branch("latTimeCone1DOffset_sim_EW",&latTimeCone1DOffset_sim_EW,"latTimeCone1DOffset_sim_EW/D");
+      outtree->Branch("latTimeCone1DSigOffset_sim_EW",&latTimeCone1DSigOffset_sim_EW,"latTimeCone1DSigOffset_sim_EW/D");
+      outtree->Branch("latTimeCone2DOffset_sim_EW",&latTimeCone2DOffset_sim_EW,"latTimeCone2DOffset_sim_EW/D");
+      outtree->Branch("latTimeCone2DSigOffset_sim_EW",&latTimeCone2DSigOffset_sim_EW,"latTimeCone2DSigOffset_sim_EW/D");
+      
       outtree->Branch("R_0_EW",&R_0_EW,"R_0_EW/D");
       outtree->Branch("sigR_0_EW",&sigR_0_EW,"sigR_0_EW/D");
       outtree->Branch("eps_EW",&eps_EW,"eps_EW/D");
@@ -639,6 +660,11 @@ int main (int argc, char *argv[])
       outtree->Branch("latTimeCone2DRho_sim_NS",&latTimeCone2DRho_sim_NS,"latTimeCone2DRho_sim_NS/D");
       outtree->Branch("latTimeCone2DSigRho_sim_NS",&latTimeCone2DSigRho_sim_NS,"latTimeCone2DSigRho_sim_NS/D");
       outtree->Branch("latTimeCone2DChi2NDF_sim_NS",&latTimeCone2DChi2NDF_sim_NS,"latTimeCone2DChi2NDF_sim_NS/D");
+            
+      outtree->Branch("latTimeCone1DOffset_sim_NS",&latTimeCone1DOffset_sim_NS,"latTimeCone1DOffset_sim_NS/D");
+      outtree->Branch("latTimeCone1DSigOffset_sim_NS",&latTimeCone1DSigOffset_sim_NS,"latTimeCone1DSigOffset_sim_NS/D");
+      outtree->Branch("latTimeCone2DOffset_sim_NS",&latTimeCone2DOffset_sim_NS,"latTimeCone2DOffset_sim_NS/D");
+      outtree->Branch("latTimeCone2DSigOffset_sim_NS",&latTimeCone2DSigOffset_sim_NS,"latTimeCone2DSigOffset_sim_NS/D");
       
       outtree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
       outtree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
@@ -736,6 +762,11 @@ int main (int argc, char *argv[])
       outtree->Branch("latTimeCone2DSigRho_sim_VE",&latTimeCone2DSigRho_sim_VE,"latTimeCone2DSigRho_sim_VE/D");
       outtree->Branch("latTimeCone2DChi2NDF_sim_VE",&latTimeCone2DChi2NDF_sim_VE,"latTimeCone2DChi2NDF_sim_VE/D");
       
+      outtree->Branch("latTimeCone1DOffset_sim_VE",&latTimeCone1DOffset_sim_VE,"latTimeCone1DOffset_sim_VE/D");
+      outtree->Branch("latTimeCone1DSigOffset_sim_VE",&latTimeCone1DSigOffset_sim_VE,"latTimeCone1DSigOffset_sim_VE/D");
+      outtree->Branch("latTimeCone2DOffset_sim_VE",&latTimeCone2DOffset_sim_VE,"latTimeCone2DOffset_sim_VE/D");
+      outtree->Branch("latTimeCone2DSigOffset_sim_VE",&latTimeCone2DSigOffset_sim_VE,"latTimeCone2DSigOffset_sim_VE/D");
+            
       outtree->Branch("R_0_VE",&R_0_VE,"R_0_VE/D");
       outtree->Branch("sigR_0_VE",&sigR_0_VE,"sigR_0_VE/D");
       outtree->Branch("eps_VE",&eps_VE,"eps_VE/D");
@@ -903,7 +934,8 @@ int main (int argc, char *argv[])
         }
 
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to76/maxamp_summary.dat";
-        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to74/maxamp_summary.dat";
+        //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to74/maxamp_summary.dat";
+        string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopes_rect43to74_up/maxamp_summary.dat";
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz_allCompMaxima/maxamp_summary.dat";
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesew_43to74Mhz_allCompMaxima/maxamp_summary.dat"; 
         //string reasFileName = simPath+"/"+m_dict[Gt]+ "_lopesdual_43to74Mhz/maxamp_summary.dat";
@@ -919,7 +951,9 @@ int main (int argc, char *argv[])
 	
         // read Xmax value
         Xmax_sim = reasXmaxFromREAS(reasLogFile);
-        cout << "\nXmax (simulation) = " << Xmax_sim << " g/cm^2" << endl;
+        //cout << "Primary energy (KASCADE) = " << pow(10,lgE+9) << endl;
+        //cout << "Primary energy (Grande) = " << pow(10,lgEg+9) << endl;
+        cout << "Xmax (simulation) = " << Xmax_sim << " g/cm^2\n" << endl;
         if (Xmax_sim < 200)
           cout << "\nWARNING: Xmax for simulation " << m_dict[Gt] << " , GT = " << Gt << " too low!\n" << endl;
 
@@ -941,6 +975,8 @@ int main (int argc, char *argv[])
           istringstream iss2 (buffer2);
           if(iss2.str().size()>0&&iss2.str()[0]!='%'&&iss2.str()[0]!='#') {//in sim file:az in reas sistem
             iss2>>NantS>>distS>>azSREAS>>NSfield>>EWfield>>VEfield>>timeREAS>>distX>>distY>>distZ;
+            
+            //cout << "Read in simulation for antenna: " << NantS << endl;
             
             azS=180.-(azSREAS*gradeg); //convert to LOPES coordinates
             
@@ -970,8 +1006,9 @@ int main (int argc, char *argv[])
                 cout<<"WARNING: Low field strength in EW simulation (< 0.1)." << endl;
                 // EWfield=0.1;  // Steffen used 0.1 as minimum value for simulations
               }
-              
+
               if (m_recPulses[NantS].polarization == "EW") {
+                //cout << "Polarization of antenna: " << NantS << " = " << m_recPulses[NantS].polarization << endl;
                 //cout<<"   xxxxxx   EW polarization   xxxxxx  "<<endl;
                 //define recEW map
                 m_recEW[NantS] = m_recPulses[NantS];
@@ -982,8 +1019,6 @@ int main (int argc, char *argv[])
                 simPropEW.height = EWfield;
                 //cout<<"EW Field  "<<EWfield<<endl;
                 simPropEW.heightError = 0.;                
-                simPropEW.time = timeREAS; // pulse time in ns
-                simPropEW.timeError = 0;
                 distanceR=m_recEW[NantS].dist;
                 // calculate simulation distance for consistency check
                 if (!simulationDistances) { // overwrite direction with values of LOPES reconstruction
@@ -1005,6 +1040,16 @@ int main (int argc, char *argv[])
                   simPropEW.dist =distanceR;
                 simPropEW.disterr = distanceSerr;
                 
+                // pulse time in ns (corrected for offset), correction dependent on distance does not work
+                simPropEW.time = timeREAS; 
+                /* simPropEW.time += 1.1 + 0.015*latMeanDist;
+                if (latMeanDist>80.)
+                  simPropEW.time += 0.007*(latMeanDist-80.);
+                if (latMeanDist>120.)
+                  simPropEW.time += 0.018*(latMeanDist-120.);
+                simPropEW.timeError = 0;*/
+                simPropEW.timeError = 0;
+                
                 // calculate antenna height (z) in shower coordinates
                 //zShower = -0.01* groundDist * sin(zenith) * cos(azS/gradeg-azimuth); // wrong
                 //zShower = sqrt((groundDist*groundDist*1e-4) - (distanceS*distanceS)); // wrong sign
@@ -1019,7 +1064,8 @@ int main (int argc, char *argv[])
                 
                 
                 if ( abs(zShower-m_recEW[NantS].distZ) > (abs(zShower*0.05)+0.5) ) {
-                  cout<<"WARNING: z_shower simulated EW channel:  "<<zShower<<"\t z_shower from LOPES  "<<m_recEW[NantS].distZ<<endl;
+                  cout<<"WARNING: z_shower simulated EW channel " << NantS <<":  "<<zShower
+                      <<"\t z_shower from LOPES  "<<m_recEW[NantS].distZ<<endl;
                   cout<<"az_sim= " << azimuth*gradeg << " \t az_lop= " << AzL << endl;
                   cout<<"ze_sim= " << zenith*gradeg << " \t ze_lop= " << (90.-ElL) << endl;
                   cout<<"x_sim = " << xShower << " \t x_lop = " << m_recEW[NantS].distX << endl;
@@ -1048,6 +1094,7 @@ int main (int argc, char *argv[])
                 m_simEW[NantS] = simPropEW; //fill the sim map
               }
               if (m_recPulses[NantS].polarization == "NS") {
+                //cout << "Polarization of antenna: " << NantS << " = " << m_recPulses[NantS].polarization << endl;
                 //cout<<"   kkkkkk   NS polarization   kkkkkk  "<<endl;
                 //define recNS map
                 m_recNS[NantS] = m_recPulses[NantS];
@@ -1086,7 +1133,7 @@ int main (int argc, char *argv[])
                 zShower = distX*cos(azimuth)*sin(zenith) - distY*sin(azimuth)*sin(zenith) + distZ*cos(zenith);
                 zShower *= 1e-2; // conversion from cm to m
                 if ( abs(zShower-m_recNS[NantS].distZ) > (abs(zShower*0.05)+0.5) ) {
-                  cout<<"WARNING: z_shower simulated EW channel:  "<<zShower<<"\t z_shower from LOPES  "<<m_recEW[NantS].distZ<<endl;
+                  cout<<"WARNING: z_shower simulated NS channel:  "<<zShower<<"\t z_shower from LOPES  "<<m_recNS[NantS].distZ<<endl;
                 }
                 simPropNS.distZ = zShower;
                 simPropNS.distZerr = 0.;
@@ -1134,8 +1181,14 @@ int main (int argc, char *argv[])
       latTimeCone2DSigRho_sim_EW = 0, latTimeCone2DSigRho_sim_NS = 0, latTimeCone2DSigRho_sim_VE = 0;
       latTimeCone2DChi2NDF_sim_EW = 0, latTimeCone2DChi2NDF_sim_NS = 0, latTimeCone2DChi2NDF_sim_VE = 0;
 
+      latTimeCone1DOffset_sim_EW = 0, latTimeCone1DOffset_sim_NS = 0, latTimeCone1DOffset_sim_VE = 0;
+      latTimeCone1DSigOffset_sim_EW = 0, latTimeCone1DSigOffset_sim_NS = 0, latTimeCone1DSigOffset_sim_VE = 0;
+      latTimeCone2DOffset_sim_EW = 0, latTimeCone2DOffset_sim_NS = 0, latTimeCone2DOffset_sim_VE = 0;
+      latTimeCone2DSigOffset_sim_EW = 0, latTimeCone2DSigOffset_sim_NS = 0, latTimeCone2DSigOffset_sim_VE = 0;
+
       CR::lateralDistribution lateralFitter;
       string plotPrefix = "";
+
       if(m_recEW.size()>=4) {        
         if (simDictName!="") 
           plotPrefix = "lateral-EW-"+m_dict[Gt]+"-";
@@ -1192,8 +1245,13 @@ int main (int argc, char *argv[])
         latTimeCone2DRho_sim_EW = ergTimeEW.asDouble("latTime2D_ConeRho_sim");
         latTimeCone2DSigRho_sim_EW = ergTimeEW.asDouble("latTime2D_sigConeRho_sim");
         latTimeCone2DChi2NDF_sim_EW = ergTimeEW.asDouble("latTime2D_Conechi2NDF_sim");
+
+        latTimeCone1DOffset_sim_EW = ergTimeEW.asDouble("latTime1D_ConeOffset_sim");
+        latTimeCone1DSigOffset_sim_EW = ergTimeEW.asDouble("latTime1D_sigConeOffset_sim");
+        latTimeCone2DOffset_sim_EW = ergTimeEW.asDouble("latTime2D_ConeOffset_sim");
+        latTimeCone2DSigOffset_sim_EW = ergTimeEW.asDouble("latTime2D_sigConeOffset_sim");
       }
-      if ((hasNS) && (m_recNS.size()>=4)) {
+      if ((hasNS) && (m_recNS.size()>=4) && (!onlyEW)) {
         if (simDictName!="") 
           plotPrefix = "lateral-NS-"+m_dict[Gt]+"-";
         else 
@@ -1249,6 +1307,11 @@ int main (int argc, char *argv[])
         latTimeCone2DRho_sim_NS = ergTimeNS.asDouble("latTime2D_ConeRho_sim");
         latTimeCone2DSigRho_sim_NS = ergTimeNS.asDouble("latTime2D_sigConeRho_sim");
         latTimeCone2DChi2NDF_sim_NS = ergTimeNS.asDouble("latTime2D_Conechi2NDF_sim");
+        
+        latTimeCone1DOffset_sim_NS = ergTimeNS.asDouble("latTime1D_ConeOffset_sim");
+        latTimeCone1DSigOffset_sim_NS = ergTimeNS.asDouble("latTime1D_sigConeOffset_sim");
+        latTimeCone2DOffset_sim_NS = ergTimeNS.asDouble("latTime2D_ConeOffset_sim");
+        latTimeCone2DSigOffset_sim_NS = ergTimeNS.asDouble("latTime2D_sigConeOffset_sim");
       }
       
       // Fill information in root file
@@ -1266,8 +1329,8 @@ int main (int argc, char *argv[])
    meanDevX /= double(meanDevCounter);
    meanDevY /= double(meanDevCounter);
    meanDevZ /= double(meanDevCounter);
-   //cout << "\nMean deviation of antenna position in shower coordinates (is ought to be small):\n"
-   //     << "x: " << meanDevX << "\t y:" << meanDevY << "\t z:" << meanDevZ << endl;
+   cout << "\nMean deviation of antenna position in shower coordinates (is ought to be small):\n"
+        << "x: " << meanDevX << "\t y:" << meanDevY << "\t z:" << meanDevZ << endl;
   } catch (AipsError x) {
     cerr << "compareLOPES2sim: " << x.getMesg() << endl;
   }

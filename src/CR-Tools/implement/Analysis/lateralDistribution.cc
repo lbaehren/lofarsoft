@@ -756,17 +756,17 @@ namespace CR { // Namespace CR -- begin
       string coneNameS = "";
       if (index1 != "") {
         curvName = "r_{c}- " + index1 + " [m]";
-        coneName = "#rho " + index1;
+        coneName = "#rho " + index1 + " [rad]";
       } else {
         curvName = "r_{c} [m]";
-        coneName = "#rho ";
+        coneName = "#rho [rad]";
       }
       if (index2 != "") {
         curvNameS = "r_{c}- " + index2 + " [m]";
-        coneNameS = "#rho " + index2;
+        coneNameS = "#rho " + index2 + " [rad]";
       } else {
         curvNameS = "r_{c} [m]";
-        coneNameS = "#rho ";
+        coneNameS = "#rho [rad]";
       }
       
       /* FIT */
@@ -853,6 +853,9 @@ namespace CR { // Namespace CR -- begin
         fitFuncCone2D=new TF2("fitFuncCone2D","3.335640952*(x*sin([0])-y*cos([0]))",0,1000,-200,200);
         fitFuncCone->SetParName(0,coneName.c_str());
         fitFuncCone2D->SetParName(0,coneName.c_str());
+        //fitFuncCone->SetParName(1,"offset [ns]");
+        //fitFuncCone2D->SetParName(1,"offset [ns]");
+        //fitFuncCone2D->FixParameter(1,0);
         //fitFunc->FixParameter(1,1e9/lightspeed); // = 3.335640952
         fitFuncCone2D->SetParameter(0,0);
         
@@ -872,9 +875,11 @@ namespace CR { // Namespace CR -- begin
         cout << "\nResults of cone fit (data)\n"
              << "Rho   (1D) = " << fitFuncCone->GetParameter(0)*180./3.14159 
              << "\t +/- " << fitFuncCone->GetParError(0)*180./3.14159 << " °\n"
+             //<< "offset(1D) = " << fitFuncCone->GetParameter(1) << "\t +/- " << fitFuncCone->GetParError(1) << " ns\n"
              << "Chi^2 (1D) = " << fitFuncCone->GetChisquare() << "\t NDF " << fitFuncCone->GetNDF() << "\n"
              << "Rho   (2D) = " << fitFuncCone2D->GetParameter(0)*180./3.14159 
              << "\t +/- " << fitFuncCone2D->GetParError(0)*180./3.14159 << " °\n"
+             //<< "offset(2D) = " << fitFuncCone2D->GetParameter(1) << "\t +/- " << fitFuncCone2D->GetParError(1) << " ns\n"
              << "Chi^2 (2D) = " << fitFuncCone2D->GetChisquare() << "\t NDF " << fitFuncCone2D->GetNDF() << "\n"
              << endl;
              
@@ -882,10 +887,17 @@ namespace CR { // Namespace CR -- begin
           cout << "-------- SIMULATIONS ---------"<<endl;
           TF1 *fitFuncConeS;
           TF2 *fitFuncConeS2D;
+          // without offset
           fitFuncConeS=new TF1("fitFuncConeS","3.335640952*(x*sin([0]))",0,1000);
           fitFuncConeS2D=new TF2("fitFuncConeS2D","3.335640952*(x*sin([0])-y*cos([0]))",0,1000,-200,200);
+          // with offset
+          //fitFuncConeS=new TF1("fitFuncConeS","[1]+3.335640952*(x*sin([0]))",0,1000);
+          //fitFuncConeS2D=new TF2("fitFuncConeS2D","[1]+3.335640952*(x*sin([0])-y*cos([0]))",0,1000,-200,200);
           fitFuncConeS->SetParName(0,coneNameS.c_str());
           fitFuncConeS2D->SetParName(0,coneNameS.c_str());
+          fitFuncConeS->SetParName(1,"offset [ns]");
+          fitFuncConeS2D->SetParName(1,"offset [ns]");
+          fitFuncConeS2D->SetParameter(1,0);
           //fitFunc->FixParameter(1,1e9/lightspeed); // = 3.335640952
           fitFuncConeS2D->SetParameter(0,0);
           fitFuncConeS->SetFillStyle(0);
@@ -894,21 +906,28 @@ namespace CR { // Namespace CR -- begin
           cout << "------------------------------"<<endl;
           timePro2DSim->Fit(fitFuncConeS2D, "", "");
           fitFuncConeS->SetParameter(0,fitFuncConeS2D->GetParameter(0));
+            fitFuncConeS->SetParameter(1,fitFuncConeS2D->GetParameter(1));
           timeProSim->Fit(fitFuncConeS, "");
           ptstats->Draw();
 
           erg.define("latTime1D_ConeRho_sim",fitFuncConeS->GetParameter(0));
           erg.define("latTime1D_sigConeRho_sim",fitFuncConeS->GetParError(0));
+          erg.define("latTime1D_ConeOffset_sim",fitFuncConeS->GetParameter(1));
+          erg.define("latTime1D_sigConeOffset_sim",fitFuncConeS->GetParError(1));
           erg.define("latTime1D_Conechi2NDF_sim",fitFuncConeS->GetChisquare()/double(fitFuncConeS->GetNDF()));
           erg.define("latTime2D_ConeRho_sim",fitFuncConeS2D->GetParameter(0));
           erg.define("latTime2D_sigConeRho_sim",fitFuncConeS2D->GetParError(0));
+          erg.define("latTime2D_ConeOffset_sim",fitFuncConeS2D->GetParameter(1));
+          erg.define("latTime2D_sigConeOffset_sim",fitFuncConeS2D->GetParError(1));
           erg.define("latTime2D_Conechi2NDF_sim",fitFuncConeS2D->GetChisquare()/double(fitFuncConeS2D->GetNDF()));
           cout << "\nResults of cone fit (SIMULATION)\n"
              << "Rho   (1D) = " << fitFuncConeS->GetParameter(0)*180./3.14159 
              << "\t +/- " << fitFuncConeS->GetParError(0)*180./3.14159 << " °\n"
+             << "offset(1D) = " << fitFuncConeS->GetParameter(1) << "\t +/- " << fitFuncConeS->GetParError(1) << " ns\n"
              << "Chi^2 (1D) = " << fitFuncConeS->GetChisquare() << "\t NDF " << fitFuncConeS->GetNDF() << "\n"
              << "Rho   (2D) = " << fitFuncConeS2D->GetParameter(0)*180./3.14159 
              << "\t +/- " << fitFuncConeS2D->GetParError(0)*180./3.14159 << " °\n"
+             << "offset(2D) = " << fitFuncConeS2D->GetParameter(1) << "\t +/- " << fitFuncConeS2D->GetParError(1) << " ns\n"
              << "Chi^2 (2D) = " << fitFuncConeS2D->GetChisquare() << "\t NDF " << fitFuncConeS2D->GetNDF() << "\n"
               << endl;
         }
