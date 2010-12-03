@@ -320,19 +320,35 @@ endif (HAVE_FFTW3)
 ## the components in one place but not have them interfere with possible other
 ## installations of the same packages (e.g. FFTW3)
 
-find_path (prefix release_area.txt
-  PATHS
-  ${PULSAR_SOURCE_DIR}
-  PATH_SUFFIXES
-  ../release
-  ../../release
-  NO_DEFAULT_PATH
-  )
+#find_path (prefix release_area.txt
+#  PATHS
+#  ${PULSAR_SOURCE_DIR}
+#  PATH_SUFFIXES
+#  ../release
+#  ../../release
+#  NO_DEFAULT_PATH
+#  )
 
-if (prefix)
-  message (STATUS "Installation area located for package PULSAR.")
-  set (CMAKE_INSTALL_PREFIX ${prefix}/share/pulsar) 
-endif (prefix)
+find_path (USG_INSTALL_PREFIX devel_common/cmake/CMakeSettings.cmake
+ PATHS 
+ ${PROJECT_SOURCE_DIR}
+ ${PROJECT_SOURCE_DIR}/..
+ ${PROJECT_SOURCE_DIR}/../..
+ ${PROJECT_SOURCE_DIR}/../../..
+ $ENV{LOFARSOFT}
+ )
+
+#if (prefix)
+#  message (STATUS "Installation area located for package PULSAR.")
+#  set (CMAKE_INSTALL_PREFIX ${prefix}/share/pulsar) 
+#endif (prefix)
+
+if (USG_INSTALL_PREFIX)
+ message (STATUS "[PULSAR] Installation area located for package PULSAR ${USG_INSTALL_PREFIX}/share/pulsar.")
+ set (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX}/share/pulsar)
+else (USG_INSTALL_PREFIX)
+ message (STATUS "[PULSAR] WARNING: Installation area NOT located for package PULSAR!")
+endif (USG_INSTALL_PREFIX)
 
 if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
   message (STATUS "[PULSAR] Installation location ${CMAKE_INSTALL_PREFIX} exists!")
