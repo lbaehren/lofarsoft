@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.0
+VERSION=2.1
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -737,11 +737,16 @@ do
 		  exit 1
 		fi
         
-#        if [[ $STOKES == "incoherentstokes" ]] 
-#        then 		
 			modulo_files=`echo $all_num $core | awk '{print ($1 % $2)}'`
 			# If the number of cores does not evenly divide into the # of files, then find another good value
-			if (( $modulo_files != 0 ))
+			if (( $modulo_files != 0 )) && (( $nrBeams =>1 ))
+            then 
+			   echo "ERROR: For multi-beam IS mode, the number of files ($all_num) must divide by the number of beams ($core)!"
+			   echo "       There seems to be missing data or an error in the parset or pipeline;  cannot continue."
+			   echo "ERROR: For multi-beam IS mode, the number of files ($all_num) must divide by the number of beams ($core)!" >> $log
+			   echo "       There seems to be missing data or an error in the parset or pipeline;  cannot continue."  >> $log
+               exit            
+            elif (( $modulo_files != 0 )) 
 			then
 			   echo "WARNING: User requested $core cores; this does not evently divide into $all_num number of files"
 			   echo "WARNING: User requested $core cores; this does not evently divide into $all_num number of files" >> $log
@@ -764,9 +769,8 @@ do
 			   echo "WARNING: Resetting user requested number of cores from $core to $ii for processing of $all_num subbands"
 			   echo "WARNING: Resetting user requested number of cores from $core to $ii for processing of $all_num subbands" >> $log
 			   core=$ii
-#			fi
 
-		fi # end if [[ $STOKES = "incoherentstokes" ]]
+		fi # [[ $nrBeams == 1 ]]
         		    
 		div_files=`echo $all_num $core | awk '{print $1 / $2}'`
 		count=0
