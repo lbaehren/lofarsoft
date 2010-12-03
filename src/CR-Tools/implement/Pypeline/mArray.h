@@ -26,10 +26,6 @@
 #include "mModule.h"
 
 
-using namespace std;
-using namespace casa;
-
-
 //========================================================================
 //                             Array Class
 //========================================================================
@@ -43,22 +39,22 @@ template <class T>
     HNumber scale_factor;
     HString prefix;
     HString name;
-    map<HString,HNumber> prefix_to_factor;
+    std::map<HString,HNumber> prefix_to_factor;
   };
 
   struct storage_container {
     HInteger *ndims_p;
     HInteger *size_p;
-    vector<HInteger> * dimensions_p;
-    vector<HInteger> * slice_sizes_p;
-    vector<T>* vec_p;
+    std::vector<HInteger> * dimensions_p;
+    std::vector<HInteger> * slice_sizes_p;
+    std::vector<T>* vec_p;
     hArray* parent;
     bool vector_is_shared;
     unit_container unit;
     bool trackHistory;
-    vector<HString> history;
-    map<HString,HString> keywords;
-    map<HString,HPyObjectPtr> keywords_py;
+    std::vector<HString> history;
+    std::map<HString,HString> keywords;
+    std::map<HString,HPyObjectPtr> keywords_py;
   };
 
     void init();
@@ -84,11 +80,11 @@ template <class T>
     void setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
     HInteger getNumberOfDimensions();
     hArray<T> & setSlice(HInteger beg, HInteger end=-1);
-    hArray<T> & setSliceVector(vector<HInteger> & index_vector);
+    hArray<T> & setSliceVector(std::vector<HInteger> & index_vector);
     HInteger getSubSliceEnd();
     HInteger getSubSliceStart();
     hArray<T> & setSubSlice(HInteger start, HInteger end, HInteger level);
-    hArray<T> & setSubSliceVec(vector<HInteger> & start, vector<HInteger> & end, HInteger level);
+    hArray<T> & setSubSliceVec(std::vector<HInteger> & start, std::vector<HInteger> & end, HInteger level);
     typename std::vector<T>::iterator begin();
     typename std::vector<T>::iterator end();
     HInteger getLoop_i();
@@ -104,9 +100,9 @@ template <class T>
     HInteger length();
     bool loopingMode();
     bool doLoopAgain();
-    hArray<T> & loop(vector<HInteger> & start_element_index, HInteger start=0, HInteger end=-1, HInteger increment=1);
-    hArray<T> & loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec);
-    HInteger setLoopSlice(vector<HInteger> & start_element_index);
+    hArray<T> & loop(std::vector<HInteger> & start_element_index, HInteger start=0, HInteger end=-1, HInteger increment=1);
+    hArray<T> & loopVector(std::vector<HInteger> & start_element_index, std::vector<HInteger> & vec);
+    HInteger setLoopSlice(std::vector<HInteger> & start_element_index);
     hArray<T> &  next();
     hArray<T> &  loopOn();
     hArray<T> &  loopOff();
@@ -121,7 +117,7 @@ template <class T>
     bool isTrackingHistory();
     hArray<T> &  clearHistory();
     hArray<T> &  addHistory(HString name, HString text);
-    vector<HString> & getHistory();
+    std::vector<HString> & getHistory();
     void printHistory();
     HString getKey(HString key);
     hArray<T> & setKey(HString key, HString contents);
@@ -142,9 +138,9 @@ template <class T>
     HInteger loop_slice_begin, loop_slice_end, loop_slice_size, loop_lower_level_size;
     HInteger loop_start, loop_end, loop_increment, loop_i, loop_nslice, loop_maxn;
     HInteger subslice_level,subslice_start,subslice_end;
-    vector<HInteger> subslice_vec_start,subslice_vec_end;
-    vector<HInteger>::iterator subslice_start_it,subslice_end_it;
-    vector<HInteger> index_vector;
+    std::vector<HInteger> subslice_vec_start,subslice_vec_end;
+    std::vector<HInteger>::iterator subslice_start_it,subslice_end_it;
+    std::vector<HInteger> index_vector;
     bool loop_over_indexvector;
     bool loop_next;
     bool doiterate;
@@ -202,7 +198,7 @@ template <class T>
     .def("isTrackingHistory",&hArray<TYPE>::isTrackingHistory)	\
     .def("history",&hArray<TYPE>::printHistory)	\
     .def("setKey",&hArray<TYPE>::setKey,return_internal_reference<>())	\
-    .def("getKey",&hArray<TYPE>::getKey)	
+    .def("getKey",&hArray<TYPE>::getKey)
 
 template <class T> HString pretty_vec(hArray<T> & a, const HInteger maxlen);
 void hArray_trackHistory(HBool on);

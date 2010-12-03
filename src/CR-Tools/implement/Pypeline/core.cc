@@ -82,3 +82,44 @@ vector<uint> PyList2STLuIntVec(PyObject* pyob){
   return vec;
 }
 
+// ========================================================================
+//  Additional string operation functions
+// ========================================================================
+
+/*!
+  \brief Convert a string to lower case.
+
+  \param ioString -- In- and output string.
+
+  \return Status -- Result of the opertation: true if successful, false otherwise.
+*/
+
+bool stringToLower(std::string& ioString)
+{
+  bool status = false;
+
+  for (unsigned int i=0; i<ioString.length(); ++i) {
+    ioString[i] = tolower(ioString[i]);
+  }
+  status = true;
+
+  return status;
+}
+
+/*!
+  \brief Convert a string to uppercase
+
+  \param ioString -- In- and output string.
+
+  \return Status -- result of the operation: true if successful, false otherwise.
+*/
+bool stringToUpper (std::string& ioString)
+{
+  bool status = false;
+
+  for (unsigned int i=0; i<ioString.length(); ++i) {
+    ioString[i] = toupper(ioString[i]);
+  }
+
+  return status;
+}

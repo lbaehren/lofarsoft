@@ -28,13 +28,12 @@
 #include "mArray.h"
 #include "mModule.h"
 
-using namespace std;
+
+// ========================================================================
+//  Type definitions
+// ========================================================================
 
 typedef boost::python::numeric::array ndarray;
-
-// ========================================================================
-//  Definitions
-// ========================================================================
 
 //========================================================================
 //                           Numpy Functions
@@ -49,8 +48,6 @@ typedef boost::python::numeric::array ndarray;
 #define HFPP_FILETYPE hFILE
 //-----------------------
 #include "../../../../build/cr/implement/Pypeline/mNumpy.def.h"
-
-
 
 
 #endif /* CR_PIPELINE_NUMPY_H */

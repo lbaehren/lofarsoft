@@ -38,6 +38,7 @@
 // ========================================================================
 
 #include "core.h"
+#include "mMath.h"
 #include "mImaging.h"
 
 #include "Math/VectorConversion.h"
@@ -54,6 +55,9 @@
 //  Implementation
 //
 // ========================================================================
+
+using namespace std;
+using namespace casa;
 
 #undef HFPP_FILETYPE
 //--------------------

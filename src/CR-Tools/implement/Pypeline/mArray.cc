@@ -4,7 +4,7 @@
  *  Copyright (c) 2010                                                    *
  *                                                                        *
  *  Martin van den Akker <martinva@astro.ru.nl>                           *
- *  Heino Falcke <h.falcke@astro.ru.nl>                                   *     
+ *  Heino Falcke <h.falcke@astro.ru.nl>                                   *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -62,6 +62,7 @@
 //$SECTION: Array functionality
 // ========================================================================
 
+using namespace std;
 
 // ________________________________________________________________________
 //                                         Casting and conversion functions
@@ -975,7 +976,7 @@ void hArray_trackHistory(HBool on){
     ary.clearHistory();			_H_NL_\
     ary.setHistory(true);			_H_NL_\
     ary.isTrackingHistory();			_H_NL_\
-} 
+}
 
 //Create dummy function for all types
 BOOST_PP_SEQ_FOR_EACH(HFPP_DUMMYCALL_MACRO,NIX,HFPP_ALL_TYPES(HBool))

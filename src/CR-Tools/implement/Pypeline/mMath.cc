@@ -4,7 +4,7 @@
  *  Copyright (c) 2010                                                    *
  *                                                                        *
  *  Martin van den Akker <martinva@astro.ru.nl>                           *
- *  Heino Falcke <h.falcke@astro.ru.nl>                                   *     
+ *  Heino Falcke <h.falcke@astro.ru.nl>                                   *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -2160,8 +2160,8 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
   if (abs(sum) > A_LOW_NUMBER) {
     return (vec_end-vec)/sum;
   } else {
-    if (sum>0) return A_HIGH_NUMBER;// sign(sum)*(vec_end-vec)/A_LOW_NUMBER;
-    else return -A_HIGH_NUMBER;//(vec_end-vec)/A_LOW_NUMBER;
+    if (sum>0) return static_cast<IterValueType>(A_HIGH_NUMBER);// sign(sum)*(vec_end-vec)/A_LOW_NUMBER;
+    else return static_cast<IterValueType>(-A_HIGH_NUMBER);//(vec_end-vec)/A_LOW_NUMBER;
   }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -2336,7 +2336,7 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also: find, findsequencegreaterthan, findsequencegreaterequal, findsequencelessthan, findsequencelessequal, findsequencebetween, findsequenceoutside, findsequenceoutsideorequal, findsequencebetweenorequal 
+See also: find, findsequencegreaterthan, findsequencegreaterequal, findsequencelessthan, findsequencelessequal, findsequencebetween, findsequenceoutside, findsequenceoutsideorequal, findsequencebetweenorequal
 
 Example:
 
@@ -2384,7 +2384,7 @@ HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
       ++itnow;
       if (sequenceon) {
 	if ((itnow-itlast)>maxgap) { //end of sequence
-	  sequenceon=false; 
+	  sequenceon=false;
 	  if (itlast-itfirst>=minlength) {//Previous sequence long enough, start new sequence and advance output vector
 	    *itout=(itfirst-vecin); ++itout; //Store result, begin
 	    if (itout!=vecout_end) {*itout=(itlast-vecin); ++nsequence; ++itout;}; //Store result, begin
@@ -2603,7 +2603,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also: find, findsequencegreaterthan, findsequencegreaterequal, findsequencelessthan, findsequencelessequal, findsequencebetween, findsequenceoutside, findsequenceoutsideorequal, findsequencebetweenorequal 
+See also: find, findsequencegreaterthan, findsequencegreaterequal, findsequencelessthan, findsequencelessequal, findsequencebetween, findsequenceoutside, findsequenceoutsideorequal, findsequencebetweenorequal
 
 Example:
 
@@ -2647,7 +2647,7 @@ HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
       ++itnow;
       if (sequenceon) {
 	if ((itnow-itlast)>maxgap) { //end of sequence
-	  sequenceon=false; 
+	  sequenceon=false;
 	  if (itlast-itfirst>=minlength) {//Previous sequence long enough, start new sequence and advance output vector
 	    *itout=(itfirst-vecin); ++itout; //Store result, begin
 	    if (itout!=vecout_end) {*itout=(itlast-vecin); ++nsequence; ++itout;}; //Store result, begin

@@ -31,7 +31,6 @@
 
 #include <Coordinates/CoordinateType.h>
 
-using namespace std;
 
 // ========================================================================
 //  Definitions

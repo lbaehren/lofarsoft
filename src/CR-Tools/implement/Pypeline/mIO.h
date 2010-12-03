@@ -35,9 +35,6 @@
 //  Definitions
 // ========================================================================
 
-using namespace std;
-
-
 typedef CR::DataReader* DataReaderPointer;
 typedef CR::DataReader CRDataReader;
 
@@ -61,7 +58,7 @@ CRDataReader& hFileOpen(HString Filename);
 HPyObject hFileGetParameter(CRDataReader &dr, HString key);
 bool hFileSetParameter(CRDataReader &dr, HString key, HPyObjectPtr pyob);
 HPyObjectPtr hCalTable(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob);
-vector<HNumber> hCalTableVector(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob);
+std::vector<HNumber> hCalTableVector(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob);
 
 template<class T> inline T hfcast(CR::DataReader v);
 

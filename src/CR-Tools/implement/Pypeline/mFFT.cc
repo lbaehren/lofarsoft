@@ -4,7 +4,7 @@
  *  Copyright (c) 2010                                                    *
  *                                                                        *
  *  Martin van den Akker <martinva@astro.ru.nl>                           *
- *  Heino Falcke <h.falcke@astro.ru.nl>                                   *     
+ *  Heino Falcke <h.falcke@astro.ru.nl>                                   *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -53,6 +53,9 @@
 //  Implementation
 //
 // ========================================================================
+
+using namespace std;
+using namespace casa;
 
 #undef HFPP_FILETYPE
 //--------------------
@@ -211,7 +214,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   int lenIn  = data_in_end - data_in;
   int lenOut = data_out_end - data_out;
   fftw_plan p;
-  vector<IterValueType> scratchfft(lenIn);
+  std::vector<IterValueType> scratchfft(lenIn);
 
   // Sanity check
   if (lenIn != lenOut) {
@@ -309,7 +312,7 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   // Declaration of variables
   int lenIn = data_in_end - data_in;
   int lenOut = data_out_end - data_out;
-  vector<IterValueType> scratchfft(lenOut);
+  std::vector<IterValueType> scratchfft(lenOut);
   fftw_plan p;
 
   // Sanity check
@@ -464,8 +467,8 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   uint blocksize(data_in_end - data_in);
   uint fftLength(blocksize/2+1);
   uint nofChannels(fftLength);
-  IPosition shape_in(1,blocksize);
-  IPosition shape_out(1,fftLength);
+  casa::IPosition shape_in(1,blocksize);
+  casa::IPosition shape_out(1,fftLength);
   casa::FFTServer<Double,DComplex> fftserver(shape_in, casa::FFTEnums::REALTOCOMPLEX);
 
   Vector<Double> cvec_in(shape_in, 0.);
@@ -549,8 +552,8 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   uint blocksize(data_out_end - data_out);
   uint fftLength(blocksize/2+1);
   uint nofChannels(fftLength);
-  IPosition shape_in(1,fftLength);
-  IPosition shape_out(1,blocksize);
+  casa::IPosition shape_in(1,fftLength);
+  casa::IPosition shape_out(1,blocksize);
 
   Vector<DComplex> cvec_f(shape_in, reinterpret_cast<DComplex*>(&(*data_in)), casa::SHARE);
   Vector<DComplex> cvec_in(fftLength);

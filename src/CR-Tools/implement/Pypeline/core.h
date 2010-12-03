@@ -99,11 +99,9 @@
 
 // Replacement of "hfcommon.h"
 
-using namespace std;
-
-#define ERROR( txt ) ( cout << endl << "ERROR in file " << __FILE__ << " line " << __LINE__ << ": "  << txt << endl )
-#define MESSAGE( txt ) ( cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt << endl )
-#define PRINT( txt ) ( cout << txt << endl )
+#define ERROR( txt ) ( std::cout << std::endl << "ERROR in file " << __FILE__ << " line " << __LINE__ << ": "  << txt << std::endl )
+#define MESSAGE( txt ) ( std::cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt << std::endl )
+#define PRINT( txt ) ( std::cout << txt << std::endl )
 #define MSG MESSAGE
 
 //------------------------------------------
@@ -212,10 +210,10 @@ void aipsvec2stlvec(CasaVector<S>& data, std::vector<T>& stlvec);
 template <class S, class Iter>
 void aipsvec2stdit(CasaVector<S>& data, const Iter stlvec, const Iter stlvec_end);
 
-vector<HNumber> PyList2STLFloatVec(PyObject* pyob);
-vector<HInteger> PyList2STLIntVec(PyObject* pyob);
-vector<int> PyList2STLInt32Vec(PyObject* pyob);
-vector<uint> PyList2STLuIntVec(PyObject* pyob);
+std::vector<HNumber> PyList2STLFloatVec(PyObject* pyob);
+std::vector<HInteger> PyList2STLIntVec(PyObject* pyob);
+std::vector<int> PyList2STLInt32Vec(PyObject* pyob);
+std::vector<uint> PyList2STLuIntVec(PyObject* pyob);
 
 template<class T> T hfnull(){};
 template<> inline HString  hfnull<HString>(){HString null=""; return null;}
@@ -236,8 +234,8 @@ template<class T> inline T hfcast(ptrdiff_t v);
 template<class T> inline T hfcast(HInteger v);
 template<class T> inline T hfcast(HNumber v);
 template<class T> inline T hfcast(HComplex v);
-template<class T> inline T hfcast(/*const*/ HPointer v);
-template<class T> inline T hfcast(/*const*/ HString v);
+template<class T> inline T hfcast(HPointer v);
+template<class T> inline T hfcast(HString v);
 
 
 
@@ -252,11 +250,11 @@ template<> inline HString hfcast<HString>(HInteger v);
 template<> inline HString hfcast<HString>(HNumber v);
 template<> inline HString hfcast<HString>(HComplex v);
 
-template<class T> inline T hfcast(/*const*/ HString v);
-template<> inline HPointer hfcast(/*const*/ HString v);
-template<> inline HInteger hfcast(/*const*/ HString v);
-template<> inline HNumber hfcast(/*const*/ HString v);
-template<> inline HComplex hfcast(/*const*/ HString v);
+template<class T> inline T hfcast(HString v);
+template<> inline HPointer hfcast(HString v);
+template<> inline HInteger hfcast(HString v);
+template<> inline HNumber hfcast(HString v);
+template<> inline HComplex hfcast(HString v);
 
 template<class T> inline T hfcast(HBool v);
 template<>  inline HBool hfcast<HBool>(HInteger v);
@@ -269,7 +267,7 @@ template<>  inline HBool hfcast<HBool>(HPointer v);
 template<class T> inline HString hf2string(T v);
 
 template <class T>
-HString pretty_vec(vector<T> & v,const HInteger maxlen=8);
+HString pretty_vec(std::vector<T> & v,const HInteger maxlen=8);
 
 
 
@@ -327,10 +325,10 @@ template<> inline HString hfcast<HString>(uint v){std::ostringstream os; os << v
 template<> inline HString hfcast<HString>(HInteger v){std::ostringstream os; os << v; return os.str();}
 template<> inline HString hfcast<HString>(HNumber v){std::ostringstream os; os << v; return os.str();}
 template<> inline HString hfcast<HString>(HComplex v){std::ostringstream os; os << v; return os.str();}
-template<> inline HPointer hfcast(/*const*/ HString v){HPointer t=NULL; std::istringstream is(v); is >> t; return t;}
-template<> inline HInteger hfcast(/*const*/ HString v){HInteger t=0; std::istringstream is(v); is >> t; return t;}
-template<> inline HNumber hfcast(/*const*/ HString v){HNumber t=0.0; std::istringstream is(v); is >> t; return t;}
-template<> inline HComplex hfcast(/*const*/ HString v){HComplex t=0.0; std::istringstream is(v); is >> t; return t;}
+template<> inline HPointer hfcast(HString v){HPointer t=NULL; std::istringstream is(v); is >> t; return t;}
+template<> inline HInteger hfcast(HString v){HInteger t=0; std::istringstream is(v); is >> t; return t;}
+template<> inline HNumber hfcast(HString v){HNumber t=0.0; std::istringstream is(v); is >> t; return t;}
+template<> inline HComplex hfcast(HString v){HComplex t=0.0; std::istringstream is(v); is >> t; return t;}
 
 //Bools
 template<class T> inline T hfcast(HBool v){return hfcast<T>(hfcast<HInteger>(v));}
@@ -348,8 +346,8 @@ template<class T> inline T hfcast(int v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HInteger v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HNumber v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HComplex v){return static_cast<T>(v);}
-template<class T> inline T hfcast(/*const*/ HPointer v){return hfcast<T>(reinterpret_cast<HInteger>(v));}
-template<class T> inline T hfcast(/*const*/ HString v){T t; std::istringstream is(v); is >> t; return t;}
+template<class T> inline T hfcast(HPointer v){return hfcast<T>(reinterpret_cast<HInteger>(v));}
+template<class T> inline T hfcast(HString v){T t; std::istringstream is(v); is >> t; return t;}
 
 
 inline HInteger ptr2int(HPointer v){return reinterpret_cast<HInteger>(v);}
@@ -382,10 +380,10 @@ HString hgetFileExtension(HString filename);
 //========================================================================
 
 template <class T>
-HString pretty_vec(vector<T> & v,const HInteger maxlen){
+HString pretty_vec(std::vector<T> & v,const HInteger maxlen){
   if (v.size()==0) return "[]";
   int i=1;
-  typename vector<T>::iterator it=v.begin();
+  typename std::vector<T>::iterator it=v.begin();
   HString s=("[");
   s+=hf2string(*it); ++it; ++i;
   while (it!=v.end() && i< maxlen) {
@@ -478,6 +476,13 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
     };
   };
 }
+
+// ========================================================================
+//  Additional string operation functions
+// ========================================================================
+
+bool stringToLower(std::string& ioString);
+bool stringToUpper(std::string& ioString);
 
 
 // ========================================================================

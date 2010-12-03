@@ -26,7 +26,6 @@
 #include "mArray.h"
 #include "mModule.h"
 
-using namespace std;
 
 // ========================================================================
 //  Function definition

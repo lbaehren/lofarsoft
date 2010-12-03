@@ -49,6 +49,8 @@
 //
 // ========================================================================
 
+using namespace std;
+
 #undef HFPP_FILETYPE
 //--------------------
 #define HFPP_FILETYPE CC

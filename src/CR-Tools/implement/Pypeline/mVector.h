@@ -26,7 +26,6 @@
 #include "mArray.h"
 #include "mModule.h"
 
-using namespace std;
 
 // ________________________________________________________________________
 //                                    Add declarations of wrapper functions
