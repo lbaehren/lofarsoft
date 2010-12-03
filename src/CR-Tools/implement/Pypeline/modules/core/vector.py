@@ -53,15 +53,22 @@ def Vector(Type=float,size=-1,fill=None):
     if (type(vtype) in hAllArrayTypes):  # hArrayClass
         vtype=basetype(Type)
         vec=Vector(Type.vec())
-    elif (type(vtype) in hAllListTypes):  #List or Vector
+    elif (type(vtype) in hAllListTypes):  # List or Vector
         vtype=type(Type[0])
         vec=type2vector(vtype)
         vec.extend(Type)
-    elif type(vtype) == np.ndarray:  #List or Vector
-        Type=list(Type.ravel())
-        vtype=type(Type[0])
-        vec=type2vector(vtype)
-        vec.extend(Type)
+    elif type(vtype) == np.ndarray:  # Numpy ndarray
+        if vtype.dtype == np.dtype('float'):
+            vec = FloatVec()
+        elif vtype.dtype == np.dtype('complex'):
+            vec = ComplexVec()
+        elif vtype.dtype == np.dtype('int'):
+            vec = IntVec()
+        else:
+            raise TypeError("No available copy constructor for dtype: '"+str(vtype.dtype)+"'")
+
+        vec.resize(vtype.size)
+        hCopy(vec, vtype)
     else:
         vec=type2vector(vtype)
     vec.type=vtype

@@ -573,15 +573,15 @@ def hArray_toNumpy(self):
     """Returns a copy of the array as a numpy.ndarray object with the correct dimensions."""
     if isinstance(self, FloatArray):
         array = np.empty(shape=self.shape(), dtype='float')
-        hCopyToNumpy(array, self)
+        hCopy(array, self)
     elif isinstance(self, IntArray):
         array = np.empty(shape=self.shape(), dtype='int')
-        hCopyToNumpy(array, self)
+        hCopy(array, self)
     elif isinstance(self, ComplexArray):
         array = np.empty(shape=self.shape(), dtype='complex')
-        hCopyToNumpy(array, self)
+        hCopy(array, self)
     else:
-        print "Cannot use hCopyToNumpy for this type, falling back to (slower) list constructor"
+        print "Cannot use hCopy for this type, falling back to (slower) list constructor"
         array = np.asarray(self.vec()).reshape(self.shape())
 
     return array

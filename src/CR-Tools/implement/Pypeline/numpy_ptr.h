@@ -26,7 +26,7 @@
 */
 template <class T> T* numpyBeginPtr(boost::python::numeric::array pydata)
 {
-  // test if the numpy-array has the preperties we need
+  // test if the numpy-array has the properties we need
   // (they throw exceptions if not)
   //num_util::check_type(pydata, num_util::getEnum<T>() );
   num_util::check_contiguous(pydata);
@@ -44,7 +44,7 @@ template <class T> T* numpyBeginPtr(boost::python::numeric::array pydata)
 */
 template <class T> T* numpyEndPtr(boost::python::numeric::array pydata)
 {
-  // test if the numpy-array has the preperties we need
+  // test if the numpy-array has the properties we need
   // (they throw exceptions if not)
   //num_util::check_type(pydata, num_util::getEnum<T>() );
   num_util::check_contiguous(pydata);
