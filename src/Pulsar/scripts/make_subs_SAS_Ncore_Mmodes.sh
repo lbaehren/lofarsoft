@@ -1,10 +1,10 @@
-#!/bin/ksh -x
+#!/bin/ksh
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.2
+VERSION=2.3
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
