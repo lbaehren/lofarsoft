@@ -1,10 +1,10 @@
-#!/bin/ksh
+#!/bin/ksh -x
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.1
+VERSION=2.2
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -688,10 +688,10 @@ do
 		#Create subband lists
 		if [[ $transpose == 0 ]] 
 		then		    
-			all_list=`ls /net/sub?/lse*/data?/${OBSID}/*${STOKES} | sort -t B -g -k 2`
+			all_list=`ls /net/sub?/lse*/data?/${OBSID}/*.${STOKES} | sort -t B -g -k 2`
 #A2test			all_list=`cat /data4/2nd_transpose/L2010_21488_red_freqwrong/incoherentstokes/SB_master.list`
 		#XXX	all_list=`ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
-			ls /net/sub?/lse*/data?/${OBSID}/*${STOKES} | sort -t B -g -k 2 > $master_list
+			ls /net/sub?/lse*/data?/${OBSID}/*.${STOKES} | sort -t B -g -k 2 > $master_list
 #A2test			cp /data4/2nd_transpose/L2010_21488_red_freqwrong/incoherentstokes/SB_master.list $master_list
 		#XXX	ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
 	    else
@@ -739,7 +739,7 @@ do
         
 			modulo_files=`echo $all_num $core | awk '{print ($1 % $2)}'`
 			# If the number of cores does not evenly divide into the # of files, then find another good value
-			if (( $modulo_files != 0 )) && (( $nrBeams =>1 ))
+			if (( $modulo_files != 0 )) && (( $nrBeams > 1 )) && [[ $STOKES == "incoherentstokes" ]]
             then 
 			   echo "ERROR: For multi-beam IS mode, the number of files ($all_num) must divide by the number of beams ($core)!"
 			   echo "       There seems to be missing data or an error in the parset or pipeline;  cannot continue."
@@ -934,23 +934,29 @@ do
 	
 		if [[ $core == 1 ]] && [[ $STOKES == "stokes" ]]
 		then
-		   echo "Warning - turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0"
-		   echo "Warning - turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0" >> $log
 		   if [[ $all == 1 ]]
 		   then
+  		      echo "WARNING: turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0"
+		      echo "WARNING: turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0" >> $log
 		      all=0
 		   fi
 		   if [[ $all_pproc == 1 ]]
 		   then 
+  		      echo "WARNING: turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0"
+		      echo "WARNING: turning off 'all' processing since number of cores/slipts is 1 and therefore all are done together in RSP0" >> $log
 		      all_pproc=0
 		   fi
 		elif [[ $all == 0 ]] && [[ $core != 1 ]] && [[ $all_orig == 1 ]] && [[ $STOKES == "incoherentstokes" ]]
 		then
 		   # turn all processing back on if it was turned off for stokes processing
+  		   echo "Turning ON 'all' processing for mode $STOKES."
+		   echo "Turning ON 'all' processing for mode $STOKES." >> $log
 		   all=1
 		elif [[ $all_pproc == 0 ]] && [[ $core != 1 ]] && [[ $all_pproc_orig == 1 ]] && [[ $STOKES == "incoherentstokes" ]]
 		then
 		   # turn all_pproc processing back on if it was turned off for stokes processing
+  		   echo "Turning ON 'all' processing for mode $STOKES."
+		   echo "Turning ON 'all' processing for mode $STOKES." >> $log
 		   all_pproc=1
 		fi
 		
@@ -1388,8 +1394,8 @@ do
 		    if [ $check_number -ne $total ]
 		    then
 		        all=0
-		        echo "Warning - possible problem running on ALL subbands in $STOKES/$jjj/RSPA;  master list is too short (is $check_number but should be $total rows)"
-		        echo "Warning - possible problem running on ALL subbands in $STOKES/$jjj/RSPA;  master list is too short (is $check_number but should be $total rows)" >> $log
+		        echo "WARNING: possible problem running on ALL subbands in $STOKES/$jjj/RSPA;  master list is too short (is $check_number but should be $total rows)"
+		        echo "WARNING: possible problem running on ALL subbands in $STOKES/$jjj/RSPA;  master list is too short (is $check_number but should be $total rows)" >> $log
 		    else
 		        echo ./run.sh >> $log
 		        if [ $all_pproc == 0 ]
