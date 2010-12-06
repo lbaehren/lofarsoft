@@ -67,7 +67,7 @@ class Op_spectralindex(Op):
             img.avimage_flags = iniflags
             mylog.info('%s %i %s' % ('Kept all ',shp[0]," channels "))
         img.avimage = avimage
-        pyfits.writeto(img.imagename + '.avimage.fits', N.transpose(img.avimage, (0,2,1)), img.header, clobber=True)
+        #pyfits.writeto(img.imagename + '.avimage.fits', N.transpose(img.avimage, (0,2,1)), img.header, clobber=True)
                                                 # calculate the rms of each channel
 
         nchan = avimage.shape[0]
@@ -158,24 +158,18 @@ class Op_spectralindex(Op):
         sbeam = img.opts.beam_spectrum 
         if sbeam != None and len(sbeam) != shp[0]: sbeam = None
         if sbeam == None:
-          img.opts.beam_spectrum = [img.opts.beam]*shp[0]
+            img.opts.beam_spectrum = [img.opts.beam]*shp[0]
 
-        hdr = img.header
-        nax = img.header['naxis']
         img.freq = N.zeros(shp[0])
-        found = False
-        for i in range(nax):
-          s = str(i+1)
-          if hdr['ctype'+s][0:4] == 'FREQ':
-            crval, cdelt, crpix = hdr['CRVAL'+s], hdr['CDELT'+s], hdr['CRPIX'+s]
-            found = True
+        crval, cdelt, crpix = img.freq_pars
+        if crval == 0.0 and cdelt == 0.0 and crpix == 0.0:
+            mylog.critical("CTYPE = FREQ not found in header")
+            raise RuntimeError("CTYPE = FREQ not found in header")
+        else:
             for ichan in range(shp[0]):
-              ich = ichan+1
-              img.freq[ichan] = crval+cdelt*(ich-crpix)
-        if not found:
-          mylog.critical("CTYPE = FREQ not found in header")
-          raise RuntimeError("CTYPE = FREQ not found in header")
-
+                ich = ichan+1
+                img.freq[ichan] = crval+cdelt*(ich-crpix)
+                
 
 ####################################################################################
     def pre_av(self, img, shp, iniflags):

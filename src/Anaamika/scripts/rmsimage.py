@@ -98,7 +98,7 @@ class Op_rmsimage(Op):
 	from math import sqrt
 
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Rmsimage.Checkrms  ")
-        cdelt = (img.header['cdelt1'], img.header['cdelt2'])
+        cdelt = img.wcs_obj.cdelt
 	bm = (img.opts.beam[0], img.opts.beam[1])
 	fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
 	stdsub = N.std(rms)
@@ -123,7 +123,7 @@ class Op_rmsimage(Op):
 	from math import sqrt
 
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Rmsimage.Checkmean ")
-        cdelt = (img.header['cdelt1'], img.header['cdelt2'])
+        cdelt = img.wcs_obj.cdelt
 	bm = (img.opts.beam[0], img.opts.beam[1])
 	fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
 	stdsub = N.std(mean)

@@ -47,7 +47,7 @@ class Op_threshold(Op):
             mylog.debug("Threshold for pixels set to : "+str.swapcase(opts.thresh))
 
 	if img.opts.thresh=='fdr':
-            cdelt = (img.header['cdelt1'], img.header['cdelt2'])
+            cdelt = img.wcs_obj.cdelt
 	    bm = (opts.beam[0], opts.beam[1])
             area_pix = int(round(N.product(bm)/(abs(N.product(cdelt))* \
                                                   pi/(4.0*log(2.0)))))
@@ -81,9 +81,9 @@ class Op_threshold(Op):
         fwsig = const.fwsig
 	cutoff = 5.0
 	spin = -0.80
-	freq = img.header['crval3']
         bm = (img.opts.beam[0], img.opts.beam[1])
-        cdelt = (img.header['cdelt1'], img.header['cdelt2'])
+        freq = img.cfreq
+        cdelt = img.wcs_obj.cdelt
 	x = 2.0*pi*N.product(bm)/abs(N.product(cdelt))/(fwsig*fwsig)*img.omega
 
 	smin_L = img.clipped_rms*cutoff*((1.4e9/freq)**spin)

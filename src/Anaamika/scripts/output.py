@@ -120,8 +120,7 @@ def write_srl(img, filename=None, format='fits'):
             filename = img.imagename + '.srl.sky'
     print 'Sorry, this feature is not yet available. Use "write_gaul" instead.'
 
-
-def write_gaul(img, filename=None, format='fits'):
+def write_gaul(img, filename=None, format='ascii'):
     """Write the Gaussian list to a file.
 
     Supported formats are:
@@ -129,8 +128,8 @@ def write_gaul(img, filename=None, format='fits'):
         "ascii"
         "bbs"
     """
-    if (format in ['fits', 'ascii', 'bbs']) == False:
-        raise RuntimeError('format must be "fits", "ascii", or "bbs"')
+    if (format in ['fits', 'ascii', 'bbs', 'ds9']) == False:
+        raise RuntimeError('format must be "fits", "ascii", "ds9", or "bbs"')
     if filename == None:
         if format == 'fits':
             filename = img.imagename + '.gaul.fits'
@@ -138,6 +137,8 @@ def write_gaul(img, filename=None, format='fits'):
             filename = img.imagename + '.gaul.txt'
         if format == 'bbs':
             filename = img.imagename + '.gaul.sky'
+        if format == 'ds9':
+            filename = img.imagename + '.gaul.reg'
     if format == 'fits':
         # Write as FITS binary table.
         import pyfits
@@ -152,7 +153,7 @@ def write_gaul(img, filename=None, format='fits'):
             col_list.append(list1)
         tbhdu = pyfits.new_table(col_list)
         tbhdu.writeto(filename, clobber=True)
-        print '--> Wrote FITS file '+filename+'.'
+        print '--> Wrote FITS file ' + filename
     if format == 'ascii':
         # Write as ascii file.
         f = open(filename, "w")
@@ -180,7 +181,7 @@ def write_gaul(img, filename=None, format='fits'):
                    shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2])
             f.write(str1)
         f.close()
-        print '--> Wrote ASCII file '+filename+'.'
+        print '--> Wrote ASCII file ' + filename
     if format == 'bbs':
         # Write as a BBS sky model.
         import numpy as N
@@ -238,58 +239,107 @@ def write_gaul(img, filename=None, format='fits'):
         for i in flux_indx:
           f.write(str_src[i])
         f.close()
-        print '--> Wrote BBS sky model '+filename+'.'
-
+        print '--> Wrote BBS sky model ' + filename
+    if format == 'ds9':
+        # write ds9 region file
+        import numpy as N
+        from const import fwsig
+        out_region_file = open(filename, "w")
+        region_comment = 'global color=green dashlist=8 3 width=1 font="helvetica 10 normal" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1\nfk5\n'
+        out_region_file.write(region_comment)
+        sname = img.imagename.split('.')[0]
+        bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
+        bm_deg = img.pix2beam(bm_pix)
+        for g in img.gaussians():
+            src = sname + '_' + str(g.gaus_num)
+            ra, dec = g.centre_sky
+            deconv = g.deconv_size_sky
+            if deconv[0] == 0.: deconv[0] = bm_deg[0]
+            if deconv[1] == 0.: deconv[1] = bm_deg[1]
+            if deconv[0] <= bm_deg[0] and deconv[1] <= bm_deg[1]:
+                stype = 'POINT'
+                deconv[0] = bm_deg[0]
+                deconv[1] = bm_deg[1]
+                region = 'point('+str(ra)+','+str(dec)+') # point=cross width=2 text={'+src+'}\n'
+            else:
+                stype = 'GAUSSIAN'
+                region = 'ellipse('+str(ra)+','+str(dec)+','+str(deconv[0]*3600.0)+'",'+str(deconv[1]*3600.0)+'",'+str(deconv[2]+90.0)+') # text={'+src+'}\n'
+            out_region_file.write(region)
+        out_region_file.close()
+        print '--> Wrote ds9 region file ' + filename
+        
 def write_resid_img(img, filename=None):
     """Write the residual Gaussian image to a fits file."""
-    import pyfits
     if filename == None:
         filename = img.imagename + '.resid_gaus.fits'
-    pyfits.writeto(filename, N.transpose(img.resid_gaus), img.header, clobber=True)
-    print 'Wrote FITS file '+filename+'.'
+    temp_im = make_fits_image(N.transpose(img.resid_gaus), img.wcs_obj)
+    temp_im.writeto(filename, clobber=True)
+    print 'Wrote FITS file ' + filename
 
 def write_model_img(img, filename=None):
     """Write the model Gaussian image to a fits file."""
-    import pyfits
     if filename == None:
         filename = img.imagename + '.model_gaus.fits'
-    pyfits.writeto(filename, N.transpose(img.model_gaus), img.header, clobber=True)
-    print 'Wrote FITS file '+filename+'.'
+    temp_im = make_fits_image(N.transpose(img.model_gaus), img.wcs_obj)
+    temp_im.writeto(filename, clobber=True)
+    print 'Wrote FITS file ' + filename
 
 def write_rms_img(img, filename=None):
     """Write the rms image to a fits file."""
-    import pyfits
     if filename == None:
         filename = img.imagename + '.rms.fits'
-    pyfits.writeto(filename, N.transpose(img.rms), img.header, clobber=True)
-    print 'Wrote FITS file '+filename+'.'
-        
+    temp_im = make_fits_image(N.transpose(img.rms), img.wcs_obj)
+    temp_im.writeto(filename, clobber=True)
+    print 'Wrote FITS file ' + filename
+
+def write_ch0_img(img, filename=None):
+    """Write the ch0 image (used for source detection) to a fits file."""
+    if filename == None:
+        filename = img.imagename + '.ch0.fits'
+    temp_im = make_fits_image(N.transpose(img.ch0), img.wcs_obj)
+    temp_im.writeto(filename, clobber=True)
+    print 'Wrote FITS file ' + filename
+
+def make_fits_image(imagedata, wcsobj):
+    """Makes a simple FITS hdulist appropriate for images"""
+    import pyfits
+    hdu = pyfits.PrimaryHDU(imagedata)
+    hdulist = pyfits.HDUList([hdu])
+    header = hdulist[0].header
+    header.update('CTYPE1', wcsobj.ctype[0])
+    header.update('CTYPE2', wcsobj.ctype[1])
+    header.update('CRVAL1', wcsobj.crval[0])
+    header.update('CRVAL2', wcsobj.crval[1])
+    header.update('CDELT1', wcsobj.cdelt[0])
+    header.update('CDELT2', wcsobj.cdelt[1])
+    header.update('CRPIX1', wcsobj.crpix[0])
+    header.update('CRPIX2', wcsobj.crpix[1])
+    header.update('CROTA1', wcsobj.crota[0])
+    header.update('CROTA2', wcsobj.crota[1])
+    hdulist[0].header = header
+    return hdulist
+    
 def ra2hhmmss(deg):
     """Convert RA coordinate (in degrees) to HH MM SS"""
-
     from math import modf
     if deg < 0:
         raise RuntimeError("Negative RA")
     x, hh = modf(deg/15.)
     x, mm = modf(x*60)
     ss = x*60
-
     return (int(hh), int(mm), ss)
 
 def dec2ddmmss(deg):
     """Convert DEC coordinate (in degrees) to DD MM SS"""
-
     from math import modf
     sign = (-1 if deg < 0 else 1)
     x, dd = modf(abs(deg))
     x, ma = modf(x*60)
     sa = x*60
-
     return (int(dd), int(ma), sa, sign)
 
 def pybdsm2fbdsm(img):
     import functions as func
-
     fbdsm = []
     for g in img.gaussians():
         gidx = g.gaus_num
@@ -309,7 +359,6 @@ def pybdsm2fbdsm(img):
                  shape[2], eshape[2], 0.,0.,0.,0.,0.,0., 0.,0.,0.,0., 0.,0., iidx, 0,0,0,0, 0.,0.,0.,0.,0.,0.]
         fbdsm.append(list1)
     fbdsm = func.trans_gaul(fbdsm)
-
     return fbdsm
 
 

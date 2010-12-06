@@ -64,21 +64,35 @@ class Op_collapse(Op):
             # that the images have the same shape as I were done in FITS.py. Also,
             # assume (until true 4-D cubes are available) that input filename includes
             # '_I.fits' and that other Stokes cubes are named '*_Q.fits', etc.
-            split_fitsname = img.opts.fits_name.split("_I.fits") # replace 'I' with 'Q', 'U', or 'V'
-            fits_file = split_fitsname[0]+'_'+pol+'.fits'
-            fits = pyfits.open(fits_file, mode="readonly")
-            data = fits[0].data
-            hdr = fits[0].header
-            fits.close()
+            if img.opts.use_pyrap:
+                split_imname = img.opts.filename.split("_I.") # replace 'I' with 'Q', 'U', or 'V'
+                image_file = split_imname[0] + '_' + pol + split_imname[-1]
+                inputimage = pim.image(image_file)
+                data = inputimage.getdata()
+                
+                ### now we need to transpose coordinates corresponding to RA & DEC
+                axes = range(len(data.shape))
+                axes[-1], axes[-2] = axes[-2], axes[-1]
+                data = data.transpose(*axes)
 
-            ### now we need to transpose coordinates corresponding to RA & DEC
-            axes = range(len(data.shape))
-            axes[-1], axes[-2] = axes[-2], axes[-1]
-            data = data.transpose(*axes)
+                ### and make a copy of it to get proper layout & byteorder
+                data = N.array(data, order='C',
+                               dtype=data.dtype.newbyteorder('='))
+            else:
+                split_fitsname = img.opts.fits_name.split("_I.fits") # replace 'I' with 'Q', 'U', or 'V'
+                fits_file = split_fitsname[0]+'_'+pol+'.fits'
+                fits = pyfits.open(fits_file, mode="readonly")
+                data = fits[0].data
+                fits.close()
 
-            ### and make a copy of it to get proper layout & byteorder
-            data = N.array(data, order='C',
-                           dtype=data.dtype.newbyteorder('='))
+                ### now we need to transpose coordinates corresponding to RA & DEC
+                axes = range(len(data.shape))
+                axes[-1], axes[-2] = axes[-2], axes[-1]
+                data = data.transpose(*axes)
+
+                ### and make a copy of it to get proper layout & byteorder
+                data = N.array(data, order='C',
+                               dtype=data.dtype.newbyteorder('='))
                 
           if mode == 'single':
             if pol == 'I': 
@@ -112,21 +126,27 @@ class Op_collapse(Op):
               mylog.debug('%s %s %s' % ('Channel weights : ', str1, '; unity=zero if c_wts="rms"'))
             ch0images[ipol][:] = ch0[:]
 
-          pyfits.writeto(img.imagename+'.ch0_'+pol+'.fits', N.transpose(ch0), img.header, clobber=True)
-          mylog.debug('%s %s ' % ('Writing file ', img.imagename+'.ch0_'+pol+'.fits'))
+          #pyfits.writeto(img.imagename+'.ch0_'+pol+'.fits', N.transpose(ch0), img.header, clobber=True)
+          #mylog.debug('%s %s ' % ('Writing file ', img.imagename+'.ch0_'+pol+'.fits'))
 
       else:
         img.ch0 = img.image
         if img.opts.polarisation_do: 
           for pol in pols[1:]:
-            split_fitsname = img.opts.fits_name.split("_I.fits") 
-            fits_file = split_fitsname[0]+'_'+pol+'.fits'
-            fits = pyfits.open(fits_file, mode="readonly")
-            data = fits[0].data
-            fits.close()
-            axes = range(len(data.shape)); axes[-1], axes[-2] = axes[-2], axes[-1]
-            data = data.transpose(*axes)
-            data = N.array(data, order='C', dtype=data.dtype.newbyteorder('='))
+            if img.opts.use_pyrap:
+                split_imname = img.opts.filename.split("_I.") # replace 'I' with 'Q', 'U', or 'V'
+                image_file = split_imname[0] + '_' + pol + split_imname[-1]
+                inputimage = pim.image(image_file)
+                data = inputimage.getdata()
+            else:
+                split_fitsname = img.opts.fits_name.split("_I.fits") 
+                fits_file = split_fitsname[0]+'_'+pol+'.fits'
+                fits = pyfits.open(fits_file, mode="readonly")
+                data = fits[0].data
+                fits.close()
+                axes = range(len(data.shape)); axes[-1], axes[-2] = axes[-2], axes[-1]
+                data = data.transpose(*axes)
+                data = N.array(data, order='C', dtype=data.dtype.newbyteorder('='))
             if pol == 'Q': img.ch0_Q = data
             if pol == 'U': img.ch0_U = data
             if pol == 'V': img.ch0_V = data

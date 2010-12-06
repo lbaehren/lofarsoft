@@ -4,9 +4,16 @@ Import all standard operations, define default chain of
 operations and provide function 'execute', which can
 execute chain of operations properly.
 """
+# Try simple check of whether pyrap is available
+try:
+    import pyrap.images as pim
+    has_pyrap = True
+except ImportError:
+    has_pyrap = False
 
+if has_pyrap:
+    from read_image import Op_readimage
 from FITS import Op_loadFITS
-#from read_image import Op_readimage
 from preprocess import Op_preprocess
 from rmsimage import Op_rmsimage
 from threshold import Op_threshold
@@ -23,24 +30,41 @@ from wavelet_atrous import Op_wavelet_atrous
 #from psf_vary import Op_psf_vary # this module is not in current USG repository, and _pytesselate.so does not import
 import mylogger 
 
-fits_chain = [#Op_readimage(),
-              Op_loadFITS(),
-              Op_collapse(),
-              Op_preprocess(),
-              Op_rmsimage(),
-              Op_threshold(), 
-	      Op_islands(),
-              Op_gausfit(), 
-              Op_shapelets(),
-              Op_make_residimage(), 
-              Op_gaul2srl(), 
-              Op_spectralindex(),
-              Op_polarisation(),
-              Op_wavelet_atrous(),
-              #Op_psf_vary(),
-              Op_outlist()
-              ]
-
+if has_pyrap:
+    fits_chain = [Op_readimage(),
+                  Op_collapse(),
+                  Op_preprocess(),
+                  Op_rmsimage(),
+                  Op_threshold(), 
+                  Op_islands(),
+                  Op_gausfit(), 
+                  Op_shapelets(),
+                  Op_make_residimage(), 
+                  Op_gaul2srl(), 
+                  Op_spectralindex(),
+                  Op_polarisation(),
+                  Op_wavelet_atrous(),
+                  #Op_psf_vary(),
+                  Op_outlist()
+                  ]
+else:
+    fits_chain = [Op_loadFITS(),
+                  Op_collapse(),
+                  Op_preprocess(),
+                  Op_rmsimage(),
+                  Op_threshold(), 
+                  Op_islands(),
+                  Op_gausfit(), 
+                  Op_shapelets(),
+                  Op_make_residimage(), 
+                  Op_gaul2srl(), 
+                  Op_spectralindex(),
+                  Op_polarisation(),
+                  Op_wavelet_atrous(),
+                  #Op_psf_vary(),
+                  Op_outlist()
+                  ]
+   
 
 def execute(chain, opts):
     """Execute chain.
@@ -54,7 +78,7 @@ def execute(chain, opts):
     import mylogger 
 
     mylog = mylogger.logging.getLogger("PyBDSM.init      ")
-    mylog.info("Running PyBDSM on "+opts["fits_name"])
+    mylog.info("Running PyBDSM on "+opts["filename"])
     
     img = Image(opts)
     img.log = ''
@@ -85,7 +109,7 @@ def execute(chain, opts):
     return img
 
 
-def process_image(input_file, beam=None, do_pol=False, do_spec=False, do_shapelets=False, isl_thresh=3.0, pix_thresh=5.0, collapse_mode='average', collapse_wt='rms', threshold_method=None, use_rms_map=None, use_mean_map='default', rms_box=None, extended=False, gaussian_maxsize=10.0):
+def process_image(input_file, beam=None, do_pol=False, do_spec=False, do_shapelets=False, isl_thresh=3.0, pix_thresh=5.0, collapse_mode='average', collapse_wt='rms', threshold_method=None, use_rms_map=None, use_mean_map='default', rms_box=None, extended=False, gaussian_maxsize=10.0, use_pyrap=True):
     """
     Run a standard analysis on an image and returns the associated Image object.
 
@@ -125,9 +149,49 @@ def process_image(input_file, beam=None, do_pol=False, do_spec=False, do_shapele
     if extended == True:
         gaussian_maxsize = 100.0 # allow extended gaussians
         use_rms_map = False # ignore rms map, which may be biased by extended emission        
-    
+    if use_pyrap == True and has_pyrap == True:
+        use_pyrap = True
+    else:
+        use_pyrap = False
+
+    if use_pyrap:
+        fits_chain = [Op_readimage(),
+                      Op_collapse(),
+                      Op_preprocess(),
+                      Op_rmsimage(),
+                      Op_threshold(), 
+                      Op_islands(),
+                      Op_gausfit(), 
+                      Op_shapelets(),
+                      Op_make_residimage(), 
+                      Op_gaul2srl(), 
+                      Op_spectralindex(),
+                      Op_polarisation(),
+                      Op_wavelet_atrous(),
+                      #Op_psf_vary(),
+                      Op_outlist()
+                      ]
+    else:
+        fits_chain = [Op_loadFITS(),
+                      Op_collapse(),
+                      Op_preprocess(),
+                      Op_rmsimage(),
+                      Op_threshold(), 
+                      Op_islands(),
+                      Op_gausfit(), 
+                      Op_shapelets(),
+                      Op_make_residimage(), 
+                      Op_gaul2srl(), 
+                      Op_spectralindex(),
+                      Op_polarisation(),
+                      Op_wavelet_atrous(),
+                      #Op_psf_vary(),
+                      Op_outlist()
+                      ]
+ 
+        
     # Build options dictionary
-    opts = {'fits_name':input_file, 'beam': beam, 'collapse_mode':collapse_mode , 'collapse_wt':collapse_wt, 'thresh':threshold_method, 'thresh_isl':isl_thresh, 'thresh_pix':pix_thresh, 'polarisation_do':do_pol, 'spectralindex_do':do_spec, 'shapelet_do':do_shapelets, 'rms_map':use_rms_map, 'mean_map':use_mean_map, 'rms_box':rms_box, 'flag_maxsize_bm':gaussian_maxsize}
+    opts = {'filename':input_file, 'fits_name':input_file, 'beam': beam, 'collapse_mode':collapse_mode , 'collapse_wt':collapse_wt, 'thresh':threshold_method, 'thresh_isl':isl_thresh, 'thresh_pix':pix_thresh, 'polarisation_do':do_pol, 'spectralindex_do':do_spec, 'shapelet_do':do_shapelets, 'rms_map':use_rms_map, 'mean_map':use_mean_map, 'rms_box':rms_box, 'flag_maxsize_bm':gaussian_maxsize, 'use_pyrap':use_pyrap}
 
     # Run execute with the default fits_chain and given options
     img = execute(fits_chain, opts)

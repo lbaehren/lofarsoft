@@ -66,10 +66,15 @@ class Image(object):
     def __init__(self, opts):
         self.opts = Opts(opts)
 
-    def plotfit(self):
-        """Plot ch0 image with Gaussians overlaid and residual image."""
+    def showfit(self):
+        """Show ch0 image with Gaussians overlaid and residual image."""
         import plotresults
         plotresults.plotresults(self)
+
+    def showrms(self):
+        """Show rms image."""
+        import plotresults
+        plotresults.showrms(self)
 
     def write_resid_img(self, filename=None):
         """Write the residual Gaussian image to a fits file."""
@@ -86,24 +91,31 @@ class Image(object):
         import output
         output.write_rms_img(self, filename=filename)
 
-    def write_srl(self, filename=None, format='fits'):
-        """Write the source list to a file.
-
-        Supported formats are:
-            "fits"
-            "ascii"
-            "bbs"
-        """
+    def write_ch0_img(self, filename=None):
+        """Write the compressed ch0 image (used for source detection) to a fits file."""
         import output
-        output.write_srl(self, filename=filename, format=format)
+        output.write_ch0_img(self, filename=filename)
 
-    def write_gaul(self, filename=None, format='fits'):
+        
+    # def write_srl(self, filename=None, format='fits'):
+    #     """Write the source list to a file.
+
+    #     Supported formats are:
+    #         "fits"
+    #         "ascii"
+    #         "bbs"
+    #     """
+    #     import output
+    #     output.write_srl(self, filename=filename, format=format)
+
+    def write_gaul(self, filename=None, format='ascii'):
         """Write the Gaussian list to a file.
 
         Supported formats are:
             "fits"
             "ascii"
             "bbs"
+            "ds9"
         """
         import output
         output.write_gaul(self, filename=filename, format=format)

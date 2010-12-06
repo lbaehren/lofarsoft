@@ -6,6 +6,10 @@ The current implementation tries to reduce input file to 2D if
 possible, as this makes more sence atm. One more important thing
 to note -- in it's default configuration pyfits will read data
 in non-native format, so we have to convert it before usage.
+
+Lastly, wcs and spectal information are stored in img.wcs_obj and
+img.freq_pars to remove any FITS-specific calls to the header,
+etc. in other modules.
 """
 
 import numpy as N
@@ -14,6 +18,8 @@ import mylogger
 import pyfits
 
 Image.imagename = String(doc="Identifier name for output files")
+Image.cfreq = Float(doc="Frequency in the header")
+Image.freq_pars = Tuple((0.0, 0.0, 0.0), doc="Frequency prarmeters from the header: (crval, cdelt, crpix)")
 
 class Op_loadFITS(Op):
     """FITS file loader
@@ -23,9 +29,6 @@ class Op_loadFITS(Op):
     """
     def __call__(self, img):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"LoadFits  ")
-
-        #if img.opts.fits_name is None:
-        #    raise RuntimeError("FITS file name not specified")
 
         # Open file(s). Check if there are other polarizations available
         # (assume for now that they are all separate fits files with *_I.fits
@@ -103,9 +106,10 @@ class Op_loadFITS(Op):
                     mylog.warning('Shape of one or more of Q, U, V images does not match that of I. Polarisation module disabled.')
                     break
 
-        ### initialize wcs conversion routines
+        ### initialize wcs conversion routines, beam properties, and frequency info
         self.init_wcs(img)
         self.init_beam(img)
+        self.init_freq(img)
 
         if img.opts.fits_name[-5:] in ['.fits', '.FITS']:
           fname = img.opts.fits_name[:-5]
@@ -142,6 +146,26 @@ class Op_loadFITS(Op):
         img.wcs_obj = t
         img.pix2sky = t.p2s
         img.sky2pix = t.s2p
+
+    def init_freq(self, img):
+        ### Place frequency info in img
+        found  = False
+        hdr = img.header
+        nax = hdr['naxis']
+        if nax > 2:
+          for i in range(nax):
+            s = str(i+1)
+            if hdr['ctype'+s][0:4] == 'FREQ':
+              found = True
+              crval, cdelt, crpix = hdr['CRVAL'+s], hdr['CDELT'+s], hdr['CRPIX'+s]
+              ff = crval+cdelt*(1.-crpix)
+        if found: 
+          img.cfreq = ff
+          img.freq_pars = (crval, cdelt, crpix)
+        else:
+          img.cfreq = 50.0e6
+          img.freq_pars = (0.0, 0.0, 0.0)
+          mylog.warning('Could not determine frequency from the header. Using 50 MHz.')
 
     def init_beam(self, img):
         """Initialize beam parameters, and conversion routines

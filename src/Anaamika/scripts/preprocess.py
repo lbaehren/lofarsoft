@@ -27,7 +27,6 @@ Image.minpix_coord = Tuple(Int(), Int(),
                            doc="Coordinates of minimal pixel in the image")
 Image.max_value = Float(doc="Maximal pixel in the image")
 Image.min_value = Float(doc="Minimal pixel in the image")
-Image.cfreq = Float(doc="Frequency in the header")
 
 Image.omega = Float(doc="Solid angle covered by the image")
 confused = String(doc = 'confused image or not')
@@ -98,23 +97,8 @@ class Op_preprocess(Op):
         img.max_value    = image.flat[max_idx]
         img.min_value    = image.flat[min_idx]
 
-        ### Freq in header
-        nax = img.header['naxis']
-        found  = False 
-        if nax > 2:
-          for i in range(nax):
-            s = str(i+1)
-            if img.header['ctype'+s][0:4] == 'FREQ':
-              found = True
-              crval, cdelt, crpix = img.header['CRVAL'+s], img.header['CDELT'+s], img.header['CRPIX'+s]
-              ff = crval+cdelt*(1.-crpix)
-        if found: 
-          img.cfreq = ff
-        else:
-          img.cfreq = 50.0e6
-
         ### Solid angle of the image
-        cdelt = (img.header['cdelt1'], img.header['cdelt2'])
+        cdelt = img.wcs_obj.cdelt
         img.omega = N.product(shape)*abs(N.product(cdelt))/(180.*180./pi/pi)
 
         ### if image seems confused, then take background mean as zero instead

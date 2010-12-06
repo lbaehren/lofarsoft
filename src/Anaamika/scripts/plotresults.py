@@ -45,7 +45,7 @@ def plotresults(img):
         tit = ['Original Image\n(arbitrary logarithmic scale)', 'Islands (hatched boundaries) and\nBest-fit Gaussians (ellipses)', 'Model Image', 'Residual Image']
 
         images = [img.ch0, img.ch0, img.model_gaus, img.resid_gaus]
-        pl.figure(figsize=(10.0,img.ch0.shape[1]/img.ch0.shape[0]*10.0))
+        fig = pl.figure(figsize=(10.0,img.ch0.shape[1]/img.ch0.shape[0]*10.0))
         gray_palette = cm.gray
         gray_palette.set_bad('k')
         for i, image in enumerate(images):
@@ -87,7 +87,50 @@ def plotresults(img):
           if i == 3:
               ax4.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
                     cmap=gray_palette)
-          pl.title(tit[i])          
+          pl.title(tit[i])
         pl.show()
+        pl.close()
 
+def showrms(img):
+    """Show original and background rms images or print rms if constant."""
+    if img.opts.rms_map is False:
+        # rms map is a constant, so don't show image
+        print 'Background rms map is set to constant value of '+str(img.clipped_rms)
+    else:
+        # show rms map
+        im_mean = img.clipped_mean
+        im_rms = img.clipped_rms
+        low = N.max(1.1*abs(img.min_value),1.1*abs(img.resid_gaus.min()))
+        vmin = N.log10(img.rms.min()+low)
+        vmax = N.log10(img.rms.max()+low)
+        origin='lower'
+        tit = ['Original Image with Islands\n(arbitrary logarithmic scale)', 'Background rms Image']
 
+        images = [img.ch0, img.rms]
+        fig = pl.figure(figsize=(12.0,img.ch0.shape[1]/img.ch0.shape[0]*5.0))
+        gray_palette = cm.gray
+        gray_palette.set_bad('k')
+        for i, image in enumerate(images):
+          if i == 0:
+              ax1 = pl.subplot(1, 2, 1)
+          if i == 1:
+              ax2 = pl.subplot(1, 2, 2, sharex=ax1, sharey=ax1)
+          im = N.log10(image + low)
+          if i == 0:
+              ax1.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
+                    cmap=gray_palette)
+          if i == 0:
+              for iisl, isl in enumerate(img.islands):
+                                            # draw the border
+                xb, yb = _isl2border(img, isl) 
+                ax1.plot(xb, yb, 'x', color='#afeeee', markersize=8)
+                                            # mark the island number
+                ax1.text(N.max(xb)+2, N.max(yb), str(isl.island_id), color='#afeeee', clip_on=True)
+                                            # draw the gaussians with one colour per island
+          if i == 1:
+              ax2.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
+                    cmap=gray_palette)
+              #ax2.colorbar()
+          pl.title(tit[i])
+        pl.show()
+        pl.close()

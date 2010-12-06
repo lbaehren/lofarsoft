@@ -30,8 +30,9 @@ from tc import Int, Float, Bool, String, Tuple, Enum, \
 
 class Opts(object):
     """Class Opts -- user-controllable parameters."""
-    fits_name      = Option(None, String(), doc="input FITS file name")
-    filename      = Option(None, String(), doc="input file name")
+    use_pyrap      = Bool(False, doc="Use pyrap (must be available)")
+    fits_name      = String(doc="input FITS file name")
+    filename       = String(doc="input file name")
 
     beam           = Option(None, Tuple(Float(), Float(), Float()),
                             doc="Override beam shape from file header: " \

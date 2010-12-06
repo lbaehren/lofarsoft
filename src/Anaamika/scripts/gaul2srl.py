@@ -28,10 +28,9 @@ class Op_gaul2srl(Op):
     """  
     Slightly modified from fortran. 
     """
-
     def __call__(self, img):
-                        #  for each island, get the gaussians into a list and then send them to process
-                        #  src_index is source number, starting from 0
+        #  for each island, get the gaussians into a list and then send them to process
+        #  src_index is source number, starting from 0
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gaul2Srl  ")
         src_index = -1
         sources = []
@@ -56,7 +55,7 @@ class Op_gaul2srl(Op):
         img.source = sources
         img.nsrc = src_index+1
         mylog.info("Grouped " + str(img.ngaus) + " gaussians into " + str(img.nsrc) + " sources")
-        print "Grouped " + str(img.ngaus) + " gaussians into " + str(img.nsrc) + " sources"
+        #print "Grouped " + str(img.ngaus) + " gaussians into " + str(img.nsrc) + " sources"
         #if img.opts.output_fbdsm: opf.write_fbdsm_gaul(img)
 
 ##################################################################################################
@@ -244,7 +243,7 @@ class Op_gaul2srl(Op):
         import functions as func
 
         dum = img.opts.beam[0]*img.opts.beam[1]
-        cdeltsq = abs(img.header['CDELT1']*img.header['CDELT2'])
+        cdeltsq = abs(img.wcs_obj.cdelt[0]*img.wcs_obj.cdelt[1])
         bmar_p = 2.0*pi*dum/(cdeltsq*fwsig*fwsig)
 
                                         # try
