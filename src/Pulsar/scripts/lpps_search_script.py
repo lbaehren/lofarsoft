@@ -54,8 +54,8 @@ import numpy
 import sifting
 # TODO : commit fixed .inf reader to ssps Git repository. 
 #from ssps.presto.files.inf import inf_reader
-from inf import inf_reader
-import crawler
+from lpps_search.inf import inf_reader
+import lpps_search.crawler as crawler
 
 
 # ----------------------------------------------------------------------------
