@@ -169,8 +169,8 @@ log4cplus.appender.FILE=log4cplus::RollingFileAppender
 log4cplus.appender.FILE.File=$log_filename
 log4cplus.appender.FILE.ImmediateFlush=true
 log4cplus.appender.FILE.MaxFileSize=10MB
-log4cplus.appender.FILE.MaxBackupIndex=1
-log4cplus.appender.FILE.layout=log4cplus::PatternLayout
+#log4cplus.appender.FILE.MaxBackupIndex=1
+#log4cplus.appender.FILE.layout=log4cplus::PatternLayout
 log4cplus.appender.FILE.layout.ConversionPattern=%l [%-3p] - %m%n
         """)
         self.log_prop_filename = os.path.join(
