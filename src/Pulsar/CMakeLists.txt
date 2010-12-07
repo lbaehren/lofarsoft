@@ -344,8 +344,8 @@ find_path (USG_INSTALL_PREFIX devel_common/cmake/CMakeSettings.cmake
 #endif (prefix)
 
 if (USG_INSTALL_PREFIX)
- message (STATUS "[PULSAR] Installation area located for package PULSAR ${USG_INSTALL_PREFIX}/share/pulsar.")
- set (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX}/share/pulsar)
+ message (STATUS "[PULSAR] Installation area located for package PULSAR ${USG_INSTALL_PREFIX}/release/share/pulsar.")
+ set (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX}/release/share/pulsar)
 else (USG_INSTALL_PREFIX)
  message (STATUS "[PULSAR] WARNING: Installation area NOT located for package PULSAR!")
 endif (USG_INSTALL_PREFIX)
