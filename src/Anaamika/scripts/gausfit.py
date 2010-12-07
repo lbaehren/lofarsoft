@@ -77,7 +77,7 @@ class Op_gausfit(Op):
                 g.gaus_num = n
             isl.ngaus = m
         img.ngaus = n
-        print "Found %i Gaussians" % (n, )
+        print '%s %i' % ("Number of Gaussians found :", n)
         return img
 
     def fit_island(self, isl, opts, img):

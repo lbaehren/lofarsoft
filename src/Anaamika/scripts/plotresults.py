@@ -5,6 +5,7 @@ import pylab as pl
 from math import log10
 import matplotlib.cm as cm
 import functions as func
+import os
 
 def _isl2border(img, isl):
     """ From all valid islan pixels, generate the border. """
@@ -63,21 +64,28 @@ def plotresults(img):
                     cmap=gray_palette)
           if i == 1:
               for iisl, isl in enumerate(img.islands):
-                                            # draw the border
+                                           
                 xb, yb = _isl2border(img, isl) 
-                ax2.plot(xb, yb, 'x', color='#afeeee', markersize=8)
-                                            # mark the island number
-                ax2.text(N.max(xb)+2, N.max(yb), str(isl.island_id), color='#afeeee', clip_on=True)
-                                            # draw the gaussians with one colour per island
-                nsrc = len(isl.source)
-                for isrc in range(nsrc):
+                ax2.plot(xb, yb, 'x', color='#afeeee', markersize=8) # mark the island number
+                ax2.text(N.max(xb)+2, N.max(yb), str(isl.island_id), color='#afeeee', clip_on=True) # draw the border
+                # draw the gaussians with one colour per source or island (if gaul2srl was not run)
+                if hasattr(img, 'nsrc'): # check whether gaul2srl was run
+                    nsrc = len(isl.source)
+                    for isrc in range(nsrc):
+                        col = colours[isrc % 7]
+                        style = styles[isrc/7 % 3]
+                        src = isl.source[isrc]
+                        for g in src.gaussians:
+                            ellx, elly = func.drawellipse(g)
+                            ax2.plot(ellx, elly, color = col, linestyle = style)
+                else: # just plot one color per island
+                    isrc = 0
                     col = colours[isrc % 7]
                     style = styles[isrc/7 % 3]
-                    src = isl.source[isrc]
-                    for g in src.gaussians:
+                    for g in isl.gaul:
                         ellx, elly = func.drawellipse(g)
-                        ax2.plot(ellx, elly, color = col, linestyle = style) 
-
+                        ax2.plot(ellx, elly, color = col, linestyle = style)
+   
           if i == 1:
               ax2.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
                     cmap=gray_palette)
@@ -89,13 +97,14 @@ def plotresults(img):
                     cmap=gray_palette)
           pl.title(tit[i])
         pl.show()
-        pl.close()
+        if os.environ.get("REMOTEHOST") != 'lfe001.offline.lofar':
+            pl.close()
 
 def showrms(img):
     """Show original and background rms images or print rms if constant."""
     if img.opts.rms_map is False:
         # rms map is a constant, so don't show image
-        print 'Background rms map is set to constant value of '+str(img.clipped_rms)
+        print 'Background rms map is set to constant value of '+str(img.clipped_rms)+' Jy/beam'
     else:
         # show rms map
         im_mean = img.clipped_mean
@@ -107,7 +116,7 @@ def showrms(img):
         tit = ['Original Image with Islands\n(arbitrary logarithmic scale)', 'Background rms Image']
 
         images = [img.ch0, img.rms]
-        fig = pl.figure(figsize=(12.0,img.ch0.shape[1]/img.ch0.shape[0]*5.0))
+        fig = pl.figure(figsize=(10.0,img.ch0.shape[1]/img.ch0.shape[0]*5.0))
         gray_palette = cm.gray
         gray_palette.set_bad('k')
         for i, image in enumerate(images):
@@ -121,16 +130,13 @@ def showrms(img):
                     cmap=gray_palette)
           if i == 0:
               for iisl, isl in enumerate(img.islands):
-                                            # draw the border
                 xb, yb = _isl2border(img, isl) 
-                ax1.plot(xb, yb, 'x', color='#afeeee', markersize=8)
-                                            # mark the island number
-                ax1.text(N.max(xb)+2, N.max(yb), str(isl.island_id), color='#afeeee', clip_on=True)
-                                            # draw the gaussians with one colour per island
+                ax1.plot(xb, yb, 'x', color='#afeeee', markersize=8)  # mark the island number
+                ax1.text(N.max(xb)+2, N.max(yb), str(isl.island_id), color='#afeeee', clip_on=True)  # draw the border
           if i == 1:
               ax2.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
                     cmap=gray_palette)
-              #ax2.colorbar()
           pl.title(tit[i])
         pl.show()
-        pl.close()
+        if os.environ.get("REMOTEHOST") != 'lfe001.offline.lofar':
+            pl.close()

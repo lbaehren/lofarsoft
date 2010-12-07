@@ -149,6 +149,7 @@ class Op_loadFITS(Op):
 
     def init_freq(self, img):
         ### Place frequency info in img
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"LoadFits  ")
         found  = False
         hdr = img.header
         nax = hdr['naxis']

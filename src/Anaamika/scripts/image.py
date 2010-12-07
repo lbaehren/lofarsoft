@@ -108,9 +108,12 @@ class Image(object):
     #     import output
     #     output.write_srl(self, filename=filename, format=format)
 
-    def write_gaul(self, filename=None, format='ascii'):
+    def write_gaul(self, filename=None, format='ascii', srcroot=None):
         """Write the Gaussian list to a file.
 
+        filename - name of resulting file
+        srcroot - root for source names
+        format - format of output list
         Supported formats are:
             "fits"
             "ascii"
@@ -118,7 +121,7 @@ class Image(object):
             "ds9"
         """
         import output
-        output.write_gaul(self, filename=filename, format=format)
+        output.write_gaul(self, filename=filename, format=format, srcroot=srcroot)
                 
 
 class Op(object):

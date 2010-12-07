@@ -109,39 +109,83 @@ def execute(chain, opts):
     return img
 
 
-def process_image(input_file, beam=None, do_pol=False, do_spec=False, do_shapelets=False, isl_thresh=3.0, pix_thresh=5.0, collapse_mode='average', collapse_wt='rms', threshold_method=None, use_rms_map=None, use_mean_map='default', rms_box=None, extended=False, gaussian_maxsize=10.0, use_pyrap=True):
+def process_image(input_file, beam=None, thresh_isl=3.0, thresh_pix=5.0, use_rms_map=None, extended=False, gaussian_maxsize=10.0, use_pyrap=True):
+    #polarisation_do=False, spectralindex_do=False, shapelet_do=False,
     """
-    Run a standard analysis on an image and returns the associated Image object.
+    Run a standard analysis and returns the associated Image object.
 
-    explain options, etc. here.
+    
+    The following options are available:
+    
+      beam = (major axis FWHM [deg], minor axis FWHM [deg], pos. angle [deg])
+      polarisation_do = True/False; do polarisation analysis (default = False)?
+      spectralindex_do = True/False; do spectral index analysis (default = False)?
+      shapelet_do = True/False; do shapelet analysis (default = False)?
+      thresh_isl = threshold for island detection in sigma (default = 3.0)
+      thresh_pix = at least one pixel in island must exceed this threshold in sigma
+                   (default = 5.0)
+      use_rms_map = None/True/False; use 2D map of rms or constant (default = None =
+                    determine automatically)
+      gaussian_maxsize = maximum allowed Gaussian size in pixels (default = 10.0)
+      extended = True/False; if significant portion of field has extended emission,
+                 setting this flag to True may help. It sets rms map to a constant
+                 (since the extended emission will bias map) and sets the maximum
+                 Gaussian size to 100.0 pixels
+
+                 
+    Examples:
+    
+      - Find sources in an image:
+        > img = bdsm.process_image('image.fits')
+          --> process with default parameters
+        > img = bdsm.process_image('image.fits', beam=(0.0138, 0.0066, -54.6))
+          --> process with specified beam
+        > img = bdsm.process_image('image.fits', isl_thresh=5.0)
+          --> set threshold for island detection to 5-sigma
+
+      - Write list of resulting Gaussians to a file:
+        > img.write_gaul()
+          --> write Gaussian list to "image.gaul.txt"
+        > img.write_gaul(format='fits')
+          --> write list in FITS format to "image.gaul.fits"
+        > img.write_gaul(format='bbs')
+          --> write list in BBS format to "image.gaul.sky"
+        > img.write_gaul('im.sky', format='bbs')
+          --> write to "im.sky"
+        > img.write_gaul(format='ds9')
+          --> write Gaussian list to "image.gaul.reg"
+
     """
     import sys
     
     # Handle options
+    polarisation_do=False
+    spectralindex_do=False
+    shapelet_do=False
     if beam != None and (isinstance(beam, tuple) == False or len(beam) != 3):
         raise RuntimeError('Beam must be a Tuple of length 3: (maj [deg], min [deg], angle [deg]).')
-    if isinstance(do_pol, bool) == False:
+    if isinstance(polarisation_do, bool) == False:
         raise RuntimeError('do_pol must be True or False')
-    if isinstance(do_spec, bool) == False:
+    if isinstance(spectralindex_do, bool) == False:
         raise RuntimeError('do_spec must be True or False')
-    if isinstance(do_shapelets, bool) == False:
+    if isinstance(shapelet_do, bool) == False:
         raise RuntimeError('do_shapelets must be True or False')
-    if isinstance(isl_thresh, float) == False or isl_thresh <= 1.0:
+    if isinstance(thresh_isl, float) == False or thresh_isl <= 1.0:
         raise RuntimeError('isl_thresh must be greater than 1.0')
-    if isinstance(pix_thresh, float) == False or pix_thresh <= 1.0:
+    if isinstance(thresh_pix, float) == False or thresh_pix <= 1.0:
         raise RuntimeError('pix_thresh must be greater than 1.0')
-    if (collapse_mode in ['average', 'single']) == False:
-        raise RuntimeError('collapse_mode must be "average" or "single"')
-    if (collapse_wt in ['rms', 'unity']) == False:
-        raise RuntimeError('collapse_wt must be "rms" or "unity"')
-    if threshold_method != None and (threshold_method in ['hard', 'fdr']) == False:
-        raise RuntimeError('threshold_method must be None, "hard", or "fdr"')
+    # if (collapse_mode in ['average', 'single']) == False:
+    #     raise RuntimeError('collapse_mode must be "average" or "single"')
+    # if (collapse_wt in ['rms', 'unity']) == False:
+    #     raise RuntimeError('collapse_wt must be "rms" or "unity"')
+    # if threshold_method != None and (threshold_method in ['hard', 'fdr']) == False:
+    #     raise RuntimeError('threshold_method must be None, "hard", or "fdr"')
     if use_rms_map != None and isinstance(use_rms_map, bool) == False :
         raise RuntimeError('use_rms_map must be None, True, or False')
-    if (use_mean_map in ['default', 'const', 'map']) == False:
-        raise RuntimeError('use_mean_map must be "default", "const", or "map"')
-    if rms_box != None and (isinstance(rms_box, tuple) == False or len(rms_box) != 2):
-        raise RuntimeError('rms_box not defined properly.')
+    # if (use_mean_map in ['default', 'const', 'map']) == False:
+    #     raise RuntimeError('use_mean_map must be "default", "const", or "map"')
+    # if rms_box != None and (isinstance(rms_box, tuple) == False or len(rms_box) != 2):
+    #     raise RuntimeError('rms_box not defined properly.')
     if isinstance(gaussian_maxsize, float) == False or gaussian_maxsize < 0.0:
         raise RuntimeError('gaussian_maxsize must be greater than 0.0')
     if isinstance(extended, bool) == False:
@@ -162,13 +206,7 @@ def process_image(input_file, beam=None, do_pol=False, do_spec=False, do_shapele
                       Op_threshold(), 
                       Op_islands(),
                       Op_gausfit(), 
-                      Op_shapelets(),
                       Op_make_residimage(), 
-                      Op_gaul2srl(), 
-                      Op_spectralindex(),
-                      Op_polarisation(),
-                      Op_wavelet_atrous(),
-                      #Op_psf_vary(),
                       Op_outlist()
                       ]
     else:
@@ -179,19 +217,12 @@ def process_image(input_file, beam=None, do_pol=False, do_spec=False, do_shapele
                       Op_threshold(), 
                       Op_islands(),
                       Op_gausfit(), 
-                      Op_shapelets(),
-                      Op_make_residimage(), 
-                      Op_gaul2srl(), 
-                      Op_spectralindex(),
-                      Op_polarisation(),
-                      Op_wavelet_atrous(),
-                      #Op_psf_vary(),
+                      Op_make_residimage(),
                       Op_outlist()
                       ]
  
-        
     # Build options dictionary
-    opts = {'filename':input_file, 'fits_name':input_file, 'beam': beam, 'collapse_mode':collapse_mode , 'collapse_wt':collapse_wt, 'thresh':threshold_method, 'thresh_isl':isl_thresh, 'thresh_pix':pix_thresh, 'polarisation_do':do_pol, 'spectralindex_do':do_spec, 'shapelet_do':do_shapelets, 'rms_map':use_rms_map, 'mean_map':use_mean_map, 'rms_box':rms_box, 'flag_maxsize_bm':gaussian_maxsize, 'use_pyrap':use_pyrap}
+    opts = {'filename':input_file, 'fits_name':input_file, 'beam': beam, 'thresh_isl':thresh_isl, 'thresh_pix':thresh_pix, 'polarisation_do':polarisation_do, 'spectralindex_do':spectralindex_do, 'shapelet_do':shapelet_do, 'rms_map':use_rms_map, 'flag_maxsize_bm':gaussian_maxsize, 'use_pyrap':use_pyrap}
 
     # Run execute with the default fits_chain and given options
     img = execute(fits_chain, opts)
