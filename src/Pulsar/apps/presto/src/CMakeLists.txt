@@ -134,7 +134,6 @@ add_dependencies (presto
   fftw_install
   tempo_install
 #  bf2presto_install
-  lpps_install
   scripts_install
   see_install
   presto_includes
@@ -143,6 +142,7 @@ add_dependencies (presto
   presto_clig_install
   presto_cat_install
   ssps_install
+  lpps_install
   )
 
 ##__________________________________________________________
