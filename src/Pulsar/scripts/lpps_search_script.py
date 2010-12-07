@@ -508,7 +508,7 @@ class SearchRun(object):
         return [ddplan.lodm + ddplan.dmstep * i  \
             for i in range(ddplan.dmsperpass)]
 
-    def run_search(self, ddplans, n_cores = None):
+    def run_search(self, ddplans, z_values, n_cores = None):
         # The GBT drift scan survey uses dedispersion plans as units
         # of work. Because our use of mpiprepsubband (has extra constraints
         # on the number of DM trials it can write) and the fact that
@@ -547,11 +547,9 @@ class SearchRun(object):
         rfifind_mask_file = os.path.join(self.out_dir, self.basename + \
             '_rfifind.mask')
         
-        
-        z_values = [0, 50]
-        
-        ddplan_i = 0 
+        ddplan_i = -1 
         for ddplan, n_cores in self.annotated_ddplans:
+            ddplan_i += 1
             # Note : Check whether data needs downsampling (and how GBT does
             # it).
             prepsubband_status = run_prepsubband(ddplan, n_cores,
@@ -633,9 +631,11 @@ class SearchRun(object):
             for core_index in range(n_cores):
                 if not command_list[core_index]: continue
                 script_filename = os.path.join(self.work_dir, 
-                    'per_dm_analysis_core%d.sh' % core_index)
+                    'per_dm_analysis_core%d_step%d.sh' % \
+                    (core_index, ddplan_i))
                 log_filename = os.path.join(self.work_dir, 
-                    'per_dm_analysis_core%d.log.txt' % core_index)
+                    'per_dm_analysis_core%d_step%d.log.txt' % \
+                    (core_index, ddplan_i))
                 try:
                     p = run_as_script(command_list[core_index], script_filename,
                         log_filename)
@@ -880,6 +880,11 @@ if __name__ == '__main__':
         type='string', metavar='WORK_DIR', dest='work_dir')
     parser.add_option('--rfi', help='RFI file', type='string', default='',
         metavar='RFI_FILE', dest='rfi_file')    
+    parser.add_option('-t', help='Run in testing mode (quick).',
+        action='store_true', dest='test', default=False)
+    parser.add_option('--z_list', dest='z_list', type='string',
+        default='[0,50]', metavar='Z_LIST', 
+        help='List of integer z values, default [0,50] - don\'t use spaces.')
  
     options, args = parser.parse_args()
 
@@ -887,8 +892,22 @@ if __name__ == '__main__':
         print 'Provide --i, --w and --o options.'
         print parser.print_help()
         sys.exit(1)
-   
-
+    
+    # parse list of z values:
+    # TODO : refactor list parsing code
+    z_values = []
+    if options.z_list[0] == '[' and options.z_list[-1] == ']':
+        tmp = options.z_list[1:-1].split(',')
+        try:
+            for z_str in tmp:
+                z_values.append(int(z_str))
+        except ValueError, e:
+            print 'List of z values not specified correctly.'
+            raise
+    else:
+        print 'Z values list needs to be inside of [] and contain no spaces.'
+        raise Exception()
+    
     # Add basic logging right here.
     logging.basicConfig(
         format='%(asctime)-15s - %(name)s - %(levelname)s - %(message)s',
@@ -902,14 +921,33 @@ if __name__ == '__main__':
     # The number of subbands defaults to being the number of channels in the
     # data (according to DDplan.py which is how it is implemented here and
     # in Vishal's script as well).
-    ddplans.append(DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
-        numsub=SR.metadata.n_channels, downsamp=1))
-#    ddplans.append(DedispPlan(0.00, 0.02, 7720, 1, input_path.metadata.n_channels, 1))
-#    ddplans.append(DedispPlan(154.4, 0.05, 2655, 1, input_path.metadata.n_channels, 2))
-#    ddplans.append(DedispPlan(287.15, 0.1, 2635, 1, input_path.metadata.n_channels, 4))
-#    ddplans.append(DedispPlan(550.65, 0.2, 2247, 1, input_path.metadata.n_channels, 8))
+
+
+    if options.test:
+        # Quick very tiny dedispersion plan used for testing (whether code
+        # is still ok, nothing else). Use --test flag to run with this 
+        # dedispersion plan.
+        ddplans.append(DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
+            numsub=SR.metadata.n_channels, downsamp=1))
+        ddplans.append(DedispPlan(lodm=7, dmstep=1, dmsperpass=7, numpasses=1, 
+            numsub=SR.metadata.n_channels, downsamp=1))
+    else:
+        # Jason's full LPPS dedispersion plan:
+        ddplans.append(DedispPlan(lodm=0, dmstep=0.03, dmsperpass=1037, 
+            numpasses=1, numsub=SR.metadata.n_channels, downsamp=1))
+        ddplans.append(DedispPlan(lodm=31.11, dmstep=0.05, dmsperpass=378,
+            numpasses=1, numsub=SR.metadata.n_channels, downsamp=2))
+        ddplans.append(DedispPlan(lodm=50.01, dmstep=0.1, dmsperpass=447,
+            numpasses=1, numsub=SR.metadata.n_channels, downsamp=4))
+        ddplans.append(DedispPlan(lodm=94.71, dmstep=0.30, dmsperpass=434,
+            numpasses=1, numsub=SR.metadata.n_channels, downsamp=8))
+        ddplans.append(DedispPlan(lodm=224.91, dmstep=0.50, dmsperpass=367,
+            numpasses=1, numsub=SR.metadata.n_channels, downsamp=16))
+        ddplans.append(DedispPlan(lodm=408.41, dmstep=1.00, dmsperpass=92,
+            numpasses=1, numsub=SR.metadata.n_channels, downsamp=32))
+
     N_CORES = 8
-    SR.run_search(ddplans, N_CORES)
+    SR.run_search(ddplans, z_values, N_CORES)
     t_end = time.time()
 
     print 'It took %.2f seconds to search the data.' % (t_end - t_start)
