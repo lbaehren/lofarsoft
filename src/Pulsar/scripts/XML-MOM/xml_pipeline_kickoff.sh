@@ -4,14 +4,18 @@ USAGE="\nusage : xml_pipeline_kickoff.sh -infile obs_finished.xml -prefix prefix
 "      -infile obs_finished.xml  ==> Specify the finished xml file name (i.e. Obs_B1254-10_HBA.xml) \n"\
 "      -prefix run  ==> Output name prefix (i.e. Obs_20100730) \n"\
 "      [-splits N]  ==> Number of output split files to contain the processing commands (i.e. 4) \n"\
+"      [-survey]    ==> Indicates that all the observations are in survey mode;  changes pipeline args to:\n"\
+"                       pulp.sh -id OBSID -o OBSID_red -p position -rfi   [without -all] \n"\
 "\n"\
 "      Example:\n"\
-"      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -prefix Obs_20100730 -splits 4 \n"
-
+"      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -prefix Obs_20100730 -splits 4 \n"\
+"      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -prefix Obs_20100730 -splits 4 -survey \n"\
+"      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -prefix Obs_20100730 -survey \n"
 
 infile=""
 prefix=""
 splits=1
+survey=0
 
 if [ $# -lt 4 ]                    
 then
@@ -25,6 +29,7 @@ do
     -infile)    infile=$2; shift;;
 	-prefix)    prefix=$2; shift;;
 	-splits)    splits=$2; shift;;
+	-survey)    survey=1;;
 	-*)
 	    echo >&2 \
 	    "$USAGE"
@@ -61,7 +66,12 @@ fi
 # previous version to extract the OBSID and Target name
 #egrep "observationId|\(.BA" $infile | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/<.*Obs / /g' | sed 's/(.BA.*//g' | awk '{printf("pulp.sh -id L2010_%05d -p %s -o L2010_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
 
-egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/\</ \</g' | sed 's/\>/\> /g' | sed 's/(.*//g' | sed 's/\<.*\>//g' | awk '{ if ( $2 == "Pos" ) printf("pulp.sh -id L2010_%05d -p position -o L2010_%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2010_%05d -p %s -o L2010_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2010_%05d -p %s -o L2010_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
+if [[ $survey == 0 ]]
+then
+   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/\</ \</g' | sed 's/\>/\> /g' | sed 's/(.*//g' | sed 's/\<.*\>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L2010_%05d -p position -o L2010_%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2010_%05d -p %s -o L2010_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2010_%05d -p %s -o L2010_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
+else
+   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/\</ \</g' | sed 's/\>/\> /g' | sed 's/(.*//g' | sed 's/\<.*\>//g' | awk '{ printf("pulp.sh -id L2010_%05d -p position -o L2010_%05d_red -rfi\n", $1, $1)}' > $outfile
+fi
 
 cp $outfile $outfile.all
 
