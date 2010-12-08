@@ -69,7 +69,7 @@ class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
         vdsnames = []
         for host, ms in data:
             vdsnames.append(
-                "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms))
+                "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms.rstrip('/')))
             )
             jobs.append(
                 ComputeJob(
