@@ -148,8 +148,8 @@ class cimager(BaseRecipe, RemoteCommandRecipeMixIn):
         else:
             self.logger.info("Using timestep of %s s" % self.inputs['timestep'])
             gvds = get_parset(gvds_file)
-            start_time = quantity(gvds['StartTime']).get('s').get_value()
-            end_time = quantity(gvds['EndTime']).get('s').get_value()
+            start_time = quantity(gvds['StartTime'].get()).get('s').get_value()
+            end_time = quantity(gvds['EndTime'].get()).get('s').get_value()
             step = float(self.inputs['timestep'])
             while start_time < end_time:
                 timesteps.append(
