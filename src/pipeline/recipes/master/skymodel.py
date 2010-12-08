@@ -187,8 +187,9 @@ class skymodel(BaseRecipe):
             with open(self.inputs['skymodel_file'], 'w') as file:
                 file.write(header_line)
                 file.writelines(", ".join(line) + ",\n" for line in results)
-        except:
+        except Exception, e:
             self.logger.warn("Failed to write skymodel file")
+            self.logger.warn(str(e))
             return 1
 
         return 0
