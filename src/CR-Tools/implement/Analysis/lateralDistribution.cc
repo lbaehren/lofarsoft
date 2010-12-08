@@ -623,12 +623,19 @@ namespace CR { // Namespace CR -- begin
       TGraphErrors *timePro = 
         new TGraphErrors(ant, distance, timeVal, distanceEr, timeValEr);
       double offsetY = 40;
-      if (fitSim)
-        offsetY += 20;
+      if (fitSim) {
+        //timeMin += 10;
+        //timeMax -= 25;
+        //timeMin += 13;
+        //timeMax -= 22;
+        timeMin += 13;
+        timeMax -= 26;
+      }  
       double offsetX = 20;
+      
       timePro->SetFillColor(0);
-      timePro->SetLineColor(4);
-      timePro->SetMarkerColor(4);
+      timePro->SetLineColor(1); // normally blue (4), in comparison to simulation black (1)
+      timePro->SetMarkerColor(1); // normally blue (4), in comparison to simulation black (1)
       timePro->SetMarkerStyle(kFullCircle);
       timePro->SetMarkerSize(1.1);
       stringstream label;
@@ -636,7 +643,7 @@ namespace CR { // Namespace CR -- begin
       //timePro->SetTitle(label.str().c_str());
       timePro->SetTitle("");
       timePro->GetXaxis()->SetTitle("distance R [m]"); 
-      timePro->GetYaxis()->SetTitle("time T [ns]");
+      timePro->GetYaxis()->SetTitle("time t [ns]");
       timePro->GetXaxis()->SetTitleSize(0.05);
       timePro->GetYaxis()->SetTitleSize(0.05);
       timePro->GetYaxis()->SetRangeUser(timeMin, timeMax + offsetY);
@@ -652,7 +659,7 @@ namespace CR { // Namespace CR -- begin
       timePro2D->SetTitle("");
       timePro2D->GetXaxis()->SetTitle("distance R [m]"); 
       timePro2D->GetYaxis()->SetTitle("z_shower [m]"); 
-      timePro2D->GetZaxis()->SetTitle("time T [ns]");
+      timePro2D->GetZaxis()->SetTitle("time t [ns]");
       timePro2D->GetXaxis()->SetTitleSize(0.05);
       timePro2D->GetYaxis()->SetTitleSize(0.05);
       timePro2D->GetZaxis()->SetTitleSize(0.05);
@@ -662,10 +669,12 @@ namespace CR { // Namespace CR -- begin
       TGraphErrors *timeProSim = 
         new TGraphErrors (ant, distanceSim, timeValSim, distanceErSim, timeValErSim);
       timeProSim->SetFillColor(1);
-      timeProSim->SetLineColor(2);
-      timeProSim->SetMarkerColor(2);
+      timeProSim->SetLineColor(4); // 2 (red) for iron, 4 (blue) for proton
+      timeProSim->SetMarkerColor(4); // 2 (red) for iron, 4 (blue) for proton
       timeProSim->SetMarkerStyle(kFullSquare);
       timeProSim->SetMarkerSize(1.1);
+      timeProSim->GetYaxis()->SetRangeUser(timeMin, timeMax + offsetY);
+      timeProSim->GetXaxis()->SetLimits(0, maxdist + offsetX);     
 
       TGraph2DErrors *timePro2DSim = 
         new TGraph2DErrors (ant, distanceSim, zshowerSim, timeValUnproSim, distanceErSim, zshowerErSim, timeValUnproErSim);
@@ -756,14 +765,14 @@ namespace CR { // Namespace CR -- begin
       string coneNameS = "";
       if (index1 != "") {
         curvName = "r_{c}- " + index1 + " [m]";
-        coneName = "#rho " + index1 + " [rad]";
+        coneName = "#rho- " + index1 + " [rad]";
       } else {
         curvName = "r_{c} [m]";
         coneName = "#rho [rad]";
       }
       if (index2 != "") {
         curvNameS = "r_{c}- " + index2 + " [m]";
-        coneNameS = "#rho " + index2 + " [rad]";
+        coneNameS = "#rho- " + index2 + " [rad]";
       } else {
         curvNameS = "r_{c} [m]";
         coneNameS = "#rho [rad]";
@@ -814,6 +823,7 @@ namespace CR { // Namespace CR -- begin
           fitFuncS2D->SetParameter(0,1000);
           fitFuncS->SetFillStyle(0);
           fitFuncS->SetLineWidth(2);
+          fitFuncS->SetLineColor(4);  // 2 (red) for iron, 4 (blue) for proton
         
           cout << "------------------------------"<<endl;
           timePro2DSim->Fit(fitFuncS2D, "", "");
@@ -902,7 +912,8 @@ namespace CR { // Namespace CR -- begin
           fitFuncConeS2D->SetParameter(0,0);
           fitFuncConeS->SetFillStyle(0);
           fitFuncConeS->SetLineWidth(2);
-
+          fitFuncConeS->SetLineColor(4); // red (2) for iron, blue (4) for proton
+          
           cout << "------------------------------"<<endl;
           timePro2DSim->Fit(fitFuncConeS2D, "", "");
           fitFuncConeS->SetParameter(0,fitFuncConeS2D->GetParameter(0));
