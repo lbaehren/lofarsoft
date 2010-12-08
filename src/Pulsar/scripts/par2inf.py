@@ -258,13 +258,13 @@ rad = float(par.rar) * 180.0 / math.pi
 rah = int(24.0 * rad / 360.0)
 ram = int((24.0 * rad / 360.0 - rah) * 60.0)
 ras = 60.0*(((24.0 * rad / 360.0 - rah) * 60.0) - ram)
-id.RA = "%02d:%02d:%f" % (rah,ram,ras)
+id.RA = "%02d:%02d:%07.4f" % (rah,ram,ras)
 
 decd = float(par.decr) * 180.0 / math.pi
 decdi = int(decd)
 decm  = int((decd - decdi) * 60.0)
 decs  = (((decd - decdi) * 60.0) - decm)*60.0
-id.DEC = "%02d:%02d:%f" % (decdi,abs(decm),abs(decs))
+id.DEC = "%02d:%02d:%07.4f" % (decdi,abs(decm),abs(decs))
 
 # Calculate the MJD of the observation.
 
