@@ -4,7 +4,7 @@
 #
 #  Created by Andreas Horneffer on Aug. 1, 2010.
 #  Copyright (c) 2010, Andreas Horneffer. All rights reserved.
-#  Partially ported to pycrtools on Nov. 15, 2010
+#  Ported to pycrtools on Nov. 15, 2010 (AC)
 """
 This module supplies different functions to fit the direction of a triggered
 pulse
@@ -152,14 +152,16 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   crfile.setAntennaset(antennaset)
   # validity check - has to move !!!
   dates = crfile["TIME"]
-  print crfile["shift"]
-  print crfile["shift"].val()
-  if dates.max() - dates.min() > 0:
+#  print crfile["shift"]
+#  print crfile["shift"].val()
+  if dates.max() - dates.min() > 0: # MOVE to integrity check
       print 'Invalid times in file!!!'
+      return dict(success=False, reason=format("Timestamps don't match, spread = %d seconds") % (dates.max() - dates.min()))
       
-  if (crfile["sampleFrequency"] != 200e6):
+  if crfile["sampleFrequency"] != 200e6: 
+  # MOVE to integrity check
     print crfile["sampleFrequency"]
-    raise ValueError, "Can only process events taken with 200MHz samplingrate."
+    raise ValueError, "Can only process events taken with 200MHz samplingrate." # no exception, return status in dict
   #Get the trigger message data
   trigData = triggerMessageFit(crfile, triggerMessageFile)
   trigLinfitData = triggerMessageFit(crfile, triggerMessageFile, fittype='linearFit')
@@ -167,7 +169,7 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   samplefreq = 200.0e6 # must be
   blocksize = 512
   # crfile["blocksize"] = blocksize # doesn't work, bug?
-  crfile.set("blocksize", blocksize)
+  crfile.set("blocksize", blocksize) # proper way, apparently
   print 'File size is %d' % crfile["Filesize"]
   print 'Block size is now: %d' % crfile["blocksize"]
   print 'So there are: %d blocks' % int((crfile["Filesize"]) / int(crfile["blocksize"]))
@@ -217,12 +219,12 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   ant_indices = range(1,96,2)
   fitDataOdd = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                   cr_freqs, FarField=FarField,blocksize=blocksize)
-  erg = dict()
-  erg['triggerFit']=trigData
-  erg['linearFit']=trigLinfitData
-  erg['fitEven']=fitDataEven
-  erg['fitOdd']=fitDataOdd
-  return erg
+  result = dict()
+  result['triggerFit'] = trigData
+  result['linearFit'] = trigLinfitData
+  result['fitEven'] = fitDataEven
+  result['fitOdd'] = fitDataOdd
+  return result
 
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
