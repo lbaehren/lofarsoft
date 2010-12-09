@@ -4,7 +4,7 @@
 import os
 #import pycr as cr
 import numpy as np
-import triggered_pulsefitting as tp
+import pulsefit as tp
 import matching as match
 
 #------------------------------------------------------------------------
