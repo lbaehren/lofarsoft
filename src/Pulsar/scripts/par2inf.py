@@ -56,8 +56,6 @@ class pardata:
                 self.pulsarsrc = line.split("=")[-1].strip()
                 continue
 
-
-
 class infodata:
     def __init__(self, filenm):
         self.breaks = 0
@@ -204,6 +202,7 @@ parser.add_option("-B", "--beamnumber", action="store", type="int",
 		  
 (options, args) = parser.parse_args()
 
+
 # Set the default Beam Number to 0
 if ( options.beamnumber ):
     print "Using user input beam number %d"%(options.beamnumber)
@@ -217,7 +216,6 @@ id = infodata(defaultfile)
 print "  Taking template from .inf file: %s."%defaultfile
 #id = infodata("default.inf")
 par = pardata(filename)
-
 
 # Checking on command line options
 if ( options.repeat and not options.nsubbands ):
@@ -238,11 +236,33 @@ if ( options.low_subband ):
 
 
 # Change the source name
+# Change the data file name to match source name
 if (par.pulsarsrc):
     id.object = options.source
+    id.basenm = options.source
 if (options.source):
     id.object = options.source
+    id.basenm = options.source
 
+#find the DM for the pulsar
+catalogfile="%s/release/share/pulsar/data/PSR_catalog_NA.txt"%os.environ['LOFARSOFT']
+psr_name = id.object
+print "Looking for DM for pulsar name %s"%(psr_name)
+print "Using catalog %s"%(catalogfile)
+dm="D"
+for line in open(catalogfile).readlines():
+    pulsar_line=string.find(line, psr_name)
+    if (pulsar_line >= 0):
+        columns = string.split(line)
+        dm = columns[8]
+        break
+if dm[0] == "N":
+    print "DM from catalog is NA, using dummy default for inf file"
+elif dm[0] == "D":
+    print "Unable to determine DM from catalog, using dummy default for inf file"
+else:
+    id.DM=dm
+    print "Pusar %s has DM = %s"%(psr_name, id.DM)
 
 # Change the name of the person analysing the data.
 if (options.user):
