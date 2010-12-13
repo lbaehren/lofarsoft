@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.3
+VERSION=2.4
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -1208,8 +1208,8 @@ do
 					   jj=`expr $jj + 1`
 					done
 				else # (( $nrBeams > 1 ))
-			        echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r 1 -B $beam_counter ./${OBSID}.parset >> $log
-			        python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r 1 -B $beam_counter ./${OBSID}.parset
+			        echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[$beam_counter]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r 1 -B $beam_counter ./${OBSID}.parset >> $log
+			        python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[$beam_counter]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r 1 -B $beam_counter ./${OBSID}.parset
 			        status=$?	
 			        
 					if [ $status -ne 0 ]
@@ -1927,6 +1927,29 @@ do
     fi
  
 done # for loop over modes in $mode_str 
+
+#Make a combined png of all the th.png files
+echo "Combining all th.png files into one"
+echo "Combining all th.png files into one" >> $log
+date
+date >> $log
+
+#find all the th.png files and convert them into a list, then paste them together
+find ./ -name "*.th.png" -print  > combine_col1.txt
+find ./ -name "*.th.png" -print  | sed -e 's/\// /g' -e 's/^.* //g' -e 's/.*_RSP/RSP/g' -e 's/\..*//g'  -e 's/_PSR//g' > combine_col2.txt
+paste combine_col1.txt combine_col2.txt | awk '{print "-label "$2" "$1" "}' | tr -d '\n' | awk '{print "montage "$0" combined.th.png"}' > combine_png.sh
+rm combine_col1.txt combine_col2.txt
+wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
+if [[ $wc_convert > 0 ]]
+then
+   chmod 777 combine_png.sh
+   cat combine_png.sh >> $log
+   ./combine_png.sh
+else
+   echo "No .th.png files were found to combine."
+   echo "No .th.png files were found to combine." >> $log
+fi
+
 	
 #Make a tarball of all the plots
 echo "Creating tar file of plots"
