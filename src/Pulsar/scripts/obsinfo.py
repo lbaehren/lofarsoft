@@ -4,6 +4,11 @@
 # the list of obs with different parameters listed, both in ascii
 # and Html formats
 #
+# NOTE: script was tested mainly on BASH, and it's known for
+# sure that it fails on CSH, because of many specific cexec and find
+# system calls that require shell-specific format. Try using
+# another version obsinfo-shell.py
+#
 # Vlad, Aug 5, 2010 (c)
 ###################################################################
 import os, sys, glob
@@ -1177,6 +1182,10 @@ if __name__ == "__main__":
         						if param[k] == "-p":
                 						mainpsr=param[k+1].split(",")[0]
                 						break
+				# it's possible to specify the pulsar name by "position". In this case profiles will be folded for 3 pulsars closest
+				# to this position
+				if mainpsr == "position":
+					mainpsr = "undefined"
 				# RSP0
 				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) > 0:
