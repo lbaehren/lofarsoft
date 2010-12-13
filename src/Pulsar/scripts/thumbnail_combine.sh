@@ -15,8 +15,11 @@ then
    ./combine_png.sh
    echo ""
    echo "Results:  combined.th.png"
+   echo ""
 else
+   echo ""
    echo "No thumbnail (*.th.png) files were found to combine."
+   echo ""
 fi
 
 exit 0
