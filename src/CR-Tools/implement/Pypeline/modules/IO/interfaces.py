@@ -1,22 +1,19 @@
-"""This module contains standardised interface classes.
-"""
-
-class IO(object):
+class IOInterface(object):
     """Base class for data IO.
     """
 
     def __init__(self):
         pass
 
-    def setAntennaSelection(self, antennaIDs):
+    def setAntennaSelection(self, selection):
         """Sets the antenna selection used in subsequent calls to
         `getAntennaPositions`, `getFFTData`, `getTimeseriesData`.
 
         Arguments:
-        *antennaIDs* Either Python list with index of the antenna as
-                     known to self (integers (e.g. [1, 5, 6]))
-                     Or list of IDs to specify a LOFAR dipole
-                     (e.g. ['142000005', '3001008'])
+        *selection* Either Python list with index of the antenna as
+                    known to self (integers (e.g. [1, 5, 6]))
+                    Or list of IDs to specify a LOFAR dipole
+                    (e.g. ['142000005', '3001008'])
 
         Return value:
         This method does not return anything.
@@ -40,7 +37,7 @@ class IO(object):
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
     
-    def setFrequenceRange(self, fmin, fmax):
+    def setFrequencyRange(self, fmin, fmax):
         """Sets the frequency selection used in subsequent calls to
         `getFFTData`. The selection set is all frequencies available
         for the set blocksize in the range [fmin,fmax].
@@ -56,6 +53,24 @@ class IO(object):
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
+    def setFrequencyRangeByIndex(self, nfmin, nfmax):
+        """Sets the frequency selection used in subsequent calls to
+        `getFFTData`.
+        If **frequencies** is the array of frequencies available for the
+        selected blocksize, then subsequent calls to `getFFTData` will
+        return data corresponding to frequencies[nfmin:nfmax].
+        
+        Arguments:
+        *nfmin* minimum frequency as index into frequency array
+        *nfmax* maximum frequency as index into frequency array
+        
+        Return value:
+        This method does not return anything.
+        It raises an IndexError if frequency selection cannot be set
+        to requested values (e.g. index out of range)
+        """
+        raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
+
     def getFrequencies(self):
         """Returns the frequencies that are appicable to the FFT data
 
@@ -68,7 +83,23 @@ class IO(object):
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
-    def getAntennaPositions(self):
+    def getRelativeAntennaPositions(self):
+        """Returns relative antenna positions for selected antennas, or all
+        antennas if no selection was applied.
+
+        Arguments:
+        None
+
+        Return value:
+        a two dimensional array containing the Cartesian position of
+        each antenna in meters in local coordinates from a predefined
+        center.
+        So that if `a` is the returned array `a[i]` is an array of
+        length 3 with positions (x,y,z) of antenna i.
+        """
+        raise NotImplementedError
+
+    def getITRFAntennaPositions(self):
         """Returns antenna positions for selected antennas, or all
         antennas if no selection was applied.
 
@@ -84,10 +115,11 @@ class IO(object):
         """
         raise NotImplementedError
 
-    def getFFTData(self, block):
-        """Returns FFT data for selected antennas.
+    def getFFTData(self, data, block):
+        """Writes FFT data for selected antennas to data array.
 
         Arguments:
+        *data* data array to write FFT data to.
         *block* index of block to return data from.
 
         Return value:
@@ -99,10 +131,11 @@ class IO(object):
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
-    def getTimeseriesData(self, block):
+    def getTimeseriesData(self, data, block):
         """Returns timeseries data for selected antennas.
 
         Arguments:
+        *data* data array to write FFT data to.
         *block* index of block to return data from.
 
         Return value:
@@ -126,4 +159,5 @@ class IO(object):
         system. 
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
+
 

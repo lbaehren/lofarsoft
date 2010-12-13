@@ -1,21 +1,6 @@
-#
-#  srcfind.py - Find a source on the sky based on arrival times and/or phase delays in multiple antennas
-#  
-#
-#  Created by Arthur Corstanje on Aug. 2, 2010.
-#  Copyright (c) 2010, Arthur Corstanje. All rights reserved.
+"""Find a source on the sky based on arrival times and/or phase delays in multiple antennas
 
-"""
-Calculate arrival direction from time delays in 3 points in space'
-Usage: give positions in a list or array of 9 numbers x,y,z,x,y,z,x,y,z.'
-A direction in [az, el] (radians) can be given, then time delays follow from:'
-    timeDelaysFromDirection(positions, direction)'
-Given a set of time delays, the direction can be calculated using: '
-    directionFromThreeAntennas(positions, times) '
-A full-sky test can be run using: '
-    testDirectionCalculationForThreeAntennas(positions)'
-which does these two steps for many (grid)points on the sky, and checks if the results match.'
-Some errors may come up in this, because of floating point roundoff and mod-2pi issues. '
+.. moduleauthor:: Arthur Corstanje <a.corstanje@astro.ru.nl>
 """
 
 #import pycrtools
@@ -37,10 +22,18 @@ def directionFromThreeAntennas(positions, times):
     Usually, when the 3 antennas are in a more or less horizontal plane, one of the solutions will appear to come
     from below the horizon (el < 0) and can be discarded.
     
-    In: positions array (x1, y1, z1, x2, y2, z2, x3, y3, z3); 
-        times array (t1, t2, t3).
+    Required arguments:
+
+    =========== =================================================
+    Parameter   Description
+    =========== =================================================
+    *positions* array ``(x1, y1, z1, x2, y2, z2, x3, y3, z3)``; 
+    *times*     array ``(t1, t2, t3)``.
+    =========== =================================================
+
     Input is assumed to be Numpy arrays.
-    Out: (az1, el1, az2, el2), in radians, containing the two solutions.
+
+    Output: ``(az1, el1, az2, el2)``, in radians, containing the two solutions.
     
     """
     
@@ -120,14 +113,26 @@ def directionFromThreeAntennas(positions, times):
 
 def timeDelaysFromDirection(positions, direction):
     """
-    Get time delays for antennas at given positions (np-array x1, y1, z1, x2, y2, z2, ...)
-    and a given direction (az, el) in radians.
+    Get time delays for antennas at given position for a given direction.
     Time delays come out as an np-array.
     
-    >>> pos = np.array([0, 0, 0, 23, -21, 54, 11, 21, 33])
-    >>> dir = (1.2, 0.7)
-    >>> timeDelaysFromDirection(pos, dir)
-    array([ -0.00000000e+00,  -8.73671261e-08,  -1.31017019e-07])
+    Required arguments:
+
+    =========== =================================================
+    Parameter   Description
+    =========== =================================================
+    *positions* ``(np-array x1, y1, z1, x2, y2, z2, ...)``
+    *direction* (az, el) in radians.
+    =========== =================================================
+
+    Example:
+
+    .. doctest::
+
+        >>> pos = np.array([0, 0, 0, 23, -21, 54, 11, 21, 33])
+        >>> dir = (1.2, 0.7)
+        >>> timeDelaysFromDirection(pos, dir)
+        array([ -0.00000000e+00,  -8.73671261e-08,  -1.31017019e-07])
 
     """
     
@@ -142,27 +147,28 @@ def timeDelaysFromDirection(positions, direction):
         timeDelays[i] = - (1/c) * np.dot(cartesianDirection, thisPosition) # note the minus sign! Signal vector points down from the sky.
         
     return timeDelays
-    
-    
+
 def testDirectionCalculationForThreeAntennas(positions):
     """
     Given antenna positions, calculate time delays for 'every' signal vector on the sky.
     Then, invert and calculate the signal vector from the given time delays. One out of the 2 possible solutions has to match 
     within some floating point roundoff interval. A two-pi error may occur (and gets written out), but that's no problem.
     
-    >>> testDirectionCalculationForThreeAntennas(np.array([0, 0, 0, 23, -21, 54, 11, 21, 33]))
-    Wrong value for az: 0.0 calculated: 195.081863616 or: 360.0
-    el: 18.0 calculated: 60.2318806131 or: 18.0
-    Wrong value for az: 0.0 calculated: 196.898077333 or: 360.0
-    el: 24.0 calculated: 66.1764021336 or: 24.0
-    Wrong value for az: 0.0 calculated: 285.811432122 or: 360.0
-    el: 48.0 calculated: 86.4889718066 or: 48.0
-    Wrong value for az: 0.0 calculated: 358.619827389 or: 360.0
-    el: 66.0 calculated: 71.2661264901 or: 66.0
-    Wrong value for az: 0.0 calculated: 360.0 or: 1.33942285143
-    el: 72.0 calculated: 72.0 or: 65.3494016156
-    Wrong value for az: 0.0 calculated: 360.0 or: 3.05501838316
-    el: 78.0 calculated: 78.0 or: 59.4017926229
+    Example:
+
+        >>> testDirectionCalculationForThreeAntennas(np.array([0, 0, 0, 23, -21, 54, 11, 21, 33]))
+        Wrong value for az: 0.0 calculated: 195.081863616 or: 360.0
+        el: 18.0 calculated: 60.2318806131 or: 18.0
+        Wrong value for az: 0.0 calculated: 196.898077333 or: 360.0
+        el: 24.0 calculated: 66.1764021336 or: 24.0
+        Wrong value for az: 0.0 calculated: 285.811432122 or: 360.0
+        el: 48.0 calculated: 86.4889718066 or: 48.0
+        Wrong value for az: 0.0 calculated: 358.619827389 or: 360.0
+        el: 66.0 calculated: 71.2661264901 or: 66.0
+        Wrong value for az: 0.0 calculated: 360.0 or: 1.33942285143
+        el: 72.0 calculated: 72.0 or: 65.3494016156
+        Wrong value for az: 0.0 calculated: 360.0 or: 3.05501838316
+        el: 78.0 calculated: 78.0 or: 59.4017926229
 
     """
     azSteps = 60; elSteps = 15
@@ -182,8 +188,17 @@ def testDirectionCalculationForThreeAntennas(positions):
 def mse(az, el, pos, times):
     """ 
     Mean-squared error in the times for a given direction on the sky, as used in the brute force search
-    In: (az, el) in radians
-        pos, times as in the other functions
+
+    Required arguments:
+
+    =========== =================================================
+    Parameter   Description
+    =========== =================================================
+    *az*        Azimuth in radians
+    *el*        Elevation in radians
+    *pos*       times as in the other functions
+    =========== =================================================
+
     """
     
     N = len(times)
@@ -206,11 +221,19 @@ def directionBruteForceSearch(positions, times):
     Note that the square-root of the MSE value is useful to determine the average 'timing noise', 
     i.e. the timing deviation from the plane-wave solution.
     
-    In: positions array (x1, y1, z1, x2, y2, z2, x3, y3, z3), in meters
-        times array (t1, t2, t3), in seconds.
+    Required arguments:
+
+    =========== =========================================================
+    Parameter   Description
+    =========== =========================================================
+    *positions* array ``(x1, y1, z1, x2, y2, z2, x3, y3, z3)``, in meters
+    *times*     array ``(t1, t2, t3)``, in seconds.
+    =========== =========================================================
+
     Input is assumed to be Numpy arrays.
     
-    Out: (az, el, mse), in radians, and seconds-squared.
+    Output: ``(az, el, mse)``, in radians, and seconds-squared.
+
     """
     
     # this can probably be done better by Scipy. But for now this is easy and it works...
@@ -248,25 +271,39 @@ def directionForHorizontalArray(positions, times):
     If all antennas are co-planar, the best-fitting solution can be found using a 2D-linear fit.
     We find the best-fitting A and B in:
     
+    .. math::
+
         t = A x + B y + C
         
     where t is the array of times; x and y are arrays of coordinates of the antennas.
     The C is the overall time offset in the data, that has to be subtracted out. 
     The optimal value of C has to be determined in the fit process (it's not just the average time, nor the time at antenna 0).
     
-    This is done using numpy.linalg.lstsq.
+    This is done using :mod:`numpy.linalg.lstsq`.
     
     The (az, el) follows from:
     
-        A = cos(el) cos(az)
-        B = cos(el) sin(az)
-        C can be discarded here
+    .. math::
+
+        A = \cos(\mathrm{el}) \cos(\mathrm{az})
+
+        B = \cos(\mathrm{el}) \sin(\mathrm{az})
         
-    In: positions array (x1, y1, z1, x2, y2, z2, x3, y3, z3), in meters. NB: z_i is simply ignored but still assumed to be there!
-        times array (t1, t2, t3), in seconds.
+    Required arguments:
+
+    =========== ==========================================================
+    Parameter   Description
+    =========== ==========================================================
+    *positions* array ``(x1, y1, z1, x2, y2, z2, x3, y3, z3)``, in meters.
+                NB: :math:`z_i` is simply ignored but still assumed to be
+                there!
+    *times*     array ``(t1, t2, t3)``, in seconds.
+    =========== ==========================================================
+
     Input is assumed to be Numpy arrays.
     
-    Out: (az, el), in radians, and seconds-squared.
+    Output: ``(az, el)``, in radians, and seconds-squared.
+
     """
     
     # make x, y arrays out of the input position array
@@ -295,8 +332,17 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     Then, for the 3 different fit methods, the result is calculated back.
     This is done without noise (should return the input), and with noise 
     
-    In: az, el, N_ant
-        noiselevel: as a fraction of the max time difference across the antennas, e.g. 0.1 
+    Required arguments:
+
+    ============ ===================================================
+    Parameter    Description
+    ============ ===================================================
+    *az*         Azimuth
+    *el*         Elevation
+    *N_ant*      Number of antennae
+    *noiselevel* as a fraction of the max time difference across the
+                 antennas, e.g. 0.1 
+    ============ ===================================================
 
     """
     
@@ -347,10 +393,22 @@ def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel, fitType = 'Lin
     Put in the given (az, el) direction, see what comes out of the fits.
     By averaging over these trials, we can see if the fit result is biased or not.
     
-    In: n_trials, N_ant, az, el
-        noiselevel: as a fraction of the max time difference across the antennas, e.g. 0.1
-        fitType = 'LinearFit': can choose 'LinearFit', 'BruteForce', or 'Triangles'.
+    Required arguments:
+
+    ============ ===================================================
+    Parameter    Description
+    ============ ===================================================
+    *n_trials*
+    *N_ant*
+    *az*
+    *el*
+    *noiselevel* as a fraction of the max time difference across the
+                 antennas, e.g. 0.1
+    *fitType*    ['LinearFit' (default)|'BruteForce'|'Triangles']
+    ============ ===================================================
+
     Output is printed.
+
     """
     
     print 'Testing for bias using fit type = %s' %fitType
@@ -469,14 +527,9 @@ def directionFromAllTriangles(positions, times):
 #    print '# Uncertainty el = %f' %u_el
     print '# Total triangles = %d, valid = %d' %(count, validcount)
     return (az_avg, el_avg)
-    
-            
-       
-## Executing a module should run doctests.
-#  This examines the docstrings of a module and runs the examples
-#  as a selftest for the module.
-#  See http://docs.python.org/library/doctest.html for more information.
-if __name__=='__main__':
+
+# Execute doctests if module is executed as script
+if __name__ == "__main__":
     import doctest
     doctest.testmod()
 

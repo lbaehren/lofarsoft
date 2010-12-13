@@ -1,19 +1,48 @@
 """This module reads in calibration metadata from file in the early fases of LOFAR. In the future this should be replaced by reading the metadata from the files.
+
+.. moduleauthor:: Sander ter Veen <s.terveen@astro.ru.nl>
 """
 
 ## Imports
 import numpy as np
 import struct
 import os
-import pycrtools as hf
+import pycrtools as cr
 
 def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
     """Return metadata values, given the antennaIDs and the antennaset.
     
-    *keyword* Any of StationPhaseCalibration, CableDelays, RelativeAntennaPositions, ClockCorrection, StationPositions
-    *antennaIDs* AntennaIDs as given by crfile["antennaIDs"]
-    *antennaset* For example HBA, LBA_INNER
-    *return_as_hArray* Default False, for compatibility with users without hftools. 
+    Required arguments:
+
+    ================== ====================================================
+    Parameter          Description
+    ================== ====================================================
+    *keyword*          Any of StationPhaseCalibration, CableDelays,
+                       RelativeAntennaPositions, ClockCorrection,
+                       StationPositions
+    *antennaIDs*       AntennaIDs as given by crfile["antennaIDs"]
+    *antennaset*       Antennaset used for this station. Options:
+
+                       * LBA_INNER
+                       * LBA_OUTER
+                       * LBA_X
+                       * LBA_Y
+                       * LBA_SPARSE0
+                       * LBA_SPARSE1
+                       * HBA_0
+                       * HBA_1
+                       * HBA
+
+    ================== ====================================================
+
+    Optional arguments:
+
+    ================== ====================================================
+    Parameter          Description
+    ================== ====================================================
+    *return_as_hArray* Default False
+    ================== ====================================================
+
     """
 
     dim2=0
@@ -38,14 +67,15 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
         return False
 
     #import pycrtools as hf
-    if isinstance(antennaIDs,hf.IntArray):
+    if isinstance(antennaIDs,cr.IntArray):
         antennaIDs=antennaIDs.vec()
     if isinstance(antennaIDs,list):
-        antennaIDs=hf.Vector(antennaIDs)
+        antennaIDs=cr.Vector(antennaIDs)
     stationIDs=np.array(list(antennaIDs))/1000000
     rcuIDs=np.mod(antennaIDs,1000)
     allStIDs=np.unique(stationIDs)
     allValues={}
+
     for station in allStIDs:
         allValues[station]=functionname(int(station),antennaset,return_as_hArray)
    
@@ -70,11 +100,11 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
         #import pycrtools as hf
         if keyword in ["StationPhaseCalibration"]:
             if dim2==1:
-                #mdata=hf.hArray(allValues[allStIDs[0]],len(antennaIDs))
-                mdata=hf.hArray(complex,len(antennaIDs))
+                #mdata=cr.hArray(allValues[allStIDs[0]],len(antennaIDs))
+                mdata=cr.hArray(complex,len(antennaIDs))
             else:
-                mdata=hf.hArray(complex,[len(antennaIDs),allValues[allStIDs[0]].shape()[1]])
-                #mdata=hf.hArray(allValues[allStIDs[0]],[len(antennaIDs),allValues[allStIDs[0]].shape()[1]])
+                mdata=cr.hArray(complex,[len(antennaIDs),allValues[allStIDs[0]].shape()[1]])
+                #mdata=cr.hArray(allValues[allStIDs[0]],[len(antennaIDs),allValues[allStIDs[0]].shape()[1]])
             for st in allStIDs:
                 for num, check in enumerate(stationIDs==st):
                     if check:
@@ -82,20 +112,20 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
 
         if keyword not in ["StationPositions","ClockCorrection"]:
             if dim2==1:
-                #mdata=hf.hArray(allValues[allStIDs[0]],len(antennaIDs))
-                mdata=hf.hArray(float,len(antennaIDs))
+                #mdata=cr.hArray(allValues[allStIDs[0]],len(antennaIDs))
+                mdata=cr.hArray(float,len(antennaIDs))
             else:
-                mdata=hf.hArray(float,[len(antennaIDs),allValues[allStIDs[0]].shape()[1]])
-                #mdata=hf.hArray(allValues[allStIDs[0]],[len(antennaIDs),allValues[allStIDs[0]].shape()[1]])
+                mdata=cr.hArray(float,[len(antennaIDs),allValues[allStIDs[0]].shape()[1]])
+                #mdata=cr.hArray(allValues[allStIDs[0]],[len(antennaIDs),allValues[allStIDs[0]].shape()[1]])
             for st in allStIDs:
                 for num, check in enumerate(stationIDs==st):
                     if check:
                         mdata[num]=allValues[st][int(rcuIDs[num])]
         else:
             if keyword == "ClockCorrection": #dim2==1
-                mdata=hf.hArray(float,len(antennaIDs),fill=0)
+                mdata=cr.hArray(float,len(antennaIDs),fill=0)
             else:
-                mdata=hf.hArray(float,[len(antennaIDs),allValues[allStIDs[0]].shape()[0]])
+                mdata=cr.hArray(float,[len(antennaIDs),allValues[allStIDs[0]].shape()[0]])
             for st in allStIDs:
                 for num, check in enumerate(stationIDs==st):
                     if check:
@@ -106,43 +136,57 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
 def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
     """Read phase calibration data for a station.
 
-    *station* station name or ID.
-    *mode* observation mode. Currently supported: "LBA_OUTER"
+    Required arguments:
+
+    ================== ====================================================
+    Parameter          Description
+    ================== ====================================================
+    *station*          station name or ID.
+    *mode*             observation mode. Currently supported: "LBA_OUTER"
+    ================== ====================================================
+
+    Optional arguments:
+
+    ================== ====================================================
+    Parameter          Description
+    ================== ====================================================
+    *return_as_hArray* Default False
+    ================== ====================================================
 
     returns weights for 512 subbands.
 
-    Examples (also for doctests):
+    Examples::
 
-    >>> metadata.getStationPhaseCalibration("CS002","LBA_OUTER")
-    array([[ 1.14260161 -6.07397622e-18j,  1.14260161 -6.05283530e-18j,
-         1.14260161 -6.03169438e-18j, ...,  1.14260161 +4.68675289e-18j,
-         1.14260161 +4.70789381e-18j,  1.14260161 +4.72903474e-18j],
-       [ 0.95669876 +2.41800591e-18j,  0.95669876 +2.41278190e-18j,
-         0.95669876 +2.40755789e-18j, ...,  0.95669876 -2.41017232e-19j,
-         0.95669876 -2.46241246e-19j,  0.95669876 -2.51465260e-19j],
-       [ 0.98463207 +6.80081617e-03j,  0.98463138 +6.89975906e-03j,
-         0.98463069 +6.99870187e-03j, ...,  0.98299670 +5.71319125e-02j,
-         0.98299096 +5.72306908e-02j,  0.98298520 +5.73294686e-02j],
-       ..., 
-       [ 1.03201290 +7.39535744e-02j,  1.03144532 +8.14880844e-02j,
-         1.03082273 +8.90182487e-02j, ..., -0.82551740 -6.23731331e-01j,
-        -0.82094046 -6.29743206e-01j, -0.81631975 -6.35721497e-01j],
-       [ 1.12370332 -1.15296909e-01j,  1.12428451 -1.09484545e-01j,
-         1.12483564 -1.03669252e-01j, ..., -0.92476286 +6.48703460e-01j,
-        -0.92810503 +6.43912711e-01j, -0.93142239 +6.39104744e-01j],
-       [ 1.10043006 -6.18995646e-02j,  1.10075250 -5.58731668e-02j,
-         1.10104193 -4.98450938e-02j, ..., -1.01051042 +4.40052904e-01j,
-        -1.01290481 +4.34513198e-01j, -1.01526883 +4.28960464e-01j]])
+        >>> metadata.getStationPhaseCalibration("CS002","LBA_OUTER")
+        array([[ 1.14260161 -6.07397622e-18j,  1.14260161 -6.05283530e-18j,
+             1.14260161 -6.03169438e-18j, ...,  1.14260161 +4.68675289e-18j,
+             1.14260161 +4.70789381e-18j,  1.14260161 +4.72903474e-18j],
+           [ 0.95669876 +2.41800591e-18j,  0.95669876 +2.41278190e-18j,
+             0.95669876 +2.40755789e-18j, ...,  0.95669876 -2.41017232e-19j,
+             0.95669876 -2.46241246e-19j,  0.95669876 -2.51465260e-19j],
+           [ 0.98463207 +6.80081617e-03j,  0.98463138 +6.89975906e-03j,
+             0.98463069 +6.99870187e-03j, ...,  0.98299670 +5.71319125e-02j,
+             0.98299096 +5.72306908e-02j,  0.98298520 +5.73294686e-02j],
+           ..., 
+           [ 1.03201290 +7.39535744e-02j,  1.03144532 +8.14880844e-02j,
+             1.03082273 +8.90182487e-02j, ..., -0.82551740 -6.23731331e-01j,
+            -0.82094046 -6.29743206e-01j, -0.81631975 -6.35721497e-01j],
+           [ 1.12370332 -1.15296909e-01j,  1.12428451 -1.09484545e-01j,
+             1.12483564 -1.03669252e-01j, ..., -0.92476286 +6.48703460e-01j,
+            -0.92810503 +6.43912711e-01j, -0.93142239 +6.39104744e-01j],
+           [ 1.10043006 -6.18995646e-02j,  1.10075250 -5.58731668e-02j,
+             1.10104193 -4.98450938e-02j, ..., -1.01051042 +4.40052904e-01j,
+            -1.01290481 +4.34513198e-01j, -1.01526883 +4.28960464e-01j]])
 
-    >>> metadata.getStationPhaseCalibration(122,"LBA_OUTER")
-    Calibration data not yet available. Returning 1 
-    array([[ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
-       [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
-       [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
-       ..., 
-       [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
-       [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
-       [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j]])
+        >>> metadata.getStationPhaseCalibration(122,"LBA_OUTER")
+        Calibration data not yet available. Returning 1 
+        array([[ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
+           [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
+           [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
+           ..., 
+           [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
+           [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
+           [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j]])
 
     """
 
@@ -154,7 +198,7 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
         print "Station phase calibration data not yet available for antennaset",antennaset,".Returning 1"
         if return_as_hArray:
             #import pycrtools as hf
-            complexdata=hf.hArray(complex,[96,512],fill=complex(1,0))    
+            complexdata=cr.hArray(complex,[96,512],fill=complex(1,0))    
         else:
             complexdata=np.zeros(shape=(96,512),dtype=complex)
             complexdata.real=1
@@ -177,7 +221,7 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
         print "Calibration data not yet available for station",station,"Returning 1"
         if return_as_hArray:
             #import pycrtools as hf
-            complexdata=hf.hArray(complex,[96,512],fill=complex(1,0))    
+            complexdata=cr.hArray(complex,[96,512],fill=complex(1,0))    
         else:
             complexdata=np.zeros(shape=(96,512),dtype=complex)
             complexdata.real=1
@@ -203,13 +247,13 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
     #
     if return_as_hArray:
         #import pycrtools as hf
-        data=hf.hArray(data,[512*96,2])
-        realdata=hf.hArray(float,[512*96])
-        imagdata=hf.hArray(float,[512*96])
-        complexdata=hf.hArray(complex,[96,512])
+        data=cr.hArray(data,[512*96,2])
+        realdata=cr.hArray(float,[512*96])
+        imagdata=cr.hArray(float,[512*96])
+        complexdata=cr.hArray(complex,[96,512])
         realdata[...].copy(data[...,0])
         imagdata[...].copy(data[...,1])
-        complexdata2=hf.hArray(complex,[512*96])
+        complexdata2=cr.hArray(complex,[512*96])
         complexdata2.fill(complex(0,1))
         complexdata2.mul(imagdata)
         complexdata2.add(realdata)
@@ -228,13 +272,38 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
         return complexdata.transpose()
 
 def getCableDelays(station,antennaset,return_as_hArray=False):
-    """ Get cable delays in s.
+    """ Get cable delays in seconds.
 
-    *station*  Station name or ID e.g. "CS302", 142
-    *antennaset*   Set of antennas e.g. LBA_OUTER, HBA
-    *return_as_hArray*    Returns numpy array if False (default)
+    Required arguments:
+
+    ================== ====================================================
+    Parameter          Description
+    ================== ====================================================
+    *station*          Station name or ID e.g. "CS302", 142
+    *antennaset*       Antennaset used for this station. Options:
+
+                       * LBA_INNER
+                       * LBA_OUTER
+                       * LBA_X
+                       * LBA_Y
+                       * LBA_SPARSE0
+                       * LBA_SPARSE1
+                       * HBA_0
+                       * HBA_1
+                       * HBA
+
+    ================== ====================================================
+
+    Optional arguments:
+
+    ================== ====================================================
+    Parameter          Description
+    ================== ====================================================
+    *return_as_hArray* Returns numpy array if False (default)
+    ================== ====================================================
 
     returns "array of (rcus * cable delays ) for all dipoles in a station"
+
     """
 
     # Check station id type
@@ -260,7 +329,7 @@ def getCableDelays(station,antennaset,return_as_hArray=False):
 
     if return_as_hArray:
         #import pycrtools as hf
-        cable_delays=hf.hArray(float,dimensions=[96])
+        cable_delays=cr.hArray(float,dimensions=[96])
     else:
         cable_delays=np.zeros(96)
 
@@ -320,7 +389,8 @@ def idToStationName(station_id):
     return station_name
 
 def stationNameToID(station_name):
-    """Returns the station id from a station name"""
+    """Returns the station id from a station name
+    """
     
     digit1=int(station_name[2])
     digit2=int(station_name[3])
@@ -342,41 +412,57 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
     station can be the name or id of the station. Default returns as numpy
     array, option to return as hArray.
 
-    *station*      Name or id of the station. e.g. "CS302" or 142
-    *antennaset*   Antennaset used for this station. Options:
-                   LBA_INNER
-                   LBA_OUTER
-                   LBA_X
-                   LBA_Y
-                   LBA_SPARSE0
-                   LBA_SPARSE1
-                   HBA_0
-                   HBA_1
-                   HBA
+    Required arguments:
+
+    =================== ==============================================
+    Parameter           Description
+    =================== ==============================================
+    *station*           Name or id of the station. e.g. "CS302" or 142
+    *antennaset*        Antennaset used for this station. Options:
+
+                        * LBA_INNER
+                        * LBA_OUTER
+                        * LBA_X
+                        * LBA_Y
+                        * LBA_SPARSE0
+                        * LBA_SPARSE1
+                        * HBA_0
+                        * HBA_1
+                        * HBA
+
+    =================== ==============================================
+
+    Optional arguments:
+
+    =================== ==============================================
+    Parameter           Description
+    =================== ==============================================
     *return_as_hArray*  Return as hArray.
+    =================== ==============================================
 
-    Examples:
-    >>> metadata.getRelativeAntennaPositions(142,"LBA_INNER",True)
-    hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
+    Examples::
 
-
-    >>> getRelativeAntennaPositions("CS005","HBA",False)
-    array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
-           [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
-            [  1.28090000e+01,   2.88400000e+00,   1.00000000e-03],....
+        >>> metadata.getRelativeAntennaPositions(142,"LBA_INNER",True)
+        hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
 
 
-    >>> antenna_ids=file["antennaIDs"]
-    [1420000005,142000008,142000080]
-    >>> station_id=antenna_ids[0]/1000000
-    142
-    >>> rcu_ids=np.mod(antenna_ids,1000)
-    array([5, 8, 80])
-    >>> all_antenna_pos=getRelativeAntennaPositions(station_id,"LBA_INNER",False)
-    >>> used_antenna_pos=all_antenna_pos[rcu_ids]
-    array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
-           [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
-           [  8.53000000e-01,   1.37240000e+01,  -3.00000000e-03]])
+        >>> getRelativeAntennaPositions("CS005","HBA",False)
+        array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
+               [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
+                [  1.28090000e+01,   2.88400000e+00,   1.00000000e-03],....
+
+
+        >>> antenna_ids=file["antennaIDs"]
+        [1420000005,142000008,142000080]
+        >>> station_id=antenna_ids[0]/1000000
+        142
+        >>> rcu_ids=np.mod(antenna_ids,1000)
+        array([5, 8, 80])
+        >>> all_antenna_pos=getRelativeAntennaPositions(station_id,"LBA_INNER",False)
+        >>> used_antenna_pos=all_antenna_pos[rcu_ids]
+        array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
+               [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
+               [  8.53000000e-01,   1.37240000e+01,  -3.00000000e-03]])
 
     """
 
@@ -431,7 +517,7 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
     # Return requested type
     if return_as_hArray:
         #import pycrtools as hf
-        antpos=hf.hArray(antpos,dimensions=[2*int(nrantennas),int(nrdir)])
+        antpos=cr.hArray(antpos,dimensions=[2*int(nrantennas),int(nrdir)])
     else:
         antpos=np.asarray(antpos).reshape(2*int(nrantennas),int(nrdir))
 
@@ -445,41 +531,55 @@ def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
     station can be the name or id of the station. Default returns as numpy
     array, option to return as hArray.
 
-    *station*      Name or id of the station. e.g. "CS302" or 142
-    *antennaset*   Antennaset used for this station. Options:
-                   LBA_INNER
-                   LBA_OUTER
-                   LBA_X
-                   LBA_Y
-                   LBA_SPARSE0
-                   LBA_SPARSE1
-                   HBA_0
-                   HBA_1
-                   HBA
+    Required arguments:
+
+    =================== ==============================================
+    Parameter           Description
+    =================== ==============================================
+    *station*           Name or id of the station. e.g. "CS302" or 142
+    *antennaset*        Antennaset used for this station. Options:
+
+                        * LBA_INNER
+                        * LBA_OUTER
+                        * LBA_X
+                        * LBA_Y
+                        * LBA_SPARSE0
+                        * LBA_SPARSE1
+                        * HBA_0
+                        * HBA_1
+                        * HBA
+
+    =================== ==============================================
+
+    Optional arguments:
+
+    =================== ==============================================
+    Parameter           Description
+    =================== ==============================================
     *return_as_hArray*  Return as hArray.
+    =================== ==============================================
 
-    Examples:
-    >>> metadata.getRelativeAntennaPositions(142,"LBA_INNER",True)
-    hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
+    Examples::
 
+        >>> metadata.getRelativeAntennaPositions(142,"LBA_INNER",True)
+        hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
 
-    >>> getRelativeAntennaPositions("CS005","HBA",False)
-    array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
-           [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
-            [  1.28090000e+01,   2.88400000e+00,   1.00000000e-03],....
+        >>> getRelativeAntennaPositions("CS005","HBA",False)
+        array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
+               [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
+                [  1.28090000e+01,   2.88400000e+00,   1.00000000e-03],....
 
-
-    >>> antenna_ids=file["antennaIDs"]
-    [1420000005,142000008,142000080]
-    >>> station_id=antenna_ids[0]/1000000
-    142
-    >>> rcu_ids=np.mod(antenna_ids,1000)
-    array([5, 8, 80])
-    >>> all_antenna_pos=getRelativeAntennaPositions(station_id,"LBA_INNER",False)
-    >>> used_antenna_pos=all_antenna_pos[rcu_ids]
-    array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
-           [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
-           [  8.53000000e-01,   1.37240000e+01,  -3.00000000e-03]])
+        >>> antenna_ids=file["antennaIDs"]
+        [1420000005,142000008,142000080]
+        >>> station_id=antenna_ids[0]/1000000
+        142
+        >>> rcu_ids=np.mod(antenna_ids,1000)
+        array([5, 8, 80])
+        >>> all_antenna_pos=getRelativeAntennaPositions(station_id,"LBA_INNER",False)
+        >>> used_antenna_pos=all_antenna_pos[rcu_ids]
+        array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
+               [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
+               [  8.53000000e-01,   1.37240000e+01,  -3.00000000e-03]])
 
     """
 
@@ -592,7 +692,7 @@ def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
     # Return requested type
     if return_as_hArray:
         #import pycrtools as hf
-        antpos=hf.hArray(antpos)        
+        antpos=cr.hArray(antpos)        
     #else:
     #    antpos=np.asarray(antpos).reshape(2*int(nrantennas),int(nrdir))
     
@@ -606,25 +706,40 @@ def getAntennaPositions(station,antennaset,return_as_hArray=False):
     station can be the name or id of the station. Default returns as numpy
     array, option to return as hArray.
 
-    *station*      Name or id of the station. e.g. "CS302" or 142
-    *antennaset*   Antennaset used for this station. Options:
-                   LBA_INNER
-                   LBA_OUTER
-                   LBA_X
-                   LBA_Y
-                   LBA_SPARSE0
-                   LBA_SPARSE1
-                   HBA_0
-                   HBA_1
-                   HBA
-    *return_as_hArray*  Return as hArray.
+    Required arguments:
+
+    ================== ==============================================
+    Parameter          Description
+    ================== ==============================================
+    *station*          Name or id of the station. e.g. "CS302" or 142
+    *antennaset*       Antennaset used for this station. Options:
+
+                       * LBA_INNER
+                       * LBA_OUTER
+                       * LBA_X
+                       * LBA_Y
+                       * LBA_SPARSE0
+                       * LBA_SPARSE1
+                       * HBA_0
+                       * HBA_1
+                       * HBA
+
+    ================== ==============================================
+
+    Optional arguments:
+
+    ================== ==============================================
+    Parameter          Description
+    ================== ==============================================
+    *return_as_hArray* Return as hArray.
+    ================== ==============================================
 
     """
 
     itrfpos=getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=True)
-    lonlatCS002=hf.hArray([6.869837540*np.pi/180.,52.91512249*np.pi/180.]) # 49.344
-    ITRFCS002=hf.hArray([3826577.09500000,461022.916010,5064892.767])
-    returnpos=convert_ITRF_to_local(itrfpos,refpos=ITRFCS002,reflonlat=lonlatCS002)
+    lonlatCS002=cr.hArray([6.869837540*np.pi/180.,52.91512249*np.pi/180.]) # 49.344
+    ITRFCS002=cr.hArray([3826577.09500000,461022.916010,5064892.767])
+    returnpos=convertITRFToLocal(itrfpos,refpos=ITRFCS002,reflonlat=lonlatCS002)
     
     if not return_as_hArray:
         returnpos=returnpos.toNumpy()
@@ -662,46 +777,60 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
     station can be the name or id of the station. Default returns as numpy
     array, option to return as hArray.
 
-    *station*      Name or id of the station. e.g. "CS302" or 142
-    *antennaset*   Antennaset used for this station. Options:
-                   LBA_INNER
-                   LBA_OUTER
-                   LBA_X
-                   LBA_Y
-                   LBA_SPARSE0
-                   LBA_SPARSE1
-                   HBA_0
-                   HBA_1
-                   HBA
-    *coordinatesystem*  Currently only WGS84. in the future also ITRF
-    *return_as_hArray*  Return as hArray.
+    Required arguments:
 
-    Examples:
-    >>> import pycr_metadata as md
-    >>>
-    >>> ant_pos=get_antenna_positions(142,"LBA_INNER",True)
-    >>> ant_pos
-    hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
+    ================== ==============================================
+    Argument           Description
+    ================== ==============================================
+    *station*          Name or id of the station. e.g. "CS302" or 142
+    *antennaset*       Antennaset used for this station. Options:
 
+                       * LBA_INNER
+                       * LBA_OUTER
+                       * LBA_X
+                       * LBA_Y
+                       * LBA_SPARSE0
+                       * LBA_SPARSE1
+                       * HBA_0
+                       * HBA_1
+                       * HBA
 
-    >>> ant_pos=get_antenna_positions("CS005","HBA",False)
-    >>> ant_pos
-    array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
-           [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
-            [  1.28090000e+01,   2.88400000e+00,   1.00000000e-03],....
+    *coordinatesystem* Currently only WGS84. in the future also ITRF
+    ================== ==============================================
 
+    Optional arguments
 
-    >>> antenna_ids=file["antennaIDs"]
-    [1420000005,142000008,142000080]
-    >>> station_id=antenna_ids[0]/1000000
-    142
-    >>> rcu_ids=np.mod(antenna_ids,1000)
-    array([5, 8, 80])
-    >>> all_antenna_pos=get_antenna_positions(station_id,"LBA_INNER",False)
-    >>> used_antenna_pos=all_antenna_pos[rcu_ids]
-    array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
-           [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
-           [  8.53000000e-01,   1.37240000e+01,  -3.00000000e-03]])
+    ================== ==============================================
+    Argument           Description
+    ================== ==============================================
+    *return_as_hArray* Return as hArray.
+    ================== ==============================================
+
+    Examples::
+
+        >>> import pycr_metadata as md
+        >>>
+        >>> ant_pos=get_antenna_positions(142,"LBA_INNER",True)
+        >>> ant_pos
+        hArray(float,[96, 3]) # len=288, slice=[0:288], vec -> [-0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.0004,2.55,...]
+
+        >>> ant_pos=get_antenna_positions("CS005","HBA",False)
+        >>> ant_pos
+        array([[  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
+               [  1.07150000e+01,   7.58900000e+00,   1.00000000e-03],
+                [  1.28090000e+01,   2.88400000e+00,   1.00000000e-03],....
+
+        >>> antenna_ids=file["antennaIDs"]
+        [1420000005,142000008,142000080]
+        >>> station_id=antenna_ids[0]/1000000
+        142
+        >>> rcu_ids=np.mod(antenna_ids,1000)
+        array([5, 8, 80])
+        >>> all_antenna_pos=get_antenna_positions(station_id,"LBA_INNER",False)
+        >>> used_antenna_pos=all_antenna_pos[rcu_ids]
+        array([[  2.25000000e+00,   1.35000000e+00,  -1.00000000e-03],
+               [  4.00000000e-04,  -2.55000000e+00,   1.00000000e-03],
+               [  8.53000000e-01,   1.37240000e+01,  -3.00000000e-03]])
 
     """
 
@@ -749,36 +878,32 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
     # Return requested type
     if return_as_hArray:
         #import pycrtools as hf
-        stationpos=hf.hArray(stationpos,3)
+        stationpos=cr.hArray(stationpos,3)
     else:
         stationpos=np.asarray(stationpos)
 
     return stationpos
 
+def convertITRFToLocal(itrfpos,refpos,reflonlat):
+    """.. todo:: Document :func:`~metadata.convertITRFToLocal`.
+    """
 
-
-
-def convert_ITRF_to_local(itrfpos,refpos,reflonlat):
     from numpy import sin
     from numpy import cos
     
     lon=reflonlat[0]
     lat=reflonlat[1]
-    Arg0=hf.hArray([-sin(lon),-sin(lat)*cos(lon),cos(lat)*cos(lon)])
-    Arg1=hf.hArray([cos(lon),-sin(lat)*sin(lon),cos(lat)*sin(lon)])
-    Arg2=hf.hArray([0.0,cos(lat),sin(lat)])
+    Arg0=cr.hArray([-sin(lon),-sin(lat)*cos(lon),cos(lat)*cos(lon)])
+    Arg1=cr.hArray([cos(lon),-sin(lat)*sin(lon),cos(lat)*sin(lon)])
+    Arg2=cr.hArray([0.0,cos(lat),sin(lat)])
     
     itrfpos.sub(refpos)
     
-    returnpos=hf.hArray(float,itrfpos.shape())
+    returnpos=cr.hArray(float,itrfpos.shape())
 
     returnpos[...].muladd(Arg0,itrfpos[...,0])
     returnpos[...].muladd(Arg1,itrfpos[...,1])
     returnpos[...].muladd(Arg2,itrfpos[...,2])
 
     return returnpos
-
-if __name__=='__main__':
-    import doctest
-    doctest.testmod()
 

@@ -16,6 +16,7 @@ Contents:
    tutorial
    cookbook
    api
+   development
 
 ==================
 Indices and tables
