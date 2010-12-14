@@ -119,7 +119,7 @@ class skymodel(BaseRecipe):
         ),
         'dec': ingredient.FloatField(
             '--dec',
-            help='dec of image centre (degres)'
+            help='dec of image centre (degrees)'
         ),
         'search_size': ingredient.FloatField(
             '--search-size',
