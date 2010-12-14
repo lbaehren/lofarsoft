@@ -1935,9 +1935,16 @@ date
 date >> $log
 
 #find all the th.png files and convert them into a list, then paste them together
+if [ -f combined.th.png ]
+then 
+   echo "WARNING: deleting previous version of results: combined.th.png"
+   echo "WARNING: deleting previous version of results: combined.th.png" >> $log
+   rm combined.th.png
+fi
+
 find ./ -name "*.th.png" -print  > combine_col1.txt
 find ./ -name "*.th.png" -print  | sed -e 's/\// /g' -e 's/^.* //g' -e 's/.*_RSP/RSP/g' -e 's/\..*//g'  -e 's/_PSR//g' > combine_col2.txt
-paste combine_col1.txt combine_col2.txt | awk '{print "-label "$2" "$1" "}' | tr -d '\n' | awk '{print "montage "$0" combined.th.png"}' > combine_png.sh
+paste combine_col1.txt combine_col2.txt | awk '{print "-label "$2" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.th.png"}' > combine_png.sh
 rm combine_col1.txt combine_col2.txt
 wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
 if [[ $wc_convert > 0 ]]
