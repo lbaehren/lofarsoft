@@ -44,7 +44,7 @@ class dppp(LOFARnodeTCP):
             #                                             Initialise environment
             #                 Limit number of threads used, per request from GvD
             # ------------------------------------------------------------------
-            env = read_initscript(initscript)
+            env = read_initscript(self.logger, initscript)
             if nthreads == "None": nthreads = 1
             self.logger.debug("Using %s threads for NDPPP" % nthreads)
             env['OMP_NUM_THREADS'] = str(nthreads)

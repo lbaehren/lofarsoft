@@ -162,20 +162,25 @@ def group_iterable(iterable, size):
 #                                                                  Miscellaneous
 # ------------------------------------------------------------------------------
 
-def read_initscript(filename, shell="/bin/sh"):
+def read_initscript(logger, filename, shell="/bin/sh"):
     """
     Return a dict of the environment after sourcing the given script in a shell.
     """
-    p = subprocess.Popen(
-        ['. %s ; env' % (filename)],
-        shell=True,
-        executable=shell,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        close_fds=True
-    )
-    so, se = p.communicate()
-    return dict([x.split('=', 1) for x in so.strip().split('\n')])
+    if not os.path.exists(filename):
+        logger.warn("Environment initialisation script not found!")
+        return {}
+    else:
+        logger.debug("Reading environment from %s" % filename)
+        p = subprocess.Popen(
+            ['. %s ; env' % (filename)],
+            shell=True,
+            executable=shell,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            close_fds=True
+        )
+        so, se = p.communicate()
+        return dict([x.split('=', 1) for x in so.strip().split('\n')])
 
 def string_to_list(my_string):
     """

@@ -253,7 +253,7 @@ class bbs(BaseRecipe):
                 # --------------------------------------------------------------
                 command = "python %s" % (self.__file__.replace('master', 'nodes'))
                 env = {
-                    "LOFARROOT": utilities.read_initscript(self.inputs['initscript'])["LOFARROOT"],
+                    "LOFARROOT": utilities.read_initscript(self.logger, self.inputs['initscript'])["LOFARROOT"],
                     "PYTHONPATH": self.config.get('deploy', 'engine_ppath'),
                     "LD_LIBRARY_PATH": self.config.get('deploy', 'engine_lpath')
                 }
@@ -336,7 +336,7 @@ class bbs(BaseRecipe):
         Run BBS Global Control and wait for it to finish. Return its return
         code.
         """
-        env = utilities.read_initscript(self.inputs['initscript'])
+        env = utilities.read_initscript(self.logger, self.inputs['initscript'])
         self.logger.info("Running BBS GlobalControl")
         working_dir = tempfile.mkdtemp()
         with CatchLog4CPlus(

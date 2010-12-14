@@ -67,7 +67,7 @@ class bbs(LOFARnodeTCP):
             #               Catch & log output from the kernel logger and stdout
             # ------------------------------------------------------------------
             working_dir = mkdtemp()
-            env = read_initscript(initscript)
+            env = read_initscript(self.logger, initscript)
             try:
                 cmd = [executable, parset_filename, "0"]
                 self.logger.debug("Executing BBS kernel")
