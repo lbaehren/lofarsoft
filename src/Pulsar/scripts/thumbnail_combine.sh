@@ -10,7 +10,7 @@ fi
 
 find ./ -name "*.th.png" -print  > /tmp/$$_combine_col1.txt
 find ./ -name "*.th.png" -print  | sed -e 's/\// /g' -e 's/^.* //g' -e 's/.*_RSP/RSP/g' -e 's/\..*//g'  -e 's/_PSR//g' > /tmp/$$_combine_col2.txt
-paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt | awk '{print "-label "$2" "$1" "}' | tr -d '\n' | awk '{print "montage "$0" combined.th.png"}' > combine_png.sh
+paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt | awk '{print "-label "$2" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.th.png"}' > combine_png.sh
 rm /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt
 wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
 
