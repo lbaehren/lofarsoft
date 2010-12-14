@@ -237,6 +237,8 @@ if (NOT FIND_HDF5_CMAKE)
   ## HDF5 tools
 
   find_program (H5CHECK_EXECUTABLE h5check ${bin_locations} )
+  find_program (H5DUMP_EXECUTABLE  h5dump  ${bin_locations} )
+  find_program (H5LS_EXECUTABLE    h5ls    ${bin_locations} )
   find_program (H5STAT_EXECUTABLE  h5stat  ${bin_locations} )
   
   ##_____________________________________________________________________________
