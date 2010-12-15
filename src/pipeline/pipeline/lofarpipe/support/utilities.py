@@ -186,7 +186,7 @@ def string_to_list(my_string):
     """
     Convert a list-like string (as in pipeline.cfg) to a list of values.
     """
-    return [x.strip() for x in my_string.strip('[] ').split(',')]
+    return [x.strip() for x in my_string.strip('[] ').split(',') if x.strip()]
 
 def spawn_process(cmd, logger, cwd=None, env=None, max_tries=2, max_timeout=30):
     """
