@@ -121,7 +121,8 @@ template <class T>
     void printHistory();
     HString getKey(HString key);
     hArray<T> & setKey(HString key, HString contents);
-
+    HString writeRaw();
+    void readRaw(HString raw);
     //hArray<T> & setKeyPy(HString key, HPyObjectPtr pyobj);
     //HPyObject & getKeyPy(HString key);
 
@@ -198,7 +199,10 @@ template <class T>
     .def("isTrackingHistory",&hArray<TYPE>::isTrackingHistory)	\
     .def("history",&hArray<TYPE>::printHistory)	\
     .def("setKey",&hArray<TYPE>::setKey,return_internal_reference<>())	\
-    .def("getKey",&hArray<TYPE>::getKey)
+    .def("getKey",&hArray<TYPE>::getKey)                                   \
+    .def("writeRaw",&hArray<TYPE>::writeRaw)                               \
+    .def("readRaw",&hArray<TYPE>::readRaw)
+;
 
 template <class T> HString pretty_vec(hArray<T> & a, const HInteger maxlen);
 void hArray_trackHistory(HBool on);

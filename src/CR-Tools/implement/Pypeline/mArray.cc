@@ -44,6 +44,8 @@
 #include "mArray.h"
 #include "mMath.h"
 
+#include <bitset>
+
 // ========================================================================
 //
 //  Implementation
@@ -824,6 +826,70 @@ template <class T> hArray<T> &  hArray<T>::setUnit(HString prefix, HString name)
   return *this;
 }
 
+
+/*!
+  \brief Write the vector content to a raw (binary) string.
+*/
+template <class T> HString hArray<T>::writeRaw()
+{
+  HString raw = "";
+  int element_size = sizeof(T)/sizeof(char);
+  int vector_size = 0;
+  int raw_size = 0;
+  char* raw_ptr = NULL;
+
+  if (storage_p==NULL) return "x1";
+  if (storage_p->vec_p==NULL) return "x2";
+
+  vector_size = storage_p->vec_p->size();
+  raw_size = vector_size*element_size;
+  raw.resize(raw_size);
+  raw_ptr = &(raw[0]);
+
+  if (typeid(T).name() == typeid(bool).name()) {
+    // Processing boolean vector
+    //    PyCR::NotImplementedError("Not implemented for booleans");
+    // vector<bool> is not an actual container type
+    //memcpy(raw_ptr, &(*storage_p->vec_p->begin()), raw_size/8);
+  } else {
+    // Processing non-boolean vector
+    memcpy(raw_ptr, &(*storage_p->vec_p->begin()), raw_size);
+  }
+
+  return raw;
+};
+
+
+/*!
+  \brief Read the vector content from a raw (binary) string.
+*/
+template <class T> void hArray<T>::readRaw(HString raw)
+{
+  unsigned int element_size = sizeof(T)/sizeof(char);
+  unsigned int vector_size = 0;
+  unsigned int raw_size = 0;
+  char* raw_ptr = NULL;
+
+  if (storage_p==NULL) return;
+  if (storage_p->vec_p==NULL) return;
+
+  vector_size = storage_p->vec_p->size();
+  raw_size = hfmin(vector_size*element_size, raw.size());
+  raw_ptr = &(raw[0]);
+
+  if (typeid(T).name() == typeid(bool).name()) {
+    // Processing boolean vector
+    //PyCR::NotImplementedError("Not implemented for booleans");
+    // vector<bool> is not an actual container type
+  } else {
+    // Processing non-boolean vector
+    memcpy(&(*storage_p->vec_p->begin()), raw_ptr, raw_size);
+  }
+
+  return;
+};
+
+
 /*!
 \brief Add a line of history information to the history vector
  */
@@ -976,6 +1042,8 @@ void hArray_trackHistory(HBool on){
     ary.clearHistory();			_H_NL_\
     ary.setHistory(true);			_H_NL_\
     ary.isTrackingHistory();			_H_NL_\
+    ary.writeRaw();                             _H_NL_\
+    ary.readRaw("dummy");                       _H_NL_\
 }
 
 //Create dummy function for all types

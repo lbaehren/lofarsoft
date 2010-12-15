@@ -130,6 +130,11 @@ plt.plot() like color="red"
 - Removed "using namespace" from headers.
 - Added stringToUpper and stringToLower methods to core functionality.
 
+2010-12-14 Pypeline - Martin van den Akker
+- Added writeRaw and readRaw method for hArrays
+  These create a raw string which is a memcopy of the data in the (flat) hArray vector. This can be used to write and read hArray data with pickle in Python.
+
+
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------
