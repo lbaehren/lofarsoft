@@ -109,7 +109,7 @@ def execute(chain, opts):
     return img
 
 
-def process_image(input_file, beam=None, thresh_isl=3.0, thresh_pix=5.0, use_rms_map=None, extended=False, gaussian_maxsize=10.0, use_pyrap=True):
+def process_image(input_file, beam=None, thresh_isl=3.0, thresh_pix=5.0, use_rms_map=None, rms_box=None, extended=False, gaussian_maxsize=10.0, use_pyrap=True):
     #polarisation_do=False, spectralindex_do=False, shapelet_do=False,
     """
     Run a standard analysis and returns the associated Image object.
@@ -117,7 +117,7 @@ def process_image(input_file, beam=None, thresh_isl=3.0, thresh_pix=5.0, use_rms
     
     The following options are available:
     
-      beam = (major axis FWHM [deg], minor axis FWHM [deg], pos. angle [deg])
+      beam = None or (major axis FWHM [deg], minor axis FWHM [deg], pos. angle [deg])
       polarisation_do = True/False; do polarisation analysis (default = False)?
       spectralindex_do = True/False; do spectral index analysis (default = False)?
       shapelet_do = True/False; do shapelet analysis (default = False)?
@@ -126,7 +126,9 @@ def process_image(input_file, beam=None, thresh_isl=3.0, thresh_pix=5.0, use_rms
                    (default = 5.0)
       use_rms_map = None/True/False; use 2D map of rms or constant (default = None =
                     determine automatically)
-      gaussian_maxsize = maximum allowed Gaussian size in pixels (default = 10.0)
+      rms_box = None or (box_size [pixels], box_step [pixels])
+      gaussian_maxsize = maximum allowed Gaussian size in number of beam areas
+                         (default = 10.0)
       extended = True/False; if significant portion of field has extended emission,
                  setting this flag to True may help. It sets rms map to a constant
                  (since the extended emission will bias map) and sets the maximum
@@ -170,10 +172,10 @@ def process_image(input_file, beam=None, thresh_isl=3.0, thresh_pix=5.0, use_rms
         raise RuntimeError('do_spec must be True or False')
     if isinstance(shapelet_do, bool) == False:
         raise RuntimeError('do_shapelets must be True or False')
-    if isinstance(thresh_isl, float) == False or thresh_isl <= 1.0:
-        raise RuntimeError('isl_thresh must be greater than 1.0')
-    if isinstance(thresh_pix, float) == False or thresh_pix <= 1.0:
-        raise RuntimeError('pix_thresh must be greater than 1.0')
+    # if isinstance(thresh_isl, float) == False or thresh_isl < 1.0:
+    #     raise RuntimeError('isl_thresh must be greater than 1.0')
+    # if isinstance(thresh_pix, float) == False or thresh_pix < 1.0:
+    #     raise RuntimeError('pix_thresh must be greater than 1.0')
     # if (collapse_mode in ['average', 'single']) == False:
     #     raise RuntimeError('collapse_mode must be "average" or "single"')
     # if (collapse_wt in ['rms', 'unity']) == False:
@@ -184,8 +186,8 @@ def process_image(input_file, beam=None, thresh_isl=3.0, thresh_pix=5.0, use_rms
         raise RuntimeError('use_rms_map must be None, True, or False')
     # if (use_mean_map in ['default', 'const', 'map']) == False:
     #     raise RuntimeError('use_mean_map must be "default", "const", or "map"')
-    # if rms_box != None and (isinstance(rms_box, tuple) == False or len(rms_box) != 2):
-    #     raise RuntimeError('rms_box not defined properly.')
+    if rms_box != None and (isinstance(rms_box, tuple) == False or len(rms_box) != 2):
+        raise RuntimeError('rms_box not defined properly.')
     if isinstance(gaussian_maxsize, float) == False or gaussian_maxsize < 0.0:
         raise RuntimeError('gaussian_maxsize must be greater than 0.0')
     if isinstance(extended, bool) == False:
@@ -222,7 +224,7 @@ def process_image(input_file, beam=None, thresh_isl=3.0, thresh_pix=5.0, use_rms
                       ]
  
     # Build options dictionary
-    opts = {'filename':input_file, 'fits_name':input_file, 'beam': beam, 'thresh_isl':thresh_isl, 'thresh_pix':thresh_pix, 'polarisation_do':polarisation_do, 'spectralindex_do':spectralindex_do, 'shapelet_do':shapelet_do, 'rms_map':use_rms_map, 'flag_maxsize_bm':gaussian_maxsize, 'use_pyrap':use_pyrap}
+    opts = {'filename':input_file, 'fits_name':input_file, 'beam': beam, 'thresh_isl':thresh_isl, 'thresh_pix':thresh_pix, 'polarisation_do':polarisation_do, 'spectralindex_do':spectralindex_do, 'shapelet_do':shapelet_do, 'rms_map':use_rms_map, 'rms_box': rms_box, 'flag_maxsize_bm':gaussian_maxsize, 'use_pyrap':use_pyrap, 'thresh':'hard'}
 
     # Run execute with the default fits_chain and given options
     img = execute(fits_chain, opts)

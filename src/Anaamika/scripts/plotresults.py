@@ -1,5 +1,67 @@
 
 """ Plot stuff """
+# fig = plt.figure(1)
+
+# def somefunc(x, y, fig=None):
+#     if fig is None:
+#         # we import pyplot here and not at the top level so that
+#         # people who are managing their own figures, eg in a user
+#         # interface application, will not trigger the pyplot user
+#         # interface code which coul cause conflicts
+#         import matplotlib.pyplot as plt
+#         fig = plt.figure()
+
+#     # we explicitly instantiate our axes rather than rely on pyplot's
+#     # stateful management of current figure and axes
+#     ax = fig.add_subplot(111)
+
+#     ax.plot(x, y)
+#     ax.set_title('x vs y')
+#     ax.set_xlabel('x')
+#     ax.set_ylabel('y')
+#     ax.grid(True)
+#     return fig
+
+
+# import matplotlib
+# matplotlib.use('TkAgg')
+
+# from numpy import arange, sin, pi
+# from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+# from matplotlib.figure import Figure
+
+# import Tkinter as Tk
+# import sys
+
+# def destroy(e): sys.exit()
+
+# root = Tk.Tk()
+# root.wm_title("Embedding in TK")
+# #root.bind("<Destroy>", destroy)
+
+
+# f = Figure(figsize=(5,4), dpi=100)
+# a = f.add_subplot(111)
+# t = arange(0.0,3.0,0.01)
+# s = sin(2*pi*t)
+
+# a.plot(t,s)
+
+
+# # a tk.DrawingArea
+# canvas = FigureCanvasTkAgg(f, master=root)
+# canvas.show()
+# canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
+
+# toolbar = NavigationToolbar2TkAgg( canvas, root )
+# toolbar.update()
+# canvas._tkcanvas.pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
+
+# #button = Tk.Button(master=root, text='Quit', command=sys.exit)
+# #button.pack(side=Tk.BOTTOM)
+
+# Tk.mainloop()
+
 from image import *
 import pylab as pl
 from math import log10
@@ -46,7 +108,8 @@ def plotresults(img):
         tit = ['Original Image\n(arbitrary logarithmic scale)', 'Islands (hatched boundaries) and\nBest-fit Gaussians (ellipses)', 'Model Image', 'Residual Image']
 
         images = [img.ch0, img.ch0, img.model_gaus, img.resid_gaus]
-        fig = pl.figure(figsize=(10.0,img.ch0.shape[1]/img.ch0.shape[0]*10.0))
+        fig = pl.figure(figsize=(10.0,10.0))
+        #fig = pl.figure(figsize=(10.0,img.ch0.shape[1]/img.ch0.shape[0]*10.0))
         gray_palette = cm.gray
         gray_palette.set_bad('k')
         for i, image in enumerate(images):
