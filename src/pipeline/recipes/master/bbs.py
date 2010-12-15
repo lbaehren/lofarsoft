@@ -7,7 +7,7 @@
 
 from __future__ import with_statement
 from contextlib import closing
-import psycopg2
+import psycopg2, psycopg2.extensions
 import subprocess
 import sys
 import os
