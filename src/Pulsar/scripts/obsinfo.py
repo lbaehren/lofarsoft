@@ -386,9 +386,9 @@ class outputInfo:
 		if viewtype == "brief":
 			self.colspan = 13
 		elif viewtype == "plots":
-			self.colspan = 18
+			self.colspan = 19
 		elif viewtype == "mega":
-			self.colspan = 22 + self.cs
+			self.colspan = 23 + self.cs
 		else:
 			self.colspan = 14 + self.cs
 		self.filestem_array = filestem_array
