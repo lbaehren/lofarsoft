@@ -359,9 +359,9 @@ class outputInfo:
 		if viewtype == "brief":
 			self.colspan = 13
 		elif viewtype == "plots":
-			self.colspan = 18
+			self.colspan = 19
 		elif viewtype == "mega":
-			self.colspan = 22 + self.cs
+			self.colspan = 23 + self.cs
 		else:
 			self.colspan = 14 + self.cs
 
@@ -369,7 +369,7 @@ class outputInfo:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=left>%s</td>" % (self.id, self.colspan, self.comment,)
 
-	def Init(self, id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, comment, filestem_array, chi_array):
+	def Init(self, id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, comment, filestem_array, chi_array, combined_plot):
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
 		self.oi = oi
@@ -386,13 +386,14 @@ class outputInfo:
 		if viewtype == "brief":
 			self.colspan = 13
 		elif viewtype == "plots":
-			self.colspan = 17
+			self.colspan = 18
 		elif viewtype == "mega":
-			self.colspan = 21 + self.cs
+			self.colspan = 22 + self.cs
 		else:
 			self.colspan = 14 + self.cs
 		self.filestem_array = filestem_array
 		self.chi_array = chi_array
+		self.combined_plot = combined_plot
 
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
 		self.totsize=0.0
@@ -439,6 +440,12 @@ class outputInfo:
 							self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[l], self.id, self.filestem_array[l])
 						else:
 							self.infohtml = self.infohtml + "\n <td align=center></td>"
+				# adding combined_plot column
+				if self.combined_plot != "":
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s\"><img width=200 height=140 src=\"plots/%s/%s\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+				else:
+					self.infohtml = self.infohtml + "\n <td align=center></td>"
+				# adding the rest (columns) of the table
 				if viewtype == "plots": self.infohtml = self.infohtml + "\n <td align=left>%s</td>\n <td align=center>%s</td>" % (self.redlocation, self.statusline.replace("-", "&#8211;"))
 				if viewtype == "mega":
 					self.infohtml = self.infohtml + "\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=left>%s</td>\n <td align=center>%s</td>" % (self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.stations_html, self.redlocation, self.statusline.replace("-", "&#8211;"))
@@ -463,9 +470,9 @@ class outputInfo:
 		if viewtype == "brief":
 			self.colspan = 13
 		elif viewtype == "plots":
-			self.colspan = 18
+			self.colspan = 19
 		elif viewtype == "mega":
-			self.colspan = 22 + self.cs
+			self.colspan = 23 + self.cs
 		else:
 			self.colspan = 14 + self.cs
 
@@ -503,6 +510,12 @@ class outputInfo:
 							self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[l], self.id, self.filestem_array[l])
 						else:
 							self.infohtml = self.infohtml + "\n <td align=center></td>"
+				# adding combined_plot column
+				if self.combined_plot != "":
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s\"><img width=200 height=140 src=\"plots/%s/%s\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+				else:
+					self.infohtml = self.infohtml + "\n <td align=center></td>"
+				# adding the rest (columns) of the table
 				if viewtype == "plots": self.infohtml = self.infohtml + "\n <td align=left>%s</td>\n <td align=center>%s</td>" % (self.redlocation, self.statusline.replace("-", "&#8211;"))
 				if viewtype == "mega":
 					self.infohtml = self.infohtml + "\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=left>%s</td>\n <td align=center>%s</td>" % (self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.stations_html, self.redlocation, self.statusline.replace("-", "&#8211;"))
@@ -567,9 +580,9 @@ class writeHtmlList:
 		if viewtype == "brief":
 			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=left>Location</th>\n</tr>\n")
 		elif viewtype == "plots":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Chi-squared (RSP0)</th>\n <th align=center>Profile (RSP0)</th>\n <th align=center>Chi-squared (RSPA)</th>\n <th align=center>Profile (RSPA)</th>\n <th align=left>Location</th>\n <th align=center>Status</th>\n</tr>\n")
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Chi-squared (RSP0)</th>\n <th align=center>Profile (RSP0)</th>\n <th align=center>Chi-squared (RSPA)</th>\n <th align=center>Profile (RSPA)</th>\n <th align=center>Combined</th>\n <th align=left>Location</th>\n <th align=center>Status</th>\n</tr>\n")
 		elif viewtype == "mega":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Chi-squared (RSP0)</th>\n <th align=center>Profile (RSP0)</th>\n <th align=center>Chi-squared (RSPA)</th>\n <th align=center>Profile (RSPA)</th>\n <th align=center>NodesList (lse)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=left style=\"white-space: nowrap;\">Stations</th>\n <th align=left>Location</th>\n <th align=center>Status</th>\n</tr>\n" % (storage_nodes_string_html,))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Chi-squared (RSP0)</th>\n <th align=center>Profile (RSP0)</th>\n <th align=center>Chi-squared (RSPA)</th>\n <th align=center>Profile (RSPA)</th>\n <th align=center>Combined</th>\n <th align=center>NodesList (lse)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=left style=\"white-space: nowrap;\">Stations</th>\n <th align=left>Location</th>\n <th align=center>Status</th>\n</tr>\n" % (storage_nodes_string_html,))
 		else:
 			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>NodesList (lse)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Status</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
 
@@ -580,9 +593,9 @@ class writeHtmlList:
 		if viewtype == "brief":
 			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=left>Location</th>\n</tr>\n" % (sf[0], sf[3], sf[1]))
 		elif viewtype == "plots":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Chi-squared (RSP0)</th>\n <th align=center>Profile (RSP0)</th>\n <th align=center>Chi-squared (RSPA)</th>\n <th align=center>Profile (RSPA)</th>\n <th align=left>Location</th>\n <th align=center>Status</th>\n</tr>\n" % (sf[0], sf[3], sf[1]))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Chi-squared (RSP0)</th>\n <th align=center>Profile (RSP0)</th>\n <th align=center>Chi-squared (RSPA)</th>\n <th align=center>Profile (RSPA)</th>\n <th align=center>Combined</th>\n <th align=left>Location</th>\n <th align=center>Status</th>\n</tr>\n" % (sf[0], sf[3], sf[1]))
 		elif viewtype == "mega":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Chi-squared (RSP0)</th>\n <th align=center>Profile (RSP0)</th>\n <th align=center>Chi-squared (RSPA)</th>\n <th align=center>Profile (RSPA)</th>\n <th align=center>NodesList (lse)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=left style=\"white-space: nowrap;\">Stations</th>\n <th align=left>Location</th>\n <th align=center>Status</th>\n</tr>\n" % (sf[0], sf[3], sf[1], storage_nodes_string_html, sf[2]))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Chi-squared (RSP0)</th>\n <th align=center>Profile (RSP0)</th>\n <th align=center>Chi-squared (RSPA)</th>\n <th align=center>Profile (RSPA)</th>\n <th align=center>Combined</th>\n <th align=center>NodesList (lse)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=left style=\"white-space: nowrap;\">Stations</th>\n <th align=left>Location</th>\n <th align=center>Status</th>\n</tr>\n" % (sf[0], sf[3], sf[1], storage_nodes_string_html, sf[2]))
 		else:
 			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>NodesList (lse)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Status</th>\n <th align=center><a href=\"%s\">Pointing</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n</tr>\n" % (sf[0], sf[1], storage_nodes_string_html, sf[2], sf[3], sf[3]))
 
@@ -631,10 +644,10 @@ def usage (prg):
                                        Second <mode> is \"brief\" that lists antenna array, band filter, number of stations\n\
                                        used. Third <mode> is \"plots\" which is the same as \"brief\" mode in ascii output,\n\
                                        but in html-format it also provides the profiles (if existed) for RSP0 split and\n\
-                                       in the full band (RSPA) together with chi-squared values of profiles.\n\
-                                       Fourth <mode> is \"mega\" which is huge table like for \"plots\" but also with\n\
-                                       with all other info from \"usual\" mode together with list of all stations\n\
-                                       All view modes are: \"usual\" (default), \"brief\", \"plots\", \"mega\"\n\
+                                       in the full band (RSPA) together with chi-squared values of profiles, and with\n\
+                                       the combined profiles from all RSPs together. Fourth <mode> is \"mega\" which is huge\n\
+                                       table like for \"plots\" but also with all other info from \"usual\" mode together with\n\
+                                       list of all stations. All view modes are: \"usual\" (default), \"brief\", \"plots\", \"mega\"\n\
           -r, --rebuild              - reprocess all observations from scratch (can take a while) rather than to read\n\
                                        the existent database, process obs that do not exist there, and add them to the database\n\
           -u, --update               - update db file only, new observations in /data? won't be added\n\
@@ -1160,6 +1173,7 @@ if __name__ == "__main__":
 		# Collecting info about chi-squared and profile png-files
 		profiles_array=[]
 		chi_array=[]
+		combined_plot=""  # name of the combined plot (always the same), or empty string if it does not exist
 
 		for lse in storage_nodes:
 			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
@@ -1228,10 +1242,20 @@ if __name__ == "__main__":
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
 						chi_array = np.append(chi_array, status[0][:-1])
+
+				# checking if combined plot exists and rsync it if it does exist
+				cmd="cexec %s 'ls -1 %s/%s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir, "combined.th.png", cexec_egrep_string)
+				if np.size(os.popen(cmd).readlines()) != 0:
+					combined_plot="combined.th.png"
+					# copying combined plot
+					cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s/%s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[lse], reddir, "combined.th.png", plotsdir, id)
+					os.system(cmd)
+				
+				# we found lse, so get out of the loop
 				break
 
 		# combining info
-		out.Init(id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, "", profiles_array, chi_array)
+		out.Init(id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, "", profiles_array, chi_array, combined_plot)
 		obstable[id] = out
 		# printing the info line by line in debug mode
 		if is_debug:
