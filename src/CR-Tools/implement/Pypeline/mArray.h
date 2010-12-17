@@ -155,6 +155,7 @@ template <class T>
 
 #define HFPP_hARRAY_BOOST_PYTHON_WRAPPER(TYPE,NAME)	\
     class_<hArray<TYPE> >(#NAME) \
+    .enable_pickling() \
     .def("getVector",&hArray<TYPE>::getVector,return_internal_reference<>()) \
     .def("shared_copy",&hArray<TYPE>::shared_copy,return_internal_reference<>()) \
     .def("getDimensions",&hArray<TYPE>::getDimensions,return_internal_reference<>()) \

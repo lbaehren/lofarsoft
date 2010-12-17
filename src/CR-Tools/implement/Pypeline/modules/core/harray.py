@@ -586,6 +586,34 @@ def hArray_toNumpy(self):
 
     return array
 
+# Pickling
+def hArray_getinitargs(self):
+    """Get arguments for hArray constructor.
+
+    .. warning:: This is not the hArray factory function but the constructor for the actual type. E.g. :meth:`IntArray.__init__`
+
+    """
+
+    return ()
+
+def hArray_getstate(self):
+    """Get current state of hArray object for pickling.
+    """
+
+    return (hTypeNamesDictionary[basetype(self)], self.shape(), self.writeRaw())
+
+def hArray_setstate(self, state):
+    """Restore state of hArray object for unpickling.
+    """
+
+    size = 1
+    for d in state[1]:
+        size *= d
+
+    self.resize(size)
+    self.reshape(state[1])
+    self.readRaw(state[2])
+
 # Fourier Transforms
 setattr(FloatArray,"fft",hFFTCasa)
 
@@ -593,6 +621,10 @@ setattr(IntArray,"toslice",hArray_toslice)
 
 for v in hAllArrayTypes:
     setattr(v,"__repr__",hArray_repr)
+    setattr(v,"__getinitargs__",hArray_getinitargs)
+    setattr(v,"__getstate__",hArray_getstate)
+    setattr(v,"__setstate__",hArray_setstate)
+    setattr(v,"__getstate_manages_dict__",1)
     setattr(v,"toNumpy", hArray_toNumpy)
     setattr(v,"setPar",hArray_setPar)
     setattr(v,"shape",hArray_shape)
