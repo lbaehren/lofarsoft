@@ -51,10 +51,11 @@ import pprint
 import numpy
 
 # PRESTO / LOFAR PULSAR library imports:
+import presto
 import sifting
 # TODO : commit fixed .inf reader to ssps Git repository. 
 #from ssps.presto.files.inf import inf_reader
-from lpps_search.inf import inf_reader
+from lpps_search.inf import inf_reader, ra2ascii, dec2ascii
 import lpps_search.crawler as crawler
 
 
@@ -83,6 +84,23 @@ class DedispPlan(object):
              dmlist = ["%.2f"%dm for dm in \
                        numpy.arange(self.dmsperpass)*self.dmstep + lodm]
              self.dmlist.append(dmlist)
+
+
+def get_baryv(ra, dec, mjd, T, obs="GB"):
+    """ 
+    get_baryv(ra, dec, mjd, T):
+        Determine the average barycentric velocity towards 'ra', 'dec'
+        during an observation from 'obs'.  The RA and DEC are in the
+        standard string format (i.e. 'hh:mm:ss.ssss' and 'dd:mm:ss.ssss').
+        'T' is in sec and 'mjd' is (of course) in MJD.
+    """
+    tts = pu.span(mjd, mjd+T/86400.0, 100)
+    nn = len(tts)
+    bts = numpy.zeros(nn, dtype=numpy.float64)
+    vel = numpy.zeros(nn, dtype=numpy.float64)
+    presto.barycenter(tts, bts, vel, nn, ra, dec, obs, "DE200")
+    return vel.mean()
+
 
 # ----------------------------------------------------------------------------
 
@@ -217,15 +235,20 @@ def run_command(program, options_dict, parameters):
 def run_rfifind(subband_globpattern, result_dir, basename, bad_channel_str):
     '''Get the commandline for rfifind. '''
     files = subband_globpattern
+    # Jump to the results directory to run rfifind.
+    current_dir = os.getcwd()
+    os.chdir(result_dir)
+  
     options = {
         '-blocks' : str(8192),
-        '-o' : os.path.join(result_dir, basename)
+        '-o' : basename,
     }
 
     if bad_channel_str:
         options['-zapchan'] = bad_channel_str
 
     status = run_command('rfifind', options, [files])
+    os.chdir(current_dir)
     return status
 
 def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
@@ -247,7 +270,7 @@ def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
         '-downsamp' : str(ddplan.downsamp),
         '-dmstep' : '%.2f' % ddplan.dmstep,
         '-numout' : str(numout),
-    #   '-runavg' options should be added, but does not work TODO
+        '-runavg' : '', 
     }
     
 
@@ -488,17 +511,18 @@ class SearchRun(object):
         in Vishal's code that have ddplan.dmsperpass > 1000 DM steps per pass.
         '''
         annotated_ddplans = []
+        
         for ddplan in ddplans:
             downsample = ddplan.downsamp
             if n_cores > 1:
                 rebatched = mpiprepsubband_helper(ddplan, n_cores)
             else:
                 rebatched = prepsubband_helper(ddplan)
-
-            for lowest_dm, n_dms, n_cores in rebatched:
-                new_ddplan = DedispPlan(lowest_dm, ddplan.dmstep, n_dms, 1, 
+            
+            for chunk in rebatched: 
+                new_ddplan = DedispPlan(chunk[0], ddplan.dmstep, chunk[1], 1, 
                     self.metadata.n_channels, downsample)
-                annotated_ddplans.append((new_ddplan, n_cores))
+                annotated_ddplans.append((new_ddplan, chunk[2]))
         
         return annotated_ddplans
 
@@ -548,15 +572,16 @@ class SearchRun(object):
             '_rfifind.mask')
         
         ddplan_i = -1 
-        for ddplan, n_cores in self.annotated_ddplans:
+        for ddplan, n_cores_to_use in self.annotated_ddplans:
             ddplan_i += 1
             # Note : Check whether data needs downsampling (and how GBT does
             # it).
-            prepsubband_status = run_prepsubband(ddplan, n_cores,
+            prepsubband_status = run_prepsubband(ddplan, n_cores_to_use,
                 self.get_subband_globpattern(), self.work_dir, self.basename,
                 rfifind_mask_file, determine_numout(self.metadata.n_bins))
             
             command_list = [[] for i in range(n_cores)]
+
             for i, dm in enumerate(self.get_dms(ddplan)):
                 # determine which core the command is for:
                 core_index = i % n_cores
@@ -649,7 +674,7 @@ class SearchRun(object):
             # wait for all the scripts to finish
             for p in popen_objects:
                 p.wait()
-            
+
         # Crawl the output directory for the products of the scripts:
         # TODO : remove debug output
         tmp1 = crawler.find_accelsearch_output(self.out_dir, self.basename)
@@ -673,7 +698,7 @@ class SearchRun(object):
             accel_cands = sift_accel_cands(self.out_dir, self.basename, 
                 accel_cands_found_for[z_max], z_max)
             sifted_candidates.extend(accel_cands[:MAX_CANDIDATES])
-  
+ 
         # Write out a file with acceleration candidates
         sifting.write_candlist(accel_cands, os.path.join(self.out_dir, 
             self.basename + '_ALL_ACCELCANDS_ALL_Z'))
@@ -686,17 +711,19 @@ class SearchRun(object):
         except Exception, e:
             print 'Cannot make per core folding output directories'
             raise
-        for core_index in range(N_CORES):
+        for core_index in range(n_cores):
             try:
                 os.mkdir(os.path.join(self.out_dir, 'folds', 'CORE_%d' % core_index))
             except Exception, e:
                 print 'Cannot make per core folding output directories'
                 raise
-
+        
         # Prepare lists of folding commands
         command_list = [[] for i in range(n_cores)]
         for i, candidate in enumerate(sifted_candidates):
+
             core_index = i % n_cores
+            print 'Candidate %d will be folded by core %d out of %d .' % (i, core_index, n_cores)
             # Fold the acceleration search results:
             core_index_str = 'CORE_%d' % core_index
             command_list[core_index].extend(
@@ -710,6 +737,7 @@ class SearchRun(object):
         # Make scripts to do the folding:
         print 'Running folding scripts, see log files for their standard out.'
         popen_objects = []
+        print 'Using %d cores' % n_cores
         for core_index in range(n_cores):
             if not command_list[core_index]: continue
             core_index_str = 'CORE_%d' % core_index
@@ -885,9 +913,13 @@ if __name__ == '__main__':
     parser.add_option('--z_list', dest='z_list', type='string',
         default='[0,50]', metavar='Z_LIST', 
         help='List of integer z values, default [0,50] - don\'t use spaces.')
- 
-    options, args = parser.parse_args()
+    parser.add_option('--ncores', dest='ncores', type='int',
+        default=8, help='Number of cores to use (default 8).')
 
+     
+    options, args = parser.parse_args()
+    N_CORES = options.ncores
+    
     if not (options.in_dir and options.out_dir and options.work_dir):
         print 'Provide --i, --w and --o options.'
         print parser.print_help()
@@ -916,7 +948,7 @@ if __name__ == '__main__':
     t_start = time.time()
     SR = SearchRun(options.in_dir, options.work_dir, options.out_dir, 
         options.rfi_file)  
-    # Use hardcoded dedispersion plan for now TODO replace as is appropriate
+
     ddplans = []
     # The number of subbands defaults to being the number of channels in the
     # data (according to DDplan.py which is how it is implemented here and
@@ -925,11 +957,15 @@ if __name__ == '__main__':
 
     if options.test:
         # Quick very tiny dedispersion plan used for testing (whether code
-        # is still ok, nothing else). Use --test flag to run with this 
+        # is still ok, nothing else). Use -t flag to run with this 
         # dedispersion plan.
         ddplans.append(DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
             numsub=SR.metadata.n_channels, downsamp=1))
-        ddplans.append(DedispPlan(lodm=7, dmstep=1, dmsperpass=7, numpasses=1, 
+        ddplans.append(DedispPlan(lodm=7, dmstep=1, dmsperpass=2, numpasses=1, 
+            numsub=SR.metadata.n_channels, downsamp=1))
+        ddplans.append(DedispPlan(lodm=9, dmstep=1, dmsperpass=7, numpasses=1, 
+            numsub=SR.metadata.n_channels, downsamp=1))
+        ddplans.append(DedispPlan(lodm=16, dmstep=1, dmsperpass=2, numpasses=1, 
             numsub=SR.metadata.n_channels, downsamp=1))
     else:
         # Jason's full LPPS dedispersion plan:
@@ -946,7 +982,6 @@ if __name__ == '__main__':
         ddplans.append(DedispPlan(lodm=408.41, dmstep=1.00, dmsperpass=92,
             numpasses=1, numsub=SR.metadata.n_channels, downsamp=32))
 
-    N_CORES = 8
     SR.run_search(ddplans, z_values, N_CORES)
     t_end = time.time()
 
