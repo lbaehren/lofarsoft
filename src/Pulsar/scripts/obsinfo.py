@@ -1167,6 +1167,10 @@ if __name__ == "__main__":
 					statusline=statusline+" +rfiA"
 				else:
 					statusline=statusline+" -rfiA"
+				# checking if "search" directory exists
+				cmd="cexec %s 'ls -1 -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "search*", cexec_egrep_string)
+                                if np.size(os.popen(cmd).readlines()) > 0:
+					statusline=statusline+" +search"
 				break
 
 
