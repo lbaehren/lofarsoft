@@ -1943,7 +1943,7 @@ then
 fi
 
 find ./ -name "*.th.png" -print  > combine_col1.txt
- find ./ -name "*.th.png" -print | sed -e 's/\/incoherentstokes\//_IS_/g' -e 's/\/stokes\//_CS_/g' -e 's/\//_/g' -e 's/^.*_IS/IS/g' -  's/^.*_CS/CS/g' -e 's/_L20.*//g' -e 's/_RSP._/&\\n/g' > /tmp/combine_col2.txt
+ find ./ -name "*.th.png" -print | sed -e 's/\/incoherentstokes\//_IS_/g' -e 's/\/stokes\//_CS_/g' -e 's/\//_/g' -e 's/^.*_IS/IS/g' -e  's/^.*_CS/CS/g' -e 's/_L20.*//g' -e 's/_RSP._/&\\n/g' > /tmp/combine_col2.txt
 paste combine_col1.txt combine_col2.txt | awk '{print "-label \""$2"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.th.png"}' > combine_png.sh
 rm combine_col1.txt combine_col2.txt
 wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
