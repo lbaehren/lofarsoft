@@ -951,6 +951,9 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   const int Nantennae = Nantpos / 3;
   const int Nskycoord = Nskypos / 3;
 
+  // Indices
+  int j, k;
+
   // Sanity checks
   if (Nantpos != Nantennae * 3)
   {
@@ -984,7 +987,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   // Loop over pixels (parallel on multi core systems if supported)
 #ifdef _OPENMP
   std::cout<<"Running in parallel mode"<<std::endl;
-  #pragma omp parallel for private(delay, norm, it_im, it_im_inner, it_fft, it_freq, it_ant, it_sky)
+  #pragma omp parallel for private(delay, norm, it_im, it_im_inner, it_fft, it_freq, it_ant, it_sky, j, k)
 #else
   std::cout<<"Running in serial mode"<<std::endl;
 #endif // _OPENMP
@@ -1001,7 +1004,9 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
     // Loop over antennae
     it_ant = antpos;
     it_fft = fftdata;
-    for (int j=Nantennae; j!=0; --j)
+
+    j = Nantennae;
+    while (--j)
     {
       // Reset image iterator to first frequency of current pixel
       it_im_inner = it_im;
@@ -1016,7 +1021,9 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 
       // Loop over frequencies
       it_freq = frequencies;
-      for (int k=Nfreq; k!=0; --k)
+
+      k = Nfreq;
+      while (--k)
       {
         // Multiply by geometric weight and add to image
         *it_im_inner++ += *it_fft++ * exp(HComplex(0.0, CR::_2pi*(*it_freq++ * delay)));
