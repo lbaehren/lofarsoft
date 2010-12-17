@@ -128,24 +128,22 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     if type(name)==str: ary.setKey("name",name);
     return ary
 
-def hArrayToPrintString(self,maxlen=5):
-    s=typename(basetype(self))+", "
-    loops=""
-    if self.loopingMode(): loops="*"
-    name=self.getKey("name");
-    if name=="": name="hArray";
-    return name+"("+s+str(self.getDim())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
+def hArray_repr(self, maxlen=100):
 
-def hArray_repr(self,maxlen=8,long=True):
+    # Check if looping is enabled
     loops=""
-    if self.loopingMode(): loops="*"
+    if self.loopingMode():
+        loops="*"
+
+    # Get name (if any)
     name=self.getKey("name")
-    if not name=="": name=', name="'+name+'"'
-    s="hArray("+hTypeNamesDictionary[basetype(self)]
-    if long:
-        s+=","+str(list(self.getDim()))+name+") # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
-    else:
-        s+=")"
+
+    if not name=="":
+        name=', name="'+name+'"'
+
+    # Compose string
+    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+name+" # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> "+VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+")"
+
     return s
 
 def hArray_none(self):
@@ -675,43 +673,3 @@ for v in hNumericalContainerTypes:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hNumericalContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
-#======================================================================
-#  Pretty Printing
-#======================================================================
-
-#Some definitons to make pretty (and short) output of vectors
-def VecToString(self,maxlen=10):
-    veclen=len(self)
-    stringval=""
-    if veclen>0:
-        stringval+=str(self[0])
-    for i in range(1,min(len(self),maxlen)):
-        stringval+=","+str(self[i])
-    if veclen>maxlen:
-        stringval+=",..."
-    return stringval
-
-
-def VecToPrintString(self,maxlen=5):
-    s=typename(basetype(self))+","
-    return "Vec("+s+str(len(self))+")=[" +VecToString(self,maxlen)+"]"
-
-def hArrayToPrintString(self,maxlen=5):
-    s=typename(basetype(self))+", "
-    loops=""
-    if self.loopingMode(): loops="*"
-    name=self.getKey("name");
-    if name=="": name="hArray";
-    return name+"("+s+str(self.shape())+"="+str(len(self))+", ["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+") -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
-
-def hArray_repr(self,maxlen=8,long=True):
-    loops=""
-    if self.loopingMode(): loops="*"
-    name=self.getKey("name")
-    if not name=="": name=', name="'+name+'"'
-    s="hArray("+hTypeNamesDictionary[basetype(self)]
-    if long:
-        s+=","+str(list(self.shape()))+name+") # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> [" +VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+"]"
-    else:
-        s+=")"
-    return s

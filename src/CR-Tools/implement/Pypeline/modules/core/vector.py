@@ -149,20 +149,19 @@ def isVector(vec):
 #======================================================================
 
 #Some definitons to make pretty (and short) output of vectors
-def VecToString(self,maxlen=10):
-    veclen=len(self)
-    stringval=""
-    if veclen>0:
-        stringval+=str(self[0])
-    for i in range(1,min(len(self),maxlen)):
-        stringval+=","+str(self[i])
-    if veclen>maxlen:
-        stringval+=",..."
-    return stringval
+def VecToString(self, maxlen=100):
+    if len(self) <= maxlen:
+        s = "["
+        for i in range(len(self)-1):
+            s += str(self[i]) + ", "
+        s += str(self[len(self)-1]) + "]"
+    else:
+        s = "[" + str(self[0]) + ", " + str(self[1]) + ", " + str(self[2]) + ", ..., " + str(self[-3]) + ", " + str(self[-2]) + ", " + str(self[-1]) + "]"
 
-def VecToPrintString(self,maxlen=5):
-    s=typename(basetype(self))+","
-    return "Vec("+s+str(len(self))+")=[" +VecToString(self,maxlen)+"]"
+    return s
+
+def hVector_repr(self,maxlen=100):
+    return "Vector("+typename(basetype(self))+", "+str(len(self))+", "+VecToString(self, maxlen)+")"
 
 #======================================================================
 #  Vector Methods/Attributes
@@ -279,7 +278,7 @@ def Vec_div(vec1,val):
 setattr(FloatVec,"fft",hFFTCasa)
 
 for v in hAllVectorTypes:
-    setattr(v,"__repr__",VecToPrintString)
+    setattr(v,"__repr__",hVector_repr)
     setattr(v,"extendflat",extendflat)
     setattr(v,"elem",hVector_elem)
     setattr(v,"val",hVector_val)
