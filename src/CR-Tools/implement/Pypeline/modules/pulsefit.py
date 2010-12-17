@@ -81,6 +81,7 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
       hPhaseToComplex(weights,phases)
 
       hMul(shifted_fft, cr_fft, weights) # Dimensions don't match: need [...] ???
+      #import pdb; pdb.set_trace()
       #shifted_fft[...].mul(cr_fft[...], weights)
       
       #cr.azElRadius2Cartesian(cartesian, azel, True)
@@ -100,8 +101,8 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
       #for n in ant_indices[1:]:
 #       beamformed_fft += shifted_fft[n]
  #     import pdb; pdb.set_trace()
-      #shifted_fft[ant_indices, ...].addto(beamformed_fft)
-      shifted_fft[...].addto(beamformed_fft)
+      shifted_fft[ant_indices, ...].addto(beamformed_fft)
+      #shifted_fft[...].addto(beamformed_fft)
 #     test code for indexing arrays
 #      shifted_fft[range(0, nofAntennas, 2), ...].addto(beamformed_fft_even)
 #      shifted_fft[range(1, nofAntennas, 2), ...].addto(beamformed_fft_odd)
@@ -114,7 +115,11 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
 #      import pdb; pdb.set_trace()
 
       hInvFFTw(beamformed_efield,beamformed_fft)
-#      beamformed_efield.plot()
+      
+      efield = beamformed_efield.toNumpy()
+      plt.clf()
+      plt.plot(efield.T / blocksize)
+      #beamformed_efield.plot()
       beamformed_efield.abs() # make absolute value!
       hRunningAverage(beamformed_efield_smoothed, beamformed_efield, 5, hWEIGHTS.GAUSSIAN)
 
@@ -122,7 +127,7 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
       erg = - beamformed_efield_smoothed.max()[0] # just the maximum of beamformed_efield_smoothed
       #erg = - np.max(np.convolve(np.abs(beamformed_efield),window,'same'))
     #print "beamform_function azel:", azel_in, " result:", erg
-    return erg
+    return erg / blocksize
 
   optErg = fmin(beamform_function, start_position, xtol=1e-2, ftol=1e-4, full_output=1)
   return optErg
@@ -199,7 +204,7 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   trigLinfitData = triggerMessageFit(crfile, triggerMessageFile, fittype='linearFit')
   #Set the parameters
   samplefreq = 200.0e6 # must be
-  blocksize = 512
+  blocksize = 65536 * 2
   # crfile["blocksize"] = blocksize # doesn't work, bug?
   crfile.set("blocksize", blocksize) # proper way, apparently
   print 'File size is %d' % crfile["Filesize"]
@@ -216,8 +221,13 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   #cr_time = np.empty(blocksize)
   
   cr_efield = crfile["emptyFx"]
+#  import pdb; pdb.set_trace()
+
   crfile.readdata(cr_efield, blockNo) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
-  cr_efield.plot()
+  efield = cr_efield.toNumpy()
+  #plt.plot(efield.T)
+  #import pdb; pdb.set_trace()
+
   cr_fft = crfile["emptyFFT"]
   print 'Number of antennas = %d' % cr_fft.shape()[0]
   print 'Block length fft = %d' % cr_fft.shape()[1]
@@ -229,6 +239,9 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   
   #    fftdata[...].fftcasa(fxdata[...], nyquistZone)
   cr_fft[...].fftw(cr_efield[...]) 
+  for i in range(cr_fft.shape()[0]):
+      cr_fft[i, 0] = 0.0 # kill DC offsets
+      
   #cr_fft = np.empty( (ants, fftlength), dtype=complex )
   
 #  for ant in range(ants):
