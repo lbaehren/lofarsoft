@@ -1026,7 +1026,10 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       while (--k)
       {
         // Multiply by geometric weight and add to image
-        *it_im_inner++ += *it_fft++ * exp(HComplex(0.0, CR::_2pi*(*it_freq++ * delay)));
+        *it_im_inner += (*it_fft) * exp(HComplex(0.0, CR::_2pi*((*it_freq) * delay)));
+        ++it_im_inner;
+        ++it_fft;
+        ++it_freq;
       }
 
       // Next antenna position
