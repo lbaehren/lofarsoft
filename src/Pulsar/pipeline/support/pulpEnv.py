@@ -52,10 +52,24 @@ class PulpEnv:
 
     def __init__(self, obsid, pulsar, arch, uEnv):
 
-        self.obsid         = obsid
-        self.pulsar        = pulsar
-        self.arch          = arch
+        self.obsid     = obsid
+        self.pulsar    = pulsar
+        self.arch      = arch
+        self.pArchive  = self.archPaths[self.arch]
+        self.subnet    = self.__getsubnet()
+        self.environ   = self.__dictify(uEnv)
+        self.LOFARSOFT = self.environ["LOFARSOFT"]
+        self.user      = os.environ["LOGNAME"]
 
+        self.parsetPath    = '/globalhome/lofarsystem/log/'
+        self.logLocation   = '/globalhome/lofarsystem/log/'
+        self.oldParsetName = 'RTCP.parset.0'
+        self.oldLogName    = 'run.Storage.R00.log'
+        self.logfilepath   = os.path.join(self.logLocation,obsid,self.oldLogName)
+        self.stokes        = 'incoherentstokes'  #  default stokes type
+        self.defaultInf    = os.path.join(self.LOFARSOFT,
+                                          'release/share/pulsar/data/lofar_default.inf'
+                                          )
         self.archPaths     = {
             'arch134': '/net/sub5/lse013/data4/PULP_ARCHIVE',
             'arch144': '/net/sub5/lse014/data4/PULP_ARCHIVE',
@@ -65,20 +79,6 @@ class PulpEnv:
             'arch184': '/net/sub6/lse018/data4/PULP_ARCHIVE',
             }
 
-        self.pArchive      = self.archPaths[self.arch]
-        self.subnet        = self.__getsubnet()
-        self.environ       = self.__dictify(uEnv)
-        self.LOFARSOFT     = self.environ["LOFARSOFT"]
-        self.user          = os.environ["LOGNAME"]
-        self.parsetPath    = '/globalhome/lofarsystem/log/'
-        self.logLocation   = '/globalhome/lofarsystem/log/'
-        self.oldParsetName = 'RTCP.parset.0'
-        self.oldLogName    = 'run.Storage.R00.log'
-        self.logfilepath   = os.path.join(self.logLocation,obsid,self.oldLogName)
-        self.stokes        = 'incoherentstokes'  #  default stokes type
-        self.defaultInf    = os.path.join(self.LOFARSOFT,
-                                          'release/share/pulsar/data/lofar_default.inf'
-                                          )                        
 
         # The following method calls will populated attributes,
 
