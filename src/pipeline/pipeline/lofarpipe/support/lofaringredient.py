@@ -59,6 +59,7 @@ class Field(object):
             self.optional = True
             self.help += " [Optional]"
 
+    @classmethod
     def is_valid(self, value):
         raise NotImplementedError
 
@@ -72,42 +73,51 @@ class Field(object):
         return make_option(help=self.help, dest=name, *self.optionstrings)
 
 class StringField(Field):
-    def is_valid(self, value):
+    @classmethod
+    def is_valid(value):
         return isinstance(value, str)
 
 class IntField(Field):
-    def is_valid(self, value):
+    @classmethod
+    def is_valid(value):
         return isinstance(value, int)
 
-    def coerce(self, value):
+    @classmethod
+    def coerce(value):
         try:
             return int(value)
         except:
             return value
 
 class FloatField(Field):
-    def is_valid(self, value):
+    @classmethod
+    def is_valid(value):
         return isinstance(value, float)
 
-    def coerce(self, value):
+    @classmethod
+    def coerce(value):
         try:
             return float(value)
         except:
             return value
 
 class FileField(Field):
-    def is_valid(self, value):
+    @classmethod
+    def is_valid(value):
         return os.path.exists(str(value))
 
 class ExecField(Field):
-    def is_valid(self, value):
+    @classmethod
+    def is_valid(value):
         return os.access(value, os.X_OK)
 
 class DirectoryField(Field):
-    def is_valid(self, value):
+    @classmethod
+    def is_valid(value):
         return os.path.isdir(str(value))
 
-    def coerce(self, value):
+    @classmethod
+    def coerce(value):
         try:
             os.makedirs(str(value))
         except:
@@ -116,10 +126,12 @@ class DirectoryField(Field):
             return value
 
 class BoolField(Field):
-    def is_valid(self, value):
+    @classmethod
+    def is_valid(value):
         return isinstance(value, bool)
 
-    def coerce(self, value):
+    @classmethod
+    def coerce(value):
         if value == "False" or value == "None" or value == "":
             return False
         elif value == "True":
@@ -128,21 +140,25 @@ class BoolField(Field):
             return value
 
 class ListField(Field):
-    def is_valid(self, value):
+    @classmethod
+    def is_valid(value):
         return not isinstance(value, str) and is_iterable(value)
 
-    def coerce(self, value):
+    @classmethod
+    def coerce(value):
         if isinstance(value, str):
             return string_to_list(value)
         else:
             return value
 
 class DictField(Field):
-    def is_valid(self, value):
+    @classmethod
+    def is_valid(value):
         return isinstance(value, dict)
 
 class FileList(ListField):
-    def is_valid(self, value):
+    @classmethod
+    def is_valid(value):
         if super(FileList, self).is_valid(value) and \
         not False in [os.path.exists(file) for file in value]:
             return True
