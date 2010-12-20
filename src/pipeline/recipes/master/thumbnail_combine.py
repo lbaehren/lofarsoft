@@ -48,13 +48,9 @@ class thumbnail_combine(BaseRecipe, RemoteCommandRecipeMixIn):
         self.logger.info("Starting thumbnail_combine run")
         super(thumbnail_combine, self).go()
 
-        #hosts = get_compute_nodes(
-        #    ClusterDesc(self.config.get('cluster', "clusterdesc"))
-        #)
-        hosts = self.inputs['target_hosts']
         command = "python %s" % (self.__file__.replace('master', 'nodes'))
         jobs = []
-        for host in hosts:
+        for host in self.inputs['target_hosts']:
             jobs.append(
                 ComputeJob(
                     host, command,
