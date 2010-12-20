@@ -144,41 +144,42 @@ class prepfold(LOFARrecipe):
                 rspCount += 1
 
             # ____________________________________ #
-            #   RSPA job appending to task list ... #
+            #   RSPA job appending to task list ...#
 
-            rspGroup = self.__ravelRspLists(rspLists)
+            if filefactor > 1:
+                rspGroup = self.__ravelRspLists(rspLists)
 
-            self.logger.info("rspGroup in process ... RSPA:")
+                self.logger.info("rspGroup in process ... RSPA:")
 
-            task = LOFARTask(
-            "result = run_prepfold(inputs, infiles, obsid, pulsar, arch, userEnv, rspCount)",
-            push=dict(
-                    recipename = self.name,
-                    nodepath   = os.path.dirname(self.__file__.replace('master', 'nodes')),
-                    inputs     = dict(self.inputs),
-                    infiles    = rspGroup,
-                    obsid      = obsid,
-                    pulsar     = pulsar,
-                    arch       = arch,
-                    userEnv    = userEnv,
-                    rspCount   = "A",
-                    loghost    = loghost,
-                    logport    = logport
+                task = LOFARTask(
+                    "result = run_prepfold(inputs, infiles, obsid, pulsar, arch, userEnv, rspCount)",
+                    push=dict(
+                        recipename = self.name,
+                        nodepath   = os.path.dirname(self.__file__.replace('master', 'nodes')),
+                        inputs     = dict(self.inputs),
+                        infiles    = rspGroup,
+                        obsid      = obsid,
+                        pulsar     = pulsar,
+                        arch       = arch,
+                        userEnv    = userEnv,
+                        rspCount   = "A",
+                        loghost    = loghost,
+                        logport    = logport
+                        )
                     )
-            )
 
-            # ____________________________________ #
-            #   RSPA job appended   ...            #
+                # ____________________________________ #
+                #   RSPA job appending   ...            #
 
-            self.logger.info("Scheduling processing of %s" % ("RSPA"))
+                self.logger.info("Scheduling processing of %s" % ("RSPA"))
+                tasks.append((tc.run(task),rspGroup))
+            else:
+                pass
+            # task client (tc) blocks until completion.
 
-            # pending job, task client (tc) blocks until completion.
-            
-            tasks.append((tc.run(task),rspGroup))
-
-            self.logger.info("Waiting for all prepfold tasks to complete")
-
+            self.logger.info("Attending prepfold task completion...")
             tc.barrier([task for task, rspGroup in tasks])
+
             failure = False
             for task, rspGroup in tasks:
                 res = tc.get_task_result(task)
