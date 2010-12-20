@@ -72,6 +72,7 @@ class rfiplot(LOFARrecipe):
         obsid      = self.inputs['obsid']
         pulsar     = self.inputs['pulsar']
         arch       = self.inputs['arch']
+        filefactor = self.inputs['filefactor']
         executable = self.inputs['executable']
         userEnv    = self.__buildUserEnv() # push to compute node
 
@@ -96,8 +97,8 @@ class rfiplot(LOFARrecipe):
         #
         # [['dir1','dir2',dir3']]
         #
-
-        rspDirs[0].pop()      # discard 'RSPA' == rspDirs[0][-1]
+        if filefactor > 1:
+            rspDirs[0].pop()     # discard 'RSPA' == rspDirs[0][-1]
 
         # clusterlogger context manager accepts networked logging from compute nodes.
         
