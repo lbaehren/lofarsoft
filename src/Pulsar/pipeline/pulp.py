@@ -60,12 +60,19 @@ class pulp(control):
 
         with log_time(self.logger):
             with ipython_cluster(self.config, self.logger):
-		self.run_task("buildPulsArch",obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
-                self.run_task("bf2presto",    obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
-                self.run_task("buildRSPAll",  obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
-                self.run_task("prepareInf",   obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
-                self.run_task("prepfold",     obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
-                self.run_task("rfiplot",      obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                if filefactor == 1:
+                    self.run_task("buildPulsArch",obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("bf2presto",    obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("prepareInf",   obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("prepfold",     obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("rfiplot",      obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                else:
+                    self.run_task("buildPulsArch",obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("bf2presto",    obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("buildRSPAll",  obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("prepareInf",   obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("prepfold",     obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("rfiplot",      obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)                    
         return
 
 
