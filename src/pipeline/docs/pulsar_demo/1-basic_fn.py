@@ -19,7 +19,7 @@ def run(file_pattern, input_dir, output_file, clobber):
 
     try:
         # Run "montage" command
-        subprocess.check_call(['/usr/bin/montage'] + input_files + [output_file]
+        subprocess.check_call(['/usr/bin/montage'] + input_files + [output_file])
     except Exception, e:
         return 1
 
