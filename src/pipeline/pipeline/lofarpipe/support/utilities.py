@@ -180,7 +180,9 @@ def read_initscript(logger, filename, shell="/bin/sh"):
             close_fds=True
         )
         so, se = p.communicate()
-        return dict([x.split('=', 1) for x in so.strip().split('\n')])
+        environment = [x.split('=', 1) for x in so.strip().split('\n')]
+        environment = filter(lambda x: len(x) == 2, environment)
+        return dict(environment)
 
 def string_to_list(my_string):
     """
