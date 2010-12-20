@@ -63,7 +63,7 @@ class prepareInf(LOFARrecipe):
     def go(self):
         super(prepareInf, self).go()
 
-        self.logger.info("...building RSPA (RSP All) for obsid " + self.inputs['obsid'])
+        self.logger.info("...Preparing .inf files for obsid " + self.inputs['obsid'])
 
         obsid      = self.inputs['obsid']
         pulsar     = self.inputs['pulsar']
