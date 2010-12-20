@@ -14,7 +14,6 @@ class ParData:
     def __init__(self, parSet):
 
         self.parSet  = expanduser(parSet)
-        self.parVals = {}
 
     def readParSet(self):
 
@@ -39,9 +38,7 @@ class ParData:
                 continue
             if line.startswith("Observation.Beam[0].subbandList") or \
                     line.startswith("Observation.subbandList"):
-
-                # for either ".." ranges, or a CSV list
-
+                # for CSV list or ".." ranges
                 try:
                     self.subbandFirst = float(self.__getParVal(line).split("..")[0][1:])
                 except: 
@@ -51,11 +48,6 @@ class ParData:
                 except:
                     self.subbandLast = float(line[-5:-2])
                 continue
-
-#             if line.startswith("Observation.subbandList"):
-#                 self.subbandFirst = float(self.__getParVal(line).split("..")[0][1:])
-#                 self.subbandLast  = float(self.__getParVal(line).split("..")[1][:-1])
-#                 continue
 
             if line.startswith("Observation.channelsPerSubband"):
                 self.channelsPerSubband = self.__getParVal(line)
@@ -71,6 +63,7 @@ class ParData:
                 self.pulsarsrc = self.__getParVal(line)
                 continue
             else: continue
+        return
 
 
     def __getParVal(self, line):

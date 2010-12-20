@@ -71,10 +71,14 @@ class PrepInfFiles():
                 RSPFile.write(line+"\n")
             rspFile.close()
             RSPFile.close()
-        rspAPath     = os.path.join(self.stokesPath,"RSPA")
-        rspaListName = os.path.basename(fullRSPFile)
-        rspaFullName = os.path.join(rspAPath,rspaListName)
-        copyfile(fullRSPFile,rspaFullName)
+
+        if self.filefactor > 1:
+            rspAPath     = os.path.join(self.stokesPath,"RSPA")
+            rspaListName = os.path.basename(fullRSPFile)
+            rspaFullName = os.path.join(rspAPath,rspaListName)
+            copyfile(fullRSPFile,rspaFullName)
+        else: pass
+
         del rspFile, RSPFile
         return
 
@@ -82,7 +86,7 @@ class PrepInfFiles():
     def prepRSPS(self):
 
         """
-        self.rspLists will be used by the InfoData class to facilitate calculation
+        self.rspLists will be used by the FoldingData class to facilitate calculation
         of several frequency parameters, namely
 
         Central freq of low channel (MHz)
@@ -90,7 +94,7 @@ class PrepInfFiles():
         Number of channels
         Channel bandwidth (MHz)
 
-        The InfoData class will handle these calculations for the .inf file write.
+        The FoldingData class will handle these calculations for the .inf file write.
 
         """
 
@@ -98,7 +102,6 @@ class PrepInfFiles():
         # get default parset file into obsid directory  #
 
         finalParFile = os.path.join(self.obsidPath,self.obsid+".parset")
-        print finalParFile
         print "copy ",self.parset,"to obsid directory"
         copyfile(self.parset,os.path.join(self.obsidPath,finalParFile))
 

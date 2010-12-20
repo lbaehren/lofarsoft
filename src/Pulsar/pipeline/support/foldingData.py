@@ -58,13 +58,13 @@ class FoldingData():
         rah = int(24.0 * rad / 360.0)
         ram = int((24.0 * rad / 360.0 - rah) * 60.0)
         ras = 60.0*(((24.0 * rad / 360.0 - rah) * 60.0) - ram)
-        self.RA = "%02d:%02d:%f" % (rah,ram,ras)
+        self.RA = "%02d:%02d:%07.4f" % (rah,ram,ras)
 
         decd = float(par.decr) * 180.0 / math.pi
         decdi = int(decd)
         decm  = int((decd - decdi) * 60.0)
         decs  = (((decd - decdi) * 60.0) - decm)*60.0
-        self.DEC = "%02d:%02d:%f" % (decdi,decm,decs)
+        self.DEC = "%02d:%02d:%07.4f" % (decdi,decm,decs)
 
         # _______________________________________ #
         # Calculate the MJD of the observation.   #
@@ -141,6 +141,8 @@ class FoldingData():
             par.subbandFirst = par.subbandFirst + nRSPFiles
             par.subbandLast  = par.subbandLast  + nRSPFiles
 
+
+
         # _______________________________________ #
         #        Handle the RSPA directory        #
 
@@ -148,16 +150,17 @@ class FoldingData():
 
         reset_lowerBandEdge,reset_subbandFirst = self.__resetPars(parSet)
         rspADir      = os.path.join(stokesPath,"RSPA")
-        outAFile     = os.path.join(rspADir,self.pulsar+"_"+obsid+"_"+"RSPA.sub.inf")
-        print outAFile
-        nRSPAFiles   = glob.glob(rspADir+"/*RSPA.sub????")
+        if os.path.isdir(rspADir):
+            outAFile     = os.path.join(rspADir,self.pulsar+"_"+obsid+"_"+"RSPA.sub.inf")
+            nRSPAFiles   = glob.glob(rspADir+"/*RSPA.sub????")
 
-        self.lofreq  = reset_lowerBandEdge + (float(reset_subbandFirst)- 0.5) * subband_width
-        self.numchan = len(nRSPAFiles)
-        self.BW      = self.numchan * self.chan_width
+            self.lofreq  = reset_lowerBandEdge + (float(reset_subbandFirst)- 0.5) * subband_width
+            self.numchan = len(nRSPAFiles)
+            self.BW      = self.numchan * self.chan_width
 
-        self.__buildInf()
-        self.writeInf(outAFile)
+            self.__buildInf()
+            self.writeInf(outAFile)
+        else: pass
 
         return
 
