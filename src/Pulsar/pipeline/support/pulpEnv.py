@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 # Operating environment for the pulsar pipeline, pulp.
 
-# These paths  set up where the pulp PULSAR ARCHIVE output will go.
+# These paths set up where the pulp PULSAR ARCHIVE output will go.
 #
 # K. Anderson
 # UvA.
