@@ -5,11 +5,9 @@
 #                                                      swinbank@transientskp.org
 # ------------------------------------------------------------------------------
 
-from __future__ import with_statement
 import sys
 import glob
 import os
-import subprocess
 
 from lofarpipe.support.lofarnode import LOFARnodeTCP
 from lofarpipe.support.utilities import catch_segfaults
