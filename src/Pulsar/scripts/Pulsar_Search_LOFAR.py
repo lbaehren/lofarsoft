@@ -62,12 +62,12 @@ max_lo_cands_to_fold   = 20      # Never fold more than this many lo-accel candi
 lo_accel_numharm       = 16      # max harmonics
 lo_accel_sigma         = 2.0     # threshold gaussian significance
 lo_accel_zmax          = 0       # bins
-lo_accel_flo           = 1.0     # Hz
+lo_accel_flo           = 2.0     # Hz
 max_hi_cands_to_fold   = 10      # Never fold more than this many hi-accel candidates
 hi_accel_numharm       = 8       # max harmonics
 hi_accel_sigma         = 3.0     # threshold gaussian significance
 hi_accel_zmax          = 50      # bins
-hi_accel_flo           = 0.1     # Hz
+hi_accel_flo           = 1.0     # Hz
 numhits_to_fold        = 2       # Number of DMs with a detection needed to fold
 extra_prepfold_options = ""      # Extra options that can be passed to prepfold command to fold candidates (e.g. -nosearch)
 low_DM_cutoff          = 1.0     # Lowest DM to consider as a "real" pulsar
@@ -417,6 +417,7 @@ def run_searching (scratchdir, outfile, search_script, waittime):
 		datgroup=["%s_DM%s" % (outfile, dm) for dm in dmslice]
 		cmd="%s%s %s %d %s &" % (scratchdir, search_script, scratchdir, core, " ".join(datgroup))
 		print "Starting searching on core %d for %d DMs [%s - %s] ..." % (core, dmblock, dmslice[0], dmslice[-1])
+		sys.stdout.flush()
 		os.system(cmd)	
 		ndms -= dmblock
 		start_block += dmblock
@@ -806,6 +807,7 @@ if __name__ == "__main__":
 		print "Total search time (s) : %.2f   [%.1f h]" % (tot_search_time, tot_search_time/3600.)
 		rfp.write("Total search time (s) : %.2f   [%.1f h]\n" % (tot_search_time, tot_search_time/3600.))
 		print
+		sys.stdout.flush()
 
 	# running the search here only when dedispersion skipped from the cmdline
 	if is_skip_dedispersion and not is_sift_n_fold_only:
@@ -822,6 +824,7 @@ if __name__ == "__main__":
 
 	# Generating single-pulse plot
 	print "Generating single-pulse plots ..."
+	sys.stdout.flush()
 	# before generating plots we have to cd to the scratch directory
 	# and after go back to the current directory
 	# Otherwise the default name of the ps-file could be ".p" rather than *.ps"
@@ -861,6 +864,7 @@ if __name__ == "__main__":
 	print
 	print "Total time to make single-pulse plots (s) : %.2f   [%.1f h]" % (sp_time, sp_time/3600.)
 	rfp.write("Total time to make single-pulse plots (s) : %.2f   [%.1f h]\n" % (sp_time, sp_time/3600.))
+	sys.stdout.flush()
 	
 	#
 	# Following will sort out the candidates 
@@ -868,6 +872,7 @@ if __name__ == "__main__":
 	# read_candidate will generate collective information about lo-accel and hi-accel cands
 	print
 	print "Sifting lo-accel candidates ..."
+	sys.stdout.flush()
 	start_sifting_time = time.time()
 	lo_accel_cands = sifting.read_candidates(glob.glob(scratchdir + "*ACCEL_%d" % (lo_accel_zmax)))
 	# Remove candidates with same period and low significance. 
@@ -882,6 +887,7 @@ if __name__ == "__main__":
 	# if running hi-accel search
 	if is_run_hi_accel_search:
 		print "Sifting hi-accel candidates ..."
+		sys.stdout.flush()
 		hi_accel_cands = sifting.read_candidates(glob.glob(scratchdir + "*ACCEL_%d" % (hi_accel_zmax)))
 		if len(hi_accel_cands):
 			hi_accel_cands = sifting.remove_duplicate_candidates(hi_accel_cands) 
@@ -896,6 +902,7 @@ if __name__ == "__main__":
 	totime += sifting_time
 	print "Sifting the candidates time (s) : %.2f   [%.1f h]" % (sifting_time, sifting_time/3600.)
 	rfp.write("Sifting the candidates time (s) : %.2f   [%.1f h]\n" % (sifting_time, sifting_time/3600.))
+	sys.stdout.flush()
 
 	# Read the pulsar catalog
 	psrname, rRA, rDEC = numpy.loadtxt(bright_catalog, dtype=str, usecols=(1,3,4), comments='#', unpack=True)
@@ -1040,6 +1047,7 @@ if __name__ == "__main__":
 	fold_script = "psrfold.sh"
 	print "Creating fold script: %s" % (fold_script)
 	create_fold_script(scratchdir, fold_script, maskfile, extra_prepfold_options, basename, infile)
+	sys.stdout.flush()
 	start_block=0
 	nprocess=0  # number of started background processes
 	for core in numpy.arange(0, ncores):
@@ -1053,6 +1061,7 @@ if __name__ == "__main__":
 		foldgroup=["%d:%s.cand:%s:%s:%s" % (ff.candnum, ff.filename, ff.DMstr, basename+"_DM%s_Z%s" % (ff.DMstr, ff.filename.split("_")[-1]), get_folding_options(ff)) for ff in foldslice]
 		cmd="%s%s %s %d %s &" % (scratchdir, fold_script, scratchdir, core, " ".join(foldgroup))
 		print "Starting folding on core %d for %d candidates ..." % (core, foldblock)
+		sys.stdout.flush()
 		os.system(cmd)	
 		time.sleep(5)  # wait 5 sec before to start next script (in order not to mess with resid2.tmp)
 		nfolded -= foldblock
@@ -1075,6 +1084,7 @@ if __name__ == "__main__":
 	totime += prepfold_time
 	print "Fold time (s) : %.2f   [%.1f h]" % (prepfold_time, prepfold_time/3600.)
 	rfp.write("Total prepfold time (s) : %.2f   [%.1f h]\n" % (prepfold_time, prepfold_time/3600.))	
+	sys.stdout.flush()
 
 	# Now step through the .ps files and convert them to .png and gzip them
 	# Also, creating tarballs of results and copy them to the OUTPUT directory
@@ -1091,9 +1101,11 @@ if __name__ == "__main__":
 	print "Total runtime (s) : %.2f   [%.1f h]" % (totime, totime/3600.)
         rfp.write("Total runtime (s) : %.2f   [%.1f h]\n" % (totime, totime/3600.))
 	rfp.close()
+	sys.stdout.flush()
 
 	print
 	print "Archiving ..."
+	sys.stdout.flush()
 	# Tar up the results files
 	tar_suffixes = ["_ACCEL_%d.tgz"%lo_accel_zmax, 
                         "_ACCEL_%d.cand.tgz"%lo_accel_zmax, 
@@ -1114,8 +1126,8 @@ if __name__ == "__main__":
 		tar_suffixes.append(["_ACCEL_%d.tgz"%hi_accel_zmax, "_ACCEL_%d.cand.tgz"%hi_accel_zmax])
 		tar_globs.append(["*_ACCEL_%d"%hi_accel_zmax, "*_ACCEL_%d.cand"%hi_accel_zmax])
 	for (tar_suffix, tar_glob) in zip(tar_suffixes, tar_globs):
-        	tf = tarfile.open(outfile+tar_suffix, "w:gz")
-		for infile in glob.glob(scratchdir + tar_glob):
+        	tf = tarfile.open(outfile + str(tar_suffix), "w:gz")
+		for infile in glob.glob(scratchdir + str(tar_glob)):
             		tf.add(infile, arcname=infile.split("/")[-1])
 	tf.close()
 
