@@ -34,7 +34,7 @@ class rficonsole(LOFARnodeTCP):
                         cmd.extend(["-strategy", strategy])
                     else:
                         raise Exception("Strategy definition not available")
-                if indirect == "True":
+                if indirect == True:
                     cmd.extend(["-indirect-read"])
                 cmd.extend(infiles)
                 with CatchLog4CPlus(
