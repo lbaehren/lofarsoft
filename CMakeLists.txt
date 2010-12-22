@@ -214,7 +214,7 @@ add_dependencies (hdf5 szip)
 
 add_dependencies (mathgl hdf5 swig num_util gsl)
 
-add_dependencies (numpy python cblas)
+add_dependencies (numpy cblas)
 
 add_dependencies (matplotlib numpy)
 
