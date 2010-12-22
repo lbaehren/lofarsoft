@@ -13,7 +13,7 @@
  so "pad" needs to be ignored (line 82) and also the data does not need to 
 be "floatswapped" (line 119). Same applies for convert_collapse() too.*/
 
-char OUTNAME[248] = "PULSAR_OBS";
+char OUTNAME[1024] = "PULSAR_OBS";
 int BASESUBBAND = 0;
 int FLYS_EYE = 0;
 int BEAMS = 1;
@@ -390,7 +390,7 @@ void secondTranspose( FILE **inputfiles, int beamnr)
     if (x == NUM_BLOCKGROUPS) break; // switch so you can choose only to read in x blocks
     unsigned num = 0;
     unsigned i,f,n_simult_files, sub;
-    char buf[1024], buf2[1024];
+    char buf[2048], buf2[2048];
     int index=0;
 
     /* read data */
@@ -997,7 +997,7 @@ void convert_collapse( FILE *input, FILE **outputfile, int beamnr )
 int main( int argc, char **argv ) {
   float avr;
   int f,b,c,y,n_outfiles,n_infiles;
-  char buf[1024],buf2[1024];
+  char buf[2048],buf2[2048];
   int i=0;
 
   while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:T:t8hCFM")) != -1)
