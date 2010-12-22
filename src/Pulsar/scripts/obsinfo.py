@@ -624,7 +624,7 @@ def usage (prg):
         print "Program %s lists info about observations" % (prg, )
 	print "Usage: %s [options]\n\
           -f, --from <date>          - list obs only _since_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
-          -t, --to <date>            - list obs only _till_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
+          -t, --to <date>            - list obs only _till_ <date> (exclusive), <date> in format YYYY-MM-DD\n\
           --sort <mode>              - sort obs list. Default list is sorted by ObsID. Possible <mode>\n\
                                        is \"time\" to sort by start obs time, \"size\" to sort by total\n\
                                        disk space occupied by _raw_ data, \"source\" to sort by\n\
