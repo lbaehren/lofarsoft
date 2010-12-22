@@ -1,0 +1,81 @@
+
+## Name of the project
+project (AERA)
+
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.8)
+
+## -----------------------------------------------------------------------------
+## Only force rebuild of the library from the provided source code, if no system
+## installation can be found. In order to handle this properly, we use the CMake
+## find script
+
+option (AERA_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
+option (AERA_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
+option (AERA_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
+
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
+
+if (NOT LUS_ROOT)
+  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../..
+    $ENV{LOFARSOFT}
+    )
+endif (NOT LUS_ROOT)
+
+if (LUS_ROOT)
+  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (LUS_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (LUS_ROOT)
+
+## ------------------------------------------------------------------------------
+## Check if the program/package/library is already available
+
+if (NOT AERA_VERBOSE_CONFIGURE)
+  set (AERA_FIND_QUIETLY     YES )
+endif (NOT AERA_VERBOSE_CONFIGURE)
+
+include (FindAERA)
+
+## <-- begin build condition --------------------------------------------------->
+
+if (NOT HAVE_AERA OR AERA_FORCE_BUILD)
+
+  set (AERA_VERSION     "1.0" )
+  set (AERA_TAR_ARCHIVE "AERA_Datareader-${AERA_VERSION}.tar.gz" )
+  set (AERA_URL         "" )
+
+  ##__________________________________________________________________
+  ## Build the project
+
+  include (ExternalProject)
+
+  find_file (HAVE_AERA_SOURCE ${AERA_TAR_ARCHIVE}  ${AERA_SOURCE_DIR})
+
+  if (NOT HAVE_AERA_SOURCE)
+    set (HAVE_AERA_SOURCE ${AERA_URL})
+  endif (NOT HAVE_AERA_SOURCE)
+
+  ExternalProject_Add (AERA
+    PREFIX ${PROJECT_BINARY_DIR}
+    DOWNLOAD_DIR ${PROJECT_BINARY_DIR}/download
+    SOURCE_DIR ${PROJECT_BINARY_DIR}/source
+    URL ${HAVE_AERA_SOURCE}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    )
+
+  ## <-- end build condition ----------------------------------------------------->
+
+else (NOT HAVE_AERA OR AERA_FORCE_BUILD)
+  add_custom_target (AERA
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[AERA] Found system-wide installation; skipping rebuild!"
+    )
+endif (NOT HAVE_AERA OR AERA_FORCE_BUILD)

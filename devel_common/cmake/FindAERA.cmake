@@ -30,6 +30,8 @@ if (NOT FIND_AERA_CMAKE)
 
   set (FIND_AERA_CMAKE TRUE)
 
+  set (AERA_REQUIRED_VERSION "1.0")
+
   ##_____________________________________________________________________________
   ## Search locations
 

@@ -6,6 +6,7 @@ include (ExternalProject)
 ## List of external packages _____________________
 
 set (external_packages
+  aera
   armadillo
   bison
   blas
