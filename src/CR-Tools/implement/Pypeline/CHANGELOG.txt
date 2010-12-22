@@ -134,6 +134,8 @@ plt.plot() like color="red"
 - Added writeRaw and readRaw method for hArrays
   These create a raw string which is a memcopy of the data in the (flat) hArray vector. This can be used to write and read hArray data with pickle in Python.
 
+2010-12-22 Pypeline - Martin van den Akker
+- Added support for AERA datareader
 
 ------------------------------------------------------------------------
 TODO

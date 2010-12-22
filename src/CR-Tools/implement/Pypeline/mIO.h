@@ -35,10 +35,8 @@
 //  Definitions
 // ========================================================================
 
-typedef CR::DataReader* DataReaderPointer;
-typedef CR::DataReader CRDataReader;
-
-template<> inline HString hf2string(CR::DataReader v);
+typedef CR::DataReader* DataReaderPointer; // Used in wrapper preprocessor
+typedef CR::DataReader CRDataReader; // Used in wrapper preprocessor
 
 template<class T> inline T hfcast(CR::DataReader v){return hfcast<T>((HInteger)((void*)&v));}
 template<> inline HString hf2string(CR::DataReader v){return hf2string((HInteger)((void*)&v));}
@@ -60,7 +58,6 @@ bool hFileSetParameter(CRDataReader &dr, HString key, HPyObjectPtr pyob);
 HPyObjectPtr hCalTable(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob);
 std::vector<HNumber> hCalTableVector(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob);
 
-template<class T> inline T hfcast(CR::DataReader v);
 
 
 // ________________________________________________________________________

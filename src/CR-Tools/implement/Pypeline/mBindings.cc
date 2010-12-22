@@ -4,7 +4,7 @@
  *  Copyright (c) 2010                                                    *
  *                                                                        *
  *  Martin van den Akker <martinva@astro.ru.nl>                           *
- *  Heino Falcke <h.falcke@astro.ru.nl>                                   *     
+ *  Heino Falcke <h.falcke@astro.ru.nl>                                   *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -57,6 +57,9 @@
 #include "mRF.h"
 #include "mNumpy.h"
 
+#ifdef HAVE_AERA
+#include "mIO_AERA.h"
+#endif
 
 // ========================================================================
 //
@@ -310,6 +313,32 @@ BOOST_PYTHON_MODULE(hftools)
     .def("summary",&hFileSummary)
     ;
 
+
+// ________________________________________________________________________
+//                                                                  IO AERA
+
+#ifdef HAVE_AERA
+
+#include "../../../../build/cr/implement/Pypeline/mIO_AERA.def.h"
+
+  class_<AERA::Datareader>("AERADatareader")
+    //    .def("open",&hAERAFileOpen)
+    .def("close",&hAERAFileClose)
+    .def("firstEvent", &hAERAFirstEvent)
+    .def("prevEvent", &hAERAPrevEvent)
+    .def("nextEvent", &hAERANextEvent)
+    .def("lastEvent", &hAERALastEvent)
+    .def("firstLocalStation", &hAERAFirstLocalStation)
+    .def("prevLocalStation", &hAERAPrevLocalStation)
+    .def("nextLocalStation", &hAERANextLocalStation)
+    .def("lastLocalStation", &hAERALastLocalStation)
+    .def("getAttribute", &hAERAGetAttribute)
+    .def("fileSummary",&hAERAFileSummary)
+    .def("eventSummary",&hAERAEventSummary)
+    .def("localStationSummary",&hAERALocalStationSummary)
+    ;
+
+#endif
 
 // ________________________________________________________________________
 //                                                                       RF

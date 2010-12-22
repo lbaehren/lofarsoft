@@ -7,6 +7,7 @@ include (FindPython)
 include (FindBoost)
 include (FindNumPy)
 include (FindNumUtil)
+include (FindAERA)
 
 ##-------------------------------------------------------------------------------
 ## Compiler options
@@ -16,9 +17,12 @@ option (PYPELINE_WITH_RUNTIME_WARNINGS "Compile Pypeline with runtime warnings e
 option (PYPELINE_WITH_DEBUG_SYMBOLS "Compile Pypeline with debug symbols." ON)
 option (PYPELINE_WITH_OPTIMIZATION "Compile Pypeline with optimization flags turned on." OFF)
 option (PYPELINE_WITH_CPU_OPTIMIZATION "Compile Pypeline with optimization for CPU architecture." OFF)
+option (PYPELINE_WITH_AERA "Compile Pypeline with support for AERA data files" OFF)
 
 # Turn off all predefined options
 set (CMAKE_CXX_FLAGS "")
+set (PYPELINE_CXX_FLAGS "")
+set (PYPELINE_CPP_FLAGS "")
 
 if (APPLE)
   set (PYPELINE_CXX_FLAGS "-fpermissive")
@@ -57,12 +61,20 @@ endif (PYPELINE_WITH_OPTIMIZATION)
 ##-------------------------------------------------------------------------------
 ## Optional dependencies
 
+
 if (CR_WITH_OPENMP AND OPENMP_FOUND)
   message (STATUS "[CR-Tools] Adding OpenMP support to Pypeline.")
-  set (PYPELINE_CXX_FLAGS "${PYPELINE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  set (PYPELINE_CPP_FLAGS ${OpenMP_CXX_FLAGS})
+  set (PYPELINE_CXX_FLAGS "${OpenMP_CXX_FLAGS} ${PYPELINE_CXX_FLAGS}")
+  set (PYPELINE_CPP_FLAGS "${OpenMP_CXX_FLAGS} ${PYPELINE_CPP_FLAGS} ")
   set (PYPELINE_LINKER_FLAGS "${PYPELINE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif (CR_WITH_OPENMP AND OPENMP_FOUND)
+
+if (PYPELINE_WITH_AERA AND AERA_FOUND)
+  set (PYPELINE_CXX_FLAGS "-DHAVE_AERA ${PYPELINE_CXX_FLAGS}")
+  set (PYPELINE_CPP_FLAGS "-DHAVE_AERA ${PYPELINE_CPP_FLAGS}")
+  list (APPEND PYPELINE_INCLUDES ${AERA_INCLUDES})
+  list (APPEND PYPELINE_LIBRARIES ${AERA_LIBRARIES})
+endif (PYPELINE_WITH_AERA AND AERA_FOUND)
 
 message (STATUS "Compiling Pypeline with flags: ${CMAKE_CXX_FLAGS} ${PYPELINE_CXX_FLAGS}")
 
@@ -90,8 +102,22 @@ set (PYPELINE_CPP_MODULES
   IO
   RF
   Numpy
-  Bindings
   )
+
+if (PYPELINE_WITH_AERA AND AERA_FOUND)
+  list (APPEND PYPELINE_CPP_MODULES IO_AERA)
+endif (PYPELINE_WITH_AERA AND AERA_FOUND)
+
+list (APPEND PYPELINE_CPP_MODULES Bindings)
+
+foreach (include ${PYPELINE_INCLUDES})
+  set (PYPELINE_INCLUDE_FLAGS "-I${include} ${PYPELINE_INCLUDE_FLAGS}")
+endforeach (include ${PYPELINE_INCLUDES})
+
+
+
+message (STATUS "PYPELINE_CPP_FLAGS     : '${PYPELINE_CPP_FLAGS}'")
+message (STATUS "PYPELINE_INCLUDE_FLAGS : '${PYPELINE_INCLUDE_FLAGS}'")
 
 ##_______________________________________________________________________________
 ## Perform Wrapper Preprocessing of module files
@@ -150,7 +176,7 @@ foreach (FILE ${PYPELINE_CPP_MODULES})
 	    ${CMAKE_CURRENT_SOURCE_DIR}/hfppnew.h
 	    ${CMAKE_CURRENT_SOURCE_DIR}/numpy_ptr.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${PYPELINE_CPP_MODULE_PREFIX}Module.h
-    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP -w -I${CMAKE_CURRENT_SOURCE_DIR} -I${NUMPY_INCLUDES} -I${NUM_UTIL_INCLUDES} -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${PYPELINE_CPP_FLAGS} ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.wpp.cc
+    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP ${PYPELINE_CPP_FLAGS} -w -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} -I${NUM_UTIL_INCLUDES} ${PYPELINE_INCLUDE_FLAGS} ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.wpp.cc
     COMMENT "Wrapper preprocessing module ${FILE}: Executing wrapper preprocessor"
     )
 
@@ -174,6 +200,7 @@ include_directories (
   ${CMAKE_CURRENT_BINARY_DIR}
   ${NUMPY_INCLUDES}
   ${NUM_UTIL_INCLUDES}
+  ${PYPELINE_INCLUDES}
   )
 
 # Core files
@@ -208,6 +235,7 @@ target_link_libraries (hftools
   ${FFTW3_LIBRARIES}
   ${GSL_LIBRARIES}
   ${NUM_UTIL_LIBRARIES}
+  ${PYPELINE_LIBRARIES}
   )
 
 ##to speed up computations use -g -O2 or -g0 -O3 if no debuggng is needed.
