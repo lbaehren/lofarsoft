@@ -1126,8 +1126,8 @@ if __name__ == "__main__":
 		tar_suffixes = tar_suffixes + ["_ACCEL_%d.tgz"%hi_accel_zmax, "_ACCEL_%d.cand.tgz"%hi_accel_zmax]
 		tar_globs = tar_globs + ["*_ACCEL_%d"%hi_accel_zmax, "*_ACCEL_%d.cand"%hi_accel_zmax]
 	for (tar_suffix, tar_glob) in zip(tar_suffixes, tar_globs):
-        	tf = tarfile.open(outfile + str(tar_suffix), "w:gz")
-		for infile in glob.glob(scratchdir + str(tar_glob)):
+        	tf = tarfile.open(outfile + tar_suffix, "w:gz")
+		for infile in glob.glob(scratchdir + tar_glob):
             		tf.add(infile, arcname=infile.split("/")[-1])
 	tf.close()
 
