@@ -87,7 +87,10 @@ class LOFARnodeTCP(LOFARnode):
         run this job.
         """
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.host, self.port))
+        try:
+            s.connect((self.host, self.port))
+        except Exception, e:
+            print "Could not connect to %s:%s (got %s)" % (self.host, str(self.port), str(e))
         message = "GET %d" % self.job_id
         s.send(struct.pack(">L", len(message)) + message)
         chunk = s.recv(4)
@@ -104,5 +107,8 @@ class LOFARnodeTCP(LOFARnode):
         """
         message = "PUT %d %s" % (self.job_id, pickle.dumps(self.outputs))
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.host, int(self.port)))
+        try:
+            s.connect((self.host, int(self.port)))
+        except Exception, e:
+            print "Could not connect to %s:%s (got %s)" % (self.host, str(self.port), str(e))
         s.send(struct.pack(">L", len(message)) + message)
