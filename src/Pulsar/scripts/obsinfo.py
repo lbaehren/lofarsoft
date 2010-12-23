@@ -499,6 +499,8 @@ class outputInfo:
 						self.infohtml = self.infohtml + "\n <td align=center></td>"
 					else:
 						self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
+				else:
+					self.infohtml = self.infohtml + "\n <td align=center></td>\n <td align=center></td>"
 				# temporary measure (remove that "if" after Dec 27)
 				if np.size(self.chi_array) > 1 and np.size(self.filestem_array) > 1:
 					# adding RSPA chi-square and profile
@@ -507,6 +509,8 @@ class outputInfo:
 						self.infohtml = self.infohtml + "\n <td align=center></td>"
 					else:
 						self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
+				else:
+					self.infohtml = self.infohtml + "\n <td align=center></td>\n <td align=center></td>"
 
 				# adding combined_plot column
 				if self.combined_plot != "":
