@@ -91,6 +91,7 @@ class LOFARnodeTCP(LOFARnode):
             s.connect((self.host, self.port))
         except Exception, e:
             print "Could not connect to %s:%s (got %s)" % (self.host, str(self.port), str(e))
+            raise
         message = "GET %d" % self.job_id
         s.send(struct.pack(">L", len(message)) + message)
         chunk = s.recv(4)
@@ -111,4 +112,5 @@ class LOFARnodeTCP(LOFARnode):
             s.connect((self.host, int(self.port)))
         except Exception, e:
             print "Could not connect to %s:%s (got %s)" % (self.host, str(self.port), str(e))
+            raise
         s.send(struct.pack(">L", len(message)) + message)
