@@ -65,13 +65,22 @@ class JobStreamHandler(SocketServer.StreamRequestHandler):
                 self.server.logger.error("Aborting.")
 
     def send_arguments(self, job_id):
-        args = self.server.jobpool[int(job_id)].arguments
+        job_id = int(job_id)
+        self.server.logger.debug(
+            "Request for job %d from %s" %
+            (job_id, self.request.getpeername())
+        )
+        args = self.server.jobpool[job_id].arguments
         pickled_args = pickle.dumps(args)
         length = struct.pack(">L", len(pickled_args))
         self.request.send(length + pickled_args)
 
     def read_results(self, job_id, pickled_results):
         job_id = int(job_id)
+        self.server.logger.debug(
+            "Results for job %d submitted by %s" %
+            (job_id, self.request.getpeername())
+        )
         results = pickle.loads(pickled_results)
         self.server.jobpool[job_id].results = results
 
