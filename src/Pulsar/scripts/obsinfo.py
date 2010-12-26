@@ -491,26 +491,18 @@ class outputInfo:
 					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
 				else:
 					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s%s%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, (self.oi.source[0] == "B" or self.oi.source[0] == "J") and atnflink_start or nedlink_start, self.oi.source.replace("+", "%2B"), (self.oi.source[0] == "B" or self.oi.source[0] == "J") and atnflink_end or nedlink_end, self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
-				# temporary measure (remove that "if" after Dec 27)
-				if np.size(self.chi_array) > 0 and np.size(self.filestem_array) > 0:
-					# adding RSP0 chi-square and profile
-					self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[0])
-					if self.filestem_array[0] == "":
-						self.infohtml = self.infohtml + "\n <td align=center></td>"
-					else:
-						self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
+				# adding RSP0 chi-square and profile
+				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[0])
+				if self.filestem_array[0] == "":
+					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				else:
-					self.infohtml = self.infohtml + "\n <td align=center></td>\n <td align=center></td>"
-				# temporary measure (remove that "if" after Dec 27)
-				if np.size(self.chi_array) > 1 and np.size(self.filestem_array) > 1:
-					# adding RSPA chi-square and profile
-					self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
-					if self.filestem_array[1] == "":
-						self.infohtml = self.infohtml + "\n <td align=center></td>"
-					else:
-						self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
+				# adding RSPA chi-square and profile
+				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
+				if self.filestem_array[1] == "":
+					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				else:
-					self.infohtml = self.infohtml + "\n <td align=center></td>\n <td align=center></td>"
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
 
 				# adding combined_plot column
 				if self.combined_plot != "":
