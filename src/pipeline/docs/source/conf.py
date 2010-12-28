@@ -22,6 +22,12 @@ import sys, os
 # ---------------------
 
 def add_recipe_inputs(app, what_, name, obj, options, lines):
+    """
+    If obj is a recipe with ingredients, add information on its inputs &
+    outputs to its docstring.
+
+    Designed to be called on the ``autodoc-process-docstring`` event.
+    """
     from lofarpipe.support.lofaringredient import RecipeIngredients
     def format_ingredient_dict(ingredients):
         for name, field in sorted(ingredients.iteritems()):
@@ -41,16 +47,15 @@ def add_recipe_inputs(app, what_, name, obj, options, lines):
         if obj.inputs:
             format_ingredient_dict(obj.inputs)
         else:
-            lines.append("None")
+            lines.append("None.")
             lines.append("")
         lines.append("**Outputs**")
         lines.append("")
         if obj.outputs:
             format_ingredient_dict(obj.outputs)
         else:
-            lines.append("None")
+            lines.append("None.")
             lines.append("")
-
 
 def setup(app):
     app.connect('autodoc-process-docstring', add_recipe_inputs)
