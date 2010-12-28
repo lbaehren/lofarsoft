@@ -22,21 +22,31 @@ from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.pipelinelogging import log_process_output
 
 class new_vdsmaker(BaseRecipe, RemoteCommandRecipeMixIn):
+    """
+    Generate a GVDS file (and, optionally, individual VDS files per subband;
+    see the ``unlink`` input parameter) describing a collection of
+    MeasurementSets.
+
+    **Arguments**
+
+    A mapfile describing the data to be processed.
+    """
     inputs = {
         'gvds': ingredient.StringField(
             '-g', '--gvds',
-            help="Output file name"
+            help="File name for output GVDS file"
         ),
         'directory': ingredient.DirectoryField(
             '--directory',
-            help="Output directory"
+            help="Directory for output GVDS file"
         ),
         'makevds': ingredient.ExecField(
             '--makevds',
-            help="makevds executable"
+            help="Full path to makevds executable"
         ),
         'combinevds': ingredient.ExecField(
-            '--combinevds', help="combinevds executable"
+            '--combinevds',
+            help="Full path to combinevds executable"
         ),
         'unlink': ingredient.BoolField(
             '--unlink',

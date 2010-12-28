@@ -15,15 +15,26 @@ from lofarpipe.support.parset import Parset
 import lofarpipe.support.lofaringredient as ingredient
 
 class datamapper(BaseRecipe):
+    """
+    Parses a list of filenames and attempts to map them to appropriate compute
+    nodes (ie, which can access the files) on the LOFAR CEP cluster. Mapping
+    by filename in this way is fragile, but is the best we can do for now.
+
+    **Arguments**
+
+    None.
+    """
     inputs = {
         'mapfile': ingredient.StringField(
             '--mapfile',
-            help="Filename for output mapfile (clobbered if exists)"
+            help="Full path (including filename) of mapfile to produce (clobbered if exists)"
         )
     }
 
     outputs = {
-        'mapfile': ingredient.FileField()
+        'mapfile': ingredient.FileField(
+            help="Full path (including filename) of generated mapfile"
+        )
     }
 
     def go(self):

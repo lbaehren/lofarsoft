@@ -37,6 +37,11 @@ from lofarpipe.support.remotecommand import RemoteCommandRecipeMixIn
 from lofarpipe.support.lofaringredient import LOFARoutput, LOFARinput
 
 class ParsetTypeField(ingredient.StringField):
+    """
+    Input field which accepts the string values either "cimager" or
+    "mwimager". Enables specification of type of parset supplied to the
+    cimager recipe.
+    """
     def is_valid(self, value):
         if value == "cimager" or value == "mwimager":
             return True
@@ -49,8 +54,12 @@ class cimager(BaseRecipe, RemoteCommandRecipeMixIn):
     Provides a convenient, pipeline-based mechanism of running the cimager on
     a dataset.
 
-    Ingests an MWimager-style parset, converting it to cimager format as
-    required.
+    Can ingest either an MWimager-style parset, converting to cimager format
+    as required, or a cimager parset directly.
+
+    **Arguments**
+
+    A mapfile describing the data to be processed.
     """
     inputs = {
         'imager_exec': ingredient.ExecField(

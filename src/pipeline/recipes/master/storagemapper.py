@@ -14,15 +14,25 @@ from lofarpipe.support.utilities import create_directory
 import lofarpipe.support.lofaringredient as ingredient
 
 class storagemapper(BaseRecipe):
+    """
+    Parses a list of filenames and generates a mapfile suitable for processing
+    on storage nodes.
+
+    **Arguments**
+
+    None.
+    """
     inputs = {
         'mapfile': ingredient.StringField(
             '--mapfile',
-            help="Filename for output mapfile (clobbered if exists)"
+            help="Full path (including filename) of mapfile to produce (clobbered if exists)"
         )
     }
 
     outputs = {
-        'mapfile': ingredient.FileField()
+        'mapfile': ingredient.FileField(
+            help="Full path (including filename) of generated mapfile"
+        )
     }
 
     def go(self):

@@ -24,38 +24,47 @@ from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.parset import Parset
 
 class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
+    """
+    Runs DPPP (either ``NDPPP`` or -- in the unlikely event it's required --
+    ``IDPPP``) on a number of MeasurementSets. This is used for compressing
+    and/or flagging data
+
+    **Arguments**
+
+    A mapfile describing the data to be processed.
+    """
     inputs = {
         'executable': ingredient.ExecField(
             '--executable',
-            help="DPPP executable"
+            help="The full path to the relevant DPPP executable"
         ),
         'initscript': ingredient.FileField(
             '--initscript',
-            help="DPPP initscript"
+            help="The full path to an (Bourne) shell script which will intialise the environment (ie, ``lofarinit.sh``)"
         ),
         'parset': ingredient.FileField(
             '-p', '--parset',
-            help="Parset containing configuration for DPPP"
+            help="The full path to a DPPP configuration parset. The ``msin`` and ``msout`` keys will be added by this recipe"
         ),
         'suffix': ingredient.StringField(
             '--suffix',
             default=".dppp",
-            help="Suffix to add to output file (default: .dppp)"
+            help="Added to the input filename to generate the output filename"
         ),
         'working_directory': ingredient.StringField(
             '-w', '--working-directory',
-            help="Working directory used on output nodes"
+            help="Working directory used on output nodes. Results will be written here"
         ),
         # NB times are read from vds file as string
         'data_start_time': ingredient.StringField(
             '--data-start-time',
             default="None",
-            help="Start time to be passed to DPPP"
+            help="Start time to be passed to DPPP; used to pad data"
         ),
         'data_end_time': ingredient.StringField(
             '--data-end-time',
             default="None",
-            help="End time to be passed to DPPP"
+            help="End time to be passed to DPPP; used to pad data"
         ),
         'nproc': ingredient.IntField(
             '--nproc',
@@ -69,18 +78,22 @@ class new_dppp(BaseRecipe, RemoteCommandRecipeMixIn):
         ),
         'mapfile': ingredient.StringField(
             '--mapfile',
-            help="Output mapfile name"
+            help="Filename into which a mapfile describing the output data will be written"
         ),
         'clobber': ingredient.BoolField(
             '--clobber',
-            help="Remove pre-existing output files",
-            default=False
+            default=False,
+            help="If ``True``, pre-existing output files will be removed before processing starts. If ``False``, the pipeline will abort if files already exist with the appropriate output filenames"
         )
     }
 
     outputs = {
-        'mapfile': ingredient.FileField(),
-        'fullyflagged': ingredient.ListField()
+        'mapfile': ingredient.FileField(
+            help="The full path to a mapfile describing the processed data"
+        ),
+        'fullyflagged': ingredient.ListField(
+            help="A list of all baselines which were completely flagged in any of the input MeasurementSets"
+        )
     }
 
 

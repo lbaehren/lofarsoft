@@ -1,3 +1,10 @@
+#                                                         LOFAR IMAGING PIPELINE
+#
+#                                                                  parmdb recipe
+#                                                            John Swinbank, 2010
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
 from __future__ import with_statement
 import os
 import subprocess
@@ -27,10 +34,20 @@ quit
 """
 
 class parmdb(BaseRecipe, RemoteCommandRecipeMixIn):
+    """
+    Add a parameter database to input MeasurementSets.
+
+    This recipe is called by the :class:`bbs.bbs` recipe; it may also be used
+    standalone.
+
+    **Arguments**
+
+    A mapfile describing the data to be processed.
+    """
     inputs = {
         'executable': ingredient.ExecField(
             '--executable',
-            help="Executable for parmdbm",
+            help="Full path to parmdbm executable",
             default="/opt/LofIm/daily/lofar/bin/parmdbm"
         ),
         'nproc': ingredient.IntField(

@@ -32,12 +32,16 @@ import lofarpipe.support.lofaringredient as ingredient
 
 class bbs(BaseRecipe):
     """
-    Provides a convenient, pipeline-based mechanism of running the BBS system
-    on a dataset.
+    The bbs recipe coordinates running BBS on a group of MeasurementSets. It
+    runs both GlobalControl and KernelControl; as yet, SolverControl has not
+    been integrated.
 
-    Includes setting up source and parameter databases, selecting subbands for
-    simultaneous processing, and orchestrating the running of GlobalControl
-    and KernelControl executables.
+    The recipe will also run the sourcedb and parmdb recipes on each of the
+    input MeasuementSets.
+
+    **Arguments**
+
+    A mapfile describing the data to be processed.
     """
     inputs = {
         'control_exec': ingredient.ExecField(

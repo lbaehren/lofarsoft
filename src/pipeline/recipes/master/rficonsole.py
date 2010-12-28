@@ -20,15 +20,23 @@ from lofarpipe.support.remotecommand import ComputeJob
 from lofarpipe.support.group_data import load_data_map
 
 class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
+    """
+    The rficonsole recipe runs the rficonsole executable (flagger) across one
+    or more MeasurementSets.
+
+    **Arguments**
+
+    A mapfile describing the data to be processed.
+    """
     inputs = {
         'executable': ingredient.ExecField(
             '--executable',
             default="/opt/LofIm/daily/lofar/bin/rficonsole",
-            help="rficonsole executable"
+            help="Full path to rficonsole executable"
         ),
         'strategy': ingredient.FileField(
             '--strategy',
-            help="RFI strategy",
+            help="Full path to RFI strategy file",
             optional=True
         ),
         'indirect_read': ingredient.BoolField(
@@ -39,7 +47,7 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
         'working_dir': ingredient.StringField(
             '--working-dir',
             default='/tmp',
-            help="Store temporary products under this root"
+            help="Temporary rficonsole products are stored under this root on each of the remote machines. This directory should therefore be writable on each machine, but need not be shared across hosts"
         ),
         'nthreads': ingredient.IntField(
             '--nthreads',

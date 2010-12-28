@@ -16,19 +16,23 @@ class vdsreader(BaseRecipe):
     """
     Read a GVDS file and return a list of the MS filenames referenced therein
     together with selected metadata.
+
+    **Arguments**
+
+    None.
     """
     inputs = {
         'gvds': ingredient.FileField(
             '-g', '--gvds',
-            help="Output file name"
+            help="GVDS file to process"
         )
     }
 
     outputs = {
-        'data': ingredient.ListField(),
-        'start_time': ingredient.StringField(),
-        'end_time': ingredient.StringField(),
-        'pointing': ingredient.DictField()
+        'data': ingredient.ListField(help="List of MeasurementSet paths"),
+        'start_time': ingredient.StringField(help="Start time of observation"),
+        'end_time': ingredient.StringField(help="End time of observation"),
+        'pointing': ingredient.DictField(help="Observation pointing direction")
     }
 
     def go(self):

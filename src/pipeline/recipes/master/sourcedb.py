@@ -1,3 +1,10 @@
+#                                                         LOFAR IMAGING PIPELINE
+#
+#                                                                sourcedb recipe
+#                                                            John Swinbank, 2010
+#                                                      swinbank@transientskp.org
+# ------------------------------------------------------------------------------
+
 from __future__ import with_statement
 import os
 
@@ -10,10 +17,20 @@ from lofarpipe.support.group_data import load_data_map
 from lofarpipe.support.remotecommand import ComputeJob
 
 class sourcedb(BaseRecipe, RemoteCommandRecipeMixIn):
+    """
+    Add a source database to input MeasurementSets.
+
+    This recipe is called by the :class:`bbs.bbs` recipe; it may also be used
+    standalone.
+
+    **Arguments**
+
+    A mapfile describing the data to be processed.
+    """
     inputs = {
         'executable': ingredient.ExecField(
             '--executable',
-            help="Executable for makesourcedb",
+            help="Full path to makesourcedb executable",
             default="/opt/LofIm/daily/lofar/bin/makesourcedb"
         ),
         'skymodel': ingredient.FileField(
