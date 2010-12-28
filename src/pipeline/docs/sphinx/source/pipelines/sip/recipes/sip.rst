@@ -28,7 +28,7 @@ does not contain logic for routines such as the "major cycle" (whereby
 calibration). Such logic should be straightforward to add based on this
 framework.
 
-.. literalinclude:: ../../../../../docs/examples/definition/sip2/sip.py
+.. literalinclude:: ../../../../../examples/definition/sip2/sip.py
 
 ``tasks.cfg``
 -------------
@@ -39,4 +39,4 @@ framework.
 
 This task file defines the tasks referred to in the above example.
 
-.. literalinclude:: ../../../../../docs/examples/definition/sip2/tasks.cfg
+.. literalinclude:: ../../../../../examples/definition/sip2/tasks.cfg

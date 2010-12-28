@@ -43,7 +43,7 @@ top-level directories:
 .. _pipeline-directory-contents:
 
 ``framework`` directory contents
--------------------------------
+--------------------------------
 
 Fiddlesticks.
 

@@ -77,7 +77,7 @@ This file will contain all the standard information the pipeline framework
 needs to get going. For a basic pipeline, running only on the head node, you
 should have something like:
 
-.. literalinclude:: ../../../../docs/examples/definition/dummy/pipeline.cfg
+.. literalinclude:: ../../../../../docs/examples/definition/dummy/pipeline.cfg
 
 Ensure that the ``runtime_directory`` and ``default_working_directory``
 directives match the directories you created above. The others can mostly be

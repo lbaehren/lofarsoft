@@ -35,7 +35,7 @@ show how this recipe can be extended to run in parallel across a cluster.
 A basic recipe
 --------------
 
-.. literalinclude:: ../../../../recipes/examples/master/example.py
+.. literalinclude:: ../../../../../recipes/examples/master/example.py
    :linenos:
 
 .. todo::
