@@ -57,12 +57,21 @@ def add_recipe_inputs(app, what_, name, obj, options, lines):
             lines.append("None.")
             lines.append("")
 
+todo_include_todos = True
+
 def setup(app):
     app.connect('autodoc-process-docstring', add_recipe_inputs)
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.graphviz',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.todo',
+    'sphinx.ext.ifconfig'
+]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']

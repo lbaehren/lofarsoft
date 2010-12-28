@@ -2,10 +2,28 @@
 LOFAR Pipeline System Documentation
 ###################################
 
-This document provides a brief overview of the so-called "pipeline framework"
-developed for supporting LOFAR pipelines, and describes how it has been used
-to assemble a prototype "standard imaging pipeline".
+.. toctree::
+   :hidden:
 
+   todo
+
+This document provides an overview of the LOFAR pipeline system. This system
+has largely been developed to support the LOFAR imaging pipeline, but is now
+being deployed for a variety of science pipelines on the LOFAR cluster. This
+document is split into three sections: :ref:`the first <section-overview>`
+provides an overview of the framework, and describes how the user can start
+building their own pipelines. :ref:`The second <section-developer-reference>`
+describes the framework codebase in more detail, and is intended primarily for
+those directly working on the framework, rather than simply developing
+pipelines. :ref:`The third <section-pipeline-specific>` provides a guide to the
+imaging pipeline itself.
+
+.. ifconfig:: todo_include_todos
+
+   This documentation is still a work in progress. See the :ref:`to-do list
+   <todo>` for upcoming improvements.
+
+.. _section-overview:
 
 The LOFAR Pipeline Framework
 ============================
@@ -23,6 +41,18 @@ various components of the framework and how they fit together.
    framework/recipe/index.rst
    framework/parallel/index.rst
    framework/dependencies/index.rst
+
+.. _section-developer-reference:
+
+Developer's Reference
+=====================
+
+.. toctree::
+   :maxdepth: 2
+
+   developer/index.rst
+
+.. _section-pipeline-specific:
 
 Pipeline Specific Documenation
 ==============================
