@@ -4,4 +4,8 @@
 cimager
 =======
 
-.. literalinclude:: ../../../../../recipes/master/cimager.py
+.. autoclass:: cimager.cimager
+   :show-inheritance:
+
+.. autoclass:: cimager.ParsetTypeField
+   :show-inheritance:

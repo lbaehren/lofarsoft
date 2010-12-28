@@ -4,4 +4,5 @@
 sourcedb
 ========
 
-.. literalinclude:: ../../../../../recipes/master/sourcedb.py
+.. autoclass:: sourcedb.sourcedb
+   :show-inheritance:

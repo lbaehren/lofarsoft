@@ -4,4 +4,5 @@
 parmdb
 ======
 
-.. literalinclude:: ../../../../../recipes/master/parmdb.py
+.. autoclass:: parmdb.parmdb
+   :show-inheritance:

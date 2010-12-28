@@ -1,5 +1,6 @@
-=================
-VDS file creation
-=================
+========
+vdsmaker
+========
 
-.. literalinclude:: ../../../../../recipes/master/new_vdsmaker.py
+.. autoclass:: new_vdsmaker.new_vdsmaker
+   :show-inheritance:

@@ -4,4 +4,5 @@
 vdsreader
 =========
 
-.. literalinclude:: ../../../../../recipes/master/vdsreader.py
+.. autoclass:: vdsreader.vdsreader
+   :show-inheritance:
