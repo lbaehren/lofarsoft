@@ -21,6 +21,40 @@ import sys, os
 # General configuration
 # ---------------------
 
+def add_recipe_inputs(app, what_, name, obj, options, lines):
+    from lofarpipe.support.lofaringredient import RecipeIngredients
+    def format_ingredient_dict(ingredients):
+        for name, field in sorted(ingredients.iteritems()):
+            if hasattr(field, "default"):
+                extra = "; default: ``%s``" % field.default
+            elif hasattr(field, "optional"):
+                extra = "; optional"
+            else:
+                extra = ""
+            lines.append("``%s`` (:class:`%s`%s)" % (name, type(field).__name__, extra))
+            if field.help:
+                lines.append("    %s" % field.help)
+            lines.append("")
+    if what_ == "class" and issubclass(obj, RecipeIngredients):
+        lines.append("**Inputs**")
+        lines.append("")
+        if obj.inputs:
+            format_ingredient_dict(obj.inputs)
+        else:
+            lines.append("None")
+            lines.append("")
+        lines.append("**Outputs**")
+        lines.append("")
+        if obj.outputs:
+            format_ingredient_dict(obj.outputs)
+        else:
+            lines.append("None")
+            lines.append("")
+
+
+def setup(app):
+    app.connect('autodoc-process-docstring', add_recipe_inputs)
+
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc']

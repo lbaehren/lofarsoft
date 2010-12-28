@@ -53,11 +53,9 @@ class Field(object):
         else:
             self.help = ""
         if attrs.has_key("default"):
-            self.help += " [Default: %s]" % str(attrs['default'])
             self.default = attrs['default']
         elif attrs.has_key("optional") and attrs["optional"]:
             self.optional = True
-            self.help += " [Optional]"
 
     def is_valid(self, value):
         raise NotImplementedError
@@ -69,7 +67,13 @@ class Field(object):
         return value
 
     def generate_option(self, name):
-        return make_option(help=self.help, dest=name, *self.optionstrings)
+        if hasattr(self, "default"):
+            help = self.help + " [Default: %s]" % str(self.default)
+        elif hasattr(self, "optional"):
+            help = self.help + " [Optional]"
+        else:
+            help = self.help
+        return make_option(help=help, dest=name, *self.optionstrings)
 
 class StringField(Field):
     def is_valid(self, value):
