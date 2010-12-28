@@ -29,7 +29,7 @@ top-level directories:
     MAC/SAS EventPort interface code. See the :ref:`mac-interface` section for
     details.
 
-``pipeline``
+``framework``
     The framework code itself: see the :ref:`pipeline-directory-contents`
     section.
 
@@ -42,7 +42,7 @@ top-level directories:
 
 .. _pipeline-directory-contents:
 
-``pipeline`` directory contents
+``framework`` directory contents
 -------------------------------
 
 Fiddlesticks.

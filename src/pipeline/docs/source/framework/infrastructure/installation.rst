@@ -37,7 +37,7 @@ option; in the example below, we install to ``/opt/pipeline/framework``.
 
 .. code-block:: bash
 
-  $ cd ~/pipeline_framework/pipeline
+  $ cd ~/pipeline_framework/framework
   $ sudo python setup.py install --prefix=/opt/pipeline/framework
   running install
   running build
