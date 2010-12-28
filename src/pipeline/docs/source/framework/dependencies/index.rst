@@ -12,6 +12,8 @@ directly interacting with these components should rarely be necessary.
 Developers, of course, will wish to learn in detail about all of these
 libraries.
 
+.. _cuisine-framework:
+
 Cuisine
 =======
 The pipeline is constructed using a system based on the `WSRT Cuisine

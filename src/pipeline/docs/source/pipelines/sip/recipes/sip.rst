@@ -2,11 +2,19 @@
 The SIP recipe
 ==============
 
+.. todo::
+
+   Check if this section is up to date.
+
 There is no single SIP recipe: an imaging pipeline should be composed of
 components as required. However, various examples are available to help.
 
 ``sip.py``
 ----------
+
+.. todo::
+
+   Provide simpler example SIP.
 
 This recipe demonstrates the basic functionality of an imaging pipeline. In
 turn, it runs ``DPPP`` (data compression and flagging), ``BBS`` (calibration),
@@ -20,11 +28,15 @@ does not contain logic for routines such as the "major cycle" (whereby
 calibration). Such logic should be straightforward to add based on this
 framework.
 
-.. literalinclude:: ../../../../../examples/definition/sip2/sip.py
+.. literalinclude:: ../../../../../docs/examples/definition/sip2/sip.py
 
 ``tasks.cfg``
 -------------
 
+.. todo::
+
+   Check task file for completenes/correctness.
+
 This task file defines the tasks referred to in the above example.
 
-.. literalinclude:: ../../../../../examples/definition/sip2/tasks.cfg
+.. literalinclude:: ../../../../../docs/examples/definition/sip2/tasks.cfg
