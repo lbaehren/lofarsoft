@@ -30,8 +30,8 @@ The LOFAR Pipeline Framework
 
 The framework aims to make it possible to manage a variety of different
 processing steps in a flexible yet consistent way, while running them in
-parallel across the LOFAR offline cluster. The following chapters describe the
-various components of the framework and how they fit together.
+parallel across a cluster. The following chapters describe the various
+components of the framework and how they fit together.
 
 .. toctree::
    :maxdepth: 2
@@ -68,4 +68,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
