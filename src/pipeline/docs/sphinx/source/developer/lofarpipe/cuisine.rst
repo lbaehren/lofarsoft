@@ -46,20 +46,20 @@ entirely wraps all relevant Cuisine functionality. The
 are related. The following API documentation covers only those routines
 directly used by the rest of the pipeline system, not Cuisine as a whole.
 
-.. module:: lofarpipe.support.cuisine.WSRTrecipe
+.. module:: lofarpipe.cuisine.WSRTrecipe
    :synopsis: Base module for all Cuisine recipe functionality.
 
-:mod:`lofarpipe.support.cuisine.WSRTrecipe`
--------------------------------------------
+:mod:`lofarpipe.cuisine.WSRTrecipe`
+-----------------------------------
 
 .. autoclass:: lofarpipe.cuisine.WSRTrecipe.WSRTrecipe
    :members: help, main_init, main, run, go, main_result, cook_recipe
 
-.. module:: lofarpipe.support.cuisine.cook
+.. module:: lofarpipe.cuisine.cook
    :synopsis: Cuisine cooks.
 
-:mod:`lofarpipe.support.cuisine.cook`
--------------------------------------------
+:mod:`lofarpipe.cuisine.cook`
+-----------------------------
 
 .. autoclass:: lofarpipe.cuisine.cook.PipelineCook
    :members: copy_inputs, copy_outputs, spawn, try_running
