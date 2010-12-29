@@ -425,23 +425,17 @@ class outputInfo:
 				else:
 					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s%s%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, (self.oi.source[0] == "B" or self.oi.source[0] == "J") and atnflink_start or nedlink_start, self.oi.source.replace("+", "%2B"), (self.oi.source[0] == "B" or self.oi.source[0] == "J") and atnflink_end or nedlink_end, self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
 				# adding RSP0 chi-square and profile
-				if np.size(self.chi_array) > 0:
-					self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[0])
-				else:
+				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[0])
+				if self.filestem_array[0] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
-				if np.size(self.filestem_array) > 0:
+				else:
 					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
-				else:
-					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				# adding RSPA chi-square and profile
-				if np.size(self.chi_array) > 1:
-					self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
-				else:
+				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
+				if self.filestem_array[1] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
-				if np.size(self.filestem_array) > 1:
+				else:
 					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
-				else:
-					self.infohtml = self.infohtml + "\n <td align=center></td>"
 
 				# adding combined_plot column
 				if self.combined_plot != "":
@@ -498,23 +492,17 @@ class outputInfo:
 				else:
 					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s%s%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, (self.oi.source[0] == "B" or self.oi.source[0] == "J") and atnflink_start or nedlink_start, self.oi.source.replace("+", "%2B"), (self.oi.source[0] == "B" or self.oi.source[0] == "J") and atnflink_end or nedlink_end, self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
 				# adding RSP0 chi-square and profile
-				if np.size(self.chi_array) > 0:
-					self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[0])
-				else:
+				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[0])
+				if self.filestem_array[0] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
-				if np.size(self.filestem_array) > 0:
+				else:
 					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
-				else:
-					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				# adding RSPA chi-square and profile
-				if np.size(self.chi_array) > 1:
-					self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
-				else:
+				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
+				if self.filestem_array[1] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
-				if np.size(self.filestem_array) > 1:
+				else:
 					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
-				else:
-					self.infohtml = self.infohtml + "\n <td align=center></td>"
 
 				# adding combined_plot column
 				if self.combined_plot != "":
@@ -1181,8 +1169,8 @@ if __name__ == "__main__":
 
 
 		# Collecting info about chi-squared and profile png-files
-		profiles_array=[]
-		chi_array=[]
+		profiles_array=["", ""]
+		chi_array=["", ""]
 		combined_plot=""  # name of the combined plot (always the same), or empty string if it does not exist
 
 		for lse in storage_nodes:
@@ -1222,7 +1210,7 @@ if __name__ == "__main__":
 						# copying png files to local directory
 						cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[lse], " ".join([ss[:-1] for ss in status]), plotsdir, id)
 						os.system(cmd)
-						profiles_array = np.append(profiles_array, status[0][:-1].split("/")[-1].split(".pfd")[0] + ".pfd")
+						profiles_array[0] = status[0][:-1].split("/")[-1].split(".pfd")[0] + ".pfd"
 					# getting chi-squared
 					if mainpsr == "undefined":
 						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.prepout", cexec_egrep_string)
@@ -1230,7 +1218,7 @@ if __name__ == "__main__":
 						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", mainpsr + "*.prepout", cexec_egrep_string)
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
-						chi_array = np.append(chi_array, status[0][:-1])
+						chi_array[0] = status[0][:-1]
 				# RSPA
 				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) > 0:
@@ -1243,7 +1231,7 @@ if __name__ == "__main__":
 						# copying png files to local directory
 						cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[lse], " ".join([ss[:-1] for ss in status]), plotsdir, id)
 						os.system(cmd)
-						profiles_array = np.append(profiles_array, status[0][:-1].split("/")[-1].split(".pfd")[0] + ".pfd")
+						profiles_array[1] = status[0][:-1].split("/")[-1].split(".pfd")[0] + ".pfd"
 					# getting chi-squared
 					if mainpsr == "undefined":
 						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", "*.prepout", cexec_egrep_string)
@@ -1251,7 +1239,7 @@ if __name__ == "__main__":
 						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", mainpsr + "*.prepout", cexec_egrep_string)
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
-						chi_array = np.append(chi_array, status[0][:-1])
+						chi_array[1] = status[0][:-1]
 
 				# checking if combined plot exists and rsync it if it does exist
 				cmd="cexec %s 'ls -1 %s/%s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir, "combined.th.png", cexec_egrep_string)
