@@ -30,8 +30,10 @@ top-level directories:
     details.
 
 ``framework``
-    The framework code itself: see the :ref:`pipeline-directory-contents`
-    section.
+    The framework code itself. This is implemented as the Python module
+    :mod:`lofarpipe`; see its documentation for details. A ``distutils`` based
+    setup script, ``setup.py``, is included for easy installation: see the
+    section on :ref:`installing the framework <framework-installation>`.
 
 ``recipes``
     A collection of :ref:`recipes <recipe-docs>`, intended to both demonstrate
@@ -39,15 +41,6 @@ top-level directories:
     Recipes intended for different pipelines may be stored in separate
     directories: for example, the ``sip`` directory contains recipes for
     useful to the :ref:`standard imaging pipeline <sip>`.
-
-.. _pipeline-directory-contents:
-
-``framework`` directory contents
---------------------------------
-
-Fiddlesticks.
-
-
 
 External components
 ===================

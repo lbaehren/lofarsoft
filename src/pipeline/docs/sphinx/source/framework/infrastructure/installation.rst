@@ -31,7 +31,7 @@ directory. That directory contains a number of subdirectories. Note first
 directory to generate the documentation tree.
 
 The framework itself is a Python package named ``lofarpipe``. It is found in
-the ``pipeline`` directory, and may be installed using the setup.py script
+the ``framework`` directory, and may be installed using the setup.py script
 included. The output directory can be specified using the ``--prefix``
 option; in the example below, we install to ``/opt/pipeline/framework``.
 
