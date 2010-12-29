@@ -13,7 +13,7 @@ Structure of the code
 =====================
 
 The pipeline code can be obtained from `USG Subversion
-<http://usg.lofar.org/svn/code/trunk/src/pipeline/>`. There are five
+<http://usg.lofar.org/svn/code/trunk/src/pipeline/>`_. There are five
 top-level directories:
 
 ``deploy``
