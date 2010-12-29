@@ -72,6 +72,14 @@ extensions = [
     'sphinx.ext.ifconfig'
 ]
 
+inheritance_graph_attrs = dict(
+    size='"0.0"', # Don't scale drawing down, as it screws up fonts
+    ratio="compress",
+    fontsize=14,
+    nodesep='"0.1"',
+    ranksep='"0.1"',
+    rankdir='"TB"'
+)
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
