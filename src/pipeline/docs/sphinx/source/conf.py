@@ -42,14 +42,14 @@ def add_recipe_inputs(app, what_, name, obj, options, lines):
                 lines.append("    %s" % field.help)
             lines.append("")
     if what_ == "class" and issubclass(obj, RecipeIngredients):
-        lines.append("**Inputs**")
+        lines.append("**Recipe inputs**")
         lines.append("")
         if obj.inputs:
             format_ingredient_dict(obj.inputs)
         else:
-            lines.append("None.")
+            lines.append("None defined -- defaults apply (see :class:`~lofarpipe.support.lofaringredient.RecipeIngredients`).")
             lines.append("")
-        lines.append("**Outputs**")
+        lines.append("**Recipe outputs**")
         lines.append("")
         if obj.outputs:
             format_ingredient_dict(obj.outputs)
