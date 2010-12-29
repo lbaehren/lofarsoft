@@ -32,7 +32,7 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
     # must go first.
     # Further, BaseIngredients.__init__ overwrites the inputs dict provided by
     # WSRTrecipe, so it must call super() before setting up inputs.
-
+    inputs = {} # No inputs to add to defaults
     def __init__(self):
         """
         Subclasses should define their own parameters, but remember to call
