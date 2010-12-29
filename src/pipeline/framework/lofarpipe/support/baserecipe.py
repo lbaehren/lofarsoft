@@ -101,7 +101,10 @@ class BaseRecipe(RecipeIngredients, WSRTrecipe):
         A task is a combination of a recipe and a set of parameters.
         Tasks can be prefedined in the task file set in the pipeline
         configuration (default: tasks.cfg).
+
         Here, we load a task configuration and execute it.
+        This is a "shorthand" version of
+        :meth:`lofarpipe.cuisine.WSRTrecipe.WSRTrecipe.cook_recipe`.
         """
         self.logger.info("Running task: %s" % (configblock,))
 

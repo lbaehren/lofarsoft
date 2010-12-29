@@ -40,7 +40,16 @@ def stateful(run_task):
 class StatefulRecipe(BaseRecipe):
     """
     Enables recipes to save and restore state.
+
+    This is used exactly as :class:`~lofarpipe.support.baserecipe.BaseRecipe`,
+    but will write a ``statefile`` in the job directory, recording the current
+    state of the pipeline after each recipe completes. If the pipeline is
+    interrupted, it can automatically resume where it left off.
+
+    To reset the pipeline and start from the beginning again, just remove the
+    ``statefile``.
     """
+    inputs = {} # No non-default inputs
     def __init__(self):
         super(StatefulRecipe, self).__init__()
         self.state = []
