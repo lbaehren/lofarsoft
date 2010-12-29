@@ -12,35 +12,6 @@ directly interacting with these components should rarely be necessary.
 Developers, of course, will wish to learn in detail about all of these
 libraries.
 
-.. _cuisine-framework:
-
-Cuisine
-=======
-The pipeline is constructed using a system based on the `WSRT Cuisine
-<http://www.astron.nl/~renting/pipeline_frame.html>`_ framework developed by
-Adriaan Renting; the reader is encouraged to refer to its documentation. Some
-modificatins have been made. These include:
-
-* Use of `new style
-  <http://www.python.org/download/releases/2.2.3/descrintro/>`_ Python classes
-  throughout.
-
-* Reworked option handling code to use the ``optparse``
-  module from the `Python standard library
-  <http://docs.python.org/library/optparse.html>`_. (While this is an
-  improvement on the original implementation, it would be desireable to
-  produce a more "bulletproof" configuration handling system for the
-  framework, which handles configuration files and command line options in a
-  uniform way.)
-
-* Reworked logging system using the ``logging`` module from the `Python
-  standard library <http://docs.python.org/library/optparse.html>`_. This
-  provides a flexible way of configuring logging formats and destinations,
-  included logging to files or TCP sockets.
-
-* Assorted bug-fixes and tweaks.
-
-
 .. _ipython-blurb:
 
 IPython

@@ -17,8 +17,13 @@ class WSRTCook(object):
         self.logger   = logger
 
 class PipelineCook(WSRTCook):
+    """
+    A system for spawning a recipe, providing it with correct inputs, and
+    collecting its outputs.
+    """
     def __init__(self, task, inputs, outputs, logger, recipe_path):
         super(PipelineCook, self).__init__(task, inputs, outputs, logger)
+        # Ensures the recipe to be run can be imported from the recipe path
         try:
             try:
                 module_details = imp.find_module(task, recipe_path)
@@ -43,10 +48,12 @@ class PipelineCook(WSRTCook):
             raise CookError (self.task + ' failed')
 
     def copy_inputs(self):
+        """Ensure inputs are available to the recipe to be run"""
         for k in self.inputs.keys():
             self.recipe.inputs[k] = self.inputs[k]
 
     def copy_outputs(self):
+        """Pass outputs from the recipe back to the rest of the pipeline"""
         if self.recipe.outputs == None:
             raise CookError (self.task + ' has no outputs') ## should it have??
         else:
@@ -54,6 +61,7 @@ class PipelineCook(WSRTCook):
                 self.outputs[k] = self.recipe.outputs[k]
 
     def spawn(self):
+        """Copy inputs to the target recipe then run it"""
         self.copy_inputs()
         self.try_running()
 

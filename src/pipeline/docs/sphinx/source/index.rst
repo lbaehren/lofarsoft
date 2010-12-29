@@ -51,6 +51,7 @@ Developer's Reference
    :maxdepth: 2
 
    developer/index.rst
+   developer/lofarpipe.rst
 
 .. _section-pipeline-specific:
 
