@@ -45,6 +45,8 @@ top-level directories:
 External components
 ===================
 
+.. _ipython-deprecated:
+
 IPython
 -------
 
