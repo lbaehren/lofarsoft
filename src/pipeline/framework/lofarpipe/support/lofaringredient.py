@@ -42,10 +42,13 @@ class LOFARoutput(WSRTingredient):
     """
     pass
 
-#                   Fields provide validation and type checking of input/output.
-#                                                     All should subclass Field.
-# ------------------------------------------------------------------------------
 class Field(object):
+    """
+    Fields provided validation and type checking of input/output.
+
+    Unlimited user-defined fields are possible; they should all derive from
+    this class.
+    """
     def __init__(self, *opts, **attrs):
         self.optionstrings = opts
         if attrs.has_key("help"):
@@ -58,15 +61,33 @@ class Field(object):
             self.optional = True
 
     def is_valid(self, value):
+        """
+        Check whether ``value`` is a valid value for this field.
+
+        This must be defined in subclasses.
+
+        :param value: value to be checked
+        :rtype: bool
+        """
         raise NotImplementedError
 
     def coerce(self, value):
         """
         Try to convert value into the appropriate type for this sort of field.
+        Results should be checked with ``is_valid()``.
+
+        :param value: value to be coerced
+        :rtype: coerced value
         """
         return value
 
     def generate_option(self, name):
+        """
+        Generated an :mod:`optparse` option.
+
+        :param name: Destination
+        :rtype: :class:`optparse.Option`
+        """
         if hasattr(self, "default"):
             help = self.help + " [Default: %s]" % str(self.default)
         elif hasattr(self, "optional"):
@@ -76,10 +97,16 @@ class Field(object):
         return make_option(help=help, dest=name, *self.optionstrings)
 
 class StringField(Field):
+    """
+    A Field which accepts any string as its value.
+    """
     def is_valid(self, value):
         return isinstance(value, str)
 
 class IntField(Field):
+    """
+    A Field which accepts any int as its value.
+    """
     def is_valid(self, value):
         return isinstance(value, int)
 
@@ -90,6 +117,9 @@ class IntField(Field):
             return value
 
 class FloatField(Field):
+    """
+    A Field which accepts any float as its value.
+    """
     def is_valid(self, value):
         return isinstance(value, float)
 
@@ -100,14 +130,23 @@ class FloatField(Field):
             return value
 
 class FileField(Field):
+    """
+    A Field which accepts the name of an extant file.
+    """
     def is_valid(self, value):
         return os.path.exists(str(value))
 
 class ExecField(Field):
+    """
+    A Field which accepts the name of an executable file.
+    """
     def is_valid(self, value):
         return os.access(value, os.X_OK)
 
 class DirectoryField(Field):
+    """
+    A Field which accepts the name of an extant directory.
+    """
     def is_valid(self, value):
         return os.path.isdir(str(value))
 
@@ -120,6 +159,9 @@ class DirectoryField(Field):
             return value
 
 class BoolField(Field):
+    """
+    A Field which accepts a bool.
+    """
     def is_valid(self, value):
         return isinstance(value, bool)
 
@@ -132,6 +174,9 @@ class BoolField(Field):
             return value
 
 class ListField(Field):
+    """
+    A Field which accepts a non-string iterable (ie, list or tuple).
+    """
     def is_valid(self, value):
         return not isinstance(value, str) and is_iterable(value)
 
@@ -142,10 +187,16 @@ class ListField(Field):
             return value
 
 class DictField(Field):
+    """
+    A Field which accepts a dict.
+    """
     def is_valid(self, value):
         return isinstance(value, dict)
 
 class FileList(ListField):
+    """
+    A Field which accepts a list of extant filenames.
+    """
     def is_valid(self, value):
         if super(FileList, self).is_valid(value) and \
         not False in [os.path.exists(file) for file in value]:
@@ -160,6 +211,11 @@ class FileList(ListField):
 # ------------------------------------------------------------------------------
 
 class LOFARingredient(DictMixin):
+    """
+    LOFARingredient provides dict-like access to a group of instances of
+    :class:`Field`.  If a field is defined which does not have a value set,
+    but which does have a default, that is returned.
+    """
     def __init__(self, fields):
         self._fields = fields
         self._values = {}
@@ -228,6 +284,10 @@ class LOFARingredient(DictMixin):
             self._values[key] = value
 
 class RecipeIngredientsMeta(type):
+    """
+    This metaclass ensures that the appropriate instances of :class:`Field`
+    are available in the inputs of every LOFAR recipe.
+    """
     def __init__(cls, name, bases, ns):
         # Inputs are inherited from the superclass.
         # Need to do some gymnastics here, as we don't want to update the
@@ -244,6 +304,11 @@ class RecipeIngredientsMeta(type):
             cls._outfields = ns['outputs']
 
 class RecipeIngredients(object):
+    """
+    All LOFAR recipes ultimately inherit from this. It provides the basic
+    ingredient structure, as well as the default fields which are available in
+    every recipe.
+    """
     __metaclass__ = RecipeIngredientsMeta
 
     inputs = {
