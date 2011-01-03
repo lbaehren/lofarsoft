@@ -51,16 +51,25 @@ if (NOT HAVE_VALGRIND OR VALGRIND_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project
     
-  ExternalProject_Add (valgrind
-    PREFIX ${VALGRIND_BINARY_DIR}
-    DOWNLOAD_DIR ${VALGRIND_BINARY_DIR}
-    SOURCE_DIR ${VALGRIND_BINARY_DIR}
-    SVN_REPOSITORY svn://svn.valgrind.org/valgrind/trunk
-    PATCH_COMMAND ${VALGRIND_BINARY_DIR}/autogen.sh
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${VALGRIND_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
-    INSTALL_COMMAND make install
-    )
+  if (SVN_EXECUTABLE)
+    
+    ExternalProject_Add (valgrind
+      PREFIX ${VALGRIND_BINARY_DIR}
+      DOWNLOAD_DIR ${VALGRIND_BINARY_DIR}
+      SOURCE_DIR ${VALGRIND_BINARY_DIR}
+      SVN_REPOSITORY svn://svn.valgrind.org/valgrind/trunk
+      PATCH_COMMAND ${VALGRIND_BINARY_DIR}/autogen.sh
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${VALGRIND_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
+      INSTALL_COMMAND make install
+      )
+    
+  else (SVN_EXECUTABLE)
+    add_custom_target (valgrind
+      WORKING_DIRECTORY ${VALGRIND_BINARY_DIR}
+      COMMENT "[Valgrind] Unable to build package - missing Subversion to get code!"
+      )
+  endif (SVN_EXECUTABLE)
   
   ## <-- end build condition ----------------------------------------------------->
   
@@ -69,5 +78,4 @@ else (NOT HAVE_VALGRIND OR VALGRIND_FORCE_BUILD)
     WORKING_DIRECTORY ${VALGRIND_BINARY_DIR}
     COMMENT "[Valgrind] Found system-wide installation; skipping rebuild!"
     )
-  message (STATUS "[Valgrind] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_VALGRIND OR VALGRIND_FORCE_BUILD)
