@@ -5,6 +5,10 @@ project (CPPUNIT)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
 
+## Package description
+set (CPPUNIT_SVN "https://cppunit.svn.sourceforge.net/svnroot/cppunit/trunk/cppunit" )
+
+## CMake modules
 include (ExternalProject)
 
 ## -----------------------------------------------------------------------------
@@ -40,19 +44,28 @@ endif (LUS_ROOT)
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_CPPUNIT OR CPPUNIT_FORCE_BUILD)
-  
-  set (CPPUNIT_SVN "https://cppunit.svn.sourceforge.net/svnroot/cppunit/trunk/cppunit" )
-  
-  ExternalProject_Add (cppunit
-    PREFIX ${CPPUNIT_BINARY_DIR}
-    DOWNLOAD_DIR ${CPPUNIT_BINARY_DIR}/download
-    SOURCE_DIR ${CPPUNIT_BINARY_DIR}/source
-    SVN_REPOSITORY ${CPPUNIT_SVN}
-    BUILD_IN_SOURCE 1
-    PATCH_COMMAND ${CPPUNIT_BINARY_DIR}/source/autogen.sh
-    CONFIGURE_COMMAND ${CPPUNIT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
-  INSTALL_COMMAND make install
-    )
+
+  if (SVN_EXECUTABLE)
+    
+    ExternalProject_Add (cppunit
+      PREFIX ${CPPUNIT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${CPPUNIT_SVN}
+      BUILD_IN_SOURCE 1
+      PATCH_COMMAND ${CPPUNIT_BINARY_DIR}/source/autogen.sh
+      CONFIGURE_COMMAND ${CPPUNIT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      INSTALL_COMMAND make install
+      )
+
+  else (SVN_EXECUTABLE)
+
+    add_custom_target (cppunit
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      COMMENT "[CPPUNIT] Unable to build package - missing Subversion to get code!"
+      )
+    
+  endif (SVN_EXECUTABLE)
   
   ## <-- end build condition ----------------------------------------------------->
   
