@@ -38,12 +38,12 @@ endif (LUS_ROOT)
 ##
 ## ==============================================================================
 
-option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"             NO )
-option (LUS_ENABLE_TESTING     "Enable testing and experimental builds?"      NO )
-option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO )
-option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO )
-option (TEST_DATASETS          "Download and install sample test datasets?"   NO )
-option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO )
+option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"             YES )
+option (LUS_ENABLE_TESTING     "Enable testing and experimental builds?"      NO  )
+option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO  )
+option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO  )
+option (TEST_DATASETS          "Download and install sample test datasets?"   NO  )
+option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO  )
 
 ## Options affecting the build of individual packages
 
@@ -351,10 +351,13 @@ add_dependencies (contrib dal)
 
 if (LUS_VERBOSE_CONFIGURE)
   message (STATUS "------------------------------------------------------------")
+  message (STATUS "[LUS] Configuration summary.")
+  message (STATUS "------------------------------------------------------------")
   message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
   message (STATUS "LUS_ROOT           = ${LUS_ROOT}")
   message (STATUS "LUS_INSTALL_PREFIX = ${LUS_INSTALL_PREFIX}")
-  message (STATUS "USG_PYTHONPATH     = ${USG_PYTHONPATH}")
+  message (STATUS "LUS_PYTHONPATH     = ${USG_PYTHONPATH}")
   message (STATUS "LUS_DATA_DIR       = ${LUS_DATA_DIR}")
+  message (STATUS "Version control    = ${VERSION_CONTROL_SYSTEM}")
   message (STATUS "------------------------------------------------------------")
 endif (LUS_VERBOSE_CONFIGURE)
