@@ -31,8 +31,12 @@
   \mainpage LOFAR User Software
 
   <ul>
-    <li>\ref configure_build_code
-    <li>\ref configure_build_install
+    <li>\ref LUS_CodeStructure
+    <li>\ref LUS_Installation
+    <ul>
+      <li>\ref LUS_Installation_General
+      <li>\ref LUS_Installation_Platforms
+    </ul>
     <li>\ref build_targets_usg
     <li>\ref build_targets_external
     <li>\ref build_targets_doc
@@ -41,125 +45,6 @@
   </ul>
 
   <hr>
-
-  \section configure_build_code Organization of the code
-	
-  Once the check-out is completed, you will find the following directory structure
-  on your disk:
-
-  \verbatim
-  lofarsoft
-  |-- data
-  |-- doc
-  |-- release
-  |-- build
-  |-- devel_common
-  |   |-- cmake
-  |   |-- scripts
-  |   `-- templates
-  |-- external
-  |   |-- cfitsio
-  |   |-- casacore
-  |   |-- hdf5
-  |   |-- plplot
-  |   |-- swig
-  |   `-- wcslib
-  `-- src
-      |-- contrib
-      |-- CR-Tools
-      |-- DAL
-      |-- LASA
-      |-- pipeline
-      |-- pybdsm
-      `-- RM
-   \endverbatim
-
-   In this:
-
-   <table border=0>
-     <tr valign=top>
-	<td width="15%">\b lofarsoft</td>
-	<td width="80%">Root of the User Software code tree - go there if you
-	want to synchronize your local working version against the repository.</td>
-     </tr>
-     <tr valign=top>
-	<td width="15%">\b build</td>
-	<td width="80%">Directory used for building individual packages in the code
-	distribution; using a separate directory for this purpose makes it easy to
-     	simply erase all compile and link attempts and start again from a clean
-	plate.</td>
-     </tr>
-     <tr valign=top>
-	<td width="15%">\b devel_common</td>
-	<td width="80%">Directory holding common tools for development; this
-	includes e.g. the find scripts for CMake or file templates for creating
-	new C++ classes. Unless you consider collaborating on the framework, you
-	will not need to touch this (but you will need it).</td>
-     </tr>
-     <tr valign=top>
-	<td width="15%">\b doc</td>
-	<td width="80%">Local version of the Doxygen-based source code
-	documentation.</td>
-     </tr>
-     <tr valign=top>
-	<td width="15%">\b external</td>
-	<td width="80%">Hosts the various \ref build_targets_external which will
-	be required to build parts of the LOFAR User Software.</td>
-     </tr>
-     <tr valign=top>
-	<td width="15%">\b src</td>
-	<td width="80%">Contains the source code of the various projects and
-	packages developed and written within the framework of the USG.</td>
-     </tr>
-   </table>
-
-   <hr>
-
-   \section configure_build_install Basic installation from source
-
-   In order to install modules/packages the following simple steps are required:
-   <ol>
-     <li><b>Get a working copy of the source code</b> from the USG Subversion
-     repository:
-     \verbatim
-     svn co http://usg.lofar.org/svn/code/trunk lofarsoft
-     \endverbatim
-     <li><b>Set up your environment</b>: Add the location of the new
-     executables to your PATH variable:
-     \code
-     # csh, tcsh
-     setenv LOFARSOFT <root directory of code tree>
-     source $LOFARSOFT/devel_common/scripts/init.csh
-
-     # sh, bash
-     export LOFARSOFT=<root directory of code tree>
-     . $LOFARSOFT/devel_common/scripts/init.sh
-     \endcode
-     If you want this information to be persistent, you should add the setting
-     to the configuration file of your shell; for \e bash users this is
-     done in either <tt>$HOME/.profile</tt> or <tt>$HOME/.bashrc</tt> -- users
-     of \e tcsh or \e csh need to add the appropriate statement to
-     <tt>$HOME/.cshrc</tt>.
-     <li>Change into the \e build directory and run the \e bootstrap script:
-     \code
-     cd $LOFARSOFT/build
-     ./bootstrap
-     \endcode
-     The script will check if there is a recent enough version of CMake available
-     <li>Run \e make for the package/module in question, e.g. for the
-     <a href="group___d_a_l.html">Data Access Library</a>
-     \code
-     cd $LOFARSOFT/build
-     make dal
-     \endcode
-     Typing
-     \code
-     make help
-     \endcode
-     will provide you with a list of available build targets.
-   </ol>
-
-   <hr>
 
    \section build_targets_usg Targets to build User Software packages
 
