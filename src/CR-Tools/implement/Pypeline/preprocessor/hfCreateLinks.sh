@@ -1,19 +1,36 @@
-#! /bin/sh
+#!/bin/sh
 
-src=$(cd $1 ; pwd)
-dst=$(cd $2 ; pwd)
+src=$1
+dst=$2
 
-echo "Building new directories in $dst..."
-for dir in $(find $src -type d); do
-	mkdir -p $dst${dir#$src}
-done
+# Overwrite command line values for testing
+#src_d=${LOFARSOFT}/src/CR-Tools/implement/Pypeline/modules/
+#dst_d=${LOFARSOFT}/release/lib/python/pycrtools/
 
-echo "Symlinking files..."
-for src_f in $(find $src -type f); do
-	dst_f=$dst${src_f#$src}
-	rm -rf $dst_f
+# Check if source directory exists
+if test -d $src_d ; then
+    src_d=$(cd $src_d ; pwd)
+    #echo "src: $src_d"
+
+    # Check if destination directory exists
+    if test -d $dst_d ; then
+	echo "OK: Source and destination directories exist."
+    else
+	echo "Creating destination directory..."
+	mkdir -p $dst_d
+    fi
+
+    dst_d=$(cd $dst_d ; pwd)
+    #echo "dst: $dst_d"
+
+    # Loop over files in source directory and create symlinks
+    for src_f in $(find $src_d -type f); do
+	dst_f=$dst_d${src_f#$src_d}
+	#echo a $src_f
+	#echo b $dst_f
+	rm -f $dst_f
 	ln -s $src_f $dst_f
-done
-
-
-
+    done
+else
+    echo "Source directory does not exist."
+fi

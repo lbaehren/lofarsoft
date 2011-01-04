@@ -14,14 +14,14 @@ cmake_minimum_required (VERSION 2.6)
 
 if (NOT LUS_ROOT)
   find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-    PATHS 
+    PATHS
     ${CR_SOURCE_DIR}
     ${CR_SOURCE_DIR}/..
     ${CR_SOURCE_DIR}/../..
     ${CR_SOURCE_DIR}/../../..
     ENV LOFARSOFT
     )
-  
+
   if (LUS_ROOT)
     include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
   else (LUS_ROOT)
@@ -74,7 +74,7 @@ macro (cr_process_awk _file _script)
     PATHS
     ${CR_SOURCE_DIR}
     ${CR_SOURCE_DIR}/implement
-    PATH_SUFFIXES 
+    PATH_SUFFIXES
     GUI
     Pypeline
     NO_DEFAULT_PATH
@@ -92,7 +92,7 @@ macro (cr_process_awk _file _script)
     PATHS
     ${CR_SOURCE_DIR}
     ${CR_SOURCE_DIR}/implement
-    PATH_SUFFIXES 
+    PATH_SUFFIXES
     GUI
     Pypeline
     NO_DEFAULT_PATH
@@ -103,7 +103,7 @@ macro (cr_process_awk _file _script)
   endif (NOT _awk_script)
 
   ## extract filename components
-  
+
   get_filename_component (_script_path      ${_awk_script} PATH    )
   get_filename_component (_infile_path      ${_infile}     PATH    )
   get_filename_component (_infile_filename  ${_infile}     NAME    )
@@ -142,7 +142,7 @@ macro (cr_process_awk _file _script)
       message (STATUS "[awk] Wrong number of arguments : ${ARGC}")
     endif (${ARGC} EQUAL 3)
   endif (${ARGC} EQUAL 2)
-  
+
 endmacro (cr_process_awk _file _script)
 
 ## =============================================================================
@@ -163,8 +163,9 @@ check_function_exists (fabs  HAVE_FABS )
 include (IncludeFindModule)
 
 set (cr_cmake_modules
+  AERA
   Blitz
-  Boost 
+  Boost
   CFITSIO
   DAL
   FFTW3
@@ -250,7 +251,7 @@ if (CR_CXX_FLAGS)
     "-W -g -Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend"
     )
 endif (CR_CXX_FLAGS)
-    
+
 ##____________________________________________________________________
 ## Handle option: Support for Glish applications?  ON/OFF
 
@@ -258,18 +259,18 @@ if (CR_WITH_GLISH)
 
   ## First check if we actually have a working version of Glish; if
   ## this is not the case, we can immediately switch off this option.
-  
+
   include_find_module (Glish ${CR_VERBOSE_CONFIGURE})
-  
+
   if (HAVE_GLISH)
     include_directories (${GLISH_INCLUDES})
   else (HAVE_GLISH)
     set (CR_WITH_GLISH FALSE)
   endif (HAVE_GLISH)
-  
+
   ## If there is a working version of Glish, then in order to use it
   ## we need a full installation of CASA
-  
+
   if (HAVE_GLISH)
     ## Check for installation of CASA
     include_find_module (CASA ${CR_VERBOSE_CONFIGURE})
@@ -278,14 +279,14 @@ if (CR_WITH_GLISH)
       set (CR_WITH_GLISH NO)
     endif (NOT HAVE_CASA)
   endif (HAVE_GLISH)
-  
+
 endif (CR_WITH_GLISH)
 
 ##____________________________________________________________________
 ## Handle configuration to use CASA/casacore
 
 if (HAVE_CASA OR HAVE_CASACORE)
-  
+
   ## Compiler flags
   set (HAVE_CASA YES)
 
@@ -295,7 +296,7 @@ if (HAVE_CASA OR HAVE_CASACORE)
     set (CMAKE_SYSTEM_64BIT 1)
     set (AIPS_64B YES)
   endif (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
-  
+
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ##____________________________________________________________________
@@ -335,14 +336,14 @@ endif (NOT HAVE_FFTW3)
 if (CR_WITH_STARTOOLS)
 
   include_find_module (StarTools {CR_VERBOSE_CONFIGURE})
-  
+
   if (HAVE_STARTOOLS)
     include_directories (${STARTOOLS_INCLUDES})
   else (HAVE_STARTOOLS)
     message (STATUS "[CR-Tools] LopesStar support disabled; startools not found.")
     set (CR_WITH_STARTOOLS FALSE)
   endif (HAVE_STARTOOLS)
-  
+
 else (CR_WITH_STARTOOLS)
   set (HAVE_STARTOOLS FALSE)
 endif (CR_WITH_STARTOOLS)
@@ -372,7 +373,7 @@ if (CR_WITH_GUI)
     message (STATUS "[CR-Tools] Unable to build GUI - missing Qt4 headers!")
     set (CR_WITH_GUI NO)
   endif (NOT QT_INCLUDES)
-  
+
   if (NOT QT_QTCORE_LIBRARY OR NOT QT_QTGUI_LIBRARY)
     message (STATUS "[CR-Tools] Unable to build GUI - Qt4 libraries incomplete!")
     set (CR_WITH_GUI NO)
@@ -398,7 +399,7 @@ if (CR_WITH_PYPELINE)
     set (CR_WITH_PYPELINE NO)
     message (STATUS "[CR-Tools] Unable to build Pypeline - missing awk!")
   endif (NOT awk_executable)
-  
+
   ## Check for Boost.Python and Python
   if (BOOST_LIBRARIES AND PYTHON_LIBRARIES)
     set (CR_WITH_PYPELINE YES)
@@ -414,7 +415,7 @@ if (CR_WITH_PYPELINE)
     set (CR_WITH_PYPELINE NO)
     message (STATUS "[CR-Tools] Unable to build Pypeline - missing DAL!")
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES AND CASA_LIBRARIES)
-  
+
 else (CR_WITH_PYPELINE)
   set (CR_WITH_GUI NO)
 endif (CR_WITH_PYPELINE)
@@ -727,7 +728,7 @@ if (tar_executable AND gzip_executable)
     COMMAND ${gzip_executable} crtools.tar
     COMMAND mv crtools.tar.gz crtools.tgz
     )
-  
+
 else (tar_executable AND gzip_executable)
 
   message (STATUS "[CR-Tools] Unable to create tar-archive - missing utilities!")
