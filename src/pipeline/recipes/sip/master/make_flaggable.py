@@ -19,7 +19,7 @@ class make_flaggable(BaseRecipe, RemoteCommandRecipeMixIn):
     Update the storage manager on an MS to make the flag column writable.
     """
     inputs = {
-        'makeFLAGwritable': ingredient.ExecField(
+        'makeflagwritable': ingredient.ExecField(
             '--makeFLAGwritable',
             help="Path to makeFLAGwritable script",
             default='/opt/LofIm/daily/lofar/bin/makeFLAGwritable'
@@ -52,7 +52,7 @@ class make_flaggable(BaseRecipe, RemoteCommandRecipeMixIn):
                     host, command,
                     arguments=[
                         ms,
-                        self.inputs['makeFLAGwritable']
+                        self.inputs['makeflagwritable']
                     ]
                 )
             )
