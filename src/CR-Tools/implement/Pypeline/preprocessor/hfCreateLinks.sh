@@ -10,7 +10,7 @@ dst_d=$2
 # Check if source directory exists
 if test -d $src_d ; then
     src_d=$(cd $src_d ; pwd)
-    #echo "src: $src_d"
+    echo "src: $src_d"
 
     # Check if destination directory exists
     if ! test -d $dst_d ; then
@@ -23,13 +23,13 @@ if test -d $src_d ; then
     done
 
     dst_d=$(cd $dst_d ; pwd)
-    #echo "dst: $dst_d"
+    echo "dst: $dst_d"
 
     # Loop over files in source directory and create symlinks
-    for src_f in $(find $src_d/*py -type f); do
+    for src_f in $(find $src_d -iname "*.py" -type f); do
 	dst_f=$dst_d${src_f#$src_d}
-	#echo a $src_f
-	#echo b $dst_f
+	echo a $src_f
+	echo b $dst_f
 	rm -f $dst_f
 	ln -s $src_f $dst_f
     done
