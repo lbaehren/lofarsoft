@@ -160,6 +160,7 @@ def obs_coords(observ):
     obs['JB'] = [531412.0, 21824.0, 78.0, '', 'JODRELL BANK']
     obs['FB'] = [332235.0, 1171501.0, 0.0, '', 'Fallbrook']
     obs['MT'] = [314119.6, 1105304.4, 2606.0, '', 'MMT']
+    obs['LF'] = [3826937.853, 460938.478, 5064630.667, '', 'LOFAR']
     if obs[observ][3] == 'XYZ':
         return xyz2geocentcyl(obs[observ][0], obs[observ][1], \
                               obs[observ][2])
