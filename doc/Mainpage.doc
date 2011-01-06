@@ -31,8 +31,8 @@
   \mainpage LOFAR User Software
 
   <ul>
-    <li>\ref LUS_CodeStructure
-    <li>\ref LUS_Installation
+    <li>\subpage LUS_CodeStructure
+    <li>\subpage LUS_Installation
     <ul>
       <li>\ref LUS_Installation_General
       <li>\ref LUS_Installation_Platforms
@@ -41,7 +41,7 @@
     <li>\ref build_targets_external
     <li>\ref build_targets_doc
     <li>\ref build_targets_clean
-    <li>\ref troubleshooting
+    <li>\subpage troubleshooting
     <li><b>Interface control documents</b> (ICD)
     <ul>
       <li>\ref dal_icd_001
