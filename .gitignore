@@ -1,0 +1,17 @@
+.DS_Store
+*.aux
+*.log
+*.dvi
+*.toc
+*.rel
+build/cr
+build/dal
+build/data
+build/devel_common
+build/doc
+build/external
+doc/html
+doc/latex
+doc/CMake.html
+doc/CTest.html
+release
