@@ -1,0 +1,155 @@
+/*!
+
+  \page LUS_Glossary LUS :: Glossary
+
+  <table>
+    <tr valign=top>
+      <td class="indexkey">BBS</td>
+      <td>BlackBoard Selfcal, pipeline used for LOFAR imaging data.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">BF</td>
+      <td>Beamed-Formed data (time series structure). Also see: \ref dal_icd_003</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">CLA</td>
+      <td>Common LOFAR attributes. Set of root-level attributes that are used
+      and required as attributes in all LOFAR science data products. If a value
+      is not available for an Attribute, '\c NULL' may be used.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">Data Interface</td>
+      <td>Set of definitions that describe the contents and structure of data
+      files.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">DAL</td> 
+      <td>The 'Data Access Library', a C++ library with Python bindings
+      providing read/write functionality for HDF5 format files, as well as
+      access to Casa-baseMeasurement Sets.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">DPPP</td>
+      <td>Default Pre-Processing Pipeline, pipeline used for LOFAR imaging
+      data.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">EAS</td>
+      <td>Extensive Air-Shower.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">GSM</td>
+      <td>Global Sky Model. Sky Models are essentially catalogues of known real
+      radio sources in the sky. A Local Sky Model for an observation is merely a
+      subset of a Global Sky Model catalogue pertaining to that observation's
+      relevant region of the sky.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">HDFView</td>
+      <td><a href="http://www.hdfgroup.org/hdf-java-html/hdfview">Hierarchical
+      Data Format Viewer</a>; a Java software tool for viewing the HDF5
+      structure and data.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">HDF5</td>
+      <td><a href="http://www.hdfgroup.org/HDF5">Hierarchical Data Format, 5</a>.
+      A file format capable of accommodating large datasets that comprises two
+      (2) primary types of objects: groups and datasets. Implements
+      self-organisation and hierarchical structures within the file format
+      itself, facilitating self-contained data administration. </td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">HDF5 group</td>
+      <td>A grouping structure containing zero or more HDF5 objects, together
+      with supporting meta-data.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">HDF5 dataset</td>
+      <td>A multidimensional array of data elements, together with supporting
+      meta-data.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">HDU</td>
+      <td>Header-Data Unit. Though typically used for FITS data descriptions,
+      the term "HDU" can also be used more generically when discussing any data
+      group that contains both data and a descriptive header.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">KSP</td>
+      <td>Key Science Project.  One of several major observational and research
+      projects defined by the LOFAR organization. These Key Science Projects are,
+      <ul>
+        <li>Cosmic Magnetism in the Nearby Universe
+        <li>High Energy Cosmic Rays
+        <li>Epoch of Re-ionization
+        <li>Extragalactic Sky Surveys
+        <li>Transients - Pulsars, Jet Sources, Planets, Flare stars
+        <li>Solar Physics and Space Weather
+      </ul>
+      </td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">LOFAR Sky Image</td>
+      <td>Standard LOFAR Image Cube. A LOFAR data product encompassing science
+      data, associated meta-data, and associated calibration information,
+      including a Local Sky Model (LSM) , and other ancillary meta groups that
+      are defined in this document.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">LSM</td>
+      <td>Local Sky Model. Sky Models are essentially catalogues of known
+      real radio sources in the sky.  A Local Sky Model for an observation is
+      merely a subset of a Global Sky Model catalogue pertaining to that
+      observation's relevant region of the sky.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">MJD</td>
+      <td>Modified Julian Day. Derived from Julian Date (JD) by MJD = JD -
+      2400000.5. Starts from midnight rather than noon.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">MS</td>
+      <td>Measurement Set, a self-described, structured set of CASA tables
+      comprising the data and meta-data of an observation.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">RMSC</td>
+      <td>The Rotation Measure synthesis cube is a data product which contains
+      the output of LOFAR RM synthesis routines, namely the polarized emission as
+      a function of Faraday depth.  As with the Sky Image data files, all
+      associated information is stored within an RMSC file. Also see:
+      \ref dal_icd_008</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">RSP</td>
+      <td>Remote Station Processing Board.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">TAI</td>
+      <td>International Atomic Time (Temps Atomique International), atomic
+      coordinate time standard.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">TBB</td>
+      <td>Transient Buffer Board.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">UTC</td>
+      <td>Coordinated Universal Time (UTC) is a time standard based on
+      International Atomic Time (TAI) with leap seconds added at irregular
+      intervals to compensate for the Earth's slowing rotation.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">VHECR</td>
+      <td>Very high-energy cosmic ray.</td>
+    </tr>
+    <tr valign=top>
+      <td class="indexkey">WCS</td>
+      <td>World Coordinate Information (WCS). The FITS "World Coordinate System"
+      (WCS) convention defines keywords and usage that provide for the description
+      of astronomical coordinate systems in a FITS image header. Also see:
+      \ref dal_icd_002</td>
+    </tr>
+  </table>
+
+*/
