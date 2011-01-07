@@ -170,10 +170,10 @@ namespace CR { // Namespace CR -- begin
       DAL::CommonAttributes attr = commonAttributes();
       telescope     = attr.telescope();
       observer      = attr.observer();
-      projectID     = attr.projectID();
-      projectTitle  = attr.projectTitle();
-      projectPI     = attr.projectPI();
-      observationID = attr.observationID();
+      projectID     = attr.attributesProject().projectID();
+      projectTitle  = attr.attributesProject().projectTitle();
+      projectPI     = attr.attributesProject().projectPI();
+      observationID = attr.attributesObservation().observationID();
     }
 
     // Display summary _____________________________________
@@ -480,7 +480,7 @@ namespace CR { // Namespace CR -- begin
   casa::Matrix<double> LOFAR_TBB::fx ()
   {
     casa::Matrix<double> data;
-    
+
     fx(data);
 
     return data;

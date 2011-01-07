@@ -313,3 +313,27 @@ install (CODE "execute_process(COMMAND ${PYPELINE_PREPROCESSOR_DIR}/hfCreateLink
 install (CODE "message (STATUS \"Install Python scripts...\")")
 install (CODE "execute_process(COMMAND ${PYPELINE_PREPROCESSOR_DIR}/hfCreateLinks.sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts ${LUS_ROOT}/release/bin/python)")
 
+
+## =============================================================================
+##
+##  Configuration summary
+##
+## =============================================================================
+
+message (STATUS "============================================================")
+message (STATUS "  CR-Tools: PyCRTools")
+message (STATUS "------------------------------------------------------------")
+
+message (STATUS "  AERA..................... : " ${AERA_FOUND})
+message (STATUS "  OpenMP................... : " ${OPENMP_FOUND})
+
+message (STATUS "------------------------------------------------------------")
+
+message (STATUS "  Compiler warnings........ : " ${PYPELINE_WITH_COMPILER_WARNINGS})
+message (STATUS "  Runtime warnings..........: " ${PYPELINE_WITH_RUNTIME_WARNINGS})
+message (STATUS "  Debug symbols.............: " ${PYPELINE_WITH_DEBUG_SYMBOLS})
+message (STATUS "  Optimization..............: " ${PYPELINE_WITH_OPTIMIZATION})
+message (STATUS "  CPU optimization..........: " ${PYPELINE_WITH_CPU_OPTIMIZATION})
+
+message (STATUS "------------------------------------------------------------")
+
