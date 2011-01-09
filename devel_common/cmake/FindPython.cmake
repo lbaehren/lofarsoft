@@ -1,5 +1,5 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
+# | $Id:: FindPython.cmake 6667 2011-01-05 08:32:02Z baehren                  $ |
 # +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
@@ -116,6 +116,7 @@ if (NOT HAVE_PYTHON)
       else (PYTHON_PYTHONHOME)
 	find_program (PYTHON_EXECUTABLE python${python_version}
 	  PATHS 
+	  /Library/Frameworks/EPD64.framework/Versions/Current/bin
 	  /Library/Frameworks/Python.framework/Versions/${python_version}/bin
 	  ${python_bin_locations}
 	  ENV PATH
@@ -155,13 +156,17 @@ if (NOT HAVE_PYTHON)
       ## Check for the Python header files
       
       find_path (PYTHON_INCLUDES Python.h
-	PATHS ${python_include_locations}
+	PATHS
+	/Library/Frameworks/EPD64.framework/Versions/Current/include/python2.6
+	${python_include_locations}
 	PATH_SUFFIXES python${python_version}
 	NO_DEFAULT_PATH
 	)
       
       find_path (HAVE_PYCONFIG_H pyconfig.h
-	PATHS ${python_include_locations}
+	PATHS 
+	/Library/Frameworks/EPD64.framework/Versions/Current/include/python2.6
+	${python_include_locations}
 	PATH_SUFFIXES python${python_version}
 	NO_DEFAULT_PATH
 	)
@@ -170,6 +175,7 @@ if (NOT HAVE_PYTHON)
       
       find_library (PYTHON_LIBRARIES python${python_version}
 	PATHS
+	/Library/Frameworks/EPD64.framework/Versions/Current/lib/python2.6/config
 	${python_lib_locations}
 	PATH_SUFFIXES
 	python${python_version}/config
@@ -237,3 +243,4 @@ if (NOT HAVE_PYTHON)
     )
   
 endif (NOT HAVE_PYTHON)
+
