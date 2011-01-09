@@ -5,7 +5,6 @@
 
 from datetime import datetime
 import pycrtools as cr
-from pycrtools.interfaces import IO
 from pytmf import deg2rad, rad2deg, gregoriandate2jd
 
 def casaRefcodes(**kwargs):
