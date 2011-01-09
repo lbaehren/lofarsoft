@@ -21,8 +21,6 @@ option (PYPELINE_WITH_AERA "Compile Pypeline with support for AERA data files" O
 
 # Turn off all predefined options
 set (CMAKE_CXX_FLAGS "")
-set (PYPELINE_CXX_FLAGS "")
-set (PYPELINE_CPP_FLAGS "")
 
 if (APPLE)
   set (PYPELINE_CXX_FLAGS "-fpermissive")
@@ -64,8 +62,8 @@ endif (PYPELINE_WITH_OPTIMIZATION)
 
 if (CR_WITH_OPENMP AND OPENMP_FOUND)
   message (STATUS "[CR-Tools] Adding OpenMP support to Pypeline.")
-  set (PYPELINE_CXX_FLAGS "${OpenMP_CXX_FLAGS} ${PYPELINE_CXX_FLAGS}")
-  set (PYPELINE_CPP_FLAGS "${OpenMP_CXX_FLAGS} ${PYPELINE_CPP_FLAGS} ")
+  set (PYPELINE_CXX_FLAGS "${PYPELINE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (PYPELINE_CPP_FLAGS ${OpenMP_CXX_FLAGS})
   set (PYPELINE_LINKER_FLAGS "${PYPELINE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif (CR_WITH_OPENMP AND OPENMP_FOUND)
 
@@ -75,8 +73,6 @@ if (PYPELINE_WITH_AERA AND AERA_FOUND)
   list (APPEND PYPELINE_INCLUDES ${AERA_INCLUDES})
   list (APPEND PYPELINE_LIBRARIES ${AERA_LIBRARIES})
 endif (PYPELINE_WITH_AERA AND AERA_FOUND)
-
-message (STATUS "Compiling Pypeline with flags: ${CMAKE_CXX_FLAGS} ${PYPELINE_CXX_FLAGS}")
 
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
@@ -114,10 +110,8 @@ foreach (include ${PYPELINE_INCLUDES})
   set (PYPELINE_INCLUDE_FLAGS "-I${include} ${PYPELINE_INCLUDE_FLAGS}")
 endforeach (include ${PYPELINE_INCLUDES})
 
-
-
-message (STATUS "PYPELINE_CPP_FLAGS     : '${PYPELINE_CPP_FLAGS}'")
-message (STATUS "PYPELINE_INCLUDE_FLAGS : '${PYPELINE_INCLUDE_FLAGS}'")
+message (STATUS "Preprocessing Pypeline with flags: ${CMAKE_CXX_FLAGS} ${PYPELINE_CPP_FLAGS}")
+message (STATUS "Compiling Pypeline with flags: ${CMAKE_CXX_FLAGS} ${PYPELINE_CXX_FLAGS}")
 
 ##_______________________________________________________________________________
 ## Perform Wrapper Preprocessing of module files
