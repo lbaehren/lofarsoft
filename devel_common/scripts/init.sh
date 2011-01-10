@@ -39,7 +39,7 @@ else  # only execute the following if LOFARSOFT is set
 ##______________________________________________________________________________
 ##  Add the LOFAR executables to the path
 
-export PATH=$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/bin:$PATH
+export PATH=$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/bin:$LOFARSOFT/release/bin/python:$PATH
 
 ##______________________________________________________________________________
 ##  Add the location of the libraries

@@ -45,7 +45,7 @@ if ( $?prompt ) then
     echo "-- Add the LOFAR executables to the path"
 endif
 
-set path = ( $LOFARSOFT/release/share/pulsar/bin $LOFARSOFT/release/bin $path )
+set path = ( $LOFARSOFT/release/share/pulsar/bin $LOFARSOFT/release/bin $LOFARSOFT/release/bin/python $path )
 
 
 ##______________________________________________________________________________
