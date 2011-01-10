@@ -78,6 +78,11 @@ template <class T>
     void setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
     void setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3);
     void setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
+    void setDimensions6(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5);
+    void setDimensions7(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6);
+    void setDimensions8(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7);
+    void setDimensions9(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8);
+    void setDimensions10(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8, HInteger dim9);
     HInteger getNumberOfDimensions();
     hArray<T> & setSlice(HInteger beg, HInteger end=-1);
     hArray<T> & setSliceVector(std::vector<HInteger> & index_vector);
@@ -165,6 +170,12 @@ template <class T>
     .def("setDimensions",&hArray<TYPE>::setDimensions2)			\
     .def("setDimensions",&hArray<TYPE>::setDimensions3)			\
     .def("setDimensions",&hArray<TYPE>::setDimensions4)			\
+    .def("setDimensions",&hArray<TYPE>::setDimensions5)			\
+    .def("setDimensions",&hArray<TYPE>::setDimensions6)			\
+    .def("setDimensions",&hArray<TYPE>::setDimensions7)			\
+    .def("setDimensions",&hArray<TYPE>::setDimensions8)			\
+    .def("setDimensions",&hArray<TYPE>::setDimensions9)			\
+    .def("setDimensions",&hArray<TYPE>::setDimensions10)			\
     .def("setSlice",&hArray<TYPE>::setSlice,return_internal_reference<>())				\
     .def("setSliceVector",&hArray<TYPE>::setSliceVector,return_internal_reference<>())				\
     .def("setSubSlice",&hArray<TYPE>::setSubSlice,return_internal_reference<>())				\
