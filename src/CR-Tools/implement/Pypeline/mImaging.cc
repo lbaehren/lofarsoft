@@ -599,7 +599,7 @@ void HFPP_FUNC_NAME (const CIter weights, const CIter weights_end,
       while (ant < ant_end && weight < weights_end) {
 	freq=frequencies;
 	while (freq < frequencies_end && weight < weights_end) {
-	  *weight=exp(HComplex(0.0,hPhase(*freq,hGeometricDelayFarField(ant,sky,distance))));
+	  *weight=polar(1.0, hPhase(*freq,hGeometricDelayFarField(ant,sky,distance))); // exp(HComplex(0.0,hPhase(*freq,hGeometricDelayFarField(ant,sky,distance))));
 	  ++weight; ++freq;
 	};
 	ant+=3;
@@ -613,7 +613,7 @@ void HFPP_FUNC_NAME (const CIter weights, const CIter weights_end,
       while (ant < ant_end && weight < weights_end) {
 	freq=frequencies;
 	while (freq < frequencies_end && weight < weights_end) {
-	  *weight=exp(HComplex(0.0,hPhase(*freq,hGeometricDelayNearField(ant,sky,distance))));
+	  *weight=polar(1.0, hPhase(*freq,hGeometricDelayNearField(ant,sky,distance))); // exp(HComplex(0.0,hPhase(*freq,hGeometricDelayNearField(ant,sky,distance))));
 	  ++weight; ++freq;
 	};
 	ant+=3;
@@ -1026,7 +1026,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       while (--k)
       {
         // Multiply by geometric weight and add to image
-        *it_im_inner += (*it_fft) * exp(HComplex(0.0, CR::_2pi*((*it_freq) * delay)));
+        *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * delay));  // exp(HComplex(0.0, CR::_2pi*((*it_freq) * delay)));
         ++it_im_inner;
         ++it_fft;
         ++it_freq;

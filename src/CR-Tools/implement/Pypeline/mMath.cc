@@ -912,7 +912,7 @@ HNumber HFPP_FUNC_NAME(const HNumber frequency, const HNumber time)
 */
 HComplex HFPP_FUNC_NAME(const HNumber phase)
 {
-  return exp(HComplex(0.0,phase));
+  return polar(1.0, phase); // exp(HComplex(0.0,phase));
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -978,7 +978,7 @@ void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 phasevec,
 */
 HComplex HFPP_FUNC_NAME(const HNumber amplitude, const HNumber phase)
 {
-  return amplitude*exp(HComplex(0.0,phase));
+  return polar(amplitude, phase); // exp(HComplex(0.0,phase))
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
