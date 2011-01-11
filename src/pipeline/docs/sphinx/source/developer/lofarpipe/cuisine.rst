@@ -19,18 +19,15 @@ of the :mod:`lofarpipe` package. The modifications include:
   <http://www.python.org/download/releases/2.2.3/descrintro/>`_ Python classes
   throughout.
 
-* Reworked option handling code to use the ``optparse``
-  module from the `Python standard library
-  <http://docs.python.org/library/optparse.html>`_. (While this is an
-  improvement on the original implementation, it would be desireable to
-  produce a more "bulletproof" configuration handling system for the
-  framework, which handles configuration files and command line options in a
-  uniform way.)
+* Reworked option handling code to use the `optparse
+  <http://docs.python.org/library/optparse.html>`_ module from the Python
+  standard library.
 
-* Reworked logging system using the ``logging`` module from the `Python
-  standard library <http://docs.python.org/library/optparse.html>`_. This
-  provides a flexible way of configuring logging formats and destinations,
-  included logging to files or TCP sockets.
+* Reworked logging system using the `logging
+  <http://docs.python.org/library/logging.html>`_ module from the Python
+  standard library. This provides a flexible way of configuring logging formats
+  and destinations, included logging to files or TCP sockets. See the section on
+  the pipeline :ref:`logging system <lofarpipe-logging>`.
 
 * Assorted bug-fixes and tweaks.
 
