@@ -597,6 +597,9 @@ class writeHtmlList:
 			else:
 				self.htmlptr.write ("List only observations since %s till %s<br>\n" % (self.fd, self.td))
 
+	def statistics (self, link):
+		self.htmlptr.write ("<a href=\"%s\">Statistics</a>\n" % (link))
+
 	def header (self, viewtype, storage_nodes_string_html):
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
 		if viewtype == "brief":
@@ -636,7 +639,210 @@ class writeHtmlList:
 		self.htmlptr.close()
 
 
+# Class that keeps the statistics of all data
+class obsstat:
+	def __init__(self, ids, fd, td):
+		self.ids = ids
+		self.fd = fd
+		self.td = td
 
+		self.totDuration = 0.0
+		self.processedDuration = 0.0
+		self.IMonlyDuration = 0.0
+		self.Nprocessed = 0
+		self.Nistype = 0
+		self.Nistype_only = 0
+		self.Ncstype = 0
+		self.Ncstype_only = 0
+		self.Nfetype = 0
+		self.Nfetype_only = 0
+		self.Nimtype = 0
+		self.Nimtype_only = 0
+		self.Nbftype = 0
+		self.Nbftype_only = 0
+		self.Nfdtype = 0
+		self.Nfdtype_only = 0
+		self.Niscsim = 0
+		self.Nisim = 0
+		self.Niscs = 0
+		self.Ncsim = 0
+		self.Ncsfe = 0
+		self.Nimfe = 0
+		self.Nisfe = 0
+		self.Niscsfe = 0
+		self.Nbfis = 0
+		self.Nbffe = 0
+		self.Nbfisfe = 0
+		self.Nbfiscsfe = 0
+		self.totRawsize = 0.0   # size in TB of raw data
+		self.IMonlyRawsize = 0.0 # size in TB of IM only raw data
+		self.totProcessedsize = 0.0   # size in TB of processed data
+
+		for r in self.ids:
+			# getting the numbers and duration
+			if obstable[r].comment == "" and obstable[r].oi.duration != "?":
+				self.totDuration += obstable[r].oi.dur	
+			if obstable[r].comment == "" and obstable[r].statusline != "x":
+				self.Nprocessed += 1
+				if obstable[r].oi.duration != "?":
+					self.processedDuration += obstable[r].oi.dur
+			# getting the number of obs of different type
+			if obstable[r].comment == "" and obstable[r].oi.istype == "+":
+				self.Nistype += 1
+				if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+					self.Nistype_only += 1
+			if obstable[r].comment == "" and obstable[r].oi.cstype == "+":
+				self.Ncstype += 1
+				if obstable[r].oi.istype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+					self.Ncstype_only += 1
+			if obstable[r].comment == "" and obstable[r].oi.fetype == "+":
+				self.Nfetype += 1
+				if obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+					self.Nfetype_only += 1
+			if obstable[r].comment == "" and obstable[r].oi.imtype == "+":
+				self.Nimtype += 1
+				if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+					self.Nimtype_only += 1
+					self.IMonlyRawsize += float(obstable[r].totsize)
+					if obstable[r].oi.duration != "?":
+						self.IMonlyDuration += obstable[r].oi.dur
+			if obstable[r].comment == "" and obstable[r].oi.bftype == "+":
+				self.Nbftype += 1
+				if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+					self.Nbftype_only += 1
+			if obstable[r].comment == "" and obstable[r].oi.fdtype == "+":
+				self.Nfdtype += 1
+				if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.imtype != "+":
+					self.Nfdtype_only += 1
+			# getting the number of some observing types' mixtures
+			if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
+				self.Niscsim += 1
+			if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+				self.Nisim += 1
+			if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+				self.Niscs += 1
+			if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
+				self.Ncsim += 1
+			if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
+				self.Ncsfe += 1
+			if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+				self.Nisfe += 1
+			if obstable[r].comment == "" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+				self.Nimfe += 1
+			if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
+				self.Niscsfe += 1
+			if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.fetype != "+":
+				self.Nbfis += 1
+			if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+				self.Nbffe += 1
+			if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+				self.Nbfisfe += 1
+			if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+				self.Nbfiscsfe += 1
+			# getting the sizes
+			if obstable[r].comment == "":
+				self.totRawsize += float(obstable[r].totsize)
+			if obstable[r].comment == "":
+				self.totProcessedsize += float(obstable[r].processed_dirsize)
+
+		self.totDuration /= 3600.
+		self.processedDuration /= 3600.
+		self.IMonlyDuration /= 3600.
+		self.totRawsize /= 1024.
+		self.totProcessedsize /= 1024.
+		self.IMonlyRawsize /= 1024.
+
+	def printstat (self):
+		print
+		print "Current pulsar obs statistics:"
+		if self.fd != "" or self.td != "":
+			print "[%s%s]" % (self.fd != "" and "from " + self.fd or (self.td != "" and " till " + self.td or ""), 
+                                                                    self.td != "" and (self.fd != "" and " till " + self.td or "") or "")
+		print "---------------------------------------------------------------------------"
+		print "Total number of observations [hours / days]:         %d [%.1f / %.1f]" % (np.size(self.ids),self.totDuration,self.totDuration/24.)
+		print "Number of observations w/o IM only [hours / days]:   %d [%.1f / %.1f]" % (np.size(self.ids)-self.Nimtype_only, self.totDuration-self.IMonlyDuration, (self.totDuration-self.IMonlyDuration)/24.)
+		print "Number of processed observations [hours / days]:     %d [%.1f / %.1f]" % (self.Nprocessed,self.processedDuration,self.processedDuration/24.)
+		print
+		print "Number of IS observations [only IS]:       %d [%d]" % (self.Nistype, self.Nistype_only)
+		print "Number of IS+CS observations only:         %d" % (self.Niscs,)
+		print "Number of IS+IM observations only:         %d" % (self.Nisim,)
+		print "Number of IS+CS+IM observations only:      %d" % (self.Niscsim,)
+		print "Number of CS observations [only CS]:       %d [%d]" % (self.Ncstype, self.Ncstype_only)
+		print "Number of CS+IM observations only:         %d" % (self.Ncsim,)
+		print "Number of FE observations [only FE]:       %d [%d]" % (self.Nfetype, self.Nfetype_only)
+		print "Number of FE+CS observations only:         %d" % (self.Ncsfe,)
+		print "Number of FE+IS observations only:         %d" % (self.Nisfe,)
+		print "Number of FE+IM observations only:         %d" % (self.Nimfe,)
+		print "Number of FE+IS+CS observations only:      %d" % (self.Niscsfe,)
+		print "Number of IM observations [only IM]:       %d [%d]" % (self.Nimtype, self.Nimtype_only)
+		print "Number of BF observations [only BF]:       %d [%d]" % (self.Nbftype, self.Nbftype_only)
+		print "Number of BF+IS observations only:         %d" % (self.Nbfis,)
+		print "Number of BF+FE observations only:         %d" % (self.Nbffe,)
+		print "Number of BF+IS+FE observations only:      %d" % (self.Nbfisfe,)
+		print "Number of BF+IS+CS+FE observations only:   %d" % (self.Nbfiscsfe,)
+		print "Number of FD observations [only FD]:       %d [%d]" % (self.Nfdtype, self.Nfdtype_only)
+		print
+		print "Total size of raw data (TB):               %.1f" % (self.totRawsize,)
+		print "Total size of raw data w/o IM-only (TB):   %.1f" % (self.totRawsize-self.IMonlyRawsize,)
+		print "Total size of processed data (TB):         %.1f" % (self.totProcessedsize,)
+		print
+
+	def printhtml (self, htmlfile):
+		self.htmlptr = open(htmlfile, 'w')
+		self.htmlptr.write ("<html>\n\
+                	         <head>\n\
+                                  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
+                          	  <meta name=\"Classification\" content=\"public HTML\">\n\
+                                  <meta name=\"robots\" content=\"noindex, nofollow\">\n\
+				  <base href=\"http://www.astron.nl/~kondratiev/lofar/\" />\n\
+                          	  <title>Pulsar observations statistics</title>\n\
+                         	</head>\n\n\
+                         	<style type='text/css'>\n\
+                          	 tr.d0 td { background-color: #ccffff; color: black; font-size: 80% }\n\
+                          	 tr.d1 td { background-color: #99cccc; color: black; font-size: 80% }\n\
+                          	 tr.d th { background-color: #99cccc; color: black;}\n\
+                         	</style>\n\n\
+                         	<body bgcolor='white'>\n\
+                          	<h2 align=left>Current pulsar observations statistics</h2>\n\
+                        	\n")
+		if self.fd != "" or self.td != "":
+			self.htmlptr.write ("\n%s%s<br>" % (self.fd != "" and "From " + self.fd or (self.td != "" and " Till " + self.td or ""), 
+                                                                    self.td != "" and (self.fd != "" and " Till " + self.td or "") or "")
+		self.htmlptr.write ("\n<br>")
+		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%.1f / %.1f]</td>\n</tr>" % ("Total number of observations [hours / days]", np.size(self.ids), self.totDuration, self.totDuration/24.))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%.1f / %.1f]</td>\n</tr>" % ("Number of observations w/o IM only [hours / days]", np.size(self.ids)-self.Nimtype_only, self.totDuration-self.IMonlyDuration, (self.totDuration-self.IMonlyDuration)/24.))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%.1f / %.1f]</td>\n</tr>" % ("Number of processed observations [hours / days]", self.Nprocessed,self.processedDuration,self.processedDuration/24.))
+
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left></td>\n <td align=left></td>\n</tr>")
+
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of IS observations [only IS]", self.Nistype, self.Nistype_only))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of IS+CS observations only", self.Niscs))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of IS+IM observations only", self.Nisim))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of IS+CS+IM observations only", self.Niscsim))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of CS observations [only CS]", self.Ncstype, self.Ncstype_only))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of CS+IM observations only", self.Ncsim))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of FE observations [only FE]", self.Nfetype, self.Nfetype_only))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of FE+CS observations only", self.Ncsfe))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of FE+IS observations only", self.Nisfe))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of FE+IM observations only", self.Nimfe))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of FE+IS+CS observations only", self.Niscsfe))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of IM observations [only IM]", self.Nimtype, self.Nimtype_only))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of BF observations [only BF]", self.Nbftype, self.Nbftype_only))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of BF+IS observations only", self.Nbfis))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of BF+FE observations only", self.Nbffe))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of BF+IS+FE observations only", self.Nbfisfe))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of BF+IS+CS+FE observations only", self.Nbfiscsfe))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of FD observations [only FD]", self.Nfdtype, self.Nfdtype_only))
+
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left></td>\n <td align=left></td>\n</tr>")
+
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%.1f</td>\n</tr>" % ("Total size of raw data (TB)", self.totRawsize))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%.1f</td>\n</tr>" % ("Total size of raw data w/o IM-only (TB)", self.totRawsize-self.IMonlyRawsize))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%.1f</td>\n</tr>" % ("Total size of processed data (TB)", self.totProcessedsize))
+
+		self.htmlptr.write ("\n</table>\n</body>\n</html>")
+		self.htmlptr.close()
 
 
 # help
@@ -811,149 +1017,11 @@ if __name__ == "__main__":
 					tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 
-				print
-				print "Current pulsar obs statistics:"
-				if is_from == True or is_to == True:
-					print "[%s%s]" % (is_from and "from " + fromdate or (is_to and " till " + todate or ""), 
-                                                                              is_to and (is_from and " till " + todate or "") or "")
-				print "---------------------------------------------------------------------------"
-				totDuration = 0.0
-				processedDuration = 0.0
-				IMonlyDuration = 0.0
-				Nprocessed = 0
-				Nistype = 0
-				Nistype_only = 0
-				Ncstype = 0
-				Ncstype_only = 0
-				Nfetype = 0
-				Nfetype_only = 0
-				Nimtype = 0
-				Nimtype_only = 0
-				Nbftype = 0
-				Nbftype_only = 0
-				Nfdtype = 0
-				Nfdtype_only = 0
-				Niscsim = 0
-				Nisim = 0
-				Niscs = 0
-				Ncsim = 0
-				Ncsfe = 0
-				Nimfe = 0
-				Nisfe = 0
-				Niscsfe = 0
-				Nbfis = 0
-				Nbffe = 0
-				Nbfisfe = 0
-				Nbfiscsfe = 0
-				totRawsize = 0.0   # size in TB of raw data
-				IMonlyRawsize = 0.0 # size in TB of IM only raw data
-				totProcessedsize = 0.0   # size in TB of processed data
-
-				for r in obsids:
-					# getting the numbers and duration
-					if obstable[r].comment == "" and obstable[r].oi.duration != "?":
-						totDuration += obstable[r].oi.dur	
-					if obstable[r].comment == "" and obstable[r].statusline != "x":
-						Nprocessed += 1
-						if obstable[r].oi.duration != "?":
-							processedDuration += obstable[r].oi.dur
-					# getting the number of obs of different type
-					if obstable[r].comment == "" and obstable[r].oi.istype == "+":
-						Nistype += 1
-						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
-							Nistype_only += 1
-					if obstable[r].comment == "" and obstable[r].oi.cstype == "+":
-						Ncstype += 1
-						if obstable[r].oi.istype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
-							Ncstype_only += 1
-					if obstable[r].comment == "" and obstable[r].oi.fetype == "+":
-						Nfetype += 1
-						if obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
-							Nfetype_only += 1
-					if obstable[r].comment == "" and obstable[r].oi.imtype == "+":
-						Nimtype += 1
-						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
-							Nimtype_only += 1
-							IMonlyRawsize += float(obstable[r].totsize)
-							if obstable[r].oi.duration != "?":
-								IMonlyDuration += obstable[r].oi.dur
-					if obstable[r].comment == "" and obstable[r].oi.bftype == "+":
-						Nbftype += 1
-						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
-							Nbftype_only += 1
-					if obstable[r].comment == "" and obstable[r].oi.fdtype == "+":
-						Nfdtype += 1
-						if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.imtype != "+":
-							Nfdtype_only += 1
-					# getting the number of some observing types' mixtures
-					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
-						Niscsim += 1
-					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
-						Nisim += 1
-					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
-						Niscs += 1
-					if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
-						Ncsim += 1
-					if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
-						Ncsfe += 1
-					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
-						Nisfe += 1
-					if obstable[r].comment == "" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
-						Nimfe += 1
-					if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
-						Niscsfe += 1
-					if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.fetype != "+":
-						Nbfis += 1
-					if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
-						Nbffe += 1
-					if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
-						Nbfisfe += 1
-					if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
-						Nbfiscsfe += 1
-					# getting the sizes
-					if obstable[r].comment == "":
-						totRawsize += float(obstable[r].totsize)
-					if obstable[r].comment == "":
-						totProcessedsize += float(obstable[r].processed_dirsize)
-
-				totDuration /= 3600.
-				processedDuration /= 3600.
-				IMonlyDuration /= 3600.
-				totRawsize /= 1024.
-				totProcessedsize /= 1024.
-				IMonlyRawsize /= 1024.
-
-				print "Total number of observations [hours / days]:         %d [%.1f / %.1f]" % (np.size(obsids),totDuration,totDuration/24.)
-				print "Number of observations w/o IM only [hours / days]:   %d [%.1f / %.1f]" % (np.size(obsids)-Nimtype_only, totDuration-IMonlyDuration, (totDuration-IMonlyDuration)/24.)
-				print "Number of processed observations [hours / days]:     %d [%.1f / %.1f]" % (Nprocessed,processedDuration,processedDuration/24.)
-				print
-				print "Number of IS observations [only IS]:       %d [%d]" % (Nistype, Nistype_only)
-				print "Number of IS+CS observations only:         %d" % (Niscs,)
-				print "Number of IS+IM observations only:         %d" % (Nisim,)
-				print "Number of IS+CS+IM observations only:      %d" % (Niscsim,)
-				print "Number of CS observations [only CS]:       %d [%d]" % (Ncstype, Ncstype_only)
-				print "Number of CS+IM observations only:         %d" % (Ncsim,)
-				print "Number of FE observations [only FE]:       %d [%d]" % (Nfetype, Nfetype_only)
-				print "Number of FE+CS observations only:         %d" % (Ncsfe,)
-				print "Number of FE+IS observations only:         %d" % (Nisfe,)
-				print "Number of FE+IM observations only:         %d" % (Nimfe,)
-				print "Number of FE+IS+CS observations only:      %d" % (Niscsfe,)
-				print "Number of IM observations [only IM]:       %d [%d]" % (Nimtype, Nimtype_only)
-				print "Number of BF observations [only BF]:       %d [%d]" % (Nbftype, Nbftype_only)
-				print "Number of BF+IS observations only:         %d" % (Nbfis,)
-				print "Number of BF+FE observations only:         %d" % (Nbffe,)
-				print "Number of BF+IS+FE observations only:      %d" % (Nbfisfe,)
-				print "Number of BF+IS+CS+FE observations only:   %d" % (Nbfiscsfe,)
-				print "Number of FD observations [only FD]:       %d [%d]" % (Nfdtype, Nfdtype_only)
-				print
-				print "Total size of raw data (TB):               %.1f" % (totRawsize,)
-				print "Total size of raw data w/o IM-only (TB):   %.1f" % (totRawsize-IMonlyRawsize,)
-				print "Total size of processed data (TB):         %.1f" % (totProcessedsize,)
-				print
+				# initializing statistics' class
+				stat = obsstat(obsids, fromdate, todate)
+				stat.printstat()
 				sys.exit(0)
-				#
 				########## end of statistics #############
-				# 
 
 	if not is_update:
 		# loop over the storage nodes and directories to get the list of all IDs
@@ -1351,12 +1419,18 @@ if __name__ == "__main__":
 		sf={"obsid": "-obsid.html", "time": "-time.html", "size": "-size.html", "source": "-source.html"}
 		for key in sf.keys():
 			sf[key] = "%s%s" % (linkedhtmlstem, sf[key])
+		# create html-file with statistics
+		htmlstatfile = "%s-stat.html" % (linkedhtmlstem) 
+		stat = obsstat(obskeys, fromdate, todate)
+		stat.printhtml(htmlstatfile)
+
 		htmlrep=writeHtmlList(sf["obsid"], linkedhtmlstem, fromdate, todate)
 		for key in sf.keys():
 			htmlrep.reInit(sf[key])
 			htmlrep.open()
 			htmlrep.obsnumber(storage_nodes, np.size(dbobsids), np.size(obsids))
 			htmlrep.datesrange()
+			htmlrep.statistics(htmlstatfile)
 			htmlrep.linkedheader(viewtype, storage_nodes_string_html)
 			if key == "size":
 				sorted_indices=np.flipud(np.argsort([float(obstable[r].totsize) for r in obskeys], kind='mergesort'))
