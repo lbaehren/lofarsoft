@@ -187,8 +187,14 @@ class obsinfo:
                 	self.nodeslist=self.nodeslist[:13] + "..."
 
 	        # getting the name of /data? where the data are stored
-        	cmd="grep Observation.MSNameMask %s" % (self.parset,)
-        	self.datadir="/" + os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("/")[1]
+		try:
+        		cmd="grep Observation.MSNameMask %s" % (self.parset,)
+        		self.datadir="/" + os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("/")[1]
+		# it seems that for some of observations, the field Observation.MSNameMask in the parset file is missing
+		# instead, there is another field called "OLAP.Storage.targetDirectory"
+		except:
+        		cmd="grep OLAP.Storage.targetDirectory %s" % (self.parset,)
+        		self.datadir="/" + os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("/")[1]
 
 	        # getting info about the Type of the data (BF, Imaging, etc.)
         	# check first if data are beamformed
