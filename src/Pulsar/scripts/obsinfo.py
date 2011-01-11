@@ -598,7 +598,7 @@ class writeHtmlList:
 				self.htmlptr.write ("List only observations since %s till %s<br>\n" % (self.fd, self.td))
 
 	def statistics (self, link):
-		self.htmlptr.write ("<a href=\"%s\">Statistics</a>\n" % (link))
+		self.htmlptr.write ("<a href=\"%s\">Statistics</a>\n" % (link.split("/")[-1]))
 
 	def header (self, viewtype, storage_nodes_string_html):
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
@@ -798,48 +798,48 @@ class obsstat:
                           	  <title>Pulsar observations statistics</title>\n\
                          	</head>\n\n\
                          	<style type='text/css'>\n\
-                          	 tr.d0 td { background-color: #ccffff; color: black; font-size: 80% }\n\
-                          	 tr.d1 td { background-color: #99cccc; color: black; font-size: 80% }\n\
+                          	 tr.d0 td { background-color: #ccffff; color: black; font-size: 100% }\n\
+                          	 tr.d1 td { background-color: #99cccc; color: black; font-size: 100% }\n\
                           	 tr.d th { background-color: #99cccc; color: black;}\n\
                          	</style>\n\n\
                          	<body bgcolor='white'>\n\
-                          	<h2 align=left>Current pulsar observations statistics</h2>\n\
+                          	<h2 align=left>Pulsar observations statistics</h2>\n\
                         	\n")
 		if self.fd != "" or self.td != "":
-			self.htmlptr.write ("\n%s%s<br>" % (self.fd != "" and "From " + self.fd or (self.td != "" and " Till " + self.td or ""), 
+			self.htmlptr.write ("\n<h3>%s%s</h3>" % (self.fd != "" and "From " + self.fd or (self.td != "" and " Till " + self.td or ""), 
                                                                     self.td != "" and (self.fd != "" and " Till " + self.td or "") or ""))
-		self.htmlptr.write ("\n<br>")
-		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%.1f / %.1f]</td>\n</tr>" % ("Total number of observations [hours / days]", np.size(self.ids), self.totDuration, self.totDuration/24.))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%.1f / %.1f]</td>\n</tr>" % ("Number of observations w/o IM only [hours / days]", np.size(self.ids)-self.Nimtype_only, self.totDuration-self.IMonlyDuration, (self.totDuration-self.IMonlyDuration)/24.))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%.1f / %.1f]</td>\n</tr>" % ("Number of processed observations [hours / days]", self.Nprocessed,self.processedDuration,self.processedDuration/24.))
 
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left></td>\n <td align=left></td>\n</tr>")
+		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=5>\n")
+		self.htmlptr.write ("\n<tr class='d1' align=left width=400>\n <td align=left>%s [<font color=\"blue\">%s</font> / <font color=\"green\">%s</font>]</td>\n <td align=left><b>%d</b> [<font color=\"blue\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>\n</tr>" % ("Total number of observations", "hours", "days", np.size(self.ids), self.totDuration, self.totDuration/24.))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"blue\">%s</font> / <font color=\"green\">%s</font>]</td>\n <td align=left><b>%d</b> [<font color=\"blue\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>\n</tr>" % ("Number of observations w/o IM only", "hours", "days", np.size(self.ids)-self.Nimtype_only, self.totDuration-self.IMonlyDuration, (self.totDuration-self.IMonlyDuration)/24.))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"blue\">%s</font> / <font color=\"green\">%s</font>]</td>\n <td align=left><b>%d</b> [<font color=\"blue\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>\n</tr>" % ("Number of processed observations", "hours", "days", self.Nprocessed,self.processedDuration,self.processedDuration/24.))
 
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of IS observations [only IS]", self.Nistype, self.Nistype_only))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of IS+CS observations only", self.Niscs))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of IS+IM observations only", self.Nisim))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of IS+CS+IM observations only", self.Niscsim))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of CS observations [only CS]", self.Ncstype, self.Ncstype_only))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of CS+IM observations only", self.Ncsim))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of FE observations [only FE]", self.Nfetype, self.Nfetype_only))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of FE+CS observations only", self.Ncsfe))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of FE+IS observations only", self.Nisfe))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of FE+IM observations only", self.Nimfe))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of FE+IS+CS observations only", self.Niscsfe))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of IM observations [only IM]", self.Nimtype, self.Nimtype_only))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of BF observations [only BF]", self.Nbftype, self.Nbftype_only))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of BF+IS observations only", self.Nbfis))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of BF+FE observations only", self.Nbffe))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of BF+IS+FE observations only", self.Nbfisfe))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d</td>\n</tr>" % ("Number of BF+IS+CS+FE observations only", self.Nbfiscsfe))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%d]</td>\n</tr>" % ("Number of FD observations [only FD]", self.Nfdtype, self.Nfdtype_only))
+		self.htmlptr.write ("\n<tr align=left height=25>\n <td align=left></td>\n <td align=left></td>\n</tr>")
 
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left></td>\n <td align=left></td>\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"green\">%s</font>]</td>\n <td align=left><b>%d</b> [<font color=\"green\"><b>%d</b></font>]</td>\n</tr>" % ("Number of IS observations", "only IS", self.Nistype, self.Nistype_only))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of IS+CS observations only", self.Niscs))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of IS+IM observations only", self.Nisim))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of IS+CS+IM observations only", self.Niscsim))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"green\">%s</font>]</td>\n <td align=left><b>%d</b> [<font color=\"green\"><b>%d<b></font>]</td>\n</tr>" % ("Number of CS observations", "only CS", self.Ncstype, self.Ncstype_only))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of CS+IM observations only", self.Ncsim))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"green\">%s</font>]</td>\n <td align=left><b>%d</b> [<font color=\"green\"><b>%d</b></font>]</td>\n</tr>" % ("Number of FE observations", "only FE", self.Nfetype, self.Nfetype_only))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of FE+CS observations only", self.Ncsfe))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of FE+IS observations only", self.Nisfe))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of FE+IM observations only", self.Nimfe))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of FE+IS+CS observations only", self.Niscsfe))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"green\">%s</font>]</td>\n <td align=left><b>%d</b> [<font color=\"green\"><b>%d</b></font>]</td>\n</tr>" % ("Number of IM observations", "only IM", self.Nimtype, self.Nimtype_only))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"green\">%s</font>]</td>\n <td align=left><b>%d</b> [<font color=\"green\"><b>%d</b></font>]</td>\n</tr>" % ("Number of BF observations", "only BF", self.Nbftype, self.Nbftype_only))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of BF+IS observations only", self.Nbfis))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of BF+FE observations only", self.Nbffe))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of BF+IS+FE observations only", self.Nbfisfe))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of BF+IS+CS+FE observations only", self.Nbfiscsfe))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"green\">%s</font>]</td>\n <td align=left><b>%d<b> [<font color=\"green\"><b>%d</b></font>]</td>\n</tr>" % ("Number of FD observations", "only FD", self.Nfdtype, self.Nfdtype_only))
 
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%.1f</td>\n</tr>" % ("Total size of raw data (TB)", self.totRawsize))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%.1f</td>\n</tr>" % ("Total size of raw data w/o IM-only (TB)", self.totRawsize-self.IMonlyRawsize))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left>%.1f</td>\n</tr>" % ("Total size of processed data (TB)", self.totProcessedsize))
+		self.htmlptr.write ("\n<tr align=left height=25>\n <td align=left></td>\n <td align=left></td>\n</tr>")
+
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%.1f</b></td>\n</tr>" % ("Total size of raw data (TB)", self.totRawsize))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%.1f</b></td>\n</tr>" % ("Total size of raw data w/o IM-only (TB)", self.totRawsize-self.IMonlyRawsize))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%.1f</b></td>\n</tr>" % ("Total size of processed data (TB)", self.totProcessedsize))
 
 		self.htmlptr.write ("\n</table>\n</body>\n</html>")
 		self.htmlptr.close()
