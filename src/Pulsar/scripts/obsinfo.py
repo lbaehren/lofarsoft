@@ -807,7 +807,7 @@ class obsstat:
                         	\n")
 		if self.fd != "" or self.td != "":
 			self.htmlptr.write ("\n%s%s<br>" % (self.fd != "" and "From " + self.fd or (self.td != "" and " Till " + self.td or ""), 
-                                                                    self.td != "" and (self.fd != "" and " Till " + self.td or "") or "")
+                                                                    self.td != "" and (self.fd != "" and " Till " + self.td or "") or ""))
 		self.htmlptr.write ("\n<br>")
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
 		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left>%d [%.1f / %.1f]</td>\n</tr>" % ("Total number of observations [hours / days]", np.size(self.ids), self.totDuration, self.totDuration/24.))
