@@ -528,6 +528,12 @@ namespace PyCR { // Namespace PyCR -- begin
     KeyError(std::string m) : Exception(m) {};
   };
 
+  class IndexError: public Exception
+  {
+  public:
+    IndexError(std::string m) : Exception(m) {};
+  };
+
   class MemoryError: public Exception
   {
   public:

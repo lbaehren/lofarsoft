@@ -41,7 +41,7 @@
 
 #include "core.h"
 #include "mVector.h"
-
+#include <sstream>
 
 // ========================================================================
 //
@@ -652,6 +652,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   Iterin itin;
   HInteger count(number_of_elements);
 
+  HInteger lenIn = std::distance(vecin, vecin_end);
   HInteger lenOut = std::distance(vecout, vecout_end);
 
   // Sanity check
@@ -661,6 +662,23 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
     return;
   if ((count<0) || (count > lenOut))
     count = lenOut;
+
+  // Checking indices
+  while (itidx != index_end) {
+    if ((*itidx >= lenIn) || (*itidx < -lenIn)) {
+      std::string errormessage;
+      std::stringstream sstream (stringstream::in | stringstream::out);
+      sstream << "Error: Illegal index value: " << *itidx;
+      errormessage = sstream.str();
+      throw PyCR::ValueError(errormessage);
+    } else {
+      if (*itidx < 0) {
+        *itidx += lenIn;
+      }
+    }
+    ++itidx;
+  }
+  itidx = index;
 
   // Copying of data
   while ((itout != vecout_end) && (count > 0)) {
