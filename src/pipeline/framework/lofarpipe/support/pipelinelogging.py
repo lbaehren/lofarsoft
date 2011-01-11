@@ -124,7 +124,7 @@ def log_file(filename, logger, killswitch):
 class LogCatcher(object):
     """
     Sets up a context in which we can catch logs from individual pipeline
-    process in a file, thensend then to the pipeline logger.
+    process in a file, then send then to the pipeline logger.
 
     This provides the basic mechanism, but requires subclassing to define
     self.log_prop and self.log_prop_filename (the name & contents of the log
