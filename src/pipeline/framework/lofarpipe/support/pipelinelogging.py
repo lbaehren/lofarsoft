@@ -94,6 +94,8 @@ class SearchingLogger(logging.Logger):
 def getSearchingLogger(name):
     """
     Return an instance of SearchingLogger with the given name.
+
+    Equivalent to logging.getLogger, but returns a SearchingLogger.
     """
     old_class = logging.getLoggerClass()
     logging.setLoggerClass(SearchingLogger)
@@ -109,6 +111,10 @@ def log_file(filename, logger, killswitch):
 
     killswitch is an instance of threading.Event: when set, we bail out of the
     loop.
+
+    :param filename: Full path to file to watch
+    :param logger: Logger to which to send updates
+    :param killswitch: instance of :class:`threading.Event` -- stop watching file when set
     """
     if not os.path.exists(filename):
         open(filename, 'w').close()
@@ -204,6 +210,8 @@ def log_time(logger):
     """
     Send information about the processing time used by code in this context to
     the specified logger.
+
+    :param logger: logger to which timing information should be sent.
     """
     def get_rusage():
         return [
@@ -232,7 +240,17 @@ def log_time(logger):
 
 def log_process_output(process_name, sout, serr, logger):
     """
-    Log sout/serr from a process if they contain anything interesting.
+    Log stdout/stderr from a process if they contain anything interesting --
+    some line-noise produced by many CEP executables is stripped.
+
+    :param process_name: Name to be used for logging purposes
+    :param sout: Standard out to log (string)
+    :param serr: Standard error to log (string)
+    :param logger: Logger to which messages should be sent
+
+    The ``sout`` and ``serr`` params are intended to be used with the output
+    of :meth:`subprocess.Popen.communicate`, but any string-a-like should
+    work.
     """
     #     These lines are never logged, since they don't tell us anything useful
     # --------------------------------------------------------------------------
