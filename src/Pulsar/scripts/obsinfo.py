@@ -646,7 +646,7 @@ def usage (prg):
         print "Program %s lists info about observations" % (prg, )
 	print "Usage: %s [options]\n\
           -f, --from <date>          - list obs only _since_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
-          -t, --to <date>            - list obs only _till_ <date> (exclusive), <date> in format YYYY-MM-DD\n\
+          -t, --to <date>            - list obs only _till_ <date> (inclusive), <date> in format YYYY-MM-DD\n\
           --sort <mode>              - sort obs list. Default list is sorted by ObsID. Possible <mode>\n\
                                        is \"time\" to sort by start obs time, \"size\" to sort by total\n\
                                        disk space occupied by _raw_ data, \"source\" to sort by\n\
@@ -808,7 +808,7 @@ if __name__ == "__main__":
 					fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
 					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
 				if is_to == True:
-					tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d"))
+					tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 
 				print
@@ -994,7 +994,7 @@ if __name__ == "__main__":
 			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
 
 		if is_to == True:
-			tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d"))
+			tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 		# Number of ObsIDs
 		Nobsids = np.size(obsids)
@@ -1147,10 +1147,15 @@ if __name__ == "__main__":
 		statusline="x"
 		redlocation="x"
 		processed_dirsize=0.0
+		reduced_node = ""
 		for lse in storage_nodes:
 			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
 			if np.size(os.popen(cmd).readlines()) == 0:
 				continue
+
+			reduced_node = lse # saving the lse node with the reduced data for further use (to increase the performance)
+			reddir = ""
+
 			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red", cexec_egrep_string)
 			redout=os.popen(cmd).readlines()
 			if np.size(redout) > 0:
@@ -1201,20 +1206,14 @@ if __name__ == "__main__":
 		chi_array=["", ""]
 		combined_plot=""  # name of the combined plot (always the same), or empty string if it does not exist
 
-		for lse in storage_nodes:
-			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
-			if np.size(os.popen(cmd).readlines()) == 0:
-				continue
-			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red", cexec_egrep_string)
-			redout=os.popen(cmd).readlines()
-			if np.size(redout) > 0:
-				reddir=redout[0][:-1]
+		if reduced_node != "":
+			if reddir != "":
 				# getting first the name of the main pulsar (first in the command-line option)
-				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir, "*.log", cexec_egrep_string)
+				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[reduced_node], reddir, "*.log", cexec_egrep_string)
 				mainlog=os.popen(cmd).readlines()
 				mainpsr="undefined"
 				if np.size(mainlog) > 0:
-					cmd="cexec %s 'cat %s 2>/dev/null | grep id | head -n 1' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], mainlog[0][:-1], cexec_egrep_string)
+					cmd="cexec %s 'cat %s 2>/dev/null | grep id | head -n 1' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[reduced_node], mainlog[0][:-1], cexec_egrep_string)
 					cmdline=os.popen(cmd).readlines()
 					if np.size(cmdline) > 0:
 						param=cmdline[0][:-1].split(" ")
@@ -1227,58 +1226,56 @@ if __name__ == "__main__":
 				if mainpsr == "position":
 					mainpsr = "undefined"
 				# RSP0
-				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", cexec_egrep_string)
+				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[reduced_node], reddir + "/incoherentstokes/RSP0", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) > 0:
 					if mainpsr == "undefined":
-						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.pfd*png", cexec_egrep_string)
+						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[reduced_node], reddir + "/incoherentstokes/RSP0", "*.pfd*png", cexec_egrep_string)
 					else:
-						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", mainpsr + "*.pfd*png", cexec_egrep_string)
+						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[reduced_node], reddir + "/incoherentstokes/RSP0", mainpsr + "*.pfd*png", cexec_egrep_string)
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
 						# copying png files to local directory
-						cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[lse], " ".join([ss[:-1] for ss in status]), plotsdir, id)
+						cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[reduced_node], " ".join([ss[:-1] for ss in status]), plotsdir, id)
 						os.system(cmd)
 						profiles_array[0] = status[0][:-1].split("/")[-1].split(".pfd")[0] + ".pfd"
 					# getting chi-squared
 					if mainpsr == "undefined":
-						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.prepout", cexec_egrep_string)
+						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[reduced_node], reddir + "/incoherentstokes/RSP0", "*.prepout", cexec_egrep_string)
 					else:
-						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", mainpsr + "*.prepout", cexec_egrep_string)
+						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[reduced_node], reddir + "/incoherentstokes/RSP0", mainpsr + "*.prepout", cexec_egrep_string)
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
 						chi_array[0] = status[0][:-1]
 				# RSPA
-				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", cexec_egrep_string)
+				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[reduced_node], reddir + "/incoherentstokes/RSPA", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) > 0:
 					if mainpsr == "undefined":
-						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", "*.pfd*png", cexec_egrep_string)
+						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[reduced_node], reddir + "/incoherentstokes/RSPA", "*.pfd*png", cexec_egrep_string)
 					else:
-						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", mainpsr + "*.pfd*png", cexec_egrep_string)
+						cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[reduced_node], reddir + "/incoherentstokes/RSPA", mainpsr + "*.pfd*png", cexec_egrep_string)
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
 						# copying png files to local directory
-						cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[lse], " ".join([ss[:-1] for ss in status]), plotsdir, id)
+						cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[reduced_node], " ".join([ss[:-1] for ss in status]), plotsdir, id)
 						os.system(cmd)
 						profiles_array[1] = status[0][:-1].split("/")[-1].split(".pfd")[0] + ".pfd"
 					# getting chi-squared
 					if mainpsr == "undefined":
-						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", "*.prepout", cexec_egrep_string)
+						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[reduced_node], reddir + "/incoherentstokes/RSPA", "*.prepout", cexec_egrep_string)
 					else:
-						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", mainpsr + "*.prepout", cexec_egrep_string)
+						cmd="cexec %s 'find %s -name \"%s\" -print -exec cat {} \; 2>/dev/null | grep chi-squared' 2>/dev/null | grep -v Permission | grep -v such | %s | awk '{print $6}' -" % (cexec_nodes[reduced_node], reddir + "/incoherentstokes/RSPA", mainpsr + "*.prepout", cexec_egrep_string)
 					status=os.popen(cmd).readlines()
 					if np.size(status) > 0:
 						chi_array[1] = status[0][:-1]
 
 				# checking if combined plot exists and rsync it if it does exist
-				cmd="cexec %s 'ls -1 %s/%s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir, "combined.th.png", cexec_egrep_string)
+				cmd="cexec %s 'ls -1 %s/%s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[reduced_node], reddir, "combined.th.png", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) != 0:
 					combined_plot="combined.th.png"
 					# copying combined plot
-					cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s/%s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[lse], reddir, "combined.th.png", plotsdir, id)
+					cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s/%s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[reduced_node], reddir, "combined.th.png", plotsdir, id)
 					os.system(cmd)
 				
-				# we found lse, so get out of the loop
-				break
 
 		# combining info
 		out.Init(id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, "", profiles_array, chi_array, combined_plot)
@@ -1314,7 +1311,7 @@ if __name__ == "__main__":
 		obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) >= fromsecs, obskeys))
 
 	if is_to == True:
-		tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d"))
+		tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 		obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) <= tosecs, obskeys))
 
 	# printing the sorted list
