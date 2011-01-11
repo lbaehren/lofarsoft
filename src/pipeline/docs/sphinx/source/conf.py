@@ -95,7 +95,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'LOFAR Pipeline System'
-copyright = u'2009—10, John Swinbank'
+copyright = u'2009—11, John Swinbank'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
