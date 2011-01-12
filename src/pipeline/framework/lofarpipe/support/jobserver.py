@@ -99,12 +99,11 @@ class JobSocketReceiver(SocketServer.ThreadingTCPServer):
         jobpool,
         error,
         host=None,
-        port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-        handler=JobStreamHandler
+        port=logging.handlers.DEFAULT_TCP_LOGGING_PORT
     ):
         if not host:
             host = socket.gethostname()
-        SocketServer.ThreadingTCPServer.__init__(self, (host, port), handler)
+        SocketServer.ThreadingTCPServer.__init__(self, (host, port), JobStreamHandler)
         self.abort = False
         self.timeout = 1
         self.queue = Queue.Queue()
