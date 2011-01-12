@@ -143,8 +143,14 @@ def run_via_paramiko(logger, host, command, environment, arguments, key_filename
 
 class ProcessLimiter(defaultdict):
     """
-    Wrap a bounded semaphore, giving a convenient way to keep tabs on the
-    number of simultaneous jobs running on a given host.
+    Provide a dictionary-like structure of bounded semaphores with arbitrary
+    keys.
+
+    This gives a convenient way to keep tabs on the number of simultaneous
+    jobs running on a given host.
+
+    :param nproc: Bound value for semaphore (ie, maximum number of jobs)
+    :type nproc: integer or none
     """
     def __init__(self, nproc=None):
         if nproc:
@@ -166,6 +172,10 @@ class ProcessLimiter(defaultdict):
 class ComputeJob(object):
     """
     Container for information about a job to be dispatched to a compute node.
+
+    :param host: Target host for job
+    :param command: Full path to command to be run on target host
+    :param arguments: List of arguments which will be passed to command
     """
     def __init__(self, host, command, arguments=[]):
         self.host = host
@@ -227,8 +237,14 @@ class ComputeJob(object):
 def threadwatcher(threadpool, logger, killswitch):
     """
     Start and watch a pool of threads. If an exception is thrown during
-    processing, set the killswitch (an instance of threading.Event) so that
-    all threads can shut down cleanly.
+    processing, set the killswitch so that all threads can shut down cleanly,
+    then join all the threads to wait for them to finish.
+
+    :param threadpool: Pool of threads to handle
+    :param logger: Logger
+    :type logger: logging.Logger or descendant
+    :param killswitch: Indication for threads to abort
+    :type killswitch: threading.Event
     """
     # If we receive a SIGTERM, shut down processing.
     signal.signal(signal.SIGTERM, killswitch.set)
@@ -259,10 +275,12 @@ class RemoteCommandRecipeMixIn(object):
     """
     def _schedule_jobs(self, jobs, max_per_node=None):
         """
-        Schedule a series of compute jobs.
+        Schedule a series of compute jobs. Blocks until completion.
 
-        job_args is an interable, containing a series of lists of arguments,
-        each of which will be dispatched to the compute nodes.
+        :param jobs: iterable of :class:`~lofarpipe.support.remotecommand.ComputeJob` to be scheduled
+        :param max_per_node: maximum number of simultaneous jobs on any given node
+        :type max_per_node: integer or none
+        :rtype: dict mapping integer job id to :class:`~lofarpipe.support.remotecommand.ComputeJob`
         """
         threadpool = []
         jobpool = {}

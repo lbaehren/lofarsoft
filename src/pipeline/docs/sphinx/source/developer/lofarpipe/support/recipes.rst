@@ -38,6 +38,7 @@ The relationship between all these classes is illustrated below.
    :members: pipeline_logic
 
 .. autoclass:: lofarpipe.support.remotecommand.RemoteCommandRecipeMixIn
+   :members: _schedule_jobs
 
    See the :ref:`distribution <lofarpipe-remotecommand>` section for details.
 

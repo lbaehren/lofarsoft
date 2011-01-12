@@ -4,6 +4,11 @@
 Pipeline-native task distribution
 =================================
 
+.. todo::
+
+   Update this to reflect the current reality. In particular, there is now
+   direct support for sending pickled Python objects to and from compute jobs.
+
 The pipeline system provides a built-in method for distributing tasks over a
 network. This provides the facility to dispatch a job (effectively consisting
 of a Python script plus a collection of arguments) to a remote host, then
