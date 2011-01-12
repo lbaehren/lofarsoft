@@ -317,10 +317,10 @@ def inf_reader(file, verbose = False):
                     # Some keys have = signs in them, deal with that:
                     if len(tmp) > 2:
                         key = '='.join(tmp[:-1])
-                        key = key.upper()
+    #                    key = key.upper()
                     else:
                         key = tmp[0]
-                        key = key.upper()
+    #                    key = key.upper()
 
                     # Special case for On/Off pairs (which have the problem that 
                     # there is information in the .inf key 8/ )
@@ -343,7 +343,7 @@ def inf_reader(file, verbose = False):
                             info.on_off_pairs[k] = t
                         continue
                     # end of special case ...
-
+                    key = key.upper()
                     try:
                         target_attribute = mapping[key]
                     except KeyError:

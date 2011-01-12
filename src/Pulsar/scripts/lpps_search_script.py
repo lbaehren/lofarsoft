@@ -50,14 +50,19 @@ import pprint
 # Common python library imports:
 import numpy
 
-# PRESTO / LOFAR PULSAR library imports:
+# PRESTO / PSR UTILS / LOFAR PULSAR library imports:
 import presto
 import sifting
+import psr_utils
+
 # TODO : commit fixed .inf reader to ssps Git repository. 
 #from ssps.presto.files.inf import inf_reader
 from lpps_search.inf import inf_reader, ra2ascii, dec2ascii
 import lpps_search.crawler as crawler
-
+#import folder
+import lpps_fold_script as folder
+from lpps_search.util import create_script, run_as_script
+from lpps_search.util import get_command, run_command
 
 # ----------------------------------------------------------------------------
 # -- Utility functions from GBT or Vishal's scripts --------------------------
@@ -85,8 +90,10 @@ class DedispPlan(object):
                        numpy.arange(self.dmsperpass)*self.dmstep + lodm]
              self.dmlist.append(dmlist)
 
+        self.prepsubband_time = None
+        self.search_time = None
 
-def get_baryv(ra, dec, mjd, T, obs="GB"):
+def get_baryv(ra, dec, mjd, T, obs="LF"):
     """ 
     get_baryv(ra, dec, mjd, T):
         Determine the average barycentric velocity towards 'ra', 'dec'
@@ -94,7 +101,7 @@ def get_baryv(ra, dec, mjd, T, obs="GB"):
         standard string format (i.e. 'hh:mm:ss.ssss' and 'dd:mm:ss.ssss').
         'T' is in sec and 'mjd' is (of course) in MJD.
     """
-    tts = pu.span(mjd, mjd+T/86400.0, 100)
+    tts = psr_utils.span(mjd, mjd+T/86400.0, 100)
     nn = len(tts)
     bts = numpy.zeros(nn, dtype=numpy.float64)
     vel = numpy.zeros(nn, dtype=numpy.float64)
@@ -202,32 +209,6 @@ def determine_numout(n_bins):
         return best_trial
 
 # ----------------------------------------------------------------------------
-# -- Helper functions for making system calls.                              --
-# ----------------------------------------------------------------------------
-
-def get_command(program, options_dict, parameters):
-    '''Construct system calls (for commandlines).'''
-    cmd = [program]
-    for option, value in options_dict.iteritems():
-        if len(value) > 0:
-            cmd.append(option)
-            cmd.append(value)
-        else:
-            cmd.append(option)
-    cmd.extend(parameters)
-    cmd = ' '.join(cmd)
-    return cmd
-
-def run_command(program, options_dict, parameters):
-    '''Construct and run system calls using subprocess module.'''
-    cmd_ln = get_command(program, options_dict, parameters)
-    # TODO : consider doing something to the return codes
-    print 'Running command :', cmd_ln
-    p = subprocess.Popen(cmd_ln, shell=True)
-    output, error = p.communicate()
-    return p.returncode
-
-# ----------------------------------------------------------------------------
 # -- Individual steps in the pipeline (functions wrapping parts of presto   --
 # -- whether they are python modules or system calls does not matter).      --
 # ----------------------------------------------------------------------------
@@ -261,6 +242,10 @@ def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
     ddplan.numpasses == 1 and an appropriate ddplan.dmsperpass --- exactly
     what this function expects).
     '''
+    new_numout = numout / ddplan.downsamp
+    print numout, ddplan.downsamp, new_numout
+    assert numout % ddplan.downsamp == 0
+    new_numout = int(new_numout)
     prepsubband_options = {
         '-noclip' : '',
         '-mask' : mask_file, 
@@ -269,7 +254,7 @@ def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
         '-numdms' : str(ddplan.dmsperpass),
         '-downsamp' : str(ddplan.downsamp),
         '-dmstep' : '%.2f' % ddplan.dmstep,
-        '-numout' : str(numout),
+        '-numout' : str(new_numout),
         '-runavg' : '', 
     }
     
@@ -287,14 +272,17 @@ def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
             prepsubband_parameters)
         mpirun_options = copy.copy(MPIRUN_OPTIONS)
         mpirun_options['-np'] = str(n_cores)
+        print get_command('mpirun', mpirun_options, [tmp])
         status = run_command('mpirun', mpirun_options, [tmp])
     else:
+        print get_command('prepsubband', prepsubband_options,
+            prepsubband_parameters)
         status = run_command('prepsubband', prepsubband_options,
             prepsubband_parameters)
 
     return status
 
-def get_fourier_and_correct_commands(work_dir, basename, dm):
+def get_fourier_and_correct_commands(work_dir, basename, dm, bary_v, zap_file):
     '''Get PRESTO realfft and rednoise commands.'''
     # TODO : add exception handling.
     # TODO : add zapbirds support (ask about zap files)
@@ -307,8 +295,18 @@ def get_fourier_and_correct_commands(work_dir, basename, dm):
         '_red.fft')    
     # Fourier transform takes place in the same directory as the .dat file.
     cmds.append(get_command('realfft', {'-outdir' : work_dir}, [dat_file]))
-    cmds.append(get_command('rednoise', {}, [fft_file]))
- 
+    
+    # Run zapbirds if zap_file is available
+    if zap_file:
+        cmds.append(get_command('zapbirds', {
+                '-zap' : '',
+                '-zapfile' : zap_file,
+                '-baryv' : '%6g' % bary_v,
+            }, [fft_file])
+        )
+        cmds.append(get_command('rednoise', {}, [fft_file]))
+    # Run rednoise correction.
+    cmds.append(get_command('rednoise', {}, [fft_file])) 
     # copy rednoise corrected fft back to the normal fft
     cmds.append(get_command('mv', {}, [red_fft_file, fft_file]))
     
@@ -358,7 +356,6 @@ def sift_accel_cands(work_dir, basename, dms, z):
 
     # Look in all the output candidates sift them using the PRESTO sifting
     # module, then fold all of it.
-    # TODO : make z = 0 not hardcoded
     
     # TODO : remove assert, need to figure out the way the way to construct
     # the correct file name endings (float vs int in ending ?)
@@ -381,33 +378,11 @@ def sift_accel_cands(work_dir, basename, dms, z):
     # PRESTO seems to return None in stead of an empty list
     if accel_cands == None: accel_cands = []
     return accel_cands 
-
-def get_folding_command(candidate, mask_file, work_dir, basename,
-    subband_globpattern):
-    '''Run PRESTO prepfold command.'''
-    
-    command_list = []
-    cwd = os.getcwd()
-    command_list.append(get_command('cd', {}, [work_dir]))
-    
-    command_list.append(get_command('prepfold', {
-        '-mask' : mask_file,
-        '-runavg' : '',
-        '-p' : str(candidate.p),
-        '-dm' : str(candidate.DM),
-        '-noxwin' : '',
-        '-nosearch' : '',
-        '-o' : basename,
-        '-fine' : '', 
-    }, [subband_globpattern]))
-    
-    command_list.append(get_command('cd', {}, [os.path.abspath(cwd)]))
-    return command_list
-    
+   
 # ----------------------------------------------------------------------------
 
 class SearchRun(object):
-    def __init__(self, in_dir, work_dir, out_dir, rfi_file):
+    def __init__(self, in_dir, work_dir, out_dir, rfi_file, zap_file):
         '''This class describes a blind pulsar search.'''
         # Set directories used in search
         self.in_dir = os.path.abspath(in_dir)
@@ -457,7 +432,12 @@ class SearchRun(object):
 
             self.rfi_file = os.path.join(lofarsoft, 'release', 'share', 
                 'pulsar', 'data', 'master.rfi')
-
+        self.zap_file = zap_file
+        ra_str = ra2ascii(*self.metadata.j2000_ra)
+        dec_str = dec2ascii(*self.metadata.j2000_dec)
+        self.bary_v = get_baryv(ra_str, dec_str, self.metadata.epoch_mjd, 
+            self.metadata.n_bins * self.metadata.bin_width, obs='LF') 
+        print 'Calculated barycentric velocity :', self.bary_v
         logging.info('Prepared for pulsar search run.')
         logging.info('Using %s as input directory.' % self.in_dir)
         logging.info('Using %s as working directory.' % self.work_dir)
@@ -532,7 +512,8 @@ class SearchRun(object):
         return [ddplan.lodm + ddplan.dmstep * i  \
             for i in range(ddplan.dmsperpass)]
 
-    def run_search(self, ddplans, z_values, n_cores = None):
+    def run_search(self, ddplans, z_values, n_cores = None, 
+            no_singlepulse = False):
         # The GBT drift scan survey uses dedispersion plans as units
         # of work. Because our use of mpiprepsubband (has extra constraints
         # on the number of DM trials it can write) and the fact that
@@ -558,8 +539,12 @@ class SearchRun(object):
         bad_channel_str = ','.join([str(idx) for idx in bad_channels]) 
 
         # Perform rfifind
+        t_rfifind_start = time.time()
         rfifind_status = run_rfifind(self.get_subband_globpattern(), 
             self.work_dir, self.basename, bad_channel_str)
+        t_rfifind_end = time.time()
+        print 'Running rfifind took %.2f seconds.' % \
+            (t_rfifind_end - t_rfifind_start)
         # Move the rfifind output files
         for file in glob.glob(os.path.join(self.work_dir, '*_rfifind*')):
             try:
@@ -576,22 +561,26 @@ class SearchRun(object):
             ddplan_i += 1
             # Note : Check whether data needs downsampling (and how GBT does
             # it).
+
+            t_prepsubband_start = time.time() 
             prepsubband_status = run_prepsubband(ddplan, n_cores_to_use,
                 self.get_subband_globpattern(), self.work_dir, self.basename,
                 rfifind_mask_file, determine_numout(self.metadata.n_bins))
-            
-            command_list = [[] for i in range(n_cores)]
+            t_prepsubband_end = time.time()
+            ddplan.prepsubband_time = t_prepsubband_end - t_prepsubband_start
 
+            t_search_start = time.time() 
+            command_list = [[] for i in range(n_cores)]
             for i, dm in enumerate(self.get_dms(ddplan)):
                 # determine which core the command is for:
                 core_index = i % n_cores
                 # Append all the per DM processing commands to the appropriate
                 # list of commands:
-
                 # fourier transform + rednoise correction:
                 command_list[core_index].extend(
                     get_fourier_and_correct_commands(
-                        self.work_dir, self.basename, dm
+                        self.work_dir, self.basename, dm, self.bary_v, 
+                        self.zap_file,
                     )
                 )
 
@@ -610,14 +599,23 @@ class SearchRun(object):
                             ]
                         )
                     )    
-                   
-                # Run PRESTO single pulse search (not the plotting or SSPS part):
-                command_list[core_index].extend(
-                    get_single_pulse_search_command(
-                        self.work_dir, self.basename, dm
+                if not no_singlepulse:                   
+                    # Run PRESTO single pulse search (not the plotting or SSPS part):
+                    command_list[core_index].extend(
+                        get_single_pulse_search_command(
+                            self.work_dir, self.basename, dm
+                            )
+                        )
+                    # move the single pulse files to the output directory
+                    command_list[core_index].append(
+                        get_command('mv', {}, [
+                            os.path.join(self.work_dir, 
+                            self.basename + '_DM%.2f' % dm + '.singlepulse'),
+                            self.out_dir
+                            ]
                         )
                     )
-                
+               
                 # move files that are no longer necessary:
                 command_list[core_index].append(
                     get_command('mv', {}, [
@@ -627,15 +625,7 @@ class SearchRun(object):
                         ]
                     )
                 )
-                command_list[core_index].append(
-                    get_command('mv', {}, [
-                        os.path.join(self.work_dir, 
-                        self.basename + '_DM%.2f' % dm + '.singlepulse'),
-                        self.out_dir
-                        ]
-                    )
-                )
-               
+              
                 # remove datafiles that are no longer necessary
                 command_list[core_index].append(
                     get_command('rm', {}, [os.path.join(self.work_dir, 
@@ -674,98 +664,25 @@ class SearchRun(object):
             # wait for all the scripts to finish
             for p in popen_objects:
                 p.wait()
+            t_search_end = time.time()
+            ddplan.search_time = t_search_end - t_search_start
+            
+        # Run the seperate folding script (after having created a directory
+        # for it to write the folds to).
+        os.mkdir(os.path.join(self.out_dir, 'folds'))
+        folder.main(
+            folddir=os.path.join(self.out_dir, 'folds'),
+            subbdir=self.in_dir,
+            canddir=self.out_dir,
+            basename=self.basename,
+        )
+        if not no_singlepulse:
+            # Deal with single pulse search plotting
+            tmp2 = crawler.find_single_pulse_search_output(self.out_dir, 
+                self.basename) 
+            pprint.pprint(tmp2)
 
-        # Crawl the output directory for the products of the scripts:
-        # TODO : remove debug output
-        tmp1 = crawler.find_accelsearch_output(self.out_dir, self.basename)
-        pprint.pprint(tmp1)
-
-        # Take output of crawler and change it to the format the folding code
-        # expects:
-        accel_cands_found_for = dict([(z, []) for z in z_values])
-        for dm, z_dict in tmp1.iteritems():
-            for z_max in z_values:
-                if z_dict.has_key(z_max):
-                    if len(z_dict[z_max]) == 3:
-                        accel_cands_found_for[z_max].append(dm)
-
-        pprint.pprint(accel_cands_found_for)
-
-        # Sift through the acceleration candiates:
-        sifted_candidates = []
-        MAX_CANDIDATES = 10
-        for z_max in z_values:
-            accel_cands = sift_accel_cands(self.out_dir, self.basename, 
-                accel_cands_found_for[z_max], z_max)
-            sifted_candidates.extend(accel_cands[:MAX_CANDIDATES])
- 
-        # Write out a file with acceleration candidates
-        sifting.write_candlist(accel_cands, os.path.join(self.out_dir, 
-            self.basename + '_ALL_ACCELCANDS_ALL_Z'))
-        print 'THERE ARE %d ACCELERATION CANDIDATES' % len(sifted_candidates)
-        
-        # Make per processor core output directories (so that folds on the
-        # different cores don't step on each other's toes).
-        try:
-            os.mkdir(os.path.join(self.out_dir, 'folds'))
-        except Exception, e:
-            print 'Cannot make per core folding output directories'
-            raise
-        for core_index in range(n_cores):
-            try:
-                os.mkdir(os.path.join(self.out_dir, 'folds', 'CORE_%d' % core_index))
-            except Exception, e:
-                print 'Cannot make per core folding output directories'
-                raise
-        
-        # Prepare lists of folding commands
-        command_list = [[] for i in range(n_cores)]
-        for i, candidate in enumerate(sifted_candidates):
-
-            core_index = i % n_cores
-            print 'Candidate %d will be folded by core %d out of %d .' % (i, core_index, n_cores)
-            # Fold the acceleration search results:
-            core_index_str = 'CORE_%d' % core_index
-            command_list[core_index].extend(
-                get_folding_command(candidate, rfifind_mask_file, 
-                    os.path.join(self.out_dir, 'folds', core_index_str), 
-                    self.basename, self.get_subband_globpattern())
-            )
-        
-
- 
-        # Make scripts to do the folding:
-        print 'Running folding scripts, see log files for their standard out.'
-        popen_objects = []
-        print 'Using %d cores' % n_cores
-        for core_index in range(n_cores):
-            if not command_list[core_index]: continue
-            core_index_str = 'CORE_%d' % core_index
-            script_filename = os.path.join(self.out_dir, 'folds', 
-                core_index_str, 'fold_script_core%d.sh' % core_index)
-            log_filename = os.path.join(self.out_dir, 'folds', 
-                core_index_str, 'fold_log_core%d.log.txt' % core_index)
-            try:
-                p = run_as_script(command_list[core_index], script_filename,
-                    log_filename)
-            except Exception, e:
-                print 'Writing  %s script failed' % script_filename
-                raise
-            else:
-                print script_filename
-                popen_objects.append(p)
-
-
-        # wait for all the scripts to finish
-        for p in popen_objects:
-            p.wait()
-
-        # Deal with single pulse search plotting
-        tmp2 = crawler.find_single_pulse_search_output(self.out_dir, 
-            self.basename) 
-        pprint.pprint(tmp2)
-
-        status = run_single_pulse_search_plotter(self.out_dir, self.basename)
+            status = run_single_pulse_search_plotter(self.out_dir, self.basename)
 
 def mpiprepsubband_helper(ddplan, n_cores):
     '''
@@ -860,46 +777,12 @@ def prepsubband_helper(ddplan):
             cum_n_dms += max_n_dms 
         return out
 
-def run_as_script(command_list, script_filename, log_filename):
-    '''Run a list of commands as script, return subprocess.Popen instance.'''
-    create_script(command_list, script_filename)
-    p = subprocess.Popen(script_filename + '>' + log_filename + '2>&1', 
-        shell=True)
-    
-    return p
-
-
-def create_script(command_list, filename):
-    '''Create a shell script given a list of commands and filename.'''
-    # Add echo statements to show what's getting run in the logs as well.
-    tmp = []
-    for cmd in command_list:
-        tmp.append('echo \'%s\'' % cmd)
-        tmp.append(cmd)
-
-    # Open the script for writing and write the contents:
-    try:
-        f = open(filename, 'w')
-        try:
-            f.write('\n'.join(tmp))
-        finally:
-            f.close()
-    except IOError, e:
-        print 'Failed to open scriptfile %s .' % filename
-        raise
-
-    # 'chmod' u+rwx
-    try:
-        os.chmod(filename, 
-            stat.S_IXUSR | stat.S_IWUSR | stat.S_IRUSR)
-    except Exception, e:
-        print 'Failed to make script executable.'
-        raise
-
-
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
+    parser.add_option('--zap_file', dest='zap_file', type='string',
+        default='', metavar='ZAP_LIST', 
+        help='File with birdies for zapbirds.')
     parser.add_option('--i', help='Input directory for raw data.', 
         type='string', metavar='IN_DIR', dest='in_dir')
     parser.add_option('--o', help='Output directory for search data.',
@@ -915,11 +798,12 @@ if __name__ == '__main__':
         help='List of integer z values, default [0,50] - don\'t use spaces.')
     parser.add_option('--ncores', dest='ncores', type='int',
         default=8, help='Number of cores to use (default 8).')
-
-     
+    parser.add_option('--ns', dest='ns', help='Run no single pulse search.',
+        action='store_true', default=False)
+    
     options, args = parser.parse_args()
     N_CORES = options.ncores
-    
+
     if not (options.in_dir and options.out_dir and options.work_dir):
         print 'Provide --i, --w and --o options.'
         print parser.print_help()
@@ -947,7 +831,7 @@ if __name__ == '__main__':
     ) 
     t_start = time.time()
     SR = SearchRun(options.in_dir, options.work_dir, options.out_dir, 
-        options.rfi_file)  
+        options.rfi_file, options.zap_file)  
 
     ddplans = []
     # The number of subbands defaults to being the number of channels in the
@@ -982,7 +866,19 @@ if __name__ == '__main__':
         ddplans.append(DedispPlan(lodm=408.41, dmstep=1.00, dmsperpass=92,
             numpasses=1, numsub=SR.metadata.n_channels, downsamp=32))
 
-    SR.run_search(ddplans, z_values, N_CORES)
+    SR.run_search(ddplans, z_values, N_CORES, options.ns)
     t_end = time.time()
-
-    print 'It took %.2f seconds to search the data.' % (t_end - t_start)
+    print '\n=== TIMINGS ==='
+    search_time = 0
+    dedisperse_time = 0 
+    for ddplan, n_cores in SR.annotated_ddplans:
+        print 'From DM %.2f to DM %.2f' %(ddplan.lodm,
+             ddplan.lodm + ddplan.dmstep * ddplan.dmsperpass) 
+        print 'Dedispersing cost %.2f seconds and searching cost %.2f seconds' % \
+            (ddplan.prepsubband_time, ddplan.search_time)
+        dedisperse_time += ddplan.prepsubband_time
+        search_time += ddplan.search_time
+    print '\nTotal time spent dedispersing %.2f' % dedisperse_time
+    print 'Total time spent searching %.2f' % search_time
+    print '\nIt took %.2f seconds to search the data.' % (t_end - t_start)
+    print '(Including bookkeeping and rfifind)'
