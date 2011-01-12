@@ -13,16 +13,24 @@ class IOInterface(object):
         """Sets the antenna selection used in subsequent calls to
         `getAntennaPositions`, `getFFTData`, `getTimeseriesData`.
 
-        Arguments:
-        *selection* Either Python list with index of the antenna as
-                    known to self (integers (e.g. [1, 5, 6]))
-                    Or list of IDs to specify a LOFAR dipole
-                    (e.g. ['142000005', '3001008'])
+        Required Arguments:
 
-        Return value:
+        =========== =================================================
+        Parameter   Description
+        =========== =================================================
+        *selection* Either Python list with index of the antenna as
+                    known to self (integers (e.g. ``[1, 5, 6]``))
+                    Or list of IDs to specify a LOFAR dipole
+                    (e.g. ``['142000005', '3001008']``)
+        =========== =================================================
+
+        Output:
         This method does not return anything.
-        It raises a ValueError if antenna selection cannot be set
+
+        Raises:
+        It raises a `ValueError` if antenna selection cannot be set
         to requested value (e.g. specified antenna not in file).
+
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
@@ -30,14 +38,23 @@ class IOInterface(object):
         """Sets the frequency selection used in subsequent calls to
         `getFFTData`.
 
-        Arguments:
-        *frequencies* FloatVector of frequencies in Hz
+        Required Arguments:
+
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *frequencies* :class:`~pycrtools.FloatVector` of frequencies
+                      in Hz
+        ============= =================================================
         
-        Return value:
+        Output:
         This method does not return anything.
-        It raises a ValueError if frequency selection cannot be set
-        to requested values (e.g. specified frequency is not
+
+        Raises:
+        It raises a `ValueError` if frequency selection
+        cannot be set to requested values (e.g. specified frequency is not
         available for this blocksize.)
+
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
     
@@ -46,14 +63,23 @@ class IOInterface(object):
         `getFFTData`. The selection set is all frequencies available
         for the set blocksize in the range [fmin,fmax].
         
-        Arguments:
-        *fmin* minimum frequency in Hz
-        *fmax* maximum frequency in Hz
+        Required Arguments:
+
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *fmin*        minimum frequency in Hz
+        *fmax*        maximum frequency in Hz
+        ============= =================================================
         
-        Return value:
+        Output:
         This method does not return anything.
-        It raises a ValueError if frequency selection cannot be set
-        to requested values (e.g. all frequencies out of range)
+
+        Raises:
+        It raises a `ValueError` if frequency selection
+        cannot be set to requested values (e.g. all frequencies out of
+        range)
+
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
@@ -64,24 +90,29 @@ class IOInterface(object):
         selected blocksize, then subsequent calls to `getFFTData` will
         return data corresponding to frequencies[nfmin:nfmax].
         
-        Arguments:
-        *nfmin* minimum frequency as index into frequency array
-        *nfmax* maximum frequency as index into frequency array
+        Required Arguments:
+
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *nfmin*       minimum frequency as index into frequency array
+        *nfmax*       maximum frequency as index into frequency array
+        ============= =================================================
         
-        Return value:
+        Output:
         This method does not return anything.
-        It raises an IndexError if frequency selection cannot be set
+
+        Raises:
+        It raises an `IndexError` if frequency selection cannot be set
         to requested values (e.g. index out of range)
+
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
     def getFrequencies(self):
         """Returns the frequencies that are appicable to the FFT data
 
-        Arguments:
-        None
-
-        Return value:
+        Output:
         This method returns a FloatVector with the selected frequencies
         in Hz.
         """
@@ -91,10 +122,7 @@ class IOInterface(object):
         """Returns relative antenna positions for selected antennas, or all
         antennas if no selection was applied.
 
-        Arguments:
-        None
-
-        Return value:
+        Output:
         a two dimensional array containing the Cartesian position of
         each antenna in meters in local coordinates from a predefined
         center.
@@ -107,10 +135,7 @@ class IOInterface(object):
         """Returns antenna positions for selected antennas, or all
         antennas if no selection was applied.
 
-        Arguments:
-        None
-
-        Return value:
+        Output:
         a two dimensional array containing the Cartesian position of
         each antenna in meters in local coordinates from a predefined
         center.
@@ -122,31 +147,43 @@ class IOInterface(object):
     def getFFTData(self, data, block):
         """Writes FFT data for selected antennas to data array.
 
-        Arguments:
-        *data* data array to write FFT data to.
-        *block* index of block to return data from.
+        Required Arguments:
 
-        Return value:
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *data*        data array to write FFT data to.
+        *block*       index of block to return data from.
+        ============= =================================================
+
+        Output:
         a two dimensional array containing the FFT data of the
         specified block for each of the selected antennae and
         for the selected frequencies.
         So that if `a` is the returned array `a[i]` is an array of
         length (number of frequencies) of antenna i.
+
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
     def getTimeseriesData(self, data, block):
         """Returns timeseries data for selected antennas.
 
-        Arguments:
-        *data* data array to write FFT data to.
-        *block* index of block to return data from.
+        Required Arguments:
 
-        Return value:
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *data*        data array to write timeseries data to.
+        *block*       index of block to return data from.
+        ============= =================================================
+
+        Output:
         a two dimensional array containing the timeseries data of the
         specified block for each of the selected antennae.
         So that if `a` is the returned array `a[i]` is an array of
         length blocksize of antenna i.
+
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
@@ -154,10 +191,7 @@ class IOInterface(object):
         """Returns reference position used for antenna position 
         coordinate system.
 
-        Arguments:
-        None
-
-        Return value:
+        Output:
         a FloatVector with (lon,lat,height) in (rad,rad,m) of the WGS84 
         position of the center used for the antenna position coordinate
         system. 
