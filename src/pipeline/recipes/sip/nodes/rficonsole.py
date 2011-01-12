@@ -19,7 +19,7 @@ from lofarpipe.support.lofarexceptions import ExecutableMissing
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 
 class rficonsole(LOFARnodeTCP):
-    def run(self, executable, nthreads, strategy, indirect, wd, *infiles):
+    def run(self, executable, nthreads, strategy, indirect, skip_flagged, wd, *infiles):
         with log_time(self.logger):
             self.logger.info("Processing %s" % " ".join(infiles))
 
@@ -36,6 +36,8 @@ class rficonsole(LOFARnodeTCP):
                         raise Exception("Strategy definition not available")
                 if indirect:
                     cmd.extend(["-indirect-read"])
+                if skip_flagged:
+                    cmd.extend(["-skip-flagged"])
                 cmd.extend(infiles)
                 with CatchLog4CPlus(
                     working_dir,

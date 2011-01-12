@@ -44,6 +44,11 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
             default=False,
             help="Indirect baseline reader: re-write MS for efficiency"
         ),
+        'skip_flagged': ingredient.BoolField(
+            '--skip-flagged',
+            default=True,
+            help="Ignore any MeasurementSet which has been flagged completely"
+        ),
         'working_dir': ingredient.StringField(
             '--working-dir',
             default='/tmp',
@@ -105,6 +110,7 @@ class rficonsole(BaseRecipe, RemoteCommandRecipeMixIn):
                             self.inputs['nthreads'],
                             strategy,
                             self.inputs['indirect_read'],
+                            self.inputs['skip_flagged'],
                             self.inputs['working_dir']
                         ] + file_list
                     )
