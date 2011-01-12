@@ -1,5 +1,9 @@
 class IOInterface(object):
     """Base class for data IO.
+
+    All functions or methods that use IO should expect to interface with
+    objects of this type and all classes that implement IO should derive
+    from this base class and overload it's functions.
     """
 
     def __init__(self):

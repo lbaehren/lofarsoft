@@ -19,9 +19,9 @@ def autogen(list,output_path):
         # Try importing the module this is needed for sphinx to function correctly
         try:
             exec('import %s' % m)
-            exec('del %s' % m)
-        except:
+        except Exception as e:
             print 'Module',m,'cannot be imported no documentation will be generated.'
+            print 'Error:', e
             continue
 
         # Check if documentation file exists

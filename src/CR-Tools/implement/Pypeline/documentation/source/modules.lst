@@ -1,12 +1,12 @@
 pycrtools.template
 #pycrtools
-#pycrtools.IO
 pycrtools.metadata
 pycrtools.grid
 pycrtools.matching
 pycrtools.srcfind
 pycrtools.PPF
-#pycrtools.bfdata
-#pycrtools.calibration
 pycrtools.tasks
 pycrtools.tasks.imager
+pycrtools.IO
+pycrtools.IO.interfaces
+#pycrtools.IO.TBB
