@@ -17,7 +17,8 @@ import matching as match
 import srcfind as sfind
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import fmin
+from scipy.optimize import fmin, brute
+import pdb;
 
 rad2deg = 180./np.pi
 #-------------------------------------------------------------------------------
@@ -25,6 +26,9 @@ rad2deg = 180./np.pi
 #------------------------------------------------------------ simplexPositionFit
 def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                        cr_freqs, FarField=True, blocksize=-1):
+  print 'ANT INDICES: '
+  print ant_indices
+  print ' '
   if not FarField:
       print 'Warning: only FarField == True is implemented!'
   ants = cr_fft.shape()[0]
@@ -41,9 +45,9 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
   # FIX: cut out the right antennaIndices here! In antenna_positions, dimensions for new arrays, then beamforming...
   nofAntennas = crfile["nofAntennas"]
   delays=hArray(float,dimensions=[nofAntennas])
-  weights=hArray(complex,dimensions=[crfile["fftLength"]],name="Complex Weights")
+  weights=hArray(complex,dimensions = cr_fft,name="Complex Weights")
   freqs = hArray(crfile["frequencyValues"]) # a FloatVec comes out, so put it into hArray
-  phases=hArray(float,dimensions=[crfile["fftLength"]],name="Phases",xvalues=crfile["frequencyValues"]) 
+  phases=hArray(float,dimensions=cr_fft,name="Phases",xvalues=crfile["frequencyValues"]) 
   shifted_fft=hArray(complex,dimensions=cr_fft)
 
   beamformed_fft=hArray(complex,dimensions=[crfile["fftLength"]])
@@ -65,6 +69,8 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
   window = hArray(float, dimensions=[5], fill=0.2) # np.array([1.,1.,1.,1.,1.]);  window /= np.sum(window)
 
   def beamform_function(azel_in):
+    print 'Evaluating for az = %f, el = %f' % (azel_in[0], azel_in[1]),
+  #  pdb.set_trace()
     if ( azel_in[0] > 360. or azel_in[0] < 0. or azel_in[1] > 90. or azel_in[1] < 0.):
       erg = 0.
     else:
@@ -74,8 +80,9 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
         azel[2] = 1.
       else:
         azel[2] = azel_in[2]
-        
+    #  pdb.set_trace()  
       hCoordinateConvert(azel, CoordinateTypes.AzElRadius, cartesian, CoordinateTypes.Cartesian, True)
+#      pdb.set_trace()
       hGeometricDelays(delays, antenna_positions, cartesian, True)   
       hDelayToPhase(phases, freqs, delays) 
       hPhaseToComplex(weights,phases)
@@ -117,19 +124,31 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
       hInvFFTw(beamformed_efield,beamformed_fft)
       
       efield = beamformed_efield.toNumpy()
-      plt.clf()
-      plt.plot(efield.T / blocksize)
+#      plt.clf()
+#      plt.plot(efield.T / blocksize)
+#      plt.show()
       #beamformed_efield.plot()
       beamformed_efield.abs() # make absolute value!
+
       hRunningAverage(beamformed_efield_smoothed, beamformed_efield, 5, hWEIGHTS.GAUSSIAN)
 
+      smoothedstuff = beamformed_efield_smoothed.toNumpy()
+#      plt.clf()
+#      plt.plot(smoothedstuff.T / blocksize)
+#      plt.show()
+
       #cr.backwardFFTW(beamformed_efield, beamformed_fft);         
-      erg = - beamformed_efield_smoothed.max()[0] # just the maximum of beamformed_efield_smoothed
+      erg = - beamformed_efield.max()[0] / blocksize # just the maximum of beamformed_efield_smoothed !!!!
+      print ' value = %f ' % erg
+      
       #erg = - np.max(np.convolve(np.abs(beamformed_efield),window,'same'))
     #print "beamform_function azel:", azel_in, " result:", erg
-    return erg / blocksize
+    return erg
 
-  optErg = fmin(beamform_function, start_position, xtol=1e-2, ftol=1e-4, full_output=1)
+ # pdb.set_trace()
+  #optErg = fmin(beamform_function, start_position, xtol=1e-2, ftol=1e-4, full_output=1)
+  bruteRanges = ((start_position[0] - 20.0, start_position[0] + 20.0), (start_position[1] - 10.0, start_position[1] + 10.0))
+  optErg = brute(beamform_function, bruteRanges, Ns = 50, full_output = 1)
   return optErg
 
 #------------------------------------------------------------- triggerMessageFit
@@ -181,7 +200,7 @@ def triggerMessageFit(crfile, triggerMessageFile, fittype='bruteForce'):  # crfi
   return (degaz, degel, mse, toffset, len(mIDs) )
 
 #------------------------------------------------------------------ fullPulseFit
-def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
+def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=True):
   #Open the file, 
   #dr = cr.open(filename,'LOFAR_TBB')
   #import pdb; pdb.set_trace()
@@ -204,9 +223,10 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   trigLinfitData = triggerMessageFit(crfile, triggerMessageFile, fittype='linearFit')
   #Set the parameters
   samplefreq = 200.0e6 # must be
-  blocksize = 65536 * 2
+  blocksize = 1024
   # crfile["blocksize"] = blocksize # doesn't work, bug?
   crfile.set("blocksize", blocksize) # proper way, apparently
+#  crfile.set("shift", 512)
   print 'File size is %d' % crfile["Filesize"]
   print 'Block size is now: %d' % crfile["blocksize"]
   print 'So there are: %d blocks' % int((crfile["Filesize"]) / int(crfile["blocksize"]))
@@ -223,10 +243,11 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   cr_efield = crfile["emptyFx"]
 #  import pdb; pdb.set_trace()
 
-  crfile.readdata(cr_efield, blockNo) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
+  crfile.getTimeseriesData(cr_efield, blockNo) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
   efield = cr_efield.toNumpy()
-  #plt.plot(efield.T)
-  #import pdb; pdb.set_trace()
+  plt.plot(efield.T)
+  plt.show()
+ # import pdb; pdb.set_trace()
 
   cr_fft = crfile["emptyFFT"]
   print 'Number of antennas = %d' % cr_fft.shape()[0]
@@ -234,7 +255,9 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
 
   antenna_positions = crfile["RelativeAntennaPositions"]
 #  import pdb; pdb.set_trace()
+  print 'ANTENNA POSITIONS: '
   print antenna_positions
+  print ' '
   #Now calculate the foruier-transform of the data
   
   #    fftdata[...].fftcasa(fxdata[...], nyquistZone)
@@ -253,6 +276,9 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   ant_indices = range(0, nofAntennas, 2)
   fitDataEven = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                    cr_freqs, FarField=FarField,blocksize=blocksize)
+                                   
+#  pdb.set_trace()
+                                   
   ant_indices = range(1, nofAntennas, 2)
   fitDataOdd = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                   cr_freqs, FarField=FarField,blocksize=blocksize)
@@ -260,7 +286,10 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=False):
   result['triggerFit'] = trigData
   result['linearFit'] = trigLinfitData
   result['fitEven'] = fitDataEven
-  result['fitOdd'] = fitDataOdd
+  
+   
+     # (fitDataEven[0][0], fitDataEven[0][1], fitDataEven[1]) #fitDataEven for simplex...
+  result['fitOdd'] = fitDataOdd #(fitDataOdd[0][0], fitDataOdd[0][1], fitDataOdd[1]) #fitDataOdd for simplex...
   return result
 
 ## Executing a module should run doctests.
