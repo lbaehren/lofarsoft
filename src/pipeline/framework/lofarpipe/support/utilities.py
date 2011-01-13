@@ -31,6 +31,11 @@ from lofarpipe.support.parset import get_parset, patch_parset
 # ------------------------------------------------------------------------------
 
 def get_mountpoint(path):
+    """
+    Return the path to the mount point containing the given path.
+
+    :param path: Path to check
+    """
     return path if os.path.ismount(path) else get_mountpoint(
         os.path.abspath(os.path.join(path, os.pardir))
     )
@@ -44,14 +49,6 @@ def create_directory(dirname):
     except OSError, failure:
         if failure.errno != errno.EEXIST:
             raise
-
-def move_log(log_file, destination):
-    """
-    Move a log file into the directory destination, creating that directory
-    if required.
-    """
-    create_directory(destination)
-    shutil.move(log_file, destination)
 
 #                                                    IPython Dependency Checking
 # ------------------------------------------------------------------------------
