@@ -46,7 +46,7 @@ using CR::LopesEventIn;
 
   \brief Calls the LOPES analysis pipeline in "analyseLOPESevent2"
 
-  \author Frank Schr&ouml;der
+  \author Frank Schröder , Nunzia Palmieri
 
   \date 2008/20/05
 
@@ -1470,7 +1470,10 @@ int main (int argc, char *argv[])
   double distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;       // distance = radius of curvature
   double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;             // R_0 from lateral distribution exponential fit
   double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;             // Epsilon from lateral distribution exponential fit
+  double epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;    // Epsilon at R=0 (necessary for the cut!)
   double chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;                                // Chi^2/NDF of lateral distribution exponential fit
+  double dispersion_RMS_perc = 0, dispersion_Mean_perc = 0;
+
   // values for lateral distribution of arrival times
   double latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
   double latTimeSphere1DSigRcurv_EW = 0, latTimeSphere1DSigRcurv_NS = 0, latTimeSphere1DSigRcurv_VE = 0;
@@ -1767,6 +1770,7 @@ int main (int argc, char *argv[])
           roottree->Branch("sigR_0",&sigR_0,"sigR_0/D");
           roottree->Branch("eps",&eps,"eps/D");
           roottree->Branch("sigeps",&sigeps,"sigeps/D");
+          roottree->Branch("epsilon_0m",&epsilon_0m,"epsilon_0m/D");
           roottree->Branch("chi2NDF",&chi2NDF,"chi2NDF/D");
           //roottree->Branch("CutCloseToCore",&CutCloseToCore,"CutCloseToCore/I");
           //roottree->Branch("CutSmallSignal",&CutSmallSignal,"CutSmallSignal/I");
@@ -1823,6 +1827,7 @@ int main (int argc, char *argv[])
           roottree->Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
           roottree->Branch("eps_EW",&eps,"eps_EW/D");
           roottree->Branch("sigeps_EW",&sigeps,"sigeps_EW/D");
+          roottree->Branch("epsilon_0m_EW",&epsilon_0m,"epsilon_0m_EW/D");
           roottree->Branch("chi2NDF_EW",&chi2NDF,"chi2NDF_EW/D");
           //roottree->Branch("CutCloseToCore_EW",&CutCloseToCore,"CutCloseToCore_EW/I");
           //roottree->Branch("CutSmallSignal_EW",&CutSmallSignal,"CutSmallSignal_EW/I");
@@ -1878,6 +1883,7 @@ int main (int argc, char *argv[])
           roottree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
           roottree->Branch("eps_NS",&eps_NS,"eps_NS/D");
           roottree->Branch("sigeps_NS",&sigeps_NS,"sigeps_NS/D");
+          roottree->Branch("epsilon_0m_NS",&epsilon_0m_NS,"epsilon_0m_NS/D");
           roottree->Branch("chi2NDF_NS",&chi2NDF_NS,"chi2NDF_NS/D");
           //roottree->Branch("CutCloseToCore_NS",&CutCloseToCore_NS,"CutCloseToCore_NS/I");
           //roottree->Branch("CutSmallSignal_NS",&CutSmallSignal_NS,"CutSmallSignal_NS/I");
@@ -1933,6 +1939,7 @@ int main (int argc, char *argv[])
           roottree->Branch("sigR_0_VE",&sigR_0_VE,"sigR_0_VE/D");
           roottree->Branch("eps_VE",&eps_VE,"eps_VE/D");
           roottree->Branch("sigeps_VE",&sigeps_VE,"sigeps_VE/D");
+          roottree->Branch("epsilon_0m_VE",&epsilon_0m_VE,"epsilon_0m_VE/D");
           roottree->Branch("chi2NDF_VE",&chi2NDF_VE,"chi2NDF_VE/D");
           //roottree->Branch("CutCloseToCore_VE",&CutCloseToCore_VE,"CutCloseToCore_VE/I");
           //roottree->Branch("CutSmallSignal_VE",&CutSmallSignal_VE,"CutSmallSignal_VE/I");
@@ -1996,6 +2003,11 @@ int main (int argc, char *argv[])
       cout << "Skipping event because start event is not reached, yet." << endl;
       ++eventCounter;
     }
+
+    //write histo info in the file
+    ofstream hisInfo("deviation_info.dat");
+    hisInfo<<"# idEvent    disp%_mean(*100)   disp%_rms(*100)  "<<endl;
+
 
     // Process events from event file list
     while ( getNextEvent() ) {
@@ -2063,6 +2075,7 @@ int main (int argc, char *argv[])
       distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;
       R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;
+      epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;
       chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;
       
       latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
@@ -2261,16 +2274,24 @@ int main (int argc, char *argv[])
                                                                        calibPulsesMap, map <int, PulseProperties>(),
                                                                        gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
                                                                        "","",config["LateralFitDistance"]->dValue());
-              R_0 = latResults.asDouble("R_0");
+             R_0 = latResults.asDouble("R_0");
               sigR_0 = latResults.asDouble("sigR_0");
               eps = latResults.asDouble("eps");
+              epsilon_0m = latResults.asDouble("epsilon_0m");
               sigeps = latResults.asDouble("sigeps");
               chi2NDF = latResults.asDouble("chi2NDF");
               latMeanDist = latResults.asDouble("latMeanDist");
               latMinDist = latResults.asDouble("latMinDist");
               latMaxDist = latResults.asDouble("latMaxDist");
               NlateralAntennas = latResults.asuInt("NlateralAntennas");
-            }
+
+              dispersion_RMS = latResults.asDouble("dispersion_RMS");
+              dispersion_Mean = latResults.asDouble("dispersion_Mean");
+              dispersion_RMS_perc = latResults.asDouble("dispersion_RMS_perc");
+              dispersion_Mean_perc = latResults.asDouble("dispersion_Mean_perc");
+              hisInfo<<gt<<"\t"<<dispersion_Mean_perc<<"\t"<<dispersion_RMS_perc<<endl;
+
+          }
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue()) {
@@ -2413,13 +2434,21 @@ int main (int argc, char *argv[])
               R_0_NS  = latResults.asDouble("R_0");
               sigR_0_NS  = latResults.asDouble("sigR_0");
               eps_NS  = latResults.asDouble("eps");
+              epsilon_0m_NS  = latResults.asDouble("epsilon_0m");
               sigeps_NS  = latResults.asDouble("sigeps");
               chi2NDF_NS  = latResults.asDouble("chi2NDF");
               latMeanDist_NS  = latResults.asDouble("latMeanDist");
               latMinDist_NS  = latResults.asDouble("latMinDist");
               latMaxDist_NS  = latResults.asDouble("latMaxDist");
               NlateralAntennas_NS  = latResults.asuInt("NlateralAntennas");
-            }
+
+              dispersion_RMS = latResults.asDouble("dispersion_RMS");
+              dispersion_Mean = latResults.asDouble("dispersion_Mean");
+              dispersion_RMS_perc = latResults.asDouble("dispersion_RMS_perc");
+              dispersion_Mean_perc = latResults.asDouble("dispersion_Mean_perc");
+              //hisInfo<<gt<<"\t"<<dispersion_Mean_perc<<"\t"<<dispersion_RMS_perc<<endl;
+
+             }
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue()) {
@@ -2566,6 +2595,7 @@ int main (int argc, char *argv[])
               sigR_0_VE = latResults.asDouble("sigR_0");
               eps_VE = latResults.asDouble("eps");
               sigeps_VE = latResults.asDouble("sigeps");
+              epsilon_0m_VE = latResults.asDouble("epsilon_0m");
               chi2NDF_VE = latResults.asDouble("chi2NDF");
               latMeanDist_VE = latResults.asDouble("latMeanDist");
               latMinDist_VE = latResults.asDouble("latMinDist");
@@ -2754,7 +2784,7 @@ int main (int argc, char *argv[])
              << meanCalPulses[i]->dist << "\t     "
              << meanCalPulses[i]->lateralExpDeviation << "\n";
     }
-
+    hisInfo.close();
     // close root file
     if (config["rootFileName"]->sValue() != "") {
       cout << "\nClosing root file: " << config["rootFileName"]->sValue() << endl;

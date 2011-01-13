@@ -31,6 +31,8 @@
 #include "TGraph2DErrors.h"
 #include "TF1.h"
 #include "TF2.h"
+#include <TH1.h>
+#include <TH2.h>
 #include "TPaveStats.h"
 #include "TAxis.h"
 
@@ -89,6 +91,7 @@ namespace CR { // Namespace CR -- begin
       unsigned int ant = 0;        // counting antennas with pulse information
       // define default values, in case lateral distribution does not work
       erg.define("eps",0.);
+      erg.define("epsilon_0m",0.);
       erg.define("R_0",0.);
       erg.define("sigeps",0.);
       erg.define("sigR_0",0.);
@@ -99,6 +102,10 @@ namespace CR { // Namespace CR -- begin
       erg.define("NlateralAntennas",ant);
       erg.define("fitDistance",fitDistance);
       
+      //for the dispersion fit values
+      erg.define("dispersion_RMS_perc",0.);
+      erg.define("dispersion_Mean_perc",0.);
+
       cout << "\nFitting lateral distribution for data (and simulation)..." << endl;
       
       // create arrays for plotting and fitting LOPES data and REAS sim
@@ -461,6 +468,86 @@ namespace CR { // Namespace CR -- begin
           latDev->Delete();
           //delete latDev;
         }
+
+
+       ///put to true if you need esp_0m and dispersion % values
+       ///dispersion methods to evaluete how good is the fit 
+        if (false) {
+
+          ///deviation along the y axix; also the deviation in the ortogonal direction to the fit have been tried but with not so much difference
+          double percentDev=0.;
+          ant = 0;
+
+          epsilon_0m = fitfuncExp->Eval(0.0);
+          erg.define("epsilon_0m",epsilon_0m);
+
+          //hist for the dispersion:
+           TCanvas *c2 = new TCanvas("c2","",0,0,600,400);
+           c2->Divide(1,1);
+           //TH1F *h1 = new TH1F("","",60,-10,10);
+           TH1F *h1 = new TH1F("","",60,-100,100);
+           h1->SetMarkerStyle(3);
+           h1->SetMarkerColor(kBlue);
+           h1->SetLineColor(kBlue);
+           h1->SetFillColor(kBlue);
+           h1->SetFillStyle(3004);
+           h1->SetLineWidth(3);
+           h1->SetLineStyle(11);
+           //h1->GetYaxis()->SetRangeUser(0,5);
+           h1->GetYaxis()->SetTitle("deviation % on y"); 
+
+           /* statistic box of fit */
+           TPaveStats *gaussInfo = new TPaveStats(0.62,0.84,0.98,0.99,"brNDC");
+           gaussInfo->SetName("Data");
+           gaussInfo->SetBorderSize(2);
+           gaussInfo->SetTextAlign(12);
+           gaussInfo->SetFillColor(0);
+           gaussInfo->SetOptStat(0);
+           gaussInfo->SetOptFit(111);
+           gaussInfo->Draw();
+
+          for (map <int, PulseProperties>::iterator it=pulsesRec.begin(); it != pulsesRec.end(); ++it)
+            if ( !(*it).second.lateralCut ) { // don't use an antenna marked to cut
+              (*it).second.lateralExpHeight = fitfuncExp->Eval((*it).second.dist);
+              (*it).second.lateralExpHeightErr = 0;
+
+
+              cout<<" x:"<<(*it).second.dist<<" eps100: "<<fitfuncExp->GetParameter(0)<<" and R0: "<<fitfuncExp->GetParameter(1)<<endl;
+
+              ///1st method : deviation point-function only concerning y axix
+              (*it).second.lateralExpDeviation = (*it).second.height - (*it).second.lateralExpHeight;
+              (*it).second.lateralExpDeviationErr = 0;
+
+              cout<<" deviation : "<<(*it).second.lateralExpDeviation<<endl;
+              cout<<" weigh     : "<<(*it).second.heightError<<endl;
+
+              //cout << (*it).second.antenna << " \t " << side1[1] << " \t "
+              //    << modSide2 << " \t " << InternAngle << " \t " << (*it).second.lateralExpDeviation << " " << endl;
+              ///deviation %
+              percentDev = (((*it).second.height/(*it).second.lateralExpHeight) - 1.)*100;
+
+              ++ant;
+              c2->cd(1);
+              h1->GetListOfFunctions()->Add(gaussInfo);
+              gaussInfo->SetParent(h1->GetListOfFunctions());
+              h1->Fill(percentDev);
+              //h1->Draw();
+              h1->DrawNormalized();
+              //h1->Fit("gaus");
+
+           }
+
+
+          gaussInfo->Draw();
+          stringstream plotNameStream2;
+          plotNameStream2 << "eps100-ydev-perc-" << Gt << ".eps"; 
+          c2->Print(plotNameStream2.str().c_str());
+
+          erg.define("dispersion_RMS_perc",h1->GetRMS());
+          erg.define("dispersion_Mean_perc",h1->GetMean());
+
+        }
+
         fitfuncExp->Delete();
         //delete fitfuncExp;
       }  
