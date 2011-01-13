@@ -13,11 +13,11 @@ being deployed for a variety of science pipelines on the LOFAR cluster. This
 document is split into three sections: :ref:`the first <section-overview>`
 describes the aims of the framework, the structure of a pipeline, and gives an
 overview of how the system fits together, as well as information on how to run
-pre-defined pipelines. :ref:`The second <section-author-guide>` covers how
-users can use the system to design their own pipelines or pipeline components.
-:ref:`The third <section-developer-reference>` describes the framework
-codebase in more detail, and is intended primarily for those directly working
-on the framework, rather than simply developing pipelines. :ref:`The fourth
+pre-defined pipelines. :ref:`The second <section-author-guide>` provides a
+tutorial introduction to writing pipelines and pipeline components. :ref:`The third
+<section-developer-reference>` describes the framework codebase in more
+detail, and is intended for pipeline authors who wish to dig a little deeper,
+as well as those interested in developing the framework itself. :ref:`The fourth
 <section-pipeline-specific>` provides a guide to the imaging pipeline itself.
 
 .. ifconfig:: todo_include_todos
