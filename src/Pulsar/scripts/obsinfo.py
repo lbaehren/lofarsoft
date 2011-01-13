@@ -669,100 +669,128 @@ class obsstat:
 		self.td = td
 		self.storage_nodes = storage_nodes
 
-		# these are to keep the info for ALL subclusters
-		self.totDuration = self.processedDuration = self.IMonlyDuration = 0.0
-		self.Nprocessed = 0
-		self.Nistype = self.Nistype_only = 0
-		self.Ncstype = self.Ncstype_only = 0
-		self.Nfetype = self.Nfetype_only = 0
-		self.Nimtype = self.Nimtype_only = 0
-		self.Nbftype = self.Nbftype_only = 0
-		self.Nfdtype = self.Nfdtype_only = 0
-		self.Niscsim = self.Nisim = 0
-		self.Niscs = self.Ncsim = self.Ncsfe   = self.Nimfe     = self.Nisfe = self.Niscsfe = 0
-		self.Nbfis = self.Nbffe = self.Nbfisfe = self.Nbfiscsfe = 0
-		self.totRawsize = 0.0   # size in TB of raw data
-		self.IMonlyRawsize = 0.0 # size in TB of IM only raw data
-		self.totProcessedsize = 0.0   # size in TB of processed data
+		self.subclusters = np.append(np.unique([cexec_nodes[s].split(":")[0] for s in self.storage_nodes]), "subA", "sub?")
+		self.dbinfo = {}
+		for sub in np.append(self.subclusters, "Total"):
+			self.dbinfo[sub] = {"totDuration": 0.0, "processedDuration": 0.0, "IMonlyDuration": 0.0,
+                                            "Ntotal": 0, "Nprocessed": 0, "Nistype": 0, "Nistype_only": 0, "Ncstype": 0, "Ncstype_only": 0,
+                                            "Nfetype": 0, "Nfetype_only": 0, "Nimtype": 0, "Nimtype_only": 0,
+                                            "Nbftype": 0, "Nbftype_only": 0, "Nfdtype": 0, "Nfdtype_only": 0,
+                                            "Niscsim": 0, "Nisim": 0, "Niscs": 0, "Ncsim": 0, "Ncsfe": 0, "Nimfe": 0, "Nisfe": 0, "Niscsfe": 0, 
+                                            "Nbfis": 0, "Nbffe": 0, "Nbfisfe": 0, "Nbfiscsfe": 0,
+                                            "totRawsize": 0.0, "IMonlyRawsize": 0.0, "totProcessedsize": 0.0 }	 # size in TB
 
-		#dbinfo = {}
-		#for sub in np.append(np.unique([cexec_nodes[s].split(":")[0] for s in self.storage_nodes]), "subA", "sub?"):
-		#	dbinfo[sub] = {"totDuration": 0.0, "processedDuration": 0.0, "IMonlyDuration": 0.0,
-                #                      "" }	
-
-		for r in self.ids:
-			# getting the numbers and duration
-			if obstable[r].comment == "" and obstable[r].oi.duration != "?":
-				self.totDuration += obstable[r].oi.dur	
-			if obstable[r].comment == "" and obstable[r].statusline != "x":
-				self.Nprocessed += 1
-				if obstable[r].oi.duration != "?":
-					self.processedDuration += obstable[r].oi.dur
-			# getting the number of obs of different type
-			if obstable[r].comment == "" and obstable[r].oi.istype == "+":
-				self.Nistype += 1
-				if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
-					self.Nistype_only += 1
-			if obstable[r].comment == "" and obstable[r].oi.cstype == "+":
-				self.Ncstype += 1
-				if obstable[r].oi.istype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
-					self.Ncstype_only += 1
-			if obstable[r].comment == "" and obstable[r].oi.fetype == "+":
-				self.Nfetype += 1
-				if obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
-					self.Nfetype_only += 1
-			if obstable[r].comment == "" and obstable[r].oi.imtype == "+":
-				self.Nimtype += 1
-				if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
-					self.Nimtype_only += 1
-					self.IMonlyRawsize += float(obstable[r].totsize)
+		for sub in self.subclusters:
+			self.subkeys=list(np.compress(np.array([obstable[r].oi.subcluster for r in self.ids]) == sub, self.ids))
+			self.dbinfo[sub]["Ntotal"] += np.size(self.subkeys)
+			for r in self.subkeys:
+				# getting the numbers and duration
+				if obstable[r].comment == "" and obstable[r].oi.duration != "?":
+					self.dbinfo[sub]["totDuration"] += obstable[r].oi.dur
+				if obstable[r].comment == "" and obstable[r].statusline != "x":
+					self.dbinfo[sub]["Nprocessed"] += 1
 					if obstable[r].oi.duration != "?":
-						self.IMonlyDuration += obstable[r].oi.dur
-			if obstable[r].comment == "" and obstable[r].oi.bftype == "+":
-				self.Nbftype += 1
-				if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
-					self.Nbftype_only += 1
-			if obstable[r].comment == "" and obstable[r].oi.fdtype == "+":
-				self.Nfdtype += 1
-				if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.imtype != "+":
-					self.Nfdtype_only += 1
-			# getting the number of some observing types' mixtures
-			if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
-				self.Niscsim += 1
-			if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
-				self.Nisim += 1
-			if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
-				self.Niscs += 1
-			if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
-				self.Ncsim += 1
-			if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
-				self.Ncsfe += 1
-			if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
-				self.Nisfe += 1
-			if obstable[r].comment == "" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
-				self.Nimfe += 1
-			if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
-				self.Niscsfe += 1
-			if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.fetype != "+":
-				self.Nbfis += 1
-			if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
-				self.Nbffe += 1
-			if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
-				self.Nbfisfe += 1
-			if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
-				self.Nbfiscsfe += 1
-			# getting the sizes
-			if obstable[r].comment == "":
-				self.totRawsize += float(obstable[r].totsize)
-			if obstable[r].comment == "":
-				self.totProcessedsize += float(obstable[r].processed_dirsize)
+						self.dbinfo[sub]["processedDuration"] += obstable[r].oi.dur
+				# getting the number of obs of different type
+				if obstable[r].comment == "" and obstable[r].oi.istype == "+":
+					self.dbinfo[sub]["Nistype"] += 1
+					if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+						self.dbinfo[sub]["Nistype_only"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.cstype == "+":
+					self.dbinfo[sub]["Ncstype"] += 1
+					if obstable[r].oi.istype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+						self.dbinfo[sub]["Ncstype_only"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.fetype == "+":
+					self.dbinfo[sub]["Nfetype"] += 1
+					if obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+						self.dbinfo[sub]["Nfetype_only"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.imtype == "+":
+					self.dbinfo[sub]["Nimtype"] += 1
+					if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+						self.dbinfo[sub]["Nimtype_only"] += 1
+						self.dbinfo[sub]["IMonlyRawsize"] += float(obstable[r].totsize)
+						if obstable[r].oi.duration != "?":
+							self.dbinfo[sub]["IMonlyDuration"] += obstable[r].oi.dur
+				if obstable[r].comment == "" and obstable[r].oi.bftype == "+":
+					self.dbinfo[sub]["Nbftype"] += 1
+					if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+						self.dbinfo[sub]["Nbftype_only"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.fdtype == "+":
+					self.dbinfo[sub]["Nfdtype"] += 1
+					if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.imtype != "+":
+						self.dbinfo[sub]["Nfdtype_only"] += 1
+				# getting the number of some observing types' mixtures
+				if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
+					self.dbinfo[sub]["Niscsim"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+					self.dbinfo[sub]["Nisim"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+					self.dbinfo[sub]["Niscs"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
+					self.dbinfo[sub]["Ncsim"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
+					self.dbinfo[sub]["Ncsfe"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+					self.dbinfo[sub]["Nisfe"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+					self.dbinfo[sub]["Nimfe"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
+					self.dbinfo[sub]["Niscsfe"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.fetype != "+":
+					self.dbinfo[sub]["Nbfis"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+					self.dbinfo[sub]["Nbffe"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+					self.dbinfo[sub]["Nbfisfe"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+					self.dbinfo[sub]["Nbfiscsfe"] += 1
+				# getting the sizes
+				if obstable[r].comment == "":
+					self.dbinfo[sub]["totRawsize"] += float(obstable[r].totsize)
+				if obstable[r].comment == "":
+					self.dbinfo[sub]["totProcessedsize"] += float(obstable[r].processed_dirsize)
 
-		self.totDuration /= 3600.
-		self.processedDuration /= 3600.
-		self.IMonlyDuration /= 3600.
-		self.totRawsize /= 1024.
-		self.totProcessedsize /= 1024.
-		self.IMonlyRawsize /= 1024.
+			self.dbinfo[sub]["totDuration"] /= 3600.
+			self.dbinfo[sub]["processedDuration"] /= 3600.
+			self.dbinfo[sub]["IMonlyDuration"] /= 3600.
+			self.dbinfo[sub]["totRawsize"] /= 1024.
+			self.dbinfo[sub]["totProcessedsize"] /= 1024.
+			self.dbinfo[sub]["IMonlyRawsize"] /= 1024.
+
+		for sub in self.subclusters:
+			self.dbinfo["Total"]["totDuration"] += self.dbinfo[sub]["totDuration"]
+			self.dbinfo["Total"]["processedDuration"] += self.dbinfo[sub]["processedDuration"]
+			self.dbinfo["Total"]["IMonlyDuration"] += self.dbinfo[sub]["IMonlyDuration"]
+			self.dbinfo["Total"]["totRawsize"] += self.dbinfo[sub]["totRawsize"]
+			self.dbinfo["Total"]["totProcessedsize"] += self.dbinfo[sub]["totProcessedsize"]
+			self.dbinfo["Total"]["IMonlyRawsize"] += self.dbinfo[sub]["IMonlyRawsize"]
+			self.dbinfo["Total"]["Ntotal"] += self.dbinfo[sub]["Ntotal"]
+			self.dbinfo["Total"]["Nprocessed"] += self.dbinfo[sub]["Nprocessed"]
+			self.dbinfo["Total"]["Nistype"] += self.dbinfo[sub]["Nistype"]
+			self.dbinfo["Total"]["Nistype_only"] += self.dbinfo[sub]["Nistype_only"]
+			self.dbinfo["Total"]["Ncstype"] += self.dbinfo[sub]["Ncstype"]
+			self.dbinfo["Total"]["Ncstype_only"] += self.dbinfo[sub]["Ncstype_only"]
+			self.dbinfo["Total"]["Nfetype"] += self.dbinfo[sub]["Nfetype"]
+			self.dbinfo["Total"]["Nfetype_only"] += self.dbinfo[sub]["Nfetype_only"]
+			self.dbinfo["Total"]["Nimtype"] += self.dbinfo[sub]["Nimtype"]
+			self.dbinfo["Total"]["Nimtype_only"] += self.dbinfo[sub]["Nimtype_only"]
+			self.dbinfo["Total"]["Nbftype"] += self.dbinfo[sub]["Nbftype"]
+			self.dbinfo["Total"]["Nbftype_only"] += self.dbinfo[sub]["Nbftype_only"]
+			self.dbinfo["Total"]["Nfdtype"] += self.dbinfo[sub]["Nfdtype"]
+			self.dbinfo["Total"]["Nfdtype_only"] += self.dbinfo[sub]["Nfdtype_only"]
+			self.dbinfo["Total"]["Niscsim"] += self.dbinfo[sub]["Niscsim"]
+			self.dbinfo["Total"]["Nisim"] += self.dbinfo[sub]["Nisim"]
+			self.dbinfo["Total"]["Niscs"] += self.dbinfo[sub]["Niscs"]
+			self.dbinfo["Total"]["Ncsim"] += self.dbinfo[sub]["Ncsim"]
+			self.dbinfo["Total"]["Ncsfe"] += self.dbinfo[sub]["Ncsfe"]
+			self.dbinfo["Total"]["Nimfe"] += self.dbinfo[sub]["Nimfe"]
+			self.dbinfo["Total"]["Nisfe"] += self.dbinfo[sub]["Nisfe"]
+			self.dbinfo["Total"]["Niscsfe"] += self.dbinfo[sub]["Niscsfe"]
+			self.dbinfo["Total"]["Nbfis"] += self.dbinfo[sub]["Nbfis"]
+			self.dbinfo["Total"]["Nbffe"] += self.dbinfo[sub]["Nbffe"]
+			self.dbinfo["Total"]["Nbfisfe"] += self.dbinfo[sub]["Nbfisfe"]
+			self.dbinfo["Total"]["Nbfiscsfe"] += self.dbinfo[sub]["Nbfiscsfe"]
+			
 
 	def printstat (self):
 		print
@@ -771,32 +799,32 @@ class obsstat:
 			print "[%s%s]" % (self.fd != "" and "from " + self.fd or (self.td != "" and " till " + self.td or ""), 
                                                                     self.td != "" and (self.fd != "" and " till " + self.td or "") or "")
 		print "---------------------------------------------------------------------------"
-		print "Total number of observations [hours / days]:         %d [%.1f / %.1f]" % (np.size(self.ids),self.totDuration,self.totDuration/24.)
-		print "Number of observations w/o IM only [hours / days]:   %d [%.1f / %.1f]" % (np.size(self.ids)-self.Nimtype_only, self.totDuration-self.IMonlyDuration, (self.totDuration-self.IMonlyDuration)/24.)
-		print "Number of processed observations [hours / days]:     %d [%.1f / %.1f]" % (self.Nprocessed,self.processedDuration,self.processedDuration/24.)
+		print "Total number of observations [hours / days]:         %d [%.1f / %.1f]" % (self.dbinfo["Total"]["Ntotal"], self.dbinfo["Total"]["totDuration"], self.dbinfo["Total"]["totDuration"]/24.)
+		print "Number of observations w/o IM only [hours / days]:   %d [%.1f / %.1f]" % (self.dbinfo["Total"]["Ntotal"]-self.dbinfo["Total"]["Nimtype_only"], self.dbinfo["Total"]["totDuration"]-self.dbinfo["Total"]["IMonlyDuration"], (self.dbinfo["Total"]["totDuration"]-self.dbinfo["Total"]["IMonlyDuration"])/24.)
+		print "Number of processed observations [hours / days]:     %d [%.1f / %.1f]" % (self.dbinfo["Total"]["Nprocessed"], self.dbinfo["Total"]["processedDuration"], self.dbinfo["Total"]["processedDuration"]/24.)
 		print
-		print "Number of IS observations [only IS]:       %d [%d]" % (self.Nistype, self.Nistype_only)
-		print "Number of IS+CS observations only:         %d" % (self.Niscs,)
-		print "Number of IS+IM observations only:         %d" % (self.Nisim,)
-		print "Number of IS+CS+IM observations only:      %d" % (self.Niscsim,)
-		print "Number of CS observations [only CS]:       %d [%d]" % (self.Ncstype, self.Ncstype_only)
-		print "Number of CS+IM observations only:         %d" % (self.Ncsim,)
-		print "Number of FE observations [only FE]:       %d [%d]" % (self.Nfetype, self.Nfetype_only)
-		print "Number of FE+CS observations only:         %d" % (self.Ncsfe,)
-		print "Number of FE+IS observations only:         %d" % (self.Nisfe,)
-		print "Number of FE+IM observations only:         %d" % (self.Nimfe,)
-		print "Number of FE+IS+CS observations only:      %d" % (self.Niscsfe,)
-		print "Number of IM observations [only IM]:       %d [%d]" % (self.Nimtype, self.Nimtype_only)
-		print "Number of BF observations [only BF]:       %d [%d]" % (self.Nbftype, self.Nbftype_only)
-		print "Number of BF+IS observations only:         %d" % (self.Nbfis,)
-		print "Number of BF+FE observations only:         %d" % (self.Nbffe,)
-		print "Number of BF+IS+FE observations only:      %d" % (self.Nbfisfe,)
-		print "Number of BF+IS+CS+FE observations only:   %d" % (self.Nbfiscsfe,)
-		print "Number of FD observations [only FD]:       %d [%d]" % (self.Nfdtype, self.Nfdtype_only)
+		print "Number of IS observations [only IS]:       %d [%d]" % (self.dbinfo["Total"]["Nistype"], self.dbinfo["Total"]["Nistype_only"])
+		print "Number of IS+CS observations only:         %d" % (self.dbinfo["Total"]["Niscs"])
+		print "Number of IS+IM observations only:         %d" % (self.dbinfo["Total"]["Nisim"])
+		print "Number of IS+CS+IM observations only:      %d" % (self.dbinfo["Total"]["Niscsim"])
+		print "Number of CS observations [only CS]:       %d [%d]" % (self.dbinfo["Total"]["Ncstype"], self.dbinfo["Total"]["Ncstype_only"])
+		print "Number of CS+IM observations only:         %d" % (self.dbinfo["Total"]["Ncsim"])
+		print "Number of FE observations [only FE]:       %d [%d]" % (self.dbinfo["Total"]["Nfetype"], self.dbinfo["Total"]["Nfetype_only"])
+		print "Number of FE+CS observations only:         %d" % (self.dbinfo["Total"]["Ncsfe"])
+		print "Number of FE+IS observations only:         %d" % (self.dbinfo["Total"]["Nisfe"])
+		print "Number of FE+IM observations only:         %d" % (self.dbinfo["Total"]["Nimfe"])
+		print "Number of FE+IS+CS observations only:      %d" % (self.dbinfo["Total"]["Niscsfe"])
+		print "Number of IM observations [only IM]:       %d [%d]" % (self.dbinfo["Total"]["Nimtype"], self.dbinfo["Total"]["Nimtype_only"])
+		print "Number of BF observations [only BF]:       %d [%d]" % (self.dbinfo["Total"]["Nbftype"], self.dbinfo["Total"]["Nbftype_only"])
+		print "Number of BF+IS observations only:         %d" % (self.dbinfo["Total"]["Nbfis"])
+		print "Number of BF+FE observations only:         %d" % (self.dbinfo["Total"]["Nbffe"])
+		print "Number of BF+IS+FE observations only:      %d" % (self.dbinfo["Total"]["Nbfisfe"])
+		print "Number of BF+IS+CS+FE observations only:   %d" % (self.dbinfo["Total"]["Nbfiscsfe"])
+		print "Number of FD observations [only FD]:       %d [%d]" % (self.dbinfo["Total"]["Nfdtype"], self.dbinfo["Total"]["Nfdtype_only"])
 		print
-		print "Total size of raw data (TB):               %.1f" % (self.totRawsize,)
-		print "Total size of raw data w/o IM-only (TB):   %.1f" % (self.totRawsize-self.IMonlyRawsize,)
-		print "Total size of processed data (TB):         %.1f" % (self.totProcessedsize,)
+		print "Total size of raw data (TB):               %.1f" % (self.dbinfo["Total"]["totRawsize"])
+		print "Total size of raw data w/o IM-only (TB):   %.1f" % (self.dbinfo["Total"]["totRawsize"]-self.dbinfo["Total"]["IMonlyRawsize"])
+		print "Total size of processed data (TB):         %.1f" % (self.dbinfo["Total"]["totProcessedsize"])
 		print
 
 	def printhtml (self, htmlfile):
@@ -821,37 +849,119 @@ class obsstat:
 			self.htmlptr.write ("\n<h3>%s%s</h3>" % (self.fd != "" and "From " + self.fd or (self.td != "" and " Till " + self.td or ""), 
                                                                     self.td != "" and (self.fd != "" and " Till " + self.td or "") or ""))
 
-		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=5>\n")
-		self.htmlptr.write ("\n<tr class='d1' align=left width=400>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>\n</tr>" % ("Total number of observations", "hours", "days", np.size(self.ids), self.totDuration, self.totDuration/24.))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>\n</tr>" % ("Number of observations w/o IM only", "hours", "days", np.size(self.ids)-self.Nimtype_only, self.totDuration-self.IMonlyDuration, (self.totDuration-self.IMonlyDuration)/24.))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>\n</tr>" % ("Number of processed observations", "hours", "days", self.Nprocessed,self.processedDuration,self.processedDuration/24.))
+		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=5>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <th align=left width=400></th>")
+		for sub in np.append("Total", self.subclusters):	
+			self.htmlptr.write ("\n <th align=left>%s</th>" % (sub))	
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Total number of observations", "hours", "days"))
+		for sub in np.append("Total", self.subclusters):	
+			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Ntotal"], self.dbinfo[sub]["totDuration"], self.dbinfo[sub]["totDuration"]/24.))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of observations w/o IM only", "hours", "days"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Ntotal"]-self.dbinfo[sub]["Nimtype_only"], self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"], (self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"])/24.))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of processed observations", "hours", "days"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Nprocessed"], self.dbinfo[sub]["processedDuration"], self.dbinfo[sub]["processedDuration"]/24.))
+		self.htmlptr.write ("\n</tr>")
 
-		self.htmlptr.write ("\n<tr align=left height=25>\n <td align=left></td>\n <td align=left></td>\n</tr>")
+		self.htmlptr.write ("\n<tr align=left height=25>\n <td align=left></td>")
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left></td>")
+		self.htmlptr.write ("\n</tr>")
 
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>\n</tr>" % ("Number of IS observations", "only IS", self.Nistype, self.Nistype_only))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of IS+CS observations only", self.Niscs))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of IS+IM observations only", self.Nisim))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of IS+CS+IM observations only", self.Niscsim))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d<b></font>]</td>\n</tr>" % ("Number of CS observations", "only CS", self.Ncstype, self.Ncstype_only))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of CS+IM observations only", self.Ncsim))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>\n</tr>" % ("Number of FE observations", "only FE", self.Nfetype, self.Nfetype_only))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of FE+CS observations only", self.Ncsfe))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of FE+IS observations only", self.Nisfe))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of FE+IM observations only", self.Nimfe))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of FE+IS+CS observations only", self.Niscsfe))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>\n</tr>" % ("Number of IM observations", "only IM", self.Nimtype, self.Nimtype_only))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>\n</tr>" % ("Number of BF observations", "only BF", self.Nbftype, self.Nbftype_only))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of BF+IS observations only", self.Nbfis))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of BF+FE observations only", self.Nbffe))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of BF+IS+FE observations only", self.Nbfisfe))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%d</b></td>\n</tr>" % ("Number of BF+IS+CS+FE observations only", self.Nbfiscsfe))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>\n <td align=left><b>%d<b> [<font color=\"brown\"><b>%d</b></font>]</td>\n</tr>" % ("Number of FD observations", "only FD", self.Nfdtype, self.Nfdtype_only))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of IS observations", "only IS"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Nistype"], self.dbinfo[sub]["Nistype_only"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of IS+CS observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Niscs"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of IS+IM observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nisim"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of IS+CS+IM observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Niscsim"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of CS observations", "only CS"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d<b></font>]</td>" % (self.dbinfo[sub]["Ncstype"], self.dbinfo[sub]["Ncstype_only"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of CS+IM observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Ncsim"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of FE observations", "only FE"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Nfetype"], self.dbinfo[sub]["Nfetype_only"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of FE+CS observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Ncsfe"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of FE+IS observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nisfe"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of FE+IM observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nimfe"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of FE+IS+CS observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Niscsfe"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of IM observations", "only IM"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Nimtype"], self.dbinfo[sub]["Nimtype_only"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of BF observations", "only BF"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Nbftype"], self.dbinfo[sub]["Nbftype_only"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of BF+IS observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nbfis"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of BF+FE observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nbffe"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of BF+IS+FE observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nbfisfe"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of BF+IS+CS+FE observations only"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nbfiscsfe"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of FD observations", "only FD"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d<b> [<font color=\"brown\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Nfdtype"], self.dbinfo[sub]["Nfdtype_only"]))
+		self.htmlptr.write ("\n</tr>")
 
-		self.htmlptr.write ("\n<tr align=left height=25>\n <td align=left></td>\n <td align=left></td>\n</tr>")
+		self.htmlptr.write ("\n<tr align=left height=25>\n <td align=left></td>")
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left></td>")
+		self.htmlptr.write ("\n</tr>")
 
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%.1f</b></td>\n</tr>" % ("Total size of raw data (TB)", self.totRawsize))
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%.1f</b></td>\n</tr>" % ("Total size of raw data w/o IM-only (TB)", self.totRawsize-self.IMonlyRawsize))
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%.1f</b></td>\n</tr>" % ("Total size of processed data (TB)", self.totProcessedsize))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Total size of raw data (TB)"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%.1f</b></td>" % (self.dbinfo[sub]["totRawsize"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Total size of raw data w/o IM-only (TB)"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%.1f</b></td>" % (self.dbinfo[sub]["totRawsize"]-self.dbinfo[sub]["IMonlyRawsize"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Total size of processed data (TB)"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%.1f</b></td>" % (self.dbinfo[sub]["totProcessedsize"]))
+		self.htmlptr.write ("\n</tr>")
 
 		self.htmlptr.write ("\n</table>")
                 # getting date & time of last update
