@@ -186,6 +186,25 @@ class obsinfo:
         	if len(self.nodeslist)>13:
                 	self.nodeslist=self.nodeslist[:13] + "..."
 
+		# getting the subcluster number where the raw data were taken (e.g. sub4, sub5, etc.)
+		# if raw data were spread between several subclusters, then 'subA' is assigned
+		# these data are checked if there are more than 3 compute nodes in nodeslist
+		# also, even if there are 3 or less storage nodes used, we check if they belong to the
+		# same subcluster, if not then 'subA' is assigned
+		# is 'nodeslist' is empty, or has old strange node names like 'list...', then we 
+		# assign 'sub?' to them. If the data is processed and present in the archive, then 'sub?'
+		# will be further corrected
+		try:
+			snames = np.unique([cexec_nodes["lse%s" % (i)].split(":")[0] for i in self.nodeslist.split(",")])
+			if np.size(snames) == 0:
+				self.subcluster = 'sub?'
+			elif np.size(snames) > 1:
+				self.subcluster = "subA"
+			else:
+				self.subcluster = snames[0]
+		except:
+			self.subcluster = 'sub?'
+
 	        # getting the name of /data? where the data are stored
 		try:
         		cmd="grep Observation.MSNameMask %s" % (self.parset,)
@@ -397,7 +416,7 @@ class outputInfo:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=left>%s</td>" % (self.id, self.colspan, self.comment,)
 
-	def Init(self, id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, comment, filestem_array, chi_array, combined_plot):
+	def Init(self, id, oi, storage_nodes, dirsizes, statusline, reduced_node, redlocation, processed_dirsize, comment, filestem_array, chi_array, combined_plot):
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
 		self.oi = oi
@@ -407,6 +426,9 @@ class outputInfo:
 			self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 		self.pointing = self.oi.pointing
 		self.statusline = statusline
+		self.reduced_node = reduced_node
+		if self.reduced_node != "" and self.oi.subcluster == 'sub?':
+			self.oi.subcluster = cexec_nodes[self.reduced_node]
 		self.redlocation = redlocation
 		self.processed_dirsize = processed_dirsize
 		self.comment = comment
@@ -467,7 +489,7 @@ class outputInfo:
 
 				# adding combined_plot column
 				if self.combined_plot != "":
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s\"><img width=200 height=140 src=\"plots/%s/%s\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.th.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
 				else:
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				# adding the rest (columns) of the table
@@ -534,7 +556,7 @@ class outputInfo:
 
 				# adding combined_plot column
 				if self.combined_plot != "":
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s\"><img width=200 height=140 src=\"plots/%s/%s\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.th.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
 				else:
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				# adding the rest (columns) of the table
@@ -641,42 +663,32 @@ class writeHtmlList:
 
 # Class that keeps the statistics of all data
 class obsstat:
-	def __init__(self, ids, fd, td):
+	def __init__(self, ids, fd, td, storage_nodes):
 		self.ids = ids
 		self.fd = fd
 		self.td = td
+		self.storage_nodes = storage_nodes
 
-		self.totDuration = 0.0
-		self.processedDuration = 0.0
-		self.IMonlyDuration = 0.0
+		# these are to keep the info for ALL subclusters
+		self.totDuration = self.processedDuration = self.IMonlyDuration = 0.0
 		self.Nprocessed = 0
-		self.Nistype = 0
-		self.Nistype_only = 0
-		self.Ncstype = 0
-		self.Ncstype_only = 0
-		self.Nfetype = 0
-		self.Nfetype_only = 0
-		self.Nimtype = 0
-		self.Nimtype_only = 0
-		self.Nbftype = 0
-		self.Nbftype_only = 0
-		self.Nfdtype = 0
-		self.Nfdtype_only = 0
-		self.Niscsim = 0
-		self.Nisim = 0
-		self.Niscs = 0
-		self.Ncsim = 0
-		self.Ncsfe = 0
-		self.Nimfe = 0
-		self.Nisfe = 0
-		self.Niscsfe = 0
-		self.Nbfis = 0
-		self.Nbffe = 0
-		self.Nbfisfe = 0
-		self.Nbfiscsfe = 0
+		self.Nistype = self.Nistype_only = 0
+		self.Ncstype = self.Ncstype_only = 0
+		self.Nfetype = self.Nfetype_only = 0
+		self.Nimtype = self.Nimtype_only = 0
+		self.Nbftype = self.Nbftype_only = 0
+		self.Nfdtype = self.Nfdtype_only = 0
+		self.Niscsim = self.Nisim = 0
+		self.Niscs = self.Ncsim = self.Ncsfe   = self.Nimfe     = self.Nisfe = self.Niscsfe = 0
+		self.Nbfis = self.Nbffe = self.Nbfisfe = self.Nbfiscsfe = 0
 		self.totRawsize = 0.0   # size in TB of raw data
 		self.IMonlyRawsize = 0.0 # size in TB of IM only raw data
 		self.totProcessedsize = 0.0   # size in TB of processed data
+
+		#dbinfo = {}
+		#for sub in np.append(np.unique([cexec_nodes[s].split(":")[0] for s in self.storage_nodes]), "subA", "sub?"):
+		#	dbinfo[sub] = {"totDuration": 0.0, "processedDuration": 0.0, "IMonlyDuration": 0.0,
+                #                      "" }	
 
 		for r in self.ids:
 			# getting the numbers and duration
@@ -841,7 +853,13 @@ class obsstat:
 		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>\n <td align=left><b>%.1f</b></td>\n</tr>" % ("Total size of raw data w/o IM-only (TB)", self.totRawsize-self.IMonlyRawsize))
 		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>\n <td align=left><b>%.1f</b></td>\n</tr>" % ("Total size of processed data (TB)", self.totProcessedsize))
 
-		self.htmlptr.write ("\n</table>\n</body>\n</html>")
+		self.htmlptr.write ("\n</table>")
+                # getting date & time of last update
+                if self.lupd == "":
+                        cmd="date +'%b %d, %Y %H:%M:%S'"
+                        self.lupd=os.popen(cmd).readlines()[0][:-1]
+                self.htmlptr.write ("\n\n<hr width=100%%>\n<address>\nLast Updated: %s\n</address>\n" % (self.lupd, ))
+		self.htmlptr.write ("\n</body>\n</html>")
 		self.htmlptr.close()
 
 
@@ -1018,7 +1036,7 @@ if __name__ == "__main__":
 					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 
 				# initializing statistics' class
-				stat = obsstat(obsids, fromdate, todate)
+				stat = obsstat(obsids, fromdate, todate, storage_nodes)
 				stat.printstat()
 				sys.exit(0)
 				########## end of statistics #############
@@ -1064,6 +1082,20 @@ if __name__ == "__main__":
 		if is_to == True:
 			tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
+
+		# also db can have obsids from all subclusters. However, we need not update all of them, only those
+		# from the same subclusters as for lse in the command line option. This is because, the info from the parset
+		# files is always the same, and do not need to be updated, and update of the processed data status can only
+		# have sense for the same subclusters as in the command line option
+		# also, we add 'subA' and 'sub?' as well
+		newobsids=[]
+		for sub in np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes]):
+			newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].oi.subcluster for r in obsids]) == sub, obsids)))
+		newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].oi.subcluster for r in obsids]) == "subA", obsids)))
+		newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].oi.subcluster for r in obsids]) == "sub?", obsids)))
+		newobsids = np.flipud(np.sort(np.unique(newobsids), kind='mergesort'))
+		obsids = newobsids
+
 		# Number of ObsIDs
 		Nobsids = np.size(obsids)
 
@@ -1339,14 +1371,15 @@ if __name__ == "__main__":
 				# checking if combined plot exists and rsync it if it does exist
 				cmd="cexec %s 'ls -1 %s/%s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[reduced_node], reddir, "combined.th.png", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) != 0:
-					combined_plot="combined.th.png"
+					combined_plot="combined"
 					# copying combined plot
-					cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s/%s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[reduced_node], reddir, "combined.th.png", plotsdir, id)
+#					cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s/%s %s/%s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[reduced_node], reddir, combined_plot + ".png", reddir, combined_plot + ".th.png", plotsdir, id)
+					cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s/%s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[reduced_node], reddir, combined_plot + ".th.png", plotsdir, id)
 					os.system(cmd)
 				
 
 		# combining info
-		out.Init(id, oi, storage_nodes, dirsizes, statusline, redlocation, processed_dirsize, "", profiles_array, chi_array, combined_plot)
+		out.Init(id, oi, storage_nodes, dirsizes, statusline, reduced_node, redlocation, processed_dirsize, "", profiles_array, chi_array, combined_plot)
 		obstable[id] = out
 		# printing the info line by line in debug mode
 		if is_debug:
@@ -1381,6 +1414,16 @@ if __name__ == "__main__":
 	if is_to == True:
 		tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 		obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) <= tosecs, obskeys))
+
+	# similar to what we do when we are updating db records, here we also only want to show the observations from
+	# selected (from the command line) subclusters, because db can have data for all subclusters
+	newobskeys=[]
+	for sub in np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes]):
+		newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].oi.subcluster for r in obskeys]) == sub, obskeys)))
+	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].oi.subcluster for r in obskeys]) == "subA", obskeys)))
+	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].oi.subcluster for r in obskeys]) == "sub?", obskeys)))
+	newobskeys = np.flipud(np.sort(np.unique(newobskeys), kind='mergesort'))
+	obskeys = newobskeys
 
 	# printing the sorted list
 	if sortkind == "size":
@@ -1421,7 +1464,7 @@ if __name__ == "__main__":
 			sf[key] = "%s%s" % (linkedhtmlstem, sf[key])
 		# create html-file with statistics
 		htmlstatfile = "%s-stat.html" % (linkedhtmlstem) 
-		stat = obsstat(obskeys, fromdate, todate)
+		stat = obsstat(obskeys, fromdate, todate, storage_nodes)
 		stat.printhtml(htmlstatfile)
 
 		htmlrep=writeHtmlList(sf["obsid"], linkedhtmlstem, fromdate, todate)
