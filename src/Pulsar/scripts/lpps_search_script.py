@@ -221,7 +221,7 @@ def run_rfifind(subband_globpattern, result_dir, basename, bad_channel_str):
     os.chdir(result_dir)
   
     options = {
-        '-blocks' : str(8192),
+        '-blocks' : str(512),
         '-o' : basename,
     }
 
@@ -543,6 +543,10 @@ class SearchRun(object):
         rfifind_status = run_rfifind(self.get_subband_globpattern(), 
             self.work_dir, self.basename, bad_channel_str)
         t_rfifind_end = time.time()
+        # Do some exit status checking on rfifind
+        if rfifind_status != 0:
+            print 'rfifind failed, exiting'
+            sys.exit(1)
         print 'Running rfifind took %.2f seconds.' % \
             (t_rfifind_end - t_rfifind_start)
         # Move the rfifind output files
