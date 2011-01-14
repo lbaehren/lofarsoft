@@ -45,8 +45,7 @@ Recipe & Pipeline Author's Guide
 .. toctree::
    :maxdepth: 2
 
-   author/recipe/index.rst
-   author/parallel/index.rst
+   author/index.rst
 
 .. _section-developer-reference:
 
