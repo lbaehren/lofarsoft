@@ -45,8 +45,10 @@ class LOFARnode(object):
         self.outputs = {}
 
     def run_with_logging(self, *args):
-        # Call the run() method, ensuring that the logging handler is added
-        # and removed properly.
+        """
+        Calls the run() method, ensuring that the logging handler is added
+        and removed properly.
+        """
         if self.loghost:
             my_tcp_handler = logging.handlers.SocketHandler(self.loghost, self.logport)
             self.logger.addHandler(my_tcp_handler)
@@ -63,8 +65,9 @@ class LOFARnode(object):
 
 class LOFARnodeTCP(LOFARnode):
     """
-    This node script will receive instructions via TCP from a
-    jobserver.JobSocketReceiver.
+    This node script extends :class:`~lofarpipe.support.lofarnode.LOFARnode`
+    to receive instructions via TCP from a
+    :class:`~lofarpipe.support.jobserver.JobSocketReceiver`.
     """
     def __init__(self, job_id, host, port):
         self.job_id, self.host, self.port = int(job_id), host, int(port)

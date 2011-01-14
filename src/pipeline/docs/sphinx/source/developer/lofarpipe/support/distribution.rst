@@ -13,6 +13,15 @@ detail what goes on behind the scenes and how it can be extended.
 
    Details!
 
+Node scripts
+------------
+
+.. autoclass:: lofarpipe.support.lofarnode.LOFARnode
+   :members:
+
+.. autoclass:: lofarpipe.support.lofarnode.LOFARnodeTCP
+   :members:
+
 Compute jobs
 ------------
 
