@@ -18,7 +18,6 @@ import time
 import signal
 
 from lofarpipe.support.baserecipe import BaseRecipe
-from lofarpipe.support.lofarnode import run_node
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.group_data import gvds_iterator
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
