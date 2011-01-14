@@ -41,7 +41,7 @@ class thumbnail_combine(BaseRecipe, RemoteCommandRecipeMixIn):
         # And run them
         self._schedule_jobs(jobs)
 
-        # Th error flag is set if a job failed
+        # The error flag is set if a job failed
         if self.error.isSet():
             self.logger.warn("Failed compute job process detected")
             return 1

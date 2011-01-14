@@ -1,4 +1,5 @@
 import sys
+import subprocess
 import glob
 import os
 
@@ -42,8 +43,5 @@ class thumbnail_combine(LOFARnodeTCP):
         return 0
 
 if __name__ == "__main__":
-    #   If invoked directly, parse command line arguments for logger information
-    #                        and pass the rest to the run() method defined above
-    # --------------------------------------------------------------------------
     jobid, jobhost, jobport = sys.argv[1:4]
     sys.exit(thumbnail_combine(jobid, jobhost, jobport).run_with_stored_arguments())
