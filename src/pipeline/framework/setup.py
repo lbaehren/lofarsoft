@@ -4,7 +4,10 @@ setup(
     name="Pipeline Framework",
     version="0.1.dev",
     packages=[
-        'lofarpipe', 'lofarpipe.cuisine', 'lofarpipe.support',
+        'lofarpipe',
+        'lofarpipe.cuisine',
+        'lofarpipe.support',
+        'lofarpipe.tests',
     ],
     description="LOFAR Pipeline System",
     author="John Swinbank",
