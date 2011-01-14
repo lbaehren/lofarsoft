@@ -399,6 +399,7 @@ class outputInfo:
 		self.obsyear = self.id.split("_")[0][1:]
 		self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 		self.comment = comment
+		self.subcluster = "sub?"
 		self.totsize = 0.0
 		self.processed_dirsize = 0.0
 		self.pointing = "????_????"
@@ -424,6 +425,7 @@ class outputInfo:
 			self.seconds = self.oi.seconds
 		else:
 			self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
+		self.subcluster = self.oi.subcluster
 		self.pointing = self.oi.pointing
 		self.statusline = statusline
 		self.reduced_node = reduced_node
@@ -1200,9 +1202,9 @@ if __name__ == "__main__":
 		# also, we add 'subA' and 'sub?' as well
 		newobsids=[]
 		for sub in np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes]):
-			newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].oi.subcluster for r in obsids]) == sub, obsids)))
-		newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].oi.subcluster for r in obsids]) == "subA", obsids)))
-		newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].oi.subcluster for r in obsids]) == "sub?", obsids)))
+			newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == sub, obsids)))
+		newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == "subA", obsids)))
+		newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == "sub?", obsids)))
 		newobsids = np.flipud(np.sort(np.unique(newobsids), kind='mergesort'))
 		obsids = newobsids
 
@@ -1529,9 +1531,9 @@ if __name__ == "__main__":
 	# selected (from the command line) subclusters, because db can have data for all subclusters
 	newobskeys=[]
 	for sub in np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes]):
-		newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].oi.subcluster for r in obskeys]) == sub, obskeys)))
-	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].oi.subcluster for r in obskeys]) == "subA", obskeys)))
-	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].oi.subcluster for r in obskeys]) == "sub?", obskeys)))
+		newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == sub, obskeys)))
+	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == "subA", obskeys)))
+	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == "sub?", obskeys)))
 	newobskeys = np.flipud(np.sort(np.unique(newobskeys), kind='mergesort'))
 	obskeys = newobskeys
 
