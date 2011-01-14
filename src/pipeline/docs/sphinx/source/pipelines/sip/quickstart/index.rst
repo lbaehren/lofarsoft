@@ -20,7 +20,7 @@ type a password: see the `LOFAR wiki
 
 Note that examples of many of the steps described here are available as part
 of the example data provided with the pipeline framework (`available from
-Subversion <http://usg.lofar.org/svn/code/trunk/src/pipeline/examples/>`_ if
+Subversion <http://usg.lofar.org/svn/code/trunk/src/pipeline/docs/examples/>`_ if
 required).
 
 For the sake of example, we will consider the ``L2009_16007`` dataset,
