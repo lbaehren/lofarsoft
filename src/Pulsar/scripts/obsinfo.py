@@ -670,6 +670,7 @@ class obsstat:
 		self.fd = fd
 		self.td = td
 		self.storage_nodes = storage_nodes
+		self.lupd = ""
 
 		self.subclusters = np.append(np.unique([cexec_nodes[s].split(":")[0] for s in self.storage_nodes]), ["subA", "sub?"])
 		self.dbinfo = {}
