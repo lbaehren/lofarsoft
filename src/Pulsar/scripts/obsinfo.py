@@ -855,9 +855,9 @@ class obsstat:
                                                                     self.td != "" and (self.fd != "" and " Till " + self.td or "") or ""))
 
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=5>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <th align=left width=400></th>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left width=400></td>")
 		for sub in np.append("Total", self.subclusters):	
-			self.htmlptr.write ("\n <th align=left>%s</th>" % (sub))	
+			self.htmlptr.write ("\n <td align=left><b>%s</b></td>" % (sub))	
 		self.htmlptr.write ("\n</tr>")
 		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Total number of observations", "hours", "days"))
 		for sub in np.append("Total", self.subclusters):	
