@@ -8,6 +8,8 @@ The framework provides a number of convenience and utility functions. These
 are not fundamental to the operation of the framework itself, but rathr
 provude functionality which is commonly needed in pipeline recipes.
 
+.. _parset-handling:
+
 Parset handling
 ---------------
 

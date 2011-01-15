@@ -64,11 +64,21 @@ a ``ksh`` script.
 Per-node script
 ===============
 
+First, we will consider the processing that must be done on each of the remote
+hosts. We start by converting the ``ksh`` script to a native Python version,
+then refining it to best take advantage of the framework capabilities.
+
+It may be worth emphasising that the conversion to Python is optional: an
+alternative approach would be to run code each node which simply spawned a
+copy of ``ksh`` and executed the script directly. In general, though,
+minimising forking is a wise approach -- and the Python code provides better
+opportunity to demosntrate the framework capabilities.
+
 First Python implementation
 ---------------------------
 
-The recipe design starts by considering the processing that must be done on
-the remote hosts. A simple Python implementation is show below.
+A simple Python implementation of functionality similar to that provided by
+the ``ksh`` script is shown below.
 
 .. code-block:: python
    :linenos:
@@ -632,10 +642,81 @@ file. Here, we use :class:`lofarpipe.support.clusterdesc.ClusterDesc` and
 all the compute nodes defined in the cluster, and then proceed to use the list
 of hosts in the recipe exactly as before.
 
-.. todo::
+Additional notes
+================
 
-   Add a node about "mapfiles", and determining which jobs can run on which
-   node.
+Some important aspects of recipe design were not covered in the above
+discussion.
+
+Assigning jobs to specific hosts
+--------------------------------
+
+The example we have considered above is, in one important respect, simpler
+than many pipeline recipes: it runs exactly the same code on each of the
+remote hosts. A more general situation is processing a large number of
+similar, but not identical, datasets (such as independent subbands of an
+observation). Due to limited storage capacities on the remote hosts, it is
+usually the case that each host only stores a subset of the total number of
+datasets locally. Therefore, when dispatching jobs to the host, the recipe
+author must be careful only to send jobs which refer to data it can reasonably
+process.
+
+From the recipe point of view, this procedure is straightforward. The recipe
+developer earlier contains code like:
+
+.. code-block:: python
+
+   jobs = []
+   for host in hosts:
+       jobs.append(
+           ComputeJob(
+               host, command,
+               arguments=[
+                   ...
+               ]
+           )
+
+When specifying a job which must run on a specific host, the pipeline author
+can use a mapping of the form:
+
+.. code-block:: python
+
+   job_list = [
+       ("hostname1", [arguments for job 1]),
+       ("hostname2", [arguments for job 2]),
+       ...
+   ]
+
+And our earlier code can then simply be modified to:
+
+.. code-block:: python
+
+   jobs = []
+   for host, arguments in job_list:
+       jobs.append(
+           ComputeJob(
+               host, command, arguments=arguments
+           )
+
+In general, the recipe author must define the mapping between hostnames and
+job arguments themselves: this will depend on the details of the problem the
+recipe is addressing. Often, it is conventient to use one recipe to generate
+the mapping, then save it to disk for use by several recipes in the pipeline.
+This is the approach taken in LOFAR's standard imaging pipeline. Here, the
+:ref:`recipe-datamapper` recipe determines which filenames are accessible from
+which hosts, and stores them to disk in a :ref:`parset file <parset-handling>`
+formatted as follows:
+
+.. code-block:: none
+
+   hostname1 = [ /path/to/filename1, /path/to/filename2 ]
+   hostname2 = [ /path/to/filename3, /path/to/filename3 ]
+   ...
+
+The :func:`lofarpipe.support.group_data.load_data_map` function makes it easy
+to read back this parset from disk and iterate over the values to dispatch
+compute jobs: see the imaging pipeline's :ref:`dppp-recipe` recipe for an
+example.
 
 .. todo::
 
