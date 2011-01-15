@@ -671,9 +671,9 @@ class obsstat:
 		self.td = td
 		self.storage_nodes = storage_nodes
 
-		self.subclusters = list(np.append(list(np.unique([cexec_nodes[s].split(":")[0] for s in self.storage_nodes])), "subA", "sub?"))
+		self.subclusters = np.append(np.unique([cexec_nodes[s].split(":")[0] for s in self.storage_nodes]), ["subA", "sub?"])
 		self.dbinfo = {}
-		for sub in np.append(self.subclusters, "Total"):
+		for sub in np.append(self.subclusters, ["Total"]):
 			self.dbinfo[sub] = {"totDuration": 0.0, "processedDuration": 0.0, "IMonlyDuration": 0.0,
                                             "Ntotal": 0, "Nprocessed": 0, "Nistype": 0, "Nistype_only": 0, "Ncstype": 0, "Ncstype_only": 0,
                                             "Nfetype": 0, "Nfetype_only": 0, "Nimtype": 0, "Nimtype_only": 0,
@@ -683,7 +683,7 @@ class obsstat:
                                             "totRawsize": 0.0, "IMonlyRawsize": 0.0, "totProcessedsize": 0.0 }	 # size in TB
 
 		for sub in self.subclusters:
-			self.subkeys=list(np.compress(np.array([obstable[r].subcluster for r in self.ids]) == sub, self.ids))
+			self.subkeys=np.compress(np.array([obstable[r].subcluster for r in self.ids]) == sub, self.ids)
 			self.dbinfo[sub]["Ntotal"] += np.size(self.subkeys)
 			for r in self.subkeys:
 				# getting the numbers and duration
