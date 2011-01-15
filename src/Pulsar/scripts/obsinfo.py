@@ -855,19 +855,19 @@ class obsstat:
                                                                     self.td != "" and (self.fd != "" and " Till " + self.td or "") or ""))
 
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=5>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left width=400></td>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left width=400></td>")
 		for sub in np.append("Total", self.subclusters):	
 			self.htmlptr.write ("\n <td align=left><b>%s</b></td>" % (sub))	
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Total number of observations", "hours", "days"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Total number of observations", "hours", "days"))
 		for sub in np.append("Total", self.subclusters):	
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Ntotal"], self.dbinfo[sub]["totDuration"], self.dbinfo[sub]["totDuration"]/24.))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of observations w/o IM only", "hours", "days"))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of observations w/o IM only", "hours", "days"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Ntotal"]-self.dbinfo[sub]["Nimtype_only"], self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"], (self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"])/24.))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of processed observations", "hours", "days"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of processed observations", "hours", "days"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Nprocessed"], self.dbinfo[sub]["processedDuration"], self.dbinfo[sub]["processedDuration"]/24.))
 		self.htmlptr.write ("\n</tr>")
