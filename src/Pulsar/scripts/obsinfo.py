@@ -182,9 +182,6 @@ class obsinfo:
         	if np.size(self.nodeslist) > 0:
                 	# it means that this keyword exist and we can extract the info
                 	self.nodeslist=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
-        	# cut the string of nodes if it is too long
-        	if len(self.nodeslist)>13:
-                	self.nodeslist=self.nodeslist[:13] + "..."
 
 		# getting the subcluster number where the raw data were taken (e.g. sub4, sub5, etc.)
 		# if raw data were spread between several subclusters, then 'subA' is assigned
@@ -195,7 +192,7 @@ class obsinfo:
 		# assign 'sub?' to them. If the data is processed and present in the archive, then 'sub?'
 		# will be further corrected
 		try:
-			snames = np.unique([cexec_nodes["lse%s" % (i)].split(":")[0] for i in self.nodeslist.split(",")])
+			snames = np.unique([cexec_nodes["lse%s" % (i)].split(":")[0] for i in self.nodeslist.split("[")[1].split("]")[0].split(",")])
 			if np.size(snames) == 0:
 				self.subcluster = 'sub?'
 			elif np.size(snames) > 1:
@@ -204,6 +201,11 @@ class obsinfo:
 				self.subcluster = snames[0]
 		except:
 			self.subcluster = 'sub?'
+
+		# After we figured the correct subcluster, then we cut the nodeslist string
+        	# cut the string of nodes if it is too long
+        	if len(self.nodeslist)>13:
+                	self.nodeslist=self.nodeslist[:13] + "..."
 
 	        # getting the name of /data? where the data are stored
 		try:
