@@ -41,6 +41,8 @@ class Opts(object):
                             doc = "synthesized beam per channel; None=>all equal")
     beam_sp_derive = Bool(False, doc = "If true and beam_spectrum is None, then assume header beam is for \
                           median frequency and scales with frequency for channels.") 
+    frequency      = Option(None, List(Float()), doc="List of user-specified channel frequencies in Hz; \
+                                     None => try to determine from header")
 
     thresh         = Enum(None, "hard", "fdr", 
                           doc="hard/fdr thresholds.\n" \
@@ -69,6 +71,9 @@ class Opts(object):
 
     thresh_isl     = Float(3, doc="pixel threshold in sigma, for the island boundary")
     thresh_pix     = Float(5, doc="pixel threshold in sigma, for island peak")
+    thresh_gaus    = Float(-1.0, doc="pixel threshold in sigma, peak in island " \
+                                     "must exceed this value for Gaussian to be fit." \
+                                     "If < 0 => determine automatically using thresh_isl and isl.mean")
     minpix_isl     = Int(4, doc="minimal number of pixels with " \
                              "emission per island")
     ini_gausfit    = String('default', doc = "Initial guess for gaussians, 'default', 'fbdsm', or \
@@ -147,6 +152,7 @@ class Opts(object):
     print_timing   = Bool(False, doc="print basic timing information")
     verbose_fitting= Bool(False, doc="print out extra information " \
                               "during fitting")
+    quiet = Bool(False, doc="Suppress output to screen. Output is still sent to the logfile as usual.")
     debug_figs_1   = Bool(False, doc='Plot gaussian fit images for each source for each channel for spectralindex')
     debug_figs_2   = Bool(False, doc='Plot gaussian fit parameter plots for each source as a fn of channel')
     debug_figs_3   = Bool(False, doc='Plot flagged channels before and after averaging for spectralindex for image')

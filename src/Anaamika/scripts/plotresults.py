@@ -1,67 +1,4 @@
-
 """ Plot stuff """
-# fig = plt.figure(1)
-
-# def somefunc(x, y, fig=None):
-#     if fig is None:
-#         # we import pyplot here and not at the top level so that
-#         # people who are managing their own figures, eg in a user
-#         # interface application, will not trigger the pyplot user
-#         # interface code which coul cause conflicts
-#         import matplotlib.pyplot as plt
-#         fig = plt.figure()
-
-#     # we explicitly instantiate our axes rather than rely on pyplot's
-#     # stateful management of current figure and axes
-#     ax = fig.add_subplot(111)
-
-#     ax.plot(x, y)
-#     ax.set_title('x vs y')
-#     ax.set_xlabel('x')
-#     ax.set_ylabel('y')
-#     ax.grid(True)
-#     return fig
-
-
-# import matplotlib
-# matplotlib.use('TkAgg')
-
-# from numpy import arange, sin, pi
-# from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-# from matplotlib.figure import Figure
-
-# import Tkinter as Tk
-# import sys
-
-# def destroy(e): sys.exit()
-
-# root = Tk.Tk()
-# root.wm_title("Embedding in TK")
-# #root.bind("<Destroy>", destroy)
-
-
-# f = Figure(figsize=(5,4), dpi=100)
-# a = f.add_subplot(111)
-# t = arange(0.0,3.0,0.01)
-# s = sin(2*pi*t)
-
-# a.plot(t,s)
-
-
-# # a tk.DrawingArea
-# canvas = FigureCanvasTkAgg(f, master=root)
-# canvas.show()
-# canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
-
-# toolbar = NavigationToolbar2TkAgg( canvas, root )
-# toolbar.update()
-# canvas._tkcanvas.pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
-
-# #button = Tk.Button(master=root, text='Quit', command=sys.exit)
-# #button.pack(side=Tk.BOTTOM)
-
-# Tk.mainloop()
-
 from image import *
 import pylab as pl
 from math import log10
@@ -200,6 +137,52 @@ def showrms(img):
               ax2.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
                     cmap=gray_palette)
           pl.title(tit[i])
+        pl.show()
+        if os.environ.get("REMOTEHOST") != 'lfe001.offline.lofar':
+            pl.close()
+
+
+def showsrc(img):
+    """Show original image and overlay source boundaries and indices."""
+    if hasattr(img, 'nsrc') is False:
+        # gaul2srl was not run
+        print 'Gaussians were not grouped into sources.'
+    else:
+        # show ch0 map
+        im_mean = img.clipped_mean
+        im_rms = img.clipped_rms
+        low = N.max(1.1*abs(img.min_value),1.1*abs(img.resid_gaus.min()))
+        vmin_est = im_mean - im_rms*5.0 + low
+        if vmin_est <= 0.0:
+            vmin = N.log10(low)
+        else:
+            vmin = N.log10(vmin_est)
+        vmax = N.log10(im_mean + im_rms*30.0 + low)
+        origin='lower'
+        colours = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+        styles = ['-', '-.', '--']
+        tit = 'Original Image with Sources\n(arbitrary logarithmic scale)'
+
+        image = img.ch0
+        fig = pl.figure(figsize=(10.0,10.0))
+        gray_palette = cm.gray
+        gray_palette.set_bad('k')
+        ax1 = pl.subplot(1, 1, 1)
+        im = N.log10(image + low)
+        ax1.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
+                       cmap=gray_palette)
+        # draw the gaussians with one colour per source
+        for isrc, src in enumerate(img.source):
+            col = colours[isrc % 7]
+            style = styles[isrc/7 % 3]
+            for g in src.gaussians:
+                ellx, elly = func.drawellipse(g)
+                ax1.plot(ellx, elly, color = col, linestyle = style)
+            text_xpos = img.sky2pix([src.posn_sky_centroid[0] + src.size_sky[0]/N.cos(src.posn_sky_centroid[1]), src.posn_sky_centroid[1]])[0]
+            text_ypos = img.sky2pix(src.posn_sky_centroid)[1]
+            ax1.text(text_xpos, text_ypos, str(src.source_id), color=col, clip_on=True) # label source
+
+        pl.title(tit)
         pl.show()
         if os.environ.get("REMOTEHOST") != 'lfe001.offline.lofar':
             pl.close()

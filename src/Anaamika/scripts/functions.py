@@ -375,7 +375,7 @@ def fit_mask_1d(x, y, sig, mask, funct, do_err, order=0, p0 = None):
            else:
              p0=N.array([ind1[0], -0.8] + [0.]*(order-1))
       res=lambda p, xfit, yfit, sigfit: (yfit-funct(p, xfit))/sigfit
-      (p, cov, info, mesg, flag)=leastsq(res, p0, args=(xfit, yfit, sigfit), full_output=True)
+      (p, cov, info, mesg, flag)=leastsq(res, p0, args=(xfit, yfit, sigfit), full_output=True, warning=False)
   
       if do_err: 
         if cov != None:
@@ -494,7 +494,7 @@ def fit_gaus2d(data, p_ini, x, y, mask = None, err = None):
         errorfunction = lambda p: N.ravel(func.gaus_2d(p, x, y) - data)[g_ind]
     else:  
         errorfunction = lambda p: N.ravel((func.gaus_2d(p, x, y) - data)/err)[g_ind]
-    p, success = leastsq(errorfunction, p_ini)
+    p, success = leastsq(errorfunction, p_ini, warning=False)
 
     return p, success
 
@@ -683,6 +683,7 @@ def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None):
     """ fitcode : 0=fit all; 1=fit amp; 2=fit amp, posn; 3=fit amp, size """
     from scipy.optimize import leastsq
     import numpy as N
+    import functions as func
    
     if mask != None and mask.shape != image.shape:
         print 'Data and mask array dont have the same shape, ignoring mask'
@@ -714,7 +715,7 @@ def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None):
 
       errorfunction = lambda p, x, y, p_tofix, ind, image, err, g_ind: \
                      N.ravel((func.gaus_2d_itscomplicated(p, x, y, p_tofix, ind)-image)/err)[g_ind]
-      p, success = leastsq(errorfunction, p_tofit, args=(x, y, p_tofix, ind, image, err, g_ind))
+      p, success = leastsq(errorfunction, p_tofit, args=(x, y, p_tofix, ind, image, err, g_ind), warning=False)
     else:
       p, sucess = None, 1
 

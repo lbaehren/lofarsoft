@@ -55,8 +55,8 @@ class Op_gaul2srl(Op):
         img.source = sources
         img.nsrc = src_index+1
         mylog.info("Grouped " + str(img.ngaus) + " gaussians into " + str(img.nsrc) + " sources")
-        #print "Grouped " + str(img.ngaus) + " gaussians into " + str(img.nsrc) + " sources"
-        #if img.opts.output_fbdsm: opf.write_fbdsm_gaul(img)
+        if img.opts.quiet == False:
+            print "Grouped " + str(img.ngaus) + " gaussians into " + str(img.nsrc) + " sources"
 
 ##################################################################################################
 
@@ -225,12 +225,42 @@ class Op_gaul2srl(Op):
 
             return same_island
 
+        def same_island_max(pair, g_list, delc, isl):
+            """ If the flux at the position of one Gaussian is dominated by that of
+                the other Gaussian, then they belong to the same source."""
+            g1 = g_list[pair[0]]
+            g2 = g_list[pair[1]]
+            pix1 = N.array(g1.centre_pix)
+            x1, y1 = N.floor(pix1)-delc # location of g1 peak
+
+            # make image of 2nd Gaussian with size = island box
+            boxx, boxy = isl.bbox
+            subn = boxx.stop-boxx.start; subm = boxy.stop-boxy.start
+            x, y = N.indices((subn, subm))
+
+            params = func.g2param(g2)
+            params[1] -= delc[0]; params[2] -= delc[1]
+            gau2 = func.gaus_2d(params, x, y)
+           
+
+            flux1 = g1.peak_flux 
+            flux2 = gau2[x1, y1] # flux of 2nd Gaussian at peak of 1st Gaussian
+            island_id = g1.island_id
+            if flux1 < flux2:
+                same_island = True
+            else:
+                same_island = False
+                
+            return same_island
+              
+            
         same_isl1_min, same_isl1_cont = same_island_min(pair, g_list, subim, delc)
         same_isl2 = same_island_dist(pair, g_list, img.header)
+        same_isl3 = same_island_max(pair, g_list, delc, isl)
 
         g1 = g_list[pair[0]]
 
-        same_island = (same_isl1_min and same_isl2) or same_isl1_cont
+        same_island = (same_isl1_min and same_isl2) or same_isl1_cont or same_isl3
         
         return same_island
 
@@ -280,12 +310,26 @@ class Op_gaul2srl(Op):
                                         # calculate peak by bilinear interpolation around centroid
         x1 = N.int(N.round(mompara[1])); y1 = N.int(N.round(mompara[2]))
         xind = slice(x1, x1+2, 1); yind = slice(y1, y1+2, 1)
+        g = g_sublist[0]
+        # NOTE: the following gives errors on certain island geometries,
+        # such as very narrow islands, islands with holes, etc. Instead,
+        # just use the max of subim_src as the peak flux when the
+        # ValueError is triggered.
+        #
+        # if N.sum(mask[xind, yind]==N.ones((2,2))*isrc) != 4:
+        #     raise ValueError("Island number not in mask for gaus->source")
+        # t=(mompara[1]-x1)/(x1+1-x1)  # in case u change it later
+        # u=(mompara[2]-y1)/(y1+1-y1)
+        # s_peak=(1.0-t)*(1.0-u)*subim_src[x1,y1]+t*(1.0-u)*subim_src[x1+1,y1]+ \
+        #        t*u*subim_src[x1+1,y1+1]+(1.0-t)*u*subim_src[x1,y1+1]
         if N.sum(mask[xind, yind]==N.ones((2,2))*isrc) != 4:
-            raise ValueError("Island number not in mask for gaus->source")
-        t=(mompara[1]-x1)/(x1+1-x1)  # in case u change it later
-        u=(mompara[2]-y1)/(y1+1-y1)
-        s_peak=(1.0-t)*(1.0-u)*subim_src[x1,y1]+t*(1.0-u)*subim_src[x1+1,y1]+ \
-               t*u*subim_src[x1+1,y1+1]+(1.0-t)*u*subim_src[x1,y1+1]
+            s_peak = N.max(subim_src)
+        else:
+            t=(mompara[1]-x1)/(x1+1-x1)  # in case u change it later
+            u=(mompara[2]-y1)/(y1+1-y1)
+            s_peak=(1.0-t)*(1.0-u)*subim_src[x1,y1]+t*(1.0-u)*subim_src[x1+1,y1]+ \
+                t*u*subim_src[x1+1,y1+1]+(1.0-t)*u*subim_src[x1,y1+1]
+ 
                                         # convert pixels to coords
         sra, sdec = img.pix2sky([mompara[1]+delc[0], mompara[2]+delc[1]])
         mra, mdec = img.pix2sky(posn)
@@ -365,11 +409,13 @@ class Op_gaul2srl(Op):
 from image import *
 from gausfit import Gaussian
 from islands import Island
+import pylab as pl
+import os
 
 class Source(object):
     """ Instances of this class store sources made from grouped gaussians. """
 
-    code                = String(doc='Source code S, C, or M')
+    code                = String(doc='Source code S (= source is a single Gaussian), C (= source is a single Gaussian, multiple sources per island), or M (= source is composed of multiple Gaussians)')
     total_flux          = Float(doc="Total flux (Jy)")
     total_fluxE         = Float(doc="Error in total flux (Jy)")
     peak_flux_centroid  = Float(doc="Peak flux at centroid of emission (Jy/beam)")
@@ -407,6 +453,29 @@ class Source(object):
         self.gaussians = gaussians
         self.rms_isl = img.islands[island_id].rms
 
+    def showsed(self):
+        fig = pl.figure(figsize=(5.0,5.0))
+        ax1 = pl.subplot(1, 1, 1)
+        pl.title('SED of source #'+str(self.source_id))
+        spin = self.spin1
+        espin = self.espin1
+        spin1 = self.spin2
+        espin1 = self.espin2
+        take2nd = self.take2nd
+        y = self.specin_flux
+        ey = self.specin_fluxE
+        x = self.specin_freq
+        ax1.plot(N.log10(x), N.log10(y), '*b')
+        ax1.errorbar(N.log10(x), N.log10(y), ey/y)
+        ax1.plot(N.log10(x), N.log10(spin[0])+N.log10(x/self.specin_freq0)*spin[1], '-g')
+        ax1.plot(N.log10(x), N.log10(spin1[0])+N.log10(x/self.specin_freq0)*spin1[1]+N.log10(x/self.specin_freq0)*N.log10(x/self.specin_freq0)*spin1[2], '-m')
+        pl.xlabel('log Frequncy (Hz)')
+        pl.ylabel('log Flux (Jy)')
+        pl.show()
+        if os.environ.get("REMOTEHOST") != 'lfe001.offline.lofar':
+            pl.close()
+
+    
 
 Image.source = List(tInstance(Source), doc="List of Sources")
 Island.source = List(tInstance(Source), doc="List of Sources")

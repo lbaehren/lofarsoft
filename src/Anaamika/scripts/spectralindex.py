@@ -18,6 +18,8 @@ from copy import deepcopy as cp
 import _cbdsm
 import pylab as pl
 import collapse 
+import sys
+import time
 
 specQC_phot = NArray(doc="Array of abs(fitted peak-expected value for str8 line fit excl data)/rms excl data")
 raw_rms = Float(doc=" ")
@@ -36,7 +38,9 @@ take2nd = Bool(doc = "spectral index fit with 2nd order in log makes sense or no
 spec_descr = String(doc = "Description of source, if multiple")
 specind_win_size = Int(doc = "Size of averaging window for spectral index of M sources")
 specin_freq = NArray(doc = 'Frequency array used to calculate spectral index')
+specin_freq0 = NArray(doc = 'Reference frequency used to calculate spectral index')
 specin_flux = NArray(doc = 'Flux density array used to calculate spectral index')
+specin_fluxE = NArray(doc = 'Errors on flux density array used to calculate spectral index')
 
 
         #check size vs freq wrt beam and see if consistent
@@ -48,6 +52,9 @@ class Op_spectralindex(Op):
 
      mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"SpectIndex")
      if img.opts.spectralindex_do:
+      if img.opts.quiet == False:
+          sys.stdout.write('Preparing to calculate spectra indices.')
+          sys.stdout.flush()
       shp = img.image.shape
       if len(shp) == 3 and shp[0] > 1:
                                                 # calc freq, beam_spectrum for nchan channels
@@ -65,6 +72,7 @@ class Op_spectralindex(Op):
             img.freq_av = img.freq
             img.freq0 = N.median(img.freq)
             img.avimage_flags = iniflags
+            img.avimage_crms = img.channel_clippedrms
             mylog.info('%s %i %s' % ('Kept all ',shp[0]," channels "))
         img.avimage = avimage
         #pyfits.writeto(img.imagename + '.avimage.fits', N.transpose(img.avimage, (0,2,1)), img.header, clobber=True)
@@ -72,8 +80,27 @@ class Op_spectralindex(Op):
 
         nchan = avimage.shape[0]
         rms_spec = self.rms_spectrum(img, avimage)
+        if img.opts.quiet == False:
+            sys.stdout.write('done.\n')
+            sys.stdout.flush()
 
+            sys.stdout.write('Calculating spectral index for source : ')
+            sys.stdout.flush()
         for src in img.source:
+          if img.opts.quiet == False:
+              sys.stdout.write('#' + str(src.source_id))
+              sys.stdout.flush()
+              time.sleep(0.02)
+              sys.stdout.write('.')
+              sys.stdout.flush()
+              time.sleep(0.02)
+              sys.stdout.write('.')
+              sys.stdout.flush()
+              time.sleep(0.02)
+              sys.stdout.write('.')
+              sys.stdout.flush()
+              time.sleep(0.02)
+
           if src.code in ['S', 'C']:
             isl = img.islands[src.island_id]
             case, casepara = self.findcase(img, src, nchan, avimage, rms_spec)
@@ -87,16 +114,19 @@ class Op_spectralindex(Op):
             gaus.spin1 = spin; gaus.espin1 = espin; gaus.spin2 = spin1; gaus.espin2 = espin1; gaus.take2nd = take2nd
         #self.globalastrometry(img)
         
-        for src in img.source:
+        #for src in img.source:
           if src.code == 'M':
             isl = img.islands[src.island_id]
             case, casepara = self.findcase(img, src, nchan, avimage, rms_spec)
             src.case = str(case)
             para, epara, q_spec, spin_para = self.msource(img, src, rms_spec, avimage, casepara, nchan)
-
+        if img.opts.quiet == False:
+            sys.stdout.write('done.\n')
+            sys.stdout.flush()
+            
       else:
           img.opts.spectralindex_do = False
-          mylog.warning('Only one spectral channel found. Spectral index module disabled.')
+          mylog.info('Only one spectral channel found. Spectral index module disabled.')
 
 
 ####################################################################################
@@ -162,13 +192,20 @@ class Op_spectralindex(Op):
 
         img.freq = N.zeros(shp[0])
         crval, cdelt, crpix = img.freq_pars
-        if crval == 0.0 and cdelt == 0.0 and crpix == 0.0:
-            mylog.critical("CTYPE = FREQ not found in header")
-            raise RuntimeError("CTYPE = FREQ not found in header")
+        if crval == 0.0 and cdelt == 0.0 and crpix == 0.0 and img.opts.frequency == None:
+            mylog.critical("CTYPE = FREQ not found in header and frequencies not specified by user")
+            raise RuntimeError("CTYPE = FREQ not found in header and frequencies not specified by user")
         else:
-            for ichan in range(shp[0]):
-                ich = ichan+1
-                img.freq[ichan] = crval+cdelt*(ich-crpix)
+            if img.opts.frequency == None:
+                for ichan in range(shp[0]):
+                    ich = ichan+1
+                    img.freq[ichan] = crval+cdelt*(ich-crpix)
+            else:
+                if len(img.opts.frequency) != shp[0]:
+                    mylog.critical("Number of channels does not match number of frequencies specified by user")
+                    raise RuntimeError("Number of channels does not match number of frequencies specified by user")
+                for ichan in range(shp[0]):
+                    img.freq[ichan] = img.opts.frequency[ichan]
                 
 
 ####################################################################################
@@ -227,6 +264,10 @@ class Op_spectralindex(Op):
           rms = N.zeros(image.shape[1:])
           median_rms = N.zeros(nchan)
           for ichan in range(nchan):
+            if img.opts.quiet == False:
+                sys.stdout.write('.')          
+                sys.stdout.flush()
+                time.sleep(0.02)
             if not chanflag[ichan]:
               dumi = Op_rmsimage()
               Op_rmsimage.map_2d(dumi, image[ichan], mean, rms, None, *map_opts)
@@ -236,6 +277,10 @@ class Op_spectralindex(Op):
           rms_spec = N.zeros(nchan)
           avimage_crms = img.avimage_crms
           for ichan in range(nchan):
+            if img.opts.quiet == False:
+                sys.stdout.write('.')          
+                sys.stdout.flush()
+                time.sleep(0.02)
             if not chanflag[ichan]:
               rms_spec[ichan] = avimage_crms[ichan]
           median_rms = rms_spec
@@ -382,9 +427,11 @@ class Op_spectralindex(Op):
       self.calc_src_spin(img, src, im, rmask, freqarr)
       ind1 = N.where(src.phot_mask == False)[0]
       gaus.specin_freq = freqarr[ind1]
+      gaus.specin_freq0 = img.freq0
       if img.opts.spin_flux =='peak': ind = 0
       else: ind = 6
       gaus.specin_flux = N.array(para)[:,ind][ind1]
+      gaus.specin_fluxE = N.array(epara)[:,ind][ind1]
 
       ### plots for debug_figs
       if img.opts.debug_figs_4: 
@@ -430,7 +477,8 @@ class Op_spectralindex(Op):
         import functions as func
         from const import fwsig
         from math import sqrt
-
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"SpectIndex")
+        
         minchan = img.opts.specind_minchan
         S0, S_i, K, rms_i = casepara
         freqs = img.freq_av; nf = len(freqs)
@@ -587,7 +635,10 @@ class Op_spectralindex(Op):
             self.calc_src_spin(img, src, avimage[srcslice], rmask, img.freq_av)
             ind1 = N.where(src.phot_mask == False)[0]
             gaus.specin_freq = img.freq_av[ind1]
+            gaus.specin_freq0 = img.freq0
+            gaus.spin1 = None; gaus.espin1 = None; gaus.spin2 = None; gaus.espin2 = None; gaus.take2nd = None
             gaus.specin_flux = None
+            gaus.specin_fluxE = None
 
         src.case = src.case+casetype
         para = None; epara = None; q_spec = None; chanmask = None
@@ -631,6 +682,7 @@ class Op_spectralindex(Op):
         import functions as func
         from math import pi, sqrt
         from const import fwsig
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"SpectIndex")
 
         isl = img.islands[src.island_id]                        # set up parameters
         S0, S_i, K, rms_i = casepara
@@ -770,19 +822,27 @@ class Op_spectralindex(Op):
               if img.opts.spin_flux =='peak': ind2 = 0
               else: ind2 = 6
               g.specin_freq = src_freq_av[ind1]
+              g.specin_freq0 = img.freq0
               g.specin_flux = g_par[:,ind2][ind1]
+              g.specin_fluxE = g_epar[:,ind2][ind1]
             else:
               g.spin1 = None; g.espin1 = None; g.spin2 = None; g.espin2 = None; g.take2nd = None
               g.specin_freq = None
+              g.specin_freq0 = img.freq0
               g.specin_flux = None
+              g.specin_fluxE = None
         else:                                                   # extended
           para = epara = q_spec = None; spin_para = [None]*5
           src.phot_mask = chanmask
           src_freq_av = img.freq_av
           ind1 = N.where(src.phot_mask == False)[0]
-          g.specin_freq = None
-          g.specin_flux = None
-                                                                # spectral index for src as a whole
+          for g in src.gaussians:      
+              g.spin1 = None; g.espin1 = None; g.spin2 = None; g.espin2 = None; g.take2nd = None
+              g.specin_freq = None
+              g.specin_freq0 = img.freq0
+              g.specin_flux = None
+              g.specin_fluxE = None
+                                                               # spectral index for src as a whole
         self.calc_src_spin(img, src, image, srcmask, src_freq_av)
                             
         return para, epara, q_spec, spin_para
@@ -944,7 +1004,7 @@ class Op_spectralindex(Op):
         import math
         from scipy.optimize import leastsq
 
-        print 'Need to flag gaussians'
+        #print 'Need to flag gaussians'
         cflux = img.opts.spin_flux
         if cflux=='peak': 
           ind = 0
@@ -1000,6 +1060,7 @@ class Op_spectralindex(Op):
           if not chanmask[ichan]:
             im = image[ichan]
             flux[ichan] = N.sum(im[ind])/beamarea
+            eflux[ichan] = isl.rms*sqrt(beamarea/npix)
             para[ichan, 0] = para[ichan, 6] = flux[ichan]
             epara[ichan, 0] = epara[ichan,0] = isl.rms*sqrt(beamarea/npix)
 
@@ -1008,7 +1069,9 @@ class Op_spectralindex(Op):
         src.spin1 = spin; src.espin1 = espin; src.spin2 = spin1; src.espin2 = espin1; src.take2nd = take2nd
         ind = N.where(src.phot_mask == False)[0]
         src.specin_freq = freqarr[ind]
+        src.specin_freq0 = img.freq0
         src.specin_flux = flux[ind]
+        src.specin_fluxE = eflux[ind]
 
 
 ####################################################################################

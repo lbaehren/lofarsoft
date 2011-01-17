@@ -15,6 +15,8 @@ provides all functionality required by the specific fitters.
 from image import *
 from copy import deepcopy as cp
 import mylogger
+import sys
+import time
 
 gaus_num = Int(doc="Serial number of the gaussian for the image")
 ngaus = Int(doc="Total number of gaussians extracted")
@@ -40,10 +42,26 @@ class Op_gausfit(Op):
     def __call__(self, img):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gausfit   ")
         opts = img.opts
-        print "Fitting islands with Gaussians..."
+        if img.opts.quiet == False:
+            sys.stdout.write('Fitting islands : ')
+            sys.stdout.flush()
         for idx, isl in enumerate(img.islands):
-          if opts.verbose_fitting:
-            print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active)
+          if img.opts.quiet == False:
+              sys.stdout.write('#' + str(idx))
+              sys.stdout.flush()
+              time.sleep(0.02)
+              sys.stdout.write('.')
+              sys.stdout.flush()
+              time.sleep(0.02)
+              sys.stdout.write('.')
+              sys.stdout.flush()
+              time.sleep(0.02)
+              sys.stdout.write('.')
+              sys.stdout.flush()
+              time.sleep(0.02)
+          
+          # if opts.verbose_fitting:
+          #   print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active)
 
           gaul, fgaul = self.fit_island(isl, opts, img)
 
@@ -77,7 +95,10 @@ class Op_gausfit(Op):
                 g.gaus_num = n
             isl.ngaus = m
         img.ngaus = n
-        print '%s %i' % ("Number of Gaussians found :", n)
+        if img.opts.quiet == False:
+            sys.stdout.write('done.')
+            sys.stdout.flush()
+            print '\n%s %i' % ("Total number of Gaussians fit to image:", n)
         return img
 
     def fit_island(self, isl, opts, img):
@@ -105,8 +126,12 @@ class Op_gausfit(Op):
         from _cbdsm import MGFunction
         fcn = MGFunction(isl.image, isl.mask_noisy, 1)
         beam = img.pixel_beam
-        thr1 = isl.mean + opts.thresh_isl*isl.rms
-        thr2 = isl.mean + opts.thresh_pix*isl.rms
+        if opts.thresh_gaus < 0.0:
+            thr1 = isl.mean + opts.thresh_isl*isl.rms
+            thr2 = isl.mean + opts.thresh_pix*isl.rms
+        else:
+            thr1 = opts.thresh_gaus*isl.rms
+            thr2 = thr1
         verbose = opts.verbose_fitting
         peak = fcn.find_peak()[0]
         dof = isl.size_active
@@ -314,7 +339,7 @@ class Op_gausfit(Op):
             else:
               break
           fitok &= self.add_gaussian(fcn, g, dof)
-
+ 
           fitok &= fit(fcn, final=0, verbose=verbose)
 
         ### and one last fit with higher precision
@@ -511,6 +536,31 @@ class Gaussian(object):
         self.deconv_size_sky = img.pix2beam(gaus_dc)
         self.deconv_size_skyE  = [0., 0., 0.]
 
+    def showsed(self):
+        import pylab as pl
+        import os
+        fig = pl.figure(figsize=(5.0,5.0))
+        ax1 = pl.subplot(1, 1, 1)
+        pl.title('SED of Gaussian #'+str(self.gaussian_idx)+' of source #'+str(self.source_id))
+        spin = self.spin1
+        espin = self.espin1
+        spin1 = self.spin2
+        espin1 = self.espin2
+        take2nd = self.take2nd
+        y = self.specin_flux
+        ey = self.specin_fluxE
+        x = self.specin_freq
+        ax1.plot(N.log10(x), N.log10(y), '*b')
+        ax1.errorbar(N.log10(x), N.log10(y), ey/y)
+        ax1.plot(N.log10(x), N.log10(spin[0])+N.log10(x/self.specin_freq0)*spin[1], '-g')
+        ax1.plot(N.log10(x), N.log10(spin1[0])+N.log10(x/self.specin_freq0)*spin1[1]+N.log10(x/self.specin_freq0)*N.log10(x/self.specin_freq0)*spin1[2], '-m')
+        pl.xlabel('log Frequncy (Hz)')
+        pl.ylabel('log Flux (Jy)')
+        pl.show()
+        if os.environ.get("REMOTEHOST") != 'lfe001.offline.lofar':
+            pl.close()
+
+        
 ### Insert attributes into Island class
 from islands import Island
 Island.gaul = List(tInstance(Gaussian), doc="List of extracted gaussians")

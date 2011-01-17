@@ -38,7 +38,8 @@ class Op_islands(Op):
         img.nisl = len(img.islands)
 
         mylog.info('%s %i' % ("Number of islands found :", len(img.islands)))
-        print '%s %i' % ("Number of islands found :", len(img.islands))
+        if img.opts.quiet == False:
+            print '%s %i' % ("Number of islands found :", len(img.islands))
         
         for i, isl in enumerate(img.islands):
             isl.island_id = i

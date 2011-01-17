@@ -76,6 +76,11 @@ class Image(object):
         import plotresults
         plotresults.showrms(self)
 
+    def showsrc(self):
+        """Show ch0 image with sources overlaid."""
+        import plotresults
+        plotresults.showsrc(self)
+
     def write_resid_img(self, filename=None):
         """Write the residual Gaussian image to a fits file."""
         import output

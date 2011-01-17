@@ -35,6 +35,10 @@ class Op_collapse(Op):
       else: pols = ['I']                                       # assume I is always present
 
       if len(img.image.shape) == 3:
+        mylog.info('%s %i' % ('Number of channels in image :', img.image.shape[0]))
+        if img.opts.quiet == False:
+            print '%s %i' % ('Number of channels in image :', img.image.shape[0])
+      
         mode = img.opts.collapse_mode
         chan0 = img.opts.collapse_ch0
         c_list = img.opts.collapse_av
@@ -98,6 +102,8 @@ class Op_collapse(Op):
             if pol == 'I': 
               img.ch0 = ch0 = img.image[chan0]
               mylog.info('%s %i' % ('Source extraction will be done on channel', chan0))
+              if img.opts.quiet == False:
+                  print '%s %i' % ('Source extraction will be done on channel', chan0)
             else:
                     ch0images[ipol][:] = ch0[:] = data[chan0][:]
 
@@ -118,8 +124,17 @@ class Op_collapse(Op):
             if pol == 'I':
               img.ch0 = ch0
               img.avspc_wtarr = wtarr
-              mylog.info('%s %s' % ('Channels averaged with weights c_wts = ',c_wts))
+              if c_wts == 'unity':
+                  mylog.info('Channels averaged with uniform weights')
+                  if img.opts.quiet == False:
+                      print 'Channels averaged with uniform weights'
+              else:
+                  mylog.info('Channels averaged with weights set to (1/rms)^2')
+                  if img.opts.quiet == False:
+                      print 'Channels averaged with weights set to (1/rms)^2'                  
               mylog.info('Source extraction will be done on averaged ch0 image')
+              if img.opts.quiet == False:
+                  print 'Source extraction will be done on averaged ("ch0") image'
               str1 = " ".join(str(n) for n in c_list)
               mylog.debug('%s %s' % ('Channels averaged : ', str1))
               str1 = " ".join(["%9.4e" % n for n in wtarr])

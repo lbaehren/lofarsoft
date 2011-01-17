@@ -162,7 +162,12 @@ def write_gaul(img, filename=None, format='ascii', srcroot=None):
     if format == 'ascii':
         # Write as ascii file.
         f = open(filename, "w")
-        f.write('#  Gaul_id   Island_id   Flag   Total_flux   Err_total_flux   Peak_flux  Err_peak_flux  RA   Err_RA    DEC    Err_DEC     Xpos        Err_xpos    Ypos      Err_ypos       Bmaj_fw      Err_bmaj  Bmin_fw   Err_bmin   Bpa     Err_bpa\n')
+        f.write('# PyBDSM Gaussian list for '+img.filename+'\n')
+        f.write('# Refernce frequency : %.3e\n\n' % (img.freq0,))
+        if img.opts.spectralindex_do:
+            f.write('#  Gaul_id   Island_id   Flag   Total_flux   Err_total_flux   Peak_flux  Err_peak_flux Spec_indx Err_spec_indx  RA   Err_RA    DEC    Err_DEC     Xpos        Err_xpos    Ypos      Err_ypos       Bmaj_fw      Err_bmaj  Bmin_fw   Err_bmin   Bpa     Err_bpa\n')
+        else:           
+            f.write('#  Gaul_id   Island_id   Flag   Total_flux   Err_total_flux   Peak_flux  Err_peak_flux  RA   Err_RA    DEC    Err_DEC     Xpos        Err_xpos    Ypos      Err_ypos       Bmaj_fw      Err_bmaj  Bmin_fw   Err_bmin   Bpa     Err_bpa\n')
         for g in img.gaussians():
             gidx = g.gaus_num-1  # python numbering
             iidx = g.island_id
@@ -177,13 +182,43 @@ def write_gaul(img, filename=None, format='ascii', srcroot=None):
             era, edec = g.centre_skyE
             ex, ey = g.centre_pixE
             eshape = g.size_skyE
-
-            str1 = "%4d  %4d  %d    %10f %10f   %10f %10f  " \
-                  "%10f %10f   %10f %10f   %10f %10f   %10f %10f   " \
-                  "%10f %10f   %10f %10f   %10f %10f\n" % \
-                  (gidx, iidx, F,    T, eT,     A, eA, \
-                   ra, era,     dec, edec,    x, ex,  y, ey, \
-                   shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2])
+            if img.opts.spectralindex_do:
+                spin1 = g.spin1
+                espin1 = g.espin1
+                if spin1 == None:
+                    specin = 0.0
+                    especin = 0.0
+                else:                       
+                    specin = spin1[1]
+                    especin = espin1[1]
+                # srcid = g.source_id
+                # src = img.source[srcid]
+                # for g_src in src.gaussians:
+                #     if g_src.gaus_num == g.gaus_num:
+                #         spin1 = g_src.spin1
+                #         espin1 = g_src.espin1
+                #         if spin1 == None:
+                #             specin = 0.0
+                #             especin = 0.0
+                #         else:                       
+                #             specin = spin1[1]
+                #             especin = espin1[1]
+                    # else:
+                    #     specin = 0.0
+                    #     especin = 0.0
+                str1 = "%4d  %4d  %d    %10f %10f   %10f %10f  %10f %10f " \
+                      "%10f %10f   %10f %10f   %10f %10f   %10f %10f   " \
+                      "%10f %10f   %10f %10f   %10f %10f\n" % \
+                      (gidx, iidx, F,    T, eT,     A, eA, specin, especin,\
+                       ra, era,     dec, edec,    x, ex,  y, ey, \
+                       shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2])
+            else:                
+                str1 = "%4d  %4d  %d    %10f %10f   %10f %10f  " \
+                      "%10f %10f   %10f %10f   %10f %10f   %10f %10f   " \
+                      "%10f %10f   %10f %10f   %10f %10f\n" % \
+                      (gidx, iidx, F,    T, eT,     A, eA, \
+                       ra, era,     dec, edec,    x, ex,  y, ey, \
+                       shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2])
             f.write(str1)
         f.close()
         print '--> Wrote ASCII file ' + filename
@@ -238,8 +273,17 @@ def write_gaul(img, filename=None, format='ascii', srcroot=None):
             deconvstr = deconv1 + ', ' + deconv2 + ', ' + deconv3
             specin = '-0.8'
             if img.opts.spectralindex_do: 
-                specin = g.spin1[1]
-                total = str("%.3e" % (g.spin1[0]))
+                spin1 = g.spin1
+                if spin1 != None:
+                    specin = str("%.3e" % (spin1[1]))
+                # srcid = g.source_id
+                # src_for_g = img.source[srcid]
+                # for g_src in src_for_g.gaussians:
+                #     if g_src.gaus_num == g.gaus_num:
+                #         spin1 = g_src.spin1
+                #         if spin1 != None:
+                #             specin = str("%.3e" % (spin1[1]))
+                       
             str_src.append(src + sep + stype + sep + sra + sep + sdec + sep + total + sep + pol + \
                           freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
         # sort by flux (largest -> smallest)
@@ -371,8 +415,37 @@ def pybdsm2fbdsm(img):
         era, edec = g.centre_skyE
         ex, ey = g.centre_pixE
         eshape = g.size_skyE
+        if img.opts.spectralindex_do:
+            # if hasattr(g, 'spin1') == False:
+            #     import pdb; pdb.set_trace()
+            spin1 = g.spin1
+            espin1 = g.espin1
+            if spin1 == None:
+                specin = 0.0
+                especin = 0.0
+            else:                       
+                specin = spin1[1]
+                especin = espin1[1]
+            # srcid = g.source_id
+            # src_of_g = img.source[srcid]
+            # for g_src in src_of_g.gaussians:
+            #     if g_src.gaus_num == g.gaus_num:
+            #         if hasattr(g_src, 'spin1') == False:
+            #             import pdb; pdb.set_trace()
+            #         spin1 = g_src.spin1
+            #         espin1 = g_src.espin1
+            #         if spin1 == None:
+            #             specin = 0.0
+            #             especin = 0.0
+            #         else:                       
+            #             specin = spin1[1]
+            #             especin = espin1[1]
+        else:
+            specin = 0.0
+            especin = 0.0
+  
         list1 = [gidx, iidx, F, T, eT, A, eA, ra, era, dec, edec, x, ex, y, ey, shape[0], eshape[0], shape[1], eshape[1], \
-                 shape[2], eshape[2], 0.,0.,0.,0.,0.,0., 0.,0.,0.,0., 0.,0., iidx, 0,0,0,0, 0.,0.,0.,0.,0.,0.]
+                 shape[2], eshape[2], 0.,0.,0.,0.,0.,0., 0.,0.,0.,0.,specin , especin, iidx, 0,0,0,0, 0.,0.,0.,0.,0.,0.]
         fbdsm.append(list1)
     fbdsm = func.trans_gaul(fbdsm)
     return fbdsm

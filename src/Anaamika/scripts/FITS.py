@@ -62,7 +62,8 @@ class Op_loadFITS(Op):
                   break
 
             mylog.info("Opened "+fits_file)
-            print "Opened "+fits_file
+            if img.opts.quiet == False:
+                print "Opened "+fits_file
 
             if len(fits) != 1:
                 mylog.warning("Mutliple extentions found. Only the primary extention will be considered")
@@ -95,8 +96,12 @@ class Op_loadFITS(Op):
                 data = N.array(data, order='C',
                                dtype=data.dtype.newbyteorder('='))
                 mylog.info("Final image size : "+str(data.shape))
-                print "Image size in pixels : "+str(data.shape)
-                
+                if img.opts.quiet == False:
+                    if len(data.shape) == 3:
+                        print "Image size : "+str(data.shape[-2:])+' pixels'
+                    else:
+                        print "Image size : "+str(data.shape)+' pixels'
+                    
                 img.image = data
                 img.header = hdr
             else:
@@ -150,23 +155,28 @@ class Op_loadFITS(Op):
     def init_freq(self, img):
         ### Place frequency info in img
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"LoadFits  ")
-        found  = False
-        hdr = img.header
-        nax = hdr['naxis']
-        if nax > 2:
-          for i in range(nax):
-            s = str(i+1)
-            if hdr['ctype'+s][0:4] == 'FREQ':
-              found = True
-              crval, cdelt, crpix = hdr['CRVAL'+s], hdr['CDELT'+s], hdr['CRPIX'+s]
-              ff = crval+cdelt*(1.-crpix)
-        if found: 
-          img.cfreq = ff
-          img.freq_pars = (crval, cdelt, crpix)
+        if img.opts.frequency != None:
+            img.cfreq = img.opts.frequency[0]
+            img.freq_pars = (0.0, 0.0, 0.0)
+            mylog.info('Using user-specified frequency/frequencies instead of header values (if any).')
         else:
-          img.cfreq = 50.0e6
-          img.freq_pars = (0.0, 0.0, 0.0)
-          mylog.warning('Could not determine frequency from the header. Using 50 MHz.')
+            found  = False
+            hdr = img.header
+            nax = hdr['naxis']
+            if nax > 2:
+              for i in range(nax):
+                s = str(i+1)
+                if hdr['ctype'+s][0:4] == 'FREQ':
+                  found = True
+                  crval, cdelt, crpix = hdr['CRVAL'+s], hdr['CDELT'+s], hdr['CRPIX'+s]
+                  ff = crval+cdelt*(1.-crpix)
+            if found: 
+              img.cfreq = ff
+              img.freq_pars = (crval, cdelt, crpix)
+            else:
+              img.cfreq = 50.0e6
+              img.freq_pars = (0.0, 0.0, 0.0)
+              mylog.warning('Could not determine frequency from the header. Using 50 MHz.')
 
     def init_beam(self, img):
         """Initialize beam parameters, and conversion routines
@@ -250,8 +260,9 @@ class Op_loadFITS(Op):
                             bmin = bmin/3600.0
                         beam = (bmaj, bmin, bpa)
                         found_in_history = True
-                        print "BMAJ, BMIN, and/or BPA keywords not found in header"
-                        print "  Using beam parameters found in header history"
+                        if img.opts.quiet == False:
+                            print "BMAJ, BMIN, and/or BPA keywords not found in header"
+                            print "  Using beam parameters found in header history"
                         break
                 if found_in_history == False:
                     raise RuntimeError("FITS file error: no beam information found in header")
@@ -269,6 +280,7 @@ class Op_loadFITS(Op):
         img.beam = beam
         img.pixel_beam = pbeam
         img.opts.beam = beam
-        print "Using beam = (" + str(beam[0]) +", " + str(beam[1]) + ", " + str(beam[2]) + ") deg"
+        if img.opts.quiet == False:
+            print "Beam shape (major, minor, pos angle) : (%4g, %4g, %4g) degrees" % (beam[0], beam[1], beam[2])
 
 
