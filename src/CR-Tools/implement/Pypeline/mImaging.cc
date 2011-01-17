@@ -1005,8 +1005,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
     it_ant = antpos;
     it_fft = fftdata;
 
-    j = Nantennae;
-    while (--j)
+    for (j=Nantennae; j!=0; --j)
     {
       // Reset image iterator to first frequency of current pixel
       it_im_inner = it_im;
@@ -1022,8 +1021,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       // Loop over frequencies
       it_freq = frequencies;
 
-      k = Nfreq;
-      while (--k)
+      for (k=Nfreq; k!=0; --k)
       {
         // Multiply by geometric weight and add to image
         *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * delay));  // exp(HComplex(0.0, CR::_2pi*((*it_freq) * delay)));
