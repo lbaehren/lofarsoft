@@ -287,14 +287,14 @@ def get_fourier_and_correct_commands(work_dir, basename, dm, bary_v, zap_file):
     # TODO : add exception handling.
     # TODO : add zapbirds support (ask about zap files)
 
-    cmds = []
+    cmds = ['cd %s' % work_dir]
 
-    dat_file = os.path.join(work_dir, basename + '_DM%.2f' % dm + '.dat')
-    fft_file = os.path.join(work_dir, basename + '_DM%.2f' % dm + '.fft')
-    red_fft_file = os.path.join(work_dir, basename + '_DM%.2f' % dm + \
-        '_red.fft')    
+    dat_file = basename + '_DM%.2f' % dm + '.dat'
+    fft_file = basename + '_DM%.2f' % dm + '.fft'
+    red_fft_file = basename + '_DM%.2f' % dm + '_red.fft'    
+
     # Fourier transform takes place in the same directory as the .dat file.
-    cmds.append(get_command('realfft', {'-outdir' : work_dir}, [dat_file]))
+    cmds.append(get_command('realfft', {'-outdir' : '.'}, [dat_file]))
     
     # Run zapbirds if zap_file is available
     if zap_file:
@@ -323,12 +323,12 @@ def get_accelsearch_command(work_dir, basename, dm, z_max):
         '-flo' : '%.2f' % 1,
         '-zmax' : '%d' % z_max,
     }
+    fft_file = basename + '_DM%.2f' % dm + '.fft'
 
-    fft_file = os.path.join(work_dir, basename + '_DM%.2f' % dm + '.fft')
-    cmd = get_command('accelsearch', ACCELSEARCH_OPTIONS, 
-        [os.path.join(fft_file)])
+    cmds = ['cd %s' % work_dir]
+    cmds.append(get_command('accelsearch', ACCELSEARCH_OPTIONS, [fft_file]))
 
-    return [cmd]
+    return cmds
 
 def get_single_pulse_search_command(work_dir, basename, dm):
     '''Run PRESTO single_pulse_search.py for searching.'''
@@ -350,34 +350,6 @@ def run_single_pulse_search_plotter(work_dir, basename):
     }, [])
 
     return status
-
-def sift_accel_cands(work_dir, basename, dms, z):
-    '''Sift through the candidate pulsars found by accelsearch.'''
-
-    # Look in all the output candidates sift them using the PRESTO sifting
-    # module, then fold all of it.
-    
-    # TODO : remove assert, need to figure out the way the way to construct
-    # the correct file name endings (float vs int in ending ?)
-    assert type(z) == type(1)
-    
-    # Search for and read the acceleration search candidate files:
-    files = glob.glob(os.path.join(work_dir, 
-            basename + '_DM*.*_ACCEL_%d' % z))
-    accel_cands = sifting.read_candidates(files)
-
-    # Do some sifting on the candidate files (same as Vishal)
-    dm_strs = ['%.2f' % dm for dm in dms]
-
-    if accel_cands:
-        accel_cands = sifting.remove_duplicate_candidates(accel_cands)
-    if accel_cands:
-        accel_cands = sifting.remove_DM_problems(accel_cands, 2, dm_strs, 1.)
-    if accel_cands:
-        accel_cands.sort(sifting.cmp_sigma)
-    # PRESTO seems to return None in stead of an empty list
-    if accel_cands == None: accel_cands = []
-    return accel_cands 
    
 # ----------------------------------------------------------------------------
 
@@ -682,11 +654,10 @@ class SearchRun(object):
         )
         if not no_singlepulse:
             # Deal with single pulse search plotting
-            tmp2 = crawler.find_single_pulse_search_output(self.out_dir, 
-                self.basename) 
-            pprint.pprint(tmp2)
-
-            status = run_single_pulse_search_plotter(self.out_dir, self.basename)
+            d = os.getcwd()
+            os.chdir(self.out_dir)
+            status = run_single_pulse_search_plotter('.', self.basename)
+            os.chdir(d)
 
 def mpiprepsubband_helper(ddplan, n_cores):
     '''
