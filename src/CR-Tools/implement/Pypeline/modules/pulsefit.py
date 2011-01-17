@@ -51,26 +51,15 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
   shifted_fft=hArray(complex,dimensions=cr_fft)
 
   beamformed_fft=hArray(complex,dimensions=[crfile["fftLength"]])
-  beamformed_fft_even = hArray(complex,dimensions=[crfile["fftLength"]])
-  beamformed_fft_odd = hArray(complex,dimensions=[crfile["fftLength"]])
-  beamformed_fft_test = hArray(complex,dimensions=[crfile["fftLength"]])
-  beamformed_fft_test2 = hArray(complex,dimensions=[crfile["fftLength"]])
+#  beamformed_fft_even = hArray(complex,dimensions=[crfile["fftLength"]])
+#  beamformed_fft_odd = hArray(complex,dimensions=[crfile["fftLength"]])
+#  beamformed_fft_test = hArray(complex,dimensions=[crfile["fftLength"]])
+#  beamformed_fft_test2 = hArray(complex,dimensions=[crfile["fftLength"]])
   beamformed_efield=hArray(float,dimensions=[crfile["blocksize"]])
   beamformed_efield_smoothed=hArray(float,dimensions=[crfile["blocksize"]])
 
-  #azel = np.zeros( (3) );
-  #cartesian = np.zeros( (3) );
-  #delays =  np.zeros( (ants) );
-  #weights = np.empty( (ants, fftlength), dtype=complex )
-  #shifted_fft = np.empty( (ants, fftlength), dtype=complex )
-  #beamformed_fft = np.empty( (fftlength), dtype=complex )
-  #beamformed_efield =  np.zeros( (blocksize) )
-  
-  window = hArray(float, dimensions=[5], fill=0.2) # np.array([1.,1.,1.,1.,1.]);  window /= np.sum(window)
-
   def beamform_function(azel_in):
     print 'Evaluating for az = %f, el = %f' % (azel_in[0], azel_in[1]),
-  #  pdb.set_trace()
     if ( azel_in[0] > 360. or azel_in[0] < 0. or azel_in[1] > 90. or azel_in[1] < 0.):
       erg = 0.
     else:
@@ -80,36 +69,18 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
         azel[2] = 1.
       else:
         azel[2] = azel_in[2]
-    #  pdb.set_trace()  
       hCoordinateConvert(azel, CoordinateTypes.AzElRadius, cartesian, CoordinateTypes.Cartesian, True)
-#      pdb.set_trace()
       hGeometricDelays(delays, antenna_positions, cartesian, True)   
       hDelayToPhase(phases, freqs, delays) 
       hPhaseToComplex(weights,phases)
 
       hMul(shifted_fft, cr_fft, weights) # Dimensions don't match: need [...] ???
-      #import pdb; pdb.set_trace()
-      #shifted_fft[...].mul(cr_fft[...], weights)
       
-      #cr.azElRadius2Cartesian(cartesian, azel, True)
-#      cr.geometricDelays(delays, antenna_positions, cartesian, FarField)
-#      cr.complexWeights(weights, delays, cr_freqs)        
-#      shifted_fft = cr_fft*weights        
-      beamformed_fft.fill(0.0) # = shifted_fft[ant_indices[0]]  
-      
-#      shifted_fft[1, ...].addto(beamformed_fft)
-#      hInvFFTw(beamformed_efield, beamformed_fft)
-#      beamformed_efield.plot()
-#      import pdb; pdb.set_trace()
-      
-      beamformed_fft_even.fill(0.0)
-      beamformed_fft_odd.fill(0.0)
-#      beamformed_fft = shifted_fft[ant_indices[0]]
-      #for n in ant_indices[1:]:
-#       beamformed_fft += shifted_fft[n]
- #     import pdb; pdb.set_trace()
+      beamformed_fft.fill(0.0)   
+          
+#      beamformed_fft_even.fill(0.0)
+#      beamformed_fft_odd.fill(0.0)
       shifted_fft[ant_indices, ...].addto(beamformed_fft)
-      #shifted_fft[...].addto(beamformed_fft)
 #     test code for indexing arrays
 #      shifted_fft[range(0, nofAntennas, 2), ...].addto(beamformed_fft_even)
 #      shifted_fft[range(1, nofAntennas, 2), ...].addto(beamformed_fft_odd)
@@ -119,33 +90,27 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
       
 #      beamformed_fft_test2.subadd(beamformed_fft_test, beamformed_fft)
 #      beamformed_fft_test2.pprint()
-#      import pdb; pdb.set_trace()
 
       hInvFFTw(beamformed_efield,beamformed_fft)
       
-      efield = beamformed_efield.toNumpy()
+#      efield = beamformed_efield.toNumpy()
 #      plt.clf()
 #      plt.plot(efield.T / blocksize)
 #      plt.show()
-      #beamformed_efield.plot()
       beamformed_efield.abs() # make absolute value!
-
       hRunningAverage(beamformed_efield_smoothed, beamformed_efield, 5, hWEIGHTS.GAUSSIAN)
+      # make smoother by convoluting with a 5-tap gaussian window
 
-      smoothedstuff = beamformed_efield_smoothed.toNumpy()
+#       smoothedstuff = beamformed_efield_smoothed.toNumpy()
 #      plt.clf()
 #      plt.plot(smoothedstuff.T / blocksize)
 #      plt.show()
 
-      #cr.backwardFFTW(beamformed_efield, beamformed_fft);         
       erg = - beamformed_efield.max()[0] / blocksize # just the maximum of beamformed_efield_smoothed !!!!
       print ' value = %f ' % erg
       
-      #erg = - np.max(np.convolve(np.abs(beamformed_efield),window,'same'))
-    #print "beamform_function azel:", azel_in, " result:", erg
     return erg
 
- # pdb.set_trace()
   #optErg = fmin(beamform_function, start_position, xtol=1e-2, ftol=1e-4, full_output=1)
   bruteRanges = ((start_position[0] - 20.0, start_position[0] + 20.0), (start_position[1] - 10.0, start_position[1] + 10.0))
   optErg = brute(beamform_function, bruteRanges, Ns = 50, full_output = 1)
@@ -202,14 +167,11 @@ def triggerMessageFit(crfile, triggerMessageFile, fittype='bruteForce'):  # crfi
 #------------------------------------------------------------------ fullPulseFit
 def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=True):
   #Open the file, 
-  #dr = cr.open(filename,'LOFAR_TBB')
-  #import pdb; pdb.set_trace()
   crfile = IO.open([filename])
   crfile.setAntennaset(antennaset)
   # validity check - has to move !!!
   dates = crfile["TIME"]
 #  print crfile["shift"]
-#  print crfile["shift"].val()
   if dates.max() - dates.min() > 0: # MOVE to integrity check
       print 'Invalid times in file!!!'
       return dict(success=False, reason=format("Timestamps don't match, spread = %d seconds") % (dates.max() - dates.min()))
@@ -223,8 +185,7 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=True):
   trigLinfitData = triggerMessageFit(crfile, triggerMessageFile, fittype='linearFit')
   #Set the parameters
   samplefreq = 200.0e6 # must be
-  blocksize = 1024
-  # crfile["blocksize"] = blocksize # doesn't work, bug?
+  blocksize = 1024 # MOVE
   crfile.set("blocksize", blocksize) # proper way, apparently
 #  crfile.set("shift", 512)
   print 'File size is %d' % crfile["Filesize"]
@@ -238,37 +199,28 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=True):
   #Get the data
   cr_time = hArray(float, dimensions=[blocksize])
   cr_freqs = hArray(float, dimensions=[blocksize/2 + 1])
-  #cr_time = np.empty(blocksize)
   
   cr_efield = crfile["emptyFx"]
-#  import pdb; pdb.set_trace()
-
   crfile.getTimeseriesData(cr_efield, blockNo) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
+
   efield = cr_efield.toNumpy()
   plt.plot(efield.T)
   plt.show()
- # import pdb; pdb.set_trace()
 
   cr_fft = crfile["emptyFFT"]
   print 'Number of antennas = %d' % cr_fft.shape()[0]
   print 'Block length fft = %d' % cr_fft.shape()[1]
 
   antenna_positions = crfile["RelativeAntennaPositions"]
-#  import pdb; pdb.set_trace()
   print 'ANTENNA POSITIONS: '
   print antenna_positions
   print ' '
-  #Now calculate the foruier-transform of the data
+  #Now calculate the fourier-transform of the data
   
-  #    fftdata[...].fftcasa(fxdata[...], nyquistZone)
   cr_fft[...].fftw(cr_efield[...]) 
   for i in range(cr_fft.shape()[0]):
       cr_fft[i, 0] = 0.0 # kill DC offsets
-      
-  #cr_fft = np.empty( (ants, fftlength), dtype=complex )
-  
-#  for ant in range(ants):
-#    status =  cr.forwardFFTW(cr_fft[ant], cr_efield[ant])
+       
   if (FarField):
     start_position = [trigData[0], trigData[1]]
   else:
@@ -277,8 +229,6 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=True):
   fitDataEven = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                    cr_freqs, FarField=FarField,blocksize=blocksize)
                                    
-#  pdb.set_trace()
-                                   
   ant_indices = range(1, nofAntennas, 2)
   fitDataOdd = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                   cr_freqs, FarField=FarField,blocksize=blocksize)
@@ -286,10 +236,8 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=True):
   result['triggerFit'] = trigData
   result['linearFit'] = trigLinfitData
   result['fitEven'] = fitDataEven
+  result['fitOdd'] = fitDataOdd 
   
-   
-     # (fitDataEven[0][0], fitDataEven[0][1], fitDataEven[1]) #fitDataEven for simplex...
-  result['fitOdd'] = fitDataOdd #(fitDataOdd[0][0], fitDataOdd[0][1], fitDataOdd[1]) #fitDataOdd for simplex...
   return result
 
 ## Executing a module should run doctests.
