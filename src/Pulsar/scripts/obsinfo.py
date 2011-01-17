@@ -848,7 +848,9 @@ class obsstat:
                           	 tr.d th { background-color: #99cccc; color: black;}\n\
                          	</style>\n\n\
                          	<body bgcolor='white'>\n\
-                          	<h2 align=left>Pulsar observations statistics</h2>\n\
+                          	<h2 align=left>Pulsar observations statistics</h2>\n\n\
+				<a href=\"archive/number.png\">Number of observations over time</a><br>\n\
+				<a href=\"archive/volume.png\">Data volume over time</a><br>\n\
                         	\n")
 		if self.fd != "" or self.td != "":
 			self.htmlptr.write ("\n<h3>%s%s</h3>" % (self.fd != "" and "From " + self.fd or (self.td != "" and " Till " + self.td or ""), 
