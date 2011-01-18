@@ -801,37 +801,149 @@ class obsstat:
 
 	def printstat (self):
 		print
-		print "Current pulsar obs statistics:"
+		print "Pulsar observations' statistics:"
 		if self.fd != "" or self.td != "":
 			print "[%s%s]" % (self.fd != "" and "from " + self.fd or (self.td != "" and " till " + self.td or ""), 
                                                                     self.td != "" and (self.fd != "" and " till " + self.td or "") or "")
-		print "---------------------------------------------------------------------------"
-		print "Total number of observations [hours / days]:         %d [%.1f / %.1f]" % (self.dbinfo["Total"]["Ntotal"], self.dbinfo["Total"]["totDuration"], self.dbinfo["Total"]["totDuration"]/24.)
-		print "Number of observations w/o IM only [hours / days]:   %d [%.1f / %.1f]" % (self.dbinfo["Total"]["Ntotal"]-self.dbinfo["Total"]["Nimtype_only"], self.dbinfo["Total"]["totDuration"]-self.dbinfo["Total"]["IMonlyDuration"], (self.dbinfo["Total"]["totDuration"]-self.dbinfo["Total"]["IMonlyDuration"])/24.)
-		print "Number of processed observations [hours / days]:     %d [%.1f / %.1f]" % (self.dbinfo["Total"]["Nprocessed"], self.dbinfo["Total"]["processedDuration"], self.dbinfo["Total"]["processedDuration"]/24.)
+		ruler_size=53+23*(1 + np.size(self.subclusters))
+		rulers=[]
+		for r in np.arange(ruler_size): rulers = np.append(rulers, "-")
+		rulerstring="".join(rulers) + "-"
+		print rulerstring
+		header_string="                                                     "
+		for sub in np.append("Total", self.subclusters):
+			symbols=[]
+			for r in np.arange(23-len(sub)): symbols = np.append(symbols, " ")
+			header_string += "%s%s" % (sub, "".join(symbols))
+		print header_string
+		print rulerstring
+
+		line="Total number of observations [hours / days]:         "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d [%.1f / %.1f]" % (self.dbinfo[sub]["Ntotal"], self.dbinfo[sub]["totDuration"], self.dbinfo[sub]["totDuration"]/24.)
+			line += "%-23s" % (field)
+		print line
+		line="Number of observations w/o IM-only [hours / days]:   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d [%.1f / %.1f]" % (self.dbinfo[sub]["Ntotal"]-self.dbinfo[sub]["Nimtype_only"], self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"], (self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"])/24.)
+			line += "%-23s" % (field)
+		print line
+		line="Number of processed observations [hours / days]:     "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d [%.1f / %.1f]" % (self.dbinfo[sub]["Nprocessed"], self.dbinfo[sub]["processedDuration"], self.dbinfo[sub]["processedDuration"]/24.)
+			line += "%-23s" % (field)
+		print line
+
 		print
-		print "Number of IS observations [only IS]:       %d [%d]" % (self.dbinfo["Total"]["Nistype"], self.dbinfo["Total"]["Nistype_only"])
-		print "Number of IS+CS observations only:         %d" % (self.dbinfo["Total"]["Niscs"])
-		print "Number of IS+IM observations only:         %d" % (self.dbinfo["Total"]["Nisim"])
-		print "Number of IS+CS+IM observations only:      %d" % (self.dbinfo["Total"]["Niscsim"])
-		print "Number of CS observations [only CS]:       %d [%d]" % (self.dbinfo["Total"]["Ncstype"], self.dbinfo["Total"]["Ncstype_only"])
-		print "Number of CS+IM observations only:         %d" % (self.dbinfo["Total"]["Ncsim"])
-		print "Number of FE observations [only FE]:       %d [%d]" % (self.dbinfo["Total"]["Nfetype"], self.dbinfo["Total"]["Nfetype_only"])
-		print "Number of FE+CS observations only:         %d" % (self.dbinfo["Total"]["Ncsfe"])
-		print "Number of FE+IS observations only:         %d" % (self.dbinfo["Total"]["Nisfe"])
-		print "Number of FE+IM observations only:         %d" % (self.dbinfo["Total"]["Nimfe"])
-		print "Number of FE+IS+CS observations only:      %d" % (self.dbinfo["Total"]["Niscsfe"])
-		print "Number of IM observations [only IM]:       %d [%d]" % (self.dbinfo["Total"]["Nimtype"], self.dbinfo["Total"]["Nimtype_only"])
-		print "Number of BF observations [only BF]:       %d [%d]" % (self.dbinfo["Total"]["Nbftype"], self.dbinfo["Total"]["Nbftype_only"])
-		print "Number of BF+IS observations only:         %d" % (self.dbinfo["Total"]["Nbfis"])
-		print "Number of BF+FE observations only:         %d" % (self.dbinfo["Total"]["Nbffe"])
-		print "Number of BF+IS+FE observations only:      %d" % (self.dbinfo["Total"]["Nbfisfe"])
-		print "Number of BF+IS+CS+FE observations only:   %d" % (self.dbinfo["Total"]["Nbfiscsfe"])
-		print "Number of FD observations [only FD]:       %d [%d]" % (self.dbinfo["Total"]["Nfdtype"], self.dbinfo["Total"]["Nfdtype_only"])
+
+		line="Number of IS observations [only IS]:                 "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d [%d]" % (self.dbinfo[sub]["Nistype"], self.dbinfo[sub]["Nistype_only"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of IS+CS observations only:                   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Niscs"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of IS+IM observations only:                   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Nisim"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of IS+CS+IM observations only:                "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Niscsim"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of CS observations [only CS]:                 "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d [%d]" % (self.dbinfo[sub]["Ncstype"], self.dbinfo[sub]["Ncstype_only"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of CS+IM observations only:                   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Ncsim"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of FE observations [only FE]:                 "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d [%d]" % (self.dbinfo[sub]["Nfetype"], self.dbinfo[sub]["Nfetype_only"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of FE+CS observations only:                   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Ncsfe"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of FE+IS observations only:                   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Nisfe"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of FE+IM observations only:                   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Nimfe"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of FE+IS+CS observations only:                "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Niscsfe"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of IM observations [only IM]:                 "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d [%d]" % (self.dbinfo[sub]["Nimtype"], self.dbinfo[sub]["Nimtype_only"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of BF observations [only BF]:                 "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d [%d]" % (self.dbinfo[sub]["Nbftype"], self.dbinfo[sub]["Nbftype_only"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of BF+IS observations only:                   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Nbfis"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of BF+FE observations only:                   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Nbffe"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of BF+IS+FE observations only:                "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Nbfisfe"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of BF+IS+CS+FE observations only:             "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Nbfiscsfe"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of FD observations [only FD]:                 "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d [%d]" % (self.dbinfo[sub]["Nfdtype"], self.dbinfo[sub]["Nfdtype_only"])
+			line += "%-23s" % (field)
+		print line
+
 		print
-		print "Total size of raw data (TB):               %.1f" % (self.dbinfo["Total"]["totRawsize"])
-		print "Total size of raw data w/o IM-only (TB):   %.1f" % (self.dbinfo["Total"]["totRawsize"]-self.dbinfo["Total"]["IMonlyRawsize"])
-		print "Total size of processed data (TB):         %.1f" % (self.dbinfo["Total"]["totProcessedsize"])
+
+		line="Total size of raw data (TB):                         "
+		for sub in np.append("Total", self.subclusters):
+			field = "%.1f" % (self.dbinfo[sub]["totRawsize"])
+			line += "%-23s" % (field)
+		print line
+		line="Total size of raw data w/o IM-only (TB):             "
+		for sub in np.append("Total", self.subclusters):
+			field = "%.1f" % (self.dbinfo[sub]["totRawsize"]-self.dbinfo[sub]["IMonlyRawsize"])
+			line += "%-23s" % (field)
+		print line
+		line="Total size of processed data (TB):                   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%.1f" % (self.dbinfo[sub]["totProcessedsize"])
+			line += "%-23s" % (field)
+		print line
 		print
 
 	def printhtml (self, htmlfile):
@@ -867,7 +979,7 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):	
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Ntotal"], self.dbinfo[sub]["totDuration"], self.dbinfo[sub]["totDuration"]/24.))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of observations w/o IM only", "hours", "days"))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of observations w/o IM-only", "hours", "days"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Ntotal"]-self.dbinfo[sub]["Nimtype_only"], self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"], (self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"])/24.))
 		self.htmlptr.write ("\n</tr>")
@@ -1111,7 +1223,7 @@ if __name__ == "__main__":
 	# parsing command line
 	parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
 
-	if is_rebuild == True and is_update == True:
+	if is_rebuild and is_update:
 		print "Choose what you want to do: rebuild, update or add new observations if any"
 		sys.exit()
 
@@ -1150,16 +1262,18 @@ if __name__ == "__main__":
 				obsids = dbobsids
 				# we also have to choose only those IDs within the desired time range
 				# if --from and/or --to are specified
-				if is_from == True:
+				if is_from:
 					fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
 					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
-				if is_to == True:
+				if is_to:
 					tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 
 				# initializing statistics' class
 				stat = obsstat(obsids, fromdate, todate, storage_nodes)
 				stat.printstat()
+				if is_html:
+					stat.printhtml(htmlfile)
 				sys.exit(0)
 				########## end of statistics #############
 
@@ -1185,9 +1299,6 @@ if __name__ == "__main__":
 		# more recent obs is the obs with higher ID (as it should be)
 		obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 
-		# Number of ObsIDs
-		Nobsids = np.size(obsids)
-
 		# if is_rebuild == False then excluding ObsIDs from obsids list that are already in the database, i.e. in dbobsids list
 		# only new ObsIDs will be processed and added to database
 		if not is_rebuild:
@@ -1197,11 +1308,11 @@ if __name__ == "__main__":
 		obsids = dbobsids
 		# for the db update we also have to choose only those IDs within the desired time range
 		# if --from and/or --to are specified
-		if is_from == True:
+		if is_from:
 			fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
 			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
 
-		if is_to == True:
+		if is_to:
 			tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 
@@ -1220,61 +1331,8 @@ if __name__ == "__main__":
 		newobsids = np.flipud(np.sort(np.unique(newobsids), kind='mergesort'))
 		obsids = newobsids
 
-		# Number of ObsIDs
-		Nobsids = np.size(obsids)
-
-
-	print "Number of observations in %s: %d" % (", ".join(subclusters), Nobsids)
-	if not is_rebuild and not is_update:
-		print "Number of new observations found in %s: %d" % (", ".join(storage_nodes), np.size(obsids))
-
-	if is_from == True or is_to == True:
-		print "List only observations%s%s" % (is_from and " since " + fromdate or (is_to and " till " + todate or ""), 
-                                                      is_to and (is_from and " till " + todate or "") or "")
-	print
-
-	# number of storage nodes
-	Nnodes=np.size(storage_nodes)
-
-	# printing out the header of the table
-	storage_nodes_string=""
-	for i in np.arange(Nnodes-1):
-		storage_nodes_string=storage_nodes_string+storage_nodes[i]+"\t"
-	storage_nodes_string=storage_nodes_string+storage_nodes[-1]
-	storage_nodes_string_html="</th>\n <th align=center>".join(storage_nodes_string.split("\t"))
-
-	if viewtype == "brief" or viewtype == "plots":
-		equalstrs=[]
-		equalstring_size=163
-		for e in np.arange(equalstring_size):
-			equalstrs = np.append(equalstrs, "=")
-		equalstring="#" + "".join(equalstrs)
-		
-		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	Location		Status"
-		print equalstring
-	elif viewtype == "mega":
-		equalstrs=[]
-		equalstring_size=233+8*Nnodes
-		for e in np.arange(equalstring_size):
-			equalstrs = np.append(equalstrs, "=")
-		equalstring="#" + "".join(equalstrs)
-		
-		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	NodesList (lse) Datadir	%s	Total(GB)	Stations		Location                Status" % (storage_nodes_string,)
-		print equalstring
-	else: # usual
-		equalstrs=[]
-		equalstring_size=159+8*Nnodes
-		for e in np.arange(equalstring_size):
-			equalstrs = np.append(equalstrs, "=")
-		equalstring="#" + "".join(equalstrs)
-		
-		print equalstring
-		print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Status				Pointing    Source" % (storage_nodes_string,)
-		print equalstring
-		
-
+	# Number of ObsIDs
+	Nobsids = np.size(obsids)
 
 	# loop for every observation
 	for id in obsids:
@@ -1508,7 +1566,6 @@ if __name__ == "__main__":
 			os.system(cmd)
 			debugcounter += 1
 
-
 	# dump obs table to the file
 	dfdescr = open (dumpfile, "w")
 	cPickle.dump(obstable, dfdescr, True)
@@ -1527,11 +1584,11 @@ if __name__ == "__main__":
 
 	# if is_from and/or is_to are set, then we have to exclude those records
 	# from obstable that do not obey the conditions
-	if is_from == True:
+	if is_from:
 		fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
 		obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) >= fromsecs, obskeys))
 
-	if is_to == True:
+	if is_to:
 		tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 		obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) <= tosecs, obskeys))
 
@@ -1544,6 +1601,58 @@ if __name__ == "__main__":
 	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == "sub?", obskeys)))
 	newobskeys = np.flipud(np.sort(np.unique(newobskeys), kind='mergesort'))
 	obskeys = newobskeys
+	
+	#
+	# Printing the table
+	#
+	print "Number of observations in %s: %d" % (", ".join(subclusters), np.size(obskeys))
+	if not is_rebuild and not is_update:
+		print "Number of new observations found in %s: %d" % (", ".join(storage_nodes), np.size(obsids))
+
+	if is_from == True or is_to == True:
+		print "List only observations%s%s" % (is_from and " since " + fromdate or (is_to and " till " + todate or ""), 
+                                                      is_to and (is_from and " till " + todate or "") or "")
+	print
+
+	# number of storage nodes
+	Nnodes=np.size(storage_nodes)
+
+	# printing out the header of the table
+	storage_nodes_string=""
+	for i in np.arange(Nnodes-1):
+		storage_nodes_string=storage_nodes_string+storage_nodes[i]+"\t"
+	storage_nodes_string=storage_nodes_string+storage_nodes[-1]
+	storage_nodes_string_html="</th>\n <th align=center>".join(storage_nodes_string.split("\t"))
+
+	equalstrs=[]
+	if viewtype == "brief" or viewtype == "plots":
+		equalstring_size=163
+		for e in np.arange(equalstring_size):
+			equalstrs = np.append(equalstrs, "=")
+		equalstring="#" + "".join(equalstrs)
+		
+		print equalstring
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	Location		Status"
+		print equalstring
+	elif viewtype == "mega":
+		equalstring_size=233+8*Nnodes
+		for e in np.arange(equalstring_size):
+			equalstrs = np.append(equalstrs, "=")
+		equalstring="#" + "".join(equalstrs)
+		
+		print equalstring
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	NodesList (lse) Datadir	%s	Total(GB)	Stations		Location                Status" % (storage_nodes_string,)
+		print equalstring
+	else: # usual
+		equalstring_size=159+8*Nnodes
+		for e in np.arange(equalstring_size):
+			equalstrs = np.append(equalstrs, "=")
+		equalstring="#" + "".join(equalstrs)
+		
+		print equalstring
+		print "# No.	ObsID		MMDD	Dur	NodesList (lse)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Status				Pointing    Source" % (storage_nodes_string,)
+		print equalstring
+		
 
 	# printing the sorted list
 	if sortkind == "size":
@@ -1564,7 +1673,7 @@ if __name__ == "__main__":
 
 
 	# writing the html code if chosen
-	if is_html == True:
+	if is_html:
 		htmlrep=writeHtmlList(htmlfile, linkedhtmlstem, fromdate, todate)
 		htmlrep.open()
 		htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids))
@@ -1578,7 +1687,7 @@ if __name__ == "__main__":
 		htmlrep.close()
 
 	# create html files sorted for different sorting modes, linked together
-	if is_linkedhtml == True:
+	if is_linkedhtml:
 		sf={"obsid": "-obsid.html", "time": "-time.html", "size": "-size.html", "source": "-source.html"}
 		for key in sf.keys():
 			sf[key] = "%s%s" % (linkedhtmlstem, sf[key])
