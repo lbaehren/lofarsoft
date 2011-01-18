@@ -1,5 +1,5 @@
 #
-#  triggered-pulsefitting.py - fit the direction of the triggered pulse
+#  pulsefit.py - fit the direction of the triggered pulse based on the full data
 #  
 #
 #  Created by Andreas Horneffer on Aug. 1, 2010.
@@ -18,7 +18,7 @@ import srcfind as sfind
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fmin, brute
-import pdb;
+import pdb
 
 rad2deg = 180./np.pi
 #-------------------------------------------------------------------------------
@@ -106,29 +106,26 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
 #      plt.plot(smoothedstuff.T / blocksize)
 #      plt.show()
 
-      erg = - beamformed_efield.max()[0] / blocksize # just the maximum of beamformed_efield_smoothed !!!!
+      erg = - beamformed_efield_smoothed.max()[0] / blocksize # just the maximum of beamformed_efield_smoothed !!!!
       print ' value = %f ' % erg
       
     return erg
 
-  #optErg = fmin(beamform_function, start_position, xtol=1e-2, ftol=1e-4, full_output=1)
+  optErg = fmin(beamform_function, start_position, xtol=1e-2, ftol=1e-4, full_output=1)
   bruteRanges = ((start_position[0] - 20.0, start_position[0] + 20.0), (start_position[1] - 10.0, start_position[1] + 10.0))
-  optErg = brute(beamform_function, bruteRanges, Ns = 50, full_output = 1)
+  #optErg = brute(beamform_function, bruteRanges, Ns = 50, full_output = 1)
   return optErg
 
 #------------------------------------------------------------- triggerMessageFit
-def triggerMessageFit(crfile, triggerMessageFile, fittype='bruteForce'):  # crfile has to be imported using IO module!
+def triggerMessageFit(crfile, triggers, fittype='bruteForce'):  # crfile has to be imported using IO module!
   #Get the trigger-message information
   fileDate = crfile["Date"]
   fileSamplenum = crfile["SAMPLE_NUMBER"][0]                  # assuming start sample nr. is the same for all antennas
   ddate = fileDate + fileSamplenum / 200.0e6             
-  (mIDs, mdDates, mTdiffs, mTriggerDates, mSampleNums) = match.matchTriggerfileToTime((ddate+0.00033024),triggerMessageFile)
+  (mIDs, mdDates, mTdiffs, mTriggerDates, mSampleNums) = match.matchTriggerfileToTime((ddate+0.00033024),triggers)
   if len(mIDs) == 0:
       print 'NO TRIGGERS FOUND'
   #get the position for that
-  #match_positions = np.reshape(dr["antenna_position"][mIDs],(len(mIDs)*3))
-  # !!! GET antenna positions for the correct station. How do you know the station? 
-  # -> use IO, metadata (sub)modules
   
   nofAntennas = crfile["nofAntennas"]
   # now trim the matched trigger IDs to include only antennas which are actually in the data!
@@ -165,27 +162,12 @@ def triggerMessageFit(crfile, triggerMessageFile, fittype='bruteForce'):  # crfi
   return (degaz, degel, mse, toffset, len(mIDs) )
 
 #------------------------------------------------------------------ fullPulseFit
-def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=True):
-  #Open the file, 
-  crfile = IO.open([filename])
-  crfile.setAntennaset(antennaset)
-  # validity check - has to move !!!
-  dates = crfile["TIME"]
-#  print crfile["shift"]
-  if dates.max() - dates.min() > 0: # MOVE to integrity check
-      print 'Invalid times in file!!!'
-      return dict(success=False, reason=format("Timestamps don't match, spread = %d seconds") % (dates.max() - dates.min()))
-      
-  if crfile["sampleFrequency"] != 200e6: 
-  # MOVE to integrity check
-    print crfile["sampleFrequency"]
-    raise ValueError, "Can only process events taken with 200MHz samplingrate." # no exception, return status in dict
+def fullPulseFit(crfile, triggers, blocksize, FarField=True): 
   #Get the trigger message data
-  trigData = triggerMessageFit(crfile, triggerMessageFile)
-  trigLinfitData = triggerMessageFit(crfile, triggerMessageFile, fittype='linearFit')
+  trigData = triggerMessageFit(crfile, triggers)
+  trigLinfitData = triggerMessageFit(crfile, triggers, fittype='linearFit')
   #Set the parameters
   samplefreq = 200.0e6 # must be
-  blocksize = 1024 # MOVE
   crfile.set("blocksize", blocksize) # proper way, apparently
 #  crfile.set("shift", 512)
   print 'File size is %d' % crfile["Filesize"]
@@ -203,6 +185,7 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=True):
   cr_efield = crfile["emptyFx"]
   crfile.getTimeseriesData(cr_efield, blockNo) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
 
+  # temp: plot to see if pulse is in this block...
   efield = cr_efield.toNumpy()
   plt.plot(efield.T)
   plt.show()
@@ -225,6 +208,9 @@ def fullPulseFit(filename, triggerMessageFile, antennaset, FarField=True):
     start_position = [trigData[0], trigData[1]]
   else:
     start_position = [trigData[0], trigData[1], 30000.]
+  
+  # HACK 
+#  start_position = [255.0, 25.0]
   ant_indices = range(0, nofAntennas, 2)
   fitDataEven = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                    cr_freqs, FarField=FarField,blocksize=blocksize)

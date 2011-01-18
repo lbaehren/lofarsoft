@@ -6,6 +6,8 @@
 .. moduleauthor:: Arthur Corstanje <A.Corstanje@astro.ru.nl>
 """
 
+import os
+import time
 from pycrtools import IO
 
 def safeOpenFile(filename, antennaset): # antennaset only here because it's not set in the file
@@ -28,28 +30,45 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
     [else] *file*               opened file object
     
     """
-    # TODO test system filesize first
-    crfile = IO.open([filename])
+    result = dict(success=False, name = filename)
+    # test system exists / filesize first
+    if not os.path.exists(filename.strip()):
+        print 'file not found'
+        return result.update(reason = "File doesn't exist")
+    bytesize = os.path.getsize(filename.strip())
+    if bytesize < 15 * 1048576:
+        print 'File size too small: %d' % bytesize
+        return result.update(reason = format("File size too small: %d") % bytesize)
+
+    crfile = IO.open([filename.strip()])
     crfile.setAntennaset(antennaset)
 
-    dates = crfile["TIME"]
+    fileDate = crfile["Date"]
+    readableDate = time.strftime("%a, %d %b %Y %H:%M:%S", time.gmtime(fileDate))
+    result.update(date = readableDate)
+    print result
+
+    times = crfile["TIME"]
   #  print crfile["shift"]
-    if dates.max() - dates.min() > 0:
+    if times.max() - times.min() > 0:
         print 'Error: Timestamps vary across antennas' # redundant
-        return dict(success=False, reason=format("Timestamps don't match, spread = %d seconds") % (dates.max() - dates.min()) )
+        return result.update(reason=format("Timestamps don't match, spread = %d seconds") % (dates.max() - dates.min()) )
         
     if crfile["sampleFrequency"] != 200e6: 
     # MOVE to integrity check
         print 'Error: wrong sampling frequency: %d; needs to be 200e6' % crfile["sampleFrequency"]
-        return dict(success=False, reason=format("wrong sampling frequency %d") % crfile["sampleFrequency"])
+        return result.update(reason=format("wrong sampling frequency %d") % crfile["sampleFrequency"])
     
     if crfile["Filesize"] < 2 * 65536:
-        return dict(success=False, reason=format("file size too small: %d") % crfile["Filesize"])
-        
+        return result.update(reason=format("file size too small: %d") % crfile["Filesize"])
+    result.update(datalength = crfile["Filesize"])    
     if crfile["nofAntennas"] < 64: # arbitrary choice...
-        return dict(success=False, reason=format("not enough antennas: %d") % crfile["nofAntennas"])
+        return result.update(reason=format("not enough antennas: %d") % crfile["nofAntennas"])
+    result.update(nofAntennas = crfile["nofAntennas"])
 
-    return dict(success=True, file=crfile)
+    result.update(success=True, file=crfile)
+    return result
+#    return result.update(success=True, file=crfile) !!! This actually returns None (nonetype)...
     
 
 
