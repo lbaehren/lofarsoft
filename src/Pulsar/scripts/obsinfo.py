@@ -431,7 +431,8 @@ class outputInfo:
 		self.pointing = self.oi.pointing
 		self.statusline = statusline
 		self.reduced_node = reduced_node
-		if self.reduced_node != "" and self.oi.subcluster == 'sub?':
+#		if self.reduced_node != "" and self.oi.subcluster == 'sub?':
+		if self.reduced_node != "":
 			self.oi.subcluster = cexec_nodes[self.reduced_node]
 		self.redlocation = redlocation
 		self.processed_dirsize = processed_dirsize
@@ -608,9 +609,10 @@ class writeHtmlList:
                           	<h2 align=left>LOFAR pulsar observations</h2>\n\
                         	\n")
 
-	def obsnumber (self, storage_nodes, ndbnodes, nnodes):
+	def obsnumber (self, storage_nodes, subclusters, ndbnodes, nnodes):
 		self.nodes_string = ", ".join(storage_nodes)
-		self.htmlptr.write("Number of observations in db file: <b>%d</b><br>\n" % (ndbnodes, ))
+		self.subs_string = ", ".join(subclusters)
+		self.htmlptr.write("Number of observations in %s: <b>%d</b><br>\n" % (self.subs_string, ndbnodes, ))
 		self.htmlptr.write("Number of new observations found in %s: <b>%d</b><br>\n" % (self.nodes_string, nnodes))
 
 	def datesrange (self):
@@ -1113,6 +1115,9 @@ if __name__ == "__main__":
 		print "Choose what you want to do: rebuild, update or add new observations if any"
 		sys.exit()
 
+	# list of subclusters
+	subclusters = np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes])
+
 	# table with obs info
 	# key is the ObsId, and value is outputInfo class instance
 	obstable={}
@@ -1200,13 +1205,15 @@ if __name__ == "__main__":
 			tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 
+
+	if is_update or is_rebuild:
 		# also db can have obsids from all subclusters. However, we need not update all of them, only those
 		# from the same subclusters as for lse in the command line option. This is because, the info from the parset
 		# files is always the same, and do not need to be updated, and update of the processed data status can only
 		# have sense for the same subclusters as in the command line option
 		# also, we add 'subA' and 'sub?' as well
 		newobsids=[]
-		for sub in np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes]):
+		for sub in subclusters:
 			newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == sub, obsids)))
 		newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == "subA", obsids)))
 		newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == "sub?", obsids)))
@@ -1217,13 +1224,9 @@ if __name__ == "__main__":
 		Nobsids = np.size(obsids)
 
 
-	if is_rebuild == True:
-		print "Number of observations in %s: %d" % (", ".join(storage_nodes), Nobsids)
-	else:
-		print "Number of observations in db file: %d" % (np.size(dbobsids), )
-		if not is_update:
-			print "Number of new observations found in %s: %d" % (", ".join(storage_nodes), np.size(obsids))
-		
+	print "Number of observations in %s: %d" % (", ".join(subclusters), Nobsids)
+	if not is_rebuild and not is_update:
+		print "Number of new observations found in %s: %d" % (", ".join(storage_nodes), np.size(obsids))
 
 	if is_from == True or is_to == True:
 		print "List only observations%s%s" % (is_from and " since " + fromdate or (is_to and " till " + todate or ""), 
@@ -1535,7 +1538,7 @@ if __name__ == "__main__":
 	# similar to what we do when we are updating db records, here we also only want to show the observations from
 	# selected (from the command line) subclusters, because db can have data for all subclusters
 	newobskeys=[]
-	for sub in np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes]):
+	for sub in subclusters:
 		newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == sub, obskeys)))
 	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == "subA", obskeys)))
 	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == "sub?", obskeys)))
@@ -1564,7 +1567,7 @@ if __name__ == "__main__":
 	if is_html == True:
 		htmlrep=writeHtmlList(htmlfile, linkedhtmlstem, fromdate, todate)
 		htmlrep.open()
-		htmlrep.obsnumber(storage_nodes, np.size(dbobsids), np.size(obsids))
+		htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids))
 		htmlrep.datesrange()
 		htmlrep.header(viewtype, storage_nodes_string_html)
 		counter = 0
@@ -1588,7 +1591,7 @@ if __name__ == "__main__":
 		for key in sf.keys():
 			htmlrep.reInit(sf[key])
 			htmlrep.open()
-			htmlrep.obsnumber(storage_nodes, np.size(dbobsids), np.size(obsids))
+			htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids))
 			htmlrep.datesrange()
 			htmlrep.statistics(htmlstatfile)
 			htmlrep.linkedheader(viewtype, storage_nodes_string_html)
