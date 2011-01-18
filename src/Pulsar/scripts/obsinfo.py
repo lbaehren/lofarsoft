@@ -1130,7 +1130,7 @@ def usage (prg):
           -u, --update               - update db file only, new observations in /data? won't be added\n\
                                        This option can be used together with --from and --to to update only some observations\n\
           --stats                    - to calculate the statistics of existent observations in the database\n\
-                                       can be used together with --from and --to options\n\
+                                       can be used together with --from and --to options, and with --html option\n\
           --norsync                  - don't rsync plots to external webserver when \"mega\" or \"plots\" view mode is used\n\
           --dbfile <dbfile>          - database file with stored info about the observations\n\
           --debug                    - debug mode\n\
