@@ -6,15 +6,14 @@
 	\ingroup pipeline
 */
 
-#include <lofar_config.h>
-#include <Common/LofarLogger.h>
-#include <sys/time.h>
+#include <MACIO/GCF_Event.h>
 
 /*!
 	\class GenericEventWrapper
 	\ingroup pipeline
 	\brief Interface definition class for a generic event
 */
+
 class GenericEventWrapper {
 private:
     LOFAR::MACIO::GCFEvent* my_event;

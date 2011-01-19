@@ -1,5 +1,6 @@
-#include "ep_interface.h"
+#include <lofar_config.h>
 #include <boost/python.hpp>
+#include "ep_interface.h"
 
 BOOST_PYTHON_MODULE(_ep_interface) {
     using namespace boost::python;

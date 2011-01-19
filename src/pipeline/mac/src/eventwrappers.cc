@@ -1,3 +1,4 @@
+#include <lofar_config.h>
 #include "echowrappers.h"
 
 //
