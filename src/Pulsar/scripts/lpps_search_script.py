@@ -521,16 +521,29 @@ class SearchRun(object):
             sys.exit(1)
         print 'Running rfifind took %.2f seconds.' % \
             (t_rfifind_end - t_rfifind_start)
+        # Create 
+        try:
+            os.mkdir(os.path.join(self.work_dir, 'RFIFIND'))
+
+            os.mkdir(os.path.join(self.out_dir, 'SINGLEPULSE'))
+            os.mkdir(os.path.join(self.out_dir, 'LOGS'))
+            os.mkdir(os.path.join(self.out_dir, 'INF'))
+            os.mkdir(os.path.join(self.out_dir, 'RFIFIND'))
+            os.mkdir(os.path.join(self.out_dir, 'ACCELSEARCH')) 
+            os.mkdir(os.path.join(self.out_dir, 'DM0.00'))
+        except Exception, e:
+            raise e
+
         # Move the rfifind output files
         for file in glob.glob(os.path.join(self.work_dir, '*_rfifind*')):
             try:
-                shutil.move(file, self.out_dir)
+                shutil.move(file, os.path.join(self.work_dir, 'RFIFIND'))
             except IOError, e:
                 pass 
         # Store the location of the rfifind mask file (used by other PRESTO
         # binaries):
-        rfifind_mask_file = os.path.join(self.out_dir, self.basename + \
-            '_rfifind.mask')
+        rfifind_mask_file = os.path.join(os.path.join(self.work_dir, 'RFIFIND', 
+            self.basename + '_rfifind.mask'))
         
         ddplan_i = -1 
         for ddplan, n_cores_to_use in self.annotated_ddplans:
@@ -566,15 +579,7 @@ class SearchRun(object):
                         get_accelsearch_command(self.work_dir, 
                             self.basename, dm, z_max)
                     )
-                    # move the accelsearch output to the output directory
-                    command_list[core_index].append(
-                        get_command('mv', {}, [
-                            os.path.join(self.work_dir, self.basename + \
-                                '_DM%.2f' % dm + '_ACCEL_%s' % z_max + '*'),
-                                self.out_dir
-                            ]
-                        )
-                    )    
+
                 if not no_singlepulse:                   
                     # Run PRESTO single pulse search (not the plotting or SSPS part):
                     command_list[core_index].extend(
@@ -582,25 +587,14 @@ class SearchRun(object):
                             self.work_dir, self.basename, dm
                             )
                         )
-                    # move the single pulse files to the output directory
-                    command_list[core_index].append(
-                        get_command('mv', {}, [
-                            os.path.join(self.work_dir, 
-                            self.basename + '_DM%.2f' % dm + '.singlepulse'),
-                            self.out_dir
-                            ]
-                        )
-                    )
                
-                # move files that are no longer necessary:
-                command_list[core_index].append(
-                    get_command('mv', {}, [
-                        os.path.join(self.work_dir, 
-                        self.basename + '_DM%.2f' % dm + '.inf'),
-                        self.out_dir
-                        ]
+                # Copy the DM 0 files to the output directories.
+                if dm == 0:
+                    command_list[core_index].append(
+                        get_command('cp', {}, [self.basename + '_DM0.00.*',
+                        os.path.join(self.out_dir, 'DM0.00')])
                     )
-                )
+                
               
                 # remove datafiles that are no longer necessary
                 command_list[core_index].append(
@@ -645,19 +639,43 @@ class SearchRun(object):
             
         # Run the seperate folding script (after having created a directory
         # for it to write the folds to).
-        os.mkdir(os.path.join(self.out_dir, 'folds'))
+        os.mkdir(os.path.join(self.work_dir, 'FOLDS'))
         folder.main(
-            folddir=os.path.join(self.out_dir, 'folds'),
+            folddir=os.path.join(self.work_dir, 'FOLDS'),
             subbdir=self.in_dir,
-            canddir=self.out_dir,
+            canddir=self.work_dir,
             basename=self.basename,
         )
         if not no_singlepulse:
             # Deal with single pulse search plotting
             d = os.getcwd()
-            os.chdir(self.out_dir)
+            os.chdir(self.work_dir)
             status = run_single_pulse_search_plotter('.', self.basename)
             os.chdir(d)
+        # Add code that cleans up after the search:
+        # move the FOLDS directory to the output directory
+        shutil.move(os.path.join(self.work_dir, 'FOLDS'), 
+            os.path.join(self.out_dir, 'FOLDS'))
+        # move all the candidate files to the output location
+        for f in glob.glob(os.path.join(self.work_dir, self.basename \
+            + '_DM*.[0-9][0-9]_ACCEL*')):
+            shutil.move(f, os.path.join(self.out_dir, 'ACCELSEARCH'))
+        # move all the singlepulse related stuff
+        for f in glob.glob(os.path.join(self.work_dir, '*.singlepulse')):
+            shutil.move(f, os.path.join(self.out_dir, 'SINGLEPULSE'))
+        for f in glob.glob(os.path.join(self.work_dir, '*_singlepulse.ps')):
+            shutil.move(f, os.path.join(self.out_dir, 'SINGLEPULSE'))
+        # move all the .inf files
+        for f in glob.glob(os.path.join(self.work_dir, '*.inf')):
+            shutil.move(f, os.path.join(self.out_dir, 'INF'))
+        # move all the search scripts/logs to the LOGS directory
+        for f in glob.glob(os.path.join(self.work_dir, '*.log.txt2')):
+            shutil.move(f, os.path.join(self.out_dir, 'LOGS'))
+        for f in glob.glob(os.path.join(self.work_dir, '*.sh')):
+            shutil.move(f, os.path.join(self.out_dir, 'LOGS'))
+        # move the rfifind output
+        shutil.move(os.path.join(self.work_dir, 'RFIFIND'), 
+            os.path.join(self.out_dir, 'RFIFIND'))
 
 def mpiprepsubband_helper(ddplan, n_cores):
     '''

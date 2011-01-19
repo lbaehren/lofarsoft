@@ -174,7 +174,9 @@ def main(*args, **kwargs):
  
     # search for all the accelcand files and sift them
     sifted_candidates = sift_accel_cands(cand_dir, basename)
-    assert len(sifted_candidates) > 0
+    if len(sifted_candidates) == 0:
+        print 'In directory %s there are no candidate files.' % cand_dir
+        assert len(sifted_candidates) > 0
 
     # using knowledge about the directory layout:
     mask_filename = os.path.join(cand_dir, basename + '_rfifind.mask')
