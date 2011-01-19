@@ -287,8 +287,8 @@ def main():
                 downfacts = [x for x in default_downfacts if x*dt <= opts.maxwidth]
             else:
                 downfacts = [x for x in default_downfacts if x <= max_downfact]
-            if len(downfacts) == 0:
-                downfacts = [default_downfacts[0]]
+#            if len(downfacts) == 0:
+#                downfacts = [default_downfacts[0]]
             if (filenm == args[0]):
                 orig_N = N
                 orig_dt = dt
@@ -447,7 +447,8 @@ def main():
             # Now walk through the dm_candlist and remove the ones that
             # are within the downsample proximity of a higher
             # signal-to-noise pulse
-            dm_candlist = prune_related2(dm_candlist, downfacts)
+            if len(downfacts) != 0:
+                dm_candlist = prune_related2(dm_candlist, downfacts)
             print "  Found %d pulse candidates"%len(dm_candlist)
             
             # Get rid of those near padding regions
