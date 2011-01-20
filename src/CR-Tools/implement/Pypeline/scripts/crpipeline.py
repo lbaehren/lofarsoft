@@ -15,15 +15,22 @@ antennaset = 'LBA_OUTER' # hack around missing info in data files
 
 def writeDictOneLine(outfile, dict):
     for key in dict:
-        outfile.write('%s: %s; ' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
+        if type(dict[key]) == np.float64:
+            outfile.write('%s: %7.2f\n' % (str(key), dict[key]))
+        else:
+            outfile.write('%s: %s; ' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
 
 def writeDict(outfile, dict):
     for key in dict:
+#        print '%s %s %s' % (key, dict[key], type(dict[key]))
         if type(dict[key]) == dict: # if we have a dict inside our dict, print it on one line (and hope it's small)
             writeDictOneLine(outfile, dict[key])
+        elif type(dict[key]) == np.float64:        
+            outfile.write('%s: %7.2f\n' % (str(key), dict[key]))
         else:
             outfile.write('%s: %s\n' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
-
+    outfile.write('\n')
+    
 def runAnalysis(files, triggers, outfilename):
     """ Input: list of files to process, trigger info as read in by match.readtriggers(...), filename for results output
     """
@@ -41,7 +48,8 @@ def runAnalysis(files, triggers, outfilename):
         crfile = result["file"]
         outfile.write('\n')
         # do quality check and rfi cleaning here
-        
+        flaglist = dc.qualityCheck(crfile)
+        #print flaglist
         # find initial direction of incoming pulse, using trigger logs
         result = pf.triggerMessageFit(crfile, triggers, 'linearFit')
         writeDict(outfile, result)
@@ -50,32 +58,11 @@ def runAnalysis(files, triggers, outfilename):
         triggerFitResult = result
         # now find the final direction based on all data, using initial direction as starting point
         try: # apparently it's dangerous...
-          result = pf.fullDirectionFit(crfile, triggerFitResult, 1024)     
+          result = pf.fullDirectionFit(crfile, triggerFitResult, 65536*2)     
           writeDict(outfile, result)
           if not result["success"]:
               continue
           
-#          outstring = ('bruteForce: Az:%7.2f, El:%7.2f'%fitResult['triggerFit'][0:2]+
-#                       ', Dist:%8.1f'%-1.+
-#                       ', mse:%8.3f'%fitResult['triggerFit'][2] +
-#                       ', nAnts:%u\n'%fitResult['triggerFit'][4])
-#          outfile.write(outstring)
-#          outstring = (' linearFit: Az:%7.2f, El:%7.2f'%fitResult['linearFit'][0:2]+
-#                       ', Dist:%8.1f'%-1.+
-#                       ', mse:%8.3f'%fitResult['linearFit'][2] +
-#                       ', nAnts:%u\n'%fitResult['linearFit'][4])
-#          outfile.write(outstring)
-#          evenResults = fitResult['fitEven']
-#          outstring = ('  Even-Fit: Az:%7.2f, El:%7.2f, Dist: xxx '%tuple(evenResults[0])+
-#                       ', Val:%8.0f, Iter: xxx' % evenResults[1] )#  + # 0 tot 2 voor brute, 1 to 3 for simplex
-#    #                   ', Flag:%u\n'%fitResult['fitEven'][4] ) 
-#          outfile.write(outstring)
-#          oddResults = fitResult['fitOdd']
-#          outstring = ('   Odd-Fit: Az:%7.2f, El:%7.2f, Dist: xxx '%tuple(oddResults[0])+
-#                       ', Val:%8.0f, Iter: xxx' % oddResults[1] ) # + 
-#    #                   ', Flag:%u\n'%fitResult['fitOdd'][4] )
-#          outfile.write(outstring)
-#          outfile.flush()
         except (ZeroDivisionError, IndexError):
           print 'EROR!'
         outfile.flush()
@@ -94,7 +81,7 @@ elif len(sys.argv) > 1:
 else:
     print 'No files given on command line, using a default set instead.'
     datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-23*'
-    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER.dat'
+    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat'
     #datafiles = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/*'
     #triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs006.dat'
 
@@ -129,4 +116,26 @@ runAnalysis(files, triggers, outfile)
 #  pixarray = np.zeros( (n_el,n_az) ) 
 #  pixarray = -1.0 * fitDataEven[3].T # of transpose?
 #  plt.imshow(pixarray,cmap=plt.cm.hot,extent=(az_min, az_max, el_min, el_max) )
+
+#          outstring = ('bruteForce: Az:%7.2f, El:%7.2f'%fitResult['triggerFit'][0:2]+
+#                       ', Dist:%8.1f'%-1.+
+#                       ', mse:%8.3f'%fitResult['triggerFit'][2] +
+#                       ', nAnts:%u\n'%fitResult['triggerFit'][4])
+#          outfile.write(outstring)
+#          outstring = (' linearFit: Az:%7.2f, El:%7.2f'%fitResult['linearFit'][0:2]+
+#                       ', Dist:%8.1f'%-1.+
+#                       ', mse:%8.3f'%fitResult['linearFit'][2] +
+#                       ', nAnts:%u\n'%fitResult['linearFit'][4])
+#          outfile.write(outstring)
+#          evenResults = fitResult['fitEven']
+#          outstring = ('  Even-Fit: Az:%7.2f, El:%7.2f, Dist: xxx '%tuple(evenResults[0])+
+#                       ', Val:%8.0f, Iter: xxx' % evenResults[1] )#  + # 0 tot 2 voor brute, 1 to 3 for simplex
+#    #                   ', Flag:%u\n'%fitResult['fitEven'][4] ) 
+#          outfile.write(outstring)
+#          oddResults = fitResult['fitOdd']
+#          outstring = ('   Odd-Fit: Az:%7.2f, El:%7.2f, Dist: xxx '%tuple(oddResults[0])+
+#                       ', Val:%8.0f, Iter: xxx' % oddResults[1] ) # + 
+#    #                   ', Flag:%u\n'%fitResult['fitOdd'][4] )
+#          outfile.write(outstring)
+#          outfile.flush()
 

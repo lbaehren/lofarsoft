@@ -106,7 +106,7 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
 #      plt.plot(smoothedstuff.T / blocksize)
 #      plt.show()
 
-      erg = - beamformed_efield_smoothed.max()[0] / blocksize # just the maximum of beamformed_efield_smoothed !!!!
+      erg = - beamformed_efield.max()[0] / blocksize # just the maximum of beamformed_efield_smoothed !!!!
       print ' value = %f ' % erg
       
     return erg

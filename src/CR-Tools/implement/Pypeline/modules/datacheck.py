@@ -8,7 +8,7 @@
 
 import os
 import time
-from pycrtools import IO
+from pycrtools import IO, CRQualityCheck
 
 def safeOpenFile(filename, antennaset): # antennaset only here because it's not set in the file
     """ Opens a file and performs some safety / consistency checks
@@ -70,8 +70,12 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
     return result
 #    return result.update(success=True, file=crfile) !!! This actually returns None (nonetype)...
     
-
-
+def qualityCheck(crfile):
+    qualitycriteria={"mean":(-1.5,1.5),"rms":(4,15),"spikyness":(-7,7)}
+    # BUG: works only with one file at a time. 'crfile' has no attribute 'filename' because it can be one or many...
+    flaglist=CRQualityCheck(qualitycriteria, crfile.files[0], dataarray=None, maxblocksize=65536, nsigma=5, verbose=True) 
+    return flaglist
+    
 # Execute doctests if module is executed as script
 if __name__ == "__main__":
     import doctest
