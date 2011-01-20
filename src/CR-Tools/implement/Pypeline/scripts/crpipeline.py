@@ -9,15 +9,22 @@ import numpy as np
 
 import datacheck as dc
 import pulsefit as pf
-import matching as match
+import matching as match # possibly push this down to pulsefit?
 
 antennaset = 'LBA_OUTER' # hack around missing info in data files
 
+def writeDictOneLine(outfile, dict):
+    for key in dict:
+        outfile.write('%s: %s; ' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
+
 def writeDict(outfile, dict):
     for key in dict:
-        outfile.write('%s: %s\n' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
+        if type(dict[key]) == dict: # if we have a dict inside our dict, print it on one line (and hope it's small)
+            writeDictOneLine(outfile, dict[key])
+        else:
+            outfile.write('%s: %s\n' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
 
-def runAnalysis(files, trigs, outfilename):
+def runAnalysis(files, triggers, outfilename):
     """ Input: list of files to process, trigger info as read in by match.readtriggers(...), filename for results output
     """
     outfile = open(outfilename, mode='w')
@@ -35,35 +42,45 @@ def runAnalysis(files, trigs, outfilename):
         outfile.write('\n')
         # do quality check and rfi cleaning here
         
-        # find direction of incoming pulse
-        try:
-          fitResult = pf.fullPulseFit(crfile, trigs, 1024)     
-          outstring = ('bruteForce: Az:%7.2f, El:%7.2f'%fitResult['triggerFit'][0:2]+
-                       ', Dist:%8.1f'%-1.+
-                       ', mse:%8.3f'%fitResult['triggerFit'][2] +
-                       ', nAnts:%u\n'%fitResult['triggerFit'][4])
-          outfile.write(outstring)
-          outstring = (' linearFit: Az:%7.2f, El:%7.2f'%fitResult['linearFit'][0:2]+
-                       ', Dist:%8.1f'%-1.+
-                       ', mse:%8.3f'%fitResult['linearFit'][2] +
-                       ', nAnts:%u\n'%fitResult['linearFit'][4])
-          outfile.write(outstring)
-          evenResults = fitResult['fitEven']
-          outstring = ('  Even-Fit: Az:%7.2f, El:%7.2f, Dist: xxx '%tuple(evenResults[0])+
-                       ', Val:%8.0f, Iter: xxx' % evenResults[1] )#  + # 0 tot 2 voor brute, 1 to 3 for simplex
-    #                   ', Flag:%u\n'%fitResult['fitEven'][4] ) 
-          outfile.write(outstring)
-          oddResults = fitResult['fitOdd']
-          outstring = ('   Odd-Fit: Az:%7.2f, El:%7.2f, Dist: xxx '%tuple(oddResults[0])+
-                       ', Val:%8.0f, Iter: xxx' % oddResults[1] ) # + 
-    #                   ', Flag:%u\n'%fitResult['fitOdd'][4] )
-          outfile.write(outstring)
-          outfile.flush()
+        # find initial direction of incoming pulse, using trigger logs
+        result = pf.triggerMessageFit(crfile, triggers, 'linearFit')
+        writeDict(outfile, result)
+        if not result["success"]:
+            continue
+        triggerFitResult = result
+        # now find the final direction based on all data, using initial direction as starting point
+        try: # apparently it's dangerous...
+          result = pf.fullDirectionFit(crfile, triggerFitResult, 1024)     
+          writeDict(outfile, result)
+          if not result["success"]:
+              continue
+          
+#          outstring = ('bruteForce: Az:%7.2f, El:%7.2f'%fitResult['triggerFit'][0:2]+
+#                       ', Dist:%8.1f'%-1.+
+#                       ', mse:%8.3f'%fitResult['triggerFit'][2] +
+#                       ', nAnts:%u\n'%fitResult['triggerFit'][4])
+#          outfile.write(outstring)
+#          outstring = (' linearFit: Az:%7.2f, El:%7.2f'%fitResult['linearFit'][0:2]+
+#                       ', Dist:%8.1f'%-1.+
+#                       ', mse:%8.3f'%fitResult['linearFit'][2] +
+#                       ', nAnts:%u\n'%fitResult['linearFit'][4])
+#          outfile.write(outstring)
+#          evenResults = fitResult['fitEven']
+#          outstring = ('  Even-Fit: Az:%7.2f, El:%7.2f, Dist: xxx '%tuple(evenResults[0])+
+#                       ', Val:%8.0f, Iter: xxx' % evenResults[1] )#  + # 0 tot 2 voor brute, 1 to 3 for simplex
+#    #                   ', Flag:%u\n'%fitResult['fitEven'][4] ) 
+#          outfile.write(outstring)
+#          oddResults = fitResult['fitOdd']
+#          outstring = ('   Odd-Fit: Az:%7.2f, El:%7.2f, Dist: xxx '%tuple(oddResults[0])+
+#                       ', Val:%8.0f, Iter: xxx' % oddResults[1] ) # + 
+#    #                   ', Flag:%u\n'%fitResult['fitOdd'][4] )
+#          outfile.write(outstring)
+#          outfile.flush()
         except (ZeroDivisionError, IndexError):
           print 'EROR!'
+        outfile.flush()
     # end for
     outfile.close()
-
 
 
 # get list of files to process
@@ -93,10 +110,10 @@ nofiles = len(files)
 print "Number of files to process:", nofiles
 fd.close()
 print 'Reading triggers...'
-trigs = match.readtriggers(triggerMessageFile)
+triggers = match.readtriggers(triggerMessageFile)
 print 'Trigger reading complete.'
 
-runAnalysis(files, trigs, outfile)
+runAnalysis(files, triggers, outfile)
 #fitergs = dict()
 
 

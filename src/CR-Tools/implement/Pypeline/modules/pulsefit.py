@@ -159,13 +159,16 @@ def triggerMessageFit(crfile, triggers, fittype='bruteForce'):  # crfile has to 
     degaz += 360.
   #get the average time-offset
   toffset = np.mean((mTriggerDates - fileDate) + (mSampleNums - fileSamplenum) / 200.0e6) # matching.py returns np array, so keep it (doing mean anyway)
-  return (degaz, degel, mse, toffset, len(mIDs) )
+  
+  result = dict(success = True, action = 'Trigger message fit', az = degaz, el = degel, 
+                mse = mse, avgToffset = toffset, nofAntennasUsed = len(mIDs) )
+  return result
 
 #------------------------------------------------------------------ fullPulseFit
-def fullPulseFit(crfile, triggers, blocksize, FarField=True): 
+def fullDirectionFit(crfile, triggerFitResult, blocksize, FarField=True): 
   #Get the trigger message data
-  trigData = triggerMessageFit(crfile, triggers)
-  trigLinfitData = triggerMessageFit(crfile, triggers, fittype='linearFit')
+  #trigData = triggerMessageFit(crfile, triggers)
+  #trigLinfitData = triggerMessageFit(crfile, triggers, fittype='linearFit')
   #Set the parameters
   samplefreq = 200.0e6 # must be
   crfile.set("blocksize", blocksize) # proper way, apparently
@@ -173,7 +176,7 @@ def fullPulseFit(crfile, triggers, blocksize, FarField=True):
   print 'File size is %d' % crfile["Filesize"]
   print 'Block size is now: %d' % crfile["blocksize"]
   print 'So there are: %d blocks' % int((crfile["Filesize"]) / int(crfile["blocksize"]))
-  blockNo = int((trigData[3] * samplefreq) / blocksize)
+  blockNo = int((triggerFitResult["avgToffset"] * samplefreq) / blocksize)
   print "fullPulseFit: set block-number to:", blockNo
 #  crfile.set("block", blockNo)
   nofAntennas = crfile["nofAntennas"]
@@ -205,9 +208,9 @@ def fullPulseFit(crfile, triggers, blocksize, FarField=True):
       cr_fft[i, 0] = 0.0 # kill DC offsets
        
   if (FarField):
-    start_position = [trigData[0], trigData[1]]
+    start_position = [triggerFitResult["az"], triggerFitResult["el"]]
   else:
-    start_position = [trigData[0], trigData[1], 30000.]
+    start_position = [triggerFitResult["az"], triggerFitResult["el"], 30000.0]
   
   # HACK 
 #  start_position = [255.0, 25.0]
@@ -218,11 +221,13 @@ def fullPulseFit(crfile, triggers, blocksize, FarField=True):
   ant_indices = range(1, nofAntennas, 2)
   fitDataOdd = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                   cr_freqs, FarField=FarField,blocksize=blocksize)
-  result = dict()
-  result['triggerFit'] = trigData
-  result['linearFit'] = trigLinfitData
-  result['fitEven'] = fitDataEven
-  result['fitOdd'] = fitDataOdd 
+  result = dict(success = True, action = 'Full direction fit',
+                even = dict(az = fitDataEven[0][0], el = fitDataEven[0][1], optValue = fitDataEven[1]),
+                odd = dict(az = fitDataOdd[0][0], el = fitDataOdd[0][1], optValue = fitDataOdd[1]) )
+  #result['triggerFit'] = trigData
+  #result['linearFit'] = trigLinfitData
+#  result['fitEven'] = fitDataEven
+#  result['fitOdd'] = fitDataOdd 
   
   return result
 
