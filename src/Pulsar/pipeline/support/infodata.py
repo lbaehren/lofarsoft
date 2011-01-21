@@ -155,7 +155,7 @@ class InfoData:
         band          = par.bandFilter[0:3]
         subband_width = bw / nsubbands
 
-        self.object   = self.pulsar
+        self.object = self.basenm = self.pulsar
 
         if ( band == "HBA"):
             lowerBandFreq = float(par.bandFilter[4:7])

@@ -5,20 +5,20 @@
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
-# Python standard library
 from __future__ import with_statement
-
-from contextlib import closing
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
-import os.path, tempfile, shutil
-
-from lofarpipe.support.lofarnode import LOFARnode
-from lofarpipe.support.utilities import log_time
-from lofarpipe.support.lofarexceptions import ExecutableMissing
 
 import os, glob
+
+from lofarpipe.support.lofarnode       import LOFARnode
+from lofarpipe.support.utilities       import log_time
+from lofarpipe.support.lofarexceptions import ExecutableMissing
+
+# PULP libs
 import bf2Pars
 import pulpEnv
+
+
 
 class rfiplot(LOFARnode):
 

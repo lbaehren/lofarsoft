@@ -1,7 +1,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
-#                                    Initialize prepfold run (prepareInf) recipe
-#                                                          Ken Anderson, 2009-10
+#                                              pipeline.recipes.master.bundle.py
+#                                                          Ken Anderson, 2010-11
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
@@ -17,87 +17,102 @@ from lofarpipe.support.clusterdesc   import ClusterDesc, get_compute_nodes
 from lofarpipe.support.lofarnode     import run_node
 
 
-
-class prepareInf(LOFARrecipe):
-
-    """
-    This recipe will build the "all" RSP directory for the given obsid.
-    This is only done when filefactor is not equal to 1, which will not 
-    be nominal (4 or 8 RSP splits will be nominal).  To this end, some
-    fiddling to build a directory for the full set of subband data and then 
-    add one job to the prepfold job queue.
+class bundleFiles(LOFARrecipe):
 
     """
+    This recipe will create a gzipped tarball for the obsid pulsar output.
+
+    i.e. a file named like, <pulsarName>_<obsid>_plots.tar.gz
+
+    eg.,
+
+     B1112+50_L2010_21325_plots.tar.gz
+
+    """
+
     inputs = {
         'obsid' : ingredient.StringField(
             '--obsid',
             dest="obsid",
             help="Observation identifier"
-        ),
+            ),
         'pulsar' : ingredient.StringField(
             '--pulsar',
             dest="pulsar",
             help="Pulsar name"
-        ),
+            ),
         'filefactor' : ingredient.IntField(
             '--filefactor',
             dest="filefactor",
             help="factor by which obsid subbands will be RSP split."
-        ),
+            ),
         'arch' : ingredient.StringField(
             '--arch',
-            dest="",
-            help="Destination PULSAR ARCHIVE"
-        )
-    }
+            dest="arch",
+            help="Destination output Pulsar Archive, string like 'arch134'",
+            )
+        }
 
     outputs = {
         'data': ingredient.ListField()
-    }
+        }
 
 
     def go(self):
-        super(prepareInf, self).go()
+        super(bundleFiles, self).go()
 
-        self.logger.info("...Preparing .inf files for obsid " + self.inputs['obsid'])
+        self.logger.info("... Bundling data for obsid " + self.inputs['obsid'])
 
         obsid      = self.inputs['obsid']
         pulsar     = self.inputs['pulsar']
         arch       = self.inputs['arch']
         filefactor = self.inputs['filefactor']
-        uEnv       = self.__buildUserEnv()
+        #executable = self.inputs['executable']
+        logDir     = self.config.get('layout','log_directory')
+        userEnv    = self.__buildUserEnv()           # push to compute node
 
         # clusterlogger context manager accepts networked logging from compute nodes.
         # Need only one engine, get_ids()[0], to do the job.
 
         tc, mec = self._get_cluster()
         targets = mec.get_ids()[0]
-        self.logger.info("Importing prepInfFiles ...")
-        mec.execute("import prepInfFiles", targets=[targets])
-        self.logger.info("Instatiating PrepInfFiles")
-        mec.execute("infFiles = prepInfFiles.PrepInfFiles(\"%s\",\"%s\",%d,\"%s\",\"%s\")" \
-                        % (obsid,pulsar,filefactor,arch,uEnv), targets=[targets])
-        self.logger.info("Calling ...buildListsAndLinks()")
-        mec.execute("infFiles.buildListsAndLinks()",targets=[targets])
-        self.logger.info("Obsid directory, RSPA, is populated.")
 
+        self.logger.info("Building tar archive ..." )
+        self.logger.info("Tar archive will appear at OBSID directory level.")
+        self.logger.info("remote import on bundlePlots ...")
+
+        mec.execute("import bundlePlots",targets=[targets])
+
+        self.logger.info("remote instantiation on bundlePlots.BundlePlots ...")
+
+        mec.execute("tarball = bundlePlots.BundlePlots(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\")" \
+                        % (obsid,pulsar,arch,logDir,userEnv),targets=[targets])
+
+        self.logger.info("calling ballIt() on tarball instance ...")
+
+        mec.execute("tarch = tarball.ballIt()",targets=[targets])
+        tarFile = mec.pull("tarch",targets=[targets])
+
+        self.logger.info(obsid+" Tar archive built:")
+        self.logger.info(tarFile)
         return
+
 
 
     def __buildUserEnv(self):
         """
         User environment must be pushed to the compute nodes.
-
+        
         Environment variables needed:
         $LOFARSOFT
         $TEMPO
         $PRESTO
-
+        
         These are stringified, pushed through to pulpEnv via RSPS call to pulpEnv,
         and unpacked in the pulpEnv module.
-
-        """
         
+        """
+        userEnv  = ""
         userEnv  = "LOFARSOFT = "+os.environ["LOFARSOFT"]
         userEnv += ":TEMPO = "   +os.environ["TEMPO"]
         userEnv += ":PRESTO ="   +os.environ["PRESTO"]

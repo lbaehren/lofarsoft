@@ -19,10 +19,10 @@ class PulpEnv:
     """
     Builds an environment object for a given user and obseration.
 
-    archPaths sets up a dict  for pulp pipeline processing archive.
+    archPaths sets up a dict for pulp pipeline processing archive.
     Nominally called, PULP__ARCHIVE.
 
-    Attributes made available through the pulp environment class (PulpEnv)
+    Attributes available through the pulp environment class (PulpEnv)
 
     self.obsid        :: LOFAR observation ID, like L<YYYY>_<nnnnn>
     self.pulsar       :: Name of targeted pulsar
@@ -52,11 +52,37 @@ class PulpEnv:
 
     def __init__(self, obsid, pulsar, arch, uEnv):
 
+        """Constuctor recieves args and builds an appropriate
+        environment for the observation.  This environment object
+        (an instance of PulpEnv), is instantiated by each recipe,
+        and used as needed.  The framework enforces, to some degree,
+        recipe independence, which is why each recipe builds its
+        environment sans dependencies on other recipe parameters.
+
+        This constructor also calls the private methods,
+        .__testParset()
+        .__readParset()
+        
+        which will check for the location of an observational parset
+        and, once found, read the parameter file as needed.
+
+        """
+
+        self.archPaths = {
+            'arch134': '/net/sub5/lse013/data4/PULP_ARCHIVE',
+            'arch144': '/net/sub5/lse014/data4/PULP_ARCHIVE',
+            'arch154': '/net/sub5/lse015/data4/PULP_ARCHIVE',
+            'arch164': '/net/sub6/lse016/data4/PULP_ARCHIVE',
+            'arch174': '/net/sub6/lse017/data4/PULP_ARCHIVE',
+            'arch184': '/net/sub6/lse018/data4/PULP_ARCHIVE',
+            }
+
         self.obsid     = obsid
         self.pulsar    = pulsar
         self.arch      = arch
         self.pArchive  = self.archPaths[self.arch]
         self.subnet    = self.__getsubnet()
+        self.nodes     = self.__getNodes()
         self.environ   = self.__dictify(uEnv)
         self.LOFARSOFT = self.environ["LOFARSOFT"]
         self.user      = os.environ["LOGNAME"]
@@ -70,17 +96,8 @@ class PulpEnv:
         self.defaultInf    = os.path.join(self.LOFARSOFT,
                                           'release/share/pulsar/data/lofar_default.inf'
                                           )
-        self.archPaths     = {
-            'arch134': '/net/sub5/lse013/data4/PULP_ARCHIVE',
-            'arch144': '/net/sub5/lse014/data4/PULP_ARCHIVE',
-            'arch154': '/net/sub5/lse015/data4/PULP_ARCHIVE',
-            'arch164': '/net/sub6/lse016/data4/PULP_ARCHIVE',
-            'arch174': '/net/sub6/lse017/data4/PULP_ARCHIVE',
-            'arch184': '/net/sub6/lse018/data4/PULP_ARCHIVE',
-            }
 
-
-        # The following method calls will populated attributes,
+        # The following method calls will populate attributes,
 
         # self.transpose2
         # self.stokes
@@ -105,12 +122,50 @@ class PulpEnv:
         self.obsidPath  = os.path.join(self.pArchive,self.obsid)
         self.stokesPath = os.path.join(self.obsidPath,self.stokes)
 
+
+    # ------------ formatted parameter set display ---------- #
+
+    def show(self):
+
+        """
+        Display command line and other parameters, either read or constructed.
+
+        """
+        
+        print "\n\n\tObservation & Pipeline parameters for OBSID:",self.obsid,"\n"
+        print "---------------------"
+        for key in self.__dict__.keys():
+            print "Parameter: ",key, "\t= ",self.__dict__[key]
+        print "---------------------"
+        return
+
     # ------------- private helper methods ------------------ #
 
     def __getsubnet(self):
         subn = self.pArchive.split("/")[2]
         subnet = os.path.join('/net',subn)
         return subnet
+
+
+    def __getNodes(self):
+
+        """
+        Determine search nodes from subnet attribute..
+        
+        eg.,
+
+        /net/sub5 --> nodes = ['lse013','lse014','lse015']
+        /net/sub6 --> nodes = ['lse016','lse017','lse018']
+        
+        """
+
+        if self.subnet == "/net/sub5":
+            nodes = ["lse013","lse014","lse015"]
+        elif self.subnet == "/net/sub6":
+            nodes = ["lse016","lse017","lse018"]
+        else:
+            raise RuntimeError, "Cannot resolve subnet descriptor."
+        return nodes
     
 
     def __dictify(self, uEnv):
@@ -224,19 +279,6 @@ class PulpEnv:
                 continue
             if self.transpose2 and self.stokes and self.parTarget:
                 break
-        return
-
-
-    def show(self):
-        """
-        Display command line and other parameters, either read or constructed.
-        """
-        
-        print "\n\n\tObservation & Pipeline parameters for OBSID:",self.obsid,"\n"
-        print "---------------------"
-        for key in self.__dict__.keys():
-            print "Parameter: ",key, "\t= ",self.__dict__[key]
-        print "---------------------"
         return
 
 

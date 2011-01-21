@@ -1,11 +1,11 @@
 #!/usr/env/python
 
 """
-This is a model pulsar pipeline definition.
+This is a model pulsar pipeline definition, aka pulp.py
 
-Although it should be runnable as it stands, the user is encouraged to copy it
-to a job directory and customise it as appropriate for the particular task at
-hand.
+Unlike standard framework pipeline definitions, this definition
+is tighlty bound to pulsar processing.  Alteration of this 
+definition should be undertaken only with proper expertise.
 """
 
 from __future__ import with_statement
@@ -16,6 +16,9 @@ from lofarpipe.support.clusterhandler import ipython_cluster
 import lofarpipe.support.lofaringredient as ingredient
 
 import sys, os
+
+# This is verison ...
+__version__="0.2"
 
 class pulp(control):
 
@@ -66,6 +69,7 @@ class pulp(control):
                     self.run_task("prepareInf",   obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                     self.run_task("prepfold",     obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                     self.run_task("rfiplot",      obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("bundle",       obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                 else:
                     self.run_task("buildPulsArch",obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                     self.run_task("bf2presto",    obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
@@ -73,6 +77,7 @@ class pulp(control):
                     self.run_task("prepareInf",   obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                     self.run_task("prepfold",     obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                     self.run_task("rfiplot",      obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)                    
+                    self.run_task("bundleFiles",  obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
         return
 
 

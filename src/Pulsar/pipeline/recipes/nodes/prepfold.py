@@ -5,20 +5,21 @@
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
-# Python standard library
-
 from __future__ import with_statement
-from contextlib import closing
 from subprocess import Popen, check_call, CalledProcessError, PIPE, STDOUT
+from os.path    import splitext
 
-from lofarpipe.support.lofarnode import LOFARnode
-from lofarpipe.support.utilities import log_time
-from lofarpipe.support.lofarexceptions import ExecutableMissing
-
-from os.path import splitext
 import os, glob
 
+#local helpers
+from lofarpipe.support.lofarnode       import LOFARnode
+from lofarpipe.support.utilities       import log_time
+from lofarpipe.support.lofarexceptions import ExecutableMissing
+
+# PULP libs
 import pulpEnv
+
+
 
 class prepfold(LOFARnode):
     def run(self, inputs, infiles, obsid, pulsar, arch, userEnv, rspN):

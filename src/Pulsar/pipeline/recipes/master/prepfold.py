@@ -7,19 +7,17 @@
 
 from __future__ import with_statement
 
-import sys, os, logging 
-from subprocess import check_call, CalledProcessError
-from contextlib import closing
-from collections import defaultdict
+import sys, os
 
 # Local helpers
-from lofarpipe.support.ipython import LOFARTask
-from lofarpipe.support.lofarrecipe import LOFARrecipe
-from lofarpipe.support.clusterlogger import clusterlogger
-from lofarpipe.support.clusterdesc import ClusterDesc, get_compute_nodes
-import lofarpipe.support.utilities as utilities
-from lofarpipe.support.lofarnode import run_node
 import lofarpipe.support.lofaringredient as ingredient
+
+from lofarpipe.support.ipython       import LOFARTask
+from lofarpipe.support.lofarrecipe   import LOFARrecipe
+from lofarpipe.support.clusterlogger import clusterlogger
+from lofarpipe.support.clusterdesc   import ClusterDesc, get_compute_nodes
+from lofarpipe.support.lofarnode     import run_node
+
 
 class prepfold(LOFARrecipe):
 

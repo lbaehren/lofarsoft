@@ -12,8 +12,7 @@ import gzip
 import pulpEnv
 
 
-parts        = ['data1', 'data2', 'data3', 'data4']
-nodes        = ['lse013', 'lse014', 'lse015']
+parts = ['data1', 'data2', 'data3', 'data4']
 
 
 class DISTError(IOError):
@@ -73,6 +72,8 @@ class RSPS():
         self.arch       = obsEnv.pArchive
         self.subnet     = obsEnv.subnet
         self.logfilepath= obsEnv.logfilepath
+        self.subnet     = obsEnv.subnet
+        self.nodes      = obsEnv.nodes
 
 
     def RSPLists(self):
@@ -120,7 +121,7 @@ class RSPS():
         rspList = []
         infiles = []
         orderedSBFiles = []
-        for i in nodes:
+        for i in self.nodes:
             for j in parts:
                 searchPath = os.path.join(self.subnet, i, j, self.obsid)
                 try:
@@ -148,6 +149,7 @@ class RSPS():
         return rspList
 
 
+
     def __stripMS(self,list):
         pulsarFiles = []
         for file in list:
@@ -158,6 +160,7 @@ class RSPS():
 
 
     def __readLog(self):
+
         """
         Read the SAS/MAC Storage log file (run.Storage.R00.log) for passed obsid.
         The log details write locations for all subband data for a given obsid.
@@ -172,6 +175,13 @@ class RSPS():
         eg.,
 
         run.Storage.R00.log.gz
+
+        N.B. Since August, 2010, the log file described herein no longer exists.
+             The Storgae Node output that was found in this log has been folded
+             into other log files, like run.IONProc.R00.log.  These files are now
+             enormous and gzipped.
+
+             Use of these data is now deprecated.
 
         """
 

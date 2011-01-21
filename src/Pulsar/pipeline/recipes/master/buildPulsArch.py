@@ -5,19 +5,19 @@
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
-
-from __future__ import with_statement
 import sys, os
 
-# Local helpers
-import lofarpipe.support.utilities as utilities
-from lofarpipe.support.lofarrecipe import LOFARrecipe
-from lofarpipe.support.ipython import LOFARTask
-from lofarpipe.support.clusterlogger import clusterlogger
-from lofarpipe.support.lofarnode import run_node
+# Local framework helpers
 import lofarpipe.support.lofaringredient as ingredient
 
+from lofarpipe.support.lofarrecipe   import LOFARrecipe
+from lofarpipe.support.ipython       import LOFARTask
+from lofarpipe.support.clusterlogger import clusterlogger
+from lofarpipe.support.lofarnode     import run_node
+
+# PULP libs 
 import bf2Pars, RSPlist
+
 
 
 class buildPulsArch(LOFARrecipe):
