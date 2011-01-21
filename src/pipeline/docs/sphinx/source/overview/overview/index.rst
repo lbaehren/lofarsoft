@@ -8,7 +8,7 @@ Before plunging into the nitty-gritty of all the various components that make
 up a pipeline, let's first take a bird's-eye overview of the concepts
 involved.
 
-The figure shows a schmatic pipeline layout, illustrating most of the relevant
+The figure shows a schematic pipeline layout, illustrating most of the relevant
 concepts. We will consider each of these in turn below.
 
 .. image:: ../pipeline-flowchart.png
@@ -69,7 +69,7 @@ head can dispatch compute-intensive jobs to other nodes on a cluster. Various
 mechanisms are provided for queueing and dispatching jobs and collecting their
 results.
 
-Complex cluster layouts may be descibred by a "clusterdesc" file, as used by
+Complex cluster layouts may be described by a "clusterdesc" file, as used by
 :ref:`distproc`. The framework understands these files natively, whether or
 not the distproc system itself is in use.
 
@@ -78,8 +78,8 @@ not the distproc system itself is in use.
 Pipeline jobs
 =============
 
-Once a pipeline has been descibed as above, it will often be used multiple
-times -- for exanmple, to process multiple independent datasets. Each pipeline
+Once a pipeline has been described as above, it will often be used multiple
+times -- for example, to process multiple independent datasets. Each pipeline
 run is associated with a "job identifier" which can be used to keep track of
 these independent pipeline runs. Their results, logs, configuration and so on
 can therefore be conveniently kept separate. The job identifier is a free-form
