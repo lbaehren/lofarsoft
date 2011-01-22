@@ -29,6 +29,9 @@ pipeline itself.
 
 .. _section-overview:
 
+The pipeline system was developed by John Swinbank (University of Amsterdam)
+in 2009 & 2010. Since 2011, the primary maintainer is Marcel Loose (ASTRON).
+
 Overview & Getting Started
 ==========================
 
