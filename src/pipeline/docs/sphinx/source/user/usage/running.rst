@@ -106,36 +106,3 @@ Saving the above definition in ``pipeline.py``, we now have:
   2010-10-27 18:17:31 INFO    pipeline: recipe pipeline completed
   Results:
 
-Tasks
------
-
-Declaring the full inputs and outputs for a recipe every time it is run can be
-a chore, expecially when the same set of parameters are used frequently.
-Therefore, we introduce the concept of a "task": the combination of a recipe
-and a set of standard paramters.
-
-First, we define a task file in our ``pipeline.cfg`` ``DEFAULT`` section.:
-
-.. code-block:: none
-
-  task_files = [/home/username/tasks.cfg]
-
-Then define the task, specifying the recipe and any additional parameters, in
-that file:
-
-.. code-block:: none
-
-  [run_true]
-  recipe = example
-  executable = /bin/true
-
-Our pipeline definition can now be much simpler:
-
-.. code-block:: python
-
-  class pipeline(control):
-      def pipeline_logic(self):
-          self.run_task('run_true')
-
-  if __name__ == "__main__":
-      sys.exit(pipeline().main())

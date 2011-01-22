@@ -10,15 +10,17 @@ LOFAR Pipeline System Documentation
 This document provides an overview of the LOFAR pipeline system. This system
 has largely been developed to support the LOFAR imaging pipeline, but is now
 being deployed for a variety of science pipelines on the LOFAR cluster. This
-document is split into three sections: :ref:`the first <section-overview>`
-describes the aims of the framework, the structure of a pipeline, and gives an
-overview of how the system fits together, as well as information on how to run
-pre-defined pipelines. :ref:`The second <section-author-guide>` provides a
-tutorial introduction to writing pipelines and pipeline components. :ref:`The third
+document is split into a number of sections: :ref:`the first
+<section-overview>` describes the aims of the framework, the structure of a
+pipeline, and gives an overview of how the system fits together. :ref:`The
+second <section-user-guide>` provides details on how to run pre-defined
+pipelines. :ref:`The third <section-author-guide>` provides a tutorial
+introduction to writing pipelines and pipeline components. :ref:`The fourth
 <section-developer-reference>` describes the framework codebase in more
 detail, and is intended for pipeline authors who wish to dig a little deeper,
-as well as those interested in developing the framework itself. :ref:`The fourth
-<section-pipeline-specific>` provides a guide to the imaging pipeline itself.
+as well as those interested in developing the framework itself. :ref:`The
+final section <section-pipeline-specific>` provides a guide to the imaging
+pipeline itself.
 
 .. ifconfig:: todo_include_todos
 
@@ -34,8 +36,18 @@ Overview & Getting Started
    :maxdepth: 2
 
    overview/overview/index.rst
-   overview/infrastructure/index.rst
    overview/dependencies/index.rst
+
+.. _section-user-guide:
+
+User's Guide
+============
+
+.. toctree::
+   :maxdepth: 2
+
+   user/installation/index.rst
+   user/usage/index.rst
 
 .. _section-author-guide:
 

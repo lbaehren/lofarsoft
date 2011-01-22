@@ -3,6 +3,10 @@
 CEP Quickstart
 ==============
 
+.. todo::
+
+   Bring this quickstart guide in-line with the current situation.
+
 This section provides some quick notes on getting started with the pipeline
 system. More details are available in subsequent sections of this chapter.
 
