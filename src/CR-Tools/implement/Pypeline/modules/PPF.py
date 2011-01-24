@@ -50,7 +50,8 @@ class PPF():
         if self.startrow > 15:
             self.startrow = 0
         input.muladd2(self.weights[0:16-self.startrow],self.buffer[self.startrow:16])
-        input.muladd2(self.weights[16-self.startrow:16],self.buffer[0:self.startrow])
+        if self.startrow != 0:
+	    input.muladd2(self.weights[16-self.startrow:16],self.buffer[0:self.startrow])
            
            # print "multiplying weight",row,"with buffer",(row+self.startrow)%16
          
@@ -72,7 +73,7 @@ class iPPF():
         weights=cr.hArray(float,[16,1024])
         weights.readdump(weights_filename)
         
-        if weights[0,0].val()==0.0:
+        if weights[0,0]==0.0:
             print "Obtaining inverse PPF coefficient from file"
             # Reading of weights failed
             f=open(cr.LOFARSOFT+'/src/CR-Tools/data/ppf_inv.dat')
@@ -107,7 +108,8 @@ class iPPF():
         if self.startrow > 15:
             self.startrow = 0
         input.muladd2(self.weights[0:16-self.startrow],self.buffer[self.startrow:16])
-        input.muladd2(self.weights[16-self.startrow:16],self.buffer[0:self.startrow])
+        if self.startrow != 0:
+	    input.muladd2(self.weights[16-self.startrow:16],self.buffer[0:self.startrow])
            # print "multiplying weight",row,"with buffer",(row+self.startrow)%16
         self.total_rows_added+=1
         if self.total_rows_added < 16:

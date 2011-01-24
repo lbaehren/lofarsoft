@@ -73,7 +73,7 @@ import pycrtools as cr
 import numpy as np
 import os
 
-from pycrtools import calibration
+#from pycrtools import calibration
 from pycrtools import metadata as md
 
 # This class implements the IO interface
@@ -542,7 +542,6 @@ def get(files, keyword,return_as_list=True):
                 for i in range(0,len(files)-1):
                     if retall[i]!=retall[i+1]:
                         return retall
-            
             if "nof" in keyword and "Channels" not in keyword:
                 ret=sum(retall)
                 if "nofBaselines" is keyword:
