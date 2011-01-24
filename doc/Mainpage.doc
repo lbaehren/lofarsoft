@@ -59,5 +59,25 @@
     <li>\subpage LUS_Glossary
   </ul>
 
+  More LOFAR documentation:
+
+  <ul>
+    <li>The <a href="http://www.astron.nl/radio-observatory/lofar/lofar-imaging-cookbook">LOFAR imaging cookbook</a> was initially  written by Timothy Garn, who was its main author till his death in 2009. Currently, Roberto Pizzo is in charge of udating it thanks to the contributions of the Lofar commissioners.  The manual explains how to manually reduce imaging data and inspect the results, using tools from the standard imaging pipeline (NDPPP, BBS, and MWImager). 
+
+    <li><a href="http://www.astron.nl/radio-observatory/astronomers/lofar-beamformed-data-pipeline-cookbook/lofar-beamformed-data-pipeline">LOFAR Beamformed-Data Pipeline Cookbook</a>
+
+    <li><a href="http://usg.lofar.org/documentation/pipeline">LOFAR pipeline
+    system</a>: This system has largely been developed to support the LOFAR
+    imaging pipeline, but is now being deployed for a variety of science pipelines
+    on the LOFAR cluster. This document is split into three sections: the first
+    describes the aims of the framework, the structure of a pipeline, and gives
+    an overview of how the system fits together, as well as information on how to
+    run pre-defined pipelines. The second provides a tutorial introduction to
+    writing pipelines and pipeline components. The third describes the framework
+    codebase in more detail, and is intended for pipeline authors who wish to dig
+    a little deeper, as well as those interested in developing the framework   
+    itself. The fourth provides a guide to the imaging pipeline itself.
+  </ul>
+  
 */
 

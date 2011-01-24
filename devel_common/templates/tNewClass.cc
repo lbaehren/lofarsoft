@@ -69,6 +69,12 @@ int test_constructors ()
 //_______________________________________________________________________________
 //                                                                           main
 
+/*!
+  \brief Main routine of the test program
+
+  \return nofFailedTests -- The number of failed tests encountered within and
+          identified by this test program.
+*/
 int main ()
 {
   int nofFailedTests (0);
