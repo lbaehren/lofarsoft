@@ -917,11 +917,11 @@ void HFPP_FUNC_NAME (const Iter hc, const Iter hc_end,
 #define HFPP_FUNC_NAME hBeamformImage
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HComplex)(image)()("Image")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HComplex)(fftdata)()("FFT data")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(frequencies)()("Frequencies")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HNumber)(antpos)()("Antenna positions")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_4 (HNumber)(skypos)()("Sky positions")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HComplex)(image)()("Array to store resulting image. Stored as [I(x_0, y_0, f_0), I(x_0, y_0, f_1), ... I(x_nx, y_ny, f_nf)] e.g. the rightmost (frequency) index runs fastest. This array may contain an existing image.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(fftdata)()("Array with FFT data of each antenna. Expects data to be stored as [f(0,0), f(0,1), ..., f(0,nf), f(1,0), f(1,1), ..., f(1,nf), ..., f(na, 0), f(na,1), ..., f(na,nf)] e.g. f(i,j) where `i` is the antenna number and `j` is the frequency.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(frequencies)()("Array with frequencies stored as [f_0, f_1, ..., f_n] in Hertz.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(antpos)()("Array with antenna positions in the local Cartesian frame in meters. Stored as [x_0, y_0, z_0, x_1, y_1, z_1, ... x_na, y_na, z_na] where `na` is the number of antennas.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(skypos)()("Array with sky positions in the local cartesian frame in Hertz. Stored as [x_0, y_0, z_0, x_1, y_1, z_1, ... x_np, y_np, z_np] where `np` is the number of pixels in the image. Storage order for the pixels is the same as for the image e.g. runs faster in y.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -958,22 +958,18 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   if (Nantpos != Nantennae * 3)
   {
     throw PyCR::ValueError("Antenna positions array has wrong size.");
-    return;
   }
   if (Nskypos != Nskycoord * 3)
   {
     throw PyCR::ValueError("Sky positions array has wrong size.");
-    return;
   }
   if (Nfftdata != Nfreq * Nantennae)
   {
     throw PyCR::ValueError("FFT data array has wrong size.");
-    return;
   }
   if (Nimage != Nskycoord * Nfreq)
   {
     throw PyCR::ValueError("Image array has wrong size.");
-    return;
   }
 
   // Get iterators
@@ -994,12 +990,10 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   for (int i=0; i<Nskycoord; ++i)
   {
     // Image iterator to start position
-    it_im = image;
-    it_im += i * Nfreq + 1;
+    it_im = image + (i * Nfreq);
 
     // Sky coordinate iterator to start position
-    it_sky = skypos;
-    it_sky += i * 3;
+    it_sky = skypos + (i * 3);
 
     // Loop over antennae
     it_ant = antpos;
@@ -1015,7 +1009,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
                   *(it_sky+1) * *(it_sky+1) +
                   *(it_sky+2) * *(it_sky+2));
 
-      // Calculate geometric delay (and increment iterator)
+      // Calculate geometric delay
       delay = hGeometricDelayFarField(it_ant, it_sky, norm);
 
       // Loop over frequencies
@@ -1024,7 +1018,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       for (k=Nfreq; k!=0; --k)
       {
         // Multiply by geometric weight and add to image
-        *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * delay));  // exp(HComplex(0.0, CR::_2pi*((*it_freq) * delay)));
+        *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * delay));
         ++it_im_inner;
         ++it_fft;
         ++it_freq;
