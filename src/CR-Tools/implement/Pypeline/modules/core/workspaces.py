@@ -794,7 +794,9 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,maxblocksi
         if not datafile==None: datafile.set("block",Block).read("Voltage",dataarray.vec())
         datamean = dataarray[...].mean()
         datarms = dataarray[...].stddev(datamean)
-        datanpeaks = dataarray[...].countgreaterthanabs(datarms*nsigma)
+        # Count # peaks while accounting for DC offset
+        datanpeaks = dataarray[...].countgreaterthan(datamean + datarms*nsigma)
+        datanpeaks += dataarray[...].countlessthan(datamean - datarms*nsigma)
         dataNonGaussianity = Vector(float,nAntennas)
         dataNonGaussianity.sub(datanpeaks,npeaksexpected)
         dataNonGaussianity /= npeakserror
