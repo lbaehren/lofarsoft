@@ -48,7 +48,11 @@ def runAnalysis(files, triggers, outfilename):
         crfile = result["file"]
         outfile.write('\n')
         # do quality check and rfi cleaning here
-        flaglist = dc.qualityCheck(crfile)
+        result = dc.qualityCheck(crfile)
+        flaggedList = result["flagged"]
+        writeDict(outfile, result)
+        if not result["success"]: 
+            continue
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
         result = pf.triggerMessageFit(crfile, triggers, 'linearFit')
@@ -58,7 +62,7 @@ def runAnalysis(files, triggers, outfilename):
         triggerFitResult = result
         # now find the final direction based on all data, using initial direction as starting point
         try: # apparently it's dangerous...
-          result = pf.fullDirectionFit(crfile, triggerFitResult, 65536*2)     
+          result = pf.fullDirectionFit(crfile, triggerFitResult, 2*65536, flaggedList = flaggedList)     
           writeDict(outfile, result)
           if not result["success"]:
               continue

@@ -165,10 +165,7 @@ def triggerMessageFit(crfile, triggers, fittype='bruteForce'):  # crfile has to 
   return result
 
 #------------------------------------------------------------------ fullPulseFit
-def fullDirectionFit(crfile, triggerFitResult, blocksize, FarField=True): 
-  #Get the trigger message data
-  #trigData = triggerMessageFit(crfile, triggers)
-  #trigLinfitData = triggerMessageFit(crfile, triggers, fittype='linearFit')
+def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarField=True): 
   #Set the parameters
   samplefreq = 200.0e6 # must be
   crfile.set("blocksize", blocksize) # proper way, apparently
@@ -180,6 +177,12 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, FarField=True):
   print "fullPulseFit: set block-number to:", blockNo
 #  crfile.set("block", blockNo)
   nofAntennas = crfile["nofAntennas"]
+# Apply flagged antenna list - select those out
+#  selectedList = range(nofAntennas)
+#  for entry in flaggedList:
+#      selectedList.remove(entry)  
+#  crfile.setAntennaSelection(selectedList)
+  
   fftlength = crfile["fftLength"]
   #Get the data
   cr_time = hArray(float, dimensions=[blocksize])
@@ -201,7 +204,7 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, FarField=True):
   print 'ANTENNA POSITIONS: '
   print antenna_positions
   print ' '
-  #Now calculate the fourier-transform of the data
+  #Now calculate the Fourier transform of the data
   
   cr_fft[...].fftw(cr_efield[...]) 
   for i in range(cr_fft.shape()[0]):
@@ -215,10 +218,18 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, FarField=True):
   # HACK 
 #  start_position = [255.0, 25.0]
   ant_indices = range(0, nofAntennas, 2)
+  # for the time being: apply flags here instead of using crfile.setAntennaSelection (avoiding complications)
+  for entry in flaggedList:
+      if entry in ant_indices:
+          ant_indices.remove(entry) # or [ant_indices.remove(x) for x in flaggedList if x in ant_indices] ...
+  
   fitDataEven = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                    cr_freqs, FarField=FarField,blocksize=blocksize)
                                    
   ant_indices = range(1, nofAntennas, 2)
+  for entry in flaggedList:
+      if entry in ant_indices:
+          ant_indices.remove(entry)
   fitDataOdd = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                   cr_freqs, FarField=FarField,blocksize=blocksize)
   result = dict(success = True, action = 'Full direction fit',

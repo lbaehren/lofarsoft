@@ -71,10 +71,28 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
 #    return result.update(success=True, file=crfile) !!! This actually returns None (nonetype)...
     
 def qualityCheck(crfile):
-    qualitycriteria={"mean":(-1.5,1.5),"rms":(4,15),"spikyness":(-7,7)}
+    qualitycriteria={"mean":(-1.5,1.5),"rms":(4,15),"spikyness":(-5,5)}
     # BUG: works only with one file at a time. 'crfile' has no attribute 'filename' because it can be one or many...
+#    datalength = crfile["Filesize"]
+#    blocksize = 1024
+#    blocklist = hArray(int, [0.5 * datalength / blocksize])
     flaglist=CRQualityCheck(qualitycriteria, crfile.files[0], dataarray=None, maxblocksize=65536, nsigma=5, verbose=True) 
-    return flaglist
+    # make warnings for DC offsets and spikyness; flag out for rms too high (i.e. junk data)
+    flagged = []
+    highDCOffsets = 0
+    spikies = 0
+    #import pdb; pdb.set_trace()
+    for entry in flaglist:
+        if entry[3][0] == 'mean': 
+            highDCOffsets += 1
+        elif entry[3][0] == 'spikyness':
+            spikies += 1
+        elif entry[3][0] == 'rms':
+            flagged.append(entry[0]) # entry[0] = antenna nr.
+            
+    result = dict(success=True, action = 'Data quality check', flagged = flagged, 
+                  warnings = format("Too high DC offsets: %d; too high spikyness: %d") % (highDCOffsets, spikies) )
+    return result
     
 # Execute doctests if module is executed as script
 if __name__ == "__main__":
