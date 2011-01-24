@@ -785,6 +785,7 @@ def get_parameters_new(obsid, useFilename=False):
     parameters["SBspernode"]=SBspernode
     parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
     parameters["subbands"]=allparameters["Observation.subbandList"]
+    parameters["nrsubbands"]=sum(parameters["SBspernode"])
     #parameters["subbandsperMS"]=allparameters["OLAP.StorageProc.subbandsPerMS"]
     #parameters["antennaset"]=allparameters["Observation.antennaSet"]
     parameters["filterselection"]=allparameters["Observation.bandFilter"]
