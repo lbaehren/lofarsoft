@@ -100,8 +100,8 @@ wcs = {
     'CRVAL2' : pytmf.dms2deg(22, 0, 52.0),
     'CRVAL3' : frequencies[0],
     'CRVAL4' : 0.,
-    'CRPIX1' : float(options.naxis1 / 2),
-    'CRPIX2' : float(options.naxis2 / 2),
+    'CRPIX1' : float(options.naxis1) / 2,
+    'CRPIX2' : float(options.naxis2) / 2,
     'CRPIX3' : 0.0,
     'CRPIX4' : 0.0,
     'CDELT1' : -1.0 * options.angres,
@@ -113,6 +113,8 @@ wcs = {
     'CUNIT3' : 'Hz',
     'CUNIT4' : 's',
 }
+
+print wcs
 
 # Create empty image
 image=cr.hArray(float, dimensions=(ntimesteps, wcs['NAXIS1'], wcs['NAXIS2'], nfreq), fill=0.)
