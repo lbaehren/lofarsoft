@@ -10,64 +10,90 @@ def sb2str(sb):
     else:
        return str(sb)
 
-def get_stokes_data(file, block, channels, samples, nrstations=1, type="StokesI"):
+def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI",noSubbandAxis=False):
     """Get a lofar datablock from stokes (I or IQUV) raw data format. 
-    Returns a array of data(stations,channels,samples,nrstokes).
+    Returns a array of data(nrstokes,channels,samples) (IncoherentStokes)
+                    or data(samples,subbands,channels) (CoherentStokes,subbands>1)
+                      
     
     *file* opened data file
     *block* which block to read, negative numbers mean the next block
-    *channels* nr of channels per subband
+    *channels* nr of channels per subband (Incoherent) or in file (Coherent = SBs*Channels)
     *samples* nr of samples per subband (This is the samples/block divided by integration length)
-    *nr stations* Nr of stations in flysEye mode.
-    *type* StokesI, I, StokesIQUV, IQUV
+    *nrsubbands* Nr of subbands used for coherent data.
+    *type* StokesI, I, StokesIQUV, IQUV, CoherentStokesI, CoherentStokesIQUV
+    *noSubbandAxis* Only have one channels axis?
     """
     
     # 
+    bCoherent=False
     if type is "StokesI" or type is "I":
         nrStokes=1
     elif type is "StokesIQUV" or type is "IQUV":
         nrStokes=4
+    elif type is "CoherentStokesI":
+        nrStokes=1
+        bCoherent=True
+    elif type is "CoherentStokesIQUV":
+        nrStokes=4
+        bCoherent=True
     else:
         print "Unsupported datatype. Aborting...."
         assert False
  
     # Calculate how large the datablock is.
-    n=nrstations*channels*(samples|2)*nrStokes
+    n=channels*(samples|2)*nrStokes*nrsubbands
     
-    # Format string for sequence number, padding and data (Big endian)
-    fmt='>I508x'+str(n)+'f'
+    # Format string for header (sequence number, padding)  (Big endian)
+    fmtH='>I508x'
+
+    # Format string for data (Big endian)
+    fmtD='>'+str(n)+'f'
     
     # Size represented by format string in bytes
-    sz=struct.calcsize(fmt)
+    szH=struct.calcsize(fmtH)
+    szD=struct.calcsize(fmtD)
+    sz=szH+szD
+    
+    dt=np.dtype(np.float32)
+    dt=dt.newbyteorder('>')
     
     # read data from file
     if block < 0:
-        x=file.read(sz)
+        file.seek(file.tell()+szH)
+        data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(nrStokes,channels,samples|2)
         # unpack struct into intermediate data
-        t=struct.unpack(fmt,x)
     else:
         file.seek(sz*block)
-        x=file.read(sz)
+        x=file.read(szH)
         # unpack struct into intermediate data
-        t=struct.unpack(fmt,x)
+        t=struct.unpack(fmtH,x)
         if t[0] != block:
             file.seek(0)
-            x=file.read(sz)
-            t=struct.unpack(fmt,x)
+            x=file.read(szH)
+            t=struct.unpack(fmtH,x)
             startblock=t[0]
             file.seek((block-startblock)*sz)
-            x=file.read(sz)
-            t=struct.unpack(fmt,x)
+            x=file.read(szH)
+            t=struct.unpack(fmtH,x)
             if t[0] != block:
                 print "Discontinuous data is not supported yet in this mode. Use blocknr = -1 and step through the data"
                 assert False
                  
     # unpack struct into intermediate data
     #t=struct.unpack(fmt,x)
+    if bCoherent:
+         if noSubbandAxis:
+             data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,channels)[0:samples,:]
+         else:
+             data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,nrsubbands,channels)[0:samples,:,:]
+    else:
+         data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(nrStokes,channels,samples|2)[:,:,0:samples]
     
-    
+
     # return sequence number as uint, and data as nparray
-    return np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrStokes)[:,:,0:samples,:]
+    return data
+    #np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrStokes)[:,:,0:samples|2,:]
 
 def get_rawvoltage_data(file, block, channels, samples, nrstations=1, nrpol=2):
     """Get a lofar datablock from raw voltage complex data. 
@@ -121,6 +147,59 @@ def get_rawvoltage_data(file, block, channels, samples, nrstations=1, nrpol=2):
     # return sequence number as uint, and data as nparray
     return np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrpol,2)[:,:,0:samples|2,:,:]
 
+
+
+def get_rawvoltage_data_new(file, block, channels, samples, nrsubbands, nrstations=1):
+    """Get a lofar datablock from raw voltage complex data. 
+    Returns a array of data(stations,channels,samples,nrpol,(real,imag)).
+    
+    *file* opened data file. There are different files for the X and Y polarisation.
+    *block* which block to read, negative numbers mean the next block
+    *channels* nr of channels per subband
+    *samples* nr of samples per subband (This is the samples/block divided by integration length)
+    *nrsubbands* Subbands in the file. At the moment this is the total number of subbands.
+    *nr stations* Nr of stations in flysEye mode.
+    """
+    
+    # 
+    
+    # Calculate how large the datablock is.
+    n=nrstations*nrsubbands*channels*(samples|2)*2
+  
+    # Format string for sequence number, padding and data (Big endian)
+    fmt='>I508x'+str(n)+'f'
+    
+    # Size represented by format string in bytes
+    sz=struct.calcsize(fmt)
+    
+    # read data from file
+    if block < 0:
+        x=file.read(sz)
+        # unpack struct into intermediate data
+        t=struct.unpack(fmt,x)
+    else:
+        file.seek(sz*block)
+        x=file.read(sz)
+        # unpack struct into intermediate data
+        t=struct.unpack(fmt,x)
+        if t[0] != block:
+            file.seek(0)
+            x=file.read(sz)
+            t=struct.unpack(fmt,x)
+            startblock=t[0]
+            file.seek((block-startblock)*sz)
+            x=file.read(sz)
+            t=struct.unpack(fmt,x)
+            if t[0] != block:
+                print "Discontinuous data is not supported yet in this mode. Useblocknr = -1 and step through the data"
+                assert False
+                 
+    # unpack struct into intermediate data
+    #t=struct.unpack(fmt,x)
+    
+    
+    # return sequence number as uint, and data as nparray
+    return np.asarray(t[1:]).reshape(samples|2,nrsubbands,channels,2)#[:,0:samples|2,:,:,:]
 
 
 
@@ -525,6 +604,7 @@ def get_parameters(obsid, useFilename=False):
     parameters["samples"]=int(allparameters["OLAP.CNProc.integrationSteps"])
     parameters["namemask"]=allparameters["Observation.MSNameMask"]
     parameters["stationnames"]=allparameters["OLAP.storageStationNames"]
+    parameters["nrstations"]=len(parameters["stationnames"].split([',']))
     parameters["storagenodes"]=allparameters["Observation.VirtualInstrument.storageNodeList"].strip('[]').split(',')
     parameters["storagenodes"].sort()
     SBspernode=allparameters["OLAP.storageNodeList"].strip('[]').split(',')
@@ -596,6 +676,8 @@ def get_parameters(obsid, useFilename=False):
                 names.append(name)
                 sb+=1
         
+
+
     if parameters["incoherentstokes"]:
         sb=0
         for i in range(len(parameters["storagenodes"])):
@@ -692,7 +774,9 @@ def get_parameters_new(obsid, useFilename=False):
     parameters["channels"]=int(allparameters["Observation.channelsPerSubband"])
     parameters["samples"]=int(allparameters["OLAP.CNProc.integrationSteps"])
     parameters["namemask"]=allparameters["Observation.MSNameMask"]
+    parameters["antennaset"]=allparameters["Observation.antennaSet"]
     parameters["stationnames"]=allparameters["OLAP.storageStationNames"]
+    parameters["nrstations"]=len(parameters["stationnames"].split(','))
     parameters["storagenodes"]=allparameters["Observation.VirtualInstrument.storageNodeList"].strip('[]').split(',')
     parameters["storagenodes"].sort()
     SBspernode=allparameters["OLAP.storageNodeList"].strip('[]').split(',')
@@ -751,18 +835,32 @@ def get_parameters_new(obsid, useFilename=False):
    
     names=[]
     datatype=[] 
+
     if parameters["coherentstokes"]:
         sb=0
-        for i in range(min(len(parameters["storagenodes"]),len(parameters["SBspernode"]))):
-            node=parameters["storagenodes"][i]
-            nrpernode=parameters["SBspernode"][i]
-            mask=parameters["namemask"]
-            for j in range(int(nrpernode)):
-                name='/net/'+subcluster[node]+'/'+node
-                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',sb2str(sb))
-                name=name+'.stokes'
-                names.append(name)
-                sb+=1
+        nrbeams=1
+        nrpol=1
+        if parameters['stokestype'] == 'IQUV':
+            nrpol=4
+        nrstorage=len(parameters["storagenodes"])
+        nrpernode=parameters["nrstations"]/nrstorage
+        if parameters["nrstations"]%nrstorage>0:
+            nrpernode+=1
+        storNr=0
+        storThreshold=nrpernode
+        for b in range(parameters["nrstations"]):
+            if b>=storThreshold:
+                storNr+=1
+                storThreshold+=nrpernode
+            node=parameters["storagenodes"][storNr]
+            mask=parameters["namemask"].strip('.MS')
+	    name='/net/'+subcluster[node]+'/'+node
+            name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('/SB${SUBBAND}','/L'+parameters['obsid']+'_B'+sb2str(b))
+            for pol in range(nrpol):
+                name2=name+'_S'+str(pol)+'_bf.raw'
+                names.append(name2)
+
+
         
     if parameters["incoherentstokes"]:
         sb=0
@@ -779,16 +877,16 @@ def get_parameters_new(obsid, useFilename=False):
 
     if parameters["beamformeddata"]:
         sb=0
-        for i in range(min(len(parameters["storagenodes"]),len(parameters["SBspernode"]))):
-            node=parameters["storagenodes"][i]
-            nrpernode=parameters["SBspernode"][i]
-            mask=parameters["namemask"]
-            for j in range(int(nrpernode)):
-                name='/net/'+subcluster[node]+'/'+node
-                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',sb2str(sb))
-                name=name+'.beams'
+        nrbeams=1
+        nrpol=2
+        for b in range(nrbeams):
+            for pol in range(nrpol):
+                node=parameters["storagenodes"][(b*nrpol+pol)%len(parameters["storagenodes"])]
+                mask=parameters["namemask"].strip('.MS')
+	        name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('/SB${SUBBAND}','/L'+parameters['obsid']+'_B'+sb2str(b))
+                name=name+'_S'+str(pol)+'_bf.raw'
                 names.append(name)
-                sb+=1
 
 
     if parameters["correlateddata"]:
@@ -820,6 +918,24 @@ def get_parameters_new(obsid, useFilename=False):
 
     parameters["files"]=names
 
+    # Get beams information
+    nrbeams=int(allparameters["Observation.nrBeams"])
+    parameters["nrbeams"]=nrbeams
+    parameters["beam"]=[]
+    for beam in range(nrbeams):
+        parameters["beam"].append({})
+    for beam in range(nrbeams):
+        parameters["beam"][beam]["RA"]=float(allparameters["Observation.Beam["+str(beam)+"].angle1"])
+        parameters["beam"][beam]["DEC"]=float(allparameters["Observation.Beam["+str(beam)+"].angle2"])
+        parameters["beam"][beam]["directionType"]=allparameters["Observation.Beam["+str(beam)+"].directionType"]
+        parameters["beam"][beam]["subbands"]=allparameters["Observation.Beam["+str(beam)+"].subbandList"]
+        parameters["beam"][beam]["beamletList"]=allparameters["Observation.Beam["+str(beam)+"].beamletList"]
+        parameters["beam"][beam]["startTime"]=allparameters["Observation.Beam["+str(beam)+"].startTime"]
+        parameters["beam"][beam]["target"]=allparameters["Observation.Beam["+str(beam)+"].target"]
+        
+    
+
+
     return parameters
 
 
@@ -832,8 +948,10 @@ def get_all_parameters_new(obsid, useFilename=False):
         parsetfilename=obsid
     else:
         # What is the observation number? This determines the filename
-        obsnr=obsid.split('_')[1]
-        
+        if '_' in obsid:
+           obsnr=obsid.split('_')[1]
+        else:
+           obsnr=obsid.strip('L')
         # Name of the parset file
         parsetfilename='/globalhome/lofarsystem/production/lofar/bgfen/log/L'+obsnr+'/L'+obsnr+'.parset'
         if not os.path.isfile(parsetfilename):
