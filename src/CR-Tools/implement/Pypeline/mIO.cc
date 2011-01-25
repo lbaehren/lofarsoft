@@ -722,8 +722,10 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   char * v1 = reinterpret_cast<char*>(&(*vec));
   char * v2 = reinterpret_cast<char*>(&(*vec_end));
   fstream outfile(filename.c_str(), ios::out | ios::binary);
-  outfile.write(v1, (HInteger)(v2-v1));
-  outfile.close();
+  if (outfile){
+    outfile.write(v1, (HInteger)(v2-v1));
+    outfile.close();
+  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -734,7 +736,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to write File to. The vector needs to have the length corresponding to the file size.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to read data from. The vector needs to have the length corresponding to the file size.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   vec.readdump(filename) -> reads dumped vector from file
@@ -760,8 +762,10 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   char * v1 = reinterpret_cast<char*>(&(*vec));
   char * v2 = reinterpret_cast<char*>(&(*vec_end));
   fstream outfile(filename.c_str(), ios::in | ios::binary);
-  outfile.read(v1, (HInteger)(v2-v1));
-  outfile.close();
+  if (outfile){
+    outfile.read(v1, (HInteger)(v2-v1));
+    outfile.close();
+  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -772,7 +776,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to write File to. The vector needs to have the length corresponding to the file size.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to read data from. The vector needs to have the length corresponding to the file size.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HInteger)(block)()("The block number to read (zero-based index), the block length is determined by the vector length.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
@@ -803,9 +807,108 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
   char * v2 = reinterpret_cast<char*>(&(*vec_end));
   HInteger clen(v2-v1);
   ifstream outfile(filename.c_str(), ios::in | ios::binary);
-  outfile.seekg(clen*block);
-  outfile.read(v1, clen);
-  outfile.close();
+  if (outfile){
+    outfile.seekg(clen*block);
+    outfile.read(v1, clen);
+    outfile.close();
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+/*vector<HString> hSplitString(HString str){
+  vector<HString> out;
+  char word[256];
+  //  char line(str.c_str())
+  //  string word;
+  HInteger n(0);
+  std::istringstream sfile(str); 
+  while (!sfile.eof()) {
+    //    fscanf(s,"%s",word);
+    fscanf(sfile,"%s",word);
+    cout << ++n << " " << word << endl;
+    out.push_back(word);
+  };
+  return out;
+}
+*/
+
+//inline vector<HString> hSplitString(HString s){return hSplitString(s.c_str());}
+
+vector<HString> hSplitString(char * str){
+  vector<HString> out;
+  char * pch;
+  pch = strtok (str," ,\t");
+  while (pch != NULL)
+    {
+      out.push_back(pch); 
+      pch = strtok (NULL, " ,\t");
+    }
+  return out;
+}
+
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Read columns of data from a file in text (ASCII) form into an array
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hReadTextTable
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Output data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to read data from.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(skiplines)()("The number of lines to skip before reading the data.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(nlines)()("The number of lines to read. If equal to -1 read all.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(columns)()("An array with a list of column numbers (starting at zero) from which to read data into the array. Read all if empty.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  vec.readtexttable(filename,skiplines,nlines,columns) -> reads a number of columns into the vector vec
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Related functions:
+  hReadDump, hWriteDump
+
+Example:
+  from pycrtools import *
+  vec=Vector(float,24*3)
+  hReadTextTable(vec, "AERAcoordinates-1.txt", 4, 10, Vector([5,3,7]))
+hReadTextTable(vec, "AERAcoordinates-1.txt", 4, -1, Vector([5,3,7]))
+
+This will skip the first 4 lines and then read 10 lines where columns
+5,3,&7 will be read into the vector vec. The ordering will be [l0.c5,
+l0.c3, l0.c7, l1.c5, l1.c3, l1.c7, ..., l9.c7] (where l and c stand
+for line and column respectively)
+
+*/
+template <class Iter, class IterI>
+void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInteger skiplines, HInteger nlines, const IterI columns, const IterI columns_end) {
+  ifstream infile(filename.c_str(), ios::in);
+  HInteger nskip(skiplines);
+  HInteger linesread(0);
+  HString line;
+  IterI col;
+  Iter it(vec);
+  typedef IterValueType T;
+  vector<HString> words;
+  if (infile){
+    while(getline(infile,line) && (!infile.eof()) && linesread!=nlines && it<vec_end) {
+      if (nskip>0) {
+	--nskip;
+      } else {
+	++linesread;
+	words=hSplitString(line.c_str()); //Split the line into words separates by whitespaces
+	col=columns;
+	while (col!=columns_end){ //loop over all columns listed in the columns array
+	  if (it<vec_end) {
+	    *it=hfcast<T>(words[*col]); 
+	    ++it;
+	  };
+	  ++col;
+	};
+      };
+    };
+    infile.close();
+  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
