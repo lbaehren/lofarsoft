@@ -137,6 +137,10 @@ plt.plot() like color="red"
 2010-12-22 Pypeline - Martin van den Akker
 - Added support for AERA datareader
 
+2011-01-26 Pypeline - rev 6832 - Heino Falcke
+- Added hReadTextTable to read data from a textfile
+- added hSplitString (not in Python) to split a string into words.
+
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------
