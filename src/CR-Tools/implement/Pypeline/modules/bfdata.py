@@ -10,6 +10,7 @@ def sb2str(sb):
     else:
        return str(sb)
 
+
 def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI",noSubbandAxis=False):
     """Get a lofar datablock from stokes (I or IQUV) raw data format. 
     Returns a array of data(nrstokes,channels,samples) (IncoherentStokes)
@@ -61,7 +62,6 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
     # read data from file
     if block < 0:
         file.seek(file.tell()+szH)
-        data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(nrStokes,channels,samples|2)
         # unpack struct into intermediate data
     else:
         file.seek(sz*block)
@@ -84,7 +84,7 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
     #t=struct.unpack(fmt,x)
     if bCoherent:
          if noSubbandAxis:
-             data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,channels)[0:samples,:]
+             data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,channels*nrsubbands)[0:samples,:]
          else:
              data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,nrsubbands,channels)[0:samples,:,:]
     else:
@@ -607,10 +607,10 @@ def get_parameters(obsid, useFilename=False):
     parameters["nrstations"]=len(parameters["stationnames"].split([',']))
     parameters["storagenodes"]=allparameters["Observation.VirtualInstrument.storageNodeList"].strip('[]').split(',')
     parameters["storagenodes"].sort()
-    SBspernode=allparameters["OLAP.storageNodeList"].strip('[]').split(',')
-    for i in range(len(SBspernode)):
-        SBspernode[i]=int(SBspernode[i].split('*')[0])
-    parameters["SBspernode"]=SBspernode
+    sbspernode=allparameters["OLAP.storageNodeList"].strip('[]').split(',')
+    for i in range(len(sbspernode)):
+        sbspernode[i]=int(sbspernode[i].split('*')[0])
+    parameters["sbspernode"]=sbspernode
     parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
     parameters["subbands"]=allparameters["Observation.subbandList"]
     #parameters["subbandsperMS"]=allparameters["OLAP.StorageProc.subbandsPerMS"]
@@ -667,7 +667,7 @@ def get_parameters(obsid, useFilename=False):
         sb=0
         for i in range(len(parameters["storagenodes"])):
             node=parameters["storagenodes"][i]
-            nrpernode=parameters["SBspernode"][i]
+            nrpernode=parameters["sbspernode"][i]
             mask=parameters["namemask"]
             for j in range(int(nrpernode)):
                 name='/net/'+subcluster[node]+'/'+node
@@ -682,7 +682,7 @@ def get_parameters(obsid, useFilename=False):
         sb=0
         for i in range(len(parameters["storagenodes"])):
             node=parameters["storagenodes"][i]
-            nrpernode=parameters["SBspernode"][i]
+            nrpernode=parameters["sbspernode"][i]
             mask=parameters["namemask"]
             for j in range(int(nrpernode)):
                 name='/net/'+subcluster[node]+'/'+node
@@ -695,7 +695,7 @@ def get_parameters(obsid, useFilename=False):
         sb=0
         for i in range(len(parameters["storagenodes"])):
             node=parameters["storagenodes"][i]
-            nrpernode=parameters["SBspernode"][i]
+            nrpernode=parameters["sbspernode"][i]
             mask=parameters["namemask"]
             for j in range(int(nrpernode)):
                 name='/net/'+subcluster[node]+'/'+node
@@ -709,7 +709,7 @@ def get_parameters(obsid, useFilename=False):
         sb=0
         for i in range(len(parameters["storagenodes"])):
             node=parameters["storagenodes"][i]
-            nrpernode=parameters["SBspernode"][i]
+            nrpernode=parameters["sbspernode"][i]
             mask=parameters["namemask"]
             for j in range(int(nrpernode)):
                 name='/net/'+subcluster[node]+'/'+node
@@ -723,7 +723,7 @@ def get_parameters(obsid, useFilename=False):
         sb=0
         for i in range(len(parameters["storagenodes"])):
             node=parameters["storagenodes"][i]
-            nrpernode=parameters["SBspernode"][i]
+            nrpernode=parameters["sbspernode"][i]
             mask=parameters["namemask"]
             for j in range(int(nrpernode)):
                 name='/net/'+subcluster[node]+'/'+node
@@ -779,13 +779,13 @@ def get_parameters_new(obsid, useFilename=False):
     parameters["nrstations"]=len(parameters["stationnames"].split(','))
     parameters["storagenodes"]=allparameters["Observation.VirtualInstrument.storageNodeList"].strip('[]').split(',')
     parameters["storagenodes"].sort()
-    SBspernode=allparameters["OLAP.storageNodeList"].strip('[]').split(',')
-    for i in range(len(SBspernode)):
-        SBspernode[i]=int(SBspernode[i].split('*')[0])
-    parameters["SBspernode"]=SBspernode
+    sbspernode=allparameters["OLAP.storageNodeList"].strip('[]').split(',')
+    for i in range(len(sbspernode)):
+        sbspernode[i]=int(sbspernode[i].split('*')[0])
+    parameters["sbspernode"]=sbspernode
     parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
     parameters["subbands"]=allparameters["Observation.subbandList"]
-    parameters["nrsubbands"]=sum(parameters["SBspernode"])
+    parameters["nrsubbands"]=sum(parameters["sbspernode"])
     #parameters["subbandsperMS"]=allparameters["OLAP.StorageProc.subbandsPerMS"]
     #parameters["antennaset"]=allparameters["Observation.antennaSet"]
     parameters["filterselection"]=allparameters["Observation.bandFilter"]
@@ -867,7 +867,7 @@ def get_parameters_new(obsid, useFilename=False):
         sb=0
         for i in range(len(parameters["storagenodes"])):
             node=parameters["storagenodes"][i]
-            nrpernode=parameters["SBspernode"][i]
+            nrpernode=parameters["sbspernode"][i]
             mask=parameters["namemask"].strip('.MS')
             for j in range(int(nrpernode)):
                 name='/net/'+subcluster[node]+'/'+node
@@ -894,7 +894,7 @@ def get_parameters_new(obsid, useFilename=False):
         sb=0
         for i in range(len(parameters["storagenodes"])):
             node=parameters["storagenodes"][i]
-            nrpernode=parameters["SBspernode"][i]
+            nrpernode=parameters["sbspernode"][i]
             mask=parameters["namemask"]
             for j in range(int(nrpernode)):
                 name='/net/'+subcluster[node]+'/'+node
@@ -908,7 +908,7 @@ def get_parameters_new(obsid, useFilename=False):
         sb=0
         for i in range(len(parameters["storagenodes"])):
             node=parameters["storagenodes"][i]
-            nrpernode=parameters["SBspernode"][i]
+            nrpernode=parameters["sbspernode"][i]
             mask=parameters["namemask"]
             for j in range(int(nrpernode)):
                 name='/net/'+subcluster[node]+'/'+node
