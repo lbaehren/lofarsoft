@@ -1,7 +1,7 @@
 import struct
 import numpy as np
 import os
-
+import time
 # Written by Sander ter Veen (s.terveen astro ru nl )
 
 def sb2str(sb):
@@ -726,6 +726,29 @@ def get_parameters(obsid, useFilename=False):
     parameters["stokestype"]=allparameters["OLAP.Stokes.which"]
     if "Observation.Beam[0].target" in allparameters.keys():
         parameters["target"]=allparameters["Observation.Beam[0].target"]
+
+    # Calcultate starttime and endtime in seconds since EPOCH
+    year=int(parameters["starttime"][1:5])
+    month=int(parameters["starttime"][6:8])
+    day=int(parameters["starttime"][9:11])
+    hour=int(parameters["starttime"][12:14])
+    minute=int(parameters["starttime"][15:17])
+    second=int(parameters["starttime"][18:20])
+
+    endyear=int(parameters["stoptime"][1:5])
+    endmonth=int(parameters["stoptime"][6:8])
+    endday=int(parameters["stoptime"][9:11])
+    endhour=int(parameters["stoptime"][12:14])
+    endminute=int(parameters["stoptime"][15:17])
+    endsecond=int(parameters["stoptime"][18:20])
+ 
+    starttime=time.mktime((year,month,day,hour,minute,second,0,0,0))
+    stoptime=time.mktime((endyear,endmonth,endday,endhour,endminute,endsecond,0,0,0))
+    blockduration=1/(float(parameters["clockfrequency"])*1e6)*1024*float(parameters["samples"])*float(parameters["channels"])
+    parameters["nrblocks"]=int((stoptime-starttime)/blockduration)
+
+
+
     # Get file names
     year=parameters['starttime'].split('-')[0].replace('\'','')
 
@@ -900,6 +923,27 @@ def get_parameters_new(obsid, useFilename=False):
     parameters["stokestype"]=allparameters["OLAP.Stokes.which"]
     if "Observation.Beam[0].target" in allparameters.keys():
         parameters["target"]=allparameters["Observation.Beam[0].target"]
+
+    # Calcultate starttime and endtime in seconds since EPOCH
+    year=int(parameters["starttime"][1:5])
+    month=int(parameters["starttime"][6:8])
+    day=int(parameters["starttime"][9:11])
+    hour=int(parameters["starttime"][12:14])
+    minute=int(parameters["starttime"][15:17])
+    second=int(parameters["starttime"][18:20])
+
+    endyear=int(parameters["stoptime"][1:5])
+    endmonth=int(parameters["stoptime"][6:8])
+    endday=int(parameters["stoptime"][9:11])
+    endhour=int(parameters["stoptime"][12:14])
+    endminute=int(parameters["stoptime"][15:17])
+    endsecond=int(parameters["stoptime"][18:20])
+
+    starttime=time.mktime((year,month,day,hour,minute,second,0,0,0))
+    stoptime=time.mktime((endyear,endmonth,endday,endhour,endminute,endsecond,0,0,0))
+    blockduration=1/(float(parameters["clockfrequency"])*1e6)*1024*float(parameters["samples"])*float(parameters["channels"])
+    parameters["nrblocks"]=int((stoptime-starttime)/blockduration)
+    
     # Get file names
     year=parameters['starttime'].split('-')[0].replace('\'','')
 
