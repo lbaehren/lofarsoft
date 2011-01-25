@@ -2,6 +2,8 @@ import struct
 import numpy as np
 import os
 
+# Written by Sander ter Veen (s.terveen astro ru nl )
+
 def sb2str(sb):
     if sb<10:
        return '00'+str(sb)
@@ -9,6 +11,97 @@ def sb2str(sb):
        return '0'+str(sb)
     else:
        return str(sb)
+
+
+class BFDataReader():
+    """Class to read in beamformed data"""
+
+    def __init__(self,obsID):
+        """Constructor
+        Initializes the array
+        """
+        
+        self.par=get_parameters_new(obsID)
+        self.files=[]
+        for file in self.par["files"]:
+            if os.path.isfile(file):
+                self.files.append(open(file))
+        
+        self.channels=self.par["channels"]
+        self.nrsubbands=self.par["nrsubbands"]
+        self.samples=int(self.par["samples"]/self.par["timeintegration"])
+        
+        if self.par["stokestype"]=='IQUV':
+            self.data=np.zeros((4,self.samples,self.channels*self.nrsubbands))
+        elif self.par["stokestype"]=='I':
+            self.data=np.zeros((self.samples,self.channels*self.nrsubbands))
+
+        
+        self.nrtypes=0
+        for type in ["incoherentstokes","coherentstokes","complexvoltages"]:
+            if self.par[type]:
+                self.nrtypes+=1
+        
+        if self.nrtypes==0:
+            self.datatype="invalid"
+        elif self.nrtypes==1:
+            if self.par["incoherentstokes"]:
+                if self.par["stokestype"]=="I":
+                    self.datatype="IncoherentStokesI"
+                    self.data=np.zeros((self.samples,self.channels*len(self.files)))
+                if self.par["stokestype"]=="IQUV":
+                    self.datatype="IncoherentStokesIQUV"
+                    self.data=np.zeros((4,self.samples,self.channels*len(self.files)))
+            elif self.par["coherentstokes"]:
+                if self.par["stokestype"]=="I":
+                    self.datatype="CoherentStokesI"
+                    self.data=np.zeros((len(self.files),self.samples,self.channels*self.nrsubbands))     
+                elif self.par["stokestype"]=="IQUV":
+                    self.datatype="CoherentStokesIQUV"
+            elif self.par["complexvoltage"]:
+                self.datatype="ComplexVoltage"
+                self.samples=self.par["samples"]
+        else:
+           "More than one datatype in observation. Select the one you want to read with setDatatype(type), where type is incoherentstokes, coherentstokes or rawvoltage"
+                
+
+    def setDatatype(self,type):
+            if type == "incoherentstokes":
+                if self.par["stokestype"]=="I":
+                    self.datatype="IncoherentStokesI"
+                    self.data=np.zeros((self.samples,self.channels*len(self.files)))
+                if self.par["stokestype"]=="IQUV":
+                    self.datatype="IncoherentStokesIQUV"
+                    self.data=np.zeros((4,self.samples,self.channels*len(self.files)))
+            elif type == "coherentstokes":
+                if self.par["stokestype"]=="I":
+                    self.datatype="CoherentStokesI"
+                    self.data=np.zeros((len(self.files),self.samples,self.channels*self.nrsubbands))     
+                elif self.par["stokestype"]=="IQUV":
+                    self.datatype="CoherentStokesIQUV"
+            elif type == "complexvoltage":
+                self.datatype="ComplexVoltage"
+                self.samples=self.par["samples"]
+            else:
+                print "Invalide type"
+                return False
+            return True
+          
+
+    def read(self,block):
+        if self.datatype is "IncoherentStokesI":
+            for num, file in enumerate(self.files):
+                self.data[:,num*self.channels:(num+1)*self.channels]=get_stokes_data(file,block,self.channels,self.samples,1,type=self.datatype)[0,:,:].transpose()
+        elif self.datatype is "IncoherentStokesIQUV":
+           for num, file in enumerate(self.files):
+                self.data[:,:,num*self.channels:(num+1)*self.channels]=get_stokes_data(file,block,self.channels,self.samples,1,type=self.datatype).swapaxes(1,2)
+        elif self.datatype is "CoherentStokesI":
+           for num, file in enumerate(self.files):
+               self.data[num]=get_stokes_data(file,block,self.channels,self.samples,self.nrsubbands,type=self.datatype,noSubbandAxis=True)
+        else:
+           return "Can't read data"
+         
+        return self.data
 
 
 def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI",noSubbandAxis=False):
@@ -28,9 +121,9 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
     
     # 
     bCoherent=False
-    if type is "StokesI" or type is "I":
+    if type in ["StokesI","I","IncoherentStokesI"]:
         nrStokes=1
-    elif type is "StokesIQUV" or type is "IQUV":
+    elif type in ["StokesIQUV","IQUV","IncoherentStokesIQUV"]:
         nrStokes=4
     elif type is "CoherentStokesI":
         nrStokes=1
@@ -626,6 +719,7 @@ def get_parameters(obsid, useFilename=False):
     parameters["coherentstokes"]=allparameters["OLAP.outputCoherentStokes"]=='true'
     parameters["incoherentstokes"]=allparameters["OLAP.outputIncoherentStokes"]=='true'
     parameters["beamformeddata"]=allparameters["OLAP.outputBeamFormedData"]=='true'
+    parameters["complexvoltages"]=parameters["beamformeddata"]
     parameters["correlateddata"]=allparameters["OLAP.outputCorrelatedData"]=='true'
     parameters["filtereddata"]=allparameters["OLAP.outputFilteredData"]=='true'
     parameters["flyseyes"]=allparameters["OLAP.PencilInfo.flysEye"]=='true' 
@@ -799,6 +893,7 @@ def get_parameters_new(obsid, useFilename=False):
     parameters["coherentstokes"]=allparameters["OLAP.outputCoherentStokes"]=='true'
     parameters["incoherentstokes"]=allparameters["OLAP.outputIncoherentStokes"]=='true'
     parameters["beamformeddata"]=allparameters["OLAP.outputBeamFormedData"]=='true'
+    parameters["complexvoltages"]=parameters["beamformeddata"]
     parameters["correlateddata"]=allparameters["OLAP.outputCorrelatedData"]=='true'
     parameters["filtereddata"]=allparameters["OLAP.outputFilteredData"]=='true'
     parameters["flyseyes"]=allparameters["OLAP.PencilInfo.flysEye"]=='true' 
