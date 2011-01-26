@@ -64,7 +64,7 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
         return result
     
     if crfile["Filesize"] < 2 * 65536:
-        result.update(reason=format("file size too small: %d") % crfile["Filesize"])
+        result.update(reason=format("Data length too small: %d") % crfile["Filesize"])
         return result
     result.update(datalength = crfile["Filesize"])    
     if crfile["nofAntennas"] < 64: # arbitrary choice...
