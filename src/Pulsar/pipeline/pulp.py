@@ -1,11 +1,24 @@
 #!/usr/env/python
 
+#                                                          LOFAR PULSAR PIPELINE
+#
+#                                                        Pulsar.pipeline.pulp.py
+#                                                          Ken Anderson, 2009-10
+#                                                            k.r.anderson@uva.nl
+# ------------------------------------------------------------------------------
 """
 This is a model pulsar pipeline definition, aka pulp.py
 
-Unlike standard framework pipeline definitions, this definition
-is tighlty bound to pulsar processing.  Alteration of this 
+This definition is tighlty bound to pulsar processing.  Alteration of this 
 definition should be undertaken only with proper expertise.
+
+N.B. Commonality of the run_node interfaces to all recipes, i.e. a common,
+shared argument set, is a design  decision only.  Future processing
+requirements may demand modification to these interfaces, and/or that new
+run_node recipe interfaces and definitions may deviate from this design.
+
+                                                          -- k.r.anderson,
+                                                               25.01.2011
 """
 
 from __future__ import with_statement
@@ -17,7 +30,7 @@ import lofarpipe.support.lofaringredient as ingredient
 
 import sys, os
 
-# This is verison ...
+# This is version ...
 __version__="0.2"
 
 class pulp(control):
@@ -69,7 +82,7 @@ class pulp(control):
                     self.run_task("prepareInf",   obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                     self.run_task("prepfold",     obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                     self.run_task("rfiplot",      obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
-                    self.run_task("bundle",       obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
+                    self.run_task("bundleFiles",  obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                 else:
                     self.run_task("buildPulsArch",obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                     self.run_task("bf2presto",    obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)

@@ -1,6 +1,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                            Data Folding Node (prepfold) recipe
+#                                     Pulsar.pipeline.recipes.nodes.prepfold.py
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------

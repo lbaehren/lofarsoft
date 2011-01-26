@@ -1,6 +1,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                              rfiplot master (subdyn.py) recipe
+#                                      Pulsar.pipeline.recipes.master.rfiplot.py
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------

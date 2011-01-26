@@ -1,6 +1,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                       Construct  RSP "ALL"(buildRSPAll) recipe
+#                                  Pulsar.pipeline.recipes.master.buildRSPAll.py
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------

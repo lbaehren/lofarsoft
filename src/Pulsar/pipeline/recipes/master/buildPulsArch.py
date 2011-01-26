@@ -1,6 +1,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
-#                                   Sbband directory build (buildPulsArch) recipe
+#                                         directory build (buildPulsArch) recipe
+#                                Pulsar.pipeline.recipes.master.buildPulsArch.py
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
@@ -14,10 +15,6 @@ from lofarpipe.support.lofarrecipe   import LOFARrecipe
 from lofarpipe.support.ipython       import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.lofarnode     import run_node
-
-# PULP libs 
-import bf2Pars, RSPlist
-
 
 
 class buildPulsArch(LOFARrecipe):
@@ -63,10 +60,9 @@ class buildPulsArch(LOFARrecipe):
         pulsar     = self.inputs['pulsar']
         filefactor = self.inputs['filefactor']
         arch       = self.inputs['arch']
-        userEnv    = self.__buildUserEnv() # push to compute node
+        userEnv    = self.__buildUserEnv()      # push to compute node
 
         # clusterlogger context manager accepts networked logging from compute nodes.
-        # Need only one engine (..._ids()[0]) for this job.
 
         tc, mec = self._get_cluster()
         targets = mec.get_ids()[0]
@@ -82,11 +78,10 @@ class buildPulsArch(LOFARrecipe):
         self.logger.info("rsps = buildRSPS.buildRSPS(\"%s\",\"%s\",%d,\"%s\",\"%s\")" \
                              % (obsid,pulsar,filefactor,arch,userEnv))
 
-        self.logger.info("calling makeLists method ...")
-        mec.execute("rsps.makeLists()",targets=[targets])
+        self.logger.info("calling buildRspDirs() method ...")
+        mec.execute("rsps.buildRspDirs()",targets=[targets])
 
         return
-
 
 
     def __buildUserEnv(self):
@@ -100,9 +95,9 @@ class buildPulsArch(LOFARrecipe):
 
         These are stringified, pushed through to pulpEnv via RSPS call to pulpEnv,
         and unpacked in the pulpEnv module.
-
         """
-        
+
+        userEnv  = ""
         userEnv  = "LOFARSOFT = "+os.environ["LOFARSOFT"]
         userEnv += ":TEMPO = "   +os.environ["TEMPO"]
         userEnv += ":PRESTO ="   +os.environ["PRESTO"]

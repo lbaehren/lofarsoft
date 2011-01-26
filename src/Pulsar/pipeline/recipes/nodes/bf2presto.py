@@ -1,6 +1,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                            Beam-formed data conversion Node (bf2presto) recipe
+#                                     Pulsar.pipeline.recipes.nodes.bf2presto.py
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
@@ -9,6 +10,7 @@ from __future__ import with_statement
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
 
 import os.path
+import ConfigParser
 
 # local helpers
 from lofarpipe.support.lofarnode       import LOFARnode
@@ -34,10 +36,10 @@ class bf2presto(LOFARnode):
 
         obsEnv = pulpEnv.PulpEnv(obsid,pulsar,arch,uEnv) # environment
 
-        self.obsid  = obsEnv.obsid
-        self.pulsar = obsEnv.pulsar
-        self.stokes = obsEnv.stokes
-        self.pArch  = obsEnv.archPaths[arch]
+        self.obsid     = obsEnv.obsid
+        self.pulsar    = obsEnv.pulsar
+        self.stokes    = obsEnv.stokes
+        self.pArch     = obsEnv.archPaths[arch]
 
         with log_time(self.logger):
             self.logger.info("Building bf2presto command line...")
@@ -71,12 +73,17 @@ class bf2presto(LOFARnode):
 
     def __buildcmd(self, obsEnv):
         """
-        build the full bf2presto command line
+        build the full bf2presto command line.
+
+        args:   <pulpEnv.PulpEnv instance>
+        return: <list>
         """
+
         self.logger.debug("@ bf2presto.__buildcmd()")
         bf2_cmd   = [self.inputs['executable']]
-        bf2_flags = bf2Pars.bf2Pars(obsEnv)
 
+        bf2_flags = bf2Pars.bf2Pars(obsEnv)
+        
         try:
             bf2_flags.readBFpars()
         except Exception, err:
@@ -95,17 +102,18 @@ class bf2presto(LOFARnode):
             self.logger.debug("No command extension.")
 
         if self.inputs["nsigmas"] != 7:
-            self.logger.debug("Got nsigmas:"+ str(self.inputs['nsigmas']))
+            self.logger.warn("Pulp recieved a Non-Default nsigmas:"\
+                                 + str(self.inputs['nsigmas']))
             self.logger.debug("Extending cmd ...")
             bf2_cmd.extend([('-r ' + str(self.inputs["nsigmas"]))])
 
         bfRootOut = self.__buildOutRoot()
 
         bf2_cmd.extend([
-                ('-A 10'),
-                ('-f 0'),
+                ('-A 10'),    # 'A' value set here. Problem on inputs parse.
+                ('-f ' + bf2_flags.sb_base),
                 ('-c ' + bf2_flags.channels),
-                ('-n 16'),
+                ('-n ' + bf2_flags.down),
                 ('-N ' + str(bf2_flags.Nsamples)),
                 ('-o ' + bfRootOut),
                 ])
@@ -118,6 +126,12 @@ class bf2presto(LOFARnode):
 
 
     def __buildOutRoot(self):
+        """ build and return the output path for <obsid>.
+
+        args:   None
+        return: <string>
+        """
+
         outRoot = os.path.join(
             self.pArch,
             self.obsid,
@@ -126,5 +140,3 @@ class bf2presto(LOFARnode):
             self.pulsar+"_"+self.obsid+"_"+"RSP"+str(self.rspN)
             )
         return outRoot
-            
- 

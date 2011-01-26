@@ -1,6 +1,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                                rfiplot (subdyn.py) Node recipe
+#                                       Pulsar.pipeline.recipes.nodes.rfiplot.py
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------

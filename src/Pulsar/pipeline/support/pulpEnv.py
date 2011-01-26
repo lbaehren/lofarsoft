@@ -105,11 +105,12 @@ class PulpEnv:
         self.__testParset()
         self.__readParset()
 
+        if self.transpose2:
+            self.transpose2  = True
+        else: self.tranpose2 = False
 
-#         if self.transpose2:
-#             self.transpose2  = True
-#         else: self.tranpose2 = False
 
+        # ------- envars for node recipe execution ---- #
         try:
             self.TEMPO  = self.environ["TEMPO"]
         except KeyError, err:
@@ -118,10 +119,10 @@ class PulpEnv:
             self.PRESTO  = self.environ["PRESTO"]
         except KeyError, err:
             raise KeyError, "$PRESTO not defined"
+        # ----------------------------------------------- #
 
         self.obsidPath  = os.path.join(self.pArchive,self.obsid)
         self.stokesPath = os.path.join(self.obsidPath,self.stokes)
-
 
     # ------------ formatted parameter set display ---------- #
 
@@ -208,10 +209,7 @@ class PulpEnv:
         """
 
         oldNominalParsetFile = os.path.join(self.parsetPath, self.obsid, self.oldParsetName)
-        print oldNominalParsetFile
-
         newNominalParsetFile = self.__makeParsetPath()
-        print newNominalParsetFile
 
         if os.path.isfile(oldNominalParsetFile):
             print "Found old nominal parset file."

@@ -8,10 +8,13 @@
 # ------------------------------------------------------------------------------
 
 import os
+from   shutil import copyfile
+
+# PULP libs
 import foldingData
 import RSPlist
 import pulpEnv
-from   shutil import copyfile
+
 
 
 class PrepInfFiles():
@@ -47,7 +50,7 @@ class PrepInfFiles():
 
     def buildListsAndLinks(self):
         
-        self.writeRSPLists()
+        #self.writeRSPLists()
         self.prepRSPS()
 
 
@@ -155,6 +158,7 @@ class PrepInfFiles():
                 break
             else: continue
         return (parsetLogDir, parsetFile)
+
 
     def __findParsetFile(self):
         """

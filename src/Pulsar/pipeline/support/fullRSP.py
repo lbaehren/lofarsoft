@@ -20,8 +20,8 @@ class FullRSP():
 
     """
     Build an RSP directory containing all .subnnnn files produced by bf2presto
-    during an RSP split operation (nominal).  This involves making the "RSPA",
-    populating it as a linked in set of all files across all RSPS.
+    during an RSP split operation (nominal).  This involves populating "RSPA",
+    as a linked in set of all files across all RSPS.
 
     It will be incumbent upon the prepfold recipes to add this full file directory
     to the prepfold job queue.
@@ -35,30 +35,36 @@ class FullRSP():
         self.pulsar     = obsEnv.pulsar
         self.filefactor = filefactor
         self.pArchive   = obsEnv.pArchive
-        self.obsidPath  = os.path.join(self.pArchive,self.obsid)
         self.stokes     = obsEnv.stokes
+        self.obsidPath  = obsEnv.obsidPath
+        self.stokesPath = obsEnv.stokesPath
+        self.rspAdir    = os.path.join(self.stokesPath,"RSPA")
+
 
     def fillAllSubFiles(self):
 
         """
         method returns upon successful build of OBSID's RSPA directory.
-        PULSAR_ARCIVE/<OBSID>/RSPA will not exist until now.
+        PULSAR_ARCIVE/<OBSID>/RSPA should have been build by 
+        buildRSPS.buildRspDirs() method call in the master.buildRSPAll
+        recipe.
         """
 
         # RSPA directory will be built parallel to other RSP dirs
         # i.e. under OBSID/[somekind of stokes]/RSPA
         
-        rspAdir = os.path.join(self.obsidPath,self.stokes,"RSPA")
 
-        if not os.path.isdir(rspAdir):
-            os.mkdir(rspAdir)
-            os.chdir(rspAdir)
+        if not os.path.isdir(self.rspAdir):
+            os.mkdir(self.rspAdir)
+            os.chdir(self.rspAdir)
+        else: 
+            os.chdir(self.rspAdir)
 
         subfileIndex = 0
 
         for i in range(self.filefactor):
             rspN   = "RSP"+str(i)
-            srcPath= os.path.join(self.obsidPath,self.stokes,rspN)
+            srcPath= os.path.join(self.stokesPath,rspN)
             subFiles = os.listdir(srcPath)
             for subFile in subFiles:
                 if ".list" in subFile:
@@ -66,7 +72,6 @@ class FullRSP():
                 linkTarget = os.path.join("..",rspN,subFile)
                 newRoot    = os.path.splitext(subFile)[0][:-1] + "A"
                 linkName   = newRoot+".sub%04d" % subfileIndex
-                #print linkName, linkTarget
                 os.symlink(linkTarget, linkName)
                 subfileIndex += 1
         return

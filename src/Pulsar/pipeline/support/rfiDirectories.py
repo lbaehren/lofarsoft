@@ -1,6 +1,6 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
-#                                             Pulsar.pipeline.support.rfiPlot.py
+#                                      Pulsar.pipeline.support.rfiDirectories.py
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------

@@ -6,14 +6,20 @@
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
+#
+# a couple of explicit ufuncs 
+from os.path import splitext, basename
 
-import os,string,math
+import os, string, math
 import fnmatch, glob
+
+#PULP libs
 import pardata
+
 
 class FoldingData():
     """ 
-    rspBands is a list of lists of RSP groups, one list for each grouping
+    rspLists is a list of lists of RSP groups, one list for each grouping
     based on splitting of a full observation subband set by <filefactor>.
     These lists will be used to determine various frequency parameters for
     a given RSP group.
@@ -134,17 +140,16 @@ class FoldingData():
             self.BW     = self.numchan * self.chan_width
             self.dt     = par.integrationSteps / (1000000 * self.chan_width)
             self.N      = self.__getNBinVal(rspDir)
-            
+            self.basenm = basename(splitext(splitext(outFile)[0])[0])
+
             self.__buildInf()
             self.writeInf(outFile)
 
             par.subbandFirst = par.subbandFirst + nRSPFiles
             par.subbandLast  = par.subbandLast  + nRSPFiles
 
-
-
         # _______________________________________ #
-        #        Handle the RSPA directory        #
+        #            Handle RSPA                  #
 
         # reset initial par-inf values ...
 
@@ -157,10 +162,14 @@ class FoldingData():
             self.lofreq  = reset_lowerBandEdge + (float(reset_subbandFirst)- 0.5) * subband_width
             self.numchan = len(nRSPAFiles)
             self.BW      = self.numchan * self.chan_width
+            self.basenm  = basename(splitext(splitext(outAFile)[0])[0])
 
             self.__buildInf()
             self.writeInf(outAFile)
         else: pass
+
+        # _______________________________________ #
+        #             End handle RSPA             #
 
         return
 

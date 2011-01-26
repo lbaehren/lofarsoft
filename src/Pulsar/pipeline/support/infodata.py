@@ -1,4 +1,11 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
+
+#                                                          LOFAR PULSAR PIPELINE
+#
+#                                            Pulsar.pipeline.support.infodata.py
+#                                                          Ken Anderson, 2009-10
+#                                                            k.r.anderson@uva.nl
+# ------------------------------------------------------------------------------
 
 import os,string, math
 import pardata

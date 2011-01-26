@@ -1,6 +1,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                 Beam-formed data conversion (bf2presto) recipe
+#                                    Pulsar.pipeline.recipes.master.bf2presto.py
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------

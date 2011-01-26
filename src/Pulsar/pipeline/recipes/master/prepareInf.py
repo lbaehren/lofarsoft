@@ -1,6 +1,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                    Initialize prepfold run (prepareInf) recipe
+#                                   Pulsar.pipeline.recipes.master.prepareInf.py
 #                                                          Ken Anderson, 2009-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------

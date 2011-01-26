@@ -1,6 +1,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
-#                                              pipeline.recipes.master.bundle.py
+#                          Gather, tar select data products (bundleFiles) recipe
+#                                         pipeline.recipes.master.bundleFiles.py
 #                                                          Ken Anderson, 2010-11
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------

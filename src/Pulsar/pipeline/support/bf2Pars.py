@@ -42,18 +42,16 @@ class bf2Pars():
 
     """
 
-    __module__ = __name__
-
     def __init__(self, env ):
         self.obsid  = env.obsid
         self.pulsar = env.pulsar
         self.arch   = env.arch
 
         # cmd line args, switches, flags, ...
-        self.sb_base  = '1'         # -f  base Subband number
+        self.sb_base  = '0'         # -f  base Subband number
         self.array    = ''          #     "HBA", "LBA", etc.
         self.channels = ''          # -c  n channels 
-        self.down     = ''          # -n  n samples per Stokes
+        self.down     = ''          # -n  n int steps per Stokes
         self.magicNum = ''          # 
         self.Nsamples = ''          # -N  n samples per block (def 768)
         self.RSPlist  = []          # bf2preseto file arguments 
@@ -91,42 +89,70 @@ class bf2Pars():
 
         -- New parameters for new processing modes
 
-        INCOHERENTSTOKES 'OLAP.outputIncoherentStokes'
-        COHERENTSTOKES   'OLAP.outputCoherentStokes'
-        2ND TRANSPOSE    'OLAP.BeamsAreTransposed'
-        STOKES_TYPE      'OLAP.outputIncoherentStokes'
-        FLYSEYE          'OLAP.PencilInfo.flysEye'
-        NBEAMS           'OLAP.storageStationNames'
+        NR_BEAMS         'Observation.nrBeams'         # <int>, N incoherent beams
+        INCOHERENTSTOKES 'OLAP.outputIncoherentStokes' # <bool>,true or false
+        COHERENTSTOKES   'OLAP.outputCoherentStokes'   # <bool>,true or false
+        2ND TRANSPOSE    'OLAP.BeamsAreTransposed'     # <bool>,true or false
+        STOKES_TYPE      'OLAP.outputIncoherentStokes' # <bool>,true or false
+        FLYSEYE          'OLAP.PencilInfo.flysEye'     # <bool>,true or false
+        NBEAMS           'OLAP.storageStationNames'    # <list>
+
+
+        The parameter `OLAP.storageStationNames' will have a value, the form of
+        which is written as a list like,
+
+        [CS001HBA0,CS001HBA1,CS002HBA0,CS002HBA1,CS003HBA0, ...]
+        
+        This will pass in as string that will need to be listified.
 
         """
 
         pars = open(self.parsetName).readlines()
+        print "PARSET: ",self.parsetName
         for line in pars:
-
-#             if ('OLAP.BeamsAreTransposed' in line):
-#                 self.transpose2 = line.split('=')[1].strip()
-#                 continue
-#             else: self.transpose2 = False
-
             if ('OLAP.outputIncoherentStokes' in line):
-                incoherentstokes = line.split('=')[1].strip()
+                print "Found! OLAP.outputIncoherentStokes."
+                incoherentstokes = self.__extractValue(line)
                 if incoherentstokes == 'True':
                     self.stokes = 'incoherentstokes'
+                    continue
+            if ('OLAP.Stokes.integrationSteps' in line):
+                print "Found! OLAP.Stokes.integrationSteps"
+                self.down = self.__extractValue(line)
+                continue
+            if ('OLAP.CNProc.integrationSteps' in line):
+                print "Found! OLAP."
+                self.magicNum = self.__extractValue(line)
+                continue
+
+            # `Observation.*' parameters ...
 
             if ('Observation.bandFilter' in line):
+                print "Found! OLAP.BeamsAreTransposed"
                 self.array = line.split('=')[1].split('_')[0].strip()
                 continue
             if ('Observation.channelsPerSubband' in line):
-                self.channels = line.split('=')[1].strip()
+                print "Found! OLAP.BeamsAreTransposed"
+                self.channels = self.__extractValue(line)
                 continue
-            if ('OLAP.Stokes.integrationSteps' in line):
-                self.down = line.split('=')[1].strip()
+
+            # The 'BeamsAreTransposed' boolean parameter may or may not be in the 
+            # parset.
+
+            if ('OLAP.BeamsAreTransposed' in line):
+                print "found! OLAP.BeamsAreTransposed"
+                self.transpose2 = self.__extractValue(line)
                 continue
-            if ('OLAP.CNProc.integrationSteps' in line):
-                self.magicNum = line.split('=')[1].strip()
+            else:
+                self.transpose2 = False
                 continue
+
             if (self.array and self.channels and self.down and self.magicNum):
+                print "Got all params.",self.array.self.channels,self.down,self.magicNum
                 break
+
+        print "magic Number:",self.magicNum, "\nDOWN:",self.down
+
         self.Nsamples = int(float(self.magicNum)/float(self.down))
         return
 
@@ -141,3 +167,8 @@ class bf2Pars():
             print "Parameter: ",key, "\t= ",self.__dict__[key]
         print "---------------------"
         return
+
+
+    def __extractValue(self, line):
+        return line.split('=')[1].strip()
+        
