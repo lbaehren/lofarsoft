@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.8
+VERSION=2.9
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -1961,9 +1961,16 @@ then
    rm combined.th.png
 fi
 
+if [ -f combined.png ]
+then 
+   echo "WARNING: deleting previous version of results: combined.png"
+   echo "WARNING: deleting previous version of results: combined.png" >> $log
+   rm combined.png
+fi
+
 find ./ -name "*.th.png" -print  > combine_col1.txt
- find ./ -name "*.th.png" -print | sed -e 's/\/incoherentstokes\//_IS_/g' -e 's/\/stokes\//_CS_/g' -e 's/\//_/g' -e 's/^.*_IS/IS/g' -e  's/^.*_CS/CS/g' -e 's/_L20.*//g' -e 's/_RSP._/&\\n/g' > combine_col2.txt
-paste combine_col1.txt combine_col2.txt | awk '{print "-label \""$2"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.th.png"}' > combine_png.sh
+find ./ -name "*.th.png" -print | sed -e 's/\/incoherentstokes\//_IS_/g' -e 's/\/stokes\//_CS_/g' -e 's/\//_/g' -e 's/^.*_IS/IS/g' -e  's/^.*_CS/CS/g' -e 's/_L20.*//g' -e 's/_RSP._/&\\n/g' > combine_col2.txt
+paste combine_col1.txt combine_col2.txt | awk '{print "-label \""$2"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
 rm combine_col1.txt combine_col2.txt
 wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
 if [[ $wc_convert > 0 ]]
@@ -1971,6 +1978,9 @@ then
    chmod 777 combine_png.sh
    cat combine_png.sh >> $log
    ./combine_png.sh
+   convert -scale 200x140-0 combined.png combined.th.png
+   echo "Results:  combined.png (large scale) and combined.th.png (thumbnail for the web summaries)"
+   echo "Results:  combined.png (large scale) and combined.th.png (thumbnail for the web summaries)" >> $log
 else
    echo "No .th.png files were found to combine."
    echo "No .th.png files were found to combine." >> $log
