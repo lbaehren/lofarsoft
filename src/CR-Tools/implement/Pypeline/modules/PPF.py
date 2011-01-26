@@ -61,7 +61,9 @@ class PPF():
             return False
         
         return True
-        
+
+
+
 class iPPF():
     """Class documentation"""
 
@@ -72,15 +74,16 @@ class iPPF():
         # Initialize arrays and values
         weights=cr.hArray(float,[16,1024])
         weights.readdump(weights_filename)
-        
+	
+	
         if weights[0,0]==0.0:
             print "Obtaining inverse PPF coefficient from file"
             # Reading of weights failed
             f=open(cr.LOFARSOFT+'/src/CR-Tools/data/ppf_inv.dat')
             f.seek(0)
-            for i in range(0,1024):
-                for j in range(0,16):
-                    weights[j,i]=float(f.readline())           
+            for i in range(0,16):
+                for j in range(0,1024):
+                    weights[i,j]=float(f.readline())           
             #weights.setDim([16,1024])
             weights.writedump(weights_filename)
         
