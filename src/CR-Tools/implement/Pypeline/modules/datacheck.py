@@ -34,11 +34,13 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
     # test system exists / filesize first
     if not os.path.exists(filename.strip()):
         print 'file not found'
-        return result.update(reason = "File doesn't exist")
+        result.update(reason = "File doesn't exist")
+        return result
     bytesize = os.path.getsize(filename.strip())
     if bytesize < 15 * 1048576:
         print 'File size too small: %d' % bytesize
-        return result.update(reason = format("File size too small: %d") % bytesize)
+        result.update(reason = format("File size too small: %d") % bytesize)
+        return result
 
     crfile = IO.open([filename.strip()])
     crfile.setAntennaset(antennaset)
@@ -52,18 +54,22 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
   #  print crfile["shift"]
     if times.max() - times.min() > 0:
         print 'Error: Timestamps vary across antennas' # redundant
-        return result.update(reason=format("Timestamps don't match, spread = %d seconds") % (dates.max() - dates.min()) )
+        result.update(reason=format("Timestamps don't match, spread = %d seconds") % (dates.max() - dates.min()) )
+        return result
         
     if crfile["sampleFrequency"] != 200e6: 
     # MOVE to integrity check
         print 'Error: wrong sampling frequency: %d; needs to be 200e6' % crfile["sampleFrequency"]
-        return result.update(reason=format("wrong sampling frequency %d") % crfile["sampleFrequency"])
+        result.update(reason=format("wrong sampling frequency %d") % crfile["sampleFrequency"])
+        return result
     
     if crfile["Filesize"] < 2 * 65536:
-        return result.update(reason=format("file size too small: %d") % crfile["Filesize"])
+        result.update(reason=format("file size too small: %d") % crfile["Filesize"])
+        return result
     result.update(datalength = crfile["Filesize"])    
     if crfile["nofAntennas"] < 64: # arbitrary choice...
-        return result.update(reason=format("not enough antennas: %d") % crfile["nofAntennas"])
+        result.update(reason=format("not enough antennas: %d") % crfile["nofAntennas"])
+        return result
     result.update(nofAntennas = crfile["nofAntennas"])
 
     result.update(success=True, file=crfile)
