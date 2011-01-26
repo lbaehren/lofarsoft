@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.7
+VERSION=2.8
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -1024,8 +1024,9 @@ do
 #                 cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/incoherentstokes/RSP$ii/*sub[0-9]* ${location}/${STOKES}/RSP$ii/
 			     bf2presto_pid[$ii]=$!  
               else # [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
-			     echo bf2presto8 ${COLLAPSE} -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${pulsar_name}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> $log  
-			     bf2presto8 ${COLLAPSE} -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}/RSP$ii"/"${pulsar_name}_${OBSID}"_RSP"$ii `cat ${STOKES}/"RSP"$ii"/RSP"$ii".list"` >> ${STOKES}"/RSP"$ii"/bf2presto_RSP"$ii".out" 2>&1 &
+                 cd ${location}/${STOKES}/RSP$ii/
+			     echo bf2presto8 ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+			     bf2presto8 ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
 #A2test
 #                 cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/incoherentstokes/RSP$ii/*sub[0-9]* ${location}/${STOKES}/RSP$ii/
 			     bf2presto_pid[$ii]=$!  
@@ -1078,6 +1079,7 @@ do
 
 #	if (( $flyseye == 0 ))
 #	then
+
 		for ii in $num_dir
 		do
 		   echo "Waiting for RSP$ii bf2presto to finish"
@@ -1093,6 +1095,16 @@ do
 		echo "Done bf2presto8 (splits)" >> $log
 		date
 		date >> $log
+		
+	    if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 0 ]] && [[ $nrBeams == 1 ]]
+	    then
+	       # move the beam_0 data out one directory
+	       cd ${location}/${STOKES}/RSP0/beam_0
+	       mv * ../
+	       cd ../
+	       rmdir beam_0
+	    fi
+
 	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
 	# Calculating the number of samples to be passed to inf-file
@@ -1188,9 +1200,16 @@ do
 				
 				if (( $nrBeams == 1 ))
 				then
-			        echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset >> $log
-			        python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
-			        status=$?	
+                   if [[ $STOKES != "stokes" ]]
+                   then
+				        echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset >> $log
+				        python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+				        status=$?	
+	                else 
+					    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset >> $log
+					    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset
+				        status=$?	
+                    fi
 			        
 					if [ $status -ne 0 ]
 					then
