@@ -101,20 +101,20 @@ namespace CR { // Namespace CR -- begin
       erg.define("latMaxDist",0.);
       erg.define("NlateralAntennas",ant);
       erg.define("fitDistance",fitDistance);
-      
+
       //for the dispersion fit values
       erg.define("dispersion_RMS_perc",0.);
       erg.define("dispersion_Mean_perc",0.);
 
       cout << "\nFitting lateral distribution for data (and simulation)..." << endl;
-      
+
       // create arrays for plotting and fitting LOPES data and REAS sim
       unsigned int Nant = pulsesRec.size();
       double fieldStr[Nant],distance[Nant],fieldStrSim[Nant],distanceSim[Nant];
       double fieldStrEr[Nant],distanceEr[Nant],fieldStrErSim[Nant],distanceErSim[Nant];
       int antennaNumber[Nant];
       int antID[Nant];
-      
+
       // fit simulation only, if values are submitted
       bool fitSim = false;
       if (pulsesSim.size() > 0)
@@ -136,22 +136,22 @@ namespace CR { // Namespace CR -- begin
             cerr << "\nlateralDistribution::fitLateralDistribution: antenna IDs of data and simulation do not match. Skipping...\n" << endl;
             //return Record();
             continue; //this antennas are not counted!
-          }         
+          }
           fieldStrSim[ant] = pulsesSim[antID[ant]].height;
           fieldStrErSim[ant] = pulsesSim[antID[ant]].heightError;
           distanceSim[ant] = pulsesSim[antID[ant]].dist;
           distanceErSim[ant] = pulsesSim[antID[ant]].disterr;
         }
-        
+
         if (distance[ant] == 0.)
           cout << "\nlateralDistribution::fitLateralDistribution: WARNING: lateral distance of 0 m. \n" << endl;
 
-        ++ant; // increase counter  
+        ++ant; // increase counter
       }
 
       // consistancy check
       if (ant != Nant)
-        cerr << "lateralDistribution::fitLateralDistribution: Nant != number of antenna values\n" << endl; 
+        cerr << "lateralDistribution::fitLateralDistribution: Nant != number of antenna values\n" << endl;
 
       Double_t fieldMax=3.5;
       Double_t fieldMin=0;
@@ -184,7 +184,7 @@ namespace CR { // Namespace CR -- begin
 
       cout << "\nAntennas in the Plot/Fit (no cuts applied): " << ant << endl;
       erg.define("NlateralAntennas",ant);
-      
+
       // calculate mean distance of the remaining antennas
       double latMeanDist = 0;
       double latMinDist = 0;
@@ -193,7 +193,7 @@ namespace CR { // Namespace CR -- begin
         latMeanDist = TMath::Mean(ant, distance);
         latMinDist = *min_element(distance, distance + ant);
         latMaxDist = *max_element(distance, distance + ant);
-      }  
+      }
       cout << "Mean distance (data): " << latMeanDist << " m." << endl;
       cout << "Min distance (data): " << latMinDist << " m." << endl;
       cout << "Max distance (data): " << latMaxDist << " m." << endl;
@@ -211,14 +211,14 @@ namespace CR { // Namespace CR -- begin
       label << "Lateral distribution - " << Gt;
       //latPro->SetTitle(label.str().c_str());
       latPro->SetTitle("");
-      latPro->GetXaxis()->SetTitle("distance R [m]"); 
+      latPro->GetXaxis()->SetTitle("distance R [m]");
       latPro->GetYaxis()->SetTitle("field strength #epsilon [#muV/m/MHz]");
       latPro->GetXaxis()->SetTitleSize(0.05);
       latPro->GetXaxis()->SetLimits(0,maxdist*1.1);
       latPro->GetYaxis()->SetTitleSize(0.05);
       latPro->GetYaxis()->SetRange(1,fieldMax*3);
       latPro->GetYaxis()->SetRangeUser(1,fieldMax*3);
-      
+
 
       TGraphErrors *latProSim = new TGraphErrors (ant, distanceSim,fieldStrSim,distanceErSim,fieldStrErSim);
       latProSim->SetFillColor(0);
@@ -226,7 +226,7 @@ namespace CR { // Namespace CR -- begin
       latProSim->SetMarkerColor(2); // red (2) for iron, blue (4) for proton
       latProSim->SetMarkerStyle(kFullSquare);
       latProSim->SetMarkerSize(1.1);
- 
+
       /* Canvas and Plotting */
       TCanvas *c1 = new TCanvas("c1","");
       c1->Range(-18.4356,-0.31111,195.528,2.19048);
@@ -320,7 +320,7 @@ namespace CR { // Namespace CR -- begin
           epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "} [#muV/m/MHz]";
           R0Name = "R_{0} [m]";
         }
-      
+
         // fit exponential
         TF1 *fitfuncExp;
         string fitFunction = "[0]*exp(-(x-"+boost::lexical_cast<string>(fitDistance)+")/[1])";
@@ -352,8 +352,8 @@ namespace CR { // Namespace CR -- begin
              << "R_0    = " << fitfuncExp->GetParameter(1) << "\t +/- " << fitfuncExp->GetParError(1) << "\t m\n"
              << "Chi^2  = " << fitfuncExp->GetChisquare() << "\t NDF " << fitfuncExp->GetNDF() << "\n"
              << endl;
-        
-        if (fitSim) {        
+
+        if (fitSim) {
           cout << "-------- SIMULATIONS ---------"<<endl;
           // define names for statistics
           if (index2 != "") {
@@ -403,10 +403,10 @@ namespace CR { // Namespace CR -- begin
 	plotNameStream.str("");
         plotNameStream << filePrefix << Gt << ".root";
         c1->Print(plotNameStream.str().c_str());
-	
-        // calculate expectet value from fitted function and relative deviation for each point.residual  
+
+        // calculate expectet value from fitted function and relative deviation for each point.residual
         if (false) {
-          double angleToCore[Nant],angleToCoreErr[Nant],deviation[Nant],deviationErr[Nant];           
+          double angleToCore[Nant],angleToCoreErr[Nant],deviation[Nant],deviationErr[Nant];
           ant = 0;
           cout << "Antenna\t distance \t expected \t measured \t deviation" << endl;
           for (map <int, PulseProperties>::iterator it=pulsesRec.begin(); it != pulsesRec.end(); ++it)
@@ -430,7 +430,7 @@ namespace CR { // Namespace CR -- begin
               if (deviation[ant] < -100)
                 deviation[ant] = -100;
             }
-            
+
           // make plot of deviation
           TGraphErrors *latDev = new TGraphErrors (ant, angleToCore,deviation,angleToCoreErr,deviationErr);
           latDev->SetFillColor(4);
@@ -441,13 +441,13 @@ namespace CR { // Namespace CR -- begin
           stringstream label;
           label << "Lateral deviations - " << Gt;
           latDev->SetTitle(label.str().c_str());
-          latDev->GetXaxis()->SetTitle("angle in radians"); 
+          latDev->GetXaxis()->SetTitle("angle in radians");
           latDev->GetYaxis()->SetTitle("deviation in percent");
           latDev->GetXaxis()->SetTitleSize(0.05);
           latDev->GetYaxis()->SetRange(-105,105);
           latDev->GetYaxis()->SetTitleSize(0.05);
           latDev->GetXaxis()->SetRange(-3.2,3.2);
-          
+
           c1->Clear();
           c1->SetLogy(0);
           latDev->SetMinimum(-105);
@@ -457,7 +457,7 @@ namespace CR { // Namespace CR -- begin
           latDev->GetXaxis()->SetRangeUser(-3.2,3.2);
           latDev->GetYaxis()->SetRangeUser(-105,105);
           latDev->Draw("AP");
-          
+
           plotNameStream.str("");
           plotNameStream << filePrefix << "dev-" << Gt << ".eps";
           cout << "\nCreating plot: " << plotNameStream.str() << endl;
@@ -471,14 +471,14 @@ namespace CR { // Namespace CR -- begin
 
 
        ///put to true if you need esp_0m and dispersion % values
-       ///dispersion methods to evaluete how good is the fit 
+       ///dispersion methods to evaluete how good is the fit
         if (false) {
 
           ///deviation along the y axix; also the deviation in the ortogonal direction to the fit have been tried but with not so much difference
           double percentDev=0.;
           ant = 0;
 
-          epsilon_0m = fitfuncExp->Eval(0.0);
+          double epsilon_0m = fitfuncExp->Eval(0.0);
           erg.define("epsilon_0m",epsilon_0m);
 
           //hist for the dispersion:
@@ -494,7 +494,7 @@ namespace CR { // Namespace CR -- begin
            h1->SetLineWidth(3);
            h1->SetLineStyle(11);
            //h1->GetYaxis()->SetRangeUser(0,5);
-           h1->GetYaxis()->SetTitle("deviation % on y"); 
+           h1->GetYaxis()->SetTitle("deviation % on y");
 
            /* statistic box of fit */
            TPaveStats *gaussInfo = new TPaveStats(0.62,0.84,0.98,0.99,"brNDC");
@@ -540,7 +540,7 @@ namespace CR { // Namespace CR -- begin
 
           gaussInfo->Draw();
           stringstream plotNameStream2;
-          plotNameStream2 << "eps100-ydev-perc-" << Gt << ".eps"; 
+          plotNameStream2 << "eps100-ydev-perc-" << Gt << ".eps";
           c2->Print(plotNameStream2.str().c_str());
 
           erg.define("dispersion_RMS_perc",h1->GetRMS());
@@ -550,8 +550,8 @@ namespace CR { // Namespace CR -- begin
 
         fitfuncExp->Delete();
         //delete fitfuncExp;
-      }  
-      
+      }
+
       ptstats->Delete();
       ptstatsS->Delete();
       easstats->Delete();
@@ -582,7 +582,7 @@ namespace CR { // Namespace CR -- begin
     Record erg;
     try {
       cout << "\nPlotting time vs distance" << endl;
-      
+
       // predefine fields for fit results
       erg.define("latTime1D_Rcurv",0.);
       erg.define("latTime1D_sigRcurv",0.);
@@ -590,7 +590,7 @@ namespace CR { // Namespace CR -- begin
       erg.define("latTime2D_Rcurv",0.);
       erg.define("latTime2D_sigRcurv",0.);
       erg.define("latTime2D_chi2NDF",0.);
-      
+
       erg.define("latTime1D_ConeRho",0.);
       erg.define("latTime1D_sigConeRho",0.);
       erg.define("latTime1D_Conechi2NDF",0.);
@@ -602,7 +602,7 @@ namespace CR { // Namespace CR -- begin
       unsigned int Nant = pulsesRec.size();
       Double_t timeVal  [Nant], distance  [Nant]; // time value at antenna position projected to shower plane
       Double_t timeValEr[Nant], distanceEr[Nant];
-      Double_t timeValUnpro  [Nant], timeValUnproEr [Nant]; // time values at antenna positions 
+      Double_t timeValUnpro  [Nant], timeValUnproEr [Nant]; // time values at antenna positions
       Double_t zshower[Nant],  zshowerEr[Nant];             // z shower coordinate of antenna position
       Double_t timeValSim  [Nant], distanceSim  [Nant];
       Double_t timeValErSim[Nant], distanceErSim[Nant];
@@ -611,7 +611,7 @@ namespace CR { // Namespace CR -- begin
       int antennaNumber [Nant];
       int antID         [Nant];
 
-      
+
       // fit simulation only, if values are submitted
       bool fitSim = false;
       if (pulsesSim.size() > 0)
@@ -621,7 +621,7 @@ namespace CR { // Namespace CR -- begin
       unsigned int ant = 0;  // counting antennas with pulse information
       for (map <int, PulseProperties>::iterator it=pulsesRec.begin(); it != pulsesRec.end(); ++it) {
         // Pulse time relative to shower plane and relative to CC time
-        // = geom. delay from beam forming (as it is substracted during analysis) + 
+        // = geom. delay from beam forming (as it is substracted during analysis) +
         // time of pulse in trace (- CC beam time, to get an average of 0).
         timeVal       [ant] = (*it).second.distZ / lightspeed * 1e9,    // defined in Math/Constants.h
         timeVal       [ant] += (*it).second.geomDelay;
@@ -638,14 +638,14 @@ namespace CR { // Namespace CR -- begin
         distanceEr    [ant] = (*it).second.disterr;
         antennaNumber [ant] = (*it).second.antenna;
         antID         [ant] = (*it).second.antennaID;
-        
+
         //for simulation
         if (fitSim) {
           if (pulsesSim[antID[ant]].antennaID != antID[ant]) { // consistency check
             cerr << "\nlateralDistribution::lateralTimeDistribution: antenna IDs of data and simulation do not match. Skipping...\n" << endl;
             //return Record();
             continue; //this antennas are not counted!
-          }         
+          }
           timeValSim[ant] = pulsesSim[antID[ant]].time + pulsesSim[antID[ant]].distZ / lightspeed * 1e9;;
           timeValErSim[ant] = pulsesSim[antID[ant]].timeError;
           distanceSim[ant] = pulsesSim[antID[ant]].dist;
@@ -658,19 +658,19 @@ namespace CR { // Namespace CR -- begin
           zshowerSim[ant] = pulsesSim[antID[ant]].distZ;
           zshowerErSim[ant] = pulsesSim[antID[ant]].distZerr;
         }
-        
+
         ++ant;
       }
 
       // consistancy check
       if (ant != Nant)
-        cerr << "lateralDistribution::lateralTimeDistribution: Nant != number of antenna values\n" << endl; 
+        cerr << "lateralDistribution::lateralTimeDistribution: Nant != number of antenna values\n" << endl;
 
       // find plot/fit range
       Double_t timeMax=0;
       Double_t timeMin=0;
       Double_t maxdist=0;
-      Double_t mindist=0;      
+      Double_t mindist=0;
       timeMin = *min_element(timeVal, timeVal + Nant);
       timeMax = *max_element(timeVal, timeVal + Nant);
       mindist = *min_element(distance, distance + Nant);
@@ -695,7 +695,7 @@ namespace CR { // Namespace CR -- begin
       }
       // add error to neccessary plot range
       if (timeMin>0)
-        timeMin = 0;      
+        timeMin = 0;
       timeMin -= *max_element(timeValEr, timeValEr + Nant)+10.;
       timeMax += *max_element(timeValEr, timeValEr + Nant);
 
@@ -706,8 +706,8 @@ namespace CR { // Namespace CR -- begin
       if (ant > 0)
         latMeanDist = Mean(ant, distance);
       cout << "Mean distance of antennas: " << latMeanDist << " m." << endl;
-   
-      TGraphErrors *timePro = 
+
+      TGraphErrors *timePro =
         new TGraphErrors(ant, distance, timeVal, distanceEr, timeValEr);
       double offsetY = 40;
       if (fitSim) {
@@ -717,9 +717,9 @@ namespace CR { // Namespace CR -- begin
         //timeMax -= 22;
         timeMin += 13;
         timeMax -= 26;
-      }  
+      }
       double offsetX = 20;
-      
+
       timePro->SetFillColor(0);
       timePro->SetLineColor(1); // normally blue (4), in comparison to simulation black (1)
       timePro->SetMarkerColor(1); // normally blue (4), in comparison to simulation black (1)
@@ -729,14 +729,14 @@ namespace CR { // Namespace CR -- begin
       label << "radius of curvature - " << Gt;
       //timePro->SetTitle(label.str().c_str());
       timePro->SetTitle("");
-      timePro->GetXaxis()->SetTitle("distance R [m]"); 
+      timePro->GetXaxis()->SetTitle("distance R [m]");
       timePro->GetYaxis()->SetTitle("time t [ns]");
       timePro->GetXaxis()->SetTitleSize(0.05);
       timePro->GetYaxis()->SetTitleSize(0.05);
       timePro->GetYaxis()->SetRangeUser(timeMin, timeMax + offsetY);
-      timePro->GetXaxis()->SetLimits(0, maxdist + offsetX);     
-      
-      TGraph2DErrors *timePro2D = 
+      timePro->GetXaxis()->SetLimits(0, maxdist + offsetX);
+
+      TGraph2DErrors *timePro2D =
         new TGraph2DErrors(ant, distance, zshower, timeValUnpro, distanceEr, zshowerEr, timeValUnproEr);
       timePro2D->SetFillColor(0);
       timePro2D->SetLineColor(4);
@@ -744,16 +744,16 @@ namespace CR { // Namespace CR -- begin
       timePro2D->SetMarkerStyle(kFullCircle);
       timePro2D->SetMarkerSize(1.1);
       timePro2D->SetTitle("");
-      timePro2D->GetXaxis()->SetTitle("distance R [m]"); 
-      timePro2D->GetYaxis()->SetTitle("z_shower [m]"); 
+      timePro2D->GetXaxis()->SetTitle("distance R [m]");
+      timePro2D->GetYaxis()->SetTitle("z_shower [m]");
       timePro2D->GetZaxis()->SetTitle("time t [ns]");
       timePro2D->GetXaxis()->SetTitleSize(0.05);
       timePro2D->GetYaxis()->SetTitleSize(0.05);
       timePro2D->GetZaxis()->SetTitleSize(0.05);
       //timePro2D->GetZaxis()->SetRangeUser(timeMin, timeMax + offsetY);
-      //timePro2D->GetXaxis()->SetRangeUser(mindist - offsetX, maxdist + offsetX);            
-      
-      TGraphErrors *timeProSim = 
+      //timePro2D->GetXaxis()->SetRangeUser(mindist - offsetX, maxdist + offsetX);
+
+      TGraphErrors *timeProSim =
         new TGraphErrors (ant, distanceSim, timeValSim, distanceErSim, timeValErSim);
       timeProSim->SetFillColor(1);
       timeProSim->SetLineColor(4); // 2 (red) for iron, 4 (blue) for proton
@@ -761,9 +761,9 @@ namespace CR { // Namespace CR -- begin
       timeProSim->SetMarkerStyle(kFullSquare);
       timeProSim->SetMarkerSize(1.1);
       timeProSim->GetYaxis()->SetRangeUser(timeMin, timeMax + offsetY);
-      timeProSim->GetXaxis()->SetLimits(0, maxdist + offsetX);     
+      timeProSim->GetXaxis()->SetLimits(0, maxdist + offsetX);
 
-      TGraph2DErrors *timePro2DSim = 
+      TGraph2DErrors *timePro2DSim =
         new TGraph2DErrors (ant, distanceSim, zshowerSim, timeValUnproSim, distanceErSim, zshowerErSim, timeValUnproErSim);
       timePro2DSim->SetFillColor(1);
       timePro2DSim->SetLineColor(2);
@@ -864,9 +864,9 @@ namespace CR { // Namespace CR -- begin
         curvNameS = "r_{c} [m]";
         coneNameS = "#rho [rad]";
       }
-      
+
       /* FIT */
-      if (ant >= 3) {           
+      if (ant >= 3) {
         // spherical fit (1 and 2 dimensional)
         TF1 *fitFunc;
         TF2 *fitFunc2D;
@@ -898,9 +898,9 @@ namespace CR { // Namespace CR -- begin
              << "Rcurv(2D) = " << fitFunc2D->GetParameter(0) << "\t +/- " << fitFunc2D->GetParError(0) << " m\n"
              << "Chi^2 (2D) = " << fitFunc2D->GetChisquare() << "\t NDF " << fitFunc2D->GetNDF() << "\n"
              << endl;
-             
+
         if (fitSim) {
-          cout << "-------- SIMULATIONS ---------"<<endl;          
+          cout << "-------- SIMULATIONS ---------"<<endl;
           TF1 *fitFuncS;
           TF2 *fitFuncS2D;
           fitFuncS=new TF1("fitFuncS","3.335640952*(sqrt([0]**2+x**2)-[0])",0,1000);
@@ -911,7 +911,7 @@ namespace CR { // Namespace CR -- begin
           fitFuncS->SetFillStyle(0);
           fitFuncS->SetLineWidth(2);
           fitFuncS->SetLineColor(4);  // 2 (red) for iron, 4 (blue) for proton
-        
+
           cout << "------------------------------"<<endl;
           timePro2DSim->Fit(fitFuncS2D, "", "");
           fitFuncS->SetParameter(1,fitFuncS2D->GetParameter(1));
@@ -942,7 +942,7 @@ namespace CR { // Namespace CR -- begin
         plotNameStream << filePrefix << "sphere-" << Gt <<".root";
         c1->Print(plotNameStream.str().c_str());
         fitFunc->Delete();
-        
+
         // fit cone (one and two dimensional)
         TF1 *fitFuncCone;
         TF2 *fitFuncCone2D;
@@ -955,7 +955,7 @@ namespace CR { // Namespace CR -- begin
         //fitFuncCone2D->FixParameter(1,0);
         //fitFunc->FixParameter(1,1e9/lightspeed); // = 3.335640952
         fitFuncCone2D->SetParameter(0,0);
-        
+
         cout << "------------------------------"<<endl;
         timePro2D->Fit(fitFuncCone2D, "", "");
         fitFuncCone->SetParameter(0,fitFuncCone2D->GetParameter(0));
@@ -970,16 +970,16 @@ namespace CR { // Namespace CR -- begin
         erg.define("latTime2D_sigConeRho",fitFuncCone2D->GetParError(0));
         erg.define("latTime2D_Conechi2NDF",fitFuncCone2D->GetChisquare()/double(fitFuncCone2D->GetNDF()));
         cout << "\nResults of cone fit (data)\n"
-             << "Rho   (1D) = " << fitFuncCone->GetParameter(0)*180./3.14159 
+             << "Rho   (1D) = " << fitFuncCone->GetParameter(0)*180./3.14159
              << "\t +/- " << fitFuncCone->GetParError(0)*180./3.14159 << " °\n"
              //<< "offset(1D) = " << fitFuncCone->GetParameter(1) << "\t +/- " << fitFuncCone->GetParError(1) << " ns\n"
              << "Chi^2 (1D) = " << fitFuncCone->GetChisquare() << "\t NDF " << fitFuncCone->GetNDF() << "\n"
-             << "Rho   (2D) = " << fitFuncCone2D->GetParameter(0)*180./3.14159 
+             << "Rho   (2D) = " << fitFuncCone2D->GetParameter(0)*180./3.14159
              << "\t +/- " << fitFuncCone2D->GetParError(0)*180./3.14159 << " °\n"
              //<< "offset(2D) = " << fitFuncCone2D->GetParameter(1) << "\t +/- " << fitFuncCone2D->GetParError(1) << " ns\n"
              << "Chi^2 (2D) = " << fitFuncCone2D->GetChisquare() << "\t NDF " << fitFuncCone2D->GetNDF() << "\n"
              << endl;
-             
+
         if (fitSim) {
           cout << "-------- SIMULATIONS ---------"<<endl;
           TF1 *fitFuncConeS;
@@ -1000,7 +1000,7 @@ namespace CR { // Namespace CR -- begin
           fitFuncConeS->SetFillStyle(0);
           fitFuncConeS->SetLineWidth(2);
           fitFuncConeS->SetLineColor(4); // red (2) for iron, blue (4) for proton
-          
+
           cout << "------------------------------"<<endl;
           timePro2DSim->Fit(fitFuncConeS2D, "", "");
           fitFuncConeS->SetParameter(0,fitFuncConeS2D->GetParameter(0));
@@ -1019,11 +1019,11 @@ namespace CR { // Namespace CR -- begin
           erg.define("latTime2D_sigConeOffset_sim",fitFuncConeS2D->GetParError(1));
           erg.define("latTime2D_Conechi2NDF_sim",fitFuncConeS2D->GetChisquare()/double(fitFuncConeS2D->GetNDF()));
           cout << "\nResults of cone fit (SIMULATION)\n"
-             << "Rho   (1D) = " << fitFuncConeS->GetParameter(0)*180./3.14159 
+             << "Rho   (1D) = " << fitFuncConeS->GetParameter(0)*180./3.14159
              << "\t +/- " << fitFuncConeS->GetParError(0)*180./3.14159 << " °\n"
              << "offset(1D) = " << fitFuncConeS->GetParameter(1) << "\t +/- " << fitFuncConeS->GetParError(1) << " ns\n"
              << "Chi^2 (1D) = " << fitFuncConeS->GetChisquare() << "\t NDF " << fitFuncConeS->GetNDF() << "\n"
-             << "Rho   (2D) = " << fitFuncConeS2D->GetParameter(0)*180./3.14159 
+             << "Rho   (2D) = " << fitFuncConeS2D->GetParameter(0)*180./3.14159
              << "\t +/- " << fitFuncConeS2D->GetParError(0)*180./3.14159 << " °\n"
              << "offset(2D) = " << fitFuncConeS2D->GetParameter(1) << "\t +/- " << fitFuncConeS2D->GetParError(1) << " ns\n"
              << "Chi^2 (2D) = " << fitFuncConeS2D->GetChisquare() << "\t NDF " << fitFuncConeS2D->GetNDF() << "\n"
@@ -1043,7 +1043,7 @@ namespace CR { // Namespace CR -- begin
       } else {
         cout<<"No fit was done, because less than 3 antennas are 'good':\n";
       }
-      
+
       easstats->Delete();
       ptstats->Delete();
       // ptstatsS->Delete();

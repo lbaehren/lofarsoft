@@ -28,7 +28,6 @@
 
 #include "core.h"
 
-
 // ========================================================================
 //
 //  Implementation
@@ -106,6 +105,7 @@ bool stringToLower(std::string& ioString)
   return status;
 }
 
+
 /*!
   \brief Convert a string to uppercase
 
@@ -123,3 +123,52 @@ bool stringToUpper (std::string& ioString)
 
   return status;
 }
+
+
+/*!
+  \brief Split a string with delimiter characters into multiple pieces.
+
+  \param str -- Input strings.
+
+  \return substrings -- Returns vector with substrings.
+
+  The delimiter characters are space, comma and tab.
+*/
+vector<HString> stringSplit(const HString& str_const)
+{
+  HString delim(" ,\t"); // Delimiter characters.
+
+  return stringSplit(str_const, delim);
+}
+
+
+/*!
+  \brief Split a string with delimiter characters into multiple pieces.
+
+  \param str -- Input strings.
+  \param delim -- String containing delimiter characters.
+
+  \return substrings -- Returns vector with substrings.
+*/
+vector<HString> stringSplit(const HString& str_const, const HString& delim)
+{
+  vector<HString> result;
+
+  HString str(str_const);
+  size_t pos = str.find_first_of(delim);
+
+  while ( pos != str.npos ) {
+    if ( pos > 0 ) {
+      result.push_back(str.substr(0,pos));
+    }
+    str = str.substr(pos+1);
+    pos = str.find_first_of(delim);
+  }
+
+  if (str.length() > 0) {
+    result.push_back(str);
+  }
+
+  return result;
+}
+

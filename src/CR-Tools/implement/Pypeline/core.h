@@ -483,6 +483,8 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
 
 bool stringToLower(std::string& ioString);
 bool stringToUpper(std::string& ioString);
+vector<HString> stringSplit(const HString& str_const);
+vector<HString> stringSplit(const HString& str_const, const HString& delim);
 
 
 // ========================================================================

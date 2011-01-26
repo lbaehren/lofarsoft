@@ -42,7 +42,7 @@
 #include "core.h"
 #include "mVector.h"
 #include "mIO.h"
-
+#include "mMath.h"
 
 // ========================================================================
 //
@@ -821,7 +821,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
   //  char line(str.c_str())
   //  string word;
   HInteger n(0);
-  std::istringstream sfile(str); 
+  std::istringstream sfile(str);
   while (!sfile.eof()) {
     //    fscanf(s,"%s",word);
     fscanf(sfile,"%s",word);
@@ -834,17 +834,23 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
 
 //inline vector<HString> hSplitString(HString s){return hSplitString(s.c_str());}
 
-vector<HString> hSplitString(char * str){
-  vector<HString> out;
-  char * pch;
-  pch = strtok (str," ,\t");
-  while (pch != NULL)
-    {
-      out.push_back(pch); 
-      pch = strtok (NULL, " ,\t");
-    }
-  return out;
-}
+// vector<HString> hSplitString(char * str){
+//   vector<HString> out;
+//   char * pch;
+//   pch = strtok (str," ,\t");
+//   while (pch != NULL)
+//     {
+//       out.push_back(pch);
+//       pch = strtok (NULL, " ,\t");
+//     }
+//   return out;
+// }
+
+//vector<HString> hSplitString(char* str)
+
+
+// To be moved to header file.
+
 
 
 //-----------------------------------------------------------------------
@@ -886,29 +892,51 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
   HInteger nskip(skiplines);
   HInteger linesread(0);
   HString line;
-  IterI col;
-  Iter it(vec);
+  IterI col_it;
+  Iter vec_it(vec);
+  HInteger col_max = 0;
+
   typedef IterValueType T;
   vector<HString> words;
+
+  // Check column numbers
+  col_it = columns;
+  while (col_it != columns_end) {
+    if (*col_it < 0) {
+      throw PyCR::IndexError("Negative index numbers not allowed");
+    }
+    if (*col_it > col_max) {
+      col_max = *col_it;
+    }
+    ++col_it;
+  }
+
   if (infile){
-    while(getline(infile,line) && (!infile.eof()) && linesread!=nlines && it<vec_end) {
+    while(getline(infile,line) && (!infile.eof()) && (linesread != nlines) && (vec_it < vec_end)) {
       if (nskip>0) {
 	--nskip;
       } else {
 	++linesread;
-	words=hSplitString(line.c_str()); //Split the line into words separates by whitespaces
-	col=columns;
-	while (col!=columns_end){ //loop over all columns listed in the columns array
-	  if (it<vec_end) {
-	    *it=hfcast<T>(words[*col]); 
-	    ++it;
-	  };
-	  ++col;
-	};
-      };
-    };
+	words = stringSplit(line); //Split the line into words separated by whitespaces
+        if (col_max < (HInteger)words.size()) {
+          col_it = columns;
+          while (col_it != columns_end) { //loop over all columns listed in the columns array
+            if ( vec_it < vec_end) {
+              *vec_it = hfcast<T>(words[*col_it]);
+               ++vec_it;
+            }
+            ++col_it;
+          }
+         } else {
+          // warning: column index out of range for this line: line is skipped
+          cout << "Warning: line " << linesread << "  skipped" << endl;
+        }
+      }
+    }
     infile.close();
-  };
+  } else {
+    throw PyCR::IOError("Unable to open file.");
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

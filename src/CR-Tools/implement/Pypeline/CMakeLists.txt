@@ -142,7 +142,7 @@ foreach (FILE ${PYPELINE_CPP_MODULES})
     PRE_BUILD
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc
     COMMAND ${PYPELINE_PREPROCESSOR_DIR}/hfCheckInterfaceChange.sh ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}
-    COMMENT "Wrapper preprocessing module ${FILE}: Checking interfaces of wrappers"
+#    COMMENT "Wrapper preprocessing module ${FILE}: Checking interfaces of wrappers"
     )
 
 endforeach (FILE ${PYPELINE_CPP_MODULES})

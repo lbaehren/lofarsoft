@@ -209,8 +209,8 @@ using CR::LopesEventIn;
   <br>
   <b>Options ocaisonally needed:</b><br>
     <li>\b CalTablePath     Status: <i>optional</i> - normally not neccessary <br>
-                            The caltables are in $LOFARSOFT/data/LOPES/LOPES-CalTable; the main importance 
-                            of this variable is to locate the LOPES CalTable in case you have put it down 
+                            The caltables are in $LOFARSOFT/data/LOPES/LOPES-CalTable; the main importance
+                            of this variable is to locate the LOPES CalTable in case you have put it down
                             in some non-standard location - otherwise the configuration script will be able
                             to locate it and place the path into the "crtools.h" header file.<br>
     <li>\b RotatePos        Status: <i>for experts</i> - don't touch it<br>
@@ -259,10 +259,10 @@ using CR::LopesEventIn;
                             Time range to search for CC-beam-peak in lateral distribution studies,
                             default is +/- 45 ns.<br>
     <li>\b writeAllAntennas Status: <i>preliminary</i><br>
-                            Writes all antennas (except those flagged in the config file) in the root file, 
+                            Writes all antennas (except those flagged in the config file) in the root file,
                             even the ones flagged during the analysis (with zeros).<br>
     <li>\b writeBadEvents   Status: <i>preliminary</i><br>
-                            Events with a bad reconstruction (e.g. simplex fit crashed) will be written 
+                            Events with a bad reconstruction (e.g. simplex fit crashed) will be written
                             to the root file. Though, detection of bad reconstructions does not work
                             reliable.<br>
     <li>\b calibration      Status: <i>for experts</i><br>
@@ -275,7 +275,7 @@ using CR::LopesEventIn;
                             Event to stop with (stopEvent is included, 0 for all events)<br>
     <li>\b rootCut          Status: <i>preliminary</i> - under test<br>
                             Cut on input eventlist (root files)<br>
-                
+
   <br>
   <b>Other options (for completeness):</b><br>
     <li>\b lateralOutputFile Status: <i>obsolete</i><br>
@@ -297,7 +297,7 @@ using CR::LopesEventIn;
                             SNR cut for the lateral distribution.<br>
                             Caution: This option has no effect at the moment.<br>
     <li>\b lateralTimeCut   Status: <i>switched off</i><br>
-                            Points with a time position more than a certain value away of the CC beam 
+                            Points with a time position more than a certain value away of the CC beam
                             center will be removed from the lateral distribution.<br>
                             Caution: This option has no effect at the moment.<br>
     <li>\b calculateMeanValues Status: <i>preliminary</i><br>
@@ -384,27 +384,27 @@ public:
   virtual bool         bValue()
   {
     cerr<<"Error: calling bValue() on object which is not bool"<<endl;
-    return bDef; 
+    return bDef;
   }
   virtual double       dValue()
   {
     cerr<<"Error: calling dValue() on object which is not double"<<endl;
-    return dDef; 
+    return dDef;
   }
   virtual int          iValue()
   {
     cerr<<"Error: calling iValue() on object which is not int"<<endl;
-    return iDef; 
+    return iDef;
   }
   virtual unsigned int uiValue()
   {
     cerr<<"Error: calling uiValue() on object which is not uint"<<endl;
-    return uiDef; 
+    return uiDef;
   }
   virtual string       sValue()
   {
     cerr<<"Error: calling sValue() on object which is not string"<<endl;
-    return sDef; 
+    return sDef;
   }
   virtual int          getType()                    { return (int)_AnyType; }
 };
@@ -416,7 +416,7 @@ public:
     BoolType(bool value = bDef) { this->value = value; }
 
     virtual bool    bValue     () { return this->value; }
-    virtual bool    setValue   (string value) 
+    virtual bool    setValue   (string value)
     {
         bool result = fromString<bool>(this->value, value, std::boolalpha);
         this->value = result ? this->value : this->defaultValue;
@@ -436,7 +436,7 @@ public:
     DoubleType(double value = dDef) { this->value = value; }
 
     virtual double  dValue     () { return this->value; }
-    virtual bool    setValue   (string value) 
+    virtual bool    setValue   (string value)
     {
         bool result = fromString<double>(this->value, value, std::scientific);
         this->value = result ? this->value : this->defaultValue;
@@ -466,7 +466,7 @@ public:
         this->value = result ? this->value : this->defaultValue;
         return result;
     }
-    virtual string  errorSetVal() 
+    virtual string  errorSetVal()
     {
         stringstream errorMsg;
         errorMsg << "Value must be 'int' type.";
@@ -526,8 +526,8 @@ public:
         this->value = result ? value : defaultValue;
         return result;
     }
-    virtual string  errorSetVal() 
-    { 
+    virtual string  errorSetVal()
+    {
         stringstream errorMsg;
         errorMsg << "Value must be 'string' type.";
         if(allowedValues.size() > 0) {
@@ -819,10 +819,10 @@ private:
     const static char     commentIndicator = '#';
 };
 // ---------------------------------------------
-// NOTE: classes can be written even more general and therefore allow to perform serializaion and 
+// NOTE: classes can be written even more general and therefore allow to perform serializaion and
 // deserialization totally independent of ROOT library
 
-// NOTE: for the sake of proper architecture design those classes should be put in seperate files (which 
+// NOTE: for the sake of proper architecture design those classes should be put in seperate files (which
 // is rather useless in current design
 
 
@@ -862,7 +862,7 @@ double_t geomag_angle = 0, geomag_angleg = 0;           // geomagnetic angle (KA
 char KRETAver[1024] = "unknown";
 double_t EfieldMaxAbs = 0;                              // maximum of the absolute e-field strength around +/- 15 min
 double_t EfieldAvgAbs = 0;                              // average of the absolute e-field strength around +/- 15 min
- 
+
 char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande reconstruction taken
 
 
@@ -871,7 +871,7 @@ char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande recon
 /*!
   \brief reads text file which contains configuration information
 
-  \param filenname     -- 
+  \param filenname     --
 
   \return nothing (If an error occurs, the program will continue with the default configuration.)
 */
@@ -896,7 +896,7 @@ void readConfigFile (const string &filename)
    config.addBool("ignoreDistance", true);          	// distance value of the eventlist will be ignored
    config.addBool("simplexFit", true);
    config.addBool("doGainCal", true);		      	// calibration of the electrical fieldstrength
-   config.addBool("doDispersionCal", true);	      	// application of the CalTable PhaseCal values	
+   config.addBool("doDispersionCal", true);	      	// application of the CalTable PhaseCal values
    config.addBool("doDelayCal", true);              	// correction for the general delay of each antenna
    config.addBool("doRFImitigation", true);	      	// supresses narrow band noise ("RFI)
    config.addBool("doFlagNotActiveAnts", true);     	// flags antennas marked as "not active" in the CalTables
@@ -927,8 +927,8 @@ void readConfigFile (const string &filename)
    config.addUint("startRandomSeed", 0);                // random seed for root random number generator
    config.addUint("startEvent", 0);                     // event to start with (other events will be skipped)
    config.addUint("stopEvent", 0);                      // event to stop with (0 means stopping at end of file)
- 
-   IntType* _doTVcal = new IntType(-1);                // 1: yes, 0: no, -1: use default	
+
+   IntType* _doTVcal = new IntType(-1);                // 1: yes, 0: no, -1: use default
    _doTVcal->addAllowedValue(1);
    _doTVcal->addAllowedValue(0);
    _doTVcal->addAllowedValue(-1);
@@ -958,14 +958,14 @@ void readConfigFile (const string &filename)
      both_pol = true;
    else
      both_pol = false;
-     
+
    if(config["polarization"]->sValue() == "THREE")
      three_pol = true;
    else
      three_pol = false;
 
-   // set random seed to start value  
-   randomSeed = config["startRandomSeed"]->uiValue();  
+   // set random seed to start value
+   randomSeed = config["startRandomSeed"]->uiValue();
 }
 
 
@@ -1021,7 +1021,7 @@ bool getEventFromEventlist (const string &eventfilelistname)
 
     // check if file is still good
     if (!(eventfilelist.good())) {
-      cout << "\nFile \"" << eventfilelistname 
+      cout << "\nFile \"" << eventfilelistname
            << "\"is no longer good. Do not worry if this message appears after processing the last event."
            << endl;
       // close file and return to main()
@@ -1040,7 +1040,7 @@ bool getEventFromEventlist (const string &eventfilelistname)
       // check if end of file occured:
       // eventname should contain "", if file is terminated by a new line
       if (eventname == "") {
-        cout << "\nFile \"" << eventfilelistname 
+        cout << "\nFile \"" << eventfilelistname
              << "\"seems to contain no more events."
              << endl;
         // close file and return to main()
@@ -1131,19 +1131,19 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       cout << "Opened file for readin: " << kascadeRootFile << endl;
 
       TTree* readTree = static_cast<TTree*>(inputFile->Get("k;1"));
-      
-      // apply additional cut on selection      
+
+      // apply additional cut on selection
       TCut cut("");
       if (config["rootCut"]->sValue() == "") {
         inputTree = readTree;
       } else {
-        cut += config["rootCut"]->sValue().c_str();       
+        cut += config["rootCut"]->sValue().c_str();
         cout << "Applying cut: " << cut << endl;
         cout << "Cut reduces number of events from " << readTree->GetEntries();
         inputTree = readTree->CopyTree(cut);
         cout << " to " << inputTree->GetEntries() << "." << endl;
-      }  
-      
+      }
+
       if (!inputTree || (inputTree->GetEntries() == 0) ) {
         cerr << "Failed to get tree of file \"" << kascadeRootFile <<"\" or tree is empty." << endl;
         return false;
@@ -1220,12 +1220,12 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       if ((lgE == 0) && (lgEg == 0)) {
         cerr << "call_pipeline:getEventFromKASCADE: ERROR: For this event there is neither KASCADE nor Grande data available!" << endl;
         return false;
-      }  
+      }
       bool grande = config["preferGrande"]->bValue(); // default: if both reconstructions are available
       // if only one reconstruction is available, choose that one
-      if ((lgE != 0) && (lgEg == 0)) 
+      if ((lgE != 0) && (lgEg == 0))
         grande = false;
-      if ((lgE == 0) && (lgEg != 0)) 
+      if ((lgE == 0) && (lgEg != 0))
         grande = true;
 
       // set variables (Grande or KASCADE reconstruction)
@@ -1285,7 +1285,7 @@ bool getEventFromLOPES (const string &lopesRootFile)
     // reset pipeline parameters before readin
     eventname ="";
     azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;
-    
+
     // if this function is called for the first time, then try to open the file
     if (!fileOpen) {
       // open root file with the KASCADE results
@@ -1296,20 +1296,20 @@ bool getEventFromLOPES (const string &lopesRootFile)
       }
 
       cout << "Opened file for readin: " << lopesRootFile << endl;
-      
+
       TTree* readTree = static_cast<TTree*>(inputFile->Get("T;1"));
-      
-      // apply additional cut on selection      
+
+      // apply additional cut on selection
       TCut cut("");
       if (config["rootCut"]->sValue() == "") {
         inputTree = readTree;
       } else {
-        cut += config["rootCut"]->sValue().c_str();       
+        cut += config["rootCut"]->sValue().c_str();
         cout << "Applying cut: " << cut << endl;
         cout << "Cut reduces number of events from " << readTree->GetEntries();
         inputTree = readTree->CopyTree(cut);
         cout << " to " << inputTree->GetEntries() << "." << endl;
-      }  
+      }
 
       if (!inputTree || (inputTree->GetEntries() == 0) ) {
         cerr << "Failed to get tree of file \"" << lopesRootFile <<"\" or tree is empty." << endl;
@@ -1356,7 +1356,7 @@ bool getEventFromLOPES (const string &lopesRootFile)
       inputTree->SetBranchAddress("lgEMario",&lgEMario);
       // use same input reconstruction as previous time
       inputTree->SetBranchAddress("reconstruction",&reconstruction);
-        
+
       // as there is no radius of curvature in the file, set ignoreDistance to true
       if (!config["ignoreDistance"]->bValue()) {
         config["ignoreDistance"]->setValue("TRUE");
@@ -1389,8 +1389,8 @@ bool getEventFromLOPES (const string &lopesRootFile)
       if ((lgE == 0) && (lgEg == 0)) {
         cerr << "call_pipeline:getEventFromLOPES: ERROR: For this event there is neither KASCADE nor Grande data available!" << endl;
         return false;
-      }  
-  
+      }
+
       // set variables (Grande or KASCADE reconstruction, as obtained from root file)
       eventname = string(Eventname);
       if (reconstruction == 'G') {
@@ -1473,6 +1473,7 @@ int main (int argc, char *argv[])
   double epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;    // Epsilon at R=0 (necessary for the cut!)
   double chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;                                // Chi^2/NDF of lateral distribution exponential fit
   double dispersion_RMS_perc = 0, dispersion_Mean_perc = 0;
+  double dispersion_RMS = 0, dispersion_Mean = 0;
 
   // values for lateral distribution of arrival times
   double latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
@@ -1481,14 +1482,14 @@ int main (int argc, char *argv[])
   double latTimeSphere2DRcurv_EW = 0, latTimeSphere2DRcurv_NS = 0, latTimeSphere2DRcurv_VE = 0;
   double latTimeSphere2DSigRcurv_EW = 0, latTimeSphere2DSigRcurv_NS = 0, latTimeSphere2DSigRcurv_VE = 0;
   double latTimeSphere2DChi2NDF_EW = 0, latTimeSphere2DChi2NDF_NS = 0, latTimeSphere2DChi2NDF_VE = 0;
-  
+
   double latTimeCone1DRho_EW = 0, latTimeCone1DRho_NS = 0, latTimeCone1DRho_VE = 0;
   double latTimeCone1DSigRho_EW = 0, latTimeCone1DSigRho_NS = 0, latTimeCone1DSigRho_VE = 0;
   double latTimeCone1DChi2NDF_EW = 0, latTimeCone1DChi2NDF_NS = 0, latTimeCone1DChi2NDF_VE = 0;
   double latTimeCone2DRho_EW = 0, latTimeCone2DRho_NS = 0, latTimeCone2DRho_VE = 0;
   double latTimeCone2DSigRho_EW = 0, latTimeCone2DSigRho_NS = 0, latTimeCone2DSigRho_VE = 0;
   double latTimeCone2DChi2NDF_EW = 0, latTimeCone2DChi2NDF_NS = 0, latTimeCone2DChi2NDF_VE = 0;
-    
+
   map <int,PulseProperties> rawPulsesMap;                // pulse properties of pules in raw data traces
   map <int,PulseProperties> calibPulsesMap;              // pulse properties of pules in calibrated data traces
   bool goodEW = false, goodNS = false, goodVE = false;                // true if reconstruction worked
@@ -1659,7 +1660,7 @@ int main (int argc, char *argv[])
       cerr << "Use --help for more information." << endl;
       return 1;
     }
-    if ( (!(eventfilelistname == "") && !(kascadeRootFile == "")) 
+    if ( (!(eventfilelistname == "") && !(kascadeRootFile == ""))
        ||(!(eventfilelistname == "") && !(lopesRootFile == ""))
        ||(!(lopesRootFile == "") && !(kascadeRootFile == "")) ) {
       cerr << "ERROR: Please set only one input file with the --in, --k and --l option!\n";
@@ -1690,8 +1691,8 @@ int main (int argc, char *argv[])
     roottree->Branch("Eventname",&eventfilename,"Eventname/C");
     double lateralFitDistance = config["LateralFitDistance"]->dValue();
     if (config["lateralDistribution"]->bValue())
-      roottree->Branch("LateralFitDistance",&lateralFitDistance,"LateralFitDistance/D"); 
-  
+      roottree->Branch("LateralFitDistance",&lateralFitDistance,"LateralFitDistance/D");
+
     // the following branches are not used in the calibration mode
     if ( !config["calibrationMode"]->bValue() ) {
       if ((kascadeRootFile == "")&&(lopesRootFile == "")) {
@@ -1788,7 +1789,7 @@ int main (int argc, char *argv[])
           roottree->Branch("latTimeSphere2DRcurv",&latTimeSphere2DRcurv_EW,"latTimeSphere2DRcurv/D");
           roottree->Branch("latTimeSphere2DSigRcurv",&latTimeSphere2DSigRcurv_EW,"latTimeSphere2DSigRcurv/D");
           roottree->Branch("latTimeSphere2DChi2NDF",&latTimeSphere2DChi2NDF_EW,"latTimeSphere2DChi2NDF/D");
-          
+
           roottree->Branch("latTimeCone1DRho",&latTimeCone1DRho_EW,"latTimeCone1DRho/D");
           roottree->Branch("latTimeCone1DSigRho",&latTimeCone1DSigRho_EW,"latTimeCone1DSigRho/D");
           roottree->Branch("latTimeCone1DChi2NDF",&latTimeCone1DChi2NDF_EW,"latTimeCone1DChi2NDF/D");
@@ -1845,7 +1846,7 @@ int main (int argc, char *argv[])
           roottree->Branch("latTimeSphere2DRcurv_EW",&latTimeSphere2DRcurv_EW,"latTimeSphere2DRcurv_EW/D");
           roottree->Branch("latTimeSphere2DSigRcurv_EW",&latTimeSphere2DSigRcurv_EW,"latTimeSphere2DSigRcurv_EW/D");
           roottree->Branch("latTimeSphere2DChi2NDF_EW",&latTimeSphere2DChi2NDF_EW,"latTimeSphere2DChi2NDF_EW/D");
-          
+
           roottree->Branch("latTimeCone1DRho_EW",&latTimeCone1DRho_EW,"latTimeCone1DRho_EW/D");
           roottree->Branch("latTimeCone1DSigRho_EW",&latTimeCone1DSigRho_EW,"latTimeCone1DSigRho_EW/D");
           roottree->Branch("latTimeCone1DChi2NDF_EW",&latTimeCone1DChi2NDF_EW,"latTimeCone1DChi2NDF_EW/D");
@@ -1901,7 +1902,7 @@ int main (int argc, char *argv[])
           roottree->Branch("latTimeSphere2DRcurv_NS",&latTimeSphere2DRcurv_NS,"latTimeSphere2DRcurv_NS/D");
           roottree->Branch("latTimeSphere2DSigRcurv_NS",&latTimeSphere2DSigRcurv_NS,"latTimeSphere2DSigRcurv_NS/D");
           roottree->Branch("latTimeSphere2DChi2NDF_NS",&latTimeSphere2DChi2NDF_NS,"latTimeSphere2DChi2NDF_NS/D");
-          
+
           roottree->Branch("latTimeCone1DRho_NS",&latTimeCone1DRho_NS,"latTimeCone1DRho_NS/D");
           roottree->Branch("latTimeCone1DSigRho_NS",&latTimeCone1DSigRho_NS,"latTimeCone1DSigRho_NS/D");
           roottree->Branch("latTimeCone1DChi2NDF_NS",&latTimeCone1DChi2NDF_NS,"latTimeCone1DChi2NDF_NS/D");
@@ -1916,7 +1917,7 @@ int main (int argc, char *argv[])
         roottree->Branch("Distance_VE",&distanceResultVE,"Distance_VE/D");      // radius of curvature
         roottree->Branch("CCheight_VE",&CCheight_VE,"CCheight_VE/D");
         roottree->Branch("CCwidth_VE",&CCwidth_VE,"CCwidth_VE/D");
-        roottree->Branch("CCcenter_VE",&CCcenter_VE,"CCcenter_VE/D");       
+        roottree->Branch("CCcenter_VE",&CCcenter_VE,"CCcenter_VE/D");
         roottree->Branch("CCheight_error_VE",&CCheight_error_VE,"CCheight_error_VE/D");
         roottree->Branch("CCconverged_VE",&CCconverged_VE,"CCconverged_VE/B");
         roottree->Branch("Xheight_VE",&Xheight_VE,"Xheight_VE/D");
@@ -1957,7 +1958,7 @@ int main (int argc, char *argv[])
           roottree->Branch("latTimeSphere2DRcurv_VE",&latTimeSphere2DRcurv_VE,"latTimeSphere2DRcurv_VE/D");
           roottree->Branch("latTimeSphere2DSigRcurv_VE",&latTimeSphere2DSigRcurv_VE,"latTimeSphere2DSigRcurv_VE/D");
           roottree->Branch("latTimeSphere2DChi2NDF_VE",&latTimeSphere2DChi2NDF_VE,"latTimeSphere2DChi2NDF_VE/D");
-          
+
           roottree->Branch("latTimeCone1DRho_VE",&latTimeCone1DRho_VE,"latTimeCone1DRho_VE/D");
           roottree->Branch("latTimeCone1DSigRho_VE",&latTimeCone1DSigRho_VE,"latTimeCone1DSigRho_VE/D");
           roottree->Branch("latTimeCone1DChi2NDF_VE",&latTimeCone1DChi2NDF_VE,"latTimeCone1DChi2NDF_VE/D");
@@ -1966,13 +1967,13 @@ int main (int argc, char *argv[])
           roottree->Branch("latTimeCone2DChi2NDF_VE",&latTimeCone2DChi2NDF_VE,"latTimeCone2DChi2NDF_VE/D");
         }
       }
-    } 
+    }
 
     // add brances for all unflagged antennas if requested
     if ( (config["writeAllAntennas"]->bValue()) && (config["CalculateMaxima"]->bValue()) ) {
       vector<int> flagged = config.getFlagged();
       for (int i = 0; i < MAX_NUM_ANTENNAS; ++i) {
-        stringstream antNumber(""); 
+        stringstream antNumber("");
         antNumber << i+1;
         // check if antenna is flagged in config file
         int antID = config.checkFlagged(antNumber.str());
@@ -1999,7 +2000,7 @@ int main (int argc, char *argv[])
       if (! getNextEvent()) {
         cerr << "ERROR: startEvent to high! File seems to contain only " << eventCounter << " events.\n" << endl;
         break;
-      } 
+      }
       cout << "Skipping event because start event is not reached, yet." << endl;
       ++eventCounter;
     }
@@ -2011,14 +2012,14 @@ int main (int argc, char *argv[])
 
     // Process events from event file list
     while ( getNextEvent() ) {
-    
+
       // check if stop Event is reached
-      ++eventCounter;      
+      ++eventCounter;
       if ( (config["stopEvent"]->uiValue()!=0) && (eventCounter>config["stopEvent"]->uiValue()) ) {
         cout << "\nStop event reached at event #" << eventCounter << "!\n" << endl;
         break;
-      }  
-      
+      }
+
       // print information and process the event
       if (config["calibrationMode"]->bValue()) {
         cout << "\nProcessing calibration event #"<< eventCounter <<": \"" << eventname << "\".\n" << endl;
@@ -2042,8 +2043,8 @@ int main (int argc, char *argv[])
 
       // delete the file ending
       if (plotprefix.find(".event") != string::npos)
-        plotprefix.erase(plotprefix.find_last_of('.'));	
-      // deletes the file path, if it exists	
+        plotprefix.erase(plotprefix.find_last_of('.'));
+      // deletes the file path, if it exists
       if (plotprefix.find("/") != string::npos)
        plotprefix.erase(0,plotprefix.find_last_of('/')+1);
 
@@ -2054,7 +2055,7 @@ int main (int argc, char *argv[])
       goodVE = false;
       // Generate cstring with a length of 64 characters to write to the root file, using the eventname
       string eventname_ =  eventname;
-      // deletes the file path, if it exists    
+      // deletes the file path, if it exists
       if (eventname_.find("/") != string::npos)
         eventname_.erase(0,plotprefix.find_last_of('/')+1);
       // resize to 64 characters if longer
@@ -2077,21 +2078,21 @@ int main (int argc, char *argv[])
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;
       epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;
       chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;
-      
+
       latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
       latTimeSphere1DSigRcurv_EW = 0, latTimeSphere1DSigRcurv_NS = 0, latTimeSphere1DSigRcurv_VE = 0;
       latTimeSphere1DChi2NDF_EW = 0, latTimeSphere1DChi2NDF_NS = 0, latTimeSphere1DChi2NDF_VE = 0;
       latTimeSphere2DRcurv_EW = 0, latTimeSphere2DRcurv_NS = 0, latTimeSphere2DRcurv_VE = 0;
       latTimeSphere2DSigRcurv_EW = 0, latTimeSphere2DSigRcurv_NS = 0, latTimeSphere2DSigRcurv_VE = 0;
       latTimeSphere2DChi2NDF_EW = 0, latTimeSphere2DChi2NDF_NS = 0, latTimeSphere2DChi2NDF_VE = 0;
-    
+
       latTimeCone1DRho_EW = 0, latTimeCone1DRho_NS = 0, latTimeCone1DRho_VE = 0;
       latTimeCone1DSigRho_EW = 0, latTimeCone1DSigRho_NS = 0, latTimeCone1DSigRho_VE = 0;
       latTimeCone1DChi2NDF_EW = 0, latTimeCone1DChi2NDF_NS = 0, latTimeCone1DChi2NDF_VE = 0;
       latTimeCone2DRho_EW = 0, latTimeCone2DRho_NS = 0, latTimeCone2DRho_VE = 0;
       latTimeCone2DSigRho_EW = 0, latTimeCone2DSigRho_NS = 0, latTimeCone2DSigRho_VE = 0;
       latTimeCone2DChi2NDF_EW = 0, latTimeCone2DChi2NDF_NS = 0, latTimeCone2DChi2NDF_VE = 0;
-      
+
       rmsCCbeam = 0, rmsXbeam = 0, rmsPbeam = 0 ;
       rmsCCbeam_NS = 0, rmsXbeam_NS = 0, rmsPbeam_NS = 0;
       rmsCCbeam_VE = 0, rmsXbeam_VE = 0, rmsPbeam_VE = 0;
@@ -2259,7 +2260,7 @@ int main (int argc, char *argv[])
             // create a special file for the lateral distribution output
             if (config["lateralOutputFile"]->bValue())
               eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
-              
+
 
             // get the pulse properties
             rawPulsesMap = eventPipeline.getRawPulseProperties();
@@ -2295,26 +2296,26 @@ int main (int argc, char *argv[])
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue()) {
-              Record latTimeResults = 
+              Record latTimeResults =
                        lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",
                                                               calibPulsesMap, map <int, PulseProperties>(),
                                                               gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
                                                               results.asDouble("CCcenter"),"","");
-                                                                      
+
               latTimeSphere1DRcurv_EW = latTimeResults.asDouble("latTime1D_Rcurv");
               latTimeSphere1DSigRcurv_EW = latTimeResults.asDouble("latTime1D_sigRcurv");
               latTimeSphere1DChi2NDF_EW = latTimeResults.asDouble("latTime1D_chi2NDF");
               latTimeSphere2DRcurv_EW = latTimeResults.asDouble("latTime2D_Rcurv");
               latTimeSphere2DSigRcurv_EW = latTimeResults.asDouble("latTime2D_sigRcurv");
               latTimeSphere2DChi2NDF_EW = latTimeResults.asDouble("latTime2D_chi2NDF");
-                                                                      
+
               latTimeCone1DRho_EW = latTimeResults.asDouble("latTime1D_ConeRho");
               latTimeCone1DSigRho_EW = latTimeResults.asDouble("latTime1D_sigConeRho");
               latTimeCone1DChi2NDF_EW = latTimeResults.asDouble("latTime1D_Conechi2NDF");
               latTimeCone2DRho_EW = latTimeResults.asDouble("latTime2D_ConeRho");
               latTimeCone2DSigRho_EW = latTimeResults.asDouble("latTime2D_sigConeRho");
               latTimeCone2DChi2NDF_EW = latTimeResults.asDouble("latTime2D_Conechi2NDF");
-            }  
+            }
 
             // getting necessary data to plot [added: mfranc]
             if(config["eventDisplayPlot"]->bValue()) {
@@ -2452,26 +2453,26 @@ int main (int argc, char *argv[])
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue()) {
-              Record latTimeResults = 
+              Record latTimeResults =
                        lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",
                                                               newPulses, map <int, PulseProperties>(),
                                                               gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
                                                               results.asDouble("CCcenter"),"","");
-                                                                      
+
               latTimeSphere1DRcurv_NS = latTimeResults.asDouble("latTime1D_Rcurv");
               latTimeSphere1DSigRcurv_NS = latTimeResults.asDouble("latTime1D_sigRcurv");
               latTimeSphere1DChi2NDF_NS = latTimeResults.asDouble("latTime1D_chi2NDF");
               latTimeSphere2DRcurv_NS = latTimeResults.asDouble("latTime2D_Rcurv");
               latTimeSphere2DSigRcurv_NS = latTimeResults.asDouble("latTime2D_sigRcurv");
               latTimeSphere2DChi2NDF_NS = latTimeResults.asDouble("latTime2D_chi2NDF");
-                                                                      
+
               latTimeCone1DRho_NS = latTimeResults.asDouble("latTime1D_ConeRho");
               latTimeCone1DSigRho_NS = latTimeResults.asDouble("latTime1D_sigConeRho");
               latTimeCone1DChi2NDF_NS = latTimeResults.asDouble("latTime1D_Conechi2NDF");
               latTimeCone2DRho_NS = latTimeResults.asDouble("latTime2D_ConeRho");
               latTimeCone2DSigRho_NS = latTimeResults.asDouble("latTime2D_sigConeRho");
               latTimeCone2DChi2NDF_NS = latTimeResults.asDouble("latTime2D_Conechi2NDF");
-            }  
+            }
 
             // insert calibrated pulse properties here, for eventual changes during the lateral distribution
             calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
@@ -2605,26 +2606,26 @@ int main (int argc, char *argv[])
 
             // plot lateral distribution of arrival times, if requested
             if (config["lateralTimeDistribution"]->bValue()) {
-              Record latTimeResults = 
+              Record latTimeResults =
                        lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",
                                                               newPulses, map <int, PulseProperties>(),
                                                               gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
                                                               results.asDouble("CCcenter"),"","");
-                                                                      
+
               latTimeSphere1DRcurv_VE = latTimeResults.asDouble("latTime1D_Rcurv");
               latTimeSphere1DSigRcurv_VE = latTimeResults.asDouble("latTime1D_sigRcurv");
               latTimeSphere1DChi2NDF_VE = latTimeResults.asDouble("latTime1D_chi2NDF");
               latTimeSphere2DRcurv_VE = latTimeResults.asDouble("latTime2D_Rcurv");
               latTimeSphere2DSigRcurv_VE = latTimeResults.asDouble("latTime2D_sigRcurv");
               latTimeSphere2DChi2NDF_VE = latTimeResults.asDouble("latTime2D_chi2NDF");
-                                                                      
+
               latTimeCone1DRho_VE = latTimeResults.asDouble("latTime1D_ConeRho");
               latTimeCone1DSigRho_VE = latTimeResults.asDouble("latTime1D_sigConeRho");
               latTimeCone1DChi2NDF_VE = latTimeResults.asDouble("latTime1D_Conechi2NDF");
               latTimeCone2DRho_VE = latTimeResults.asDouble("latTime2D_ConeRho");
               latTimeCone2DSigRho_VE = latTimeResults.asDouble("latTime2D_sigConeRho");
               latTimeCone2DChi2NDF_VE = latTimeResults.asDouble("latTime2D_Conechi2NDF");
-            }  
+            }
 
             // insert calibrated pulse properties here, for eventual changes during the lateral distribution
             calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
@@ -2650,7 +2651,7 @@ int main (int argc, char *argv[])
       // Create event display plot of all antennas [added: mfranc]
       if(config["eventDisplayPlot"]->bValue()) {
         if(calibPulsesMap.size() != 0) {
-          itBeg = calibPulsesMap.begin();	
+          itBeg = calibPulsesMap.begin();
           itEnd = calibPulsesMap.end();
           cout << "Event display plot of all antennas will be created using calibrated pulses information." << endl;
 
@@ -2704,7 +2705,7 @@ int main (int argc, char *argv[])
         else {
           *rawPulses[it->second.antenna-1] = it->second;
           // create branch name
-          stringstream antNumber(""); 
+          stringstream antNumber("");
           antNumber << it->second.antenna;
           string branchname = "Ant_" + antNumber.str() + "_raw.";
           // check if branch allready exists and if not, create it
@@ -2728,7 +2729,7 @@ int main (int argc, char *argv[])
             meanCalPulses[antenna-1]->dist = it->second.dist;
           } else {
             ++meanCalCounter[antenna-1];
-            meanCalPulses[antenna-1]->dist = 
+            meanCalPulses[antenna-1]->dist =
               ((meanCalCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->dist + it->second.dist) / meanCalCounter[antenna-1];
           }
           // calcutlate mean of lateral deviations (different counter, because of different antenna cut criteria
@@ -2739,17 +2740,17 @@ int main (int argc, char *argv[])
               meanCalPulses[antenna-1]->lateralExpDeviation = it->second.lateralExpDeviation;
             } else {
               ++meanResCounter[antenna-1];
-              meanCalPulses[antenna-1]->lateralExpHeight = 
+              meanCalPulses[antenna-1]->lateralExpHeight =
                 ((meanResCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->lateralExpHeight + it->second.lateralExpHeight)
                 / meanResCounter[antenna-1];
-              meanCalPulses[antenna-1]->lateralExpDeviation = 
+              meanCalPulses[antenna-1]->lateralExpDeviation =
                 ((meanResCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->lateralExpDeviation + it->second.lateralExpDeviation)
                 / meanResCounter[antenna-1];
             }
           }
 
           // create branch names
-          stringstream antNumber(""); 
+          stringstream antNumber("");
           antNumber << antenna;
           string branchname = "Ant_" + antNumber.str() + "_cal.";
           // check if branch allready exists and if not, create it
@@ -2799,7 +2800,7 @@ int main (int argc, char *argv[])
       delete meanRawPulses[i];
     }
 
-    
+
     cout << "\nPipeline finished successfully.\n" << endl;
 
   } catch (AipsError x) {
