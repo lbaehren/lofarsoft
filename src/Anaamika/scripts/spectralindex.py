@@ -53,7 +53,7 @@ class Op_spectralindex(Op):
      mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"SpectIndex")
      if img.opts.spectralindex_do:
       if img.opts.quiet == False:
-          sys.stdout.write('Preparing to calculate spectra indices.')
+          sys.stdout.write('Preparing to calculate spectral indices.')
           sys.stdout.flush()
       shp = img.image.shape
       if len(shp) == 3 and shp[0] > 1:
@@ -70,7 +70,7 @@ class Op_spectralindex(Op):
             avimage = img.image
             img.opts.beam_spec_av = img.opts.beam_spectrum
             img.freq_av = img.freq
-            img.freq0 = N.median(img.freq)
+            img.freq0 = img.cfreq #N.median(img.freq)
             img.avimage_flags = iniflags
             img.avimage_crms = img.channel_clippedrms
             mylog.info('%s %i %s' % ('Kept all ',shp[0]," channels "))
@@ -84,7 +84,7 @@ class Op_spectralindex(Op):
             sys.stdout.write('done.\n')
             sys.stdout.flush()
 
-            sys.stdout.write('Calculating spectral index for source : ')
+            sys.stdout.write('Calculating spectral indices for sources : ')
             sys.stdout.flush()
         for src in img.source:
           if img.opts.quiet == False:
@@ -231,7 +231,7 @@ class Op_spectralindex(Op):
                 freqin=img.freq, calcrms_fromim=True)
         image, img.opts.beam_spec_av, freq_av, avimage_flags, crms_av = d
         img.freq_av = freq_av
-        img.freq0 = N.median(img.freq_av)
+        img.freq0 = img.cfreq #N.median(img.freq_av)
         img.avimage_crms = crms_av
                                                    # flag channels based on high rms if asked for, again
         if img.opts.flagchan_rms:

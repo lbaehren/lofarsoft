@@ -27,9 +27,15 @@ class Image(object):
         - BBS 
         - FITS
         - ASCII
+        - ds9
         
     write_srl(filename=None, format='fits')
-        Writes Source list    in these formats:   
+        Writes Source list in these formats:   
+        - FITS
+        - ASCII
+
+    write_shpl(filename=None, format='fits')
+        Writes Shapelet list in these formats:   
         - BBS 
         - FITS
         - ASCII
@@ -38,10 +44,10 @@ class Image(object):
           Writes rms image to FITS file.
           
     write_model_img(filename=None)
-          Writes model image to FITS file.
+          Writes Gaussian and shapelet model images to FITS file.
           
     write_resid_img(filename=None)
-          Writes resid image to FITS file.
+          Writes Gaussian and shaplet resid images to FITS file.
 
     """
     # A number of type-checked properties 
@@ -100,25 +106,40 @@ class Image(object):
         """Write the compressed ch0 image (used for source detection) to a fits file."""
         import output
         output.write_ch0_img(self, filename=filename)
+      
+    def write_srl(self, filename=None, format='fits'):
+        """Write the source list to a file.
 
-        
-    # def write_srl(self, filename=None, format='fits'):
-    #     """Write the source list to a file.
+        filename - name of resulting file
+        format - format of output list
+        Supported formats are:
+            "fits"
+            "ascii"
+        """
+        import output
+        output.write_srl(self, filename=filename, format=format)
 
-    #     Supported formats are:
-    #         "fits"
-    #         "ascii"
-    #         "bbs"
-    #     """
-    #     import output
-    #     output.write_srl(self, filename=filename, format=format)
+    def write_shpl(self, filename=None, format='fits', srcroot=None):
+        """Write the shapelet list to a file.
 
-    def write_gaul(self, filename=None, format='ascii', srcroot=None):
+        filename - name of resulting file
+        srcroot - root for source names (BBS format only)
+        format - format of output list
+        Supported formats are:
+            "bbs"
+            "fits"
+            "ascii"
+        """
+        import output
+        output.write_shpl(self, filename=filename, format=format)
+
+    def write_gaul(self, filename=None, format='fits', srcroot=None, patches=False):
         """Write the Gaussian list to a file.
 
         filename - name of resulting file
-        srcroot - root for source names
+        srcroot - root for source names (BBS format only)
         format - format of output list
+        patches - If True, make one patch for each Gaussian 
         Supported formats are:
             "fits"
             "ascii"
@@ -126,7 +147,7 @@ class Image(object):
             "ds9"
         """
         import output
-        output.write_gaul(self, filename=filename, format=format, srcroot=srcroot)
+        output.write_gaul(self, filename=filename, format=format, srcroot=srcroot, patches=patches)
                 
 
 class Op(object):

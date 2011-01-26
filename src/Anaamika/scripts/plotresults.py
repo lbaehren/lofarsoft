@@ -30,75 +30,97 @@ def _isl2border(img, isl):
     return N.transpose(N.array(border))
 
 def plotresults(img):
-        im_mean = img.clipped_mean
-        im_rms = img.clipped_rms
-        low = N.max(1.1*abs(img.min_value),1.1*abs(img.resid_gaus.min()))
-        vmin_est = im_mean - im_rms*5.0 + low
-        if vmin_est <= 0.0:
-            vmin = N.log10(low)
-        else:
-            vmin = N.log10(vmin_est)
-        vmax = N.log10(im_mean + im_rms*30.0 + low)
-        origin='lower'
-        colours = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
-        styles = ['-', '-.', '--']
-        tit = ['Original Image\n(arbitrary logarithmic scale)', 'Islands (hatched boundaries) and\nBest-fit Gaussians (ellipses)', 'Model Image', 'Residual Image']
-
+    """Show the results of a fit with model and residual images."""
+    # This function should be rewritten similarly to Joris's parmdbplot.py
+    # Then, we can use check boxes to show/hide island boundaries, Gaussians,
+    # and sources on all images. Maybe also show scale bars or pixel values?
+    im_mean = img.clipped_mean
+    im_rms = img.clipped_rms
+    low = N.max(1.1*abs(img.min_value),1.1*abs(img.resid_gaus.min()))
+    vmin_est = im_mean - im_rms*5.0 + low
+    if vmin_est <= 0.0:
+        vmin = N.log10(low)
+    else:
+        vmin = N.log10(vmin_est)
+    vmax = N.log10(im_mean + im_rms*30.0 + low)
+    origin='lower'
+    colours = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+    styles = ['-', '-.', '--']
+    if img.opts.shapelet_do:
+        tit = ['Original Image\n(arbitrary logarithmic scale)', 'Islands (hatched boundaries) and\nBest-fit Gaussians (ellipses)', 'Gaussian Model Image', 'Gaussian Residual Image', 'Shapelet Model Image', 'Shapelet Residual Image']  
+        images = [img.ch0, img.ch0, img.model_gaus, img.resid_gaus, img.model_shap, img.resid_shap]
+        numy = 3
+    else:
+        tit = ['Original Image\n(arbitrary logarithmic scale)', 'Islands (hatched boundaries) and\nBest-fit Gaussians (ellipses)', 'Gaussian Model Image', 'Gaussian Residual Image']
         images = [img.ch0, img.ch0, img.model_gaus, img.resid_gaus]
-        fig = pl.figure(figsize=(10.0,10.0))
-        #fig = pl.figure(figsize=(10.0,img.ch0.shape[1]/img.ch0.shape[0]*10.0))
-        gray_palette = cm.gray
-        gray_palette.set_bad('k')
-        for i, image in enumerate(images):
-          if i == 0:
-              ax1 = pl.subplot(2, 2, 1)
-          if i == 1:
-              ax2 = pl.subplot(2, 2, 2, sharex=ax1, sharey=ax1)
-          if i == 2:
-              ax3 = pl.subplot(2, 2, 3, sharex=ax1, sharey=ax1)
-          if i == 3:
-              ax4 = pl.subplot(2, 2, 4, sharex=ax1, sharey=ax1)
-          im = N.log10(image + low)
-          if i == 0:
-              ax1.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
-                    cmap=gray_palette)
-          if i == 1:
-              for iisl, isl in enumerate(img.islands):
-                                           
-                xb, yb = _isl2border(img, isl) 
-                ax2.plot(xb, yb, 'x', color='#afeeee', markersize=8) # mark the island number
-                ax2.text(N.max(xb)+2, N.max(yb), str(isl.island_id), color='#afeeee', clip_on=True) # draw the border
-                # draw the gaussians with one colour per source or island (if gaul2srl was not run)
-                if hasattr(img, 'nsrc'): # check whether gaul2srl was run
-                    nsrc = len(isl.source)
-                    for isrc in range(nsrc):
-                        col = colours[isrc % 7]
-                        style = styles[isrc/7 % 3]
-                        src = isl.source[isrc]
-                        for g in src.gaussians:
-                            ellx, elly = func.drawellipse(g)
-                            ax2.plot(ellx, elly, color = col, linestyle = style)
-                else: # just plot one color per island
-                    isrc = 0
+        numy = 2
+
+    fig = pl.figure(figsize=(10.0,10.0))
+    #fig = pl.figure(figsize=(10.0,img.ch0.shape[1]/img.ch0.shape[0]*10.0))
+    gray_palette = cm.gray
+    gray_palette.set_bad('k')
+
+    for i, image in enumerate(images):
+      if i == 0:
+          ax1 = pl.subplot(2, numy, 1)
+      if i == 1:
+          ax2 = pl.subplot(2, numy, 2, sharex=ax1, sharey=ax1)
+      if i == 2:
+          ax3 = pl.subplot(2, numy, 3, sharex=ax1, sharey=ax1)
+      if i == 3:
+          ax4 = pl.subplot(2, numy, 4, sharex=ax1, sharey=ax1)
+      if i == 4:
+          ax5 = pl.subplot(2, numy, 5, sharex=ax1, sharey=ax1)
+      if i==5:
+          ax6 = pl.subplot(2, numy, 6, sharex=ax1, sharey=ax1)
+
+      im = N.log10(image + low)
+      if i == 0:
+          ax1.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
+                cmap=gray_palette)
+      if i == 1:
+          for iisl, isl in enumerate(img.islands):
+
+            xb, yb = _isl2border(img, isl) 
+            ax2.plot(xb, yb, 'x', color='#afeeee', markersize=8) # mark the island number
+            ax2.text(N.max(xb)+2, N.max(yb), str(isl.island_id), color='#afeeee', clip_on=True) # draw the border
+            # draw the gaussians with one colour per source or island (if gaul2srl was not run)
+            if hasattr(img, 'nsrc'): # check whether gaul2srl was run
+                nsrc = len(isl.source)
+                for isrc in range(nsrc):
                     col = colours[isrc % 7]
                     style = styles[isrc/7 % 3]
-                    for g in isl.gaul:
+                    src = isl.source[isrc]
+                    for g in src.gaussians:
                         ellx, elly = func.drawellipse(g)
                         ax2.plot(ellx, elly, color = col, linestyle = style)
-   
-          if i == 1:
-              ax2.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
-                    cmap=gray_palette)
-          if i == 2:
-              ax3.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
-                    cmap=gray_palette)
-          if i == 3:
-              ax4.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
-                    cmap=gray_palette)
-          pl.title(tit[i])
-        pl.show()
-        if os.environ.get("REMOTEHOST") != 'lfe001.offline.lofar':
-            pl.close()
+            else: # just plot one color per island
+                isrc = 0
+                col = colours[isrc % 7]
+                style = styles[isrc/7 % 3]
+                for g in isl.gaul:
+                    ellx, elly = func.drawellipse(g)
+                    ax2.plot(ellx, elly, color = col, linestyle = style)
+
+      if i == 1:
+          ax2.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
+                cmap=gray_palette)
+      if i == 2:
+          ax3.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
+                cmap=gray_palette)
+      if i == 3:
+          ax4.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
+                cmap=gray_palette)
+      if i == 4:
+          ax5.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
+                cmap=gray_palette)
+      if i == 5:
+          ax6.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
+                cmap=gray_palette)
+      pl.title(tit[i])
+    pl.show()
+    if os.environ.get("REMOTEHOST") != 'lfe001.offline.lofar':
+        pl.close()
 
 def showrms(img):
     """Show original and background rms images or print rms if constant."""

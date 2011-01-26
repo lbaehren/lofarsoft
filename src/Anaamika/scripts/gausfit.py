@@ -43,7 +43,7 @@ class Op_gausfit(Op):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gausfit   ")
         opts = img.opts
         if img.opts.quiet == False:
-            sys.stdout.write('Fitting islands : ')
+            sys.stdout.write('Fitting islands with Gaussians : ')
             sys.stdout.flush()
         for idx, isl in enumerate(img.islands):
           if img.opts.quiet == False:
@@ -98,7 +98,7 @@ class Op_gausfit(Op):
         if img.opts.quiet == False:
             sys.stdout.write('done.')
             sys.stdout.flush()
-            print '\n%s %i' % ("Total number of Gaussians fit to image:", n)
+            print '\n%s %i' % ("Total number of Gaussians fit to image :", n)
         return img
 
     def fit_island(self, isl, opts, img):

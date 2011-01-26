@@ -44,6 +44,13 @@ class Op_collapse(Op):
         c_list = img.opts.collapse_av
         c_wts = img.opts.collapse_wt
         if c_list == []: c_list = N.arange(img.image.shape[0])
+
+        # Check if c_list is just one channel. If so, set mode to single
+        if len(c_list) == 1:
+            mode = 'single'
+            chan0 = c_list[0]
+            img.collapse_ch0 = chan0
+            
         ch0sh = img.image.shape[1:]
         img.ch0 = N.zeros(ch0sh)
         if img.opts.polarisation_do: 
@@ -101,9 +108,10 @@ class Op_collapse(Op):
           if mode == 'single':
             if pol == 'I': 
               img.ch0 = ch0 = img.image[chan0]
-              mylog.info('%s %i' % ('Source extraction will be done on channel', chan0))
+              init_freq_collapse(img)
+              mylog.info('%s %i (%.3f MHz)' % ('Source extraction will be done on channel :', chan0, img.cfreq/1e6))
               if img.opts.quiet == False:
-                  print '%s %i' % ('Source extraction will be done on channel', chan0)
+                  print '%s %i (%.3f MHz)' % ('Source extraction will be done on channel :', chan0, img.cfreq/1e6)
             else:
                     ch0images[ipol][:] = ch0[:] = data[chan0][:]
 
@@ -124,6 +132,7 @@ class Op_collapse(Op):
             if pol == 'I':
               img.ch0 = ch0
               img.avspc_wtarr = wtarr
+              init_freq_collapse(img, wtarr)
               if c_wts == 'unity':
                   mylog.info('Channels averaged with uniform weights')
                   if img.opts.quiet == False:
@@ -133,8 +142,10 @@ class Op_collapse(Op):
                   if img.opts.quiet == False:
                       print 'Channels averaged with weights set to (1/rms)^2'                  
               mylog.info('Source extraction will be done on averaged ch0 image')
+              mylog.info('Frequency of ch0 image : %.3f MHz' % (img.cfreq/1e6,))
               if img.opts.quiet == False:
                   print 'Source extraction will be done on averaged ("ch0") image'
+                  print 'Frequency of ch0 image : %.3f MHz' % (img.cfreq/1e6,)
               str1 = " ".join(str(n) for n in c_list)
               mylog.debug('%s %s' % ('Channels averaged : ', str1))
               str1 = " ".join(["%9.4e" % n for n in wtarr])
@@ -311,3 +322,49 @@ def windowaverage_cube(imagein, imageout, fac, chanrms, iniflags, c_wts, kappa, 
     return imageout, beamlist, freq_av, avimage_flags, crms_av 
         
 
+def init_freq_collapse(img, wtarr=None):
+    ### Place appropriate, post-collapse frequency info in img
+    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Collapse  ")
+
+    # If no weights are given, assume collapse mode if single and use chan0
+    if wtarr == None:
+        chan0 = img.opts.collapse_ch0
+        if img.opts.frequency != None:
+            img.cfreq = img.opts.frequency[chan0]
+        else:
+            # Calculate from header info
+            crval, cdelt, crpix = img.freq_pars
+            if crval == 0.0 and cdelt == 0.0 and crpix == 0.0 and img.opts.frequency == None:
+                mylog.critical("CTYPE = FREQ not found in header and frequencies not specified by user")
+                raise RuntimeError("CTYPE = FREQ not found in header and frequencies not specified by user")
+            else:
+                img.cfreq = crval+cdelt*(chan0+1-crpix)
+    else:
+        #If weights are given, calculate weighted average frequency
+        if img.opts.frequency != None:
+            c_list = img.opts.collapse_av
+            if c_list == []: c_list = N.arange(img.image.shape[0])
+            freqs = img.opts.frequency
+            sumwts = 0.0
+            sumfrq = 0.0
+            for i, ch in enumerate(c_list):
+                sumwts += wtarr[i]
+                sumfrq += freqs[ch]*wtarr[i]
+            img.cfreq = sumfrq / sumwts
+        else:
+            # Calculate from header info
+            c_list = img.opts.collapse_av
+            if c_list == []: c_list = N.arange(img.image.shape[0])
+            freqs = numpy.zeros(len(c_list))
+            sumwts = 0.0
+            sumfrq = 0.0
+            crval, cdelt, crpix = img.freq_pars
+            if crval == 0.0 and cdelt == 0.0 and crpix == 0.0 and img.opts.frequency == None:
+                mylog.critical("CTYPE = FREQ not found in header and frequencies not specified by user")
+                raise RuntimeError("CTYPE = FREQ not found in header and frequencies not specified by user")
+            else:
+                for i, ch in enumerate(c_list):
+                    sumwts += wtarr[i]
+                    freq = crval+cdelt*(ch+1-crpix)
+                    sumfrq += freq*wtarr[i]
+                img.cfreq = sumfrq / sumwts

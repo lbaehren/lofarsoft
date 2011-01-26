@@ -7,7 +7,8 @@ from image import *
 from islands import *
 from shapelets import *
 import mylogger
-
+import sys
+import time
 
 Island.shapelet_basis=String(doc="Coordinate system for shapelet decomposition (cartesian/polar)")
 Island.shapelet_beta=Float(doc="Value of shapelet scale beta")
@@ -23,8 +24,24 @@ class Op_shapelets(Op):
     
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Shapefit")
         if img.opts.shapelet_do:
+          if img.opts.quiet == False:
+              sys.stdout.write('Fitting islands with Shapelets : ')
+              sys.stdout.flush()
+
           for id, isl in enumerate(img.islands):
-            print ' ISLAND ',isl.island_id
+            if img.opts.quiet == False:
+              sys.stdout.write('#' + str(id))
+              sys.stdout.flush()
+              time.sleep(0.02)
+              sys.stdout.write('.')
+              sys.stdout.flush()
+              time.sleep(0.02)
+              sys.stdout.write('.')
+              sys.stdout.flush()
+              time.sleep(0.02)
+              sys.stdout.write('.')
+              sys.stdout.flush()
+              time.sleep(0.02)
             arr=isl.image
 	    mask=isl.mask_active + isl.mask_noisy
 	    basis=img.opts.shapelet_basis
@@ -44,6 +61,9 @@ class Op_shapelets(Op):
 	    isl.shapelet_cf=cf
             mylog.info('Shape : cen '+str(isl.shapelet_centre[0])+' '+ \
                  str(isl.shapelet_centre[1])+' beta '+str(beta))
+          if img.opts.quiet == False:
+            sys.stdout.write('done.\n')
+            sys.stdout.flush()
 
 
     def get_shapelet_params(self, image, mask, basis, beam_pix, fixed, ori, mode, beta=None, cen=None, nmax=None):
@@ -55,6 +75,7 @@ class Op_shapelets(Op):
 	     specified as an argument, then fixed is taken as 0."""
 	 from math import sqrt, log, floor
          import functions as func
+         import numpy as N
 
 	 if fixed[0]==1 and beta==None: fixed[0]=0
 	 if fixed[1]==1 and cen==None: fixed[1]=0
@@ -71,11 +92,12 @@ class Op_shapelets(Op):
              (n, m)=image.shape
              nmax=int(round(sqrt(1.0*n*n+m*m)/beam_pix[1]))-1
              nmax=min(max(nmax*2+2,10),10)                      # totally ad hoc
+             
              if mode == 'fit':   # make sure npara <= npix
                npix = N.product(image.shape)-N.sum(mask)
-               nmax_max = int(round(0.5*(-3+sqrt(1+8*npix))))
+               #nmax_max = int(round(0.5*(-3+sqrt(1+8*npix)))) # Why do this?
+               nmax_max = int(sqrt(npix)) - 1
                nmax=min(nmax, nmax_max)
-
          betarange=[0.5,sqrt(beta*max(n,m))]  # min, max
          #print betarange 
 

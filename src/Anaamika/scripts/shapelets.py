@@ -19,8 +19,6 @@ def decompose_shapelets(image, mask, basis, beta, centre, nmax, mode):
 	Centre is by python convention, for retards who count from zero. """
 	
     import compute_shapelet_coeff as csc
-
-    #print ' DOESNT HANDLE MASKS YET !!!!! '
     bad = False
     if (beta < 0 or beta/max(image.shape) > 5 or \
        (max(N.abs(list(centre)))-max(image.shape)/2) > 10*max(image.shape)): bad = True
@@ -60,9 +58,13 @@ def fit_shapeletbasis(image, mask, cf0, Bset):
     import functions as func
     
     cfshape = cf0.shape
-
-    res=lambda p, image, Bset, cfshape : image.flatten()-func.shapeletfit(p, Bset, cfshape)
-    (cf, flag)=leastsq(res, cf0.flatten(), args=(image, Bset, cfshape))
+    mask_flat = ~mask.flatten()
+    # print mask_flat
+    res=lambda p, image, Bset, cfshape, mask_flat : (image.flatten()-func.shapeletfit(p, Bset, cfshape))[mask_flat]
+    # print res(cf0.flatten(), image, Bset, cfshape, mask_flat)
+    # print ''
+    # print cf0.flatten()
+    (cf, flag)=leastsq(res, cf0.flatten(), args=(image, Bset, cfshape, mask_flat))
     cf = cf.reshape(cfshape)
 
     return cf
@@ -191,9 +193,10 @@ def shape_findcen(image, mask, basis, beta, nmax, beam_pix): # + check_cen_shape
     # check if estimated centre makes sense
     error=shapelet_check_centre(image, mask, cen, beam_pix)
     if error > 0:
-        print 'Error '+str(error)+' in finding centre, will take 1st moment instead.'
+        #print 'Error '+str(error)+' in finding centre, will take 1st moment instead.'
         (m1, m2, m3) = func.moment(image, mask)
 	cen = m2
+        
     
     return cen
 
@@ -292,7 +295,7 @@ def shapelet_check_centre(image, mask, cen, beam_pix):
     x, y = round(cen[0]), round(cen[1])
     if x <= 0 or x >= n or y <= 0 or y >= m: error = 1
     if error == 0: 
-        if not mask[int(round(x)),int(round(y))]: error == 2
+        if not mask[int(cen[0]),int(cen[1])]: error == 2
 
     if error > 0:
         if (N.product(mask.shape)-sum(sum(mask)))/(pi*0.25*beam_pix[0]*beam_pix[1]) < 2.5:

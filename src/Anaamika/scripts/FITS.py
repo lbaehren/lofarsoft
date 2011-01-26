@@ -18,7 +18,7 @@ import mylogger
 import pyfits
 
 Image.imagename = String(doc="Identifier name for output files")
-Image.cfreq = Float(doc="Frequency in the header")
+Image.cfreq = Float(doc="Frequency of the ch0 image. All fluxes are referenced to this frequency.")
 Image.freq_pars = Tuple((0.0, 0.0, 0.0), doc="Frequency prarmeters from the header: (crval, cdelt, crpix)")
 
 class Op_loadFITS(Op):
@@ -153,12 +153,13 @@ class Op_loadFITS(Op):
         img.sky2pix = t.s2p
 
     def init_freq(self, img):
-        ### Place frequency info in img
+        """Initialize frequency parameters and store them"""
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"LoadFits  ")
         if img.opts.frequency != None:
+            # If user specifies frequencies, then let collapse.py do the initialization 
             img.cfreq = img.opts.frequency[0]
             img.freq_pars = (0.0, 0.0, 0.0)
-            mylog.info('Using user-specified frequency/frequencies instead of header values (if any).')
+            mylog.info('Using user-specified frequency/frequencies.')
         else:
             found  = False
             hdr = img.header

@@ -17,7 +17,7 @@ import time
 import pyrap.images as pim
 
 Image.imagename = String(doc="Identifier name for output files")
-Image.cfreq = Float(doc="Frequency in the header")
+Image.cfreq = Float(doc="Frequency of the ch0 image. All fluxes are referenced to this frequency.")
 Image.freq_pars = Tuple(doc="Frequency prarmeters from the header: (crval, cdelt, crpix)")
 
 class Op_readimage(Op):
@@ -29,9 +29,7 @@ class Op_readimage(Op):
     def __call__(self, img):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"LoadImage  ")
 
-        # Open file(s) with pyrap, which can read FITS, CASA, and HDF5 files
-        # or, if pyrap is unavailable, use pyfits, which can only read FITS files.
-        # 
+        # Open file(s) with pyrap, which can read FITS, CASA, and HDF5 files.
         # Check if there are other polarizations available
         # (assume for now that they are all separate files with *_I.ext
         # as the filename, and *_Q.ext, *_U.ext, and *_V.ext in the same
@@ -155,12 +153,13 @@ class Op_readimage(Op):
         img.sky2pix = t.s2p
         
     def init_freq(self, img):
-        ### Place frequency info in img
+        """Initialize frequency parameters and store them"""
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"LoadImage  ")
         if img.opts.frequency != None:
+            # If user specifies frequencies, then let collapse.py do the initialization 
             img.cfreq = img.opts.frequency[0]
             img.freq_pars = (0.0, 0.0, 0.0)
-            mylog.info('Using user-specified frequency/frequencies instead of header values (if any).')
+            mylog.info('Using user-specified frequency/frequencies.')
         else:
             found  = False
             hdr = img.header

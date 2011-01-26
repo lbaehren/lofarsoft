@@ -56,6 +56,7 @@ class Opts(object):
     rms_map        = Option(None, Bool(), doc="True => use rms map; " \
                                 "False => constant rms; " \
                                 "None => calculate inside program whether to use or not")
+    rms_value      = Option(None, Float(), doc="Specify value of constant rms to use when rms_map==False")
     mean_map        = String('default', doc="default => calc whether to use or not, 'zero' => 0, \
                                 'const' => clipped mean, 'map' => use map")
     rms_box        = Option(None, Tuple(Int(), Int()),

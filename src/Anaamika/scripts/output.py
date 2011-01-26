@@ -16,6 +16,8 @@ Also include are the following functions:
        - ASCII
   - write_srl(img, filename=None, format='fits')
       Writes Source list      
+  - write_shpl(img, filename=None, format='fits')
+      Writes Shapelet list      
   - write_rms_img(img, filename=None)
       Writes rms image to FITS file.      
   - write_model_img(img, filename=None)
@@ -49,7 +51,6 @@ class Op_outlist(Op):
             write_kvis_ann(img)
             write_gaul_FITS(img)
         return img
-
 
 def write_star(img):
     fname = img.imagename + '.star'
@@ -104,6 +105,8 @@ def write_kvis_ann(img):
 def write_srl(img, filename=None, format='fits'):
     """Write the source list to a file.
 
+    filename - name of resulting file
+    format - format of output list
     Supported formats are:
         "fits"
         "ascii"
@@ -120,12 +123,35 @@ def write_srl(img, filename=None, format='fits'):
             filename = img.imagename + '.srl.sky'
     print 'Sorry, this feature is not yet available. Use "write_gaul" instead.'
 
-def write_gaul(img, filename=None, format='ascii', srcroot=None):
+def write_shpl(img, filename=None, format='fits', srcroot=None):
+    """Write the shapelet list to a file.
+
+    filename - name of resulting file
+    srcroot - root for source names (BBS format only)
+    format - format of output list
+    Supported formats are:
+        "fits"
+        "ascii"
+        "bbs"
+    """
+    if (format in ['fits', 'ascii', 'bbs']) == False:
+        raise RuntimeError('format must be "fits", "ascii", or "bbs"')       
+    if filename == None:
+        if format == 'fits':
+            filename = img.imagename + '.shpl.fits'
+        if format == 'ascii':
+            filename = img.imagename + '.shpl.txt'
+        if format == 'bbs':
+            filename = img.imagename + '.shpl.sky'
+    print 'Sorry, this feature is not yet available. Use "write_gaul" instead.'
+
+def write_gaul(img, filename=None, format='fits', srcroot=None, patches=False):
     """Write the Gaussian list to a file.
 
     filename - name of resulting file
-    srcroot - root for source names
+    srcroot - root for source names (BBS format only)
     format - format of output list
+    patches - True = each Gaussian has its own patch
     Supported formats are:
         "fits"
         "ascii"
@@ -163,7 +189,7 @@ def write_gaul(img, filename=None, format='ascii', srcroot=None):
         # Write as ascii file.
         f = open(filename, "w")
         f.write('# PyBDSM Gaussian list for '+img.filename+'\n')
-        f.write('# Refernce frequency : %.3e\n\n' % (img.freq0,))
+        f.write('# Reference frequency : %.3e Hz\n\n' % (img.cfreq,))
         if img.opts.spectralindex_do:
             f.write('#  Gaul_id   Island_id   Flag   Total_flux   Err_total_flux   Peak_flux  Err_peak_flux Spec_indx Err_spec_indx  RA   Err_RA    DEC    Err_DEC     Xpos        Err_xpos    Ypos      Err_ypos       Bmaj_fw      Err_bmaj  Bmin_fw   Err_bmin   Bpa     Err_bpa\n')
         else:           
@@ -191,21 +217,6 @@ def write_gaul(img, filename=None, format='ascii', srcroot=None):
                 else:                       
                     specin = spin1[1]
                     especin = espin1[1]
-                # srcid = g.source_id
-                # src = img.source[srcid]
-                # for g_src in src.gaussians:
-                #     if g_src.gaus_num == g.gaus_num:
-                #         spin1 = g_src.spin1
-                #         espin1 = g_src.espin1
-                #         if spin1 == None:
-                #             specin = 0.0
-                #             especin = 0.0
-                #         else:                       
-                #             specin = spin1[1]
-                #             especin = espin1[1]
-                    # else:
-                    #     specin = 0.0
-                    #     especin = 0.0
                 str1 = "%4d  %4d  %d    %10f %10f   %10f %10f  %10f %10f " \
                       "%10f %10f   %10f %10f   %10f %10f   %10f %10f   " \
                       "%10f %10f   %10f %10f   %10f %10f\n" % \
@@ -235,24 +246,33 @@ def write_gaul(img, filename=None, format='ascii', srcroot=None):
         else:
             freq = "%.5e" % img.cfreq
         f = open(filename, 'w')
-        str1 = "# (Name, Type, Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+", SpectralIndexDegree='0', " \
-              + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n"
+        if patches:
+            str1 = "# (Name, Type, Patch, Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+"', SpectralIndexDegree='0', " \
+                + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n"
+        else:
+            str1 = "# (Name, Type, Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+"', SpectralIndexDegree='0', " \
+                + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n"
         f.write(str1)
         sep = ', '
         if srcroot == None:
             sname = img.imagename.split('.')[0]
         else:
             sname = srcroot  
+        if patches:
+            pname = sname + '_patch'
+
         str_src = []
         total_flux = []
         bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
         bm_deg = img.pix2beam(bm_pix)
         for g in img.gaussians():
             src = sname + '_' + str(g.gaus_num)
+            if patches:
+                patch = pname + '_' + str(g.gaus_num)
             ra, dec = g.centre_sky
             ra = ra2hhmmss(ra)
             sra = str(ra[0]).zfill(2)+':'+str(ra[1]).zfill(2)+':'+str("%.3f" % (ra[2])).zfill(6)
-            dec= dec2ddmmss(dec)
+            dec = dec2ddmmss(dec)
             decsign = ('-' if dec[3] < 0 else '+')
             sdec = decsign+str(dec[0]).zfill(2)+'.'+str(dec[1]).zfill(2)+'.'+str("%.3f" % (dec[2])).zfill(6)
             total_flux.append(g.total_flux)
@@ -276,16 +296,11 @@ def write_gaul(img, filename=None, format='ascii', srcroot=None):
                 spin1 = g.spin1
                 if spin1 != None:
                     specin = str("%.3e" % (spin1[1]))
-                # srcid = g.source_id
-                # src_for_g = img.source[srcid]
-                # for g_src in src_for_g.gaussians:
-                #     if g_src.gaus_num == g.gaus_num:
-                #         spin1 = g_src.spin1
-                #         if spin1 != None:
-                #             specin = str("%.3e" % (spin1[1]))
-                       
-            str_src.append(src + sep + stype + sep + sra + sep + sdec + sep + total + sep + pol + \
-                          freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
+            if patches:
+                str_src.append(', , ' + patch + ', 00:00:00, +00.00.00\n' + src + sep + stype + sep + patch + sep + sra + sep + sdec + sep + total + sep + pol + freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
+            else:
+                str_src.append(src + sep + stype + sep + sra + sep + sdec + sep + total + sep + pol + \
+                                   freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
         # sort by flux (largest -> smallest)
         flux_indx = range(len(str_src))
         flux_indx.sort(lambda x,y: cmp(total_flux[x],total_flux[y]), reverse=True)
@@ -326,27 +341,43 @@ def write_gaul(img, filename=None, format='ascii', srcroot=None):
         print '--> Wrote ds9 region file ' + filename
         
 def write_resid_img(img, filename=None):
-    """Write the residual Gaussian image to a fits file."""
+    """Write the residual Gaussian and shapelet (if done) images to a fits file."""
     if filename == None:
-        filename = img.imagename + '.resid_gaus.fits'
-    temp_im = make_fits_image(N.transpose(img.resid_gaus), img.wcs_obj)
-    temp_im.writeto(filename, clobber=True)
-    print 'Wrote FITS file ' + filename
+        filename_g = img.imagename + '.resid_gaus.fits'
+        filename_s = img.imagename + '.resid_shap.fits'
+    else:
+        filename_g = filename
+        filename_s = os.path.splitext(filename)[0] + '_shap' + os.path.splitext(filename)[1]
+    temp_im = make_fits_image(N.transpose(img.resid_gaus), img.wcs_obj, img.beam, img.freq_pars)
+    temp_im.writeto(filename_g, clobber=True)
+    print 'Wrote FITS file ' + filename_g
+    if img.opts.shapelet_do == True:
+        temp_im = make_fits_image(N.transpose(img.resid_shap), img.wcs_obj, img.beam, img.freq_pars)
+        temp_im.writeto(filename_s, clobber=True)
+        print 'Wrote FITS file ' + filename_s
 
 def write_model_img(img, filename=None):
     """Write the model Gaussian image to a fits file."""
     if filename == None:
-        filename = img.imagename + '.model_gaus.fits'
-    temp_im = make_fits_image(N.transpose(img.model_gaus), img.wcs_obj)
-    temp_im.writeto(filename, clobber=True)
-    print 'Wrote FITS file ' + filename
+        filename_g = img.imagename + '.model_gaus.fits'
+        filename_s = img.imagename + '.model_shap.fits'
+    else:
+        filename_g = filename
+        filename_s = os.path.splitext(filename)[0] + '_shap' + os.path.splitext(filename)[1]
+    temp_im = make_fits_image(N.transpose(img.model_gaus), img.wcs_obj, img.beam, img.freq_pars)
+    temp_im.writeto(filename_g, clobber=True)
+    print 'Wrote FITS file ' + filename_g
+    if img.opts.shapelet_do == True:
+        temp_im = make_fits_image(N.transpose(img.model_shap), img.wcs_obj, img.beam, img.freq_pars)
+        temp_im.writeto(filename_s, clobber=True)
+        print 'Wrote FITS file ' + filename_s
 
 def write_rms_img(img, filename=None):
     """Write the rms image to a fits file."""
     if img.opts.rms_map == True:
         if filename == None:
             filename = img.imagename + '.rms.fits'
-        temp_im = make_fits_image(N.transpose(img.rms), img.wcs_obj)
+        temp_im = make_fits_image(N.transpose(img.rms), img.wcs_obj, img.beam, img.freq_pars)
         temp_im.writeto(filename, clobber=True)
         print 'Wrote FITS file ' + filename
     else:
@@ -356,11 +387,11 @@ def write_ch0_img(img, filename=None):
     """Write the ch0 image (used for source detection) to a fits file."""
     if filename == None:
         filename = img.imagename + '.ch0.fits'
-    temp_im = make_fits_image(N.transpose(img.ch0), img.wcs_obj)
+    temp_im = make_fits_image(N.transpose(img.ch0), img.wcs_obj, img.beam, img.freq_pars)
     temp_im.writeto(filename, clobber=True)
     print 'Wrote FITS file ' + filename
 
-def make_fits_image(imagedata, wcsobj):
+def make_fits_image(imagedata, wcsobj, beam, freq):
     """Makes a simple FITS hdulist appropriate for images"""
     import pyfits
     hdu = pyfits.PrimaryHDU(imagedata)
@@ -376,6 +407,12 @@ def make_fits_image(imagedata, wcsobj):
     header.update('CRPIX2', wcsobj.crpix[1])
     header.update('CROTA1', wcsobj.crota[0])
     header.update('CROTA2', wcsobj.crota[1])
+    header.update('BMAJ', beam[0])
+    header.update('BMIN', beam[1])
+    header.update('BPA', beam[2])
+    header.update('CRVAL3', freq[0])
+    header.update('CDELT3', freq[1])
+    header.update('CRPIX3', freq[2])
     hdulist[0].header = header
     return hdulist
     
@@ -416,8 +453,6 @@ def pybdsm2fbdsm(img):
         ex, ey = g.centre_pixE
         eshape = g.size_skyE
         if img.opts.spectralindex_do:
-            # if hasattr(g, 'spin1') == False:
-            #     import pdb; pdb.set_trace()
             spin1 = g.spin1
             espin1 = g.espin1
             if spin1 == None:
@@ -426,26 +461,12 @@ def pybdsm2fbdsm(img):
             else:                       
                 specin = spin1[1]
                 especin = espin1[1]
-            # srcid = g.source_id
-            # src_of_g = img.source[srcid]
-            # for g_src in src_of_g.gaussians:
-            #     if g_src.gaus_num == g.gaus_num:
-            #         if hasattr(g_src, 'spin1') == False:
-            #             import pdb; pdb.set_trace()
-            #         spin1 = g_src.spin1
-            #         espin1 = g_src.espin1
-            #         if spin1 == None:
-            #             specin = 0.0
-            #             especin = 0.0
-            #         else:                       
-            #             specin = spin1[1]
-            #             especin = espin1[1]
         else:
             specin = 0.0
             especin = 0.0
   
         list1 = [gidx, iidx, F, T, eT, A, eA, ra, era, dec, edec, x, ex, y, ey, shape[0], eshape[0], shape[1], eshape[1], \
-                 shape[2], eshape[2], 0.,0.,0.,0.,0.,0., 0.,0.,0.,0.,specin , especin, iidx, 0,0,0,0, 0.,0.,0.,0.,0.,0.]
+                 shape[2], eshape[2], 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., specin, especin, iidx, 0, 0, 0, 0, 0.]
         fbdsm.append(list1)
     fbdsm = func.trans_gaul(fbdsm)
     return fbdsm

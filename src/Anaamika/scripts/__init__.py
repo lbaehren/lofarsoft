@@ -109,7 +109,7 @@ def execute(chain, opts):
     return img
 
 
-def process_image(input_file, beam=None, beam_spectrum=None, freq=None, thresh_isl=3.0, thresh_pix=5.0, thresh_gaus=None, use_rms_map=None, rms_box=None, extended=False, gaussian_maxsize=10.0, spectralindex_do=False, polarisation_do=False, shapelet_do=False, use_pyrap=True, collapse_mode='average', collapse_ch0=0, collapse_wt='rms', quiet=False):
+def process_image(input_file, beam=None, beam_spectrum=None, freq=None, thresh_isl=3.0, thresh_pix=5.0, thresh_gaus=None, use_rms_map=None, rms=None, rms_box=None, extended=False, gaussian_maxsize=10.0, spectralindex_do=False, polarisation_do=False, shapelet_do=False, use_pyrap=True, collapse_mode='average', collapse_ch0=0, collapse_av=[], collapse_wt='rms', quiet=False):
     """
     Run a standard analysis and returns the associated Image object.
 
@@ -130,10 +130,15 @@ def process_image(input_file, beam=None, beam_spectrum=None, freq=None, thresh_i
                       perform source detection on
       collapse_ch0 = Number of the channel for source extraction, if collapse_mode =
                      "single"
+      collapse_av = List of channels to average if collapse_mode = "average" (default
+                    = [] => use all channels)
       collapse_wt = unity/rms; Average channels with weights=1 or 1/rms^2 if 
                     collapse_mode="average"
+                    
       use_rms_map = None/True/False; use 2D map of rms or constant (default = None
                     => determine automatically)
+      rms = None or value to use for constant rms when use_rms_map=False (default =
+            None)
       rms_box = None or (box_size [pixels], box_step [pixels])
       gaussian_maxsize = maximum allowed Gaussian size in number of beam areas
                          (default = 10.0)
@@ -197,6 +202,8 @@ def process_image(input_file, beam=None, beam_spectrum=None, freq=None, thresh_i
         raise RuntimeError('collapse_ch0 must be an integer')
     if (collapse_wt in ['rms', 'unity']) == False:
         raise RuntimeError('collapse_wt must be "rms" or "unity"')
+    if isinstance(collapse_av, list) == False:
+        raise RuntimeError('collapse_av must be a list of integers.')
     # if threshold_method != None and (threshold_method in ['hard', 'fdr']) == False:
     #     raise RuntimeError('threshold_method must be None, "hard", or "fdr"')
     if use_rms_map != None and isinstance(use_rms_map, bool) == False :
@@ -265,12 +272,13 @@ def process_image(input_file, beam=None, beam_spectrum=None, freq=None, thresh_i
                           Op_threshold(), 
                           Op_islands(),
                           Op_gausfit(), 
+                          Op_shapelets(),
                           Op_make_residimage(),
                           Op_outlist()
                           ]
 
     # Build options dictionary
-    opts = {'filename':input_file, 'fits_name':input_file, 'beam': beam, 'beam_spectrum': beam_spectrum, 'frequency':freq, 'thresh_isl':thresh_isl, 'thresh_pix':thresh_pix, 'thresh_gaus':thresh_gaus, 'polarisation_do':polarisation_do, 'spectralindex_do':spectralindex_do, 'shapelet_do':shapelet_do, 'rms_map':use_rms_map, 'rms_box': rms_box, 'flag_maxsize_bm':gaussian_maxsize, 'use_pyrap':use_pyrap, 'thresh':'hard', 'collapse_mode':collapse_mode, 'collapse_ch0':collapse_ch0, 'collapse_wt':collapse_wt, 'quiet':quiet}
+    opts = {'filename':input_file, 'fits_name':input_file, 'beam': beam, 'beam_spectrum': beam_spectrum, 'frequency':freq, 'thresh_isl':thresh_isl, 'thresh_pix':thresh_pix, 'thresh_gaus':thresh_gaus, 'polarisation_do':polarisation_do, 'spectralindex_do':spectralindex_do, 'shapelet_do':shapelet_do, 'rms_map':use_rms_map, 'rms_box': rms_box, 'flag_maxsize_bm':gaussian_maxsize, 'use_pyrap':use_pyrap, 'thresh':'hard', 'collapse_mode':collapse_mode, 'collapse_ch0':collapse_ch0, 'collapse_av':collapse_av, 'collapse_wt':collapse_wt, 'quiet':quiet, 'rms_value':rms}
 
     # Run execute with the fits_chain and given options
     img = execute(fits_chain, opts)
