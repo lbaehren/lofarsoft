@@ -100,7 +100,7 @@ inline T square(const T val)
 template <class T>
 inline T HFPP_FUNC_NAME(const T val)
 {
-  if (val>0) return log(val);
+  if (val>hfcast<HNumber>(0)) return log(val);
   else return A_LOW_NUMBER;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
