@@ -10,6 +10,7 @@ import numpy as np
 import datacheck as dc
 import pulsefit as pf
 import matching as match # possibly push this down to pulsefit?
+# import beamformer as bf
 
 antennaset = 'LBA_OUTER' # hack around missing info in data files
 
@@ -62,7 +63,7 @@ def runAnalysis(files, triggers, outfilename):
         triggerFitResult = result
         # now find the final direction based on all data, using initial direction as starting point
         try: # apparently it's dangerous...
-          result = pf.fullDirectionFit(crfile, triggerFitResult, 2*65536, flaggedList = flaggedList)     
+          result = pf.fullDirectionFit(crfile, triggerFitResult, 4096, flaggedList = flaggedList)     
           writeDict(outfile, result)
           if not result["success"]:
               continue
@@ -81,11 +82,11 @@ if len(sys.argv) > 2:
 elif len(sys.argv) > 1:
     datafiles = sys.argv[1]
     print 'Taking default trigger message file.'
-    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER.dat'
+    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_.dat'
 else:
     print 'No files given on command line, using a default set instead.'
-    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-23*'
-    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat'
+    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-2*.h5'
+    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat' #TRIGGER_debugstripped.dat'
     #datafiles = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/*'
     #triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs006.dat'
 

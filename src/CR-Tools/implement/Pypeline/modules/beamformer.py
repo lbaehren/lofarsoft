@@ -16,6 +16,8 @@ class Beamformer(object):
     def __init__(self, crfile, cr_fft):
         nofAntennas = crfile["nofAntennas"]
         
+        blocksize = crfile["blocksize"]
+        
         self.delays=hArray(float,dimensions=[nofAntennas])
         self.weights=hArray(complex,dimensions = cr_fft,name="Complex Weights")
         self.freqs = hArray(crfile["frequencyValues"]) # a FloatVec comes out, so put it into hArray
@@ -24,19 +26,20 @@ class Beamformer(object):
         
         self.beamformed_fft=hArray(complex,dimensions=[crfile["fftLength"]])
         
-        self.tiedArrayBeam = hArray(float, dimensions=[crfile["blocksize"]])
-        self.incoherentBeam = hArray(float, dimensions=[crfile["blocksize"]])
-        self.ccBeam = hArray(float, dimensions=[crfile["blocksize"]])
+        self.tiedArrayBeam = hArray(float, dimensions=[blocksize])
+        self.incoherentBeam = hArray(float, dimensions=[blocksize])
+        self.ccBeam = hArray(float, dimensions=[blocksize])
         
-        self.beamformed_smoothed=hArray(float,dimensions=[crfile["blocksize"]])
+        self.beamformed_smoothed=hArray(float,dimensions=[blocksize])
 
         self.azel=hArray(float,dimensions=[3])
-        self.cartesian=azel.new()
-  
+        self.cartesian=self.azel.new()
+        self.blocksize = blocksize
+        
   #antennaPositionsForIndices = 
   # FIX: cut out the right antennaIndices here! In antenna_positions, dimensions for new arrays, then beamforming...
 
-    def tiedArrayBeam(azel_in, cr_fft, antennaPositions, antennaIndices):
+    def getTiedArrayBeam(self, azel_in, cr_fft, antennaPositions, antennaIndices, FarField):
         print 'Evaluating for az = %f, el = %f' % (azel_in[0], azel_in[1]),
         if ( azel_in[0] > 360. or azel_in[0] < 0. or azel_in[1] > 90. or azel_in[1] < 0.):
             erg = 0.
@@ -63,12 +66,12 @@ class Beamformer(object):
         return self.tiedArrayBeam
     
     
-    def pulseMaximizer(azel_in, cr_fft, antennaPositions, antennaIndices):
-        tiedArrayBeam = tiedArrayBeam(azel_in, cr_fft, antennaPositions, antennaIndices)
+    def pulseMaximizer(self, azel_in, cr_fft, antennaPositions, antennaIndices, FarField):
+        tiedArrayBeam = self.getTiedArrayBeam(azel_in, cr_fft, antennaPositions, antennaIndices, FarField)
         tiedArrayBeam.abs() # make absolute value!
 #        hRunningAverage(beamformed_smoothed, tiedArrayBeam, 5, hWEIGHTS.GAUSSIAN)
 
-        value = - tiedArrayBeam.max()[0] / blocksize # just the maximum. 
+        value = - tiedArrayBeam.max()[0] / self.blocksize # just the maximum. 
         print ' value = %f ' % value
         return value
         
