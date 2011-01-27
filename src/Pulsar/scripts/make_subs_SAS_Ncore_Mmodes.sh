@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.9
+VERSION=2.10
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -672,7 +672,7 @@ do
 	    then
 	       core=`ls -F $location/${STOKES} | grep -w 'RSP[0-7].' | wc -l`
 	    else
-	       core=`ls -F $location/${STOKES}/*/* | grep -w 'RSP[0-7].' | wc -l`	    	    
+	       core=`ls -F $location/${STOKES}/*/* | egrep -w 'RSP[0-7].|beam_[0-7].' | sed 's/^.*\///' | sort | uniq | wc -l`	    	    
 	    fi
 	    
 	    if [ $core -lt 1 ]
@@ -1109,7 +1109,7 @@ do
 
 	# Calculating the number of samples to be passed to inf-file
 	split_files=`echo $all_num $CHAN | awk '{print $1 * $2}'`
-	if (( $flyseye == 0 ))
+	if (( $flyseye == 0 )) && (( $rfi_pproc == 0 ))
 	then
 	    # check the file sizes to be sure all sub files are the same
 	    file_size_check=`ls -l ${location}/${STOKES}/RSP0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort | uniq -c | head -1 | awk '{print $1}'`
@@ -1120,7 +1120,8 @@ do
 	       echo "WARNING: RSP0/SubXXXX files are not all the same size;  raw data and processing is suspect to problems." >> $log
 	    fi
 		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort -n | uniq -c | sort -n -r | head -1 | awk '{print $2 / 2 }' -`
-	else
+	elif (( $flyseye == 1 )) && (( $rfi_pproc == 0 ))
+	then
 	    file_size_check=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort | uniq -c | head -1 | awk '{print $1}'`
 	    num_files_check=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP0.sub???? | grep -v .inf | wc -l | awk '{print $1}`
 	    if (( $file_size_check != $num_files_check ))
@@ -1724,10 +1725,30 @@ do
 	         fi
 	         subdyn_pid[$ii]=$!
 	      else
-			 for jjj in $beams_init
+# commented out as there seems to be a bug for FE (solar obs)
+#			 for jjj in $beams_init
+#			 do
+#		         echo cd ${location}/${STOKES}/${jjj}/RSP${ii} >> $log
+#		         cd ${location}/${STOKES}/${jjj}/RSP${ii}
+#		         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
+#			     if [ $test == 0 ]
+#			     then
+#		            python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
+#		         fi
+#		         subdyn_pid[$ii][$jjj]=$!	
+#	         done      
+
+             if [ $rfi_pproc == 1 ]
+             then
+                loop_beams=$beams
+             else
+                loop_beams=$beams_init
+             fi
+
+			 for jjj in $loop_beams
 			 do
-		         echo cd ${location}/${STOKES}/${jjj}/RSP${ii} >> $log
-		         cd ${location}/${STOKES}/${jjj}/RSP${ii}
+		         echo cd ${location}/${STOKES}/${jjj}/beam_${ii} >> $log
+		         cd ${location}/${STOKES}/${jjj}/beam_${ii}
 		         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
 			     if [ $test == 0 ]
 			     then
@@ -1735,6 +1756,7 @@ do
 		         fi
 		         subdyn_pid[$ii][$jjj]=$!	
 	         done      
+
           fi
 	   done
 	
@@ -1752,7 +1774,7 @@ do
 	   else
 	      for ii in $num_dir
 	      do
-			 for jjj in $beams_init
+			 for jjj in $loop_beams
 			 do
 		         echo "Waiting for RSP$ii and $jjj subdyn to finish"
 	             wait ${subdyn_pid_[ii][jjj]}
@@ -1807,7 +1829,8 @@ do
 			      do
 			         offset=$(( $all_num * $CHAN / $core * $ii ))
 		             echo "RFI beam=$jjj, all_num=$all_num, chan=$CHAN, core=$core, num_dir=ii=$ii ==> offset=$offset"
-			         cat $location/${STOKES}/${jjj}/RSP${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
+#			         cat $location/${STOKES}/${jjj}/RSP${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
+			         cat $location/${STOKES}/${jjj}/beam_${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
 			      done
 	
 		      done
