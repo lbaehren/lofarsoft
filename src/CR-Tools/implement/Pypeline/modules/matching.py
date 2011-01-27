@@ -108,7 +108,13 @@ def readtriggers(filename):
     for i in range(nevents):
       str_line = fd.readline()
       antennaIDs[i] = int(str_line.split()[0])
-      dates[i] = int(str_line.split()[2])
+      testdate = long(str_line.split()[2])
+      # Have to check for invalid dates! These are 2^32 - 1, and somehow Python complains about not getting that into its 'int' type...
+      if testdate < 2.2e9:
+          dates[i] = int(testdate)
+      else:
+          dates[i] = 0 # not easy to skip over it... it'll fall out when matching dates.
+
       samplenumers[i] = int(str_line.split()[3])
       dDates[i] = float(dates[i]) + float(samplenumers[i])/200.0e6
     fd.close()
