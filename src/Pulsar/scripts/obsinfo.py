@@ -450,7 +450,6 @@ class outputInfo:
 		self.chi_array = chi_array
 		self.combined_plot = combined_plot
 		self.archivestatus = archivestatus
-		self.archivestatus = "x"
 
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
 		self.totsize=0.0
@@ -522,7 +521,6 @@ class outputInfo:
 		# converting total size to GB
 		self.totsize = "%.1f" % (self.totsize / 1024. / 1024. / 1024.,)
 		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
-		self.archivestatus = "x"
 
 		if viewtype == "brief":
 			self.colspan = 13
