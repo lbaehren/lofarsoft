@@ -141,6 +141,10 @@ plt.plot() like color="red"
 - Added hReadTextTable to read data from a textfile
 - added hSplitString (not in Python) to split a string into words.
 
+2011-01-27 Pypeline - rev 6860 - Heino Falcke
+- Added hWriteTextTable to write data to a textfile
+- changed parameters in hReadTextTable
+
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------

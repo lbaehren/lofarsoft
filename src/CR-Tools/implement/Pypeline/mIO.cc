@@ -293,7 +293,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, const HString key)
 #define HFPP_FUNC_NAME hFileSetParameter
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
-#define HFPP_FUNCDEF  (bool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNCDEF  (HBool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object openen, e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be set in the file")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HPyObjectPtr)(pyob)()("Input parameter")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -302,7 +302,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, const HString key)
  \brief $DOCSTRING
  $PARDOCSTRING
 */
-bool HFPP_FUNC_NAME(CRDataReader &dr, const HString key, const HPyObjectPtr pyob)
+HBool HFPP_FUNC_NAME(CRDataReader &dr, const HString key, const HPyObjectPtr pyob)
 {
   DataReader *drp=&dr;
   HString key1(key);
@@ -745,7 +745,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   $PARDOCSTRING
 
 Related functions:
-  hReadDump, hWriteDump
+  hReadDump, hWriteDump,  hWriteTextTable,  hReadTextTable
 
 Python Example:
   >>> hWriteFileBinaryVector
@@ -786,7 +786,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   $PARDOCSTRING
 
 Related functions:
-  hReadDump, hWriteDump
+  hReadDump, hWriteDump,  hWriteTextTable,  hReadTextTable
 
 Example:
  x=hArray(range(20))
@@ -822,39 +822,39 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
 #define HFPP_FUNC_NAME hReadTextTable
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Output data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to read data from.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HInteger)(skiplines)()("The number of lines to skip before reading the data.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_3 (HInteger)(nlines)()("The number of lines to read. If equal to -1 read all.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_4 (HInteger)(columns)()("An array with a list of column numbers (starting at zero) from which to read data into the array. Read all if empty.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(skiprows)()("The number of rows to skip before reading the data.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(columns)()("An array with a list of column numbers (starting at zero) from which to read data into the array. Read all if empty.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HInteger)(nrows)()("The number of rows to read. If equal to -1 read all.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  vec.readtexttable(filename,skiplines,nlines,columns) -> reads a number of columns into the vector vec
+  vec.readtexttable(filename,skiprows,columns,nrows) -> reads a number of columns into the vector vec
 
   \brief $DOCSTRING
   $PARDOCSTRING
 
 Related functions:
-  hReadDump, hWriteDump
+  hReadDump, hWriteDump,  hWriteTextTable,  hReadTextTable
 
 Example:
   from pycrtools import *
   vec=Vector(float,24*3)
-  hReadTextTable(vec, "AERAcoordinates-1.txt", 4, 10, Vector([5,3,7]))
-hReadTextTable(vec, "AERAcoordinates-1.txt", 4, -1, Vector([5,3,7]))
+  hReadTextTable(vec, "AERAcoordinates-1.txt", 4, Vector([5,3,7]),10)
 
-This will skip the first 4 lines and then read 10 lines where columns
+
+This will skip the first 4 rows and then read 10 rows where columns
 5,3,&7 will be read into the vector vec. The ordering will be [l0.c5,
 l0.c3, l0.c7, l1.c5, l1.c3, l1.c7, ..., l9.c7] (where l and c stand
-for line and column respectively)
+for row and column respectively)
 
 */
 template <class Iter, class IterI>
-void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInteger skiplines, HInteger nlines, const IterI columns, const IterI columns_end) {
+void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename,  HInteger skiprows, const IterI columns, const IterI columns_end, HInteger nrows) {
   ifstream infile(filename.c_str(), ios::in);
-  HInteger nskip(skiplines);
-  HInteger linesread(0);
-  HString line;
+  HInteger nskip(skiprows);
+  HInteger rowsread(0);
+  HString row;
   IterI col_it;
   Iter vec_it(vec);
   HInteger col_max = 0;
@@ -875,12 +875,12 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
   }
 
   if (infile){
-    while(getline(infile,line) && (!infile.eof()) && (linesread != nlines) && (vec_it < vec_end)) {
+    while(getline(infile,row) && (!infile.eof()) && (rowsread != nrows) && (vec_it < vec_end)) {
       if (nskip>0) {
 	--nskip;
       } else {
-	++linesread;
-	words = stringSplit(line); //Split the line into words separated by whitespaces
+	++rowsread;
+	words = stringSplit(row); //Split the row into words separated by whitespaces
         if (col_max < (HInteger)words.size()) {
           col_it = columns;
           while (col_it != columns_end) { //loop over all columns listed in the columns array
@@ -892,7 +892,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
           }
          } else {
           // warning: column index out of range for this line: line is skipped
-          cout << "Warning: requested field not found in line " << linesread << ": line skipped" << endl;
+          cout << "Warning: requested field not found in row " << rowsread << ": row skipped" << endl;
         }
       }
     }
@@ -900,6 +900,67 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
   } else {
     throw PyCR::IOError("Unable to open file.");
   }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Write columns of data in an array to a (ASCII) text file. 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hWriteTextTable
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Output data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to write data to.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HString)(header)()("The header to preceed the table, e.g. a description of the columns.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(ncolumns)()("The number of columns in the table.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(nrows)()("The number of rows to write. If equal to -1 write all.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HBool)(append)()("If true append data to the file, rather than overwrite it.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  vec.writetexttable(filename,header,ncolumns,nrows) -> write vec as table into filename
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Related functions:
+  hReadDump, hWriteDump,  hWriteTextTable,  hReadTextTable
+
+Example:
+  from pycrtools import *
+  vec=Vector(float,24*3,fill=range(24*3))
+  vec.writetexttable("table.dat","# col1, col2, col3", 3, 24,False)
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename,  HString header, HInteger ncolumns, HInteger nrows, HBool append) {
+  Iter it(vec);
+  HInteger row(0);
+  HInteger col;
+  //  typedef IterValueType T;
+
+  ofstream outfile;
+  
+  if (ncolumns<=0) return;
+
+  if (append) outfile.open(filename.c_str(), ios::out | ios::app);
+  else outfile.open(filename.c_str(), ios::out);
+
+  if (outfile){
+    outfile << header << endl;
+    while((row != nrows) && (it != vec_end)) {
+      col=ncolumns;
+      while (col != 0) { //loop over all columns
+	if ( it != vec_end) {
+	  outfile << *it << " ";
+	  ++it; --col;
+	};
+      };
+      ++row;
+      outfile << endl;
+    };
+    outfile.close();
+  } else {
+    throw PyCR::IOError("Unable to open file.");
+  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

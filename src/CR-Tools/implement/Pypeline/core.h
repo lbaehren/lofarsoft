@@ -364,6 +364,24 @@ inline HComplex operator-(HComplex c, HInteger i) {return c-hfcast<HComplex>(i);
 inline HComplex operator/(HInteger i, HComplex c) {return hfcast<HComplex>(i)/c;}
 inline HComplex operator/(HComplex c, HInteger i) {return c/hfcast<HComplex>(i);}
 
+inline bool operator< (HInteger i, HComplex c) {return (i <  real(c));}
+inline bool operator> (HInteger i, HComplex c) {return (i >  real(c));}
+inline bool operator>=(HInteger i, HComplex c) {return (i >= real(c));}
+inline bool operator<=(HInteger i, HComplex c) {return (i <= real(c));}
+inline bool operator< (HNumber  n, HComplex c) {return (n <  real(c));}
+inline bool operator> (HNumber  n, HComplex c) {return (n >  real(c));}
+inline bool operator>=(HNumber  n, HComplex c) {return (n >= real(c));}
+inline bool operator<=(HNumber  n, HComplex c) {return (n <= real(c));}
+
+inline bool operator< (HComplex c, HInteger i) {return ( real(c) <  i);}
+inline bool operator> (HComplex c, HInteger i) {return ( real(c) >  i);}
+inline bool operator>=(HComplex c, HInteger i) {return ( real(c) >= i);}
+inline bool operator<=(HComplex c, HInteger i) {return ( real(c) <= i);}
+inline bool operator< (HComplex c, HNumber  n) {return ( real(c) <  n);}
+inline bool operator> (HComplex c, HNumber  n) {return ( real(c) >  n);}
+inline bool operator>=(HComplex c, HNumber  n) {return ( real(c) >= n);}
+inline bool operator<=(HComplex c, HNumber  n) {return ( real(c) <= n);}
+
 
 //========================================================================
 //                        Helper Functions

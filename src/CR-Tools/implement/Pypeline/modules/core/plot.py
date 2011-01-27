@@ -1,5 +1,7 @@
 """Provides an n-dimensional array class.
 """
+#import pdb
+#pdb.set_trace()
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -67,48 +69,48 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     var="clf"; dflt=True; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     var="xlabel"; dflt=""; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     var="ylabel"; dflt=""; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     var="xlim"; dflt=None; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     var="ylim"; dflt=None; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     var="legend"; dflt=None; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     var="title"; dflt=""; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
         elif hasattr(self.par,"filename"): exec(var+"=self.par.filename")
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     var="logplot"; dflt=""; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     var="highlightcolor"; dflt=("red"); val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     var="nhighlight"; dflt=[1]; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     var="highlight"; dflt=None; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec("var=dflt")
+        else: exec(var+"="+str(dflt.__repr__()))
     if type(val)==str: val=(str)
     if clf: self.plt.clf()
     if logplot=="x": _plot=self.plt.semilogx
@@ -119,8 +121,11 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     while (iterate):
         _plot(xvalues.vec(),self.vec(),**plotargs)
         if not highlight==None:
+            if type(nhighlight)==int: nhighlight=[nhighlight]
+            hv=highlight.vec()
+            ha=hArray(hv,[len(hv)/2,2])
             for n in range(nhighlight[loop]): #how many sections are to be highlighted?
-                slc=slice(highlight[n,0],highlight[n,1]+1)
+                slc=slice(ha[n,0],ha[n,1]+1)
                 _plot(xvalues.vec()[slc],self.vec()[slc],color=highlightcolor)
         xvalues.next()
         iterate=self.next().doLoopAgain()

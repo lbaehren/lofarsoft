@@ -1771,7 +1771,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType minim
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMean
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+//#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
@@ -1783,7 +1783,7 @@ template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
   // Declaration of variables
-  HNumber mean = hSum(vec,vec_end);
+  HNumber mean = hfcast<HNumber>(hSum(vec,vec_end));
   HInteger len = vec_end - vec;
 
   // Sanity check
@@ -1938,25 +1938,23 @@ T HFPP_FUNC_NAME(std::vector<T> & vec)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hStdDev
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter>
-HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType mean)
+template <class Iter, class T>
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const T mean)
 {
-  typedef IterValueType T;
   HNumber scrt,sum=0.0;
   HInteger len=vec_end-vec;
   Iter it=vec;
   while (it<vec_end) {
-    scrt = *it - mean;
+    scrt = hfcast<HNumber>(*it - mean);
     sum += scrt * scrt;
     ++it;
   };
@@ -1971,26 +1969,24 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType m
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hStdDevBelow
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter>
-HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType mean)
+template <class Iter, class T>
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const T mean)
 {
-  typedef IterValueType T;
-  HNumber scrt,sum=0.0;
-  HInteger len=(0);
-  Iter it=vec;
+  HNumber scrt,sum(0.0);
+  HInteger len(0);
+  Iter it(vec);
   while (it<vec_end) {
-    if (*it <= mean) {
-      scrt = *it - mean;
+    if (hfcast<HNumber>(*it) <= mean) {
+      scrt = hfcast<HNumber>(*it - mean);
       sum += scrt * scrt;
       ++len;
     };
@@ -2007,26 +2003,24 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType m
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hStdDevAbove
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(mean)()("The mean value of the vector calculated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter>
-HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const IterValueType mean)
+template <class Iter, class T>
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const T mean)
 {
-  typedef IterValueType T;
-  HNumber scrt,sum=0.0;
-  HInteger len=(0);
-  Iter it=vec;
+  HNumber scrt,sum(0.0);
+  HInteger len(0);
+  Iter it(vec);
   while (it<vec_end) {
-    if (*it >= mean) {
-      scrt = *it - mean;
+    if (hfcast<HNumber>(*it) >= mean) {
+      scrt = hfcast<HNumber>(*it - mean);
       sum += scrt * scrt;
       ++len;
     };
@@ -2232,6 +2226,34 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
 //$ITERATE MFUNC Between,BetweenOrEqual,Outside,OutsideOrEqual
 //========================================================================
 
+//$DOCSTRING: Count the samples that are $MFUNC a certain threshold value and returns the number of samples found.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCount{$MFUNC}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(lower_limit)()("Lower limit to search for.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(upper_limit)()("Upper limit to search for.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter, class T>
+HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const T lower_limit, const T upper_limit)
+{
+  Iter it(vec);
+  HInteger count(0);
+  while (it<vec_end) {
+    if  ({$MFUNC}(*it,lower_limit,upper_limit)) ++count;
+    ++it;
+  };
+  return count;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Find the first sample that is $MFUNC the two input values and return its position. Return -1 if not found.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFind{$MFUNC}
@@ -2417,9 +2439,10 @@ HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
 #define HFPP_FUNC_NAME hFind{$MFUNC}
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
+#define HFPP_FUNC_VARIANT 1
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector to search through.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("Threshold value to search for.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Input vector to search through.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(threshold)()("Threshold value to search for.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -2427,9 +2450,9 @@ HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
 
 See also: findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
 */
-template <class Iter>
-HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
-			 const IterValueType threshold)
+template <class Iter, class T>
+HInteger hFind{$MFUNC}1 (const Iter vecin,const Iter vecin_end,
+			 const T threshold)
 {
   // Declaration of variables
   Iter itin(vecin);
@@ -2452,10 +2475,11 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
 #define HFPP_FUNC_NAME hFind{$MFUNC}
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
+#define HFPP_FUNC_VARIANT 2
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in the input vector which satisfy the threshold condition.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -2463,15 +2487,15 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
 
 See also: find, findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
 */
-template <class Iter>
-HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
+template <class Iter, class T>
+HInteger hFind{$MFUNC}2 (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
 			 const Iter vecin , const Iter vecin_end,
-			 const IterValueType threshold
+			 const T threshold
 			 )
 {
   // Declaration of variables
-  Iter itin=vecin;
-  typename vector<HInteger>::iterator itout=vecout;
+  Iter itin(vecin);
+  typename vector<HInteger>::iterator itout(vecout);
 
   // Function operation
   while (itin != vecin_end) {
@@ -2494,22 +2518,22 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 #define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in input vector which are above threshold")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vecin)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter>
+template <class Iter, class T>
 HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
 			 const Iter vecin , const Iter vecin_end,
-			 const IterValueType threshold
+			 const T threshold
 			 )
 {
   // Declaration of variables
-  Iter itin=vecin;
-  typename vector<HInteger>::iterator itout=vecout;
+  Iter itin(vecin);
+  typename vector<HInteger>::iterator itout(vecout);
   HInteger lenIn = vecin_end - vecin;
   HInteger lenOut = vecout_end - vecout;
 
@@ -2540,18 +2564,18 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter>
-HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueType threshold)
+template <class Iter, class T>
+HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const T threshold)
 {
-  Iter it=vec;
-  HInteger count=0;
+  Iter it(vec);
+  HInteger count(0);
   while (it<vec_end) {
     if (*it HFPP_OPERATOR_$MFUNC threshold) ++count;
     ++it;
@@ -2566,18 +2590,18 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter>
-HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueType threshold)
+template <class Iter, class T>
+HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const T threshold)
 {
-  Iter it=vec;
-  HInteger count=0;
+  Iter it(vec);
+  HInteger count(0);
   while (it<vec_end) {
     if (abs(*it) HFPP_OPERATOR_$MFUNC threshold) ++count;
     ++it;
@@ -2593,8 +2617,8 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
 #define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of 3 tuples of position, length, and mean value for each sequence found.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(threshold)()("Threshold value - if values are $MFUNC this, they can belong to a sequence.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vecin)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(threshold)()("Threshold value - if values are $MFUNC this, they can belong to a sequence.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_3 (HInteger)(maxgap)()("The maximum gap (in between sample numbers) between two samples to still belong to one sequence. 0=no gaps allowed, i.e. consecutive.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_4 (HInteger)(minlength)()("The minimum length of a sequence.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 
@@ -2625,10 +2649,10 @@ npeaks -> Vec(int,4)=[3,3,3,3]
 datapeaks -> hArray(int,[4, 256, 2], name="Location of peaks") # len=2048, slice=[0:512], vec -> [2,4,32,33,64,68,0,0,...]
 
 */
-template <class Iter, class IterI>
+template <class Iter, class IterI, class T>
 HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
 			 const Iter vecin , const Iter vecin_end,
-			 const IterValueType threshold,
+			 const T threshold,
 			 const HInteger maxgap,
 			 const HInteger minlength
 			 )
@@ -2668,8 +2692,6 @@ HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$ENDITERATE
-
-
 
 // ========================================================================
 //

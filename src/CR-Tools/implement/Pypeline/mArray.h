@@ -188,6 +188,7 @@ template <class T>
     .def("doLoopAgain",&hArray<TYPE>::doLoopAgain)			\
     .def("loop_i",&hArray<TYPE>::getLoop_i)				\
     .def("loop_nslice",&hArray<TYPE>::getLoop_nslice)			\
+    .def("setLoopSlice",&hArray<TYPE>::setLoopSlice)			\
     .def("loop_start",&hArray<TYPE>::getLoop_start)			\
     .def("loop_end",&hArray<TYPE>::getLoop_end)				\
     .def("loop_increment",&hArray<TYPE>::getLoop_increment)		\

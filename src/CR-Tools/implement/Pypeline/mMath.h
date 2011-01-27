@@ -38,13 +38,21 @@ enum hWEIGHTS {WEIGHTS_FLAT,WEIGHTS_LINEAR,WEIGHTS_GAUSSIAN};
 //                           Math Functions
 //========================================================================
 
-
+/*
 #define Between(x,lower,upper) ((x > lower) && (x < upper))
 #define BetweenOrEqual(x,lower,upper) ((x >= lower) && (x <= upper))
 #define Outside(x,lower,upper) ((x < lower) || (x > upper))
 #define OutsideOrEqual(x,lower,upper) ((x <= lower) || (x >= upper))
+*/
 
-
+template <class T, class S>
+  inline bool Between(T x, S lower, S upper) {return ((x > lower) && (x < upper));}
+template <class T,class S>
+  inline bool BetweenOrEqual(T x, S lower, S upper) {return ((x >= lower) && (x <= upper));}
+template <class T,class S>
+  inline bool Outside(T x, S lower, S upper) {return ((x < lower) || (x > upper));}
+template <class T,class S>
+  inline bool OutsideOrEqual(T x, S lower, S upper) {return ((x <= lower) || (x >= upper));}
 
 extern vector<HNumber> hWeights(const HInteger wlen, const hWEIGHTS wtype);
 

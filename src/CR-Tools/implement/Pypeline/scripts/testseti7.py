@@ -9,21 +9,31 @@ This file tests a double FFT all at once in memory.
 ## Imports
 #  Only import modules that are actually needed and avoid
 #  "from module import *" as much as possible to prevent name clashes.
+
+# but use from module import as much as possible to make sure the user
+# has an easy life, after all it is the user who needs to be happy in
+# the end.
+
 from pycrtools import *
 import time
+
+execfile("../qualitycheck.py")
 
 #------------------------------------------------------------------------
 #Input values
 #------------------------------------------------------------------------
-tmpfilename="testseti_"
+tmpfilename="testseti2_"
 tmpfileext=".dat"
 filename= LOFARSOFT+"/data/lofar/CS302C-B0T6:01:48.h5"
 filename= LOFARSOFT+"/data/lofar/RS307C-readfullsecondtbb1.h5"
+#nblocks=4096
 nblocks=4096
 #nblocks=256
 stretch=2
 stride=1
-maxchunks=0
+maxchunks=0# read from file
+maxchunks=1# read only first chunk of data needed to get required resolution
+#maxchunks=100# sum over multiple chunks of data to get an average spectrum
 #------------------------------------------------------------------------
 datafile=crfile(filename)
 
@@ -41,6 +51,24 @@ dobig=(fullsize<=4194304)
 dostride=(stride>1)
 nchunks=datafile.filesize/fullsize
 
+#Delete arrays first, in case they were already existing, to make sure
+#enough memory is available when re-running the script
+tmpspecT=None
+tmpspec=None
+specT=None
+specT2=None
+spec=None
+power=None
+subpower=None
+subspec=None
+subfrequencies=None
+frequencies=None
+subsubfrequencies=None
+bigfrequencies=None
+bigfft=None
+cdata=None
+cdataT=None
+
 #start_frequency=10**8;end_frequency=2*10**8
 start_frequency=0; end_frequency=10**8
 delta_frequency=(end_frequency-start_frequency)/(speclen-1.0)
@@ -49,8 +77,12 @@ subfrequencies=hArray(float,[subspeclen],name="Frequency",units=("M","Hz"))
 frequencies=hArray(float,[subspeclen/2],name="Frequency",units=("M","Hz"))
 subsubfrequencies=hArray(frequencies.vec(),[nsubsubspectra,subsubspeclen],name="Frequency",units=("M","Hz"))
 
+maxgap=int(ceil(1000/delta_frequency))
 
 print "Frequency Resolution:",delta_frequency,"Hz"
+print "Length of subspectrum:",subsubspeclen*delta_frequency/1000,"kHz"
+print "Maximum gap between peaks: ",maxgap*delta_frequency," Hz (",maxgap," channels)"
+
 if fullsize>10**6:
     print "Full size:",fullsize/10**6,"MSamples"
     print "Full size:",fullsize/1024/1024*16,"MBytes"
@@ -61,6 +93,8 @@ else:
 t0=time.clock(); print "Setting up."
 #Open file
 antennas=list(datafile["antennas"])
+antennaIDs=list(datafile["AntennaIDs"])
+
 nAntennas=datafile["nofSelectedAntennas"]
 antenna=0 # Select which antenna to read in
 
@@ -104,7 +138,12 @@ for nchunk in range(min(nchunks,maxchunks)):
     for offset in range(stride):
         print "Pass #",offset
         blocks=range(offset+nchunk*nsubblocks,(nchunk+1)*nsubblocks,stride)
-        cdata[...].read(datafile,"Fx",blocks,antenna)
+        datafile["selectedAntennas"]=[antenna]
+        cdata[...].read(datafile,"Fx",blocks)
+        quality=CRQualityCheckAntenna(cdata,antennaID=antennaIDs[antenna])
+#        cdata_mean=cdata[...].mean()
+#        cdata_stddev=cdata[...].stddev(cdata_mean)
+#        datanpeaks = cdata[...].countgreaterthanabs(cdata_stddev*5)
         print "Time:",time.clock()-t0,"s for reading."
         cdataT.doublefft1(cdata,fullsize,nblocks,blocklen,offset)
         print "Time:",time.clock()-t0,"s for 1st FFT."
@@ -144,15 +183,15 @@ for nchunk in range(min(nchunks,maxchunks)):
 print "End of all chunks."
 
 
-def findpeaks(subpower,threshold=7):
+def findpeaks(self,subpower,threshold=7):
     datamean=subpower[...].meaninverse()
     datathreshold = subpower[...].stddevbelow(datamean)
     datathreshold *= threshold
     datathreshold += datamean
-    maxgap=Vector(int,len(datamean),fill=0)
+    maxgapvec=Vector(int,len(datamean),fill=maxgap)
     minlength=Vector(int,len(datamean),fill=1)
-    npeaks=datapeaks[...].findsequencegreaterthan(subpower[...],datathreshold,maxgap,minlength)
-    return (npeaks,datathreshold)
+    npeaks=self[...].findsequencegreaterthan(subpower[...],datathreshold,maxgapvec,minlength)
+    return (npeaks,datathreshold,datamean)
     
 def rp(offset,sub=-1,clf=True,markpeaks=False):
     """Basic plotting of a part of the specturm"""
@@ -167,35 +206,30 @@ def rp(offset,sub=-1,clf=True,markpeaks=False):
     frequencies.fillrange((start_frequency+offset*delta_band)/10**6,delta_frequency/10**6)
     if sub>=0:
         sub=min(sub,nsubsubspectra-1)
-        subpower[sub].plot(xvalues=subsubfrequencies[sub],clf=clf)
         if markpeaks:
-            plotconst(datathreshold[sub],subsubfrequencies[sub]).plot(clf=False,color="green")
-            for n in range(npeaks[sub]):
-                s=slice(datapeaks2[sub,n,0],datapeaks2[sub,n,1]+1)
-                subpower.getSlicedArray((sub,s)).plot(xvalues=subsubfrequencies.getSlicedArray((sub,s)),clf=False,color="red")
+            plotconst(datathreshold[sub],subsubfrequencies[sub]).plot(clf=clf,color="green")
+            subpower[sub].plot(xvalues=subsubfrequencies[sub],highlight=datapeaks[sub],nhighlight=npeaks[sub],color="blue",clf=False)
+        else:
+            subpower[sub].plot(xvalues=subsubfrequencies[sub],clf=clf)
     else:
         power.plot(clf=clf)
+
+def pa(sub=0,nstart=0):
+    for i in range(nstart,nsubsubspectra):
+        print i," - n peaks =",npeaks[i],", mean = ",datamean[i]
+        rp(sub,i,markpeaks=True)
+        s=raw_input("Press enter (q to quit): ")
+        if s=="q": break
+
+#----------------------
 
 if maxchunks==0:
     print "maxchunks==0 - > Reading spectrum from file."  
     power.readdump("spectrum.dat")
-#for i in range(stride): rp(i)
 
 datapeaks=hArray(int,[nsubsubspectra,subsubspeclen/16],name="Slicelist of Peaks")
-datapeaks2=hArray(datapeaks.vec(),[nsubsubspectra,subsubspeclen/32,2])
-datamean=hArray(subpower[...].meaninverse())
-datathreshold = hArray(subpower[...].stddevbelow(datamean.vec()))
-maxgap=Vector(int,len(datamean),fill=10)
-minlength=Vector(int,len(datamean),fill=1)
-
-"""
-(npeaks,datathreshold)=findpeaks(subpower)
-rp(0,0)
-"""
-
-#peakedbands
-#=npeaks.
+(npeaks,datathreshold,datamean)=findpeaks(datapeaks,subpower)
+rp(0,151,markpeaks=True)
 
 
-#rp 0,151
-#npeaks=findpeaks(subpower)
+#pa 0,141

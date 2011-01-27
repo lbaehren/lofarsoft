@@ -700,7 +700,7 @@ def CheckParameterConformance(data,keys,limits):
     return result
 
 
-def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,maxblocksize=65536,blocksize=None,nsigma=5,verbose=True):
+def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,nantennas=None,nbocks=None,maxblocksize=65536,blocksize=None,nsigma=5,verbose=True):
     """
     Usage:
     CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True)
@@ -740,7 +740,17 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,maxblocksi
     saves one the creation and destruction of the array.
 
     blocksize - The blocksize for reading in the data, will be
-    determined automatically is not provided explicitly here.
+    determined automatically is not provided explicitly here.  If None
+    use information from datafile or use first dimension of dataarray.
+
+    natennas - How many antennas are in the dataarray or in the
+    datafile. If None use information from datafile or use first
+    dimension of dataarray. If equal to 0 then dataarray does not have
+    that dimension.
+
+    nblocks - How many antennas are in the dataarray or in the
+    datafile.  If None use information from datafile or use first
+    dimension of dataarray.
 
     maxblocksize - If the blocksize is determined automatically, this
     is the maximum blocksize to use.

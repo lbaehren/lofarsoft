@@ -769,12 +769,11 @@ template <class T> hArray<T> & hArray<T>::resetLoop(){
   return *this;
 }
 
-
 /*!
 \brief Sets the slice parameters used by the looping algorithm to calculate the currently worked on slice.
 
 \param start_element_index: a vector of n indices which remain
-constant during the looping. Looping will be done over the npipil+1st
+constant during the looping. Looping will be done over the n+1st
 index.
 
  */
@@ -808,7 +807,9 @@ template <class T> hArray<T> &  hArray<T>::next(){
   loop_i+=loop_increment;
   subslice_start_it+=loop_increment; if (subslice_start_it>=subslice_vec_start.end()) subslice_start_it=subslice_vec_start.begin();
   subslice_end_it+=loop_increment; if (subslice_end_it>=subslice_vec_end.end()) subslice_end_it=subslice_vec_end.begin();
-  if (loop_i>=loop_end) { // the end is near, stop looping ...
+  // if (subslice_start_it>=storage_p->vec_p->end()) {subslice_start_it=storage_p->vec_p->end(); loop_next=false;};//don't run past end of vector
+  // if (subslice_end_it>=storage_p->vec_p->end()) {subslice_end_it=storage_p->vec_p->end(); loop_next=false;};//don't run past end of vector
+  if ((loop_i>=loop_end) || !loop_next) { // the end is near, stop looping ...
     resetLoop();
     loop_next=false;
   } else {
