@@ -815,43 +815,6 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-/*vector<HString> hSplitString(HString str){
-  vector<HString> out;
-  char word[256];
-  //  char line(str.c_str())
-  //  string word;
-  HInteger n(0);
-  std::istringstream sfile(str);
-  while (!sfile.eof()) {
-    //    fscanf(s,"%s",word);
-    fscanf(sfile,"%s",word);
-    cout << ++n << " " << word << endl;
-    out.push_back(word);
-  };
-  return out;
-}
-*/
-
-//inline vector<HString> hSplitString(HString s){return hSplitString(s.c_str());}
-
-// vector<HString> hSplitString(char * str){
-//   vector<HString> out;
-//   char * pch;
-//   pch = strtok (str," ,\t");
-//   while (pch != NULL)
-//     {
-//       out.push_back(pch);
-//       pch = strtok (NULL, " ,\t");
-//     }
-//   return out;
-// }
-
-//vector<HString> hSplitString(char* str)
-
-
-// To be moved to header file.
-
-
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Read columns of data from a file in text (ASCII) form into an array
@@ -929,7 +892,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
           }
          } else {
           // warning: column index out of range for this line: line is skipped
-          cout << "Warning: line " << linesread << "  skipped" << endl;
+          cout << "Warning: requested field not found in line " << linesread << ": line skipped" << endl;
         }
       }
     }
