@@ -1322,7 +1322,7 @@ if __name__ == "__main__":
 			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 
 
-	if is_update or is_rebuild:
+	if is_update:
 		# also db can have obsids from all subclusters. However, we need not update all of them, only those
 		# from the same subclusters as for lse in the command line option. This is because, the info from the parset
 		# files is always the same, and do not need to be updated, and update of the processed data status can only
