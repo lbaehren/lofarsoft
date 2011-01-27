@@ -190,3 +190,40 @@ void HFPP_FUNC_NAME(const Iter out, const Iter out_end, ndarray in)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Calculates the square of the absolute value and add to output vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hAbsSquareAdd
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (ndarray)(out)()("Numpy vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HComplex)(in)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Calculate absolute value squared for each value in the input vector
+  and add result to output vector.
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(ndarray out, const Iter in_begin, const Iter in_end)
+{
+  Iter in_it = in_begin;
+
+  // Get pointers to memory of numpy array
+  double* out_it = numpyBeginPtr<double>(out);
+  double* out_end = numpyEndPtr<double>(out);
+
+  // Copy and cast to correct type
+  while (out_it != out_end && in_it != in_end)
+  {
+    *out_it = static_cast<double>(real(*in_it * conj(*in_it)));
+
+    ++out_it;
+    ++in_it;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+

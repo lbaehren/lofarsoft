@@ -1031,3 +1031,4 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
