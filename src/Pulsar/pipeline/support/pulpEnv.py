@@ -266,7 +266,6 @@ class PulpEnv:
 
         pars = open(self.parsetName).readlines()
 
-        self.stokes     = False
         self.parTarget  = False
         self.transpose2 = False
 
