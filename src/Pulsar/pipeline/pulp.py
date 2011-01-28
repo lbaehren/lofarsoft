@@ -1,5 +1,6 @@
 #!/usr/env/python
-#$Id$
+
+#            $Id: pulp.py 6866 2011-01-28 09:59:43Z kenneth $
 
 #                                                          LOFAR PULSAR PIPELINE
 #
@@ -39,7 +40,7 @@ __version__      = pulpVersion.version
 __version_date__ = pulpVersion.version_date
 __svn_revision__ = $Rev$
 __svn_revdate__  = $Date$
-    
+__svn_author__   = $Author$    
 
 
 class pulp(control):
