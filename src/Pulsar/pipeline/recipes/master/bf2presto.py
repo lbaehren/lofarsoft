@@ -1,4 +1,4 @@
-#                   $Id$
+#           $Id$
 
 #                                                          LOFAR PULSAR PIPELINE
 #
@@ -23,7 +23,7 @@ from lofarpipe.support.lofarnode     import run_node
 
 # Repository info ...
 __svn_revision__ = ('$Rev$').split()[1]
-__svn_revdate__  = ('$Date')[7:26]
+__svn_revdate__  = ('$Date$')[7:26]
 __svn_author__   = ('$Author$').split()[1]
 
 
