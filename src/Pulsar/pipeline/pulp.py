@@ -39,7 +39,7 @@ import pulpVersion
 __version__      = pulpVersion.version
 __version_date__ = pulpVersion.version_date
 __svn_revision__ = ('$Rev$').split()[1]
-__svn_revdate__  = ('$Date$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
 __svn_author__   = ('$Author$').split()[1]
 
 
@@ -86,6 +86,8 @@ class pulp(control):
 
         with log_time(self.logger):
             with ipython_cluster(self.config, self.logger):
+                self.logger.info("Pulp package, version "+__version__+":")
+                self.logger.info("pulp.py revision id: "+__svn_revision__)
                 if filefactor == 1:
                     self.run_task("buildPulsArch",obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)
                     self.run_task("bf2presto",    obsid=obsid,pulsar=pulsar,filefactor=filefactor,arch=arch)

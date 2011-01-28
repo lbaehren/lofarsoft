@@ -1,15 +1,21 @@
-#! /usr/bin/env python
+#
+#           $Id$
 
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                             Pulsar.pipeline.support.RSPlist.py
-#                                                          Ken Anderson, 2009-10
+#                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
 import os
 import gzip
 import pulpEnv
+
+# Repository info ...
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
+__svn_author__   = ('$Author$').split()[1]
 
 
 parts = ['data1', 'data2', 'data3', 'data4']

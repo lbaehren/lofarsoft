@@ -1,8 +1,10 @@
+#           $Id$
+
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                              rfiplot master (subdyn.py) recipe
 #                                      Pulsar.pipeline.recipes.master.rfiplot.py
-#                                                          Ken Anderson, 2009-10
+#                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
@@ -19,10 +21,26 @@ from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.clusterdesc   import ClusterDesc, get_compute_nodes
 from lofarpipe.support.lofarnode     import run_node
 
+# Repository info ...
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
+__svn_author__   = ('$Author$').split()[1]
 
 class rfiplot(LOFARrecipe):
 
     """
+    Pipeline-based mechanism of running th Pulsar Group code,
+    subdyn.py, on a dataset.  "subdyn.py" is part of the pulsar
+    build, located in the usual,
+
+    ${LOFARSOFT}/release/share/pulsar/bin
+
+    Parser processes all arguments passed by the framework
+    through cli arguments and any arguments specified in 
+    tasks configuration files.
+
+    Command line arguments override defaults set in the task.cfg.
+
     This recipe will run the subdyn.py pulsar script (others as needed),
     producing the rfi report files,
 

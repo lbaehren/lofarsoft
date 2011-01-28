@@ -1,3 +1,5 @@
+#           $Id$
+
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                          Gather, tar select data products (bundleFiles) recipe
@@ -17,11 +19,26 @@ from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.clusterdesc   import ClusterDesc, get_compute_nodes
 from lofarpipe.support.lofarnode     import run_node
 
+# Repository info ...
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
+__svn_author__   = ('$Author$').split()[1]
+
 
 class bundleFiles(LOFARrecipe):
 
     """
-    This recipe will create a gzipped tarball for the obsid pulsar output.
+    Pipeline-based mechanism for creagting a tar archive of
+    output data products from this pipeline.
+
+    Parser processes all arguments passed by the framework
+    through cli arguments and any arguments specified in 
+    tasks configuration files.
+
+    Command line arguments override defaults set in the task.cfg.
+
+    This recipe will create a gzipped tarball for the obsid
+    pulsar output.
 
     i.e. a file named like, <pulsarName>_<obsid>_plots.tar.gz
 

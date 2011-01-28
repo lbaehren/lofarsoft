@@ -1,8 +1,10 @@
+#           $Id$
+
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                            Beam-formed data conversion Node (bf2presto) recipe
 #                                     Pulsar.pipeline.recipes.nodes.bf2presto.py
-#                                                          Ken Anderson, 2009-10
+#                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
@@ -20,6 +22,12 @@ from lofarpipe.support.lofarexceptions import ExecutableMissing
 # PULP libs
 import bf2Pars
 import pulpEnv
+
+# Repository info ...
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
+__svn_author__   = ('$Author$').split()[1]
+
 
 
 class bf2presto(LOFARnode):
@@ -73,10 +81,21 @@ class bf2presto(LOFARnode):
 
     def __buildcmd(self, obsEnv):
         """
-        build the full bf2presto command line.
+        Method builds the full bf2presto command line.
 
         args:   <pulpEnv.PulpEnv instance>
         return: <list>
+
+        N.B. When passed through the framework as a task default,
+        the "-A" option fails to register and does not extend the
+        command line.  All other arguments pass without fault. Ergo,
+        the "A" option, described as 
+
+        -----------------------------
+        -A  Number of blocks to average over when rescaling (Default = 600)
+        -----------------------------
+
+        is fixed and set here to the shell script value of 10.
         """
 
         self.logger.debug("@ bf2presto.__buildcmd()")

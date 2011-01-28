@@ -1,18 +1,22 @@
+#
+#           $Id$
+
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                             Pulsar.pipeline.support.pulpEnv.py
-#                                                          Ken Anderson, 2009-10
+#                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 # Operating environment for the pulsar pipeline, pulp.
 
-# These paths set up where the pulp PULSAR ARCHIVE output will go.
-#
-# K. Anderson
-# UvA.
-# 2010-08-04
 
 import os
+
+# Repository info ...
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
+__svn_author__   = ('$Author$').split()[1]
+
 
 class PulpEnv:
 
@@ -65,6 +69,13 @@ class PulpEnv:
         
         which will check for the location of an observational parset
         and, once found, read the parameter file as needed.
+
+        Note:
+        ---- 
+        For now, archPaths is a path library only to those
+	storage node paths on subclusters 5 and 6 (/net/sub5,
+	/net/sub6). Add to and take from this dict as subclusters
+	become available and not.
 
         """
 
@@ -260,21 +271,29 @@ class PulpEnv:
         self.transpose2 = False
 
         for line in pars:
-#             if ('OLAP.BeamsAreTransposed' in line):
-#                 self.transpose2 = line.split('=')[1].strip()
-#                 continue
+            if ('OLAP.BeamsAreTransposed' in line):
+                transpose2 = line.split()
+                if len(transpose2) == 3:
+                    if transpose2      =="True":
+                        self.transpose2 = True
+                    elif transpose2    =="False":
+                        pass
+                else:pass
+                continue
+
             if ('OLAP.outputIncoherentStokes' in line):
                 incoherentstokes = line.split('=')[1].strip()
-                if incoherentstokes == 'true':
-                    self.stokes   = 'incoherentstokes'
+                if incoherentstokes == 'True':
+                    self.stokes  = 'incoherentstokes'
                 else: pass
 
-            if ('Observation.Beam[0].target' in line):
-                self.parTarget = True
-                target = line.split('=')[1].strip()
-                if target:
-                    self.pulsar = target
+                if ('Observation.Beam[0].target' in line):
+                    self.parTarget = True
+                    target = line.split('=')[1].strip()
+                    if target:
+                        self.pulsar = target
                 continue
+
             if self.transpose2 and self.stokes and self.parTarget:
                 break
         return
@@ -325,8 +344,7 @@ class PulpEnv:
 
         """
         
-        oid = "L"+self.obsid.split("_")[1]
-        
+        oid          = "L"+self.obsid.split("_")[1]
         parsetLogDir = os.path.join(self.parsetPath,oid)
         parsetFile   = os.path.join(parsetLogDir,oid+".parset")
         return parsetFile

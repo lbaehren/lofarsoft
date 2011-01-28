@@ -1,8 +1,10 @@
+#           $Id$
+
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                         directory build (buildPulsArch) recipe
 #                                Pulsar.pipeline.recipes.master.buildPulsArch.py
-#                                                          Ken Anderson, 2009-10
+#                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
@@ -16,13 +18,24 @@ from lofarpipe.support.ipython       import LOFARTask
 from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.lofarnode     import run_node
 
+# Repository info ...
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
+__svn_author__   = ('$Author$').split()[1]
+
 
 class buildPulsArch(LOFARrecipe):
     """
-    Provides a convenient, pipeline-based mechanism of running bf2presto
-    on a dataset.
+    Pipeline-based mechanism for building the output path for
+    processing -- recipe buildPulsArch.
 
+    Parser processes all arguments passed by the framework
+    through cli arguments and any arguments specified in 
+    tasks configuration files.
+
+    Command line arguments override defaults set in the task.cfg.
     """
+
     inputs = {
         'obsid' : ingredient.StringField(
             '--obsid',

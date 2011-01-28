@@ -1,8 +1,10 @@
+#           $Id$
+
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                    Initialize prepfold run (prepareInf) recipe
 #                                   Pulsar.pipeline.recipes.master.prepareInf.py
-#                                                          Ken Anderson, 2009-10
+#                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
@@ -17,18 +19,29 @@ from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.clusterdesc   import ClusterDesc, get_compute_nodes
 from lofarpipe.support.lofarnode     import run_node
 
+# Repository info ...
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
+__svn_author__   = ('$Author$').split()[1]
 
 
 class prepareInf(LOFARrecipe):
 
     """
-    This recipe will build the "all" RSP directory for the given obsid.
-    This is only done when filefactor is not equal to 1, which will not 
-    be nominal (4 or 8 RSP splits will be nominal).  To this end, some
-    fiddling to build a directory for the full set of subband data and then 
-    add one job to the prepfold job queue.
+    Pipeline-based mechanism for writing pulp job parameter files.
 
+    Parser processes all arguments passed by the framework
+    through cli arguments and any arguments specified in tasks
+    configuration files.
+
+    Command line arguments override defaults set in the task.cfg.
+
+    This recipe will build and install PRESTO-required ".inf" files
+    for observation data processing.  The so-called "dotinf" files
+    are written, one for each RSP directory, including the "all"
+    directory, RSPA.
     """
+
     inputs = {
         'obsid' : ingredient.StringField(
             '--obsid',

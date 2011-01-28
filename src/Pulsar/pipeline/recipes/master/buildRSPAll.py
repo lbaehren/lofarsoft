@@ -1,3 +1,5 @@
+#           $Id$
+
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                       Construct  RSP "ALL"(buildRSPAll) recipe
@@ -17,11 +19,24 @@ from lofarpipe.support.clusterlogger import clusterlogger
 from lofarpipe.support.clusterdesc   import ClusterDesc, get_compute_nodes
 from lofarpipe.support.lofarnode     import run_node
 
+# Repository info ...
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
+__svn_author__   = ('$Author$').split()[1]
 
 
 class buildRSPAll(LOFARrecipe):
 
     """
+    Pipeline-based mechanism for building the ad hoc RSPA 
+    directory.
+
+    Parser processes all arguments passed by the framework
+    through cli arguments and any arguments specified in 
+    tasks configuration files.
+
+    Command line arguments override defaults set in the task.cfg.
+
     This recipe will build the "all" RSP directory for the given obsid.
     This is only done when filefactor is not equal to 1, which will not 
     be nominal (4 or 8 RSP splits will be nominal).  To this end, some

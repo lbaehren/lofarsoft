@@ -1,7 +1,10 @@
+#
+#           $Id$
+
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                         Pulsar.pipeline.support.bundlePlots.py
-#                                                          Ken Anderson, 2009-11
+#                                                          Ken Anderson, 2010-11
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 

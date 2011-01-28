@@ -1,8 +1,10 @@
+#           $Id$
+
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                                rfiplot (subdyn.py) Node recipe
 #                                       Pulsar.pipeline.recipes.nodes.rfiplot.py
-#                                                          Ken Anderson, 2009-10
+#                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
@@ -18,6 +20,11 @@ from lofarpipe.support.lofarexceptions import ExecutableMissing
 # PULP libs
 import bf2Pars
 import pulpEnv
+
+# Repository info ...
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
+__svn_author__   = ('$Author$').split()[1]
 
 
 

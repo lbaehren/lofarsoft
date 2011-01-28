@@ -1,9 +1,10 @@
-#!/usr/bin/python
+#
+#           $Id$
 
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                        Pulsar.pipeline.support.prepInfFiles.py
-#                                                          Ken Anderson, 2009-10
+#                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 
@@ -15,6 +16,10 @@ import foldingData
 import RSPlist
 import pulpEnv
 
+# Repository info ...
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$')[7:26]
+__svn_author__   = ('$Author$').split()[1]
 
 
 class PrepInfFiles():
