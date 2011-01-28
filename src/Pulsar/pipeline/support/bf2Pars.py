@@ -1,6 +1,5 @@
-#! /usr/bin/env python
-
-#           $Id$
+#
+# $Id$
 
 #                                                          LOFAR PULSAR PIPELINE
 #
