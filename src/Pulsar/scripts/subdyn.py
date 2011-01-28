@@ -3,6 +3,7 @@ import numpy as np
 import array as ar
 import os, os.path, stat, glob, sys, getopt
 import infodata as inf
+import math
 
 is_saveonly = False      # if True, script will save the dynamic spectrum in png file
 is_excludeonly = False   # if True, only completely bad subbands will be excluded
@@ -106,14 +107,15 @@ def setup_plot(x, title, colormap):
 	global cax, cbar
 	plt.clf()
 	ax = fig.add_subplot (111)
+	ax.set_zorder(0.1)   # to make moise y-cursor to get values from this 'Subband' axis, rather then from axr 'Freq' axis
 	cax = ax.imshow(x, interpolation='nearest', aspect='auto', origin='lower', cmap=colormap)
 	cbar = fig.colorbar (cax, orientation='horizontal', spacing='uniform', pad=0.1)
+	fig.suptitle (title, fontsize=fs, y=0.94)
         def printsub (x, pos=None): return '%d' % (subband_offset + x)
 	ax.yaxis.set_major_formatter(ticker.FuncFormatter(printsub))
 	for label in ax.get_yticklabels(): label.set_fontsize(fs)
-	plt.xlabel ("Time (s)", fontsize=fs)
 	plt.ylabel ("Channels", fontsize=fs)
-	fig.suptitle (title, fontsize=fs, y=0.94)
+	plt.xlabel ("Time (s)", fontsize=fs)
 
 	axr = plt.twinx()
 	axr.yaxis.tick_right()
@@ -332,20 +334,21 @@ if __name__=="__main__":
 		samples2show = int(samples2show / tsamp)	
 		if size-samples_offset > samples2show: 
 			size = samples2show
-			sizes = [samples2show for value in sizes]
+			sizes = [value-samples_offset > samples2show and samples2show or value for value in sizes]
 		else:
 			if samples_offset > 0:
 				sizes = [value - samples_offset for value in sizes]
 
 	# first subband number
-	# i am reading [1] file (and then decrease value by 1) rather than just reading [0] file
-	# to avoid problem with a need having first file called *.sub000
-	subband_offset = int(subfiles[1].split(".sub")[-1])-1
+	subband_offset = int(subfiles[0].split(".sub")[-1])
 
 	if is_saveonly:
 		pngname = subfiles[0].split(".sub")[0] + ".sub" + str(subband_offset) + "-" + str(subband_offset+nfiles-1) + ".png"
 
 	# forming the array for having the dynamic spectrum
+	if int(size/Nbins) == 0:
+		print "Number of bins %d is larger than given size %d!" % (Nbins, size) 
+		sys.exit(1)	
 	spectrum=np.zeros((nfiles, int(size/Nbins)))
 
 	# forming a mask file with samples to reject
@@ -373,6 +376,11 @@ if __name__=="__main__":
 		data.read(f, sizes[i])
 		f.close()
 		ndata = np.array(data)
+		if sizes[i] == 0:
+			rfi_fraction = 100.
+			clipped[i] = np.zeros(int(size/Nbins))
+			print "subband %d will be excluded (blanked)" % (i+subband_offset,)
+			continue
 		spectrum[i] = [np.average(ndata[k*Nbins:(k+1)*Nbins]) for k in np.arange(0, int(size/Nbins), 1)]
 		# calculate mean and rms in the windows of Nbins size
 		# to exclude outliers we sort the values in Nbins interval first and then use only first half of it
@@ -417,11 +425,8 @@ if __name__=="__main__":
 
 		if rfi_fraction >= rfilimit:  # bad subband  
 			clipped[i] = np.zeros(int(size/Nbins))
-			if sizes[i] != 0:
-				badbands.append(i)
-				print "subband %d will be excluded (rfi fraction = %.2f%%)" % (i+subband_offset, rfi_fraction)
-			else:
-				print "subband %d will be excluded (blanked)" % (i+subband_offset,)
+			badbands.append(i)
+			print "subband %d will be excluded (rfi fraction = %.2f%%)" % (i+subband_offset, rfi_fraction)
 		else:
 			clipindices[i] = np.where(levels[i] > threshold)[0]
 
