@@ -55,9 +55,15 @@ username=os.environ['USER']
 # where to copy profile plots (dop95)
 webserver="%s@10.87.2.95" % (username, )
 plotsdir="/home/%s/Lofar/plots" % (username, )
+griddir="/home/%s/Lofar/grid" % (username, )
 webplotsdir="public_html/lofar/plots"
+webgriddir="public_html/lofar/grid"
 # if False, then do not rsync plots to external webserver
 is_torsync = True
+
+# common large file with archive links in the GRID
+archivefile="/home/leeuwen/grid/archived-at-sara.txt"
+gridfiles = ()  # list of archive files
 
 # file used in debug mode to write iteration number in main loop
 debugfile="/home/%s/.obsinfo_debug" % (username, )
@@ -487,23 +493,26 @@ class outputInfo:
 				if self.filestem_array[0] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
+#					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
 				# adding RSPA chi-square and profile
 				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
 				if self.filestem_array[1] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
+#					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
 
 				# adding combined_plot column
 				if self.combined_plot != "":
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+#					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
 				else:
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				# adding the rest (columns) of the table
-				if viewtype == "plots": self.infohtml = self.infohtml + "\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus)
+				if viewtype == "plots": self.infohtml = self.infohtml + "\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
 				if viewtype == "mega":
-					self.infohtml = self.infohtml + "\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.stations_html, self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus)
+					self.infohtml = self.infohtml + "\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.stations_html, self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
 			else: # usual
 				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
 		else:
@@ -556,23 +565,26 @@ class outputInfo:
 				if self.filestem_array[0] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
+#					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
 				# adding RSPA chi-square and profile
 				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
 				if self.filestem_array[1] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
+#					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
 
 				# adding combined_plot column
 				if self.combined_plot != "":
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+#					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
 				else:
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				# adding the rest (columns) of the table
-				if viewtype == "plots": self.infohtml = self.infohtml + "\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus)
+				if viewtype == "plots": self.infohtml = self.infohtml + "\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
 				if viewtype == "mega":
-					self.infohtml = self.infohtml + "\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.stations_html, self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus)
+					self.infohtml = self.infohtml + "\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.stations_html, self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
 			else:
 				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
 		else:
@@ -1136,7 +1148,7 @@ def usage (prg):
                                        This option can be used together with --from and --to to update only some observations\n\
           --stats                    - to calculate the statistics of existent observations in the database\n\
                                        can be used together with --from and --to options, and with --html option\n\
-          --norsync                  - don't rsync plots to external webserver when \"mega\" or \"plots\" view mode is used\n\
+          --norsync                  - don't rsync plots and grid links to external webserver when \"mega\" or \"plots\" view mode is used\n\
           --dbfile <dbfile>          - database file with stored info about the observations\n\
           --debug                    - debug mode\n\
           -h, --help                 - print this message\n" % (prg, )
@@ -1242,6 +1254,13 @@ if __name__ == "__main__":
 	# creating plotsdir directory if it does not exist
 	cmd="mkdir -p %s" % (plotsdir, )
 	os.system(cmd)
+	# creating griddir directory if it does not exist
+	cmd="mkdir -p %s" % (griddir, )
+	os.system(cmd)
+
+	# reading the grid links from common file to the list
+	if os.path.exists(archivefile):
+		gridfiles, griddates, gridtimes, gridlinks = np.loadtxt(archivefile, usecols=(0,1,2,3), dtype=str, unpack=True, comments='#')
 
 	# just make sure that rebuild and update switches are off
 	if is_stats:
@@ -1431,7 +1450,6 @@ if __name__ == "__main__":
 		redlocation="x"
 		processed_dirsize=0.0
 		reduced_node = ""
-		archivestatus = "x"
 		for lse in storage_nodes:
 			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
 			if np.size(os.popen(cmd).readlines()) == 0:
@@ -1559,7 +1577,27 @@ if __name__ == "__main__":
 					# copying combined plot
 					cmd="mkdir -p %s/%s ; cexec %s 'cp -f %s/%s %s/%s %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexec_nodes[reduced_node], reddir, combined_plot + ".png", reddir, combined_plot + ".th.png", plotsdir, id)
 					os.system(cmd)
-				
+
+		# getting the grid links for the current ObsID and putting them to separate ascii file
+		# and making the archive status line for the table
+		archivestatus = "x"
+		if len(gridfiles) != 0:
+			grid_obsid_indices = [i for i in np.arange(len(gridfiles)) if re.search(id, gridfiles[i])]
+			if len(grid_obsid_indices) != 0:
+				archivestatus = ""
+				grid_obsid_files = [gridfiles[i] for i in grid_obsid_indices]
+				grid_obsid_dates = [griddates[i] for i in grid_obsid_indices]
+				grid_obsid_times = [gridtimes[i] for i in grid_obsid_indices]
+				grid_obsid_links = [gridlinks[i] for i in grid_obsid_indices]
+				# saving the grid links to the separate ascii file
+				np.savetxt(griddir + "/%s.txt" % (id), np.transpose((grid_obsid_files, grid_obsid_dates, grid_obsid_times, grid_obsid_links)), fmt="%s", delimiter="   ")
+				rawfiles = [file for file in grid_obsid_files if re.search("raw", file)]
+				if len(rawfiles) != 0: archivestatus = archivestatus+" raw"
+				subbandfiles = [file for file in grid_obsid_files if re.search("sub", file)]
+				if len(subbandfiles) != 0: archivestatus = archivestatus+" sub"
+				metafiles = [file for file in grid_obsid_files if re.search("meta", file)]
+				if len(metafiles) != 0: archivestatus = archivestatus+" meta"
+				archivestatus = " ".join(archivestatus.split(" ")[1:])
 
 		# combining info
 		out.Init(id, oi, storage_nodes, dirsizes, statusline, reduced_node, redlocation, processed_dirsize, "", profiles_array, chi_array, combined_plot, archivestatus)
@@ -1582,6 +1620,10 @@ if __name__ == "__main__":
 			cmd="ssh %s mkdir -p %s" % (webserver, webplotsdir)	
 			os.system(cmd)
 			cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (plotsdir, webserver, webplotsdir)
+			os.system(cmd)
+			cmd="ssh %s mkdir -p %s" % (webserver, webgriddir)	
+			os.system(cmd)
+			cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (griddir, webserver, webgriddir)
 			os.system(cmd)
 
 	# copying to another list to keep the old one
@@ -1640,22 +1682,22 @@ if __name__ == "__main__":
 		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	Location		Status"
 		print equalstring
 	elif viewtype == "plots":
-		equalstring_size=173
+		equalstring_size=172
 		for e in np.arange(equalstring_size):
 			equalstrs = np.append(equalstrs, "=")
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	Location		Status   Archive"
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	Location		Status      Archive"
 		print equalstring
 	elif viewtype == "mega":
-		equalstring_size=243+8*Nnodes
+		equalstring_size=245+8*Nnodes
 		for e in np.arange(equalstring_size):
 			equalstrs = np.append(equalstrs, "=")
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	NodesList (lse) Datadir	%s	Total(GB)	Stations		Location                Status   Archive" % (storage_nodes_string,)
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	NodesList (lse) Datadir	%s	Total(GB)	Stations		Location                Status      Archive" % (storage_nodes_string,)
 		print equalstring
 	else: # usual
 		equalstring_size=159+8*Nnodes
