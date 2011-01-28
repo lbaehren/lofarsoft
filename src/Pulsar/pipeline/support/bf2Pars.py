@@ -50,6 +50,8 @@ class bf2Pars():
     """
 
     def __init__(self, env ):
+        """ env: an instance of PulpEnv()
+        """
         self.obsid  = env.obsid
         self.pulsar = env.pulsar
         self.arch   = env.arch
@@ -99,7 +101,6 @@ class bf2Pars():
         NR_BEAMS         'Observation.nrBeams'         # <int>, N incoherent beams
         INCOHERENTSTOKES 'OLAP.outputIncoherentStokes' # <bool>,true or false
         COHERENTSTOKES   'OLAP.outputCoherentStokes'   # <bool>,true or false
-        2ND TRANSPOSE    'OLAP.BeamsAreTransposed'     # <bool>,true or false
         STOKES_TYPE      'OLAP.outputIncoherentStokes' # <bool>,true or false
         FLYSEYE          'OLAP.PencilInfo.flysEye'     # <bool>,true or false
         NBEAMS           'OLAP.storageStationNames'    # <list>

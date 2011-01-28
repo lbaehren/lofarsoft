@@ -1,0 +1,116 @@
+
+<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module bf2Pars</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>bf2Pars</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/kanderson/LOFAR/lofarsoft/src/Pulsar/pipeline/support/bf2Pars.py">/home/kanderson/LOFAR/lofarsoft/src/Pulsar/pipeline/support/bf2Pars.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;$Id:&nbsp;<a href="#bf2Pars">bf2Pars</a>.py&nbsp;6881&nbsp;2011-01-28&nbsp;14:01:26Z&nbsp;kenneth&nbsp;$</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="bf2Pars.html#bf2Pars">bf2Pars</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="bf2Pars">class <strong>bf2Pars</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;presents&nbsp;bf2presto&nbsp;command&nbsp;line&nbsp;arguments&nbsp;and&nbsp;other&nbsp;parameters<br>
+as&nbsp;instance&nbsp;variables.&nbsp;&nbsp;Values&nbsp;are&nbsp;stringified&nbsp;for&nbsp;cli.<br>
+&nbsp;<br>
+NOTE:&nbsp;output&nbsp;files&nbsp;from&nbsp;bf2presto&nbsp;are&nbsp;named&nbsp;like,<br>
+&nbsp;<br>
+&lt;target_name&gt;_&lt;obsid&gt;_RSP[i].sub[0-9][nnn],<br>
+&nbsp;<br>
+though&nbsp;this&nbsp;is&nbsp;dependent&nbsp;upon&nbsp;the&nbsp;of&nbsp;number&nbsp;input&nbsp;subbands.<br>
+&nbsp;<br>
+Below,&nbsp;the&nbsp;output&nbsp;files&nbsp;in&nbsp;our&nbsp;current&nbsp;operational&nbsp;mode<br>
+would&nbsp;be&nbsp;under&nbsp;a&nbsp;directory&nbsp;called&nbsp;'incoherentstokes'&nbsp;which&nbsp;<br>
+would&nbsp;lead&nbsp;to&nbsp;a&nbsp;output_base&nbsp;equal&nbsp;to<br>
+&nbsp;<br>
+incoherentstokes/RSP[0123]/&lt;targetName&gt;_&lt;obsid&gt;_RSP[0123],<br>
+&nbsp;<br>
+eg,&nbsp;under&nbsp;../incoherentstokes/RSP0,&nbsp;we&nbsp;see&nbsp;files&nbsp;named<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;B0329+54_L2010_06160_RSP0.sub0000<br>
+&nbsp;&nbsp;&nbsp;&nbsp;B0329+54_L2010_06160_RSP0.sub0002<br>
+&nbsp;&nbsp;&nbsp;&nbsp;B0329+54_L2010_06160_RSP0.sub0003<br>
+&nbsp;&nbsp;&nbsp;&nbsp;B0329+54_L2010_06160_RSP0.sub0004<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;<br>
+so,&nbsp;in&nbsp;this&nbsp;case,&nbsp;output_base&nbsp;=&nbsp;'incoherentstokes/RSP0/B0329+54_L2010_06160_RSP0'<br>
+bf2presto&nbsp;produces&nbsp;the&nbsp;name&nbsp;extensions&nbsp;during&nbsp;channelization.<br>
+&nbsp;<br>
+Constructor&nbsp;receives&nbsp;a&nbsp;pulp&nbsp;environment&nbsp;object&nbsp;(an&nbsp;instance&nbsp;of&nbsp;PulpEnv()).<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="bf2Pars-__init__"><strong>__init__</strong></a>(self, env)</dt></dl>
+
+<dl><dt><a name="bf2Pars-readBFpars"><strong>readBFpars</strong></a>(self)</dt><dd><tt>Read&nbsp;a&nbsp;LOFAR&nbsp;observation&nbsp;parset&nbsp;file&nbsp;for&nbsp;the&nbsp;passed&nbsp;LOFAR&nbsp;obsid.<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;has&nbsp;been&nbsp;adapted&nbsp;to&nbsp;read&nbsp;'nominal',&nbsp;re:&nbsp;old,&nbsp;and&nbsp;'new'<br>
+parameter&nbsp;sets,&nbsp;the&nbsp;kind&nbsp;determined&nbsp;by&nbsp;testParset()&nbsp;and&nbsp;indicated<br>
+by&nbsp;instance&nbsp;variable,&nbsp;self.<strong>parsetKind</strong><br>
+&nbsp;<br>
+Parameters&nbsp;grabbed&nbsp;from&nbsp;&nbsp;parsets:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;Observation.bandFilter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;currently&nbsp;not&nbsp;used.<br>
+&nbsp;&nbsp;&nbsp;Observation.channelsPerSubband<br>
+&nbsp;&nbsp;&nbsp;OLAP.Stokes.integrationSteps<br>
+&nbsp;&nbsp;&nbsp;OLAP.CNProc.integrationSteps<br>
+&nbsp;&nbsp;&nbsp;OLAP.BeamsAreTransposed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;2nd&nbsp;transpose,&nbsp;'True'&nbsp;or&nbsp;'False'<br>
+&nbsp;<br>
+TBD:<br>
+===<br>
+&nbsp;<br>
+--&nbsp;New&nbsp;parameters&nbsp;for&nbsp;new&nbsp;processing&nbsp;modes<br>
+&nbsp;<br>
+NR_BEAMS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'Observation.nrBeams'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&lt;int&gt;,&nbsp;N&nbsp;incoherent&nbsp;beams<br>
+INCOHERENTSTOKES&nbsp;'OLAP.outputIncoherentStokes'&nbsp;#&nbsp;&lt;bool&gt;,true&nbsp;or&nbsp;false<br>
+COHERENTSTOKES&nbsp;&nbsp;&nbsp;'OLAP.outputCoherentStokes'&nbsp;&nbsp;&nbsp;#&nbsp;&lt;bool&gt;,true&nbsp;or&nbsp;false<br>
+2ND&nbsp;TRANSPOSE&nbsp;&nbsp;&nbsp;&nbsp;'OLAP.BeamsAreTransposed'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&lt;bool&gt;,true&nbsp;or&nbsp;false<br>
+STOKES_TYPE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'OLAP.outputIncoherentStokes'&nbsp;#&nbsp;&lt;bool&gt;,true&nbsp;or&nbsp;false<br>
+FLYSEYE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'OLAP.PencilInfo.flysEye'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&lt;bool&gt;,true&nbsp;or&nbsp;false<br>
+NBEAMS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'OLAP.storageStationNames'&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&lt;list&gt;<br>
+&nbsp;<br>
+&nbsp;<br>
+The&nbsp;parameter&nbsp;`OLAP.storageStationNames'&nbsp;will&nbsp;have&nbsp;a&nbsp;value,&nbsp;the&nbsp;form&nbsp;of<br>
+which&nbsp;is&nbsp;written&nbsp;as&nbsp;a&nbsp;list&nbsp;like,<br>
+&nbsp;<br>
+[CS001HBA0,CS001HBA1,CS002HBA0,CS002HBA1,CS003HBA0,&nbsp;...]<br>
+&nbsp;<br>
+This&nbsp;will&nbsp;pass&nbsp;in&nbsp;as&nbsp;string&nbsp;that&nbsp;will&nbsp;need&nbsp;to&nbsp;be&nbsp;listified.</tt></dd></dl>
+
+<dl><dt><a name="bf2Pars-show"><strong>show</strong></a>(self)</dt><dd><tt>Display&nbsp;command&nbsp;line&nbsp;and&nbsp;other&nbsp;parameters,&nbsp;either&nbsp;read&nbsp;or&nbsp;constructed.</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__svn_author__</strong> = 'kenneth'<br>
+<strong>__svn_revdate__</strong> = '2011-01-28 15:01:26'<br>
+<strong>__svn_revision__</strong> = '6881'</td></tr></table>
+</body></html>
