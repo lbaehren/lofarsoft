@@ -729,6 +729,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
 //-----------------------------------------------------------------------
 //$DOCSTRING: Read a single vector from a file which was dumped in (machine-dependent) binary format
 //$COPY_TO HFILE START --------------------------------------------------
@@ -768,6 +769,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Read a section (block) of a single vector from a file which was dumped in (machine-dependent) binary format
@@ -850,7 +852,12 @@ for row and column respectively)
 
 */
 template <class Iter, class IterI>
-void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename,  HInteger skiprows, const IterI columns, const IterI columns_end, HInteger nrows) {
+void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end,
+                    const HString filename,
+                    const HInteger skiprows,
+                    const IterI columns, const IterI columns_end,
+                    const HInteger nrows)
+{
   ifstream infile(filename.c_str(), ios::in);
   HInteger nskip(skiprows);
   HInteger rowsread(0);
@@ -904,7 +911,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename,  HIn
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //-----------------------------------------------------------------------
-//$DOCSTRING: Write columns of data in an array to a (ASCII) text file. 
+//$DOCSTRING: Write columns of data in an array to a (ASCII) text file.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hWriteTextTable
 //-----------------------------------------------------------------------
@@ -931,36 +938,51 @@ Example:
   vec.writetexttable("table.dat","# col1, col2, col3", 3, 24,False)
 */
 template <class Iter>
-void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename,  HString header, HInteger ncolumns, HInteger nrows, HBool append) {
-  Iter it(vec);
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
+                    const HString filename,
+                    const HString header,
+                    const HInteger ncolumns,
+                    const HInteger nrows,
+                    const HBool append)
+{
+  Iter vec_it(vec);
   HInteger row(0);
   HInteger col;
-  //  typedef IterValueType T;
-
   ofstream outfile;
-  
-  if (ncolumns<=0) return;
 
-  if (append) outfile.open(filename.c_str(), ios::out | ios::app);
-  else outfile.open(filename.c_str(), ios::out);
+  // Checks on input parameters
+  if (ncolumns <= 0) {
+    throw PyCR::ValueError("Number of columns <= 0.");
+  }
+  if ((std::distance(vec,vec_end) % ncolumns) != 0) {
+    throw PyCR::ValueError("Vector size is not a multiple of the number of columns.");
+  }
 
-  if (outfile){
-    outfile << header << endl;
-    while((row != nrows) && (it != vec_end)) {
+  if (append) {
+    outfile.open(filename.c_str(), ios::out | ios::app);
+  } else {
+    outfile.open(filename.c_str(), ios::out);
+  }
+
+  if (outfile) {
+    if (!append) { // Add a header for new files.
+      outfile << header << endl;
+    }
+    while((row != nrows) && (vec_it != vec_end)) {
       col=ncolumns;
-      while (col != 0) { //loop over all columns
-	if ( it != vec_end) {
-	  outfile << *it << " ";
-	  ++it; --col;
-	};
-      };
+      while (col != 0) { // Loop over all columns
+	if (vec_it != vec_end) {
+	  outfile << *vec_it << " ";
+	  ++vec_it; --col;
+	}
+      }
       ++row;
       outfile << endl;
-    };
+    }
     outfile.close();
   } else {
     throw PyCR::IOError("Unable to open file.");
-  };
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
