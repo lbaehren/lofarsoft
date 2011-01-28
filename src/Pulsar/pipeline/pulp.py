@@ -1,4 +1,5 @@
 #!/usr/env/python
+#$Id$
 
 #                                                          LOFAR PULSAR PIPELINE
 #
@@ -31,7 +32,15 @@ import lofarpipe.support.lofaringredient as ingredient
 import sys, os
 
 # This is version ...
-__version__="0.2"
+
+import pulpVersion
+
+__version__      = pulpVersion.version
+__version_date__ = pulpVersion.version_date
+__svn_revision__ = $Rev$
+__svn_revdate__  = $Date$
+    
+
 
 class pulp(control):
 
