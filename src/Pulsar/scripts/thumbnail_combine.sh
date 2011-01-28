@@ -33,7 +33,7 @@ then
    echo "Executing the following comamnd: "
    cat combine_png.sh
    ./combine_png.sh
-   convert -scale 200x140-0 combined.png combined.th.png
+   convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png
    chmod 775 combined.png combined.th.png
    echo ""
    echo "Results:  combined.png (large scale) and combined.th.png (thumbnail for the web summaries)"
