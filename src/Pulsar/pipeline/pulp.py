@@ -5,7 +5,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                                        Pulsar.pipeline.pulp.py
-#                                                          Ken Anderson, 2009-10
+#                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
 """
@@ -38,9 +38,9 @@ import pulpVersion
 
 __version__      = pulpVersion.version
 __version_date__ = pulpVersion.version_date
-__svn_revision__ = $Rev$
-__svn_revdate__  = $Date$
-__svn_author__   = $Author$    
+__svn_revision__ = ('$Rev$').split()[1]
+__svn_revdate__  = ('$Date$').split()[1]
+__svn_author__   = ('$Author$').split()[1]
 
 
 class pulp(control):
