@@ -1,10 +1,10 @@
 #  
-# $Id$
+# $Id: bf2presto.py 6881 2011-01-28 14:01:26Z kenneth $
 
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                 Beam-formed data conversion (bf2presto) recipe
-#                                    Pulsar.pipeline.recipes.master.bf2presto.py
+#                                 $URL$
 #                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
@@ -23,9 +23,9 @@ from lofarpipe.support.clusterdesc   import ClusterDesc, get_compute_nodes
 from lofarpipe.support.lofarnode     import run_node
 
 # Repository info ...
-__svn_revision__ = ('$Rev$').split()[1]
-__svn_revdate__  = ('$Date$')[7:26]
-__svn_author__   = ('$Author$').split()[1]
+__svn_revision__ = ('$Rev: 6881 $').split()[1]
+__svn_revdate__  = ('$Date: 2011-01-28 15:01:26 +0100 (Fri, 28 Jan 2011) $')[7:26]
+__svn_author__   = ('$Author: kenneth $').split()[1]
 
 
 class bf2presto(LOFARrecipe):
@@ -166,8 +166,8 @@ class bf2presto(LOFARrecipe):
         $TEMPO
         $PRESTO
         
-        These are stringified, pushed through to pulpEnv via RSPS call to pulpEnv,
-        and unpacked in the pulpEnv module.
+        These are stringified, pushed through to pulpEnv via calls on it,
+	and unpacked in the pulpEnv module.
         
         """
         
