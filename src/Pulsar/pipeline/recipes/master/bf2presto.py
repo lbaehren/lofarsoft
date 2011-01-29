@@ -4,7 +4,7 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                 Beam-formed data conversion (bf2presto) recipe
-#                                 $URL$
+LOFARPATH = ("$URL$")[40:]
 #                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
