@@ -4,29 +4,31 @@
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
-<tr bgcolor="#7799ee">
+<tr bgcolor="#003333">
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>prepfold</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/kanderson/LOFAR/lofarsoft/src/Pulsar/pipeline/recipes/master/prepfold.py">/home/kanderson/LOFAR/lofarsoft/src/Pulsar/pipeline/recipes/master/prepfold.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a
+  href=".">index</a><br><a
+  href="file:/home/kanderson/LOFAR/lofarsoft/src/Pulsar/pipeline/recipes/master/prepfold.py">${LOFARSOFT}/srcPulsar/pipeline/recipes/master/prepfold.py</a></font></td></tr></table>
     <p><tt>#&nbsp;$Id:&nbsp;<a href="#prepfold">prepfold</a>.py&nbsp;6881&nbsp;2011-01-28&nbsp;14:01:26Z&nbsp;kenneth&nbsp;$</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#aa55cc">
+<tr bgcolor="#006699">
 <td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
-<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<tr><td bgcolor="#006699"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="lofarpipe.support.lofaringredient.html">lofarpipe.support.lofaringredient</a><br>
 </td><td width="25%" valign=top><a href="os.html">os</a><br>
 </td><td width="25%" valign=top><a href="sys.html">sys</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ee77aa">
+<tr bgcolor="#3399cc">
 <td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
     
-<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<tr><td bgcolor="#3399cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl>
 <dt><font face="helvetica, arial"><a href="lofarpipe.support.lofarrecipe.html#LOFARrecipe">lofarpipe.support.lofarrecipe.LOFARrecipe</a>(<a href="lofarpipe.support.baserecipe.html#BaseRecipe">lofarpipe.support.baserecipe.BaseRecipe</a>, <a href="lofarpipe.support.ipython.html#IPythonRecipeMixIn">lofarpipe.support.ipython.IPythonRecipeMixIn</a>, <a href="lofarpipe.support.remotecommand.html#RemoteCommandRecipeMixIn">lofarpipe.support.remotecommand.RemoteCommandRecipeMixIn</a>)
 </font></dt><dd>
@@ -37,11 +39,11 @@
 </dl>
  <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
+<tr bgcolor="#cccccc">
 <td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="prepfold">class <strong>prepfold</strong></a>(<a href="lofarpipe.support.lofarrecipe.html#LOFARrecipe">lofarpipe.support.lofarrecipe.LOFARrecipe</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<tr bgcolor="#cccccc"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt>Pipeline-based&nbsp;mechanism&nbsp;of&nbsp;running&nbsp;the&nbsp;PRESTO&nbsp;code,<br>
 prefold&nbsp;on&nbsp;a&nbsp;dataset.<br>
 &nbsp;<br>
@@ -67,7 +69,17 @@ Methods defined here:<br>
 
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>inputs</strong> = {'arch': &lt;lofarpipe.support.lofaringredient.StringField object at 0x1504710&gt;, 'executable': &lt;lofarpipe.support.lofaringredient.ExecField object at 0x1504490&gt;, 'filefactor': &lt;lofarpipe.support.lofaringredient.IntField object at 0x1504290&gt;, 'fine': &lt;lofarpipe.support.lofaringredient.BoolField object at 0x1504350&gt;, 'nopdsearch': &lt;lofarpipe.support.lofaringredient.BoolField object at 0x1504650&gt;, 'noxwin': &lt;lofarpipe.support.lofaringredient.BoolField object at 0x15040d0&gt;, 'nperstokes': &lt;lofarpipe.support.lofaringredient.IntField object at 0x1504550&gt;, 'obsid': &lt;lofarpipe.support.lofaringredient.StringField object at 0x15043d0&gt;, 'pulsar': &lt;lofarpipe.support.lofaringredient.StringField object at 0x15045d0&gt;}</dl>
+<dl><dt><strong>inputs</strong> = <pre>
+{'arch'      : &lt;lofarpipe.support.lofaringredient.StringField object&gt;,
+ 'executable': &lt;lofarpipe.support.lofaringredient.ExecField object&gt;,
+ 'filefactor': &lt;lofarpipe.support.lofaringredient.IntField object&gt;,
+ 'fine'      : &lt;lofarpipe.support.lofaringredient.BoolField object&gt;,
+ 'nopdsearch': &lt;lofarpipe.support.lofaringredient.BoolField object&gt;,
+ 'noxwin'    : &lt;lofarpipe.support.lofaringredient.BoolField object&gt;,
+ 'nperstokes': &lt;lofarpipe.support.lofaringredient.IntField object&gt;,
+ 'obsid'     : &lt;lofarpipe.support.lofaringredient.StringField object&gt;,
+ 'pulsar'    : &lt;lofarpipe.support.lofaringredient.StringField object&gt;
+}</pre></dl>
 
 <dl><dt><strong>outputs</strong> = {'data': &lt;lofarpipe.support.lofaringredient.ListField object at 0x1504090&gt;}</dl>
 
