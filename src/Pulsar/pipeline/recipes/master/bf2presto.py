@@ -4,10 +4,10 @@
 #                                                          LOFAR PULSAR PIPELINE
 #
 #                                 Beam-formed data conversion (bf2presto) recipe
-LOFARPATH = ("$URL$")[40:]
 #                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
+#URL: http://usg.lofar.org/svn/code/trunk/src/Pulsar/pipeline/recipes/master/bf2presto.py $
 
 from __future__ import with_statement
 
