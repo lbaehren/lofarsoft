@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.10
+VERSION=2.11
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -2001,7 +2001,7 @@ then
    chmod 777 combine_png.sh
    cat combine_png.sh >> $log
    ./combine_png.sh
-   convert -scale 200x140-0 combined.png combined.th.png
+   convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png
    echo "Results:  combined.png (large scale) and combined.th.png (thumbnail for the web summaries)"
    echo "Results:  combined.png (large scale) and combined.th.png (thumbnail for the web summaries)" >> $log
 else
