@@ -18,19 +18,19 @@ class Beamformer(object):
         
         blocksize = crfile["blocksize"]
         
-        self.delays=hArray(float,dimensions=[nofAntennas])
-        self.weights=hArray(complex,dimensions = cr_fft,name="Complex Weights")
+        self.delays = hArray(float,dimensions=[nofAntennas])
+        self.weights = hArray(complex,dimensions = cr_fft,name="Complex Weights")
         self.freqs = hArray(crfile["frequencyValues"]) # a FloatVec comes out, so put it into hArray
-        self.phases=hArray(float,dimensions=cr_fft,name="Phases",xvalues=crfile["frequencyValues"]) 
-        self.shifted_fft=hArray(complex,dimensions=cr_fft)
+        self.phases = hArray(float,dimensions=cr_fft,name="Phases",xvalues=crfile["frequencyValues"]) 
+        self.shiftedFFT = hArray(complex,dimensions=cr_fft)
         
-        self.beamformed_fft=hArray(complex,dimensions=[crfile["fftLength"]])
+        self.beamformedFFT=hArray(complex,dimensions=[crfile["fftLength"]])
         
         self.tiedArrayBeam = hArray(float, dimensions=[blocksize])
         self.incoherentBeam = hArray(float, dimensions=[blocksize])
         self.ccBeam = hArray(float, dimensions=[blocksize])
         
-        self.beamformed_smoothed=hArray(float,dimensions=[blocksize])
+        self.smoothedBeam = hArray(float,dimensions=[blocksize])
 
         self.azel=hArray(float,dimensions=[3])
         self.cartesian=self.azel.new()
@@ -39,7 +39,7 @@ class Beamformer(object):
   #antennaPositionsForIndices = 
   # FIX: cut out the right antennaIndices here! In antenna_positions, dimensions for new arrays, then beamforming...
 
-    def getTiedArrayBeam(self, azel_in, cr_fft, antennaPositions, antennaIndices, FarField):
+    def getTiedArrayBeam(self, azel_in, fftData, antennaPositions, antennaIndices, FarField):
         print 'Evaluating for az = %f, el = %f' % (azel_in[0], azel_in[1]),
         if ( azel_in[0] > 360. or azel_in[0] < 0. or azel_in[1] > 90. or azel_in[1] < 0.):
             erg = 0.
@@ -55,21 +55,21 @@ class Beamformer(object):
         hDelayToPhase(self.phases, self.freqs, self.delays) 
         hPhaseToComplex(self.weights, self.phases)
 
-        hMul(self.shifted_fft, cr_fft, self.weights) # Dimensions don't match: need [...] ???
+        hMul(self.shiftedFFT, fftData, self.weights) # Dimensions don't match: need [...] ???
         
-        self.beamformed_fft.fill(0.0)   
+        self.beamformedFFT.fill(0.0)   
             
-        self.shifted_fft[antennaIndices, ...].addto(self.beamformed_fft)
+        self.shiftedFFT[antennaIndices, ...].addto(self.beamformedFFT)
 
-        hInvFFTw(self.tiedArrayBeam, self.beamformed_fft)
+        hInvFFTw(self.tiedArrayBeam, self.beamformedFFT)
           
         return self.tiedArrayBeam
     
     
-    def pulseMaximizer(self, azel_in, cr_fft, antennaPositions, antennaIndices, FarField):
-        tiedArrayBeam = self.getTiedArrayBeam(azel_in, cr_fft, antennaPositions, antennaIndices, FarField)
+    def pulseMaximizer(self, azel_in, fftData, antennaPositions, antennaIndices, FarField):
+        tiedArrayBeam = self.getTiedArrayBeam(azel_in, fftData, antennaPositions, antennaIndices, FarField)
         tiedArrayBeam.abs() # make absolute value!
-#        hRunningAverage(beamformed_smoothed, tiedArrayBeam, 5, hWEIGHTS.GAUSSIAN)
+#        hRunningAverage(smoothedBeam, tiedArrayBeam, 5, hWEIGHTS.GAUSSIAN)
 
         value = - tiedArrayBeam.max()[0] / self.blocksize # just the maximum. 
         print ' value = %f ' % value

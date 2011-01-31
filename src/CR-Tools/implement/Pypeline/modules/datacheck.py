@@ -1,7 +1,7 @@
 """ 
   Module datacheck.py. Part of the LOFAR Cosmic Ray pipeline.
   Opens a CR event data file and performs elementary checks to ensure stability further down the pipeline.
-  TODO: Provides methods for checking of data quality, flagging of antennas.
+  Provides methods for checking of data quality, flagging of antennas.
   
 .. moduleauthor:: Arthur Corstanje <A.Corstanje@astro.ru.nl>
 """
@@ -58,7 +58,6 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
         return result
         
     if crfile["sampleFrequency"] != 200e6: 
-    # MOVE to integrity check
         print 'Error: wrong sampling frequency: %d; needs to be 200e6' % crfile["sampleFrequency"]
         result.update(reason=format("wrong sampling frequency %d") % crfile["sampleFrequency"])
         return result
@@ -86,18 +85,18 @@ def qualityCheck(crfile):
     # make warnings for DC offsets and spikyness; flag out for rms too high (i.e. junk data)
     flagged = []
     highDCOffsets = 0
-    spikies = 0
+    spikyChannels = 0
     #import pdb; pdb.set_trace()
     for entry in flaglist:
         if entry[3][0] == 'mean': 
             highDCOffsets += 1
         elif entry[3][0] == 'spikyness':
-            spikies += 1
+            spikyChannels += 1
         elif entry[3][0] == 'rms':
             flagged.append(entry[0]) # entry[0] = antenna nr.
             
     result = dict(success=True, action = 'Data quality check', flagged = flagged, 
-                  warnings = format("Too high DC offsets: %d; too high spikyness: %d") % (highDCOffsets, spikies) )
+                  warnings = format("Too high DC offsets: %d; too high spikyness: %d") % (highDCOffsets, spikyChannels) )
     return result
     
 # Execute doctests if module is executed as script
