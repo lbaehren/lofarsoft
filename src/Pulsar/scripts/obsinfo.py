@@ -493,17 +493,17 @@ class outputInfo:
 				if self.filestem_array[0] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
 				# adding RSPA chi-square and profile
 				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
 				if self.filestem_array[1] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
 
 				# adding combined_plot column
 				if self.combined_plot != "":
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
 				else:
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				# adding the rest (columns) of the table
@@ -562,17 +562,17 @@ class outputInfo:
 				if self.filestem_array[0] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
 				# adding RSPA chi-square and profile
 				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
 				if self.filestem_array[1] == "":
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
 
 				# adding combined_plot column
 				if self.combined_plot != "":
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img width=200 height=140 src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
 				else:
 					self.infohtml = self.infohtml + "\n <td align=center></td>"
 				# adding the rest (columns) of the table
