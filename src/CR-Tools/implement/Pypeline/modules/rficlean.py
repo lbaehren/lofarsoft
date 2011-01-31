@@ -4,6 +4,9 @@
   It can also do gain calibration, i.e. flattening the spectrum.
   Mostly taken from testrfi3.py.
   
+  !! Working with event files opened by IO submodule of pycrtools. 
+  !! This gives compatibility issues down the line in workspaces.py and harray.py
+  
 .. moduleauthor:: Arthur Corstanje <A.Corstanje@astro.ru.nl>
 """
 
@@ -83,7 +86,7 @@ def cleanSpectrum(crfile):
     if ws["verbose"]: print time.clock()-ws["t0"],"s: Done calculating clean spectrum."
     if ws["doplot"]:
         ws.cleanspec[0].plot(clf=False)
-        plt.savefig("testrfi2-spectrum.pdf",format="pdf")
+#        plt.savefig("testrfi2-spectrum.pdf",format="pdf")
         raw_input("Plotted clean spectrum - press Enter to continue...")
 
 

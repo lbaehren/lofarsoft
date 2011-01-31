@@ -131,7 +131,7 @@ class CRAverageSpectrumWorkSpace(CRWorkSpace):
 #        return crfile(DEFAULTDATAFILE)
     def default_nblocks(self):
         """Number of blocks to average, take all blocks by default."""
-        return min(self["datafile"].filesize/self["datafile"].blocksize,self["max_nblocks"])
+        return min(self["datafile"]["filesize"]/self["datafile"]["blocksize"],self["max_nblocks"])
     def default_max_nblocks(self):
         """Absolute maximum number of blocks to average, irrespective of filesize."""
         return 100000
@@ -378,7 +378,7 @@ Available parameters:
         return self["datafile"]["Frequency"].setUnit("M","")
     def default_spectrum(self):
         """Power as a function of frequency."""
-        return hArray(float,[self["nofAntennas"],self["datafile"].fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=self["frequency"],par=[("logplot","y")])
+        return hArray(float,[self["nofAntennas"],self["datafile"]["fftLength"]],fill=0,name="Spectrum",units="a.u.",xvalues=self["frequency"],par=[("logplot","y")])
     def default_cleanspec(self):
         """Copy of the spectrum with the gain curve and the spiky channels taken out."""
         return hArray(properties=self["spectrum"])
@@ -652,7 +652,7 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
     ws=CRsetWorkSpace(ws,"AverageSpectrum",datafile=datafile,**keywords)
     if ws["verbose"]:
         maxcount=len(ws["blocks"])
-        print time.clock()-ws["t0"],"s: Calculating",maxcount,"blocks of size",datafile.blocksize
+        print time.clock()-ws["t0"],"s: Calculating",maxcount,"blocks of size",datafile["blocksize"]
         count=0;
         lastprogress=-1
         ws["t0"]=time.clock()
