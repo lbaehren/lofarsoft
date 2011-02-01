@@ -145,6 +145,16 @@ plt.plot() like color="red"
 - Added hWriteTextTable to write data to a textfile
 - changed parameters in hReadTextTable
 
+2011-02-01 Pypeline - rev 6914 - Heino Falcke
+- Renamed Write/ReadDump to Write/ReadFileBinary Renamed
+- Write/ReadTextTable to Write/ReadFileText Added
+- WriteFileBinaryAppend to append a block of data 
+- Write/ReadFileBinary have a changed parameter "start" rather than
+  "block", which allows one to specify the starting position in units 
+  of the elements in the vector rather than in unist of the vector
+  size. This allows simple random access read and write.
+
+
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------

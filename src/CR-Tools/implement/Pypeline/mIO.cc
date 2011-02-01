@@ -687,11 +687,10 @@ vector<HNumber> HFPP_FUNC_NAME(const HString filename, const HString keyword, co
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-
 //-----------------------------------------------------------------------
 //$DOCSTRING: Dump a single vector to a file in binary format (machine dependent)
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hWriteDump
+#define HFPP_FUNC_NAME hWriteFileBinary
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Output data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -701,29 +700,116 @@ vector<HNumber> HFPP_FUNC_NAME(const HString filename, const HString keyword, co
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  vec.writedump(filename) -> dumps vector to file
+  vec.writefilebinary(filename) -> dumps vector to file
 
 Related functions:
-  hReadDump, hWriteDump
+  hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend 
 
 Python Example:
-  >>> hWriteFileBinaryVector
-  >>> v=Vector(float,10,fill=3.0)
-  >>> hWriteFileBinaryVector(v,"test.dat")
-  >>> x=Vector(float,10,fill=1.0)
-  >>> hReadFileBinaryVector(x,"test.dat")
-  >>> x
-  Vec(float,10)=[3.0,3.0,3.0,3.0,3.0,...]
 
+v=Vector(float,10,fill=3.0)
+hWriteFileBinary(v,"test.dat")
+x=Vector(float,10,fill=1.0)
+hReadFileBinary(x,"test.dat")
+
+x -> Vector(float, 10, [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0])
 
 */
 template <class Iter>
-void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename) {
+  if (vec_end<=vec) return;
   char * v1 = reinterpret_cast<char*>(&(*vec));
   char * v2 = reinterpret_cast<char*>(&(*vec_end));
-  fstream outfile(filename.c_str(), ios::out | ios::binary);
+  ofstream outfile(filename.c_str(), ios::out | ios::binary | ios::trunc);
   if (outfile){
     outfile.write(v1, (HInteger)(v2-v1));
+    outfile.close();
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Dump a single vector and append it to the end of a file in binary format (machine dependent)
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hWriteFileBinaryAppend
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Output data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to write file to.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  vec.writefilebinaryappend(filename,true) -> appends binary vector data to end of file
+
+Related functions:
+  hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend
+
+Python Example:
+
+v=Vector(float,10,fill=3.0)
+hWriteFileBinary(v,"test.dat")
+v.fill(2.0)
+hWriteFileBinaryAppend(v,"test.dat")
+x=Vector(float,20,fill=1.0)
+hReadFileBinary(x,"test.dat")
+
+x ->  Vec(float,20)=[3.0,3.0,3.0,3.0,3.0,...,2.0,2.0]
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
+  if (vec_end<=vec) return;
+  char * v1 = reinterpret_cast<char*>(&(*vec));
+  char * v2 = reinterpret_cast<char*>(&(*vec_end));
+  fstream outfile(filename.c_str(), ios::out | ios::binary | ios::app);
+  if (outfile){
+    outfile.write(v1, (HInteger)(v2-v1));
+    outfile.close();
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Dump a single vector to a file in binary format (machine dependent)
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hWriteFileBinary
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Output data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to write file to.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(start)()("Start writing at element 'start' (zero-based index), the data block length to write is determined by the vector length.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  vec.writedump(filename,start) -> writes binary vector data at location start in the file
+
+Related functions:
+  hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend
+
+Python Example:
+
+v=Vector(float,10,fill=3.0)
+hWriteFileBinary(v,"test.dat",0)
+v.fill(2.0)
+hWriteFileBinary(v,"test.dat",5)
+x=Vector(float,15,fill=1.0)
+hReadFileBinary(x,"test.dat")
+
+x -> Vector(float, 15, [3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0])
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename, HInteger start) {
+  if (vec_end<=vec) return;
+  char * v1 = reinterpret_cast<char*>(&(*vec));
+  char * v2 = reinterpret_cast<char*>(&(*(vec+1)));
+  char * vend = reinterpret_cast<char*>(&(*vec_end));
+  fstream outfile(filename.c_str(), ios::binary | ios::in | ios::out);
+  if (outfile){
+    outfile.seekp(((HInteger) (v2-v1))*start);
+    outfile.write(v1, (HInteger)(vend-v1));
     outfile.close();
   };
 }
@@ -733,7 +819,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 //-----------------------------------------------------------------------
 //$DOCSTRING: Read a single vector from a file which was dumped in (machine-dependent) binary format
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hReadDump
+#define HFPP_FUNC_NAME hReadFileBinary
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -746,16 +832,16 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   $PARDOCSTRING
 
 Related functions:
-  hReadDump, hWriteDump,  hWriteTextTable,  hReadTextTable
+  hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend,  hWriteFileText,  hReadFileText
 
 Python Example:
-  >>> hWriteFileBinaryVector
-  >>> v=Vector(float,10,fill=3.0)
-  >>> hWriteFileBinaryVector(v,"test.dat")
-  >>> x=Vector(float,10,fill=1.0)
-  >>> hReadFileBinaryVector(x,"test.dat")
-  >>> x
-  Vec(float,10)=[3.0,3.0,3.0,3.0,3.0,...]
+
+v=Vector(float,10,fill=3.0)
+hWriteFileBinary(v,"test.dat")
+x=Vector(float,10,fill=1.0)
+hReadFileBinary(x,"test.dat")
+
+x ->  Vec(float,10)=[3.0,3.0,3.0,3.0,3.0,...]
 
 */
 template <class Iter>
@@ -774,44 +860,44 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 //-----------------------------------------------------------------------
 //$DOCSTRING: Read a section (block) of a single vector from a file which was dumped in (machine-dependent) binary format
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hReadDump
+#define HFPP_FUNC_NAME hReadFileBinary
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to read data from. The vector needs to have the length corresponding to the file size.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HInteger)(block)()("The block number to read (zero-based index), the block length is determined by the vector length.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(start)()("Start reading at element 'start' (zero-based index), the data block length to read is determined by the vector length.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  vec.readdump(filename,block) -> reads a specfic block from file (blocklength determined by len(vec))
+  vec.readdump(filename,start) -> reads a specfic block from file starting at element start (blocklength determined by len(vec))
 
   \brief $DOCSTRING
   $PARDOCSTRING
 
 Related functions:
-  hReadDump, hWriteDump,  hWriteTextTable,  hReadTextTable
+  hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend,  hWriteFileText,  hReadFileText
 
 Example:
- x=hArray(range(20))
- x.writedump("test.dat")
- v=hArray(int,10)
- v.readdump("test.dat",0)
- v.pprint()
+x=hArray(range(20))
+x.writefilebinary("test.dat")
+v=hArray(int,10)
+v.readfilebinary("test.dat",0)
+v.pprint()
  >> [0,1,2,3,4,5,6,7,8,9]
 
-#Now read the third block (of length 3) into the start of the vector
- v[0:3].readdump("test.dat",2)
- v.pprint()
+#Now read the third block (of length 3) into the first part of the vector
+v[0:3].readfilebinary("test.dat",2*3)
+v.pprint()
  >> [6,7,8,3,4,5,6,7,8,9]
 */
 template <class Iter>
-void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInteger block) {
+void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInteger start) {
   char * v1 = reinterpret_cast<char*>(&(*vec));
-  char * v2 = reinterpret_cast<char*>(&(*vec_end));
-  HInteger clen(v2-v1);
+  char * v2 = reinterpret_cast<char*>(&(*(vec+1)));
+  char * vend = reinterpret_cast<char*>(&(*vec_end));
   ifstream outfile(filename.c_str(), ios::in | ios::binary);
   if (outfile){
-    outfile.seekg(clen*block);
-    outfile.read(v1, clen);
+    outfile.seekg(((HInteger) (v2-v1))*start);
+    outfile.read(v1, (HInteger)(vend-v1));
     outfile.close();
   };
 }
@@ -821,7 +907,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
 //-----------------------------------------------------------------------
 //$DOCSTRING: Read columns of data from a file in text (ASCII) form into an array
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hReadTextTable
+#define HFPP_FUNC_NAME hReadFileText
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -837,12 +923,12 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
   $PARDOCSTRING
 
 Related functions:
-  hReadDump, hWriteDump,  hWriteTextTable,  hReadTextTable
+  hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend,  hWriteFileText,  hReadFileText
 
 Example:
   from pycrtools import *
   vec=Vector(float,24*3)
-  hReadTextTable(vec, "AERAcoordinates-1.txt", 4, Vector([5,3,7]),10)
+  hReadFileText(vec, "AERAcoordinates-1.txt", 4, Vector([5,3,7]),10)
 
 
 This will skip the first 4 rows and then read 10 rows where columns
@@ -913,7 +999,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end,
 //-----------------------------------------------------------------------
 //$DOCSTRING: Write columns of data in an array to a (ASCII) text file.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hWriteTextTable
+#define HFPP_FUNC_NAME hWriteFileText
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Output data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -930,7 +1016,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end,
   $PARDOCSTRING
 
 Related functions:
-  hReadDump, hWriteDump,  hWriteTextTable,  hReadTextTable
+  hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend,  hWriteFileText,  hReadFileText
 
 Example:
   from pycrtools import *
