@@ -24,8 +24,9 @@ class Op_new_op(Op):
 Opts.my_new_opt = Float(33, doc="docstring")
 """
 
+import sys
 from tc import Int, Float, Bool, String, Tuple, Enum, \
-    Option, NArray, Instance, tInstance, List, Any, TCInit
+    Option, NArray, Instance, tInstance, List, Any, TCInit, tcError
 
 
 class Opts(object):
@@ -67,7 +68,7 @@ class Opts(object):
                             doc="Theoretical estimate of number of beams " \
                                 "per source. None => calculate inside program")
 
-    spline_rank    = Enum(1,3, doc="rank of the interpolating function " \
+    spline_rank    = Enum(3,3, doc="rank of the interpolating function " \
                               "for rms/mean map")
 
     thresh_isl     = Float(3, doc="pixel threshold in sigma, for the island boundary")
@@ -151,6 +152,7 @@ class Opts(object):
     psf_tess_fuzzy = Float(0.05, doc = "Fraction of overlap for fuzzy tesselation; default=0.05")
 
     print_timing   = Bool(False, doc="print basic timing information")
+    show_progress  = Bool(False, doc="print progress of fitting to shell")
     verbose_fitting= Bool(False, doc="print out extra information " \
                               "during fitting")
     quiet = Bool(False, doc="Suppress output to screen. Output is still sent to the logfile as usual.")
@@ -186,7 +188,10 @@ class Opts(object):
         """
         opts = dict(opts)
         for k, v in opts.iteritems():
-            self.__setattr__(k,v)
+            try:
+                self.__setattr__(k,v)
+            except(tcError):
+                sys.exit('Parameter "%s" is not defined properly.' % (k,))
 
     def info(self):
         """Pretty-print current values of options"""

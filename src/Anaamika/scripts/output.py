@@ -31,6 +31,7 @@ import os
 import pyfits
 import fbdsm_fitstable_stuff as stuff
 import numpy as N
+import sys
 
 class Op_outlist(Op):
     """Write out list of gaussians
@@ -52,90 +53,55 @@ class Op_outlist(Op):
             write_gaul_FITS(img)
         return img
 
-def write_star(img):
-    fname = img.imagename + '.star'
-    f = open(fname, 'w')
-
-    for g in img.gaussians():
-        A = g.peak_flux
-        ra, dec = g.centre_sky
-        shape = g.size_sky
-        ### convert to canonical representation
-        ra = ra2hhmmss(ra)
-        dec= dec2ddmmss(dec)
-        decsign = ('-' if dec[3] < 0 else '+')
-
-        str = '%2i %2i %6.3f ' \
-              '%c%2i %2i %6.3f ' \
-              '%9.4f %9.4f %7.2f ' \
-              '%2i %13.7f %10s\n' % \
-               (ra[0], ra[1], ra[2], 
-                decsign, dec[0], dec[1], dec[2],
-                shape[0]*3600, shape[1]*3600, shape[2],
-                4, A, '')
-
-        f.write(str)
-    f.close()
-
-def write_kvis_ann(img):
-    fname = img.imagename + '.kvis.ann'
-    f = open(fname, 'w')
-    f.write("### KVis annotation file\n\n")
-    f.write("color green\n\n")
-
-    for g in img.gaussians():
-        iidx = g.island_id
-        A = g.peak_flux
-        ra, dec = g.centre_sky
-        shape = g.size_sky
-        cross = (3*img.header['cdelt1'],
-                 3*img.header['cdelt2'])
-
-        str = 'text   %10.5f %10.5f   %d\n' % \
-            (ra, dec, iidx)
-        f.write(str)
-        str = 'cross   %10.5f %10.5f   %10.7f %10.7f\n' % \
-            (ra, dec, abs(cross[0]), abs(cross[1]))
-        #f.write(str)
-        str = 'ellipse %10.5f %10.5f   %10.7f %10.7f %10.4f\n' % \
-            (ra, dec, shape[0], shape[1], shape[2])
-        f.write(str)
-    f.close()
-
-def write_srl(img, filename=None, format='fits'):
+    
+def write_srl(img, filename=None, format='fits', srcroot=None):
     """Write the source list to a file.
 
     filename - name of resulting file
     format - format of output list
+    srcroot - root for source names (BBS format only)
     Supported formats are:
         "fits"
         "ascii"
-        "bbs"
+        "bbs" -- each source gets its own patch
     """
+    format = format.lower()
     if (format in ['fits', 'ascii', 'bbs']) == False:
-        raise RuntimeError('format must be "fits", "ascii", or "bbs"')       
+        print 'ERROR: Format must be "fits", "ascii", or "bbs"'
+        return
+    if img.nsrc ==0 and img.ngaus > 0:
+        print 'Gaussians were not grouped into sources. Output file not written.'
+        return
+    if img.nsrc ==0 and img.ngaus == 0:
+        print 'No sources were found. Output file not written.'
+        return
     if filename == None:
-        if format == 'fits':
-            filename = img.imagename + '.srl.fits'
-        if format == 'ascii':
-            filename = img.imagename + '.srl.txt'
-        if format == 'bbs':
-            filename = img.imagename + '.srl.sky'
-    print 'Sorry, this feature is not yet available. Use "write_gaul" instead.'
+        if format == 'fits': filename = img.imagename + '.srl.fits'
+        if format == 'ascii': filename = img.imagename + '.srl.txt'
+        if format == 'bbs': filename = img.imagename + '.srl.sky'
+    if format == 'fits': print 'Sorry, fits output is not yet available. Use "bbs" format instead.'
+    if format == 'ascii': print 'Sorry, ascii output is not yet available. Use "bbs" format instead.'
+    if format == 'bbs': write_bbs_srl(img, filename, srcroot)
 
+    
 def write_shpl(img, filename=None, format='fits', srcroot=None):
     """Write the shapelet list to a file.
 
     filename - name of resulting file
-    srcroot - root for source names (BBS format only)
     format - format of output list
+    srcroot - root for source names (BBS format only)
     Supported formats are:
         "fits"
         "ascii"
         "bbs"
     """
+    format = format.lower()
     if (format in ['fits', 'ascii', 'bbs']) == False:
-        raise RuntimeError('format must be "fits", "ascii", or "bbs"')       
+        print 'ERROR: Format must be "fits", "ascii", or "bbs"'
+        return
+    if img.otps.shapelet_do == False:
+        print 'Shapelet module was not run. Output file not written.'
+        return
     if filename == None:
         if format == 'fits':
             filename = img.imagename + '.shpl.fits'
@@ -143,14 +109,15 @@ def write_shpl(img, filename=None, format='fits', srcroot=None):
             filename = img.imagename + '.shpl.txt'
         if format == 'bbs':
             filename = img.imagename + '.shpl.sky'
-    print 'Sorry, this feature is not yet available. Use "write_gaul" instead.'
+    print 'Sorry, this feature is not yet available. Use "write_gaul" or "write_srl" instead.'
 
+    
 def write_gaul(img, filename=None, format='fits', srcroot=None, patches=False):
     """Write the Gaussian list to a file.
 
     filename - name of resulting file
-    srcroot - root for source names (BBS format only)
     format - format of output list
+    srcroot - root for source names (BBS format only)
     patches - True = each Gaussian has its own patch
     Supported formats are:
         "fits"
@@ -158,188 +125,24 @@ def write_gaul(img, filename=None, format='fits', srcroot=None, patches=False):
         "bbs"
         "ds9"
     """
+    format = format.lower()
     if (format in ['fits', 'ascii', 'bbs', 'ds9']) == False:
-        raise RuntimeError('format must be "fits", "ascii", "ds9", or "bbs"')
+        print 'ERROR: Format must be "fits", "ascii", "ds9", or "bbs"'
+        return
+    if img.ngaus == 0:
+        print 'No Gaussians were fit to image. Output file not written.'
+        return    
     if filename == None:
-        if format == 'fits':
-            filename = img.imagename + '.gaul.fits'
-        if format == 'ascii':
-            filename = img.imagename + '.gaul.txt'
-        if format == 'bbs':
-            filename = img.imagename + '.gaul.sky'
-        if format == 'ds9':
-            filename = img.imagename + '.gaul.reg'
-    if format == 'fits':
-        # Write as FITS binary table.
-        import pyfits
-        import fbdsm_fitstable_stuff as stuff
-        from output import pybdsm2fbdsm
+        if format == 'fits': filename = img.imagename + '.gaul.fits'
+        if format == 'ascii': filename = img.imagename + '.gaul.txt'
+        if format == 'bbs': filename = img.imagename + '.gaul.sky'
+        if format == 'ds9': filename = img.imagename + '.gaul.reg'        
+    if format == 'fits':  write_fits_gaul(img, filename)
+    if format == 'ascii': write_ascii_gaul(img, filename)       
+    if format == 'bbs': write_bbs_gaul(img, filename, srcroot, patches)
+    if format == 'ds9': write_ds9_gaul(img, filename)
 
-        cnames, cunit, cformat = stuff.cnames, stuff.cunit, stuff.cformat
-        fbdsm_list = pybdsm2fbdsm(img)
-        col_list = []
-        for ind, col in enumerate(fbdsm_list):
-            list1 = pyfits.Column(name=cnames[ind], format=cformat[ind], unit=cunit[ind], array=fbdsm_list[ind])
-            col_list.append(list1)
-        tbhdu = pyfits.new_table(col_list)
-        tbhdu.writeto(filename, clobber=True)
-        print '--> Wrote FITS file ' + filename
-        
-    if format == 'ascii':
-        # Write as ascii file.
-        f = open(filename, "w")
-        f.write('# PyBDSM Gaussian list for '+img.filename+'\n')
-        f.write('# Reference frequency : %.3e Hz\n\n' % (img.cfreq,))
-        if img.opts.spectralindex_do:
-            f.write('#  Gaul_id   Island_id   Flag   Total_flux   Err_total_flux   Peak_flux  Err_peak_flux Spec_indx Err_spec_indx  RA   Err_RA    DEC    Err_DEC     Xpos        Err_xpos    Ypos      Err_ypos       Bmaj_fw      Err_bmaj  Bmin_fw   Err_bmin   Bpa     Err_bpa\n')
-        else:           
-            f.write('#  Gaul_id   Island_id   Flag   Total_flux   Err_total_flux   Peak_flux  Err_peak_flux  RA   Err_RA    DEC    Err_DEC     Xpos        Err_xpos    Ypos      Err_ypos       Bmaj_fw      Err_bmaj  Bmin_fw   Err_bmin   Bpa     Err_bpa\n')
-        for g in img.gaussians():
-            gidx = g.gaus_num-1  # python numbering
-            iidx = g.island_id
-            F = g.flag
-            A = g.peak_flux
-            T = g.total_flux
-            ra, dec = g.centre_sky
-            x, y = g.centre_pix
-            shape = g.size_sky
-            eA = g.peak_fluxE
-            eT = g.total_fluxE
-            era, edec = g.centre_skyE
-            ex, ey = g.centre_pixE
-            eshape = g.size_skyE
-            if img.opts.spectralindex_do:
-                spin1 = g.spin1
-                espin1 = g.espin1
-                if spin1 == None:
-                    specin = 0.0
-                    especin = 0.0
-                else:                       
-                    specin = spin1[1]
-                    especin = espin1[1]
-                str1 = "%4d  %4d  %d    %10f %10f   %10f %10f  %10f %10f " \
-                      "%10f %10f   %10f %10f   %10f %10f   %10f %10f   " \
-                      "%10f %10f   %10f %10f   %10f %10f\n" % \
-                      (gidx, iidx, F,    T, eT,     A, eA, specin, especin,\
-                       ra, era,     dec, edec,    x, ex,  y, ey, \
-                       shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2])
-            else:                
-                str1 = "%4d  %4d  %d    %10f %10f   %10f %10f  " \
-                      "%10f %10f   %10f %10f   %10f %10f   %10f %10f   " \
-                      "%10f %10f   %10f %10f   %10f %10f\n" % \
-                      (gidx, iidx, F,    T, eT,     A, eA, \
-                       ra, era,     dec, edec,    x, ex,  y, ey, \
-                       shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2])
-            f.write(str1)
-        f.close()
-        print '--> Wrote ASCII file ' + filename
-        
-    if format == 'bbs':
-        # Write as a BBS sky model.
-        import numpy as N
-        from const import fwsig
-        from output import ra2hhmmss
-        from output import dec2ddmmss
-
-        if img.opts.spectralindex_do: 
-            freq = "%.5e" % img.freq0
-        else:
-            freq = "%.5e" % img.cfreq
-        f = open(filename, 'w')
-        if patches:
-            str1 = "# (Name, Type, Patch, Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+"', SpectralIndexDegree='0', " \
-                + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n"
-        else:
-            str1 = "# (Name, Type, Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+"', SpectralIndexDegree='0', " \
-                + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n"
-        f.write(str1)
-        sep = ', '
-        if srcroot == None:
-            sname = img.imagename.split('.')[0]
-        else:
-            sname = srcroot  
-        if patches:
-            pname = sname + '_patch'
-
-        str_src = []
-        total_flux = []
-        bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
-        bm_deg = img.pix2beam(bm_pix)
-        for g in img.gaussians():
-            src = sname + '_' + str(g.gaus_num)
-            if patches:
-                patch = pname + '_' + str(g.gaus_num)
-            ra, dec = g.centre_sky
-            ra = ra2hhmmss(ra)
-            sra = str(ra[0]).zfill(2)+':'+str(ra[1]).zfill(2)+':'+str("%.3f" % (ra[2])).zfill(6)
-            dec = dec2ddmmss(dec)
-            decsign = ('-' if dec[3] < 0 else '+')
-            sdec = decsign+str(dec[0]).zfill(2)+'.'+str(dec[1]).zfill(2)+'.'+str("%.3f" % (dec[2])).zfill(6)
-            total_flux.append(g.total_flux)
-            total = str("%.3e" % (g.total_flux))
-            pol = '0.0, 0.0, 0.0, '
-            deconv = g.deconv_size_sky
-            if deconv[0] == 0.: deconv[0] = bm_deg[0]
-            if deconv[1] == 0.: deconv[1] = bm_deg[1]
-            if deconv[0] <= bm_deg[0] and deconv[1] <= bm_deg[1]:
-                stype = 'POINT'
-                deconv[0] = bm_deg[0]
-                deconv[1] = bm_deg[1]
-            else:
-                stype = 'GAUSSIAN'
-            deconv1 = str("%.5e" % (deconv[0])) 
-            deconv2 = str("%.5e" % (deconv[1])) 
-            deconv3 = str("%.5e" % (deconv[2])) 
-            deconvstr = deconv1 + ', ' + deconv2 + ', ' + deconv3
-            specin = '-0.8'
-            if img.opts.spectralindex_do: 
-                spin1 = g.spin1
-                if spin1 != None:
-                    specin = str("%.3e" % (spin1[1]))
-            if patches:
-                str_src.append(', , ' + patch + ', 00:00:00, +00.00.00\n' + src + sep + stype + sep + patch + sep + sra + sep + sdec + sep + total + sep + pol + freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
-            else:
-                str_src.append(src + sep + stype + sep + sra + sep + sdec + sep + total + sep + pol + \
-                                   freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
-        # sort by flux (largest -> smallest)
-        flux_indx = range(len(str_src))
-        flux_indx.sort(lambda x,y: cmp(total_flux[x],total_flux[y]), reverse=True)
-        for i in flux_indx:
-            f.write(str_src[i])
-        f.close()
-        print '--> Wrote BBS sky model ' + filename
-        
-    if format == 'ds9':
-        # write ds9 region file
-        import numpy as N
-        from const import fwsig
-        out_region_file = open(filename, "w")
-        region_comment = '# Region file format: DS9 version 4.0\nglobal color=green font="helvetica 10 normal" select=1 highlite=1 edit=1 move=1 delete=1 include=1 fixed=0 source\nfk5\n'
-        out_region_file.write(region_comment)
-        if srcroot == None:
-            sname = img.imagename.split('.')[0]
-        else:
-            sname = srcroot  
-        bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
-        bm_deg = img.pix2beam(bm_pix)
-        for g in img.gaussians():
-            src = sname + '_' + str(g.gaus_num)
-            ra, dec = g.centre_sky
-            deconv = g.deconv_size_sky
-            if deconv[0] == 0.: deconv[0] = bm_deg[0]
-            if deconv[1] == 0.: deconv[1] = bm_deg[1]
-            if deconv[0] <= bm_deg[0] and deconv[1] <= bm_deg[1]:
-                stype = 'POINT'
-                deconv[0] = bm_deg[0]
-                deconv[1] = bm_deg[1]
-                region = 'point('+str(ra)+','+str(dec)+') # point=cross width=2 text={'+src+'}\n'
-            else:
-                stype = 'GAUSSIAN'
-                region = 'ellipse('+str(ra)+','+str(dec)+','+str(deconv[0]*3600.0)+'",'+str(deconv[1]*3600.0)+'",'+str(deconv[2]+90.0)+') # text={'+src+'}\n'
-            out_region_file.write(region)
-        out_region_file.close()
-        print '--> Wrote ds9 region file ' + filename
-        
+    
 def write_resid_img(img, filename=None):
     """Write the residual Gaussian and shapelet (if done) images to a fits file."""
     if filename == None:
@@ -356,6 +159,7 @@ def write_resid_img(img, filename=None):
         temp_im.writeto(filename_s, clobber=True)
         print 'Wrote FITS file ' + filename_s
 
+        
 def write_model_img(img, filename=None):
     """Write the model Gaussian image to a fits file."""
     if filename == None:
@@ -372,6 +176,7 @@ def write_model_img(img, filename=None):
         temp_im.writeto(filename_s, clobber=True)
         print 'Wrote FITS file ' + filename_s
 
+        
 def write_rms_img(img, filename=None):
     """Write the rms image to a fits file."""
     if img.opts.rms_map == True:
@@ -382,7 +187,8 @@ def write_rms_img(img, filename=None):
         print 'Wrote FITS file ' + filename
     else:
         print 'RMS map is set to a constant. No image written.'
-    
+
+        
 def write_ch0_img(img, filename=None):
     """Write the ch0 image (used for source detection) to a fits file."""
     if filename == None:
@@ -391,6 +197,7 @@ def write_ch0_img(img, filename=None):
     temp_im.writeto(filename, clobber=True)
     print 'Wrote FITS file ' + filename
 
+    
 def make_fits_image(imagedata, wcsobj, beam, freq):
     """Makes a simple FITS hdulist appropriate for images"""
     import pyfits
@@ -415,16 +222,18 @@ def make_fits_image(imagedata, wcsobj, beam, freq):
     header.update('CRPIX3', freq[2])
     hdulist[0].header = header
     return hdulist
-    
+
+
 def ra2hhmmss(deg):
     """Convert RA coordinate (in degrees) to HH MM SS"""
     from math import modf
     if deg < 0:
-        raise RuntimeError("Negative RA")
+        sys.exit("Negative RA")
     x, hh = modf(deg/15.)
     x, mm = modf(x*60)
     ss = x*60
     return (int(hh), int(mm), ss)
+
 
 def dec2ddmmss(deg):
     """Convert DEC coordinate (in degrees) to DD MM SS"""
@@ -435,12 +244,13 @@ def dec2ddmmss(deg):
     sa = x*60
     return (int(dd), int(ma), sa, sign)
 
+
 def pybdsm2fbdsm(img):
     import functions as func
     fbdsm = []
     for g in img.gaussians():
-        gidx = g.gaus_num
-        iidx = g.island_id+1
+        gidx = g.gaus_num-1  # python numbering
+        iidx = g.island_id  # python numbering
         F = g.flag
         A = g.peak_flux
         T = g.total_flux
@@ -471,4 +281,295 @@ def pybdsm2fbdsm(img):
     fbdsm = func.trans_gaul(fbdsm)
     return fbdsm
 
+
+def write_fits_gaul(img, filename):
+    """Write Gaussian list to a FITS binary table"""
+    import pyfits
+    import fbdsm_fitstable_stuff as stuff
+    from output import pybdsm2fbdsm
+
+    cnames, cunit, cformat = stuff.cnames, stuff.cunit, stuff.cformat
+    fbdsm_list = pybdsm2fbdsm(img)
+    col_list = []
+    for ind, col in enumerate(fbdsm_list):
+        list1 = pyfits.Column(name=cnames[ind], format=cformat[ind], unit=cunit[ind], array=fbdsm_list[ind])
+        col_list.append(list1)
+    tbhdu = pyfits.new_table(col_list)
+    tbhdu.writeto(filename, clobber=True)
+    print '--> Wrote FITS file ' + filename
+
+    
+def write_ascii_gaul(img, filename):
+    """Writes Gaussian list to an ASCII file"""
+    f = open(filename, "w")
+    f.write('# PyBDSM Gaussian list for '+img.filename+'\n')
+    f.write('# Reference frequency : %.3e Hz\n\n' % (img.cfreq,))
+    if img.opts.spectralindex_do:
+        f.write('#  Gaul_id   Island_id   Flag   Total_flux   Err_total_flux   Peak_flux  Err_peak_flux Spec_indx Err_spec_indx  RA   Err_RA    DEC    Err_DEC     Xpos        Err_xpos    Ypos      Err_ypos       Bmaj_fw      Err_bmaj  Bmin_fw   Err_bmin   Bpa     Err_bpa\n')
+    else:           
+        f.write('#  Gaul_id   Island_id   Flag   Total_flux   Err_total_flux   Peak_flux  Err_peak_flux  RA   Err_RA    DEC    Err_DEC     Xpos        Err_xpos    Ypos      Err_ypos       Bmaj_fw      Err_bmaj  Bmin_fw   Err_bmin   Bpa     Err_bpa\n')
+    for g in img.gaussians():
+        gidx = g.gaus_num-1  # python numbering
+        iidx = g.island_id  # python numbering
+        F = g.flag
+        A = g.peak_flux
+        T = g.total_flux
+        ra, dec = g.centre_sky
+        x, y = g.centre_pix
+        shape = g.size_sky
+        eA = g.peak_fluxE
+        eT = g.total_fluxE
+        era, edec = g.centre_skyE
+        ex, ey = g.centre_pixE
+        eshape = g.size_skyE
+        if img.opts.spectralindex_do:
+            spin1 = g.spin1
+            espin1 = g.espin1
+            if spin1 == None:
+                specin = 0.0
+                especin = 0.0
+            else:                       
+                specin = spin1[1]
+                especin = espin1[1]
+            str1 = "%4d  %4d  %d    %10f %10f   %10f %10f  %10f %10f " \
+                  "%10f %10f   %10f %10f   %10f %10f   %10f %10f   " \
+                  "%10f %10f   %10f %10f   %10f %10f\n" % \
+                  (gidx, iidx, F,    T, eT,     A, eA, specin, especin,\
+                   ra, era,     dec, edec,    x, ex,  y, ey, \
+                   shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2])
+        else:                
+            str1 = "%4d  %4d  %d    %10f %10f   %10f %10f  " \
+                  "%10f %10f   %10f %10f   %10f %10f   %10f %10f   " \
+                  "%10f %10f   %10f %10f   %10f %10f\n" % \
+                  (gidx, iidx, F,    T, eT,     A, eA, \
+                   ra, era,     dec, edec,    x, ex,  y, ey, \
+                   shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2])
+        f.write(str1)
+    f.close()
+    print '--> Wrote ASCII file ' + filename
+
+    
+def write_bbs_gaul(img, filename, srcroot, patches):
+    """Writes Gaussian list to a BBS sky model"""
+    import numpy as N
+    from const import fwsig
+    from output import ra2hhmmss
+    from output import dec2ddmmss
+
+    if img.opts.spectralindex_do: 
+        freq = "%.5e" % img.freq0
+    else:
+        freq = "%.5e" % img.cfreq
+    f = open(filename, 'w')
+    if patches:
+        str1 = "# (Name, Type, Patch, Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+"', SpectralIndexDegree='0', " \
+            + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n"
+    else:
+        str1 = "# (Name, Type, Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+"', SpectralIndexDegree='0', " \
+            + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n"
+    f.write(str1)
+    sep = ', '
+    if srcroot == None:
+        sname = img.imagename.split('.')[0]
+    else:
+        sname = srcroot  
+    if patches:
+        pname = sname + '_patch'
+
+    str_src = []
+    total_flux = []
+    bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
+    bm_deg = img.pix2beam(bm_pix)
+    for g in img.gaussians():
+        src = sname + '_' + str(g.gaus_num-1)  # python numbering
+        if patches:
+            patch = pname + '_' + str(g.gaus_num-1)  # python numbering
+        ra, dec = g.centre_sky
+        ra = ra2hhmmss(ra)
+        sra = str(ra[0]).zfill(2)+':'+str(ra[1]).zfill(2)+':'+str("%.3f" % (ra[2])).zfill(6)
+        dec = dec2ddmmss(dec)
+        decsign = ('-' if dec[3] < 0 else '+')
+        sdec = decsign+str(dec[0]).zfill(2)+'.'+str(dec[1]).zfill(2)+'.'+str("%.3f" % (dec[2])).zfill(6)
+        total_flux.append(g.total_flux)
+        total = str("%.3e" % (g.total_flux))
+        pol = '0.0, 0.0, 0.0, '
+        deconv = g.deconv_size_sky
+        if deconv[0] == 0.: deconv[0] = bm_deg[0]
+        if deconv[1] == 0.: deconv[1] = bm_deg[1]
+        if deconv[0] <= bm_deg[0] and deconv[1] <= bm_deg[1]:
+            stype = 'POINT'
+            deconv[0] = bm_deg[0]
+            deconv[1] = bm_deg[1]
+        else:
+            stype = 'GAUSSIAN'
+        deconv1 = str("%.5e" % (deconv[0])) 
+        deconv2 = str("%.5e" % (deconv[1])) 
+        deconv3 = str("%.5e" % (deconv[2])) 
+        deconvstr = deconv1 + ', ' + deconv2 + ', ' + deconv3
+        specin = '-0.8'
+        if img.opts.spectralindex_do: 
+            spin1 = g.spin1
+            if spin1 != None:
+                specin = str("%.3e" % (spin1[1]))
+        if patches:
+            str_src.append(', , ' + patch + ', 00:00:00, +00.00.00\n' + src + sep + stype + sep + patch + sep + sra + sep + sdec + sep + total + sep + pol + freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
+        else:
+            str_src.append(src + sep + stype + sep + sra + sep + sdec + sep + total + sep + pol + \
+                               freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
+    # sort by flux (largest -> smallest)
+    flux_indx = range(len(str_src))
+    flux_indx.sort(lambda x,y: cmp(total_flux[x],total_flux[y]), reverse=True)
+    for i in flux_indx:
+        f.write(str_src[i])
+    f.close()
+    print '--> Wrote BBS sky model ' + filename
+
+    
+def write_ds9_gaul(img, filename):
+    """Writes Gaussian list to a ds9 region file"""
+    import numpy as N
+    from const import fwsig
+    out_region_file = open(filename, "w")
+    region_comment = '# Region file format: DS9 version 4.0\nglobal color=green font="helvetica 10 normal" select=1 highlite=1 edit=1 move=1 delete=1 include=1 fixed=0 source\nfk5\n'
+    out_region_file.write(region_comment)
+    if srcroot == None:
+        sname = img.imagename.split('.')[0]
+    else:
+        sname = srcroot  
+    bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
+    bm_deg = img.pix2beam(bm_pix)
+    for g in img.gaussians():
+        src = sname + '_' + str(g.gaus_num-1)  # python numbering
+        ra, dec = g.centre_sky
+        deconv = g.deconv_size_sky
+        if deconv[0] == 0.: deconv[0] = bm_deg[0]
+        if deconv[1] == 0.: deconv[1] = bm_deg[1]
+        if deconv[0] <= bm_deg[0] and deconv[1] <= bm_deg[1]:
+            stype = 'POINT'
+            deconv[0] = bm_deg[0]
+            deconv[1] = bm_deg[1]
+            region = 'point('+str(ra)+','+str(dec)+') # point=cross width=2 text={'+src+'}\n'
+        else:
+            stype = 'GAUSSIAN'
+            region = 'ellipse('+str(ra)+','+str(dec)+','+str(deconv[0]*3600.0)+'",'+str(deconv[1]*3600.0)+'",'+str(deconv[2]+90.0)+') # text={'+src+'}\n'
+        out_region_file.write(region)
+    out_region_file.close()
+    print '--> Wrote ds9 region file ' + filename
+
+    
+def write_bbs_srl(img, filename, srcroot):
+    """Writes source list to a BBS sky model"""
+    import numpy as N
+    from const import fwsig
+    from output import ra2hhmmss
+    from output import dec2ddmmss
+
+    if img.opts.spectralindex_do: 
+        freq = "%.5e" % img.freq0
+    else:
+        freq = "%.5e" % img.cfreq
+    f = open(filename, 'w')
+    str1 = "# (Name, Type, Patch, Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+"', SpectralIndexDegree='0', " \
+            + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n"
+    f.write(str1)
+    sep = ', '
+    if srcroot == None:
+        sname = img.imagename.split('.')[0]
+    else:
+        sname = srcroot  
+    pname = sname + '_patch'
+
+    str_src = []
+    total_flux = []
+    bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
+    bm_deg = img.pix2beam(bm_pix)
+    for source in img.source:
+        patch = pname + '_src' + str(source.source_id)
+        str_src.append(', , ' + patch + ', 00:00:00, +00.00.00\n')
+        for g in source.gaussians:
+            src = sname + '_src' + str(source.source_id) + '_' + str(g.gaus_num-1)  # python numbering
+            ra, dec = g.centre_sky
+            ra = ra2hhmmss(ra)
+            sra = str(ra[0]).zfill(2)+':'+str(ra[1]).zfill(2)+':'+str("%.3f" % (ra[2])).zfill(6)
+            dec = dec2ddmmss(dec)
+            decsign = ('-' if dec[3] < 0 else '+')
+            sdec = decsign+str(dec[0]).zfill(2)+'.'+str(dec[1]).zfill(2)+'.'+str("%.3f" % (dec[2])).zfill(6)
+            total_flux.append(g.total_flux)
+            total = str("%.3e" % (g.total_flux))
+            pol = '0.0, 0.0, 0.0, '
+            deconv = g.deconv_size_sky
+            if deconv[0] == 0.: deconv[0] = bm_deg[0]
+            if deconv[1] == 0.: deconv[1] = bm_deg[1]
+            if deconv[0] <= bm_deg[0] and deconv[1] <= bm_deg[1]:
+                stype = 'POINT'
+                deconv[0] = bm_deg[0]
+                deconv[1] = bm_deg[1]
+            else:
+                stype = 'GAUSSIAN'
+            deconv1 = str("%.5e" % (deconv[0])) 
+            deconv2 = str("%.5e" % (deconv[1])) 
+            deconv3 = str("%.5e" % (deconv[2])) 
+            deconvstr = deconv1 + ', ' + deconv2 + ', ' + deconv3
+            specin = '-0.8'
+            if img.opts.spectralindex_do: 
+                spin1 = g.spin1
+                if spin1 != None:
+                    specin = str("%.3e" % (spin1[1]))
+            str_src.append(src + sep + stype + sep + patch + sep + sra + sep + sdec + sep + total + sep + pol + freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
+    for i in range(len(str_src)):
+        f.write(str_src[i])
+    f.close()
+    print '--> Wrote BBS sky model ' + filename
+
+    
+def write_star(img):
+    fname = img.imagename + '.star'
+    f = open(fname, 'w')
+
+    for g in img.gaussians():
+        A = g.peak_flux
+        ra, dec = g.centre_sky
+        shape = g.size_sky
+        ### convert to canonical representation
+        ra = ra2hhmmss(ra)
+        dec= dec2ddmmss(dec)
+        decsign = ('-' if dec[3] < 0 else '+')
+
+        str = '%2i %2i %6.3f ' \
+              '%c%2i %2i %6.3f ' \
+              '%9.4f %9.4f %7.2f ' \
+              '%2i %13.7f %10s\n' % \
+               (ra[0], ra[1], ra[2], 
+                decsign, dec[0], dec[1], dec[2],
+                shape[0]*3600, shape[1]*3600, shape[2],
+                4, A, '')
+
+        f.write(str)
+    f.close()
+
+    
+def write_kvis_ann(img):
+    fname = img.imagename + '.kvis.ann'
+    f = open(fname, 'w')
+    f.write("### KVis annotation file\n\n")
+    f.write("color green\n\n")
+
+    for g in img.gaussians():
+        iidx = g.island_id
+        A = g.peak_flux
+        ra, dec = g.centre_sky
+        shape = g.size_sky
+        cross = (3*img.header['cdelt1'],
+                 3*img.header['cdelt2'])
+
+        str = 'text   %10.5f %10.5f   %d\n' % \
+            (ra, dec, iidx)
+        f.write(str)
+        str = 'cross   %10.5f %10.5f   %10.7f %10.7f\n' % \
+            (ra, dec, abs(cross[0]), abs(cross[1]))
+        #f.write(str)
+        str = 'ellipse %10.5f %10.5f   %10.7f %10.7f %10.4f\n' % \
+            (ra, dec, shape[0], shape[1], shape[2])
+        f.write(str)
+    f.close()
 

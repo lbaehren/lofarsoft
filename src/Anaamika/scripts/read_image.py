@@ -15,6 +15,7 @@ from image import *
 import mylogger 
 import time
 import pyrap.images as pim
+import sys
 
 Image.imagename = String(doc="Identifier name for output files")
 Image.cfreq = Float(doc="Frequency of the ch0 image. All fluxes are referenced to this frequency.")
@@ -54,14 +55,15 @@ class Op_readimage(Op):
             except:
               if pol == 'I':
                   mylog.critical("Cannot open file : "+image_file)
-                  raise RuntimeError("Cannot open file : "+image_file)
+                  sys.exit("Cannot open file : "+image_file)
               else:
                   img.opts.polarisation_do = False
                   mylog.warning('One or more of Q, U, V images not found. Polarisation module disabled.')
                   break
 
             mylog.info("Opened "+image_file)
-            print "Opened "+image_file
+            if img.opts.quiet == False:
+                print "Opened "+image_file
 
             #if inputimage.shape()[0] != 1:
             #    mylog.warning("Mutliple extentions found. Only the primary extention will be considered")
@@ -76,7 +78,7 @@ class Op_readimage(Op):
                 dims = data.shape[0:-3]
                 allones = N.equal(dims, 1).all()
                 if not allones:
-                    raise RuntimeError("Data dimensionality too high")
+                    sys.exit("Data dimensionality too high")
                 else:
                     data.shape = data.shape[-3:]
             if len(data.shape) == 3:
@@ -93,10 +95,11 @@ class Op_readimage(Op):
                 data = N.array(data, order='C',
                                dtype=data.dtype.newbyteorder('='))
                 mylog.info("Final image size : "+str(data.shape))
-                if len(data.shape) == 3:
-                    print "Image size : "+str(data.shape[-2:])+' pixels'
-                else:
-                    print "Image size : "+str(data.shape)+' pixels'
+                if img.opts.quiet == False:
+                    if len(data.shape) == 3:
+                        print "Image size : "+str(data.shape[-2:])+' pixels'
+                    else:
+                        print "Image size : "+str(data.shape)+' pixels'
                 
                 img.image = data
                 img.header = hdr
@@ -220,7 +223,7 @@ class Op_readimage(Op):
             if iminfo.has_key('restoringbeam'):
                 beaminfo = iminfo['restoringbeam']
             else:
-                raise RuntimeError("Error: no beam information found in header. Please specify beam.")
+                sys.exit("Nno beam information found in header. Please specify beam.")
             if beaminfo.has_key('major') and beaminfo.has_key('minor') and beaminfo.has_key('major'):
                 bmaj = beaminfo['major']['value']
                 bmin = beaminfo['minor']['value']
@@ -236,7 +239,7 @@ class Op_readimage(Op):
                     bmin = bmin * 180.0 / N.pi
                 beam = (bmaj, bmin, bpa) # all degrees
             else:
-                raise RuntimeError("Error: incomplete beam information found in header. Please specify beam.")
+                sys.exit("Incomplete beam information found in header. Please specify beam.")
 
         ### convert beam into pixels and make sure it's asymmetric
         pbeam = beam2pix(beam)
@@ -251,6 +254,7 @@ class Op_readimage(Op):
         img.beam = beam
         img.pixel_beam = pbeam
         img.opts.beam = beam
-        print "Beam shape (major, minor, pos angle) : (%4g, %4g, %4g) degrees" % (beam[0], beam[1], beam[2])
+        if img.opts.quiet == False:
+            print "Beam shape (major, minor, pos angle) : (%4g, %4g, %4g) degrees" % (beam[0], beam[1], beam[2])
 
 

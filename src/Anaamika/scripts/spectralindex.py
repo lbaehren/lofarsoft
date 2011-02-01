@@ -194,7 +194,7 @@ class Op_spectralindex(Op):
         crval, cdelt, crpix = img.freq_pars
         if crval == 0.0 and cdelt == 0.0 and crpix == 0.0 and img.opts.frequency == None:
             mylog.critical("CTYPE = FREQ not found in header and frequencies not specified by user")
-            raise RuntimeError("CTYPE = FREQ not found in header and frequencies not specified by user")
+            sys.exit("CTYPE = FREQ not found in header and frequencies not specified by user")
         else:
             if img.opts.frequency == None:
                 for ichan in range(shp[0]):
@@ -203,7 +203,7 @@ class Op_spectralindex(Op):
             else:
                 if len(img.opts.frequency) != shp[0]:
                     mylog.critical("Number of channels does not match number of frequencies specified by user")
-                    raise RuntimeError("Number of channels does not match number of frequencies specified by user")
+                    sys.exit("Number of channels does not match number of frequencies specified by user")
                 for ichan in range(shp[0]):
                     img.freq[ichan] = img.opts.frequency[ichan]
                 

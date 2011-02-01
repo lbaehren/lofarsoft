@@ -43,38 +43,29 @@ class Op_gausfit(Op):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gausfit   ")
         opts = img.opts
         if img.opts.quiet == False:
-            sys.stdout.write('Fitting islands with Gaussians : ')
+            if img.nisl == 1:
+                sys.stdout.write('Fitting island with Gaussians : ')
+            else:
+                sys.stdout.write('Fitting islands with Gaussians : ')
             sys.stdout.flush()
         for idx, isl in enumerate(img.islands):
-          if img.opts.quiet == False:
-              sys.stdout.write('#' + str(idx))
-              sys.stdout.flush()
-              time.sleep(0.02)
-              sys.stdout.write('.')
-              sys.stdout.flush()
-              time.sleep(0.02)
-              sys.stdout.write('.')
-              sys.stdout.flush()
-              time.sleep(0.02)
-              sys.stdout.write('.')
-              sys.stdout.flush()
-              time.sleep(0.02)
-          
-          # if opts.verbose_fitting:
-          #   print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active)
+            if img.opts.quiet == False and img.opts.show_progress == True and opts.verbose_fitting==False:
+                update_progress(idx)
+            if opts.verbose_fitting:
+                print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active)
 
-          gaul, fgaul = self.fit_island(isl, opts, img)
+            gaul, fgaul = self.fit_island(isl, opts, img)
 
-          ### now convert gaussians into Gaussian objects and store
-          gaul = [Gaussian(img, par, idx, gidx)
+            ### now convert gaussians into Gaussian objects and store
+            gaul = [Gaussian(img, par, idx, gidx)
                       for (gidx, par) in enumerate(gaul)]
 
-          if len(gaul) == 0: gidx = 0
-          fgaul= [Gaussian(img, par, idx, gidx + gidx2 + 1, flag)
+            if len(gaul) == 0: gidx = 0
+            fgaul= [Gaussian(img, par, idx, gidx + gidx2 + 1, flag)
                       for (gidx2, (flag, par)) in enumerate(fgaul)]
 
-          isl.gaul = gaul
-          isl.fgaul= fgaul
+            isl.gaul = gaul
+            isl.fgaul= fgaul
 
         ### create generator which allow to easily access all gaussians
         def gaussian_list():
@@ -328,6 +319,7 @@ class Op_gausfit(Op):
         ### in the image and fitting converges
         while fitok:
           peak, coords = fcn.find_peak()
+
           if peak < thr:  ### no good peaks left
               break
           if len(fcn.parameters) < ngmax and iter == 1 and inifit == 'fbdsm' and len(gaul) >= ng1+1: 
@@ -457,6 +449,21 @@ class Op_gausfit(Op):
         np[5] = divmod(np[5], 180)[1]
         
         return np
+
+def update_progress(idx):
+    """Simple progress indicator for the shell"""
+    sys.stdout.write('#' + str(idx))
+    sys.stdout.flush()
+    time.sleep(0.02)
+    sys.stdout.write('.')
+    sys.stdout.flush()
+    time.sleep(0.02)
+    sys.stdout.write('.')
+    sys.stdout.flush()
+    time.sleep(0.02)
+    sys.stdout.write('.')
+    sys.stdout.flush()
+    time.sleep(0.02)
 
 
 from image import *

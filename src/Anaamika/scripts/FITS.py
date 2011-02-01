@@ -16,6 +16,7 @@ import numpy as N
 from image import *
 import mylogger 
 import pyfits
+import sys
 
 Image.imagename = String(doc="Identifier name for output files")
 Image.cfreq = Float(doc="Frequency of the ch0 image. All fluxes are referenced to this frequency.")
@@ -55,7 +56,7 @@ class Op_loadFITS(Op):
             except:
               if pol == 'I':
                   mylog.critical("Cannot open file : "+fits_file)
-                  raise RuntimeError("Cannot open file : "+fits_file)
+                  sys.exit("Cannot open file : "+fits_file)
               else:
                   img.opts.polarisation_do = False
                   mylog.warning('One or more of Q, U, V images not found. Polarisation module disabled.')
@@ -79,7 +80,7 @@ class Op_loadFITS(Op):
                 dims = data.shape[0:-3]
                 allones = N.equal(dims, 1).all()
                 if not allones:
-                    raise RuntimeError("Data dimensionality too high")
+                    sys.exit("Data dimensionality too high")
                 else:
                     data.shape = data.shape[-3:]
             if len(data.shape) == 3:
@@ -266,7 +267,7 @@ class Op_loadFITS(Op):
                             print "  Using beam parameters found in header history"
                         break
                 if found_in_history == False:
-                    raise RuntimeError("FITS file error: no beam information found in header")
+                    sys.exit("FITS file error: no beam information found in header")
 
         ### convert beam into pixels and make sure it's asymmetric
         pbeam = beam2pix(beam)

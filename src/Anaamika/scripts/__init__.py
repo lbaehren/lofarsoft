@@ -3,6 +3,9 @@
 Import all standard operations, define default chain of
 operations and provide function 'execute', which can
 execute chain of operations properly.
+
+Also defines the 'process_image()' convenience function
+that makes it easy to run PyBDSM from ipython.
 """
 # Try simple check of whether pyrap is available
 try:
@@ -27,7 +30,7 @@ from gaul2srl import Op_gaul2srl
 from spectralindex import Op_spectralindex
 from polarisation import Op_polarisation
 from wavelet_atrous import Op_wavelet_atrous
-#from psf_vary import Op_psf_vary # this module is not in current USG repository, and _pytesselate.so does not import
+#from psf_vary import Op_psf_vary 
 import mylogger 
 
 if has_pyrap:
@@ -44,7 +47,7 @@ if has_pyrap:
                   Op_spectralindex(),
                   Op_polarisation(),
                   Op_wavelet_atrous(),
-                  #Op_psf_vary(),
+                  # Op_psf_vary(),
                   Op_outlist()
                   ]
 else:
@@ -61,7 +64,7 @@ else:
                   Op_spectralindex(),
                   Op_polarisation(),
                   Op_wavelet_atrous(),
-                  #Op_psf_vary(),
+                  # Op_psf_vary(),
                   Op_outlist()
                   ]
    
@@ -109,32 +112,20 @@ def execute(chain, opts):
     return img
 
 
-def process_image(input_file, beam=None, beam_spectrum=None, freq=None, thresh_isl=3.0, thresh_pix=5.0, thresh_gaus=None, use_rms_map=None, rms=None, rms_box=None, extended=False, gaussian_maxsize=10.0, spectralindex_do=False, polarisation_do=False, shapelet_do=False, use_pyrap=True, collapse_mode='average', collapse_ch0=0, collapse_av=[], collapse_wt='rms', quiet=False):
+def process_image(input_file, beam=None, beam_spectrum=None, freq=None, thresh_isl=3.0, thresh_pix=5.0, thresh_gaus=None, use_rms_map=None, rms=None, rms_box=None, extended=False, gaussian_maxsize=10.0, collapse_mode='average', collapse_ch0=0, collapse_av=[], collapse_wt='rms', spectralindex_do=False, polarisation_do=False, shapelet_do=False, use_pyrap=True, quiet=False):
     """
-    Run a standard analysis and returns the associated Image object.
+  Run a standard analysis and returns the associated Image object.
 
-    The following options are available:    
+  The following options are available:    
       beam = None or (major axis FWHM [deg], minor axis FWHM [deg], pos. angle [deg])
       beam_spectrum = Synthesized beam per channel; None => all equal
       freq = None or frequency in Hz of input image (use a list if input image
              is a cube: e.g., [30e6, 35e6, 72e6])
-      polarisation_do = True/False; do polarisation analysis (default = False)?
-      spectralindex_do = True/False; do spectral index analysis (default = False)?
-      shapelet_do = True/False; do shapelet analysis (default = False)?
       thresh_isl = threshold for island detection in sigma (default = 3.0)
       thresh_pix = at least one pixel in island must exceed this threshold in sigma
                    or island is ignored (default = 5.0)
       thresh_gaus = peak threshold in sigma for adding more Gaussians to an island
                     (default = None => determine automatically)
-      collapse_mode = average/single; Average channels or take a single channel to 
-                      perform source detection on
-      collapse_ch0 = Number of the channel for source extraction, if collapse_mode =
-                     "single"
-      collapse_av = List of channels to average if collapse_mode = "average" (default
-                    = [] => use all channels)
-      collapse_wt = unity/rms; Average channels with weights=1 or 1/rms^2 if 
-                    collapse_mode="average"
-                    
       use_rms_map = None/True/False; use 2D map of rms or constant (default = None
                     => determine automatically)
       rms = None or value to use for constant rms when use_rms_map=False (default =
@@ -146,9 +137,21 @@ def process_image(input_file, beam=None, beam_spectrum=None, freq=None, thresh_i
                  setting this flag to True may help. It sets rms map to a constant
                  (since the extended emission will bias map) and sets the maximum
                  Gaussian area to 100.0 times the beam area.
+      collapse_mode = average/single; Average channels or take a single channel to 
+                      perform source detection on
+      collapse_ch0 = Number of the channel for source extraction, if collapse_mode =
+                     "single"
+      collapse_av = List of channels to average if collapse_mode = "average" (default
+                    = [] => use all channels)
+      collapse_wt = unity/rms; Average channels with weights=1 or 1/rms^2 if 
+                    collapse_mode="average"
+      spectralindex_do = True/False; do spectral index analysis (default = False)?
+      polarisation_do = True/False; do polarisation analysis (default = False)?
+      shapelet_do = True/False; do shapelet analysis (default = False)?
+      use_pyrap = True/False; try to use pyrap to read the image (default = True)?
       quiet - Suppress output to screen. Output is still sent to the logfile as usual.
       
-    Examples:   
+  Examples:   
       Find sources in an image:
         > img = bdsm.process_image('image.fits')
           --> process with default parameters
@@ -172,50 +175,12 @@ def process_image(input_file, beam=None, beam_spectrum=None, freq=None, thresh_i
     """
     import sys
     import os
-    
+
     # Handle options
-    if beam != None and (isinstance(beam, tuple) == False or len(beam) != 3):
-        raise RuntimeError('beam must be a Tuple of length 3: (maj [deg], min [deg], angle [deg]).')
-    if beam_spectrum != None and isinstance(beam_spectrum, list) == False:
-        raise RuntimeError('beam_spectrum must be a list of Tuples of length 3: (maj [deg], min [deg], angle [deg]).')
-    if freq != None and (isinstance(freq, float) == False and isinstance(freq, list) == False):
-        raise RuntimeError('freq must be a float, a list of floats, or None')
     if isinstance(freq, float):
         freq = [freq] # make it a list
-    if isinstance(polarisation_do, bool) == False:
-        raise RuntimeError('polarisation_do must be True or False')
-    if isinstance(spectralindex_do, bool) == False:
-        raise RuntimeError('spectralindex_do must be True or False')
-    if isinstance(shapelet_do, bool) == False:
-        raise RuntimeError('shapelet_do must be True or False')
-    if isinstance(thresh_isl, float) == False or thresh_isl < 0.0:
-        raise RuntimeError('thresh_isl must be greater than 0.0')
-    if isinstance(thresh_pix, float) == False or thresh_pix < 0.0:
-        raise RuntimeError('thresh_pix must be greater than 0.0')
-    if thresh_gaus != None and isinstance(thresh_gaus, float) == False:
-        raise RuntimeError('thresh_gaus must be greater than 0.0 or None')
     if thresh_gaus == None:
         thresh_gaus = -1.0
-    if (collapse_mode in ['average', 'single']) == False:
-        raise RuntimeError('collapse_mode must be "average" or "single"')
-    if isinstance(collapse_ch0, int) == False:
-        raise RuntimeError('collapse_ch0 must be an integer')
-    if (collapse_wt in ['rms', 'unity']) == False:
-        raise RuntimeError('collapse_wt must be "rms" or "unity"')
-    if isinstance(collapse_av, list) == False:
-        raise RuntimeError('collapse_av must be a list of integers.')
-    # if threshold_method != None and (threshold_method in ['hard', 'fdr']) == False:
-    #     raise RuntimeError('threshold_method must be None, "hard", or "fdr"')
-    if use_rms_map != None and isinstance(use_rms_map, bool) == False :
-        raise RuntimeError('use_rms_map must be None, True, or False')
-    # if (use_mean_map in ['default', 'const', 'map']) == False:
-    #     raise RuntimeError('use_mean_map must be "default", "const", or "map"')
-    if rms_box != None and (isinstance(rms_box, tuple) == False or len(rms_box) != 2):
-        raise RuntimeError('rms_box must be entered as: (box_size [pixels], box_step [pixels])')
-    if isinstance(gaussian_maxsize, float) == False or gaussian_maxsize < 0.0:
-        raise RuntimeError('gaussian_maxsize must be greater than 0.0')
-    if isinstance(extended, bool) == False:
-        raise RuntimeError('extended flag must be True or False')
     if extended == True:
         gaussian_maxsize = 100.0 # allow very extended gaussians 
         use_rms_map = False # don't use rms map, which may be biased by extended emission        
@@ -223,63 +188,49 @@ def process_image(input_file, beam=None, beam_spectrum=None, freq=None, thresh_i
         use_pyrap = True
     else:
         use_pyrap = False
-
+    show_progress = True # print progress of Gaussian/shapelet fitting to shell
+    
+    # Define operations chain
+    # ATM, use two different operation chains depending on whether or not pyrap is available
     if use_pyrap:
-        if spectralindex_do:
-            fits_chain = [Op_readimage(),
-                          Op_collapse(),
-                          Op_preprocess(),
-                          Op_rmsimage(),
-                          Op_threshold(), 
-                          Op_islands(),
-                          Op_gausfit(), 
-                          Op_make_residimage(), 
-                          Op_gaul2srl(), 
-                          Op_spectralindex(),
-                          Op_outlist()
-                          ]
-        else: # remove stuff needed only for specindx as they are buggy
-            fits_chain = [Op_readimage(),
-                          Op_collapse(),
-                          Op_preprocess(),
-                          Op_rmsimage(),
-                          Op_threshold(), 
-                          Op_islands(),
-                          Op_gausfit(), 
-                          Op_make_residimage(), 
-                          Op_outlist()
-                          ]
-
+        fits_chain = [Op_readimage(),
+                      Op_collapse(),
+                      Op_preprocess(),
+                      Op_rmsimage(),
+                      Op_threshold(), 
+                      Op_islands(),
+                      Op_gausfit(), 
+                      Op_shapelets(),
+                      Op_make_residimage(), 
+                      Op_gaul2srl(), 
+                      Op_spectralindex(),
+                      Op_polarisation(),
+                      Op_outlist()
+                      ]
     else:
-        if spectralindex_do:
-            fits_chain = [Op_loadFITS(),
-                          Op_collapse(),
-                          Op_preprocess(),
-                          Op_rmsimage(),
-                          Op_threshold(), 
-                          Op_islands(),
-                          Op_gausfit(), 
-                          Op_make_residimage(),
-                          Op_gaul2srl(), 
-                          Op_spectralindex(),
-                          Op_outlist()
-                          ]
-        else: # remove stuff needed only for specindx as they are buggy
-            fits_chain = [Op_loadFITS(),
-                          Op_collapse(),
-                          Op_preprocess(),
-                          Op_rmsimage(),
-                          Op_threshold(), 
-                          Op_islands(),
-                          Op_gausfit(), 
-                          Op_shapelets(),
-                          Op_make_residimage(),
-                          Op_outlist()
-                          ]
+        fits_chain = [Op_loadFITS(),
+                      Op_collapse(),
+                      Op_preprocess(),
+                      Op_rmsimage(),
+                      Op_threshold(), 
+                      Op_islands(),
+                      Op_gausfit(), 
+                      Op_shapelets(),
+                      Op_make_residimage(),
+                      Op_gaul2srl(), 
+                      Op_spectralindex(),
+                      Op_polarisation(),
+                      Op_outlist()
+                      ]
 
     # Build options dictionary
-    opts = {'filename':input_file, 'fits_name':input_file, 'beam': beam, 'beam_spectrum': beam_spectrum, 'frequency':freq, 'thresh_isl':thresh_isl, 'thresh_pix':thresh_pix, 'thresh_gaus':thresh_gaus, 'polarisation_do':polarisation_do, 'spectralindex_do':spectralindex_do, 'shapelet_do':shapelet_do, 'rms_map':use_rms_map, 'rms_box': rms_box, 'flag_maxsize_bm':gaussian_maxsize, 'use_pyrap':use_pyrap, 'thresh':'hard', 'collapse_mode':collapse_mode, 'collapse_ch0':collapse_ch0, 'collapse_av':collapse_av, 'collapse_wt':collapse_wt, 'quiet':quiet, 'rms_value':rms}
+    opts = {'filename':input_file, 'fits_name':input_file, 'beam': beam, 'beam_spectrum': beam_spectrum, 'frequency':freq, 'thresh_isl':thresh_isl, 'thresh_pix':thresh_pix, 'thresh_gaus':thresh_gaus, 'polarisation_do':polarisation_do, 'spectralindex_do':spectralindex_do, 'shapelet_do':shapelet_do, 'rms_map':use_rms_map, 'rms_box': rms_box, 'flag_maxsize_bm':gaussian_maxsize, 'use_pyrap':use_pyrap, 'thresh':'hard', 'collapse_mode':collapse_mode, 'collapse_ch0':collapse_ch0, 'collapse_av':collapse_av, 'collapse_wt':collapse_wt, 'quiet':quiet, 'rms_value':rms, 'show_progress':show_progress}
 
-    # Run execute with the fits_chain and given options
-    img = execute(fits_chain, opts)
-    return img
+    # Try to run execute with the fits_chain and given options
+    try:
+        img = execute(fits_chain, opts)
+        return img
+    except SystemExit, err:
+        # Catch all the SystemExit exceptions [generated by sys.exit("error message")]
+        # and print a nice error message since these are all ones we can trap. 
+        print '\nERROR: ' + str(err)

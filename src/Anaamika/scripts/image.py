@@ -19,35 +19,16 @@ class Image(object):
     and the results of the analysis (like island lists,
     gaussian lists, etc) are stored here.
 
-    A few convienience functions are provided for writing out
-    lists and images:
-    
-    write_gaul(filename=None, format='fits')
-        Writes Gaussian list in these formats:
-        - BBS 
-        - FITS
-        - ASCII
-        - ds9
-        
-    write_srl(filename=None, format='fits')
-        Writes Source list in these formats:   
-        - FITS
-        - ASCII
-
-    write_shpl(filename=None, format='fits')
-        Writes Shapelet list in these formats:   
-        - BBS 
-        - FITS
-        - ASCII
-
-    write_rms_img(filename=None)
-          Writes rms image to FITS file.
-          
-    write_model_img(filename=None)
-          Writes Gaussian and shapelet model images to FITS file.
-          
-    write_resid_img(filename=None)
-          Writes Gaussian and shaplet resid images to FITS file.
+    A few convienience methods are provided for writing out
+    lists and images:   
+      write_gaul(): Writes Gaussian list in these formats:       
+      write_srl(): Writes Source list in these formats:   
+      write_shpl(): Writes Shapelet list in these formats:   
+      write_rms_img(): Writes rms image to FITS file.         
+      write_model_img(): Writes Gaussian and shapelet model
+                         images to FITS file.    
+      write_resid_img(): Writes Gaussian and shaplet resid
+                         images to FITS file.
 
     """
     # A number of type-checked properties 
@@ -107,25 +88,27 @@ class Image(object):
         import output
         output.write_ch0_img(self, filename=filename)
       
-    def write_srl(self, filename=None, format='fits'):
+    def write_srl(self, filename=None, format='fits', srcroot=None):
         """Write the source list to a file.
 
         filename - name of resulting file
         format - format of output list
+        srcroot - root for source names (BBS format only)
         Supported formats are:
             "fits"
             "ascii"
+            "bbs" -- each source gets its own patch
         """
         import output
         output.write_srl(self, filename=filename, format=format)
-
+        
     def write_shpl(self, filename=None, format='fits', srcroot=None):
         """Write the shapelet list to a file.
 
         filename - name of resulting file
-        srcroot - root for source names (BBS format only)
         format - format of output list
         Supported formats are:
+        srcroot - root for source names (BBS format only)
             "bbs"
             "fits"
             "ascii"

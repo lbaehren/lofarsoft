@@ -18,6 +18,7 @@ from image import *
 import _cbdsm
 import pyfits
 import mylogger
+import sys
 
 avspc_wtarr = NArray(doc = "Weight array for channel collapse")
 channel_rms = NArray(doc = "RMS per channel")
@@ -336,7 +337,7 @@ def init_freq_collapse(img, wtarr=None):
             crval, cdelt, crpix = img.freq_pars
             if crval == 0.0 and cdelt == 0.0 and crpix == 0.0 and img.opts.frequency == None:
                 mylog.critical("CTYPE = FREQ not found in header and frequencies not specified by user")
-                raise RuntimeError("CTYPE = FREQ not found in header and frequencies not specified by user")
+                sys.exit("CTYPE = FREQ not found in header and frequencies not specified by user")
             else:
                 img.cfreq = crval+cdelt*(chan0+1-crpix)
     else:
@@ -361,7 +362,7 @@ def init_freq_collapse(img, wtarr=None):
             crval, cdelt, crpix = img.freq_pars
             if crval == 0.0 and cdelt == 0.0 and crpix == 0.0 and img.opts.frequency == None:
                 mylog.critical("CTYPE = FREQ not found in header and frequencies not specified by user")
-                raise RuntimeError("CTYPE = FREQ not found in header and frequencies not specified by user")
+                sys.exit("CTYPE = FREQ not found in header and frequencies not specified by user")
             else:
                 for i, ch in enumerate(c_list):
                     sumwts += wtarr[i]

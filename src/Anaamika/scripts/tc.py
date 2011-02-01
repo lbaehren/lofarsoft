@@ -86,7 +86,7 @@ def Tuple(*values, **kws):
 
     If the first item of values is a tuple, it's used as the
     default value. The remaining arguments are used to build
-    type constrains and should be TC values.
+    type constraints and should be TC values.
 
     Examples:
     Tuple((1,2,3))          # tuple of 3 integers, default = (1,2,3)

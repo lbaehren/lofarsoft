@@ -24,46 +24,36 @@ class Op_shapelets(Op):
     
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Shapefit")
         if img.opts.shapelet_do:
-          if img.opts.quiet == False:
-              sys.stdout.write('Fitting islands with Shapelets : ')
-              sys.stdout.flush()
-
-          for id, isl in enumerate(img.islands):
             if img.opts.quiet == False:
-              sys.stdout.write('#' + str(id))
-              sys.stdout.flush()
-              time.sleep(0.02)
-              sys.stdout.write('.')
-              sys.stdout.flush()
-              time.sleep(0.02)
-              sys.stdout.write('.')
-              sys.stdout.flush()
-              time.sleep(0.02)
-              sys.stdout.write('.')
-              sys.stdout.flush()
-              time.sleep(0.02)
-            arr=isl.image
-	    mask=isl.mask_active + isl.mask_noisy
-	    basis=img.opts.shapelet_basis
-	    beam_pix=img.beam2pix(img.beam)
-            mode=img.opts.shapelet_fitmode
-            if mode != 'fit': mode=''
+                sys.stdout.write('Fitting islands with Shapelets : ')
+                sys.stdout.flush()
 
-	    fixed=(0,0,0)
-	    (beta, centre, nmax)=self.get_shapelet_params(arr, mask, basis, beam_pix, fixed, N.array(isl.origin), mode)
+            for id, isl in enumerate(img.islands):
+                if img.opts.quiet == False and img.opts.show_progress == True:
+                    update_progress(id)
+                arr=isl.image
+                mask=isl.mask_active + isl.mask_noisy
+                basis=img.opts.shapelet_basis
+                beam_pix=img.beam2pix(img.beam)
+                mode=img.opts.shapelet_fitmode
+                if mode != 'fit': mode=''
 
-	    cf=decompose_shapelets(arr, mask, basis, beta, centre, nmax, mode)
+                fixed=(0,0,0)
+                (beta, centre, nmax)=self.get_shapelet_params(arr, mask, basis, beam_pix, fixed, N.array(isl.origin), mode)
 
-	    isl.shapelet_beta=beta
-	    isl.shapelet_centre=tuple(N.array(centre) + N.array(isl.origin))
-	    isl.shapelet_nmax=nmax
-	    isl.shapelet_basis=basis
-	    isl.shapelet_cf=cf
-            mylog.info('Shape : cen '+str(isl.shapelet_centre[0])+' '+ \
-                 str(isl.shapelet_centre[1])+' beta '+str(beta))
-          if img.opts.quiet == False:
-            sys.stdout.write('done.\n')
-            sys.stdout.flush()
+                cf=decompose_shapelets(arr, mask, basis, beta, centre, nmax, mode)
+
+                isl.shapelet_beta=beta
+                isl.shapelet_centre=tuple(N.array(centre) + N.array(isl.origin))
+                isl.shapelet_nmax=nmax
+                isl.shapelet_basis=basis
+                isl.shapelet_cf=cf
+                #mylog.info('Shape : cen '+str(isl.shapelet_centre[0])+' '+ \
+                #     str(isl.shapelet_centre[1])+' beta '+str(beta))
+                
+            if img.opts.quiet == False:
+                sys.stdout.write('done.\n')
+                sys.stdout.flush()
 
 
     def get_shapelet_params(self, image, mask, basis, beam_pix, fixed, ori, mode, beta=None, cen=None, nmax=None):
@@ -121,6 +111,18 @@ class Op_shapelets(Op):
 
          return beta, cen, nmax
 
- 
-       
+def update_progress(idx):
+    """Simple progress indicator for the shell"""
+    sys.stdout.write('#' + str(idx))
+    sys.stdout.flush()
+    time.sleep(0.02)
+    sys.stdout.write('.')
+    sys.stdout.flush()
+    time.sleep(0.02)
+    sys.stdout.write('.')
+    sys.stdout.flush()
+    time.sleep(0.02)
+    sys.stdout.write('.')
+    sys.stdout.flush()
+    time.sleep(0.02)
 
