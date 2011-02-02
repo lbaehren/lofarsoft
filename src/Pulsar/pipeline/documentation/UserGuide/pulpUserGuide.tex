@@ -559,8 +559,8 @@ filefactor  = subband splitting factor, <int>
               optional user speciﬁcation (range, 1-248)
               default = 8
 \end{verbatim}
-The user should be aware of the relationship between the defined subclusters on the offline LOFAR cluster, the selectable storage nodes, and the location of the data.  For example, if a user wishes to process data on the subcluster six, i.e. \verb|sub6|, it is incumbent upon the user to specify an appropriate ``arch'' value,  which is primarily determined by data location.  \\
-These values can be found in the PulpEnv() API specification, and defined thusly:
+The user should be aware of the relationship between the defined subclusters of the offline LOFAR cluster, the electable storage nodes, and the location of the data.  For example, if a user wishes to process data on subcluster six, i.e. \verb|sub6|, it is incumbent upon the user to specify an appropriate ``arch'' value,  which is primarily determined by data location.  \\
+These values can be found in the PulpEnv() API specification, and are defined thusly:
 \begin{verbatim}
           arch134:  /net/sub5/lse013/data4/PULP_ARCHIVE
           arch144:  /net/sub5/lse014/data4/PULP_ARCHIVE
@@ -570,7 +570,8 @@ These values can be found in the PulpEnv() API specification, and defined thusly
           arch184:  /net/sub6/lse018/data4/PULP_ARCHIVE
 \end{verbatim}
 
-As a real world example of a typical ``pulp'' command line, user will become use to this sort of invocation.
+As a real world example of a typical ``pulp'' command line, user will
+become familiar with this sort of invocation:
 
 \begin{verbatim}
 $ python pulp.py -d --job-name=pulpTest001 --obsid=L2010_09067 --pulsar=B0809+54 \
@@ -653,7 +654,8 @@ There remain some vestigial attributes in PulpEnv, such as the defunct self.logf
 The log files those attributes once addressed have long since disappeared.
 
 \subsubsection{A note on Pulp packaging:}
-The Pulp package has been recently made an importable package, and importing Pulp now does not demand that recipe and support directories appear explicitly in \verb|$PYTHONPATH|.   Since packaging is a recent and ad hoc supplement  that was not available to the Pulp modules at first.  Which means that internal imports depend on direct import access to modules.  Therefore, it is encouraged that users specify the explicit paths in their  \verb|$PYTHONPATH| because, internally, the package does not have direct access to all Pulp modules without them.  These ``pipeline'' python paths appear as vestigial, a furture development would seek to eliminate this explicit \verb|$PYTHONPATH| reliance. 
+Pulp was recently packagized and made importable.  Importing Pulp
+modules now does not require that recipe and support directories appear explicitly in \verb|$PYTHONPATH|.   Packaging is a recent and \emph{ad hoc} supplement  that was not available to the Pulp modules at first.  Which means that internal imports depend on direct import access to modules.  Therefore, it is encouraged that users specify the explicit paths in their  \verb|$PYTHONPATH| because, internally, the package does not have direct access to all Pulp modules without them.  These ``pipeline'' python paths appear as vestigial, a furture development would seek to eliminate this explicit \verb|$PYTHONPATH| reliance. 
 
 Here is an example to further illustrate a Pulp package importation.
 
@@ -677,24 +679,34 @@ Ultimately, and with minor interface adjustment, such an importable package coul
 \begin{verbatim}
 #!/usr/env/python
 
-import pipeline as pulp
+# Pulp pulsar pipeline controlling script
 
-# multiple obsid and pulsar values, different filefactors, ...
+import pipeline as pulp
+from pulp.support import pulpEnv
+
+# no cli, a short ex. 
+# multiple obsids, filefactors, ... 
+# dreaming of a day when the user does not
+# have to specify unnecessary parameters.
+
+# demonstrate `filefactor' as 2nd arg.
 
 obsid1      = "L2010_12343"
-pulsar1     = "B0809+54"
 filefactor1 = 8
 
 obsid2      = "L2010_56748"
-pulsar2     = "B0111-11"
 filefactor2 = 4
 
-pulp.pulp(obsid1,pulsar1,filfactor1).go()
-pulp.pulp(obsid2,pulsar2,filefactor2).go()
+env1 = pulpEnv.PulpEnv(obsid1, filefactor1)
+env2 = pulpEnv.PulpEnv(obsid2, filefactor2)
+
+pulp.pulp(env1).go()
+pulp.pulp(env2).go()
 \end{verbatim}
 Again, this would require some tweaks to the definition interface, as
 it is currently implemented. Calling Pulp in such a manner would be
 equivalent to invoking the pipeline from the command line.
+
 %% ------------------------------------------------------------------------------
 
 \section{Discussion}
@@ -735,25 +747,26 @@ discovered, though the parset location appears to have been stabilized.
 
 \subsection{An Investigation of prepfold execution}
 A report on the investigation into the undocumented behaviour of
-prepfold within the LOFAR cluster environment, various other webs
-of intrigue.  Prepfold recipe implementation friction was the result
-of a converegence of undocumented behaviours by both the Framework
-and the execution of prepfold itself, with secret files being written 
-to cwd() and then deleted quietly and without notice.  That the framework
-did not pass the environment to compute nodes is not unexpected, just not
-documented -- at least not then.  Ultimately, the environment is not 
-a framework problem per se, but users and developers should be aware of
-prepfold's secret file writing behaviour.
+prepfold within the LOFAR cluster environment. \footnote{Some
+  segments written ``in the moment'' as notes. Hence the present tense
+  voice at times.}\\
 
-Firstly, here are the temp files produced and removed by 
+Prepfold recipe implementation friction was the result
+of a converegence of unknown behaviour in execution of prepfold
+itself, with secret files being written to cwd() and then deleted
+quietly and without notice, and unknown arbitrary file path limits
+(now know at 100 char). Users and developers should be aware of
+prepfold's unannounced file writing behaviour.
+
+Here are the temp files produced and removed by 
 \texttt{barycenter.c} done during the prepfold process.  This effort
 was undertaken when \textit{barycentering was turned on} during 
-prepfold processing (x.inf file: barycentering?  1)
+prepfold processing \footnote{(x.inf file: Barycentered?           (1=yes, 0=no)  =  1}
+\texttt{barycenter.c}, \footnote{lines 176 - 182 are the best summary
+  of the files written and deleted to be found.)}
 
-\texttt{barycenter.c}, lines 176 - 182 (the best summary of this 
-secret behaviour to be found.)
-
-\begin{verbatim}   remove("tempo.lis");
+\begin{verbatim}  
+   remove("tempo.lis");
    remove("tempoout_times.tmp");
    remove("tempoout_vels.tmp");
    remove("resid2.tmp");
@@ -763,15 +776,11 @@ secret behaviour to be found.)
 \end{verbatim}
 
 Below is the source of the file read on the TEMPO temp file creation,
-and specifically, the "resid2.tmp" file.
+and specifically, the ``\verb|resid2.tmp|" file.
 
 At first, I thought that the embedded (see below) system call to tempo 
-was failing, that I did not have tempo in my \$PATH.  But that can't be
-right. Because I am able to run prepfold perfectly well directly in the
-shell on the nodes, to completion, no problems.
-
-Except, the prepfold behaviour looks exactly like the tempo call is
-failing in some way.
+was failing, no \$TEMPO in my \$PATH.  Environment problem on the
+compute node. fixed. still breaking.
 
 This is barycenter.c, which writes a temp file for TEMPO called bary.tmp,
 calls tempo with one argument, the bary.tmp file and pipes the output to
@@ -857,28 +866,27 @@ Somehow.  prepfold makes it impossible to find out what that system
 call is doing.  As mentioned earlier, prepfold runs perfectly well, 
 cutting and pasting the exact command in the shell.
 
-A poorly built system call (! is this the way all of presto interacts?)
+A poorly built system call (is this the nominal PRESTO interface?)
 that presumes \verb|$TEMPO| is available directly in your \verb|\$PATH|, throws
-away stderr and any return signal. According to barycenter.c, tempo ran 
+away stderr and return signal. According to barycenter.c, tempo ran 
 perfectly, no matter what actually happened.
 
 Another unadvertised feature of \verb|prepfold| and siblings like
-\verb|barycenter.c| is an arbtrary filename size limited to 100
+\verb|barycenter.c| is an arbtrary path limit of 100
 characters.\\
 \verb|barycenter.c|:
 \begin{verbatim}
     temporaryfile[100]
 \end{verbatim}
-Users and other recipe writers should beware long path names when playing
-with elements of PRESTO.
+Users and other recipe writers should beware long path names when
+working with elements of PRESTO.
 
 \subsection{Open questions}
 \label{sec:open-questions}
 \subsubsection{On output paths}
 In general, production pipelines should maintain tight control over
 data writing locations.  Abiding this prescription, Pulp defines a set
-of partition specific output archive locations. This seems to be a
-strange notion at ASTRON, but malaise best avoided by output control
+of partition specific output archive locations. Malaise best avoided by output control
 cropped up when user selectable output paths caused the crash of a
 storage node running multiple pulsar shell script jobs.  Such an event
 ought not happen in a production environment, which is why Pulp
