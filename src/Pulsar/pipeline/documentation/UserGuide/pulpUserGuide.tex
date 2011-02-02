@@ -578,6 +578,20 @@ archive on storage node, lse014, and will appear in a path like,
 \begin{verbatim}
 /net/sub5/lse014/data4/PULP_ARCHIVE/L2010_09067/
 \end{verbatim}
+Where the final state of the observation directory will look roughly like this.
+\begin{verbatim}
+/net/sub6/lse018/data4/PULP_ARCHIVE/L2010_09053:
+total used in directory 1008988 available 95461848
+drwxr-sr-x  pulsar       4096 2011-02-02 13:31 .
+drwxr-sr-x  pulsar         24 2011-02-02 12:58 ..
+ -rw-r--r-- pulsar 1031558764 2011-02-02 13:31 B1726-00_L2010_09053_plots.tar.gz
+ -rw-r--r-- pulsar    1502482 2011-02-02 13:31 B1726-00_L2010_09053_pulp.log
+drwxr-sr-x  pulsar        105 2011-02-02 12:58 incoherentstokes/
+ -rw-r--r-- pulsar      15018 2011-02-02 12:58 L2010_09053_Master_RSP.list
+ -rw-r--r-- pulsar      41764 2011-02-02 13:03 L2010_09053.parset
+ -rw-r--r-- pulsar       1106 2011-02-02 13:03 lofar_default.inf
+\end{verbatim}
+
 
 \subsection{A note on PulpEnv() and Pulp package interfaces}
 The PulpEnv class was designed initially introduced to bring environment variables
