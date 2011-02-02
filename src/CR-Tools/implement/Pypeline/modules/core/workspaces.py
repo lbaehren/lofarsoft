@@ -489,6 +489,7 @@ def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywo
         baseline[...,numin_i:numax_i].bspline(ws["baseline_x"][numin_i:numax_i],ws["coeffs"][...])
     #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth
     #Left end
+    import pdb; pdb.set_trace()
     ws["height_ends"][0,...].copy(baseline[...,numin_i])
     factor=hArray(float,ws["nofAntennas"],fill=6.9) # Factor 1000 in log
     if not ws["logfit"]:
@@ -658,7 +659,13 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
         ws["t0"]=time.clock()
     for block in ws["blocks"]:
         ws["datafile"]["block"]=block
-        ws["fx"].read(datafile,"Fx")
+        # Hack: fix compatibility with new-style-IO module opened files. They don't have 'filename' attribute
+        # as they can have multiple files underneath. In that case read directly and put result into ws["fx"].
+        if 'filename' in dir(datafile):
+            ws["fx"].read(datafile,"Fx")  # that's the old method
+        else:
+            ws["fx"] = datafile["Fx"] # case sensitivity... 
+            
         ws["fft"][...].fftw(ws["fx"][...])
         spectrum[...].spectralpower(ws["fft"][...])
         if ws["verbose"]:
