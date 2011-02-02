@@ -5,7 +5,7 @@
 \usepackage[today,nofancy]{svninfo}
 %\usepackage[colorlinks=true,urlcolor=cyan]{hyperref}
 
-\svnInfo $Id$
+\svnInfo $Id$e
 
 \begin{document}
 
@@ -72,7 +72,7 @@ framework pulsar pipeline, known as Pulp (executable: \verb|pulp.py|).
 Users are encouraged to seek detailed information about the
 actual processing engaged by the ``known pulsar pipeline'' from the
 LOFAR Transient Key Project (TKP) science team. Details
-regarding LOFAR beam-formed data processing are beyond the scope of this
+regarding LOFAR beam-formed data processing actual are beyond the scope of this
 document.\footnote{Readers of this
   document who find themselves unfamiliar with the terms, `known pulsar
   pipeline,'  or `Jason Hessels', should probably be reading something else.}
@@ -85,7 +85,9 @@ be used throughout this document.
 \subsection{Applicable Documents}
 Documentation on the Pulp package is provided with the Pulp
 distribution, and is available with the Pulp package download in
-\verb|${LOFARSOFT}/src/Pulsar/pipeline/documentation|. 
+\verb|${LOFARSOFT}/src/Pulsar/pipeline/documentation|. This document
+is delivered and appears in the top level of the Pulp distribution,
+with build materiel located in the documentation directory. 
 Further documentation on the LOFAR pipeline framework, development
 under the LOFAR pipeline framework,  as well as schematic
 documentation on the Pulp API,  are available  within the repository
@@ -95,33 +97,36 @@ part of any download of the \verb|$LOFARSOFT| repository.
 The Pulp current release under the LOFAR USG repository is located in \\
 \noindent \verb|$LOFARSOFT/src/Pulsar/pipeline:|
 \begin{verbatim}
-drwxr-xr-x  15 <user>  staff   510 Jan 30 08:21 documentation/
--rw-r--r--   1 <user>  staff  3614 Jan 28 20:33 dynspec.py
--rw-r--r--   1 <user>  staff  1708 Jan 21 17:16 pipeline.cfg
--rwxr-xr-x   1 <user>  staff  4545 Jan 28 20:34 pulp.py
--rw-r--r--   1 <user>  staff    40 Jan 28 17:28 pulpVersion.py
-drwxr-xr-x   5 <user>  staff   170 Nov  1 11:15 recipes/
-drwxr-xr-x  22 <user>  staff   748 Jan 29 23:09 support/
--rw-r--r--   1 <user>  staff   789 Jan 28 22:07 tasks.cfg≈
+drwxr-xr-x   9 <user>    staff     306 Feb  2 18:07 .svn 
+-rw-r--r--@  1 <user>    staff      67 Jan 31 01:29 __init__.py
+drwxr-xr-x   8 <user>    staff     272 Feb  2 18:05 documentation/
+-rw-r--r--   1 <user>    staff    3614 Jan 28 20:33 dynspec.py
+-rw-r--r--   1 <user>    staff    1708 Jan 21 17:16 pipeline.cfg
+-rwxr-xr-x   1 <user>    staff    4545 Jan 31 01:48 pulp.py
+-rw-r--r--   1 <user>    staff  315325 Feb  2 20:00 pulpUserGuide.pdf
+rw-r--r--    1 <user>    staff      40 Jan 28 17:28 pulpVersion.py
+drwxr-xr-x   6 <user>    staff     204 Jan 31 01:21 recipes/
+drwxr-xr-x  18 <user>    staff     612 Feb  1 16:16 support/
+-rw-r--r--   1 <user>    staff     789 Jan 28 22:07 tasks.cfg
 \end{verbatim}
 In \verb|documentation/|, users will  find a directory structure that
 somewhat mimics the pipeline's recipe-support directory structure, with
 recipe API documents fou d under \verb|./pipeline/documentation/| in
 `master',`nodes', and `support'.
 \begin{verbatim}
-.Pulsar/pipeline/documentation/:
--------
-drwxr-xr-x  15  <user>   staff    510 Jan 30 09:11 .
-drwxr-xr-x  11  <user>   staff    374 Jan 30 08:13 ..
-drwxr-xr-x  10  <user>   staff    340 Jan 29 15:39 master/
-drwxr-xr-x   6  <user>   staff    204 Jan 29 15:09 nodes/
-drwxr-xr-x  13  <user>   staff    442 Jan 29 17:11 support/
+$LOFARSOFT src/Pulsar/pipeline/documentation:
+
+  drwxr-xr-x   9 <user>     staff  306 Jan 30 08:08 .svn
+  drwxr-xr-x  10 <user>     staff  340 Jan 29 15:39 master
+  drwxr-xr-x   6 <user>     staff  204 Jan 29 15:09 nodes
+  drwxr-xr-x  13 <user>     staff  442 Jan 29 17:11 support
 \end{verbatim}
 where a user will find API documents for the pipeline recipes, and all support
 modules.\\
 \begin{verbatim}
 ./master:
 -------
+-rw-r--r--@   0  __init__.py
  rw-r--r--  ...  bf2presto.html
 -rw-r--r--  ...  buildPulsArch.html
 -rw-r--r--  ...  buildRSPAll.html
@@ -132,12 +137,14 @@ modules.\\
 
 ./nodes:
 ------
+-rw-r--r--@   0 __init__.py
 -rw-r--r--  ...  bf2presto.html
 -rw-r--r--  ...  prepfold.html
 -rw-r--r--  ...  rfiplot.html
 
 ./support:
 --------
+-rw-r--r--@   0  __init__.py
  rw-r--r--  ...  RSPlist.html
 -rw-r--r--  ...  bf2Pars.html
 -rw-r--r--  ...  buildRSPS.html
