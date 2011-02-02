@@ -233,11 +233,10 @@ The nominal processing performed by the Pulp package involves,
 \item The number of subbands in a observation is entirely selected by the observer,
 however, nominally 248 subbands of `incoherent' beam-formed data are
 usually delivered and processed.  Currently, Pulp can only process
-so-called  `incoherentstokes' beam-formed data.  It was mandated that
-development on `coherentstokes', or possibly `stokes', perhaps even
-`raw', data processing would be tabled until coherent stokes data are
-being written to the cluster in the new LOFAR HDF5
-format\footnote{see LOFAR document, \textit{LOFAR-USG-ICD-003,
+so-called  `incoherentstokes' beam-formed data.\footnote{JH mandated that
+development on `coherentstokes' data processing would be tabled until
+the data type was being written to the cluster in conformance with the
+LOFAR-USG-ICD-003 specification}\footnote{see LOFAR document, \textit{LOFAR-USG-ICD-003,
     Beam-formed Data}, Alexov et al, ASTRON, 2010.}
 \item The pipeline is capable of handling any user selected ``splitting'' factor, i.e. the 
 `filefactor' parameter within Pulp.  This factor is known as ``ncores'' in the pulsar
