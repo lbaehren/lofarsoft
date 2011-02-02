@@ -43,7 +43,6 @@ class PPF():
             self.weights=weights2
 
         
-       # print "adding data in row",self.startrow
         self.buffer[self.startrow].copy(input)
         input.fill(0)
         self.startrow += 1
@@ -52,8 +51,6 @@ class PPF():
         input.muladd2(self.weights[0:16-self.startrow],self.buffer[self.startrow:16])
         if self.startrow != 0:
 	    input.muladd2(self.weights[16-self.startrow:16],self.buffer[0:self.startrow])
-           
-           # print "multiplying weight",row,"with buffer",(row+self.startrow)%16
          
         self.total_rows_added+=1
         if self.total_rows_added < 16:
@@ -74,7 +71,6 @@ class iPPF():
         # Initialize arrays and values
         weights=cr.hArray(float,[16,1024])
         weights.readdump(weights_filename)
-	
 	
         if weights[0,0]==0.0:
             print "Obtaining inverse PPF coefficient from file"
