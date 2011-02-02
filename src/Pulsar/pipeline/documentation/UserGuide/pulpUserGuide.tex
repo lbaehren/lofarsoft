@@ -86,7 +86,7 @@ be used throughout this document.
 Documentation on the Pulp package is provided with the Pulp
 distribution, and is available with the Pulp package download in
 \verb|${LOFARSOFT}/src/Pulsar/pipeline/documentation|\footnote{This
-  document can be found in ``UserGuide/UserGuide.pdf','' under ``documentation/''}Further documentation on the LOFAR pipeline framework, development
+  document can be found op ``UserGuide/UserGuide.pdf','' under ``documentation/''}Further documentation on the LOFAR pipeline framework, development
 under the LOFAR pipeline framework,  as well as schematic
 documentation on the Pulp API, are available within the repository
 itself. Pulp API documents are delivered with the Pulp package as
@@ -114,6 +114,7 @@ recipe API documents fou d under \verb|./pipeline/documentation/| in
 $LOFARSOFT src/Pulsar/pipeline/documentation:
 
   drwxr-xr-x   9 <user>     staff  306 Jan 30 08:08 .svn
+  drwxr-xr-x  27 <user>     staff  918 Feb  3 00:00 UserGuide
   drwxr-xr-x  10 <user>     staff  340 Jan 29 15:39 master
   drwxr-xr-x   6 <user>     staff  204 Jan 29 15:09 nodes
   drwxr-xr-x  13 <user>     staff  442 Jan 29 17:11 support
@@ -178,8 +179,7 @@ cluster. Depending upon the required action, recipes may or may not be
 paired across head node/compute node connections.\footnote{This is
   explicitly true for the Pulp package, as it employs the framework's IPython
   facility.  This statement is likely not correct for the ``new
-  style'' imaging pipeline, which employs the more recently introduced
-  ssh method.}  When a ``head node'' 
+  style'' imaging pipeline, which employs an ssh protocol.}  When a ``head node'' 
 recipe is not paired with a matching ``compute node'' recipe (name
 matching of head/compute node recipes is required by the framework),
 this necessarily implies that a single process will be activited on a
@@ -194,7 +194,7 @@ parallel jobs.  Those recipes (bolded) show matching named ``node recipe''
 modules in the package.  It is these head node/compute node recipe pairs that 
 multiply execute all requested processing jobs.  Those jobs, and the resulting 
 job queues, are arranged and built by the respective head node recipe, and 
-them farmed to the cluster based upon a user's ``clusterdesc'' 
+then farmed to the cluster based upon a user's ``clusterdesc'' 
 file (see \S \ref{sec:environment}).
 
 \begin{table}[ht]
