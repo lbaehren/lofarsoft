@@ -1,0 +1,27 @@
+\contentsline {section}{Change record}{3}
+\contentsline {section}{\numberline {1}Introduction}{4}
+\contentsline {subsection}{\numberline {1.1}Applicable Documents}{4}
+\contentsline {subsection}{\numberline {1.2}Reference Documents}{5}
+\contentsline {subsection}{\numberline {1.3}Package Overview}{5}
+\contentsline {subsubsection}{\numberline {1.3.1}Nominal Pulp Processing}{6}
+\contentsline {subsection}{\numberline {1.4}Glossary}{6}
+\contentsline {section}{\numberline {2}User Environment}{7}
+\contentsline {subsection}{\numberline {2.1}Configuration}{7}
+\contentsline {subsubsection}{\numberline {2.1.1}Environment variables, paths}{7}
+\contentsline {subsubsection}{\numberline {2.1.2}Framework configuration files}{8}
+\contentsline {subsubsection}{\numberline {2.1.3}Cluster configuraton files}{10}
+\contentsline {section}{\numberline {3}Interfaces}{11}
+\contentsline {subsection}{\numberline {3.1}The Pulp command line interface}{11}
+\contentsline {subsection}{\numberline {3.2}A note on PulpEnv() and Pulp package interfaces}{12}
+\contentsline {subsubsection}{\numberline {3.2.1}A note on Pulp packaging:}{13}
+\contentsline {section}{\numberline {4}Discussion}{14}
+\contentsline {subsection}{\numberline {4.1}Cuisine Exception Handling}{14}
+\contentsline {subsection}{\numberline {4.2}The State of LOFAR parsets}{14}
+\contentsline {subsection}{\numberline {4.3}An Investigation of prepfold execution}{14}
+\contentsline {subsection}{\numberline {4.4}Open questions}{16}
+\contentsline {subsubsection}{\numberline {4.4.1}On output paths}{16}
+\contentsline {paragraph}{Writing to local disks.}{16}
+\contentsline {subsection}{\numberline {4.5}Future enhancements}{18}
+\contentsline {section}{\numberline {5}Acknowledgement}{18}
+\contentsline {section}{\numberline {6}Appendix A}{19}
+\contentsline {subsection}{\numberline {6.1}Pulp Class Hierarchy: a comprehensive listing of public and private methods}{19}

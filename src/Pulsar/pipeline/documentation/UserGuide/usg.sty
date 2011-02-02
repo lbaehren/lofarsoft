@@ -1,0 +1,136 @@
+
+% Required LaTeX packages
+
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{supertabular}
+\usepackage{pstricks, pst-node}
+
+% Check if we're running pdflatex; if so, convert eps on the fly.
+% NB: need to invoke pdflatex with --shell-escape.
+\usepackage{ifpdf}
+\ifpdf
+  \usepackage[pdftex]{graphicx}
+  \usepackage{epstopdf}
+\else
+  \usepackage{graphicx}
+\fi
+
+%% Handling of program code
+
+\floatstyle{ruled}
+
+\newfloat{code}{thp}{lop}
+\floatname{code}{Code example}
+
+\newfloat{data}{thp}{lop}
+\floatname{data}{Data format example}
+
+%% ------------------------------------------------------------------------------
+%% Header for the pages
+%% - any modification of the textcolumn dimension have to take place before this
+%%   point, as the fancyheader package performs further dimension calculations
+%%   on the current values
+
+\advance\hoffset -0.75cm
+\advance\textwidth 1.5cm
+
+\pagestyle{fancy}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[RE,RO]{Page \thepage}
+
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyfoot[C]{}
+\fancyfoot[LE,LO]{\textsc{lofar} Project}
+\fancyfoot[RE,RO]{Page \thepage}
+
+%% Additional types of (sub)sections
+
+\newcommand{\glossaryname}{Glossary of terms}
+% \newcommand{\glossary}{
+%   \section*{\glossaryname}
+%   \addcontentsline{toc}{section}{\glossaryname}
+% }
+
+%% ------------------------------------------------------------------------------
+%% Macros for typesetting/abbreviations
+
+\newcommand{\aipspp}{{\sc aips{\tt ++}}}
+\newcommand{\cep}{\textsc{cep}}
+\newcommand{\cpp}{{\sc C\tt ++}}
+\newcommand{\CR}{\textsc{cr}}
+\newcommand{\lofar}{\textsc{lofar}}
+\newcommand{\lopes}{\textsc{lopes}}
+\newcommand{\lopestools}{{\sc lopes}--{\tt Tools}}
+\newcommand{\ROOT}{{\sc root}}
+\newcommand{\CINT}{{\sc cint}}
+\newcommand{\uhecr}{\textsc{uhecr}}
+\newcommand{\vhecr}{\textsc{vhecr}}
+
+%% Typesetting macros
+
+\newcommand\summary[1]{
+  \begin{list}{$\blacksquare$}{}
+  \item \underline{\sc Summary:} \\
+    \sl #1 \hfill $\Box$
+  \end{list}
+}
+
+\newcommand{\comment}[1]{%
+  \begin{displaymath}
+    \color{red}
+    \mathbf{
+      \left[
+        \quad
+        \begin{minipage}[c]{0.85\linewidth}
+          \sl #1
+        \end{minipage}
+        \quad
+      \right]
+    }
+    \message{NOTE: #1}
+  \end{displaymath}
+}
+
+%% Mathematical macros
+
+\newcommand{\id}{1\hskip-2.5pt{\rm l}}
+\renewcommand\matrix[2]{\left[ \begin{array}{#1} #2 \end{array} \right]}
+\renewcommand{\vec}[1]{{\mathbf #1}}
+\newcommand{\vect}[1]{\left[ \begin{array}{c} #1 \end{array} \right]}
+\newcommand{\fft}[2]{{\mathcal F}^{#1} \left\{ #2 \right\}}
+
+%% FITS keyword macros
+
+% FITS keywords, no argument.
+\newcommand{\keyw}[1]{\hbox{{\tt #1}}}
+% FITS keywords, single italicized argument.
+\newcommand{\keyi}[2]{\hbox{{\tt #1\hspace{1pt}}{$#2$}\/}}
+\newcommand{\CRPIX}[1]{\keyi{CRPIX}{#1}}
+\newcommand{\CDELT}[1]{\keyi{CDELT}{#1}}
+\newcommand{\CRVAL}[1]{\keyi{CRVAL}{#1}}
+\newcommand{\CTYPE}[1]{\keyi{CTYPE}{#1}}
+\newcommand{\CUNIT}[1]{\keyi{CUNIT}{#1}}
+\newcommand{\NAXIS}[1]{\keyi{NAXIS}{#1}}
+\newcommand{\CROTA}[1]{\keyi{CROTA}{#1}}
+% FITS keywords, double italicized arguments.
+\newcommand{\keyii}[3]{\hbox{{\tt #1\hspace{1pt}{$#2$}\_{$#3$}}\/}}
+\newcommand{\PC}[2]{\keyii{PC}{#1}{#2}}
+\newcommand{\CD}[2]{\keyii{CD}{#1}{#2}}
+\newcommand{\PV}[2]{\keyii{PV}{#1}{#2}}
+\newcommand{\PS}[2]{\keyii{PS}{#1}{#2}}
+% FITS keywords, single tt argument.
+\newcommand{\PVi}[1]{\hbox{{\tt PV\hspace{1pt}{$i$}\_{#1}{$a$}}\/}}
+% FITS keyvalue.
+\newcommand{\keyv}[1]{\hbox{{\tt #1}}}
+% older ones
+\newcommand{\PCij}{\PC{i}{j}}
+\newcommand{\CDij}{\CD{i}{j}}
+\newcommand{\Ci}{{\it a\/}}
+\newcommand{\NN}[1]{\noalign{\noindent{#1}}\noalign{\vspace{4pt}}}
+
+%% ------------------------------------------------------------------------------
+%% Hyphenation
+
+\hyphenation{beam-shape}
