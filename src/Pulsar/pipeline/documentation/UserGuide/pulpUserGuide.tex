@@ -963,11 +963,15 @@ The author wishes to thank John Swinbank for providing vital insight
 and levity when the author had none.
 \newpage
 \section{Appendix A}
-\subsection{Pulp Class Hierarchy: a comprehensive listing of public and private methods}
+\subsection{Pulp Classes: a comprehensive listing of public and private methods}
 \label{sec:future-enhancements}
 The follow images are a schematic representation of Pulp class
 hierarchy.  First, the top level of the package, showing the pipeline
-definitions, version and package files. (images: \verb|idle| Path browser)
+definitions, version and package files. (images: \verb|idle| Path
+browser)\footnote{Illustration of an obvious need for a PulpPipeline()
+ base class that would supply the python-private ``buildUserEnv()'' method.
+ However, once the PulpEnv() call is moved the master recipes, this
+ method will be deprecated and expunged.}
 
 \begin{figure}[htbp] 
   \begin{center}
