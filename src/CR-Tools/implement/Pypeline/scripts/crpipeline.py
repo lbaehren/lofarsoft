@@ -8,6 +8,7 @@ import time
 import numpy as np
 
 import datacheck as dc
+import rficlean as rf
 import pulsefit as pf
 import matching as match # possibly push this down to pulsefit?
 # import beamformer as bf
@@ -42,11 +43,16 @@ def runAnalysis(files, triggers, outfilename):
         print 'Processing file %d out of %d' % (n, len(files))
         result = dc.safeOpenFile(file, antennaset)
         print result
-
+        
         writeDict(outfile, result)
         if not result["success"]:
             continue
         crfile = result["file"]
+        
+        crfile.set("blocksize", 32768)
+#        import pdb; pdb.set_trace()
+#        rf.cleanSpectrum(crfile)
+        
         outfile.write('\n')
         # do quality check and rfi cleaning here
         result = dc.qualityCheck(crfile)
@@ -56,7 +62,7 @@ def runAnalysis(files, triggers, outfilename):
             continue
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
-        result = pf.triggerMessageFit(crfile, triggers, 'linearFit')
+        result = pf.triggerMessageFit(crfile, triggers, 'bruteForce') # be more robust against invalid linearFit
         writeDict(outfile, result)
         if not result["success"]:
             continue
@@ -68,8 +74,9 @@ def runAnalysis(files, triggers, outfilename):
           if not result["success"]:
               continue
           
-        except (ZeroDivisionError, IndexError):
+        except (ZeroDivisionError, IndexError), msg:
           print 'EROR!'
+          print msg
         outfile.flush()
     # end for
     outfile.close()
@@ -85,8 +92,10 @@ elif len(sys.argv) > 1:
     triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_.dat'
 else:
     print 'No files given on command line, using a default set instead.'
-    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-2*.h5'
-    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat' #TRIGGER_debugstripped.dat'
+#    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-2*.h5'
+    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
+    triggerMessageFile = '/Users/acorstanje/triggering/MACdatarun_2feb2011/2011-02-02_TRIGGER.dat'
+#    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat' #TRIGGER_debugstripped.dat'
     #datafiles = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/*'
     #triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs006.dat'
 

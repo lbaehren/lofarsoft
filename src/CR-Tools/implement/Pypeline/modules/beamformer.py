@@ -40,7 +40,10 @@ class Beamformer(object):
   # FIX: cut out the right antennaIndices here! In antenna_positions, dimensions for new arrays, then beamforming...
 
     def getTiedArrayBeam(self, azel_in, fftData, antennaPositions, antennaIndices, FarField):
-        print 'Evaluating for az = %f, el = %f' % (azel_in[0], azel_in[1]),
+        if FarField:
+            print 'Evaluating for az = %f, el = %f, R = inf' % (azel_in[0], azel_in[1]),
+        else:
+            print 'Evaluating for az = %f, el = %f, R = %f' % (azel_in[0], azel_in[1], azel_in[2]),
         if ( azel_in[0] > 360. or azel_in[0] < 0. or azel_in[1] > 90. or azel_in[1] < 0.):
             erg = 0.
         else:
@@ -67,6 +70,7 @@ class Beamformer(object):
     
     
     def pulseMaximizer(self, azel_in, fftData, antennaPositions, antennaIndices, FarField):
+        import pdb; pdb.set_trace()
         tiedArrayBeam = self.getTiedArrayBeam(azel_in, fftData, antennaPositions, antennaIndices, FarField)
         tiedArrayBeam.abs() # make absolute value!
 #        hRunningAverage(smoothedBeam, tiedArrayBeam, 5, hWEIGHTS.GAUSSIAN)

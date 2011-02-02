@@ -34,6 +34,7 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
       print 'Warning: only FarField == True is implemented!'
   
   thisBF = bf.Beamformer(crfile, cr_fft) # initialize object. Isn't this an ugly memory leak?
+  #import pdb; pdb.set_trace()
   optimum = fmin(thisBF.pulseMaximizer, start_position, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-2, ftol=1e-4, full_output=1)
 #  bruteRanges = ((start_position[0] - 20.0, start_position[0] + 20.0), (start_position[1] - 10.0, start_position[1] + 10.0))
   #optErg = brute(beamform_function, bruteRanges, Ns = 50, full_output = 1)
@@ -149,7 +150,7 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
   
   fitDataEven = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                    cr_freqs, FarField=FarField,blocksize=blocksize)
-                                   
+          
   ant_indices = range(1, nofAntennas, 2)
   for entry in flaggedList:
       if entry in ant_indices:
