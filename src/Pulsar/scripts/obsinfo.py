@@ -40,6 +40,10 @@ linkedhtmlstem=""   # filestem of linked html files if is_linkedhtml = True
 is_rebuild = False
 # if True then updates only the records in the dumpfile without checking if new obs appeared
 is_update = False
+# list of ObsIDs to be updated (only can be used with --update option)
+update_obsids = []
+# if True list of ObsIDs 'update_obsids' will only be updated
+is_update_obsids = False
 # if True then obs will be printed one by one (debug mode) (with # = 0 for all)
 is_debug = False
 debugcounter=0
@@ -1140,6 +1144,8 @@ def usage (prg):
                                        the existent database, process obs that do not exist there, and add them to the database\n\
           -u, --update               - update db file only, new observations in /data? won't be added\n\
                                        This option can be used together with --from and --to to update only some observations\n\
+          --obsids <ObsIDs>          - set the list of ObsIDs to be updated. This option can be used only with --update\n\
+                                       ObsIDs should be separated by comma with no spaces, range symbol '-' is not allowed\n\
           --stats                    - to calculate the statistics of existent observations in the database\n\
                                        can be used together with --from and --to options, and with --html option\n\
           --norsync                  - don't rsync plots and grid links to external webserver when \"mega\" or \"plots\" view mode is used\n\
@@ -1155,7 +1161,7 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hf:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats", "dbfile=", "norsync"])
+		opts, args = getopt.getopt (argv, "hf:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats", "dbfile=", "norsync", "obsids="])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -1208,6 +1214,19 @@ def parsecmd(prg, argv):
 			if opt in ("-u", "--update"):
 				global is_update
 				is_update = True
+			if opt in ("--obsids"):
+				global is_update_obsids
+				is_update_obsids = True
+				if arg.isspace() == True:
+					print "--obsids option has spaces that is not allowed"
+					sys.exit()
+				global update_obsids
+				for s in arg.split(","):
+					if s.count("-") == 0:
+						update_obsids = np.append(update_obsids, s)
+					else:
+						print "The range in --obsids is not allowed"
+						sys.exit()
 			if opt in ("--debug"):
 				global is_debug
 				is_debug = True
@@ -1323,16 +1342,19 @@ if __name__ == "__main__":
 			# now obsids have only those IDs that are not in the dump file
 			obsids=list(set(obsids)-set(obsids).intersection(set(dbobsids)))
 	else:   ## --update is set
-		obsids = dbobsids
-		# for the db update we also have to choose only those IDs within the desired time range
-		# if --from and/or --to are specified
-		if is_from:
-			fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
-			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
+		if not is_update_obsids:  # list of ObsIDs to update is not specified
+			obsids = dbobsids
+			# for the db update we also have to choose only those IDs within the desired time range
+			# if --from and/or --to are specified
+			if is_from:
+				fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+				obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
 
-		if is_to:
-			tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
-			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
+			if is_to:
+				tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
+				obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
+		else:
+			obsids = update_obsids
 
 
 	if is_update:
