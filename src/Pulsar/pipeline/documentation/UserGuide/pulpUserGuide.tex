@@ -500,7 +500,9 @@ filefactor = 8
 recipe     = bundleFilesj
 filefactor = 8
 \end{verbatim}
-Users will note the explicit paths to \verb|$LOFARSOFT| executables.  This is because the configuration parser does not perform shell variable interpolation.   Upon Pulp download, users are encouraged to edit these explicit paths to use their own \verb|$LOFARSOFT| build.
+Users will note the explicit paths to \verb|$LOFARSOFT| executables.
+This is because the configuration parser does not perform shell variable
+interpolation\footnote{Rather disappointing}.  Upon Pulp download, users are encouraged to edit these explicit paths to use their own \verb|$LOFARSOFT| build.
 \
 \subsubsection{Cluster configuraton files}
 Parallel processing as executed on the LOFAR offline cluster and through the pipeline framework will require three configuration files that define various parameters for job control on the LOFAR offline cluster.  None of these files are part of the Pulp distribution.  Users will have to locate templates of these files from the generalized pipeline framework location.  Once located, these files can be placed arbitrarily, with the arbitrary location specified in the above mentioned and critical \verb|pipeline.cfg| file.  Usually, these files are located in the user's specified ``runtime\_directory'', again defined in users' \verb|pipeline.cfg| files.
@@ -545,8 +547,8 @@ own command line interfaces\footnote{Writing a
 pipeline definition can be thought of as writing an interface to
 control what processing the user wants done. Users should be
 aware that, though the recipes are ``independent'', there is usually a
-proxy dependence in that they do depend upon the state of the data on
-disk as it may be provided by recipes executed prior.} , that is,
+proxy dependence in that recipes may depend upon the
+state of the data on disk as it may be provided by prior recipe calls}, that is,
 their own pipeline definitions. The two defintions provided are
 \begin{enumerate}
 \item \verb|pulp.py|
@@ -581,12 +583,12 @@ filefactor  = subband splitting factor, <int>
 \end{verbatim}
 
 The second interface provided is \verb|dynspec.py|, and was first
-describe during the early November ``pulsar busy week''.  This
+describe during the early November (2010) ``pulsar busy week''.  This
 definition produces only the so-called ``rfi report'', and a `png'
 image of the calculated dynamic spectrum, which is really
 the product of the pulsar ``subdyn.py'' script\footnote{This python
   script can and should be refactored to be fully funtional on import.}.
-The recipe stack is noticeably smaller, sans prepfold. 
+The Pulp recipe stack is noticeably lighter sans prepfold.
 \begin{verbatim}
 Current usage:
 
@@ -606,12 +608,12 @@ filefactor  = subband splitting factor, <int>
               optional user speciﬁcation (range, 1-248)
               default = 8
 \end{verbatim}
-Users will find the data products of \verb|dynspec.py| located in the
+\paragraph{The PULP\_ARCHIVE Device:}Users will find the data products of \verb|dynspec.py| located in the
 various ``RSP[0-248]A'' directories\footnote{Though Pulp provides
   much more flexibilty in \textsc{rsp} splitting than the pulsar shell
   script, users are advised against using large numbers for
   filefactor, especially 248.  Mostly because, well, that just seems
-  crazy.}, in the user selected Pulp archive (\verb|--arch=archnnn|') The user should be aware of the relationship between the defined subclusters of the offline LOFAR cluster, the electable storage nodes, and the location of the data.  For example, if a user wishes to process data on subcluster six, i.e. \verb|sub6|, it is incumbent upon the user to specify an appropriate ``arch'' value,  which is primarily determined by data location.  \\
+  crazy.}, in the user selected Pulp archive (\verb|--arch=archnnn|) The user should be aware of the relationship between the defined subclusters of the offline LOFAR cluster, the electable storage nodes, and the location of the data.  For example, if a user wishes to process data on subcluster six, i.e. \verb|sub6|, it is incumbent upon the user to specify an appropriate ``arch'' value,  which is primarily determined by data location.  \\
 These values can be found in the PulpEnv() API specification, and are defined thusly:
 \begin{verbatim}
           arch134:  /net/sub5/lse013/data4/PULP_ARCHIVE
@@ -639,8 +641,7 @@ archive on storage node, lse014, and will appear in a path like,
 /net/sub5/lse014/data4/PULP_ARCHIVE/L2010_09067/
 \end{verbatim}
 Users should expect the final state of the observation directory look
-roughly like that below, with more similarly named compressed tarfiles appearing for
-multiple pulsars, one tarfile per named pulsar.
+roughly like that below. 
 \begin{verbatim}
 /net/sub6/lse018/data4/PULP_ARCHIVE/L2010_09053:
 total used in directory 1008988 available 95461848
