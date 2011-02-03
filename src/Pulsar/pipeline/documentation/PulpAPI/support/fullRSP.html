@@ -1,0 +1,145 @@
+
+<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module fullRSP</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#003333">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>fullRSP</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/kanderson/LOFAR/lofarsoft/src/Pulsar/pipeline/support/fullRSP.py">${LOFARSOFT}/src/Pulsar/pipeline/support/fullRSP.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;$Id:&nbsp;fullRSP.py&nbsp;6881&nbsp;2011-01-28&nbsp;14:01:26Z&nbsp;kenneth&nbsp;$</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#006699">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#006699"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="pulpEnv.html">pulpEnv</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#3399cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#3399cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="exceptions.html#IOError">exceptions.IOError</a>(<a href="exceptions.html#EnvironmentError">exceptions.EnvironmentError</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="fullRSP.html#DISTError">DISTError</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="fullRSP.html#FullRSP">FullRSP</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#cccccc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DISTError">class <strong>DISTError</strong></a>(<a href="exceptions.html#IOError">exceptions.IOError</a>)</font></td></tr>
+    
+<tr bgcolor="#cccccc"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Exception&nbsp;for&nbsp;data&nbsp;distribution&nbsp;trouble<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="fullRSP.html#DISTError">DISTError</a></dd>
+<dd><a href="exceptions.html#IOError">exceptions.IOError</a></dd>
+<dd><a href="exceptions.html#EnvironmentError">exceptions.EnvironmentError</a></dd>
+<dd><a href="exceptions.html#StandardError">exceptions.StandardError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="DISTError-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#IOError">exceptions.IOError</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x723aa0&gt;<dd><tt>T.<a href="#DISTError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#EnvironmentError">exceptions.EnvironmentError</a>:<br>
+<dl><dt><a name="DISTError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="DISTError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#EnvironmentError">exceptions.EnvironmentError</a>:<br>
+<dl><dt><strong>errno</strong></dt>
+<dd><tt>exception&nbsp;errno</tt></dd>
+</dl>
+<dl><dt><strong>filename</strong></dt>
+<dd><tt>exception&nbsp;filename</tt></dd>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+<dl><dt><strong>strerror</strong></dt>
+<dd><tt>exception&nbsp;strerror</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="DISTError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#cccccc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="FullRSP">class <strong>FullRSP</strong></a></font></td></tr>
+    
+<tr bgcolor="#cccccc"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Build&nbsp;an&nbsp;RSP&nbsp;directory&nbsp;containing&nbsp;all&nbsp;.subnnnn&nbsp;files&nbsp;produced&nbsp;by&nbsp;bf2presto<br>
+during&nbsp;an&nbsp;RSP&nbsp;split&nbsp;operation&nbsp;(nominal).&nbsp;&nbsp;This&nbsp;involves&nbsp;populating&nbsp;"RSPA",<br>
+as&nbsp;a&nbsp;linked&nbsp;in&nbsp;set&nbsp;of&nbsp;all&nbsp;files&nbsp;across&nbsp;all&nbsp;RSPS.<br>
+&nbsp;<br>
+It&nbsp;will&nbsp;be&nbsp;incumbent&nbsp;upon&nbsp;the&nbsp;prepfold&nbsp;recipes&nbsp;to&nbsp;add&nbsp;this&nbsp;full&nbsp;file&nbsp;directory<br>
+to&nbsp;the&nbsp;prepfold&nbsp;job&nbsp;queue.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="FullRSP-__init__"><strong>__init__</strong></a>(self, obsid, pulsar, filefactor, arch, env)</dt></dl>
+
+<dl><dt><a name="FullRSP-fillAllSubFiles"><strong>fillAllSubFiles</strong></a>(self)</dt><dd><tt>method&nbsp;returns&nbsp;upon&nbsp;successful&nbsp;build&nbsp;of&nbsp;OBSID's&nbsp;RSPA&nbsp;directory.<br>
+PULSAR_ARCIVE/&lt;OBSID&gt;/RSPA&nbsp;should&nbsp;have&nbsp;been&nbsp;build&nbsp;by&nbsp;<br>
+buildRSPS.buildRspDirs()&nbsp;method&nbsp;call&nbsp;in&nbsp;the&nbsp;master.buildRSPAll<br>
+recipe.</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__svn_author__</strong> = 'kenneth'<br>
+<strong>__svn_revdate__</strong> = '2011-01-28 15:01:26'<br>
+<strong>__svn_revision__</strong> = '6881'</td></tr></table>
+</body></html>

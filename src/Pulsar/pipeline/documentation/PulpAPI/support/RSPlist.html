@@ -1,0 +1,176 @@
+
+<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module RSPlist</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#003333">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>RSPlist</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/kanderson/LOFAR/lofarsoft/src/Pulsar/pipeline/support/RSPlist.py">${LOFARSOFT}/src/Pulsar/pipeline/support/RSPlist.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;$Id:&nbsp;RSPlist.py&nbsp;6881&nbsp;2011-01-28&nbsp;14:01:26Z&nbsp;kenneth&nbsp;$</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#006699">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#006699"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="gzip.html">gzip</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="pulpEnv.html">pulpEnv</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#3399cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#3399cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="RSPlist.html#RSPS">RSPS</a>
+</font></dt><dt><font face="helvetica, arial"><a href="exceptions.html#IOError">exceptions.IOError</a>(<a href="exceptions.html#EnvironmentError">exceptions.EnvironmentError</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="RSPlist.html#DISTError">DISTError</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#cccccc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DISTError">class <strong>DISTError</strong></a>(<a href="exceptions.html#IOError">exceptions.IOError</a>)</font></td></tr>
+    
+<tr bgcolor="#cccccc"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Exception&nbsp;for&nbsp;data&nbsp;distribution&nbsp;trouble<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="RSPlist.html#DISTError">DISTError</a></dd>
+<dd><a href="exceptions.html#IOError">exceptions.IOError</a></dd>
+<dd><a href="exceptions.html#EnvironmentError">exceptions.EnvironmentError</a></dd>
+<dd><a href="exceptions.html#StandardError">exceptions.StandardError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="DISTError-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#IOError">exceptions.IOError</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x723aa0&gt;<dd><tt>T.<a href="#DISTError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#EnvironmentError">exceptions.EnvironmentError</a>:<br>
+<dl><dt><a name="DISTError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="DISTError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#EnvironmentError">exceptions.EnvironmentError</a>:<br>
+<dl><dt><strong>errno</strong></dt>
+<dd><tt>exception&nbsp;errno</tt></dd>
+</dl>
+<dl><dt><strong>filename</strong></dt>
+<dd><tt>exception&nbsp;filename</tt></dd>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+<dl><dt><strong>strerror</strong></dt>
+<dd><tt>exception&nbsp;strerror</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="DISTError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DISTError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="DISTError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#cccccc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RSPS">class <strong>RSPS</strong></a></font></td></tr>
+    
+<tr bgcolor="#cccccc"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Initialize&nbsp;some&nbsp;parameters&nbsp;that&nbsp;will&nbsp;be&nbsp;passed&nbsp;or&nbsp;otherwise&nbsp;determined.<br>
+using&nbsp;a&nbsp;nested&nbsp;list&nbsp;for&nbsp;partition&nbsp;listings.&nbsp;This&nbsp;list&nbsp;is&nbsp;ordered&nbsp;and&nbsp;separable.<br>
+&nbsp;<br>
+a&nbsp;returned&nbsp;<a href="#RSPS">RSPS</a>&nbsp;object&nbsp;will&nbsp;be&nbsp;list&nbsp;of&nbsp;ordered&nbsp;subband&nbsp;lists,&nbsp;where<br>
+&nbsp;<br>
+<a href="#RSPS">RSPS</a>[0]&nbsp;=&nbsp;['/path/SB0.MS.incoherentstokes',<br>
+'/path/SB1.MS.incoherentstokes',<br>
+...,<br>
+'/path/SB61.MS.incoherentstokes'<br>
+]<br>
+&nbsp;<br>
+<a href="#RSPS">RSPS</a>[1]&nbsp;=&nbsp;['/path/SB62.MS.incoherentstokes',<br>
+'/path/SB63.MS.incoherentstokes',<br>
+...<br>
+'/path/SB123.MS.incoherentstokes'<br>
+]<br>
+etc.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;caller&nbsp;switches&nbsp;readlog&nbsp;argument&nbsp;to&nbsp;False,&nbsp;the&nbsp;searchNodes()&nbsp;function&nbsp;<br>
+assumes&nbsp;nominal&nbsp;data&nbsp;delivery&nbsp;of&nbsp;248&nbsp;subbands,&nbsp;0-247.&nbsp;&nbsp;These&nbsp;lists&nbsp;are&nbsp;meant<br>
+to&nbsp;contain&nbsp;(usually)&nbsp;about&nbsp;62&nbsp;subband&nbsp;files,&nbsp;a&nbsp;number&nbsp;chosen&nbsp;for&nbsp;presto<br>
+post-processing,&nbsp;which&nbsp;imposes&nbsp;an&nbsp;arbitrary&nbsp;limit&nbsp;of&nbsp;1024&nbsp;directory&nbsp;files.<br>
+Hexadecimal&nbsp;channelization&nbsp;(16&nbsp;chan/subband)&nbsp;on&nbsp;62&nbsp;subbands&nbsp;produces&nbsp;992&nbsp;files<br>
+to&nbsp;the&nbsp;output&nbsp;directory,&nbsp;within&nbsp;presto&nbsp;limits.<br>
+&nbsp;<br>
+N.B.&nbsp;There&nbsp;are&nbsp;hazards&nbsp;within:&nbsp;this&nbsp;assumes&nbsp;bands&nbsp;low&nbsp;to&nbsp;high&nbsp;are&nbsp;deposited<br>
+and&nbsp;ordered&nbsp;on&nbsp;the&nbsp;cluster,&nbsp;such&nbsp;that<br>
+&nbsp;<br>
+first&nbsp;subbands&nbsp;--&gt;&nbsp;lse013,&nbsp;2nd&nbsp;subbands&nbsp;--&gt;&nbsp;lse014,&nbsp;3rd&nbsp;subbands&nbsp;--&gt;&nbsp;lse15.<br>
+&nbsp;<br>
+This&nbsp;has&nbsp;been&nbsp;the&nbsp;nominally&nbsp;data&nbsp;delivery&nbsp;pattern,&nbsp;but&nbsp;could&nbsp;easily&nbsp;change&nbsp;and&nbsp;this&nbsp;function<br>
+should&nbsp;be&nbsp;made&nbsp;robust&nbsp;under&nbsp;changing&nbsp;delivery&nbsp;conditions.&nbsp;&nbsp;It&nbsp;is&nbsp;not&nbsp;robust&nbsp;now.<br>
+&nbsp;<br>
+--&nbsp;readlog&nbsp;parameter&nbsp;is&nbsp;now&nbsp;set&nbsp;for&nbsp;default&nbsp;False.&nbsp;&nbsp;The&nbsp;logfile&nbsp;as&nbsp;has&nbsp;been&nbsp;known,<br>
+has&nbsp;disasppeared,&nbsp;and&nbsp;records&nbsp;of&nbsp;storage&nbsp;writes&nbsp;have&nbsp;been&nbsp;incorporated&nbsp;into&nbsp;a&nbsp;much&nbsp;larger<br>
+and&nbsp;more&nbsp;complicated&nbsp;log&nbsp;file,<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="RSPS-RSPLists"><strong>RSPLists</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;subband&nbsp;file&nbsp;lists&nbsp;rather&nbsp;than&nbsp;a&nbsp;list&nbsp;of&nbsp;strings.</tt></dd></dl>
+
+<dl><dt><a name="RSPS-RSPStrings"><strong>RSPStrings</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;strings&nbsp;rather&nbsp;than&nbsp;a&nbsp;list&nbsp;of&nbsp;subband&nbsp;file&nbsp;lists&nbsp;(see&nbsp;RSPLists).</tt></dd></dl>
+
+<dl><dt><a name="RSPS-__init__"><strong>__init__</strong></a>(self, obsid, pulsar, filefactor, arch, uEnv, readlog<font color="#909090">=False</font>)</dt></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__svn_author__</strong> = 'kenneth'<br>
+<strong>__svn_revdate__</strong> = '2011-01-28 15:01:26'<br>
+<strong>__svn_revision__</strong> = '6881'<br>
+<strong>parts</strong> = ['data1', 'data2', 'data3', 'data4']</td></tr></table>
+</body></html>
