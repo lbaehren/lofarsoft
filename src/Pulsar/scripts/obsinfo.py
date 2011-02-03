@@ -42,8 +42,9 @@ is_rebuild = False
 is_update = False
 # list of ObsIDs to be updated (only can be used with --update option)
 update_obsids = []
-# if True list of ObsIDs 'update_obsids' will only be updated
-is_update_obsids = False
+# if True then script just reads the db file without looking for new ObsIDs and without
+# updating already existed records in db
+is_just_access = False
 # if True then obs will be printed one by one (debug mode) (with # = 0 for all)
 is_debug = False
 debugcounter=0
@@ -624,11 +625,12 @@ class writeHtmlList:
                           	<h2 align=left>LOFAR pulsar observations</h2>\n\
                         	\n")
 
-	def obsnumber (self, storage_nodes, subclusters, ndbnodes, nnodes):
+	def obsnumber (self, storage_nodes, subclusters, ndbnodes, nnodes, is_new):
 		self.nodes_string = ", ".join(storage_nodes)
 		self.subs_string = ", ".join(subclusters)
 		self.htmlptr.write("Number of observations in %s: <b>%d</b><br>\n" % (self.subs_string, ndbnodes, ))
-		self.htmlptr.write("Number of new observations found in %s: <b>%d</b><br>\n" % (self.nodes_string, nnodes))
+		if is_new:
+			self.htmlptr.write("Number of new observations found in %s: <b>%d</b><br>\n" % (self.nodes_string, nnodes))
 
 	def datesrange (self):
 		if self.fd == "":
@@ -1144,8 +1146,11 @@ def usage (prg):
                                        the existent database, process obs that do not exist there, and add them to the database\n\
           -u, --update               - update db file only, new observations in /data? won't be added\n\
                                        This option can be used together with --from and --to to update only some observations\n\
-          --obsids <ObsIDs>          - set the list of ObsIDs to be updated. This option can be used only with --update\n\
-                                       ObsIDs should be separated by comma with no spaces, range symbol '-' is not allowed\n\
+          --obsids <ObsIDs>          - set the list of ObsIDs to be updated or accessed. This option can be used only with either\n\
+                                       --update or --justaccess. ObsIDs should be separated by comma with no spaces, range symbol '-'\n\
+                                       is not allowed\n\
+          -j, --justaccess           - just reads records from db file without looking for new ObsIDs (default behaviour)\n\
+                                       and without updating the db\n\
           --stats                    - to calculate the statistics of existent observations in the database\n\
                                        can be used together with --from and --to options, and with --html option\n\
           --norsync                  - don't rsync plots and grid links to external webserver when \"mega\" or \"plots\" view mode is used\n\
@@ -1161,7 +1166,7 @@ def parsecmd(prg, argv):
         """ Parsing the command line
         """
 	try:
-		opts, args = getopt.getopt (argv, "hf:t:v:ru", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats", "dbfile=", "norsync", "obsids="])
+		opts, args = getopt.getopt (argv, "hf:t:v:ruj", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats", "dbfile=", "norsync", "obsids=", "justaccess"])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -1215,8 +1220,6 @@ def parsecmd(prg, argv):
 				global is_update
 				is_update = True
 			if opt in ("--obsids"):
-				global is_update_obsids
-				is_update_obsids = True
 				if arg.isspace() == True:
 					print "--obsids option has spaces that is not allowed"
 					sys.exit()
@@ -1227,6 +1230,9 @@ def parsecmd(prg, argv):
 					else:
 						print "The range in --obsids is not allowed"
 						sys.exit()
+			if opt in ("-j", "--justaccess"):
+				global is_just_access
+				is_just_access = True
 			if opt in ("--debug"):
 				global is_debug
 				is_debug = True
@@ -1254,8 +1260,12 @@ if __name__ == "__main__":
 	parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
 
 	if is_rebuild and is_update:
-		print "Choose what you want to do: rebuild, update or add new observations if any"
+		print "Choose what you want to do: rebuild, update or add new observations if any!"
 		sys.exit()
+
+	if is_just_access and (is_rebuild or is_update):
+		print "--justaccess option can not be used with either --rebuild or --update options!"
+		sys.exit(1)
 
 	# list of subclusters
 	subclusters = np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes])
@@ -1314,47 +1324,48 @@ if __name__ == "__main__":
 				sys.exit(0)
 				########## end of statistics #############
 
-	if not is_update:
-		# loop over the storage nodes and directories to get the list of all IDs
-		for s in storage_nodes:
-			for d in data_dirs:
-				cmd="cexec %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], d, "?20??_*", cexec_egrep_string)
-				indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
+	if not is_just_access:
+		if not is_update:
+			# loop over the storage nodes and directories to get the list of all IDs
+			for s in storage_nodes:
+				for d in data_dirs:
+					cmd="cexec %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], d, "?20??_*", cexec_egrep_string)
+					indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
+					obsids = np.append(obsids, indlist)
+
+			# also checking the archive directories to extend the list of ObsIDs in case the raw data was removed
+			for s in storage_nodes:
+				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, cexec_egrep_string)
+				if np.size(os.popen(cmd).readlines()) == 0:
+					continue
+				cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
+				indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
 				obsids = np.append(obsids, indlist)
 
-		# also checking the archive directories to extend the list of ObsIDs in case the raw data was removed
-		for s in storage_nodes:
-			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, cexec_egrep_string)
-			if np.size(os.popen(cmd).readlines()) == 0:
-				continue
-			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
-			indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
-			obsids = np.append(obsids, indlist)
+			# getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
+			# and sort in reverse order (most recent obs go first)
+			# more recent obs is the obs with higher ID (as it should be)
+			obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
 
-		# getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
-		# and sort in reverse order (most recent obs go first)
-		# more recent obs is the obs with higher ID (as it should be)
-		obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
+			# if is_rebuild == False then excluding ObsIDs from obsids list that are already in the database, i.e. in dbobsids list
+			# only new ObsIDs will be processed and added to database
+			if not is_rebuild:
+				# now obsids have only those IDs that are not in the dump file
+				obsids=list(set(obsids)-set(obsids).intersection(set(dbobsids)))
+		else:   ## --update is set
+			if np.size(update_obsids) == 0:  # list of ObsIDs to update is not specified
+				obsids = dbobsids
+				# for the db update we also have to choose only those IDs within the desired time range
+				# if --from and/or --to are specified
+				if is_from:
+					fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
 
-		# if is_rebuild == False then excluding ObsIDs from obsids list that are already in the database, i.e. in dbobsids list
-		# only new ObsIDs will be processed and added to database
-		if not is_rebuild:
-			# now obsids have only those IDs that are not in the dump file
-			obsids=list(set(obsids)-set(obsids).intersection(set(dbobsids)))
-	else:   ## --update is set
-		if not is_update_obsids:  # list of ObsIDs to update is not specified
-			obsids = dbobsids
-			# for the db update we also have to choose only those IDs within the desired time range
-			# if --from and/or --to are specified
-			if is_from:
-				fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
-				obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
-
-			if is_to:
-				tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
-				obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
-		else:
-			obsids = update_obsids
+				if is_to:
+					tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
+					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
+			else:
+				obsids = update_obsids
 
 
 	if is_update:
@@ -1363,13 +1374,14 @@ if __name__ == "__main__":
 		# files is always the same, and do not need to be updated, and update of the processed data status can only
 		# have sense for the same subclusters as in the command line option
 		# also, we add 'subA' and 'sub?' as well
-		newobsids=[]
-		for sub in subclusters:
-			newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == sub, obsids)))
-		newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == "subA", obsids)))
-		newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == "sub?", obsids)))
-		newobsids = np.flipud(np.sort(np.unique(newobsids), kind='mergesort'))
-		obsids = newobsids
+		if np.size(obsids) != 0:
+			newobsids=[]
+			for sub in subclusters:
+				newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == sub, obsids)))
+			newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == "subA", obsids)))
+			newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == "sub?", obsids)))
+			newobsids = np.flipud(np.sort(np.unique(newobsids), kind='mergesort'))
+			obsids = newobsids
 
 	# Number of ObsIDs
 	Nobsids = np.size(obsids)
@@ -1631,7 +1643,7 @@ if __name__ == "__main__":
 	dfdescr.close()
 
 	# uploading the png files to webserver
-	if is_torsync:
+	if is_torsync and not is_just_access:
 		if viewtype == 'plots' or viewtype == 'mega':
 			cmd="ssh %s mkdir -p %s" % (webserver, webplotsdir)	
 			os.system(cmd)
@@ -1645,36 +1657,41 @@ if __name__ == "__main__":
 	# copying to another list to keep the old one
 	obskeys = np.flipud(np.sort(obstable.keys(), kind='mergesort'))
 
-	# if is_from and/or is_to are set, then we have to exclude those records
-	# from obstable that do not obey the conditions
-	if is_from:
-		fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
-		obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) >= fromsecs, obskeys))
+	if is_just_access and np.size(update_obsids) != 0:
+		obskeys = update_obsids
+	else:
+		# if is_from and/or is_to are set, then we have to exclude those records
+		# from obstable that do not obey the conditions
+		if is_from:
+			fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+			obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) >= fromsecs, obskeys))
 
-	if is_to:
-		tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
-		obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) <= tosecs, obskeys))
+		if is_to:
+			tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
+			obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) <= tosecs, obskeys))
 
 	# similar to what we do when we are updating db records, here we also only want to show the observations from
 	# selected (from the command line) subclusters, because db can have data for all subclusters
-	newobskeys=[]
-	for sub in subclusters:
-		newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == sub, obskeys)))
-	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == "subA", obskeys)))
-	newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == "sub?", obskeys)))
-	newobskeys = np.flipud(np.sort(np.unique(newobskeys), kind='mergesort'))
-	obskeys = newobskeys
+	if np.size(obskeys) != 0:
+		newobskeys=[]
+		for sub in subclusters:
+			newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == sub, obskeys)))
+		newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == "subA", obskeys)))
+		newobskeys=np.append(newobskeys, list(np.compress(np.array([obstable[r].subcluster for r in obskeys]) == "sub?", obskeys)))
+		newobskeys = np.flipud(np.sort(np.unique(newobskeys), kind='mergesort'))
+		obskeys = newobskeys
 	
 	#
 	# Printing the table
 	#
 	print "Number of observations in %s: %d" % (", ".join(subclusters), np.size(obskeys))
-	if not is_rebuild and not is_update:
+	if not is_rebuild and not is_update and not is_just_access:
 		print "Number of new observations found in %s: %d" % (", ".join(storage_nodes), np.size(obsids))
 
-	if is_from == True or is_to == True:
-		print "List only observations%s%s" % (is_from and " since " + fromdate or (is_to and " till " + todate or ""), 
-                                                      is_to and (is_from and " till " + todate or "") or "")
+	if not is_just_access or np.size(update_obsids) == 0:
+		if is_from == True or is_to == True:
+			print "List only observations%s%s" % (is_from and " since " + fromdate or (is_to and " till " + todate or ""), 
+                        	                              is_to and (is_from and " till " + todate or "") or "")
 	print
 
 	# number of storage nodes
@@ -1748,8 +1765,12 @@ if __name__ == "__main__":
 	if is_html:
 		htmlrep=writeHtmlList(htmlfile, linkedhtmlstem, fromdate, todate)
 		htmlrep.open()
-		htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids))
-		htmlrep.datesrange()
+		if not is_rebuild and not is_update and not is_just_access:
+			htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), True)
+		else:
+			htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), False)
+		if not is_just_access or np.size(update_obsids) == 0:
+			htmlrep.datesrange()
 		htmlrep.header(viewtype, storage_nodes_string_html)
 		counter = 0
 		for i in sorted_indices:
@@ -1772,8 +1793,12 @@ if __name__ == "__main__":
 		for key in sf.keys():
 			htmlrep.reInit(sf[key])
 			htmlrep.open()
-			htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids))
-			htmlrep.datesrange()
+			if not is_rebuild and not is_update and not is_just_access:
+				htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), True)
+			else:
+				htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), False)
+			if not is_just_access or np.size(update_obsids) == 0:
+				htmlrep.datesrange()
 			htmlrep.statistics(htmlstatfile)
 			htmlrep.linkedheader(viewtype, storage_nodes_string_html)
 			if key == "size":
