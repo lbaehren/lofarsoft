@@ -79,8 +79,8 @@ def write_srl(img, filename=None, format='fits', srcroot=None):
         if format == 'fits': filename = img.imagename + '.srl.fits'
         if format == 'ascii': filename = img.imagename + '.srl.txt'
         if format == 'bbs': filename = img.imagename + '.srl.sky'
-    if format == 'fits': print 'Sorry, fits output is not yet available. Use "bbs" format instead.'
-    if format == 'ascii': print 'Sorry, ascii output is not yet available. Use "bbs" format instead.'
+    if format == 'fits': print 'Sorry, FITS output is not yet available. Use "bbs" format instead.'
+    if format == 'ascii': print 'Sorry, ASCII output is not yet available. Use "bbs" format instead.'
     if format == 'bbs': write_bbs_srl(img, filename, srcroot)
 
     
@@ -153,11 +153,11 @@ def write_resid_img(img, filename=None):
         filename_s = os.path.splitext(filename)[0] + '_shap' + os.path.splitext(filename)[1]
     temp_im = make_fits_image(N.transpose(img.resid_gaus), img.wcs_obj, img.beam, img.freq_pars)
     temp_im.writeto(filename_g, clobber=True)
-    print 'Wrote FITS file ' + filename_g
+    print '--> Wrote FITS file ' + filename_g
     if img.opts.shapelet_do == True:
         temp_im = make_fits_image(N.transpose(img.resid_shap), img.wcs_obj, img.beam, img.freq_pars)
         temp_im.writeto(filename_s, clobber=True)
-        print 'Wrote FITS file ' + filename_s
+        print '--> Wrote FITS file ' + filename_s
 
         
 def write_model_img(img, filename=None):
@@ -170,11 +170,11 @@ def write_model_img(img, filename=None):
         filename_s = os.path.splitext(filename)[0] + '_shap' + os.path.splitext(filename)[1]
     temp_im = make_fits_image(N.transpose(img.model_gaus), img.wcs_obj, img.beam, img.freq_pars)
     temp_im.writeto(filename_g, clobber=True)
-    print 'Wrote FITS file ' + filename_g
+    print '--> Wrote FITS file ' + filename_g
     if img.opts.shapelet_do == True:
         temp_im = make_fits_image(N.transpose(img.model_shap), img.wcs_obj, img.beam, img.freq_pars)
         temp_im.writeto(filename_s, clobber=True)
-        print 'Wrote FITS file ' + filename_s
+        print '--> Wrote FITS file ' + filename_s
 
         
 def write_rms_img(img, filename=None):
@@ -184,7 +184,7 @@ def write_rms_img(img, filename=None):
             filename = img.imagename + '.rms.fits'
         temp_im = make_fits_image(N.transpose(img.rms), img.wcs_obj, img.beam, img.freq_pars)
         temp_im.writeto(filename, clobber=True)
-        print 'Wrote FITS file ' + filename
+        print '--> Wrote FITS file ' + filename
     else:
         print 'RMS map is set to a constant. No image written.'
 
@@ -195,7 +195,7 @@ def write_ch0_img(img, filename=None):
         filename = img.imagename + '.ch0.fits'
     temp_im = make_fits_image(N.transpose(img.ch0), img.wcs_obj, img.beam, img.freq_pars)
     temp_im.writeto(filename, clobber=True)
-    print 'Wrote FITS file ' + filename
+    print '--> Wrote FITS file ' + filename
 
     
 def make_fits_image(imagedata, wcsobj, beam, freq):
@@ -294,7 +294,25 @@ def write_fits_gaul(img, filename):
     for ind, col in enumerate(fbdsm_list):
         list1 = pyfits.Column(name=cnames[ind], format=cformat[ind], unit=cunit[ind], array=fbdsm_list[ind])
         col_list.append(list1)
+    beam = img.beam
     tbhdu = pyfits.new_table(col_list)
+    header = tbhdu.header
+    header.update('BMAJ', beam[0])
+    header.update('BMIN', beam[1])
+    header.update('BPA', beam[2])
+    header.update('CFREQ', img.cfreq)
+    header.update('IMG', img.filename)
+    header.add_comment('PyBDSM Gaussian list for '+img.filename)
+    header.add_history('Image size : '+str(img.ch0.shape)+' pixels')
+    header.add_history('Using user-specified frequency/frequencies.')
+    header.add_history('For rms image, boxsize = '+str(img.opts.rms_box[0])+' and stepsize = '+str(img.opts.rms_box[1]))
+    if img.opts.rms_map == True:
+        header.add_history('Variation in rms image significant, using this image.')
+    else:
+        header.add_history('Variation in rms image not significant, using constant rms.')
+    header.add_history('%s %i' % ("Number of islands found :", len(img.islands)))
+    header.add_history('%s %i' % ("Total number of Gaussians fit to image :", img.ngaus))
+    tbhdu.header = header
     tbhdu.writeto(filename, clobber=True)
     print '--> Wrote FITS file ' + filename
 

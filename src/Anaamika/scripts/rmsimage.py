@@ -224,7 +224,7 @@ class Op_rmsimage(Op):
         imgshape = N.array(arr.shape)
 
         ## If boxize is less than 10% of image, use simple extrapolation to derive the edges
-        ## of the mean and rms maps; otherwise, use a padded version of arr and mask
+        ## of the mean and rms maps; otherwise, use padded versions of arr and mask
         ## to derive the mean and rms maps 
         if float(BS)/float(imgshape[0]) < 0.1 and float(BS)/float(imgshape[1]) < 0.1:
             use_extrapolation = True
@@ -246,7 +246,7 @@ class Op_rmsimage(Op):
                 mask_pad = None
             else:
                 mask_pad = self.pad_array(mask, new_shape)
-                 
+
         ## arrays for calculated data
         mean_map = N.zeros(mapshape, dtype=float)
         rms_map  = N.zeros(mapshape, dtype=float)
@@ -268,25 +268,28 @@ class Op_rmsimage(Op):
         ### step 2: borders of the image
         if bounds[0]:
             for j in range(boxcount[1]):
-                ind = [-BS, arr.shape[0], j*SS,j*SS+BS]
                 if use_extrapolation:
+                    ind = [-BS, arr.shape[0], j*SS,j*SS+BS]
                     self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [-2, j+1])
                 else:
+                    ind = [-BS, arr_pad.shape[0], j*SS,j*SS+BS]
                     self.for_masked(mean_map, rms_map, mask_pad, arr_pad, ind, kappa, [-1, j])
 
         if bounds[1]:
             for i in range(boxcount[0]):
-                ind = [i*SS,i*SS+BS, -BS,arr.shape[1]]
                 if use_extrapolation:
+                    ind = [i*SS,i*SS+BS, -BS,arr.shape[1]]
                     self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [i+1, -2])
                 else:
+                    ind = [i*SS,i*SS+BS, -BS,arr_pad.shape[1]]
                     self.for_masked(mean_map, rms_map, mask_pad, arr_pad, ind, kappa, [i, -1])
 
         if bounds.all():
-                ind = [-BS,arr.shape[0], -BS,arr.shape[1]]
                 if use_extrapolation:
+                    ind = [-BS,arr.shape[0], -BS,arr.shape[1]]
                     self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [-2, -2])
                 else:
+                    ind = [-BS,arr_pad.shape[0], -BS,arr_pad.shape[1]]
                     self.for_masked(mean_map, rms_map, mask_pad, arr_pad, ind, kappa, [-1, -1])
 
         ### step 3: correct(extrapolate) borders of the image

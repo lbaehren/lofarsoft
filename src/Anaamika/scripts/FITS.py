@@ -122,7 +122,7 @@ class Op_loadFITS(Op):
           if fname[-2:] in '_I': fname = fname[:-2] # trim off '_I' as well
         else:
           fname = img.opts.fits_name
-        img.filename = fname
+        img.filename = img.opts.fits_name
         img.imagename = fname+'.pybdsm'
 
         return img

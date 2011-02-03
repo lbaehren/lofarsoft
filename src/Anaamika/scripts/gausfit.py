@@ -86,6 +86,7 @@ class Op_gausfit(Op):
                 g.gaus_num = n
             isl.ngaus = m
         img.ngaus = n
+        mylog.info('%s %i' % ("Total number of Gaussians fit to image :", n))
         if img.opts.quiet == False:
             sys.stdout.write('done.')
             sys.stdout.flush()
