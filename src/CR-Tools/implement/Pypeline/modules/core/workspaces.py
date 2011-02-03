@@ -489,7 +489,7 @@ def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywo
         baseline[...,numin_i:numax_i].bspline(ws["baseline_x"][numin_i:numax_i],ws["coeffs"][...])
     #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth
     #Left end
-    import pdb; pdb.set_trace()
+#    import pdb; pdb.set_trace()
     ws["height_ends"][0,...].copy(baseline[...,numin_i])
     factor=hArray(float,ws["nofAntennas"],fill=6.9) # Factor 1000 in log
     if not ws["logfit"]:
