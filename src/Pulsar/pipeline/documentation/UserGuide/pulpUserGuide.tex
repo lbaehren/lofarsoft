@@ -243,6 +243,8 @@ so-called  `incoherentstokes' beam-formed data.\footnote{Development
 `filefactor' parameter within Pulp.  This factor is known as ``ncores'' in the pulsar
 shell script.  Pulp places no restriction on what `filefactor' can be, though nominal
 processing will usually dictate the default \verb|filefactor = 8|.
+Because of this, users are encouraged to use judgment in <filefactor>
+specification, when the default is not desired.
 \item In the special case that a user select \verb|filefactor == 1|,
   No ``all'' processing will be done.  That is, no \verb|RSPA| is
   made, and no \verb|RSPA| processing, \emph{per se}, occurs.  Output will appear in the
@@ -276,13 +278,14 @@ though remain confirmed by this user)
 
 \section{User Environment}
 \label{sec:environment}
-In computing environments, pipelines function as automated, simulated users at the command
-line.  More aptly, a pipeline functions as a command line user
-agent. Therefore, and in order that the Pulp package execute properly,
-Pulp users will need to take a number of steps in adjusting their
-compute environments. Framework pipeline operations require that a number
-of locally defined configuration files be accessible to the
-framework. These files are (in no particular order):
+In computing environments, pipelines function as automated, simulated
+users at the command line.  More aptly, a pipeline
+functions as a proxy user, or user agent. Therefore, and in order
+that the Pulp package execute properly, Pulp users will need to take a
+number of steps in adjusting their compute environments. Framework
+pipeline operations require that a number of locally defined
+configuration files be accessible to the framework. These files are
+(in no particular order):
 \begin{enumerate}
 \item pipeline.cfg            -- configuration for framework operations
 \item tasks.cfg                -- define things to do
@@ -296,8 +299,8 @@ users will want to edit the pipeline configuration file to use their
 own builds of the \verb|$LOFARSOFT| code repository.  Users may edit the
 \verb|tasks.cfg| file, which is where a user may easily change default
 arguments of any or all recipes.  In all likelihood, most users will
-not want or need to do this. These configuration files, and others, are discussed in detail in
-\S\ref{sec:cfgfiles}, ``Framework configuration files''.
+not want or need to do this. These configuration files, and others,
+are discussed in detail in \S\ref{sec:cfgfiles}, ``Framework configuration files''.
 
 \subsection{Configuration}
 \label{sec:config}
@@ -539,12 +542,12 @@ Once a user has established a viable environment for the framework pipeline, exe
 The Pulp package provides two (2) pre-built command line interfaces
 (``pre-built'' in the sense that users will certainly be writing their
 own command line interfaces\footnote{Writing a
-pipeline definition can be thought of as writing your own interface to
-control what processing is done  Users should be aware that, though
-the recipes are ``independent'', there is usually a proxy dependence
-in that they do depend upon the state of the data on disk as it may be provided by
-recipes executed prior.} , that is, their own pipeline
-definitions. The two defintions provided are
+pipeline definition can be thought of as writing an interface to
+control what processing the user wants done. Users should be
+aware that, though the recipes are ``independent'', there is usually a
+proxy dependence in that they do depend upon the state of the data on
+disk as it may be provided by recipes executed prior.} , that is,
+their own pipeline definitions. The two defintions provided are
 \begin{enumerate}
 \item \verb|pulp.py|
 \item \verb|dynspec.py|
