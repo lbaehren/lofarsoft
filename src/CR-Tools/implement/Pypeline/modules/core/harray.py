@@ -2,6 +2,8 @@
 """
 
 import numpy as np
+import os
+
 import matplotlib.pyplot as plt
 
 #import pdb
@@ -613,14 +615,168 @@ def hArray_getstate(self):
 def hArray_setstate(self, state):
     """Restore state of hArray object for unpickling.
     """
-
     size = 1
     for d in state[1]:
         size *= d
-
     self.resize(size)
     self.reshape(state[1])
     self.readRaw(state[2])
+
+def hArray_write(self, filename,nblocks=1,varname=''):
+    """Write an hArray to disk including a header file to read it back
+    again. A simple interface to hArray_writeheader and then
+    hWriteFileBinary.
+
+    filename - the filename where the data will be dumped. The header
+    filename will have the ending".hdr" the data file a ".dat" ending (the filename can contain either of those endings or none).
+
+    nblocks - Allows one to specify that one will write the same
+    vector multiple times to the same file, so that the data file size
+    in the end is actually nblocks times the original hArray
+    size. This needs to be known at creation time. In case multiple
+    blocks will be written, the function will write the first block to
+    disk.
+
+    varname - you can store the original variable name in which the
+    hArray was stored.
+
+Example:
+
+x=hArray([1.0,2.0,3,4],name="test")
+x.write("test.dat",varname='x')
+y=hArrayRead("test")
+y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
+
+cat test.hdr
+# Header for hArray vector
+ha_filename = 'test'
+ha_type = float
+ha_dim = [4]
+ha_nblocks = 1
+ha_name = 'test'
+ha_units = ('', '')
+ha_varname = 'x'
+    """
+    if filename[-4:].upper() in [".DAT",".HDR"]: fn=filename[:-4]
+    else: fn=filename
+    hArray_writeheader(self,fn,nblocks=nblocks,varname=varname)
+    self.writefilebinary(fn+".dat")
+
+def hArray_writeheader(self, filename,nblocks=1,varname=''):
+    """Write a header for an hArray binary data file, which was written with hWriteFileBinary.
+
+    filename - the filename where the data was dumped. The header
+    filename will have the ending".hdr", replacing a ".dat" ending if present.
+
+    nblocks - Allows one to specify that one has written the same
+    vector multiple times to the same file, so that the data file
+    size is actually nblocks times the original hArray size.
+
+    varname - you can store the original variable name in which the
+    hArray was stored.
+
+Example:
+x=hArray([1.0,2.0,3,4],name="test")
+x.writeheader("test.dat")
+x.writefilebinary("test.dat")
+y=hArrayRead("test")
+y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
+
+
+    """
+    if filename[-4:].upper() == ".DAT": fn=filename[:-4]+'.hdr'
+    else: fn=filename+'.hdr'
+    f=open(fn,"w")
+    f.write("# Header for hArray vector\n")
+    f.write("ha_filename = '"+filename+"'\n")
+    f.write("ha_type = "+typename(basetype(self))+"\n")
+    f.write("ha_dim = "+str(self.getDim())+"\n")
+    f.write("ha_nblocks = "+str(nblocks)+"\n")
+    f.write("ha_name = '" + self.getKey("name")+"'\n")
+    f.write("ha_units = ('" +self.getUnitPrefix()+"', '" + self.getUnitName()+"')\n")
+    f.write("ha_varname = '" + varname+"'\n")
+    f.close()
+
+def hArrayRead(filename,block=-1,restorevar=False):
+    """
+    Usage:
+    
+    ary=hArrayRead("testdata.hdr") -> new hArray read from testdata.hdr and testdata.dat
+
+    Create and return a new hArray which contains data read from a
+    binary data file with hWriteFileBinary and which has a (.hdr)
+    header file written with hArray_writeheader.
+
+    filename - the filename of either the ".dat" file or the ".hdr" file (but both files need to be present). You can only give the
+    filename without the extension.
+
+    block - Allows one to specify that one has written the same vector
+    multiple times to the same file, so that the data file size is
+    actually nblocks (see hArray_writeheader) times the original
+    hArray size. if block<0 then the entire file is being read and a
+    big array is returned, otherwise only the block specified will be
+    read and returned.
+
+Example:
+
+x=hArray([1.0,2.0,3,4],name="test")
+x.write("test.dat")
+y=hArrayRead("test")
+y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
+
+
+x.write("test.dat",nblocks=2)
+x.writefilebinary("test.dat",1*4)
+y=hArrayRead("test")
+y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0])
+
+    """
+    if filename[-4:].upper() in [".DAT",".HDR"]: fn=filename[:-4]
+    else: fn=filename
+    if os.path.exists(fn+".hdr"): hdr=".hdr"
+    elif os.path.exists(fn+".HDR"): hdr=".HDR"
+    else:
+        print "Error hArrayRead: header file ", fn+".hdr does not exists!"
+        return -1
+    if os.path.exists(fn+".dat"): dat=".dat"
+    elif os.path.exists(fn+".DAT"): dat=".DAT"
+    else:
+        print "Error hArrayRead: data file ", fn+".data does not exists!"
+        return -1
+    execfile(fn+hdr)
+    l=locals();
+    if l["ha_nblocks"] == 1 :
+        block=0
+    if block<0:
+        dim = [l["ha_nblocks"]]+l["ha_dim"]
+        block=0
+    else:
+        dim=l["ha_dim"]
+    ary=hArray(l["ha_type"],dim,name=l["ha_name"],units=l["ha_units"])
+    ary.readfilebinary(fn+dat,block*ary.getSize())
+#    if restorevar & (not l["ha_varname"] == ''):
+#        print "Creating new object",l["ha_varname"]
+#        exec ("global "+l["ha_varname"]+"\n"+l["ha_varname"]+" = ary")
+    return ary
+
+def ashArray(val):
+    """ashArray(val) -> hArray(val)
+
+    Returns an hArray withe the argument val unless val is already an
+    hArray. In this case return the argument unchanged.
+
+    Example:
+
+    ashArray(3) -> hArray(int, [1] # len=1, slice=[0:1], vec -> [3])
+    ashArray([3,4]) -> hArray(int, [2] # len=2, slice=[0:2], vec -> [3, 4])
+    x=ashArray([3,4]); ashArray(x) -> hArray(int, [2] # len=2, slice=[0:2], vec -> [3, 4])
+    """
+    if type(val) in hAllArrayTypes:
+        return val
+    elif type(val) in hAllListTypes:
+        return hArray(val)
+    else:
+        return hArray([val])
 
 # Fourier Transforms
 setattr(FloatArray,"fft",hFFTCasa)
@@ -645,6 +801,8 @@ for v in hAllArrayTypes:
     setattr(v,"none",hArray_none)
     setattr(v,"read",hArray_read)
     setattr(v,"list",hArray_list)
+    setattr(v,"write",hArray_write)
+    setattr(v,"writeheader",hArray_writeheader)
     setattr(v,"mprint",hArray_mprint)
     setattr(v,"transpose",hArray_transpose)
     setattr(v,"copy_resize",hArray_copy_resize)

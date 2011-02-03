@@ -70,30 +70,30 @@ for offset in range(stride):
     print "Time:",time.clock()-t0,"s for reading + FFT."
     ofile=tmpfilename+str(offset)+"a"+tmpfileext
     ofiles+=[ofile]
-    cdata.writedump(ofile)  # output of doublefft1 is in cdata ...
+    cdata.writefilebinary(ofile)  # output of doublefft1 is in cdata ...
     
 #Now sort the different blocks together (which requires a transpose over passes/strides)
 ofiles2=[]
 for offset in range(stride):
-    tmpspecT[...].readdump(Vector(ofiles),Vector(int,stride,fill=offset))
+    tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,stride,fill=offset)*nblocks_section*blocklen)
     #This transpose it to make sure the blocks are properly interleaved
     hTranspose(tmpspec,tmpspecT,stride,nblocks_section)
     specT.doublefft2(tmpspec,nblocks_section,full_blocklen)
     ofile=tmpfilename+str(offset)+"b"+tmpfileext
-    specT.writedump(ofile)
+    specT.writefilebinary(ofile)
     ofiles2+=[ofile]
 
 ofiles3=[]
 for offset in range(stride):
-    specT2[...].readdump(Vector(ofiles2),Vector(int,stride,fill=offset))
+    specT2[...].readfilebinary(Vector(ofiles2),Vector(int,stride,fill=offset)*blocklen*nblocks_section)
     #This transpose it to make sure the blocks are properly interleaved
     hTranspose(spec,specT2,stride,blocklen)
     ofile=tmpfilename+"spec_"+str(offset)+tmpfileext
-    spec.writedump(ofile)
+    spec.writefilebinary(ofile)
     ofiles3+=[ofile]
 
 for offset in range(stride):
-    allspec[...].readdump(Vector(ofiles3),Vector(int,stride,fill=offset))
+    allspec[...].readfilebinary(Vector(ofiles3),Vector(int,stride,fill=offset)*subspeclen)
 
 print "Time:",time.clock()-t0,"s for resorting, 2nd FFT, and 3rd transpose."
 

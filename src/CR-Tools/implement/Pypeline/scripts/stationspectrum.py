@@ -3,6 +3,8 @@
 #cd /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/scripts/tmp
 #execfile("../stationspectrum.py")
 
+import pdb
+#pdb.set_trace()
 
 """
 Test of a SETI application by making a high-resolution spectrum of a long data set, using a double FFT.
@@ -38,26 +40,28 @@ doplot=True
 plotsubspectrum=151# Which part of the spectrum to plot
 maxblocksflagged=2
 #delta_nu=120 # Hz 
-delta_nu=6 # frequency resolution in Hz
-blocklen=2**15 #The size of a block being read in
+delta_nu=200 #6 frequency resolution in Hz
+blocklen=2**10 #15The size of a block being read in
 stride=1 # if >1 then then one block is actually stride*blocklen and data is stored on disk during processing to save memory (slower!)
-maxnantennas=100# Maximum number of antennas to sum over
+maxnantennas=1# Maximum number of antennas to sum over
+maxchunks=1 # the maximum number of chunks to integrate over
 #------------------------------------------------------------------------
-filename= LOFARSOFT+"/data/lofar/RS307C-readfullsecondtbb1.h5"
-datafile=crfile(filename)
-antennas=datafile["selectedAntennas"]
+#datafile=crfile(filename)
+#antennas=datafile["selectedAntennas"]
+
+spectrum_file=tmpfilename+"spec"+tmpfileext
 
 datafile=crfile(filename)
-f=datafile["Frequency"]
+freqs=datafile["Frequency"]
 
 antennas=hArray(range(min(datafile["nofAntennas"],maxnantennas)))
-antennaIDs=hArray(datafile["AntennaIDs"])[antennas]
+antennaIDs=ashArray(hArray(datafile["AntennaIDs"])[antennas])
 
 quality=[]
 antennacharacteristics={}
 
 full_blocklen=blocklen*stride
-start_frequency=f[0]; end_frequency=f[-1]
+start_frequency=freqs[0]; end_frequency=freqs[-1]
 delta_t=datafile["sampleInterval"]
 fullsize_estimated=1./delta_nu/delta_t
 nblocks=2**int(round(log(fullsize_estimated/full_blocklen,2)))
@@ -84,6 +88,8 @@ print "Frequency Resolution:",delta_frequency,"Hz"
 print "Full block length:",full_blocklen,"samples split into", stride,"subblocks."
 print "Number of blocks:", nblocks
 print "Width of subspectrum:",subsubspeclen*delta_frequency/1000,"kHz"
+print "Writing spectrum to file","'"+spectrum_file+"'."
+
 
 if fullsize>10**6:
     print "Full size:",fullsize/10**6,"MSamples"
@@ -151,7 +157,7 @@ def rp(offset,sub=-1,clf=True,markpeaks=False):
     if dobig:
         bigfft[offset*subspeclen:(offset+1)*subspeclen].plot(xvalues=bigfrequencies[offset*subspeclen:(offset+1)*subspeclen],clf=True)
         clf=False
-    if dostride: power.readfilebinary(ofiles3[offset])
+    if dostride: power.readfilebinary(ofiles3[offset],subspeclen/2*offset)
     frequencies.fillrange((start_frequency+offset*delta_band)/10**6,delta_frequency/10**6)
     if sub>=0:
         sub=min(sub,nsubsubspectra-1)
@@ -177,7 +183,9 @@ for antenna in antennas:
         ofiles=[]; ofiles2=[]; ofiles3=[]
         for offset in range(stride):
             print "#    Pass ",offset,"/",stride-1,"Starting block=",offset+nchunk*nsubblocks
+#            pdb.set_trace()
             blocks=range(offset+nchunk*nsubblocks,(nchunk+1)*nsubblocks,stride)            
+            cdata[...].read(datafile,"Fx",blocks)
             quality.append(CRQualityCheckAntenna(cdata,datafile=datafile,normalize=True,blockoffset=offset+nchunk*nsubblocks,observatorymode=lofarmode))
             CRDatabaseWrite(quality_database_filename+".txt",quality[-1])
             mean+=quality[-1]["mean"]
@@ -200,7 +208,7 @@ for antenna in antennas:
             for offset in range(stride):
                 if dostride:
                     print "#    Offset",offset
-                    tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,stride,fill=offset)*blocklen)
+                    tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,stride,fill=offset)*(nblocks_section*blocklen))
                     #This transpose it to make sure the blocks are properly interleaved
                     hTranspose(tmpspec,tmpspecT,stride,nblocks_section)
                 specT.doublefft2(tmpspec,nblocks_section,full_blocklen)
@@ -210,20 +218,21 @@ for antenna in antennas:
                     ofiles2+=[ofile]
     #        print "Time:",time.clock()-t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."
             for offset in range(stride):
-                ofile=tmpfilename+"spec_"+str(offset)+tmpfileext
+#                ofile=tmpfilename+"spec_"+str(offset)+tmpfileext
                 if (nchunk>0): power.readfilebinary(ofile)
                 else: power.fill(0.0)
                 if dostride:
                     print "#    Offset",offset
-                    specT2[...].readfilebinary(Vector(ofiles2),Vector(int,stride,fill=offset)*nblocks_section)
+                    specT2[...].readfilebinary(Vector(ofiles2),Vector(int,stride,fill=offset)*(blocklen*nblocks_section))
                     # This transpose it to make sure the blocks are properly interleaved
                     hTranspose(spec,specT2,stride,blocklen)
                     power.spectralpower(spec)
+#                    ofiles3+=[ofile]
                 else: # data is all in memory
                     power.spectralpower(specT)
                 nspectraadded+=1
                 if nspectraadded>1: power *= (nspectraadded-1.0)/nspectraadded                        
-                power.writefilebinary(ofile)
+                power.writefilebinary(ofile,subspeclen/2*offset)
             print "#  Time:",time.clock()-t0,"s for processing this chunk. Number of spectra added =",nspectraadded
         else: #data not ok
             nspectraflagged+=1
@@ -241,7 +250,7 @@ for antenna in antennas:
             rp(0,plotsubspectrum,markpeaks=False,clf=False)
             plt.draw()
 print "##End of all Antennas - nspectraadded=",nspectraadded,"nspectraflagged=",nspectraflagged
-
+print "Total time used:",time.clock()-t0,"s."
 
 #----------------------
     

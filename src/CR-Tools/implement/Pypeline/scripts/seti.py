@@ -188,7 +188,7 @@ for antenna in antennas:
         for offset in range(stride):
             print "#    Pass ",offset,"/",stride-1,"Starting block=",offset+nchunk*nsubblocks
             blocks=range(offset+nchunk*nsubblocks,(nchunk+1)*nsubblocks,stride)
-            
+            cdata[...].read(datafile,"Fx",blocks)            
             quality.append(CRQualityCheckAntenna(cdata,datafile=datafile,normalize=True,blockoffset=offset+nchunk*nsubblocks,observatorymode=lofarmode))
             CRDatabaseWrite(quality_database_filename+".txt",quality[-1])
             mean+=quality[-1]["mean"]

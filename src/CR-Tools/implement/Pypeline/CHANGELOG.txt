@@ -154,6 +154,14 @@ plt.plot() like color="red"
   of the elements in the vector rather than in unist of the vector
   size. This allows simple random access read and write.
 
+2011-02-03 Pypeline - rev 6952 - Heino Falcke 
+- added hArrayRead, hArray_write, and hArray_writeheader this allows
+one to write an hArray with a header file (filename.hdr) to disk that
+contains dimensions and other info. It can be read in with
+hArrayRead()
+
+
+
 
 ------------------------------------------------------------------------
 TODO
