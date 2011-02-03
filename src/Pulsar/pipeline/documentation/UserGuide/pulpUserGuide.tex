@@ -5,7 +5,7 @@
 \usepackage[today,nofancy]{svninfo}
 %\usepackage[colorlinks=true,urlcolor=cyan]{hyperref}
 
-\svnInfo $Id$e
+\svnInfo $Id$
 
 \begin{document}
 
@@ -86,8 +86,9 @@ be used throughout this document.
 Documentation on the Pulp package is provided with the Pulp
 distribution, and is available with the Pulp package download in
 \verb|${LOFARSOFT}/src/Pulsar/pipeline/documentation|\footnote{This
-  document can be found op ``UserGuide/UserGuide.pdf','' under ``documentation/''}Further documentation on the LOFAR pipeline framework, development
-under the LOFAR pipeline framework,  as well as schematic
+  document can be found op ``UserGuide/UserGuide.pdf','' under
+  ``documentation/''}. Further documentation on the LOFAR pipeline
+framework, development under the LOFAR pipeline framework,  as well as schematic
 documentation on the Pulp API, are available within the repository
 itself. Pulp API documents are delivered with the Pulp package as
 part of any download of the \verb|$LOFARSOFT| repository.
@@ -108,19 +109,22 @@ drwxr-xr-x  18 <user>    staff     612 Feb  1 16:16 support/
 \end{verbatim}
 In \verb|documentation/|, users will  find a directory structure that
 somewhat mimics the pipeline's recipe-support directory structure, with
-recipe API documents fou d under \verb|./pipeline/documentation/| in
-`master',`nodes', and `support'.
+recipe API documents found under
+\verb|./pipeline/documentation/PulpAPI/| in
+`master',`nodes', and `support', which contain, respectively, head
+node recipes, compute node recipes, and support modules providing adminstrative and
+executive function.
 \begin{verbatim}
 $LOFARSOFT src/Pulsar/pipeline/documentation:
 
   drwxr-xr-x   9 <user>     staff  306 Jan 30 08:08 .svn
-  drwxr-xr-x   6 <user>     staff  204 Feb  3 15:09 Pulp_API
+  drwxr-xr-x   6 <user>     staff  204 Feb  3 15:09 PulpAPI
   drwxr-xr-x  27 <user>     staff  918 Feb  3 00:00 UserGuide
 \end{verbatim}
 where a user will find API documents for the pipeline recipes, and all support
 modules.\\
 \begin{verbatim}
-./Pulp_API/master:
+./PulpAPI/master:
 -------
 -rw-r--r--@   0  __init__.py
  rw-r--r--  ...  bf2presto.html
@@ -131,14 +135,14 @@ modules.\\
 -rw-r--r--  ...  prepfold.html
 -rw-r--r--  ...  rfiplot.html
 
-./Pulp_API/nodes:
+./PulpAPI/nodes:
 ------
 -rw-r--r--@   0 __init__.py
 -rw-r--r--  ...  bf2presto.html
 -rw-r--r--  ...  prepfold.html
 -rw-r--r--  ...  rfiplot.html
 
-./Pulp_API/support:
+./PulpAPI/support:
 --------
 -rw-r--r--@   0  __init__.py
  rw-r--r--  ...  RSPlist.html
@@ -231,10 +235,9 @@ The nominal processing performed by the Pulp package involves,
 \item The number of subbands in a observation is entirely selected by the observer,
 however, nominally 248 subbands of `incoherent' beam-formed data are
 usually delivered and processed.  Currently, Pulp can only process
-so-called  `incoherentstokes' beam-formed data.\footnote{JH mandated that
-development on `coherentstokes' data processing would be tabled until
-the data type was being written to the cluster in conformance with the
-LOFAR-USG-ICD-003 specification}\footnote{see LOFAR document, \textit{LOFAR-USG-ICD-003,
+so-called  `incoherentstokes' beam-formed data.\footnote{Development
+  on `coherentstokes' data processing tabled until beam-formed data
+  type is written in conformance with the \textsc{lofar-usg-icd-003} specification}\footnote{see LOFAR document, \textit{LOFAR-USG-ICD-003,
     Beam-formed Data}, Alexov et al, ASTRON, 2010.}  
 \item The pipeline is capable of handling any user selected ``splitting'' factor, i.e. the 
 `filefactor' parameter within Pulp.  This factor is known as ``ncores'' in the pulsar
@@ -267,7 +270,7 @@ computing environment, the head node is lfe001.  (rumours of a second
 though remain confirmed by this user)
 \item \textbf{Pulp} -- the ``known pulsar pipeline'' implemented under
   the LOFAR pipeline framework.
-\item \textsc{TKP}-- the Transient Key Project (LOFAR).
+\item \textbf{TKP}-- The Transient Key Project (LOFAR).
 \end{itemize}
 
 
@@ -330,7 +333,9 @@ directory.\footnote{Explicit paths must appear in this configuration file.}
 
 Once these are defined (usually within a user's shell resource file),
 a user's \verb|$PYTHONPATH| should further include the following paths
-described below (defer to J. Swinbank if any of this changes or is unneeded.)
+described below.  This should become obsolete in the near future
+(v1.1), with refactoring to use package namespace explicivity, rather
+than some still ``blind'' imports, usually on support modules).
 
 \begin{verbatim}
 PYTHONPATH=/opt/pipeline/dependencies/lib/python2.5/site-packages:\
@@ -525,19 +530,38 @@ The most common adjustment user's might make here is altering the available ``Co
 
 \section{Interfaces}
 \label{sec:interfaces}
-\subsection{The Pulp command line interface}
+\subsection{Pulp command line interfaces}
 
 \underline{(pulp.py, 1.0, delivered 31.01.2011)}
 
 Once a user has established a viable environment for the framework pipeline, execution of Pulp should thence be straight forward.
 
-The command line interface to the executable ``pulp.py'' module is described below.  If the user does not have their \verb|$PATH| environment set to access \verb|pulp.py|, then the command line below should be invoked in the common pythonic idiom,\\
+The Pulp package provides two (2) pre-built command line interfaces
+(``pre-built'' in the sense that users will certainly be writing their
+own command line interfaces\footnote{Writing a
+pipeline definition can be thought of as writing your own interface to
+control what processing is done  Users should be aware that, though
+the recipes are ``independent'', there is usually a proxy dependence
+in that they do depend upon the state of the data on disk as it may be provided by
+recipes executed prior.} , that is, their own pipeline
+definitions. The two defintions provided are
+\begin{enumerate}
+\item \verb|pulp.py|
+\item \verb|dynspec.py|
+\end{enumerate}
+
+The pipeline definition \verb|pulp.py| runs the ``basic mode'' of the
+``known pulsar pipeline.''\footnote{ \texttt{make\_subs\_SAS\_Ncore\_Mmodes.sh} in
+\texttt{\$\{LOFARSOFT\}/lofarsoft/src/Pulsar/scripts}}. Users should
+ensure \verb|PATH| access the this program. The ``cli'' to the
+executable ``pulp.py'' module is invoked in the common pythonic idiom,\\
+
  i.e. \verb|$ python pulp.py -d --job-name ...|\\
 \begin{verbatim}
  Current usage:
 
-$ pulp.py --d --job-name=<job_name> --arch=<PULP_ARCHIVE>
-[--pulsar=<pulsar1[,pulsar2,pulsar3,…]>] [--filefactor=<m>]
+$ pulp.py --d --job-name=<job_name> --obsid=L<yyyy>_<nnnnn[...]>
+--arch=<PULP_ARCHIVE> [--pulsar=<pulsar1[,pulsar2,pulsar3]>] [--filefactor=<m>]
 
 where,
 
@@ -552,7 +576,39 @@ filefactor  = subband splitting factor, <int>
               optional user speciﬁcation (range, 1-248)
               default = 8
 \end{verbatim}
-The user should be aware of the relationship between the defined subclusters of the offline LOFAR cluster, the electable storage nodes, and the location of the data.  For example, if a user wishes to process data on subcluster six, i.e. \verb|sub6|, it is incumbent upon the user to specify an appropriate ``arch'' value,  which is primarily determined by data location.  \\
+
+The second interface provided is \verb|dynspec.py|, and was first
+describe during the early November ``pulsar busy week''.  This
+definition produces only the so-called ``rfi report'', and a `png'
+image of the calculated dynamic spectrum, which is really
+the product of the pulsar ``subdyn.py'' script\footnote{This python
+  script can and should be refactored to be fully funtional on import.}.
+The recipe stack is noticeably smaller, sans prepfold. 
+\begin{verbatim}
+Current usage:
+
+$ dynspec.py --d --job-name=<job_name> --obsid=L<yyyy>_<nnnnn[...]>
+--arch=<PULP_ARCHIVE> [--pulsar=<pulsar1[,pulsar2,pulsar3]>] [--filefactor=<m>]
+
+where,
+
+--d         = pipeline debug flag, full logging, use.
+--obsid     = observation identifier          
+--job-name  = arbitrary job name             
+--arch      = selected PULSAR ARCHIVE.
+--pulsar    = name of pulsar, or csv list of pulsar names.
+              eg., --pulsar=B0919+06
+                   --pulsar=B0919+06,B0834+06
+filefactor  = subband splitting factor, <int>
+              optional user speciﬁcation (range, 1-248)
+              default = 8
+\end{verbatim}
+Users will find the data products of \verb|dynspec.py| located in the
+various ``RSP[0-248]A'' directories\footnote{Though Pulp provides
+  much more flexibilty in \textsc{rsp} splitting than the pulsar shell
+  script, users are advised against using large numbers for
+  filefactor, especially 248.  Mostly because, well, that just seems
+  crazy.}, in the user selected Pulp archive (\verb|--arch=archnnn|') The user should be aware of the relationship between the defined subclusters of the offline LOFAR cluster, the electable storage nodes, and the location of the data.  For example, if a user wishes to process data on subcluster six, i.e. \verb|sub6|, it is incumbent upon the user to specify an appropriate ``arch'' value,  which is primarily determined by data location.  \\
 These values can be found in the PulpEnv() API specification, and are defined thusly:
 \begin{verbatim}
           arch134:  /net/sub5/lse013/data4/PULP_ARCHIVE
@@ -619,7 +675,7 @@ self.arch         :: arch, raw archive selection, 'arch134', etc.,
 self.subnet       :: subnet in use,
 self.environ      :: some user environ values, __dictify(uEnv),    
 self.LOFARSOFT    :: ${LOFARSOFT},   -- from the head node
-Self.TEMPO        :: ${TEMPO},       -- from the head node
+self.TEMPO        :: ${TEMPO},       -- from the head node
 self.PRESTO       :: ${PRESTO},      -- from the head node
 self.oldParsetName:: legacy parset filename 'RTCP.parset.0'
 self.parsetPath   :: path to actual parset found.
@@ -754,8 +810,8 @@ prepfold's unannounced file writing behaviour.
 Here are the temp files produced and removed by 
 \texttt{barycenter.c} done during the prepfold process.  This effort
 was undertaken when \textit{barycentering was turned on} during 
-prepfold processing \footnote{(x.inf file: Barycentered?           (1=yes, 0=no)  =  1}
-\texttt{barycenter.c}, \footnote{lines 176 - 182 are the best summary
+prepfold processing \footnote{(x.inf file: Barycentered?           (1=yes, 0=no)  =  1}\\
+From \texttt{barycenter.c}: \footnote{lines 176 - 182 are the best summary
   of the files written and deleted to be found.)}
 
 \begin{verbatim}  
