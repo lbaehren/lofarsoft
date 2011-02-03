@@ -73,6 +73,9 @@ def triggerMessageFit(crfile, triggers, fittype='bruteForce'):  # crfile has to 
 
   if (fittype=='linearFit'):
     (radaz, radel) = sfind.directionForHorizontalArray(match_positions, mTdiffs)
+    if np.isnan(radel) or np.isnan(radaz):
+        (radaz, radel, bftime) = sfind.directionBruteForceSearch(match_positions, mTdiffs)
+        result.update(warning = 'Linear fit failed (produced NaN). Falling back to brute force method.')
   elif (fittype=='bruteForce'):
     (radaz, radel, bftime) = sfind.directionBruteForceSearch(match_positions, mTdiffs)
   else : 

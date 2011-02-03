@@ -62,14 +62,14 @@ def runAnalysis(files, triggers, outfilename):
             continue
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
-        result = pf.triggerMessageFit(crfile, triggers, 'bruteForce') # be more robust against invalid linearFit
+        result = pf.triggerMessageFit(crfile, triggers, 'linearFit') # be more robust against invalid linearFit
         writeDict(outfile, result)
         if not result["success"]:
             continue
         triggerFitResult = result
         # now find the final direction based on all data, using initial direction as starting point
         try: # apparently it's dangerous...
-          result = pf.fullDirectionFit(crfile, triggerFitResult, 4096, flaggedList = flaggedList)     
+          result = pf.fullDirectionFit(crfile, triggerFitResult, 4096, flaggedList = flaggedList, FarField = False)     
           writeDict(outfile, result)
           if not result["success"]:
               continue
