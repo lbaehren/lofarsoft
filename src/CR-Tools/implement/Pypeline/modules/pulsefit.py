@@ -138,7 +138,7 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
   if (FarField):
     start_position = [triggerFitResult["az"], triggerFitResult["el"]]
   else:
-    start_position = [triggerFitResult["az"], triggerFitResult["el"], 30000.0]
+    start_position = [triggerFitResult["az"], triggerFitResult["el"], 1.0]
   
   # HACK 
 #  start_position = [255.0, 25.0]
