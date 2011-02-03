@@ -114,15 +114,13 @@ recipe API documents fou d under \verb|./pipeline/documentation/| in
 $LOFARSOFT src/Pulsar/pipeline/documentation:
 
   drwxr-xr-x   9 <user>     staff  306 Jan 30 08:08 .svn
+  drwxr-xr-x   6 <user>     staff  204 Feb  3 15:09 Pulp_API
   drwxr-xr-x  27 <user>     staff  918 Feb  3 00:00 UserGuide
-  drwxr-xr-x  10 <user>     staff  340 Jan 29 15:39 master
-  drwxr-xr-x   6 <user>     staff  204 Jan 29 15:09 nodes
-  drwxr-xr-x  13 <user>     staff  442 Jan 29 17:11 support
 \end{verbatim}
 where a user will find API documents for the pipeline recipes, and all support
 modules.\\
 \begin{verbatim}
-./master:
+./Pulp_API/master:
 -------
 -rw-r--r--@   0  __init__.py
  rw-r--r--  ...  bf2presto.html
@@ -133,14 +131,14 @@ modules.\\
 -rw-r--r--  ...  prepfold.html
 -rw-r--r--  ...  rfiplot.html
 
-./nodes:
+./Pulp_API/nodes:
 ------
 -rw-r--r--@   0 __init__.py
 -rw-r--r--  ...  bf2presto.html
 -rw-r--r--  ...  prepfold.html
 -rw-r--r--  ...  rfiplot.html
 
-./support:
+./Pulp_API/support:
 --------
 -rw-r--r--@   0  __init__.py
  rw-r--r--  ...  RSPlist.html
@@ -237,7 +235,7 @@ so-called  `incoherentstokes' beam-formed data.\footnote{JH mandated that
 development on `coherentstokes' data processing would be tabled until
 the data type was being written to the cluster in conformance with the
 LOFAR-USG-ICD-003 specification}\footnote{see LOFAR document, \textit{LOFAR-USG-ICD-003,
-    Beam-formed Data}, Alexov et al, ASTRON, 2010.}
+    Beam-formed Data}, Alexov et al, ASTRON, 2010.}  
 \item The pipeline is capable of handling any user selected ``splitting'' factor, i.e. the 
 `filefactor' parameter within Pulp.  This factor is known as ``ncores'' in the pulsar
 shell script.  Pulp places no restriction on what `filefactor' can be, though nominal
