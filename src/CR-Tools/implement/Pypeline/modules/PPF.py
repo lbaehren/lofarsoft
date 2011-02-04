@@ -12,7 +12,7 @@ class PPF():
         weights_filename=cr.LOFARSOFT+'/src/CR-Tools/data/ppfWeights16384.dat'
         # Initialize arrays and values
         weights=cr.hArray(float,[16,1024])
-        weights.readdump(weights_filename)
+        weights.readfilebinary(weights_filename)
 
         if weights[0,0]==0.0:
             print "Obtaining Kaiser coefficient from file"
@@ -23,7 +23,7 @@ class PPF():
             for i in range(0,16*1024):
                 weights[i]=float(f.readline())
             weights.setDim([16,1024])
-            weights.writedump(weights_filename)
+            weights.writefilebinary(weights_filename)
         
 
         self.weights=weights
@@ -70,7 +70,7 @@ class iPPF():
         weights_filename=cr.LOFARSOFT+'/src/CR-Tools/data/ippfWeights16384.dat'
         # Initialize arrays and values
         weights=cr.hArray(float,[16,1024])
-        weights.readdump(weights_filename)
+        weights.readfilebinary(weights_filename)
 	
         if weights[0,0]==0.0:
             print "Obtaining inverse PPF coefficient from file"
@@ -81,7 +81,7 @@ class iPPF():
                 for j in range(0,1024):
                     weights[i,j]=float(f.readline())           
             #weights.setDim([16,1024])
-            weights.writedump(weights_filename)
+            weights.writefilebinary(weights_filename)
         
         self.weights=weights
         self.buffer=None#cr.hArray(float,[16,1024])
