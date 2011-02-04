@@ -89,7 +89,7 @@ if calMethod:
 for i in range(len(filenames)):
     filenames[i]=datadir+filenames[i]
     if not os.path.isfile(filenames[i]):
-    	raise IOError('File ', thefile, ' can not be found.')
+    	raise IOError('File ', filenames[i], ' can not be found.')
 
 crfile=IO.open(filenames,blocksize,antennaSelection)
 actualSelection=crfile.get('selectedAntennas')
