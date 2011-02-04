@@ -1,33 +1,34 @@
 #!/usr/bin/env python
 #
-# Script to convert .singlepulse to .tim file in Princeton format
-# with extra columns added in the end of each line (sigma, phase)
-#
-# Vlad, Aug 5, 2010 (c)
-######################################################################
 import numpy as np
 import os, os.path, stat, glob, sys, getopt
 import infodata as inf
 
 is_phase = False   # if True then calculate the phase of the pulses
-is_rphase = False  # if True then calculate phase relative to obs start time
 inffile=""   # inf-file
 spfile=""    # .singlepulse file
 polycofile="polyco.dat"  # polyco-file
-obscode="1"  # GBT
+obscode="t"  # LOFAR
 psrname=""
+is_tempo2 = False  # if True then output tim-file is in Tempo2 format
+extra=""
 
 def usage (prg):
         """ prints the usage info about the current program
         """
         print "Program %s converts the .singlepulse file to tim-file\n" % (prg,)
-        print "Usage: %s [-p, --phase] [-o, --obs <obscode>]\n\
-                         [-h, --help] <inf-file> <singlepulse-file>\n\
-         -o, --obs <obscode>        - set the observatory code (default = 1 for GBT)\n\
+        print "Usage: %s [-p, --polyco <polyco-file>] [-o, --obs <obscode>]\n\
+                         [-s, --source <psrname>] [-h, --help] <inf-file> <singlepulse-file>\n\
+         -o, --obs <obscode>        - set the observatory code (default = t for LOFAR)\n\
          -s, --source <psrname>     - pulsar name to be used for polyco and output tim-file\n\
          -p, --polyco <polyco-file> - use polyco-file to calculate the phase of the pulses\n\
-         --rphase                   - calculate phase relative to obs start time\n\
-         -h, --help                 - print this message\n" % (prg,)
+         --tempo2                   - convert to Tempo2 format, default - Princeton\n\
+                                      in Tempo2 format the first column is sigma, downfact, phase\n\
+                                      (when -p option used), and extra field (when --extra option used)\n\
+                                      separated by comma with no spaces\n\
+         --extra <field>            - extra field to pass to tim-file. It will be added to the first column\n\
+                                      in Tempo2 format, or be the last column in Princeton format\n\
+         -h, --help                 - print this help\n" % (prg,)
 
 def parsecmdline (prg, argv):
         """ parse the command line arguments
@@ -37,7 +38,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "hs:p:o:", ["help", "source=", "polyco=", "obs=", "rphase"])
+                        opts, args = getopt.getopt (argv, "hs:p:o:", ["help", "source=", "polyco=", "obs=", "tempo2", "extra="])
                         for opt, arg in opts:
                                 if opt in ("-h", "--help"):
                                         usage (prg)
@@ -53,13 +54,17 @@ def parsecmdline (prg, argv):
                                         global psrname
                                         psrname = arg
 
-                                if opt in ("--rphase"):
-                                        global is_rphase
-                                        is_rphase = True
-
                                 if opt in ("-o", "--obs"):
                                         global obscode
                                         obscode = arg
+
+                                if opt in ("--tempo2"):
+                                        global is_tempo2
+					is_tempo2 = True
+
+                                if opt in ("--extra"):
+                                        global extra
+                                        extra = arg
 
                         if not args:
                                 print "inf-file and .singlepulse files are not given!\n"
@@ -84,9 +89,6 @@ if __name__=="__main__":
 	# reading inf-file
 	id = inf.infodata(inffile)
 
-	if is_phase == False and is_rphase == True:
-		is_rphase = False
-
 	if is_phase == True:
 		import polycos as poly
 
@@ -100,44 +102,47 @@ if __name__=="__main__":
 	cfreq = id.lofreq
 	totbw = id.BW
 	chanbw = id.chan_width
-	freq = cfreq + totbw - chanbw     # lowest freq of the highest channel
+	freq = cfreq + totbw - chanbw     # central freq of the highest channel
                                           # prepdata is dedispersing to higher freq (the highest freq channel gets zero delay)
 
 	# reading .singlepulse file
 	dm, sigma, secs = np.loadtxt(spfile, usecols=(0,1,2), comments='#', dtype=float, unpack=True)
 	offset, downfact = np.loadtxt(spfile, usecols=(3,4), comments='#', dtype=int, unpack=True)
-	if is_rphase == True:
-		dm = np.append(dm, dm[0])
-		sigma = np.append(sigma, 0.0)
-		secs = np.append(secs, 0.0)
-		offset = np.append(offset, 0)
-		downfact = np.append(downfact, 1)
 	toa = ["%.13f" % (startmjd + (offset[i] * tres)/86400.,) for i in np.arange(np.size(offset))]
 
 	# calculating the phases of pulses 
 	if is_phase == True:
 		pid=poly.polycos(source, polycofile)
 		phase=[pid.get_phs_and_freq(float(t.split(".")[0]), float("0." + t.split(".")[1]))[0] for t in toa]
-		rotfreq=[pid.get_phs_and_freq(float(t.split(".")[0]), float("0." + t.split(".")[1]))[1] for t in toa]
-
-	if is_rphase == True:
-		ssize = np.size(offset)
-		phase_offset = phase[ssize-1]
-		dm = np.delete(dm, [ssize-1])
-		sigma = np.delete(sigma, [ssize-1])
-		secs = np.delete(secs, [ssize-1])
-		offset = np.delete(offset, [ssize-1])
-		downfact = np.delete(downfact, [ssize-1])
-		rotfreq = np.delete(rotfreq, [ssize-1])
-		phase = np.delete(phase, [ssize-1])
-		phase = [f-phase_offset for f in phase]
-		phase = [f < 0 and f+1. or f for f in phase]
 
 	# writing the tim-file
 	# Princeton format (+ additional extra field is for sigma)
-	timfile=inffile.split(".inf")[0] + ".list"
-	if is_phase == True:
-		lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %f   %f   %d" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), phase[i], rotfreq[i], downfact[i]) for i in np.arange(np.size(offset))]
-	else:
-		lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i]) for i in np.arange(np.size(offset))]
-	np.savetxt(timfile, np.transpose((lines)), fmt="%s")
+	timfile=inffile.split(".inf")[0] + ".tim"
+	if is_tempo2:  # output tim-file is in Tempo2 format
+		if is_phase == True:
+			if extra != "":
+				lines=["%s,%d,%f,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+			else:
+				lines=["%s,%d,%f   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+		else:
+			if extra != "":
+				lines=["%s,%d,,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+			else:
+				lines=["%s,%d   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+	else: # Princeton format
+		if is_phase == True:
+			if extra != "":
+				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), phase[i], extra) for i in np.arange(np.size(offset))]
+			else:
+				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %f" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), phase[i]) for i in np.arange(np.size(offset))]
+		else:
+			if extra != "":
+				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   0.0   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), extra) for i in np.arange(np.size(offset))]
+			else:
+				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i])) for i in np.arange(np.size(offset))]
+
+	timp = open(timfile, 'a')	
+	if is_tempo2:
+		timp.write("FORMAT 1\n")
+	np.savetxt(timp, np.transpose((lines)), fmt="%s")
+	timp.close()
