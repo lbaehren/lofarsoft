@@ -18,6 +18,7 @@ import time
 tmpfilename="testseti_"
 tmpfileext=".dat"
 filename= LOFARSOFT+"/data/lofar/CS302C-B0T6:01:48.h5"
+filename= LOFARSOFT+"/data/lofar/RS307C-readfullsecondtbb1.h5"
 fullsize=256*128
 nblocks=128
 stride=4
@@ -40,7 +41,6 @@ cdata=hArray(complex,[nblocks,blocklen]) # creating input and work array
 cdataT=hArray(complex,[blocklen,nblocks]) # creating output array with transposed axis
 
 tmpspecT=hArray(complex,[stride,nblocks_section,blocklen]) 
-#tmpspec=hArray(complex,[nblocks_section,stride,blocklen]) 
 tmpspec=hArray(complex,[nblocks_section,full_blocklen]) 
 
 specT=hArray(complex,[full_blocklen,nblocks_section]) 
@@ -75,7 +75,7 @@ for offset in range(stride):
 #Now sort the different blocks together (which requires a transpose over passes/strides)
 ofiles2=[]
 for offset in range(stride):
-    tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,stride,fill=offset)*nblocks_section*blocklen)
+    tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,stride,fill=offset)*(nblocks_section*blocklen))
     #This transpose it to make sure the blocks are properly interleaved
     hTranspose(tmpspec,tmpspecT,stride,nblocks_section)
     specT.doublefft2(tmpspec,nblocks_section,full_blocklen)
@@ -85,7 +85,7 @@ for offset in range(stride):
 
 ofiles3=[]
 for offset in range(stride):
-    specT2[...].readfilebinary(Vector(ofiles2),Vector(int,stride,fill=offset)*blocklen*nblocks_section)
+    specT2[...].readfilebinary(Vector(ofiles2),Vector(int,stride,fill=offset)*(blocklen*nblocks_section))
     #This transpose it to make sure the blocks are properly interleaved
     hTranspose(spec,specT2,stride,blocklen)
     ofile=tmpfilename+"spec_"+str(offset)+tmpfileext

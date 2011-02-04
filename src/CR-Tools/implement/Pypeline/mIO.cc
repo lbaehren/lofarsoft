@@ -724,7 +724,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename) {
   if (outfile){
     outfile.write(v1, (HInteger)(v2-v1));
     outfile.close();
-  };
+  } else throw PyCR::IOError("hWriteFileBinary: Unable to open file "+filename+".");
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -766,7 +766,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   if (outfile){
     outfile.write(v1, (HInteger)(v2-v1));
     outfile.close();
-  };
+  } else throw PyCR::IOError("hWriteFileBinaryAppend: Unable to open file "+filename+".");
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -806,12 +806,20 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename, HInteg
   char * v1 = reinterpret_cast<char*>(&(*vec));
   char * v2 = reinterpret_cast<char*>(&(*(vec+1)));
   char * vend = reinterpret_cast<char*>(&(*vec_end));
-  fstream outfile(filename.c_str(), ios::binary | ios::in | ios::out);
+  fstream outfile;
+  ifstream f(filename.c_str(), ios::binary | ios::in);
+  if (f) {//file exists
+    f.close();
+    outfile.open(filename.c_str(), ios::binary | ios::out | ios::in);
+  } else {//file exists so, needs to be created (and cannot be opened as r/w)
+    f.close();
+    outfile.open(filename.c_str(), ios::binary | ios::out);
+  };
   if (outfile){
-    outfile.seekp(((HInteger) (v2-v1))*start);
+    if (start>0) outfile.seekp(((HInteger) (v2-v1))*start);
     outfile.write(v1, (HInteger)(vend-v1));
     outfile.close();
-  };
+  } else throw PyCR::IOError("hWriteFileBinary: Unable to open file "+filename+".");
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -852,7 +860,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   if (outfile){
     outfile.read(v1, (HInteger)(v2-v1));
     outfile.close();
-  };
+  } else throw PyCR::IOError("hReadFileBinary: Unable to open file "+filename+".");
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -896,10 +904,10 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
   char * vend = reinterpret_cast<char*>(&(*vec_end));
   ifstream outfile(filename.c_str(), ios::in | ios::binary);
   if (outfile){
-    outfile.seekg(((HInteger) (v2-v1))*start);
+    if (start>0) outfile.seekg(((HInteger) (v2-v1))*start);
     outfile.read(v1, (HInteger)(vend-v1));
     outfile.close();
-  };
+  } else throw PyCR::IOError("hReadFileBinary: Unable to open file "+filename+".");
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -991,7 +999,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end,
     }
     infile.close();
   } else {
-    throw PyCR::IOError("Unable to open file.");
+    throw PyCR::IOError("hReadFileText: Unable to open file "+filename+".");
   }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1067,7 +1075,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
     }
     outfile.close();
   } else {
-    throw PyCR::IOError("Unable to open file.");
+    throw PyCR::IOError("hWriteFileText: Unable to open file "+filename+".");
   }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"

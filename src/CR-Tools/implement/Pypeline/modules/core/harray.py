@@ -2,7 +2,9 @@
 """
 
 import numpy as np
+import time
 import os
+import pickle
 
 import matplotlib.pyplot as plt
 
@@ -17,7 +19,7 @@ from vector import *
 #  hArray Class Methods/Attributes
 #======================================================================
 
-def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None):
+def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None,header=None):
     """
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
@@ -79,6 +81,8 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     array, and are used, e.g., by the plot method to use certain
     defaults.
 
+    header = a dict containing optional keywords and values that can
+    be taken over from a datafile
     """
     if type(copy) in hAllArrayTypes:
         if properties==None: properties=copy
@@ -112,11 +116,13 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
         ary.stored_vector=vec
         ary.setVector(ary.stored_vector)
     if not hasattr(ary,"par"): setattr(ary,"par",hArray_par())
+    if not hasattr(ary.par,"hdr"): setattr(ary.par,"hdr",{})
     if type(dimensions)==int: ary.reshape([dimensions])
     elif (type(dimensions) in [list,tuple,IntVec]): ary.reshape(dimensions)
     elif (type(dimensions) in hAllArrayTypes): ary.reshape(dimensions.shape())
     if type(par) == tuple: setattr(ary.par,par[0],par[1])
     if type(par) == list: map(lambda elem:setattr(ary.par,elem[0],elem[1]),par)
+    if type(header) == dict: ary.par.hdr.update(header)
     if not (xvalues == None): ary.par.xvalues=xvalues
     if not (units == None):
         if type(units)==str: ary.setUnit("",units)
@@ -603,13 +609,11 @@ def hArray_getinitargs(self):
     .. warning:: This is not the hArray factory function but the constructor for the actual type. E.g. :meth:`IntArray.__init__`
 
     """
-
     return ()
 
 def hArray_getstate(self):
     """Get current state of hArray object for pickling.
     """
-
     return (hTypeNamesDictionary[basetype(self)], self.shape(), self.writeRaw())
 
 def hArray_setstate(self, state):
@@ -622,7 +626,11 @@ def hArray_setstate(self, state):
     self.reshape(state[1])
     self.readRaw(state[2])
 
-def hArray_write(self, filename,nblocks=1,varname=''):
+#------------------------------------------------------------------------
+# Reading and Writing an array
+#------------------------------------------------------------------------
+
+def hArray_write(self, filename,nblocks=1,block=0,writeheader=None,varname=''):
     """Write an hArray to disk including a header file to read it back
     again. A simple interface to hArray_writeheader and then
     hWriteFileBinary.
@@ -637,10 +645,16 @@ def hArray_write(self, filename,nblocks=1,varname=''):
     blocks will be written, the function will write the first block to
     disk.
 
-    varname - you can store the original variable name in which the
-    hArray was stored.
+    block - which block to write. If the block is larger than 0, then
+    the header file is not being written.
 
-Example:
+    varname - you can store the original variable name in which the
+    hArray was stored. Currently not really used.
+
+    writeheader - force header file to be written or not (for
+    True/False resp.). Use default behavior if not set (i.e. None).
+
+    Example:
 
 x=hArray([1.0,2.0,3,4],name="test")
 x.write("test.dat",varname='x')
@@ -659,8 +673,9 @@ ha_varname = 'x'
     """
     if filename[-4:].upper() in [".DAT",".HDR"]: fn=filename[:-4]
     else: fn=filename
-    hArray_writeheader(self,fn,nblocks=nblocks,varname=varname)
-    self.writefilebinary(fn+".dat")
+    if ((block==0) & (not writeheader==False)) | (writeheader==True):
+        hArray_writeheader(self,fn,nblocks=nblocks,varname=varname)
+    self.writefilebinary(fn+".dat",block*self.getSize())
 
 def hArray_writeheader(self, filename,nblocks=1,varname=''):
     """Write a header for an hArray binary data file, which was written with hWriteFileBinary.
@@ -681,13 +696,11 @@ x.writeheader("test.dat")
 x.writefilebinary("test.dat")
 y=hArrayRead("test")
 y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
-
-
     """
     if filename[-4:].upper() == ".DAT": fn=filename[:-4]+'.hdr'
     else: fn=filename+'.hdr'
     f=open(fn,"w")
-    f.write("# Header for hArray vector\n")
+    f.write("# Header for hArray vector written on "+time.ctime()+"\n")
     f.write("ha_filename = '"+filename+"'\n")
     f.write("ha_type = "+typename(basetype(self))+"\n")
     f.write("ha_dim = "+str(self.getDim())+"\n")
@@ -695,6 +708,14 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     f.write("ha_name = '" + self.getKey("name")+"'\n")
     f.write("ha_units = ('" +self.getUnitPrefix()+"', '" + self.getUnitName()+"')\n")
     f.write("ha_varname = '" + varname+"'\n")
+#    if hasattr(self.par,"hdr"):
+    par=self.par.__list__()
+    for i in range(len(par)): # to avoid pickling data arrays
+        if type(par[i][1]) in hAllContainerTypes: del par[i]
+        elif par[i][0]=="hdr":
+            for k in par[i][1].keys(): # dirty hack until pickling of Vectors works ...
+                if type(par[i][1][k]) in hAllVectorTypes: par[i][1][k]=list(par[i][1][k])
+    f.write('ha_parameters="""'+pickle.dumps(par)+'"""\n')
     f.close()
 
 def hArrayRead(filename,block=-1,restorevar=False):
@@ -724,7 +745,6 @@ x.write("test.dat")
 y=hArrayRead("test")
 y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
 
-
 x.write("test.dat",nblocks=2)
 x.writefilebinary("test.dat",1*4)
 y=hArrayRead("test")
@@ -743,16 +763,17 @@ y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3
     else:
         print "Error hArrayRead: data file ", fn+".data does not exists!"
         return -1
-    execfile(fn+hdr)
-    l=locals();
-    if l["ha_nblocks"] == 1 :
+    f=open(fn+hdr)
+    exec f in globals()
+    f.close()
+    if ha_nblocks == 1 :
         block=0
     if block<0:
-        dim = [l["ha_nblocks"]]+l["ha_dim"]
+        dim = [ha_nblocks]+ha_dim
         block=0
     else:
-        dim=l["ha_dim"]
-    ary=hArray(l["ha_type"],dim,name=l["ha_name"],units=l["ha_units"])
+        dim=ha_dim
+    ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=pickle.loads(ha_parameters))
     ary.readfilebinary(fn+dat,block*ary.getSize())
 #    if restorevar & (not l["ha_varname"] == ''):
 #        print "Creating new object",l["ha_varname"]

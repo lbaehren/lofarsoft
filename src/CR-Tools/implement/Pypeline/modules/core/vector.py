@@ -150,7 +150,9 @@ def isVector(vec):
 
 #Some definitons to make pretty (and short) output of vectors
 def VecToString(self, maxlen=100):
-    if len(self) <= maxlen:
+    if len(self) == 0:
+        return "[]"
+    elif len(self) <= maxlen:
         s = "["
         for i in range(len(self)-1):
             s += str(self[i]) + ", "
@@ -273,6 +275,33 @@ def Vec_div(vec1,val):
     vecout=vec1.new()
     hDiv(vecout,vec1,val)
     return vecout
+
+
+# Pickling - not yet implemented
+#------------------------------------------------------------------------
+# def Vec_getinitargs(self):
+#     """Get arguments for Vector constructor.
+
+#     .. warning:: This is not the Vector factory function but the constructor for the actual type. E.g. :meth:`IntVector.__init__`
+
+#     """
+#     return ()
+
+# def Vec_getstate(self):
+#     """Get current state of Vector object for pickling.
+#     """
+#     return (hTypeNamesDictionary[basetype(self)], self.shape(), self.writeRaw())
+
+# def Vec_setstate(self, state):
+#     """Restore state of Vector object for unpickling.
+#     """
+#     size = 1
+#     for d in state[1]:
+#         size *= d
+#     self.resize(size)
+#     self.reshape(state[1])
+#     self.readRaw(state[2])
+
 
 # Fourier Transforms
 setattr(FloatVec,"fft",hFFTCasa)

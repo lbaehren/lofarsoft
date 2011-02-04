@@ -160,6 +160,14 @@ one to write an hArray with a header file (filename.hdr) to disk that
 contains dimensions and other info. It can be read in with
 hArrayRead()
 
+2011-02-03 Pypeline - rev xxx - Heino Falcke 
+- added error messages to read/write functions in mIO.cc
+- fixed a bug in hWriteFileBinary which would not write a block if the file
+did not exist yet
+- hArrays now contain a header dict, which can be assigned at creation
+or is inherited upon reading from a datafile and can be extended at will
+- the header information is stored with hArray_writeheader etc. (and retrieved)
+
 
 
 

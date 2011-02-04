@@ -38,9 +38,11 @@ def DataReader_getHeaderVariables(self):
     Method to read out the header information from the DataReader and
     put it into attributes of the DataReader object.
     """
-    self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample']))
+    self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample','frequencyValues']))
+    self.hdr={}
     for v in self.keywords:
-        setattr(self,v,self.get(v))
+        self.hdr[v]=self.get(v)     # hdr=header - This is probably a better way to store the keywords
+        setattr(self,v,self.get(v)) # This should then become obsolete
 
 def DataReader_getitem(self,*keys):
     """
@@ -57,13 +59,13 @@ def DataReader_getitem(self,*keys):
     emptyarray=(keys0[0:5]=='empty')
     if emptyarray: keys0=keys0[5:]
     if keys0 in ["Time","Frequency","Fx","Voltage","FFT","CalFFT","TimeLag"]: #these are the data vectors
-        if keys0=="Time": ary=hArray(float,dimensions=[self["blocksize"]],name="Time",units="s")
-        if keys0=="Frequency": ary=hArray(float,dimensions=[self["fftLength"]],name="Frequency",units="Hz")
-        if keys0=="Fx": ary=hArray(float,dimensions=[self["nofSelectedAntennas"],self["blocksize"]],name="E-Field",units="ADC Counts")
-        if keys0=="Voltage": ary=hArray(float,dimensions=[self["nofSelectedAntennas"],self["blocksize"]],name="Voltage",units="V")
-        if keys0=="FFT": ary=hArray(complex,dimensions=[self["nofSelectedAntennas"],self["fftLength"]],name="FFT(E-Field)",units="ar.u.")
-        if keys0=="CalFFT": ary=hArray(complex,dimensions=[self["nofSelectedAntennas"],self["fftLength"]],name="CalFFT(E-Field)",units="ar.u.")
-        if keys0=="TimeLag": ary=hArray(float,dimensions=[self["blocksize"]],name="Time Lag",units="s")
+        if keys0=="Time": ary=hArray(float,dimensions=[self["blocksize"]],name="Time",units="s",header=self.hdr)
+        if keys0=="Frequency": ary=hArray(float,dimensions=[self["fftLength"]],name="Frequency",units="Hz",header=self.hdr)
+        if keys0=="Fx": ary=hArray(float,dimensions=[self["nofSelectedAntennas"],self["blocksize"]],name="E-Field",units="ADC Counts",header=self.hdr)
+        if keys0=="Voltage": ary=hArray(float,dimensions=[self["nofSelectedAntennas"],self["blocksize"]],name="Voltage",units="V",header=self.hdr)
+        if keys0=="FFT": ary=hArray(complex,dimensions=[self["nofSelectedAntennas"],self["fftLength"]],name="FFT(E-Field)",units="ar.u.",header=self.hdr)
+        if keys0=="CalFFT": ary=hArray(complex,dimensions=[self["nofSelectedAntennas"],self["fftLength"]],name="CalFFT(E-Field)",units="ar.u.",header=self.hdr)
+        if keys0=="TimeLag": ary=hArray(float,dimensions=[self["blocksize"]],name="Time Lag",units="s",header=self.hdr)
         if not emptyarray:
             if keys0=="TimeLag": ary.fillrange(-self["blocksize"]/2*self["sampleInterval"],self["sampleInterval"])
             else: ary.read(self,keys0)
