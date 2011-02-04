@@ -60,7 +60,7 @@ import psr_utils
 from lpps_search.inf import inf_reader, ra2ascii, dec2ascii
 import lpps_search.crawler as crawler
 #import folder
-import lpps_fold_script as folder
+import lpps_search.fold as folder
 from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
 
@@ -846,18 +846,18 @@ if __name__ == '__main__':
             numsub=SR.metadata.n_channels, downsamp=1))
     else:
         # Jason's full LPPS dedispersion plan:
-        ddplans.append(DedispPlan(lodm=0, dmstep=0.03, dmsperpass=1037, 
+        # DDplan.py -t 0.00065536 -r 0.5 -b 6.8369375 -f 142.3828125 -n 560 
+        # -d 500
+        ddplans.append(DedispPlan(lodm=0, dmstep=0.05, dmsperpass=1196, 
             numpasses=1, numsub=SR.metadata.n_channels, downsamp=1))
-        ddplans.append(DedispPlan(lodm=31.11, dmstep=0.05, dmsperpass=378,
+        ddplans.append(DedispPlan(lodm=59.8, dmstep=0.10, dmsperpass=408,
             numpasses=1, numsub=SR.metadata.n_channels, downsamp=2))
-        ddplans.append(DedispPlan(lodm=50.01, dmstep=0.1, dmsperpass=447,
+        ddplans.append(DedispPlan(lodm=100.60, dmstep=0.20, dmsperpass=449,
             numpasses=1, numsub=SR.metadata.n_channels, downsamp=4))
-        ddplans.append(DedispPlan(lodm=94.71, dmstep=0.30, dmsperpass=434,
+        ddplans.append(DedispPlan(lodm=190.40, dmstep=0.50, dmsperpass=442,
             numpasses=1, numsub=SR.metadata.n_channels, downsamp=8))
-        ddplans.append(DedispPlan(lodm=224.91, dmstep=0.50, dmsperpass=367,
+        ddplans.append(DedispPlan(lodm=411.4, dmstep=1.0, dmsperpass=89,
             numpasses=1, numsub=SR.metadata.n_channels, downsamp=16))
-        ddplans.append(DedispPlan(lodm=408.41, dmstep=1.00, dmsperpass=92,
-            numpasses=1, numsub=SR.metadata.n_channels, downsamp=32))
 
     SR.run_search(ddplans, z_values, N_CORES, options.ns)
     t_end = time.time()
@@ -871,7 +871,11 @@ if __name__ == '__main__':
             (ddplan.prepsubband_time, ddplan.search_time)
         dedisperse_time += ddplan.prepsubband_time
         search_time += ddplan.search_time
+    t_total = t_end - t_start
     print '\nTotal time spent dedispersing %.2f' % dedisperse_time
     print 'Total time spent searching %.2f' % search_time
-    print '\nIt took %.2f seconds to search the data.' % (t_end - t_start)
+    print '\nFolding (+book keeping) took %.2f seconds for the candiates.' % (
+        t_total - dedisperse_time - search_time)
+    print '\nIt took %.2f seconds to search the data.' % t_total 
     print '(Including bookkeeping and rfifind)'
+
