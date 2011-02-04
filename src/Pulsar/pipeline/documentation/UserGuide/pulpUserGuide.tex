@@ -544,13 +544,13 @@ Once a user has established a viable environment for the framework pipeline, exe
 
 The Pulp package provides two (2) pre-built command line interfaces
 (``pre-built'' in the sense that users will certainly be writing their
-own command line interfaces\footnote{Writing a
-pipeline definition can be thought of as writing an interface to
-control what processing the user wants done. Users should be
-aware that, though the recipes are ``independent'', there is usually a
-proxy dependence in that recipes may depend upon the
-state of the data on disk as it may be provided by prior recipe calls}, that is,
-their own pipeline definitions. The two defintions provided are
+own command line interfaces)\footnote{Writing a
+pipeline definition can be thought of as writing an interface to the
+Pulp package. Users should be aware that, though the recipes are
+``independent'', there is usually a proxy dependence in that recipes
+may depend upon the state of the data on disk as it may be provided by
+prior recipe calls}, that is, their own pipeline definitions. The two
+defintions provided are 
 \begin{enumerate}
 \item \verb|pulp.py|
 \item \verb|dynspec.py|
