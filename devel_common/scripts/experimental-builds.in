@@ -23,7 +23,7 @@ echo "-- Building projects ..."
 cd ${LUS_ROOT}/build
 ./bootstrap
 
-for USG_PACKAGE in anaamika cr dal pulsar rm
+for USG_PACKAGE in dal anaamika cr pulsar rm
 {
     echo "-- Building $USG_PACKAGE ..."
     cd ${LUS_ROOT}/build
@@ -31,5 +31,19 @@ for USG_PACKAGE in anaamika cr dal pulsar rm
     echo "-- Experimental build of $USG_PACKAGE ..."
     cd ${LUS_ROOT}/build/$USG_PACKAGE
     make install
-    make Experimental
+
+    echo "-- Initiating testing procedures ..."
+
+    make ExperimentalStart
+    make ExperimentalConfigure
+    make ExperimentalBuild
+    make ExperimentalSubmit
+
+    make ExperimentalTest
+    make ExperimentalCoverage
+    make ExperimentalSubmit
+
+    make ExperimentalMemCheck
+    make ExperimentalSubmit
 }
+
