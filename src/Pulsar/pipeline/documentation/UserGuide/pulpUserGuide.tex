@@ -163,7 +163,7 @@ For documentation on the framework itself, as well as guidance on recipe writing
 the user is invited to examine the framework documenation available in the 
 repository under
 \begin{verbatim}
-${LOFARSOFT}/src/pipeline/docs ,
+${LOFARSOFT}/src/pipeline/docs .
 \end{verbatim}
 A subset of the framework's API is documented in the Pulp  API
 documentation described above.
@@ -246,15 +246,16 @@ processing will usually dictate the default \verb|filefactor = 8|.
 Because of this, users are encouraged to use judgment in <filefactor>
 specification, when the default is not desired.
 \item In the special case that a user select \verb|filefactor == 1|,
-  No ``all'' processing will be done.  That is, no \verb|RSPA| is
-  made, and no \verb|RSPA| processing, \emph{per se}, occurs.  Output will appear in the
-  expected `\verb|RSP0| directory. \verb|RSP0| is equivalent to
-  \verb|RSPA|, when \verb|filefactor=1|.
+  No ``all'' processing will be done.  That is, no
+  \verb|RSPA| is made, and no \verb|RSPA| processing, \emph{per se},
+  occurs.  Output will appear in the expected `\verb|RSP0| directory. \verb|RSP0| is equivalent to  \verb|RSPA|, when \verb|filefactor=1|.
 \item The shell script ``-rfi'' swtich is not a switch with Pulp (it
   could be made that way).  Pulp executes the relevent steps
-  automatically and the product, a ``.rffireport'' file, is bundled as
-  a standard pipeline data product.
+  automatically and the products, a dynamic spectrum of the data and a
+  so-called  ``.rffireport'' file, are bundled as a standard pipeline data
+  product. 
 \end{itemize}
+
 Details on the Pulp command line interface are provided in
 \S\ref{sec:interfaces}, ``Interfaces''.
 \subsection{Glossary}
