@@ -8,7 +8,7 @@ import pickle
 
 import matplotlib.pyplot as plt
 
-#import pdb
+import pdb
 #pdb.set_trace()
 
 from hftools import *
@@ -630,10 +630,25 @@ def hArray_setstate(self, state):
 # Reading and Writing an array
 #------------------------------------------------------------------------
 
-def hArray_write(self, filename,nblocks=1,block=0,writeheader=None,varname=''):
-    """Write an hArray to disk including a header file to read it back
-    again. A simple interface to hArray_writeheader and then
+def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varname='',overwrite=None):
+    """
+    Usage:
+
+    array.write(filename,nblocks=1,block=0,dim=None,writeheader=None,overwrite=None)
+    
+    Write an hArray to disk including a header file to read it back
+    again. This is a simple interface to hArray_writeheader and then
     hWriteFileBinary.
+
+    Attention: if a file exists already, then it will not be
+    automatically overwritten, unless it is explicitly asked for. This
+    can be dangerous if one writes a smaller file to a pre-existing
+    older and larger file because then the 'new' file will contain the rest
+    of the old file.
+
+    By default a header will be written and the file will be
+    overwritten, if one writes the first block. This can be explicitly
+    switched on or off with keywords 'writeheader' and 'overwrite'.
 
     filename - the filename where the data will be dumped. The header
     filename will have the ending".hdr" the data file a ".dat" ending (the filename can contain either of those endings or none).
@@ -674,11 +689,22 @@ ha_varname = 'x'
     if filename[-4:].upper() in [".DAT",".HDR"]: fn=filename[:-4]
     else: fn=filename
     if ((block==0) & (not writeheader==False)) | (writeheader==True):
-        hArray_writeheader(self,fn,nblocks=nblocks,varname=varname)
+        hArray_writeheader(self,fn,nblocks=nblocks,dim=dim,varname=varname)
+        if (not overwrite==False):
+            if os.path.exists(fn+".dat"): os.remove(fn+".dat") 
+            if os.path.exists(fn+".DAT"): os.remove(fn+".DAT") 
+    if (overwrite):
+        if os.path.exists(fn+".dat"): os.remove(fn+".dat") 
+        if os.path.exists(fn+".DAT"): os.remove(fn+".DAT") 
     self.writefilebinary(fn+".dat",block*self.getSize())
 
-def hArray_writeheader(self, filename,nblocks=1,varname=''):
-    """Write a header for an hArray binary data file, which was written with hWriteFileBinary.
+def hArray_writeheader(self, filename,nblocks=1,varname='',dim=None):
+    """
+    Usage:
+
+    ary.writeheader(filename,nblocks=1,dim=None)
+    
+    Write a header for an hArray binary data file, which was written with hWriteFileBinary.
 
     filename - the filename where the data was dumped. The header
     filename will have the ending".hdr", replacing a ".dat" ending if present.
@@ -687,6 +713,10 @@ def hArray_writeheader(self, filename,nblocks=1,varname=''):
     vector multiple times to the same file, so that the data file
     size is actually nblocks times the original hArray size.
 
+    dim - Specify a different dimension vector [dim1,dim2,dim3,
+    ....,dimn] under which the array should be restored. The user is
+    responsible for consistency.
+    
     varname - you can store the original variable name in which the
     hArray was stored.
 
@@ -700,15 +730,18 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     if filename[-4:].upper() == ".DAT": fn=filename[:-4]+'.hdr'
     else: fn=filename+'.hdr'
     f=open(fn,"w")
+    slicelength=self.getEnd()-self.getBegin()
+    arydim=self.getDim()
+    if not slicelength==len(self): arydim=[slicelength]
+    if not dim == None: arydim=dim
     f.write("# Header for hArray vector written on "+time.ctime()+"\n")
     f.write("ha_filename = '"+filename+"'\n")
     f.write("ha_type = "+typename(basetype(self))+"\n")
-    f.write("ha_dim = "+str(self.getDim())+"\n")
+    f.write("ha_dim = "+str(arydim)+"\n")
     f.write("ha_nblocks = "+str(nblocks)+"\n")
     f.write("ha_name = '" + self.getKey("name")+"'\n")
     f.write("ha_units = ('" +self.getUnitPrefix()+"', '" + self.getUnitName()+"')\n")
     f.write("ha_varname = '" + varname+"'\n")
-#    if hasattr(self.par,"hdr"):
     par=self.par.__list__()
     for i in range(len(par)): # to avoid pickling data arrays
         if type(par[i][1]) in hAllContainerTypes: del par[i]

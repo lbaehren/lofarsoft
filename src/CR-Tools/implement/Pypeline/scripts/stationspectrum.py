@@ -42,13 +42,14 @@ maxblocksflagged=2
 #delta_nu=120 # Hz 
 delta_nu=200 #6 frequency resolution in Hz
 blocklen=2**10 #15The size of a block being read in
-stride=1 # if >1 then then one block is actually stride*blocklen and data is stored on disk during processing to save memory (slower!)
-maxnantennas=1# Maximum number of antennas to sum over
-maxchunks=4 # the maximum number of chunks to integrate over
+stride_n=2# if >0 then then one block is actually stride*blocklen and data is stored on disk during processing to save memory (slower!)
+maxnantennas=4# Maximum number of antennas to sum over
+maxchunks=1 # the maximum number of chunks to integrate over
 #------------------------------------------------------------------------
 #datafile=crfile(filename)
 #antennas=datafile["selectedAntennas"]
 
+stride=2**stride_n
 spectrum_file=tmpfilename+"spec"+tmpfileext
 
 datafile=crfile(filename)
@@ -76,8 +77,6 @@ subspeclen=blocklen*nblocks
 subsubspeclen=min(blocklen*nblocks,2**16)
 nsubsubspectra=subspeclen/2/subsubspeclen #factor 2 since we only look at first half
 speclen=fullsize/2+1
-dobig=(fullsize<=4194304)
-dobig=False
 dostride=(stride>1)
 nchunks=min(datafile.filesize/fullsize,maxchunks)
 nspectraadded=0
@@ -170,7 +169,6 @@ spec=hArray(cdata.vec(),[blocklen,nblocks],header=header)
 writeheader=True # used to make sure the header is written the first time
 #power=hArray(float,[subspeclen/2],name="Spectral Power",xvalues=frequencies,par=[("logplot","y")])
 power=hArray(float,[subspeclen],name="Spectral Power",xvalues=frequencies,par=[("logplot","y")],header=header)
-subpower=hArray(power.vec(),[nsubsubspectra,subsubspeclen],name="Spectral Power",xvalues=frequencies,par=[("logplot","y")],header=header)
 
 subspec=hArray(cdata.vec(),[subspeclen],name="FFT",xvalues=subfrequencies,par=[("logplot","y")],header=header) 
 print "Time:",time.clock()-t0,"s for set-up."
@@ -186,6 +184,7 @@ for antenna in antennas:
     antennaID=antennaIDs[antenna]
     print "#Antenna =",antenna,"( ID=",antennaID,")"
     for nchunk in range(nchunks):
+#        pdb.set_trace()
         print "#  Chunk ",nchunk,"/",nchunks-1,". Reading in data and doing a double FFT."
         ofiles=[]; ofiles2=[]; ofiles3=[]
         for offset in range(stride):
@@ -211,6 +210,7 @@ for antenna in antennas:
         #Now sort the different blocks together (which requires a transpose over passes/strides)
         print "Time:",time.clock()-t0,"s for 1st FFT now doing 2nd FFT."
         if dataok:
+            nspectraadded+=1
             for offset in range(stride):
                 if dostride:
                     print "#    Offset",offset
@@ -224,23 +224,23 @@ for antenna in antennas:
                     ofiles2+=[ofile]
             print "Time:",time.clock()-t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."
             for offset in range(nbands):
-#                ofile=tmpfilename+"spec_"+str(offset)+tmpfileext
-                if (nspectraadded==0): # first chunk
+                if (nspectraadded==1): # first chunk
                     power.fill(0.0)
                 else: #2nd or higher chunk, so read data in and add new spectrum to it
-                    power.readfilebinary(spectrum_file,subspeclen/2*offset)
+                    power.readfilebinary(spectrum_file,subspeclen*offset)
+                    power*= (nspectraadded-1.0)/(nspectraadded)                        
                 if dostride:
                     print "#    Offset",offset
                     specT2[...].readfilebinary(Vector(ofiles2),Vector(int,stride,fill=offset)*(blocklen*nblocks_section))
-                    # This transpose it to make sure the blocks are properly interleaved
-                    hTranspose(spec,specT2,stride,blocklen)
+                    hTranspose(spec,specT2,stride,blocklen) # Make sure the blocks are properly interleaved
+                    if nspectraadded>1: spec/=float(nspectraadded)   
                     power.spectralpower(spec)
-#                    ofiles3+=[ofile]
                 else: # no striding, data is all fully in memory
+                    if nspectraadded>1: specT/=float(nspectraadded)   
                     power.spectralpower(specT)
-                if nspectraadded>1: power *= (nspectraadded-1.0)/nspectraadded                        
-                power.write(spectrum_file,nblocks=nbands,block=offset,writeheader=writeheader); writeheader=False
-            nspectraadded+=1
+                if stride==1: power[0:subspeclen/2].write(spectrum_file,nblocks=nbands,block=offset,writeheader=writeheader)
+                else: power.write(spectrum_file,nblocks=nbands,block=offset,writeheader=writeheader)
+                writeheader=False
             print "#  Time:",time.clock()-t0,"s for processing this chunk. Number of spectra added =",nspectraadded
         else: #data not ok
             nspectraflagged+=1
@@ -266,9 +266,10 @@ print "To read back the spectrum type: sp=hArrayRead('"+spectrum_file+"')"
 #Now update the header file again ....
 parameters["nspectraadded"]={"doc":"Total number of spectra co-added","val":nspectraadded}
 parameters["nspectraflagged"]={"doc":"Total number of spectra co-added","val":nspectraflagged}
-parameters["antennacharacteristics"]={"doc":"Charachteristic numbers (rms,mean,npeaks, etc.) for antennas obtained from QualityCheck","val":antennacharacteristics}
+parameters["antennacharacteristics"]={"doc":"Characteristic numbers (rms,mean,npeaks, etc.) for antenna data obtained from QualityCheck","val":antennacharacteristics}
 parameters_mergeheader(parameters,power.par.hdr)
-power.writeheader(spectrum_file,nblocks=nbands)
+if stride==1: power.writeheader(spectrum_file,nblocks=nbands,dim=[subspeclen/2])
+else: power.writeheader(spectrum_file,nblocks=nbands)
 
 def make_frequencies(spectrum,offset=-1,frequencies=None,setxvalues=True):
     hdr=spectrum.par.hdr
@@ -276,11 +277,20 @@ def make_frequencies(spectrum,offset=-1,frequencies=None,setxvalues=True):
         mult=hdr["nbands"]
         offset=0
     else: mult=1;
+    l=hdr["subspeclen"]
+    if hdr["stride"]==1: l/=2
     if frequencies==None:
-        frequencies=hArray(float,[hdr["subspeclen"]*mult],name="Frequency",units=("M","Hz"),header=hdr)
+        frequencies=hArray(float,[l*mult],name="Frequency",units=("M","Hz"),header=hdr)
     frequencies.fillrange((hdr["start_frequency"]+offset*hdr["delta_band"])/10**6,hdr["delta_frequency"]/10**6)
     if setxvalues: spectrum.par.xvalues=frequencies
     return frequencies
+
+sp=hArrayRead('testseti_spec.dat');sp.vec()[0]=2000;sp.plot()
+make_frequencies(sp)
+mean=sp.vec()[0:30000].mean()
+rms=sp.vec()[0:30000].stddev(mean)
+noise=rms/mean
+print "rms,mean,noise = ",(rms,mean,noise)
 
 """
 sp=hArrayRead('testseti_spec.dat')

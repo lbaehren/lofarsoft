@@ -786,6 +786,13 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 
   vec.writedump(filename,start) -> writes binary vector data at location start in the file
 
+  Attention: if a file exists already and a start value is specified,
+  then it will not be overwritten, but the data will be written into
+  the location asked by start. This can be dangerous if one writes a
+  smaller file (e.g. with start=0) to a pre-existing older and larger
+  file because then the 'new' file will contain the rest of the old
+  file.
+
 Related functions:
   hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend
 
