@@ -2,7 +2,7 @@
 
 #
 #                            Beam-formed data conversion Node (bf2presto) recipe
-#                                     Pulsar.pipeline.recipes.nodes.bf2presto.py
+#                                     Pulsar.pipeline.support.PulpRecipeMixIn.py
 #                                                          Ken Anderson, 2010-10
 #                                                            k.r.anderson@uva.nl
 # ------------------------------------------------------------------------------
