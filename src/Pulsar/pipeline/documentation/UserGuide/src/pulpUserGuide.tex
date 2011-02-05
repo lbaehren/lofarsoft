@@ -65,7 +65,7 @@
 framework pulsar pipeline, known colloquially as `pulp'.  This User
 Guide provides general instruction to help users establish a viable user environment
 as required by the LOFAR pipeline framework in order to run
-the framework pulsar pipeline in the LOFAR cluster compute environment.
+the framework pulsar pipeline in the LOFAR cluster compute domain.
 
 This document will also present details on running the
 framework pulsar pipeline, known as Pulp (executable: \verb|pulp.py|).
@@ -73,14 +73,14 @@ Users are encouraged to seek detailed information about the
 actual processing engaged by the ``known pulsar pipeline'' from the
 LOFAR Transient Key Project (TKP) science team. Details
 regarding LOFAR beam-formed data processing actual are beyond the scope of this
-document.\footnote{Readers of this
-  document unfamiliar with the terms, `known pulsar
-  pipeline,'  or `Jason Hessels', should probably be reading something else.}
+document.
 
 This document assumes some familiarity with terms surrounding the pipeline
 framework, such as ``recipe'',  and ``head node'', as well as terms
 associated with ``known pulsar pipeline'' processing. Such terms will
-be used throughout this document.
+be used throughout this document. \footnote{Readers of this
+  document unfamiliar with the terms, `known pulsar
+  pipeline,'  or `Jason Hessels', should probably be reading something else.}
 
 \subsection{Applicable Documents}
 Documentation on the Pulp package is provided with the Pulp
@@ -115,11 +115,12 @@ recipe API documents found under
 node recipes, compute node recipes, and support modules providing adminstrative and
 executive function.
 \begin{verbatim}
-$LOFARSOFT src/Pulsar/pipeline/documentation:
+$LOFARSOFT/src/Pulsar/pipeline/documentation:
 
   drwxr-xr-x   9 <user>     staff  306 Jan 30 08:08 .svn
-  drwxr-xr-x   6 <user>     staff  204 Feb  3 15:09 PulpAPI
-  drwxr-xr-x  27 <user>     staff  918 Feb  3 00:00 UserGuide
+  drwxr-xr-x   6 <user>     staff  204 Feb  3 15:09 PresentationsAndPapers/
+  drwxr-xr-x   6 <user>     staff  204 Feb  3 15:09 PulpAPI/
+  drwxr-xr-x  27 <user>     staff  918 Feb  3 00:00 UserGuide/
 \end{verbatim}
 where a user will find API documents for the pipeline recipes, and all support
 modules.\\
@@ -158,9 +159,10 @@ modules.\\
 \end{verbatim}
 These are accessible and viewable through any browser\footnote{Firefox (v3.0+)
   has a nice indexing feature and is recommended for viewing these
-  documents.}
+  documents. }
 
 \subsection{Reference Documents}
+\label{sec:refdocs}
 For documentation on the framework itself, as well as guidance on recipe writing,
 the user is invited to examine the framework documenation available in the 
 repository under
@@ -172,8 +174,7 @@ documentation described above.
 
 \subsection{Package Overview}
 \label{sec:package}
-The Pulp package is a framework implementation of the LOFAR TKP Pulsar Group's pipeline shell 
-script\footnote{ \texttt{make\_subs\_SAS\_Ncore\_Mmodes.sh}, src:
+The Pulp package is a framework implementation of the ``basic mode'' of the LOFAR TKP Pulsar Group's pipeline shell script\footnote{\texttt{make\_subs\_SAS\_Ncore\_Mmodes.sh}, src:
   \texttt{ \$\{LOFARSOFT\}/lofarsoft/src/Pulsar/scripts}}.  Pulp is
 built on the LOFAR pipeline framework and, as with all such pipelines,
 comprises a set of `recipes'\footnote{The term ``recipe'' is apprently
@@ -251,7 +252,7 @@ so-called  `incoherentstokes' beam-formed data.\footnote{Development
   2010.}  
 \item The pipeline is capable of handling any user selected ``splitting'' factor, i.e. the 
 `filefactor' parameter within Pulp.  This factor is known as ``ncores'' in the pulsar
-shell script\footnote{The framework and Pulp are node generic.}.
+shell script\footnote{Pulp is node generic at the user interface and the API.}.
 Pulp places no restriction on what `filefactor' can be, though nominal
 processing will usually dictate the default \verb|filefactor = 8|.
 Because of this, users are encouraged to use judgment in filefactor
@@ -259,18 +260,14 @@ specification, when the default is not desired.
 \item Pulp accomodates any number of observation subbands and any
   splitting factor, though the number of subbands appears unlikely to
   exceed 248.  Nominal beam-formed data delivery is expected to range
-  from a few files\footnote{esp., ``coherentstokes''}, to the usual
+  from a few files\footnote{esp. ``coherentstokes'' beam-formed data.}, to the usual
   248.  However, Pulp places no constraint on the number of subbands/files an
-  observation may comprise.
+  observation may comprise\footnote{ Pulp seemlessly handles ``uneven'' splitting of subbands across \texttt{RSP} groups. In cases where evaluation of the quantity \texttt{nsubbands mod filefactor} is uneven divison, the modulo number of subbands are added to the ``last'' \texttt{RSP} group, i.e.  \texttt{RSP}[\texttt{filefactor} - 1].}.
 \item In the special case that a user select \verb|filefactor == 1|,
   No ``all'' processing will be done.  That is, no
   \verb|RSPA| is made, and no \verb|RSPA| processing, \emph{per se},
   occurs.  Output will appear in the expected `\verb|RSP0| directory. \verb|RSP0| is equivalent to  \verb|RSPA|, when \verb|filefactor=1|.
-\item The shell script ``-rfi'' swtich is not a switch with Pulp (it
-  could be made that way).  Pulp executes the relevent steps
-  automatically and the products, a dynamic spectrum of the data and a
-  so-called  ``.rffireport'' file, are bundled as a standard pipeline data
-  product. 
+\item The ``rfi report'' is produced automatically and is not currently switchable\footnote{Switching ``rfireport'' production (or any other part of the pipeline) is as easy to do as providing a command line switch,  as the recipe(s) can simply be excluded or included from a user's pipeline definition with a single comment key.  And the user will have developed their own customized user interface to Pulp.}.  Pulp executes the relevent steps  automatically and the products, a dynamic spectrum of the data and a so-called  ``.rffireport'' file, are bundled as a standard pipeline data product. 
 \end{itemize}
 
 Details on the Pulp command line interface are provided in
@@ -281,7 +278,7 @@ Details on the Pulp command line interface are provided in
 \item \textbf{Compute node} -- One of an assigned number of cluster nodes 
 configured for computing.  For LOFAR, these compute nodes have NFS connections 
 to selected storage nodes, which is where both input and output data will be 
-read from  and written to.  Within the context of the LOFAR pipeline framework, compute nodes
+read from  and written to\footnote{IO bottleneck}.  Within the context of the LOFAR pipeline framework, compute nodes
 are often referred to simply as ``nodes''.
 \item \textbf{Cluster} -- A multi-node computing cluster.
 \item \textbf{Head node} -- The head (controlling) node of a cluster environment. In the LOFAR 
@@ -325,7 +322,7 @@ are discussed in detail in \S\ref{sec:cfgfiles}, ``Framework configuration files
 \subsubsection{Environment variables, paths}
 
 The following steps should be taken by users to establish the
-environment variables and resource \verb|PATH|s required by the pipeline framework.
+environment variables and resource \verb|PATH|s required by the pipeline framework. 
 \begin{itemize}
 \item[--] Define \verb|LOFARSOFT|, \verb|LOFARROOT (=/opt/LofIm/daily/lofar)|
 \item [--]source \verb|${LOFARSOFT}/devel_common/scripts/init.sh|
@@ -341,7 +338,7 @@ Once the paths are defined (usually within a user's shell resource file),
 a user's \verb|$PYTHONPATH| should further include the following paths
 described below.  This should become obsolete in the near future
 (v1.1), with refactoring to use package namespace explicivity, rather
-than some still ``blind'' imports, usually on support modules).
+than some still ``blind'' internal imports\footnote{on \texttt{support/} modules.}
 
 \begin{verbatim}
 PYTHONPATH=/opt/pipeline/dependencies/lib/python2.5/site-packages:\
@@ -366,7 +363,7 @@ ${LOFARSOFT}/src/Pulsar/pipeline:\
 /opt/LofIm/daily/askapsoft/bin:\ 
 /opt/scripts:${PATH} 
 \end{verbatim}
-\underline{N.B.} These paths are subject to future alteration of the LOFAR system.
+\underline{N.B.} These paths are subject to future alteration of the LOFAR system.\footnote{Scrubbing of unused imaging pipeline imports has been performed to a large extent. However, clutter may still appear, eg., the \texttt{casarest} and \texttt{pyrap} paths from this user's own path sample, which are ``this'' environment necessary.}
 
 \subsubsection{Framework configuration files, directories}
 \label{sec:cfgfiles}
@@ -392,18 +389,16 @@ i.e.
 runtime_directory = /path/to/your/runtime_directory
 \end{verbatim}
 As illustrated, this directory is arbitrary in both name and location,
-though by convention, it is usually located under a user's home
-directory.\footnote{Explicit paths must appear in this configuration file.}
-
-The following steps should be taken by users to establish the
-environment variables and resource \verb|PATH|s required by the pipeline framework.
+though in nominal practice, it is usually located under a user's home
+directory, while ``\verb|runtime_directory|'' is also somewhat conventionalized.\footnote{Explicit paths must appear in this configuration file.}
+The following steps should be taken by users to establish a configuration required and recognized by the pipeline framework.
 \begin{itemize}
 \item[--] Make a ``\verb|pipeline_runtime/|'' directory (arbitrary location)
 \item[--] Edit user's \verb|pipeline.cfg| file to reflect this path
 \end{itemize}
 The \verb|pipeline.cfg| file is a ``pipeline generic'' configuration
 file applicable to all framework pipelines.  The Pulp \verb|tasks.cfg|
-file is not.  It is advised that this file not be altered without
+file is not.  It is advised that this file be altered only with
 perspicacious intent.
 
 Here is the top level of a delivered \verb|$LOFARSOFT| Pulp directory:
@@ -426,10 +421,9 @@ The reasons these particular files are delivered as part of the Pulp
 package are two fold: provide user's with a configuration basis, and
 to specify Pulp functionality, delivered by the
 \verb|tasks.cfg| file.  This confiuration file is critical to proper
-pipeline operations and should not be altered by users unless done so
-with understanding of pipeline operations.\\
+pipeline operations and should be altered only with user percipience of pipeline and framework operations.\\
 
-Here is a quasi-generic pipeliine configuration file:
+Here is a quasi-generic pipeliine configuration file\footnote{For details on the various sections of the \texttt{tasks.cfg} file, users should consult the documentation on the frameword pipeline (Swinbank, 2011), indicated \S \ref{sec:refdocs}}:
 \begin{verbatim}
 [DEFAULT]
 runtime_directory  = /some/path/pipeline_runtime
@@ -481,8 +475,7 @@ engine_lpath = /opt/pipeline/dependencies/lib:\
 The Pulp specific \verb|tasks.cfg| file is delivered with the Pulp
 package. The set of  ``tasks'' are named within brackets, their names,
 the names of available recipes.  The \verb|tasks.cfg| file is
-specified in the \verb|pipeline.cfg| file.  Default recipe argument values
-can be set in the \verb|tasks.cfg| file, as can be seen below.
+specified in the \verb|pipeline.cfg| file. The user must edit the \verb|pipeline.cfg| file to reflect the path to this \verb|tasks.cfg| file. Default recipe arguments can be set in the \verb|tasks.cfg| file, seen below.  Some recipe defaults appearing in this file are pass-through arguments, and will be recognizable to users as arguments to the respective core components of the ``known pulsar pipeline.''
 
 \begin{verbatim}
 [buildPulsArch]
@@ -522,9 +515,8 @@ filefactor = 8
 recipe     = bundleFilesj
 filefactor = 8
 \end{verbatim}
-Users will note the explicit paths to \verb|$LOFARSOFT| executables.
-This is because the configuration parser does not perform shell variable
-interpolation\footnote{Rather disappointing}.  Upon Pulp download, users are encouraged to edit these explicit paths to use their own \verb|$LOFARSOFT| build.
+Users will note the explicit paths to \verb|$LOFARSOFT| executables; the configuration parser does not perform shell variable
+interpolation\footnote{Troubling.}.  Upon Pulp download, users are encouraged to edit these explicit paths to use their own \verb|$LOFARSOFT| build.
 \
 \subsubsection{Cluster configuraton files}
 Parallel processing as executed on the LOFAR offline cluster and through the pipeline framework will require three configuration files that define various parameters for job control on the LOFAR offline cluster.  None of these files are part of the Pulp distribution.  Users will have to locate templates of these files from the generalized pipeline framework location.  Once located, these files can be placed arbitrarily, with the arbitrary location specified in the above mentioned and critical \verb|pipeline.cfg| file.  Usually, these files are located in the user's specified ``runtime\_directory'', again defined in users' \verb|pipeline.cfg| files.
@@ -533,21 +525,24 @@ Parallel processing as executed on the LOFAR offline cluster and through the pip
 \item \verb|task.furl| -- furl file for tasks to be executed
 \item \verb|multiengine furl| -- furl file for the multiengine client
 \end{enumerate}
-Of these files, the user will mostly likely edit the subcluster file, selecting compute node targets as needed.  An example of clusterdesc file content illustrates the configuration options.\\
-\verb|sub5.clusterdesc|:
+Of these files, the user will mostly likely edit the subcluster file, i.e. the \verb|.clusterdesc| file.  A ``clusterdesc'' (cluster description) file is used by the user and the pipeline to assign jobs to the compute cluster, selecting user-specified compute node targets as needed.  An example of clusterdesc file content illustrates the configuration options.  A typical clusterdesc file content will look like that found in \verb|sub5.clusterdesc|:
 \begin{verbatim}
 ClusterName = sub5 
 # Storage nodes. 
 Storage.Nodes         = [ lse013..15 ] 
 Storage.LocalDisks    = [ /data1..4 ] 
 # Compute nodes. 
-Compute.Nodes         = [ lce037..45 ]         ==> selected compute nodes
+Compute.Nodes         = [ lce037..45 ]        ==> selected compute nodes
 Compute.RemoteDisks   = [ /net/sub1/lse013..15/data1..4 ] 
 Compute.RemoteFileSys = [ /lse013..15:/data1..4 ] 
 Compute.LocalDisks    = [ /data ] 
 # Head nodes. 
 Head.Nodes            = [ lfe001..2 ] 
 Head.LocalDisks       = [ /data ]
+\end{verbatim}
+Users can use the range specifier (``..'') when altering the ``\verb|Compute.Nodes|'' parameter, or may explicity enumerate compute nodes in the list, like
+ \begin{verbatim}
+Compute.Nodes   = [ lce037, lce038, lce45 ], etc..
 \end{verbatim}
 The most common adjustment user's might make here is altering the available ``Compute Nodes'' list, selecting or deslecting a subset of these ``sub5'' compute nodes.  As specified here, framework job control will (possibly) use all nodes on subnet five.
 
@@ -630,8 +625,8 @@ filefactor  = subband splitting factor, <int>
               optional user speciﬁcation (range, 1-248)
               default = 8
 \end{verbatim}
-\paragraph{The PULP\_ARCHIVE Device:}Users will find the data products of \verb|dynspec.py| located in the
-various ``RSP[0-248]A'' directories\footnote{Though Pulp provides
+\paragraph{The PULP\_ARCHIVE Device:}Users will find the data products of both \verb|pulp.py| and  \verb|dynspec.py| located in the
+various ``RSP[0-248]A'' directories defined by the user selected ``--arch=archnnn'' parameter.\footnote{Though Pulp provides
   much more flexibilty in \textsc{rsp} splitting than the pulsar shell
   script, users are advised against using large numbers for
   filefactor, especially 248.  Mostly because, well, that just seems
@@ -1022,7 +1017,7 @@ not share comman pathnames.  Writing to local disk would require a
 complete redesign and would tend toward the programmatic operatons of
 the standard imaging pipeline.
 
-But even if Pulp were refactored to write to local disk.  This still
+But even if Pulp were refactored to write to local disk, this still
 won't work for the pulsar pipeline as it currently operates.  Speaking
 specifically of the ``RSPA'' processing as it is done now, the current
 implementation of using symbolic links to ``link in'' all beam formed
