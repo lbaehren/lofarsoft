@@ -106,7 +106,7 @@ class TBBData(IOInterface):
                     - None (select all antennas)
         """
         
-        self.new_selection_method=True
+        self.new_selection_method=False #True
         self.files=openAligned(filenames,blocksize)
         
         self.setAntennaSelection(selection)
@@ -234,15 +234,15 @@ class TBBData(IOInterface):
         if self.new_selection_method:
             return readFx(self.files,data,block)
         if not self.selection:
-            retval = readFx(self.files,self.alldata,block)
+            retval = readFx(self.files,self.allfxdata,block)
             if not data:
-                return self.alldata
+                return self.allfxdata
             else:
-                data.copy(self.alldata)
+                data.copy(self.allfxdata)
                 return retval
         else:
-            readFx(self.files,self.alldata,block)
-            return applySelection(self.selection,self.alldata,data)
+            readFx(self.files,self.allfxdata,block)
+            return applySelection(self.selection,self.allfxdata,data)
 
     def setAntennaSelection(self, selection):
         """Set an antennaselection.
