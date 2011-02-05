@@ -26,6 +26,40 @@
 #include "mArray.h"
 #include "mModule.h"
 
+// ________________________________________________________________________
+//                                        Vector to raw string for storrage
+
+/*!
+  \brief Write the vector content to a raw (binary) string.
+*/
+template <class T> HString hWriteRawVector(std::vector<T> &vec)
+{
+  size_t size = vec.size()*sizeof(T);
+  char* buffer = new char[size];
+
+  T* vec_p = &(vec[0]);
+
+  memcpy(buffer, vec_p, size);
+
+  HString str(buffer, size);
+
+  return str;
+};
+
+/*!
+  \brief Read the vector content from a raw (binary) string.
+*/
+template <class T> void hReadRawVector(std::vector<T> &vec, HString raw)
+{
+  size_t size = vec.size()*sizeof(T);
+
+  if (size != raw.size())
+  {
+    throw PyCR::ValueError("Vector size does not match raw string.");
+  }
+
+  memcpy(&(vec[0]), raw.c_str(), size);
+};
 
 // ________________________________________________________________________
 //                                    Add declarations of wrapper functions

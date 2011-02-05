@@ -195,10 +195,12 @@ BOOST_PYTHON_MODULE(hftools)
 //                                                       Core functionality
 
   class_<std::vector<HInteger> >("IntVec")
+    .enable_pickling()
     .def(vector_indexing_suite<std::vector<HInteger> >())
     ;
 
   class_<std::vector<HNumber> >("FloatVec")
+    .enable_pickling()
     .def(vector_indexing_suite<std::vector<HNumber> >())
     ;
 
@@ -207,6 +209,7 @@ BOOST_PYTHON_MODULE(hftools)
     ;
 
   class_<std::vector<HComplex> >("ComplexVec")
+    .enable_pickling()
     .def(vector_indexing_suite<std::vector<HComplex> >())
     ;
 
@@ -243,6 +246,22 @@ BOOST_PYTHON_MODULE(hftools)
 //                                                                   Vector
 
 #include "../../../../build/cr/implement/Pypeline/mVector.def.h"
+
+  HString (*hWriteRawVectorHInteger)(std::vector<HInteger>&) = hWriteRawVector;
+  HString (*hWriteRawVectorHNumber)(std::vector<HNumber>&) = hWriteRawVector;
+  HString (*hWriteRawVectorHComplex)(std::vector<HComplex>&) = hWriteRawVector;
+
+  def("hWriteRawVector", hWriteRawVectorHInteger);
+  def("hWriteRawVector", hWriteRawVectorHNumber);
+  def("hWriteRawVector", hWriteRawVectorHComplex);
+
+  void (*hReadRawVectorHInteger)(std::vector<HInteger>&, HString) = hReadRawVector;
+  void (*hReadRawVectorHNumber)(std::vector<HNumber>&, HString) = hReadRawVector;
+  void (*hReadRawVectorHComplex)(std::vector<HComplex>&, HString) = hReadRawVector;
+
+  def("hReadRawVector", hReadRawVectorHInteger);
+  def("hReadRawVector", hReadRawVectorHNumber);
+  def("hReadRawVector", hReadRawVectorHComplex);
 
 // ________________________________________________________________________
 //                                                                     Math

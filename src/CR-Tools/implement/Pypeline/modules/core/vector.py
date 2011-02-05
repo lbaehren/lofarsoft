@@ -276,38 +276,38 @@ def Vec_div(vec1,val):
     hDiv(vecout,vec1,val)
     return vecout
 
+# Pickling
+def hVector_getinitargs(self):
+    """Get arguments for hVector constructor.
 
-# Pickling - not yet implemented
-#------------------------------------------------------------------------
-# def Vec_getinitargs(self):
-#     """Get arguments for Vector constructor.
+    .. warning:: This is not the hVector factory function but the constructor for the actual type. E.g. :meth:`IntArray.__init__`
 
-#     .. warning:: This is not the Vector factory function but the constructor for the actual type. E.g. :meth:`IntVector.__init__`
+    """
 
-#     """
-#     return ()
+    return ()
 
-# def Vec_getstate(self):
-#     """Get current state of Vector object for pickling.
-#     """
-#     return (hTypeNamesDictionary[basetype(self)], self.shape(), self.writeRaw())
+def hVector_getstate(self):
+    """Get current state of hVector object for pickling.
+    """
 
-# def Vec_setstate(self, state):
-#     """Restore state of Vector object for unpickling.
-#     """
-#     size = 1
-#     for d in state[1]:
-#         size *= d
-#     self.resize(size)
-#     self.reshape(state[1])
-#     self.readRaw(state[2])
+    return (len(self), hWriteRawVector(self))
 
+def hVector_setstate(self, state):
+    """Restore state of hVector object for unpickling.
+    """
+
+    self.resize(state[0])
+    hReadRawVector(self, state[1])
 
 # Fourier Transforms
 setattr(FloatVec,"fft",hFFTCasa)
 
 for v in hAllVectorTypes:
     setattr(v,"__repr__",hVector_repr)
+    setattr(v,"__getinitargs__",hVector_getinitargs)
+    setattr(v,"__getstate__",hVector_getstate)
+    setattr(v,"__setstate__",hVector_setstate)
+    setattr(v,"__getstate_manages_dict__",1)
     setattr(v,"extendflat",extendflat)
     setattr(v,"elem",hVector_elem)
     setattr(v,"val",hVector_val)

@@ -60,6 +60,16 @@ using namespace std;
 //$SECTION: Vector functions
 // ========================================================================
 
+// ________________________________________________________________________
+//                                        Vector to raw string for storrage
+
+template HString hWriteRawVector(std::vector<HInteger> &vec);
+template HString hWriteRawVector(std::vector<HNumber> &vec);
+template HString hWriteRawVector(std::vector<HComplex> &vec);
+
+template void hReadRawVector(std::vector<HInteger> &vec, HString raw);
+template void hReadRawVector(std::vector<HNumber> &vec, HString raw);
+template void hReadRawVector(std::vector<HComplex> &vec, HString raw);
 
 //$DOCSTRING: Fills a vector with a constant value.
 //$COPY_TO HFILE START --------------------------------------------------
