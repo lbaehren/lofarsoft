@@ -943,19 +943,19 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   // Inspect length of input arrays
   const int Nimage = std::distance(image, image_end);
   const int Nfftdata = std::distance(fftdata, fftdata_end);
-  const int Nfreq = std::distance(frequencies, frequencies_end);
+  const int Nfrequencies = std::distance(frequencies, frequencies_end);
   const int Nantpos = std::distance(antpos, antpos_end);
   const int Nskypos = std::distance(skypos, skypos_end);
 
   // Get relevant numbers
-  const int Nantennae = Nantpos / 3;
+  const int Nantennas = Nantpos / 3;
   const int Nskycoord = Nskypos / 3;
 
   // Indices
   int j, k;
 
   // Sanity checks
-  if (Nantpos != Nantennae * 3)
+  if (Nantpos != Nantennas * 3)
   {
     throw PyCR::ValueError("Antenna positions array has wrong size.");
   }
@@ -963,11 +963,11 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   {
     throw PyCR::ValueError("Sky positions array has wrong size.");
   }
-  if (Nfftdata != Nfreq * Nantennae)
+  if (Nfftdata != Nfrequencies * Nantennas)
   {
     throw PyCR::ValueError("FFT data array has wrong size.");
   }
-  if (Nimage != Nskycoord * Nfreq)
+  if (Nimage != Nskycoord * Nfrequencies)
   {
     throw PyCR::ValueError("Image array has wrong size.");
   }
@@ -990,16 +990,16 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   for (int i=0; i<Nskycoord; ++i)
   {
     // Image iterator to start position
-    it_im = image + (i * Nfreq);
+    it_im = image + (i * Nfrequencies);
 
     // Sky coordinate iterator to start position
     it_sky = skypos + (i * 3);
 
-    // Loop over antennae
+    // Loop over antennas
     it_ant = antpos;
     it_fft = fftdata;
 
-    for (j=Nantennae; j!=0; --j)
+    for (j=Nantennas; j!=0; --j)
     {
       // Reset image iterator to first frequency of current pixel
       it_im_inner = it_im;
@@ -1015,7 +1015,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       // Loop over frequencies
       it_freq = frequencies;
 
-      for (k=Nfreq; k!=0; --k)
+      for (k=Nfrequencies; k!=0; --k)
       {
         // Multiply by geometric weight and add to image
         *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * delay));
@@ -1026,6 +1026,101 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 
       // Next antenna position
       it_ant+=3;
+    }
+  }
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Beamform image
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBeamformImage
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(image)()("Array to store resulting image. Stored as [I(x_0, y_0, f_0), I(x_0, y_0, f_1), ... I(x_nx, y_ny, f_nf)] e.g. the rightmost (frequency) index runs fastest. This array may contain an existing image.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(fftdata)()("Array with FFT data of each antenna. Expects data to be stored as [f(0,0), f(0,1), ..., f(0,nf), f(1,0), f(1,1), ..., f(1,nf), ..., f(na, 0), f(na,1), ..., f(na,nf)] e.g. f(i,j) where `i` is the antenna number and `j` is the frequency.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(frequencies)()("Array with frequencies stored as [f_0, f_1, ..., f_n] in Hertz.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(delays)()("Array containing the delays in seconds for all antennas and positions [antenna index runs fastest: (ant1,pos1),(ant2,pos1),...] - length of vector has to be number of antennas times positions as calculated by hGeometricDelays.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class CIter, class Iter>
+void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
+    const CIter fftdata, const CIter fftdata_end,
+    const Iter frequencies, const Iter frequencies_end,
+    const Iter delays, const Iter delays_end
+    )
+{
+  // Inspect length of input arrays
+  const int Nimage = std::distance(image, image_end);
+  const int Nfftdata = std::distance(fftdata, fftdata_end);
+  const int Nfrequencies = std::distance(frequencies, frequencies_end);
+  const int Ndelays = std::distance(delays, delays_end);
+
+  // Get relevant numbers
+  const int Nantennas = Nfftdata / Nfrequencies;
+  const int Nskycoord = Ndelays / Nantennas;
+
+  // Indices
+  int j, k;
+
+  // Sanity checks
+  if (Nfftdata != Nfrequencies * Nantennas)
+  {
+    throw PyCR::ValueError("FFT data array has wrong size.");
+  }
+  if (Nimage != Nskycoord * Nfrequencies)
+  {
+    throw PyCR::ValueError("Image array has wrong size.");
+  }
+
+  // Get iterators
+  CIter it_im = image;
+  CIter it_im_inner = image;
+  CIter it_fft = fftdata;
+  Iter it_freq = frequencies;
+  Iter it_delays = delays;
+
+  // Loop over pixels (parallel on multi core systems if supported)
+#ifdef _OPENMP
+  std::cout<<"Running in parallel mode"<<std::endl;
+  #pragma omp parallel for private(it_im, it_im_inner, it_fft, it_freq, it_delays, j, k)
+#else
+  std::cout<<"Running in serial mode"<<std::endl;
+#endif // _OPENMP
+  for (int i=0; i<Nskycoord; ++i)
+  {
+    // Image iterator to start position
+    it_im = image + (i * Nfrequencies);
+
+    // Delays iterator to start position
+    it_delays = delays + (i * Nantennas);
+
+    // Loop over antennas
+    it_fft = fftdata;
+
+    for (j=Nantennas; j!=0; --j)
+    {
+      // Reset image iterator to first frequency of current pixel
+      it_im_inner = it_im;
+
+      // Loop over frequencies
+      it_freq = frequencies;
+
+      for (k=Nfrequencies; k!=0; --k)
+      {
+        // Multiply by geometric weight and add to image
+        *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * (*delays)));
+        ++it_im_inner;
+        ++it_fft;
+        ++it_freq;
+      }
+
+      // Next antenna delay
+      ++it_delays;
     }
   }
 }

@@ -117,7 +117,7 @@ wcs = {
 print wcs
 
 # Create empty image
-image=cr.hArray(float, dimensions=(ntimesteps, wcs['NAXIS1'], wcs['NAXIS2'], nfreq), fill=0.)
+image = np.zeros(shape=(ntimesteps, wcs['NAXIS1'], wcs['NAXIS2'], nfreq), dtype='float')
 
 # Initialize imager
 im = imager.Imager(image, crfile, startblock, nblocks, ntimesteps, obstime, wcs=wcs)
@@ -127,15 +127,8 @@ im.run()
 
 print "Image complete, storing to disk."
 
-# Get image as numpy.ndarray
-npimage = image.toNumpy()
-
-np.save(storename+".npy", npimage)
-
-npimage = np.rollaxis(npimage, 0, 4).transpose()
-
 # Save image as FITS
-hdu = pyfits.PrimaryHDU(npimage)
+hdu = pyfits.PrimaryHDU(image)
 
 # Write WCS parameters to header
 hdr = hdu.header
@@ -143,7 +136,8 @@ hdr = hdu.header
 keys = wcs.keys()
 keys.sort()
 for key in keys:
-    hdr.update(key, wcs[key])
+    if 'NAXIS' not in key:
+        hdr.update(key, wcs[key])
 
 # Check if file exists and overwrite if so
 if os.path.isfile(storename+'.fits'):

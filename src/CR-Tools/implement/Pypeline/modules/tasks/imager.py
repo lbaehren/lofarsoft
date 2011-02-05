@@ -84,6 +84,10 @@ class Imager(Task):
         self.antpos=self.data.getRelativeAntennaPositions()
         self.nantennas=int(self.antpos.getDim()[0])
 
+        # Calculate geometric delays for all sky positions for all antennas
+        self.delays = cr.hArray(float, dimensions=(wcs['NAXIS1'], wcs['NAXIS2'], self.nantennas))
+        cr.hGeometricDelays(self.delays, self.antpos, self.grid.cartesian, True)
+
         # Initialize empty arrays
         self.fftdata=cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
         self.t_image=cr.hArray(complex, dimensions=(wcs['NAXIS1'], wcs['NAXIS2'], self.nfreq), fill=0.)
@@ -104,7 +108,7 @@ class Imager(Task):
                 self.t_image.fill(0.)
         
                 print "beamforming started"
-                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian)
+                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
                 print "beamforming done"
                 
                 cr.hAbsSquareAdd(self.image[step], self.t_image)
