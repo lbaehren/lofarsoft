@@ -3454,3 +3454,112 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Compares two vectors for equality
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hEqual
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HBool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec0)()("Primary vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec1)()("Secondary vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class Iter>
+HBool HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, const Iter vec1_end)
+{
+  // Are both referencing the same vector?
+  if (vec0 == vec1 && vec0_end == vec1_end)
+  {
+    return true;
+  }
+
+  // Are they the same length?
+  const int N0 = std::distance(vec0, vec0_end);
+  const int N1 = std::distance(vec1, vec1_end);
+
+  if (N0 != N1)
+  {
+    return false;
+  }
+
+  // Declaration of variables
+  Iter it0(vec0);
+  Iter it1(vec1);
+
+  // Compare values
+  while (it0 != vec0_end)
+  {
+    if (*it0 != *it1)
+    {
+      return false;
+    }
+
+    ++it0;
+    ++it1;
+  }
+
+  return true;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Compares two vectors for equality within a given bound
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hAlmostEqual
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HBool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec0)()("Primary vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec1)()("Secondary vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(bound)()("If the absolute value of the diference between one of the elements is greater than bound the two vectors are considered unequal.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class Iter>
+HBool HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, const Iter vec1_end, const HNumber bound)
+{
+  // Are both referencing the same vector?
+  if (vec0 == vec1 && vec0_end == vec1_end)
+  {
+    return true;
+  }
+
+  // Are they the same length?
+  const int N0 = std::distance(vec0, vec0_end);
+  const int N1 = std::distance(vec1, vec1_end);
+
+  if (N0 != N1)
+  {
+    return false;
+  }
+
+  // Declaration of variables
+  Iter it0(vec0);
+  Iter it1(vec1);
+
+  // Compare values
+  while (it0 != vec0_end)
+  {
+    if (abs((*it0) - (*it1)) > bound)
+    {
+      return false;
+    }
+
+    ++it0;
+    ++it1;
+  }
+
+  return true;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
