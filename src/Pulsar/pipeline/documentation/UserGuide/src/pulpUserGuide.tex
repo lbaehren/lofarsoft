@@ -15,7 +15,7 @@
 \title{LOFAR User Guide: \\ The Framework Pulsar Pipeline\\
 {\large Pulp, Version 1.0} \\ 
 {\normalsize Document version 1.0} \\
-{\normalsize SVN Repository .Revision: \svnInfoRevision}}
+{\normalsize SVN Repository Revision: \svnInfoRevision}}
 \author{K. R. Anderson}
 \date{\small{SVN Date: \svnInfoDate}}
 \maketitle
@@ -578,7 +578,7 @@ The pipeline definition \verb|pulp.py| runs the ``basic mode'' of the
 ensure \verb|PATH| access the this program. The ``cli'' to the
 executable ``pulp.py'' module is invoked in the common pythonic idiom,\\
 
- i.e. \verb|$ python pulp.py -d --job-name ...|\\
+ i.e. \verb|$ python pulp.py -d --job-name ...|\footnote{``\texttt{Nsubbands}'' is this example represents the number of subband data files comprising ``this''  pipeline run.}\\
 \begin{verbatim}
  Current usage:
 
@@ -595,7 +595,7 @@ where,
               eg., --pulsar=B0919+06
                    --pulsar=B0919+06,B0834+06
 filefactor  = subband splitting factor, <int>
-              optional user speciﬁcation (range, 1-248)
+              user speciﬁcation (range,1--Nsubbands),
               default = 8
 \end{verbatim}
 
@@ -622,7 +622,7 @@ where,
               eg., --pulsar=B0919+06
                    --pulsar=B0919+06,B0834+06
 filefactor  = subband splitting factor, <int>
-              optional user speciﬁcation (range, 1-248)
+              user speciﬁcation (range, 1--Nsubbands)
               default = 8
 \end{verbatim}
 \paragraph{The PULP\_ARCHIVE Device:}Users will find the data products of both \verb|pulp.py| and  \verb|dynspec.py| located in the
