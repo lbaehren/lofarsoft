@@ -3508,7 +3508,7 @@ HBool HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, cons
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Compares two vectors for equality within a given bound
+//$DOCSTRING: Compares two vectors for equality up to a given number of decimal places.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hAlmostEqual
 //-----------------------------------------------------------------------
@@ -3517,7 +3517,7 @@ HBool HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, cons
 #define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec0)()("Primary vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec1)()("Secondary vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(bound)()("If the absolute value of the diference between one of the elements is greater than bound the two vectors are considered unequal.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(decimal)()("Desired number of decimal places for equality.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -3526,7 +3526,7 @@ HBool HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, cons
 
 */
 template <class Iter>
-HBool HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, const Iter vec1_end, const HNumber bound)
+HBool HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, const Iter vec1_end, const HInteger decimal)
 {
   // Are both referencing the same vector?
   if (vec0 == vec1 && vec0_end == vec1_end)
@@ -3547,10 +3547,12 @@ HBool HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, cons
   Iter it0(vec0);
   Iter it1(vec1);
 
+  const double cmp = 0.5 * pow(10.0, -1.0 * decimal);
+
   // Compare values
   while (it0 != vec0_end)
   {
-    if (abs((*it0) - (*it1)) > bound)
+    if (abs((*it0) - (*it1)) >= cmp)
     {
       return false;
     }
