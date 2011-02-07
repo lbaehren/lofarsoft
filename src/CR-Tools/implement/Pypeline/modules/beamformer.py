@@ -43,7 +43,7 @@ class Beamformer(object):
         if FarField:
             print 'Evaluating for az = %f, el = %f, R = inf' % (azel_in[0], azel_in[1]),
         else:
-            print 'Evaluating for az = %f, el = %f, R = %f' % (azel_in[0], azel_in[1], 2000.0 / (azel_in[2] * azel_in[2])),
+            print 'Evaluating for az = %f, el = %f, R = %f' % (azel_in[0], azel_in[1], 2000.0 / (azel_in[2])),
         if ( azel_in[0] > 360. or azel_in[0] < 0. or azel_in[1] > 90. or azel_in[1] < 0.):
             erg = 0.
         else:
@@ -52,7 +52,7 @@ class Beamformer(object):
             if (FarField):
                 self.azel[2] = 1.
             else:
-                self.azel[2] = 2000.0 / (azel_in[2] * azel_in[2])
+                self.azel[2] = 2000.0 / (azel_in[2])
 #        import pdb; pdb.set_trace()
         hCoordinateConvert(self.azel, CoordinateTypes.AzElRadius, self.cartesian, CoordinateTypes.Cartesian, True)
         hGeometricDelays(self.delays, antennaPositions, self.cartesian, FarField)   

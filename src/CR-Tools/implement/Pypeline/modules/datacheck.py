@@ -9,6 +9,7 @@
 import os
 import time
 from pycrtools import IO, CRQualityCheck
+import matplotlib.pyplot as plt
 
 def safeOpenFile(filename, antennaset): # antennaset only here because it's not set in the file
     """ Opens a file and performs some safety / consistency checks
@@ -43,12 +44,13 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
         return result
 
     crfile = IO.open([filename.strip()])
+    crfile.set("blocksize", 2*65536)
     crfile.setAntennaset(antennaset)
 
     fileDate = crfile["Date"]
     readableDate = time.strftime("%a, %d %b %Y %H:%M:%S", time.gmtime(fileDate))
     result.update(date = readableDate)
-    print result
+    #print result
 
     times = crfile["TIME"]
   #  print crfile["shift"]
@@ -75,13 +77,20 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
     return result
 #    return result.update(success=True, file=crfile) !!! This actually returns None (nonetype)...
     
-def qualityCheck(crfile):
+def qualityCheck(crfile, doPlot=False):
+    if doPlot:
+        cr_efield = crfile["emptyFx"]
+        crfile.getTimeseriesData(cr_efield, 0) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
+        efield = cr_efield.toNumpy()
+        plt.plot(efield.T)
+        raw_input("--- Plotted raw timeseries data - press Enter to continue...")
+
     qualitycriteria={"mean":(-1.5,1.5),"rms":(4,15),"spikyness":(-5,5)}
     # BUG: works only with one file at a time. 'crfile' has no attribute 'filename' because it can be one or many...
 #    datalength = crfile["Filesize"]
 #    blocksize = 1024
 #    blocklist = hArray(int, [0.5 * datalength / blocksize])
-    flaglist=CRQualityCheck(qualitycriteria, crfile.files[0], dataarray=None, maxblocksize=65536, nsigma=5, verbose=True) 
+    flaglist=CRQualityCheck(qualitycriteria, crfile.files[0], dataarray=None, maxblocksize=2*65536, nsigma=5, verbose=True) 
     # make warnings for DC offsets and spikyness; flag out for rms too high (i.e. junk data)
     flagged = []
     highDCOffsets = 0
@@ -94,7 +103,15 @@ def qualityCheck(crfile):
             spikyChannels += 1
         elif entry[3][0] == 'rms':
             flagged.append(entry[0]) # entry[0] = antenna nr.
-            
+    
+    if doPlot and len(flagged) > 0:
+        cr_efield = crfile["emptyFx"]
+        crfile.getTimeseriesData(cr_efield, 0) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
+        efield = cr_efield.toNumpy()
+        toplot = efield[flagged]
+        plt.plot(toplot.T)
+        raw_input("--- Plotted antennas flagged as BAD - press Enter to continue...")
+                            
     result = dict(success=True, action = 'Data quality check', flagged = flagged, 
                   warnings = format("Too high DC offsets: %d; too high spikyness: %d") % (highDCOffsets, spikyChannels) )
     return result

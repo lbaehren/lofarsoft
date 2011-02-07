@@ -33,7 +33,7 @@ def writeDict(outfile, dict):
             outfile.write('%s: %s\n' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
     outfile.write('\n')
     
-def runAnalysis(files, triggers, outfilename):
+def runAnalysis(files, triggers, outfilename, doPlot = False):
     """ Input: list of files to process, trigger info as read in by match.readtriggers(...), filename for results output
     """
     outfile = open(outfilename, mode='w')
@@ -42,34 +42,34 @@ def runAnalysis(files, triggers, outfilename):
         n += 1
         print 'Processing file %d out of %d' % (n, len(files))
         result = dc.safeOpenFile(file, antennaset)
-        print result
+        #print result
         
         writeDict(outfile, result)
         if not result["success"]:
             continue
         crfile = result["file"]
         
-        crfile.set("blocksize", 32768)
+#        crfile.set("blocksize", 32768)
 #        import pdb; pdb.set_trace()
 #        rf.cleanSpectrum(crfile)
         
         outfile.write('\n')
         # do quality check and rfi cleaning here
-        result = dc.qualityCheck(crfile)
+        result = dc.qualityCheck(crfile, doPlot = doPlot)
         flaggedList = result["flagged"]
         writeDict(outfile, result)
         if not result["success"]: 
             continue
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
-        result = pf.triggerMessageFit(crfile, triggers, 'linearFit') # be more robust against invalid linearFit
+        result = pf.triggerMessageFit(crfile, triggers, 'linearFit') 
         writeDict(outfile, result)
         if not result["success"]:
             continue
         triggerFitResult = result
         # now find the final direction based on all data, using initial direction as starting point
         try: # apparently it's dangerous...
-          result = pf.fullDirectionFit(crfile, triggerFitResult, 4096, flaggedList = flaggedList, FarField = False)     
+          result = pf.fullDirectionFit(crfile, triggerFitResult, 4096, flaggedList = flaggedList, FarField = False, doPlot = doPlot)     
           writeDict(outfile, result)
           if not result["success"]:
               continue
@@ -92,10 +92,10 @@ elif len(sys.argv) > 1:
     triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_.dat'
 else:
     print 'No files given on command line, using a default set instead.'
-#    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-2*.h5'
-    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
-    triggerMessageFile = '/Users/acorstanje/triggering/MACdatarun_2feb2011/2011-02-02_TRIGGER.dat'
-#    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat' #TRIGGER_debugstripped.dat'
+    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-23.h5'
+#    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
+#    triggerMessageFile = '/Users/acorstanje/triggering/MACdatarun_2feb2011/2011-02-02_TRIGGER.dat'
+    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat' #TRIGGER_debugstripped.dat'
     #datafiles = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/*'
     #triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs006.dat'
 
@@ -114,7 +114,8 @@ print 'Reading triggers...'
 triggers = match.readtriggers(triggerMessageFile)
 print 'Trigger reading complete.'
 
-runAnalysis(files, triggers, outfile)
+
+#runAnalysis(files, triggers, outfile)
 #fitergs = dict()
 
 

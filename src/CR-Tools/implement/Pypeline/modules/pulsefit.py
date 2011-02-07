@@ -26,7 +26,7 @@ rad2deg = 180./np.pi
 
 #------------------------------------------------------------ simplexPositionFit
 def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
-                       cr_freqs, FarField=True, blocksize=-1):
+                       cr_freqs, FarField=True, blocksize=-1, doPlot = False):
   print 'ANT INDICES: '
   print ant_indices
   print ' '
@@ -36,6 +36,22 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
   thisBF = bf.Beamformer(crfile, cr_fft) # initialize object. Isn't this an ugly memory leak?
   #import pdb; pdb.set_trace()
   optimum = fmin(thisBF.pulseMaximizer, start_position, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-2, ftol=1e-4, full_output=1)
+  
+  if doPlot and not FarField:
+      distResult = np.zeros(100)
+      distances = np.zeros(100)
+      R = 10.0
+      for i in range(100):
+          distances[i] = R
+          R *= 1.12
+#      print distances
+      for i in range(100):
+          pos = [optimum[0][0], optimum[0][1], 2000.0 / distances[i]]
+          distResult[i] = - thisBF.pulseMaximizer(pos, cr_fft, antenna_positions, ant_indices, False)
+      
+      plt.semilogx(distances, distResult)
+      raw_input("--- Plotted bf pulse height versus distance - press Enter to continue...")
+ 
 #  bruteRanges = ((start_position[0] - 20.0, start_position[0] + 20.0), (start_position[1] - 10.0, start_position[1] + 10.0))
   #optErg = brute(beamform_function, bruteRanges, Ns = 50, full_output = 1)
   return optimum
@@ -50,20 +66,21 @@ def triggerMessageFit(crfile, triggers, fittype='bruteForce'):  # crfile has to 
   (mIDs, mdDates, mTdiffs, mTriggerDates, mSampleNums) = match.matchTriggerfileToTime((ddate+0.00033024),triggers)
   if len(mIDs) == 0:
       print 'NO TRIGGERS FOUND'
+      result.update(reason = 'No matching triggers found!')
       return result
-  #get the position for that
-  
+
+  #get the position for that 
   nofAntennas = crfile["nofAntennas"]
   # now trim the matched trigger IDs to include only antennas which are actually in the data!
   validChannels = np.argwhere(mIDs < nofAntennas) # get indices in array
-  print mTdiffs
-  print len(mTdiffs)
+#  print mTdiffs
+#  print len(mTdiffs)
   mTdiffs = mTdiffs[validChannels].ravel()
-  print mTdiffs
-  print len(mTdiffs)
-  print ' '
+#  print mTdiffs
+#  print len(mTdiffs)
+#  print ' '
   mIDs = mIDs[validChannels].ravel()
-  print len(mIDs)
+#  print len(mIDs)
   match_positions = crfile["RelativeAntennaPositions"].toNumpy()[mIDs].reshape(3 * len(mIDs))
   #print mTdiffs
   #print len(mTdiffs)
@@ -93,7 +110,7 @@ def triggerMessageFit(crfile, triggers, fittype='bruteForce'):  # crfile has to 
   return result
 
 #------------------------------------------------------------------ fullPulseFit
-def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarField=True): 
+def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarField=True, doPlot = False): 
   #Set the parameters
   samplefreq = 200.0e6 # must be
   crfile.set("blocksize", blocksize) # proper way, apparently
@@ -152,17 +169,17 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
           ant_indices.remove(entry) # or [ant_indices.remove(x) for x in flaggedList if x in ant_indices] ...
   
   fitDataEven = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
-                                   cr_freqs, FarField=FarField,blocksize=blocksize)
-          
+                                   cr_freqs, FarField=FarField,blocksize=blocksize, doPlot=doPlot)
+                                   
   ant_indices = range(1, nofAntennas, 2)
   for entry in flaggedList:
       if entry in ant_indices:
           ant_indices.remove(entry)
   fitDataOdd = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
-                                  cr_freqs, FarField=FarField,blocksize=blocksize)
+                                  cr_freqs, FarField=FarField,blocksize=blocksize, doPlot=doPlot)
   result = dict(success = True, action = 'Full direction fit',
-                even = dict(az = fitDataEven[0][0], el = fitDataEven[0][1], optValue = fitDataEven[1]),
-                odd = dict(az = fitDataOdd[0][0], el = fitDataOdd[0][1], optValue = fitDataOdd[1]) )
+                even = dict(az = fitDataEven[0][0], el = fitDataEven[0][1], optValue = - fitDataEven[1]),
+                odd = dict(az = fitDataOdd[0][0], el = fitDataOdd[0][1], optValue = - fitDataOdd[1]) )
   
   return result
 
