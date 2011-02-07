@@ -1140,7 +1140,7 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%.1f</b></td>" % (self.dbinfo[sub]["totProcessedsize"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"gr     een\"><b>%s</b></font>]</td>" % ("Total size of archived data (TB)", "raw", "processed"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Total size of archived data (TB)", "raw", "processed"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%.1f</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_processed"]))
 		self.htmlptr.write ("\n</tr>")
