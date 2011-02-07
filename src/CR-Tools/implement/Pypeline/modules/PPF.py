@@ -1,4 +1,10 @@
 """Polyphase filters.
+Note that the original .dat files supplied by Kalpana for the
+coefficients have different orderings.
+In the case of the ppf, it runs 1,2,3....1024, 1025...2048,...16384
+while in the case of ippf, it runs 1,1025,2049,...,15361, 2,1026,
+2050,...,15362,...,1024,2048,...,13384
+Beware when loading this into the file!
 """
 
 import pycrtools as cr
@@ -77,9 +83,9 @@ class iPPF():
             # Reading of weights failed
             f=open(cr.LOFARSOFT+'/src/CR-Tools/data/ppf_inv.dat')
             f.seek(0)
-            for i in range(0,16):
-                for j in range(0,1024):
-                    weights[i,j]=float(f.readline())           
+            for i in range(0,1024):
+                for j in range(0,16):
+                    weights[j,i]=float(f.readline())           
             #weights.setDim([16,1024])
             weights.writefilebinary(weights_filename)
         
