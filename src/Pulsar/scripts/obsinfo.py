@@ -704,7 +704,8 @@ class obsstat:
                                             "Nbftype": 0, "Nbftype_only": 0, "Nfdtype": 0, "Nfdtype_only": 0,
                                             "Niscsim": 0, "Nisim": 0, "Niscs": 0, "Ncsim": 0, "Ncsfe": 0, "Nimfe": 0, "Nisfe": 0, "Niscsfe": 0, 
                                             "Nbfis": 0, "Nbffe": 0, "Nbfisfe": 0, "Nbfiscsfe": 0,
-                                            "totRawsize": 0.0, "IMonlyRawsize": 0.0, "totProcessedsize": 0.0 }	 # size in TB
+                                            "totRawsize": 0.0, "IMonlyRawsize": 0.0, "totProcessedsize": 0.0,
+                                            "Archivedsize": 0.0, "Archivedsize_raw": 0.0, "Archivedsize_processed": 0.0 } # sizes in TB
 
 		for sub in self.subclusters:
 			self.subkeys=np.compress(np.array([obstable[r].subcluster for r in self.ids]) == sub, self.ids)
@@ -722,10 +723,13 @@ class obsstat:
 					self.dbinfo[sub]["Narchived"] += 1
 					if re.search("raw", obstable[r].archivestatus):
 						self.dbinfo[sub]["Narchived_raw"] += 1
+						self.dbinfo[sub]["Archivedsize_raw"] += float(obstable[r].totsize)
 					if re.search("sub", obstable[r].archivestatus):
 						self.dbinfo[sub]["Narchived_sub"] += 1
+						self.dbinfo[sub]["Archivedsize_processed"] += float(obstable[r].processed_dirsize)
 					if re.search("meta", obstable[r].archivestatus):
 						self.dbinfo[sub]["Narchived_meta"] += 1
+
 				# getting the number of obs of different type
 				if obstable[r].comment == "" and obstable[r].oi.istype == "+":
 					self.dbinfo[sub]["Nistype"] += 1
@@ -791,6 +795,10 @@ class obsstat:
 			self.dbinfo[sub]["totRawsize"] /= 1024.
 			self.dbinfo[sub]["totProcessedsize"] /= 1024.
 			self.dbinfo[sub]["IMonlyRawsize"] /= 1024.
+			self.dbinfo[sub]["Archivedsize"] = self.dbinfo[sub]["Archivedsize_raw"] + self.dbinfo[sub]["Archivedsize_processed"]
+			self.dbinfo[sub]["Archivedsize"] /= 1024.
+			self.dbinfo[sub]["Archivedsize_raw"] /= 1024.
+			self.dbinfo[sub]["Archivedsize_processed"] /= 1024.
 
 		for sub in self.subclusters:
 			self.dbinfo["Total"]["totDuration"] += self.dbinfo[sub]["totDuration"]
@@ -805,6 +813,9 @@ class obsstat:
 			self.dbinfo["Total"]["Narchived_raw"] += self.dbinfo[sub]["Narchived_raw"]
 			self.dbinfo["Total"]["Narchived_sub"] += self.dbinfo[sub]["Narchived_sub"]
 			self.dbinfo["Total"]["Narchived_meta"] += self.dbinfo[sub]["Narchived_meta"]
+			self.dbinfo["Total"]["Archivedsize"] += self.dbinfo[sub]["Archivedsize"]
+			self.dbinfo["Total"]["Archivedsize_raw"] += self.dbinfo[sub]["Archivedsize_raw"]
+			self.dbinfo["Total"]["Archivedsize_processed"] += self.dbinfo[sub]["Archivedsize_processed"]
 			self.dbinfo["Total"]["Nistype"] += self.dbinfo[sub]["Nistype"]
 			self.dbinfo["Total"]["Nistype_only"] += self.dbinfo[sub]["Nistype_only"]
 			self.dbinfo["Total"]["Ncstype"] += self.dbinfo[sub]["Ncstype"]
@@ -981,6 +992,11 @@ class obsstat:
 			field = "%.1f" % (self.dbinfo[sub]["totProcessedsize"])
 			line += "%-23s" % (field)
 		print line
+		line="Total size of archived data (TB) [raw / processed]:  "
+		for sub in np.append("Total", self.subclusters):
+			field = "%.1f [%.1f / %.1f]" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_processed"] )
+			line += "%-23s" % (field)
+		print line
 		print
 
 	def printhtml (self, htmlfile):
@@ -1024,9 +1040,9 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Nprocessed"], self.dbinfo[sub]["processedDuration"], self.dbinfo[sub]["processedDuration"]/24.))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font> / <font color=\"blue\"><b>%s</b></font>]</td>" % ("Number of archived observations", "raw", "sub", "meta"))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font> / <font color=\"darkblue\"><b>%s</b></font>]</td>" % ("Number of archived observations", "raw", "sub", "meta"))
 		for sub in np.append("Total", self.subclusters):
-			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font> / <font color=\"green\"><b>%d</b></font> / <font color=\"blue\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Narchived"], self.dbinfo[sub]["Narchived_raw"], self.dbinfo[sub]["Narchived_sub"], self.dbinfo[sub]["Narchived_meta"]))
+			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font> / <font color=\"green\"><b>%d</b></font> / <font color=\"darkblue\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Narchived"], self.dbinfo[sub]["Narchived_raw"], self.dbinfo[sub]["Narchived_sub"], self.dbinfo[sub]["Narchived_meta"]))
 		self.htmlptr.write ("\n</tr>")
 
 		self.htmlptr.write ("\n<tr align=left height=25>\n <td align=left></td>")
@@ -1123,6 +1139,10 @@ class obsstat:
 		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Total size of processed data (TB)"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%.1f</b></td>" % (self.dbinfo[sub]["totProcessedsize"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"gr     een\"><b>%s</b></font>]</td>" % ("Total size of archived data (TB)", "raw", "processed"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%.1f</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_processed"]))
 		self.htmlptr.write ("\n</tr>")
 
 		self.htmlptr.write ("\n</table>")
