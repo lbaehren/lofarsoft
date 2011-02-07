@@ -17,8 +17,8 @@ cmake_minimum_required (VERSION 2.8)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (FLEX_FORCE_BUILD       "Force rebuild and local installation"      NO  )
-option (FLEX_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
+option (FLEX_FORCE_BUILD       "Force rebuild and local installation"      NO )
+option (FLEX_VERBOSE_BUILD     "Be verbose during build process?"          NO )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -53,6 +53,7 @@ if (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)
   set (FLEX_VERSION     "2.5.35")
   set (FLEX_DIRECTORY   "flex-${FLEX_VERSION}")
   set (FLEX_TAR_ARCHIVE "${FLEX_DIRECTORY}.tar.gz")
+  set (FLEX_URL         "http://sourceforge.net/projects/flex/files/flex/flex-${FLEX_VERSION}/${FLEX_TAR_ARCHIVE}/download")
   
   ##__________________________________________________________________
   ## Build the project
@@ -61,15 +62,12 @@ if (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)
 
   if (have_flex_tgz)
     ExternalProject_Add (flex
-      PREFIX ${FLEX_BINARY_DIR}
-      DOWNLOAD_DIR ${FLEX_BINARY_DIR}
-      SOURCE_DIR ${FLEX_BINARY_DIR}
-      STAMP_DIR ${FLEX_BINARY_DIR}
-      TMP_DIR /tmp/flex_tmp/
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
       URL ${have_flex_tgz}
-      URL_MD5 201d3f38758d95436cbc64903386de0b
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${FLEX_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${FLEX_BINARY_DIR}/source/configure --prefix=${LUS_INSTALL_PREFIX}
       )
   else (have_flex_tgz)
     message (WARNING "[Flex] Unable to build project - missing source!")
