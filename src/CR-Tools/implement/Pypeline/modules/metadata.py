@@ -192,31 +192,29 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
 
 
     # Return mode nr depending on observation mode
-    if antennaset in [ "LBA_OUTER" , 1, "1" ]:
-        modenr="1"
-    else:
-        print "Station phase calibration data not yet available for antennaset",antennaset,".Returning 1"
-        if return_as_hArray:
-            #import pycrtools as hf
-            complexdata=cr.hArray(complex,[96,512],fill=complex(1,0))    
-        else:
-            complexdata=np.zeros(shape=(96,512),dtype=complex)
-            complexdata.real=1
-        return complexdata
 
-    # Convert station name to file identifier
-    if   station in [ "CS002",2,"002" ]:
-        stationname = "002"
-    elif station in [ "CS003",3,"003" ]:
-        stationname = "003"
-    elif station in [ "CS004",4,"004" ]:
-        stationname = "004"
-    elif station in [ "CS005",5,"005" ]:
-        stationname = "005"
-    elif station in [ "CS006",6,"006" ]:
-        stationname = "006"
-    elif station in [ "CS007",7,"007" ]:
-        stationname = "007"
+    if antennaset not in ["LBA_OUTER", "HBA", "HBA0", "HBA1" ]:
+        print "Antennaset not supported yet"
+
+    antennasetToMode={}
+    antennasetToMode["LBA_OUTER"]="1"
+    antennasetToMode["LBA_INNER"]="3"
+    antennasetToMode["HBA"]="5"
+    antennasetToMode["HBA0"]="5"
+    antennasetToMode["HBA1"]="5"
+     
+    modenr=antennasetToMode[antennaset]
+    if isinstance(station, int):
+        # Convert a station id to a station name
+        station=idToStationName(station)
+
+    station=stationNameToNR(station)
+
+    # filename
+    LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
+    filename=LOFARSOFT+'/data/lofar/StaticMetaData/CalTables/CalTable_'+station+'_mode'+modenr+'.dat'
+    if os.path.isfile(filename):
+        file=open(filename)
     else:
         print "Calibration data not yet available for station",station,"Returning 1"
         if return_as_hArray:
@@ -227,10 +225,7 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
             complexdata.real=1
         return complexdata
 
-    # filename
-    LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
-    filename=LOFARSOFT+'/data/calibration/PhaseCalibration/CalTable_'+stationname+'_mode'+modenr+'.dat'
-    file=open(filename)
+
 
     # reading in 96 * 512 * 2 doubles
     fmt='98304d'
@@ -324,7 +319,7 @@ def getCableDelays(station,antennaset,return_as_hArray=False):
         return "Antenna set not yet supported"
 
     LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
-    cabfilename=LOFARSOFT+'/data/calibration/CableDelays/'+station+'-CableDelays.conf'
+    cabfilename=LOFARSOFT+'/data/lofar/StaticMetaData/CableDelays/'+station+'-CableDelays.conf'
     cabfile=open(cabfilename)
 
     if return_as_hArray:
@@ -406,6 +401,25 @@ def stationNameToID(station_name):
     
     return station_id
 
+    
+def stationNameToNR(station_name):
+    """Returns the station id from a station name
+    """
+    
+    digit1=int(station_name[2])
+    digit2=int(station_name[3])
+    digit3=int(station_name[4])
+    
+    if digit1==6:
+        digit1=2
+    elif digit1>1:
+        digit2=(digit1-1)*2+digit2
+        digit1=1
+    
+    station_nr=str(digit1)+str(digit2)+str(digit3)
+    
+    return station_nr
+
 def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
     """Returns the antenna positions of all the antennas in the station
     relative to the station center for the specified antennaset.
@@ -479,7 +493,7 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
 
     # Obtain filename of antenna positions
     LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
-    filename=LOFARSOFT+"data/calibration/AntennaArrays/"+station+"-AntennaArrays.conf"
+    filename=LOFARSOFT+"data/lofar/StaticMetaData/"+station+"-AntennaArrays.conf"
 
     # Open file
     f = open(filename, 'r')
@@ -602,7 +616,7 @@ def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
 
     # Obtain filename of antenna positions
     LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
-    filename=LOFARSOFT+"data/calibration/AntennaFields/"+station+"-AntennaField.conf"
+    filename=LOFARSOFT+"data/lofar/StaticMetaData/AntennaFields/"+station+"-AntennaField.conf"
 
     # Open file
     f = open(filename, 'r')
@@ -847,7 +861,7 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
 
     # Obtain filename of antenna positions
     LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
-    filename=LOFARSOFT+"data/calibration/AntennaArrays/"+station+"-AntennaArrays.conf"
+    filename=LOFARSOFT+"data/lofar/StaticMetaData/AntennaArrays/"+station+"-AntennaArrays.conf"
 
     # Open file
     f = open(filename, 'r')
