@@ -726,9 +726,10 @@ class obsstat:
 						self.dbinfo[sub]["Archivedsize_raw"] += float(obstable[r].totsize)
 					if re.search("sub", obstable[r].archivestatus):
 						self.dbinfo[sub]["Narchived_sub"] += 1
-						self.dbinfo[sub]["Archivedsize_processed"] += float(obstable[r].processed_dirsize)
 					if re.search("meta", obstable[r].archivestatus):
 						self.dbinfo[sub]["Narchived_meta"] += 1
+					if re.search("sub", obstable[r].archivestatus) and re.search("meta", obstable[r].archivestatus):
+						self.dbinfo[sub]["Archivedsize_processed"] += float(obstable[r].processed_dirsize)
 
 				# getting the number of obs of different type
 				if obstable[r].comment == "" and obstable[r].oi.istype == "+":
