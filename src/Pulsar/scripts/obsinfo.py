@@ -697,7 +697,9 @@ class obsstat:
 		self.dbinfo = {}
 		for sub in np.append(self.subclusters, ["Total"]):
 			self.dbinfo[sub] = {"totDuration": 0.0, "processedDuration": 0.0, "IMonlyDuration": 0.0,
-                                            "Ntotal": 0, "Nprocessed": 0, "Nistype": 0, "Nistype_only": 0, "Ncstype": 0, "Ncstype_only": 0,
+                                            "Ntotal": 0, "Nprocessed": 0, "Narchived": 0, "Narchived_raw": 0,
+                                            "Narchived_sub": 0, "Narchived_meta": 0,
+                                            "Nistype": 0, "Nistype_only": 0, "Ncstype": 0, "Ncstype_only": 0,
                                             "Nfetype": 0, "Nfetype_only": 0, "Nimtype": 0, "Nimtype_only": 0,
                                             "Nbftype": 0, "Nbftype_only": 0, "Nfdtype": 0, "Nfdtype_only": 0,
                                             "Niscsim": 0, "Nisim": 0, "Niscs": 0, "Ncsim": 0, "Ncsfe": 0, "Nimfe": 0, "Nisfe": 0, "Niscsfe": 0, 
@@ -715,6 +717,15 @@ class obsstat:
 					self.dbinfo[sub]["Nprocessed"] += 1
 					if obstable[r].oi.duration != "?":
 						self.dbinfo[sub]["processedDuration"] += obstable[r].oi.dur
+				# getting the number of archived observations (of all types)
+				if obstable[r].comment == "" and obstable[r].archivestatus != "x":
+					self.dbinfo[sub]["Narchived"] += 1
+					if re.search("raw", obstable[r].archivestatus):
+						self.dbinfo[sub]["Narchived_raw"] += 1
+					if re.search("sub", obstable[r].archivestatus):
+						self.dbinfo[sub]["Narchived_sub"] += 1
+					if re.search("meta", obstable[r].archivestatus):
+						self.dbinfo[sub]["Narchived_meta"] += 1
 				# getting the number of obs of different type
 				if obstable[r].comment == "" and obstable[r].oi.istype == "+":
 					self.dbinfo[sub]["Nistype"] += 1
@@ -790,6 +801,10 @@ class obsstat:
 			self.dbinfo["Total"]["IMonlyRawsize"] += self.dbinfo[sub]["IMonlyRawsize"]
 			self.dbinfo["Total"]["Ntotal"] += self.dbinfo[sub]["Ntotal"]
 			self.dbinfo["Total"]["Nprocessed"] += self.dbinfo[sub]["Nprocessed"]
+			self.dbinfo["Total"]["Narchived"] += self.dbinfo[sub]["Narchived"]
+			self.dbinfo["Total"]["Narchived_raw"] += self.dbinfo[sub]["Narchived_raw"]
+			self.dbinfo["Total"]["Narchived_sub"] += self.dbinfo[sub]["Narchived_sub"]
+			self.dbinfo["Total"]["Narchived_meta"] += self.dbinfo[sub]["Narchived_meta"]
 			self.dbinfo["Total"]["Nistype"] += self.dbinfo[sub]["Nistype"]
 			self.dbinfo["Total"]["Nistype_only"] += self.dbinfo[sub]["Nistype_only"]
 			self.dbinfo["Total"]["Ncstype"] += self.dbinfo[sub]["Ncstype"]
@@ -848,6 +863,11 @@ class obsstat:
 		line="Number of processed observations [hours / days]:     "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d [%.1f / %.1f]" % (self.dbinfo[sub]["Nprocessed"], self.dbinfo[sub]["processedDuration"], self.dbinfo[sub]["processedDuration"]/24.)
+			line += "%-23s" % (field)
+		print line
+		line="Number of archived observations [raw / sub / meta]:  "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d [%d / %d / %d]" % (self.dbinfo[sub]["Narchived"], self.dbinfo[sub]["Narchived_raw"], self.dbinfo[sub]["Narchived_sub"], self.dbinfo[sub]["Narchived_meta"])
 			line += "%-23s" % (field)
 		print line
 
@@ -1003,6 +1023,10 @@ class obsstat:
 		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of processed observations", "hours", "days"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Nprocessed"], self.dbinfo[sub]["processedDuration"], self.dbinfo[sub]["processedDuration"]/24.))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font> / <font color=\"blue\"><b>%s</b></font>]</td>" % ("Number of archived observations", "raw", "sub", "meta"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font> / <font color=\"green\"><b>%d</b></font> / <font color=\"blue\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Narchived"], self.dbinfo[sub]["Narchived_raw"], self.dbinfo[sub]["Narchived_sub"], self.dbinfo[sub]["Narchived_meta"]))
 		self.htmlptr.write ("\n</tr>")
 
 		self.htmlptr.write ("\n<tr align=left height=25>\n <td align=left></td>")
