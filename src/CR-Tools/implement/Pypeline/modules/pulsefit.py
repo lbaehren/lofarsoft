@@ -27,11 +27,11 @@ rad2deg = 180./np.pi
 #------------------------------------------------------------ simplexPositionFit
 def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                        cr_freqs, FarField=True, blocksize=-1, doPlot = False):
-  print 'ANT INDICES: '
-  print ant_indices
-  print ' '
-  if not FarField:
-      print 'Warning: only FarField == True is implemented!'
+#  print 'ANT INDICES: '
+#  print ant_indices
+#  print ' '
+#  if not FarField:
+#      print 'Warning: only FarField == True is implemented!'
   
   thisBF = bf.Beamformer(crfile, cr_fft) # initialize object. Isn't this an ugly memory leak?
   #import pdb; pdb.set_trace()
@@ -146,9 +146,9 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
   print 'Block length fft = %d' % cr_fft.shape()[1]
 
   antenna_positions = crfile["RelativeAntennaPositions"]
-  print 'ANTENNA POSITIONS: '
-  print antenna_positions
-  print ' '
+#  print 'ANTENNA POSITIONS: '
+#  print antenna_positions
+#  print ' '
   #Now calculate the Fourier transform of the data
   
   cr_fft[...].fftw(cr_efield[...]) 
