@@ -1,0 +1,93 @@
+#
+# List of TBB Connections for all stations
+# Each station is connected to a single storage node
+# This table contains the mapping.
+#
+# $Id: $
+#
+# Station  Board      DestinationNode
+CS001      TBB_0      lse005
+CS002      TBB_0      lse004
+CS003      TBB_0      lse005
+CS004      TBB_0      lse006
+CS005      TBB_0      lse004
+CS006      TBB_0      lse005
+CS007      TBB_0      lse006
+CS010      TBB_0      lse004
+CS011      TBB_0      lse006
+CS012      TBB_0      lse005
+CS013      TBB_0      lse005
+CS014      TBB_0      lse004
+CS015      TBB_0      lse004
+CS016      TBB_0      lse004
+CS017      TBB_0      lse006
+CS018      TBB_0      lse004
+CS019      TBB_0      lse004
+CS020      TBB_0      lse004
+CS021      TBB_0      lse004
+CS022      TBB_0      lse004
+CS023      TBB_0      lse004
+CS024      TBB_0      lse004
+CS026      TBB_0      lse005
+CS028      TBB_0      lse004
+CS029      TBB_0      lse004
+CS030      TBB_0      lse006
+CS031      TBB_0      lse006
+CS032      TBB_0      lse006
+#
+CS101      TBB_0      lse004
+CS103      TBB_0      lse004
+CS201      TBB_0      lse004
+CS301      TBB_0      lse006
+CS302      TBB_0      lse004
+CS401      TBB_0      lse005
+CS501      TBB_0      lse005
+# Test stations
+RS005      TBB_0      LIST001
+CS099      TBB_0      LIST001
+#
+# Remote Stations
+#
+RS104      TBB_0      lse005
+RS106      TBB_0      lse004
+RS107      TBB_0      lse005
+#
+RS205      TBB_0      lse005
+RS206      TBB_0      lse005
+RS207      TBB_0      lse005
+RS208      TBB_0      lse004
+RS210      TBB_0      lse005
+#
+RS306      TBB_0      lse004
+RS307      TBB_0      lse004
+RS308      TBB_0      lse005
+RS309      TBB_0      lse005
+RS310      TBB_0      lse005
+RS311      TBB_0      lse004
+#
+RS404      TBB_0      lse005
+RS406      TBB_0      lse006
+RS407      TBB_0      lse006
+RS408      TBB_0      lse005
+RS409      TBB_0      lse006
+RS410      TBB_0      lse006
+RS411      TBB_0      lse004
+RS412      TBB_0      lse004
+RS413      TBB_0      lse004
+#
+RS503      TBB_0      lse004
+RS506      TBB_0      lse005
+RS507      TBB_0      lse005
+RS508      TBB_0      lse006
+RS509      TBB_0      lse004
+#
+# European stations
+#
+DE601      TBB_0      lse004
+DE602      TBB_0      lse005
+DE603      TBB_0      lse004
+DE604      TBB_0      lse005
+DE605      TBB_0      lse005
+FR606      TBB_0      lse006
+SE607      TBB_0      lse006
+UK608      TBB_0      lse006

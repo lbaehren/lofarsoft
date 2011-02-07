@@ -1,0 +1,632 @@
+#!/usr/bin/env python
+#
+# Syntax: createFiles localhost [<BG/P partition>] or
+#         createFiles <resultdir> <datadir> [<BG/P partition>] <stationname>
+#
+# - localhost will create the files for the current host
+# - resultdir is the root directory for the outputfiles:
+#     <stationname>/etc/<files>
+# - datadir is the root dir for the metadata files (e.g., /opt/lofar/etc)
+# - stationname is the name of the station for which to produce the files.
+#   Using 'all' as stationname will create files for all stations in file
+#   StationInfo.dat
+#
+#
+
+import re, sys, os
+from subprocess import *
+
+warnings = []
+
+#
+# setWarning(message)
+#
+def setWarning(message):
+    """
+    Adds the given warning to the list of warnings.
+    """
+    warnings.append(message)
+
+
+#
+# Find host IP number from DNS
+#
+def findIPNumber(stationName):
+    """
+    Returns the IPnumber for a station LCU.
+    In case the station is not known, it will return -1.
+    """
+    
+    localStationName = Popen("hostname -s",shell=True, stdout=PIPE).stdout.readlines()[0].strip()[0:5].lower()
+    if (localStationName == stationName):
+        command = "hostname -i"
+        output = Popen(command,shell=True, stdout=PIPE).stdout
+        stdout = output.readlines()
+        outline = stdout[0].strip()
+        outwords = outline.split()
+        if (len(outwords) != 1):
+            return "-1"
+        else:
+            return outwords[0]
+    else:
+        command = "host "+stationName+"C"
+        output = Popen(command,shell=True, stdout=PIPE).stdout
+        stdout = output.readlines()
+        outline = stdout[0].strip()
+        outwords = outline.split()
+        if (len(outwords) != 4):
+            return "10.150.1.1"
+#            return "-1"
+        else:
+            return outwords[3]
+        
+
+#
+# Copies a set of fixed test files to the config dir
+# To be used when setting up a LCU for test/validation
+#
+def copyTestFiles(dataDir):
+
+    for file in ["RSPDriver.conf.test","TBBDriver.conf.test",
+                     "RemoteStation.conf.test","HardwareMonitor.conf.test"]:
+        
+        testFile = dataDir+"/"+file
+        # the existence of /opt/lofar/etc has been checked in main() already
+        destFile = "/opt/lofar/etc/"+file.split(".")[0]+"."+file.split(".")[1]
+        command = "cp -f "+testFile+ " " + destFile
+        os.system(command);
+        
+#
+# findRSPDestNodes(stationName)
+#
+def findRSPDestNodes(stationName, dataDir):
+    """
+    Collects the destination nodes from each rspboard of the given station.
+    Expected format of the RSPConnection file is:
+    station		board	destinationnode
+    CS001		RSP_0	BGL001
+    """
+    pattern=re.compile("[^#]"+stationName+"[ \t]*RSP_([0-9]+)[ \t]*(.*)", re.IGNORECASE)
+    rspDestNode = {}
+    for match in pattern.finditer(open(dataDir+"/RSPConnections.dat").read()):
+        rspDestNode[match.group(1)] = match.group(2)
+    if len(rspDestNode) == 0:
+        setWarning(stationName+" not found in file 'RSPConnections'")
+    return rspDestNode
+
+#
+# findTBBDestNodes(stationName)
+#
+def findTBBDestNodes(stationName, dataDir):
+    """
+    Collects the destination nodes from each tbbboard of the given station.
+    Expected format of the TBBConnection file is:
+    station  Boeard  node
+    CS001    TBB-0   LIST004
+    """
+    # NOTE: for now we always take the first nodename
+    pattern=re.compile("[^#]"+stationName+"[ \t]*TBB_([0-9]+)[ \t]*([a-zA-Z0-9]*)[, ]?.*", re.IGNORECASE)
+    tbbDestNode = {}
+    for match in pattern.finditer(open(dataDir+"/TBBConnections.dat").read()):
+        tbbDestNode[match.group(1)] = match.group(2)
+    if len(tbbDestNode) == 0:
+        setWarning(stationName+" not found in file 'TBBConnections.dat'")
+    return tbbDestNode
+
+#
+# findIPandMAC(node)
+#
+def findIPandMAC(nodeName, dataDir):
+    """
+    Translates the given nodename to an MAC address and and IP address.
+    """
+    pattern=re.compile("^"+nodeName+"[ \t]*([0-9\.]*)[ \t]*([0-9a-fA-F:]*)", re.IGNORECASE | re.MULTILINE)
+    ipAndMac = ()
+    ipAndMac = pattern.search(open(dataDir+"/MAC+IP.dat").read())
+    if not ipAndMac:
+        raise "\nFatal error: "+nodeName+" is not defined in file 'MAC+IP'"
+    return ipAndMac.group(1), ipAndMac.group(2)
+
+def findStorageIPandMAC(nodeName, dataDir):
+    """
+    Translates the given storage nodename to an MAC address and and IP address.
+    """
+    print nodeName
+    pattern=re.compile("^"+nodeName+"[ \t]*([0-9a-fA-F:]*)[ \t]*([0-9\.]*)", re.IGNORECASE | re.MULTILINE)
+    ipAndMac = ()
+    ipAndMac = pattern.search(open(dataDir+"/Storage+MAC.dat").read())
+    if not ipAndMac:
+        raise "\nFatal error: "+nodeName+" is not defined in file 'Storage+MAC.dat'"
+    return ipAndMac.group(2), ipAndMac.group(1)
+
+
+#
+# findRSPIP(node)
+#
+def findRSPIP(nodeName, dataDir):
+    """
+    Translates the given nodename to an MAC address and and IP address.
+    """
+    pattern=re.compile("^"+nodeName+"_([0-9]*)[ \t]*([0-9\.]*)", re.IGNORECASE | re.MULTILINE)
+    RspIp = pattern.findall(open(dataDir+"/RSP+IP.dat").read())
+    if not RspIp:
+        raise "\nFatal error: "+nodeName+" is not defined in file 'RSP+IP'"
+    return RspIp
+
+
+#
+# findAllStations()
+#
+def findAllStations(dataDir):
+    """
+    Return a list of all stationnames that are found in file StationInfo
+    """
+    pattern = re.compile("^[A-Z][A-Z][0-9][0-9][0-9]",re.IGNORECASE | re.MULTILINE)
+    match = pattern.findall(open(dataDir+"/StationInfo.dat").read())
+    if not match:
+        raise "\nFatal error: could not find any stationnames in file 'StationInfo'"
+    return match
+
+#
+# findStationInfo(stationName)
+#
+def findStationInfo(stationName, dataDir):
+    """
+    Return all basic station info (eg. nr RSPboards) from a station.
+    """
+    pattern=re.compile("^"+stationName+"[ \t].*", re.IGNORECASE | re.MULTILINE)
+    match = pattern.search(open(dataDir+"/StationInfo.dat").read())
+    if not match:
+        raise "\nFatal error: "+stationName+" is not defined in file 'StationInfo'"
+    info = match.group().split()
+    if (len(info) != 12):
+        raise "\nFatal error: Data of "+stationName+" is not complete in file 'StationInfo'"
+    return info
+
+
+def createRSPConnectionsFile(resultDir, dataDir, partitionName):
+    """
+    Fills in the markers in the RSPConnections.dat.tmpl file to match the values for the given Blue Gene partition.
+    """
+    # Substitute MAC and IP address of destination nodes
+    RSPConnectionsfile = open(dataDir+"/RSPConnections.dat.tmpl")
+    RSPConnectionsConfig = RSPConnectionsfile.read()
+    RSPConnectionsfile.close()
+    RSPConnectionsConfig = RSPConnectionsConfig.replace("@BGP-PARTITION@",   partitionName)
+    outFile = os.open(resultDir+"/RSPConnections.dat", os.O_RDWR|os.O_CREAT|os.O_TRUNC)
+    os.write(outFile, RSPConnectionsConfig)
+    os.close(outFile)
+    return
+
+    
+def createRSPDriverFile(resultDir, stationName, dataDir, partitionName):
+    """
+    Fills in the markers in the RSPDriver.conf file to match the values for the given station.
+    """
+    # First create RSPConnections.dat with proper BG-P partition filled in.
+    createRSPConnectionsFile(resultDir, dataDir, partitionName)
+    # Find connections of the RSPBoards of the station
+    rspDestNode = findRSPDestNodes(stationName, resultDir)
+    #print stationName,"matches:",rspDestNode
+
+    (name, stationID, stnType, long, lat, height, nrRSP, nrTBB, nrLBA, nrHBA, HBAsplit, LBAcal ) = findStationInfo(stationName, dataDir)
+
+    # Substitute MAC and IP address of destination nodes
+    RSPfile = open(dataDir+"/RSPDriver.conf.tmpl")
+    RSPconfig = RSPfile.read()
+    RSPfile.close()
+    nrNodes = len(rspDestNode) # Number of occurences in file
+    # Core stations have two occurences (these have a splitter), and so
+    # for these we need to fill in LANE0x and LANE1x values.
+    # All other stations have one occurence, so only LANE_0x is relevant.
+    if (nrNodes == 1 or nrNodes == 2):
+        if str(0) in rspDestNode.keys():
+            (ip, mac) = findIPandMAC(rspDestNode[str(0)],dataDir)
+            for rspNr in range(4):
+                RSPconfig = RSPconfig.replace("@LANE_0"+str(rspNr)+"_MAC@", mac +"   # "+rspDestNode[str(0)])
+                RSPconfig = RSPconfig.replace("@LANE_0"+str(rspNr)+"_IP@",  ip)
+        if str(1) in rspDestNode.keys():
+            (ip, mac) = findIPandMAC(rspDestNode[str(1)],dataDir)
+            for rspNr in range(0,4):
+                RSPconfig = RSPconfig.replace("@LANE_1"+str(rspNr)+"_MAC@", mac +"   # "+rspDestNode[str(1)])
+                RSPconfig = RSPconfig.replace("@LANE_1"+str(rspNr)+"_IP@",  ip)
+
+    # Find Ip number station
+    ipnumber = findIPNumber(stationName)
+    ip_parts = ipnumber.split('.')
+    # Find IP address for RSP board ethernet. All NL stations have RSP address
+    # like 10.175.x.x, Non-NL station must be looked up 
+    if (ip_parts[1] == "151"): 
+        ip_prefix = "175" # NL stations; FIXED!
+
+        # Core stations should have Splitter set to 1; others to 0.
+        if (stationName[0:2].upper() == "CS"):
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_00@",   "1")
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_01@",   "2")
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_02@",   "3")
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_03@",   "4")
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_10@",   "1")
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_11@",   "2")
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_12@",   "3")
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_13@",   "4")
+        else:
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_00@",   "1")
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_01@",   "2")
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_02@",   "3")
+            RSPconfig = RSPconfig.replace("@IP_EXTEN_03@",   "4")
+      
+        hexStationID = str("%02x" % int(stationName[3:6]))
+        ringID = '0'+stationName[2]
+        RSPconfig = RSPconfig.replace("@STATION_NAME@", stationName.upper())
+        RSPconfig = RSPconfig.replace("@RING_ID@",   ringID)
+        RSPconfig = RSPconfig.replace("@STATION_HID@",  hexStationID)
+        RSPconfig = RSPconfig.replace("@IP_PREFIX_00@",   ip_prefix)
+        RSPconfig = RSPconfig.replace("@IP_PREFIX_01@",   ip_prefix)
+        RSPconfig = RSPconfig.replace("@IP_PREFIX_02@",   ip_prefix)
+        RSPconfig = RSPconfig.replace("@IP_PREFIX_03@",   ip_prefix)
+        RSPconfig = RSPconfig.replace("@IP_SUBNET_00@",   ip_parts[2])
+        RSPconfig = RSPconfig.replace("@IP_SUBNET_01@",   ip_parts[2])
+        RSPconfig = RSPconfig.replace("@IP_SUBNET_02@",   ip_parts[2])
+        RSPconfig = RSPconfig.replace("@IP_SUBNET_03@",   ip_parts[2])
+        RSPconfig = RSPconfig.replace("@LAST_XLET_OUT@",  "11")
+    else: # Non-NL station
+        hexStationID = str("%02x" % int(stationName[3:6]))
+        ringID = '0'+stationName[2]
+        RSPconfig = RSPconfig.replace("@STATION_NAME@", stationName.upper())
+        RSPconfig = RSPconfig.replace("@RING_ID@",   ringID)
+        RSPconfig = RSPconfig.replace("@STATION_HID@",  hexStationID)
+        RSPconfig = RSPconfig.replace("@LAST_XLET_OUT@",  "23")
+        rspinfo = findRSPIP(stationName, dataDir)
+        for rspNr in range(len(rspinfo)):        
+            rspip = rspinfo[rspNr][1]
+            rspip_parts = rspip.split('.')
+            repl_str = "@IP_EXTEN_"+rspinfo[rspNr][0]+"@"
+            RSPconfig = RSPconfig.replace(repl_str, rspip_parts[3])
+            repl_str = "@IP_PREFIX_"+rspinfo[rspNr][0]+"@"
+            RSPconfig = RSPconfig.replace(repl_str, rspip_parts[1])
+            repl_str = "@IP_SUBNET_"+rspinfo[rspNr][0]+"@"
+            RSPconfig = RSPconfig.replace(repl_str, rspip_parts[2])
+            
+    outFile = os.open(dataDir+"/RSPDriver.conf.tmp", os.O_RDWR|os.O_CREAT|os.O_TRUNC)
+    os.write(outFile, RSPconfig)
+    os.close(outFile)
+
+
+    # An ugly way to get rid of all lines in the template file that are not
+    # filled yet.
+    cmd = "grep -v '@' "+dataDir+"/RSPDriver.conf.tmp > "+resultDir+"/RSPDriver.conf";
+    os.system(cmd);
+
+def createTBBDriverFile(resultDir, stationName, dataDir):
+    """
+    Fills in the markers in the TBBDriver.conf file to match the values for the given station.
+    """
+    # Find connections of the TBBBoards of the station
+    tbbDestNode = findTBBDestNodes(stationName, dataDir)
+    print stationName,"matches:",tbbDestNode
+
+    (name, stationID, stnType, long, lat, height, nrRSP, nrTBB, nrLBA, nrHBA, HBAsplit, LBAcal ) = findStationInfo(stationName, dataDir)
+    #print stationName," has ",nrTBB," TBBoards"
+    
+    # Substitute MAC and IP address of destination nodes
+    TBBfile = open(dataDir+"/TBBDriver.conf.tmpl")
+    TBBconfig = TBBfile.read()
+    TBBfile.close()
+    for tbbNr in range(0,int(nrTBB)):
+        if (len(tbbDestNode) == 1):
+            (ip, mac) = findStorageIPandMAC(tbbDestNode["0"], dataDir)
+            print ip, mac
+            TBBconfig = TBBconfig.replace("@TBB_"+str(tbbNr)+"_DST_MAC@", mac)
+            TBBconfig = TBBconfig.replace("@TBB_"+str(tbbNr)+"_DST_IP@",  ip)
+            TBBconfig = TBBconfig.replace("@TBB_"+str(tbbNr)+"_DST_NAME@",tbbDestNode["0"]  )
+
+        else:
+            if str(tbbNr) in tbbDestNode.keys():
+                (ip, mac) = findStorageIPandMAC(tbbDestNode[str(tbbNr)], dataDir)
+                TBBconfig = TBBconfig.replace("@TBB_"+str(tbbNr)+"_DST_MAC@", mac)
+                TBBconfig = TBBconfig.replace("@TBB_"+str(tbbNr)+"_DST_IP@",  ip)
+                TBBconfig = TBBconfig.replace("@TBB_"+str(tbbNr)+"_DST_NAME@",tbbDestNode[str(tbbNr)]  )
+        
+
+    # substitute StationInfo
+    # Find IP number of data sending side of TBB board; use LCU's IP as basis
+    # for the ip prefix and subnet 
+    ipnumber = findIPNumber(stationName)
+    ip_parts = ipnumber.split('.')
+    if (ip_parts[1] == "151"):
+        ip_prefix = "175"
+    else:
+        ip_prefix = "174"
+    
+    hexStationID = str("%02x" % int(stationName[3:6]))
+    ringID = '0'+stationName[2]
+    
+    TBBconfig = TBBconfig.replace("@STATION_NAME@", stationName.upper())
+    TBBconfig = TBBconfig.replace("@STATION_HID@",  hexStationID)
+    TBBconfig = TBBconfig.replace("@STATION_ID@",   stationID)
+    TBBconfig = TBBconfig.replace("@RING_ID@",   ringID)
+    TBBconfig = TBBconfig.replace("@IP_PREFIX@",   ip_prefix)
+    TBBconfig = TBBconfig.replace("@IP_SUBNET@",   ip_parts[2])
+    outFile = os.open(dataDir+"/TBBDriver.conf.tmp", os.O_RDWR|os.O_CREAT|os.O_TRUNC)
+    os.write(outFile, TBBconfig)
+    os.close(outFile)
+    # An ugly way to get rid of all lines in the template file that are not
+    # filled yet.
+    cmd = "grep -v '@' "+dataDir+"/TBBDriver.conf.tmp > "+resultDir+"/TBBDriver.conf";
+    os.system(cmd);
+    
+def createRemoteStationFile(resultDir, stationName, dataDir):
+    """
+    Fills in the markers in the RemoteStation.conf file to match the values for the given station.
+    """
+    (name, stationID, stnType, long, lat, height, nrRSP, nrTBB, nrLBA, nrHBA, HBAsplit, LBAcal ) = findStationInfo(stationName, dataDir)
+    RSconfig = open(dataDir+"/RemoteStation.conf.tmpl").read()
+    RSconfig = RSconfig.replace("@STATION_NAME@", stationName.upper())
+    RSconfig = RSconfig.replace("@STATION_ID@",   stationID)
+    RSconfig = RSconfig.replace("@NR_RSP@",       nrRSP)
+    RSconfig = RSconfig.replace("@NR_TBB@",       nrTBB)
+    RSconfig = RSconfig.replace("@NR_LBA@",       nrLBA)
+    RSconfig = RSconfig.replace("@NR_HBA@",       nrHBA)
+    RSconfig = RSconfig.replace("@HBA_SPLIT@",    HBAsplit)
+    RSconfig = RSconfig.replace("@LBA_WIDE@",     LBAcal)
+
+    outFile = os.open(resultDir+"/RemoteStation.conf", os.O_RDWR|os.O_CREAT|os.O_TRUNC)
+    os.write(outFile, RSconfig)
+    os.close(outFile)
+
+def createAntennaArraysFile(resultDir, stationName, dataDir):
+    """
+    Copies the right AntennaArrays.conf file for this station
+    """
+    # Copy file <stationname>-antennaarrays.conf> to
+    # /opt/lofar/etc/AntennaArray.conf
+    srcFile = dataDir + "/" + stationName.upper() + "-AntennaArrays.conf"
+    if (os.access(srcFile,os.F_OK) == False):
+        print "Cannot find or open file ",srcFile," for creating AntennaArrays.conf"
+        print "Will create AntennaArrays_default.conf instead"
+        srcFile = dataDir + "/AntennaArrays_default.conf"
+        destFile= resultDir + "/AntennaArrays.conf"
+    else:
+        destFile = resultDir + "/AntennaArrays.conf"
+
+    command = "cp -f "+srcFile+ " " + destFile
+    print command
+    os.system(command)
+
+def createAntennaFieldFile(resultDir, stationName, dataDir):
+    """
+    Copies the right AntennaField.conf file for this station
+    """
+    # Copy file <stationname>-antennafield.conf> to
+    # /opt/lofar/etc/AntennaField.conf
+    srcFile = dataDir + "/" + stationName.upper() + "-AntennaField.conf"
+    if (os.access(srcFile,os.F_OK) == False):
+        print "Cannot find or open file ",srcFile," for creating AntennaField.conf"
+        print "Will create AntennaField_default.conf instead"
+        srcFile = dataDir + "/AntennaField_default.conf"
+        destFile= resultDir + "/AntennaField.conf"
+    else:
+        destFile = resultDir + "/AntennaField.conf"
+
+    command = "cp -f "+srcFile+ " " + destFile
+    print command
+    os.system(command)
+
+def createCableDelaysFile(resultDir, stationName, dataDir):
+    """
+    Copies the right CableDelays.conf file for this station
+    """
+    # Copy file <stationname>-cabledelays.conf> to
+    # /opt/lofar/etc/CableDelays.conf
+    
+    # stationName is in lowercase!
+    srcFile = dataDir + "/" + stationName.upper() + "-CableDelays.conf"
+    if (os.access(srcFile,os.F_OK) == False):
+        print "Cannot find or open file ",srcFile," for creating CableDelays.conf"
+        print "Will create CableDelays_default.conf instead"
+        srcFile = dataDir + "/CableDelays_default.conf"
+        destFile= resultDir + "/CableDelays.conf"
+    else:
+        destFile = resultDir + "/CableDelays.conf"
+    
+    command = "cp -f "+srcFile+ " " + destFile
+    print command
+    os.system(command)
+
+def createHBADeltasFile(resultDir, stationName, dataDir):
+    """
+    Copies the right HBADeltas.conf file for this station
+    """
+    # Copy file <stationname>-hbadeltas.conf> to
+    # /opt/lofar/etc/HBADeltas.conf
+    
+    # stationName is in lowercase!
+    srcFile = dataDir + "/" + stationName.upper() + "-HBADeltas.conf"
+    if (os.access(srcFile,os.F_OK) == False):
+        print "Cannot find or open file ",srcFile," for creating HBADeltas.conf"
+        print "Will create HBADeltas_default.conf instead"
+        srcFile = dataDir + "/HBADeltas_default.conf"
+        destFile= resultDir + "/HBADeltas.conf"
+    else:
+        destFile = resultDir + "/HBADeltas.conf"
+
+    command = "cp -f "+srcFile+ " " + destFile
+    print command
+    os.system(command)
+
+def createiHBADeltasFile(resultDir, stationName, dataDir):
+    """
+    Copies the right iHBADeltas.conf file for this station
+    """
+    # Copy file <stationname>-iHBADeltas.conf> to
+    # /opt/lofar/etc/iHBADeltas.conf
+    
+    # stationName is in lowercase!
+    srcFile = dataDir + "/" + stationName.upper() + "-iHBADeltas.conf"
+    if (os.access(srcFile,os.F_OK) == False):
+        print "Cannot find or open file ",srcFile," for creating iHBADeltas.conf"
+        print "Will create iHBADeltas_default.conf instead"
+        srcFile = dataDir + "/iHBADeltas_default.conf"
+        destFile= resultDir + "/iHBADeltas.conf"
+    else:
+        destFile = resultDir + "/iHBADeltas.conf"
+
+    command = "cp -f "+srcFile+ " " + destFile
+    print command
+    os.system(command)
+
+def createCalTableFile(resultDir, stationName, dataDir):
+    """
+    Copies the right Caltables for this station
+    """
+    # Copy file CalTable_<stationnumber>_mode<x>.dat to
+    # /opt/lofar/etc/CalTable_mode<x>.dat
+    
+    # stationName is in lowercase!
+    srcFileRoot = dataDir + "/CalTable_" + stationName[2:5] + "_mode"
+    for mode in range(7):
+        srcFile = srcFileRoot + str(mode+1) + ".dat"
+        if (os.access(srcFile,os.F_OK) == False):
+            print "Cannot find or open file ",srcFile
+        else:
+            destFile = resultDir + "/CalTable_mode" + str(mode+1) + ".dat"
+            command = "cp -f "+srcFile+ " " + destFile
+            os.system(command)
+    
+def createHardwareMonitorFile(resultDir, stationName, dataDir):
+    """
+    Creates the right HardwareMonitor.conf file for this station
+
+    """
+    # Find Ip number station
+    ipnumber = findIPNumber(stationName)
+    ip_parts = ipnumber.split('.')
+    ip_parts[3] = "3"
+    HWMip = ip_parts[0]+"."+ip_parts[1]+"."+ip_parts[2]+"."+ip_parts[3]
+    HWMfile = open(dataDir+"/HardwareMonitor.conf.tmpl")
+    HWMconfig = HWMfile.read()
+    HWMfile.close()
+    HWMconfig = HWMconfig.replace("@STATION@",   stationName.upper())
+    HWMconfig = HWMconfig.replace("@IP_ENV_CONTR@", HWMip)
+    outFile = os.open(resultDir+"/HardwareMonitor.conf", os.O_RDWR|os.O_CREAT|os.O_TRUNC)
+    os.write(outFile, HWMconfig)
+    os.close(outFile)
+    
+
+def de601Exceptions(resultDir, stationName, dataDir):
+    """
+    Handle exceptions for station de601 (Effelsberg)
+    """
+    if (stationName.lower() == "de601"):
+        srcFile = dataDir + "/../DE601-Attenuation.conf"
+        destFile= resultDir + "/Attenuation.conf"
+        command = "cp -f "+srcFile+ " " + destFile
+        print command
+        os.system(command)
+      
+# MAIN
+
+if (len(sys.argv) == 1):
+    print "Provide arguments:"
+    print sys.argv[0]+" localhost [<BG/P partition>] or"
+    print sys.argv[0]+" <resultdir> <datadir>  [<BG/P partition>] <stationname(s)> "
+    print " - <BG/P partition> is optional and can be R00, R01, R02; default is R00"
+    print " - For setting up station-based LCU use option 'localhost'"
+    print " - <stationame(s)> can be the name of one or more stations, or 'all'"
+    sys.exit(1)
+    
+
+# If argument is localhost, we can safely assume we are running on a station
+# LCU and we need to create the config files for this station. They must be
+# put in /opt/lofar/etc; the required datafiles will be in directory
+# /opt/lofar/etc/StaticMetaData
+
+if (sys.argv[1] == "localhost"):
+    # Find out stationname from command 'hostname -s'
+    stationName = Popen("hostname -s",shell=True, stdout=PIPE).stdout.readlines()[0].strip()[0:5].lower()
+    if (len(stationName) > 0) :
+        if (os.path.exists("/opt/lofar/etc")):
+            resultDir = "/opt/lofar/etc"
+            dataDir = resultDir + "/StaticMetaData"
+        else:
+            print "Cannot find output directory /opt/lofar/etc"
+            sys.exit(1)
+
+        # If the hostname is like 'lcu001', this lcu is set up to be tested
+        # in the lab before a station is assigned. We can then use a set of
+        # fixed test configuration files.
+        if (stationName[0:3] == "lcu"):
+            copyTestFiles(dataDir)
+        else:
+            if (len(sys.argv) == 3):
+                partitionName = sys.argv[2];
+            else:
+                partitionName = "R00";
+            print "Using BG/P partition " + partitionName + " for creating RSPConnections.dat file"
+            createRSPDriverFile    (resultDir, stationName, dataDir, partitionName) 
+            createTBBDriverFile    (resultDir, stationName, dataDir)
+            createRemoteStationFile(resultDir, stationName, dataDir)
+            createAntennaArraysFile(resultDir, stationName, dataDir)
+            createAntennaFieldFile (resultDir, stationName, dataDir)
+            createCableDelaysFile  (resultDir, stationName, dataDir)
+            createHBADeltasFile    (resultDir, stationName, dataDir)
+            createiHBADeltasFile   (resultDir, stationName, dataDir)
+            createCalTableFile     (resultDir, stationName, dataDir)
+            createHardwareMonitorFile(resultDir, stationName, dataDir)
+            de601Exceptions        (resultDir, stationName, dataDir)
+    else:
+        print "Cannot determine stationname"
+        sys.exit(1)
+else:
+    # We are not running on a station LCU. The user needs to provide
+    # where we can find and put files, and for which station.
+    
+    if (len(sys.argv) < 4):
+        print "Provide rootdir for output files, dir for datafiles, stationname(s) (or 'all')."
+        sys.exit(1)
+    
+    resultRoot = sys.argv[1]
+    dataDir = sys.argv[2]
+    stationList = []
+    # Find BG/P partition to use (if one is provided; looks like R0x)
+    if (re.match("R0",sys.argv[3])):
+        partitionName = sys.argv[3];
+        next_argn = 4;
+    else:
+        partitionName = "R00";
+        next_argn = 3;
+        
+    print "Using BG/P partition " + partitionName + " for creating RSPConnections.dat file"
+            
+    if sys.argv[next_argn] == "all":
+        stationList = findAllStations(dataDir)
+    else:
+        stationList = sys.argv[next_argn:]
+
+    for stationName in stationList:
+        resultDir = resultRoot+"/"+stationName+"/"
+        if os.path.exists(resultDir):
+            for oldfile in os.listdir(resultDir):
+                os.remove(resultDir+"/"+oldfile)
+        else:
+            os.makedirs(resultDir)
+
+        createRSPDriverFile    (resultDir, stationName, dataDir, partitionName) 
+        createTBBDriverFile    (resultDir, stationName, dataDir)
+        createRemoteStationFile(resultDir, stationName, dataDir)
+        createAntennaArraysFile(resultDir, stationName, dataDir)
+        createAntennaFieldFile (resultDir, stationName, dataDir)
+        createCableDelaysFile  (resultDir, stationName, dataDir)
+        createHBADeltasFile    (resultDir, stationName, dataDir)
+        createiHBADeltasFile   (resultDir, stationName, dataDir)
+        createHardwareMonitorFile(resultDir, stationName, dataDir)
+        createCalTableFile     (resultDir, stationName, dataDir)
+        de601Exceptions        (resultDir, stationName, dataDir)
+        
+if len(warnings) > 0:
+    print "The following warnings occured:"
+    print warnings
+
+
+
+ 
