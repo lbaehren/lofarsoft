@@ -137,8 +137,7 @@ endif (BOOST_FIND_wave)
 
 set (BOOST_LIBRARIES "")
 
-#fkbreitl: added 1_39 for Scientific Linux, removed incompatible 1_33, 1_34
-foreach (boost_version 1_39_0 1_39 1_36_0 1_34_1) 
+foreach (boost_version 1_44 1_39_0 1_39 1_36_0 1_34_1) 
 
   ## Check for the header files ------------------
 
