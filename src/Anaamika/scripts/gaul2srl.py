@@ -54,17 +54,9 @@ class Op_gaul2srl(Op):
 
         img.source = sources
         img.nsrc = src_index+1
-        if img.nsrc == 1:
-            src_s = ''
-        else:
-            src_s = 's'
-        if img.ngaus == 1:
-            gaus_s = ''
-        else:
-            gaus_s = 's'
-        mylog.info("Grouped " + str(img.ngaus) + " Gaussian" + gaus_s + " into " + str(img.nsrc) + " source" + src_s)
+        mylog.info("Number of sources formed by grouping Gaussians : "+ str(img.nsrc))
         if img.opts.quiet == False:
-            print "Grouped " + str(img.ngaus) + " Gaussian" + gaus_s + " into " + str(img.nsrc) + " source" + src_s
+            print "Number of sources formed by grouping Gaussians : "+ str(img.nsrc)
 
 ##################################################################################################
 
