@@ -19,7 +19,7 @@
             <antenna>ANTENNA SETTING</antenna>
             <clock mode="200 MHz"/>
             <instrumentFilter>INSTRUMENT FILTER MHz</instrumentFilter>
-            <integrationInterval>1</integrationInterval>
+            <integrationInterval>INTEG INTERVAL</integrationInterval>
             <channelsPerSubband>CHANNELS PER SUBBAND</channelsPerSubband>
             <cnIntegrationSteps>12208</cnIntegrationSteps>
             <pencilBeams>

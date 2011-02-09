@@ -3,8 +3,9 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
        -in observation_list_file -inswitch IM -intype source_or_position 
        -out template_output_file -project project_name [-stations stations_list]   
        [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] 
-       [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] 
-       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode]  
+       [-subsHBAHigh subband_range] [-subsHBALow subband_range] [-subsLBA subband_range] 
+       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  
+       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] 
        [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol]
 
        REQUIRED Input Parameters:
@@ -19,8 +20,13 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
        [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
        [[-stations stations_list]] ==> Comma separated list of stations: (i.e. CS001,CS002,RS405) 
        [[-antenna HBA_or_LBA]] ==> The antenna name: HBAHigh, HBALow or LBA (default = HBAHigh) 
-       [[-subsHBA subband_range]] ==> The subband range (default = '200..443') 
+       [[-subsHBAHigh subband_range]] ==> The subband range for HBAHigh (default = '77..320') 
+       [[-subsHBALow subband_range]] ==> The subband range for HBALow (default = '54..297') 
        [[-subsLBA subband_range]] ==> The subband range (default = '154..397') 
+       [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16) 
+       [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16) 
+       [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 1) 
+       [[-integLBA integration_interval_LBA]] ==> The IM-obs integration interval for LBA (default = 3) 
        [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
        [[+IS list_or_ALL]] ==> Turn on incoherentStokesData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
        [[+CS list_or_ALL]] ==> Turn on coherentStokesData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
@@ -39,35 +45,49 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
       Input File Options (SINGLE BEAM): 
       1) Example input file with maximum number of items specified:
          Example Type I input file using source names:
-         # object   antenna     start-time           duration-mins stations                                  subbands
-         3C14       HBAHigh     2010-07-22T14:50:00     10         CS001,CS002,CS003,CS005,CS006,CS007        200..261
-         3C14       LBA         2010-07-22T15:03:00     20         CS001,CS002,CS005,CS006,CS007              230..351
-         3C99       HBALow      2010-07-22T15:15:30     10         CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..443
-         3C83.1     LBA         2010-07-22T15:27:30     60         CS001,CS002,CS006,CS007                    100..159
-         3C99       HBAHigh     2010-07-22T15:52:00     60         CS001,CS003,CS004                          200..397
+         # object   antenna   chan_per_subs integ_interval   start-time           duration-mins stations                                  subbands
+         3C14       HBAHigh       16            1          2010-07-22T14:50:00     10         CS001,CS002,CS003,CS005,CS006,CS007        200..261
+         3C14       LBA           32            3          2010-07-22T15:03:00     20         CS001,CS002,CS005,CS006,CS007              230..351
+         3C99       HBALow         4            2          2010-07-22T15:15:30     10         CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..443
+         3C83.1     LBA          128            5          2010-07-22T15:27:30     60         CS001,CS002,CS006,CS007                    100..159
+         3C99       HBAHigh       16            1          2010-07-22T15:52:00     60         CS001,CS003,CS004                          200..397
           
          Example Type I input file using ra dec positions:
-         # ra     dec       antenna    start-time          duration-mins stations                            subbands
-         13.98   +68.487    HBAHigh    2010-07-22T14:50:00     10        CS005,CS006,CS007                   200..261
-         13.98   +68.487    LBA        2010-07-22T15:03:00     20        CS001,CS006,CS007                   230..351
-         70.498  +1.728     HBALow     2010-07-22T15:15:30     10        CS001,CS002,CS003,CS004             230..351
-         217.17   -1.623    LBA        2010-07-22T15:39:00    120        CS001,CS002,CS003,CS004,CS006,CS007 200..443
-         217.17   -1.623    HBAHigh    2010-07-22T15:52:00     60        CS007                               200..397
+         # ra     dec       antenna  chan_per_subs integ_interval  start-time          duration-mins stations                            subbands
+         13.98   +68.487    HBAHigh      16            1           2010-07-22T14:50:00     10        CS005,CS006,CS007                   200..261
+         13.98   +68.487    LBA          64            3           2010-07-22T15:03:00     20        CS001,CS006,CS007                   230..351
+         70.498  +1.728     HBALow       32            2           2010-07-22T15:15:30     10        CS001,CS002,CS003,CS004             230..351
+         217.17   -1.623    LBA          4             5           2010-07-22T15:39:00    120        CS001,CS002,CS003,CS004,CS006,CS007 200..443
+         217.17   -1.623    HBAHigh      128           1           2010-07-22T15:52:00     60        CS007                               200..397
          
       2) Example input file with maximum number of items specified without subbands:
          Example Type II input file using source names:
-         # object   antenna     start-time         duration-mins stations
-         3C14       HBAHigh    2010-07-22T14:50:00    10         CS001,CS002,CS003,CS005,CS006,CS007
-         3C83.1     LBA        2010-07-22T15:27:30    60         CS001,CS002,CS006,CS007
-         3C99       HBALow     2010-07-22T15:52:00    60         CS001,CS003,CS004
+         # object   antenna   chan_per_subs integ_interval  start-time         duration-mins stations
+         3C14       HBAHigh      16            1           2010-07-22T14:50:00    10         CS001,CS002,CS003,CS005,CS006,CS007
+         3C83.1     LBA          32            5           2010-07-22T15:27:30    60         CS001,CS002,CS006,CS007
+         3C99       HBALow       16            3           2010-07-22T15:52:00    60         CS001,CS003,CS004
           
          Example Type II input file using ra dec positions:
-         # ra     dec           antenna           start-time           duration-mins     stations
-         13.98   +68.487         HBAHigh        2010-07-22T14:50:00     10           CS005,CS006,CS007
-         70.498  +1.728          HBALow         2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004
-         217.17   -1.623         LBA            2010-07-22T15:39:00    120           CS002,CS003,CS004,CS006,CS007
+         # ra     dec      antenna    chan_per_subs integ_interval  start-time           duration-mins     stations
+         13.98   +68.487   HBAHigh        4            1            2010-07-22T14:50:00     10           CS005,CS006,CS007
+         70.498  +1.728    HBALow        16            1            2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004
+         217.17   -1.623   LBA           32            1            2010-07-22T15:39:00    120           CS002,CS003,CS004,CS006,CS007
 
-      3) Example input file with pointing and antenna specification:
+
+      3) Example input file with pointing, antenna, channels per subband, and integration interval specification:
+         Example Type III input file using source names:
+         # object       antenna     chan_per_subs integ_interval 
+         3C99           LBA              16            1          
+         3C99           HBALow           32            5          
+         3C327          HBALow           16            2          
+         
+         Example Type III input file using ra dec positions:
+         # ra     dec           antenna       chan_per_subs integ_interval 
+         13.98   +68.487         LBA            16            1    
+         70.498  +1.728          HBALow         32            5  
+         217.17   -1.623         HBAHigh        16            2    
+
+      4) Example input file with pointing and antenna specification:
          Example Type III input file using source names:
          # object       antenna
          3C99           LBA 
@@ -80,7 +100,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          70.498  +1.728          HBALow 
          217.17   -1.623         HBAHigh 
          
-      4) Example input file with just the pointing input
+      5) Example input file with just the pointing input
          Example Type IV input file using source names:
          # object      
          3C99   
@@ -93,7 +113,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          70.498  +1.728      
          217.17   -1.623     
 
-      5) Example input file has "NameColumn" and object name (NOTE: the NameColumn must be 1st)!
+      6) Example input file has "NameColumn" and object name (NOTE: the NameColumn must be 1st)!
          "NameColumn" can be added to ANY of the above data tables, but it must always be the 1st column.
          Example Type V input file using source names:
          # namecol        object                                     
@@ -123,31 +143,44 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          
       1) Example input file with maximum number of items specified; lines 2 and 3 contain multiple beams:
          Example Type I input file using source names:
-         # object   antenna     start-time           duration-mins stations                                  subbands  ; object_beamN  subbands_beamN
-         3C14       HBAHigh     2010-07-22T14:50:00     10         CS001,CS002,CS003,CS005,CS006,CS007        200..261 
-         3C14       LBA         2010-07-22T15:03:00     20         CS001,CS002,CS005,CS006,CS007              230..351 ;   3C327         352..401
-         3C99       HBALow      2010-07-22T15:15:30     10         CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..261 ;   3C14          262..371 
+         # object   antenna  chan_per_subs integ_interval   start-time           duration-mins stations                                  subbands  ; object_beamN  subbands_beamN
+         3C14       HBAHigh      16            1            2010-07-22T14:50:00     10         CS001,CS002,CS003,CS005,CS006,CS007        200..261 
+         3C14       LBA          32            5            2010-07-22T15:03:00     20         CS001,CS002,CS005,CS006,CS007              230..351 ;   3C327         352..401
+         3C99       HBALow       16            2            2010-07-22T15:15:30     10         CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..261 ;   3C14          262..371 
           
          Example Type I input file using ra dec positions:
-         # ra     dec       antenna    start-time          duration-mins stations                            subbands  ; ra_beamN dec_beamN subbands_beamN
-         13.98   +68.487    HBAHigh    2010-07-22T14:50:00     10        CS005,CS006,CS007                   200..261
-         217.17   -1.623    LBA        2010-07-22T15:39:00    120        CS001,CS002,CS003,CS004,CS006,CS007 300..447  ;   13.98   +68.487    448..461
-         217.17   -1.623    HBAHigh    2010-07-22T15:52:00     60        CS007                               300..401  ;   217.17   -1.623    402..431
+         # ra     dec       antenna  chan_per_subs integ_interval  start-time          duration-mins stations                            subbands  ; ra_beamN dec_beamN subbands_beamN
+         13.98   +68.487    HBAHigh      16            1           2010-07-22T14:50:00     10        CS005,CS006,CS007                   200..261
+         217.17   -1.623    LBA          32            3           2010-07-22T15:39:00    120        CS001,CS002,CS003,CS004,CS006,CS007 300..447  ;   13.98   +68.487    448..461
+         217.17   -1.623    HBAHigh      64            1           2010-07-22T15:52:00     60        CS007                               300..401  ;   217.17   -1.623    402..431
          
       2) Example input file with maximum number of items specified w/o subbands; lines 2 and 3 contain multiple beams:
          Example Type II input file using source names:
-         # object   antenna     start-time         duration-mins stations                             ; object_beamN 
-         3C14       HBAHigh    2010-07-22T14:50:00    10         CS001,CS002,CS003,CS005,CS006,CS007  
-         3C83.1     LBA        2010-07-22T15:27:30    60         CS001,CS002,CS006,CS007              ;    3C327       
-         3C99       HBALow     2010-07-22T15:52:00    60         CS001,CS003,CS004                    ;    3C14    ;    3C327      
+         # object   antenna   chan_per_subs integ_interval  start-time         duration-mins stations                             ; object_beamN 
+         3C14       HBAHigh       32            1          2010-07-22T14:50:00    10         CS001,CS002,CS003,CS005,CS006,CS007  
+         3C83.1     LBA           16            5          2010-07-22T15:27:30    60         CS001,CS002,CS006,CS007              ;    3C327       
+         3C99       HBALow         4            2          2010-07-22T15:52:00    60         CS001,CS003,CS004                    ;    3C14    ;    3C327      
           
          Example Type II input file using ra dec positions:
-         # ra     dec           antenna           start-time           duration-mins     stations                  ; ra_beamN dec_beamN
-         13.98   +68.487         HBAHigh        2010-07-22T14:50:00     10           CS005,CS006,CS007
-         70.498  +1.728          HBALow         2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004       ;    13.98   +68.487 
-         217.17   -1.623         LBA            2010-07-22T15:39:00    120           CS002,CS003,CS004,CS006,CS007 ;    13.98   +68.487 
+         # ra     dec           antenna    chan_per_subs integ_interval       start-time           duration-mins     stations                  ; ra_beamN dec_beamN
+         13.98   +68.487         HBAHigh       32            1              2010-07-22T14:50:00     10           CS005,CS006,CS007
+         70.498  +1.728          HBALow        16            7              2010-07-22T15:15:30     10           CS001,CS002,CS003,CS004       ;    13.98   +68.487 
+         217.17   -1.623         LBA           64            3              2010-07-22T15:39:00    120           CS002,CS003,CS004,CS006,CS007 ;    13.98   +68.487 
 
       3) Example input file with pointing and antenna specification; lines 2 and 3 contain multiple beams:
+         Example Type III input file using source names:
+         # object       antenna  chan_per_subs integ_interval; object_beamN
+         3C99           LBA         32            7         
+         3C99           HBALow      16            1          ;    3C14   
+         3C327          HBALow      16            3          ;    3C14    ;    3C327
+         
+         Example Type III input file using ra dec positions:
+         # ra     dec           antenna   chan_per_subs integ_interval
+         13.98   +68.487         LBA         32            7         
+         70.498  +1.728          HBALow      16            3           ;    13.98   +68.487
+         217.17   -1.623         HBAHigh     32            1           ;    70.498  +1.728    ;    13.98   +68.487
+         
+      4) Example input file with pointing and antenna specification; lines 2 and 3 contain multiple beams:
          Example Type III input file using source names:
          # object       antenna  ; object_beamN
          3C99           LBA 
@@ -161,7 +194,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          217.17   -1.623         HBAHigh ;    70.498  +1.728    ;    13.98   +68.487
          
          
-      4) Example input file with just the pointing input; lines 2 and 3 contain multiple beams:
+      5) Example input file with just the pointing input; lines 2 and 3 contain multiple beams:
          Example Type IV input file using source names:
          # object      ; object_beamN
          3C99   
@@ -175,7 +208,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          217.17   -1.623  ;  13.98   +68.487  ;    70.498  +1.728
 
 
-      5) Example input file has "NameColumn" and object name (NOTE: the NameColumn must be 1st)!
+      6) Example input file has "NameColumn" and object name (NOTE: the NameColumn must be 1st)!
          "NameColumn" can be added to ANY of the above data tables, but it must always be the 1st column.
          Example Type V input file using source names and mutiple beams:
          # namecol        object   ; object_beamN                                  
@@ -205,4 +238,5 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..397  
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 
-         
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 -integLBA 7 
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 -integLBA 7 -chansubsLBA 16

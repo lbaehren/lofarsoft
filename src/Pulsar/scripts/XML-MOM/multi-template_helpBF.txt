@@ -1,12 +1,12 @@
 
 Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]] 
-       -in observation_list_file -inswitch BF -intype source_or_position 
-       -out template_output_file -project project_name [-stations stations_list]   
-       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] [-IS list_or_ALL] [+IS|+CS|+FD|+BF list_or_ALL]
-       [-subsHBA subband_range] [-subsLBA subband_range] [-interation integration_interval] 
+       -out template_output_file -project project_name [-st stations_list]   
+       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] [-IS list_or_ALL]  
+       [+IS|+CS|+FD|+BF list_or_ALL] [-subsHBA subband_range] [-subsLBA subband_range] 
+       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  
        [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] 
        [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] 
-       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA]  [-namecol]
+       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol]
 
        REQUIRED Input Parameters:
        -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
@@ -26,6 +26,8 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16) 
        [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) 
        [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) 
+       [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 1) 
+       [[-integLBA integration_interval_LBA]] ==> The IM-obs integration interval for LBA (default = 3) 
        [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
        [[+IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
        [[-IS list_or_ALL]] ==> Turn OFF incoherentStokesData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
@@ -253,5 +255,5 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -chansubsHBA 64 -integstepsHBA 4  +multi -namecol
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  
-         
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -integLBA 5 +IM all
 
