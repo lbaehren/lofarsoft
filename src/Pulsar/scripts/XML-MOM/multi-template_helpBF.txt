@@ -20,8 +20,8 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
        [[-stations stations_list]] ==> Comma separated list of stations: (i.e. CS001,CS002,RS405) 
        [[-antenna HBA_or_LBA]] ==> The antenna name: HBA or LBA (default = HBA) 
-       [[-subsHBA subband_range]] ==> The subband range (default = '200..447') 
-       [[-subsLBA subband_range]] ==> The subband range (default = '154..401') 
+       [[-subsHBA subband_range]] ==> The subband range (default = '200..443') 
+       [[-subsLBA subband_range]] ==> The subband range (default = '154..397') 
        [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16) 
        [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16) 
        [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) 
@@ -246,7 +246,7 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 +multi
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +IM ALL +multi
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 +FD all
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..401  
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..397  
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -project LEA032 +IM ALL 
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -project LEA032 +IM 1,2

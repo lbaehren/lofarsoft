@@ -31,8 +31,8 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
 "         [[-stations stations_list]] ==> Comma separated list of stations (i.e. CS001,CS002,RS405) \n"\
 "         [[-antenna HBA_or_LBA]] ==> The antenna name - HBA, HBAHigh, HBALow or LBA (default = HBA (BF); HBAHigh (IM)) \n"\
-"         [[-subsHBA subband_range]] ==> The subband range (default = '200..447') \n"\
-"         [[-subsLBA subband_range]] ==> The subband range (default = '154..401') \n"\
+"         [[-subsHBA subband_range]] ==> The subband range (default = '200..443') \n"\
+"         [[-subsLBA subband_range]] ==> The subband range (default = '154..397') \n"\
 "         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16) \n"\
 "         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16) \n"\
 "         [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) \n"\
@@ -74,9 +74,9 @@ user_inswitch=0
 INTYPE=1
 INTYPE_STR=""
 user_intype=0
-SUBBANDS_HBA="200..447"
+SUBBANDS_HBA="200..443"
 user_subbands_hba=0
-SUBBANDS_LBA="154..401"
+SUBBANDS_LBA="154..397"
 user_subbands_lba=0
 SUBBANDS=""
 SUBBANDS_SET=0
@@ -1066,10 +1066,10 @@ do
 		        then
 					if [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBA" ] && [ $INSWITCH == 1 ] 
 					then
-					    SUBBANDS="200..447"
+					    SUBBANDS="200..443"
 					elif [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBAHigh" ] && [ $INSWITCH == 2 ] 
 					then
-					    SUBBANDS="77..324"
+					    SUBBANDS="77..320"
 			        elif ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBA" ] && [ $INSWITCH == 1 ] ) || ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBAHigh" ] && [ $INSWITCH == 2 ] )
 			        then
 			            needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
@@ -1081,7 +1081,7 @@ do
 					    fi
 			        elif [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ] 
 			        then
-					    SUBBANDS="54..301"
+					    SUBBANDS="54..297"
 			        elif [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ] 
 			        then
 					    needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
@@ -1093,7 +1093,7 @@ do
 					    fi
 					elif [ $user_subbands_lba == 0 ] && [ $ANTENNA == "LBA" ] 
 					then
-					    SUBBANDS="154..401"
+					    SUBBANDS="154..397"
 			        elif [ $user_subbands_lba == 1 ] && [ $ANTENNA == "LBA" ] 
 			        then
 			            needs_expand=`echo $SUBBANDS_LBA | grep "," | grep ".."`
@@ -1108,13 +1108,13 @@ do
 		    fi # end if (( $beam > 1 ))
 		    
 		    ##################################################
-		    # If multi-beam obs, split up subbands by N beams (TBD) if subbands > 248
+		    # If multi-beam obs, split up subbands by N beams (TBD) if subbands > 244
 		    if (( $MULTI == 1 )) && (( $beam == 1 )) && (( $nbeams > 1 )) && (( $SUBBANDS_SET == 0 ))
 		    then
 		       total_subbands=`echo $SUBBANDS | expand_sblist.py | awk -F"," '{print NF}'`
-		       if (( $total_subbands >= 248 ))
+		       if (( $total_subbands >= 244 ))
 		       then
-		          echo "WARNING: Multi-beam specification must have total subbands <= 248;"
+		          echo "WARNING: Multi-beam specification must have total subbands <= 244;"
 		          echo "         Input has $total_subbands;  splitting subbands by $nbeams beams"
 		          split_subs=`echo $total_subbands / $nbeams | bc`
 		       fi
