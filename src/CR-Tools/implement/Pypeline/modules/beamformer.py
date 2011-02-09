@@ -66,7 +66,10 @@ class Beamformer(object):
         self.shiftedFFT[antennaIndices, ...].addto(self.beamformedFFT)
 
         hInvFFTw(self.tiedArrayBeam, self.beamformedFFT)
-          
+        
+        self.tiedArrayBeam *= (1.0 / self.blocksize)
+        # that's in fact faster than dividing by the blocksize. Not that it matters here, of course
+
         return self.tiedArrayBeam
     
     
@@ -75,7 +78,7 @@ class Beamformer(object):
         tiedArrayBeam.abs() # make absolute value!
 #        hRunningAverage(smoothedBeam, tiedArrayBeam, 5, hWEIGHTS.GAUSSIAN)
 
-        value = - tiedArrayBeam.max()[0] / self.blocksize # just the maximum. 
+        value = - tiedArrayBeam.max()[0] # just the maximum. 
         print ' value = %f ' % value
         return value
         
