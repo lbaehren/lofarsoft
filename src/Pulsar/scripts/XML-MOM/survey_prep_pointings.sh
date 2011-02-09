@@ -15,7 +15,9 @@ USAGE="\nusage : survey_prep_pointings.sh pointing_range pointings_file xml_scri
 "      survey_prep_pointings.sh 75,79,93,106 LOFAR_HBA_catalog_cluster7_101031.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001,CS002 -antenna HBA +multi -namecol \n"\
 "\n"\
 "      Example using a single row:\n"\
-"      survey_prep_pointings.sh 75 LOFAR_HBA_catalog_cluster7_101031.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001,CS002 -antenna HBA +multi -namecol \n"
+"      survey_prep_pointings.sh 75 LOFAR_HBA_catalog_cluster7_101031.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001,CS002 -antenna HBA +multi -namecol \n"\
+"\n"\
+"      multi-templatesNbeams.sh HELP:\n"
 
 
 range=""
@@ -26,6 +28,7 @@ infile=$2
 if [ $# -lt 4 ]                    
 then
    print "$USAGE"    
+   multi-templatesNbeams.sh -help BF | head -46
    exit 1
 fi
 
