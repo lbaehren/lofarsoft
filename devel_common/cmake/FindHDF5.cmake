@@ -29,9 +29,9 @@
 #  HDF5_HDF5_HL_LIBRARY  = Path to libhdf5_hl, the high-level interface
 #  HDF5_HDF5_CPP_LIBRARY = Path to libhdf5_cpp
 #  HDF5_LIBRARIES        = Link these to use HDF5
-#  HDF5_MAJOR_VERSION    = Major version of the HDF5 library
-#  HDF5_MINOR_VERSION    = Minor version of the HDF5 library
-#  HDF5_RELEASE_VERSION  = Release version of the HDF5 library
+#  HDF5_VERSION_MAJOR    = Major version of the HDF5 library
+#  HDF5_VERSION_MINOR    = Minor version of the HDF5 library
+#  HDF5_VERSION_RELEASE  = Release version of the HDF5 library
 
 if (NOT FIND_HDF5_CMAKE)
 
@@ -45,74 +45,92 @@ if (NOT FIND_HDF5_CMAKE)
   ##_____________________________________________________________________________
   ## Check for the header files
   
+  ## Include directory
+
   find_path (HDF5_INCLUDES hdf5.h hdf5_hl.h
-    PATHS ${include_locations} /usr/local
-    PATH_SUFFIXES hdf5 hdf5/include
-    NO_DEFAULT_PATH
+    PATHS ${include_locations} ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES include include/hdf5
     )
 
-  ## search for individual header files
+  ## Individual header files
   
   find_path (HAVE_HDF5_HDF5_H hdf5.h
-    PATHS ${include_locations} /usr/local
-    PATH_SUFFIXES hdf5 hdf5/include
-    NO_DEFAULT_PATH
+    PATHS ${include_locations} ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES include include/hdf5
     )
   
   find_path (HAVE_HDF5_H5LT_H H5LT.h
-    PATHS ${include_locations}
-    PATH_SUFFIXES hdf5
-    NO_DEFAULT_PATH
+    PATHS ${include_locations} ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES include include/hdf5
     )
   
   find_path (HAVE_HDF5_HDF5_HL_H hdf5_hl.h
-    PATHS ${include_locations} /usr/local
-    PATH_SUFFIXES hdf5 hdf5/include
-    NO_DEFAULT_PATH
+    PATHS ${include_locations} ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES include include/hdf5
     )
   
   ##_____________________________________________________________________________
   ## Check for the library components
   
-  ## [1] Core library (libhdf5)
+  set (HDF5_LIBRARIES "")
+
+  ## Core library (libhdf5)
   
-  find_library (HDF5_HDF5_LIBRARY
-    NAMES hdf5
-    PATHS ${lib_locations} /usr/local
-    PATH_SUFFIXES hdf5 hdf5/lib
-    NO_DEFAULT_PATH
+  find_library (HDF5_HDF5_LIBRARY hdf5
+    PATHS ${lib_locations} ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES lib hdf5/lib
     )
   
   if (HDF5_HDF5_LIBRARY)
     set (HDF5_LIBRARIES ${HDF5_HDF5_LIBRARY})
   endif (HDF5_HDF5_LIBRARY)
   
-  ## [2] High level interface (libhdf5_hl)
+  ## High level interface (libhdf5_hl)
   
-  FIND_LIBRARY (HDF5_HDF5_HL_LIBRARY
-    NAMES hdf5_hl
-    PATHS ${lib_locations} /usr/local
-    PATH_SUFFIXES hdf5 hdf5/lib
-    NO_DEFAULT_PATH
+  FIND_LIBRARY (HDF5_HDF5_HL_LIBRARY hdf5_hl
+    PATHS ${lib_locations} ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES lib hdf5/lib
     )
   
   if (HDF5_HDF5_HL_LIBRARY)
     list (APPEND HDF5_LIBRARIES ${HDF5_HDF5_HL_LIBRARY})
   endif (HDF5_HDF5_HL_LIBRARY)
   
-  ## [3] C++ interface (libhdf5_cpp)
+  ## C++ interface (libhdf5_cpp)
   
-  FIND_LIBRARY (HDF5_HDF5_CPP_LIBRARY
-    NAMES hdf5_cpp
-    PATHS ${lib_locations} /usr/local
-    PATH_SUFFIXES hdf5 hdf5/lib
-    NO_DEFAULT_PATH
+  FIND_LIBRARY (HDF5_HDF5_CPP_LIBRARY hdf5_cpp
+    PATHS ${lib_locations} ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES lib hdf5/lib
     )
   
   if (HDF5_HDF5_CPP_LIBRARY)
     list (APPEND HDF5_LIBRARIES ${HDF5_HDF5_CPP_LIBRARY})
   endif (HDF5_HDF5_CPP_LIBRARY)
   
+  
+  ##_____________________________________________________________________________
+  ## Check for the executables
+  
+  find_program (H5CHECK_EXECUTABLE h5check
+    PATHS /sw /usr /usr/local /opt/local ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES bin
+    )
+  
+  find_program (H5DUMP_EXECUTABLE h5dump 
+    PATHS /sw /usr /usr/local /opt/local ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES bin
+    )
+  
+  find_program (H5LS_EXECUTABLE h5ls 
+    PATHS /sw /usr /usr/local /opt/local ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES bin
+    )
+  
+  find_program (H5STAT_EXECUTABLE h5stat 
+    PATHS /sw /usr /usr/local /opt/local ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES bin
+    )
+
   ##_____________________________________________________________________________
   ## Actions taken when all components have been found
   
@@ -133,85 +151,51 @@ if (NOT FIND_HDF5_CMAKE)
   ##_____________________________________________________________________________
   ## Determine library version
   
-  find_file (HAVE_H5PUBLIC_H H5public.h
-    PATHS ${include_locations}
-    PATH_SUFFIXES hdf5
-    NO_DEFAULT_PATH
-    )
-  
-  if (HAVE_H5PUBLIC_H)
-    
-    ## extract library major version
-    file (STRINGS ${HAVE_H5PUBLIC_H} HDF5_MAJOR_VERSION
-      REGEX "H5_VERS_MAJOR.*For major"
+  if (HDF5_INCLUDES AND HDF5_LIBRARIES)
+    ## Locate test program
+    find_file (HAVE_TestHDF5LibraryVersion TestHDF5LibraryVersion.cc
+      PATHS ${CMAKE_CURRENT_SOURCE_DIR} ${LUS_ROOT}
+      PATH_SUFFIXES cmake Modules devel_common/cmake
       )
-    string (REGEX REPLACE "#define H5_VERS_MAJOR" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
-    string (REGEX MATCH "[0-9]" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
-    ## extract library minor version
-    file (STRINGS ${HAVE_H5PUBLIC_H} HDF5_MINOR_VERSION
-      REGEX "H5_VERS_MINOR.*For minor"
-      )
-    string (REGEX REPLACE "#define H5_VERS_MINOR" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
-    string (REGEX MATCH "[0-9]" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
-    ## extract library release version
-    file (STRINGS ${HAVE_H5PUBLIC_H} HDF5_RELEASE_VERSION
-      REGEX "H5_VERS_RELEASE.*.For tweaks"
-      )
-    string (REGEX REPLACE "#define H5_VERS_RELEASE" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
-    string (REGEX MATCH "[0-9]" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
-  else (HAVE_H5PUBLIC_H)
-    find_file (HAVE_TESTHDF5VERSION TestHDF5Version.cc
-      PATHS ${CMAKE_MODULE_PATH} ${LUS_ROOT}
-      PATH_SUFFIXES devel_common/cmake
-      )
-    
-  else (HAVE_H5PUBLIC_H)
-    
-    if (HAVE_HDF5 AND HAVE_TESTHDF5VERSION)
-      
-      list (APPEND CMAKE_REQUIRED_LIBRARIES ${HDF5_LIBRARIES})
-      
-      try_run (var_exit var_compiled
-	${CMAKE_BINARY_DIR}
-	${HAVE_TESTHDF5VERSION}
-	COMPILE_DEFINITIONS -I${HDF5_INCLUDES} -I${HDF5_INCLUDES}/hdf5
-	CMAKE_FLAGS -DHAVE_H5PUBLIC_H:BOOL=${HAVE_H5PUBLIC_H} -DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}
-	COMPILE_OUTPUT_VARIABLE var_compile
-	RUN_OUTPUT_VARIABLE var_run
+    ## Test for library version
+    if (HAVE_TestHDF5LibraryVersion)
+      ## Build and run test program
+      try_run(HDF5_VERSION_RUN_RESULT HDF5_VERSION_COMPILE_RESULT
+	${PROJECT_BINARY_DIR}
+	${HAVE_TestHDF5LibraryVersion}
+	CMAKE_FLAGS -DLINK_LIBRARIES:STRING=${HDF5_LIBRARIES}
+	COMPILE_DEFINITIONS -I${HDF5_INCLUDES}
+	RUN_OUTPUT_VARIABLE HDF5_VERSION_OUTPUT
 	)
-      
-      ## process the output of the test program
-      
-      if (var_compiled AND var_exit)
-	
-	string (REGEX MATCH "maj=.*:min" HDF5_MAJOR_VERSION ${var_run})
-	string (REGEX REPLACE "maj=" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
-	string (REGEX REPLACE ":min" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
-	
-	string (REGEX MATCH "min=.*:rel" HDF5_MINOR_VERSION ${var_run})
-	string (REGEX REPLACE "min=" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
-	string (REGEX REPLACE ":rel" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
-	
-	string (REGEX MATCH "rel=.*:" HDF5_RELEASE_VERSION ${var_run})
-	string (REGEX REPLACE "rel=" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
-	string (REGEX REPLACE ":" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
-	
-      else (var_compiled AND var_exit)
-	message (STATUS "[FindHDF5] Unable to determine HDF5 library version!")
-	## did we at least manage to compile the source?
-	if (NOT var_compiled)
-	  message (STATUS "Compile of test program failed! -- ${var_compile}")
-	endif (NOT var_compiled)
-      endif (var_compiled AND var_exit)
-      
-    endif (HAVE_HDF5 AND HAVE_TESTHDF5VERSION)
+      ## Evaluate test results
+      if (HDF5_VERSION_COMPILE_RESULT)
+	if (HDF5_VERSION_RUN_RESULT)
+	  ## Extract major version
+	  string(REGEX REPLACE "H5_VERS_MAJOR ([0-9]+).*" "\\1" HDF5_VERSION_MAJOR ${HDF5_VERSION_OUTPUT})
+	  ## Extract minor version
+	  string(REGEX REPLACE ".*H5_VERS_MINOR ([0-9]+).*" "\\1" HDF5_VERSION_MINOR ${HDF5_VERSION_OUTPUT})
+	  ## Extract release version
+	  string(REGEX REPLACE ".*H5_VERS_RELEASE ([0-9]+).*" "\\1" HDF5_VERSION_RELEASE ${HDF5_VERSION_OUTPUT})
+	else (HDF5_VERSION_RUN_RESULT)
+	  message (STATUS "[HDF5] Failed to run TestHDF5LibraryVersion!")
+	endif (HDF5_VERSION_RUN_RESULT)
+      else (HDF5_VERSION_COMPILE_RESULT)
+	message (STATUS "[HDF5] Failed to compile TestHDF5LibraryVersion!")
+      endif (HDF5_VERSION_COMPILE_RESULT)
+    else (HAVE_TestHDF5LibraryVersion)
+      message (STATUS "[HDF5] Unable to test library version - missing test program!")
+      set (HDF5_VERSION_MAJOR   "-1" )
+      set (HDF5_VERSION_MINOR   "-1" )
+      set (HDF5_VERSION_RELEASE "-1" )
+    endif (HAVE_TestHDF5LibraryVersion)
+  else (HDF5_INCLUDES AND HDF5_LIBRARIES)
+    set (HDF5_VERSION_MAJOR   "-1" )
+    set (HDF5_VERSION_MINOR   "-1" )
+    set (HDF5_VERSION_RELEASE "-1" )
+  endif (HDF5_INCLUDES AND HDF5_LIBRARIES)
 
-  endif (HAVE_H5PUBLIC_H)
+  set (HDF5_VERSION "${HDF5_VERSION_MAJOR}.${HDF5_VERSION_MINOR}.${HDF5_VERSION_RELEASE}")
   
-  ## Construct full version string
-  
-  set (HDF5_VERSION "${HDF5_MAJOR_VERSION}.${HDF5_MINOR_VERSION}.${HDF5_RELEASE_VERSION}")
-    
   ##_____________________________________________________________________________
   ## HDF5 compiled with parallel IO support?
 
@@ -234,14 +218,6 @@ if (NOT FIND_HDF5_CMAKE)
     "HDF5 library compiled with parallel IO support" )
   
   ##_____________________________________________________________________________
-  ## HDF5 tools
-
-  find_program (H5CHECK_EXECUTABLE h5check ${bin_locations} )
-  find_program (H5DUMP_EXECUTABLE  h5dump  ${bin_locations} )
-  find_program (H5LS_EXECUTABLE    h5ls    ${bin_locations} )
-  find_program (H5STAT_EXECUTABLE  h5stat  ${bin_locations} )
-  
-  ##_____________________________________________________________________________
   ## Feedback
   
   if (HAVE_HDF5)
@@ -249,15 +225,18 @@ if (NOT FIND_HDF5_CMAKE)
       message (STATUS "Found components for HDF5")
       message (STATUS "HDF5_INCLUDES        = ${HDF5_INCLUDES}")
       message (STATUS "HDF5_LIBRARIES       = ${HDF5_LIBRARIES}")
-      message (STATUS "HDF5_MAJOR_VERSION   = ${HDF5_MAJOR_VERSION}")
-      message (STATUS "HDF5_MINOR_VERSION   = ${HDF5_MINOR_VERSION}")
-      message (STATUS "HDF5_RELEASE_VERSION = ${HDF5_RELEASE_VERSION}")
+      message (STATUS "HDF5_VERSION_MAJOR   = ${HDF5_VERSION_MAJOR}")
+      message (STATUS "HDF5_VERSION_MINOR   = ${HDF5_VERSION_MINOR}")
+      message (STATUS "HDF5_VERSION_RELEASE = ${HDF5_VERSION_RELEASE}")
     endif (NOT HDF5_FIND_QUIETLY)
   else (HAVE_HDF5)
     if (HDF5_FIND_REQUIRED)
       message (FATAL_ERROR "Could not find HDF5!")
     endif (HDF5_FIND_REQUIRED)
   endif (HAVE_HDF5)
+
+  ## Set standard variable
+  set (HDF5_FOUND ${HAVE_HDF5})
   
   ##_____________________________________________________________________________
   ## Mark as advanced ...
@@ -267,9 +246,9 @@ if (NOT FIND_HDF5_CMAKE)
     HDF5_LIBRARIES
     HAVE_H5PUBLIC_H
     HDF5_VERSION
-    HDF5_MAJOR_VERSION
-    HDF5_MINOR_VERSION
-    HDF5_RELEASE_VERSION
+    HDF5_VERSION_MAJOR
+    HDF5_VERSION_MINOR
+    HDF5_VERSION_RELEASE
     HAVE_TESTHDF5VERSION
     HDF5_HDF5_LIBRARY
     HDF5_HDF5_HL_LIBRARY
