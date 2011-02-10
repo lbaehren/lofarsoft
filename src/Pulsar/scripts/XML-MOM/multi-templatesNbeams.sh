@@ -38,11 +38,11 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-subsHBAHigh subband_range]] ==> The IM HBAHigh subband range (default = '77..320') \n"\
 "         [[-subsHBALow subband_range]] ==> The IM HBALow subband range (default = '54..297') \n"\
 "         [[-subsLBA subband_range]] ==> The subband range (default = '154..397') \n"\
-"         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16) \n"\
-"         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16) \n"\
+"         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16 (BF), 64 (IM)) \n"\
+"         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16 (BF), 64 (IM)) \n"\
 "         [[-integstepsHBA integration_steps_HBA]] ==> The BF integration steps for HBA (default = 16) \n"\
 "         [[-integstepsLBA integration_steps_LBA]] ==> The BF integration steps for LBA (default = 16) \n"\
-"         [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 1) \n"\
+"         [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 2) \n"\
 "         [[-integLBA integration_interval_LBA]] ==> The IM-obs integration interval for LBA (default = 3) \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) \n"\
 "         [[-IS list_or_ALL]] ==> Turn OFF incoherentStokesData [set to ON by default];  'ALL' or row-number-list '2,4,5' (rows start at #1);  must use +CS|+FD|+BF switches when IS is turned off for all rows \n"\
@@ -103,15 +103,17 @@ user_gap=0
 ANTENNA=HBAHigh
 user_antenna=0
 CHAN_SUBS_HBA=16
+CHAN_SUBS_HBA_IM=64
 user_chan_subs_hba=0
 CHAN_SUBS_LBA=16
+CHAN_SUBS_LBA_IM=64
 user_chan_subs_lba=0
 CHAN_SUBS=0
 STEPS_HBA=16
 user_steps_hba=0
 STEPS_LBA=16
 user_steps_lba=0
-INTEG_HBA=1
+INTEG_HBA=2
 user_integ_hba=0
 INTEG_LBA=3
 user_integ_lba=0
@@ -161,8 +163,8 @@ do
      -antenna)           ANTENNA=$2; user_antenna=1; shift;;
      -modeHBA)           modeHBA=$2; user_modeHBA=1; shift;;
      -modeLBA)           modeLBA=$2; user_modeLBA=1; shift;;
-     -chansubsHBA)       CHAN_SUBS_HBA=$2; user_chan_subs_hba=1; shift;;
-     -chansubsLBA)       CHAN_SUBS_LBA=$2; user_chan_subs_lba=1; shift;;
+     -chansubsHBA)       CHAN_SUBS_HBA=$2; CHAN_SUBS_HBA_IM=$2; user_chan_subs_hba=1; shift;;
+     -chansubsLBA)       CHAN_SUBS_LBA=$2; CHAN_SUBS_LBA_IM=$2; user_chan_subs_lba=1; shift;;
      -integstepsHBA)     STEPS_HBA=$2; user_steps_hba=1; shift;;
      -integstepsLBA)     STEPS_LBA=$2; user_steps_lba=1; shift;;
      -integHBA)          INTEG_HBA=$2; user_integ_hba=1; shift;;
@@ -477,17 +479,17 @@ else
 	   if [[ $ANTENNA == "HBALow" ]]
 	   then
 	       ANT_SHORT=HBA
-	       CHAN_SUBS=$CHAN_SUBS_HBA
+	       CHAN_SUBS=$CHAN_SUBS_HBA_IM
 	       INTERVAL=$INTEG_HBA
 	   elif [[ $ANTENNA == "HBAHigh" ]]
 	   then
 	       ANT_SHORT=HBA
-	       CHAN_SUBS=$CHAN_SUBS_HBA
+	       CHAN_SUBS=$CHAN_SUBS_HBA_IM
 	       INTERVAL=$INTEG_HBA
 	   elif [[ $ANTENNA == "LBA" ]]
 	   then
 	       ANT_SHORT=LBA
-	       CHAN_SUBS=$CHAN_SUBS_LBA
+	       CHAN_SUBS=$CHAN_SUBS_LBA_IM
 	       INTERVAL=$INTEG_LBA
 	   else
 	      echo "ERROR: Antenna must be set to any of these three values: HBALow, HBAHigh or LBA"
@@ -933,10 +935,10 @@ do
 						else
 							if [[ $ANTENNA == "HBAHigh" ]] || [[ $ANTENNA == "HBALow" ]] 
 							then 
-						        CHAN_SUBS=$CHAN_SUBS_HBA
+						        CHAN_SUBS=$CHAN_SUBS_HBA_IM
 						        INTERVAL=$INTEG_HBA
 							else
-						        CHAN_SUBS=$CHAN_SUBS_LBA
+						        CHAN_SUBS=$CHAN_SUBS_LBA_IM
 						        INTERVAL=$INTEG_LBA
 							fi
 						fi # end if [ $INSWITCH == 1 ]
@@ -1038,10 +1040,10 @@ do
 						else
 							if [[ $ANTENNA == "HBAHigh" ]] || [[ $ANTENNA == "HBALow" ]] 
 							then 
-						        CHAN_SUBS=$CHAN_SUBS_HBA
+						        CHAN_SUBS=$CHAN_SUBS_HBA_IM
 						        INTERVAL=$INTEG_HBA
 							else
-						        CHAN_SUBS=$CHAN_SUBS_LBA
+						        CHAN_SUBS=$CHAN_SUBS_LBA_IM
 						        INTERVAL=$INTEG_LBA
 							fi
 						fi # end if [ $INSWITCH == 1 ]

@@ -26,7 +26,7 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16) 
        [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) 
        [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) 
-       [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 1) 
+       [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 2) 
        [[-integLBA integration_interval_LBA]] ==> The IM-obs integration interval for LBA (default = 3) 
        [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
        [[+IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
