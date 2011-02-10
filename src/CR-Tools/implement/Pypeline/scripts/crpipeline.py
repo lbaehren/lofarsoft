@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 
 import datacheck as dc
 import rficlean as rf
@@ -77,6 +78,14 @@ def runAnalysis(files, triggers, outfilename, doPlot = False):
         except (ZeroDivisionError, IndexError), msg:
           print 'EROR!'
           print msg
+        bfEven = result["even"]["optBeam"]
+        bfOdd = result["odd"]["optBeam"]
+        
+        bfEven.plot()
+        raw_input("--- Plotted optimal beam for even antennas - press Enter to continue...")
+        bfOdd.plot()
+        raw_input("--- Plotted optimal beam for odd antennas - press Enter to continue...")
+        
         outfile.flush()
     # end for
     outfile.close()
@@ -115,7 +124,7 @@ triggers = match.readtriggers(triggerMessageFile)
 print 'Trigger reading complete.'
 
 
-#runAnalysis(files, triggers, outfile)
+runAnalysis(files, triggers, outfile, doPlot = True)
 #fitergs = dict()
 
 
@@ -132,25 +141,4 @@ print 'Trigger reading complete.'
 #  pixarray = -1.0 * fitDataEven[3].T # of transpose?
 #  plt.imshow(pixarray,cmap=plt.cm.hot,extent=(az_min, az_max, el_min, el_max) )
 
-#          outstring = ('bruteForce: Az:%7.2f, El:%7.2f'%fitResult['triggerFit'][0:2]+
-#                       ', Dist:%8.1f'%-1.+
-#                       ', mse:%8.3f'%fitResult['triggerFit'][2] +
-#                       ', nAnts:%u\n'%fitResult['triggerFit'][4])
-#          outfile.write(outstring)
-#          outstring = (' linearFit: Az:%7.2f, El:%7.2f'%fitResult['linearFit'][0:2]+
-#                       ', Dist:%8.1f'%-1.+
-#                       ', mse:%8.3f'%fitResult['linearFit'][2] +
-#                       ', nAnts:%u\n'%fitResult['linearFit'][4])
-#          outfile.write(outstring)
-#          evenResults = fitResult['fitEven']
-#          outstring = ('  Even-Fit: Az:%7.2f, El:%7.2f, Dist: xxx '%tuple(evenResults[0])+
-#                       ', Val:%8.0f, Iter: xxx' % evenResults[1] )#  + # 0 tot 2 voor brute, 1 to 3 for simplex
-#    #                   ', Flag:%u\n'%fitResult['fitEven'][4] ) 
-#          outfile.write(outstring)
-#          oddResults = fitResult['fitOdd']
-#          outstring = ('   Odd-Fit: Az:%7.2f, El:%7.2f, Dist: xxx '%tuple(oddResults[0])+
-#                       ', Val:%8.0f, Iter: xxx' % oddResults[1] ) # + 
-#    #                   ', Flag:%u\n'%fitResult['fitOdd'][4] )
-#          outfile.write(outstring)
-#          outfile.flush()
 

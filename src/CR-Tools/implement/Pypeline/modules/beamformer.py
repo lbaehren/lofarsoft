@@ -23,6 +23,7 @@ class Beamformer(object):
         self.freqs = hArray(crfile["frequencyValues"]) # a FloatVec comes out, so put it into hArray
         self.phases = hArray(float,dimensions=cr_fft,name="Phases",xvalues=crfile["frequencyValues"]) 
         self.shiftedFFT = hArray(complex,dimensions=cr_fft)
+        self.shiftedTimeSeries = hArray(float, dimensions=[nofAntennas, blocksize])
         
         self.beamformedFFT=hArray(complex,dimensions=[crfile["fftLength"]])
         
@@ -65,20 +66,101 @@ class Beamformer(object):
             
         self.shiftedFFT[antennaIndices, ...].addto(self.beamformedFFT)
 
-        hInvFFTw(self.tiedArrayBeam, self.beamformedFFT)
+        hInvFFTw(self.tiedArrayBeam, self.beamformedFFT)              
         
         self.tiedArrayBeam *= (1.0 / self.blocksize)
         # that's in fact faster than dividing by the blocksize. Not that it matters here, of course
 
         return self.tiedArrayBeam
     
-    
+    def getAllBeams(self, azel_in, fftData, antennaPositions, antennaIndices, FarField):
+    # TODO: merge half of this stuff with previous function...
+        if FarField:
+            print 'Evaluating for az = %f, el = %f, R = inf' % (azel_in[0], azel_in[1]),
+        else:
+            print 'Evaluating for az = %f, el = %f, R = %f' % (azel_in[0], azel_in[1], 2000.0 / (azel_in[2])),
+        if ( azel_in[0] > 360. or azel_in[0] < 0. or azel_in[1] > 90. or azel_in[1] < 0.):
+            erg = 0.
+        else:
+            self.azel[0] = azel_in[0]
+            self.azel[1] = azel_in[1]
+            if (FarField):
+                self.azel[2] = 1.
+            else:
+                self.azel[2] = 2000.0 / (azel_in[2])
+        hCoordinateConvert(self.azel, CoordinateTypes.AzElRadius, self.cartesian, CoordinateTypes.Cartesian, True)
+        hGeometricDelays(self.delays, antennaPositions, self.cartesian, FarField)   
+        hDelayToPhase(self.phases, self.freqs, self.delays) 
+        hPhaseToComplex(self.weights, self.phases)
+
+        hMul(self.shiftedFFT, fftData, self.weights) # Dimensions don't match: need [...] ???
+
+        self.beamformedFFT.fill(0.0)   
+        self.shiftedFFT[antennaIndices, ...].addto(self.beamformedFFT)
+        hInvFFTw(self.tiedArrayBeam, self.beamformedFFT) # to test the following
+        self.tiedArrayBeam *= (1.0 / self.blocksize)
+
+#        cr_fft[...].fftw(cr_efield[...])
+        self.shiftedTimeSeries[...].invfftw(self.shiftedFFT[...])
+        self.shiftedTimeSeries *= (1.0 / self.blocksize) # optimize
+        
+        testSeries = self.tiedArrayBeam.new()
+        self.shiftedTimeSeries[antennaIndices, ...].addto(testSeries)
+        
+#        import pdb; pdb.set_trace()
+        
+        testInc = self.shiftedTimeSeries.new()
+        testInc[...].square(self.shiftedTimeSeries[...])
+        
+        self.incoherentBeam.fill(0.0) 
+        
+        testInc[...].addto(self.incoherentBeam)
+#        pdb.set_trace()
+        
+        self.ccBeam.fill(0.0)
+        self.ccBeam.square(self.tiedArrayBeam)
+        self.ccBeam -= self.incoherentBeam
+        self.ccBeam *= 0.5
+#        pdb.set_trace()
+        # signed square root needed! TODO: Add to hftools...       
+        ccBeam = self.ccBeam.toNumpy() # hack around
+        for i in range(len(ccBeam)):
+            if ccBeam[i] < 0.0:
+                ccBeam[i] = - np.sqrt( - ccBeam[i])
+            else:
+                ccBeam[i] = np.sqrt(ccBeam[i])
+        self.ccBeam = hArray(ccBeam)
+
+        self.incoherentBeam.sqrt()
+
+#        pdb.set_trace()
+        return (self.tiedArrayBeam, self.incoherentBeam, self.ccBeam)
+        
     def pulseMaximizer(self, azel_in, fftData, antennaPositions, antennaIndices, FarField):
+        # Develop this to calculate the pulse height in a proper way!
         tiedArrayBeam = self.getTiedArrayBeam(azel_in, fftData, antennaPositions, antennaIndices, FarField)
         tiedArrayBeam.abs() # make absolute value!
 #        hRunningAverage(smoothedBeam, tiedArrayBeam, 5, hWEIGHTS.GAUSSIAN)
 
         value = - tiedArrayBeam.max()[0] # just the maximum. 
+        print ' value = %f ' % value
+        return value
+    
+    
+    def fancyPulseMaximizer(self, azel_in, fftData, antennaPositions, antennaIndices, FarField, beamType = 'tiedArrayBeam'):
+        # Develop this to calculate the pulse height in a proper way!
+        (tiedArrayBeam, incoherentBeam, ccBeam) = self.getAllBeams(azel_in, fftData, antennaPositions, antennaIndices, FarField)
+        
+        if beamType == 'tiedArrayBeam':        
+            tiedArrayBeam.abs() # make absolute value!
+    #        hRunningAverage(smoothedBeam, tiedArrayBeam, 5, hWEIGHTS.GAUSSIAN)
+            value = - tiedArrayBeam.max()[0] # just the maximum. 
+        elif beamType == 'incoherentBeam':
+            value = - incoherentBeam.max()[0]
+        elif beamType == 'ccBeam':
+            value = - ccBeam.max()[0]
+        else:
+            return 1.0e9
         print ' value = %f ' % value
         return value
         

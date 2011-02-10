@@ -29,10 +29,7 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
                        cr_freqs, FarField=True, blocksize=-1, doPlot = False):
 #  print 'ANT INDICES: '
 #  print ant_indices
-#  print ' '
-#  if not FarField:
-#      print 'Warning: only FarField == True is implemented!'
-  
+#  print ' ' 
   thisBF = bf.Beamformer(crfile, cr_fft) # initialize object. Isn't this an ugly memory leak?
   #import pdb; pdb.set_trace()
   optimum = fmin(thisBF.pulseMaximizer, start_position, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-2, ftol=1e-4, full_output=1)
@@ -49,12 +46,19 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
           pos = [optimum[0][0], optimum[0][1], 2000.0 / distances[i]]
           distResult[i] = - thisBF.pulseMaximizer(pos, cr_fft, antenna_positions, ant_indices, False)
       
+      optR = distances[np.argmax(distResult)]
+      pos[2] = 2000.0 / optR
+      plt.clf()
       plt.semilogx(distances, distResult)
       raw_input("--- Plotted bf pulse height versus distance - press Enter to continue...")
- 
+      
+      optBeam = thisBF.getTiedArrayBeam(pos, cr_fft, antenna_positions, ant_indices, False)
+  else:
+      optBeam = thisBF.getTiedArrayBeam(optimum[0], cr_fft, antenna_positions, ant_indices, FarField)
+  
 #  bruteRanges = ((start_position[0] - 20.0, start_position[0] + 20.0), (start_position[1] - 10.0, start_position[1] + 10.0))
   #optErg = brute(beamform_function, bruteRanges, Ns = 50, full_output = 1)
-  return optimum
+  return (optimum, optBeam)
 
 #------------------------------------------------------------- triggerMessageFit
 def triggerMessageFit(crfile, triggers, fittype='bruteForce'):  # crfile has to be imported using IO module!
@@ -168,18 +172,19 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
       if entry in ant_indices:
           ant_indices.remove(entry) # or [ant_indices.remove(x) for x in flaggedList if x in ant_indices] ...
   
-  fitDataEven = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
-                                   cr_freqs, FarField=FarField,blocksize=blocksize, doPlot=doPlot)
-                                   
+  (fitDataEven, optBeamEven) = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, cr_freqs, FarField=FarField,blocksize=blocksize, doPlot=doPlot)
+                                     
   ant_indices = range(1, nofAntennas, 2)
   for entry in flaggedList:
       if entry in ant_indices:
           ant_indices.remove(entry)
-  fitDataOdd = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
+          
+  (fitDataOdd, optBeamOdd) = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                   cr_freqs, FarField=FarField,blocksize=blocksize, doPlot=doPlot)
+
   result = dict(success = True, action = 'Full direction fit',
-                even = dict(az = fitDataEven[0][0], el = fitDataEven[0][1], optValue = - fitDataEven[1]),
-                odd = dict(az = fitDataOdd[0][0], el = fitDataOdd[0][1], optValue = - fitDataOdd[1]) )
+                even = dict(az = fitDataEven[0][0], el = fitDataEven[0][1], optValue = - fitDataEven[1], optBeam = optBeamEven),
+                odd = dict(az = fitDataOdd[0][0], el = fitDataOdd[0][1], optValue = - fitDataOdd[1], optBeam = optBeamOdd) )
   
   return result
 
