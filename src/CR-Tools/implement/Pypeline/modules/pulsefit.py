@@ -32,26 +32,30 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
 #  print ' ' 
   thisBF = bf.Beamformer(crfile, cr_fft) # initialize object. Isn't this an ugly memory leak?
   #import pdb; pdb.set_trace()
-  optimum = fmin(thisBF.pulseMaximizer, start_position, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-2, ftol=1e-4, full_output=1)
+  optimum = fmin(thisBF.pulseMaximizer, start_position, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-1, ftol=1e-1, full_output=1)
   
-  if doPlot and not FarField:
-      distResult = np.zeros(100)
-      distances = np.zeros(100)
+  if not FarField:
+      nPoints = 30
+      distResult = np.zeros(nPoints)
+      distances = np.zeros(nPoints)
       R = 10.0
-      for i in range(100):
+      for i in range(nPoints):
           distances[i] = R
-          R *= 1.12
+          R *= pow(10000.0, 1.0 / nPoints)
 #      print distances
-      for i in range(100):
+      for i in range(nPoints):
           pos = [optimum[0][0], optimum[0][1], 2000.0 / distances[i]]
           distResult[i] = - thisBF.pulseMaximizer(pos, cr_fft, antenna_positions, ant_indices, False)
       
       optR = distances[np.argmax(distResult)]
       pos[2] = 2000.0 / optR
-      plt.clf()
-      plt.semilogx(distances, distResult)
-      raw_input("--- Plotted bf pulse height versus distance - press Enter to continue...")
-      
+      if doPlot:
+          plt.clf()
+          plt.semilogx(distances, distResult)
+          raw_input("--- Plotted bf pulse height versus distance - press Enter to continue...")
+      optimum = fmin(thisBF.pulseMaximizer, pos, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-2, ftol=1e-4, full_output=1) # extra simplex fit to finish it off
+      pos = [optimum[0][0], optimum[0][1], optimum[0][2]] # done at once?
+
       optBeam = thisBF.getTiedArrayBeam(pos, cr_fft, antenna_positions, ant_indices, False)
   else:
       optBeam = thisBF.getTiedArrayBeam(optimum[0], cr_fft, antenna_positions, ant_indices, FarField)
