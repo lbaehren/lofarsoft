@@ -110,10 +110,10 @@ class Op_make_residimage(Op):
         thres: threshold
         g: Gaussian object
         """
-
+        
         from math import ceil, sqrt, log
         A = g.peak_flux
         S = g.size_pix[0]
-        return ceil(S*sqrt(-2*log(thresh/A)))
+        return ceil(S*sqrt(-2*log(abs(thresh)/A)))
 
 

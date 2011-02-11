@@ -44,6 +44,10 @@ class Op_readimage(Op):
             mylog.error("First entry of pols has to be I")
             raise RuntimeError("First entry of pols has to be I")
 
+        # Check for trailing "/" in filename (happens a lot, since MS images are directories)
+        if img.opts.filename[-1] == '/':
+            img.opts.filename = img.opts.filename[:-1]
+
         for pol in pols:
             if pol == 'I':
                 image_file = img.opts.filename
@@ -115,6 +119,7 @@ class Op_readimage(Op):
         self.init_beam(img)
         self.init_freq(img)
 
+        img.filename = img.opts.filename
         img.imagename = image_file+'.pybdsm'
 
         return img

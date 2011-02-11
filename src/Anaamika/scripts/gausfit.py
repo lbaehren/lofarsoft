@@ -1,3 +1,4 @@
+
 """Module gausfit.
 
 This module does multi-gaussian fits for all detected islands.
@@ -20,6 +21,7 @@ import time
 
 gaus_num = Int(doc="Serial number of the gaussian for the image")
 ngaus = Int(doc="Total number of gaussians extracted")
+progress_position = -1 # progress indicator
 
 class Op_gausfit(Op):
     """Fit a number of 2D gaussians to each island.
@@ -41,6 +43,7 @@ class Op_gausfit(Op):
     """
     def __call__(self, img):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gausfit   ")
+        global progress_position
         opts = img.opts
         if img.opts.quiet == False:
             if img.nisl == 1:
@@ -50,7 +53,8 @@ class Op_gausfit(Op):
             sys.stdout.flush()
         for idx, isl in enumerate(img.islands):
             if img.opts.quiet == False and img.opts.show_progress == True and opts.verbose_fitting==False:
-                update_progress(idx)
+                progress_position += 1
+                update_progress(idx, max3=False)
             if opts.verbose_fitting:
                 print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active)
 
@@ -88,6 +92,8 @@ class Op_gausfit(Op):
         img.ngaus = n
         mylog.info('%s %i' % ("Total number of Gaussians fit to image :", n))
         if img.opts.quiet == False:
+            update_progress('', max3=False)
+            progress_position = -1
             sys.stdout.write('done.')
             sys.stdout.flush()
             print '\n%s %i' % ("Total number of Gaussians fit to image :", n)
@@ -147,7 +153,7 @@ class Op_gausfit(Op):
                                               beam, thr2, peak, shape)
             ng1 = len(gaul)
             if fitok and len(fgaul) == 0:
-               break
+                break
 
         ### return whatever we got
         isl.mg_fcn = fcn
@@ -301,6 +307,7 @@ class Op_gausfit(Op):
         verbose: whether to print fitting progress information
         """
         from _cbdsm import lmder_fit, dn2g_fit, dnsg_fit
+        global progress_position
         fit = lmder_fit
         beam = list(beam)
 
@@ -319,6 +326,10 @@ class Op_gausfit(Op):
         ### iteratively add gaussians while there are high peaks
         ### in the image and fitting converges
         while fitok:
+          if progress_position >= 0:
+              progress_position += 1
+              update_progress(max3=False)
+            
           peak, coords = fcn.find_peak()
 
           if peak < thr:  ### no good peaks left
@@ -451,20 +462,31 @@ class Op_gausfit(Op):
         
         return np
 
-def update_progress(idx):
+def update_progress(idx=None, max3=False):
     """Simple progress indicator for the shell"""
-    sys.stdout.write('#' + str(idx))
-    sys.stdout.flush()
-    time.sleep(0.02)
-    sys.stdout.write('.')
-    sys.stdout.flush()
-    time.sleep(0.02)
-    sys.stdout.write('.')
-    sys.stdout.flush()
-    time.sleep(0.02)
-    sys.stdout.write('.')
-    sys.stdout.flush()
-    time.sleep(0.02)
+    global progress_position
+    if progress_position >= 0:
+        import numpy
+        if idx != None:
+            if progress_position > 0 and progress_position < 4:
+                for i in range(progress_position, 4):
+                    sys.stdout.write('.') # add dots
+            if progress_position > 3 and max3 == True:
+                sys.stdout.write('\b\b\b...') # add dots
+            if idx != '':
+                sys.stdout.write('#' + str(idx))
+            sys.stdout.flush()
+            time.sleep(0.02)
+            progress_position = 0
+        else:
+            if progress_position < 4 or max3 == False:
+                sys.stdout.write('.')
+            if progress_position == 4 and max3 == True:
+                sys.stdout.write('\b\b\b.  ')
+                sys.stdout.write('\b\b')
+                progress_position = 1
+            sys.stdout.flush()
+            time.sleep(0.02)
 
 
 from image import *

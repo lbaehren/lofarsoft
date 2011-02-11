@@ -92,14 +92,15 @@ def write_shpl(img, filename=None, format='fits', srcroot=None):
     print 'Sorry, this feature is not yet available. Use "write_gaul" instead.'
 
     
-def write_gaul(img, filename=None, format='fits', srcroot=None, patches=False, patch_type='source'):
+def write_gaul(img, filename=None, format='fits', srcroot=None, patches=False, patch_type='single'):
     """Write the Gaussian list to a file."""
     format = format.lower()
+    patch_type = patch_type.lower()
     if (format in ['fits', 'ascii', 'bbs', 'ds9']) == False:
         print 'ERROR: Format must be "fits", "ascii", "ds9", or "bbs"'
         return
-    if (patch_type in ['source', 'gaussian']) == False:
-        print 'ERROR: Patch_type must be "source" or "gaussian"'
+    if (patch_type in ['source', 'gaussian', 'single']) == False:
+        print 'ERROR: Patch_type must be "source", "gaussian", or "single"'
         return
     if img.ngaus == 0:
         print 'No Gaussians were fit to image. Output file not written.'
@@ -339,7 +340,7 @@ def write_ascii_gaul(img, filename):
     print '--> Wrote ASCII file ' + filename
 
     
-def write_bbs_gaul(img, filename, srcroot=None, patches=False, patch_type='source'):
+def write_bbs_gaul(img, filename, srcroot=None, patches=False, patch_type='single'):
     """Writes Gaussian list to a BBS sky model"""
     import numpy as N
     from const import fwsig
@@ -359,17 +360,21 @@ def write_bbs_gaul(img, filename, srcroot=None, patches=False, patch_type='sourc
             + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n\n"
     f.write(str1)
     sep = ', '
-    if srcroot == None:
-        srcroot = img.imagename.split('.')[0] + '_'
-    bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
-    bm_deg = img.pix2beam(bm_pix)
     str_src = []
     total_flux = []
+    if srcroot == None:
+        srcroot = img.imagename.split('.')[0] + '_'
+    if patch_type == 'single':
+        patch_name = srcroot + 'patch'
+        f.write(', , ' + patch_name + ', 00:00:00, +00.00.00\n')
+        
+    bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
+    bm_deg = img.pix2beam(bm_pix)
     
-    if patch_type == 'gaussian' or patches == False:
+    if patch_type == 'gaussian' or patch_type == 'single' or patches == False:
         for g in img.gaussians():
             src_name = srcroot + str(g.gaus_num-1)  # python numbering
-            if patches:
+            if patch_name == 'gaussian':
                 patch_name = src_name + '_patch'
             ra, dec = g.centre_sky
             ra = ra2hhmmss(ra)
@@ -399,12 +404,15 @@ def write_bbs_gaul(img, filename, srcroot=None, patches=False, patch_type='sourc
                 if spin1 != None:
                     specin = str("%.3e" % (spin1[1]))
             if patches:
-                str_src.append(', , ' + patch_name + ', 00:00:00, +00.00.00\n' + src_name + sep + stype + sep + patch_name + sep + sra + sep + sdec + sep + total + sep + pol + freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
+                if patch_type == 'gaussian':
+                    str_src.append(', , ' + patch_name + ', 00:00:00, +00.00.00\n' + src_name + sep + stype + sep + patch_name + sep + sra + sep + sdec + sep + total + sep + pol + freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
+                else:
+                   str_src.append(src_name + sep + stype + sep + patch_name + sep + sra + sep + sdec + sep + total + sep + pol + freq + sep + '0' + sep + specin + sep + deconvstr + '\n') 
             else:
                 str_src.append(src_name + sep + stype + sep + sra + sep + sdec + sep + total + sep + pol + \
                                    freq + sep + '0' + sep + specin + sep + deconvstr + '\n')
         # sort by Gaussian total flux (largest -> smallest)
-        flux_indx = range(len(str_src))
+        flux_indx = range(len(total_flux))
         flux_indx.sort(lambda x,y: cmp(total_flux[x],total_flux[y]), reverse=True)
         for i in flux_indx:
             f.write(str_src[i])

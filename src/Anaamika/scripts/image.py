@@ -94,9 +94,9 @@ class Image(object):
 
         filename - name of resulting file
         format - format of output list. Supported formats are:
-            "fits"
-            "ascii"
-            "bbs"
+            "fits" - FITS binary table
+            "ascii" - ASCII text file
+            "bbs" - BBS sky model
         srcroot - root for source names (BBS format only)
         """
         import output
@@ -107,28 +107,32 @@ class Image(object):
 
         filename - name of resulting file
         format - format of output list. Supported formats are:
-            "bbs"
-            "fits"
-            "ascii"
+            "bbs" - BBS sky model
+            "fits" - FITS binary table
+            "ascii" - ASCII text file
         srcroot - root for source names (BBS format only)
         """
         import output
         output.write_shpl(self, filename=filename, format=format)
 
-    def write_gaul(self, filename=None, format='fits', srcroot=None, patches=False, patch_type='source'):
+    def write_gaul(self, filename=None, format='fits', srcroot=None, patches=False, patch_type='single'):
         """Write the Gaussian list to a file.
 
         filename - name of resulting file
         format - format of output list. Supported formats are:
-            "fits"
-            "ascii"
-            "bbs"
-            "ds9"
+            "fits" - FITS binary table
+            "ascii" - ASCII text file
+            "bbs" - BBS sky model
+            "ds9" - ds9 region file
         srcroot - root for source names (BBS format only)
-        patches - If True, make one patch for each Gaussian
-        patch_type - "source" or "gaussian". If "source", each
-            source gets its own patch. If "gaussian", each
-            Gaussian get its own patch.
+        patches - if True, use patches (BBS format only)
+        patch_type - type of patches to use:
+            "source" - one patch per source. All Gaussians
+                       grouped into a source belong to the
+                       same patch
+            "gaussian" - each Gaussian gets its own patch
+            "single" - all Gaussians are put into a single
+                       patch
         """
         import output
         output.write_gaul(self, filename=filename, format=format, srcroot=srcroot, patches=patches, patch_type=patch_type)
