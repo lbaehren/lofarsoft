@@ -28,12 +28,62 @@
   \author Lars B&auml;hren
   \date 2010-04-19
 */
+
+//_______________________________________________________________________________
+//                                                                    test_sysctl
+
+int test_sysctl ()
+{
+  std::cout << "\n[trmParallel::test_sysctl]\n" << std::endl;
+
+  int nofFailedTests = 0;
+
+#ifdef HW_MACHINE
+  std::cout << "-- HW_MACHINE (machine class) = " << HW_MACHINE << std::endl;
+#endif
+
+#ifdef HW_MODEL
+  std::cout << "-- HW_MODEL (machine model)   = " << HW_MODEL << std::endl;
+#endif
+
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                              test_construction
+
+int test_construction ()
+{
+  std::cout << "\n[trmParallel::test_construction]\n" << std::endl;
+
+  int nofFailedTests = 0;
+
+  try {
+    RM::parallel p;
+    p.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    ++nofFailedTests;
+  }
+  
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                                           main
+
+/*!
+  \brief Main routine of the test program
+
+  \return nofFailedTests -- The number of failed tests encountered within and
+          identified by this test program.
+*/
 int main ()
 {
   int nofFailedTests (0);
 
-  RM::parallel p;
-  p.summary();
+  nofFailedTests += test_sysctl ();
+  nofFailedTests += test_construction ();
 
   return nofFailedTests;
 }

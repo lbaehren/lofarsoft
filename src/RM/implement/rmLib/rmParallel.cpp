@@ -33,12 +33,11 @@ namespace RM {
   
   parallel::parallel ()
   {
-    numcpus      = getAvailCPUs();
-    nofCores_p   = getNofCores();
+    itsNofCPUs   = getAvailCPUs();
+    itsNofCores  = getNofCores();
     availmem     = getPhysmem();
     nofThreads_p = 0;
   }
-
 	
   //_____________________________________________________________________________
   //                                                                    ~parallel	
@@ -64,16 +63,16 @@ namespace RM {
   */
   unsigned int parallel::getAvailCPUs()
   {
-    int numCPU=0;
+    int numCPU = 0;
+    size_t len = 0;
     int mib[4];
-    size_t len; 
-
+    
 #ifdef CTL_HW
     mib[0] = CTL_HW;
 #else
     mib[0] = 1;
 #endif
-
+    
 #ifdef HW_AVAILCPU
     mib[1] = HW_AVAILCPU;  // alternatively, try HW_NCPU;
 #else
@@ -81,10 +80,10 @@ namespace RM {
 #endif
     
     // get the number of CPUs from the system 
-	 if(sysctl(mib, 2, &numCPU, &len, NULL, 0)==-1) {
-	    throw "parallel::getAvailCPUs sysctl failed";
-	 }	  
-		  
+    if(sysctl(mib, 2, &numCPU, &len, NULL, 0)==-1) {
+      throw "parallel::getAvailCPUs sysctl failed";
+    }	  
+    
     if( numCPU < 1 ) {
 #ifdef HW_NCPU
       mib[1] = HW_NCPU;
@@ -94,7 +93,7 @@ namespace RM {
       sysctl( mib, 2, &numCPU, &len, NULL, 0 );
       
       if( numCPU < 1 ) {
-			numCPU = 1;
+	numCPU = 1;
       }
     }	
     //cout << "Number of processors (OpenMP) = " omp_get_num_procs() << endl;
@@ -223,8 +222,8 @@ namespace RM {
   {
     os << "[parallel] Summary of internal parameters" << std::endl;
     
-    os << "-- nof. CPUs              = " << numcpus      << std::endl;
-    os << "-- nof. cores             = " << nofCores_p   << std::endl;
+    os << "-- nof. CPUs              = " << itsNofCPUs   << std::endl;
+    os << "-- nof. cores             = " << itsNofCores  << std::endl;
     os << "-- Physical memory        = " << availmem     << std::endl;
     os << "-- nof. threads           = " << nofThreads_p << std::endl;
     os << "-- nof. allowed processes = " << nofAllowedProcesses() << std::endl;

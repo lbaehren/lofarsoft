@@ -100,6 +100,13 @@ namespace RM {
       </tr>
     </table>
 
+    Function declarations:
+    \code
+    int     sysctl(int *, u_int, void *, size_t *, void *, size_t);
+    int     sysctlbyname(const char *, void *, size_t *, void *, size_t);
+    int     sysctlnametomib(const char *, int *, size_t *);
+    \endcode
+
     <h3>Synopsis</h3>
     
     This class contains high-level RM-Synthesis functions that parallelize the
@@ -111,9 +118,9 @@ namespace RM {
   private:
     
     //! Number of cpus found on system
-    unsigned int numcpus;
+    unsigned int itsNofCPUs;
     //! Number of cores found on system (if using OpenMP)
-    unsigned int nofCores_p;
+    unsigned int itsNofCores;
     //! Available (physical) memory on the machine
     unsigned int availmem;
     //! Number of threads to parallelize computiation into
@@ -122,32 +129,32 @@ namespace RM {
   public:
 
     // === Construction =========================================================
-
+    
     //! Default constructor
     parallel ();
-	  
-	 //! Destructor
-	 ~parallel ();
-
+    
+    //! Destructor
+    ~parallel ();
+    
     // === Parameter access =====================================================
-
+    
     //! Get the number of CPU core available
     inline unsigned int nofCores () const {
-      return nofCores_p;
+      return itsNofCores;
     }
-
+    
     //! Get number of threads the computation is working on
     inline unsigned int nofThreads () const {
       return nofThreads_p;
     }
-
+    
     // === Methods ==============================================================
     
     //! Get the number of available CPUs
     unsigned int getAvailCPUs();
     //! Determine the amount of physical memory
     unsigned long getPhysmem();
-
+    
     static int nofAllowedProcesses ();
     
     //! Provide a summary of the internal status
@@ -157,7 +164,7 @@ namespace RM {
     
     //! Provide a summary of the internal status
     void summary (std::ostream &os);
-
+    
   private:
     
     //! Determine number of CPU cores available
