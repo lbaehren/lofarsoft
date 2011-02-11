@@ -1,10 +1,10 @@
-#!/bin/ksh
+#!/bin/ksh 
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.11
+VERSION=2.12
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -582,6 +582,7 @@ then
 	   flyseye_tar=1
 	fi
 fi
+TiedArray=0
 
 user_core=$core
 #nrBeams_plus1=$(( $nrBeams + 1 ))
@@ -718,16 +719,26 @@ do
 		echo "Found a total of $all_num ${STOKES} input datafiles to process" 
 		echo "Found a total of $all_num ${STOKES} input datafiles to process" >> $log
 		
-		if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 0 ]]
-        then
-           all_num=$nrBeams
-  		   echo "2nd transpose has $nSubbands subbands in $all_num files" 
-  		   echo "2nd transpose has $nSubbands subbands in $all_num files" >> $log
-		elif [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 1 ]]
+        if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 1 ]]
         then
            all_num=$NBEAMS
   		   echo "2nd transpose has $nSubbands subbands in $all_num files" 
   		   echo "2nd transpose has $nSubbands subbands in $all_num files" >> $log
+		elif [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 0 ]]
+        then
+           if (( $nrBeams == 1 )) && (( $all_num > 1 ))
+           then
+               TiedArray=1
+               flyseye=1
+               flyseye_tar=1
+               NBEAMS=$all_num
+	  		   echo "TiedArray Beams: 2nd transpose has $nSubbands subbands in $all_num files" 
+	  		   echo "TiedArray Beams: 2nd transpose has $nSubbands subbands in $all_num files" >> $log
+           else
+	           all_num=$nrBeams
+	  		   echo "2nd transpose has $nSubbands subbands in $all_num files" 
+	  		   echo "2nd transpose has $nSubbands subbands in $all_num files" >> $log
+	  	   fi
         fi
 
 		if [ $all_num -lt $core ]
@@ -776,9 +787,21 @@ do
 		count=0
 		
 		#Create N-split sections of the file list
-		echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
-		echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_" >> $log
-		split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+#		echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+#		echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_" >> $log
+#		split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+
+        if (( $TiedArray == 1 ))
+        then 
+			echo split -a 2 -d -l 1 $master_list ${STOKES}/$$"_split_"
+			echo split -a 2 -d -l 1 $master_list ${STOKES}/$$"_split_" >> $log
+			split -a 2 -d -l 1 $master_list ${STOKES}/$$"_split_"
+        else
+			echo split -a 2 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+			echo split -a 2 -d -l $div_files $master_list ${STOKES}/$$"_split_" >> $log
+			split -a 2 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+        fi
+        
 		status=$?
 		
 		if [ $status -ne 0 ]
@@ -863,9 +886,57 @@ do
 	   then
 	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7"
 	      last_beam="beam_7"
+	   elif (( $NBEAMS == 9 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8"
+	      last_beam="beam_8"
+	   elif (( $NBEAMS == 10 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9"
+	      last_beam="beam_9"
+	   elif (( $NBEAMS == 11 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10"
+	      last_beam="beam_10"
+	   elif (( $NBEAMS == 12 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11"
+	      last_beam="beam_11"
+	   elif (( $NBEAMS == 13 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12"
+	      last_beam="beam_12"
+	   elif (( $NBEAMS == 14 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13"
+	      last_beam="beam_13"
+	   elif (( $NBEAMS == 15 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14"
+	      last_beam="beam_14"
+	   elif (( $NBEAMS == 16 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14 beam_15"
+	      last_beam="beam_15"
+	   elif (( $NBEAMS == 17 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14 beam_15 beam_16"
+	      last_beam="beam_16"
+	   elif (( $NBEAMS == 18 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14 beam_15 beam_16 beam_17"
+	      last_beam="beam_17"
+	   elif (( $NBEAMS == 19 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14 beam_15 beam_16 beam_17 beam_18"
+	      last_beam="beam_18"
+	   elif (( $NBEAMS == 20 ))
+	   then
+	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14 beam_15 beam_16 beam_17 beam_18 beam_19"
+	      last_beam="beam_19"
 	   else
-	      echo "ERROR: unable to work on more than 8 beams in this pipeline"
-	      echo "ERROR: unable to work on more than 8 beams in this pipeline" >> $log
+	      echo "ERROR: unable to work on more than 20 beams in this pipeline"
+	      echo "ERROR: unable to work on more than 20 beams in this pipeline" >> $log
 	      exit 1
 	   fi
 	fi
@@ -928,6 +999,13 @@ do
 	#	       do
 	#	          mkdir -p ${STOKES}/RSP$ii/${jjj}
 		          mkdir -p ${STOKES}/RSP$ii
+		          if (( $TiedArray == 1 ))
+		          then
+		              for jjj in $beams
+		              do 
+		                  mkdir -p ${STOKES}/RSP${ii}/${jjj}
+		              done
+		          fi
 	#	       done
 		   done
 		fi
@@ -965,29 +1043,43 @@ do
     fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
  	
     #Move the split lists to the appropriate directories
-#	if (( $flyseye == 0 ))
-#	then
-    if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
-    then
-		for ii in $num_dir
+	if (( $TiedArray == 0 ))
+	then
+	    if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+	    then
+			for ii in $num_dir
+			do
+			  if (( $ii < 10 ))
+			  then 
+			     echo mv ${STOKES}/$$"_split_0"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list" >> $log
+			     mv ${STOKES}/$$"_split_0"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list"
+			  else
+			     echo mv ${STOKES}/$$"_split_0"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list" >> $log
+			     mv ${STOKES}/$$"_split_0"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list"
+			  fi
+			done
+		fi
+	else 
+	    for ii in $num_dir
 		do
-		  echo mv ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list" >> $log
-		  mv ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list"
+	        counter=0
+			for jjj in $beams
+			do
+			  if (( $counter < 10 ))
+			  then 
+				  echo cp ${STOKES}/$$"_split_0"$counter ${STOKES}/"RSP"${ii}/${jjj}/"RSP"${ii}".list" >> $log
+				  cp ${STOKES}/$$"_split_0"$counter ${STOKES}/"RSP"${ii}/${jjj}/"RSP"${ii}".list"
+			  else
+				  echo cp ${STOKES}/$$"_split_"$counter ${STOKES}/"RSP"${ii}/${jjj}/"RSP"${ii}".list" >> $log
+				  cp ${STOKES}/$$"_split_"$counter ${STOKES}/"RSP"${ii}/${jjj}/"RSP"${ii}".list"			  
+			  fi
+		      counter=$(( $counter + 1 )) 
+			done
 		done
-	fi
-#	else
-#	    for ii in $num_dir
-#		do
-#			for jjj in $beams
-#			do
-#			  echo cp ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"${ii}/${jjj}/"RSP"${ii}".list" >> $log
-#			  cp ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"${ii}/${jjj}/"RSP"${ii}".list"
-#			done
-#		done
-#		echo rm ${STOKES}/$$"_split_"* >> $log
-#		rm ${STOKES}/$$"_split_"*
-#    fi	
-
+		echo rm ${STOKES}/$$"_split_"* >> $log
+		rm ${STOKES}/$$"_split_"*
+    fi	
+    
 	#Convert the subbands with bf2presto
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 	then
@@ -1024,12 +1116,25 @@ do
 #                 cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/incoherentstokes/RSP$ii/*sub[0-9]* ${location}/${STOKES}/RSP$ii/
 			     bf2presto_pid[$ii]=$!  
               else # [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
-                 cd ${location}/${STOKES}/RSP$ii/
-			     echo bf2presto8 ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
-			     bf2presto8 ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+                 if (( $TiedArray == 0 ))
+                 then
+                    cd ${location}/${STOKES}/RSP$ii/
+			        echo bf2presto8 ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+			        bf2presto8 ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
 #A2test
-#                 cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/incoherentstokes/RSP$ii/*sub[0-9]* ${location}/${STOKES}/RSP$ii/
-			     bf2presto_pid[$ii]=$!  
+#                    cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/incoherentstokes/RSP$ii/*sub[0-9]* ${location}/${STOKES}/RSP$ii/
+			        bf2presto_pid[$ii]=$!  
+			     else # (( $TiedArray == 1 ))
+			        for jjj in $beams
+			        do
+			            ${STOKES}/"RSP"${ii}/${jjj}
+                        cd ${location}/${STOKES}/RSP$ii/${jjj}
+			            echo bf2presto8 ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+			            bf2presto8 ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+			           bf2presto_pid[$ii][$jjj]=$!  
+			        done
+			     
+			     fi
 			  fi
 			done
 		else # if (( $flyseye != 0 ))
@@ -1057,20 +1162,39 @@ do
 			       bf2presto8 ${COLLAPSE} -t -b ${NBEAMS} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
 			       bf2presto_pid[$ii]=$!
                 else #    # [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
-			       echo bf2presto8 ${COLLAPSE} -T ${nSubbands} -A 10 -M -b 1 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
-			       bf2presto8 ${COLLAPSE} -T ${nSubbands} -A 10 -M -b 1 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+                   if (( $TiedArray == 0 ))
+                   then
+				       echo bf2presto8 ${COLLAPSE} -T ${nSubbands} -A 10 -M -b 1 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+				       bf2presto8 ${COLLAPSE} -T ${nSubbands} -A 10 -M -b 1 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+			       
+			           bf2presto_pid[$ii]=$!
+			           
+				   else # (( $TiedArray == 1 ))
+				        counter=0
+				        for jjj in $beams
+				        do
+	                        cd ${location}/${STOKES}/RSP$ii/${jjj}
+				            echo bf2presto8 ${COLLAPSE} -T ${nSubbands} -A 10 -M -b 1 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
+				            bf2presto8 ${COLLAPSE} -T ${nSubbands} -A 10 -M -b 1 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
+				            bf2presto_pid[$ii][$counter]=$!
+				            counter=$(( $counter + 1 )) 
+				        done
+				     
+				   fi #end  (( $TiedArray == 1 ))
+			       
 #A2test
 #                 echo "ln -s /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/stokes/CS007LBA/RSP0/*sub[0-9]* ${location}/${STOKES}/RSP$ii/beam_0/" >> $log
 #                 mkdir -p ${location}/${STOKES}/RSP$ii/beam_0/
 #                 cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/stokes/CS007LBA/RSP${ii}/*sub0000 ${location}/${STOKES}/RSP$ii/beam_0/
 #                 ln -s /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/stokes/CS007LBA/RSP${ii}/*sub[0-9]* ${location}/${STOKES}/RSP$ii/beam_0/
 
-			       bf2presto_pid[$ii]=$!
-			    fi
+			    fi  #end [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
+			    
 	#			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
 	#		    echo bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID} `cat SB_master.list` >> $log
 	#		    bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID} `cat SB_master.list` >> bf2presto.out 2>&1 &
-	#			set bf2presto_pid=$!  
+	#			set bf2presto_pid=$! 
+	 
 			done
 			cd ${location}
 	    fi
@@ -1083,7 +1207,17 @@ do
 		for ii in $num_dir
 		do
 		   echo "Waiting for RSP$ii bf2presto to finish"
-		   wait ${bf2presto_pid[ii]}
+		   if (( $TiedArray == 0 ))
+		   then
+		       wait ${bf2presto_pid[ii]}
+		   else
+		       counter=0
+		       for jjj in $beams
+		       do
+		           wait ${bf2presto_pid[ii][counter]}
+				   counter=$(( $counter + 1 )) 
+		       done
+		   fi
 		done
 
 #    else
@@ -1096,13 +1230,33 @@ do
 		date
 		date >> $log
 		
-	    if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 0 ]] && [[ $nrBeams == 1 ]]
+	    if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $nrBeams == 1 ]]
 	    then
-	       # move the beam_0 data out one directory
-	       cd ${location}/${STOKES}/RSP0/beam_0
-	       mv * ../
-	       cd ../
-	       rmdir beam_0
+	       if [[ $flyseye == 0 ]] 
+	       then
+		       # move the beam_0 data out one directory
+		       cd ${location}/${STOKES}/RSP0/beam_0
+		       mv * ../
+		       cd ../
+		       rmdir beam_0
+	       elif [[ $TiedArray == 1 ]]
+	       then
+		       # move the beam_0 data out one directory
+		       cd ${location}/${STOKES}/RSP0/
+
+		       counter=0
+		       for jjj in $beams
+		       do
+		           cd $jjj/beam_0
+			       mv * ../
+			       cd ../
+			       rmdir beam_0
+			       cd ../
+				   counter=$(( $counter + 1 )) 
+		       done
+
+	       fi 
+
 	    fi
 
 	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
@@ -1159,7 +1313,14 @@ do
 			    rm $$.list
 			done
 		else
-		    for jjj in $beams_init
+		    if (( $TiedArray == 0 ))
+		    then
+		       loop_beams=$beams_init
+		    else
+		       loop_beams=$beams
+		    fi
+		    
+		    for jjj in $loop_beams
 		    do
 		        for ii in $num_dir
 		        do
@@ -1223,9 +1384,19 @@ do
             		jj=0    
 					for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
 					do
-					   echo mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
-					   mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
-					   jj=`expr $jj + 1`
+                       if (( $TiedArray == 0 ))
+                       then
+						   echo mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
+						   mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
+						   jj=`expr $jj + 1`
+					   else
+					       for jjj in $beams
+					       do 
+							   echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
+							   cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
+							   jj=`expr $jj + 1`
+						   done 
+					   fi
 					done
 				else # (( $nrBeams > 1 ))
 			        echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[$beam_counter]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r 1 -B $beam_counter ./${OBSID}.parset >> $log
@@ -1267,9 +1438,20 @@ do
 				   echo "ERROR: Unable to successfully run par2inf task" >> $log
 				   exit 1
 				fi
-                result=`ls -1 test*.inf`
-                echo mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
-                mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
+
+                if (( $TiedArray == 0 ))
+                then
+	                result=`ls -1 test*.inf`
+	                echo mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
+	                mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
+		         else
+		             for jjj in $beams
+		             do
+		                result=`ls -1 test*.inf`
+		                echo cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
+		                cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
+		             done		         
+	             fi
             done
         fi
 		
@@ -1506,14 +1688,21 @@ do
 						   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
 						   sleep 5
 					    done
-					else
-					    for jjj in $beams_init
+				     else
+					    if (( $TiedArray == 0 ))
+					    then
+					       loop_beams=$beams_init
+					    else
+					       loop_beams=$beams
+					    fi
+					    counter=0
+					    for jjj in $loop_beams
 					    do
 							for ii in $num_dir
 						    do
 							   cd ${location}/${STOKES}/RSP${ii}/${jjj}
 							   echo cd ${location}/${STOKES}/RSP${ii}/${jjj} >> $log
-							   kk=`echo "$ii * $jjj" | bc`
+							   kk=`echo "$ii * $counter" | bc`
 							   echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
 						       if [ $test == 0 ]
 						       then
@@ -1523,6 +1712,7 @@ do
 							   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
 							   sleep 15
 						    done
+						    counter=$(( $counter + 1 ))
 					    done
 					fi # end if (( $flyseye == 0 ))
 					
@@ -1538,14 +1728,22 @@ do
 					      wait ${prepfold_pid[ii]}
 					   done
 					else
-					    for jjj in $beams_init
+					    if (( $TiedArray == 0 ))
+					    then
+					       loop_beams=$beams_init
+					    else
+					       loop_beams=$beams
+					    fi
+                        counter=0
+					    for jjj in $loop_beams
 					    do
 							for ii in $num_dir
 						    do
-							   kk=`echo "$ii * $jjj" | bc`
+							   kk=`echo "$ii * $counter" | bc`
 					           echo "Waiting for RSP$ii $jjj prepfold to finish"
 					           wait ${prepfold_pid[kk]}
 				            done	
+						    counter=$(( $counter + 1 ))
 					    done
 					fi
 				done # finished loop over PULSAR_LIST
@@ -1954,7 +2152,7 @@ do
 #    fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
 	#Rename the RSP?/beam_? to their actual names based on the observation parset names -> NAME/beam_?
-    if [ $flyseye == 1 ] && [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] 
+    if [ $flyseye == 1 ] && [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $TiedArray == 0 ]
     then
         cd ${location}/${STOKES}/
 		for ii in $num_dir
