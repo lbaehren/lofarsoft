@@ -493,7 +493,7 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
 
     # Obtain filename of antenna positions
     LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
-    filename=LOFARSOFT+"data/lofar/StaticMetaData/"+station+"-AntennaArrays.conf"
+    filename=LOFARSOFT+"data/lofar/StaticMetaData/AntennaArrays/"+station+"-AntennaArrays.conf"
 
     # Open file
     f = open(filename, 'r')
