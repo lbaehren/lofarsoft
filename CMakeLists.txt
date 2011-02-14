@@ -256,7 +256,7 @@ endif (ANAAMIKA_ENABLE_SCIPY)
 
 build_package (dal src/DAL)
 
-add_dependencies (dal casacore)
+add_dependencies (dal casacore git)
 
 if (DAL_PYTHON_BINDINGS)
   if (TEST_DATASETS)
