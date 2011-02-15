@@ -83,7 +83,7 @@ cmake_install ()
   if [ -f $CMAKE_SOURCE_ARCHIVE ] ; then {
     echo "-- [checkCMake] Found source archive -- initiating build ..."
   } else {
-    wget -c http://www.cmake.org/files/v2.8/cmake-2.8.2.tar.gz
+    wget -c http://www.cmake.org/files/v2.${REQUIRED_VERSION_MINOR}/cmake-2.${REQUIRED_VERSION_MINOR}.${REQUIRED_VERSION_PATCH}.tar.gz
   } fi;
 
   ## Expand the source archive
