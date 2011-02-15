@@ -430,7 +430,7 @@ class outputInfo:
 			self.info = self.comment
 			self.infohtml = "<td>%s</td>\n <td colspan=%d align=left>%s</td>" % (self.id, self.colspan, self.comment,)
 
-	def Init(self, id, oi, storage_nodes, dirsizes, statusline, reduced_node, redlocation, processed_dirsize, comment, filestem_array, chi_array, combined_plot, archivestatus):
+	def Init(self, id, oi, storage_nodes, dirsizes, statusline, reduced_node, redlocation, processed_dirsize, comment, filestem_array, chi_array, combined_plot, archivestatus, archivesize):
 		self.id = id
 		self.obsyear = self.id.split("_")[0][1:]
 		self.oi = oi
@@ -461,6 +461,7 @@ class outputInfo:
 		self.chi_array = chi_array
 		self.combined_plot = combined_plot
 		self.archivestatus = archivestatus
+		self.archivesize = archivesize
 
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
 		self.totsize=0.0
@@ -696,16 +697,16 @@ class obsstat:
 		self.subclusters = np.append(np.unique([cexec_nodes[s].split(":")[0] for s in self.storage_nodes]), ["subA", "sub?"])
 		self.dbinfo = {}
 		for sub in np.append(self.subclusters, ["Total"]):
-			self.dbinfo[sub] = {"totDuration": 0.0, "processedDuration": 0.0, "IMonlyDuration": 0.0,
-                                            "Ntotal": 0, "Nprocessed": 0, "Narchived": 0, "Narchived_raw": 0,
-                                            "Narchived_sub": 0, "Narchived_meta": 0,
+			self.dbinfo[sub] = {"totDuration": 0.0, "processedDuration": 0.0, "IMonlyDuration": 0.0, "Ntotal": 0, 
+                                            "Nprocessed": 0, "Narchived": 0, "Narchived_raw": 0, "Narchived_sub": 0, "Narchived_meta": 0,
                                             "Nistype": 0, "Nistype_only": 0, "Ncstype": 0, "Ncstype_only": 0,
                                             "Nfetype": 0, "Nfetype_only": 0, "Nimtype": 0, "Nimtype_only": 0,
                                             "Nbftype": 0, "Nbftype_only": 0, "Nfdtype": 0, "Nfdtype_only": 0,
-                                            "Niscsim": 0, "Nisim": 0, "Niscs": 0, "Ncsim": 0, "Ncsfe": 0, "Nimfe": 0, "Nisfe": 0, "Niscsfe": 0, 
-                                            "Nbfis": 0, "Nbffe": 0, "Nbfisfe": 0, "Nbfiscsfe": 0,
+                                            "Niscsim": 0, "Nisim": 0, "Niscs": 0, "Ncsim": 0, "Ncsfe": 0, "Nimfe": 0, 
+                                            "Nisfe": 0, "Niscsfe": 0, "Nbfis": 0, "Nbffe": 0, "Nbfisfe": 0, "Nbfiscsfe": 0,
                                             "totRawsize": 0.0, "IMonlyRawsize": 0.0, "totProcessedsize": 0.0,
-                                            "Archivedsize": 0.0, "Archivedsize_raw": 0.0, "Archivedsize_processed": 0.0 } # sizes in TB
+                                            "Archivedsize": 0.0, "Archivedsize_raw": 0.0, "Archivedsize_sub": 0.0, 
+                                            "Archivedsize_meta": 0.0 } # sizes in TB
 
 		for sub in self.subclusters:
 			self.subkeys=np.compress(np.array([obstable[r].subcluster for r in self.ids]) == sub, self.ids)
@@ -723,13 +724,13 @@ class obsstat:
 					self.dbinfo[sub]["Narchived"] += 1
 					if re.search("raw", obstable[r].archivestatus):
 						self.dbinfo[sub]["Narchived_raw"] += 1
-						self.dbinfo[sub]["Archivedsize_raw"] += float(obstable[r].totsize)
+						self.dbinfo[sub]["Archivedsize_raw"] += obstable[r].archivesize["raw"]
 					if re.search("sub", obstable[r].archivestatus):
 						self.dbinfo[sub]["Narchived_sub"] += 1
+						self.dbinfo[sub]["Archivedsize_sub"] += obstable[r].archivesize["sub"]
 					if re.search("meta", obstable[r].archivestatus):
 						self.dbinfo[sub]["Narchived_meta"] += 1
-					if re.search("sub", obstable[r].archivestatus) and re.search("meta", obstable[r].archivestatus):
-						self.dbinfo[sub]["Archivedsize_processed"] += float(obstable[r].processed_dirsize)
+						self.dbinfo[sub]["Archivedsize_meta"] += obstable[r].archivesize["meta"]
 
 				# getting the number of obs of different type
 				if obstable[r].comment == "" and obstable[r].oi.istype == "+":
@@ -796,10 +797,11 @@ class obsstat:
 			self.dbinfo[sub]["totRawsize"] /= 1024.
 			self.dbinfo[sub]["totProcessedsize"] /= 1024.
 			self.dbinfo[sub]["IMonlyRawsize"] /= 1024.
-			self.dbinfo[sub]["Archivedsize"] = self.dbinfo[sub]["Archivedsize_raw"] + self.dbinfo[sub]["Archivedsize_processed"]
+			self.dbinfo[sub]["Archivedsize"] = self.dbinfo[sub]["Archivedsize_raw"] + self.dbinfo[sub]["Archivedsize_sub"] + self.dbinfo[sub]["Archivedsize_meta"]
 			self.dbinfo[sub]["Archivedsize"] /= 1024.
 			self.dbinfo[sub]["Archivedsize_raw"] /= 1024.
-			self.dbinfo[sub]["Archivedsize_processed"] /= 1024.
+			self.dbinfo[sub]["Archivedsize_sub"] /= 1024.
+			self.dbinfo[sub]["Archivedsize_meta"] /= 1024.
 
 		for sub in self.subclusters:
 			self.dbinfo["Total"]["totDuration"] += self.dbinfo[sub]["totDuration"]
@@ -816,7 +818,8 @@ class obsstat:
 			self.dbinfo["Total"]["Narchived_meta"] += self.dbinfo[sub]["Narchived_meta"]
 			self.dbinfo["Total"]["Archivedsize"] += self.dbinfo[sub]["Archivedsize"]
 			self.dbinfo["Total"]["Archivedsize_raw"] += self.dbinfo[sub]["Archivedsize_raw"]
-			self.dbinfo["Total"]["Archivedsize_processed"] += self.dbinfo[sub]["Archivedsize_processed"]
+			self.dbinfo["Total"]["Archivedsize_sub"] += self.dbinfo[sub]["Archivedsize_sub"]
+			self.dbinfo["Total"]["Archivedsize_meta"] += self.dbinfo[sub]["Archivedsize_meta"]
 			self.dbinfo["Total"]["Nistype"] += self.dbinfo[sub]["Nistype"]
 			self.dbinfo["Total"]["Nistype_only"] += self.dbinfo[sub]["Nistype_only"]
 			self.dbinfo["Total"]["Ncstype"] += self.dbinfo[sub]["Ncstype"]
@@ -993,12 +996,13 @@ class obsstat:
 			field = "%.1f" % (self.dbinfo[sub]["totProcessedsize"])
 			line += "%-23s" % (field)
 		print line
-		line="Total size of archived data (TB) [raw / processed]:  "
+		line="Total size of archived data (TB) [raw / sub / meta]: "
 		for sub in np.append("Total", self.subclusters):
-			field = "%.1f [%.1f / %.1f]" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_processed"] )
+			field = "%.1f [%.1f / %.1f / %.1f]" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_sub", self.dbinfo[sub]["Archivedsize_meta"]] )
 			line += "%-23s" % (field)
 		print line
 		print
+
 
 	def printhtml (self, htmlfile):
 		self.htmlptr = open(htmlfile, 'w')
@@ -1141,9 +1145,9 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%.1f</b></td>" % (self.dbinfo[sub]["totProcessedsize"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Total size of archived data (TB)", "raw", "processed"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font> / <font color=\"darkblue\"><b>%s</b></font>]</td>" % ("Total size of archived data (TB)", "raw", "sub", "meta"))
 		for sub in np.append("Total", self.subclusters):
-			self.htmlptr.write ("\n <td align=left><b>%.1f</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_processed"]))
+			self.htmlptr.write ("\n <td align=left><b>%.1f</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font> / <font color=\"darkblue\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_sub"], self.dbinfo[sub]["Archivedsize_meta"]))
 		self.htmlptr.write ("\n</tr>")
 
 		self.htmlptr.write ("\n</table>")
@@ -1328,7 +1332,9 @@ if __name__ == "__main__":
 
 	# reading the grid links from common file to the list
 	if os.path.exists(archivefile):
-		gridfiles, griddates, gridtimes, gridlinks = np.loadtxt(archivefile, usecols=(0,1,2,3), dtype=str, unpack=True, comments='#')
+		gridfiles, griddates, gridtimes, gridsizes, gridlinks = np.loadtxt(archivefile, usecols=(0,1,2,3,4), dtype=str, unpack=True, comments='#')
+		# converting sizes to float and checking those also that are not yet determined, i.e. have '-'
+		gridsizes = [r != '-' and float(r) or 0.0 for r in gridsizes]
 
 	# just make sure that rebuild and update switches are off
 	if is_stats:
@@ -1654,6 +1660,7 @@ if __name__ == "__main__":
 		# getting the grid links for the current ObsID and putting them to separate ascii file
 		# and making the archive status line for the table
 		archivestatus = "x"
+		archivesize = {"raw": 0.0, "sub": 0.0, "meta": 0.0}  # size of archived files of different kind
 		if len(gridfiles) != 0:
 			grid_obsid_indices = [i for i in np.arange(len(gridfiles)) if re.search(id, gridfiles[i])]
 			if len(grid_obsid_indices) != 0:
@@ -1661,19 +1668,26 @@ if __name__ == "__main__":
 				grid_obsid_files = [gridfiles[i] for i in grid_obsid_indices]
 				grid_obsid_dates = [griddates[i] for i in grid_obsid_indices]
 				grid_obsid_times = [gridtimes[i] for i in grid_obsid_indices]
+				grid_obsid_sizes = [gridsizes[i] for i in grid_obsid_indices]
 				grid_obsid_links = [gridlinks[i] for i in grid_obsid_indices]
 				# saving the grid links to the separate ascii file
-				np.savetxt(griddir + "/%s.txt" % (id), np.transpose((grid_obsid_files, grid_obsid_dates, grid_obsid_times, grid_obsid_links)), fmt="%s", delimiter="   ")
+				np.savetxt(griddir + "/%s.txt" % (id), np.transpose((grid_obsid_files, grid_obsid_dates, grid_obsid_times, [str(i) for i in grid_obsid_sizes], grid_obsid_links)), fmt="%s", delimiter="   ")
 				rawfiles = [file for file in grid_obsid_files if re.search("raw", file)]
-				if len(rawfiles) != 0: archivestatus = archivestatus+" raw"
+				if len(rawfiles) != 0: 
+					archivestatus = archivestatus+" raw"
+					archivesize["raw"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("raw", grid_obsid_files[i])])
 				subbandfiles = [file for file in grid_obsid_files if re.search("sub", file)]
-				if len(subbandfiles) != 0: archivestatus = archivestatus+" sub"
+				if len(subbandfiles) != 0: 
+					archivestatus = archivestatus+" sub"
+					archivesize["sub"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("sub", grid_obsid_files[i])])
 				metafiles = [file for file in grid_obsid_files if re.search("meta", file)]
-				if len(metafiles) != 0: archivestatus = archivestatus+" meta"
+				if len(metafiles) != 0: 
+					archivestatus = archivestatus+" meta"
+					archivesize["meta"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("meta", grid_obsid_files[i])])
 				archivestatus = " ".join(archivestatus.split(" ")[1:])
 
 		# combining info
-		out.Init(id, oi, storage_nodes, dirsizes, statusline, reduced_node, redlocation, processed_dirsize, "", profiles_array, chi_array, combined_plot, archivestatus)
+		out.Init(id, oi, storage_nodes, dirsizes, statusline, reduced_node, redlocation, processed_dirsize, "", profiles_array, chi_array, combined_plot, archivestatus, archivesize)
 		obstable[id] = out
 		# printing the info line by line in debug mode
 		if is_debug:
