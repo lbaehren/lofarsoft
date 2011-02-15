@@ -18,12 +18,21 @@ cd ${LUS_ROOT}
 ${svn_executable} cleanup
 ${svn_executable} up
 
-echo "-- Building projects ..."
+echo "-- Run configure scripts ..."
 
 cd ${LUS_ROOT}/build
 ./bootstrap
 
-for USG_PACKAGE in dal anaamika cr pulsar rm
+echo "-- Build DAL ..."
+
+cd ${LUS_ROOT}/build
+make dal
+cd src/DAL/src/dal-build
+make Experimental
+
+echo "-- Build LUS packages ..."
+
+for USG_PACKAGE in anaamika cr pulsar rm
 {
     echo "-- Building $USG_PACKAGE ..."
     cd ${LUS_ROOT}/build
