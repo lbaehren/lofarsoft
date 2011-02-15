@@ -91,14 +91,16 @@ endif (HDF5_VERSION_MAJOR LESS ${HDF5_REQUIRED_VERSION_MAJ})
 
 ## Run an additional check to see whether we are on a Debian system
 
-## [...]
+if (HDF5_USE_16_API_DEFAULT)
+  set (HDF5_FORCE_BUILD TRUE)
+endif (HDF5_USE_16_API_DEFAULT)
 
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   
   include (ExternalProject)
-
+  
   ##__________________________________________________________________
   ## Configuration parameters
 
