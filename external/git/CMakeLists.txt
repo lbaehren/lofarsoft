@@ -98,7 +98,6 @@ if (NOT HAVE_GIT OR GIT_FORCE_BUILD)
       DOWNLOAD_DIR ${GIT_BINARY_DIR}/download
       SOURCE_DIR ${GIT_BINARY_DIR}/source
       URL ${HAVE_GIT_SOURCE}
-      URL_MD5 d2fefae2b787a19601c09d89975ce5fb
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${GIT_BINARY_DIR}/source/configure prefix=${CMAKE_INSTALL_PREFIX} --with-curl=${CMAKE_INSTALL_PREFIX} --with-openssl=${SSL_LIBRARY_PATH}
       INSTALL_COMMAND make install

@@ -1,9 +1,24 @@
 
-## Name of the project
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+## Name of the project handled by CMake
 project (DAL)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
+
+## Enforced CMake policy 
+cmake_policy (VERSION 2.8)
+
+##  Package information
+set (DAL_VERSION        "" )
+set (DAL_SOURCE_ARCHIVE "dal.tar.gz" )
+set (DAL_URL            "" )
+set (DAL_GIT            "git://github.com/lbaehren/DAL.git" )
 
 ## ==============================================================================
 ##
@@ -11,238 +26,95 @@ cmake_minimum_required (VERSION 2.8)
 ##
 ## ==============================================================================
 
-option (DAL_BUILD_APPS         "Build the applications?"                      YES )
-option (DAL_ENABLE_TESTING     "Build and enable test programs?"              YES )
-option (DAL_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"    ON  )
-option (DAL_PYTHON_BINDINGS    "Create python bindings?"                      YES )
-option (DAL_DEBUGGING_MESSAGES "Print debugging information?"                 NO  )
-option (DAL_VERBOSE_CONFIGURE  "Verbose output during configuration?"         NO  )
+option (DAL_FORCE_BUILD    "Force build and installation of package?" NO  )
+option (DAL_FROM_REPOS     "Install package from repository?"         YES )
+option (DAL_ENABLE_TESTING "Enable testing and experimental builds?"  YES )
 
-##__________________________________________________________
-## Handle option: testing mode
+## Handle options
 
 if (DAL_ENABLE_TESTING)
-  ## Include CTest module
   include (CTest)
   enable_testing()
-  ## Control parameters for running the tests
-  set (DART_TESTING_TIMEOUT 500)
 endif (DAL_ENABLE_TESTING)
 
-##__________________________________________________________
-## Handle option: verbose mode during configuration?
-
-if (NOT DAL_VERBOSE_CONFIGURE)
-  set (BOOST_FIND_QUIETLY     YES )
-  set (CASACORE_FIND_QUIETLY  YES )
-  set (CFITSIO_FIND_QUIETLY   YES )
-  set (GFORTRAN_FIND_QUIETLY  YES )
-  set (GSL_FIND_QUIETLY       YES )
-  set (HDF5_FIND_QUIETLY      YES )
-  set (LAPACK_FIND_QUIETLY    YES )
-  set (LOFAR_FIND_QUIETLY     YES )
-  set (MPI_FIND_QUIETLY       YES )
-  set (NUMUTIL_FIND_QUIETLY   YES )
-  set (PYTHON_FIND_QUIETLY    YES )
-  set (MPI_FIND_QUIETLY       YES )
-  set (MYSQL_FIND_QUIETLY     YES )
-  set (WCSLIB_FIND_QUIETLY    YES )
-endif (NOT DAL_VERBOSE_CONFIGURE)
-
-##__________________________________________________________
-## Handle option: Enable standard set of compiler warnings?
-
-if (DAL_COMPILER_WARNINGS)
-  set(CMAKE_CXX_FLAGS "-W -g -Wall")
-endif (DAL_COMPILER_WARNINGS)
-
-add_definitions (
-  -DMPICH_IGNORE_CXX_SEEK
-  -D_FILE_OFFSET_BITS=64
-  -D_LARGEFILE64_SOURCE
-  -D_LARGEFILE_SOURCE
-  -fPIC
-  )
-
-if (DAL_DEBUGGING_MESSAGES)
-  set (DEBUGGING_MESSAGES 1)
-else (DAL_DEBUGGING_MESSAGES)
-  set (DEBUGGING_MESSAGES 0)
-endif (DAL_DEBUGGING_MESSAGES)
-
 ## ==============================================================================
 ##
-##  External dependencies
+##  System inspection
 ##
 ## ==============================================================================
 
-include (CPack)
-include (${DAL_SOURCE_DIR}/cmake/CheckExternalPackages.cmake)
-
-## ==============================================================================
-##
-##  Include directories
-##
-## ==============================================================================
-
-##__________________________________________________________
-## Header files of the DAL itself
-
-include_directories (
-  ${DAL_BINARY_DIR}
-  ${DAL_SOURCE_DIR}/implement
-  ${DAL_SOURCE_DIR}/implement/core
-  ${DAL_SOURCE_DIR}/implement/coordinates
-  ${DAL_SOURCE_DIR}/implement/data_common
-  ${DAL_SOURCE_DIR}/implement/data_hl
-  ${DAL_SOURCE_DIR}/test
-  ${DAL_SOURCE_DIR}/test/hdf5
-  ${DAL_SOURCE_DIR}/apps
-  )
-
-##__________________________________________________________
-## Option: Generation of Python bindings (pydal)
-
-if (DAL_PYTHON_BINDINGS)
-  
-  ## Try to compile test program
-  
-  file (WRITE ${PROJECT_BINARY_DIR}/CMakeTmp/CMakeLists.txt
-    "project (TestForPythonBindings)
-     cmake_minimum_required(VERSION 2.6)
-     include_directories (${PYTHON_INCLUDES})
-     include_directories (${BOOST_INCLUDES})
-     include_directories (${NUMUTIL_INCLUDES} ${NUMUTIL_INCLUDES}/num_util)
-     ADD_EXECUTABLE(TestForPythonBindings ${DAL_SOURCE_DIR}/cmake/TestPythonBindings.cc)
-     TARGET_LINK_LIBRARIES(TestForPythonBindings ${PYTHON_LIBRARIES} ${NUMUTIL_LIBRARIES})"
-    )
-  
-  try_compile (DAL_PYTHON_BINDINGS
-    ${PROJECT_BINARY_DIR}/CMakeTmp
-    ${PROJECT_BINARY_DIR}/CMakeTmp
-    TestForPythonBindings
+if (NOT LUS_ROOT)
+  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/..
+    ${PROJECT_SOURCE_DIR}/../..
+    ${PROJECT_SOURCE_DIR}/../../..
+    ENV LOFARSOFT
     )
 
-  ## Enable include directories of test compile succeeded
+  if (LUS_ROOT)
+    include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  else (LUS_ROOT)
+    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  endif (LUS_ROOT)
+endif (NOT LUS_ROOT)
+
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
+
+if (DAL_FROM_REPOS)
+  set (DAL_FORCE_BUILD TRUE)
+endif (DAL_FROM_REPOS)
+
+if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
   
-  if (DAL_PYTHON_BINDINGS)
-    include_directories (${PYTHON_INCLUDES})
-  else (DAL_PYTHON_BINDINGS)
-      message (STATUS "[DAL] Test compilation of Python bindings failed; disabling")
-  endif (DAL_PYTHON_BINDINGS)
+  include (ExternalProject)
+
+  ## Locate source file to build from
   
-endif (DAL_PYTHON_BINDINGS)
-
-## =============================================================================
-##
-##  List of external libraries against which to link; even though we really
-##  need the external libraries listed here, we should be a bit careful when
-##  dealing with the related CMake variables - check first if the variable is
-##  set before adding it to the list of link libraries.
-##
-## =============================================================================
-
-set (dal_link_libraries "")
-
-if (HAVE_LIBZ)
-  list (APPEND dal_link_libraries ${HAVE_LIBZ})
-endif (HAVE_LIBZ)
-
-if (CASA_LIBRARIES)
-  list (APPEND dal_link_libraries ${CASA_LIBRARIES})
-endif (CASA_LIBRARIES)
-
-if (HDF5_LIBRARIES)
-  list (APPEND dal_link_libraries ${HDF5_LIBRARIES})
-else (HDF5_LIBRARIES)
-  message (FATAL_ERROR "[DAL] Missing HDF5 library file(s)!")
-endif (HDF5_LIBRARIES)
-
-if (LAPACK_LIBRARIES)
-  list (APPEND dal_link_libraries ${LAPACK_LIBRARIES})
-endif (LAPACK_LIBRARIES)
-
-if (CFITSIO_LIBRARIES)
-  list (APPEND dal_link_libraries ${CFITSIO_LIBRARIES})
-endif (CFITSIO_LIBRARIES)
-
-if (WCSLIB_LIBRARIES)
-  list (APPEND dal_link_libraries ${WCSLIB_LIBRARIES})
-endif (WCSLIB_LIBRARIES)
-
-if (HAVE_LIBPTHREAD)
-  list (APPEND dal_link_libraries ${HAVE_LIBPTHREAD})
-endif (HAVE_LIBPTHREAD)
-
-if (HAVE_MYSQL)
-  list (APPEND dal_link_libraries ${MYSQL_LIBRARIES})
-endif (HAVE_MYSQL)
-
-if (NOT APPLE)
-  if (HAVE_LIBUTIL)
-    list (APPEND dal_link_libraries ${HAVE_LIBUTIL})
-  endif (HAVE_LIBUTIL)
+  find_file (DAL_SOURCE ${DAL_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
   
-  if (HAVE_LIBDL)
-    list (APPEND dal_link_libraries ${HAVE_LIBDL})
-  endif (HAVE_LIBDL)
+  if (NOT DAL_SOURCE)
+    set (DAL_SOURCE ${DAL_URL})
+  endif (NOT DAL_SOURCE)
   
-  if (HAVE_LIBM)
-    list (APPEND dal_link_libraries ${HAVE_LIBM})
-  endif (HAVE_LIBM)
-endif (NOT APPLE)
-
-## Parallel IO usage requires MPI to be Linked and Included
-
-if (MPI_FOUND AND HDF5_HAVE_PARALLEL_IO)
-  ## compiler flags
-  if (MPI_COMPILE_FLAGS)
-    add_definitions (${MPI_COMPILE_FLAGS})
-  endif (MPI_COMPILE_FLAGS)
-  ## linker flags
-  if (MPI_LINK_FLAGS)
-    set (CMAKE_EXE_LINKER_FLAGS ${MPI_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS})
-  endif (MPI_LINK_FLAGS)
-  ## link libraries
-  list (APPEND dal_link_libraries ${MPI_LIBRARY})
-  if (MPI_EXTRA_LIBRARY)
-    list (APPEND dal_link_libraries ${MPI_EXTRA_LIBRARY})
-  endif (MPI_EXTRA_LIBRARY)
-endif (MPI_FOUND AND HDF5_HAVE_PARALLEL_IO)
-
-## =============================================================================
-##
-##  Installation
-##
-## =============================================================================
-
-# skip the full RPATH for the build tree
-set (CMAKE_SKIP_BUILD_RPATH YES)
-
-# when building, use the install RPATH already
-# (so it doesn't need to relink when installing)
-set (CMAKE_BUILD_WITH_INSTALL_RPATH YES)
-
-# the RPATH to be used when installing
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
-
-## =============================================================================
-##
-##  Project sub-directories
-##
-## =============================================================================
-
-add_subdirectory (data)
-add_subdirectory (implement)
-
-if (DAL_ENABLE_TESTING)
-  add_subdirectory (test)
-endif (DAL_ENABLE_TESTING)
-
-if (DAL_BUILD_APPS)
-  add_subdirectory (apps)
-endif (DAL_BUILD_APPS)
+  ## Build package from source
+  
+  if (DAL_FROM_REPOS)
+    
+    ExternalProject_Add (dal
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      GIT_REPOSITORY ${DAL_GIT}
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+      INSTALL_COMMAND make install
+      )
+  
+  else (DAL_FROM_REPOS)
+    
+    ExternalProject_Add (dal
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${DAL_SOURCE}
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+      INSTALL_COMMAND make install
+      )
+    
+  endif (DAL_FROM_REPOS)
+  
+else (NOT DAL_FOUND OR DAL_FORCE_BUILD)
+  
+  add_custom_target (dal
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[DAL] Found system-wide installation; skipping rebuild!"
+    )
+  
+endif (NOT DAL_FOUND OR DAL_FORCE_BUILD)

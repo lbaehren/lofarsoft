@@ -254,7 +254,7 @@ endif (ANAAMIKA_ENABLE_SCIPY)
 ##____________________________________________________________________
 ##                                           Data Access Library (DAL)
 
-build_package (dal src/DAL)
+add_subdirectory (src/DAL)
 
 add_dependencies (dal casacore git)
 
