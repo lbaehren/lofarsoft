@@ -79,7 +79,7 @@ endif (SSL_LIBRARIES)
 
 if (NOT HAVE_GIT OR GIT_FORCE_BUILD)
   
-  set (GIT_VERSION 1.7.1)
+  set (GIT_VERSION 1.7.4)
   set (GIT_SOURCE_ARCHIVE git-${GIT_VERSION}.tar.gz)
   set (GIT_URL http://kernel.org/pub/software/scm/git/${GIT_SOURCE_ARCHIVE})
   
