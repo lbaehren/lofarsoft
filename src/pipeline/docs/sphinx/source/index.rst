@@ -72,6 +72,7 @@ Developer's Reference
 
    developer/index.rst
    developer/lofarpipe.rst
+   developer/todo.rst
 
 .. _section-pipeline-specific:
 

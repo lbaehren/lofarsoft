@@ -1,7 +1,7 @@
 .. _developer-guide:
 
 *********************
-Developer Information
+Developer information
 *********************
 
 This section describes the internal structure of the pipeline framework. It is

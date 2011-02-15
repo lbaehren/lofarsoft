@@ -1,7 +1,7 @@
 .. _framework-installation:
 
 **********************
-Framework Installation
+Framework installation
 **********************
 
 **Note**: These instructions were developed and tested using Ubuntu 10.04

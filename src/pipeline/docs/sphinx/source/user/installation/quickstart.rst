@@ -1,6 +1,6 @@
 .. _framework-quickstart:
 
-CEP Quickstart
+CEP quickstart
 ==============
 
 .. todo::
