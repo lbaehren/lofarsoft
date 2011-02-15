@@ -4,7 +4,7 @@
 
 REQUIRED_VERSION_MAJOR=2
 REQUIRED_VERSION_MINOR=8
-REQUIRED_VERSION_PATCH=4
+REQUIRED_VERSION_PATCH=3
 
 
 ## === Do not edit below this point! ============================================
