@@ -5,7 +5,9 @@ basedir=`pwd`
 ##______________________________________________________________________________
 ## Build CMake from source 
 
-$basedir/../external/cmake/checkCMake.sh ../external/cmake/cmake-2.8.2.tar.gz $basedir/../release
+cmakeSource=`ls $basedir/../external/cmake/cmake*.gz`
+
+$basedir/../external/cmake/checkCMake.sh $cmakeSource $basedir/../release
 
 ##______________________________________________________________________________
 ## Run CMake to define build targets
