@@ -4,7 +4,7 @@
 # What is exported by default
 __all__ = ['imager']
 
-from pycrtools.tasks import Task, TaskLauncher
+from pycrtools.tasks import Task
 from pycrtools.grid import CoordinateGrid
 import pycrtools as cr
 import pytmf
@@ -36,16 +36,31 @@ class Imager(Task):
     """Imager class documentation.
     """
 
-    def __init__(self,
-                 image,
-                 data,
-                 startblock=0,
-                 nblocks=16,
-                 ntimesteps=1,
-                 obstime=0, # Not a sensible default
-                 L=pytmf.deg2rad(6.869837540),
-                 phi=pytmf.deg2rad(52.915122495),
-                 wcs=wcs_default):
+    def call(self, #This function actually never gets called
+	     image,
+	     data,
+	     startblock=0,
+	     nblocks=16,
+	     ntimesteps=1,
+	     obstime=0, # Not a sensible default
+	     L=pytmf.deg2rad(6.869837540),
+	     phi=pytmf.deg2rad(52.915122495),
+	     wcs=wcs_default):
+         
+	# Store reference to image and data
+	self.image = image
+	self.data = data
+
+        # Store image parameters
+        self.startblock = startblock
+        self.nblocks = nblocks
+        self.ntimesteps = ntimesteps
+        self.obstime = obstime
+	self.wcs=wcs
+	self.phi=phi
+	self.L=L
+	    
+    def init(self):
 
         """Initialize the imager.
 
@@ -57,21 +72,11 @@ class Imager(Task):
         """
 
         # Start initialization
-        print "Initializing imager"
-
-        # Store reference to image and data
-        self.image = image
-        self.data = data
-
-        # Store image parameters
-        self.startblock = startblock
-        self.nblocks = nblocks
-        self.ntimesteps = ntimesteps
-        self.obstime = obstime
+        print "Initializing imager - setting derived parameters (beter use WorkSpace)"
 
         # Generate coordinate grid
         print "Generating grid"
-        self.grid=CoordinateGrid(obstime=obstime, L=L, phi=phi, **wcs)
+        self.grid=CoordinateGrid(obstime=obstime, L=self.L, phi=self.phi, **self.wcs)
         print "Grid generation finished"
 
         # Get frequencies
@@ -116,5 +121,5 @@ class Imager(Task):
             self.startblock += self.nblocks
 
 # Create a TaskLauncher
-imager = TaskLauncher(Imager)
+#imager = TaskLauncher(Imager)
  

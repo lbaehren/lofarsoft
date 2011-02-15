@@ -1,4 +1,4 @@
-"""A Python library for analysing LOFAR TBB data.
+"""A Python library for analyzing LOFAR TBB data.
 """
 
 # Import core functionality

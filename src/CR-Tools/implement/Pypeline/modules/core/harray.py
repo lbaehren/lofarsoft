@@ -160,7 +160,8 @@ def hArray_repr(self, maxlen=100):
         name=', name="'+name+'"'
 
     # Compose string
-    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+name+" # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> "+VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+")"
+#    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+name+" # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> "+VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+")"
+    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+", fill="+VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
 
     return s
 
@@ -672,7 +673,7 @@ def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varn
     Example:
 
 x=hArray([1.0,2.0,3,4],name="test")
-x.write("test.dat",varname='x')
+x.write("test.dat")
 y=hArrayRead("test")
 y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
 
@@ -744,7 +745,8 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     f.write("ha_varname = '" + varname+"'\n")
     par=self.par.__list__()
     for i in range(len(par)): # to avoid pickling data arrays
-        if type(par[i][1]) in hAllContainerTypes: del par[i]
+        if type(par[i][1]) in hAllContainerTypes:
+            if len(par[i][1])>1000: del par[i]
         elif par[i][0]=="hdr":
             for k in par[i][1].keys(): # dirty hack until pickling of Vectors works ...
                 if type(par[i][1][k]) in hAllVectorTypes: par[i][1][k]=list(par[i][1][k])
