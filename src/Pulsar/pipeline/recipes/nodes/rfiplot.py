@@ -94,9 +94,11 @@ class rfiplot(LOFARnode):
 
             try:
                 self.logger.info("Running subdyn on: "+self.rDir)
-                rfiproc = Popen(subdyn_cmd, stdout=PIPE, stderr=PIPE)
-                (sout, serr,) = rfiproc.communicate()
-                result = 0
+                rfiproc   = Popen(subdyn_cmd, stdout=PIPE, stderr=PIPE)
+                sout,serr = rfiproc.communicate()
+                result    = 0
+                self.logger.info(('subdyn stdout: ' + sout))
+                self.logger.info(('subdyn stderr: ' + serr))
             except CalledProcessError,e:
                 self.logger.exception('Call to rfiplot failed')
                 raise CalledProcessError(rfiproc.returncode, executable)

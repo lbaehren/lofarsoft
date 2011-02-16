@@ -26,6 +26,7 @@ __svn_revdate__  = ('$Date: 2011-01-28 15:01:26 +0100 (Fri, 28 Jan 2011) $')[7:2
 __svn_author__   = ('$Author: kenneth $').split()[1]
 
 
+
 class bf2presto(LOFARrecipe):
 
     """
@@ -153,6 +154,7 @@ class bf2presto(LOFARrecipe):
                 self.logger.warn(res.failure.getTraceback())
                 failure = True
         return failure
+
 
 
     def __buildUserEnv(self):

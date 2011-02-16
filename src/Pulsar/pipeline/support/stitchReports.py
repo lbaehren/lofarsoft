@@ -53,8 +53,29 @@ class StitchReports():
         self.pArchive   = obsEnv.pArchive
         self.obsidPath  = os.path.join(self.pArchive,self.obsid)
         self.stokesPath = os.path.join(self.obsidPath,self.stokes)
-        self.newRfiFile = os.join.path(self.stokesPath,
-                                       self.obsid +"_" +"subAll.rfirep")
+        self.rspDirects = glob.glob(self.stokesPath+"/RSP[0-9]")
+        self.offsetDict = self.__rfiOffsets()
+        self.newRfiFile = os.path.join(self.stokesPath,
+                                       self.obsid
+                                       + "_"
+                                       + "subAll.rfirep"
+                                       )
+
+
+
+    def show(self):
+        """ Display the relational RSP-offset structure.
+        """
+        keys = self.offsetDict.keys()
+        keys.sort()
+        for key in keys:
+            print
+            print "RSP Directory     Measured offset"
+            print "-------------     ---------------"
+            print os.path.split(key)[1], "\t\t\t", self.offsetDict[key]
+            print
+        return
+
 
 
     def mergeFiles(self):
@@ -66,23 +87,44 @@ class StitchReports():
 
         filePatt   = "RSP?/*.rfirep"
         globPatt   = os.path.join(self.stokesPath,filePatt)
-        reportCards= glob.glob(globPatt).sort()
-        self.buildRfiReport(reportCards)
+        reportCards= glob.glob(globPatt)
+        newRfiLines= self.buildRfiReport(reportCards)
+        self.writeFullRfiReport(newRfiLines)
+        return
+
+
+    def writeFullRfiReport(self, lines):
+        fob = open(self.newRfiFile,"w")
+        fob.write("# Subband \tFreq(MHz)\n")
+        for line in  lines:
+            fob.write(line)
+        fob.close()
+        del fob
+        return
+
 
 
     def buildRfiReport(self,reportCards):
         """
         Concatenate all rfi report file lines into rfiLines.
         """
-        rfiLines = []
+
+        reportCards.sort()
+        rfiLines    = []
+
         for rfi in reportCards:
             lines = open(rfi).readlines()
+            rNum  = self.__getRspId(rfi)
+            rPath = os.path.join(self.stokesPath,"RSP"+str(rNum))
             for line in lines:
-                if "#" or "Subband" or "Freq" in line: continue
-                channel=line.split("\t")[0].strip()
-                newChannel = channel+str((self.__getSubFileOffset(rfi)))
-                rfiLines.append(self.__buildNewFileLine(newChannel, line))
-        return
+                if "#" in line:
+                    continue
+                else:
+                    channel=line.split("\t")[0].strip()
+                    newChannel = int(channel) + self.offsetDict[rPath]
+                    rfiLines.append(self.__buildNewFileLine(newChannel, line))
+        return rfiLines
+
 
 
     def __buildNewFileLine(self,newchan,line):
@@ -90,27 +132,37 @@ class StitchReports():
         """
 
         newlinetail = line.split('\t')[-1].strip()
-        newlineFull = newchan+"\t\t"+newlinetail+"\n"
+        newlineFull = str(newchan)+"\t\t"+newlinetail+"\n"
         return newlineFull
-        
-                                         
-
-    def __getSubfileOffset(self,rfi):
-        """ `rfi' is a file path string of a passed .rfirep file
-        """
-
-        subPatt = ".sub[0-9][0-9][0-9][0-9]"
-        rspId   = self.__getRspId(rfi)
-        nFiles  = len(glob.glob(rdir+subPatt))
-        offset  = nFiles*rspId
-        return offset
 
 
-            
+
     def __getRspId(self,rfi):
 
         """Extract the RSP index from the rfi report filename.
         If this is not robust, something is very wrong.
         """
-        rspN = float(os.path.split(rfi)[-1].split("_")[-1].split('.')[0][-1])
+        rspN = os.path.split(rfi)[-1].split("_")[-1].split('.')[0][-1]
         return rspN
+
+
+
+    def __rfiOffsets(self):
+
+        """ Builds an offset reference structure.  Since we are not making file
+        or directory assumptions, each RSP directory is length determined.
+        
+        the structure is a dictionary like,
+
+        offsets = {'/path/to/RSP0' : <offset0>,
+                   '/path/to/RSP1' : <offset1>,
+                   '/path/to/RSP2' : <offset2>,
+                   ...
+                   }
+        """
+        
+        subPatt = "/*.sub[0-9][0-9][0-9][0-9]"
+        rfiOffsets = {}
+        for i in range(len((self.rspDirects))):
+            rfiOffsets[self.rspDirects[i]]= len(glob.glob(self.rspDirects[i]+subPatt))*i
+        return rfiOffsets

@@ -35,6 +35,7 @@ class PrepInfFiles():
 
         self.obsid     = obsEnv.obsid
         self.pulsar    = obsEnv.pulsar
+        self.xPulsars  = obsEnv.xPulsars
         self.stokes    = obsEnv.stokes
         self.pArchive  = obsEnv.pArchive
         self.defaultInf= obsEnv.defaultInf
@@ -55,7 +56,7 @@ class PrepInfFiles():
 
     def buildListsAndLinks(self):
         
-        #self.writeRSPLists()
+        #self.writeRSPLists()  # method pushed to buildPulsArch recipe.
         self.prepRSPS()
 
 
@@ -123,6 +124,12 @@ class PrepInfFiles():
         infData = foldingData.FoldingData(prepInf, self.pulsar, self.rspLists)
         infData.readInf()
         infData.calcInfPars(self.parset, self.obsid, self.stokesPath)
+        
+        if self.xPulsars:
+            for xpulsar in self.xPulsars:
+                infData = foldingData.FoldingData(prepInf, xpulsar, self.rspLists)
+                infData.readInf()
+                infData.calcInfPars(self.parset, self.obsid, self.stokesPath)
 
         return
 

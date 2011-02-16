@@ -36,9 +36,10 @@ class prepfold(LOFARnode):
 
         self.inputs     = inputs
         self.infiles    = infiles
-        self.rspN       = str(rspN)         # int or "A" for RSPA
+        self.rspN       = str(rspN)       # int or "A" for RSPA
         self.obsid      = obsEnv.obsid
         self.pulsar     = obsEnv.pulsar
+        self.xPulsars   = obsEnv.xPulsars # extra pulsars via raw string input, if any
         self.stokes     = obsEnv.stokes
         self.pulsArch   = obsEnv.pArchive
         self.executable = self.inputs['executable']

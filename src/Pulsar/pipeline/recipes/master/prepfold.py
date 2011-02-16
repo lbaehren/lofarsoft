@@ -130,31 +130,33 @@ class prepfold(LOFARrecipe):
         with clusterlogger(self.logger) as (loghost, logport):
             self.logger.debug("Logging to %s:%d" % (loghost, logport))
 
-            # build task for each rspGroup, scheduling a prepfold job for each one.
+            # build task for each pulsar, each rspGroup, 
+            # scheduling a prepfold job for each one.
 
             tasks = []
-            rspCount = 0
-            for rspGroup in rspLists[0]:                
-                self.logger.info("rspGroup in process ... RSP"+str(rspCount)+":")
-                task = LOFARTask(
-                "result = run_prepfold(inputs, infiles, obsid, pulsar, arch, userEnv, rspCount)",
-                push=dict(
-                        recipename = self.name,
-                        nodepath   = os.path.dirname(self.__file__.replace('master', 'nodes')),
-                        inputs     = dict(self.inputs),
-                        infiles    = rspGroup,
-                        obsid      = obsid,
-                        arch       = arch,
-                        pulsar     = pulsar,
-                        userEnv    = userEnv,
-                        rspCount   = rspCount,
-                        loghost    = loghost,
-                        logport    = logport
+            for ipulsar in pulsar.split(','):
+                rspCount = 0
+                for rspGroup in rspLists[0]:                
+                    self.logger.info("rspGroup in process ... RSP"+str(rspCount)+":")
+                    task = LOFARTask(
+                        "result = run_prepfold(inputs, infiles, obsid, pulsar, arch, userEnv, rspCount)",
+                        push=dict(
+                            recipename = self.name,
+                            nodepath   = os.path.dirname(self.__file__.replace('master', 'nodes')),
+                            inputs     = dict(self.inputs),
+                            infiles    = rspGroup,
+                            obsid      = obsid,
+                            arch       = arch,
+                            pulsar     = pulsar,
+                            userEnv    = userEnv,
+                            rspCount   = rspCount,
+                            loghost    = loghost,
+                            logport    = logport
+                            )
                         )
-                )
-                self.logger.info("Scheduling processing of %s" % ("RSP"+str(rspCount)))
-                tasks.append((tc.run(task),rspGroup))
-                rspCount += 1
+                    self.logger.info("Scheduling processing of %s" % ("RSP"+str(rspCount)))
+                    tasks.append((tc.run(task),rspGroup))
+                    rspCount += 1
 
             # ____________________________________ #
             #   RSPA job appending to task list ...#

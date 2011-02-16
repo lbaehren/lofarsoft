@@ -48,7 +48,7 @@ class bf2presto(LOFARnode):
         self.obsid     = obsEnv.obsid
         self.pulsar    = obsEnv.pulsar
         self.stokes    = obsEnv.stokes
-        self.pArch     = obsEnv.archPaths[arch]
+        self.pArch     = obsEnv.pArchive
 
         with log_time(self.logger):
             self.logger.info("Building bf2presto command line...")
@@ -63,9 +63,11 @@ class bf2presto(LOFARnode):
 
             try:
                 self.logger.info("Running bf2presto: RSP"+str(self.rspN))
-                bfproc = Popen(bf2_cmd, stdout=PIPE, stderr=PIPE)
-                (sout, serr,) = bfproc.communicate()
-                result = 0
+                bfproc    = Popen(bf2_cmd, stdout=PIPE, stderr=PIPE)
+                sout,serr = bfproc.communicate()
+                result    = 0
+                self.logger.info("bf2presto stdout: " + sout)
+                self.logger.info("bf2presto stderr: " + serr)
             except CalledProcessError,e:
                 self.logger.exception('Call to bf2presto failed')
                 raise CalledProcessError(bf2_proc.returncode, executable)

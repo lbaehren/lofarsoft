@@ -70,6 +70,10 @@ class PulpEnv:
         which will check for the location of an observational parset
         and, once found, read the parameter file as needed.
 
+        The "pulsar" is passed as a raw string for the command line.
+        This string is resolved from a potential csv string of pulsar
+        names.  The first pulsar is grabbed as the namer of the 
+
         Note:
         ---- 
         For now, archPaths is a path library only to those
@@ -89,7 +93,8 @@ class PulpEnv:
             }
 
         self.obsid     = obsid
-        self.pulsar    = pulsar
+        self.pulsar    = pulsar.split(',')[0]  # 1st pulsar in csv string
+        self.xPulsars  = pulsar.split(',')[1:] # list of extra pulsars
         self.arch      = arch
         self.pArchive  = self.archPaths[self.arch]
         self.subnet    = self.__getsubnet()
@@ -109,9 +114,15 @@ class PulpEnv:
                                           )
 
         # The following method calls will populate attributes,
-
-        # self.transpose2
-        # self.stokes
+        #
+        #     self.transpose2
+        #     self.stokes
+        #
+        # N.B. when 'coherentstokes' processing is commissioned for Pulp,
+        # the pipeline parameter, self.stokes, should be, or rather, could be
+        # used in the same way '$mode_str' is employed in the shell script.
+        # self.stokes is currently a string, but could be refactored to be a list
+        # or handled internally, as the pulsars list is managed.
 
         self.__testParset()
         self.__readParset()
@@ -119,7 +130,6 @@ class PulpEnv:
         if self.transpose2:
             self.transpose2  = True
         else: self.tranpose2 = False
-
 
         # ------- envars for node recipe execution ---- #
         try:
@@ -135,7 +145,7 @@ class PulpEnv:
         self.obsidPath  = os.path.join(self.pArchive,self.obsid)
         self.stokesPath = os.path.join(self.obsidPath,self.stokes)
 
-    # ------------ formatted parameter set display ---------- #
+        # ------------ formatted parameter set display ---------- #
 
     def show(self):
 
