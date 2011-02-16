@@ -16,7 +16,7 @@ cmake_policy (VERSION 2.8)
 
 ##  Package information
 set (DAL_VERSION        "" )
-set (DAL_SOURCE_ARCHIVE "dal.tar.gz" )
+set (DAL_SOURCE_ARCHIVE "dal.tgz" )
 set (DAL_URL            "" )
 set (DAL_GIT            "https://github.com/lbaehren/DAL.git" )
 
@@ -27,7 +27,7 @@ set (DAL_GIT            "https://github.com/lbaehren/DAL.git" )
 ## ==============================================================================
 
 option (DAL_FORCE_BUILD    "Force build and installation of package?" NO  )
-option (DAL_FROM_REPOS     "Install package from repository?"         YES )
+option (DAL_FROM_REPOS     "Install package from repository?"         NO  )
 option (DAL_ENABLE_TESTING "Enable testing and experimental builds?"  YES )
 
 ## Handle options
@@ -75,13 +75,13 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
   include (ExternalProject)
 
   ## Locate source file to build from
-  
   find_file (DAL_SOURCE ${DAL_SOURCE_ARCHIVE}
     PATHS ${PROJECT_SOURCE_DIR}
     )
-  
+
+  ## If no source archive is provided, pull code from repository
   if (NOT DAL_SOURCE)
-    set (DAL_SOURCE ${DAL_URL})
+    set (DAL_FROM_REPOS TRUE)
   endif (NOT DAL_SOURCE)
   
   ## Build package from source
