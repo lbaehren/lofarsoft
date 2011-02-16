@@ -1543,53 +1543,50 @@ if __name__ == "__main__":
 			reduced_node = lse # saving the lse node with the reduced data for further use (to increase the performance)
 			reddir = ""
 
-			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_red", cexec_egrep_string)
+			# looking for both _red and _lta directories
+			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | egrep 'red|lta' | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_[rl][et][da]", cexec_egrep_string)
 			redout=os.popen(cmd).readlines()
-			# if there is no _red dir here, we try to find _lta directory
-			if np.size(redout) == 0:
-				cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_lta", cexec_egrep_string)
-				redout=os.popen(cmd).readlines()
-				if np.size(redout) > 0:
-					reddir=redout[0][:-1]
-					statusline=lse
-					redlocation="%s/%s/%s%s" % ("/net", cexec_nodes[lse].split(":")[0], lse, reddir)
-					# getting the size of the processed data
-					cmd="cexec %s 'du -s -B 1 %s 2>/dev/null | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir, cexec_egrep_string)
-					status=os.popen(cmd).readlines()
-					if np.size(status) > 0:
-						status=status[0][:-1]
-						if status.isdigit() == True:
-								processed_dirsize = float(status) / 1024. / 1024. / 1024.
-					# checking if final tar.gz file exists
-					cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir, "*_plots.tar.gz", cexec_egrep_string)
-					if np.size(os.popen(cmd).readlines()) > 0:
-						# tarfile exists
-						statusline=statusline+" +tar"	
-					else:
-						statusline=statusline+" -tar"
-					# checking if RSPA exists
-					cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", cexec_egrep_string)
-                                	if np.size(os.popen(cmd).readlines()) > 0:
-						statusline=statusline+" +all"
-					else:
-						statusline=statusline+" -all"
-					# checking if rfirep file exists in RSP0
-					cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.rfirep", cexec_egrep_string)
-                                	if np.size(os.popen(cmd).readlines()) > 0:
-						statusline=statusline+" +rfi"
-					else:
-						statusline=statusline+" -rfi"
-					# checking if summary rfirep file exists
-					cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes", "*.rfirep", cexec_egrep_string)
-                                	if np.size(os.popen(cmd).readlines()) > 0:
-						statusline=statusline+" +rfiA"
-					else:
-						statusline=statusline+" -rfiA"
-					# checking if "search" directory exists
-					cmd="cexec %s 'ls -1 -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/search*", cexec_egrep_string)
-                                	if np.size(os.popen(cmd).readlines()) > 0:
-						statusline=statusline+" +search"
-					break
+			if np.size(redout) > 0:
+				reddir=redout[0][:-1]
+				statusline=lse
+				redlocation="%s/%s/%s%s" % ("/net", cexec_nodes[lse].split(":")[0], lse, reddir)
+				# getting the size of the processed data
+				cmd="cexec %s 'du -s -B 1 %s 2>/dev/null | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir, cexec_egrep_string)
+				status=os.popen(cmd).readlines()
+				if np.size(status) > 0:
+					status=status[0][:-1]
+					if status.isdigit() == True:
+							processed_dirsize = float(status) / 1024. / 1024. / 1024.
+				# checking if final tar.gz file exists
+				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir, "*_plots.tar.gz", cexec_egrep_string)
+				if np.size(os.popen(cmd).readlines()) > 0:
+					# tarfile exists
+					statusline=statusline+" +tar"	
+				else:
+					statusline=statusline+" -tar"
+				# checking if RSPA exists
+				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", cexec_egrep_string)
+                               	if np.size(os.popen(cmd).readlines()) > 0:
+					statusline=statusline+" +all"
+				else:
+					statusline=statusline+" -all"
+				# checking if rfirep file exists in RSP0
+				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.rfirep", cexec_egrep_string)
+                               	if np.size(os.popen(cmd).readlines()) > 0:
+					statusline=statusline+" +rfi"
+				else:
+					statusline=statusline+" -rfi"
+				# checking if summary rfirep file exists
+				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes", "*.rfirep", cexec_egrep_string)
+                               	if np.size(os.popen(cmd).readlines()) > 0:
+					statusline=statusline+" +rfiA"
+				else:
+					statusline=statusline+" -rfiA"
+				# checking if "search" directory exists
+				cmd="cexec %s 'ls -1 -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/search*", cexec_egrep_string)
+                               	if np.size(os.popen(cmd).readlines()) > 0:
+					statusline=statusline+" +search"
+				break
 
 
 		# Collecting info about chi-squared and profile png-files
