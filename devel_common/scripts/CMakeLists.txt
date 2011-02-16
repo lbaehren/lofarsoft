@@ -19,8 +19,7 @@
 # ***************************************************************************
 
 foreach (infile 
-    experimental-builds
-    nightly-builds
+    lusExperimentalBuilds
     install_doxygen
     )
   configure_file (${infile}.in ${LUS_ROOT}/release/bin/${infile})

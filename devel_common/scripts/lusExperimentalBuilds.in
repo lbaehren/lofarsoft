@@ -1,0 +1,81 @@
+#!${bash_executable}
+
+## ==============================================================================
+##
+##  Environment variables
+##
+## ==============================================================================
+
+export LOFARSOFT=${LUS_ROOT}
+export PATH=${LUS_ROOT}/release/bin:$PATH
+. ${LUS_ROOT}/devel_common/scripts/init.sh
+
+## ==============================================================================
+##
+##  Function definitions
+##
+## ==============================================================================
+
+runTests ()
+{
+    echo "-- Initiating testing procedures ..."
+
+    make ExperimentalStart
+
+    make ExperimentalConfigure
+    make ExperimentalSubmit
+
+    make ExperimentalBuild
+    make ExperimentalSubmit
+
+    make ExperimentalTest
+    make ExperimentalSubmit
+
+    make ExperimentalMemCheck
+    make ExperimentalSubmit
+}
+
+## ==============================================================================
+##
+##  Main section of script
+##
+## ==============================================================================
+
+echo "-- Cleaning up code base ..."
+
+cd ${LUS_ROOT}
+rm -rf release/*
+rm -rf build/*
+
+echo "-- Updating working copy ..."
+
+cd ${LUS_ROOT}
+${svn_executable} cleanup
+${svn_executable} up
+
+echo "-- Run configure scripts ..."
+
+cd ${LUS_ROOT}/build
+./bootstrap
+
+echo "-- Build DAL ..."
+
+cd ${LUS_ROOT}/build
+make dal
+cd ${LUS_ROOT}/build/src/DAL/src/dal-build
+runTests
+
+echo "-- Build LUS packages ..."
+
+for USG_PACKAGE in anaamika cr pulsar rm
+{
+    echo "-- Building $USG_PACKAGE ..."
+    cd ${LUS_ROOT}/build
+    make $USG_PACKAGE
+    echo "-- Experimental build of $USG_PACKAGE ..."
+    cd ${LUS_ROOT}/build/$USG_PACKAGE
+    make install
+
+    runTests
+}
+
