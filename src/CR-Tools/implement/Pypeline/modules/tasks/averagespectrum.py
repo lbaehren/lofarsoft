@@ -28,6 +28,7 @@ ws=tasks.WorkSpace(**args)
 #from pycrtools.tasks import Task, TaskLauncher
 #import pycrtools.tasks
 import tasks
+from pycrtools.core import config
 from pycrtools import *
 from tshortcuts import *
 import time
@@ -211,14 +212,8 @@ class averagespectrum(tasks.Task):
         """
 
         # Start initialization
-
-        self.ws.quality=[]
-        self.ws.antennacharacteristics={}
-
-        self.ws.dostride=(self.ws.stride>1)
-        self.ws.nspectraflagged=0
-
-        self.ws.header.update(self.ws.getParameters())
+	#Nothing to do
+	return
 
     def run(self):
         """Run the program.
@@ -227,122 +222,134 @@ class averagespectrum(tasks.Task):
 
         #print "Time:",time.clock()-self.ws.t0,"s for set-up."
 
-        self.ws.t0=time.clock() #; print "Reading in data and doing a double FFT."
+        self.quality=[]
+        self.antennacharacteristics={}
 
-        self.ws.datafile["blocksize"]=self.ws.blocklen #Setting initial block size
+        self.dostride=(self.stride>1)
+        self.nspectraflagged=0
+        self.header.update(self.ws.getParameters())
+
+        self.t0=time.clock() #; print "Reading in data and doing a double FFT."
+
+        self.datafile["blocksize"]=self.blocklen #Setting initial block size
 
         writeheader=True # used to make sure the header is written the first time
         initialround=True
 
-	npass = self.ws.nchunks*self.ws.stride
-        self.ws.t0=time.clock();
+	npass = self.nchunks*self.stride
+        self.t0=time.clock();
 	for iantenna in range(self.nantennas):
-	    antenna=self.ws.antennas[iantenna]
+	    antenna=self.antennas[iantenna]
             rms=0; mean=0; npeaks=0
-            self.ws.datafile["selectedAntennas"]=[antenna]
-            antennaID=self.ws.antennaIDs[iantenna]
+            self.datafile["selectedAntennas"]=[antenna]
+            antennaID=self.antennaIDs[iantenna]
             print "# Start antenna =",antenna,"(ID=",str(antennaID)+") -",npass,"passes:"
-            for nchunk in range(self.ws.nchunks):
-		#if self.ws.nchunks>1: sys.stdout.write("*")
-                #print "#  Chunk ",nchunk,"/",self.ws.nchunks-1,". Reading in data and doing a double FFT."
+            for nchunk in range(self.nchunks):
+		#if self.nchunks>1: sys.stdout.write("*")
+                #print "#  Chunk ",nchunk,"/",self.nchunks-1,". Reading in data and doing a double FFT."
                 ofiles=[]; ofiles2=[]; ofiles3=[]
-                for offset in range(self.ws.stride):
-		    #if self.ws.stride>1: sys.stdout.write(".")
-                    #print "#    Pass ",offset,"/",self.ws.stride-1,"Starting block=",offset+nchunk*self.ws.nsubblocks
-                    blocks=range(offset+nchunk*self.ws.nsubblocks,(nchunk+1)*self.ws.nsubblocks,self.ws.stride)            
-                    self.ws.cdata[...].read(self.ws.datafile,"Fx",blocks)
-                    self.ws.quality.append(qualitycheck.CRQualityCheckAntenna(self.ws.cdata,datafile=self.ws.datafile,normalize=True,blockoffset=offset+nchunk*self.ws.nsubblocks,observatorymode=self.ws.lofarmode))
-                    qualitycheck.CRDatabaseWrite(self.ws.quality_db_filename+".txt",self.ws.quality[-1])
-                    mean+=self.ws.quality[-1]["mean"]
-                    rms+=self.ws.quality[-1]["rms"]
-                    npeaks+=self.ws.quality[-1]["npeaks"]
-                    dataok=(self.ws.quality[-1]["nblocksflagged"]<=self.ws.maxblocksflagged)
+                for offset in range(self.stride):
+		    #if self.stride>1: sys.stdout.write(".")
+                    #print "#    Pass ",offset,"/",self.stride-1,"Starting block=",offset+nchunk*self.nsubblocks
+                    blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)            
+                    self.cdata[...].read(self.datafile,"Fx",blocks)
+                    self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode))
+                    qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[-1])
+                    mean+=self.quality[-1]["mean"]
+                    rms+=self.quality[-1]["rms"]
+                    npeaks+=self.quality[-1]["npeaks"]
+                    dataok=(self.quality[-1]["nblocksflagged"]<=self.maxblocksflagged)
                     if not dataok:
                         print " # Data flagged!"
                         break
-                    #            print "Time:",time.clock()-self.ws.t0,"s for reading."
-                    self.ws.cdataT.doublefft1(self.ws.cdata,self.ws.fullsize,self.ws.nblocks,self.ws.blocklen,offset)
-                    #            print "Time:",time.clock()-self.ws.t0,"s for 1st FFT."
-                    if self.ws.dostride:
-                        ofile=self.ws.tmpfilename+str(offset)+"a"+self.ws.tmpfileext
+                    #            print "Time:",time.clock()-self.t0,"s for reading."
+                    self.cdataT.doublefft1(self.cdata,self.fullsize,self.nblocks,self.blocklen,offset)
+                    #            print "Time:",time.clock()-self.t0,"s for 1st FFT."
+                    if self.dostride:
+                        ofile=self.tmpfilename+str(offset)+"a"+self.tmpfileext
                         ofiles+=[ofile]
-                        self.ws.cdata.writefilebinary(ofile)  # output of doublefft1 is in cdata ...
+                        self.cdata.writefilebinary(ofile)  # output of doublefft1 is in cdata ...
                 #Now sort the different blocks together (which requires a transpose over passes/strides)
-                #print "Time:",time.clock()-self.ws.t0,"s for 1st FFT now doing 2nd FFT."
+                #print "Time:",time.clock()-self.t0,"s for 1st FFT now doing 2nd FFT."
                 if dataok:
-                    self.ws.nspectraadded+=1
-                    for offset in range(self.ws.stride):
-                        if self.ws.dostride:
+                    self.nspectraadded+=1
+                    for offset in range(self.stride):
+                        if self.dostride:
                             #print "#    Offset",offset
-                            self.ws.tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,self.ws.stride,fill=offset)*(self.ws.nblocks_section*self.ws.blocklen))
+                            self.tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,self.stride,fill=offset)*(self.nblocks_section*self.blocklen))
                             #This transpose it to make sure the blocks are properly interleaved
-                            hTranspose(self.ws.tmpspec,self.ws.tmpspecT,self.ws.stride,self.ws.nblocks_section)
-                        self.ws.specT.doublefft2(self.ws.tmpspec,self.ws.nblocks_section,self.ws.full_blocklen)
-                        if self.ws.dostride:
-                            ofile=self.ws.tmpfilename+str(offset)+"b"+self.ws.tmpfileext
-                            self.ws.specT.writefilebinary(ofile)
+                            hTranspose(self.tmpspec,self.tmpspecT,self.stride,self.nblocks_section)
+                        self.specT.doublefft2(self.tmpspec,self.nblocks_section,self.full_blocklen)
+                        if self.dostride:
+                            ofile=self.tmpfilename+str(offset)+"b"+self.tmpfileext
+                            self.specT.writefilebinary(ofile)
                             ofiles2+=[ofile]
-		    #print "Time:",time.clock()-self.ws.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."
-                    for offset in range(self.ws.nbands):
-                        if (self.ws.nspectraadded==1): # first chunk
-                            self.ws.power.fill(0.0)
+		    #print "Time:",time.clock()-self.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."
+                    for offset in range(self.nbands):
+                        if (self.nspectraadded==1): # first chunk
+                            self.power.fill(0.0)
                         else: #2nd or higher chunk, so read data in and add new spectrum to it
-                            self.ws.power.readfilebinary(self.ws.spectrum_file,self.ws.subspeclen*offset)
-                            self.ws.power*= (self.ws.nspectraadded-1.0)/(self.ws.nspectraadded)                        
-                        if self.ws.dostride:
+                            self.power.readfilebinary(self.spectrum_file,self.subspeclen*offset)
+                            self.power*= (self.nspectraadded-1.0)/(self.nspectraadded)                        
+                        if self.dostride:
                             #print "#    Offset",offset
-                            self.ws.specT2[...].readfilebinary(Vector(ofiles2),Vector(int,self.ws.stride,fill=offset)*(self.ws.blocklen*self.ws.nblocks_section))
-                            hTranspose(self.ws.spec,self.ws.specT2,self.ws.stride,self.ws.blocklen) # Make sure the blocks are properly interleaved
-                            if self.ws.nspectraadded>1: self.ws.spec/=float(self.ws.nspectraadded)   
-                            self.ws.power.spectralpower(self.ws.spec)
+                            self.specT2[...].readfilebinary(Vector(ofiles2),Vector(int,self.stride,fill=offset)*(self.blocklen*self.nblocks_section))
+                            hTranspose(self.spec,self.specT2,self.stride,self.blocklen) # Make sure the blocks are properly interleaved
+                            if self.nspectraadded>1: self.spec/=float(self.nspectraadded)   
+                            self.power.spectralpower(self.spec)
                         else: # no striding, data is all fully in memory
-                            if self.ws.nspectraadded>1: self.ws.specT/=float(self.ws.nspectraadded)   
-                            self.ws.power.spectralpower(self.ws.specT)
-                        if self.ws.stride==1: self.ws.power[0:self.ws.subspeclen/2].write(self.ws.spectrum_file,nblocks=self.ws.nbands,block=offset,writeheader=writeheader)
-                        else: self.ws.power.write(self.ws.spectrum_file,nblocks=self.ws.nbands,block=offset,writeheader=writeheader)
+                            if self.nspectraadded>1: self.specT/=float(self.nspectraadded)   
+                            self.power.spectralpower(self.specT)
+                        if self.stride==1: self.power[0:self.subspeclen/2].write(self.spectrum_file,nblocks=self.nbands,block=offset,writeheader=writeheader)
+                        else: self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,writeheader=writeheader)
                         writeheader=False
-                    #print "#  Time:",time.clock()-self.ws.t0,"s for processing this chunk. Number of spectra added =",self.ws.nspectraadded
+                    #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
                 else: #data not ok
-                    self.ws.nspectraflagged+=1
-                    #print "#  Time:",time.clock()-self.ws.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.ws.nspectraflagged
-            if self.ws.nchunks>0:
-                mean/=self.ws.nchunks
-                rms/=self.ws.nchunks
-                self.ws.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.ws.quality[-self.ws.nchunks:]}
+                    self.nspectraflagged+=1
+                    #print "#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged
+            if self.nchunks>0:
+                mean/=self.nchunks
+                rms/=self.nchunks
+                self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
 		l={"mean":mean,"rms":rms,"npeaks":npeaks}
-                f=open(self.ws.quality_db_filename+".py","a")
-                f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.ws.antennacharacteristics[antennaID])+"\n")
+                f=open(self.quality_db_filename+".py","a")
+                f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
                 f.close()
-                if self.ws.doplot:
+                if self.doplot:
                     #rp(0,plotsubspectrum,markpeaks=False,clf=False)
                     plt.draw()
 	    else: l=""
-	    print "# End   antenna =",antenna," Time =",time.clock()-self.ws.t0,"s  nspectraadded =",self.ws.nspectraadded,"nspectraflagged =",self.ws.nspectraflagged,l
-        print "Finished - total time used:",time.clock()-self.ws.t0,"s."
-        print "To read back the spectrum type: sp=hArrayRead('"+self.ws.spectrum_file+"')"
+	    print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged,l
+        print "Finished - total time used:",time.clock()-self.t0,"s."
+        print "To read back the spectrum type: sp=hArrayRead('"+self.spectrum_file+"')"
 
         #Now update the header file again ....
-        self.ws.header.update(self.ws.getParameters())
-        if self.ws.stride==1: self.ws.power.writeheader(self.ws.spectrum_file,nblocks=self.ws.nbands,dim=[self.ws.subspeclen/2])
-        else: self.ws.power.writeheader(self.ws.spectrum_file,nblocks=self.ws.nbands)
+        self.header.update(self.ws.getParameters())
+        self.header={}
+        if self.stride==1: self.power.writeheader(self.spectrum_file,nblocks=self.nbands,dim=[self.subspeclen/2])
+        else: self.power.writeheader(self.spectrum_file,nblocks=self.nbands)
 
-# Create a TaskLauncher
-#averagespectrum = TaskLauncher(AverageSpectrum)
-#avspec = TaskLauncher(AverageSpectrum)
- 
-class ttest(tasks.Task):
-    parameters = {"f":p_(lambda ws:ws.y*ws.z,"Example of a derived parameter."),"y":{doc:"y-Parameter"}}
+class test1(tasks.Task):
+    """
+    Documentation of task - parameters will be added automatically
+    """
+#    parameters = {"x":{default:None,doc:"x-value - a positional parameter",positional:True},"y":{default:2, doc:"y-value - a normal keyword parameter"},"xy":{default:lambda ws:ws.y*ws.x,doc:"Example of a derived parameter."}}
+    parameters = {"x":p_(None,"x-value - a positional parameter",positional=True),"y":p_(2,"y-value - a normal keyword parameter"),"xy":p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
     def init(self):
-	print "Calling optional initialization routine"
-	print self.ws
-    def call(self,x,y=1,z=2):
-	pass
+	print "Calling optional initialization routine - Nothing to do here."
     def run(self):
-	print "Printing WorkSpace containing parameters"
-	print self.ws
-	print "Printing available parameters"
-	print "self.x=",self.x,"self.y=",self.y,"self.z=",self.z,"self.f=",self.f
-	print "Printing WorkSpace containing parameters again"
-	print self.ws
+	print "Calling Run Function."
+	print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
 
-#ttest = TaskLauncher(TTest)	
+class test2(tasks.Task):
+    """
+    Documentation of task - parameters will be added automatically
+    """
+    def call(self,x,y=2,xy=lambda ws:ws.x*ws.y):
+	pass
+    def init(self):
+	print "Calling optional initialization routine - Nothing to do here."
+    def run(self):
+	print "Calling Run Function."
+	print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
+

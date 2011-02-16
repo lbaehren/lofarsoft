@@ -173,24 +173,25 @@ or is inherited upon reading from a datafile and can be extended at will
 specifying dimensions explicitly)
 - updated and tested stationspectrum
 
-2011-02-15 Pypeline - rev 7103 - Heino Falcke
-- major rewrite of the tasks module, now also include workspaces
-- added the module averagespectrum which calculates an average station
-spectrum and is implemented as a new task
--configure.py contains a number of shortcut 
-
-- added function  IO.getFilenames to retrieve a list of files in a
-directory with a certain start and/or ending.
-- changed hArray __repr__ to produce something one can read back in.
-
-
 2011-02-07 Pypeline - rev7011 Sander ter Veen
 - Changed calibration data path to /data/lofar/StaticMetadata/
 - Cron job running on own machine to keep this synchronised with the LOFAR repository
 - updated metadata.py to include the new path
 - Phase calibration for most stations now also available
 
+2011-02-15 Pypeline - rev 7103 - Heino Falcke
+- major rewrite of the tasks module, now also include workspaces
+- added the module averagespectrum which calculates an average station
+spectrum and is implemented as a new task
+-configure.py contains a number of shortcut 
+- added function  IO.getFilenames to retrieve a list of files in a
+directory with a certain start and/or ending.
+- changed hArray __repr__ to produce something one can read back in.
 
+
+2011-02-17 Pypeline - rev 7108 - Heino Falcke
+- finalized tasks, various bug fixes, added positional parameters
+- added documentation to tasks
 
 ------------------------------------------------------------------------
 TODO

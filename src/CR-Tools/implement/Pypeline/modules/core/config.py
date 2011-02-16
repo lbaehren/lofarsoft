@@ -44,11 +44,13 @@ tpar parfile="averagespectrum_2011-02-15_23:52:15.par"     # to read back a para
 treset                  #to reset parameters to default values
 tget                    #to read back the parameters from the latest run (will also be done at tload)
 tput                    #store input parameters in database
-
+tinit                   #run the intialization routine again (without resetting the parameters to default values)
+thelp                   # print documentation of task module
 """
 task_instance = None
 task_name = ""
 task_class= None
+task_list=set()
 
 #list of all loaded tasks
 loaded_tasks={}
@@ -85,17 +87,21 @@ class t_class():
     without brackets.
     """
     def __repr__(self):
+#	if task_instance == None: return ""
 	self()
+	return ""
 
 class go_class():
     """
     Dummy class to let the user start the current task by simply typing 'go'.
     """
     def __repr__(self):
+#	if task_instance == None: return ""
 	print "Starting task",task_name
 	tput()
 	task_instance()
 	print "Task",task_name,"run."
+	return ""
     def __call__(self,tsk=None,**args):
 	tput()
 	if not tsk==None:
@@ -120,9 +126,30 @@ class tpars_class(t_class):
 
 tpars = tpars_class()
 
+class tinit_class(t_class):
+    """
+    Class to let the user run the initialization part of a task. This
+    will result in a forced initialization, irrespective of whether
+    this has been run before, unless force=False.
+    """
+    def __call__(self,force=True):
+	task_instance.callinit(forceinit=force)
+
+tinit = tinit_class()
+
+class thelp_class(t_class):
+    """
+    Print documentation of tasks
+    """
+    def __call__(self):
+	import pycrtools.tasks
+	print pycrtools.tasks.__doc__
+
+thelp = thelp_class()
+
 class tlist_class(t_class):
     """
-    Dummy class to let the user list the available tasks that can be loaded with tload.
+    Class to let the user list the available tasks that can be loaded with tload.
     """
     def __call__(self):
 	print "Available Tasks:",zip(range(len(loaded_tasks)),loaded_tasks.keys())
@@ -191,9 +218,11 @@ class tpar_class():
 	task_instance.ws(**args)
 	task_instance.ws.update()
     def __repr__(self):
+#	if task_instance == None: return ""
 	print "Input parameters of task",task_name
 	print task_instance.ws.__repr__(workarrays=False,noninputparameters=False)
-
+	return ""
+    
 tpar=tpar_class()
 
 def tdel(*args):

@@ -1,21 +1,338 @@
-"""Tasks
+"""
+(+) Module Tasks
 
-An example to use tasks is give in tasks/averagespectrum.py
+(++) What are tasks?
 
-to try it start ipython and type
+Task are python classes that perform computations of a higher level of
+complexity. They are intended as major building blocks of an automatic
+pipeline or as complex tasks to be called interactively by a user.
 
-taskload                # to load the tasks
+The main parts of a pipeline are a 'run' function that performs the
+main computations, and optional initialization part that is called
+before the first time execution of the task, and a 'workspace' which
+holds all the input and output parameters of the task. The workspace
+can also hold large scratch arrays and derived parameters, which are
+only calculated when needed.
+
+If 'Task' is an instance of a task and 'par' is a parameter of that
+task, then the parameter can be accessed through Task.par and set
+through Task.par=value. Alternatively one can use
+Task["par"] and Task["par"]=value. (These are actually getter and setter functions. The actual
+value is stored in Task._par).
+
+
+For interactive use there are a number of easy to remember command
+line (i.e., Python prompt) functions that allow convenient loading of
+tasks ('tload'), listing of available parameters ('tlist') inspecting
+of parameters ('tpars'), modifying them ('tpar par=value'), storing
+and retrieving of parameters ('tput'/'tget'), and execution of tasks
+('go'). The task instance itself is retrieved with the function
+'task()'.
+
+(++) How to use tasks?
+
+(+++) Executing tasks
+
+Before using tasks they need to be imported, which is currently done
+via 'taskload'. The list of available tasks can then be viewed with
+'tlist' and a specific task is loaded via 'tload tasknumber' or 'tload
+taskname'.
+
+In general tasks can then be called in the conventional way simply
+by calling 
+
+Task(par1=value1,par2=value2,....),
+
+where Task=task().
+
+This actually executes a wrapper function which then puts those
+parameters into the workspace and executes the Task.run() function.
+
+The run function of the task can be called repeatedly without
+re-running the initialization: Task.run() executes the run function
+and Task.init() executes the init function, where Task is here the
+task instance.
+
+To run the task one can also simply type 'go' (also with extra
+function parameters, i.e. 'go par1=value1,par2=value2,....). This runs
+the task one has loaded with 'tload' and will also call 'tput' to
+store the current input parameters to a system database on disk (in
+~/.pycrtools/task).
+
+Here is brief of interactive functions one can use at the command
+prompt in ipython:
+
+taskload                # to import the tasks - needs to be executed at the begin of the session
 tlist                   # to view the available tasks
-tload 2                 # to load the task #2 (can alsO providE a name)
-tload "averagespectrum" # is safer
-tpars                   #to list all parameters
+tload 2                 # to load the task #2 (can also provide a name)
+tload "averagespectrum" # i.e., this is safer in code since the task number can change with time
+tpars                   # to list all parameters
 tpar nchunks=2          # to set a parameter
-go                      #to run the task
+go                      # to run the task
 tpar parfile="averagespectrum_2011-02-15_23:52:15.par"     # to read back a parameter file
-treset                  #to reset parameters to default values
-tget                    #to read back the parameters from the latest run (will also be done at tload)
-tput                    #store input parameters in database
+treset                  # to reset parameters to default values
+tget                    # to read back the parameters from the latest run (will also be done at tload)
+tput                    # store input parameters in database
+tinit                   # run the initialization routine again (without resetting the parameters to default values)
+thelp                   # print documentation of task module
 
+(+++) Workspaces
+
+Using go, the input parameters in the workspace will be stored
+whenever a task is run and hence tasks can be continued across
+sessions without having to retype the parameters. The workspace can be
+accessed via 'myWorkSpace=Task.ws' and a workspace can be provided as
+input to a task, e.g. f(ws=myWorkSpace).
+
+The task will also write all input and output parameters to a
+parameter file (taskname-TIME.par) at execution time (and at the
+end). This file is in python style and easy to read and to edit with a
+normal text editor. Tasks can be run with this file as input to set
+the parameters accordingly, using
+
+Task(parfile=filename,par1=value1,...)
+
+The task workspace is a relatively powerful construct. In the most
+simplest case it just holds the input parameters. Of course, default
+values can be provided so that not all parameters have to be
+specified. The parameters can also have various properties determining
+for what they are used (e.g. input/output/workarrays) and a
+documentation string which is printed at output and included in the
+__doc__ string of the task.
+
+The default value, however, can also be a function which is executed
+the first time the variable is accessed and the result is then stored
+as the parameter value. This is one example of an 'output' parameter,
+that can, however, be turned into an input parameter if the user
+assigns it a new value.
+
+Note, that since derived parameters are only calculated when they are
+used, some parameters may never get set if they are not needed. So, do
+not panic if the workspace shows a number of 'undefined'
+parameters. They simply might no have been called yet and will be
+filled during execution of the task.
+
+This 'on-first-call evaluation' can save memory, since not all arrays
+need always be created. Also, the order in which derived parameters
+are defined does not matter as long as they only depend on other
+defined parameters of the workspace. This functionality actually makes
+the init function relatively superfluous.
+
+All derived parameters know on which other parameters they depend. If
+a parameter in the workspace is modified this information is
+preserved. When executing 'Task.update()', then all the derived
+parameters which depend directly or indirectly on a derived parameter
+will be recalculated. Update will be called automatically if one uses
+'tpar par=value' (or 'tpar(par=value)' if one does not use ipython).
+
+The value will also be updated if the parameter is deleted, using
+either 'tdel par' or simply 'del Task.par'.
+
+Basic logging and performance evaluation is not yet built in, but that
+is relatively easy to do....
+
+(++) How to program tasks?
+
+The modules to import in a task module are
+
+import tasks
+from pycrtools.core import config
+from pycrtools import *
+from tshortcuts import *
+
+The four ingredients of a task are the parameters definition (a dict
+stored in Task.parameters), an init function, a call function, and a
+run function. Of these only the run function is really required, but
+either the parameters dict or the call function should be there to
+define the input parameters.
+
+A simple example is given below
+
+class test(tasks.Task):
+    \"""
+    Documentation of task - parameters will be added automatically
+    \"""
+    parameters = {
+	"x":{default:None,doc:"x-value - a positional parameter",positional:True},
+	"y":{default:2, doc:"y-value - a normal keyword parameter"},
+	"xy":{default:lambda ws:ws.y*ws.x,doc:"Example of a derived parameter."}}
+    def init(self):
+	print "Calling optional initialization routine - Nothing to do here."
+    def run(self):
+	print "Calling Run Function."
+	print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
+
+(+++) Defining parameters
+First the parameters are defined as a dict.  The parameter dict
+consists of key value pairs, where the key is the variable name and
+the value is again a dict with the various properties of that
+particular variable. The following properties are defined
+
+default     : Any default value that will be assigned at first access of
+              the parameter. The default value can also be a function
+              of the form (lambda ws: function body). The parameter ws
+              is the workspace and the function body can make
+              reference to any parameter in the workspace of the task
+              through 'ws.par'.
+
+doc          : A documentation string of the parameter
+
+unit         : An optional unit string describing the unit of the values (for output only).
+
+dependencies : A dict with parameters the parameter depends on (will
+               be generated automatically)
+    
+workarray    : True/False - this parameter is a large data array that
+               will not be saved and is listed in a separate section.
+    
+export       : True/False - If False, then don't output this parameter to
+               the .par file or list them. Also don't include it with getParameters()
+
+output       : True/False - If True, explicitly consider this an output parameter
+
+positional   : True/False - If True, this is a positional parameter
+
+
+To simplify input one can use the helper function p_(default,doc,unit,**kwargs) which will turn
+its arguments into a parameter dict. E.g. the above parameters dict could have been defined as
+
+    parameters = {"x":p_(None,"x-value - a positional parameter",positional=True),
+		  "y":p_(2,"y-value - a normal keyword parameter"),
+		  "xy":p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
+
+Yet another, and perhaps more recognizable form of defining input
+parameters is to provide a dummy call function will all input
+parameter in the definition. E.g.
+
+class test(tasks.Task):
+    \"""
+    Documentation of task - parameters will be added automatically
+    \"""
+    def call(self,x,y=2,xy=lambda ws:ws.x*ws.y):
+	pass
+    def init(self):
+	print "Calling optional initialization routine - Nothing to do here."
+    def run(self):
+	print "Calling Run Function."
+	print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
+
+This has the same effect, but has the disadvantage of not providing
+documentation strings or other options. Both methods, however, can be
+combined, where a parameters dict contains the missing properties or
+additional parameters.
+
+Note, that the call function is actually never called. You may,
+however, provide it with any code and use it for testing purposes.
+
+(+++) Run and init function
+
+The run function does the actual calculations. It will have no
+parameters (other than self, of course). When it is called, run can
+assume that all the parameters are available in the form
+'self.par'. Filling those values with the input parameters and
+calculating the derived parameters is done 'behind the scenes'.
+
+(+++) Example 
+
+Once the task is imported, e.g. here with
+
+import pycrtools.tasks.averagespectrum
+
+then an instance can be created with
+
+t=pycrtools.tasks.averagespectrum.test1()
+
+which can then be called, e.g.
+
+In [22]: t(5)
+Calling Run Function.
+self.x= 5 self.y= 2 self.xz= 10
+
+The parameters are accessed through t.par, i.e. here
+
+In [23]: t.x
+Out[23]: 5
+
+Parameters can already be set at instantiation and provided as keyword
+arguments:
+
+In [27]: t=pycrtools.tasks.averagespectrum.test1(y=3)
+
+In [28]: t(5)
+Calling optional initialization routine - Nothing to do here.
+Calling Run Function.
+self.x= 5 self.y= 3 self.xz= 15
+
+(+++) Parameter file
+
+If one types 'ls -rtl *.par' one will find the latest parameter files
+generated during execution time, e.g.
+
+-rw-r--r--  1 falcke  staff   696 Feb 17 00:22 test1_2011-02-17_00:22:13.par
+
+We can inspect this with 'cat test1_2011-02-17_00:22:13.par'
+or edit it. 
+
+# Task: averagespectrum saved on 2011-02-17 00:22:13
+# File: test1_2011-02-17_00:22:13.par
+#-----------------------------------------------------------------------
+# WorkSpace of test1
+#-----------------------------------------------------------------------
+x                      = 5                              #         x-value - a positional parameter
+y                      = 3                              #         y-value - a normal keyword parameter
+#------------------------Output Parameters------------------------------
+#                   xy = 15                             - Example of a derived parameter.
+#-----------------------------------------------------------------------
+
+
+The task can be executed with the parameter file as input.
+
+t(parfile='test1_2011-02-17_00:22:13.par')
+
+The parameters in the file can, however, be explicitly overwritten
+using keyword arguments, i.e.
+
+In [13]: t(5,parfile='test1_2011-02-17_00:22:13.par',y=2)
+Calling Run Function.
+self.x= 5 self.y= 2 self.xz= 10
+
+
+(+++) Shortcut example
+To simplify running a task one can use the 't'-shortcuts.
+
+Here is an example of using it.
+    
+In [5]: taskload
+
+In [6]: tlist
+Out[6]: Available Tasks: [(0, 'test1'), (1, 'Imager'), (2, 'test2'), (3, 'averagespectrum')]
+
+In [7]: tload 0
+------> tload(0)
+Parameters of task test1
+#-----------------------------------------------------------------------
+# WorkSpace of test1
+#-----------------------------------------------------------------------
+x                      = None                           #         x-value - a positional parameter
+y                      = 2                              #         y-value a normal keyword parameter
+#-----------------------------------------------------------------------
+
+In [9]: t=task()
+
+In [10]: t(5)              # call task directly
+Calling Run Function.
+self.x= 5 self.y= 2 self.xz= 10
+
+In [11]: t(5,y=10)         # call it with keyword arguments
+Calling Run Function.
+self.x= 5 self.y= 10 self.xz= 50
+
+In [12]: go                # start task with go, which can't handle positional parameters well yet
+Out[12]: Starting task test1
+Number of positional arguments provided ( 0 ) is less than required number ( 1 ). Keeping previous values.
+Calling Run Function.
+self.x= 5 self.y= 10 self.xz= 50
+Task test1 run.
 """
 
 import os
@@ -27,7 +344,7 @@ from pycrtools import *
 
 from tshortcuts import *
 
-import pdb
+#import pdb
 #pdb.set_trace()
 
 #import averagespectrum
@@ -57,29 +374,67 @@ class TaskInit(type):
 	if not name == "Task":
 	    config.loaded_tasks[name]=cls.__module__
         super(TaskInit, cls).__init__(name, bases, dct)
-
+	cls.addtask()
+	
     def __call__(cls, *args, **kwargs):
         """ Create a new instance.
         """
 
         # Create instance with restored arguments
         obj = type.__call__(cls, *args, **kwargs)
-
+	
         return obj
+
+    def addtask(cls):
+	"""
+	Adds a task to the library and adds its parameters to the documentation.
+	"""
+	print "Adding task module",cls.__module__+"."+cls.__taskname__
+	config.task_list.add(cls.__module__+"."+cls.__taskname__)
+	if hasattr(cls, "parameters"):
+	    dct=cls.parameters
+	else:
+	    dct={}
+	    if hasattr(cls, "WorkSpace") and hasattr(cls.WorkSpace,"parameters"):
+		dct.update(cls.WorkSpace.parameters)
+	if not type(cls.__doc__)==str: cls.__doc__=""
+	s1=""
+	s2=""
+	for p,v in dct.items():
+	    s="\n*"+p+"*"
+	    if ((v.has_key(default) and not type(v[default])==types.FunctionType)):
+		s+=" = "+str(v[default])
+	    if v.has_key(doc): s += " - "+v[doc]
+	    if ((v.has_key(default) and type(v[default])==types.FunctionType)
+		or (v.has_key(output) and v[output])):
+		s2+=s+" (OUTPUT)"
+	    else:
+		s1+=s+" (INPUT)"
+	cls.__doc__+=s1+s2
+		
+#    def pardoc(cls,par,**kwargs):
+#	"""
+#	Return a pretty string describing a parameter based on its
+#	properties. Typcially added to the __doc__ string of a class.
+#	"""
+
+
+	
+
 
 class Task(object):
     """Base class from which all tasks should be derived.
     """
     __metaclass__ = TaskInit
 
-    def __init__(self,ws=None,parfile=None,**args):
+    def __init__(self,ws=None,parfile=None,**kwargs):
 
 	self.__modulename__=self.__module__.split(".")[-1]
 	self.__taskname__=self.__class__.__taskname__
 	config.task_name=self.__taskname__
 	config.task_instance=self
 	
-	margs=args.copy() #Reading parameters from a file
+	margs=kwargs.copy() #Reading parameters from a file
 	if type(parfile)==str:
 	    if os.path.exists(parfile):
 		fargs={}
@@ -103,9 +458,9 @@ class Task(object):
 		positional_pars=self.call.im_func.func_code.co_varnames[1:n_positional_pars] # start at 1 to exclude "self" argument
 		for p in positional_pars:
 		    if property_dict.has_key(p):
-			property_dict[p].update({default:None,export:False})
+			property_dict[p].update({default:None,export:False,positional:True})
 		    else:
-			property_dict[p]={default:None,export:False}
+			property_dict[p]={default:None,export:False,positional:True}
 		for p,v in zip(named_pars,self.call.im_func.func_defaults):
 		    if property_dict.has_key(p):
 			property_dict[p].update({default:v})
@@ -121,17 +476,21 @@ class Task(object):
 	for p in pp:
 	    self.addProperty(p,eval("lambda slf:slf.ws['"+p+"']"),eval("lambda slf,x:slf.ws.__setitem__('"+p+"',x)"),eval("lambda slf:slf.ws.delx('"+p+"')"),self.ws.getParameterDoc(p))
 
-	self._starttime=time.strftime("%Y-%m-%d_%H:%M:%S")
-	self.oparfile=self.__taskname__+"_"+self._starttime+".par" 
-        self.ws.t0=time.clock()
-
+	self._initialized=False
 	self.ws.evalInputParameters()
-	if hasattr(self,"init"): self.init()
 
-	#Add those parameters that were added during init phase
-	pp=set(self.ws.getParameterNames(self,all=True)).difference(set(dir(self)))
-	for p in pp:
-	    self.addProperty(p,eval("lambda slf:slf.ws['"+p+"']"),eval("lambda slf,x:slf.ws.__setitem__('"+p+"',x)"),eval("lambda slf:slf.ws.delx('"+p+"')"),self.ws.getParameterDoc(p))
+    def callinit(self,forceinit=False):
+	"""
+	Calls the initialization routine if it wasn't run yet (or force it to run nonetheless)
+	"""
+	if hasattr(self,"init") and (not self._initialized or forceinit):
+	    self.init()
+	    self._initialized=True
+
+	    #Add those parameters that were added during init phase
+	    pp=set(self.ws.getParameterNames(self,all=True)).difference(set(dir(self)))
+	    for p in pp:
+		self.addProperty(p,eval("lambda slf:slf.ws['"+p+"']"),eval("lambda slf,x:slf.ws.__setitem__('"+p+"',x)"),eval("lambda slf:slf.ws.delx('"+p+"')"),self.ws.getParameterDoc(p))
 
     def saveOutputFile(self):
 	"""
@@ -153,23 +512,87 @@ class Task(object):
 	"""
         setattr(self.__class__, name, property(*funcs)) #property(getx, setx, delx, "I'm the property.")
 
-    def __call__(self,parfile=None,ws=None,**kwargs):
+    def __call__(self,*args,**kwargs):
 	"""
-	task.run() -> rerun the task with currently set parameters
-	task.run(par1=val1,par2=val2) -> rerun the task with the parameters parN set to the values provided and keeping the previous parameters the same
-	"""
+	Usage:
+	
+	task.run() -> (re)run the task with currently set parameters.
 
+	If called for the first time the initialization
+	routine will be called. 
+
+	task.run(x1,x2,...,par1=val1,par2=val2) -> rerun the task with
+	the positional parameters xN and the parameters parN set to
+	the values provided and keeping the previous parameters the
+	same
+
+	*init* = False - force the initalisation to run again
+	
+	*parfile* = filename - read parameters from file
+
+	*ws* - replace workspace with a different Workspace and then
+         update parameters therein as provided in the file and the
+         keywords.
+
+	 ws parameters will be overwritten by file parameter and they
+	 will be overwritten by keyword parameters (which thus have
+	 the highest priority).
+	"""
+	parfile=None; ws=None; init=False
+	if kwargs.has_key("parfile"):
+	    parfile=kwargs["parfile"]
+	    del kwargs["parfile"]
+	if kwargs.has_key("ws"):
+	    ws=kwargs["ws"]
+	    del kwargs["ws"]
+	if kwargs.has_key("init"):
+	    init=kwargs["init"]
+	    del kwargs["init"]
+	
 	self._starttime=time.strftime("%Y-%m-%d_%H:%M:%S")
 	self.oparfile=self.__taskname__+"_"+self._starttime+".par" 
+        self.ws.t0=time.clock()
 
-	if not ws==None: self.ws=ws
+	self.callinit(forceinit=init) #Call initialization if not yet done
+
+	if not ws==None: self.ws=ws           # Updating WorkSpace
 	self.ws(parfile=parfile,**kwargs)
-#	if not parfile == None: self.ws(parfile=parfile)
-#	if len(kwargs)>0: self.ws(**kwargs) # set parameters in workspace
-	self.ws.update() # make sure all parameters are up-to-date
+
+	if len(self.ws._positionals) < len(args):
+	    print "Number of positional arguments provided (",len(args),") is larger than required number (",len(self.ws._positionals),"). Stopping."
+	    return
+	if len(self.ws._positionals) > len(args):
+	    print "Number of positional arguments provided (",len(args),") is less than required number (",len(self.ws._positionals),"). Keeping previous values."
+	if len(args)>0:  #Setting positional parameters if provided
+	    for p,v in zip(self.ws._positionals[:len(args)],args):
+		self.ws[p]=v
+	
+	self.ws.update() # make sure all parameters are now up-to-date
 	self.saveOutputFile()
 	self.run()
 	self.saveOutputFile() # to store final values
+
+    def __getitem__(self,par):
+	"""
+	Usage:
+
+	task["parname"] -> Return value of a parameter in the workspace
+
+	Access the parameter value using square brackets and a string
+	of the parameter name. The basic "getter" function for workspace parameters.	
+	"""
+	return self.ws[par]
+
+    def __setitem__(self,par,value):
+	"""
+	Usage:
+
+	task["parname"] = value -> Set value of a parameter in the workspace
+
+	Set the parameter value using square brackets and a string
+	of the parameter name. The basic "setter" function for workspace parameters.
+	"""
+	self.ws[par]=value
 
 
     def put(self):
@@ -274,6 +697,7 @@ class WorkSpace(object):
         self.parameterlist=set(self.parameter_properties.keys())
 	self._initparameters=args.copy()
         self._parameterlist=set()
+        self._positionals=[]
 	self._modified_parameters=set()
         self._default_parameter_definition={doc:"", unit:"", default:None, workarray:False, export:True}
         self._default_parameter_order=(default,doc,unit)
@@ -392,7 +816,7 @@ class WorkSpace(object):
         self.parameter_properties[p].update(v) # then copy the ones explicitly provided 
     def delx(self,name):
 	"""
-	Delete a paramter from the workspace. If the parameter was
+	Delete a parameter from the workspace. If the parameter was
 	hardcoded before initialization (i.e., provided through
 	ws.parameters) then the value will be reset but the parameter
 	remains and will be filled with its default value at the next
@@ -461,7 +885,7 @@ class WorkSpace(object):
                     self.add(p[0],**(self.partuple_to_pardict(p[1:])))
                 else:
                     self.add(p)
-    def add(self,name,**properties):
+    def add(self,par,**properties):
         """
         Add a new parameter to the workspace, providing additional
         information, such as documentation and default values. The
@@ -481,14 +905,16 @@ class WorkSpace(object):
         way one can recursively go through multiple parameters upon
         retrieval.
         """
-        self._known_methods.add(name)
-        self._known_methods.add("_"+name)
-        self.parameterlist.add(name)
-        self._parameterlist.add("_"+name)
-        self.addProperty(name,lambda ws:ws[name],lambda ws,x:ws.__setitem__(name,x),lambda ws:ws.delx(name),self.getParameterDoc(name))
+        self._known_methods.add(par)
+        self._known_methods.add("_"+par)
+        self.parameterlist.add(par)
+        self._parameterlist.add("_"+par)
+        self.addProperty(par,lambda ws:ws[par],lambda ws,x:ws.__setitem__(par,x),lambda ws:ws.delx(par),self.getParameterDoc(par))
+	if properties.has_key(positional) and properties[positional]:
+	    self._positionals.append(par)
 	if properties.has_key(default) and type(properties[default])==types.FunctionType: # this is a function
-	    properties[dependencies]=self.parameterlist.intersection(properties["default"].func_code.co_names)
-        self.addParameterDefinition(name,properties)
+	    properties[dependencies]=self.parameterlist.intersection(properties["default"].func_code.co_names) #check the variables it depends on
+        self.addParameterDefinition(par,properties)
     def getDerivedParameters(self,workarrays=True):
 	"""
 	Return a python set which contains the parameters that are
@@ -509,7 +935,7 @@ class WorkSpace(object):
 	return derivedparameters
     def getOutputParameters(self):
 	"""
-	Return all paramters that are considered output parameters,
+	Return all parameters that are considered output parameters,
 	i.e. those which are 'derived' parameters and those explicitly
 	labelled as output.
 	"""
@@ -618,7 +1044,7 @@ class WorkSpace(object):
 		delattr(self,"_"+p) # delete buffered value so that it will be recalculated
 		pars.append(p)
 	for p in pars:
-	    self[p] # recalculate the paramters where the local value was deleted
+	    self[p] # recalculate the parameters where the local value was deleted
 	self.clearModifications()
     def getParameterDoc(self,name):
 	"""
@@ -630,9 +1056,9 @@ class WorkSpace(object):
 	    return "This is parameter "+name+"."
     def getParameters(self,internals=False,excludeworkarrays=True,excludenonexports=True,all=False):
         """
-        ws.getParamters(internals=False,excludeworkarrays=True,excludenonexports=True,all=False) -> {"par1":value1, "par2":value2,...}
+        ws.getParameters(internals=False,excludeworkarrays=True,excludenonexports=True,all=False) -> {"par1":value1, "par2":value2,...}
 
-        Returns a python dictionary containing all the paramters and their values as key/value pairs.
+        Returns a python dictionary containing all the parameters and their values as key/value pairs.
 
         *internals* = False - If True all stored parameters are returned,
         including those not added by ws.add and which are typically
@@ -648,9 +1074,9 @@ class WorkSpace(object):
         return pdict
     def getParameterNames(self,internals=False,excludeworkarrays=True,excludenonexports=True,all=False):
         """
-        ws.getParamterNames(internals=False,excludeworkarrays=True,excludenonexports=True,all=False) -> ["par1", "par2",...]
+        ws.getParameterNames(internals=False,excludeworkarrays=True,excludenonexports=True,all=False) -> ["par1", "par2",...]
 
-        Returns a python list containing all the paramters names
+        Returns a python list containing all the parameter names
 
         *internals* = False - If True all stored parameters are returned,
         including those not added by ws.add and which are typically
@@ -696,8 +1122,8 @@ class WorkSpace(object):
             if hasattr(self,"_"+p): val=getattr(self,"_"+p)
             else: val="'UNDEFINED'"
 	    if p in self.getInputParameters():
-                if (v[unit]==""): s+="{0:<20} = {1!r:30} #         {2:s}\n".format(p,val,v[doc])
-                else: s+="{0:<20} = {1!r:30} # [{2:^5s}] {3:s}\n".format(p,val,v[unit],v[doc]) 
+                if (v[unit]==""): s+="{0:<22} = {1!r:30} #         {2:s}\n".format(p,val,v[doc])
+                else: s+="{0:<22} = {1!r:30} # [{2:^5s}] {3:s}\n".format(p,val,v[unit],v[doc]) 
 	    elif (v.has_key(workarray)) and (v[workarray]):
 		if workarrays: s2+="#{2:s}\n# {0:s} = {1!r}\n".format(p,val,v[doc])
             elif noninputparameters:
@@ -708,13 +1134,18 @@ class WorkSpace(object):
         if internals:  s+="#-----------------------Internal Parameters-----------------------------\n"+self.listInternalParameters()
         s += "#-----------------------------------------------------------------------\n"
         return s
-
-def taskload2():
-    """
-    Used to import all tasks
-    """
-    import tasks.averagespectrum
-    import tasks.imager
+	
+# def taskload2():
+#     """
+#     Used to import all tasks - does not work ....!
+#     """
+#     print "Loading all available tasks in ", config.task_list
+#     for m in config.task_list.copy():
+# 	print m
+# 	exec("import "+m)
+# 	exec("import tasks.averagespectrum")
+# #    import tasks.averagespectrum
+# #    import tasks.imager
 
 class taskloadClass():
     """

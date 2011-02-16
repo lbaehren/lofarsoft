@@ -8,7 +8,7 @@ import pickle
 
 import matplotlib.pyplot as plt
 
-import pdb
+#import pdb
 #pdb.set_trace()
 
 from hftools import *
@@ -730,7 +730,7 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     """
     if filename[-4:].upper() == ".DAT": fn=filename[:-4]+'.hdr'
     else: fn=filename+'.hdr'
-    f=open(fn,"w")
+    f=open(fn,"wb")
     slicelength=self.getEnd()-self.getBegin()
     arydim=self.getDim()
     if not slicelength==len(self): arydim=[slicelength]
@@ -746,10 +746,10 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     par=self.par.__list__()
     for i in range(len(par)): # to avoid pickling data arrays
         if type(par[i][1]) in hAllContainerTypes:
-            if len(par[i][1])>1000: del par[i]
+            if len(par[i][1])>500: del par[i]
         elif par[i][0]=="hdr":
             for k in par[i][1].keys(): # dirty hack until pickling of Vectors works ...
-                if type(par[i][1][k]) in hAllVectorTypes: par[i][1][k]=list(par[i][1][k])
+                if type(par[i][1][k]) in hAllContainerTypes: par[i][1][k]=list(par[i][1][k])
     f.write('ha_parameters="""'+pickle.dumps(par)+'"""\n')
     f.close()
 
@@ -798,7 +798,7 @@ y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3
     else:
         print "Error hArrayRead: data file ", fn+".data does not exists!"
         return -1
-    f=open(fn+hdr)
+    f=open(fn+hdr,"rb")
     exec f in globals()
     f.close()
     if ha_nblocks == 1 :

@@ -6,7 +6,7 @@ This file contains a few simple shortcuts that make programming a little easier
 current_task=None
 
 #Shortcuts used for Workspaces in task
-doc="doc"; default="default";unit="unit";workarray="workarray";dependencies="dependencies"; export="export"; output="output"
+doc="doc"; default="default";unit="unit";workarray="workarray";dependencies="dependencies"; export="export"; output="output"; positional="positional"
 
 def p_(default=None,doc="",unit="",**args):
     """
