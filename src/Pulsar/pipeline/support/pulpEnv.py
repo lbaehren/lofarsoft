@@ -145,6 +145,8 @@ class PulpEnv:
         self.obsidPath  = os.path.join(self.pArchive,self.obsid)
         self.stokesPath = os.path.join(self.obsidPath,self.stokes)
 
+
+
         # ------------ formatted parameter set display ---------- #
 
     def show(self):
@@ -160,6 +162,8 @@ class PulpEnv:
             print "Parameter: ",key, "\t= ",self.__dict__[key]
         print "---------------------"
         return
+
+
 
     # ------------- private helper methods ------------------ #
 
