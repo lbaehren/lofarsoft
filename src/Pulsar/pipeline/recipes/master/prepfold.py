@@ -147,7 +147,7 @@ class prepfold(LOFARrecipe):
                             infiles    = rspGroup,
                             obsid      = obsid,
                             arch       = arch,
-                            pulsar     = pulsar,
+                            pulsar     = ipulsar,
                             userEnv    = userEnv,
                             rspCount   = rspCount,
                             loghost    = loghost,
