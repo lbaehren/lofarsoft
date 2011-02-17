@@ -51,8 +51,8 @@ class StitchReports():
         self.obsid      = obsEnv.obsid
         self.stokes     = obsEnv.stokes
         self.pArchive   = obsEnv.pArchive
-        self.obsidPath  = os.path.join(self.pArchive,self.obsid)
-        self.stokesPath = os.path.join(self.obsidPath,self.stokes)
+        self.obsidPath  = obsEnv.obsidPath
+        self.stokesPath = obsEnv.stokesPath
         self.rspDirects = glob.glob(self.stokesPath+"/RSP[0-9]")
         self.offsetDict = self.__rfiOffsets()
         self.newRfiFile = os.path.join(self.stokesPath,
@@ -68,12 +68,12 @@ class StitchReports():
         """
         keys = self.offsetDict.keys()
         keys.sort()
+        print "\n\n\tRSP CHANNEL OFFSETS for observation\n\t",self.obsid,":\n"
+        print "\tRSP Directory     Measured offset"
+        print "\t-------------     ---------------"
         for key in keys:
-            print
-            print "RSP Directory     Measured offset"
-            print "-------------     ---------------"
-            print os.path.split(key)[1], "\t\t\t", self.offsetDict[key]
-            print
+            print "\t",os.path.split(key)[1], "\t\t\t", self.offsetDict[key]
+        print "\n\n"
         return
 
 
@@ -83,19 +83,24 @@ class StitchReports():
         """
         Offset merge .rfirep files, one file per RSP[n] directory.
         Files must be merged in sequential RSP order.
+
+        mergeFiles() writes the full rfi report to the instance .stokesPath
+        directory.
+
+        return void
         """
 
-        filePatt   = "RSP?/*.rfirep"
-        globPatt   = os.path.join(self.stokesPath,filePatt)
-        reportCards= glob.glob(globPatt)
-        newRfiLines= self.buildRfiReport(reportCards)
-        self.writeFullRfiReport(newRfiLines)
+        filePatt     = "RSP?/*.rfirep"
+        globPatt     = os.path.join(self.stokesPath,filePatt)
+        reportCards  = glob.glob(globPatt)
+        header,lines = self.buildRfiReport(reportCards)
+        self.writeFullRfiReport(header,lines)
         return
 
 
-    def writeFullRfiReport(self, lines):
+    def writeFullRfiReport(self, header,lines):
         fob = open(self.newRfiFile,"w")
-        fob.write("# Subband \tFreq(MHz)\n")
+        fob.write(header)
         for line in  lines:
             fob.write(line)
         fob.close()
@@ -107,10 +112,12 @@ class StitchReports():
     def buildRfiReport(self,reportCards):
         """
         Concatenate all rfi report file lines into rfiLines.
+        return header, rfiLines : <str>, <list> 
         """
 
         reportCards.sort()
         rfiLines    = []
+        header      = "# Subband\tFreq(MHz)\n"  # precautionary
 
         for rfi in reportCards:
             lines = open(rfi).readlines()
@@ -118,12 +125,13 @@ class StitchReports():
             rPath = os.path.join(self.stokesPath,"RSP"+str(rNum))
             for line in lines:
                 if "#" in line:
+                    header = line
                     continue
                 else:
                     channel=line.split("\t")[0].strip()
                     newChannel = int(channel) + self.offsetDict[rPath]
                     rfiLines.append(self.__buildNewFileLine(newChannel, line))
-        return rfiLines
+        return header,rfiLines
 
 
 
