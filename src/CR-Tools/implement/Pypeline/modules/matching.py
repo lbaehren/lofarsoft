@@ -114,8 +114,14 @@ def readtriggers(filename):
           dates[i] = int(testdate)
       else:
           dates[i] = 0 # not easy to skip over it... it'll fall out when matching dates.
-
-      samplenumers[i] = int(str_line.split()[3])
+      
+      testSampleNum = long(str_line.split()[3])
+      if testSampleNum < 200e6:
+          samplenumers[i] = int(testSampleNum)
+      else:
+          samplenumers[i] = 0
+          print 'WARNING: sample number invalid in trigger log!'
+          
       dDates[i] = float(dates[i]) + float(samplenumers[i])/200.0e6
     fd.close()
 
