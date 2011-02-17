@@ -1,0 +1,11 @@
+StaticMetaData contains the Metadata of LOFAR stations to be used by the TBB
+software. This is a copy from the LOFAR repository. Metadata includes:
+
+Positions of antennas
+Cable lengths of antennas
+Phase calibration variables
+
+It is used read in into python by the metadata module in
+src/CR-Tools/implement/Pypeline/modules/
+
+The trigger directories contain test files with TBB data
