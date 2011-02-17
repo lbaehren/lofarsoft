@@ -39,8 +39,8 @@ class PrepInfFiles():
         self.stokes    = obsEnv.stokes
         self.pArchive  = obsEnv.pArchive
         self.defaultInf= obsEnv.defaultInf
-        self.obsidPath = os.path.join(self.pArchive,self.obsid)
-        self.stokesPath= os.path.join(self.obsidPath,self.stokes)
+        self.obsidPath = obsEnv.obsidPath
+        self.stokesPath= obsEnv.stokesPath
         self.filefactor= filefactor
         self.parsetPath= obsEnv.parsetPath
         self.parset    = obsEnv.parsetName
