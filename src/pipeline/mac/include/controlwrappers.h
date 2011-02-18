@@ -6,7 +6,7 @@
   \ingroup pipeline
 */
 
-// #include "Controller_Protocol.ph"
+#include "Controller_Protocol.ph"
 #include "eventwrappers.h"
 
 typedef LOFAR::TYPES::uint16 uint16;

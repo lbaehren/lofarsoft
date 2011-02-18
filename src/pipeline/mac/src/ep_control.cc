@@ -1,7 +1,6 @@
-#include <lofar_config.h>
-#include <APL/APLCommon/Controller_Protocol.ph>
-#include <boost/python.hpp>
+#include "Controller_Protocol.ph"
 #include "controlwrappers.h"
+#include <boost/python.hpp>
 
 BOOST_PYTHON_MODULE(_ep_control)
 {

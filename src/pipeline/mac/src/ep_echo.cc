@@ -1,7 +1,6 @@
-#include <lofar_config.h>
-#include <MACIO/Echo_Protocol.ph>
-#include <boost/python.hpp>
+#include "Echo_Protocol.ph"
 #include "echowrappers.h"
+#include <boost/python.hpp>
 
 BOOST_PYTHON_MODULE(_ep_echo) {
     using namespace boost::python;

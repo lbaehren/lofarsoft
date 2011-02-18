@@ -6,7 +6,7 @@
 	\ingroup pipeline
 */
 
-#include <MACIO/Echo_Protocol.ph>
+#include "Echo_Protocol.ph"
 #include "eventwrappers.h"
 
 /*!
