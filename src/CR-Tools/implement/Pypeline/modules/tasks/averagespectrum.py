@@ -59,8 +59,15 @@ value is one larger than he value in par1 in the workspace.
 class WorkSpace(tasks.WorkSpace("averagespectrum")):
     parameters = {
 
-	"datafile":{default:lambda ws:crfile(ws.filename),export:False,
+	"filefilter":p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
+			"Unix style filter (i.e., with *,~, $VARIABLE, etc.), to describe all the files to be processed."),
+			
+	"datafile":{default:lambda ws:crfile(ws.filenames[ws.file_start_number]),export:False,
 		    doc:"Data file object pointing to raw data."},
+	
+	"file_start_number":{default:0,
+		    doc:"Integer number pointing to the first file in the 'filenames' list with which to start. Can be changed to restart a calculation."},
+	
 
 	"lofarmode":{default:"LBA_OUTER",
 		     doc:"Which LOFAR mode was used (HBA/LBA_OUTER/LBA_INNER)"},   
@@ -88,8 +95,8 @@ class WorkSpace(tasks.WorkSpace("averagespectrum")):
 	"tmpfilename":{default:"tmp",
 		       doc:"Root filename for temporary date files."},
 
-	"filename":{default:lambda ws:LOFARSOFT+"/data/lofar/RS307C-readfullsecondtbb1.h5",
-		    doc:"Filename of data file to read raw data from."},
+	"filenames":{default:lambda ws:listfiles(ws.filefilter),
+		    doc:"List of filenames of data file to read raw data from."},
 
 	"spectrum_file":{default:lambda ws:ws.tmpfilename+"spec"+ws.tmpfileext,
 			 doc:"Filename to store the final spectrum."},
@@ -202,6 +209,9 @@ class WorkSpace(tasks.WorkSpace("averagespectrum")):
 
 class averagespectrum(tasks.Task):
     """class documentation.
+
+
+    files = [f for f in files if test.search(f)]
     """
     WorkSpace = WorkSpace
     
@@ -227,99 +237,105 @@ class averagespectrum(tasks.Task):
 
         self.dostride=(self.stride>1)
         self.nspectraflagged=0
+        self.nspectraadded=0
         self.header.update(self.ws.getParameters())
 
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
-
-        self.datafile["blocksize"]=self.blocklen #Setting initial block size
 
         writeheader=True # used to make sure the header is written the first time
         initialround=True
 
 	npass = self.nchunks*self.stride
-        self.t0=time.clock();
-	for iantenna in range(self.nantennas):
-	    antenna=self.antennas[iantenna]
-            rms=0; mean=0; npeaks=0
-            self.datafile["selectedAntennas"]=[antenna]
-            antennaID=self.antennaIDs[iantenna]
-            print "# Start antenna =",antenna,"(ID=",str(antennaID)+") -",npass,"passes:"
-            for nchunk in range(self.nchunks):
-		#if self.nchunks>1: sys.stdout.write("*")
-                #print "#  Chunk ",nchunk,"/",self.nchunks-1,". Reading in data and doing a double FFT."
-                ofiles=[]; ofiles2=[]; ofiles3=[]
-                for offset in range(self.stride):
-		    #if self.stride>1: sys.stdout.write(".")
-                    #print "#    Pass ",offset,"/",self.stride-1,"Starting block=",offset+nchunk*self.nsubblocks
-                    blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)            
-                    self.cdata[...].read(self.datafile,"Fx",blocks)
-                    self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode))
-                    qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[-1])
-                    mean+=self.quality[-1]["mean"]
-                    rms+=self.quality[-1]["rms"]
-                    npeaks+=self.quality[-1]["npeaks"]
-                    dataok=(self.quality[-1]["nblocksflagged"]<=self.maxblocksflagged)
-                    if not dataok:
-                        print " # Data flagged!"
-                        break
-                    #            print "Time:",time.clock()-self.t0,"s for reading."
-                    self.cdataT.doublefft1(self.cdata,self.fullsize,self.nblocks,self.blocklen,offset)
-                    #            print "Time:",time.clock()-self.t0,"s for 1st FFT."
-                    if self.dostride:
-                        ofile=self.tmpfilename+str(offset)+"a"+self.tmpfileext
-                        ofiles+=[ofile]
-                        self.cdata.writefilebinary(ofile)  # output of doublefft1 is in cdata ...
-                #Now sort the different blocks together (which requires a transpose over passes/strides)
-                #print "Time:",time.clock()-self.t0,"s for 1st FFT now doing 2nd FFT."
-                if dataok:
-                    self.nspectraadded+=1
-                    for offset in range(self.stride):
-                        if self.dostride:
-                            #print "#    Offset",offset
-                            self.tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,self.stride,fill=offset)*(self.nblocks_section*self.blocklen))
-                            #This transpose it to make sure the blocks are properly interleaved
-                            hTranspose(self.tmpspec,self.tmpspecT,self.stride,self.nblocks_section)
-                        self.specT.doublefft2(self.tmpspec,self.nblocks_section,self.full_blocklen)
-                        if self.dostride:
-                            ofile=self.tmpfilename+str(offset)+"b"+self.tmpfileext
-                            self.specT.writefilebinary(ofile)
-                            ofiles2+=[ofile]
-		    #print "Time:",time.clock()-self.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."
-                    for offset in range(self.nbands):
-                        if (self.nspectraadded==1): # first chunk
-                            self.power.fill(0.0)
-                        else: #2nd or higher chunk, so read data in and add new spectrum to it
-                            self.power.readfilebinary(self.spectrum_file,self.subspeclen*offset)
-                            self.power*= (self.nspectraadded-1.0)/(self.nspectraadded)                        
-                        if self.dostride:
-                            #print "#    Offset",offset
-                            self.specT2[...].readfilebinary(Vector(ofiles2),Vector(int,self.stride,fill=offset)*(self.blocklen*self.nblocks_section))
-                            hTranspose(self.spec,self.specT2,self.stride,self.blocklen) # Make sure the blocks are properly interleaved
-                            if self.nspectraadded>1: self.spec/=float(self.nspectraadded)   
-                            self.power.spectralpower(self.spec)
-                        else: # no striding, data is all fully in memory
-                            if self.nspectraadded>1: self.specT/=float(self.nspectraadded)   
-                            self.power.spectralpower(self.specT)
-                        if self.stride==1: self.power[0:self.subspeclen/2].write(self.spectrum_file,nblocks=self.nbands,block=offset,writeheader=writeheader)
-                        else: self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,writeheader=writeheader)
-                        writeheader=False
-                    #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
-                else: #data not ok
-                    self.nspectraflagged+=1
-                    #print "#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged
-            if self.nchunks>0:
-                mean/=self.nchunks
-                rms/=self.nchunks
-                self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
-		l={"mean":mean,"rms":rms,"npeaks":npeaks}
-                f=open(self.quality_db_filename+".py","a")
-                f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
-                f.close()
-                if self.doplot:
-                    #rp(0,plotsubspectrum,markpeaks=False,clf=False)
-                    plt.draw()
-	    else: l=""
-	    print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged,l
+	original_file_start_number=self.file_start_number
+	for fname in self.filenames[self.file_start_number:]:
+	    print "# Start File",str(self.file_start_number)+":",fname
+	    self.ws.update() # since the file_start_number was changed, make an update to get the correct file
+	    self.datafile["blocksize"]=self.blocklen #Setting initial block size
+	    for iantenna in range(self.nantennas):
+		antenna=self.antennas[iantenna]
+		rms=0; mean=0; npeaks=0
+		self.datafile["selectedAntennas"]=[antenna]
+		antennaID=self.antennaIDs[iantenna]
+		print "# Start antenna =",antenna,"(ID=",str(antennaID)+") -",npass,"passes:"
+		for nchunk in range(self.nchunks):
+		    #if self.nchunks>1: sys.stdout.write("*")
+		    #print "#  Chunk ",nchunk,"/",self.nchunks-1,". Reading in data and doing a double FFT."
+		    ofiles=[]; ofiles2=[]; ofiles3=[]
+		    for offset in range(self.stride):
+			#if self.stride>1: sys.stdout.write(".")
+			#print "#    Pass ",offset,"/",self.stride-1,"Starting block=",offset+nchunk*self.nsubblocks
+			blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)            
+			self.cdata[...].read(self.datafile,"Fx",blocks)
+			self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode))
+			qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[-1])
+			mean+=self.quality[-1]["mean"]
+			rms+=self.quality[-1]["rms"]
+			npeaks+=self.quality[-1]["npeaks"]
+			dataok=(self.quality[-1]["nblocksflagged"]<=self.maxblocksflagged)
+			if not dataok:
+			    print " # Data flagged!"
+			    break
+			#            print "Time:",time.clock()-self.t0,"s for reading."
+			self.cdataT.doublefft1(self.cdata,self.fullsize,self.nblocks,self.blocklen,offset)
+			#            print "Time:",time.clock()-self.t0,"s for 1st FFT."
+			if self.dostride:
+			    ofile=self.tmpfilename+str(offset)+"a"+self.tmpfileext
+			    ofiles+=[ofile]
+			    self.cdata.writefilebinary(ofile)  # output of doublefft1 is in cdata ...
+		    #Now sort the different blocks together (which requires a transpose over passes/strides)
+		    #print "Time:",time.clock()-self.t0,"s for 1st FFT now doing 2nd FFT."
+		    if dataok:
+			self.nspectraadded+=1
+			for offset in range(self.stride):
+			    if self.dostride:
+				#print "#    Offset",offset
+				self.tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,self.stride,fill=offset)*(self.nblocks_section*self.blocklen))
+				#This transpose it to make sure the blocks are properly interleaved
+				hTranspose(self.tmpspec,self.tmpspecT,self.stride,self.nblocks_section)
+			    self.specT.doublefft2(self.tmpspec,self.nblocks_section,self.full_blocklen)
+			    if self.dostride:
+				ofile=self.tmpfilename+str(offset)+"b"+self.tmpfileext
+				self.specT.writefilebinary(ofile)
+				ofiles2+=[ofile]
+			#print "Time:",time.clock()-self.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."
+			for offset in range(self.nbands):
+			    if (self.nspectraadded==1): # first chunk
+				self.power.fill(0.0)
+			    else: #2nd or higher chunk, so read data in and add new spectrum to it
+				self.power.readfilebinary(self.spectrum_file,self.subspeclen*offset)
+				self.power*= (self.nspectraadded-1.0)/(self.nspectraadded)                        
+			    if self.dostride:
+				#print "#    Offset",offset
+				self.specT2[...].readfilebinary(Vector(ofiles2),Vector(int,self.stride,fill=offset)*(self.blocklen*self.nblocks_section))
+				hTranspose(self.spec,self.specT2,self.stride,self.blocklen) # Make sure the blocks are properly interleaved
+				if self.nspectraadded>1: self.spec/=float(self.nspectraadded)   
+				self.power.spectralpower(self.spec)
+			    else: # no striding, data is all fully in memory
+				if self.nspectraadded>1: self.specT/=float(self.nspectraadded)   
+				self.power.spectralpower(self.specT)
+			    if self.stride==1: self.power[0:self.subspeclen/2].write(self.spectrum_file,nblocks=self.nbands,block=offset,writeheader=writeheader)
+			    else: self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,writeheader=writeheader)
+			    writeheader=False
+			#print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
+		    else: #data not ok
+			self.nspectraflagged+=1
+			#print "#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged
+		if self.nchunks>0:
+		    mean/=self.nchunks
+		    rms/=self.nchunks
+		    self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
+		    l={"mean":mean,"rms":rms,"npeaks":npeaks}
+		    f=open(self.quality_db_filename+".py","a")
+		    f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
+		    f.close()
+		    if self.doplot:
+			#rp(0,plotsubspectrum,markpeaks=False,clf=False)
+			plt.draw()
+		else: l=""
+		print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged,l
+	    print "# End File",str(self.file_start_number)+":",fname
+	    self.file_start_number+=1
+	self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
         print "Finished - total time used:",time.clock()-self.t0,"s."
         print "To read back the spectrum type: sp=hArrayRead('"+self.spectrum_file+"')"
 

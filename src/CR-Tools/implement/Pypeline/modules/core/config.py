@@ -5,6 +5,7 @@ import os
 
 from hftools import *
 
+
 LOFARSOFT=os.environ["LOFARSOFT"]
 PYCRBIN=LOFARSOFT+"/release/bin/python/"
 PYCR=LOFARSOFT+"/src/CR-Tools/implement/Pypeline/scripts/"

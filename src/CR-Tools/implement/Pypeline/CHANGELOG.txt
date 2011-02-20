@@ -193,6 +193,16 @@ directory with a certain start and/or ending.
 - finalized tasks, various bug fixes, added positional parameters
 - added documentation to tasks
 
+2011-02-20 Pypeline - rev 7128 - Heino Falcke
+- minor updates and bugfixes to tasks
+- added litsfiles to get a list of files, using unix-style file
+patterns and evironment variables
+- made averagespectrum to work on multiple files
+- added spikeexcess to qualitycheck routine (the one in
+qualitycheck.py), checks only for too many spikes
+- allowed variables nsigma, such that sigma is fixed to give a fixe
+number (e.g. one) of peaks for the given blocklength
+
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------

@@ -4,6 +4,52 @@
 from hftools import *
 from config import *
 from harray import *
+import glob
+
+#import pdb
+#pdb.set_trace()
+
+def listfiles(unix_style_filter):
+    """
+    Usage:
+
+    listfiles(unix_style_filter) -> list of filenames
+
+    listfiles takes a string or a list of strings as argument which
+    contain unix-style filename filters that can include
+    '.','..','*','?','~','$HOME', and other environement variables.
+
+    It will return a single list of filenames (including paths if
+    necessary) that match the specified filter(s).
+
+    Example:
+
+listfiles("$LOFARSOFT/*")
+
+ ['/Users/falcke/LOFAR/usg/asap_data.tar',
+ '/Users/falcke/LOFAR/usg/build',
+ '/Users/falcke/LOFAR/usg/CMakeLists.txt',
+ '/Users/falcke/LOFAR/usg/CMakeOptions.cmake',
+ '/Users/falcke/LOFAR/usg/data',
+ '/Users/falcke/LOFAR/usg/devel_common',
+ '/Users/falcke/LOFAR/usg/doc',
+ '/Users/falcke/LOFAR/usg/external',
+ '/Users/falcke/LOFAR/usg/README',
+ '/Users/falcke/LOFAR/usg/release',
+ '/Users/falcke/LOFAR/usg/src']
+
+listfiles(["$LOFARSOFT/*.txt","~/.ema*"])
+
+['/Users/falcke/LOFAR/usg/CMakeLists.txt',
+ '/Users/falcke/.emacs',
+ '/Users/falcke/.emacs.d',
+ '/Users/falcke/.emacs~']
+    """
+    ll=[]
+    for l in asList(unix_style_filter):
+	ll += glob.glob(os.path.expandvars(os.path.expanduser(l)))
+    if ll.count("."): del ll[ll.index(".")]
+    return ll
 
 #------------------------------------------------------------------------
 # cr DataReader Class

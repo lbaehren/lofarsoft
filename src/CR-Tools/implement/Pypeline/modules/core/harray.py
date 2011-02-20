@@ -834,6 +834,29 @@ def ashArray(val):
     else:
         return hArray([val])
 
+def asList(val):
+    """
+    Usage:
+    
+    asList(val) -> list(val) if val is not a list already
+
+    Returns its argument as a list, but leave it unchanged if it is
+    already a list. Sets, vectors, arrays, etc. will be turned into
+    list, strings will not.
+    
+    Example:
+
+    asList(3) -> [3]
+    asList([3]) -> [3]
+
+    """
+    if type(val)==list:
+        return val
+    elif type(val)==str:
+	return [val]
+    else:
+	return list(val)
+    
 # Fourier Transforms
 setattr(FloatArray,"fft",hFFTCasa)
 

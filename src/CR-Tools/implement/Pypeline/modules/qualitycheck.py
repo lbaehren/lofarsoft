@@ -6,10 +6,10 @@ import time
 #import pdb
 #pdb.set_trace()
 
-def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=4,rmsfactor=2,meanfactor=3,spikyness=7,refblock=None,blockoffset=0,antennaID=None,date=None,datafile=None,observatory=None,observatorymode=None,verbose=True):
+def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=-1,rmsfactor=2,meanfactor=3,spikyness=7,spikeexcess=7,refblock=None,blockoffset=0,antennaID=None,date=None,datafile=None,observatory=None,observatorymode=None,verbose=True):
     """
     Usage:
-    CRQualityCheckArray(dataarray,qualitycriteria=None,antennaID=0,nsigma=5,rmsfactor=2,meanfactor=7,spikyness=7,refblock=None,verbose=True) -> list of antennas failing the qualitycriteria limits
+    CRQualityCheckArray(dataarray,qualitycriteria=None,antennaID=0,nsigma=-1,rmsfactor=2,meanfactor=7,spikyness=7,spikeexcess=7,refblock=None,verbose=True) -> list of antennas failing the qualitycriteria limits
 
     Do a basic quality check of raw time series data, looking for rms,
     mean and spikes.
@@ -23,42 +23,51 @@ def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=
     >> datafile=crfile(filename); nblocks=10
     >> dataarray=hArray(float,[nblocks,datafile["blocksize"]])
     >> datarray[...].read(datafile,"Fx",range(nblocks))
-    >> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
-    >> flaglist=CRQualityCheck(dataarray,qualitycriteria=qualitycriteria,antennaID=0,nsigma=7,rmsfactor=2,meanfactor=7,spikyness=7,refblock=None,verbose=True)
+    >> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7),"spikeexcess":(-1,7)}
+    >> flaglist=CRQualityCheck(dataarray,qualitycriteria=qualitycriteria,antennaID=0,nsigma=-1,rmsfactor=2,meanfactor=7,spikyness=7,spikeexcess=7,refblock=None,verbose=True)
 
     Parameters:
 
-    dataarray - an array containing the data with the dimensions
+    *dataarray* - an array containing the data with the dimensions
     [nblocks,blocksize]. 
 
-    qualitycriteria - a Python dict with keywords of parameters and
+    *qualitycriteria* - a Python dict with keywords of parameters and
     tuples with limits thereof (lower, upper). Keywords currently
     implemented are mean, rms, spikyness (i.e. spikyness).
     Example: qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
 
-    normalize - If true subtract the mean from the data and divide by the rms.
+    *normalize* - If true subtract the mean from the data and divide by the rms.
     
-    antennaID - the ID of the current antenna (for output only)
+    *antennaID* - the ID of the current antenna (for output only)
 
-    blockoffset - offset of the first block from the beginning of the
+    *blockoffset* - offset of the first block from the beginning of the
     file (for output only)
 
-    date - Date of observation (for output only) - (GMT-)seconds since 1.1.1970 (standard UNIX)
+    *date* - Date of observation (for output only) - (GMT-)seconds since 1.1.1970 (standard UNIX)
 
-    datafile - to obtain date, time, antennaID from file directly (output only)
+    *datafile* - to obtain date, time, antennaID from file directly (output only)
 
-    nsigma - determines for the peak counting algorithm the threshold
-    for peak detection in standard deviations
+    *nsigma* - determines for the peak counting algorithm the
+    threshold for peak detection in standard deviations. If nsigma is
+    negative set the sigma level such that -nsigma peaks are expected.
 
-    rmsfactor - if no quality criteria present, set limits for rms at this
+    *rmsfactor* - if no quality criteria present, set limits for rms at this
     factor times the rms in the reference block (or divided by this factor)
 
-    meanfactor - if no quality criteria present, set limits for mean
+    *meanfactor* - if no quality criteria present, set limits for mean
     at mean[refblock]-rms[refblock]/sqrt(blocksize)*meanfactor
 
-    spikyness - if no quality criteria present, set maximum relative
-    number of spikes per block at this level (1 is roughly what one
-    expects from Gaussian noise)
+    *spikyness* - if no quality criteria present, set maximum
+    spikyness level to this values. The spiykness is the detected
+    number of peaks above n*sigma minus the expected number divided by
+    the square root (i.e. error) of expected peak. For Gaussian noise
+    one expects this to fluctuate +/- 1 around zero. This value can be
+    negative if too few peaks are detected.
+
+    *spikeexcess* - if no quality criteria present, set maximum allowed
+    ratio of detected over expected peaks per block to this level (1
+    is roughly what one expects from Gaussian noise). In contrast to
+    'spikyness' this value cannot be negative.
 
     refblock - use this block as reference, otherwise pick one in the
     first quarter of blocks
@@ -81,6 +90,8 @@ def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=
         if observatory==None: observatory=datafile["Observatory"]
         if observatorymode==None: observatorymode="unknown"
 #Calculate probabilities to find peaks
+    if nsigma<0:
+	nsigma=sqrt(-2.0*log(sqrt(2.*pi)/blocksize))  # set nsigma such that the expected number of peaks is one
     probability=funcGaussian(nsigma,1,0) # what is the probability of a 5 sigma peak
     npeaksexpected=probability*blocksize # what is the probability to see such a peak for the given blocksize
     npeaksexpected_full=npeaksexpected*nblocks # what is the probability to see such a peak for the given blocksize
@@ -102,30 +113,32 @@ def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=
     npeaks=datanpeaks.sum(); peaksexcess=npeaks/npeaksexpected_full
     if verbose:
 #        print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected,"+/-",npeakserror
-        print "- Mean={0:6.2f}, RMS = {1:6.2f}, Number of peaks = {2:5d} expected {3:6.2f} (Npeaks/Nexpected = {4:6.2f}), limits = ({5:6.2f}, {6:6.2f})".format(mean,rms,npeaks,npeaksexpected_full,peaksexcess,lower_limit.mean(),upper_limit.mean())
+        print "- Mean={0:6.2f}, RMS = {1:6.2f}, Number of peaks = {2:5d} expected {3:6.2f} (Npeaks/Nexpected = {4:6.2f}), nsigma = {7:6.2f}, limits = ({5:6.2f}, {6:6.2f})".format(mean,rms,npeaks,npeaksexpected_full,peaksexcess,lower_limit.mean(),upper_limit.mean(),nsigma)
     dataNonGaussianity = Vector(float,nblocks)
+    dataSpikeExcess = Vector(float,nblocks)
     dataNonGaussianity.sub(datanpeaks,npeaksexpected)
+    dataSpikeExcess.div(datanpeaks,npeaksexpected)
     dataNonGaussianity /= npeakserror
-    dataproperties=zip(range(blockoffset,nblocks+blockoffset),datamean,datarms,datanpeaks,dataNonGaussianity)
+    dataproperties=zip(range(blockoffset,nblocks+blockoffset),datamean,datarms,datanpeaks,dataNonGaussianity,dataSpikeExcess)
     if qualitycriteria==None:
         if refblock==-1:
             refblock=nblocks/4 # Take something around the first quarter of the data
         if not refblock==None:
             mean=datamean[refblock]; rms=datarms[refblock];
         if normalize:
-            qualitycriteria={"mean":(-rms*meanfactor/sqrt(blocksize),rms*meanfactor/sqrt(blocksize)),"rms":(1/rmsfactor,rmsfactor),"spikyness":(-spikyness,spikyness)}
+            qualitycriteria={"mean":(-rms*meanfactor/sqrt(blocksize),rms*meanfactor/sqrt(blocksize)),"rms":(1/rmsfactor,rmsfactor),"spikyness":(-spikyness,spikyness),"spikeexcess":(-1,spikeexcess)}
         else:
-            qualitycriteria={"mean":(mean-rms/sqrt(blocksize)*meanfactor,mean+rms/sqrt(blocksize)*meanfactor),"rms":(rms/rmsfactor,rms*rmsfactor),"spikyness":(-spikyness,spikyness)}
+            qualitycriteria={"mean":(mean-rms/sqrt(blocksize)*meanfactor,mean+rms/sqrt(blocksize)*meanfactor),"rms":(rms/rmsfactor,rms*rmsfactor),"spikyness":(-spikyness,spikyness),"spikeexcess":(-spikeexcess,spikeexcess)}
 #        if verbose:
 #            print "Quality criteria =",qualitycriteria
     for prop in iter(dataproperties):
-        noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"spikyness":4},qualitycriteria)
+        noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"spikyness":4,"spikeexcess":5},qualitycriteria)
         if noncompliancelist:
             nblocksflagged+=1
             flaggedblocklist.append(prop[0])
-            qualityflaglist.append({"block":prop[0],"mean":prop[1],"rms":prop[2],"npeaks":prop[3],"spikyness":prop[4],"flags":noncompliancelist})
+            qualityflaglist.append({"block":prop[0],"mean":prop[1],"rms":prop[2],"npeaks":prop[3],"spikyness":prop[4],"spikeexcess":prop[5],"flags":noncompliancelist})
             if verbose:
-                print "- Block {0:5d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}".format(*prop)," ",noncompliancelist
+                print "- Block {0:5d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}, spikeexcess={5: 6.2f}".format(*prop)," ",noncompliancelist
     return {"type":"QualityFx","observatory":observatory,"mode":observatorymode,"antenna":antennaID,"date":'"'+time.strftime("%Y-%m-%d %H:%M:%S %z",time.gmtime(date))+'"',"idate":date,"offset":blockoffset,"size":blocksize*nblocks,"blocksize":blocksize,"nblocks":nblocks,"mean":mean,"rms":rms,"npeaks":npeaks,"npeaksexpected":npeaksexpected_full,"peaksexcess":peaksexcess,"nblocksflagged":nblocksflagged,"flaggedblocks":flaggedblocklist,"flags":qualityflaglist}
 
 

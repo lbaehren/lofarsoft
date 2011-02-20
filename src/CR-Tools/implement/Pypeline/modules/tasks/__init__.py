@@ -121,12 +121,15 @@ the init function relatively superfluous.
 All derived parameters know on which other parameters they depend. If
 a parameter in the workspace is modified this information is
 preserved. When executing 'Task.update()', then all the derived
-parameters which depend directly or indirectly on a derived parameter
+parameters which depend directly or indirectly on a modified parameter
 will be recalculated. Update will be called automatically if one uses
 'tpar par=value' (or 'tpar(par=value)' if one does not use ipython).
 
-The value will also be updated if the parameter is deleted, using
-either 'tdel par' or simply 'del Task.par'.
+The value will also be updated if the parameter is deleted 'tdel par'
+(Note: when using simply 'del Task.par' the recalculation happens upon
+next calling of this parameter. If ws.update was not called explicitly
+this can mean that parameters which par depends on might still have
+their old value!)
 
 Basic logging and performance evaluation is not yet built in, but that
 is relatively easy to do....
@@ -139,6 +142,16 @@ import tasks
 from pycrtools.core import config
 from pycrtools import *
 from tshortcuts import *
+
+If one wants to add a new task then it should either be defined in a
+separate new file in the directory modules/tasks or it should be added
+to one of the files in modules/tasks. In the latter case it will be
+found automatically. For now, the module will be imported from the
+prompt with the function taskload (actually the taskloadClass defined
+at the end of __init__.py in modules/task). So, if you write a new
+task in a new file, you need to add the import command to the
+taskloadClass in order for the user to see that task (e.g., with
+'tlist' ot 'tload').
 
 The four ingredients of a task are the parameters definition (a dict
 stored in Task.parameters), an init function, a call function, and a
@@ -346,6 +359,7 @@ from tshortcuts import *
 
 #import pdb
 #pdb.set_trace()
+#	if hasattr(self,"trace") and self.trace: pdb.set_trace()
 
 #import averagespectrum
 #["averagespectrum","imager"]
@@ -820,7 +834,7 @@ class WorkSpace(object):
 	hardcoded before initialization (i.e., provided through
 	ws.parameters) then the value will be reset but the parameter
 	remains and will be filled with its default value at the next
-	retrieval. Othrerwise the parameter is completely removed.
+	retrieval. Otherwise the parameter is completely removed.
 	"""
 	if name in self.parameterlist:
 	    if hasattr(self,"_"+name):
@@ -915,7 +929,7 @@ class WorkSpace(object):
 	if properties.has_key(default) and type(properties[default])==types.FunctionType: # this is a function
 	    properties[dependencies]=self.parameterlist.intersection(properties["default"].func_code.co_names) #check the variables it depends on
         self.addParameterDefinition(par,properties)
-    def getDerivedParameters(self,workarrays=True):
+    def getDerivedParameters(self,workarrays=True,nonexport=True):
 	"""
 	Return a python set which contains the parameters that are
 	derived from input parameters through a default function at
@@ -924,12 +938,15 @@ class WorkSpace(object):
 	function as default value. Note, that the value is not
 	recalculated again even if the input parameters changed! One
 	can enforce recalculation by calling ws.recalc().
+
+	*workarrays* = True - Include workarrays in the list
+	*nonexport* = True - Include parameters which were not meant for export in the list
 	"""
 	derivedparameters=set()
 	for p in self.parameterlist:
 	    properties=self.parameter_properties[p] 
 	    if ((properties.has_key(default) and (type(properties[default])==types.FunctionType)) # default is a function
-		and ((not properties.has_key(export)) or properties[export])  #export is true
+		and (nonexport or ((not properties.has_key(export)) or properties[export]))  #export is true
 		or (workarrays and (properties.has_key(workarray) and properties[workarray]))): # not a workarray if requested
 		derivedparameters.add(p) # then it is a derived parameter
 	return derivedparameters
@@ -939,7 +956,7 @@ class WorkSpace(object):
 	i.e. those which are 'derived' parameters and those explicitly
 	labelled as output.
 	"""
-	l=set(self.getDerivedParameters(workarrays=False))
+	l=set(self.getDerivedParameters(workarrays=False,nonexport=False))
 	for p,v in self.parameter_properties.items():
 	    if (v.has_key(output) and v[output]): l.add(p)
 	return l
@@ -1019,7 +1036,6 @@ class WorkSpace(object):
 	the last update or recalc. The function will also add the
 	parmameter to the modified_parameters list if it was modified.
 	"""
-	if hasattr(self,"trace") and self.trace: pdb.set_trace()
 	if par in self._modified_parameters: return True
 	if self.parameter_properties[par].has_key(dependencies) and len(self.parameter_properties[par][dependencies])>0:
 	    modified=reduce(lambda a,b:a | b,map(lambda p:self.isModified(p),self.parameter_properties[par][dependencies]))
@@ -1127,8 +1143,12 @@ class WorkSpace(object):
 	    elif (v.has_key(workarray)) and (v[workarray]):
 		if workarrays: s2+="#{2:s}\n# {0:s} = {1!r}\n".format(p,val,v[doc])
             elif noninputparameters:
-                if (v[unit]==""): s1+="# {0:>20} = {1!r:30} - {2:s}\n".format(p,val,v[doc])
-                else: s1+="# {0:>20} = {1:<30} - {2:s}\n".format(p,str(val)+" "+v[unit],v[doc]) 
+		if v.has_key(dependencies):
+		    deps=" <- ["+", ".join(v[dependencies])+"]"
+		else:
+		    deps=""
+                if (v[unit]==""): s1+=("# {0:>20} = {1!r:30} - {2:s}"+deps+"\n").format(p,val,v[doc])
+                else: s1+=("# {0:>20} = {1:<30} - {2:s}"+deps+"\n").format(p,str(val)+" "+v[unit],v[doc]) 
         if not s1=="": s+="#------------------------Output Parameters------------------------------\n"+s1
         if not s2=="": s+="#---------------------------Work Arrays---------------------------------\n"+s2
         if internals:  s+="#-----------------------Internal Parameters-----------------------------\n"+self.listInternalParameters()
