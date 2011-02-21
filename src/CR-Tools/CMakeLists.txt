@@ -683,7 +683,10 @@ endif (HAVE_LIBZ)
 
 ## Create "crtools.h"
 
-configure_file (${CR_SOURCE_DIR}/crtools.h.in ${CR_BINARY_DIR}/crtools.h)
+configure_file (
+  ${CR_SOURCE_DIR}/crtools.h.in
+  ${CR_BINARY_DIR}/crtools.h
+  )
 
 ## Sub-directories
 
