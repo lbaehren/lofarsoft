@@ -63,6 +63,8 @@ def runAnalysis(files, triggers, outfilename, doPlot = False):
             continue
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
+        result = pf.initialDirectionFit(crfile, fitType = 'linearFit')
+        writeDict(outfile, result)
         result = pf.triggerMessageFit(crfile, triggers, 'linearFit') 
         writeDict(outfile, result)
         if not result["success"]:
@@ -101,10 +103,11 @@ elif len(sys.argv) > 1:
     triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_.dat'
 else:
     print 'No files given on command line, using a default set instead.'
-    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-23.h5'
+    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-1000.h5' 
+#    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-23.h5'
 #    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
-#    triggerMessageFile = '/Users/acorstanje/triggering/MACdatarun_2feb2011/2011-02-02_TRIGGER.dat'
-    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat' #TRIGGER_debugstripped.dat'
+    triggerMessageFile = '/Users/acorstanje/triggering/stabilityrun_15feb2011/RS307/2011-02-15_TRIGGER.dat'
+    #triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat' #TRIGGER_debugstripped.dat'
     #datafiles = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/*'
     #triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs006.dat'
 

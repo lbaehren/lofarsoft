@@ -65,7 +65,48 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
   return (optimum, optBeam)
 
 #------------------------------------------------------------- triggerMessageFit
-def triggerMessageFit(crfile, triggers, fittype='bruteForce'):  # crfile has to be imported using IO module!
+
+def initialDirectionFit(crfile, blocksize = 2 * 65536 / 3, fitType='bruteForce'):
+    # pass efield itself, with right dims?
+    efield = crfile["emptyFx"]
+    blockNo = 1
+    crfile.getTimeseriesData(efield, blockNo) 
+    # change to abs, then max? Destroys input array...
+    mx = efield[...].max()
+    mn = efield[...].min()
+    mxpos = efield[...].maxpos()
+    mnpos = efield[...].minpos()
+    
+    Tdiffs = np.zeros(len(mx))
+    for i in range(len(mx)):
+        if mx[i] > - mn[i]:
+            Tdiffs[i] = mxpos[i]
+        else:
+            Tdiffs[i] = mnpos[i]
+    
+    Tdiffs -= np.mean(Tdiffs)
+    Tdiffs *= 5e-9
+    match_positions = crfile["RelativeAntennaPositions"].toNumpy().reshape(3 * len(Tdiffs))
+    (radaz, radel, bftime) = sfind.directionBruteForceSearch(match_positions, Tdiffs)
+    mse = sfind.mse(radaz, radel, match_positions, Tdiffs)
+    degaz = radaz*rad2deg
+    degel = radel*rad2deg
+    
+    result = dict(az = degaz, el = degel, mse = mse, success=True, action = 'New initial direction fit')
+    
+    print mx
+    print ' '
+    print mn
+    print ' '
+    print Tdiffs
+    print ' '
+    print mse
+    print degaz
+    print degel
+    print ' '
+    return result
+    
+def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to be imported using IO module!
   #Get the trigger-message information
   result = dict(success=False, action = 'Trigger message fit')
   fileDate = crfile["Date"]
@@ -96,12 +137,12 @@ def triggerMessageFit(crfile, triggers, fittype='bruteForce'):  # crfile has to 
 #  print match_positions
 #  print len(match_positions)
 
-  if (fittype=='linearFit'):
+  if (fitType=='linearFit'):
     (radaz, radel) = sfind.directionForHorizontalArray(match_positions, mTdiffs)
     if np.isnan(radel) or np.isnan(radaz):
         (radaz, radel, bftime) = sfind.directionBruteForceSearch(match_positions, mTdiffs)
         result.update(warning = 'Linear fit failed (produced NaN). Falling back to brute force method.')
-  elif (fittype=='bruteForce'):
+  elif (fitType=='bruteForce'):
     (radaz, radel, bftime) = sfind.directionBruteForceSearch(match_positions, mTdiffs)
   else : 
     radaz = 0.
