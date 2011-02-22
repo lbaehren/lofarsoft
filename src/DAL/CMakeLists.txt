@@ -18,7 +18,7 @@ cmake_policy (VERSION 2.8)
 set (DAL_VERSION        "" )
 set (DAL_SOURCE_ARCHIVE "dal.tgz" )
 set (DAL_URL            "" )
-set (DAL_GIT            "https://github.com/lbaehren/DAL.git" )
+set (DAL_GIT            "https://github.com/nextgen-astrodata/DAL.git" )
 
 ## ==============================================================================
 ##
