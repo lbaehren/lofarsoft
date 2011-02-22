@@ -34,7 +34,7 @@ def writeDict(outfile, dict):
             outfile.write('%s: %s\n' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
     outfile.write('\n')
     
-def runAnalysis(files, triggers, outfilename, doPlot = False):
+def runAnalysis(files, outfilename, doPlot = False):
     """ Input: list of files to process, trigger info as read in by match.readtriggers(...), filename for results output
     """
     outfile = open(outfilename, mode='w')
@@ -61,6 +61,8 @@ def runAnalysis(files, triggers, outfilename, doPlot = False):
         writeDict(outfile, result)
         if not result["success"]: 
             continue
+        fileTimestamp = crfile["TIME"][0]
+        triggers = match.readtriggers(fileTimestamp, "RS307", directory = "/Users/acorstanje/triggering/stabilityrun_15feb2011/") 
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
         result = pf.initialDirectionFit(crfile, fitType = 'linearFit')
@@ -123,11 +125,11 @@ nofiles = len(files)
 print "Number of files to process:", nofiles
 fd.close()
 print 'Reading triggers...'
-triggers = match.readtriggers(triggerMessageFile)
+#triggers = match.readtriggers(triggerMessageFile)
 print 'Trigger reading complete.'
 
 
-runAnalysis(files, triggers, outfile, doPlot = True)
+runAnalysis(files, outfile, doPlot = True)
 #fitergs = dict()
 
 

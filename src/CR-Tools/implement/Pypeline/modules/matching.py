@@ -9,6 +9,7 @@ timestamps.
 import os
 import pycrtools as cr
 import numpy as np
+import time
 
 def matccrLes(dirs, sortstring, coinctime, mincoinc):
     """
@@ -75,7 +76,7 @@ def matccrLes(dirs, sortstring, coinctime, mincoinc):
         if indices[dirIndex] >= len(files[dirIndex]):
           running = False
 
-def readtriggers(filename):
+def readtriggers(timestamp, stationName, directory=''):
     """
     Read in a TBBDriver-dumpfile with the data from the trigger-messages.
     Returns a tuple of 1-d numpy arrays: (antennaIDs, dDates, dates, samplenumers)
@@ -94,36 +95,51 @@ def readtriggers(filename):
         readtriggers: File: /mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs005.dat has: 539405 lines
 
     """
-    fd = os.popen('wc '+ filename)
-    str_line = fd.readline()
-    fd.close()
-    nevents = int(str_line.split()[0])
-    print "readtriggers: File:" , filename ,"has:", nevents, "lines"
+    datestring = time.strftime("%Y-%m-%d", time.gmtime(timestamp)) # like "2011-02-15"
+    filename = directory + datestring + "_TRIGGER-"+stationName+".dat" # like "2011-02-15_TRIGGER-RS307.dat"
+    
+#    fd = os.popen('wc '+ filename)
+#    str_line = fd.readline()
+#    fd.close()
+#    nevents = int(str_line.split()[0])
+#    print "readtriggers: File:" , filename ,"has:", nevents, "lines"
 
-    antennaIDs = np.zeros( (nevents), int)
-    dDates = np.zeros( (nevents) )
-    dates = np.zeros( (nevents), int)
-    samplenumers = np.zeros( (nevents), int)
-    fd = open(filename, 'r')
-    for i in range(nevents):
-      str_line = fd.readline()
-      antennaIDs[i] = int(str_line.split()[0])
-      testdate = long(str_line.split()[2])
-      # Have to check for invalid dates! These are 2^32 - 1, and somehow Python complains about not getting that into its 'int' type...
-      if testdate < 2.2e9:
-          dates[i] = int(testdate)
+    antennaIDs = np.zeros(1000, int)
+    dDates = np.zeros(1000)
+    dates = np.zeros(1000, int)
+    samplenumers = np.zeros(1000, int)
+  
+    print timestamp
+    fd = open(filename)
+    i = 0
+    for line in fd:
+#      str_line = fd.readline()
+      if (not str(timestamp - 1) in line) and (not str(timestamp) in line) and (not str(timestamp+1) in line):
+          continue
       else:
-          dates[i] = 0 # not easy to skip over it... it'll fall out when matching dates.
-      
-      testSampleNum = long(str_line.split()[3])
-      if testSampleNum < 200e6:
-          samplenumers[i] = int(testSampleNum)
-      else:
-          samplenumers[i] = 0
-          print 'WARNING: sample number invalid in trigger log!'
+          print line
+          antennaIDs[i] = int(line.split()[0])
+          testdate = long(line.split()[2])
+          # Have to check for invalid dates! These are 2^32 - 1, and somehow Python complains about not getting that into its 'int' type...
+          if testdate < 2.2e9:
+              dates[i] = int(testdate)
+          else:
+              dates[i] = 0 # not easy to skip over it... it'll fall out when matching dates.
           
-      dDates[i] = float(dates[i]) + float(samplenumers[i])/200.0e6
+          testSampleNum = long(line.split()[3])
+          if testSampleNum < 200e6:
+              samplenumers[i] = int(testSampleNum)
+          else:
+              samplenumers[i] = 0
+              print 'WARNING: sample number invalid in trigger log!'
+              
+          dDates[i] = float(dates[i]) + float(samplenumers[i])/200.0e6
+          i += 1 # !
     fd.close()
+    antennaIDs = np.resize(antennaIDs, i)
+    dDates = np.resize(dDates, i)
+    dates = np.resize(dates, i)
+    samplenumers = np.resize(samplenumers, i)
 
     return (antennaIDs, dDates, dates, samplenumers)
 
