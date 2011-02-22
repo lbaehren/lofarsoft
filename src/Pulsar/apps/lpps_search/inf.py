@@ -38,11 +38,13 @@ def ra_ok(hour, minute, second):
         return False
     return True
 
-def dec_ok(degree, minute, second):
+def dec_ok(sign, degree, minute, second):
     '''
     Sanity check Declination values. Returns True if ok, False if not.
     '''
-    if not -90 <= degree <= 90:
+    if not sign in (-1, 1):
+        return False
+    if not 0 <= degree <= 90:
         return False
     if not 0 <= minute <= 59:
         return False
@@ -65,42 +67,44 @@ def boolean2int(b):
     if b: return 1
     else: return 0
 
-ASCII2DEC = re.compile(r'(?P<degree>-*\d{1,2}):(?P<minute>\d{1,2}):(?P<second>((\d{1,2}\.\d+)|(\d{1,2})))')
+ASCII2DEC = re.compile(r'(?P<sign>(-|\+)*)(?P<degree>\d{1,2}):(?P<minute>\d{1,2}):(?P<second>((\d{1,2}\.\d+)|(\d{1,2})))')
 
 def ascii2dec(s):
     '''
-    Convert declination in ASCII representation to a 3-tuple of numbers.
+    Convert declination in ASCII representation to a 4-tuple of numbers.
     '''
     m = ASCII2DEC.match(s.strip())
     try:
+        if m.group('sign') == '' or m.group('sign') == '+':
+            sign = +1
+        elif m.group('sign') == '-':
+            sign = -1
         degree = int(m.group('degree'))
         minute = int(m.group('minute'))
         second = float(m.group('second'))
     except (ValueError, IndexError), e:
         raise ValueError
     else:
-        if not dec_ok(degree, minute, second):
+        if not dec_ok(sign, degree, minute, second):
             raise ValueError
-    return degree, minute, second
+    return sign, degree, minute, second
 
-def dec2ascii(degree, minute, second):
+def dec2ascii(sign, degree, minute, second):
     '''
-    Convert declination from a 3-tuple of numbers to ASCII representation.
+    Convert declination from a 4-tuple of numbers to ASCII representation.
     '''
-    # TODO : see and test whether something like '%(blah) 03d' % {'blah' : -2}
-    # could be used to replace the if statement below. (possible clean-up)
-    if degree >= 0:
-        return '%(degree)02d:%(minute)02d:%(second)007.4f' % {
-            'degree' : degree,
-            'minute' : minute,
-            'second' : second,
-        }
-    else:
-        return '%(degree)03d:%(minute)02d:%(second)007.4f' % {
-            'degree' : degree,
-            'minute' : minute,
-            'second' : second,
-        }
+
+    if sign == -1:
+        sign_str = '-'
+    elif sign == 1:
+        sign_str = ''
+
+    return '%(sign)s%(degree)02d:%(minute)02d:%(second)007.4f' % {
+        'sign' : sign_str,
+        'degree' : degree,
+        'minute' : minute,
+        'second' : second,
+    }
 
 
 ASCII2RA = re.compile(r'(?P<hour>\d{1,2}):(?P<minute>\d{1,2}):(?P<second>((\d{1,2}\.\d+))|(\d{1,2}))')
@@ -183,7 +187,7 @@ SPEC = [
     [" J2000 Declination     (dd:mm:ss.ssss)  ",
         'j2000_dec',
         ascii2dec,
-        lambda x : dec2ascii(x[0], x[1], x[2])],
+        lambda x : dec2ascii(*x)],
     [" Data observed by                       ",
         'observer',
         lambda x : str(x).strip(),
