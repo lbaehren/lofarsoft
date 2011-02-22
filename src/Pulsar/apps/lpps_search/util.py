@@ -27,14 +27,14 @@ class DirectoryNotEmpty(Exception):
         self.path = path
 
     def __str__(self):
-        return 'The path %s is not empty.' % self.path
+        return 'The path \'%s\' is not empty.' % self.path
 
-def WrongPermissions(Exception):
+class WrongPermissions(Exception):
     def __init__(self, path):
         self.path = path
 
     def __str__(self):
-        return 'The path %s has the wrong permissions' % self.path
+        return 'The path \'%s\' has the wrong permissions' % self.path
 
 # ----------------------------------------------------------------------------
 # -- Helper functions for making system calls.                              --

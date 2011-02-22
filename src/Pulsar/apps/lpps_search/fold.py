@@ -24,6 +24,7 @@ from lpps_search.util import MissingOptionException
 from lpps_search.util import MissingCommandLineOptionException
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
 from lpps_search.sift import sift_accel_cands
+from lpps_search.sift import plot_p_histogram, plot_f_histogram
 
 # All the options that need to be specified for this module (either on the 
 # commandline or as keyword arguments to the main function) :
@@ -130,11 +131,25 @@ def main(*args, **kwargs):
         raise DirectoryNotEmpty(fold_dir)
  
     # search for all the accelcand files and sift them
-    sifted_candidates = sift_accel_cands(cand_dir, basename)
+    unsifted_candidates, sifted_candidates = sift_accel_cands(cand_dir, basename)
     if len(sifted_candidates) == 0:
         print 'In directory %s there are no candidate files.' % cand_dir
         assert len(sifted_candidates) > 0
-
+    
+    # Make histograms of candidate period and candidate frequency before and
+    # after sifting.
+    histogram_dir = os.path.join(fold_dir, 'CANIDATE_HISTOGRAMS')
+    os.mkdir(histogram_dir)
+    if unsifted_candidates: 
+        plot_p_histogram(unsifted_candidates, 
+            os.path.join(histogram_dir, 'before_sifting_periods.pdf'))
+        plot_f_histogram(unsifted_candidates,
+            os.path.join(histogram_dir, 'before_sifting_frequencies.pdf'))
+    if sifted_candidates: 
+        plot_p_histogram(sifted_candidates, 
+            os.path.join(histogram_dir, 'after_sifting_periods.pdf'))
+        plot_f_histogram(sifted_candidates,
+            os.path.join(histogram_dir, 'after_sifting_frequencies.pdf'))
     # using knowledge about the directory layout:
     mask_filename = os.path.join(cand_dir, basename + '_rfifind.mask')
     subband_globpattern = os.path.join(subb_dir, basename + '.sub[0-9]???')

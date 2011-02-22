@@ -12,10 +12,37 @@ import sys
 import glob
 # PRESTO imports
 import sifting
+# matplotlib imports
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot
+
 # LOFAR PILOT PULSAR SURVEY imports
 from lpps_search import crawler
 from lpps_search import inf
 
+
+def plot_p_histogram(candidates, full_path):
+    l = [c.p for c in candidates]
+    pyplot.clf()
+    pyplot.hist(l, 1000, histtype='step')
+    pyplot.xlabel('Period (s)')
+    pyplot.ylabel('Number of candidates')
+    pyplot.savefig(full_path)
+    pyplot.clf()
+
+def plot_f_histogram(candidates, full_path):
+    l = [c.f for c in candidates]
+    pyplot.clf()
+    pyplot.hist(l, 1000, histtype='step')
+    pyplot.xlabel('Frequency (Hz)')
+    pyplot.ylabel('Number of candidates')
+    pyplot.savefig(full_path)
+    pyplot.clf()
+
+# TODO: Split sift_accel_cands into 2 steps (reading and sifting) to 
+# facilitate plotting the candidate period and candidate frequency historgrams
+# before and after sifting.
 
 def sift_accel_cands(cand_dir, basename):
     '''Sift through the candidate pulsars found by accelsearch.'''
@@ -34,15 +61,17 @@ def sift_accel_cands(cand_dir, basename):
                 accel_cands_found_for[z_max].append(dm)
             except KeyError, e:
                 accel_cands_found_for[z_max] = [dm]
-    
+   
     # For each value of z_max, sift the candidates that were found and put
     # them all in one big list:
+    unsifted_accelcands = []
     sifted_accelcands = []
     for z_max, accel_cands in accel_cands_found_for.iteritems():
         # Read all the acceleration candidates:
         files = glob.glob(os.path.join(cand_dir, 
             basename + '_DM*.*_ACCEL_%d' % z_max))
         accel_cands = sifting.read_candidates(files)
+        unsifted_accelcands.extend(accel_cands)
         # The sifting module also needs all the trial DM values 
         dm_strs = ['%.2f' % dm for dm in accel_cands_found_for[z_max]]
         
@@ -59,5 +88,5 @@ def sift_accel_cands(cand_dir, basename):
         if accel_cands == None: accel_cands = [] 
         MAX_CANDIDATES = 10
         sifted_accelcands.extend(accel_cands[:MAX_CANDIDATES])
-    return sifted_accelcands 
+    return unsifted_accelcands, sifted_accelcands 
 

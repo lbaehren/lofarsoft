@@ -59,10 +59,10 @@ import psr_utils
 #from ssps.presto.files.inf import inf_reader
 from lpps_search.inf import inf_reader, ra2ascii, dec2ascii
 import lpps_search.crawler as crawler
-#import folder
 import lpps_search.fold as folder
 from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
+from lpps_search.util import DirectoryNotEmpty, WrongPermissions
 
 # ----------------------------------------------------------------------------
 # -- Utility functions from GBT or Vishal's scripts --------------------------
@@ -121,7 +121,7 @@ def read_bad_observing_frequencies(rfi_file):
         try:
             # parse master.rfi file:
             # assumes that comments are allowed on lines that start with #
-            # assumes that there are numbers per line
+            # assumes that there are the following numbers for each line
             # 1 the middle of the bad frequency range
             # 2 the width in frequency of that bad observing frequency range
             # ignores anything else
@@ -185,15 +185,16 @@ def determine_numout(n_bins):
 
     # Find the length of the data, then see whether it is easily 
     # factorisable, if not pad the data a little so that the data has an
-    # easily factorisable length.  
-    # If the number of bins is already a power of 2 just return:
-    if math.log10(n_bins) / math.log10(2) == 0:
-        return n_bins
+    # easily factorisable length.
+
     # If the data is very short just use a minimum length of 1024 .
     # Note : this 1024 should be larger than the maxmimum downsample
     # factor from the dedispersion plan.
-    elif n_bins < 1024:
+    if n_bins < 1024:
         return 1024
+    # If the number of bins is already a power of 2 just return it.
+    if (n_bins != 0) and (n_bins & (n_bins - 1) == 0):
+        return n_bins 
     # Find a length that is slightly larger than the data length that is
     # easily factorisable. 
     else:
@@ -213,7 +214,7 @@ def determine_numout(n_bins):
 # -- whether they are python modules or system calls does not matter).      --
 # ----------------------------------------------------------------------------
 
-def run_rfifind(subband_globpattern, result_dir, basename, bad_channel_str):
+def run_rfifind(subband_globpattern, result_dir, basename, bad_channels):
     '''Get the commandline for rfifind. '''
     files = subband_globpattern
     # Jump to the results directory to run rfifind.
@@ -225,8 +226,8 @@ def run_rfifind(subband_globpattern, result_dir, basename, bad_channel_str):
         '-o' : basename,
     }
 
-    if bad_channel_str:
-        options['-zapchan'] = bad_channel_str
+    if bad_channels:
+        options['-zapchan'] = ','.join([str(idx) for idx in bad_channels]) 
 
     status = run_command('rfifind', options, [files])
     os.chdir(current_dir)
@@ -361,17 +362,21 @@ class SearchRun(object):
         self.work_dir = os.path.abspath(work_dir) 
         self.out_dir = os.path.abspath(out_dir)
 
-        # Check that working directory and the output directory are empty and
-        # that they are writable.
-        os.access(self.work_dir, os.F_OK & os.R_OK & os.W_OK)
+        # Check whether working directory is empty and writable
+        if not os.access(self.work_dir, os.F_OK | os.R_OK | os.W_OK):
+            raise WrongPermissions(self.work_dir)
+
         files = os.listdir(self.work_dir)
         if len(files) > 0:
-            raise Exception('Working directory not empty.')
+            raise DirectoryNotEmpty(self.work_dir)
 
-        os.access(self.out_dir, os.F_OK & os.R_OK & os.W_OK)
+        # Check whether output directory is empty and writable
+        if not os.access(self.out_dir, os.F_OK | os.R_OK | os.W_OK):
+            raise WrongPermissions(self.out_dir)
+
         files = os.listdir(self.out_dir)    
         if len(files) > 0:
-            raise Exception('Output directory %s not empty.' % self.out_dir)
+            raise DirectoryNotEmpty(self.out_dir) 
 
 
         self.basename = self.determine_basename()
@@ -508,12 +513,11 @@ class SearchRun(object):
 
         for fr in bad_freq_ranges:
             bad_channels.extend(intersect_channel_map_with_freq_range(m, fr))
-        bad_channel_str = ','.join([str(idx) for idx in bad_channels]) 
 
         # Perform rfifind
         t_rfifind_start = time.time()
         rfifind_status = run_rfifind(self.get_subband_globpattern(), 
-            self.work_dir, self.basename, bad_channel_str)
+            self.work_dir, self.basename, bad_channels)
         t_rfifind_end = time.time()
         # Do some exit status checking on rfifind
         if rfifind_status != 0:
