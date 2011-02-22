@@ -62,7 +62,7 @@ def runAnalysis(files, outfilename, doPlot = False):
         if not result["success"]: 
             continue
         fileTimestamp = crfile["TIME"][0]
-        triggers = match.readtriggers(fileTimestamp, "RS307", directory = "/Users/acorstanje/triggering/stabilityrun_15feb2011/") 
+        triggers = match.readtriggers(crfile, directory = "/Users/acorstanje/triggering/stabilityrun_15feb2011/") 
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
         result = pf.initialDirectionFit(crfile, fitType = 'linearFit')

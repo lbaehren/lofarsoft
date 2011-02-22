@@ -10,6 +10,7 @@ import os
 import pycrtools as cr
 import numpy as np
 import time
+import metadata as md
 
 def matccrLes(dirs, sortstring, coinctime, mincoinc):
     """
@@ -76,7 +77,7 @@ def matccrLes(dirs, sortstring, coinctime, mincoinc):
         if indices[dirIndex] >= len(files[dirIndex]):
           running = False
 
-def readtriggers(timestamp, stationName, directory=''):
+def readtriggers(crfile, directory=''):
     """
     Read in a TBBDriver-dumpfile with the data from the trigger-messages.
     Returns a tuple of 1-d numpy arrays: (antennaIDs, dDates, dates, samplenumers)
@@ -95,6 +96,11 @@ def readtriggers(timestamp, stationName, directory=''):
         readtriggers: File: /mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs005.dat has: 539405 lines
 
     """
+    timestamp = crfile["TIME"][0]
+    stationID = int(crfile["AntennaIDs"][0]) / int(1e6) # assume all from the same station!
+    #print stationID
+    stationName = md.idToStationName(stationID)
+    #print stationName
     datestring = time.strftime("%Y-%m-%d", time.gmtime(timestamp)) # like "2011-02-15"
     filename = directory + datestring + "_TRIGGER-"+stationName+".dat" # like "2011-02-15_TRIGGER-RS307.dat"
     
