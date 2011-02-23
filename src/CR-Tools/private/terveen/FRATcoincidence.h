@@ -37,7 +37,7 @@
 #include <fstream>
 #include <math.h>
 // forward declaration
-#define FRAT_TASK_BUFFER_LENGTH (200)
+#define FRAT_TASK_BUFFER_LENGTH (20000)
 
 struct triggerEvent {
 	int time;
@@ -115,13 +115,15 @@ namespace FRAT {
 		CoinCheck(const CoinCheck&);
 		CoinCheck& operator=(const CoinCheck&);
 		
-        std::string printEvents(int reftime, int timewindow);
+        std::string printEvent();
+        std::string printLastEvent();
     private:
 
 
       int itsNoCoincidenceChannels;
       double itsCoincidenceTime;
-
+      std::stringstream itsEventString;
+      std::stringstream itsLastEventString;
       // avoid defaultconstruction and copying
 
       

@@ -29,7 +29,7 @@ namespace FRAT {
 		itsNrTriggers (0),
 		itsInitialized (false) {
 			// set default parameters for coincidence
-			std::cout << FRAT_TASK_BUFFER_LENGTH << std::endl;
+			//std::cout << FRAT_TASK_BUFFER_LENGTH << std::endl;
 			itsNoCoincidenceChannels = 8;
 			itsCoincidenceTime = 10.3e-6;
 			// Initialize the trigger messages buffer
@@ -65,12 +65,12 @@ namespace FRAT {
 			unsigned int i,foundSBs[nChannles],nfound;
 			unsigned int startindex,runindex;
 			int reftime;
-			
 			startindex = first;
 			while ((startindex!=trigBuffer[latestindex].next) && (startindex < FRAT_TASK_BUFFER_LENGTH)) {
 				runindex = trigBuffer[startindex].next;
 				reftime=trigBuffer[startindex].Time-timeWindow; //earliest time for coincidence events
 				nfound=1;
+		                itsEventString.str("");	
 				foundSBs[0]=trigBuffer[startindex].SBnr;
 				while ((runindex < FRAT_TASK_BUFFER_LENGTH) && (trigBuffer[runindex].Time>= reftime)){
 					//check if current time is higher than the reftime. Stop if that is not the case
@@ -85,20 +85,21 @@ namespace FRAT {
 						};
 						if (i == nfound) { 
 							if (nfound+2 > nChannles) { 
-								std::cout << "Subbands found:" ;
+		                                                itsEventString.str("");	
+								itsEventString << "Subbands found:" ;
 								for (i=0; i<nfound; i++){
-									std::cout << " " << foundSBs[i];
+									itsEventString << " " << foundSBs[i];
 								}
-								std::cout << " " << trigBuffer[runindex].SBnr << std::endl;
+								itsEventString << " " << trigBuffer[runindex].SBnr << std::endl;
 								return true; 
 							}; //startindex; };
 							foundSBs[nfound] = trigBuffer[runindex].SBnr;
-							std::cout << "Subbands found:" ;
+							//itsEventString << "Subbands found:" ;
 							for (i=0; i<nfound; i++){
-								std::cout << " " << foundSBs[i];
+								itsEventString << " " << foundSBs[i];
 							}
-							std::cout << " " << trigBuffer[runindex].SBnr << std::endl;
-							std::cout << "Not enough. Continuing...." << std::endl;
+							itsEventString << " " << trigBuffer[runindex].SBnr << std::endl;
+							itsEventString << "Not enough. Continuing...." << std::endl;
 							nfound++;
 						};
 						runindex = trigBuffer[runindex].next;
@@ -109,13 +110,21 @@ namespace FRAT {
 			//return -1;
 			return false;
 		};
+
+                std::string CoinCheck::printEvent(){
+                     return itsEventString.str();
+                }
+
+                std::string CoinCheck::printLastEvent(){
+                     return itsLastEventString.str();
+                }
 		
 		// Add a trigger message to the buffer. 
 		unsigned int CoinCheck::add2buffer(const triggerEvent& trigger){
 			// double date;
 			unsigned int newindex,runindex;
-			
-			std::cout << "Adding new event: SB " << trigger.subband << " at time " << trigger.time << std::endl;
+		        itsLastEventString.str("");	
+			itsLastEventString << "Adding new event: SB "  << trigger.subband << " at time " << trigger.time << std::endl;
 			
 			// date = trigger.itsTime + trigger.itsSampleNr/200e6;
 			newindex = last;
