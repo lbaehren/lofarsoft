@@ -11,8 +11,16 @@ ________________________________________________________________________________
 _________________________________________________________________________________
 >>> Quick start
 
-Once checkout from the repository is complete, you can change into the "build"
-directory to run the bootstrap script.
+Once checkout from the repository is complete, first set up your environment:
+
+  # csh, tcsh
+  setenv LOFARSOFT <root directory of code tree>
+  source $LOFARSOFT/devel_common/scripts/init.csh
+  # sh, bash
+  export LOFARSOFT=<root directory of code tree>
+  . $LOFARSOFT/devel_common/scripts/init.sh
+
+Then change into the "build" directory to run the bootstrap script:
 
   cd build
   ./bootstrap

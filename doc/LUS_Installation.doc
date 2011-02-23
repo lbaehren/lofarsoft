@@ -72,11 +72,11 @@
 
   \section LUS_Installation_Platforms Platform-specific installation
 
-  \section LUS_Installation_Debian Debian GNU Linux
+  \section LUS_Installation_Debian Debian GNU/Linux
 
-  Sadly enough Debian GNU Linux -- even at newer versions -- typically does not
-  come with all required devlopment packages installed; therefore the following
-  packages need to be installed through <tt>apt-get</tt>:
+  A base install of Debian does not provide all the required development
+  packages. They can be installed using <tt>apt-get</tt> as follows:
+
   \verbatim
   apt-get install bison flex
   apt-get install g++ gfortran liblapack-dev python-dev
@@ -89,19 +89,17 @@
 
   \section LUS_Installation_OSX Mac OS X
 
-  <ol>
-    <li>First install the GNU C/C++ compiler optimized for OSX provided by
-    <a hef="http://www.apple.com">Apple</a> as part of the X Code Integrated
-    Development Environment.
+  First install the GNU C/C++ compiler optimized for OSX provided by
+  <a hef="http://www.apple.com">Apple</a> as part of the X Code Integrated
+  Development Environment.
 
-    You can either use the OSX Installation DVD which came with your Mac or
-    <a href="http://developer.apple.com/technologies/xcode.html">download</a>
-    it from the Apple website.
+  You can either use the OSX Installation DVD which came with your Mac or
+  <a href="http://developer.apple.com/technologies/xcode.html">download</a>
+  it from the Apple website.
 
-    Double click the package and follow the installation instructions.
-    Then run <i>Software Update</i> from the Apple menu to ensure you have the
-    latest version of all libraries.
-  </ol>
+  Double click the package and follow the installation instructions.
+  Then run <i>Software Update</i> from the Apple menu to ensure you have the
+  latest version of all libraries.
 
   \section LUS_Installation_SL Scientific Linux
 
