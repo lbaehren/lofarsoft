@@ -3,11 +3,12 @@
 basedir=`pwd`
 
 ##______________________________________________________________________________
-## Build CMake from source 
+## Check basic requirements: CMake and Git
 
 cmakeSource=`ls $basedir/../external/cmake/cmake*.gz`
 
 $basedir/../external/cmake/checkCMake.sh $cmakeSource $basedir/../release
+$basedir/../external/git/checkGit.sh $basedir/../release
 
 ##______________________________________________________________________________
 ## Run CMake to define build targets
