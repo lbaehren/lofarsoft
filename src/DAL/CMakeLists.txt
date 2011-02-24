@@ -60,6 +60,16 @@ if (NOT LUS_ROOT)
   endif (LUS_ROOT)
 endif (NOT LUS_ROOT)
 
+## Check if DAL is installed already
+
+if (NOT DAL_FOUND)
+
+  set (DAL_ROOT_DIR ${LUS_RELEASE_DIR}/opt/dal)
+
+  include (FindDAL)
+
+endif (NOT DAL_FOUND)
+
 ## ==============================================================================
 ##
 ##  Build instructions
