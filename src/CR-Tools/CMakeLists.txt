@@ -190,6 +190,8 @@ set (cr_cmake_modules
   X11
   )
 
+set (DAL_ROOT_DIR ${LUS_RELEASE_DIR}/opt/dal)
+
 if (CR_WITH_GLISH)
   list (APPEND cr_cmake_modules Glish)
 else (CR_WITH_GLISH)
