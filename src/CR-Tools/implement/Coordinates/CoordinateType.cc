@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include <Coordinates/CoordinateType.h>
-#include <dal/CoordinateGenerator.h>
 
 namespace CR { // Namespace CR -- begin
 

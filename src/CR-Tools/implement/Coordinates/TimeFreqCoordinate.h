@@ -30,8 +30,10 @@
 #include <iostream>
 #include <string>
 
-#include <dal/CoordinateGenerator.h>
+// DAL header files
+#include <coordinates/CoordinateGenerator.h>
 
+// CR-Tools header files
 #include <Coordinates/CoordinateBase.h>
 #include <Coordinates/CoordinateType.h>
 #include <Coordinates/TimeFreq.h>

@@ -48,7 +48,7 @@
 #include <Imaging/GeomDelay.h>
 
 // DAL header files
-#include <dal/dalCommon.h>
+#include <core/dalCommon.h>
 
 using std::cout;
 using std::endl;

@@ -60,15 +60,14 @@
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
 
-/*DAL header files*/
-
-#include <dal/dalCommon.h>
-#include <dal/dalDataset.h>
-#include <dal/BeamFormed.h>
-#include <dal/BeamGroup.h>
-#include <dal/TBB_Timeseries.h>
-#include <dal/TBB_StationGroup.h>
-#include <dal/TBB_DipoleDataset.h>
+/* DAL header files */
+#include <core/dalCommon.h>
+#include <core/dalDataset.h>
+#include <data_hl/BeamFormed.h>
+#include <data_hl/BeamGroup.h>
+#include <data_hl/TBB_Timeseries.h>
+#include <data_hl/TBB_StationGroup.h>
+#include <data_hl/TBB_DipoleDataset.h>
 
 /*CR-Tools header files*/
 

@@ -30,8 +30,8 @@
 
 //DAL
 #include <crtools.h>
-#include <dal/TBB_Timeseries.h>
-#include <dal/TBB_StationGroup.h>
+#include <data_hl/TBB_Timeseries.h>
+#include <data_hl/TBB_StationGroup.h>
 
 // CR-Tools header files
 #include <Math/VectorConversion.h>

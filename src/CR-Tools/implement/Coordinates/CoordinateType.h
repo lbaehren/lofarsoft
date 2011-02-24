@@ -36,6 +36,9 @@
 #include <crtools.h>
 #include <Coordinates/MConversions.h>
 
+/* DAL header files */
+#include <coordinates/CoordinateGenerator.h>
+
 using casa::Matrix;
 using casa::MDirection;
 using casa::Projection;
