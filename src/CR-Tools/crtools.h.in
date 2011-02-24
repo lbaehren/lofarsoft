@@ -61,6 +61,10 @@
 //
 // ==============================================================================
 
+#ifdef HAVE_DAL
+#include <dal_config.h>
+#endif
+
 /* Define to 1 if we have the `abs` function*/
 #cmakedefine HAVE_ABS 1
 
@@ -115,10 +119,6 @@
 
 /* Define to 1 if we have a working installation of the HDF5 library */
 #cmakedefine HAVE_HDF5 1
-
-#ifdef HAVE_HDF5
-#include <dal_config.h>
-#endif
 
 /* Define to 1 if we have a working installation of the LAPACK library */
 #cmakedefine HAVE_LAPACK 1
