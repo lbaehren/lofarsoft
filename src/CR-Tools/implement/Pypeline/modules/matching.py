@@ -96,12 +96,15 @@ def readtriggers(crfile, directory=''):
         readtriggers: File: /mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs005.dat has: 539405 lines
 
     """
-    timestamp = crfile["TIME"][0]
+    timestamp = crfile["TIME"][0] # we know from datacheck that all are the same
     stationID = int(crfile["AntennaIDs"][0]) / int(1e6) # assume all from the same station!
     #print stationID
     stationName = md.idToStationName(stationID)
     #print stationName
     datestring = time.strftime("%Y-%m-%d", time.gmtime(timestamp)) # like "2011-02-15"
+#    import pdb; pdb.set_trace()
+    h5filename = crfile.files[0].filename
+    directory = os.path.dirname(h5filename) + '/'
     filename = directory + datestring + "_TRIGGER-"+stationName+".dat" # like "2011-02-15_TRIGGER-RS307.dat"
     
 #    fd = os.popen('wc '+ filename)
@@ -118,29 +121,31 @@ def readtriggers(crfile, directory=''):
     print timestamp
     fd = open(filename)
     i = 0
-    for line in fd:
-#      str_line = fd.readline()
-      if (not str(timestamp - 1) in line) and (not str(timestamp) in line) and (not str(timestamp+1) in line):
-          continue
-      else:
-          print line
-          antennaIDs[i] = int(line.split()[0])
-          testdate = long(line.split()[2])
-          # Have to check for invalid dates! These are 2^32 - 1, and somehow Python complains about not getting that into its 'int' type...
-          if testdate < 2.2e9:
-              dates[i] = int(testdate)
-          else:
-              dates[i] = 0 # not easy to skip over it... it'll fall out when matching dates.
+    line = fd.readline()
+    while not str(timestamp) in line: # read over it until hitting 'timestamp' (second)
+        line = fd.readline()
+        
+    while str(timestamp) in line: # now process until passing beyond 'timestamp'
+#        print line
+        antennaIDs[i] = int(line.split()[0])
+        testdate = long(line.split()[2])
+        # Have to check for invalid dates! These are 2^32 - 1, and somehow Python complains about not getting that into its 'int' type...
+        if testdate < 2.2e9:
+            dates[i] = int(testdate)
+        else:
+            dates[i] = 0 # not easy to skip over it... it'll fall out when matching dates.
+        
+        testSampleNum = long(line.split()[3])
+        if testSampleNum < 200e6:
+            samplenumers[i] = int(testSampleNum)
+        else:
+            samplenumers[i] = 0
+            print 'WARNING: sample number invalid in trigger log!'
+            
+        dDates[i] = float(dates[i]) + float(samplenumers[i])/200.0e6
+        i += 1 # !
+        line = fd.readline()
           
-          testSampleNum = long(line.split()[3])
-          if testSampleNum < 200e6:
-              samplenumers[i] = int(testSampleNum)
-          else:
-              samplenumers[i] = 0
-              print 'WARNING: sample number invalid in trigger log!'
-              
-          dDates[i] = float(dates[i]) + float(samplenumers[i])/200.0e6
-          i += 1 # !
     fd.close()
     antennaIDs = np.resize(antennaIDs, i)
     dDates = np.resize(dDates, i)
@@ -194,7 +199,8 @@ def matchTriggerfileToTime(ddate, triggerfile, coinctime=1e-5):
 
     """
     if isinstance(triggerfile,str):
-        (allIDs, allDDates, alldates, allSNs) = readtriggers(triggerfile)
+        raise ValueError("Need as input the 'triggers' as obtained from matching.readtriggers(...)")
+        #(allIDs, allDDates, alldates, allSNs) = readtriggers(triggerfile)
     else:
         (allIDs, allDDates, alldates, allSNs) = triggerfile
     indices = getTriggerIndicesFromTime(ddate, allDDates, coinctime)
@@ -209,7 +215,7 @@ def matchTriggerfileToTime(ddate, triggerfile, coinctime=1e-5):
       sortdates = selecteddates[sortind]
       sortSNs = selectedSNs[sortind]
       if (len(np.unique(sortIDs)) != len(sortIDs)):
-        print "matchTriggerfileToTime: dublicated antenna IDs!"
+        print "matchTriggerfileToTime: duplicated antenna IDs!"
       outIDs = sortIDs
       outDDates = sortDDates
       outdates = sortdates
