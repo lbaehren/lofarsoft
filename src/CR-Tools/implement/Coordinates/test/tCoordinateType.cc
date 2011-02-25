@@ -28,6 +28,7 @@
 using std::cout;
 using std::endl;
 using CR::CoordinateType;
+using namespace casa;
 
 /*!
   \file tCoordinateType.cc
