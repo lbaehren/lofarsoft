@@ -52,7 +52,7 @@ debugcounter=0
 # if True, then only db file will be read to calculate the statistics of observations
 is_stats = False
 
-# View of presenting info (usual (defaul), brief, plots, and mega)
+# View of presenting info (usual (default), brief, plots, and mega)
 viewtype="usual"
 
 # Setting User name
@@ -86,8 +86,10 @@ simbadlink_identifier="http://simbad.u-strasbg.fr/simbad/sim-id?Radius=5&Radius.
 # across many other nodes, these three "pulsar" sub5 nodes were used to record a part
 # of the data as well
 storage_nodes=["lse013", "lse014", "lse015", "lse016", "lse017", "lse018"]
-# list of directories withe the data
+# list of directories with the data
 data_dirs=["/data1", "/data2", "/data3", "/data4"]
+# mask to represent ALL data dirs in one storage nodes
+datadir_mask="/data?"
 
 # cexec corresponding table
 cexec_nodes={'lse013': 'sub5:9', 'lse014': 'sub5:10', 'lse015': 'sub5:11',
@@ -124,48 +126,199 @@ dbobsids=[]
 
 # Class obsinfo with info from the parset file
 class obsinfo:
-	def __init__(self, log):
-		self.parset = log	
+	def __init__(self, id):
+		self.id = id
+		self.parset=""
+                self.datestring="????"
+		self.seconds = 0
+                self.antenna=self.band=self.stations=self.stations_string="?"
+		self.stations_html=""
+		self.nodeslist_string=self.datadir=""
+		self.nodeslist=[]
+		self.subcluster = 'sub?'
+		self.bftype=self.fdtype=self.imtype="?"
+		self.istype=self.cstype=self.fetype="?"
+                self.rastring="????"
+                self.decstring="_????"
+		self.pointing="????_????"
+		self.source=""
+                self.duration="?"
+
+		# search for parset file
+		self.find_parset()
+		# update info if parset file was found
+		if self.parset != "":
+			self.update()
+
+	#
+	# checking first if the directory with the parset file exists
+	#
+	# There were several changes in the location of the parset files and its name, so we have to
+	# check all of them. There were:
+	# (0) OLDEST parset file: /globalhome/lofarsystem/oldlog/id/RTCP.parset.0   <-- parset_oldlogdir + id + parset  
+	# (1) OLD parset was here: /globalhome/lofarsystem/log/id/RTCP.parset.0     <-- parset_logdir + id + parset
+	#     Here, I found that for some datasets D2010_..., the dir name where parset file is
+	#     is actually L2010_...  -> so I am checking it here as well
+	# (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
+	# (3) 2nd transpose parset as of Aug 20, 2010 is here: 
+	#          /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L2010-MM-DD-DATE/RTCP-ID.parset
+	#
+
+	# search for parset file
+	def find_parset (self):
+		# suffix of ID, the sequence number of observation
+        	id_suffix=self.id.split("_")[1]   
+
+		# checking parset_logdir (1) first
+		self.logdir=parset_logdir + self.id + "/"
+		if os.path.exists(self.logdir): 
+			self.get_parset_name(self.logdir, id_suffix)
+			return
+		# for D20??_ obsids also checking L20??_ directories
+		if re.search("D20", self.id):			
+			self.logdir=parset_logdir + re.sub("D20", "L20", self.id) + "/"
+			if os.path.exists(self.logdir):
+				self.get_parset_name(self.logdir, id_suffix)
+				return
+		# checking in the oldlog directory (0)
+		self.logdir=parset_oldlogdir + self.id + "/"
+		if os.path.exists(self.logdir):
+			self.get_parset_name(self.logdir, id_suffix)
+			return
+		# Due to new naming convention and location of the parset files, also looking for the parset file
+		# in any L2010-??-??_?????? directories	(2)
+		cmd="find %s -type f -name '*%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_logdir, id_suffix)
+		status=os.popen(cmd).readlines()
+		if np.size(status) > 0:
+			# it means we found the directory with parset file
+			self.parset=status[0][:-1]
+			self.logdir="/".join(status[0][:-1].split("/")[:-1]) + "/"
+			return
+		# now checking the new parset directory (3)
+		cmd="find %s -type f -name '*%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_newlogdir, id_suffix)
+		status=os.popen(cmd).readlines()
+		if np.size(status) > 0:
+			# it means we found the directory with parset file
+			self.parset=status[0][:-1]
+			self.logdir="/".join(status[0][:-1].split("/")[:-1]) + "/"
+			return
+		self.logdir=""
+		self.parset=""
+
+
+	# get parset file from the parset directory
+	def get_parset_name (self, dir, id_suffix):
+		# get the full path for the parset file
+		self.parset=dir + parset
+		if os.path.exists(self.parset): return
+		# also checking that maybe the parset file has name the same as Obs ID
+		self.parset=dir + self.id + ".parset"
+		if os.path.exists(self.parset): return
+		# also checking that maybe the name of parset file has new naming convention, like "RTCP-<id_suffix>.parset"
+		# OR like L<id_suffix>.parset
+		self.parset=dir + "RTCP-" + id_suffix + ".parset"
+		if os.path.exists(self.parset): return
+		# OR like L<id_suffix>.parset
+		self.parset=dir + "L" + id_suffix + ".parset"
+		if os.path.exists(self.parset): return
+		self.parset=""
+
+	# getting the subcluster number where the raw data were taken (e.g. sub4, sub5, etc.)
+	# if raw data were spread between several subclusters, then 'subA' is assigned
+	# these data are checked if there are more than 3 compute nodes in nodeslist
+	# also, even if there are 3 or less storage nodes used, we check if they belong to the
+	# same subcluster, if not then 'subA' is assigned
+	# is 'nodeslist' is empty, or has old strange node names like 'list...', then we 
+	# assign 'sub?' to them. If the data is processed and present in the archive, then 'sub?'
+	# will be further corrected
+	def get_subcluster (self):
+		try:
+			snames = np.unique([cexec_nodes[i].split(":")[0] for i in self.nodeslist])
+			if np.size(snames) == 0:
+				self.subcluster = 'sub?'
+			elif np.size(snames) > 1:
+				self.subcluster = "subA"
+			else:
+				self.subcluster = snames[0]
+		except:
+			self.subcluster = 'sub?'
+
+
+	# search for raw data in all datadirs and storage nodes
+	# this function is called when no parset file was found
+	def rawdata_search (self, storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string):
+		iddirs=[]
+		self.nodeslist=[]
+		for s in storage_nodes:
+			for d in data_dirs:
+				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[s], d + "/" + self.id, cexec_egrep_string)
+				status=os.popen(cmd).readlines()
+				if np.size(status) > 0:
+					self.nodeslist.append(s)  # forming nodeslist
+					iddirs.append(d)
+		iddirs=np.unique(iddirs)
+		self.nodeslist=np.unique(self.nodeslist)
+		self.datadir = ",".join(iddirs)
+		self.get_subcluster()  # getting sub-cluster name
+		# forming string of nodes
+		self.nodeslist_string=re.sub("lse", "", "[" + ",".join(self.nodeslist) + "]")
+        	if len(self.nodeslist_string)>13:
+                	self.nodeslist_string=self.nodeslist_string[:13] + "..."
+
+
+	# check if raw data are indeed exist in datadir and nodeslist from parset file
+	# if not, we call rawdata_search to update them
+	def rawdata_check (self, storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string):
+		# getting the sizes only from the intersection of oi.nodeslist and storage_nodes
+		insecnodes=list(set(self.nodeslist).intersection(set(storage_nodes)))
+		is_ok = True  # if False, we will update datadir and nodeslist
+		if len(insecnodes) == 0: return
+		for s in insecnodes:
+			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[s], self.datadir + "/" + self.id, cexec_egrep_string)
+			status=os.popen(cmd).readlines()
+			if np.size(status) == 0: # at least there is no raw directory in one of dedicated storage nodes in datadir
+				is_ok = False
+				break
+		# updating datadir and nodeslist
+		if not is_ok:
+			self.rawdata_search(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
+
+
+	# update info based on parset file
+	def update (self):
 		# Getting the Date of observation
 	        cmd="grep Observation.startTime %s | tr -d \\'" % (self.parset,)
-        	self.starttime=os.popen(cmd).readlines()
-        	if np.size(self.starttime) > 0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status) > 0:
                 	# it means that this keyword exist and we can extract the info
-                	self.starttime=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+                	self.starttime=status[0][:-1].split(" = ")[-1]
 			# Getting the number of seconds from 1970. Can use this to sort obs out by date/time
 			self.seconds=time.mktime(time.strptime(self.starttime, "%Y-%m-%d %H:%M:%S"))
                 	smonth=self.starttime.split("-")[1]
                 	sday=self.starttime.split("-")[2].split(" ")[0]
                 	self.datestring=smonth+sday
-        	else:
-                	self.datestring="????"
-			self.seconds = 0
 
 		# Getting the Antenna info (HBA or LBA)
         	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
-        	self.antenna=os.popen(cmd).readlines()
-        	if np.size(self.antenna)>0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status)>0:
                 	# Antenna array setting exists in parset file
-                	self.antenna=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("_")[0]
-        	else:
-                	self.antenna="?"
+                	self.antenna=status[0][:-1].split(" = ")[-1].split("_")[0]
 
 		# Getting the Filter setting
         	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
-        	self.band=os.popen(cmd).readlines()
-        	if np.size(self.band)>0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status)>0:
                 	# band filter setting exists in parset file
-                	self.band=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("A_")[-1]
-        	else:
-                	self.band="?"
+                	self.band=status[0][:-1].split(" = ")[-1].split("A_")[-1]
 
 		# Getting the stations and their number (including separately the number of CS and RS)
 #        	cmd="grep 'Observation.VirtualInstrument.stationList' %s" % (self.parset,)
         	cmd="grep 'OLAP.storageStationNames' %s" % (self.parset,)
-        	self.stations=os.popen(cmd).readlines()
-        	if np.size(self.stations)>0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status)>0:
                 	# Stations setting exists in parset file
-                	self.stations=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
+                	self.stations=status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
 			# removing LBA and HBA from station names, replacing HBA ears HBA0 to /0 and HBA1 to /1
 			self.stations = re.sub("HBA0", "/0", self.stations)
 			self.stations = re.sub("HBA1", "/1", self.stations)
@@ -181,42 +334,24 @@ class obsinfo:
 				if n != 0 and n % 9 == 0: self.stations_html += "<br>"
 				self.stations_html += stations_array[n] + ","
 			self.stations_html += stations_array[-1]
-        	else:
-                	self.stations="?"
-			self.stations_string="?"
 
 	        # reading the parset file
 	        # getting the info about StorageNodes. Note! For old parsets there seems to be no such a keyword Virtual...
         	# However, the old keyword OLAP.storageNodeList has "non-friendly" format, so I just ignore this by now
         	cmd="grep Observation.VirtualInstrument.storageNodeList %s | sed -e 's/lse//g'" % (self.parset,)
-        	self.nodeslist=os.popen(cmd).readlines()
-        	if np.size(self.nodeslist) > 0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status) > 0:
                 	# it means that this keyword exist and we can extract the info
-                	self.nodeslist=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+                	self.nodeslist_string=status[0][:-1].split(" = ")[-1]
+			self.nodeslist=["lse%s" % (i) for i in self.nodeslist_string.split("[")[1].split("]")[0].split(",")]
 
-		# getting the subcluster number where the raw data were taken (e.g. sub4, sub5, etc.)
-		# if raw data were spread between several subclusters, then 'subA' is assigned
-		# these data are checked if there are more than 3 compute nodes in nodeslist
-		# also, even if there are 3 or less storage nodes used, we check if they belong to the
-		# same subcluster, if not then 'subA' is assigned
-		# is 'nodeslist' is empty, or has old strange node names like 'list...', then we 
-		# assign 'sub?' to them. If the data is processed and present in the archive, then 'sub?'
-		# will be further corrected
-		try:
-			snames = np.unique([cexec_nodes["lse%s" % (i)].split(":")[0] for i in self.nodeslist.split("[")[1].split("]")[0].split(",")])
-			if np.size(snames) == 0:
-				self.subcluster = 'sub?'
-			elif np.size(snames) > 1:
-				self.subcluster = "subA"
-			else:
-				self.subcluster = snames[0]
-		except:
-			self.subcluster = 'sub?'
+		# getting the subcluster
+		self.get_subcluster()
 
 		# After we figured the correct subcluster, then we cut the nodeslist string
         	# cut the string of nodes if it is too long
-        	if len(self.nodeslist)>13:
-                	self.nodeslist=self.nodeslist[:13] + "..."
+        	if len(self.nodeslist_string)>13:
+                	self.nodeslist_string=self.nodeslist_string[:13] + "..."
 
 	        # getting the name of /data? where the data are stored
 		try:
@@ -226,105 +361,93 @@ class obsinfo:
 		# instead, there is another field called "OLAP.Storage.targetDirectory"
 		except:
         		cmd="grep OLAP.Storage.targetDirectory %s" % (self.parset,)
-        		self.datadir="/" + os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("/")[1]
+			status=os.popen(cmd).readlines()
+			if np.size(status) > 0:
+        			self.datadir="/" + status[0][:-1].split(" = ")[-1].split("/")[1]
 
 	        # getting info about the Type of the data (BF, Imaging, etc.)
         	# check first if data are beamformed
         	cmd="grep outputBeamFormedData %s" % (self.parset,)
-        	self.bftype=os.popen(cmd).readlines()
-        	if np.size(self.bftype) > 0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.bftype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	self.bftype=status[0][:-1].split(" = ")[-1].lower()[:1]
                 	if self.bftype == 'f':
                         	self.bftype = "-"
                 	else:
                         	self.bftype = "+"
-        	else:
-                	self.bftype = "?"
 
         	# check first if data are filtered
         	cmd="grep outputFilteredData %s" % (self.parset,)
-        	self.fdtype=os.popen(cmd).readlines()
-        	if np.size(self.fdtype) > 0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.fdtype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	self.fdtype=status[0][:-1].split(" = ")[-1].lower()[:1]
                 	if self.fdtype == 'f':
                         	self.fdtype = "-"
                 	else:
                         	self.fdtype = "+"
-        	else:
-                	self.fdtype = "?"
 
 	        # check if data are imaging
         	cmd="grep outputCorrelatedData %s" % (self.parset,)
-        	self.imtype=os.popen(cmd).readlines()
-        	if np.size(self.imtype) > 0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.imtype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	self.imtype=status[0][:-1].split(" = ")[-1].lower()[:1]
                 	if self.imtype == 'f':
                         	self.imtype = "-"
                 	else:
                         	self.imtype = "+"
-        	else:
-                	self.imtype = "?"
 
 	        # check if data are incoherent stokes data
         	cmd="grep outputIncoherentStokes %s" % (self.parset,)
-        	self.istype=os.popen(cmd).readlines()
-        	if np.size(self.istype) > 0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.istype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	self.istype=status[0][:-1].split(" = ")[-1].lower()[:1]
                 	if self.istype == 'f':
                         	self.istype = "-"
                 	else:
                         	self.istype = "+"
-        	else:
-                	self.istype = "?"
 
 	        # check if data are coherent stokes data
         	cmd="grep outputCoherentStokes %s" % (self.parset,)
-        	self.cstype=os.popen(cmd).readlines()
-        	if np.size(self.cstype) > 0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.cstype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	self.cstype=status[0][:-1].split(" = ")[-1].lower()[:1]
                 	if self.cstype == 'f':
                         	self.cstype = "-"
                 	else:
                         	self.cstype = "+"
-        	else:
-                	self.cstype = "?"
 
 	        # check if data are fly's eye mode data
         	cmd="grep PencilInfo.flysEye %s" % (self.parset,)
-        	self.fetype=os.popen(cmd).readlines()
-        	if np.size(self.fetype) > 0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.fetype=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].lower()[:1]
+                	self.fetype=status[0][:-1].split(" = ")[-1].lower()[:1]
                 	if self.fetype == 'f':
                         	self.fetype = "-"
                 	else:
                         	self.fetype = "+"
-        	else:
-                	self.fetype = "?"
 
 	        # getting info about the pointing
         	cmd="grep 'Beam\[0\].angle1' %s" % (self.parset,)
-        	self.rarad=os.popen(cmd).readlines()
-        	if np.size(self.rarad)>0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status)>0:
                 	# RA info exists in parset file
-                	self.rarad=float(os.popen(cmd).readlines()[0][:-1].split(" = ")[-1])
+                	self.rarad=float(status[0][:-1].split(" = ")[-1])
                 	rahours=self.rarad*12./3.1415926
                 	rah=int(rahours)
                 	ram=int((rahours-rah)*60.)
                 	self.rastring="%02d%02d" % (rah, ram)
-        	else:
-                	self.rastring="????"
 
         	cmd="grep 'Beam\[0\].angle2' %s" % (self.parset,)
-        	self.decrad=os.popen(cmd).readlines()
-        	if np.size(self.decrad)>0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status)>0:
                 	# DEC info exists in parset file
-                	self.decrad=float(os.popen(cmd).readlines()[0][:-1].split(" = ")[-1])
+                	self.decrad=float(status[0][:-1].split(" = ")[-1])
                 	decdeg=self.decrad*180./3.1415926
                 	if decdeg>0:
                         	decsign="+"
@@ -334,30 +457,27 @@ class obsinfo:
                 	decd=int(decdeg)
                 	decm=int((decdeg-decd)*60.)
                 	self.decstring="%c%02d%02d" % (decsign, decd, decm)
-        	else:
-                	self.decstring="_????"
+
         	self.pointing="%s%s" % (self.rastring, self.decstring)
 
 	        # getting info about Source name (new addition to the Parset files)
         	cmd="grep 'Observation.Beam\[0\].target' %s" % (self.parset,)
-        	self.source=os.popen(cmd).readlines()
-        	if np.size(self.source)>0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(status)>0:
                 	# Source name exists in parset file
-                	self.source=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+                	self.source=status[0][:-1].split(" = ")[-1]
 			if self.source != "":
 				if self.source[0] == "'":
 					self.source=self.source.split("'")[1]
 				if self.source[0] == "\"":
 					self.source=self.source.split("\"")[1]
-        	else:
-                	self.source=""
 
         	# Getting the Duration
         	cmd="grep Observation.stopTime %s | tr -d \\'" % (self.parset,)
-        	self.stoptime=os.popen(cmd).readlines()
-        	if np.size(self.starttime) > 0 and np.size(self.stoptime) > 0:
+        	status=os.popen(cmd).readlines()
+        	if np.size(self.starttime) > 0 and np.size(status) > 0:
                 	# it means that both start and stop Times exist in parset file
-                	self.stoptime=os.popen(cmd).readlines()[0][:-1].split(" = ")[-1]
+                	self.stoptime=status[0][:-1].split(" = ")[-1]
                 	c1 = time.strptime(self.starttime, "%Y-%m-%d %H:%M:%S")
                 	c2 = time.strptime(self.stoptime, "%Y-%m-%d %H:%M:%S")
                 	self.dur=time.mktime(c2)-time.mktime(c1)  # difference in seconds
@@ -365,10 +485,14 @@ class obsinfo:
                         	self.duration="%.1fh" % (self.dur/3600.)
                 	else:
                         	self.duration="%.1fm" % (self.dur/60.)
-        	else:
-                	self.duration="?"
 
 
+	# return True if parset file was found, and False otherwise
+	def is_parset (self):
+		if self.parset == "":
+			return False
+		else:
+			return True
 
 
 
@@ -407,28 +531,7 @@ class outputInfo:
 #			link = nedlink_start + self.oi.source.replace("+", "%2B") + nedlink_end
 		return link
 	
-	def setcomment (self, id, storage_nodes, comment):
-		self.id = id
-		self.obsyear = self.id.split("_")[0][1:]
-		self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
-		self.comment = comment
-		self.subcluster = "sub?"
-		self.totsize = 0.0
-		self.processed_dirsize = 0.0
-		self.pointing = "????_????"
-		self.cs = len(storage_nodes)
-		if viewtype == "brief":
-			self.colspan = 13
-		elif viewtype == "plots":
-			self.colspan = 20
-		elif viewtype == "mega":
-			self.colspan = 24 + self.cs
-		else:
-			self.colspan = 14 + self.cs
 
-		if self.comment != "":
-			self.info = self.comment
-			self.infohtml = "<td>%s</td>\n <td colspan=%d align=left>%s</td>" % (self.id, self.colspan, self.comment,)
 
 	def Init(self, id, oi, storage_nodes, dirsizes, statusline, reduced_node, redlocation, processed_dirsize, comment, filestem_array, chi_array, combined_plot, archivestatus, archivesize):
 		self.id = id
@@ -438,92 +541,30 @@ class outputInfo:
 			self.seconds = self.oi.seconds
 		else:
 			self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
-		self.subcluster = self.oi.subcluster
 		self.pointing = self.oi.pointing
 		self.statusline = statusline
 		self.reduced_node = reduced_node
 #		if self.reduced_node != "" and self.oi.subcluster == 'sub?':
 		if self.reduced_node != "":
-			self.oi.subcluster = cexec_nodes[self.reduced_node]
+			self.oi.subcluster = cexec_nodes[self.reduced_node].split(":")[0]
+		self.subcluster = self.oi.subcluster
 		self.redlocation = redlocation
 		self.processed_dirsize = processed_dirsize
 		self.comment = comment
-		self.cs = len(storage_nodes)
-		if viewtype == "brief":
-			self.colspan = 13
-		elif viewtype == "plots":
-			self.colspan = 20
-		elif viewtype == "mega":
-			self.colspan = 24 + self.cs
-		else:
-			self.colspan = 14 + self.cs
 		self.filestem_array = filestem_array
 		self.chi_array = chi_array
 		self.combined_plot = combined_plot
 		self.archivestatus = archivestatus
 		self.archivesize = archivesize
 
-		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
-		self.totsize=0.0
-		self.dirsize_string=""
 		for l in storage_nodes:
 			self.storage[l]=dirsizes[l]
-		for l in storage_nodes:
-			self.totsize = self.totsize + float(self.storage[l][1])
-			self.dirsize_string = self.dirsize_string + self.storage[l][0] + "\t"
-		# converting total size to GB
-		self.totsize = "%.1f" % (self.totsize / 1024. / 1024. / 1024.,)
-		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
+		# updating info fields...
+		self.update(storage_nodes)
 
-		if self.comment == "":
-			if viewtype == "brief":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.redlocation, self.statusline)
-			elif viewtype == "plots":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.redlocation, self.statusline, self.archivestatus)
-			elif viewtype == "mega":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %s	%s%-9s	%s	%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.oi.nodeslist, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.stations, self.redlocation, self.statusline, self.archivestatus)
-			else: # usual
-				self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
-			if viewtype == "brief":
-				if self.oi.source == "":
-					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.redlocation)
-				else:
-					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.redlocation)
-			elif viewtype == "plots" or viewtype == "mega":
-				if self.oi.source == "":
-					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
-				else:
-					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
-				# adding RSP0 chi-square and profile
-				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[0])
-				if self.filestem_array[0] == "":
-					self.infohtml = self.infohtml + "\n <td align=center></td>"
-				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
-				# adding RSPA chi-square and profile
-				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
-				if self.filestem_array[1] == "":
-					self.infohtml = self.infohtml + "\n <td align=center></td>"
-				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
 
-				# adding combined_plot column
-				if self.combined_plot != "":
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
-				else:
-					self.infohtml = self.infohtml + "\n <td align=center></td>"
-				# adding the rest (columns) of the table
-				if viewtype == "plots": self.infohtml = self.infohtml + "\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
-				if viewtype == "mega":
-					self.infohtml = self.infohtml + "\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.stations_html, self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
-			else: # usual
-				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
-		else:
-			self.info = self.comment
-			self.infohtml = "<td>%s</td>\n <td colspan=%d align=left>%s</td>" % (self.id, self.colspan, self.comment,)
-
+	# update info and infohtml fields
 	def update(self, storage_nodes):
-		self.cs = len(storage_nodes)
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
 		self.totsize=0.0
 		self.dirsize_string=""
@@ -534,64 +575,80 @@ class outputInfo:
 		self.totsize = "%.1f" % (self.totsize / 1024. / 1024. / 1024.,)
 		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
 
-		if viewtype == "brief":
-			self.colspan = 13
-		elif viewtype == "plots":
-			self.colspan = 20
-		elif viewtype == "mega":
-			self.colspan = 24 + self.cs
+		if viewtype == "usual":
+			self.colspan = 2
 		else:
-			self.colspan = 14 + self.cs
+			self.colspan = 12
 
-		if self.comment == "":
-			if viewtype == "brief":
+		# forming first Info (not html) string
+		if viewtype == "brief":
+			if self.comment == "":
 				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.redlocation, self.statusline)
-			elif viewtype == "plots":
+			else: # no parset file
+				self.info = "%s	%s										%s		%-27s" % (self.id, self.comment, self.redlocation, self.statusline)
+		elif viewtype == "plots":
+			if self.comment == "":
 				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.redlocation, self.statusline, self.archivestatus)
-			elif viewtype == "mega":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %s	%s%-9s	%s	%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.oi.nodeslist, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.stations, self.redlocation, self.statusline, self.archivestatus)
-			else: #usual
-				self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
+			else: # no parset file
+				self.info = "%s	%s										%s		%-27s   %s" % (self.id, self.comment, self.redlocation, self.statusline, self.archivestatus)
+		elif viewtype == "mega":
+			if self.comment == "":
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %s	%s%-9s	%s	%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.stations, self.redlocation, self.statusline, self.archivestatus)
+			else: # no parset file
+				self.info = "%s	%s										%-16s %s	%s%-9s	%s	%s		%-27s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.stations, self.redlocation, self.statusline, self.archivestatus)
+		else: # usual
+			if self.comment == "":
+				self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
+			else: # no parset file
+				self.info = "%s	%s		%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
 
-			if viewtype == "brief":
+		# now forming first Info html string
+		if viewtype == "brief":
+			if self.comment == "":
 				if self.oi.source == "":
 					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.redlocation)
 				else:
 					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.redlocation)
-			elif viewtype == "plots" or viewtype == "mega":
+			else: # no parset file
+					self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td align=left>%s</td>" % (self.id, self.colspan, self.comment, self.redlocation)
+
+		elif viewtype == "plots" or viewtype == "mega":
+			if self.comment == "":
 				if self.oi.source == "":
 					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
 				else:
 					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
-				# adding RSP0 chi-square and profile
-				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[0])
-				if self.filestem_array[0] == "":
-					self.infohtml = self.infohtml + "\n <td align=center></td>"
-				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
-				# adding RSPA chi-square and profile
-				self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
-				if self.filestem_array[1] == "":
-					self.infohtml = self.infohtml + "\n <td align=center></td>"
-				else:
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
+			else: # no parset file
+					self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>" % (self.id, self.colspan, self.comment)
 
-				# adding combined_plot column
-				if self.combined_plot != "":
-					self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
-				else:
-					self.infohtml = self.infohtml + "\n <td align=center></td>"
-				# adding the rest (columns) of the table
-				if viewtype == "plots": self.infohtml = self.infohtml + "\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
-				if viewtype == "mega":
-					self.infohtml = self.infohtml + "\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.stations_html, self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
+			# adding RSP0 chi-square and profile
+			self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[0])
+			if self.filestem_array[0] == "":
+				self.infohtml = self.infohtml + "\n <td align=center></td>"
 			else:
-				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
-		else:
-			self.info = self.comment
-			self.infohtml = "<td>%s</td>\n <td colspan=%d align=left>%s</td>" % (self.id, self.colspan, self.comment,)
+				self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[0], self.id, self.filestem_array[0])
+			# adding RSPA chi-square and profile
+			self.infohtml = self.infohtml + "\n <td align=center>%s</td>" % (self.chi_array[1])
+			if self.filestem_array[1] == "":
+				self.infohtml = self.infohtml + "\n <td align=center></td>"
+			else:
+				self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
 
+			# adding combined_plot column
+			if self.combined_plot != "":
+				self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.combined_plot, self.id, self.combined_plot)
+			else:
+				self.infohtml = self.infohtml + "\n <td align=center></td>"
+			# adding the rest (columns) of the table
+			if viewtype == "plots": self.infohtml = self.infohtml + "\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
+			if viewtype == "mega":
+				self.infohtml = self.infohtml + "\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=left>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.stations_html, self.redlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
 
+		else: # usual
+			if self.comment == "":
+				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
+			else: # no parset file
+				self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.colspan, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
 
 
 
@@ -1345,7 +1402,7 @@ if __name__ == "__main__":
 		if not os.path.exists(dumpfile):
 			print "Dumpfile \'%s\' does not exist! Use -r option to rebuild the database." % (dumpfile, )
 			sys.exit()
-		else:
+		else:  # reading the DB file
 			dfdescr = open(dumpfile, "r")
 			obstable=cPickle.load(dfdescr)
 			dfdescr.close()
@@ -1376,33 +1433,51 @@ if __name__ == "__main__":
 				########## end of statistics #############
 
 	if not is_just_access:
+		# loop over the storage nodes and directories to get the list of all IDs
+		# Even for update (--update option) we still need to collect ObsIDs to form
+		# redonly ObsIDs and rawonly ObsIDs, to more effectively update ObsIDs from the db
+		for s in storage_nodes:
+			for d in data_dirs:
+				cmd="cexec %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], d, "?20??_*", cexec_egrep_string)
+				indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
+				obsids = np.append(obsids, indlist)
+
+		# getting unique list of ObsIDs based only on raw data dirs
+		obsids=np.unique(obsids)
+
+		# also checking the archive directories to extend the list of ObsIDs in case the raw data was removed
+		obsids_reds=[]
+		for s in storage_nodes:
+			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, cexec_egrep_string)
+			if np.size(os.popen(cmd).readlines()) == 0:
+				continue
+			# getting the list of *_red directories to get a list of ObsIDs
+			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
+			indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
+			obsids_reds = np.append(obsids_reds, indlist)
+			# also getting the list of *_lta directories to get a list of ObsIDs
+			# in case if data was already processed and archived
+			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_lta", cexec_egrep_string)
+			indlist=[i.split("/")[-1].split("_lta")[0] for i in os.popen(cmd).readlines()]
+			obsids_reds = np.append(obsids_reds, indlist)
+
+		# getting unique list of ObsIDs based only on archived data
+		obsids_reds=np.unique(obsids_reds)
+
+		# getting the list of ObsIDs that _DO NOT HAVE_ raw data
+		# based on this list we will not check the raw data (sizes) for ObsIDs in this list
+		obsids_redonly=list(set(obsids_reds)-set(obsids_reds).intersection(set(obsids)))
+		# getting the list of ObsIDs that _DO NOT HAVE_ Reduced data!
+		# based on this list we will not look for reduced data, processing status, plots, etc. for ObsIDs in this list
+		obsids_rawonly=list(set(obsids)-set(obsids).intersection(set(obsids_reds)))
+
+		# for rebuild and normal use (i.e. adding only those ObsIDs that are not yet in the db)
 		if not is_update:
-			# loop over the storage nodes and directories to get the list of all IDs
-			for s in storage_nodes:
-				for d in data_dirs:
-					cmd="cexec %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], d, "?20??_*", cexec_egrep_string)
-					indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
-					obsids = np.append(obsids, indlist)
-
-			# also checking the archive directories to extend the list of ObsIDs in case the raw data was removed
-			for s in storage_nodes:
-				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, cexec_egrep_string)
-				if np.size(os.popen(cmd).readlines()) == 0:
-					continue
-				# getting the list of *_red directories to get a list of ObsIDs
-				cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
-				indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
-				obsids = np.append(obsids, indlist)
-				# also getting the list of *_lta directories to get a list of ObsIDs
-				# in case if data was already processed and archived
-				cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_lta", cexec_egrep_string)
-				indlist=[i.split("/")[-1].split("_lta")[0] for i in os.popen(cmd).readlines()]
-				obsids = np.append(obsids, indlist)
-
+			# merging obsids and obsids_reds lists together and
 			# getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
 			# and sort in reverse order (most recent obs go first)
 			# more recent obs is the obs with higher ID (as it should be)
-			obsids = np.flipud(np.sort(np.unique(obsids), kind='mergesort'))
+			obsids = np.flipud(np.sort(np.unique(np.append(obsids, obsids_reds)), kind='mergesort'))
 
 			# if is_rebuild == False then excluding ObsIDs from obsids list that are already in the database, i.e. in dbobsids list
 			# only new ObsIDs will be processed and added to database
@@ -1443,150 +1518,114 @@ if __name__ == "__main__":
 	# Number of ObsIDs
 	Nobsids = np.size(obsids)
 
-	# loop for every observation
+	# Main loop for every observation
 	for id in obsids:
 	
+		# if we do update then we do not need to initialize obsinfo class again, unless
+		# parset file does not exist
+		if is_update and obstable[id].oi.is_parset(): # update & parset file exists
+			oi=obstable[id].oi
+		else: # initializing the obsinfo class
+			oi=obsinfo(id)
+
+		if not oi.is_parset():
+			comment = "NO PARSET FILE FOUND!"
+			# search for nodeslist and datadir with raw data
+			# we do this search only if ObsID is _NOT_ in obsids_redonly list
+			if id not in set(obsids_redonly):
+				oi.rawdata_search(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
+		else:
+			comment = ""
+			# checking if raw data directories exist
+			# we only check those ObsIDs that are _NOT_ in obsids_redonly list
+			if id not in set(obsids_redonly):
+				oi.rawdata_check(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
+
 		# class instance with output Info
 		out=outputInfo(id)	
 
-		# prefix of ID, like L2010 or L2009
-        	id_prefix=id.split("_")[0]   
-		# suffix of ID, the sequence number of observation
-        	id_suffix=id.split("_")[1]   
-
-		#
-		# checking first if the directory with the parset file exists
-		#
-		# There were several changes in the location of the parset files and its name, so we have to
-		# check all of them. There were:
-		# (0) OLDEST parset file: /globalhome/lofarsystem/oldlog/id/RTCP.parset.0   <-- parset_oldlogdir + id + parset  
-		# (1) OLD parset was here: /globalhome/lofarsystem/log/id/RTCP.parset.0     <-- parset_logdir + id + parset
-		# (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
-		# (3) 2nd transpose parset as of Aug 20, 2010 is here: 
-		#          /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L2010-MM-DD-DATE/RTCP-ID.parset
-		#
-		logdir=parset_logdir + id + "/"
-		if not os.path.exists(logdir):
-			# checking in the oldlog directory
-			logdir=parset_oldlogdir + id + "/"
-			if not os.path.exists(logdir):
-				# Due to new naming convention and location of the parset files, also looking for the parset file
-				# in any L2010-??-??_?????? directories	
-				cmd="find %s -type f -name '*%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_logdir, id_suffix)
-				logdir=os.popen(cmd).readlines()
-				if np.size(logdir) > 0:
-					# it means we found the directory with parset file
-					logdir=os.popen("dirname %s" % (logdir[0][:-1],)).readlines()[0][:-1]
-					logdir = logdir + "/"
-				else:
-					# now checking the new parset directory
-					cmd="find %s -type f -name '*%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_newlogdir, id_suffix)
-					logdir=os.popen(cmd).readlines()
-					if np.size(logdir) > 0:
-						# it means we found the directory with parset file
-						logdir=os.popen("dirname %s" % (logdir[0][:-1],)).readlines()[0][:-1]
-						logdir = logdir + "/"
-					else:
-						# no directory found
-						comment = "Oops!.. The log directory or parset file in new naming convention does not exist!"
-						out.setcomment(id, storage_nodes, comment)
-						obstable[id] = out
-						continue
-
-		# get the full path for the parset file for the current ID
-		log=logdir + parset
-		if not os.path.exists(log):
-			# also checking that maybe the parset file has name the same as Obs ID
-			log=logdir + id + ".parset"
-			if not os.path.exists(log):
-				# also checking that maybe the name of parset file has new naming convention, like "RTCP-<id_suffix>.parset"
-				# OR like L<id_suffix>.parset
-				log=logdir + "RTCP-" + id_suffix + ".parset"
-				if not os.path.exists(log):
-					log=logdir + "L" + id_suffix + ".parset"
-					if not os.path.exists(log):
-						comment = "Oops!.. The parset file '%s' does not exist in any possible location!" % (parset,)
-						out.setcomment(id, storage_nodes, comment)
-						obstable[id] = out
-						continue
-
-		# initializing the obsinfo class
-		oi=obsinfo(log)
-
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
+		# if there are data in more than one datadir in one storage node, then Total size will be taken
 		dirsizes = {}
 		for lse in storage_nodes:
-			ddir=oi.datadir + "/" + id
 			dirsizes[lse] = ["x", "0.0"]
-			cmd="cexec %s 'du -sh %s 2>/dev/null | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
-			dirout=os.popen(cmd).readlines()
-			if np.size(dirout) > 0:
-				dirsizes[lse][0]=dirout[0][:-1]
-				cmd="cexec %s 'du -s -B 1 %s 2>/dev/null | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
-				status=os.popen(cmd).readlines()
-				if np.size(status) > 0:
-					status=status[0][:-1]
-					if status.isdigit() == True:
+		# getting the sizes only from the intersection of oi.nodeslist and storage_nodes
+		# we do collect sizes only for those ObsIDs that are _NOT_ in obsids_redonly list
+		if id not in set(obsids_redonly):
+			for lse in list(set(oi.nodeslist).intersection(set(storage_nodes))):
+				ddir=datadir_mask + "/" + id   # using mask here to get the Total size of raw data in one storage node
+				cmd="cexec %s 'du -sch %s 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
+				dirout=os.popen(cmd).readlines()
+				if np.size(dirout) > 0:
+					dirsizes[lse][0]=dirout[0][:-1]
+					cmd="cexec %s 'du -sc -B 1 %s 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
+					status=os.popen(cmd).readlines()
+					if np.size(status) > 0:
+						status=status[0][:-1]
+						if status.isdigit() == True:
 							dirsizes[lse][1] = status
 
-		# checking if this specific observation was already reduced. Checking for both existence of the *_red directory
-		# in LOFAR_PULSAR_ARCHIVE and the existence of *_plots.tar.gz file
+		# checking if this specific observation was already reduced. 
+		# Checking for both existence of the *_red or *_lta directory
+		# Only checking those ObsIDs that are _NOT_ in obsids_rawonly list
 		statusline="x"
 		redlocation="x"
 		processed_dirsize=0.0
 		reduced_node = ""
-		for lse in storage_nodes:
-			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
-			if np.size(os.popen(cmd).readlines()) == 0:
-				continue
+		reddir = ""
 
-			reduced_node = lse # saving the lse node with the reduced data for further use (to increase the performance)
-			reddir = ""
+		if id not in set(obsids_rawonly):  # only check ObsIDs that do have Reduced dir (_red or _lta) in the Archive area
+			for lse in storage_nodes:
+				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
+				if np.size(os.popen(cmd).readlines()) == 0:
+					continue
 
-			# looking for both _red and _lta directories
-			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | egrep 'red|lta' | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_[rl][et][da]", cexec_egrep_string)
-			redout=os.popen(cmd).readlines()
-			if np.size(redout) > 0:
-				reddir=redout[0][:-1]
-				statusline=lse
-				redlocation="%s/%s/%s%s" % ("/net", cexec_nodes[lse].split(":")[0], lse, reddir)
-				# getting the size of the processed data
-				cmd="cexec %s 'du -s -B 1 %s 2>/dev/null | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir, cexec_egrep_string)
-				status=os.popen(cmd).readlines()
-				if np.size(status) > 0:
-					status=status[0][:-1]
-					if status.isdigit() == True:
+				reduced_node = lse # saving the lse node with the reduced data for further use (to increase the performance)
+
+				# looking for both _red and _lta directories
+				cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | egrep 'red|lta' | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_[rl][et][da]", cexec_egrep_string)
+				redout=os.popen(cmd).readlines()
+				if np.size(redout) > 0:
+					reddir=redout[0][:-1]
+					statusline=lse
+					redlocation="%s/%s/%s%s" % ("/net", cexec_nodes[lse].split(":")[0], lse, reddir)
+					# getting the size of the processed data
+					cmd="cexec %s 'du -s -B 1 %s 2>/dev/null | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], reddir, cexec_egrep_string)
+					status=os.popen(cmd).readlines()
+					if np.size(status) > 0:
+						status=status[0][:-1]
+						if status.isdigit() == True:
 							processed_dirsize = float(status) / 1024. / 1024. / 1024.
-				# checking if final tar.gz file exists
-				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir, "*_plots.tar.gz", cexec_egrep_string)
-				if np.size(os.popen(cmd).readlines()) > 0:
-					# tarfile exists
-					statusline=statusline+" +tar"	
-				else:
-					statusline=statusline+" -tar"
-				# checking if RSPA exists
-				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", cexec_egrep_string)
-                               	if np.size(os.popen(cmd).readlines()) > 0:
-					statusline=statusline+" +all"
-				else:
-					statusline=statusline+" -all"
-				# checking if rfirep file exists in RSP0
-				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.rfirep", cexec_egrep_string)
-                               	if np.size(os.popen(cmd).readlines()) > 0:
-					statusline=statusline+" +rfi"
-				else:
-					statusline=statusline+" -rfi"
-				# checking if summary rfirep file exists
-				cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes", "*.rfirep", cexec_egrep_string)
-                               	if np.size(os.popen(cmd).readlines()) > 0:
-					statusline=statusline+" +rfiA"
-				else:
-					statusline=statusline+" -rfiA"
-				# checking if "search" directory exists
-				cmd="cexec %s 'ls -1 -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/search*", cexec_egrep_string)
-                               	if np.size(os.popen(cmd).readlines()) > 0:
-					statusline=statusline+" +search"
-				break
+					# checking if final tar.gz file exists
+					cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir, "*_plots.tar.gz", cexec_egrep_string)
+					if np.size(os.popen(cmd).readlines()) > 0:
+						# tarfile exists
+						statusline=statusline+" +tar"	
+					else:
+						statusline=statusline+" -tar"
+					# checking if RSPA exists
+					cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSPA", cexec_egrep_string)
+                               		if np.size(os.popen(cmd).readlines()) > 0:
+						statusline=statusline+" +all"
+					else:
+						statusline=statusline+" -all"
+					# checking if rfirep file exists in RSP0
+					cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes/RSP0", "*.rfirep", cexec_egrep_string)
+                               		if np.size(os.popen(cmd).readlines()) > 0:
+						statusline=statusline+" +rfi"
+					else:
+						statusline=statusline+" -rfi"
+					# checking if summary rfirep file exists
+					cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir + "/incoherentstokes", "*.rfirep", cexec_egrep_string)
+                               		if np.size(os.popen(cmd).readlines()) > 0:
+						statusline=statusline+" +rfiA"
+					else:
+						statusline=statusline+" -rfiA"
+					# checking if "search" directory exists
+					cmd="cexec %s 'ls -1 -d %s 2>/dev/null' 2>/dev/null | %s" % (cexec_nodes[lse], reddir + "/search*", cexec_egrep_string)
+                               		if np.size(os.popen(cmd).readlines()) > 0:
+						statusline=statusline+" +search"
+					break
 
 
 		# Collecting info about chi-squared and profile png-files
@@ -1694,7 +1733,7 @@ if __name__ == "__main__":
 				archivestatus = " ".join(archivestatus.split(" ")[1:])
 
 		# combining info
-		out.Init(id, oi, storage_nodes, dirsizes, statusline, reduced_node, redlocation, processed_dirsize, "", profiles_array, chi_array, combined_plot, archivestatus, archivesize)
+		out.Init(id, oi, storage_nodes, dirsizes, statusline, reduced_node, redlocation, processed_dirsize, comment, profiles_array, chi_array, combined_plot, archivestatus, archivesize)
 		obstable[id] = out
 		# printing the info line by line in debug mode
 		if is_debug:
