@@ -175,8 +175,12 @@ if (NOT DAL_FOUND)
   endif (DAL_FOUND)
 
   ## Compatibility settings
-
-  set (HAVE_DAL ${DAL_FOUND})
+  
+  if (DAL_FOUND)
+    set (HAVE_DAL TRUE)
+  else (DAL_FOUND)
+    set (HAVE_DAL FALSE)
+  endif (DAL_FOUND)
   
   ##_____________________________________________________________________________
   ## Mark advanced variables
