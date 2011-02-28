@@ -190,8 +190,6 @@ set (cr_cmake_modules
   X11
   )
 
-set (DAL_ROOT_DIR ${LUS_RELEASE_DIR}/opt/dal)
-
 if (CR_WITH_GLISH)
   list (APPEND cr_cmake_modules Glish)
 else (CR_WITH_GLISH)
@@ -761,6 +759,9 @@ message (STATUS " CASA ..................... : ${HAVE_CASA}"               )
 message (STATUS " CASACORE ................. : ${HAVE_CASACORE}")
 message (STATUS " CFITSIO .................. : ${HAVE_CFITSIO}")
 message (STATUS " Data Access Library (DAL)  : ${HAVE_DAL}")
+message (STATUS " .. Library version ....... : ${DAL_VERSION}")
+message (STATUS " .. Include directory ..... : ${DAL_INCLUDES}")
+message (STATUS " .. Library path .......... : ${DAL_DAL_LIBRARY}")
 message (STATUS " FFTW3 .................... : ${HAVE_FFTW3}")
 message (STATUS " GFortran ................. : ${HAVE_GFORTRAN}")
 message (STATUS " Glish .................... : ${HAVE_GLISH}")
