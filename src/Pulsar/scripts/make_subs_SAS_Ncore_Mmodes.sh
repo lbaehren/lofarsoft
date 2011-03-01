@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.12
+VERSION=2.13
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -317,6 +317,15 @@ nSubbands=`cat $PARSET | grep "Observation.subbandList"  | head -1 | awk -F "= "
 ANT_SHORT=`cat $PARSET | grep "Observation.antennaArray"  | head -1 | awk -F "= " '{print $2}'`
 date_obs=`grep Observation.startTime *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
 date_seconds=`date -d "$date_obs"  "+%s"` 
+whichStokes=`grep OLAP.Stokes.which *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
+
+if [[ $whichStokes != "I" ]]
+then
+   echo ""
+   echo "ERROR: Pipeline can only process Stokes-I data;  parset shows OLAP.Stokes.which = '$whichStokes'; unable to proceed."
+   echo "ERROR: Pipeline can only process Stokes-I data;  parset shows OLAP.Stokes.which = '$whichStokes'; unable to proceed." >> $log
+   exit 1
+fi
 
 if (( $transpose == 0 ))
 then
