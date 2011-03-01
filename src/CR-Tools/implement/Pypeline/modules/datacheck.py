@@ -72,8 +72,12 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
         result.update(reason=format("not enough antennas: %d") % crfile["nofAntennas"])
         return result
     result.update(nofAntennas = crfile["nofAntennas"])
-
-    result.update(success=True, file=crfile)
+    
+    # get all timeseries data
+    cr_alldata = crfile["emptyFx"]
+    crfile.getTimeseriesData(cr_alldata, 0) 
+    
+    result.update(success=True, file=crfile, efield = cr_alldata)
     return result
 #    return result.update(success=True, file=crfile) !!! This actually returns None (nonetype)...
     
@@ -85,12 +89,13 @@ def qualityCheck(crfile, doPlot=False):
         plt.plot(efield.T)
         raw_input("--- Plotted raw timeseries data - press Enter to continue...")
 
-    qualitycriteria={"mean":(-1.5,1.5),"rms":(4,15),"spikyness":(-5,5)}
+    qualitycriteria={"mean":(-1.5,1.5),"rms":(3,15),"spikyness":(-5,5)}
     # BUG: works only with one file at a time. 'crfile' has no attribute 'filename' because it can be one or many...
 #    datalength = crfile["Filesize"]
 #    blocksize = 1024
 #    blocklist = hArray(int, [0.5 * datalength / blocksize])
-    flaglist=CRQualityCheck(qualitycriteria, crfile.files[0], dataarray=None, maxblocksize=2*65536, nsigma=5, verbose=True) 
+    flaglist=CRQualityCheck(qualitycriteria, crfile.files[0], dataarray=None, maxblocksize=2*65536, nsigma=5, verbose=True)  # NOTE: this changes the crfile's blocksize! Change it back afterwards.
+    crfile.set("blocksize", 2 * 65536) # parameter...
     # make warnings for DC offsets and spikyness; flag out for rms too high (i.e. junk data)
     flagged = []
     highDCOffsets = 0

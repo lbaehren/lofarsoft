@@ -48,8 +48,8 @@ def runAnalysis(files, outfilename, doPlot = False):
         writeDict(outfile, result)
         if not result["success"]:
             continue
-        crfile = result["file"]
-        
+        crfile = result["file"] # blocksize is 2 * 65536 by default ('almost' entire file)
+        cr_efield = result["efield"] # gets all data
 #        crfile.set("blocksize", 32768)
 #        import pdb; pdb.set_trace()
 #        rf.cleanSpectrum(crfile)
@@ -62,10 +62,10 @@ def runAnalysis(files, outfilename, doPlot = False):
         if not result["success"]: 
             continue
         fileTimestamp = crfile["TIME"][0]
-        triggers = match.readtriggers(crfile, directory = "/Users/acorstanje/triggering/stabilityrun_15feb2011/") 
+        triggers = match.readtriggers(crfile) 
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
-        result = pf.initialDirectionFit(crfile, fitType = 'linearFit')
+        result = pf.initialDirectionFit(crfile, cr_efield, fitType = 'linearFit')
         writeDict(outfile, result)
         result = pf.triggerMessageFit(crfile, triggers, 'linearFit') 
         writeDict(outfile, result)
@@ -85,10 +85,11 @@ def runAnalysis(files, outfilename, doPlot = False):
         bfEven = result["even"]["optBeam"]
         bfOdd = result["odd"]["optBeam"]
         
-        bfEven.plot()
-        raw_input("--- Plotted optimal beam for even antennas - press Enter to continue...")
-        bfOdd.plot()
-        raw_input("--- Plotted optimal beam for odd antennas - press Enter to continue...")
+        if doPlot:
+            bfEven.plot()
+            raw_input("--- Plotted optimal beam for even antennas - press Enter to continue...")
+            bfOdd.plot()
+            raw_input("--- Plotted optimal beam for odd antennas - press Enter to continue...")
         
         outfile.flush()
     # end for
@@ -101,14 +102,14 @@ if len(sys.argv) > 2:
     triggerMessageFile = sys.argv[2]
 elif len(sys.argv) > 1:
     datafiles = sys.argv[1]
-    print 'Taking default trigger message file.'
-    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_.dat'
+    print 'Taking default trigger message file (i.e. name constructed from date and station name in the hdf5 data file).'
+#    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_.dat'
 else:
     print 'No files given on command line, using a default set instead.'
-    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-1000.h5' 
-#    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-23.h5'
+#    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-10*.h5' 
+    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-23.h5'
 #    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
-    triggerMessageFile = '/Users/acorstanje/triggering/stabilityrun_15feb2011/RS307/2011-02-15_TRIGGER.dat'
+#    triggerMessageFile = '/Users/acorstanje/triggering/stabilityrun_15feb2011/RS307/2011-02-15_TRIGGER.dat'
     #triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat' #TRIGGER_debugstripped.dat'
     #datafiles = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/*'
     #triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs006.dat'
@@ -120,13 +121,11 @@ antennaset="LBA_OUTER"
 fd = os.popen('ls '+ datafiles+' | ' + sortstring)
 files = fd.readlines()
 nofiles = len(files)
+fd.close()
 #------------------------------------------------------------------------
 # read in trigger info
 print "Number of files to process:", nofiles
-fd.close()
-print 'Reading triggers...'
-#triggers = match.readtriggers(triggerMessageFile)
-print 'Trigger reading complete.'
+
 
 
 runAnalysis(files, outfile, doPlot = True)

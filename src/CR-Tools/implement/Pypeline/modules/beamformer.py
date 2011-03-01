@@ -16,7 +16,8 @@ class Beamformer(object):
     def __init__(self, crfile, cr_fft):
         nofAntennas = crfile["nofAntennas"]
         
-        blocksize = crfile["blocksize"]
+        blocksize = crfile["blocksize"] # BUG: use cr_fft for sizes instead...
+        # WORKAROUND: adjust crfile's blocksize accordingly
         
         self.delays = hArray(float,dimensions=[nofAntennas])
         self.weights = hArray(complex,dimensions = cr_fft,name="Complex Weights")

@@ -66,12 +66,13 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
 
 #------------------------------------------------------------- triggerMessageFit
 
-def initialDirectionFit(crfile, blocksize = 2 * 65536 / 3, fitType='bruteForce'):
+def initialDirectionFit(crfile, efield, fitType='bruteForce'):
     # pass efield itself, with right dims?
-    efield = crfile["emptyFx"]
-    blockNo = 1
-    crfile.getTimeseriesData(efield, blockNo) 
+#    efield = crfile["emptyFx"]
+#    blockNo = 1
+#    crfile.getTimeseriesData(efield, blockNo) 
     # change to abs, then max? Destroys input array...
+    
     mx = efield[...].max()
     mn = efield[...].min()
     mxpos = efield[...].maxpos()
@@ -154,6 +155,7 @@ def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to 
     degaz += 360.
   #get the average time-offset
   toffset = np.mean((mTriggerDates - fileDate) + (mSampleNums - fileSamplenum) / 200.0e6) # matching.py returns np array, so keep it (doing mean anyway)
+  print ' T OFFSET: %e' % toffset
   
   result.update(success = True, az = degaz, el = degel, mse = mse, avgToffset = toffset, nofAntennasUsed = len(mIDs) )
   return result
@@ -162,35 +164,49 @@ def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to 
 def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarField=True, doPlot = False): 
   #Set the parameters
   samplefreq = 200.0e6 # must be
-  crfile.set("blocksize", blocksize) # proper way, apparently
+  #crfile.set("blocksize", blocksize) # proper way, apparently
 #  crfile.set("shift", 512)
   print 'File size is %d' % crfile["Filesize"]
   print 'Block size is now: %d' % crfile["blocksize"]
   print 'So there are: %d blocks' % int((crfile["Filesize"]) / int(crfile["blocksize"]))
-  blockNo = int((triggerFitResult["avgToffset"] * samplefreq) / blocksize)
-  print "fullPulseFit: set block-number to:", blockNo
-#  crfile.set("block", blockNo)
+  pulseMidpoint = int(triggerFitResult["avgToffset"] * samplefreq)
   nofAntennas = crfile["nofAntennas"]
+
+  cr_alldata = crfile["emptyFx"]
+  crfile.getTimeseriesData(cr_alldata, 0) # MOVE upward to crpipeline? 
+  cr_efield = hArray(copy=cr_alldata, dimensions = [nofAntennas, blocksize])
+  start = pulseMidpoint - blocksize/2
+  stop = pulseMidpoint + blocksize/2
+  cr_efield[...].copy(cr_alldata[..., start:stop])
+  
+  crfile.set("blocksize", blocksize) # workaround, needed for correct settings in Beamformer
+  
+  #blockNo = int((triggerFitResult["avgToffset"] * samplefreq) / blocksize)
+  #print "fullPulseFit: set block-number to:", blockNo
+#  crfile.set("block", blockNo)
 # Apply flagged antenna list - select those out
 #  selectedList = range(nofAntennas)
 #  for entry in flaggedList:
 #      selectedList.remove(entry)  
 #  crfile.setAntennaSelection(selectedList)
   
-  fftlength = crfile["fftLength"]
   #Get the data
   cr_time = hArray(float, dimensions=[blocksize])
   cr_freqs = hArray(float, dimensions=[blocksize/2 + 1])
   
-  cr_efield = crfile["emptyFx"]
-  crfile.getTimeseriesData(cr_efield, blockNo) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
+#  cr_efield = crfile["emptyFx"]
+#  crfile.getTimeseriesData(cr_efield, blockNo) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
 
   # temp: plot to see if pulse is in this block...
 #  efield = cr_efield.toNumpy()
+#  plt.clf()
 #  plt.plot(efield.T)
-#  plt.show()
+#  raw_input("--- Plotted pulse, check if pulse is in block - press Enter to continue...")
 
   cr_fft = crfile["emptyFFT"]
+#  import pdb; pdb.set_trace()
+  cr_fft = hArray(complex, dimensions = [nofAntennas, blocksize/2 + 1])
+
   print 'Number of antennas = %d' % cr_fft.shape()[0]
   print 'Block length fft = %d' % cr_fft.shape()[1]
 

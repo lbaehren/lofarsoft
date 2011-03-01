@@ -135,7 +135,7 @@ def readtriggers(crfile, directory=''):
         else:
             dates[i] = 0 # not easy to skip over it... it'll fall out when matching dates.
         
-        testSampleNum = long(line.split()[3])
+        testSampleNum = long(line.split()[3]) # and sometimes the sample number goes invalid as well. Glitches...
         if testSampleNum < 200e6:
             samplenumers[i] = int(testSampleNum)
         else:
