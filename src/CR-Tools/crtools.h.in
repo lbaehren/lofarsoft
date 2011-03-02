@@ -61,10 +61,6 @@
 //
 // ==============================================================================
 
-#ifdef HAVE_DAL
-#include <dal_config.h>
-#endif
-
 /* Define to 1 if we have the `abs` function*/
 #cmakedefine HAVE_ABS 1
 
@@ -95,6 +91,10 @@
 
 /* Define to 1 if we have the Data Access Library (DAL) */
 #cmakedefine HAVE_DAL 1
+
+#ifdef HAVE_DAL
+#include <dal_config.h>
+#endif
 
 /* Define to 1 if we have the `fabs` function*/
 #cmakedefine HAVE_FABS 1

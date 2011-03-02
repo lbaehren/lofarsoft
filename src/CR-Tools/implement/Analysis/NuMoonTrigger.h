@@ -60,15 +60,6 @@
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
 
-/* DAL header files */
-#include <core/dalCommon.h>
-#include <core/dalDataset.h>
-#include <data_hl/BeamFormed.h>
-#include <data_hl/BeamGroup.h>
-#include <data_hl/TBB_Timeseries.h>
-#include <data_hl/TBB_StationGroup.h>
-#include <data_hl/TBB_DipoleDataset.h>
-
 /*CR-Tools header files*/
 
 #include <Analysis/ppfinversion.h>
@@ -102,9 +93,6 @@ using std::endl ;
 using casa::DComplex ;
 using casa::Matrix ;
 using casa::Vector ;
-
-using DAL::TBB_Timeseries ;
-using DAL::TBB_StationGroup ;
 
 using CR::CoordinateType ;
 using CR::GeomDelay ;
