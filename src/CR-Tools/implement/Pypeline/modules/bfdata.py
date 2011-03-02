@@ -12,6 +12,11 @@ def sb2str(sb):
     else:
        return str(sb)
 
+def getpar(parameters,keyword):
+    if keyword in parameters.keys():
+        return parameters[keyword]
+    else:
+        return "UNDEFINED"
 
 class BFDataReader():
     """Class to read in beamformed data"""
@@ -30,6 +35,7 @@ class BFDataReader():
         self.channels=self.par["channels"]
         self.nrsubbands=self.par["nrsubbands"]
         self.samples=int(self.par["samples"]/self.par["timeintegration"])
+        self.nrblocks=self.par["nrblocks"]
         
         if self.par["stokestype"]=='IQUV':
             self.data=np.zeros((4,self.samples,self.channels*self.nrsubbands))
@@ -284,6 +290,7 @@ def get_rawvoltage_data_new(file, block, channels, samples, nrsubbands, nrstatio
             x=file.read(sz)
             t=struct.unpack(fmt,x)
             if t[0] != block:
+                print t[0]
                 print "Discontinuous data is not supported yet in this mode. Useblocknr = -1 and step through the data"
                 assert False
                  
@@ -292,7 +299,7 @@ def get_rawvoltage_data_new(file, block, channels, samples, nrsubbands, nrstatio
     
     
     # return sequence number as uint, and data as nparray
-    return np.asarray(t[1:]).reshape(samples|2,nrsubbands,channels,2)#[:,0:samples|2,:,:,:]
+    return np.asarray(t[1:]).reshape(samples|2,nrsubbands,channels,2)[0:samples,:,:,:]
 
 
 
@@ -337,7 +344,7 @@ def check_data_parameters(file, channels, samples, nrstations=1, type="StokesI")
      
     return t1[0]-t0[0] == 1
 
-def get_data_size(channels, samples, nrstations=1, type="StokesI"):
+def get_data_size(channels, samples, nrstations=1, type="StokesI",nrsubbands=1):
     """Get the size in bytes of a lofar data block. 
     
     *channels* nr of channels per subband
@@ -348,11 +355,17 @@ def get_data_size(channels, samples, nrstations=1, type="StokesI"):
     # 
     if type is "StokesI" or type is "I":
         nrStokes=1
-    elif type is "StokesIQUV" or type is "IQUV" or type is "RawVoltage":
+    elif type is "StokesIQUV" or type is "IQUV":
         nrStokes=4
-    
+    elif type is "ComplexVoltage":
+        nrStokes=nrsubbands*2
+    else:
+        print "Unsupported datatype"
+        assert False
+
     # Calculate how large the datablock is.
     n=nrstations*channels*(samples|2)*nrStokes
+
     
     # Format string for sequence number, padding and data (Big endian)
     fmt='>I508x'+str(n)+'f'
@@ -362,7 +375,7 @@ def get_data_size(channels, samples, nrstations=1, type="StokesI"):
     
     return sz
 
-def get_sequence_number(file, block, channels, samples, nrstations=1, type="StokesI"):
+def get_sequence_number(file, block, channels, samples, nrstations=1, type="StokesI", nrsubbands=1):
     """Get a lofar datablock from stokesI raw data format. 
     Returns a tuple of sequence number and data(channels,samples).
     Note that the internal data format is data(channels,samples|2).
@@ -375,7 +388,7 @@ def get_sequence_number(file, block, channels, samples, nrstations=1, type="Stok
     """
     
     # Calculate the size of one datablock
-    seeksize=get_data_size(channels,samples,nrstations,type)
+    seeksize=get_data_size(channels,samples,nrstations,type,nrsubbands)
     
     if block >= 0: 
         # Go to the start of one datablock
@@ -896,10 +909,14 @@ def get_parameters_new(obsid, useFilename=False):
     parameters["nrstations"]=len(parameters["stationnames"].split(','))
     parameters["storagenodes"]=allparameters["Observation.VirtualInstrument.storageNodeList"].strip('[]').split(',')
     parameters["storagenodes"].sort()
-    sbspernode=allparameters["OLAP.storageNodeList"].strip('[]').split(',')
-    for i in range(len(sbspernode)):
-        sbspernode[i]=int(sbspernode[i].split('*')[0])
-    parameters["sbspernode"]=sbspernode
+    sbspernode=allparameters["OLAP.storageNodeList"]
+    if '..' in sbspernode:
+        parameters["sbspernode"]=[int(sbspernode.strip('[]').split('..')[1])]
+    else:
+        sbspernode=sbspernode.strip('[]').split(',')
+        for i in range(len(sbspernode)):
+          sbspernode[i]=int(sbspernode[i].split('*')[0])
+        parameters["sbspernode"]=sbspernode
     parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
     parameters["subbands"]=allparameters["Observation.subbandList"]
     parameters["nrsubbands"]=sum(parameters["sbspernode"])
