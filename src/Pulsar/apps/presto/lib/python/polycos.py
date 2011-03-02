@@ -37,8 +37,13 @@ class polyco:
                 self.coeffs[linenum*3+0] = float(sl[0].replace('D', 'E'))
                 self.coeffs[linenum*3+1] = float(sl[1].replace('D', 'E'))
                 self.coeffs[linenum*3+2] = float(sl[2].replace('D', 'E'))
-            # Vlad, Jul 25, 2010 - added the line below for proper reading of the polyco file
-            line = fileptr.readline()
+            # Vlad, Mar 2, 2011 - added 5 lines below for proper reading of the polyco file
+            # this block handles the case of arbitrary number of polyco coefficients
+            if self.numcoeff%3 != 0:
+                sl = fileptr.readline().split()
+                nlines = self.numcoeff/3
+                for coeffnum in range(len(sl)):
+                    self.coeffs[nlines*3+coeffnum] = float(sl[coeffnum].replace('D', 'E'))
 
     def phase(self, mjdi, mjdf):
         """
