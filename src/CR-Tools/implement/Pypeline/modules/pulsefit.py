@@ -242,10 +242,18 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
           
   (fitDataOdd, optBeamOdd) = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, 
                                   cr_freqs, FarField=FarField,blocksize=blocksize, doPlot=doPlot)
-
+  if FarField:
+      Reven = -1.0
+      Rodd = -1.0
+  else:
+      Reven = 2000.0 / fitDataEven[0][2]
+      Rodd = 2000.0 / fitDataOdd[0][2]
+  
   result = dict(success = True, action = 'Full direction fit',
-                even = dict(az = fitDataEven[0][0], el = fitDataEven[0][1], optValue = - fitDataEven[1], optBeam = optBeamEven),
-                odd = dict(az = fitDataOdd[0][0], el = fitDataOdd[0][1], optValue = - fitDataOdd[1], optBeam = optBeamOdd) )
+                even = dict(az = fitDataEven[0][0], el = fitDataEven[0][1], R = Reven,
+                optValue = - fitDataEven[1], optBeam = optBeamEven),
+                odd = dict(az = fitDataOdd[0][0], el = fitDataOdd[0][1], R = Rodd,
+                optValue = - fitDataOdd[1], optBeam = optBeamOdd) )
   
   return result
 
