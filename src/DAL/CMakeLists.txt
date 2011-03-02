@@ -63,11 +63,7 @@ endif (NOT LUS_ROOT)
 ## Check if DAL is installed already
 
 if (NOT DAL_FOUND)
-
-  set (DAL_ROOT_DIR ${LUS_RELEASE_DIR}/opt/dal)
-
   include (FindDAL)
-
 endif (NOT DAL_FOUND)
 
 ## ==============================================================================
@@ -128,3 +124,34 @@ else (NOT DAL_FOUND OR DAL_FORCE_BUILD)
     )
   
 endif (NOT DAL_FOUND OR DAL_FORCE_BUILD)
+
+## ==============================================================================
+##
+##  Test programs to work with existing installation
+##
+## ==============================================================================
+
+if (DAL_FOUND AND HDF5_FOUND)
+
+  
+  ## Assemble list of test programs
+  file (GLOB dalTestPrograms *.cc)
+  
+  if (dalTestPrograms)
+    
+    include_directories (
+      ${DAL_INCLUDES}
+      ${HDF5_INCLUDES}
+      )
+    
+    foreach (_dalTest ${dalTestPrograms})
+      
+      get_filename_component (_dalTestName ${_dalTest} NAME_WE)
+      
+      add_executable (${_dalTestName} ${_dalTest})
+      
+    endforeach (_dalTest)
+    
+  endif (dalTestPrograms)
+  
+endif (DAL_FOUND AND HDF5_FOUND)
