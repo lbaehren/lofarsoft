@@ -136,21 +136,18 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
 # get list of files to process
 if len(sys.argv) > 2:
     datafiles = sys.argv[1] 
-    triggerMessageFile = sys.argv[2]
+#    triggerMessageFile = sys.argv[2]
     print datafiles
+    print 'Too many options!'
 elif len(sys.argv) > 1:
     datafiles = sys.argv[1]
     print 'Taking default trigger message file (i.e. name constructed from date and station name in the hdf5 data file).'
-#    triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_.dat'
 else:
     print 'No files given on command line, using a default set instead.'
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-10*.h5' 
     datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-*.h5'
 #    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
-#    triggerMessageFile = '/Users/acorstanje/triggering/stabilityrun_15feb2011/RS307/2011-02-15_TRIGGER.dat'
-    #triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat' #TRIGGER_debugstripped.dat'
-    #datafiles = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/trigger-dumps-2010-07-07-cs006/*'
-    #triggerMessageFile = '/mnt/lofar/triggered-data/2010-07-07-CS003-CS005-CS006/2010-07-07-triggers/2010-07-07_TRIGGER-cs006.dat'
+
 
 sortstring = 'sort -rn --field-separator="-" --key=18'
 outfile = 'crPipelineResults.txt'
@@ -160,16 +157,9 @@ antennaset="LBA_OUTER"
 #fd = os.popen('ls '+ datafiles+' | ' + sortstring)
 p1 = subprocess.Popen(['ls '+ datafiles + ' | ' + sortstring], shell=True, stdout=subprocess.PIPE)
 output = p1.communicate()[0]
-#p2 = subprocess.Popen([sortstring], shell=True, stdin = p1.stdout, stdout=subprocess.PIPE)
-#p1.stdout.close()
-#output = p2.communicate()[0]
 
 files = output.splitlines()
-
-# split...
-#files = fd.readlines()
 nofiles = len(files)
-#fd.close()
 print "Number of files to process:", nofiles
 
 if nofiles > 10:
