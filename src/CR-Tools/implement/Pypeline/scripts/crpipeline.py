@@ -7,6 +7,7 @@ import sys
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import subprocess
 
 import datacheck as dc
 import rficlean as rf
@@ -33,11 +34,42 @@ def writeDict(outfile, dict):
         else:
             outfile.write('%s: %s\n' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
     outfile.write('\n')
+
+def writeResultLine(outfile, triggerFitResult, fullDirectionResult, filename):
+    d = triggerFitResult
+    az = str(d["az"])
+    el = str(d["el"])
+    mse = str(d["mse"])
+    outString = az + ' ' + el + ' ' + mse + ' '
     
-def runAnalysis(files, outfilename, doPlot = False):
+    d = fullDirectionResult["odd"]
+    az = str(d["az"])
+    el = str(d["el"])
+    R = str(d["R"])
+    optHeight = str(d["optValue"])
+    outString += az + ' ' + el + ' ' + R + ' ' + optHeight + ' '
+    
+    d = fullDirectionResult["even"]
+    az = str(d["az"])
+    el = str(d["el"])
+    R = str(d["R"])
+    optHeight = str(d["optValue"])
+    outString += az + ' ' + el + ' ' + R + ' ' + optHeight + ' '
+    
+    outString += filename
+    outfile.write(outString + '\n')
+
+def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
     """ Input: list of files to process, trigger info as read in by match.readtriggers(...), filename for results output
     """
-    outfile = open(outfilename, mode='w')
+    outfile = open(outfilename, mode='a')
+    if not os.path.isfile(asciiFilename):
+        asciiOutfile = open(asciiFilename, mode='a')
+        headerString = 'trig.az trig.el trig.mse odd.az odd.el odd.R odd.height even.az even.el even.R even.height filename\n'
+        asciiOutfile.write(headerString)
+    else:
+        asciiOutfile = open(asciiFilename, mode='a') # hmm, duplicate code
+    
     n = 0
     for file in files:
         n += 1
@@ -63,6 +95,9 @@ def runAnalysis(files, outfilename, doPlot = False):
             continue
         fileTimestamp = crfile["TIME"][0]
         triggers = match.readtriggers(crfile) 
+        if len(triggers) == 0:
+            writeDict(outfile, dict(success=False, reason="Trigger file couldn't be read"))
+            continue
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
         result = pf.initialDirectionFit(crfile, cr_efield, fitType = 'linearFit')
@@ -74,7 +109,8 @@ def runAnalysis(files, outfilename, doPlot = False):
         triggerFitResult = result
         # now find the final direction based on all data, using initial direction as starting point
         try: # apparently it's dangerous...
-          result = pf.fullDirectionFit(crfile, triggerFitResult, 4096, flaggedList = flaggedList, FarField = False, doPlot = doPlot)     
+          result = pf.fullDirectionFit(crfile, triggerFitResult, 2048, flaggedList = flaggedList, FarField = False, doPlot = doPlot)     
+          fullDirectionResult = result
           writeDict(outfile, result)
           if not result["success"]:
               continue
@@ -82,6 +118,7 @@ def runAnalysis(files, outfilename, doPlot = False):
         except (ZeroDivisionError, IndexError), msg:
           print 'EROR!'
           print msg
+        writeResultLine(asciiOutfile, triggerFitResult, fullDirectionResult, crfile.files[0].filename)
         bfEven = result["even"]["optBeam"]
         bfOdd = result["odd"]["optBeam"]
         
@@ -94,12 +131,13 @@ def runAnalysis(files, outfilename, doPlot = False):
         outfile.flush()
     # end for
     outfile.close()
-
+    asciiOutfile.close()
 
 # get list of files to process
 if len(sys.argv) > 2:
     datafiles = sys.argv[1] 
     triggerMessageFile = sys.argv[2]
+    print datafiles
 elif len(sys.argv) > 1:
     datafiles = sys.argv[1]
     print 'Taking default trigger message file (i.e. name constructed from date and station name in the hdf5 data file).'
@@ -107,7 +145,7 @@ elif len(sys.argv) > 1:
 else:
     print 'No files given on command line, using a default set instead.'
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-10*.h5' 
-    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-23.h5'
+    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-*.h5'
 #    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
 #    triggerMessageFile = '/Users/acorstanje/triggering/stabilityrun_15feb2011/RS307/2011-02-15_TRIGGER.dat'
     #triggerMessageFile = '/Users/acorstanje/triggering/datarun_19-20okt/2010-10-19_TRIGGER_debugstripped.dat' #TRIGGER_debugstripped.dat'
@@ -116,19 +154,34 @@ else:
 
 sortstring = 'sort -rn --field-separator="-" --key=18'
 outfile = 'crPipelineResults.txt'
+outfileAscii = 'asciiPipelineResults.txt'
 antennaset="LBA_OUTER"
 
-fd = os.popen('ls '+ datafiles+' | ' + sortstring)
-files = fd.readlines()
+#fd = os.popen('ls '+ datafiles+' | ' + sortstring)
+p1 = subprocess.Popen(['ls '+ datafiles + ' | ' + sortstring], shell=True, stdout=subprocess.PIPE)
+output = p1.communicate()[0]
+#p2 = subprocess.Popen([sortstring], shell=True, stdin = p1.stdout, stdout=subprocess.PIPE)
+#p1.stdout.close()
+#output = p2.communicate()[0]
+
+files = output.splitlines()
+
+# split...
+#files = fd.readlines()
 nofiles = len(files)
-fd.close()
-#------------------------------------------------------------------------
-# read in trigger info
+#fd.close()
 print "Number of files to process:", nofiles
 
-
-
-runAnalysis(files, outfile, doPlot = True)
+if nofiles > 10:
+    print '--- Spawning new processes for each file ---'
+    for i in range(nofiles/2): # ugly, fix
+        print files[2*i]
+        thisProcess = subprocess.Popen(['./crpipeline.py', files[2*i]])
+        thisProcess2 = subprocess.Popen(['./crpipeline.py', files[2*i+1]])
+        thisProcess.communicate()
+        thisProcess2.communicate()
+else:
+    runAnalysis(files, outfile, outfileAscii, doPlot = False)
 #fitergs = dict()
 
 
