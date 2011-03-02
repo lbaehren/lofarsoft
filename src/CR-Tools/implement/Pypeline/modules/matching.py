@@ -119,7 +119,12 @@ def readtriggers(crfile, directory=''):
     samplenumers = np.zeros(1000, int)
   
     print timestamp
-    fd = open(filename)
+    if os.path.isfile(filename):
+        fd = open(filename)
+    else:
+        print 'No trigger file to be read: %s' % filename
+        return []
+        
     i = 0
     line = fd.readline()
     while not str(timestamp) in line: # read over it until hitting 'timestamp' (second)
