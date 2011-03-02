@@ -247,6 +247,36 @@ def get_rawvoltage_data(file, block, channels, samples, nrstations=1, nrpol=2):
     return np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrpol,2)[:,:,0:samples|2,:,:]
 
 
+def put_file_at_sequence(file,seq_nr,szD):
+    # puts file pointer after the header of block with sequence number seq_nr
+    
+    # Format string for header (sequence number, padding)  (Big endian)
+    fmtH='>I508x'
+    
+    # Size represented by format string in bytes
+    szH=struct.calcsize(fmtH)
+ 
+    file.seek((szH+szD)*seq_nr);
+    
+    x=file.read(szH)
+    # unpack struct into intermediate data
+    t=struct.unpack(fmtH,x)
+    corr_seq_nr=seq_nr;
+        
+    while (t[0]> seq_nr)  and (corr_seq_nr>0):
+        corr_seq_nr-=1
+        file.seek((szH+szD)*corr_seq_nr);
+        
+        x=file.read(szH)
+        # unpack struct into intermediate data
+        t=struct.unpack(fmtH,x)
+    if t[0] != seq_nr:
+        print t[0]
+        print "Seq_nr not found. Useblocknr = -1 and step through the data"
+        assert False
+                 
+ 
+    
 
 def get_rawvoltage_data_new(file, block, channels, samples, nrsubbands, nrstations=1):
     """Get a lofar datablock from raw voltage complex data. 
@@ -265,42 +295,36 @@ def get_rawvoltage_data_new(file, block, channels, samples, nrsubbands, nrstatio
     # Calculate how large the datablock is.
     n=nrstations*nrsubbands*channels*(samples|2)*2
   
-    # Format string for sequence number, padding and data (Big endian)
-    fmt='>I508x'+str(n)+'f'
+    # Format string for header (sequence number, padding)  (Big endian)
+    fmtH='>I508x'
+
+    # Format string for data (Big endian)
+    fmtD='>'+str(n)+'f'
     
     # Size represented by format string in bytes
-    sz=struct.calcsize(fmt)
-    
-    # read data from file
-    if block < 0:
-        x=file.read(sz)
-        # unpack struct into intermediate data
-        t=struct.unpack(fmt,x)
+    szH=struct.calcsize(fmtH)
+    # Size represented by format string in bytes
+    szD=struct.calcsize(fmtD)
+    dt=np.dtype(np.float32)
+    dt=dt.newbyteorder('>')
+   
+    if block>=0:
+        put_file_at_sequence(file,block,szD);#searches for block with sequencence nr block in the data.
     else:
-        file.seek(sz*block)
-        x=file.read(sz)
-        # unpack struct into intermediate data
-        t=struct.unpack(fmt,x)
-        if t[0] != block:
-            file.seek(0)
-            x=file.read(sz)
-            t=struct.unpack(fmt,x)
-            startblock=t[0]
-            file.seek((block-startblock)*sz)
-            x=file.read(sz)
-            t=struct.unpack(fmt,x)
-            if t[0] != block:
-                print t[0]
-                print "Discontinuous data is not supported yet in this mode. Useblocknr = -1 and step through the data"
-                assert False
-                 
+        file.read(szH);
+             
     # unpack struct into intermediate data
     #t=struct.unpack(fmt,x)
     
     
     # return sequence number as uint, and data as nparray
-    return np.asarray(t[1:]).reshape(samples|2,nrsubbands,channels,2)[0:samples,:,:,:]
+    #    return np.asarray(t[1:]).reshape(samples|2,nrsubbands,channels,2)[0:samples,:,:,:]
+    data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,nrsubbands,channels,2);
+    
 
+    # return  data as nparray
+    return data
+    
 
 
 def check_data_parameters(file, channels, samples, nrstations=1, type="StokesI"):
