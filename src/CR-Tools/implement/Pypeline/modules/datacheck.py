@@ -8,7 +8,7 @@
 
 import os
 import time
-from pycrtools import IO, CRQualityCheck
+from pycrtools import IO, CRQualityCheck, Vector, hArray
 import matplotlib.pyplot as plt
 
 def safeOpenFile(filename, antennaset): # antennaset only here because it's not set in the file
@@ -81,10 +81,8 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
     return result
 #    return result.update(success=True, file=crfile) !!! This actually returns None (nonetype)...
     
-def qualityCheck(crfile, doPlot=False):
+def qualityCheck(crfile, cr_efield, doPlot=False):
     if doPlot:
-        cr_efield = crfile["emptyFx"]
-        crfile.getTimeseriesData(cr_efield, 0) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
         efield = cr_efield.toNumpy()
         plt.plot(efield.T)
         raw_input("--- Plotted raw timeseries data - press Enter to continue...")
@@ -109,6 +107,25 @@ def qualityCheck(crfile, doPlot=False):
         elif entry[3][0] == 'rms':
             flagged.append(entry[0]) # entry[0] = antenna nr.
     
+    # Now count the pulses; taken from the pycrtools-tutorial
+    nsigma = 5 # parameter
+    datamean = cr_efield[...].mean()
+    thresholdHigh = cr_efield[...].stddev(datamean)
+    thresholdHigh *= nsigma
+    thresholdLow = thresholdHigh * (-1.0)
+    thresholdLow += datamean
+    thresholdHigh += datamean
+    maxgap = Vector(int, len(datamean), fill=20) # parameter...
+    minlength = Vector(int, len(datamean), fill=1) # idem
+    
+    nofAntennas = crfile["nofAntennas"]
+    pulses = hArray(int, dimensions=[nofAntennas, 100, 2], name = 'Location of the pulses')
+    npulses = pulses[...].findsequenceoutside(cr_efield[...], thresholdLow, thresholdHigh, maxgap, minlength)
+    
+    # now we can check for spurious pulse locations and/or just for the count
+    avgPulseCount = npulses.sum() / float(nofAntennas)
+    maxPulseCount = npulses.max()
+    
     if doPlot and len(flagged) > 0:
         cr_efield = crfile["emptyFx"]
         crfile.getTimeseriesData(cr_efield, 0) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
@@ -116,9 +133,9 @@ def qualityCheck(crfile, doPlot=False):
         toplot = efield[flagged]
         plt.plot(toplot.T)
         raw_input("--- Plotted antennas flagged as BAD - press Enter to continue...")
-                            
+                    
     result = dict(success=True, action = 'Data quality check', flagged = flagged, 
-                  warnings = format("Too high DC offsets: %d; too high spikyness: %d") % (highDCOffsets, spikyChannels) )
+                  warnings = format("Too high DC offsets: %d; too high spikyness: %d") % (highDCOffsets, spikyChannels), avgPulseCount = avgPulseCount, maxPulseCount = maxPulseCount )
     return result
     
 # Execute doctests if module is executed as script

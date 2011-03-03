@@ -88,7 +88,7 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
         
         outfile.write('\n')
         # do quality check and rfi cleaning here
-        result = dc.qualityCheck(crfile, doPlot = doPlot)
+        result = dc.qualityCheck(crfile, cr_efield, doPlot = doPlot)
         flaggedList = result["flagged"]
         writeDict(outfile, result)
         if not result["success"]: 
@@ -132,6 +132,7 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
     # end for
     outfile.close()
     asciiOutfile.close()
+    return (bfEven, bfOdd)
 
 # get list of files to process
 if len(sys.argv) > 2:
@@ -145,7 +146,7 @@ elif len(sys.argv) > 1:
 else:
     print 'No files given on command line, using a default set instead.'
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-10*.h5' 
-    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-*.h5'
+    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-9.h5'
 #    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
 
 
@@ -168,10 +169,10 @@ if nofiles > 10:
         print files[2*i]
         thisProcess = subprocess.Popen(['./crpipeline.py', files[2*i]])
         thisProcess2 = subprocess.Popen(['./crpipeline.py', files[2*i+1]])
-        thisProcess.communicate()
+        thisProcess.communicate2()
         thisProcess2.communicate()
 else:
-    runAnalysis(files, outfile, outfileAscii, doPlot = False)
+    (bfEven, bfOdd) = runAnalysis(files, outfile, outfileAscii, doPlot = True)
 #fitergs = dict()
 
 
