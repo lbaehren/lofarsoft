@@ -89,6 +89,15 @@
 /* Define to 1 if we have the CFITSIO library */
 #cmakedefine HAVE_CFITSIO 1
 
+/* Define to 1 if we have the WCS library */
+#cmakedefine HAVE_WCSLIB 1
+
+#ifdef HAVE_WCSLIB
+#ifndef WCSLIB_GETWCSTAB
+#define WCSLIB_GETWCSTAB
+#endif /* WCSLIB_GETWCSTAB */
+#endif /* HAVE_WCSLIB */
+
 /* Define to 1 if we have the Data Access Library (DAL) */
 #cmakedefine HAVE_DAL 1
 
@@ -185,9 +194,6 @@
 
 /* Define to 1 if you have the <sys/utime.h> header file. */
 #cmakedefine HAVE_SYS_UTIME_H 1
-
-/* Define to 1 if we have the WCS library */
-#cmakedefine HAVE_WCSLIB 1
 
 /* Define to 1 if we use PGPlot or PLplot */
 #cmakedefine NEED_FORTRAN_UNDERSCORES 1

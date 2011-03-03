@@ -27,11 +27,11 @@
 #include <casa/HDF5/HDF5File.h>
 #include <casa/HDF5/HDF5Record.h>
 
-#include <dal/dalCommon.h>
-#include <dal/dalDataset.h>
-#include <dal/BeamFormed.h>
-#include <dal/BeamGroup.h>
-#include <dal/TBB_Timeseries.h>
+#include <dal/core/dalCommon.h>
+#include <dal/core/dalDataset.h>
+#include <dal/data_hl/BeamFormed.h>
+#include <dal/data_hl/BeamGroup.h>
+#include <dal/data_hl/TBB_Timeseries.h>
 
 #include <Analysis/ppfinversion.h>
 #include <Analysis/ppfimplement.h>
