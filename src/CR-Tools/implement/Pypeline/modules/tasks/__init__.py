@@ -141,7 +141,7 @@ The modules to import in a task module are
 import tasks
 from pycrtools.core import config
 from pycrtools import *
-from tshortcuts import *
+from shortcuts import *
 
 If one wants to add a new task then it should either be defined in a
 separate new file in the directory modules/tasks or it should be added
@@ -355,7 +355,7 @@ import time
 from pycrtools.core import config
 from pycrtools import *
 
-from tshortcuts import *
+from shortcuts import *
 
 #import pdb
 #pdb.set_trace()

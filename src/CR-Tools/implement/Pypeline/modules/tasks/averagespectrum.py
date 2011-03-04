@@ -30,7 +30,7 @@ ws=tasks.WorkSpace(**args)
 import tasks
 from pycrtools.core import config
 from pycrtools import *
-from tshortcuts import *
+from shortcuts import *
 import time
 import qualitycheck
 from pycrtools import IO
