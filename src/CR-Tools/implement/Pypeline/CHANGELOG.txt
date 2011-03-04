@@ -148,19 +148,19 @@ plt.plot() like color="red"
 2011-02-01 Pypeline - rev 6914 - Heino Falcke
 - Renamed Write/ReadDump to Write/ReadFileBinary Renamed
 - Write/ReadTextTable to Write/ReadFileText Added
-- WriteFileBinaryAppend to append a block of data 
+- WriteFileBinaryAppend to append a block of data
 - Write/ReadFileBinary have a changed parameter "start" rather than
-  "block", which allows one to specify the starting position in units 
+  "block", which allows one to specify the starting position in units
   of the elements in the vector rather than in unist of the vector
   size. This allows simple random access read and write.
 
-2011-02-03 Pypeline - rev 6952 - Heino Falcke 
+2011-02-03 Pypeline - rev 6952 - Heino Falcke
 - added hArrayRead, hArray_write, and hArray_writeheader this allows
 one to write an hArray with a header file (filename.hdr) to disk that
 contains dimensions and other info. It can be read in with
 hArrayRead()
 
-2011-02-03 Pypeline - rev 6957 - Heino Falcke 
+2011-02-03 Pypeline - rev 6957 - Heino Falcke
 - added error messages to read/write functions in mIO.cc
 - fixed a bug in hWriteFileBinary which would not write a block if the file
 did not exist yet
@@ -168,7 +168,7 @@ did not exist yet
 or is inherited upon reading from a datafile and can be extended at will
 - the header information is stored with hArray_writeheader etc. (and retrieved)
 
-2011-02-03 Pypeline - rev 6977 - Heino Falcke 
+2011-02-03 Pypeline - rev 6977 - Heino Falcke
 - minor bug fixes, writeheader (take sliced arrays into account, allow
 specifying dimensions explicitly)
 - updated and tested stationspectrum
@@ -183,7 +183,7 @@ specifying dimensions explicitly)
 - major rewrite of the tasks module, now also include workspaces
 - added the module averagespectrum which calculates an average station
 spectrum and is implemented as a new task
--configure.py contains a number of shortcut 
+-configure.py contains a number of shortcut
 - added function  IO.getFilenames to retrieve a list of files in a
 directory with a certain start and/or ending.
 - changed hArray __repr__ to produce something one can read back in.
@@ -202,6 +202,14 @@ patterns and evironment variables
 qualitycheck.py), checks only for too many spikes
 - allowed variables nsigma, such that sigma is fixed to give a fixe
 number (e.g. one) of peaks for the given blocklength
+
+
+2011-03-04 Pypeline - Martin van den Akker
+- Replaced awk parser scripts by a python script
+- The python script generates:
+  a. the wrapper code for the python bindings.
+  b. documentation in both doxygen and sphinx format.
+
 
 ------------------------------------------------------------------------
 TODO
