@@ -42,9 +42,8 @@ is_rebuild = False
 is_update = False
 # list of ObsIDs to be updated (only can be used with --update option)
 update_obsids = []
-# if True then script just reads the db file without looking for new ObsIDs and without
-# updating already existed records in db
-is_just_access = False
+# if True, then new obs (the ones not in the db) will be processed and added to db
+is_append = False
 # if True then obs will be printed one by one (debug mode) (with # = 0 for all)
 is_debug = False
 debugcounter=0
@@ -55,16 +54,29 @@ is_stats = False
 # View of presenting info (usual (default), brief, plots, and mega)
 viewtype="usual"
 
+# The string of conditions to filter out the list of output ObsIDs
+# Under development, the only possible condition is "id.is_test" or "id.is_test == True" or "id.is_test == False"
+search_string=""
+
 # Setting User name
 username=os.environ['USER']
+hostdir="Lofar"  # dir that contains plots, grid links, db file
+plotsdir="/home/%s/%s/plots" % (username, hostdir)
+griddir="/home/%s/%s/grid" % (username, hostdir)
 # where to copy profile plots (dop95)
 webserver="%s@10.87.2.95" % (username, )
-plotsdir="/home/%s/Lofar/plots" % (username, )
-griddir="/home/%s/Lofar/grid" % (username, )
-webplotsdir="public_html/lofar/plots"
-webgriddir="public_html/lofar/grid"
+htmltitle="LOFAR pulsar observations "
+basehref="http://www.astron.nl/~kondratiev"
+basehref_dir="lofar"
+webplotsdir="public_html/%s/plots" % (basehref_dir, )
+webgriddir="public_html/%s/grid" % (basehref_dir, )
 # if False, then do not rsync plots to external webserver
 is_torsync = True
+# if True, then add links of number of obs vs. time, and disk volume vs. time
+# on the statistics' page
+is_statevol_links = False
+# db file to dump the obs table
+dumpfile="/home/%s/%s/dump.b" % (username, hostdir)
 
 # common large file with archive links in the GRID
 archivefile="/home/leeuwen/grid/archived-at-sara.txt"
@@ -90,6 +102,11 @@ storage_nodes=["lse013", "lse014", "lse015", "lse016", "lse017", "lse018"]
 data_dirs=["/data1", "/data2", "/data3", "/data4"]
 # mask to represent ALL data dirs in one storage nodes
 datadir_mask="/data?"
+# pulsar archive area stem
+psr_archive_dir="/data4/LOFAR_PULSAR_ARCHIVE_"
+# test dir to keep Ashish's test reduced data (within archive area)
+# based on the presence of this dir, dataset will be marked as test
+test_dir="PULSAR_SYSTEM_TEST_OBS"
 
 # cexec corresponding table
 cexec_nodes={'lse013': 'sub5:9', 'lse014': 'sub5:10', 'lse015': 'sub5:11',
@@ -104,9 +121,6 @@ cexec_egrep_string="egrep -v \'\\*\\*\\*\\*\\*\' |egrep -v \'\\-\\-\\-\\-\\-\'"
 
 # list of lse nodes names for use as keys in the dictionary that keeps the sizes of obs directories in outputInfo class
 lsenames = ["lse%03d" % (n, ) for n in np.arange(1,25,1)]
-
-# file to dump the obs table
-dumpfile="/home/%s/Lofar/dump.b" % (username, )
 
 # directories with parset files
 parset_logdir="/globalhome/lofarsystem/log/"
@@ -129,20 +143,26 @@ class obsinfo:
 	def __init__(self, id):
 		self.id = id
 		self.parset=""
+		self.logdir=""
                 self.datestring="????"
+		self.starttime=self.stoptime=""
 		self.seconds = 0
                 self.antenna=self.band=self.stations=self.stations_string="?"
 		self.stations_html=""
+		self.nstations=self.ncorestations=self.nremotestations=0
 		self.nodeslist_string=self.datadir=""
 		self.nodeslist=[]
 		self.subcluster = 'sub?'
-		self.bftype=self.fdtype=self.imtype="?"
-		self.istype=self.cstype=self.fetype="?"
+		self.BF=self.FD=self.IM="?"
+		self.IS=self.CS=self.FE="?"
+		self.rarad=self.decrad=0
                 self.rastring="????"
                 self.decstring="_????"
 		self.pointing="????_????"
 		self.source=""
+		self.dur = 0
                 self.duration="?"
+		self.is_test=False   # if True, this obs is the test one
 
 		# search for parset file
 		self.find_parset()
@@ -371,66 +391,66 @@ class obsinfo:
         	status=os.popen(cmd).readlines()
         	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.bftype=status[0][:-1].split(" = ")[-1].lower()[:1]
-                	if self.bftype == 'f':
-                        	self.bftype = "-"
+                	self.BF=status[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.BF == 'f':
+                        	self.BF = "-"
                 	else:
-                        	self.bftype = "+"
+                        	self.BF = "+"
 
         	# check first if data are filtered
         	cmd="grep outputFilteredData %s" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.fdtype=status[0][:-1].split(" = ")[-1].lower()[:1]
-                	if self.fdtype == 'f':
-                        	self.fdtype = "-"
+                	self.FD=status[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.FD == 'f':
+                        	self.FD = "-"
                 	else:
-                        	self.fdtype = "+"
+                        	self.FD = "+"
 
 	        # check if data are imaging
         	cmd="grep outputCorrelatedData %s" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.imtype=status[0][:-1].split(" = ")[-1].lower()[:1]
-                	if self.imtype == 'f':
-                        	self.imtype = "-"
+                	self.IM=status[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.IM == 'f':
+                        	self.IM = "-"
                 	else:
-                        	self.imtype = "+"
+                        	self.IM = "+"
 
 	        # check if data are incoherent stokes data
         	cmd="grep outputIncoherentStokes %s" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.istype=status[0][:-1].split(" = ")[-1].lower()[:1]
-                	if self.istype == 'f':
-                        	self.istype = "-"
+                	self.IS=status[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.IS == 'f':
+                        	self.IS = "-"
                 	else:
-                        	self.istype = "+"
+                        	self.IS = "+"
 
 	        # check if data are coherent stokes data
         	cmd="grep outputCoherentStokes %s" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.cstype=status[0][:-1].split(" = ")[-1].lower()[:1]
-                	if self.cstype == 'f':
-                        	self.cstype = "-"
+                	self.CS=status[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.CS == 'f':
+                        	self.CS = "-"
                 	else:
-                        	self.cstype = "+"
+                        	self.CS = "+"
 
 	        # check if data are fly's eye mode data
         	cmd="grep PencilInfo.flysEye %s" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status) > 0:
                 	# this info exists in parset file
-                	self.fetype=status[0][:-1].split(" = ")[-1].lower()[:1]
-                	if self.fetype == 'f':
-                        	self.fetype = "-"
+                	self.FE=status[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.FE == 'f':
+                        	self.FE = "-"
                 	else:
-                        	self.fetype = "+"
+                        	self.FE = "+"
 
 	        # getting info about the pointing
         	cmd="grep 'Beam\[0\].angle1' %s" % (self.parset,)
@@ -583,41 +603,41 @@ class outputInfo:
 		# forming first Info (not html) string
 		if viewtype == "brief":
 			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.redlocation, self.statusline)
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.BF, self.oi.FD, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.FE, self.redlocation, self.statusline)
 			else: # no parset file
 				self.info = "%s	%s										%s		%-27s" % (self.id, self.comment, self.redlocation, self.statusline)
 		elif viewtype == "plots":
 			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.redlocation, self.statusline, self.archivestatus)
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.BF, self.oi.FD, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.FE, self.redlocation, self.statusline, self.archivestatus)
 			else: # no parset file
 				self.info = "%s	%s										%s		%-27s   %s" % (self.id, self.comment, self.redlocation, self.statusline, self.archivestatus)
 		elif viewtype == "mega":
 			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %s	%s%-9s	%s	%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.stations, self.redlocation, self.statusline, self.archivestatus)
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %s	%s%-9s	%s	%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.BF, self.oi.FD, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.FE, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.stations, self.redlocation, self.statusline, self.archivestatus)
 			else: # no parset file
 				self.info = "%s	%s										%-16s %s	%s%-9s	%s	%s		%-27s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.stations, self.redlocation, self.statusline, self.archivestatus)
 		else: # usual
 			if self.comment == "":
-				self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
+				self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.BF, self.oi.FD, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.FE, self.statusline, self.oi.pointing, self.oi.source)
 			else: # no parset file
-				self.info = "%s	%s		%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.statusline, self.oi.pointing, self.oi.source)
+				self.info = "%s	%s		%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.BF, self.oi.FD, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.FE, self.statusline, self.oi.pointing, self.oi.source)
 
 		# now forming first Info html string
 		if viewtype == "brief":
 			if self.comment == "":
 				if self.oi.source == "":
-					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.redlocation)
+					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.FD == "-" and "&#8211;" or self.oi.FD, self.oi.IM == "-" and "&#8211;" or self.oi.IM, self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.redlocation)
 				else:
-					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.redlocation)
+					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.FD == "-" and "&#8211;" or self.oi.FD, self.oi.IM == "-" and "&#8211;" or self.oi.IM, self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.redlocation)
 			else: # no parset file
 					self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td align=left>%s</td>" % (self.id, self.colspan, self.comment, self.redlocation)
 
 		elif viewtype == "plots" or viewtype == "mega":
 			if self.comment == "":
 				if self.oi.source == "":
-					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
+					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.FD == "-" and "&#8211;" or self.oi.FD, self.oi.IM == "-" and "&#8211;" or self.oi.IM, self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.FE == "-" and "&#8211;" or self.oi.FE)
 				else:
-					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype)
+					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.FD == "-" and "&#8211;" or self.oi.FD, self.oi.IM == "-" and "&#8211;" or self.oi.IM, self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.FE == "-" and "&#8211;" or self.oi.FE)
 			else: # no parset file
 					self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>" % (self.id, self.colspan, self.comment)
 
@@ -646,9 +666,9 @@ class outputInfo:
 
 		else: # usual
 			if self.comment == "":
-				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype == "-" and "&#8211;" or self.oi.bftype, self.oi.fdtype == "-" and "&#8211;" or self.oi.fdtype, self.oi.imtype == "-" and "&#8211;" or self.oi.imtype, self.oi.istype == "-" and "&#8211;" or self.oi.istype, self.oi.cstype == "-" and "&#8211;" or self.oi.cstype, self.oi.fetype == "-" and "&#8211;" or self.oi.fetype, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
+				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.FD == "-" and "&#8211;" or self.oi.FD, self.oi.IM == "-" and "&#8211;" or self.oi.IM, self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
 			else: # no parset file
-				self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.colspan, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.bftype, self.oi.fdtype, self.oi.imtype, self.oi.istype, self.oi.cstype, self.oi.fetype, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
+				self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.colspan, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.BF, self.oi.FD, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.FE, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
 
 
 
@@ -671,17 +691,19 @@ class writeHtmlList:
                                   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
                           	  <meta name=\"Classification\" content=\"public HTML\">\n\
                                   <meta name=\"robots\" content=\"noindex, nofollow\">\n\
-				  <base href=\"http://www.astron.nl/~kondratiev/lofar/\" />\n\
-                          	  <title>LOFAR pulsar observations</title>\n\
+				  <base href=\"%s/%s/\" />\n" % (basehref, basehref_dir))
+		self.htmlptr.write ("\
+                          	  <title>%s</title>\n" % (htmltitle,))
+		self.htmlptr.write ("\
                          	</head>\n\n\
                          	<style type='text/css'>\n\
                           	 tr.d0 td { background-color: #ccffff; color: black; font-size: 80% }\n\
                           	 tr.d1 td { background-color: #99cccc; color: black; font-size: 80% }\n\
                           	 tr.d th { background-color: #99cccc; color: black;}\n\
                          	</style>\n\n\
-                         	<body bgcolor='white'>\n\
-                          	<h2 align=left>LOFAR pulsar observations</h2>\n\
-                        	\n")
+                         	<body bgcolor='white'>\n")
+		self.htmlptr.write ("\
+                          	<h2 align=left>%s</h2>\n\n" % (htmltitle,))
 
 	def obsnumber (self, storage_nodes, subclusters, ndbnodes, nnodes, is_new):
 		self.nodes_string = ", ".join(storage_nodes)
@@ -766,7 +788,10 @@ class obsstat:
                                             "Archivedsize_meta": 0.0 } # sizes in TB
 
 		for sub in self.subclusters:
-			self.subkeys=np.compress(np.array([obstable[r].subcluster for r in self.ids]) == sub, self.ids)
+			if len(self.ids) != 0:
+				self.subkeys=np.compress(np.array([obstable[r].subcluster for r in self.ids]) == sub, self.ids)
+			else:
+				self.subkeys = []
 			self.dbinfo[sub]["Ntotal"] += np.size(self.subkeys)
 			for r in self.subkeys:
 				# getting the numbers and duration
@@ -790,57 +815,57 @@ class obsstat:
 						self.dbinfo[sub]["Archivedsize_meta"] += obstable[r].archivesize["meta"]
 
 				# getting the number of obs of different type
-				if obstable[r].comment == "" and obstable[r].oi.istype == "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+":
 					self.dbinfo[sub]["Nistype"] += 1
-					if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+					if obstable[r].oi.CS != "+" and obstable[r].oi.FE != "+" and obstable[r].oi.IM != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.BF != "+":
 						self.dbinfo[sub]["Nistype_only"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.cstype == "+":
+				if obstable[r].comment == "" and obstable[r].oi.CS == "+":
 					self.dbinfo[sub]["Ncstype"] += 1
-					if obstable[r].oi.istype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+					if obstable[r].oi.IS != "+" and obstable[r].oi.FE != "+" and obstable[r].oi.IM != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.BF != "+":
 						self.dbinfo[sub]["Ncstype_only"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.fetype == "+":
+				if obstable[r].comment == "" and obstable[r].oi.FE == "+":
 					self.dbinfo[sub]["Nfetype"] += 1
-					if obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+					if obstable[r].oi.IS != "+" and obstable[r].oi.CS != "+" and obstable[r].oi.IM != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.BF != "+":
 						self.dbinfo[sub]["Nfetype_only"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.imtype == "+":
+				if obstable[r].comment == "" and obstable[r].oi.IM == "+":
 					self.dbinfo[sub]["Nimtype"] += 1
-					if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.bftype != "+":
+					if obstable[r].oi.CS != "+" and obstable[r].oi.FE != "+" and obstable[r].oi.IS != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.BF != "+":
 						self.dbinfo[sub]["Nimtype_only"] += 1
 						self.dbinfo[sub]["IMonlyRawsize"] += float(obstable[r].totsize)
 						if obstable[r].oi.duration != "?":
 							self.dbinfo[sub]["IMonlyDuration"] += obstable[r].oi.dur
-				if obstable[r].comment == "" and obstable[r].oi.bftype == "+":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+":
 					self.dbinfo[sub]["Nbftype"] += 1
-					if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+					if obstable[r].oi.CS != "+" and obstable[r].oi.FE != "+" and obstable[r].oi.IS != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IM != "+":
 						self.dbinfo[sub]["Nbftype_only"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.fdtype == "+":
+				if obstable[r].comment == "" and obstable[r].oi.FD == "+":
 					self.dbinfo[sub]["Nfdtype"] += 1
-					if obstable[r].oi.cstype != "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.imtype != "+":
+					if obstable[r].oi.CS != "+" and obstable[r].oi.FE != "+" and obstable[r].oi.IS != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.IM != "+":
 						self.dbinfo[sub]["Nfdtype_only"] += 1
 				# getting the number of some observing types' mixtures
-				if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+":
 					self.dbinfo[sub]["Niscsim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.CS != "+":
 					self.dbinfo[sub]["Nisim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IM != "+":
 					self.dbinfo[sub]["Niscs"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IS != "+":
 					self.dbinfo[sub]["Ncsim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.istype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IS != "+":
 					self.dbinfo[sub]["Ncsfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.CS != "+":
 					self.dbinfo[sub]["Nisfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.imtype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.cstype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.CS != "+":
 					self.dbinfo[sub]["Nimfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.istype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.bftype != "+" and obstable[r].oi.fdtype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+":
 					self.dbinfo[sub]["Niscsfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.imtype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.fetype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.IM != "+" and obstable[r].oi.CS != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.FE != "+":
 					self.dbinfo[sub]["Nbfis"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.istype != "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS != "+" and obstable[r].oi.CS != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IM != "+":
 					self.dbinfo[sub]["Nbffe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype != "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IM != "+":
 					self.dbinfo[sub]["Nbfisfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.bftype == "+" and obstable[r].oi.istype == "+" and obstable[r].oi.fetype == "+" and obstable[r].oi.cstype == "+" and obstable[r].oi.fdtype != "+" and obstable[r].oi.imtype != "+":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IM != "+":
 					self.dbinfo[sub]["Nbfiscsfe"] += 1
 				# getting the sizes
 				if obstable[r].comment == "":
@@ -905,7 +930,7 @@ class obsstat:
 
 	def printstat (self):
 		print
-		print "Pulsar observations' statistics:"
+		print "%sstatistics:" % (htmltitle, )
 		if self.fd != "" or self.td != "":
 			print "[%s%s]" % (self.fd != "" and "from " + self.fd or (self.td != "" and " till " + self.td or ""), 
                                                                     self.td != "" and (self.fd != "" and " till " + self.td or "") or "")
@@ -1068,19 +1093,25 @@ class obsstat:
                                   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
                           	  <meta name=\"Classification\" content=\"public HTML\">\n\
                                   <meta name=\"robots\" content=\"noindex, nofollow\">\n\
-				  <base href=\"http://www.astron.nl/~kondratiev/lofar/\" />\n\
-                          	  <title>Pulsar observations statistics</title>\n\
+				  <base href=\"%s/%s/\" />\n" % (basehref, basehref_dir))
+		self.htmlptr.write ("\
+                          	  <title>%s%s</title>\n" % (htmltitle, "statistics"))
+		self.htmlptr.write ("\
                          	</head>\n\n\
                          	<style type='text/css'>\n\
                           	 tr.d0 td { background-color: #ccffff; color: black; font-size: 100% }\n\
                           	 tr.d1 td { background-color: #99cccc; color: black; font-size: 100% }\n\
                           	 tr.d th { background-color: #99cccc; color: black;}\n\
                          	</style>\n\n\
-                         	<body bgcolor='white'>\n\
-                          	<h2 align=left>Pulsar observations statistics</h2>\n\n\
-				<a href=\"archive/number.png\">Number of observations over time</a><br>\n\
-				<a href=\"archive/volume.png\">Data volume over time</a><br>\n\
-                        	\n")
+                         	<body bgcolor='white'>\n")
+		self.htmlptr.write ("\
+                                <h2 align=left>%s%s</h2>\n\n" % (htmltitle, "statistics"))
+		# adding links for evolution of disk volume and number of obs with time
+		if is_statevol_links:
+			self.htmlptr.write ("\
+                                <a href=\"archive/number.png\">Number of observations over time</a><br>\n\
+				<a href=\"archive/volume.png\">Data volume over time</a><br>\n\n")
+
 		if self.fd != "" or self.td != "":
 			self.htmlptr.write ("\n<h3>%s%s</h3>" % (self.fd != "" and "From " + self.fd or (self.td != "" and " Till " + self.td or ""), 
                                                                     self.td != "" and (self.fd != "" and " Till " + self.td or "") or ""))
@@ -1252,15 +1283,24 @@ def usage (prg):
                                        the existent database, process obs that do not exist there, and add them to the database\n\
           -u, --update               - update db file only, new observations in /data? won't be added\n\
                                        This option can be used together with --from and --to to update only some observations\n\
+          -a, --append               - process only those obs (usually new ones) that are not in the database\n\
           --obsids <ObsIDs>          - set the list of ObsIDs to be updated or accessed. This option can be used only with either\n\
-                                       --update or --justaccess. ObsIDs should be separated by comma with no spaces, range symbol '-'\n\
-                                       is not allowed\n\
-          -j, --justaccess           - just reads records from db file without looking for new ObsIDs (default behaviour)\n\
-                                       and without updating the db\n\
+                                       -u or without all of -r, -u, and -a. ObsIDs should be separated by comma with no spaces,\n\
+                                       range symbol '-' is not allowed\n\
+          --search <expr>            - under development, the only possible expression is 'id.is_test' or 'id.is_test == True' or\n\
+                                       'id.is_test == False'\n\
           --stats                    - to calculate the statistics of existent observations in the database\n\
                                        can be used together with --from and --to options, and with --html option\n\
-          --norsync                  - don't rsync plots and grid links to external webserver when \"mega\" or \"plots\" view mode is used\n\
+          --hostdir <dir>            - directory relative to which plots dir, grid dir, and dumpfile will be created. Default: Lofar\n\
+                                       If you use both --hostdir and --dbfile, make sure that --dbfile stands later in the command line\n\
           --dbfile <dbfile>          - database file with stored info about the observations\n\
+          --basehrefdir <dir>        - the base directory on remote webserver where html files, all plots and grid ascii files will be copied\n\
+                                       to corresponding plots/ and grid/ directories. This directory is relative to public_html/ on the webserver.\n\
+                                       Default is 'lofar'\n\
+          --htmltitle <str>          - the title for the html page. Default is 'LOFAR pulsar observations '\n\
+          --statevol-links           - on the statistics' page adds links to plots of evolution of number of observations\n\
+                                       and disk volume with time\n\
+          --norsync                  - don't rsync plots and grid links to external webserver when \"mega\" or \"plots\" view mode is used\n\
           --debug                    - debug mode\n\
           -h, --help                 - print this message\n" % (prg, )
 
@@ -1271,8 +1311,10 @@ def usage (prg):
 def parsecmd(prg, argv):
         """ Parsing the command line
         """
+
+	global dumpfile
 	try:
-		opts, args = getopt.getopt (argv, "hf:t:v:ruj", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "debug", "stats", "dbfile=", "norsync", "obsids=", "justaccess"])
+		opts, args = getopt.getopt (argv, "hf:t:v:rua", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "append", "debug", "stats", "dbfile=", "norsync", "obsids=", "search=", "hostdir=", "basehrefdir=", "htmltitle=", "statevol-links"])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -1325,6 +1367,9 @@ def parsecmd(prg, argv):
 			if opt in ("-u", "--update"):
 				global is_update
 				is_update = True
+			if opt in ("-a", "--append"):
+				global is_append
+				is_append = True
 			if opt in ("--obsids"):
 				if arg.isspace() == True:
 					print "--obsids option has spaces that is not allowed"
@@ -1336,9 +1381,6 @@ def parsecmd(prg, argv):
 					else:
 						print "The range in --obsids is not allowed"
 						sys.exit()
-			if opt in ("-j", "--justaccess"):
-				global is_just_access
-				is_just_access = True
 			if opt in ("--debug"):
 				global is_debug
 				is_debug = True
@@ -1346,11 +1388,34 @@ def parsecmd(prg, argv):
 				global is_stats
 				is_stats = True
 			if opt in ("--dbfile"):
-				global dumpfile
 				dumpfile = arg
 			if opt in ("--norsync"):
 				global is_torsync
 				is_torsync = False
+			if opt in ("--search"):
+				global search_string
+				search_string = arg
+			if opt in ("--statevol-links"):
+				global is_statevol_links
+				is_statevol_links = True
+			if opt in ("--basehrefdir"):
+				global basehref_dir
+				global webplotsdir
+				webplotsdir = re.sub("/" + basehref_dir + "/", "/" + arg + "/", webplotsdir)
+				global webgriddir
+				webgriddir = re.sub("/" + basehref_dir + "/", "/" + arg + "/", webgriddir)
+				basehref_dir = arg
+			if opt in ("--htmltitle"):
+				global htmltitle
+				htmltitle = arg
+			if opt in ("--hostdir"):
+				global hostdir
+				global plotsdir
+				plotsdir = re.sub("/" + hostdir + "/", "/" + arg + "/", plotsdir)
+				global griddir
+				griddir = re.sub("/" + hostdir + "/", "/" + arg + "/", griddir)
+				dumpfile = re.sub("/" + hostdir + "/", "/" + arg + "/", dumpfile)
+				hostdir = arg
 
 	except getopt.GetoptError:
 		print "Wrong option!"
@@ -1365,13 +1430,14 @@ if __name__ == "__main__":
 	# parsing command line
 	parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
 
-	if is_rebuild and is_update:
-		print "Choose what you want to do: rebuild, update or add new observations if any!"
+	if (is_rebuild and is_update) or (is_rebuild and is_append) or (is_update and is_append):
+		print "Only one action can be done at a time: rebuild (-r), update (-u), or append (-a)"
+		print "To just access the db don't use any of -r, -u, or -a"
 		sys.exit()
 
-	if is_just_access and (is_rebuild or is_update):
-		print "--justaccess option can not be used with either --rebuild or --update options!"
-		sys.exit(1)
+	# if only statistics is required, then switiching off all other keys
+	if is_stats:
+		is_rebuild = is_update = is_append = False	
 
 	# list of subclusters
 	subclusters = np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes])
@@ -1393,46 +1459,44 @@ if __name__ == "__main__":
 		# converting sizes to float and checking those also that are not yet determined, i.e. have '-'
 		gridsizes = [r != '-' and float(r) or 0.0 for r in gridsizes]
 
-	# just make sure that rebuild and update switches are off
-	if is_stats:
-		is_rebuild = False
-		is_update = False	
-
+	# do not need the db when do --rebuild
 	if not is_rebuild:
 		if not os.path.exists(dumpfile):
-			print "Dumpfile \'%s\' does not exist! Use -r option to rebuild the database." % (dumpfile, )
+			print "DB file \'%s\' does not exist! Use -r option to rebuild the database." % (dumpfile, )
 			sys.exit()
 		else:  # reading the DB file
 			dfdescr = open(dumpfile, "r")
 			obstable=cPickle.load(dfdescr)
 			dfdescr.close()
-			# update info and infohtml depending on current command line options and make the sorted list of Db obsids
+			# update info and infohtml depending on current command line options and make the sorted list of DB obsids
 			dbobsids = np.flipud(np.sort(obstable.keys(), kind='mergesort'))
 			for r in dbobsids:
 				obstable[r].update(storage_nodes)
-			#
-			# calculate statistics
-			#
-			if is_stats:
-				obsids = dbobsids
-				# we also have to choose only those IDs within the desired time range
-				# if --from and/or --to are specified
-				if is_from:
-					fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
-					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
-				if is_to:
-					tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
-					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 
-				# initializing statistics' class
-				stat = obsstat(obsids, fromdate, todate, storage_nodes)
-				stat.printstat()
-				if is_html:
-					stat.printhtml(htmlfile)
-				sys.exit(0)
-				########## end of statistics #############
+	###!!!!!!!!
+	# Here, for statistics we also have to add all conditions!!!
+	#######
+	if is_stats:
+		obsids = dbobsids
+		# we also have to choose only those IDs within the desired time range
+		# if --from and/or --to are specified
+		if is_from:
+			fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
+		if is_to:
+			tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
+			obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
 
-	if not is_just_access:
+		# initializing statistics' class
+		stat = obsstat(obsids, fromdate, todate, storage_nodes)
+		stat.printstat()
+		if is_html:
+			stat.printhtml(htmlfile)
+		sys.exit(0)
+		########## end of statistics #############
+
+
+	if is_rebuild or is_update or is_append:
 		# loop over the storage nodes and directories to get the list of all IDs
 		# Even for update (--update option) we still need to collect ObsIDs to form
 		# redonly ObsIDs and rawonly ObsIDs, to more effectively update ObsIDs from the db
@@ -1446,23 +1510,34 @@ if __name__ == "__main__":
 		obsids=np.unique(obsids)
 
 		# also checking the archive directories to extend the list of ObsIDs in case the raw data was removed
+		# Here is the way how to combine both _red and _lta in one find request and also hwo to exclude with grep
+		# all the directories that have any other symbols except for 5 or more digits between "_red" or "_lta" and the
+		# previous undescore
+		# find ./ -type d \( -name "?20??_*_red" -print , -name "?20??_*_lta" -print \) | grep -E '20[0-9][0-9]_[0-9]{5,}_(red|lta)'
+		# Can not, however, easily combine _red and _lta in one request, because then I won't be able to sun
+		# split command to get the list of ObsIDs
+		# Decided to allow additional text before _red or _lta
 		obsids_reds=[]
+		test_obsids=[] # the list of ObsIDs that have reduced data in 'test_dir' - we mark them as TEST
 		for s in storage_nodes:
-			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, cexec_egrep_string)
+			cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[s], psr_archive_dir + s, cexec_egrep_string)
 			if np.size(os.popen(cmd).readlines()) == 0:
 				continue
 			# getting the list of *_red directories to get a list of ObsIDs
-			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_red", cexec_egrep_string)
-			indlist=[i.split("/")[-1].split("_red")[0] for i in os.popen(cmd).readlines()]
-			obsids_reds = np.append(obsids_reds, indlist)
+			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], psr_archive_dir + s, "?20??_*_red", cexec_egrep_string)
+			dirlist = os.popen(cmd).readlines()
+			obsids_reds = np.append(obsids_reds, [i.split("/")[-1].split("_red")[0] for i in dirlist])
+			test_obsids = np.append(test_obsids, [i.split("/")[-1].split("_red")[0] for i in dirlist if re.search(test_dir, i)])
 			# also getting the list of *_lta directories to get a list of ObsIDs
 			# in case if data was already processed and archived
-			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], "/data4/LOFAR_PULSAR_ARCHIVE_" + s, "?20??_*_lta", cexec_egrep_string)
-			indlist=[i.split("/")[-1].split("_lta")[0] for i in os.popen(cmd).readlines()]
-			obsids_reds = np.append(obsids_reds, indlist)
+			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], psr_archive_dir + s, "?20??_*_lta", cexec_egrep_string)
+			dirlist = os.popen(cmd).readlines()
+			obsids_reds = np.append(obsids_reds, [i.split("/")[-1].split("_lta")[0] for i in dirlist])
+			test_obsids = np.append(test_obsids, [i.split("/")[-1].split("_lta")[0] for i in dirlist if re.search(test_dir, i)])
 
 		# getting unique list of ObsIDs based only on archived data
 		obsids_reds=np.unique(obsids_reds)
+		test_obsids=np.unique(test_obsids)
 
 		# getting the list of ObsIDs that _DO NOT HAVE_ raw data
 		# based on this list we will not check the raw data (sizes) for ObsIDs in this list
@@ -1471,7 +1546,7 @@ if __name__ == "__main__":
 		# based on this list we will not look for reduced data, processing status, plots, etc. for ObsIDs in this list
 		obsids_rawonly=list(set(obsids)-set(obsids).intersection(set(obsids_reds)))
 
-		# for rebuild and normal use (i.e. adding only those ObsIDs that are not yet in the db)
+		# for rebuild and append mode only
 		if not is_update:
 			# merging obsids and obsids_reds lists together and
 			# getting the unique list of IDs (some of IDs can have entries in many /data? and nodes)
@@ -1484,7 +1559,7 @@ if __name__ == "__main__":
 			if not is_rebuild:
 				# now obsids have only those IDs that are not in the dump file
 				obsids=list(set(obsids)-set(obsids).intersection(set(dbobsids)))
-		else:   ## --update is set
+		else:   # update mode
 			if np.size(update_obsids) == 0:  # list of ObsIDs to update is not specified
 				obsids = dbobsids
 				# for the db update we also have to choose only those IDs within the desired time range
@@ -1527,7 +1602,7 @@ if __name__ == "__main__":
 			oi=obstable[id].oi
 		else: # initializing the obsinfo class
 			oi=obsinfo(id)
-
+		
 		if not oi.is_parset():
 			comment = "NO PARSET FILE FOUND!"
 			# search for nodeslist and datadir with raw data
@@ -1540,6 +1615,12 @@ if __name__ == "__main__":
 			# we only check those ObsIDs that are _NOT_ in obsids_redonly list
 			if id not in set(obsids_redonly):
 				oi.rawdata_check(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
+
+		# mark the dataset as test if it has reduced data in test_dir
+		if id in set(test_obsids):
+			oi.is_test = True
+		else: # this "False" part is important in case some ObsID was first the "test" and then it got non-test
+			oi.is_test = False
 
 		# class instance with output Info
 		out=outputInfo(id)	
@@ -1576,14 +1657,14 @@ if __name__ == "__main__":
 
 		if id not in set(obsids_rawonly):  # only check ObsIDs that do have Reduced dir (_red or _lta) in the Archive area
 			for lse in storage_nodes:
-				cmd="cexec %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, cexec_egrep_string)
+				cmd="cexec %s 'ls -d %s%s 2>/dev/null' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", cexec_egrep_string)
 				if np.size(os.popen(cmd).readlines()) == 0:
 					continue
 
 				reduced_node = lse # saving the lse node with the reduced data for further use (to increase the performance)
 
 				# looking for both _red and _lta directories
-				cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | egrep 'red|lta' | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], "/data4/LOFAR_PULSAR_ARCHIVE_" + lse, id + "_[rl][et][da]", cexec_egrep_string)
+				cmd="cexec %s 'find %s%s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | egrep 'red|lta' | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id + "_[rl][et][da]", cexec_egrep_string)
 				redout=os.popen(cmd).readlines()
 				if np.size(redout) > 0:
 					reddir=redout[0][:-1]
@@ -1742,27 +1823,29 @@ if __name__ == "__main__":
 			os.system(cmd)
 			debugcounter += 1
 
-	# dump obs table to the file
-	dfdescr = open (dumpfile, "w")
-	cPickle.dump(obstable, dfdescr, True)
-	dfdescr.close()
+	# saving the database to disk
+	if is_rebuild or is_update or is_append:
+		# dump obs table to the file
+		dfdescr = open (dumpfile, "w")
+		cPickle.dump(obstable, dfdescr, True)
+		dfdescr.close()
 
-	# uploading the png files to webserver
-	if is_torsync and not is_just_access:
-		if viewtype == 'plots' or viewtype == 'mega':
-			cmd="ssh %s mkdir -p %s" % (webserver, webplotsdir)	
-			os.system(cmd)
-			cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (plotsdir, webserver, webplotsdir)
-			os.system(cmd)
-			cmd="ssh %s mkdir -p %s" % (webserver, webgriddir)	
-			os.system(cmd)
-			cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (griddir, webserver, webgriddir)
-			os.system(cmd)
+		# uploading the png files to webserver
+		if is_torsync:
+			if viewtype == 'plots' or viewtype == 'mega':
+				cmd="ssh %s mkdir -p %s" % (webserver, webplotsdir)	
+				os.system(cmd)
+				cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (plotsdir, webserver, webplotsdir)
+				os.system(cmd)
+				cmd="ssh %s mkdir -p %s" % (webserver, webgriddir)	
+				os.system(cmd)
+				cmd="rsync -a %s/ %s:%s 2>&1 1>/dev/null" % (griddir, webserver, webgriddir)
+				os.system(cmd)
 
 	# copying to another list to keep the old one
 	obskeys = np.flipud(np.sort(obstable.keys(), kind='mergesort'))
 
-	if is_just_access and np.size(update_obsids) != 0:
+	if np.size(update_obsids) != 0 and (not is_rebuild) and (not is_update) and (not is_append):
 		obskeys = update_obsids
 	else:
 		# if is_from and/or is_to are set, then we have to exclude those records
@@ -1774,6 +1857,34 @@ if __name__ == "__main__":
 		if is_to:
 			tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
 			obskeys=list(np.compress(np.array([obstable[r].seconds for r in obskeys]) <= tosecs, obskeys))
+		
+		# also, here we can potentially add other sorting things, like to exclude ObsIDs with some
+		# tags, e.g. TEST, or re-make html on-fly based on request from php-script..
+		# Also, I should check the search conditions for validation in the very beginning, because the --search
+		# also can be used in advance for a particular --update
+		if search_string != "" and len(obskeys) != 0:
+			search_conditions=search_string.split(" and ")
+			filtered_obsids=obskeys
+			for cond in search_conditions:
+				param=cond.lstrip().split(" ")[0].split("id.")[1]
+				# !!!
+				# here it should be function to validate the parameter
+				# that this param exists in the obsinfo class
+				if not hasattr (obstable[obskeys[0]].oi, param.split("[")[0]):
+					print "Wrong parameter '%s' in the search string!" % (param,)
+					sys.exit(1)
+				# making the real condition to filter out obsids
+				real_cond = re.sub("id", "np.compress(np.array([obstable[r].oi", cond)
+				# this is necessary if we want to compare only some characters in the string (e.g. source)
+				# and we need to backslash [ and ]
+				wparam = re.sub("\]", "\\]", re.sub("\[", "\\[", param))
+				real_cond = re.sub(wparam, param + " for r in filtered_obsids])", real_cond)
+				real_cond = real_cond + ", filtered_obsids)"
+				# applying this condition to the real list of obsids
+				#filtered_obsids=np.append(filtered_obsids, list(eval(real_cond)))
+				filtered_obsids=list(eval(real_cond))
+			# assigning filtered out list of ObsIDs to obsids
+			obskeys=filtered_obsids
 
 	# similar to what we do when we are updating db records, here we also only want to show the observations from
 	# selected (from the command line) subclusters, because db can have data for all subclusters
@@ -1790,10 +1901,10 @@ if __name__ == "__main__":
 	# Printing the table
 	#
 	print "Number of observations in %s: %d" % (", ".join(subclusters), np.size(obskeys))
-	if not is_rebuild and not is_update and not is_just_access:
+	if is_append:
 		print "Number of new observations found in %s: %d" % (", ".join(storage_nodes), np.size(obsids))
 
-	if not is_just_access or np.size(update_obsids) == 0:
+	if (is_rebuild or is_update or is_append) or np.size(update_obsids) == 0:
 		if is_from == True or is_to == True:
 			print "List only observations%s%s" % (is_from and " since " + fromdate or (is_to and " till " + todate or ""), 
                         	                              is_to and (is_from and " till " + todate or "") or "")
@@ -1870,11 +1981,11 @@ if __name__ == "__main__":
 	if is_html:
 		htmlrep=writeHtmlList(htmlfile, linkedhtmlstem, fromdate, todate)
 		htmlrep.open()
-		if not is_rebuild and not is_update and not is_just_access:
+		if is_append:
 			htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), True)
 		else:
 			htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), False)
-		if not is_just_access or np.size(update_obsids) == 0:
+		if (is_rebuild or is_update or is_append) or np.size(update_obsids) == 0:
 			htmlrep.datesrange()
 		htmlrep.header(viewtype, storage_nodes_string_html)
 		counter = 0
@@ -1898,11 +2009,11 @@ if __name__ == "__main__":
 		for key in sf.keys():
 			htmlrep.reInit(sf[key])
 			htmlrep.open()
-			if not is_rebuild and not is_update and not is_just_access:
+			if is_append:
 				htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), True)
 			else:
 				htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), False)
-			if not is_just_access or np.size(update_obsids) == 0:
+			if (is_rebuild or is_update or is_append) or np.size(update_obsids) == 0:
 				htmlrep.datesrange()
 			htmlrep.statistics(htmlstatfile)
 			htmlrep.linkedheader(viewtype, storage_nodes_string_html)
