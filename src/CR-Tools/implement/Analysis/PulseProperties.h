@@ -64,7 +64,84 @@
     
     <h3>Example(s)</h3>
 
-  */  
+  */ 
+  
+    // In addition to the class, there is a struct for storage in root files.
+    struct pulseStruct {
+    //! height of pulse (usually after correction for noise)
+    double height;
+    //! error of pulse height (usually calculated from noise)    
+    double heightError;
+    //! time of pulse (usually time of envelope maximum)
+    double time;
+    //! error of pulse time (usually calculated from noise)    
+    double timeError;
+    //! ID of antenna which recorde the pulse
+    int antennaID;
+    //! number of antenna
+    int antenna;
+    //! maximum of trace
+    double maximum;
+    //! maximum of envelope of trace
+    double envelopeMaximum;
+    //! minimum
+    double minimum;
+    //! time of maximum
+    double maximumTime;
+    //! time of maximum of envelope
+    double envelopeTime;
+    //! time of minimum
+    double minimumTime;
+    //! time when crossing half height
+    double halfheightTime;
+    //! time shift by the beam forming
+    double geomDelay;
+    //! FWHM
+    double fwhm;
+    //! antenna position in shower coordinates x
+    double distX;
+    //! error of antenna position in shower coordinates x
+    double distXerr;
+    //! antenna position in shower coordinates y
+    double distY;
+    //! error of antenna position in shower coordinates y
+    double distYerr;
+    //! antenna position in shower coordinates z
+    double distZ;
+    //! error of antenna position in shower coordinates z
+    double distZerr;
+    //! distance of antenna position from shower axis sqrt(x^2+y^2)
+    double dist;
+    //! error of distance of antenna position from shower axis (gaussian error propagation)
+    double disterr;
+    //! angle between antenna and core position
+    double angleToCore;
+    //! error of angle between antenna and core position
+    double angleToCoreerr;
+    //! mean noise of a certain part of the trace (for lateral distribution analysis)
+    double noise;
+    //! calculated pulse height for exponential lateral distribution
+    double lateralExpHeight;
+    //! error of calculated pulse height for exponential lateral distribution
+    double lateralExpHeightErr;
+    //! relative deviation of calculated vs. measured pulse height
+    double lateralExpDeviation;
+    //! error of relative deviation of calculated vs. measured pulse height
+    double lateralExpDeviationErr;
+    //! will be set to true, if antenna did not pass the lateral distribution cuts
+    Bool_t lateralCut;
+    //! polarization
+    char polarization[32];
+    //!sign of the signal (example positive if max-min >0)
+    int minMaxSign;
+    //!sign of the signal at the time of the maximum of the envelope
+    int envSign;
+  };
+  
+  // define a string to put struct into root file
+  #define _pulseStructRootString "height/D:heightError/D:time/D:timeError/D:antennaID/I:antenna/I:maximum/D:envelopeMaximum/D:minimum/D:maximumTime/D:envelopeTime/D:minimumTime/D:halfheightTime/D:geomDelay/D:fwhm/D:distX/D:distXerr/D:distY/D:distYerr/D:distZ/D:distZerr/D:dist/D:disterr/D:angleToCore/D:angleToCoreerr/D:noise/D:lateralExpHeight/D:lateralExpHeightErr/D:lateralExpDeviation/D:lateralExpDeviationErr/D:lateralCut/O:polarization/C:minMaxSign/I:envSign/I"
+
+  
   class PulseProperties {
     
   public:
@@ -181,6 +258,12 @@
 
     // ------------------------------------------------------------------ Methods
 
+    /*!
+      \brief Stores class information in struct
+
+      \return struct pulseStruct
+    */
+    struct pulseStruct convert2struct ();
 
     //! Make class available in ROOT dictionary (needed for ROOT I/O)
     ClassDef(PulseProperties,1)

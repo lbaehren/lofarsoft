@@ -350,6 +350,10 @@ using CR::LopesEventIn;
 
 */
 
+//! Version number YYYYMMDDxx (date + 2 digit counter)
+int call_pipeline_version  = 2011030400;
+
+
 // --- Classes enhancing config file reading ---
 const int          iDef  = 0;
 const unsigned int uiDef = 0;
@@ -1473,7 +1477,6 @@ int main (int argc, char *argv[])
   double epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;    // Epsilon at R=0 (necessary for the cut!)
   double chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;                                // Chi^2/NDF of lateral distribution exponential fit
   double dispersion_RMS_perc = 0, dispersion_Mean_perc = 0;
-  double dispersion_RMS = 0, dispersion_Mean = 0;
 
   // values for lateral distribution of arrival times
   double latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
@@ -1514,12 +1517,13 @@ int main (int argc, char *argv[])
 
   PulseProperties* rawPulses[MAX_NUM_ANTENNAS];       // use array of pointers to store pulse properties in root tree
   PulseProperties* calibPulses[MAX_NUM_ANTENNAS];     // use array of pointers to store pulse properties in root tree
+  struct pulseStruct rawPulsesStruct[MAX_NUM_ANTENNAS];     // use struct to store pulse properties
+  struct pulseStruct calibPulsesStruct[MAX_NUM_ANTENNAS];     // use struct to store pulse properties
   PulseProperties* meanRawPulses[MAX_NUM_ANTENNAS];   // mean pulse properties of all events
   PulseProperties* meanCalPulses[MAX_NUM_ANTENNAS];   // mean pulse properties of all events
   unsigned int meanRawCounter[MAX_NUM_ANTENNAS], meanCalCounter[MAX_NUM_ANTENNAS];  // Counters for mean calculation
   unsigned int meanResCounter[MAX_NUM_ANTENNAS];  // Counter for mean calculation of lateral distr. residuals
   unsigned int eventCounter = 0;
-
 
   try {
     // allocate space for arrays with pulse properties
@@ -1688,6 +1692,7 @@ int main (int argc, char *argv[])
     if (config["rootFileMode"]->sValue() == "UPDATE")
       roottree = (TTree*)rootfile->Get("T;1");
     roottree->Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
+    roottree->Branch("call_pipeline_version",&call_pipeline_version,"call_pipeline_version/I");
     roottree->Branch("Eventname",&eventfilename,"Eventname/C");
     double lateralFitDistance = config["LateralFitDistance"]->dValue();
     if (config["lateralDistribution"]->bValue())
@@ -1982,10 +1987,18 @@ int main (int argc, char *argv[])
           if ( config["PlotRawData"]->bValue() ) {
             string branchname = "Ant_" + antNumber.str() + "_raw.";
             roottree->Branch(branchname.c_str(),"PulseProperties",&rawPulses[i]);
+            
+            // store values additionally in a struct
+            branchname = "Ant_" + antNumber.str() + "_raw";
+            roottree->Branch(branchname.c_str(), &rawPulsesStruct[i], _pulseStructRootString);
           }
 
           string branchname = "Ant_" + antNumber.str() + "_cal.";
           roottree->Branch(branchname.c_str(),"PulseProperties",&calibPulses[i]);
+          
+          // store values additionally in a struct
+          branchname = "Ant_" + antNumber.str() + "_cal";
+          roottree->Branch(branchname.c_str(), &calibPulsesStruct[i], _pulseStructRootString);
 
           if ( config["calculateMeanValues"]->bValue() ) {
             string branchname = "Ant_" + antNumber.str() + "_cal_mean.";
@@ -2275,7 +2288,7 @@ int main (int argc, char *argv[])
                                                                        calibPulsesMap, map <int, PulseProperties>(),
                                                                        gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
                                                                        "","",config["LateralFitDistance"]->dValue());
-             R_0 = latResults.asDouble("R_0");
+              R_0 = latResults.asDouble("R_0");
               sigR_0 = latResults.asDouble("sigR_0");
               eps = latResults.asDouble("eps");
               epsilon_0m = latResults.asDouble("epsilon_0m");
@@ -2286,11 +2299,9 @@ int main (int argc, char *argv[])
               latMaxDist = latResults.asDouble("latMaxDist");
               NlateralAntennas = latResults.asuInt("NlateralAntennas");
 
-              dispersion_RMS = latResults.asDouble("dispersion_RMS");
-              dispersion_Mean = latResults.asDouble("dispersion_Mean");
               dispersion_RMS_perc = latResults.asDouble("dispersion_RMS_perc");
               dispersion_Mean_perc = latResults.asDouble("dispersion_Mean_perc");
-              hisInfo<<gt<<"\t"<<dispersion_Mean_perc<<"\t"<<dispersion_RMS_perc<<endl;
+              //hisInfo<<gt<<"\t"<<dispersion_Mean_perc<<"\t"<<dispersion_RMS_perc<<endl;
 
           }
 
@@ -2443,8 +2454,6 @@ int main (int argc, char *argv[])
               latMaxDist_NS  = latResults.asDouble("latMaxDist");
               NlateralAntennas_NS  = latResults.asuInt("NlateralAntennas");
 
-              dispersion_RMS = latResults.asDouble("dispersion_RMS");
-              dispersion_Mean = latResults.asDouble("dispersion_Mean");
               dispersion_RMS_perc = latResults.asDouble("dispersion_RMS_perc");
               dispersion_Mean_perc = latResults.asDouble("dispersion_Mean_perc");
               //hisInfo<<gt<<"\t"<<dispersion_Mean_perc<<"\t"<<dispersion_RMS_perc<<endl;
@@ -2704,13 +2713,17 @@ int main (int argc, char *argv[])
           cerr << "\nWARNING: Antenna number in rawPulsesMap is out of range!" << endl;
         else {
           *rawPulses[it->second.antenna-1] = it->second;
+          rawPulsesStruct[it->second.antenna-1] = it->second.convert2struct();
           // create branch name
           stringstream antNumber("");
           antNumber << it->second.antenna;
           string branchname = "Ant_" + antNumber.str() + "_raw.";
-          // check if branch allready exists and if not, create it
-          if (! roottree->GetBranchStatus(branchname.c_str()))
-            roottree->Branch(branchname.c_str(),"PulseProperties",&rawPulses[it->second.antenna-1]);
+          // check if branch allready exists and if not, write error message
+          if (! roottree->GetBranchStatus(branchname.c_str())) {
+            cerr << "ERROR: Branch is missing: " << branchname << endl;
+            return 1;
+            //roottree->Branch(branchname.c_str(),"PulseProperties",&rawPulses[it->second.antenna-1]);
+          }  
         }
       }
 
@@ -2722,6 +2735,7 @@ int main (int argc, char *argv[])
         else {
           int antenna = it->second.antenna;
           *calibPulses[antenna-1] = it->second;
+          calibPulsesStruct[it->second.antenna-1] = it->second.convert2struct();
 
           // calculate mean: if no mean exists so far, replace it by the value itself
           if (meanCalCounter[antenna-1] == 0) {
@@ -2753,12 +2767,15 @@ int main (int argc, char *argv[])
           stringstream antNumber("");
           antNumber << antenna;
           string branchname = "Ant_" + antNumber.str() + "_cal.";
-          // check if branch allready exists and if not, create it
+          // check if branch allready exists and if not, write error message
           if (! roottree->GetBranchStatus(branchname.c_str())) {
-            roottree->Branch(branchname.c_str(),"PulseProperties",&calibPulses[antenna-1]);
-          string branchname = "Ant_" + antNumber.str() + "_cal_mean.";
-          if ((config["calculateMeanValues"]->bValue()) && (! roottree->GetBranchStatus(branchname.c_str())))
-            roottree->Branch(branchname.c_str(),"PulseProperties",&meanCalPulses[antenna-1]);
+            //roottree->Branch(branchname.c_str(),"PulseProperties",&calibPulses[antenna-1]);
+            cerr << "ERROR: Branch is missing: " << branchname << endl;
+            return 1;
+            
+            string branchname = "Ant_" + antNumber.str() + "_cal_mean.";
+            if ((config["calculateMeanValues"]->bValue()) && (! roottree->GetBranchStatus(branchname.c_str())))
+              roottree->Branch(branchname.c_str(),"PulseProperties",&meanCalPulses[antenna-1]);
           }
         }
       }

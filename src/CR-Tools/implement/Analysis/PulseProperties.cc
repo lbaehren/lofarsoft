@@ -28,6 +28,7 @@
 */
 
 #include <Analysis/PulseProperties.h>
+#include <cstring>
 
 // namespace declaration causes problems with root dictionary
 // should be solved in ROOT 5.20
@@ -106,5 +107,50 @@
   //
   // ============================================================================
 
+  // converts stored pulse information into struct
+  struct pulseStruct PulseProperties::convert2struct () {
+    struct pulseStruct pulse;
+    
+    pulse.height=height;
+    pulse.heightError=heightError;
+    pulse.time=time;
+    pulse.timeError=timeError;
+    pulse.antennaID=antennaID;
+    pulse.antenna=antenna;
+    pulse.maximum=maximum;
+    pulse.envelopeMaximum=envelopeMaximum;
+    pulse.minimum=minimum;
+    pulse.maximumTime=maximumTime;
+    pulse.envelopeTime=envelopeTime;
+    pulse.minimumTime=minimumTime;
+    pulse.halfheightTime=halfheightTime;
+    pulse.geomDelay=geomDelay;
+    pulse.fwhm=fwhm;
+    pulse.distX=distX;
+    pulse.distXerr=distXerr;
+    pulse.distY=distY;
+    pulse.distYerr=distYerr;
+    pulse.distZ=distZ;
+    pulse.distZerr=distZerr;
+    pulse.dist=dist;
+    pulse.disterr=disterr;
+    pulse.angleToCore=angleToCore;
+    pulse.angleToCoreerr=angleToCoreerr;
+    pulse.noise=noise;
+    pulse.lateralExpHeight=lateralExpHeight;
+    pulse.lateralExpHeightErr=lateralExpHeightErr;
+    pulse.lateralExpDeviation=lateralExpDeviation;
+    pulse.lateralExpDeviationErr=lateralExpDeviationErr;
+    pulse.lateralCut=lateralCut;
+    // check size of sting
+    if (polarization.size()<31)
+      strcpy (pulse.polarization, polarization.c_str());
+    else  
+      strcpy (pulse.polarization, "ConversionError");    
+    pulse.minMaxSign=minMaxSign;
+    pulse.envSign=envSign;   
+    
+    return pulse;
+  }
 
 //} // Namespace CR -- end
