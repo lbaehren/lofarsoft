@@ -11,7 +11,7 @@ from config import *
 from help import *
 
 # Import array class overloaded methods
-from types import *
+from htypes import *
 from vector import *
 from harray import *
 from plot import *
@@ -21,7 +21,6 @@ from math import *
 from datareader import *
 
 # Import structure modules
-from ..tasks import *
 
 from workspaces import *
 

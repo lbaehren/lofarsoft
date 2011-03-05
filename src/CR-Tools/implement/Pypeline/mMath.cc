@@ -2161,6 +2161,128 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+//$DOCSTRING: Find the minimum standard deviation of a vector within blocks of a certain length. Used to find the RMS in the cleanest part of a spiky data set.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMinStdDev
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(blocklen)()("Length of the blocks for which to calculate the RMS")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+  Usage:
+  
+  vec.minrms(blocklen) -> minium rms (float)
+  hMinRMS(vec,blocklen) -> minium rms (float)
+
+     Subdivide the input vector into smaller blocks of len "blocklen"
+     and calculate for each block the standard deviation. The standard
+     deviation of the block with the smallest value will be returned.
+     All blocks have the same length with a possible exception of the
+     last block, which is ignored if it is shorter.
+ */
+
+template <class Iter>
+HNumber HFPP_FUNC_NAME (const Iter vecin, const Iter vecin_end, const HInteger blocklen)
+{
+  // Declaration of variables
+  HInteger lenIn = vecin_end-vecin;
+  HInteger blen(blocklen);
+  HNumber rms;
+
+  // Sanity check
+  if (lenIn <= 0) {
+    throw PyCR::ValueError("Size of input vector <= 0.");
+    return 0.0;
+  }
+  if (blen>lenIn) blen=lenIn;
+
+  Iter it1(vecin), it2(vecin+blocklen);
+  HNumber minrms(hStdDev(it1,it2));
+
+  it1=it2;
+  it2+=blen;
+
+  while (it2<vecin_end) {
+    rms=hStdDev(it1,it2);
+    if (rms < minrms) minrms=rms;
+    it1=it2;
+    it2+=blen;
+  }
+  return minrms;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Find the block of the smallest standard deviation in a vector and return mean and RMS. Used to find the the cleanest part of a spiky data set.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMinStdDevBlock
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(blocklen)()("Length of the blocks for which to calculate the RMS")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HNumber)(minrms)()("Standard deviation in block with minimum standard devitation (RMS)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(minmean)()("Average value of values in block with minimum standard devitation (RMS)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+  Usage:
+  
+  vec.minrms(blocklen) -> block number of minimum rms (int)
+  hMinRMS(vec,blocklen) -> block number of minimum rms (int)
+
+     Subdivide the input vector into smaller blocks of len "blocklen"
+     and calculate for each block the standard deviation. The block
+     number of the block with the smallest standard deviation will be
+     returned. The values of mean and standard deviation will be
+     returned in the variables minrms and minmean.
+
+     All blocks have the same length with a possible exception of the last
+     block, which is ignored if it is shorter.
+ */
+
+template <class Iter>
+HInteger HFPP_FUNC_NAME (const Iter vecin, const Iter vecin_end, const HInteger blocklen, HNumber & minrms, HNumber & minmean)
+{
+  // Declaration of variables
+  HInteger lenIn = vecin_end-vecin;
+  HInteger nblock(0), blen(blocklen);
+  HNumber rms,mean;
+
+  // Sanity check
+  if (lenIn <= 0) {
+    throw PyCR::ValueError("Size of input vector <= 0.");
+    return 0.0;
+  }
+  if (blen>lenIn) blen=lenIn;
+
+  Iter it1(vecin), it2(vecin+blocklen);
+  HInteger minblock(0);
+  minmean=hMean(it1,it2);
+  minrms=hStdDev(it1,it2,minmean);
+
+  it1=it2;
+  it2+=blen;
+
+  while (it2<vecin_end) {
+    ++nblock;
+    mean=hMean(it1,it2);
+    rms=hStdDev(it1,it2,mean);
+    if (rms < minrms) {
+      minrms=rms;
+      minmean=mean;
+      minblock=nblock;
+    };
+    it1=it2;
+    it2+=blen;
+  }
+  return minblock;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Calculates the standard deviation of a vector of values.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hStdDev
@@ -2174,7 +2296,7 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
   $PARDOCSTRING
 */
 template <class Iter>
-HNumber hStdDev (const Iter vec,const Iter vec_end)
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
   return hStdDev(vec,vec_end,hMean(vec,vec_end));
 }

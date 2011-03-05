@@ -8,11 +8,10 @@ import pickle
 
 import matplotlib.pyplot as plt
 
-#import pdb
-#pdb.set_trace()
+#import pdb; pdb.set_trace()
 
 from hftools import *
-from types import *
+from htypes import *
 from vector import *
 
 #======================================================================
@@ -27,7 +26,7 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
 
     Usage:
 
-    hArray(Type=float,dimensions=[n1,n2,n3...],fill=array/scalar,name="String", copy=array, properties=array, xvalues=array,units=("prefix","unit"),par=(keyword,value)) -> FloatArray
+    hArray(Type=float,dimensions=[n1,n2,n3...],fill=array/scalar,name="String", copy=array, properties=array, xvalues=array,units=("prefix","unit"),par={keyword==value,...}) -> FloatArray
 
     Array(Type) -  will create an empty array of type "Type", where Type is
     a basic Python type, i.e.  bool, int, float, complex, str.
@@ -76,7 +75,7 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     array accordingly, e.g. units=("M","Hz") states that the values
     are provided in units of MHz.
 
-    par = tuple or list of tuples: set additional (arbitrary)
+    par = dict of parameters: set additional (arbitrary)
     parameter values that are stored in the .par attribute of the
     array, and are used, e.g., by the plot method to use certain
     defaults.
@@ -92,7 +91,7 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
         if name==None: name=properties.getKey("name")
         if dimensions==None: dimensions=properties.shape()
         if units==None: units=(properties.getUnitPrefix(),properties.getUnitName())
-        par=properties.par.__list__()
+        par=properties.par.__dict__
     if Type==None: Type=float
     if isVector(Type):  #Make a new array with reference to the input vector
         ary=type2array(basetype(Type))
@@ -120,6 +119,9 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     if type(dimensions)==int: ary.reshape([dimensions])
     elif (type(dimensions) in [list,tuple,IntVec]): ary.reshape(dimensions)
     elif (type(dimensions) in hAllArrayTypes): ary.reshape(dimensions.shape())
+    if type(par) == dict:
+	for k,v in par.items():
+	     setattr(ary.par,k,v)
     if type(par) == tuple: setattr(ary.par,par[0],par[1])
     if type(par) == list: map(lambda elem:setattr(ary.par,elem[0],elem[1]),par)
     if type(header) == dict: ary.par.hdr.update(header)
@@ -503,6 +505,12 @@ class hArray_par:
             if not (attr.find("_")==0):
                 l.append((str(attr),getattr(self,attr)))
         return l
+    def __dict__(self):
+        d={}
+        for attr in dir(self)[2:]:
+            if not (attr.find("_")==0):
+                d[str(attr)]=getattr(self,attr)
+        return d
 
 def hArray_setUnit(self,*arg):
     self.setUnit_(*arg)
@@ -627,6 +635,42 @@ def hArray_setstate(self, state):
     self.reshape(state[1])
     self.readRaw(state[2])
 
+def hArray_setHeader(self,**kwargs):
+    """
+    Usage:
+
+    ary.setHeader(par1=val1,par2=val2, ...) 
+    
+    Set the parameters parN in the header of the array to the values
+    valN. The header is stored as a dict in ary.par.hdr.
+    """
+    if not hasattr(self,"par"):
+	setattr(self,"par",hArray_par())
+    if not hasattr(self.par,"hdr"):
+	setattr(self.par,"hdr",{})
+    self.par.hdr.update(kwargs)
+
+def hArray_getHeader(self,parameter_name=None):
+    """
+    Usage:
+
+    ary.getHeader() -> entire header dict
+    ary.getHeader('parameter_name') -> header value
+    
+    Get the parameter 'parameter_name' from the header of the array or
+    return the entire dict, if no parameter name is specified. The
+    header is stored as a dict in ary.par.hdr.
+    """
+    if hasattr(self,"par") and hasattr(self.par,"hdr"):
+	if parameter_name==None:
+	    return self.par.hdr
+	elif self.par.hdr.has_key(parameter_name):
+	    return self.par.hdr[parameter_name]
+	else:
+	    print "Error: Header keyword ",parameter_name,"not known."
+	    return None
+
+
 #------------------------------------------------------------------------
 # Reading and Writing an array
 #------------------------------------------------------------------------
@@ -687,17 +731,79 @@ ha_name = 'test'
 ha_units = ('', '')
 ha_varname = 'x'
     """
-    if filename[-4:].upper() in [".DAT",".HDR"]: fn=filename[:-4]
-    else: fn=filename
+    fn=os.path.expandvars(os.path.expanduser(filename))
+
+    #Add proper ending if missing
+    if not fn[-4:].upper() == ".PCR": fn+=".pcr"
+    binfile=os.path.join(fn,"data.bin")
+
+    #Check if data and header directory is available
+    if not os.path.exists(fn):
+	os.mkdir(fn)
+    elif not os.path.isdir(fn):
+	print "Error: Cannot write File. File",fn,"already exists and is not a directory!"
+	return    
+
+    #Write header file if requested
     if ((block==0) & (not writeheader==False)) | (writeheader==True):
         hArray_writeheader(self,fn,nblocks=nblocks,dim=dim,varname=varname)
-        if (not overwrite==False):
-            if os.path.exists(fn+".dat"): os.remove(fn+".dat") 
-            if os.path.exists(fn+".DAT"): os.remove(fn+".DAT") 
+	if (not overwrite==False):
+	    if os.path.exists(binfile):
+		os.remove(binfile)
+		
     if (overwrite):
-        if os.path.exists(fn+".dat"): os.remove(fn+".dat") 
-        if os.path.exists(fn+".DAT"): os.remove(fn+".DAT") 
-    self.writefilebinary(fn+".dat",block*self.getSize())
+        if os.path.exists(binfile):
+	    os.remove(binfile) 
+    self.writefilebinary(binfile,block*self.getSize())
+
+class hFileContainer():
+    """
+    Dummy class to hold a filename where an hArray is stored.
+    """
+    def __init__(self,path,name,vector=False):
+	self.path=path
+	self.name=name
+	self.vector=vector
+	self.__hFileContainer__=True
+    def __call__(self,path,name):
+	self.path=path
+	self.name=name
+	self.vector=vector
+    
+
+def hArrayReadDictArray(dictionary,path):
+    """
+    Recursively goes through a dict (of dicts) and replaces all placeholder (hFileCOntainer) with hArrays or Vectors read from disk.
+    """
+    newdictionary=dictionary.copy()
+    for k,v in newdictionary.items():
+	if hasattr(v,"__hFileContainer__"):
+	    filename=os.path.join(path,v.name)
+	    if v.vector:
+		newdictionary[k]=hArrayRead(filename,block=-1,restorevar=False).vec()
+	    else:
+		newdictionary[k]=hArrayRead(filename,block=-1,restorevar=False)
+	elif type(v) == dict:
+	    newdictionary[k]=hArrayReadDictArray(v,path)
+    return newdictionary
+
+def hArrayWriteDictArray(dictionary,path,prefix):
+    """
+    Recursively goes through a dict (of dicts) and replaces all values which are hArray with a placeholder and writes the array to disk.
+    """
+    newdictionary=dictionary.copy()
+    for k,v in newdictionary.items():
+	if type(v) in hAllVectorTypes:
+	    filename=prefix+"."+k+".pcr"
+	    hArray_write(hArray(v), os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=True,varname=k,overwrite=None)
+	    newdictionary[k]=hFileContainer(path,filename,vector=True)
+	if type(v) in hAllArrayTypes:
+	    filename=prefix+"."+k+".pcr"
+	    hArray_write(v, os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=True,varname=k,overwrite=None)
+	    newdictionary[k]=hFileContainer(path,filename)
+	elif type(v) == dict:
+	    newdictionary[k]=hArrayWriteDictArray(v,path,prefix+"."+k)
+    return newdictionary
 
 def hArray_writeheader(self, filename,nblocks=1,varname='',dim=None):
     """
@@ -728,9 +834,17 @@ x.writefilebinary("test.dat")
 y=hArrayRead("test")
 y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
     """
-    if filename[-4:].upper() == ".DAT": fn=filename[:-4]+'.hdr'
-    else: fn=filename+'.hdr'
-    f=open(fn,"wb")
+    fn=os.path.expandvars(os.path.expanduser(filename))
+    if fn[-4:].upper() in [".PCR",".DAT",".HDR"]:
+	fn=fn[:-4]+'.pcr'
+    else:
+	fn=fn+'.pcr'
+    if not os.path.exists(fn):
+	os.mkdir(fn)
+    elif not os.path.isdir(fn):
+	print "Error: Cannot write header. File",fn,"already exists!"
+	return
+    f=open(os.path.join(fn,"header.hdr"),"wb")
     slicelength=self.getEnd()-self.getBegin()
     arydim=self.getDim()
     if not slicelength==len(self): arydim=[slicelength]
@@ -743,13 +857,7 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     f.write("ha_name = '" + self.getKey("name")+"'\n")
     f.write("ha_units = ('" +self.getUnitPrefix()+"', '" + self.getUnitName()+"')\n")
     f.write("ha_varname = '" + varname+"'\n")
-    par=self.par.__list__()
-    for i in range(len(par)): # to avoid pickling data arrays
-        if type(par[i][1]) in hAllContainerTypes:
-            if len(par[i][1])>500: del par[i]
-        elif par[i][0]=="hdr":
-            for k in par[i][1].keys(): # dirty hack until pickling of Vectors works ...
-                if type(par[i][1][k]) in hAllContainerTypes: par[i][1][k]=list(par[i][1][k])
+    par=hArrayWriteDictArray(self.par.__dict__,fn,"par")
     f.write('ha_parameters="""'+pickle.dumps(par)+'"""\n')
     f.close()
 
@@ -786,19 +894,18 @@ y=hArrayRead("test")
 y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0])
 
     """
-    if filename[-4:].upper() in [".DAT",".HDR"]: fn=filename[:-4]
-    else: fn=filename
-    if os.path.exists(fn+".hdr"): hdr=".hdr"
-    elif os.path.exists(fn+".HDR"): hdr=".HDR"
-    else:
-        print "Error hArrayRead: header file ", fn+".hdr does not exists!"
-        return -1
-    if os.path.exists(fn+".dat"): dat=".dat"
-    elif os.path.exists(fn+".DAT"): dat=".DAT"
-    else:
-        print "Error hArrayRead: data file ", fn+".data does not exists!"
-        return -1
-    f=open(fn+hdr,"rb")
+    fn=os.path.expandvars(os.path.expanduser(filename))
+    if fn[-4:].upper() == ".PCR": fn=fn[:-4]+".pcr"
+    else: fn+=".pcr"
+    binfile=os.path.join(fn,"data.bin")
+    hdrfile=os.path.join(fn,"header.hdr")
+    if not os.path.exists(fn):
+	print "Error hArrayRead: data directory ",fn," does not exist!"
+	return -1
+    if not os.path.exists(hdrfile):
+	print "Error hArrayRead: data file ",hdrfile," does not exist!"
+	return -1
+    f=open(hdrfile,"rb")
     exec f in globals()
     f.close()
     if ha_nblocks == 1 :
@@ -808,8 +915,14 @@ y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3
         block=0
     else:
         dim=ha_dim
-    ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=pickle.loads(ha_parameters))
-    ary.readfilebinary(fn+dat,block*ary.getSize())
+    par=pickle.loads(ha_parameters)
+    par= hArrayReadDictArray(par,fn)
+    ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=par)
+    if sum(dim)>0:
+	if not os.path.exists(binfile):
+	    print "Error hArrayRead: data file ",binfile," does not exist!"
+	else:
+	    ary.readfilebinary(binfile,block*ary.getSize())
 #    if restorevar & (not l["ha_varname"] == ''):
 #        print "Creating new object",l["ha_varname"]
 #        exec ("global "+l["ha_varname"]+"\n"+l["ha_varname"]+" = ary")
@@ -890,6 +1003,9 @@ for v in hAllArrayTypes:
     setattr(v,"__getitem__",hArray_getitem)
     setattr(v,"__setitem__",hArray_setitem)
     setattr(v,"setUnit",hArray_setUnit)
+    setattr(v,"getHeader",hArray_getHeader)
+    setattr(v,"setHeader",hArray_setHeader)
+    
 
 for v in hAllContainerTypes:
     for s in hAllContainerMethods:
@@ -919,4 +1035,25 @@ for v in hNumericalContainerTypes:
     for s in hNumericalContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hNumericalContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
+
+def make_frequencies(spectrum,offset=-1,frequencies=None,setxvalues=True):
+    """Calculates the frequencies for the calculated spectrum.
+    """
+    hdr=spectrum.par.hdr
+    if offset<0 and hdr.has_key("nbands"):
+	mult=hdr["nbands"]
+    else:
+	mult=1
+    if offset<0: offset=0
+    if hdr.has_key("subspeclen"):
+	l=hdr["subspeclen"]
+	if hdr["stride"]==1: l/=2
+    else:
+	l=len(spectrum)
+    if frequencies==None:
+	frequencies=hArray(float,[l*mult],name="Frequency",units=("M","Hz"),header=hdr)
+    frequencies.fillrange((hdr["start_frequency"]+offset*hdr["delta_band"])/10**6,hdr["delta_frequency"]/10**6)
+    if setxvalues:
+	spectrum.par.xvalues=frequencies
+    return frequencies
 

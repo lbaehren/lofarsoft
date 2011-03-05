@@ -200,7 +200,7 @@ class CRFitBaselineWorkSpace(CRWorkSpace):
         return hArray(float,dimensions=[1,self["nbins"]],name="Frequency",units=("M","Hz"))
     def default_spectrum(self):
         """Array of power values holding the downsampled spectrum. (work vector)"""
-        return hArray(float,[self["nofAntennas"],self["nbins"]],name="Binned Spectrum",units="a.u.",xvalues=self["freqs"],par=("logplot","y"))
+        return hArray(float,[self["nofAntennas"],self["nbins"]],name="Binned Spectrum",units="a.u.",xvalues=self["freqs"],par=dict(logplot="y"))
     def default_rms(self):
         """Array of RMS values of the downsampled spectrum. (work vector)"""
         return hArray(properties=self["spectrum"], name="RMS of Spectrum")
@@ -212,7 +212,7 @@ class CRFitBaselineWorkSpace(CRWorkSpace):
         return hArray(properties=self["spectrum"], name="Fit Weights")
     def default_ratio(self):
         """Array holding the ratio between RMS and power of the downsampled spectrum. (work vector)"""
-        return hArray(properties=self["spectrum"],name="RMS/Amplitude",par=("logplot",False))
+        return hArray(properties=self["spectrum"],name="RMS/Amplitude",par=dict(logplot=False))
     def default_powers(self):
         """Array of integers, containing the powers to fit in the polynomial. (work vector)"""
         return hArray(int,[self["nofAntennas"],self["ncoeffs"]],range(self["ncoeffs"]))
@@ -235,7 +235,7 @@ class CRFitBaselineWorkSpace(CRWorkSpace):
         """Array holding the x-values and their powers for calculating the baseline fit."""
         return hArray(float,[self["fftLength"],self["ncoeffs"]],name="Powers of Frequency")
     def default_height_ends(self):
-        """The heights of the baseline at theleft and right endpoints of the usable bandwidth where a hanning function is smoothly added."""
+        """The heights of the baseline at the left and right endpoints of the usable bandwidth where a hanning function is smoothly added."""
         return hArray(float,[2,self["nofAntennas"]])
     def default_nselected_bins(self):
         """Number of clean bins after RFI removal. (output only)"""
@@ -378,7 +378,7 @@ Available parameters:
         return self["datafile"]["Frequency"].setUnit("M","")
     def default_spectrum(self):
         """Power as a function of frequency."""
-        return hArray(float,[self["nofAntennas"],self["datafile"]["fftLength"]],fill=0,name="Spectrum",units="a.u.",xvalues=self["frequency"],par=[("logplot","y")])
+        return hArray(float,[self["nofAntennas"],self["datafile"]["fftLength"]],fill=0,name="Spectrum",units="a.u.",xvalues=self["frequency"],par=dict(logplot="y"))
     def default_cleanspec(self):
         """Copy of the spectrum with the gain curve and the spiky channels taken out."""
         return hArray(properties=self["spectrum"])

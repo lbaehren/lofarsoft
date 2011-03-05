@@ -4,7 +4,7 @@
 import numpy as np
 
 from hftools import *
-from types import *
+from htypes import *
 
 #========================================================================
 # Convenience Vector Constructor

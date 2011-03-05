@@ -199,7 +199,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also: BSplineFit, hBSpline, hBSplineFitXValues
+See also: BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -238,7 +238,7 @@ void HFPP_FUNC_NAME(
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit
+//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit, providing the powers of x as input.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hBSpline
 //-----------------------------------------------------------------------
@@ -252,7 +252,7 @@ void HFPP_FUNC_NAME(
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also:  BSplineFit, hBSpline, hBSplineFitXValues
+See also:  BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -270,20 +270,16 @@ void HFPP_FUNC_NAME(
   HInteger lenCoeffs = coeffs_end - coeffs;
 
   // Sanity check
-  if (lenOut <= 0) {
+  if (lenOut < 0) {
     throw PyCR::ValueError("Illegal size of output vector.");
     return;
   }
-  if (lenX <= 0) {
+  if (lenX < 0) {
     throw PyCR::ValueError("Illegal size of x vector.");
     return;
   }
   if (lenCoeffs <= 0) {
     throw PyCR::ValueError("Illegal size of coefficients vector.");
-    return;
-  }
-  if (lenCoeffs*lenOut != lenX) {
-    throw PyCR::ValueError("vector sizes do not match: Vector lengths should be l(x) = l(coeffs)*l(out).");
     return;
   }
 
@@ -292,6 +288,59 @@ void HFPP_FUNC_NAME(
     *itout=hMulSum(itx,itx_end,coeffs2,coeffs_end2);
     ++itout; itx=itx_end; itx_end+=Ncoeffs;
   };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBSplineCalc
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the y-values for the input vector x-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with X-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(coeffs)()("Input vector with the coefficients calculated by the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also:  BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(
+		    const Iter vecout, const Iter vecout_end,
+		    const Iter xvec, const Iter xvec_end,
+		    const Iter coeffs, const Iter coeffs_end
+		    )
+{
+  // Declaration of variables
+  HInteger Ncoeffs(coeffs_end-coeffs);      /* nbreak = ncoeffs + 2 - k = ncoeffs - 2 since k = 4 */
+  Iter itout(vecout), itx(xvec);
+  //  HNumber* coeffsn(&(*coeffs)),coeffsn_end(&(*coeffs_end));
+
+  if (Ncoeffs <= 0) {
+    throw PyCR::ValueError("Illegal size of coefficients vector.");
+    return;
+  }
+
+  gsl_bspline_workspace *bw=gsl_bspline_alloc(4, Ncoeffs-2);
+  gsl_bspline_knots_uniform(*xvec, *(xvec_end-1), bw);
+  gsl_vector* B = gsl_vector_alloc (Ncoeffs);
+
+  Iter Bstart(B->data),Bend((B->data)+Ncoeffs);
+
+  // Implementation
+  while ((itout < vecout_end) && (itx < xvec_end)) {
+    gsl_bspline_eval(*itx, B, bw);
+    *itout=hMulSum(Bstart,Bend,coeffs,coeffs_end);
+    ++itx;++itout;
+  };
+
+  gsl_bspline_free(bw);
+  gsl_vector_free (B);
+
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -610,7 +659,7 @@ HNumber HFPP_FUNC_NAME(
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also:  BSplineFit, hBSpline, hBSplineFitXValues
+See also: BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME(

@@ -58,11 +58,12 @@ def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=
     at mean[refblock]-rms[refblock]/sqrt(blocksize)*meanfactor
 
     *spikyness* - if no quality criteria present, set maximum
-    spikyness level to this values. The spiykness is the detected
-    number of peaks above n*sigma minus the expected number divided by
-    the square root (i.e. error) of expected peak. For Gaussian noise
-    one expects this to fluctuate +/- 1 around zero. This value can be
-    negative if too few peaks are detected.
+    spikyness level to this values and minimum value to
+    -spikyness. The spiykness is the detected number of peaks above
+    n*sigma minus the expected number divided by the square root
+    (i.e. error) of expected peak. For Gaussian noise one expects this
+    to fluctuate +/- 1 around zero. The value dervide from the data
+    can be negative if too few peaks are detected.
 
     *spikeexcess* - if no quality criteria present, set maximum allowed
     ratio of detected over expected peaks per block to this level (1

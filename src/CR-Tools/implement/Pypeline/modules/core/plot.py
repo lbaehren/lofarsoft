@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from hftools import *
-from types import *
+from htypes import *
 from vector import *
 from harray import *
 
@@ -142,5 +142,11 @@ for v in hAllArrayTypes:
     setattr(v,"plot",hPlot_plot)
 
 
-def plotconst(y,xvalues):
+def plotconst(xvalues,y):
+    """
+    Usage:
+
+    plotconst(xvalues,y).plot() -> will plot a constant line with y-value 'y' for the xvalues provided.
+    
+    """
     return hArray([y,y],xvalues=hArray([xvalues.vec()[0],xvalues.vec()[-1]]))

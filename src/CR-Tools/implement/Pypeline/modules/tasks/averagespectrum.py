@@ -1,5 +1,9 @@
 """Spectrum documentation.
 
+sp=hArrayRead('tmpspec.dat'); make_frequencies(sp)
+t=task(); r=t(sp)
+
+Old:
 current_task=False
 import tasks
 
@@ -22,15 +26,9 @@ ws=tasks.WorkSpace(**args)
 #import pdb
 #pdb.set_trace()
 
-# What is exported by default
-#__all__ = ['averagespectrum',"avspec","WorkSpace"]
-
-#from pycrtools.tasks import Task, TaskLauncher
-#import pycrtools.tasks
 import tasks
-from pycrtools.core import config
 from pycrtools import *
-from shortcuts import *
+from tshortcuts import *
 import time
 import qualitycheck
 from pycrtools import IO
@@ -56,7 +54,7 @@ value is one larger than he value in par1 in the workspace.
  file.
 """
 
-class WorkSpace(tasks.WorkSpace("averagespectrum")):
+class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
     parameters = {
 
 	"filefilter":p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
@@ -76,7 +74,7 @@ class WorkSpace(tasks.WorkSpace("averagespectrum")):
 
 	"delta_nu":{default:200,doc:"6 frequency resolution",unit:"Hz"},
 
-	"blocklen":{default:2**10,doc:"15 The size of a block being read in."},
+	"blocklen":{default:lambda ws:2**int(round(log(ws.fullsize_estimated,2))/2),doc:"The size of a block being read in."},
 
 	"maxnantennas":{default:1,doc:"Maximum number of antennas to sum over,"},
 
@@ -89,11 +87,11 @@ class WorkSpace(tasks.WorkSpace("averagespectrum")):
 	"stride":{default:lambda ws:2**ws.stride_n,
 		  doc:"If stride>1 divide the FFT processing in n=stride blocks."},
     
-	"tmpfileext":{default:".dat",
+	"tmpfileext":{default:".pcr",
 		      doc:"Extension of filename for temporary data files (e.g., used if stride>1.)"},
     
 	"tmpfilename":{default:"tmp",
-		       doc:"Root filename for temporary date files."},
+		       doc:"Root filename for temporary data files."},
 
 	"filenames":{default:lambda ws:listfiles(ws.filefilter),
 		    doc:"List of filenames of data file to read raw data from."},
@@ -103,6 +101,11 @@ class WorkSpace(tasks.WorkSpace("averagespectrum")):
 
 	"quality_db_filename":{default:"qualitydatabase",
 				     doc:"Root filename of log file containing the derived antenna quality values (uses .py and .txt extension)."},
+
+	"spikyness":dict(default=10,doc="Set the maximum spikyness level in the data to this values and the minimum value to -spikyness. (see qualitycheck)"),
+
+	"spikeexcess":dict(default=10,doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
+
 
 	"start_frequency":{default:lambda ws:ws.freqs[0],
 			   doc:"Start frequency of spectrum",unit:"Hz"},
@@ -161,7 +164,7 @@ class WorkSpace(tasks.WorkSpace("averagespectrum")):
         "speclen":p_(lambda ws:ws.fullsize/2+1),
         "delta_frequency":p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen-1.0)),
 	"header":p_(lambda ws:ws.datafile.hdr,"Header of datafile",export=False),
-	"freqs":p_(lambda ws:ws.datafile["Frequency"]),
+	"freqs":p_(lambda ws:ws.datafile["Frequency"],export=False),
 
 
 #Now define all the work arrays used internally
@@ -207,11 +210,11 @@ class WorkSpace(tasks.WorkSpace("averagespectrum")):
 		hArray(ws.cdata.vec(),[ws.blocklen,ws.nblocks],header=ws.header)}
 }
 
-class averagespectrum(tasks.Task):
+#    files = [f for f in files if test.search(f)]
+
+class AverageSpectrum(tasks.Task):
     """class documentation.
 
-
-    files = [f for f in files if test.search(f)]
     """
     WorkSpace = WorkSpace
     
@@ -238,6 +241,7 @@ class averagespectrum(tasks.Task):
         self.dostride=(self.stride>1)
         self.nspectraflagged=0
         self.nspectraadded=0
+
         self.header.update(self.ws.getParameters())
 
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
@@ -266,7 +270,7 @@ class averagespectrum(tasks.Task):
 			#print "#    Pass ",offset,"/",self.stride-1,"Starting block=",offset+nchunk*self.nsubblocks
 			blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)            
 			self.cdata[...].read(self.datafile,"Fx",blocks)
-			self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode))
+			self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=self.spikyness))
 			qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[-1])
 			mean+=self.quality[-1]["mean"]
 			rms+=self.quality[-1]["rms"]
@@ -341,14 +345,15 @@ class averagespectrum(tasks.Task):
 
         #Now update the header file again ....
         self.header.update(self.ws.getParameters())
-        self.header={}
+	self.power.par.hdr=self.header
         if self.stride==1: self.power.writeheader(self.spectrum_file,nblocks=self.nbands,dim=[self.subspeclen/2])
         else: self.power.writeheader(self.spectrum_file,nblocks=self.nbands)
 
+"""
 class test1(tasks.Task):
-    """
+#    " ""
     Documentation of task - parameters will be added automatically
-    """
+#    " ""
 #    parameters = {"x":{default:None,doc:"x-value - a positional parameter",positional:True},"y":{default:2, doc:"y-value - a normal keyword parameter"},"xy":{default:lambda ws:ws.y*ws.x,doc:"Example of a derived parameter."}}
     parameters = {"x":p_(None,"x-value - a positional parameter",positional=True),"y":p_(2,"y-value - a normal keyword parameter"),"xy":p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
     def init(self):
@@ -358,9 +363,9 @@ class test1(tasks.Task):
 	print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
 
 class test2(tasks.Task):
-    """
+    " ""
     Documentation of task - parameters will be added automatically
-    """
+    " ""
     def call(self,x,y=2,xy=lambda ws:ws.x*ws.y):
 	pass
     def init(self):
@@ -369,3 +374,4 @@ class test2(tasks.Task):
 	print "Calling Run Function."
 	print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
 
+"""
