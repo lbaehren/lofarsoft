@@ -35,7 +35,7 @@ def writeDict(outfile, dict):
             outfile.write('%s: %s\n' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
     outfile.write('\n')
 
-def writeResultLine(outfile, triggerFitResult, fullDirectionResult, filename):
+def writeResultLine(outfile, pulseCountResult, triggerFitResult, fullDirectionResult, filename, timestamp):
     d = triggerFitResult
     az = str(d["az"])
     el = str(d["el"])
@@ -46,16 +46,26 @@ def writeResultLine(outfile, triggerFitResult, fullDirectionResult, filename):
     az = str(d["az"])
     el = str(d["el"])
     R = str(d["R"])
-    optHeight = str(d["optValue"])
-    outString += az + ' ' + el + ' ' + R + ' ' + optHeight + ' '
+    optHeightOdd = str(d["optValue"])
+    outString += az + ' ' + el + ' ' + R + ' ' + optHeightOdd + ' '
     
     d = fullDirectionResult["even"]
     az = str(d["az"])
     el = str(d["el"])
     R = str(d["R"])
-    optHeight = str(d["optValue"])
-    outString += az + ' ' + el + ' ' + R + ' ' + optHeight + ' '
+    optHeightEven = str(d["optValue"])
+    outString += az + ' ' + el + ' ' + R + ' ' + optHeightEven + ' '
     
+    d = pulseCountResult
+    avgCount = str(d["avgPulseCount"])
+    maxCount = str(d["maxPulseCount"])
+    outString += avgCount + ' ' + maxCount + ' '  
+    
+    summedPulseHeight = str(fullDirectionResult["summedPulseHeight"])
+    coherencyFactor = str(fullDirectionResult["coherencyFactor"])
+    outString += summedPulseHeight + ' ' + coherencyFactor + ' '
+       
+    outString += str(timestamp) + ' '
     outString += filename
     outfile.write(outString + '\n')
 
@@ -65,7 +75,7 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
     outfile = open(outfilename, mode='a')
     if not os.path.isfile(asciiFilename):
         asciiOutfile = open(asciiFilename, mode='a')
-        headerString = 'trig.az trig.el trig.mse odd.az odd.el odd.R odd.height even.az even.el even.R even.height filename\n'
+        headerString = 'trig.az trig.el trig.mse odd.az odd.el odd.R odd.height even.az even.el even.R even.height avgCount maxCount summedHeight coherency time filename\n'
         asciiOutfile.write(headerString)
     else:
         asciiOutfile = open(asciiFilename, mode='a') # hmm, duplicate code
@@ -93,6 +103,7 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
         writeDict(outfile, result)
         if not result["success"]: 
             continue
+        qualityCheckResult = result
         fileTimestamp = crfile["TIME"][0]
         triggers = match.readtriggers(crfile) 
         if len(triggers) == 0:
@@ -109,7 +120,7 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
         triggerFitResult = result
         # now find the final direction based on all data, using initial direction as starting point
         try: # apparently it's dangerous...
-          result = pf.fullDirectionFit(crfile, triggerFitResult, 2048, flaggedList = flaggedList, FarField = False, doPlot = doPlot)     
+          result = pf.fullDirectionFit(crfile, triggerFitResult, 512, flaggedList = flaggedList, FarField = False, doPlot = doPlot)     
           fullDirectionResult = result
           writeDict(outfile, result)
           if not result["success"]:
@@ -118,7 +129,8 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
         except (ZeroDivisionError, IndexError), msg:
           print 'EROR!'
           print msg
-        writeResultLine(asciiOutfile, triggerFitResult, fullDirectionResult, crfile.files[0].filename)
+        writeResultLine(asciiOutfile, qualityCheckResult, triggerFitResult, fullDirectionResult, 
+                        crfile.files[0].filename, fileTimestamp)
         bfEven = result["even"]["optBeam"]
         bfOdd = result["odd"]["optBeam"]
         
@@ -146,33 +158,43 @@ elif len(sys.argv) > 1:
 else:
     print 'No files given on command line, using a default set instead.'
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-10*.h5' 
-    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-9.h5'
+    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/*.h5'
 #    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
 
-
-sortstring = 'sort -rn --field-separator="-" --key=18'
+sortstring = 'sort -n --field-separator="-" --key=18'
 outfile = 'crPipelineResults.txt'
 outfileAscii = 'asciiPipelineResults.txt'
 antennaset="LBA_OUTER"
 
 #fd = os.popen('ls '+ datafiles+' | ' + sortstring)
-p1 = subprocess.Popen(['ls '+ datafiles + ' | ' + sortstring], shell=True, stdout=subprocess.PIPE)
-output = p1.communicate()[0]
+#p1 = subprocess.Popen(['ls '+ datafiles + ' | ' + sortstring], shell=True, stdout=subprocess.PIPE)
+(directory, files) = os.path.split(datafiles)
+p1 = subprocess.Popen(['find ' + directory + ' -type f -name "'+ files + '" | ' + sortstring], shell=True, stdout=subprocess.PIPE)
 
+output = p1.communicate()[0]
 files = output.splitlines()
 nofiles = len(files)
 print "Number of files to process:", nofiles
 
 if nofiles > 10:
     print '--- Spawning new processes for each file ---'
-    for i in range(nofiles/2): # ugly, fix
-        print files[2*i]
-        thisProcess = subprocess.Popen(['./crpipeline.py', files[2*i]])
-        thisProcess2 = subprocess.Popen(['./crpipeline.py', files[2*i+1]])
-        thisProcess.communicate2()
-        thisProcess2.communicate()
+
+    thisProcess = subprocess.Popen(['./crpipeline.py', files[0]])
+    thisProcess2 = subprocess.Popen(['./crpipeline.py', files[1]])
+    i = 2
+    while i < nofiles:
+        time.sleep(0.33)
+        if thisProcess.poll() != None:
+            print 'Going to do: %s' % files[i]
+            thisProcess = subprocess.Popen(['./crpipeline.py', files[i]])
+            i += 1
+        if thisProcess2.poll() != None:
+            print 'Going to do: %s' % files[i]
+            thisProcess2 = subprocess.Popen(['./crpipeline.py', files[i]])
+            i += 1          
+        
 else:
-    (bfEven, bfOdd) = runAnalysis(files, outfile, outfileAscii, doPlot = True)
+    (bfEven, bfOdd) = runAnalysis(files, outfile, outfileAscii, doPlot = False)
 #fitergs = dict()
 
 

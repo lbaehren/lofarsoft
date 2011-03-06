@@ -172,6 +172,8 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
   pulseMidpoint = int(triggerFitResult["avgToffset"] * samplefreq)
   nofAntennas = crfile["nofAntennas"]
 
+  # here we select the region of the data such that the pulse is (on average over antennas) 
+  # is in the middle of the block
   cr_alldata = crfile["emptyFx"]
   crfile.getTimeseriesData(cr_alldata, 0) # MOVE upward to crpipeline? 
   cr_efield = hArray(copy=cr_alldata, dimensions = [nofAntennas, blocksize])
@@ -181,6 +183,12 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
   
   crfile.set("blocksize", blocksize) # workaround, needed for correct settings in Beamformer
   
+  abs_efield = hArray(copy = cr_efield)
+  abs_efield.abs()
+  maxPerAntenna = abs_efield[...].max()
+  summedPulseHeight = maxPerAntenna.sum() # incoherently summed pulse height
+  
+  del abs_efield
   #blockNo = int((triggerFitResult["avgToffset"] * samplefreq) / blocksize)
   #print "fullPulseFit: set block-number to:", blockNo
 #  crfile.set("block", blockNo)
@@ -249,11 +257,17 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
       Reven = 2000.0 / fitDataEven[0][2]
       Rodd = 2000.0 / fitDataOdd[0][2]
   
-  result = dict(success = True, action = 'Full direction fit',
+  evenHeight = - fitDataEven[1] # optimized pulse height
+  oddHeight = - fitDataOdd[1]
+  
+  coherencyFactor = (evenHeight + oddHeight) / summedPulseHeight # very crude way of estimating coherency
+  
+  result = dict(success = True, action = 'Full direction fit', summedPulseHeight = summedPulseHeight,
+                coherencyFactor = coherencyFactor,
                 even = dict(az = fitDataEven[0][0], el = fitDataEven[0][1], R = Reven,
-                optValue = - fitDataEven[1], optBeam = optBeamEven),
+                optValue = evenHeight, optBeam = optBeamEven),
                 odd = dict(az = fitDataOdd[0][0], el = fitDataOdd[0][1], R = Rodd,
-                optValue = - fitDataOdd[1], optBeam = optBeamOdd) )
+                optValue = oddHeight, optBeam = optBeamOdd) )
   
   return result
 
