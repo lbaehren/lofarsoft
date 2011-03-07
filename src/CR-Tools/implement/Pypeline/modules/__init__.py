@@ -63,7 +63,6 @@ def tload(name,**args):
     tasks.task_instance=tasks.task_class(**args)
     tasks.set_globals("Task",tasks.task_instance)
     tget()
-    tpars(False)
 
 def task():
     """

@@ -235,7 +235,7 @@ to include vectors and arrays in "par" as binary files
 e.g., if you write ary to disk, just store another array in ary.par or
 store it with ary.setHeader()
 
-2011-03-07 Pypeline - rev 7222 - Heino Falcke
+2011-03-07 Pypeline - rev 7223 - Heino Falcke
 - moved tshortuts to tasks/shortcuts and adapted imports
 - tget/tput now accept an additional name under which to store the
 parameters
