@@ -26,11 +26,11 @@ ws=tasks.WorkSpace(**args)
 #import pdb
 #pdb.set_trace()
 
-import tasks
 from pycrtools import *
-from tshortcuts import *
+from pycrtools.tasks.shortcuts import *
+import pycrtools.tasks as tasks
+import pycrtools.qualitycheck as qualitycheck
 import time
-import qualitycheck
 from pycrtools import IO
 
 #Defining the workspace parameters

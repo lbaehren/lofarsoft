@@ -77,8 +77,8 @@ tpar nchunks=2          # to set a parameter
 go                      # to run the task
 tpar parfile="averagespectrum_2011-02-15_23:52:15.par"     # to read back a parameter file
 treset                  # to reset parameters to default values
-tget                    # to read back the parameters from the latest run (will also be done at tload)
-tput                    # store input parameters in database
+tget (name)             # to read back the parameters from the latest run - will also be done at tload - or get the one stored under 'name'
+tput (name)             # store input parameters in database (under 'name')
 tinit                   # run the initialization routine again (without resetting the parameters to default values)
 thelp                   # print documentation of task module
 
@@ -144,9 +144,9 @@ is relatively easy to do....
 
 The modules to import in a task module are
 
-import tasks
 from pycrtools import *
-from shortcuts import *
+from pycrtools.tasks.shortcuts import *
+import pycrtools.tasks as tasks
 
 If one wants to add a new task then it should either be defined in a
 separate new file in the directory modules/tasks or it should be added
@@ -356,7 +356,8 @@ import types
 import time
 
 from pycrtools import *
-from tshortcuts import *
+#from pycrtools.tasks.shortcuts import *
+from shortcuts import *
 
 #import pdb
 #pdb.set_trace()
@@ -400,8 +401,10 @@ class TaskInit(type):
         """
         cls.__taskname__ = name
 	if not name == "Task":
-#	    config.task_allloaded[name]=cls.__module__
-	    task_allloaded[name]=cls.__module__
+	    if cls.__module__[:10]=="pycrtools.":
+		task_allloaded[name]=cls.__module__[10:]
+	    else:
+		task_allloaded[name]=cls.__module__
         super(TaskInit, cls).__init__(name, bases, dct)
 	cls.addtask()
 	
@@ -629,31 +632,38 @@ class Task(object):
 	self.ws[par]=value
 
 
-    def put(self):
+    def put(self,name=""):
 	"""
 	Stores the input parameters in the workspace to the parameter
 	database (see also 'tput').  This can be restored with
 	task.get() (or 'tget' from the command line).
+
+	task.get(name) will retrieve the parameters stored under name
 	"""
 	# # Open task database
 	taskdb = shelve.open(dbfile)
 
-        taskdb[self.__taskname__] = self.ws.getInputParametersDict()
+	
+
+        taskdb[self.__taskname__+name] = self.ws.getInputParametersDict()
 
         taskdb.close()
 
-    def get(self):
+    def get(self,name=""):
 	"""
 	Gets the input parameters in the workspace from the parameter
 	database (see also 'tget').  This can be stored there with
 	task.put() (or 'tput' from the command line).
+
+	task.put(name) will store the parameters under the keyword
+	name and can be retrieved with put under this name.
 	"""
 	# # Open task database
 	taskdb = shelve.open(dbfile)
 
         if self.__taskname__ in taskdb:
              # Restoring from database
-             args = taskdb[self.__taskname__]
+             args = taskdb[self.__taskname__+name]
 	     self.ws(**args)
 
         taskdb.close()

@@ -37,14 +37,14 @@ Task.par (=value)       # access or set a parameter (without updating)
 Task(par1,par2,...)     # run the task with parameters par1,par2,....
 tlist                   # to view the available tasks
 tload 2                 # to load the task #2 (can also provide a name)
-tload "averagespectrum" # i.e., this is safer in code since the task number can change with time
+tload "taskname"        # i.e., this is safer in code since the task number can change with time
 tpars                   # to list all parameters
 tpar nchunks=2          # to set a parameter
 go                      # to run the task
 tpar parfile="averagespectrum_2011-02-15_23:52:15.par"     # to read back a parameter file
 treset                  # to reset parameters to default values
-tget                    # to read back the parameters from the latest run (will also be done at tload)
-tput                    # store input parameters in database
+tget (name)             # to read back the parameters from the latest run - will also be done at tload - or get the one stored under 'name'
+tput (name)             # store input parameters in database (under 'name')
 tinit                   # run the initialization routine again (without resetting the parameters to default values)
 thelp                   # print documentation of task module
 """
@@ -58,9 +58,8 @@ def tload(name,**args):
     One can also provide a number, which refers to the number
     associated with the task when typing 'tlist'.
     """
-    import pycrtools.tasks
     if type(name)==int: name=tasks.task_allloaded.keys()[name]
-    tasks.task_class=eval("pycrtools."+tasks.task_allloaded[name]+"."+name)
+    tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
     tasks.task_instance=tasks.task_class(**args)
     tasks.set_globals("Task",tasks.task_instance)
     tget()
@@ -172,10 +171,13 @@ class tget_class(t_class):
 
     tget -> Class to let the user retrieve the input parameters from the
     system data base on disk. See also 'tput'
+
+    tget name -> Retrieve the parameters stored under the respective name
     """
-    def __call__(self):
-	tasks.task_instance.get()
+    def __call__(self,name=""):
+	tasks.task_instance.get(name)
 	tasks.task_instance.ws.update()
+	tpars(False,False)
 	
 tget = tget_class()
 
@@ -195,6 +197,7 @@ class treset_class(t_class):
     """
     def __call__(self,restorecallparameters=False,**args):
 	tasks.task_instance.reset(restorecallparameters=False,**args)
+	tasks.task_instance.ws.evalInputParameters()
 	tpars(False,False)
 	
 treset = treset_class()
@@ -205,9 +208,11 @@ class tput_class(t_class):
 
     tput -> Class to let the user store the input parameters to the
     system data base on disk. See also 'tget'
+
+    tput name -> Store parameters stored under 'name' (retrieve with tget name)
     """
-    def __call__(self):
-	tasks.task_instance.put()
+    def __call__(self,name=""):
+	tasks.task_instance.put(name)
 
 tput = tput_class()
 
@@ -256,5 +261,5 @@ def tdel(*args):
 
 #Now importing all modules with tasks
 for mn in tasks.task_modules:
-    m=__import__("tasks",fromlist=[mn])
+    m=__import__("pycrtools.tasks",fromlist=[mn])
     setattr(tasks,mn,getattr(m,mn))
