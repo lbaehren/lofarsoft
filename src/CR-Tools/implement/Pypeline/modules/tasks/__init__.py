@@ -685,7 +685,7 @@ class Task(object):
 	self.ws.__init__(**args)
 	self.init()
 
-    def update(self,forced=False):
+    def update(self,forced=False,workarrays=True):
         """
         Recalculates all existing derived parameters and assigns them
         their default values if they depend on a value that was
@@ -697,7 +697,7 @@ class Task(object):
          irrespective of whether they depend on modified parameters or
          not.
         """
-	self.ws.update(forced)
+	self.ws.update(forced=forced,workarrays=workarrays)
 	
 #########################################################################
 #                             Workspaces
@@ -1098,7 +1098,8 @@ class WorkSpace(object):
 	    if modified: self._modified_parameters.add(par)
 	    return modified
 	return False
-    def update(self,forced=False):
+    
+    def update(self,forced=False,workarrays=True):
         """
         Recalculates all existing derived parameters and assigns them
         their default values if they depend on a value that was
@@ -1109,15 +1110,20 @@ class WorkSpace(object):
 	*forced* = False - If True, then update all parameters
          irrespective of whether they depend on modified parameters or
          not.
+
+	 *workarrays* = True - also update work arrays, set to False
+          if you want to avoid reinitializing them due to an update
+	 
         """
 	pars=[]
 	for p in self.getDerivedParameters(): # first make sure all modified parameters are identified 
-	    if (self.isModified(p) or forced) and hasattr(self,"_"+p):
+	    if (self.isModified(p) or forced) and hasattr(self,"_"+p) and (workarrays or ((not self.parameter_properties[p].has_key(workarray)) or not self.parameter_properties[p][workarray])):
 		delattr(self,"_"+p) # delete buffered value so that it will be recalculated
 		pars.append(p)
 	for p in pars:
 	    self[p] # recalculate the parameters where the local value was deleted
 	self.clearModifications()
+	
     def getParameterDoc(self,name):
 	"""
 	If parameter was defined in parameter_properties return the "doc" keyword, otherwise a default string.
@@ -1126,6 +1132,7 @@ class WorkSpace(object):
 	    return self.parameter_properties[name][doc]
 	else:
 	    return "This is parameter "+name+"."
+	
     def getParameters(self,internals=False,excludeworkarrays=True,excludenonexports=True,all=False):
         """
         ws.getParameters(internals=False,excludeworkarrays=True,excludenonexports=True,all=False) -> {"par1":value1, "par2":value2,...}
@@ -1199,7 +1206,12 @@ class WorkSpace(object):
                 if (v[unit]==""): s0+="{0:<22} = {1!r:30} #         {2:s}\n".format(p,val,v[doc])
                 else: s0+="{0:<22} = {1!r:30} # [{2:^5s}] {3:s}\n".format(p,val,v[unit],v[doc]) 
 	    elif (v.has_key(workarray)) and (v[workarray]):
-		if workarrays: s2+="# {2:s}\n# {0:s} = {1!r}\n".format(p,val,v[doc])
+		if workarrays:
+		    if v.has_key(dependencies):
+			deps=" <- ["+", ".join(v[dependencies])+"]"
+		    else:
+			deps=""
+		    s2+=("# {2:s}\n# {0:s} = {1!r}"+deps+"\n").format(p,val,v[doc])
             elif noninputparameters:
 		if v.has_key(dependencies):
 		    deps=" <- ["+", ".join(v[dependencies])+"]"

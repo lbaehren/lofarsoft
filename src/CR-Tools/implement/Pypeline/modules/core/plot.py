@@ -17,49 +17,53 @@ from harray import *
 
 def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,**plotargs):
     """
-    array[0].plot(self,xvalues=vec,xlabel="x",ylabel="y",title="Title",clf=True,logplot="xy") -> plot the array (loglog)
+    array[0].plot(self,xvalues=vec,xlabel='x',ylabel='y',title='Title',clf=True,logplot='xy') -> plot the array (loglog)
 
     Method of arrays. Plots the current slice. If the array is in
     looping mode, multiple curves are plotted in one windows.
 
     You can set the plotting parameters also as attributes to the .par
-    class of the array, e.g., "array.par.xvalues=x_vector; array.plot()"
+    class of the array, e.g., 'array.par.xvalues=x_vector; array.plot()'
 
     Parameters:
 
-    xvalues: an array with corresponding x values, if "None" numbers
+    *xvalues* an array with corresponding x values, if 'None' numbers
     from 0 to length of the array are used
 
-    xlabel: the x-axis label, if not specified, use the "name" keyword
+    *xlabel* the x-axis label, if not specified, use the 'name' keyword
     of the xvalues array - units will be added automatically
 
-    ylabel: the y-axis label, if not specified, use the "name" keyword
+    *ylabel* the y-axis label, if not specified, use the 'name' keyword
     of the array - units will be added automatically
 
-    xlim: tuple with minimum and maximum limits for the x-axis
+    *xlim* tuple with minimum and maximum limits for the x-axis
 
-    ylim: tuple with minimum and maximum limits for the y-axis
+    *ylim* tuple with minimum and maximum limits for the y-axis
 
-    legend: plots a legen taking a tuple of strings for each plotted
-    line as input, e.g. legend=("A","B",...)
+    *legend* plots a legend, taking a tuple of strings for each plotted
+    line as input, e.g. legend=('A','B',...)
 
-    title: a title for the plot
+    *title* a title for the plot
 
-    clf: if True (default) clear the screen beforehand (use False to
+    *clf* if True (default) clear the screen beforehand (use False to
     compose plots with multiple lines from different arrays.
 
-    logplot: can be used to make loglog or semilog plots:
-            "x" ->semilog in x
-            "y" ->semilog in y
-            "xy"->loglog plot
+    *logplot* can be used to make loglog or semilog plots:
+            'x' ->semilog in x
+            'y' ->semilog in y
+            'xy'->loglog plot
 
-    plotarg1=..., plotarg2=...: you can add any plotting paramter that is understood by .plot of scipy, e.g.
-            color="green", linestyle="dashed"
+    *plotarg1*=..., plotarg2=...: you can add any plotting paramter that is understood by .plot of scipy, e.g.
+     *color*='green', *linestyle*='dashed'
     """
-    if xvalues==None:
-        if hasattr(self.par,"xvalues"): xvalues=self.par.xvalues
-        else: xvalues=hArray(range(len(self.vec())))
-#        else: xvalues=Vector(range(len(self.vec())))
+    if (xvalues==None):
+        if hasattr(self.par,"xvalues"):
+	    if hasattr(self,"__slice__"):
+	        xvalues=self.par.xvalues.getSlicedArray(self.__slice__)
+	    else:
+	        xvalues=self.par.xvalues
+        else:
+	    xvalues=hArray(range(len(self.vec())))
     xunit=xvalues.getUnit().replace("\\mu","$\\mu$")
     if not xunit=="": xunit=" ["+xunit+"]"
     yunit=self.getUnit().replace("\\mu","$\\mu$")
@@ -117,9 +121,15 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     elif logplot=="y": _plot=self.plt.semilogy
     elif (logplot=="xy") | (logplot=="yx"): _plot=self.plt.loglog
     else: _plot=self.plt.plot
-    iterate=True; loop=0
+    iterate=True
+    loop=0
+    ylen=len(self.vec())
+    xlen=len(xvalues.vec())
     while (iterate):
-        _plot(xvalues.vec(),self.vec(),**plotargs)
+        if ylen<xlen:
+	    _plot(xvalues.vec()[:ylen],self.vec(),**plotargs)
+	else:
+            _plot(xvalues.vec(),self.vec(),**plotargs)
         if not highlight==None:
             if type(nhighlight)==int: nhighlight=[nhighlight]
             hv=highlight.vec()

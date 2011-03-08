@@ -369,10 +369,13 @@ def hArray_getSlicedArray(self,indexlist):
 
     Use array.reshape([dim1,dim2,...,dimN]) to set the dimensions.
     """
-    if type(indexlist)==tuple: indexlist=list(indexlist)
-    else: indexlist=[indexlist]
+    if type(indexlist)==tuple:
+	indexlist=list(indexlist)
+    else:
+	indexlist=[indexlist]
     ary=hArray(self)
     ary.par=self.par
+    ary.__slice__=tuple(indexlist)
     dimensions=ary.shape()
     subslice_start=0; subslice_end=-1;
 #   Now check if there is an ellipsis in the index list, which indicates looping.
@@ -674,12 +677,13 @@ def hArray_getHeader(self,parameter_name=None):
 #------------------------------------------------------------------------
 # Reading and Writing an array
 #------------------------------------------------------------------------
+default_blockedIOnames=set(["par.xvalues"])
 
-def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varname='',overwrite=None):
+def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varname='',clearfile=None,blockedIOnames=default_blockedIOnames):
     """
     Usage:
 
-    array.write(filename,nblocks=1,block=0,dim=None,writeheader=None,overwrite=None)
+    array.write(filename,nblocks=1,block=0,dim=None,writeheader=None,clearfile=None)
     
     Write an hArray to disk including a header file to read it back
     again. This is a simple interface to hArray_writeheader and then
@@ -693,50 +697,67 @@ def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varn
 
     By default a header will be written and the file will be
     overwritten, if one writes the first block. This can be explicitly
-    switched on or off with keywords 'writeheader' and 'overwrite'.
+    switched on or off with keywords 'writeheader' and 'clearfile'.
 
-    filename - the filename where the data will be dumped. The header
+    *filename* - the filename where the data will be dumped. The header
     filename will have the ending".hdr" the data file a ".dat" ending (the filename can contain either of those endings or none).
 
-    nblocks - Allows one to specify that one will write the same
+    *nblocks* - Allows one to specify that one will write the same
     vector multiple times to the same file, so that the data file size
     in the end is actually nblocks times the original hArray
     size. This needs to be known at creation time. In case multiple
     blocks will be written, the function will write the first block to
     disk.
 
-    block - which block to write. If the block is larger than 0, then
+    *block* - which block to write. If the block is larger than 0, then
     the header file is not being written.
 
-    varname - you can store the original variable name in which the
+    *varname* - you can store the original variable name in which the
     hArray was stored. Currently not really used.
 
-    writeheader - force header file to be written or not (for
+    *writeheader* - force header file to be written or not (for
     True/False resp.). Use default behavior if not set (i.e. None).
+
+    *dim* - Specify a different dimension vector [dim1,dim2,dim3,
+    ....,dimn] under which the array should be restored. The user is
+    responsible for consistency.
+
+    *blockedIOnames* = set(['par.xvalues']) - a set containing a list
+     of attribute names that need to be written with the same blocking
+     subdivision as the actual array data (see block, nblock) - the
+     paramters are specified as attributes with a dot,
+     e.g. 'par.xvalues' (default). An array in the header would be
+     specified as 'par.hdr.arrayname.'
 
     Example:
 
-x=hArray([1.0,2.0,3,4],name="test")
-x.write("test.dat")
+xvals=hArray(range(10))
+x=hArray(float,[10],fill=range(10),name="test",xvalues=xvals)
+x.write("test.pcr")
 y=hArrayRead("test")
 y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
+y.par.xvalues -> hArray(int, [10], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=10 slice=[0:10])
 
-cat test.hdr
-# Header for hArray vector
-ha_filename = 'test'
-ha_type = float
-ha_dim = [4]
-ha_nblocks = 1
-ha_name = 'test'
-ha_units = ('', '')
-ha_varname = 'x'
+The data files are stored in a directory with name test.pcr:
+
+ls test.pcr/ ->  data.bin		header.hdr		par.xvalues.pcr/
+
+Example using blocks:
+
+xvals=hArray(range(10))
+x=hArray(float,[10],fill=range(10),name="test",xvalues=xvals)
+x.write("test.pcr",block=0,nblocks=2)
+x.write("test.pcr",block=1,nblocks=2)
+y=hArrayRead("test")
+y -> hArray(float, [20], fill=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0], name="test") # len=20 slice=[0:20])
+y.par.xvalues -> hArray(int, [20], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=20 slice=[0:20])
     """
     fn=os.path.expandvars(os.path.expanduser(filename))
 
     #Add proper ending if missing
     if not fn[-4:].upper() == ".PCR": fn+=".pcr"
     binfile=os.path.join(fn,"data.bin")
-
+    
     #Check if data and header directory is available
     if not os.path.exists(fn):
 	os.mkdir(fn)
@@ -745,15 +766,15 @@ ha_varname = 'x'
 	return    
 
     #Write header file if requested
-    if ((block==0) & (not writeheader==False)) | (writeheader==True):
-        hArray_writeheader(self,fn,nblocks=nblocks,dim=dim,varname=varname)
-	if (not overwrite==False):
+    if not (writeheader==False):
+        hArray_writeheader(self,fn,nblocks=nblocks,block=block,dim=dim,varname=varname,blockedIOnames=blockedIOnames,writeheader=writeheader,clearfile=clearfile)
+	if (block==0) and not (clearfile==False):
 	    if os.path.exists(binfile):
 		os.remove(binfile)
-		
-    if (overwrite):
+
+    if (clearfile):
         if os.path.exists(binfile):
-	    os.remove(binfile) 
+	    os.remove(binfile)
     self.writefilebinary(binfile,block*self.getSize())
 
 class hFileContainer():
@@ -771,7 +792,7 @@ class hFileContainer():
 	self.vector=vector
     
 
-def hArrayReadDictArray(dictionary,path):
+def hArrayReadDictArray(dictionary,path,block=-1,blockedIOnames=default_blockedIOnames,amalgateblocks=True):
     """
     Recursively goes through a dict (of dicts) and replaces all placeholder (hFileCOntainer) with hArrays or Vectors read from disk.
     """
@@ -779,33 +800,47 @@ def hArrayReadDictArray(dictionary,path):
     for k,v in newdictionary.items():
 	if hasattr(v,"__hFileContainer__"):
 	    filename=os.path.join(path,v.name)
-	    if v.vector:
-		newdictionary[k]=hArrayRead(filename,block=-1,restorevar=False).vec()
+	    parname=v.name[:-4]
+	    if parname in blockedIOnames:
+		bblock=block
 	    else:
-		newdictionary[k]=hArrayRead(filename,block=-1,restorevar=False)
+		bblock=-1
+	    if v.vector:
+		newdictionary[k]=hArrayRead(filename,block=bblock,amalgateblocks=amalgateblocks,restorevar=False).vec()
+	    else:
+		newdictionary[k]=hArrayRead(filename,block=bblock,amalgateblocks=amalgateblocks,restorevar=False)
 	elif type(v) == dict:
 	    newdictionary[k]=hArrayReadDictArray(v,path)
     return newdictionary
 
-def hArrayWriteDictArray(dictionary,path,prefix):
+def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=None,clearfile=None,blockedIOnames=default_blockedIOnames):
     """
     Recursively goes through a dict (of dicts) and replaces all values which are hArray with a placeholder and writes the array to disk.
     """
     newdictionary=dictionary.copy()
     for k,v in newdictionary.items():
 	if type(v) in hAllVectorTypes:
-	    filename=prefix+"."+k+".pcr"
-	    hArray_write(hArray(v), os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=True,varname=k,overwrite=None)
+	    parname=prefix+"."+k
+	    filename=parname+".pcr"
+	    if parname in blockedIOnames:
+		hArray_write(hArray(v), os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
+	    else:
+		hArray_write(hArray(v), os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
 	    newdictionary[k]=hFileContainer(path,filename,vector=True)
 	if type(v) in hAllArrayTypes:
+	    parname=prefix+"."+k
+	    filename=parname+".pcr"
 	    filename=prefix+"."+k+".pcr"
-	    hArray_write(v, os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=True,varname=k,overwrite=None)
+	    if parname in blockedIOnames:
+		hArray_write(v, os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
+	    else:
+		hArray_write(v, os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
 	    newdictionary[k]=hFileContainer(path,filename)
 	elif type(v) == dict:
 	    newdictionary[k]=hArrayWriteDictArray(v,path,prefix+"."+k)
     return newdictionary
 
-def hArray_writeheader(self, filename,nblocks=1,varname='',dim=None):
+def hArray_writeheader(self, filename,nblocks=1,block=0,varname='',dim=None,blockedIOnames=default_blockedIOnames,writeheader=None,clearfile=None):
     """
     Usage:
 
@@ -820,6 +855,9 @@ def hArray_writeheader(self, filename,nblocks=1,varname='',dim=None):
     vector multiple times to the same file, so that the data file
     size is actually nblocks times the original hArray size.
 
+    blocks - Which block to write header for (usually only used when
+    called from hArray_write)
+
     dim - Specify a different dimension vector [dim1,dim2,dim3,
     ....,dimn] under which the array should be restored. The user is
     responsible for consistency.
@@ -829,8 +867,8 @@ def hArray_writeheader(self, filename,nblocks=1,varname='',dim=None):
 
 Example:
 x=hArray([1.0,2.0,3,4],name="test")
-x.writeheader("test.dat")
-x.writefilebinary("test.dat")
+x.writeheader("test.pcr")
+x.writefilebinary("test.pcr")
 y=hArrayRead("test")
 y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
     """
@@ -857,11 +895,11 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     f.write("ha_name = '" + self.getKey("name")+"'\n")
     f.write("ha_units = ('" +self.getUnitPrefix()+"', '" + self.getUnitName()+"')\n")
     f.write("ha_varname = '" + varname+"'\n")
-    par=hArrayWriteDictArray(self.par.__dict__,fn,"par")
+    par=hArrayWriteDictArray(self.par.__dict__,fn,"par",nblocks=nblocks,block=block,writeheader=writeheader,clearfile=clearfile)
     f.write('ha_parameters="""'+pickle.dumps(par)+'"""\n')
     f.close()
 
-def hArrayRead(filename,block=-1,restorevar=False):
+def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blockedIOnames,amalgateblocks=True):
     """
     Usage:
     
@@ -871,16 +909,22 @@ def hArrayRead(filename,block=-1,restorevar=False):
     binary data file with hWriteFileBinary and which has a (.hdr)
     header file written with hArray_writeheader.
 
-    filename - the filename of either the ".dat" file or the ".hdr" file (but both files need to be present). You can only give the
+    *filename* - the filename of either the ".dat" file or the ".hdr" file (but both files need to be present). You can only give the
     filename without the extension.
 
-    block - Allows one to specify that one has written the same vector
+    *block* = -1 - Allows one to specify that one has written the same vector
     multiple times to the same file, so that the data file size is
     actually nblocks (see hArray_writeheader) times the original
     hArray size. if block<0 then the entire file is being read and a
     big array is returned, otherwise only the block specified will be
     read and returned.
 
+    *amalgateblocks*=True - If True and multiple blocks were written
+     to file, then the array read back will have the same number of
+     dimensions as the original data set with just the first dimension
+     being nblock times bigger. If set to False, then an array with
+     dimensions [nblocks,original dimensions ...] will be returned.
+    
 Example:
 
 x=hArray([1.0,2.0,3,4],name="test")
@@ -906,17 +950,20 @@ y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3
 	print "Error hArrayRead: data file ",hdrfile," does not exist!"
 	return -1
     f=open(hdrfile,"rb")
-    exec f in globals()
+    exec f in locals()
     f.close()
     if ha_nblocks == 1 :
         block=0
     if block<0:
-        dim = [ha_nblocks]+ha_dim
-        block=0
+	if amalgateblocks:
+	    dim = [ha_dim[0]*ha_nblocks]+ha_dim[1:]
+	else:
+	    dim = [ha_nblocks]+ha_dim
+	block=0
     else:
         dim=ha_dim
     par=pickle.loads(ha_parameters)
-    par= hArrayReadDictArray(par,fn)
+    par=hArrayReadDictArray(par,fn,blockedIOnames=blockedIOnames,amalgateblocks=amalgateblocks)
     ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=par)
     if sum(dim)>0:
 	if not os.path.exists(binfile):
@@ -1036,24 +1083,4 @@ for v in hNumericalContainerTypes:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hNumericalContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
-def make_frequencies(spectrum,offset=-1,frequencies=None,setxvalues=True):
-    """Calculates the frequencies for the calculated spectrum.
-    """
-    hdr=spectrum.par.hdr
-    if offset<0 and hdr.has_key("nbands"):
-	mult=hdr["nbands"]
-    else:
-	mult=1
-    if offset<0: offset=0
-    if hdr.has_key("subspeclen"):
-	l=hdr["subspeclen"]
-	if hdr["stride"]==1: l/=2
-    else:
-	l=len(spectrum)
-    if frequencies==None:
-	frequencies=hArray(float,[l*mult],name="Frequency",units=("M","Hz"),header=hdr)
-    frequencies.fillrange((hdr["start_frequency"]+offset*hdr["delta_band"])/10**6,hdr["delta_frequency"]/10**6)
-    if setxvalues:
-	spectrum.par.xvalues=frequencies
-    return frequencies
 

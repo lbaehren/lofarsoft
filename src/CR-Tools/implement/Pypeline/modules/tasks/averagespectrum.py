@@ -35,6 +35,42 @@ from pycrtools import IO
 
 #Defining the workspace parameters
 
+def make_frequencies(spectrum,offset=-1,frequencies=None,setxvalues=True):
+    """Calculates the frequencies for the calculated spectrum (outdated)
+    """
+    hdr=spectrum.par.hdr
+    if offset<0 and hdr.has_key("nbands"):
+	mult=hdr["nbands"]
+    else:
+	mult=1
+    if offset<0: offset=0
+    if hdr.has_key("subspeclen"):
+	l=hdr["subspeclen"]
+	if hdr["stride"]==1: l/=2
+    else:
+	l=len(spectrum)
+    if frequencies==None:
+	frequencies=hArray(float,[l*mult],name="Frequency",units=("M","Hz"),header=hdr)
+    frequencies.fillrange((hdr["start_frequency"]+offset*hdr["delta_band"])/10**6,hdr["delta_frequency"]/10**6)
+    if setxvalues:
+	spectrum.par.xvalues=frequencies
+    return frequencies
+
+#def averagespectrum_calcfrequencies(self):
+#    """Calculates the frequencies for the calculated spectrum.
+#    """
+
+
+def averagespectrum_getfile(ws):
+    """
+    To produce an error message in case the file does not exist
+    """
+    if ws.file_start_number < len(ws.filenames):
+	return crfile(ws.filenames[ws.file_start_number])
+    else:
+	print "ERROR: File "+ws.filefilter+" not found!"
+	return None
+    
 """
 *default*  contains a default value or a function that will be assigned
 when the parameter is accessed the first time and no value has been
@@ -60,19 +96,25 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 	"filefilter":p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
 			"Unix style filter (i.e., with *,~, $VARIABLE, etc.), to describe all the files to be processed."),
 			
-	"datafile":{default:lambda ws:crfile(ws.filenames[ws.file_start_number]),export:False,
-		    doc:"Data file object pointing to raw data."},
-	
 	"file_start_number":{default:0,
 		    doc:"Integer number pointing to the first file in the 'filenames' list with which to start. Can be changed to restart a calculation."},
-	
 
+	"datafile":{default:averagespectrum_getfile,export:False,doc:"Data file object pointing to raw data."},
+	      
+	"doplot":{default:False,doc:"Plot current spectrum while processing."},
+
+	"plotlen":{default:2**12,doc:"How many channels +/- the center value to plot during the calculation (to allow progress checking)."},
+
+	"plotskip":{default:1,doc:"Plot only every 'plotskip'-th spectrum, skip the rest (should not be smaller than 1)."},
+    
 	"lofarmode":{default:"LBA_OUTER",
 		     doc:"Which LOFAR mode was used (HBA/LBA_OUTER/LBA_INNER)"},   
 
 	"stride_n":p_(0,"if >0 then divide the FFT processing in n=2**stride_n blocks. This is slower but uses less memory."),
 
-	"delta_nu":{default:200,doc:"6 frequency resolution",unit:"Hz"},
+	"doublefft":{doc:"if True split the FFT into two, thereby saving memory.", default:True},
+
+	"delta_nu":{default:1000,doc:"6 frequency resolution",unit:"Hz"},
 
 	"blocklen":{default:lambda ws:2**int(round(log(ws.fullsize_estimated,2))/2),doc:"The size of a block being read in."},
 
@@ -82,9 +124,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 
 	"maxblocksflagged":{default:2,doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."},
     
-	"doplot":{default:False,doc:"Plot current spectrum while processing."},
-    
-	"stride":{default:lambda ws:2**ws.stride_n,
+	"stride":{default:lambda ws: 2**ws.stride_n if ws.doublefft else 1,
 		  doc:"If stride>1 divide the FFT processing in n=stride blocks."},
     
 	"tmpfileext":{default:".pcr",
@@ -127,7 +167,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 		   doc:"Number of blocks"},
 
 	"nbands":{default:lambda ws:(ws.stride+1)/2,
-		  doc:"Number of sections/bands in spectrum"},
+		  doc:"Number of bands in spectrum which are separately written to disk, if stride>1. This is one half of stride, since only the lower half of the spectrum is written to disk."},
     
 	"subspeclen":{default:lambda ws:ws.blocklen*ws.nblocks,
 		      doc:"Size of one section/band of the final spectrum"},
@@ -169,13 +209,14 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 
 #Now define all the work arrays used internally
     
-#	"frequencies":{workarray:True,
-#		       doc:"Frequencies for final spectrum (or part thereof if stride>1)",default:lambda ws:
-#		       hArray(float,[ws.subspeclen/2],name="Frequency",units=("M","Hz"),header=ws.header)},
+	"frequencies":{workarray:True,
+		       doc:"Frequency axis for final power spectrum.",default:lambda ws:
+		       hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Frequency",units=("M","Hz"),header=ws.header)},
 
 	"power":{workarray:True,
-		 doc:"Frequencies for final spectrum (or part thereof if stride>1)",default:lambda ws:
-		 hArray(float,[ws.subspeclen],name="Spectral Power",par=[("logplot","y")],header=ws.header)},
+		 doc:"Resulting average power spectrum (or part thereof if stride>1)",default:lambda ws:
+		 hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies)},
+
 #		 hArray(float,[ws.subspeclen],name="Spectral Power",xvalues=ws.frequencies,par=[("logplot","y")],header=ws.header)},
 #Need to cerate frequencies, taking current subspec (stride) into account
 	
@@ -237,23 +278,24 @@ class AverageSpectrum(tasks.Task):
 
         self.quality=[]
         self.antennacharacteristics={}
-
+	self.spectrum_file_bin=os.path.join(self.spectrum_file,"data.bin")
         self.dostride=(self.stride>1)
         self.nspectraflagged=0
         self.nspectraadded=0
 
-        self.header.update(self.ws.getParameters())
-
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
-        writeheader=True # used to make sure the header is written the first time
+        clearfile=True 
         initialround=True
+	if self.doplot:
+	    plt.ioff()
 
 	npass = self.nchunks*self.stride
 	original_file_start_number=self.file_start_number
+
 	for fname in self.filenames[self.file_start_number:]:
 	    print "# Start File",str(self.file_start_number)+":",fname
-	    self.ws.update() # since the file_start_number was changed, make an update to get the correct file
+	    self.ws.update(workarrays=False) # since the file_start_number was changed, make an update to get the correct file
 	    self.datafile["blocksize"]=self.blocklen #Setting initial block size
 	    for iantenna in range(self.nantennas):
 		antenna=self.antennas[iantenna]
@@ -280,7 +322,10 @@ class AverageSpectrum(tasks.Task):
 			    print " # Data flagged!"
 			    break
 			#            print "Time:",time.clock()-self.t0,"s for reading."
-			self.cdataT.doublefft1(self.cdata,self.fullsize,self.nblocks,self.blocklen,offset)
+			if self.doublefft:
+			    self.cdataT.doublefft1(self.cdata,self.fullsize,self.nblocks,self.blocklen,offset)
+			else:
+			    self.cdataT.fftw(self.cdata)
 			#            print "Time:",time.clock()-self.t0,"s for 1st FFT."
 			if self.dostride:
 			    ofile=self.tmpfilename+str(offset)+"a"+self.tmpfileext
@@ -290,37 +335,59 @@ class AverageSpectrum(tasks.Task):
 		    #print "Time:",time.clock()-self.t0,"s for 1st FFT now doing 2nd FFT."
 		    if dataok:
 			self.nspectraadded+=1
-			for offset in range(self.stride):
-			    if self.dostride:
-				#print "#    Offset",offset
-				self.tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,self.stride,fill=offset)*(self.nblocks_section*self.blocklen))
-				#This transpose it to make sure the blocks are properly interleaved
-				hTranspose(self.tmpspec,self.tmpspecT,self.stride,self.nblocks_section)
-			    self.specT.doublefft2(self.tmpspec,self.nblocks_section,self.full_blocklen)
-			    if self.dostride:
-				ofile=self.tmpfilename+str(offset)+"b"+self.tmpfileext
-				self.specT.writefilebinary(ofile)
-				ofiles2+=[ofile]
-			#print "Time:",time.clock()-self.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."
-			for offset in range(self.nbands):
-			    if (self.nspectraadded==1): # first chunk
-				self.power.fill(0.0)
-			    else: #2nd or higher chunk, so read data in and add new spectrum to it
-				self.power.readfilebinary(self.spectrum_file,self.subspeclen*offset)
-				self.power*= (self.nspectraadded-1.0)/(self.nspectraadded)                        
-			    if self.dostride:
-				#print "#    Offset",offset
-				self.specT2[...].readfilebinary(Vector(ofiles2),Vector(int,self.stride,fill=offset)*(self.blocklen*self.nblocks_section))
-				hTranspose(self.spec,self.specT2,self.stride,self.blocklen) # Make sure the blocks are properly interleaved
-				if self.nspectraadded>1: self.spec/=float(self.nspectraadded)   
-				self.power.spectralpower(self.spec)
-			    else: # no striding, data is all fully in memory
-				if self.nspectraadded>1: self.specT/=float(self.nspectraadded)   
-				self.power.spectralpower(self.specT)
-			    if self.stride==1: self.power[0:self.subspeclen/2].write(self.spectrum_file,nblocks=self.nbands,block=offset,writeheader=writeheader)
-			    else: self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,writeheader=writeheader)
-			    writeheader=False
+			if self.doublefft:  # do second step of double fft, if requred
+			    for offset in range(self.stride):
+				if self.dostride:
+				    #print "#    Offset",offset
+				    self.tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,self.stride,fill=offset)*(self.nblocks_section*self.blocklen))
+				    #This transpose it to make sure the blocks are properly interleaved
+				    hTranspose(self.tmpspec,self.tmpspecT,self.stride,self.nblocks_section)
+				self.specT.doublefft2(self.tmpspec,self.nblocks_section,self.full_blocklen)
+				if self.dostride:
+				    ofile=self.tmpfilename+str(offset)+"b"+self.tmpfileext
+				    self.specT.writefilebinary(ofile)
+				    ofiles2+=[ofile]
+			    #print "Time:",time.clock()-self.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."
+			    for offset in range(self.nbands):
+				if (self.nspectraadded==1): # first chunk
+				    self.power.fill(0.0)
+				else: #2nd or higher chunk, so read data in and add new spectrum to it
+				    if self.dostride:
+					self.power.readfilebinary(self.spectrum_file_bin,self.subspeclen*offset)
+				    self.power *= (self.nspectraadded-1.0)/(self.nspectraadded)                        
+				if self.dostride:
+				    #print "#    Offset",offset
+				    self.specT2[...].readfilebinary(Vector(ofiles2),Vector(int,self.stride,fill=offset)*(self.blocklen*self.nblocks_section))
+				    hTranspose(self.spec,self.specT2,self.stride,self.blocklen) # Make sure the blocks are properly interleaved
+				    if self.nspectraadded>1:
+					self.spec/=float(self.nspectraadded)   
+				    self.power.spectralpower(self.spec)
+				else: # no striding, data is allready fully in memory
+				    if self.nspectraadded>1:
+					self.specT/=float(self.nspectraadded)   
+				    self.power.spectralpower(self.specT)
+				self.frequencies.fillrange((self.start_frequency+offset*self.delta_band)/10**6,self.delta_frequency/10**6)
+				self.power.setHeader(averagespectrum=self.ws.getParameters())
+				self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,clearfile=clearfile)#,writeheader=writeheader)
+				clearfile=False
+				if self.doplot and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
+				    self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
+				    print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
+				    plt.draw()
+			else: # do just a single FFT
+			    if self.nspectraadded>1:
+				self.cdataT/=float(self.nspectraadded)   
+			    self.power *= (self.nspectraadded-1.0)/(self.nspectraadded)                        
+			    self.power.spectralpower(self.cdataT)
+			    self.frequencies.fillrange((self.start_frequency)/10**6,self.delta_frequency/10**6)
+			    self.power.setHeader(averagespectrum=self.ws.getParameters())
+			    self.power.write(self.spectrum_file)#,writeheader=writeheader)
+			    #writeheader=False
 			#print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
+			    if self.doplot and self.nspectraadded%self.plotskip==0:
+				self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
+				print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
+				plt.draw()
 		    else: #data not ok
 			self.nspectraflagged+=1
 			#print "#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged
@@ -332,9 +399,6 @@ class AverageSpectrum(tasks.Task):
 		    f=open(self.quality_db_filename+".py","a")
 		    f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
 		    f.close()
-		    if self.doplot:
-			#rp(0,plotsubspectrum,markpeaks=False,clf=False)
-			plt.draw()
 		else: l=""
 		print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged,l
 	    print "# End File",str(self.file_start_number)+":",fname
@@ -342,12 +406,14 @@ class AverageSpectrum(tasks.Task):
 	self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
         print "Finished - total time used:",time.clock()-self.t0,"s."
         print "To read back the spectrum type: sp=hArrayRead('"+self.spectrum_file+"')"
+	if self.doplot:
+	    plt.ion()
 
         #Now update the header file again ....
-        self.header.update(self.ws.getParameters())
-	self.power.par.hdr=self.header
-        if self.stride==1: self.power.writeheader(self.spectrum_file,nblocks=self.nbands,dim=[self.subspeclen/2])
-        else: self.power.writeheader(self.spectrum_file,nblocks=self.nbands)
+#        self.header.update(self.ws.getParameters())
+#	self.power.par.hdr=self.header
+#       if self.stride==1: self.power.writeheader(self.spectrum_file,nblocks=self.nbands,dim=[self.subspeclen/2])
+#        else: self.power.writeheader(self.spectrum_file,nblocks=self.nbands)
 
 """
 class test1(tasks.Task):

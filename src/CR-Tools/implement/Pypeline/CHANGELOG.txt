@@ -241,6 +241,24 @@ store it with ary.setHeader()
 parameters
 - added the fitbaseline.py task
 
+2011-03-07 Pypeline - rev 7226 - Heino Falcke
+- plot can now deal with plotting sliced arrays where xvalues are being
+sliced in the same way
+- averagespectrum can now also do an ordinary averagespectrum (not
+using a double fft)
+
+2011-03-08 Pypeline - rev 7230 - Heino Falcke
+- Various bugfixes for averagespectrum and tasks
+
+
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------
+- change hAllTypes, hArrayTypes etc in core/htypes.py to sets - that
+is factor 2-3 faster in comparisons using 'in' ....
+
+- revisit hArrays sharing the same vector. If one has a different
+  shape the other one is also affected and lengths and slices become
+  inconsistent!
+
+-averagespectrums need to take nquistzone into account (use nyquistflip)
