@@ -248,7 +248,11 @@ sliced in the same way
 using a double fft)
 
 2011-03-08 Pypeline - rev 7230 - Heino Falcke
-- Various bugfixes for averagespectrum and tasks
+- Various bugfixes for averagespectrum, tasks, and plot
+
+2011-03-08 Pypeline - rev 7231 - Heino Falcke
+- added a method to update the (output) header in an array from within a task
+in a definde way, applied it to averagespectrum
 
 
 ------------------------------------------------------------------------

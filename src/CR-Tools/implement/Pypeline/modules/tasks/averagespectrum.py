@@ -23,8 +23,7 @@ ws
 ws=tasks.WorkSpace(**args)
 """
 
-#import pdb
-#pdb.set_trace()
+#import pdb; pdb.set_trace()
 
 from pycrtools import *
 from pycrtools.tasks.shortcuts import *
@@ -153,7 +152,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 	"end_frequency":{default:lambda ws:ws.freqs[-1],
 			 doc:"End frequency of spectrum",unit:"Hz"},
 
-	"delta_frequency":p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen-1.0),"Separation of two subsequent channels in final spectrum"),
+	"delta_frequency":p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen),"Separation of two subsequent channels in final spectrum"),
 
 	"delta_band":{default:lambda ws:(ws.end_frequency-ws.start_frequency)/ws.stride*2,
 		      doc:"Frequency width of one section/band of spectrum",unit:"Hz"},
@@ -192,6 +191,8 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 	"nspectraflagged":p_(lambda ws:0,"Number of spectra flagged and not used.",output=True),
 	
 	"antennas":p_(lambda ws:hArray(range(min(ws.datafile["nofAntennas"],ws.maxnantennas))),"Antennas to be used"),
+
+	"antennas_used":p_(lambda ws:set(),"A set of antenna names that were actually included in the average spectrum",output=True),
 	
 	"antennaIDs":p_(lambda ws:ashArray(hArray(ws.datafile["AntennaIDs"])[ws.antennas]),"Antenna IDs used in calculation."),
 
@@ -282,7 +283,9 @@ class AverageSpectrum(tasks.Task):
         self.dostride=(self.stride>1)
         self.nspectraflagged=0
         self.nspectraadded=0
-
+	self.nofAntennas=0
+	self.power.getHeader("increment")[1]=self.delta_frequency
+	
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
         clearfile=True 
@@ -313,7 +316,8 @@ class AverageSpectrum(tasks.Task):
 			blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)            
 			self.cdata[...].read(self.datafile,"Fx",blocks)
 			self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=self.spikyness))
-			qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[-1])
+			if not self.quality_db_filename=="":
+			    qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[-1])
 			mean+=self.quality[-1]["mean"]
 			rms+=self.quality[-1]["rms"]
 			npeaks+=self.quality[-1]["npeaks"]
@@ -335,7 +339,10 @@ class AverageSpectrum(tasks.Task):
 		    #print "Time:",time.clock()-self.t0,"s for 1st FFT now doing 2nd FFT."
 		    if dataok:
 			self.nspectraadded+=1
-			if self.doublefft:  # do second step of double fft, if requred
+			if not antenna in self.antennas_used:
+			    self.antennas_used.add(antennaID)
+			    self.nofAntennas+=1
+			if self.doublefft:  # do second step of double fft, if required
 			    for offset in range(self.stride):
 				if self.dostride:
 				    #print "#    Offset",offset
@@ -367,8 +374,8 @@ class AverageSpectrum(tasks.Task):
 					self.specT/=float(self.nspectraadded)   
 				    self.power.spectralpower(self.specT)
 				self.frequencies.fillrange((self.start_frequency+offset*self.delta_band)/10**6,self.delta_frequency/10**6)
-				self.power.setHeader(averagespectrum=self.ws.getParameters())
-				self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,clearfile=clearfile)#,writeheader=writeheader)
+				self.updateHeader(self.power,["nofAntennas","nspectraadded","filenames","antennas_used"],fftLength="speclen",blocksize="fullsize")
+				self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,clearfile=clearfile)
 				clearfile=False
 				if self.doplot and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
 				    self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
@@ -380,9 +387,8 @@ class AverageSpectrum(tasks.Task):
 			    self.power *= (self.nspectraadded-1.0)/(self.nspectraadded)                        
 			    self.power.spectralpower(self.cdataT)
 			    self.frequencies.fillrange((self.start_frequency)/10**6,self.delta_frequency/10**6)
-			    self.power.setHeader(averagespectrum=self.ws.getParameters())
-			    self.power.write(self.spectrum_file)#,writeheader=writeheader)
-			    #writeheader=False
+			    self.updateHeader(self.power,["nofAntennas","nspectraadded","filenames","antennas_used"],fftLength="speclen",blocksize="fullsize")
+			    self.power.write(self.spectrum_file)
 			#print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
 			    if self.doplot and self.nspectraadded%self.plotskip==0:
 				self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
@@ -408,12 +414,6 @@ class AverageSpectrum(tasks.Task):
         print "To read back the spectrum type: sp=hArrayRead('"+self.spectrum_file+"')"
 	if self.doplot:
 	    plt.ion()
-
-        #Now update the header file again ....
-#        self.header.update(self.ws.getParameters())
-#	self.power.par.hdr=self.header
-#       if self.stride==1: self.power.writeheader(self.spectrum_file,nblocks=self.nbands,dim=[self.subspeclen/2])
-#        else: self.power.writeheader(self.spectrum_file,nblocks=self.nbands)
 
 """
 class test1(tasks.Task):

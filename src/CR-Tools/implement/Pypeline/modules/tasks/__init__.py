@@ -698,6 +698,35 @@ class Task(object):
          not.
         """
 	self.ws.update(forced=forced,workarrays=workarrays)
+
+    def updateHeader(self,ary,parameters=[],**kwargs):
+	"""
+	Usage:
+	Task.updateHeader(harray,parameters=['parname1','parname2',...],newparname1=oldparname1,newparname2=oldparname2,....)
+
+	Will set parameters in the header dict of the hArray
+	'harray'.
+
+	First of all, there will be a new dict named according to the
+	current task, containing all exportable parameters.
+
+	Secondly, one can set additional parameters of the
+	Task as (top-level) header parameters, by providing their name
+	in the list 'parameters' or as keyword arguments (the latter
+	allows one to give them a different name in the header).
+
+	*parameters* = [] - a list of task parameter names to be saved in the header
+	
+	*headerkeyword* = taskkeyword - assign the header keyword the
+         value of the respective task keyword
+	
+	"""
+	ary.setHeader(**{self.__taskname__:self.ws.getParameters()})
+	for p in parameters:
+	    ary.setHeader(**{p:getattr(self,p)})
+	for p,v in kwargs.items():
+	    ary.setHeader(**{p:getattr(self,v)})
+	
 	
 #########################################################################
 #                             Workspaces
@@ -973,6 +1002,7 @@ class WorkSpace(object):
 	if properties.has_key(default) and type(properties[default])==types.FunctionType: # this is a function
 	    properties[dependencies]=self.parameterlist.intersection(properties["default"].func_code.co_names) #check the variables it depends on
         self.addParameterDefinition(par,properties)
+	
     def getDerivedParameters(self,workarrays=True,nonexport=True):
 	"""
 	Return a python set which contains the parameters that are
@@ -994,6 +1024,7 @@ class WorkSpace(object):
 		or (workarrays and (properties.has_key(workarray) and properties[workarray]))): # not a workarray if requested
 		derivedparameters.add(p) # then it is a derived parameter
 	return derivedparameters
+    
     def getOutputParameters(self):
 	"""
 	Return all parameters that are considered output parameters,
@@ -1004,6 +1035,7 @@ class WorkSpace(object):
 	for p,v in self.parameter_properties.items():
 	    if (v.has_key(output) and v[output]): l.add(p)
 	return l
+    
     def getPositionalParameters(self):
 	"""
 	Return all parameters that are used as postional parameters,
@@ -1016,6 +1048,7 @@ class WorkSpace(object):
 	for p,v in l1.items():
 	    l2[v-1]=p
 	return l2
+    
     def getInputParameters(self):
 	"""
 	Return a python set which contains the parameters that are
@@ -1032,6 +1065,7 @@ class WorkSpace(object):
 	    and ((not properties.has_key(output)) or (not properties[output]))): #not explicitly defined as output
 		inputparameters.add(p) # then it is an input parameter
 	return inputparameters
+    
     def getInputParametersDict(self):
 	"""
 	Returns the input parameters as a dict that can be provided
@@ -1041,6 +1075,7 @@ class WorkSpace(object):
 	for p in self.getInputParameters():
 	    dct[p]=self[p]
 	return dct
+    
     def getInternalParameters(self):
         """
         Return a list that contains all method names that simply contain
