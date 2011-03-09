@@ -94,12 +94,29 @@ endif (GFORTRAN_LIBRARY)
 ## Handle option: HDF5 library support
 
 if (CASACORE_WITH_HDF5)
-  include (FindHDF5)
-  include (FindZLIB)
 
-  if (ZLIB_LIBRARIES)
-    list (APPEND HDF5_LIBRARIES ${ZLIB_LIBRARIES})
-  endif (ZLIB_LIBRARIES)
+  include (FindHDF5)
+  
+  if (HDF5_FOUND)
+    
+    include (FindZLIB)
+    include (FindMPI)
+    
+    if (MPI_FOUND)
+      list (APPEND HDF5_INCLUDES ${MPI_INCLUDE_PATH})
+      list (APPEND HDF5_LIBRARIES ${MPI_LIBRARIES})
+    endif (MPI_FOUND)
+    
+    if (ZLIB_LIBRARIES)
+      list (APPEND HDF5_LIBRARIES ${ZLIB_LIBRARIES})
+    endif (ZLIB_LIBRARIES)
+    
+  else (HDF5_FOUND)
+    
+    set (CASACORE_WITH_HDF5 FALSE)
+
+  endif (HDF5_FOUND)
+  
 endif (CASACORE_WITH_HDF5)
 
 ##__________________________________________________________
