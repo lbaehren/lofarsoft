@@ -26,19 +26,11 @@ set (CASACORE_SVN            "http://casacore.googlecode.com/svn/trunk" )
 ##
 ## ==============================================================================
 
-option (CASACORE_FORCE_BUILD    "Force build and installation of package?" NO  )
+option (CASACORE_FORCE_BUILD    "Force build and installation of package?" OFF  )
 option (CASACORE_FROM_REPOS     "Install package from repository?"         YES )
-option (CASACORE_ENABLE_TESTING "Enable testing and experimental builds?"  YES )
-option (CASACORE_WITH_FFTW3     "Enable FFTW3 library support?"            NO  )
+option (CASACORE_WITH_FFTW3     "Enable FFTW3 library support?"            OFF )
 option (CASACORE_WITH_HDF5      "Enable HDF5 library support?"             YES )
-option (CASACORE_BUILD_TESTING  "Build test programs?"                     NO  )
-
-## Handle options
-
-if (CASACORE_ENABLE_TESTING)
-  include (CTest)
-  enable_testing()
-endif (CASACORE_ENABLE_TESTING)
+option (CASACORE_BUILD_TESTING  "Build test programs?"                     OFF )
 
 ## ==============================================================================
 ##
@@ -143,9 +135,8 @@ if (NOT CASACORE_FOUND OR CASACORE_FORCE_BUILD)
       DOWNLOAD_DIR download
       SOURCE_DIR source
       SVN_REPOSITORY ${CASACORE_SVN}
-      CMAKE_CACHE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${LUS_INSTALL_PREFIX}
-      CMAKE_AGRS -C${CASACORE_CMAKE}
-      BUILD_COMMAND make -j5
+      CMAKE_ARGS -C${CASACORE_CMAKE}
+      BUILD_COMMAND make -j2
       INSTALL_COMMAND make install
       )
   
@@ -156,8 +147,8 @@ if (NOT CASACORE_FOUND OR CASACORE_FORCE_BUILD)
       DOWNLOAD_DIR download
       SOURCE_DIR source
       URL ${CASACORE_SOURCE}
-      CMAKE_CACHE_ARGS _DCMAKE_INSTALL_PREFIX:PATH=${LUS_INSTALL_PREFIX}
-      CMAKE_AGRS -C${PROJECT_BINARY_DIR}/casacore.cmake
+      CMAKE_ARGS -C${CASACORE_CMAKE}
+      BUILD_COMMAND make -j2
       INSTALL_COMMAND make install
       )
     
