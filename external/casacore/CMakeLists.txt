@@ -29,6 +29,8 @@ set (CASACORE_SVN            "http://casacore.googlecode.com/svn/trunk" )
 option (CASACORE_FORCE_BUILD    "Force build and installation of package?" NO  )
 option (CASACORE_FROM_REPOS     "Install package from repository?"         YES )
 option (CASACORE_ENABLE_TESTING "Enable testing and experimental builds?"  YES )
+option (CASACORE_WITH_FFTW3     "Enable FFTW3 library support?"            NO  )
+option (CASACORE_WITH_HDF5      "Enable HDF5 library support?"             YES )
 
 ## Handle options
 
@@ -43,12 +45,40 @@ endif (CASACORE_ENABLE_TESTING)
 ##
 ## ==============================================================================
 
-include (FindFFTW3)
-include (FindHDF5)
 include (FindCFITSIO)
+include (FindGFortran)
+include (FindLAPACK)
 include (FindWCSLIB)
 
-## process results from system inspection
+if (GFORTRAN_LIBRARY)
+  list (APPEND LAPACK_LIBRARIES ${GFORTRAN_LIBRARY})
+endif (GFORTRAN_LIBRARY)
+
+##__________________________________________________________
+## Handle option: HDF5 library support
+
+if (CASACORE_WITH_HDF5)
+  include (FindHDF5)
+  include (FindZLIB)
+
+  if (ZLIB_LIBRARIES)
+    list (APPEND HDF5_LIBRARIES ${ZLIB_LIBRARIES})
+  endif (ZLIB_LIBRARIES)
+endif (CASACORE_WITH_HDF5)
+
+##__________________________________________________________
+## Handle option: FFTW3 library support
+
+if (CASACORE_WITH_FFTW3)
+  include (FindFFTW3)
+
+  if (NOT FFTW3_FOUND)
+    set (CASACORE_WITH_FFTW3 FALSE)
+  endif (NOT FFTW3_FOUND)
+endif (CASACORE_WITH_FFTW3)
+
+##__________________________________________________________
+## Create configure file for initial cache
 
 configure_file (
   ${PROJECT_SOURCE_DIR}/casacore.cmake.in
@@ -93,7 +123,7 @@ if (NOT CASACORE_FOUND OR CASACORE_FORCE_BUILD)
       DOWNLOAD_DIR download
       SOURCE_DIR source
       SVN_REPOSITORY ${CASACORE_SVN}
-      CMAKE_CACHE_ARGS _DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+      CMAKE_CACHE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
       CMAKE_AGRS -C${CASACORE_CMAKE}
       BUILD_COMMAND make -j5
       INSTALL_COMMAND sudo make install

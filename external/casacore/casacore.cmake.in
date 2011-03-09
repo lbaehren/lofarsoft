@@ -3,19 +3,25 @@
 
 set (CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
 
-## FFTW3 library
+## FFTW3 library ___________________________________________
 
-set (USE_FFTW3          ${FFTW3_FOUND}     CACHE BOOL     )
-set (FFTW3_INCLUDE_DIRS ${FFTW3_INCLUDES}  CACHE PATH     )
-set (FFTW3_LIBRARIES    ${FFTW3_LIBRARIES} CACHE FILEPATH )
+set (USE_FFTW3          ${CASACORE_WITH_FFTW3}  CACHE BOOL     "Enable FFTW3"    FORCE )
+set (FFTW3_INCLUDE_DIRS ${FFTW3_INCLUDES}       CACHE PATH     "FFTW3 includes"  FORCE )
+set (FFTW3_LIBRARIES    ${FFTW3_LIBRARIES}      CACHE FILEPATH "FFTW3 libraries" FORCE )
 
-## HDF5 library
+## HDF5 library ____________________________________________
 
-set (USE_HDF5           ${HDF5_FOUND}     CACHE BOOL     )
-set (HDF5_INCLUDE_DIRS  ${HDF5_INCLUDES}  CACHE PATH     )
-set (HDF5_LIBRARIES     ${HDF5_LIBRARIES} CACHE FILEPATH )
+set (USE_HDF5           ${HDF5_FOUND}     CACHE BOOL     "Enable HDF5"    FORCE )
+set (HDF5_INCLUDE_DIRS  ${HDF5_INCLUDES}  CACHE PATH     "HDF5 includes"  FORCE )
+set (HDF5_LIBRARIES     ${HDF5_LIBRARIES} CACHE FILEPATH "HDF5 libraries" FORCE )
 
-## WCSLIB
+## LAPACK __________________________________________________
 
-set (WCSLIB_INCLUDE_DIRS ${WCSLIB_INCLUDES}  )
-set (WCSLIB_LIBRARIES    ${WCSLIB_LIBRARIES} )
+set (LAPACK_LIBRARIES ${LAPACK_LIBRARIES} CACHE FILEPATH "LAPACK libraries" FORCE )
+
+## WCSLIB __________________________________________________
+
+set (WCSLIB_ROOT_DIR     ${CMAKE_INSTALL_PREFIX} CACHE PATH "WCSLIB root dir"  FORCE )
+set (WCSLIB_INCLUDE_DIRS ${WCSLIB_INCLUDES}      CACHE PATH "WCSLIB includes"  FORCE )
+set (WCSLIB_LIBRARIES    ${WCSLIB_LIBRARIES}     CACHE FILEPATH "WCSLIB libraries" FORCE )
+
