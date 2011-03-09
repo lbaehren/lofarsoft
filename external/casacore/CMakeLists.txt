@@ -1,129 +1,123 @@
 
-## Name of the project
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+## Name of the project handled by CMake
 project (CASACORE)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+## Enforced CMake policy 
+cmake_policy (VERSION 2.8)
 
-option (CASACORE_FORCE_BUILD       "Force rebuild and local installation?"       NO  )
-option (CASACORE_CMAKE_BUILD       "Use CMake to configure and build CASACORE?"  YES )
-option (CASACORE_VERBOSE_CONFIGURE "Be verbose during configuration?"            NO  )
-option (CASACORE_VERBOSE_BUILD     "Be verbose during build process?"            NO  )
+##  Package information
+set (CASACORE_VERSION        "1.2.0" )
+set (CASACORE_SOURCE_ARCHIVE "casacore-${CASACORE_VERSION}.tar.bz2" )
+set (CASACORE_URL            "http://code.google.com/p/casacore/downloads/detail?name=${CASACORE_SOURCE_ARCHIVE}" )
+set (CASACORE_SVN            "http://casacore.googlecode.com/svn/trunk" )
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+## ==============================================================================
+##
+##  Options
+##
+## ==============================================================================
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${CASACORE_SOURCE_DIR}
-  ${CASACORE_SOURCE_DIR}/..
-  ${CASACORE_SOURCE_DIR}/../..
-  ${CASACORE_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
+option (CASACORE_FORCE_BUILD    "Force build and installation of package?" NO  )
+option (CASACORE_FROM_REPOS     "Install package from repository?"         YES )
+option (CASACORE_ENABLE_TESTING "Enable testing and experimental builds?"  YES )
+
+## Handle options
+
+if (CASACORE_ENABLE_TESTING)
+  include (CTest)
+  enable_testing()
+endif (CASACORE_ENABLE_TESTING)
+
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
+
+include (FindFFTW3)
+include (FindHDF5)
+include (FindCFITSIO)
+include (FindWCSLIB)
+
+## process results from system inspection
+
+configure_file (
+  ${PROJECT_SOURCE_DIR}/casacore.cmake.in
+  ${PROJECT_BINARY_DIR}/casacore.cmake)
+
+find_file (CASACORE_CMAKE casacore.cmake
+  PATHS ${PROJECT_BINARY_DIR}
   )
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[CASACORE] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (NOT CASACORE_CMAKE)
+  message (WARNING "[casacore] Failed to locate initial cache values!")
+endif (NOT CASACORE_CMAKE)
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-set (CASACORE_FIND_QUIETLY YES)
+if (CASACORE_FROM_REPOS)
+  set (CASACORE_FORCE_BUILD TRUE)
+endif (CASACORE_FROM_REPOS)
 
-include (FindCASACORE)
-
-find_program (bunzip2_executable   bunzip2   PATHS ${bin_locations})
-find_program (svn_executable       svn       PATHS ${bin_locations})
-find_program (tar_executable       tar       PATHS ${bin_locations})
-find_program (find_executable      find      PATHS ${bin_locations})
-find_program (wget_executable      wget      PATHS ${bin_locations})
-
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
+if (NOT CASACORE_FOUND OR CASACORE_FORCE_BUILD)
   
-  find_file (have_casacore_tgz   casacore.tgz  ${CASACORE_SOURCE_DIR})
-  find_file (have_casacore_cmake cmake.tgz     ${CASACORE_SOURCE_DIR})
-
-  if (have_casacore_tgz)
+  ## Locate source file to build from
+  
+  find_file (CASACORE_SOURCE ${CASACORE_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
+  
+  if (NOT CASACORE_SOURCE)
+    set (CASACORE_SOURCE ${CASACORE_URL})
+  endif (NOT CASACORE_SOURCE)
+  
+  ## Build package from source
+  
+  if (CASACORE_FROM_REPOS)
+    
     ExternalProject_Add (casacore
-      PREFIX ${CASACORE_BINARY_DIR}
-      DOWNLOAD_DIR ${CASACORE_BINARY_DIR}/download
-      SOURCE_DIR ${CASACORE_BINARY_DIR}/source
-      URL ${have_casacore_tgz}
-      URL_MD5 b9205c8edec69b12685fd55084076986
-      PATCH_COMMAND ${tar_executable} -xzf ${have_casacore_cmake}
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${LUS_INSTALL_PREFIX}
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${CASACORE_SVN}
+      CMAKE_CACHE_ARGS _DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+      CMAKE_AGRS -C${CASACORE_CMAKE}
+      BUILD_COMMAND make -j5
+      INSTALL_COMMAND sudo make install
       )
-  else (have_casacore_tgz)
+  
+  else (CASACORE_FROM_REPOS)
+    
     ExternalProject_Add (casacore
-      PREFIX ${CASACORE_BINARY_DIR}
-      DOWNLOAD_DIR ${CASACORE_BINARY_DIR}/download
-      SOURCE_DIR ${CASACORE_BINARY_DIR}/source
-      URL http://casacore.googlecode.com/svn/trunk casacore
-      PATCH_COMMAND ${tar_executable} -xzf ${have_casacore_cmake}
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${LUS_INSTALL_PREFIX}
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${CASACORE_SOURCE}
+      CMAKE_CACHE_ARGS _DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+      CMAKE_AGRS -C${PROJECT_BINARY_DIR}/casacore.cmake
+      INSTALL_COMMAND sudo make install
       )
-  endif (have_casacore_tgz)
+    
+  endif (CASACORE_FROM_REPOS)
   
-  ## <-- end build condition ----------------------------------------------------->
+else (NOT CASACORE_FOUND OR CASACORE_FORCE_BUILD)
   
-else (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   add_custom_target (casacore
-    WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[CASACORE] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
-
-## ==============================================================================
-##
-##  Service targets
-##
-## ==============================================================================
-
-## Update tar-archive from code repository _______
-
-if (svn_executable AND tar_executable)
-  add_custom_target (casacore_update_archive
-    COMMAND rm -rf casacore
-    COMMAND ${svn_executable} co http://casacore.googlecode.com/svn/trunk casacore
-    COMMAND ${tar_executable} -cvzf casacore.tgz casacore --exclude .svn
-    COMMAND rm -rf casacore
-    WORKING_DIRECTORY ${CASACORE_SOURCE_DIR}
-    COMMENT "Retrieving latest version of casacore source code ..."
-    )
-endif (svn_executable AND tar_executable)
-
-## Create tar-archive with CMake scripts _________
-
-if (tar_executable)
-  add_custom_target (casacore_update_cmake
-    COMMAND rm -rf ../cmake.tgz
-    COMMAND ${tar_executable} -cvzf ../cmake.tgz . --exclude .svn
-    WORKING_DIRECTORY ${CASACORE_SOURCE_DIR}/cmake
-    COMMENT "Retrieving latest version of casacore source code ..."
-    )
-endif (tar_executable)
-
-## Download and install Measures database ________
-
-if (wget_executable AND bunzip2_executable AND tar_executable)
-  add_custom_target (casacore_measures
-    COMMAND ${wget_executable} ftp://ftp.atnf.csiro.au/pub/software/asap/data/asap_data.tar.bz2
-    COMMAND ${bunzip2_executable} asap_data.tar.bz2
-    COMMAND ${tar_executable} -xvf asap_data.tar
-    COMMAND rm -rf ephemerides geodetic
-    COMMAND mv data/* .
-    COMMAND rm -rf asap_data.* data
-    WORKING_DIRECTORY ${LUS_ROOT}/data
-    COMMENT "Retrieving latest version of measures database ..."
-    )
-endif (wget_executable AND bunzip2_executable AND tar_executable)
+  
+endif (NOT CASACORE_FOUND OR CASACORE_FORCE_BUILD)

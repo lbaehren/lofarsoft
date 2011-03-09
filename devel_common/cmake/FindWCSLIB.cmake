@@ -23,13 +23,14 @@
 # - Check for the presence of WCS
 #
 # The following variables are set when WCS is found:
-#  HAVE_WCSLIB       = Set to true, if all components of WCS have been found.
+#  WCSLIB_FOUND      = Set to true, if all components of WCS have been found.
 #  WCSLIB_INCLUDES   = Include path for the header files of WCS
 #  WCSLIB_LIBRARIES  = Link these to use WCS
 
 if (NOT FIND_WCSLIB_CMAKE)
 
-  set (FIND_WCSLIB_CMAKE TRUE)
+  set (FIND_WCSLIB_CMAKE TRUE  )
+  set (WCSLIB_FOUND      FALSE )
   
   ##_____________________________________________________________________________
   ## Search locations
@@ -61,9 +62,9 @@ if (NOT FIND_WCSLIB_CMAKE)
   ## Actions taken when all components have been found
   
   IF (WCSLIB_INCLUDES AND WCSLIB_LIBRARIES)
-    SET (HAVE_WCSLIB TRUE)
+    SET (WCSLIB_FOUND TRUE)
   ELSE (WCSLIB_INCLUDES AND WCSLIB_LIBRARIES)
-    SET (HAVE_WCSLIB FALSE)
+    SET (WCSLIB_FOUND FALSE)
     IF (NOT WCSLIB_FIND_QUIETLY)
       IF (NOT WCSLIB_INCLUDES)
 	MESSAGE (STATUS "Unable to find WCS header files!")
@@ -74,23 +75,25 @@ if (NOT FIND_WCSLIB_CMAKE)
     ENDIF (NOT WCSLIB_FIND_QUIETLY)
   ENDIF (WCSLIB_INCLUDES AND WCSLIB_LIBRARIES)
   
-  IF (HAVE_WCSLIB)
+  IF (WCSLIB_FOUND)
     IF (NOT WCSLIB_FIND_QUIETLY)
       MESSAGE (STATUS "Found components for WCS")
       MESSAGE (STATUS "WCSLIB_INCLUDES  = ${WCSLIB_INCLUDES}")
       MESSAGE (STATUS "WCSLIB_LIBRARIES = ${WCSLIB_LIBRARIES}")
     ENDIF (NOT WCSLIB_FIND_QUIETLY)
-  ELSE (HAVE_WCSLIB)
+  ELSE (WCSLIB_FOUND)
     IF (WCSLIB_FIND_REQUIRED)
       MESSAGE (FATAL_ERROR "Could not find WCS!")
     ENDIF (WCSLIB_FIND_REQUIRED)
-  ENDIF (HAVE_WCSLIB)
+  ENDIF (WCSLIB_FOUND)
   
+  set (HAVE_WCSLIB ${WCSLIB_FOUND})
+
   ##_____________________________________________________________________________
   ## Mark as advanced ...
   
   mark_as_advanced (
-    HAVE_WCSLIB
+    WCSLIB_FOUND
     WCSLIB_INCLUDES
     WCSLIB_LIBRARIES
     WCSLIB_WCS_LIBRARY

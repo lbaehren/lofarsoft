@@ -24,7 +24,7 @@
 ## Check for the presence of LAPACK
 ##
 ## The following variables are set when LAPACK is found:
-##  HAVE_LAPACK      - Set to true, if all components of LAPACK have been found.
+##  LAPACK_FOUND      - Set to true, if all components of LAPACK have been found.
 ##  LAPACK_LIBRARIES - Link these to use LAPACK
 ##  LAPACK_INCLUDES  - Location of the LAPACK header files
 
@@ -32,6 +32,8 @@
 ## Search locations
 
 include (CMakeSettings)
+
+set (LAPACK_FOUND FALSE)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
@@ -67,26 +69,28 @@ endforeach (LAPACK_LIBRARY)
 ## Actions taken when all components have been found
 
 if (LAPACK_LIBRARIES)
-  set (HAVE_LAPACK TRUE)
+  set (LAPACK_FOUND TRUE)
 else (LAPACK_LIBRARIES)
-  set (HAVE_LAPACK FALSE)
+  set (LAPACK_FOUND FALSE)
   if (NOT LAPACK_FIND_QUIETLY)
     message (STATUS "Unable to find LAPACK library files!")
   endif (NOT LAPACK_FIND_QUIETLY)
 endif (LAPACK_LIBRARIES)
 
-IF (HAVE_LAPACK)
+IF (LAPACK_FOUND)
   IF (NOT LAPACK_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for LAPACK.")
     MESSAGE (STATUS "LAPACK_LAPACK_LIBRARY = ${LAPACK_LAPACK_LIBRARY}")
     MESSAGE (STATUS "LAPACK_CBLAS_LIBRARY  = ${LAPACK_CBLAS_LIBRARY}")
     MESSAGE (STATUS "LAPACK_BLAS_LIBRARY   = ${LAPACK_BLAS_LIBRARY}")
   ENDIF (NOT LAPACK_FIND_QUIETLY)
-ELSE (HAVE_LAPACK)
+ELSE (LAPACK_FOUND)
   IF (LAPACK_FIND_REQUIRED)
     MESSAGE (FATAL_ERROR "Could not find LAPACK!")
   ENDIF (LAPACK_FIND_REQUIRED)
-ENDIF (HAVE_LAPACK)
+ENDIF (LAPACK_FOUND)
+
+set (HAVE_LAPACK ${LAPACK_FOUND})
 
 ## -----------------------------------------------------------------------------
 ## Mark as advanced...
