@@ -109,7 +109,7 @@ find_file (CASACORE_CMAKE casacore.cmake
   )
 
 if (NOT CASACORE_CMAKE)
-  message (WARNING "[casacore] Failed to locate initial cache values!")
+  message (SEND_ERROR "[casacore] Failed to locate initial cache values!")
 endif (NOT CASACORE_CMAKE)
 
 ## ==============================================================================
