@@ -46,10 +46,29 @@ endif (CASACORE_ENABLE_TESTING)
 ##
 ## ==============================================================================
 
-include (FindCFITSIO)
-include (FindGFortran)
-include (FindLAPACK)
-include (FindWCSLIB)
+##__________________________________________________________
+## Set CMAKE_MODULE_PATH to load custom CMake modules
+
+find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+  PATHS 
+  ${PROJECT_SOURCE_DIR}
+  ${PROJECT_SOURCE_DIR}/..
+  ${PROJECT_SOURCE_DIR}/../..
+  ${PROJECT_SOURCE_DIR}/../../..
+  $ENV{LOFARSOFT}
+  )
+
+if (LUS_ROOT)
+  ## Global CMake LUS settings
+  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  ## Load find modules
+  include (FindCFITSIO)
+  include (FindGFortran)
+  include (FindLAPACK)
+  include (FindWCSLIB)
+else (LUS_ROOT)
+  message (FATAL_ERROR "[casacore] Unable to locate additional CMake scripts!")
+endif (LUS_ROOT)
 
 if (GFORTRAN_LIBRARY)
   list (APPEND LAPACK_LIBRARIES ${GFORTRAN_LIBRARY})

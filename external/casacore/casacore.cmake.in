@@ -1,8 +1,8 @@
 
 ## Installation location
 
-set (CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
-set (BUILD_TESTING        ${CASACORE_BUILD_TESTING} CACHE BOOL "Build tests?" )
+set (CMAKE_INSTALL_PREFIX ${LUS_INSTALL_PREFIX}   CACHE BOOL "Installation location" FORCE)
+set (BUILD_TESTING        ${CASACORE_BUILD_TESTING} CACHE BOOL "Build tests?" FORCE )
 
 ## FFTW3 library ___________________________________________
 
