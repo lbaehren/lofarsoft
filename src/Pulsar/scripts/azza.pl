@@ -5,6 +5,8 @@
 # the script also has functions to calculate siderial time
 # (based on my sid.pl) for specific time or at "now" time
 #
+# Vlad Kondratiev (c)
+#
 use Math::Trig;
 use Getopt::Long;
 

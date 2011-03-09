@@ -2,7 +2,8 @@
 #
 # Calculate JD, MJD given usual date, and vice versa
 #
-
+# Vlad Kondratiev (c)
+#
 use Math::BigFloat; 
 
 @mon = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);

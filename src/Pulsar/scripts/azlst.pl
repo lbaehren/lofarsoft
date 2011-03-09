@@ -4,6 +4,8 @@
 # (actually the min and max values of HA and LST)
 # of the source with pointed RA and DEC for pointed elevation (zenith angle)
 #
+# Vlad Kondratiev (c)
+#
 use Math::Trig;
 use Getopt::Long;
 

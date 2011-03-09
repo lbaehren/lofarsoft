@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
 #
 # Calculate the local sidereal time
+
+# Vlad Kondratiev (c)
 #
 use Getopt::Long;
 
