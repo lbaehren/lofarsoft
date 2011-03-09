@@ -1,5 +1,5 @@
 # +-----------------------------------------------------------------------------+
-# | $Id:: FindPython.cmake 6667 2011-01-05 08:32:02Z baehren                  $ |
+# | $Id::                                                                     $ |
 # +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
@@ -87,6 +87,7 @@ if (NOT HAVE_PYTHON)
     else (python_default_version MATCHES ".*apple")
       # The headers should be available in the standard MacPorts location
       list (APPEND python_include_locations
+      	/Library/Frameworks/Python.framework/Versions/Current/Headers/
 	/opt/local/Library/Frameworks/Python.framework/Headers
 	)
     endif (python_default_version MATCHES ".*apple")
@@ -102,8 +103,8 @@ if (NOT HAVE_PYTHON)
     message (STATUS "Checking for Python versions ${python_version_list}")
   endif (NOT PYTHON_FIND_QUIETLY)
   
-  foreach (python_version ${python_version_list})
-    
+  foreach (python_version ${python_version_list})    
+
     if (NOT HAVE_PYTHON)
       
       ## Check for the Python executable
@@ -115,7 +116,8 @@ if (NOT HAVE_PYTHON)
 	  )
       else (PYTHON_PYTHONHOME)
 	find_program (PYTHON_EXECUTABLE python${python_version}
-	  PATHS 
+	  PATHS
+	  /Library/Frameworks/Python.framework/Versions/Current/bin	 
 	  /Library/Frameworks/EPD64.framework/Versions/Current/bin
 	  /Library/Frameworks/Python.framework/Versions/${python_version}/bin
 	  ${python_bin_locations}
@@ -157,14 +159,17 @@ if (NOT HAVE_PYTHON)
       
       find_path (PYTHON_INCLUDES Python.h
 	PATHS
-	/Library/Frameworks/EPD64.framework/Versions/Current/include/python2.6
 	${python_include_locations}
+	/Library/Frameworks/Python.framework/Versions/Current/include/python${python_version}
+	/Library/Frameworks/EPD64.framework/Versions/Current/include/python2.6
 	PATH_SUFFIXES python${python_version}
 	NO_DEFAULT_PATH
 	)
       
       find_path (HAVE_PYCONFIG_H pyconfig.h
 	PATHS 
+ 	/Library/Frameworks/Python.framework/Versions/Current/include/python${python_version}	
+
 	/Library/Frameworks/EPD64.framework/Versions/Current/include/python2.6
 	${python_include_locations}
 	PATH_SUFFIXES python${python_version}
@@ -172,16 +177,16 @@ if (NOT HAVE_PYTHON)
 	)
       
       ## Check for the Python library
-      
       find_library (PYTHON_LIBRARIES python${python_version}
-	PATHS
-	/Library/Frameworks/EPD64.framework/Versions/Current/lib/python2.6/config
+        PATHS
 	${python_lib_locations}
+	/Library/Frameworks/Python.framework/Versions/Current/lib/python${python_version}/config
+	/Library/Frameworks/EPD64.framework/Versions/Current/lib/python${python_version}/config
 	PATH_SUFFIXES
 	python${python_version}/config
 	NO_DEFAULT_PATH
 	)
-      
+
       # Check if we have been able to find a consistent set of exectable,
       # header files and library. If this is the case, we stop looking for
       # such a combination in an older Python release.
