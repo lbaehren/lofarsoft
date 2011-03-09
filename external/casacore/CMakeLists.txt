@@ -26,17 +26,41 @@ set (CASACORE_SVN            "http://casacore.googlecode.com/svn/trunk" )
 ##
 ## ==============================================================================
 
-option (CASACORE_FORCE_BUILD    "Force build and installation of package?" OFF  )
-option (CASACORE_FROM_REPOS     "Install package from repository?"         YES )
-option (CASACORE_WITH_FFTW3     "Enable FFTW3 library support?"            OFF )
-option (CASACORE_WITH_HDF5      "Enable HDF5 library support?"             YES )
-option (CASACORE_BUILD_TESTING  "Build test programs?"                     OFF )
+option (CASACORE_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
+option (CASACORE_FORCE_BUILD       "Force build and installation of package?" OFF )
+option (CASACORE_FROM_REPOS        "Install package from repository?"         YES )
+option (CASACORE_WITH_FFTW3        "Enable FFTW3 library support?"            OFF )
+option (CASACORE_WITH_HDF5         "Enable HDF5 library support?"             YES )
+option (CASACORE_BUILD_TESTING     "Build test programs?"                     OFF )
+
+##__________________________________________________________
+## Handle option: be verbose during configuration?
+
+if (NOT CASACORE_VERBOSE_CONFIGURE)
+  set (CFITSIO_FIND_QUIETLY    TRUE )
+  set (FFTW3_FIND_QUIETLY      TRUE )
+  set (GFORTRAN_FIND_QUIETLY   TRUE )
+  set (HDF5_FIND_QUIETLY       TRUE )
+  set (LAPACK_FIND_QUIETLY     TRUE )
+  set (MPI_FIND_QUIETLY        TRUE )
+  set (WCSLIB_FIND_QUIETLY     TRUE )
+  set (ZLIB_FIND_QUIETLY       TRUE )
+endif (NOT CASACORE_VERBOSE_CONFIGURE)
 
 ## ==============================================================================
 ##
 ##  System inspection
 ##
 ## ==============================================================================
+
+set (CFITSIO_FOUND   FALSE )
+set (FFTW3_FOUND     FALSE )
+set (GFORTRAN_FOUND  FALSE )
+set (HDF5_FOUND      FALSE )
+set (LAPACK_FOUND    FALSE )
+set (MPI_FOUND       FALSE )
+set (WCSLIB_FOUND    FALSE )
+set (ZLIB_FOUND      FALSE )
 
 ##__________________________________________________________
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -103,6 +127,28 @@ find_file (CASACORE_CMAKE casacore.cmake
 if (NOT CASACORE_CMAKE)
   message (SEND_ERROR "[casacore] Failed to locate initial cache values!")
 endif (NOT CASACORE_CMAKE)
+
+## ==============================================================================
+##
+##  Configuration summary
+##
+## ==============================================================================
+
+message (STATUS "+------------------------------------------------------------+" )
+message (STATUS "| [casacore] Summary of configuration settings               |" )
+message (STATUS "+------------------------------------------------------------+" )
+message (STATUS " PROJECT_SOURCE_DIR           = ${PROJECT_SOURCE_DIR}"     )
+message (STATUS " CMAKE_INSTALL_PREFIX         = ${CMAKE_INSTALL_PREFIX}"   )
+message (STATUS " Enable FFTW3 library support = ${CASACORE_WITH_FFTW3}"    )
+message (STATUS " Enable HDF5 library support  = ${CASACORE_WITH_HDF5}"     )
+message (STATUS " Build test programs          = ${CASACORE_BUILD_TESTING}" )
+message (STATUS " Found CFITSIO library        = ${CFITSIO_FOUND}"          )
+message (STATUS " Found FFTW3 library          = ${FFTW3_FOUND}"            )
+message (STATUS " Found HDF5 library           = ${HDF5_FOUND}"             )
+message (STATUS " Found LAPACK library         = ${LAPACK_FOUND}"           )
+message (STATUS " Found MPI library            = ${MPI_FOUND}"              )
+message (STATUS " Found WCSLIB library         = ${WCSLIB_FOUND}"           )
+message (STATUS "+------------------------------------------------------------+" )
 
 ## ==============================================================================
 ##
