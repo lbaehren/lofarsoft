@@ -31,6 +31,7 @@ option (CASACORE_FROM_REPOS     "Install package from repository?"         YES )
 option (CASACORE_ENABLE_TESTING "Enable testing and experimental builds?"  YES )
 option (CASACORE_WITH_FFTW3     "Enable FFTW3 library support?"            NO  )
 option (CASACORE_WITH_HDF5      "Enable HDF5 library support?"             YES )
+option (CASACORE_BUILD_TESTING  "Build test programs?"                     NO  )
 
 ## Handle options
 
