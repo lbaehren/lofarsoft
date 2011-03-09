@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -40,9 +38,10 @@ set (FFTW3_FOUND FALSE)
 FIND_PATH (FFTW3_INCLUDES fftw3.h
   PATHS
   ${include_locations}
-  /opt/aips++/local/include
-  /var/chroot/meqtrees/usr/include
-  /opt/local/include
+  /opt/aips++/local
+  /var/chroot/meqtrees/usr
+  /opt/local
+  PATH_SUFFIXES include include/fftw3
   )
 
 ## -----------------------------------------------------------------------------
@@ -51,9 +50,10 @@ FIND_PATH (FFTW3_INCLUDES fftw3.h
 FIND_LIBRARY (FFTW3_LIBRARIES fftw3
   PATHS
   ${lib_locations}
-  /opt/aips++/local/lib
-  /var/chroot/meqtrees/usr/lib
-  /opt/local/lib
+  /opt/aips++/local
+  /var/chroot/meqtrees/usr
+  /opt/local
+  PATH_SUFFIXES lib
   )
 
 ## -----------------------------------------------------------------------------

@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -22,7 +20,7 @@
 
 # - Check for the presence of the CFITSIO library
 #
-#  HAVE_CFITSIO          = Do we have CFITSIO?
+#  CFITSIO_FOUND          = Do we have CFITSIO?
 #  CFITSIO_LIBRARIES     = Set of libraries required for linking against CFITSIO
 #  CFITSIO_INCLUDES      = Directory where to find fitsio.h
 #  CFITSIO_VERSION       = Full version of the CFITSIO library (as deduced from 
@@ -45,8 +43,9 @@ if (NOT FIND_CFITSIO_CMAKE)
   set (CFITSIO_INCLUDES "")
   
   FIND_PATH (HAVE_FITSIO_H fitsio.h
+    HINTS ${CFITSIO_ROOT_DIR}
     PATHS ${include_locations}
-    PATH_SUFFIXES cfitsio
+    PATH_SUFFIXES include include/cfitsio cfitsio
     NO_DEFAULT_PATH
     )
   
@@ -111,7 +110,7 @@ if (NOT FIND_CFITSIO_CMAKE)
   ## Actions taken when all components have been found
   
   IF (CFITSIO_INCLUDES AND CFITSIO_LIBRARIES)
-    SET (HAVE_CFITSIO TRUE)
+    SET (CFITSIO_FOUND TRUE)
   ELSE (CFITSIO_INCLUDES AND CFITSIO_LIBRARIES)
     IF (NOT CFITSIO_FIND_QUIETLY)
       IF (NOT CFITSIO_INCLUDES)
@@ -123,7 +122,7 @@ if (NOT FIND_CFITSIO_CMAKE)
     ENDIF (NOT CFITSIO_FIND_QUIETLY)
   ENDIF (CFITSIO_INCLUDES AND CFITSIO_LIBRARIES)
   
-  IF (HAVE_CFITSIO)
+  IF (CFITSIO_FOUND)
     IF (NOT CFITSIO_FIND_QUIETLY)
       MESSAGE (STATUS "Found components for CFITSIO")
       MESSAGE (STATUS "CFITSIO_LIBRARIES     = ${CFITSIO_LIBRARIES}")
@@ -132,11 +131,13 @@ if (NOT FIND_CFITSIO_CMAKE)
       message (STATUS "CFITSIO major version = ${CFITSIO_MAJOR_VERSION}")
       message (STATUS "CFITSIO minor version = ${CFITSIO_MINOR_VERSION}")
     ENDIF (NOT CFITSIO_FIND_QUIETLY)
-  ELSE (HAVE_CFITSIO)
+  ELSE (CFITSIO_FOUND)
     IF (CFITSIO_FIND_REQUIRED)
       MESSAGE (FATAL_ERROR "Could not find CFITSIO!")
     ENDIF (CFITSIO_FIND_REQUIRED)
-  ENDIF (HAVE_CFITSIO)
+  ENDIF (CFITSIO_FOUND)
+
+  set (HAVE_CFITSIO ${CFITSIO_FOUND})
   
   ##_____________________________________________________________________________
   ## Mark as advanced ...
