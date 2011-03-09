@@ -1080,7 +1080,7 @@ class obsstat:
 		print line
 		line="Total size of archived data (TB) [raw / sub / meta]: "
 		for sub in np.append("Total", self.subclusters):
-			field = "%.1f [%.1f / %.1f / %.1f]" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_sub", self.dbinfo[sub]["Archivedsize_meta"]] )
+			field = "%.1f [%.1f / %.1f / %.1f]" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_sub"], self.dbinfo[sub]["Archivedsize_meta"])
 			line += "%-23s" % (field)
 		print line
 		print
