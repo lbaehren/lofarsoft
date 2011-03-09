@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/ksh 
 
 USAGE="\nusage : xml_pipeline_kickoff.sh -infile obs_finished.xml -prefix prefix [ -splits number ] \n\n"\
 "      -infile obs_finished.xml  ==> Specify the finished xml file name (i.e. Obs_B1254-10_HBA.xml) \n"\
@@ -68,9 +68,9 @@ fi
 
 if [[ $survey == 0 ]]
 then
-   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/\</ \</g' | sed 's/\>/\> /g' | sed 's/(.*//g' | sed 's/\<.*\>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L2011_%05d -p position -o L2011_%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
+   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L2011_%05d -p position -o L2011_%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
 else
-   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/\</ \</g' | sed 's/\>/\> /g' | sed 's/(.*//g' | sed 's/\<.*\>//g' | awk '{ printf("pulp.sh -id L2011_%05d -p position -o L2011_%05d_red -rfi\n", $1, $1)}' > $outfile
+   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L2011_%05d -p position -o L2011_%05d_red -rfi\n", $1, $1)}' > $outfile
 fi
 
 cp $outfile $outfile.all
