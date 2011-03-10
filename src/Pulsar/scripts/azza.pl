@@ -181,6 +181,8 @@ sub get_HA {
  $alpharad = &time2rad ($alpha);
  $HA = `echo \"scale=20\n$srad - $alpharad\" | bc -l`;
  chomp $HA;
+ if ($HA / $rad / 15. < -12.) { $HA += 2.*$pi; }
+ if ($HA / $rad / 15.  >= 12.) { $HA -= 2.*$pi; }
  return $HA;
 }
 
