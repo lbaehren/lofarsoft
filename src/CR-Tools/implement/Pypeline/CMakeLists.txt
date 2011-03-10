@@ -235,9 +235,9 @@ foreach (FILE ${PYPELINE_CPP_MODULES})
    add_custom_command (
      TARGET hftools
      POST_BUILD
-     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
+     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc
      COMMAND echo "" > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
-     COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetpydoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
+     COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetpydoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
 #     COMMENT "Generating python documentation for module ${FILE}"
      )
 
@@ -245,9 +245,9 @@ foreach (FILE ${PYPELINE_CPP_MODULES})
    add_custom_command (
      TARGET hftools
      POST_BUILD
-     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
+     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc
      COMMAND echo "" > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
-     COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetdoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
+     COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetdoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
 #     COMMENT "Generating text documentation for module ${FILE}"
      )
 

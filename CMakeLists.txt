@@ -9,7 +9,7 @@ project (LUS)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
 
-## Enforced CMake policy 
+## Enforced CMake policy
 cmake_policy (VERSION 2.8)
 
 ## ==============================================================================
@@ -19,7 +19,7 @@ cmake_policy (VERSION 2.8)
 ## ==============================================================================
 
 find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
+  PATHS
   ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/..
   $ENV{LOFARSOFT}
@@ -147,7 +147,7 @@ add_custom_target (clean-doc
   COMMAND rm -f html/*.map
   COMMAND rm -f html/*.html
   COMMAND rm -f html/*.md5
-  WORKING_DIRECTORY ${LUS_ROOT}/doc  
+  WORKING_DIRECTORY ${LUS_ROOT}/doc
   COMMENT "Cleaning up documentation directory ..."
   )
 
@@ -257,20 +257,24 @@ endif (ANAAMIKA_ENABLE_SCIPY)
 add_subdirectory (src/DAL)
 
 add_custom_target (dal_depends DEPENDS casacore git)
+add_dependencies (dal casacore git)
 
 if (DAL_PYTHON_BINDINGS)
   if (TEST_DATASETS)
     add_dependencies (dal_depends num_util test-data)
+    add_dependencies (dal num_util test-data)
   else(TEST_DATASETS)
     add_dependencies (dal_depends num_util)
+    add_dependencies (dal num_util)
   endif (TEST_DATASETS)
 else (DAL_PYTHON_BINDINGS)
   if (TEST_DATASETS)
     add_dependencies (dal_depends test-data)
+    add_dependencies (dal test-data)
   endif (TEST_DATASETS)
 endif (DAL_PYTHON_BINDINGS)
 
-add_dependencies (dal dal_depends)
+# add_dependencies (dal dal_depends)
 
 ##____________________________________________________________________
 ##                                          Transmogrify Library (TMF)
