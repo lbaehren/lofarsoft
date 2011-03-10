@@ -31,7 +31,9 @@ if ($UTC eq "") {
 if ($lambda eq "") {
  &error ("Longitude is not defined!");
 } 
-$jd = `jd \"$UTC\" | grep JD | grep -v MJD | awk '{print \$2}' -`;
+
+# running "jd.pl" first to get JD for a given UTC time
+$jd = `jd.pl \"$UTC\" | grep JD | grep -v MJD | awk '{print \$2}' -`;
 chomp $jd;
 
 # get the sidereal time
