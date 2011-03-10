@@ -817,55 +817,55 @@ class obsstat:
 				# getting the number of obs of different type
 				if obstable[r].comment == "" and obstable[r].oi.IS == "+":
 					self.dbinfo[sub]["Nistype"] += 1
-					if obstable[r].oi.CS != "+" and obstable[r].oi.FE != "+" and obstable[r].oi.IM != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.BF != "+":
+					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.BF == "-":
 						self.dbinfo[sub]["Nistype_only"] += 1
 				if obstable[r].comment == "" and obstable[r].oi.CS == "+":
 					self.dbinfo[sub]["Ncstype"] += 1
-					if obstable[r].oi.IS != "+" and obstable[r].oi.FE != "+" and obstable[r].oi.IM != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.BF != "+":
+					if obstable[r].oi.IS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.BF == "-":
 						self.dbinfo[sub]["Ncstype_only"] += 1
 				if obstable[r].comment == "" and obstable[r].oi.FE == "+":
 					self.dbinfo[sub]["Nfetype"] += 1
-					if obstable[r].oi.IS != "+" and obstable[r].oi.CS != "+" and obstable[r].oi.IM != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.BF != "+":
+					if obstable[r].oi.IS == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.BF == "-":
 						self.dbinfo[sub]["Nfetype_only"] += 1
 				if obstable[r].comment == "" and obstable[r].oi.IM == "+":
 					self.dbinfo[sub]["Nimtype"] += 1
-					if obstable[r].oi.CS != "+" and obstable[r].oi.FE != "+" and obstable[r].oi.IS != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.BF != "+":
+					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.BF == "-":
 						self.dbinfo[sub]["Nimtype_only"] += 1
 						self.dbinfo[sub]["IMonlyRawsize"] += float(obstable[r].totsize)
 						if obstable[r].oi.duration != "?":
 							self.dbinfo[sub]["IMonlyDuration"] += obstable[r].oi.dur
 				if obstable[r].comment == "" and obstable[r].oi.BF == "+":
 					self.dbinfo[sub]["Nbftype"] += 1
-					if obstable[r].oi.CS != "+" and obstable[r].oi.FE != "+" and obstable[r].oi.IS != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IM != "+":
+					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
 						self.dbinfo[sub]["Nbftype_only"] += 1
 				if obstable[r].comment == "" and obstable[r].oi.FD == "+":
 					self.dbinfo[sub]["Nfdtype"] += 1
-					if obstable[r].oi.CS != "+" and obstable[r].oi.FE != "+" and obstable[r].oi.IS != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.IM != "+":
+					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.IM == "-":
 						self.dbinfo[sub]["Nfdtype_only"] += 1
 				# getting the number of some observing types' mixtures
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-":
 					self.dbinfo[sub]["Niscsim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.CS != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.CS == "-":
 					self.dbinfo[sub]["Nisim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IM != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Niscs"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IS != "+":
+				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IS == "-":
 					self.dbinfo[sub]["Ncsim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IS != "+":
+				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IS == "-":
 					self.dbinfo[sub]["Ncsfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.CS != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.CS == "-":
 					self.dbinfo[sub]["Nisfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.CS != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.CS == "-":
 					self.dbinfo[sub]["Nimfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM != "+" and obstable[r].oi.BF != "+" and obstable[r].oi.FD != "+":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-":
 					self.dbinfo[sub]["Niscsfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.IM != "+" and obstable[r].oi.CS != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.FE != "+":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.FE == "-":
 					self.dbinfo[sub]["Nbfis"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS != "+" and obstable[r].oi.CS != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IM != "+":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Nbffe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS != "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IM != "+":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Nbfisfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FD != "+" and obstable[r].oi.IM != "+":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Nbfiscsfe"] += 1
 				# getting the sizes
 				if obstable[r].comment == "":
@@ -1287,8 +1287,14 @@ def usage (prg):
           --obsids <ObsIDs>          - set the list of ObsIDs to be updated or accessed. This option can be used only with either\n\
                                        -u or without all of -r, -u, and -a. ObsIDs should be separated by comma with no spaces,\n\
                                        range symbol '-' is not allowed\n\
-          --search <expr>            - under development, the only possible expression is 'id.is_test' or 'id.is_test == True' or\n\
-                                       'id.is_test == False'\n\
+          --search <expr>            - under development... Conditions can be combined using 'and' and 'or'. Spaces around them are\n\
+                                       crucial. Parentheses and 'not' are not allowed. Search parameter should start with 'id.'\n\
+                                       For boolean parameters, you should use 'True' and 'False'. Some of the possible parameters are:\n\
+                                       id.is_test (boolean, if True then this is system test observation), id.source, id.pointing,\n\
+                                       id.id, is.duration, id.antenna, id.band, id.subcluster, id.datadir, id.nodelist_string (string),\n\
+                                       id.nstations, id.ncorestations, id.nremotestations (integer), id.dur (float, duration in seconds)\n\
+                                       id.rarad, id.decrad (float, RA and DEC in radians), id.IS, id.CS, id.FE, id.IM, id.BF, id.FD\n\
+                                       (characters, '+', '-', or '?')\n\
           --stats                    - to calculate the statistics of existent observations in the database\n\
                                        can be used together with --from and --to options, and with --html option\n\
           --hostdir <dir>            - directory relative to which plots dir, grid dir, and dumpfile will be created. Default: Lofar\n\
@@ -1421,6 +1427,23 @@ def parsecmd(prg, argv):
 		print "Wrong option!"
 		usage(prg)
 		sys.exit(2)
+
+# parsing the condition and form the real condition to check
+def get_condition (cond):
+        """ Parsing the search condition and return the real condition to check
+        """
+	param=cond.lstrip().split(" ")[0].split("id.")[1]
+	if not hasattr (obstable[obskeys[0]].oi, param.split("[")[0]):
+		print "Wrong parameter '%s' in the search string!" % (param,)
+		sys.exit(1)
+	# making the real condition to filter out obsids
+	real_cond = re.sub("id", "np.compress(np.array([obstable[r].oi", cond)
+	# this is necessary if we want to compare only some characters in the string (e.g. source)
+	# and we need to backslash [ and ]
+	wparam = re.sub("\]", "\\]", re.sub("\[", "\\[", param))
+	real_cond = re.sub(wparam, param + " for r in filtered_obsids])", real_cond)
+	real_cond = real_cond + ", filtered_obsids)"
+	return real_cond
 
 ###################################################################################################################
 #          M A I N                                                                                                #
@@ -1863,26 +1886,27 @@ if __name__ == "__main__":
 		# Also, I should check the search conditions for validation in the very beginning, because the --search
 		# also can be used in advance for a particular --update
 		if search_string != "" and len(obskeys) != 0:
+			# forming the list of AND conditions
 			search_conditions=search_string.split(" and ")
 			filtered_obsids=obskeys
 			for cond in search_conditions:
-				param=cond.lstrip().split(" ")[0].split("id.")[1]
-				# !!!
-				# here it should be function to validate the parameter
-				# that this param exists in the obsinfo class
-				if not hasattr (obstable[obskeys[0]].oi, param.split("[")[0]):
-					print "Wrong parameter '%s' in the search string!" % (param,)
-					sys.exit(1)
-				# making the real condition to filter out obsids
-				real_cond = re.sub("id", "np.compress(np.array([obstable[r].oi", cond)
-				# this is necessary if we want to compare only some characters in the string (e.g. source)
-				# and we need to backslash [ and ]
-				wparam = re.sub("\]", "\\]", re.sub("\[", "\\[", param))
-				real_cond = re.sub(wparam, param + " for r in filtered_obsids])", real_cond)
-				real_cond = real_cond + ", filtered_obsids)"
-				# applying this condition to the real list of obsids
-				#filtered_obsids=np.append(filtered_obsids, list(eval(real_cond)))
-				filtered_obsids=list(eval(real_cond))
+				# checking first if this condition is complex condition with OR
+				if re.search(" or ", cond):  # complex OR condition
+					or_conditions=cond.split(" or ")
+					or_filtered=[]
+					for orcond in or_conditions:
+						# get real condition after parsing
+						real_cond = get_condition(orcond)
+						# applying this condition to the real list of obsids
+						or_filtered=np.append(or_filtered, list(eval(real_cond)))
+					# in the end of this OR condition, we form list of unique ObsIDs
+					filtered_obsids=np.unique(or_filtered)
+				else: # simple condition
+					# get real condition after parsing
+					real_cond = get_condition(cond)
+					# applying this condition to the real list of obsids
+					filtered_obsids=list(eval(real_cond))
+
 			# assigning filtered out list of ObsIDs to obsids
 			obskeys=filtered_obsids
 
