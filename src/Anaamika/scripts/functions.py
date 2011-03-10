@@ -494,6 +494,7 @@ def fit_gaus2d(data, p_ini, x, y, mask = None, err = None):
         errorfunction = lambda p: N.ravel(func.gaus_2d(p, x, y) - data)[g_ind]
     else:  
         errorfunction = lambda p: N.ravel((func.gaus_2d(p, x, y) - data)/err)[g_ind]
+    #import pdb; pdb.set_trace()
     p, success = leastsq(errorfunction, p_ini, warning=False)
 
     return p, success

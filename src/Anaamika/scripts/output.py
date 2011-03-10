@@ -364,7 +364,7 @@ def write_bbs_gaul(img, filename, srcroot=None, patches=False, patch_type='singl
     total_flux = []
     if srcroot == None:
         srcroot = img.imagename.split('.')[0] + '_'
-    if patch_type == 'single':
+    if patch_type == 'single' and patches == True:
         patch_name = srcroot + 'patch'
         f.write(', , ' + patch_name + ', 00:00:00, +00.00.00\n')
         
@@ -374,7 +374,7 @@ def write_bbs_gaul(img, filename, srcroot=None, patches=False, patch_type='singl
     if patch_type == 'gaussian' or patch_type == 'single' or patches == False:
         for g in img.gaussians():
             src_name = srcroot + str(g.gaus_num-1)  # python numbering
-            if patch_name == 'gaussian':
+            if patch_type == 'gaussian':
                 patch_name = src_name + '_patch'
             ra, dec = g.centre_sky
             ra = ra2hhmmss(ra)

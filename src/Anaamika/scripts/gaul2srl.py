@@ -299,7 +299,7 @@ class Op_gaul2srl(Op):
         rmask = N.where(smask==isrc, False, True)
         x_ax, y_ax = N.indices(data.shape) 
 
-        para, ierr = func.fit_gaus2d(data, p_ini, x_ax, y_ax, rmask)
+        para, ierr = func.fit_gaus2d(data, p_ini, x_ax, y_ax, mask=rmask)
                                         # stats
         if (0.0<para[1]<s_imsize[0]) and (0.0<para[2]<s_imsize[1]) and \
             para[3]<s_imsize[0] and para[4]<s_imsize[1]:
