@@ -13,12 +13,13 @@ pulse
 import os
 from pycrtools import *
 from pycrtools import IO
-import matching as match
-import srcfind as sfind
+from pycrtools import matching as match
+from pycrtools import srcfind as sfind
+from pycrtools import beamformer as bf
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fmin, brute
-import beamformer as bf
 import pdb
 
 rad2deg = 180./np.pi

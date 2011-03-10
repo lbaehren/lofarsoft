@@ -9,10 +9,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
 
-import datacheck as dc
-import rficlean as rf
-import pulsefit as pf
-import matching as match # possibly push this down to pulsefit?
+from pycrtools import datacheck as dc
+from pycrtools import rficlean as rf
+from pycrtools import pulsefit as pf
+from pycrtools import matching as match # possibly push this down to pulsefit?
 # import beamformer as bf
 
 antennaset = 'LBA_OUTER' # hack around missing info in data files
@@ -158,7 +158,7 @@ elif len(sys.argv) > 1:
 else:
     print 'No files given on command line, using a default set instead.'
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-10*.h5' 
-    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/*.h5'
+    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-441.h5'
 #    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
 
 sortstring = 'sort -n --field-separator="-" --key=18'
