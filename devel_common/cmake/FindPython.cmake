@@ -161,7 +161,7 @@ if (NOT HAVE_PYTHON)
 	PATHS
 	${python_include_locations}
 	/Library/Frameworks/Python.framework/Versions/Current/include/python${python_version}
-	/Library/Frameworks/EPD64.framework/Versions/Current/include/python2.6
+	/Library/Frameworks/EPD64.framework/Versions/Current/include/python${python_version}
 	PATH_SUFFIXES python${python_version}
 	NO_DEFAULT_PATH
 	)
@@ -169,8 +169,7 @@ if (NOT HAVE_PYTHON)
       find_path (HAVE_PYCONFIG_H pyconfig.h
 	PATHS 
  	/Library/Frameworks/Python.framework/Versions/Current/include/python${python_version}	
-
-	/Library/Frameworks/EPD64.framework/Versions/Current/include/python2.6
+	/Library/Frameworks/EPD64.framework/Versions/Current/include/python${python_version}
 	${python_include_locations}
 	PATH_SUFFIXES python${python_version}
 	NO_DEFAULT_PATH
