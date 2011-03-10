@@ -230,25 +230,26 @@ set_target_properties (hftools
 ## Create the documentation
 
 foreach (FILE ${PYPELINE_CPP_MODULES})
+
    # Generate the basic documentation strings that python help will use
-#    add_custom_command (
-#      TARGET hftools
-#      POST_BUILD
-#      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
-#      COMMAND echo "" > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
-#      COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetpydoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
-# #     COMMENT "Generating python documentation for module ${FILE}"
-#      )
+   add_custom_command (
+     TARGET hftools
+     POST_BUILD
+     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
+     COMMAND echo "" > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
+     COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetpydoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
+#     COMMENT "Generating python documentation for module ${FILE}"
+     )
 
    # Generate basic documentation in text form
-#    add_custom_command (
-#      TARGET hftools
-#      POST_BUILD
-#      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
-#      COMMAND echo "" > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
-#      COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetdoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
-# #     COMMENT "Generating text documentation for module ${FILE}"
-#      )
+   add_custom_command (
+     TARGET hftools
+     POST_BUILD
+     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc
+     COMMAND echo "" > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
+     COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetdoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.iter.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
+#     COMMENT "Generating text documentation for module ${FILE}"
+     )
 
   # # Generate a file that can be processed by doxygen
   # add_custom_command (
