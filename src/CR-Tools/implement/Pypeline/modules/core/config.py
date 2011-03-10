@@ -22,17 +22,13 @@ filename_lopes=LOFARSOFT+"/data/lopes/example.event"
 
 DEFAULTDATAFILE=filename_lopes
 
-#Current tasks
-#import pycrtools.tasks #as tasks
-#import pycrtools.tasks.averagespectrum
-#import pycrtools.tasks.imager
-
-
 # Read in the doc strings for the functions in hftools
-execfile(pydocpyfilename)
-f=open(pydoctxtfilename)
-pycralldocstring=f.read()
-f.close()
+
+#!!!HF_FIX!!!!
+#execfile(pydocpyfilename)
+#f=open(pydoctxtfilename)
+#pycralldocstring=f.read()
+#f.close()
 
 trackHistory.__doc__="""
 Function for PYCRTOOLS module. Globally switch history tracking of

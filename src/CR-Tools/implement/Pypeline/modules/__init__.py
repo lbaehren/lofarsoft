@@ -16,12 +16,15 @@ import tasks
 
 #Now store the interactive namespace in tasks, so that we can assign to global variables in the interactive session
 if __builtins__.has_key("get_ipython"):
-#    print "IPython detected - importing user namespace"
+    print "IPython 0.11 detected - importing user namespace"
     tasks.globals=__builtins__["get_ipython"]().user_ns
+elif __builtins__.has_key("__IPYTHON__"):
+    print "IPython 0.10 detected - importing user namespace"
+    tasks.globals=__IPYTHON__.user_ns
 else:
     import sys
     if sys.modules.has_key("__main__") and hasattr(sys.modules["__main__"],"__builtins__"):
-#	print "Python detected - importing user namespace"
+	print "Python detected - importing user namespace"
 	tasks.globals=sys.modules["__main__"]#.__builtins__.globals()
     else:
 	print "Unknown Python version detected - not importing user namespace into tasks module."
@@ -118,7 +121,17 @@ go = go_class()
 
 class tpars_class(t_class):
     """
-    Dummy class to let the user view the current parameter set by simply typing 'go'.
+    Usage:
+
+    tpars -> list parameter workspace
+    
+    Class to let the user view the current parameter set by simply
+    typing 'tpars'. Use 'tpars 0' or 'tpars False' to just see input
+    parameters (this only works in ipython, python requires brackets).
+
+    *noninputparameters*=True - If False, don't list the derived paramters.
+    
+    *workarrays*=False - If True also list the work arrays.
     """
     def __call__(self,noninputparameters=True,workarrays=False):
 	print "Parameters of task",tasks.task_name

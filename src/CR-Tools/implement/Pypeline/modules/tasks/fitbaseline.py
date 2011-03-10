@@ -210,6 +210,7 @@ class FitBaseline(tasks.Task):
 	    self.ratio[...].plot(xvalues=self.freqs,title="RMS/Amplitude",clf=True)
 	    plotconst(self.freqs,(self.limit1).val()).plot(clf=False,color="green")
 	    plotconst(self.freqs,(self.limit2).val()).plot(clf=False,color="green")
+	    plt.ioff(); plt.draw(); plt.show()
 	    raw_input("Plotted relative RMS of downsampled spectrum (doplot>=2) - press Enter to continue...")
     #Now select bins where the ratio between RMS and amplitude is within the limits
 	self.nselected_bins=self.selected_bins[...].findbetween(self.ratio[...],self.limit1,self.limit2)
@@ -247,6 +248,7 @@ class FitBaseline(tasks.Task):
 #		self.clean_bins_y[...,[0]:self.nselected_bins].bsplinecalc(self.clean_bins_x[...,[0]:(self.nselected_bins)],self.coeffs[...])
 	    self.clean_bins_y[...,[0]:self.nselected_bins-1].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins-1],clf=False,logplot=False)
 	    print "Plotted downsampled and cleaned spectrum with baseline fit."
+	    plt.draw(); plt.show(); plt.ion(); 
 	self.spectrum.setHeader(FitBaseline=self.ws.getParameters())
 	if len(self.output_files)>0:
 	    self.power.write(self.output_files[0])

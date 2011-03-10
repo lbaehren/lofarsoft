@@ -254,6 +254,17 @@ using a double fft)
 - added a method to update the (output) header in an array from within a task
 in a definde way, applied it to averagespectrum
 
+2011-03-11 Pypeline - rev 7266 - Heino Falcke
+- further tweaks to averagespectrum:
+   - more efficient read-in for smaller files
+   - function qplot (method to AverageSpectrum) to quickly plot flagged
+ blocks
+  - new parameters antenna_star and stride to, e.g., read odd/even
+antennas only
+- quality check to use median instead of mean to estimate the best RMS
+limit
+- support of 0.10 ipython version to access global variable 'Task'
+
 
 ------------------------------------------------------------------------
 TODO

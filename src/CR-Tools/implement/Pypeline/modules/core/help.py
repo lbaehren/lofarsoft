@@ -8,7 +8,9 @@ from config import *
 def all():
     pass
 
-all.__doc__=pycralldocstring
+all.__doc__=""
+#!!!!HF-FIX!!!!!
+#all.__doc__=pycralldocstring
 
 def hhelpstring(func):
     """

@@ -160,3 +160,5 @@ def plotconst(xvalues,y):
     
     """
     return hArray([y,y],xvalues=hArray([xvalues.vec()[0],xvalues.vec()[-1]]))
+
+    

@@ -111,7 +111,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 
 	"stride_n":p_(0,"if >0 then divide the FFT processing in n=2**stride_n blocks. This is slower but uses less memory."),
 
-	"doublefft":{doc:"if True split the FFT into two, thereby saving memory.", default:True},
+	"doublefft":{doc:"if True split the FFT into two, thereby saving memory.", default:False},
 
 	"delta_nu":{default:1000,doc:"6 frequency resolution",unit:"Hz"},
 
@@ -135,16 +135,15 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 	"filenames":{default:lambda ws:listfiles(ws.filefilter),
 		    doc:"List of filenames of data file to read raw data from."},
 
-	"spectrum_file":{default:lambda ws:ws.tmpfilename+"spec"+ws.tmpfileext,
+	"spectrum_file":{default:lambda ws:(ws.filenames[0] if len(ws.filenames)>0 else "unknown")+".spec"+ws.tmpfileext,
 			 doc:"Filename to store the final spectrum."},
 
 	"quality_db_filename":{default:"qualitydatabase",
-				     doc:"Root filename of log file containing the derived antenna quality values (uses .py and .txt extension)."},
+			       doc:"Root filename of log file containing the derived antenna quality values (uses .py and .txt extension)."},
 
-	"spikyness":dict(default=10,doc="Set the maximum spikyness level in the data to this values and the minimum value to -spikyness. (see qualitycheck)"),
-
-	"spikeexcess":dict(default=10,doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
-
+	"quality":{default:[],doc:"A list containing quality check information about every large chunk of data that was read in. Use Task.qplot(Entry#,flaggedblock=nn) to plot blocks in question.",export:False,output:True},
+	
+	"spikeexcess":dict(default=20,doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
 
 	"start_frequency":{default:lambda ws:ws.freqs[0],
 			   doc:"Start frequency of spectrum",unit:"Hz"},
@@ -163,7 +162,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 	"fullsize":p_(lambda ws:ws.nblocks*ws.full_blocklen,"The full length of the raw time series data used for one spectral chunk."),
 
 	"nblocks":{default:lambda ws:2**int(round(log(ws.fullsize_estimated/ws.full_blocklen,2))),
-		   doc:"Number of blocks"},
+		   doc:"Number of blocks of lenght blocklen the time series data set is split in. The blocks are also used for quality checking."},
 
 	"nbands":{default:lambda ws:(ws.stride+1)/2,
 		  doc:"Number of bands in spectrum which are separately written to disk, if stride>1. This is one half of stride, since only the lower half of the spectrum is written to disk."},
@@ -180,6 +179,15 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 	"nantennas":{default:lambda ws:len(ws.antennas),
 		     doc:"The actual number of antennas averaged (set through maxantennas)."},
 
+	"nantennas_start":{default:0,
+		     doc:"Start with the nth antenna in each file (see also natennas_stride). Can be used for selecting odd/even antennas."},
+
+	"antenna_list":{default:{},
+		     doc:"List of antenna indices used as input from each filename.",output:True},
+
+	"nantennas_stride":{default:1,
+		     doc:"Take only every nth antenna (see also natennas_start). Use 2 to select odd/even."},
+
 	"nchunks_max":{default:lambda ws:float(ws.datafile.filesize)/ws.fullsize,
 		       doc:"Maximum number of spectral chunks to average"},
 
@@ -193,7 +201,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 	"antennas":p_(lambda ws:hArray(range(min(ws.datafile["nofAntennas"],ws.maxnantennas))),"Antennas to be used"),
 
 	"antennas_used":p_(lambda ws:set(),"A set of antenna names that were actually included in the average spectrum",output=True),
-	
+
 	"antennaIDs":p_(lambda ws:ashArray(hArray(ws.datafile["AntennaIDs"])[ws.antennas]),"Antenna IDs used in calculation."),
 
 
@@ -255,7 +263,63 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 #    files = [f for f in files if test.search(f)]
 
 class AverageSpectrum(tasks.Task):
-    """class documentation.
+    """
+
+    The function will calculate an average spectrum from a list of
+    files and a series of antennas (all averaged into one
+    spectrum).
+
+    The task will do a basic quality check of each time series data
+    set and only average good data.
+
+    For very large FFTs, and to save memory, one can use a 'doublefft'
+    which means that one big FFT is split into two steps of smaller
+    FFts. This allows almost arbitrary resolution.
+
+    The desired frequency resolution is provided with the parameter
+    delta_nu, but this will be rounded off to the nearest value using
+    channel numbers of a power of 2.
+
+    The resulting spectrum is stored in the array Task.power (only
+    complete for stride=1) and written to disk as an hArray with
+    parameters stored in the header dict (use
+    getHeader('AverageSpectrum') to retrieve this.)
+
+    This spectrum can be read back and a baseline can be fitted with
+    FitBaseline.
+
+    The quality information (RMS, MEAN, flagged blocks per antennas)
+    is stored in a data 'quality database' in text and python form and
+    is also available as Task.quality.
+    
+    Flagged blocks can be easily inspeced using the task method qplot
+    (for quality plot).
+
+    If you see an outputline like this, 
+
+    # Start antenna = 92 (ID= 17011092) - 4 passes:
+    184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
+    185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
+    186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
+    - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
+
+    this will tell you that Antenn 17011092 was worked on (the 92nd
+    antenna in the data file) and the 186th chunk (block 514)
+    contained some suspicious data (too many spikes). If you want to
+    inspect this, you can call
+
+    Task.qplot(186)
+
+    This will plot the chunk and highlight the first flagged block
+    (#514) in that chunk.
+
+    Task.qplot(186,1)
+
+    would highlight the second flagged block (which does not exist here).
+
+    If the chunks are too long to be entirely plotted, use
+
+    Task.qplot(186,all=False).
 
     """
     WorkSpace = WorkSpace
@@ -277,12 +341,13 @@ class AverageSpectrum(tasks.Task):
 
         #print "Time:",time.clock()-self.ws.t0,"s for set-up."
 
-        self.quality=[]
+	self.quality=[]
         self.antennacharacteristics={}
 	self.spectrum_file_bin=os.path.join(self.spectrum_file,"data.bin")
         self.dostride=(self.stride>1)
         self.nspectraflagged=0
         self.nspectraadded=0
+	self.count=0
 	self.nofAntennas=0
 	self.power.getHeader("increment")[1]=self.delta_frequency
 	
@@ -299,8 +364,12 @@ class AverageSpectrum(tasks.Task):
 	for fname in self.filenames[self.file_start_number:]:
 	    print "# Start File",str(self.file_start_number)+":",fname
 	    self.ws.update(workarrays=False) # since the file_start_number was changed, make an update to get the correct file
-	    self.datafile["blocksize"]=self.blocklen #Setting initial block size
-	    for iantenna in range(self.nantennas):
+	    if self.stride==1:
+		self.datafile["blocksize"]=self.blocklen*self.nblocks #Setting initial block size
+	    else:
+		self.datafile["blocksize"]=self.blocklen #Setting initial block size
+	    self.antenna_list[fname]=range(self.nantennas_start,self.nantennas, self.nantennas_stride)
+	    for iantenna in self.antenna_list[fname]:
 		antenna=self.antennas[iantenna]
 		rms=0; mean=0; npeaks=0
 		self.datafile["selectedAntennas"]=[antenna]
@@ -309,19 +378,23 @@ class AverageSpectrum(tasks.Task):
 		for nchunk in range(self.nchunks):
 		    #if self.nchunks>1: sys.stdout.write("*")
 		    #print "#  Chunk ",nchunk,"/",self.nchunks-1,". Reading in data and doing a double FFT."
-		    ofiles=[]; ofiles2=[]; ofiles3=[]
+		    ofiles=[]; ofiles2=[]; ofiles3=[]; 
 		    for offset in range(self.stride):
 			#if self.stride>1: sys.stdout.write(".")
 			#print "#    Pass ",offset,"/",self.stride-1,"Starting block=",offset+nchunk*self.nsubblocks
-			blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)            
-			self.cdata[...].read(self.datafile,"Fx",blocks)
-			self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=self.spikyness))
+			if self.stride==1:
+			    self.cdata.read(self.datafile,"Fx",nchunk)
+			else:
+			    blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)            
+			    self.cdata[...].read(self.datafile,"Fx",blocks)
+			self.count=len(self.quality)
+			self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,count=self.count))
 			if not self.quality_db_filename=="":
-			    qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[-1])
-			mean+=self.quality[-1]["mean"]
-			rms+=self.quality[-1]["rms"]
-			npeaks+=self.quality[-1]["npeaks"]
-			dataok=(self.quality[-1]["nblocksflagged"]<=self.maxblocksflagged)
+			    qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
+			mean+=self.quality[self.count]["mean"]
+			rms+=self.quality[self.count]["rms"]
+			npeaks+=self.quality[self.count]["npeaks"]
+			dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
 			if not dataok:
 			    print " # Data flagged!"
 			    break
@@ -380,7 +453,7 @@ class AverageSpectrum(tasks.Task):
 				if self.doplot and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
 				    self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
 				    print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
-				    plt.draw()
+				    plt.draw(); plt.show()
 			else: # do just a single FFT
 			    if self.nspectraadded>1:
 				self.cdataT/=float(self.nspectraadded)   
@@ -393,7 +466,7 @@ class AverageSpectrum(tasks.Task):
 			    if self.doplot and self.nspectraadded%self.plotskip==0:
 				self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
 				print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
-				plt.draw()
+				plt.draw(); plt.show()
 		    else: #data not ok
 			self.nspectraflagged+=1
 			#print "#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged
@@ -411,9 +484,63 @@ class AverageSpectrum(tasks.Task):
 	    self.file_start_number+=1
 	self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
         print "Finished - total time used:",time.clock()-self.t0,"s."
+	print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '184 - Mean=  3.98, RMS=...'"
         print "To read back the spectrum type: sp=hArrayRead('"+self.spectrum_file+"')"
 	if self.doplot:
 	    plt.ion()
+
+    def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
+	"""
+	If you see an output line like this, 
+
+    # Start antenna = 92 (ID= 17011092) - 4 passes:
+    184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
+    185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
+    186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
+    - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
+
+    this will tell you that Antenna 17011092 was worked on (the 92nd
+    antenna in the data file) and the 186th chunk (block 514)
+    contained some suspicious data (too many spikes). If you want to
+    inspect this, you can call
+
+    Task.qplot(186)
+
+    This will plot the chunk and highlight the first flagged block
+    (#514) in that chunk.
+
+    Task.qplot(186,1)
+
+    would highlight the second flagged block (which does not exist here).
+
+    If the chunks are too long to be entirely plotted, use
+
+    Task.qplot(186,all=False).
+	"""
+	quality_entry=self.quality[entry]
+	filename=quality_entry["filename"]
+	datafile=crfile(filename)
+	iantenna=datafile["Antennas"].find(quality_entry["antenna"])
+	datafile["selectedAntennas"]=[iantenna]
+	if block<0 and flaggedblock<len(quality_entry["flaggedblocks"]):
+	    block=quality_entry["flaggedblocks"][flaggedblock]
+	    s="flaggedblock # "+str(flaggedblock)+"/"+str(len(quality_entry["flaggedblocks"])-1)
+	else:
+	    s=""
+	print "Filename:",filename,"block =",block,"blocksize =",quality_entry["blocksize"],s
+	if all:
+	    datafile["blocksize"]=quality_entry["size"]
+	    datafile["block"]=quality_entry["offset"]*quality_entry["blocksize"]/quality_entry["size"]
+	    y0=datafile["Fx"]
+	    y0.par.xvalues=datafile["Time"]
+	    y0.par.xvalues.setUnit("mu","")
+	    y0.plot()
+	datafile["blocksize"]=quality_entry["blocksize"]
+	datafile["block"]=block
+	y=datafile["Fx"]
+	y.par.xvalues=datafile["Time"]
+	y.par.xvalues.setUnit("mu","")
+	y.plot(clf=not all)
 
 """
 class test1(tasks.Task):
