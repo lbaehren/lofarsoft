@@ -255,14 +255,17 @@ def put_file_at_sequence(file,seq_nr,szD):
     
     # Size represented by format string in bytes
     szH=struct.calcsize(fmtH)
- 
-    file.seek((szH+szD)*seq_nr);
+    filesize = os.path.getsize(file.name);
+    max_size = filesize/(szH+szD);
+    if seq_nr >= max_size:
+#        print "larger than maxsize, resetting to",max_size;
+        corr_seq_nr = max_size-1;
+    file.seek((szH+szD)*corr_seq_nr);
     
     x=file.read(szH)
     # unpack struct into intermediate data
     t=struct.unpack(fmtH,x)
-    corr_seq_nr=seq_nr;
-        
+         
     while (t[0]> seq_nr)  and (corr_seq_nr>0):
         corr_seq_nr-=1
         file.seek((szH+szD)*corr_seq_nr);
@@ -271,10 +274,11 @@ def put_file_at_sequence(file,seq_nr,szD):
         # unpack struct into intermediate data
         t=struct.unpack(fmtH,x)
     if t[0] != seq_nr:
-        print t[0]
-        print "Seq_nr not found. Useblocknr = -1 and step through the data"
-        assert False
-                 
+        print "Seq_nr",seq_nr," not found."# Useblocknr = -1 and step through the data"
+        #back to start of file
+        file.seek(0);
+        return False;
+    return True;
  
     
 
@@ -309,7 +313,9 @@ def get_rawvoltage_data_new(file, block, channels, samples, nrsubbands, nrstatio
     dt=dt.newbyteorder('>')
    
     if block>=0:
-        put_file_at_sequence(file,block,szD);#searches for block with sequencence nr block in the data.
+        if not put_file_at_sequence(file,block,szD): #searches for block with sequencence nr block in the data.returns false if sequence number not available. Otherwise put filepointer after header of this block
+            data = np.zeros((samples|2,nrsubbands,channels,2)); #return empty data
+            return data;
     else:
         file.read(szH);
              
