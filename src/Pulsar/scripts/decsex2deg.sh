@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #
 if [ $# -eq 0 ]; then
  exit

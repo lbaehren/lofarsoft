@@ -6,7 +6,7 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  
        [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] 
        [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] 
-       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol]
+       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-sexages]
 
        REQUIRED Input Parameters:
        -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
@@ -41,6 +41,8 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One (default), Dual, Joined)
        [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
        [[-namecol]] ==> The first column in the input file contains an additional column which will be used as the Obs Name in MOM
+       [[-sexages]] ==> Indicator that input file contains RA & DEC columns in Sexagesimal 
+                        (HH:MM:SS.SSSS [+/-]DD:MM:SS.SSSSS) format (decimal degrees assumed otherwise).
        
        For help on Imaging input format and options, use '-help IM' switch
 
@@ -119,12 +121,18 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
          B1133+16               
          B1508+55                        
 
-         Example Type V input file using ra dec positions:
+         Example Type V input file using ra dec in decimal degree positions:
          # ra     dec                                        
          13.98   +68.487                           
          13.98   +68.487                     
          13.98   +68.487                     
          55.76   +18.546              
+
+         Example Type V input file using ra dec in sexagesimal positions:
+         # ra     dec                                        
+         01:57:49.9  62:12:25.9
+         03:35:16.6  +45:55:53.4
+         04:59:51.9  -02:10:06.6
 
       6) Example input file has "NameColumn" and pulsar name (NOTE: the NameColumn must be 1st)!
          "NameColumn" can be added to ANY of the above data tables, but it must always be the 1st column.
@@ -223,6 +231,13 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
          14.68   +45.234    
          13.98   +68.487   ;  13.98   +68.487     ; 14.68   +45.234 
 
+         Example Type V input file using ra dec in sexagesimal positions:
+         # ra     dec               ;  BeamN-ra BeamN-dec                          
+         01:57:49.9  62:12:25.9     ;  01:08:22.6  +66:08:34.0
+         03:35:16.6  +45:55:53.4
+         04:59:51.9  -02:10:06.6    ;  01:08:08.3  -14:31:50.1    ;  01:51:22.7  -06:35:02.8
+
+
       6) Example input file has "NameColumn" and pulsar name (NOTE: the NameColumn must be 1st)!
          "NameColumn" can be added to ANY of the above data tables, but it must always be the 1st column.
          Example Type VI input file using source names and mutiple beams:
@@ -232,12 +247,13 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
          LOFAR_HBA00003   B1133+16               
          LOFAR_HBA00004   B1508+55      ;   B1144+45   ; B1755+19                    
 
-         Example Type VI input file using ra dec positions:
+         Example Type VI input file using ra dec in decimal degree positions:
          # namecol    ra     dec            ;  BeamN-ra BeamN-dec                                 
-         LOFAR_HBA00001   13.98   +68.487   ;  B1144+45   ; B1919+55  ; B1755+19                         
-         LOFAR_HBA00002   13.98   +68.487                     
+         LOFAR_HBA00001   13.98   +68.487   ;  13.98   +68.487  ; 14.68   +45.234                            
+         LOFAR_HBA00002   14.68   +45.234                      
          LOFAR_HBA00004   13.98   +68.487                     
-         LOFAR_HBA00005   55.76   +18.546   ;   B1144+45   ; B1755+19           
+         LOFAR_HBA00005   55.76   +18.546   ;  14.68   +45.234            
+
 
          EXAMPLE runs:
          > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml 
@@ -255,5 +271,6 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -chansubsHBA 64 -integstepsHBA 4  +multi -namecol
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -integLBA 5 +IM all
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -integLBA 5 +IM all 
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -sexages 
 

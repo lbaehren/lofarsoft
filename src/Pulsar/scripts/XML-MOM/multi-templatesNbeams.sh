@@ -1,5 +1,8 @@
 #!/bin/ksh 
 
+# Please update the version number when you edit this file:
+# vervion = 1.1
+
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
 # output is an XML file which can be uploaded into MOM (if you have ADMIN privileges)
@@ -12,7 +15,7 @@ USAGE1="\nUsage for Imaging: $0 [[-help IM]] \n"\
 "       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] \n"\
 "       [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
-"       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol]\n"
+"       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol] [-sexages]\n"
 
 USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       -in observation_list_file -inswitch BF -intype source_or_position \n"\
@@ -22,7 +25,7 @@ USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] \n"\
 "       [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
-"       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol]\n"
+"       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-sexages]\n"
 
 USAGE3="Options: \n"\
 "         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
@@ -53,7 +56,8 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[+BF list_or_ALL]] ==> Turn on beamformedData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One (default), Dual, Joined)\n"\
 "         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, Sparse Even, Sparse Odd, X, Y)\n"\
-"         [[-namecol]] ==> The first column in the input file contains an additional column which will be used as the Obs Name in MOM\n"
+"         [[-namecol]] ==> The first column in the input file contains an additional column which will be used as the Obs Name in MOM\n"\
+"         [[-sexages]] ==> Indicator that input file contains RA & DEC columns in Sexagesimal (HH:MM:SS.SSSS [+/-]DD:MM:SS.SSSSS) format (decimal degrees assumed otherwise).\n"
 
 USAGE5="For help on Imaging input format and options, use '-help IM' switch\n"\
 "For help on BF (BF+IM) input format and options, use '-help BF' switch\n"
@@ -145,6 +149,7 @@ MULTI=0
 user_multi=0
 NAMECOL=0
 user_namecol=0
+sexages=0
 
 while [ $# -gt 0 ]
 do
@@ -181,6 +186,7 @@ do
      -lst|-LST)          LST=1;;
      +multi)             MULTI=1; user_multi=1;;
      -namecol)           NAMECOL=1; user_namecol=1;;
+     -sexages)           sexages=1;;
        -*)
             print >&2 \
             "$USAGE1" \
@@ -1335,7 +1341,24 @@ do
 		       echo "WARNING: skipping OBJECT $OBJECT from template creation."
 		       continue
 		    fi
+
+	        if (( $sexages == 0 ))
+	        then
+	            check_sexages=`echo $RA_DEG | grep ':'`
+	            if [[ $check_sexages != "" ]]
+	            then
+	               echo "WARNING: your input RA appears to be in sexagesimal coordinates, not decimal degrees;  assuming -sexages flag"
+	               sexages=1
+	            fi
+            fi
+	        if (( $sexages == 1 ))
+	        then
+	           RA_DEG=`rasex2deg.sh $RA_DEG`
+	           DEC_DEG=`decsex2deg.sh $DEC_DEG`
+	        fi
+
 	        #convert to radians	   
+	        
 			RA=`echo "scale=10; $RA_DEG * $pi / 180.0" | bc | awk '{printf("%1.9f\n",$1)}'`
 			DEC=`echo "scale=10; $DEC_DEG * $pi / 180.0" | bc | awk '{printf("%1.9f\n",$1)}'`
 					
