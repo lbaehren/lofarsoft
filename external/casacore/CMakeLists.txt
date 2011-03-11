@@ -29,7 +29,7 @@ set (CASACORE_SVN_REVISION   "-r21018")
 
 option (CASACORE_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
 option (CASACORE_FORCE_BUILD       "Force build and installation of package?" OFF )
-option (CASACORE_FROM_REPOS        "Install package from repository?"         YES )
+option (CASACORE_FROM_REPOS        "Install package from repository?"         NO  )
 option (CASACORE_FROM_REPOS_HEAD   "Install package from repository HEAD?"    NO  )
 option (CASACORE_WITH_FFTW3        "Enable FFTW3 library support?"            OFF )
 option (CASACORE_WITH_HDF5         "Enable HDF5 library support?"             YES )
@@ -48,6 +48,12 @@ if (NOT CASACORE_VERBOSE_CONFIGURE)
   set (WCSLIB_FIND_QUIETLY     TRUE )
   set (ZLIB_FIND_QUIETLY       TRUE )
 endif (NOT CASACORE_VERBOSE_CONFIGURE)
+
+## Handle option: Build type
+
+if (CASACORE_FROM_REPOS_HEAD)
+  set (CASACORE_FROM_REPOS TRUE)
+endif (CASACORE_FROM_REPOS_HEAD)
 
 ## ==============================================================================
 ##
