@@ -90,6 +90,7 @@ if (UNIX)
       /usr/lib/gcc/x86_64-redhat-linux/4.1.1
       /usr/lib/gcc/x86_64-redhat-linux/4.1.2
       /usr/lib/gcc/x86_64-linux-gnu/4.2
+      /usr/lib/gcc/x86_64-linux-gnu/4.4
       )
   endif (APPLE)
 endif (UNIX)
