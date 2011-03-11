@@ -76,7 +76,7 @@ class CoordinateGrid(object):
         """Creates a coordinate grid according to specified WCS parameters
         given as keyword arguments or as dictionary (using **imparam where
         imparam is a dictionary of image parameters, e.g. a FITS header).
-        
+
         *NAXIS1* number of pixels allong first image axis
         *NAXIS2* number of pixels allong second image axis
         *CUNIT1* unit for 1st axis increment (rad/deg)
@@ -146,17 +146,17 @@ class CoordinateGrid(object):
         for i in range(1, self.naxis1+1):
             for j in range(1, self.naxis2+1):
                 self.pixel.extend([float(i),float(j)])
-        
+
         self.pixel=cr.hArray(self.pixel)
         self.world=self.pixel.new()
-        
+
         # Generate world coordinates for image grid
         print "Calculating world coordinates"
         cr.hPixel2World(self.world, self.pixel, self.refcode,
             self.projection, self.crval1, self.crval2, self.cdelt1,
             self.cdelt2, self.crpix1, self.crpix2, self.lonpole,
             self.latpole)
-        
+
         # Generate (intermediate) J2000 coordinates
         print "Calculating J2000 coordinates"
         self.__calculateJ2000()
@@ -167,7 +167,7 @@ class CoordinateGrid(object):
 
         print "Calculating Cartesian coordinates"
         self.cartesian=self.azel.new()
-        
+
         cr.hCoordinateConvert(self.azel[...], cr.CoordinateTypes.AzElRadius,
             self.cartesian[...], cr.CoordinateTypes.Cartesian, False)
 
@@ -213,4 +213,3 @@ class CoordinateGrid(object):
             temp.reshape((self.npix,2))
             self.azel[...,0:2]=temp[...]
             self.azel[...,2:3]=1.
-

@@ -56,7 +56,7 @@ print "t=",time.clock(),"s -","Reading in Calibration Data"
 antennaset="HBA"
 stationname="CS302"
 antennafilename=LOFARSOFT+"/data/calibration/AntennaArrays/"+stationname+"-AntennaArrays.conf"
-antfile = open(antennafilename,'r') 
+antfile = open(antennafilename,'r')
 antfile.seek(0)
 str = ''
 while antennaset not in str:
@@ -155,12 +155,11 @@ intpower2=np.array(power.vec())
 intpower2.resize([n_az,n_el,513])
 
 
-for i in range(513): 
- max=intpower2[:,:,i].max()
- intpower2[:,:,i]/=max
+for i in range(513):
+    max=intpower2[:,:,i].max()
+    intpower2[:,:,i]/=max
 
 import pyfits
 hdu = pyfits.PrimaryHDU(intpower2)
 hdulist = pyfits.HDUList([hdu])
 hdulist.writeto("/Volumes/MyBook/data/TBB/Crab/pulse3/image15.fits")
-

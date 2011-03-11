@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 
 """
 ########### Dynamic spectrum pipeline ###########
@@ -89,14 +89,14 @@ if calMethod:
 for i in range(len(filenames)):
     filenames[i]=datadir+filenames[i]
     if not os.path.isfile(filenames[i]):
-    	raise IOError('File ', filenames[i], ' can not be found.')
+        raise IOError('File ', filenames[i], ' can not be found.')
 
 crfile=IO.open(filenames,blocksize,antennaSelection)
 actualSelection=crfile.get('selectedAntennas')
 if antennaSelection:
     if not actualSelection==antennaSelection:
-    	raise IOError('Requested antennas could not be selected')
-	antennaSelection=actualSelection
+        raise IOError('Requested antennas could not be selected')
+        antennaSelection=actualSelection
 else:
     antennaSelection=actualSelection
 
@@ -150,8 +150,8 @@ elif filtertype:
 if filtertype =='PPF':
     # fills the internal buffer of the filter
     for block in range(startblock, startblock+15):
-    	crfile.getTimeseriesData(fxdata,block)
-	ppf.add(fxdata)
+        crfile.getTimeseriesData(fxdata,block)
+        ppf.add(fxdata)
     startblock += 15
 
 timeCounter=0
@@ -159,25 +159,24 @@ timeIndex=0
 
 for block in range(startblock, startblock+nblocks):
     crfile.getTimeseriesData(fxdata,block)
-    
+
     if timeCounter==timeIntegration:
-    	timeCounter=0
-	timeIndex += 1
-    
+        timeCounter=0
+        timeIndex += 1
+
     if filtertype == 'PPF':
-    	ppf.add(fxdata)
+        ppf.add(fxdata)
     elif filtertype == 'Hanning':
-    	fxdata[...].mul(thefilter)
-    
+        fxdata[...].mul(thefilter)
+
     # calculating the power
     freqData[...].fftw(fxdata[...])
     cr.hAbs(freqData[...])
 #    freqData.mul(freqData)
-    
+
     dynamicSpectrum[...,timeIndex].muladd(freqData[...], freqData[...])
-    
+
     timeCounter += 1
-    
+
 
 dynamicSpectrum.div(float(timeIntegration))
-

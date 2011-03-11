@@ -52,7 +52,7 @@ datadir=os.environ['HOME']+'/data/saturn/'
 
 parameter_definitions={
     "lofarmode":{default:"LBA_OUTER",
-                 doc:"Which LOFAR mode was used (HBA/LBA_OUTER/LBA_INNER)"},   
+                 doc:"Which LOFAR mode was used (HBA/LBA_OUTER/LBA_INNER)"},
 
     "stride_n":p_(0,"if >0 then divide the FFT processing in n=2**stride_n blocks. This is slower but uses less memory."),
 
@@ -68,15 +68,15 @@ parameter_definitions={
     "maxchunks":{default:1,doc:"Maximum number of chunks of raw data to integrate spectrum over."},
 
     "maxblocksflagged":{default:2,doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."},
-    
+
     "doplot":{default:False,doc:"Plot current spectrum while processing."},
-    
+
     "stride":{default:lambda ws:2**ws.stride_n,
               doc:"If stride>1 divide the FFT processing in n=stride blocks."},
-    
+
     "tmpfileext":{default:".dat",
                   doc:"Extension of filename for temporary data files (e.g., used if stride>1.)"},
-    
+
     "tmpfilename":{default:"tmp",
                    doc:"Root filename for temporary date files."},
 
@@ -109,13 +109,13 @@ parameter_definitions={
 
     "nbands":{default:lambda ws:(ws.stride+1)/2,
               doc:"Number of sections/bands in spectrum"},
-    
+
     "subspeclen":{default:lambda ws:ws.blocklen*ws.nblocks,
                   doc:"Size of one section/band of the final spectrum"},
-    
+
     "nsamples_data":{default:lambda ws:float(ws.fullsize)/10**6,
                      doc:"Number of samples in raw antenna file",unit:"MSamples"},
-    
+
     "size_data":{default:lambda ws:float(ws.fullsize)/1024/1024*16,
                  doc:"Number of samples in raw antenna file",unit:"MBytes"},
 
@@ -129,7 +129,7 @@ parameter_definitions={
                doc:"Number of spectral chunks that are averaged"},
 
 #Now define all the work arrays used internally
-    
+
     "frequencies":{workarray:True,dependencies:["subspeclen"],
        doc:"Frequencies for final spectrum (or part thereof if stride>1)",default:lambda ws:
        hArray(float,[ws.subspeclen/2],name="Frequency",units=("M","Hz"),header=ws.header)},
@@ -186,7 +186,7 @@ class ParameterWorkSpace(object):
         self.add_parameters(parameter_definitions)
     def __getitem__(self,par):
         if hasattr(self,"_"+par):   # Return locally stored value
-            return getattr(self,"_"+par) 
+            return getattr(self,"_"+par)
         elif self.parameter_definitions.has_key(par):
             if self.parameter_definitions[par].has_key(default):   #return default value or function
                 f_or_val=self.parameter_definitions[par][default]
@@ -207,7 +207,7 @@ class ParameterWorkSpace(object):
             self.add(par)
     def add_parameter_definition(self,p,v):
         self.parameter_definitions[p]=self._default_parameter_definition.copy()
-        self.parameter_definitions[p].update(v) # then copy the ones explicitly provided 
+        self.parameter_definitions[p].update(v) # then copy the ones explicitly provided
         #    def add_property(self, name, *funcs):
         #        setattr(self.__class__, name, property(*funcs)) #property(getx, setx, delx, "I'm the property.")
     def delx(self,name):
@@ -296,7 +296,7 @@ class ParameterWorkSpace(object):
         for p in self.get_internal_parameters():
             if hasattr(self,p): val=getattr(self,p)
             else: val="*UNDEFINED*"
-            s+="{0:<15} = {1!r:20} \n".format(p,val) 
+            s+="{0:<15} = {1!r:20} \n".format(p,val)
         s+="#-----------------------------------------------------------------------\n"
         return s
     def printall(self):
@@ -344,7 +344,7 @@ class ParameterWorkSpace(object):
                 s2+="#{2:s}\n{0:<15} = {1!r:20}\n".format(p,val,v[doc])
             else:
                 if (v[unit]==""): s+="{0:<15} = {1!r:20} #            # {2:s}\n".format(p,val,v[doc])
-                else: s+="{0:<15} = {1!r:20} # {2:^10s} # {3:s}\n".format(p,val,v[unit],v[doc]) 
+                else: s+="{0:<15} = {1!r:20} # {2:^10s} # {3:s}\n".format(p,val,v[unit],v[doc])
         s+="#-----------------------------------------------------------------------\n"
         if not s2=="": s+=s2+"#-----------------------------------------------------------------------\n"
         if internals: s+=self.list_internal_parameters()
@@ -399,7 +399,7 @@ t0=time.clock(); print "Setting up."
 #ws.cdata=None
 #ws.cdataT=None
 
-#Defining work arrays  
+#Defining work arrays
 
 
 writeheader=True # used to make sure the header is written the first time
@@ -422,7 +422,7 @@ for antenna in ws.antennas:
         ofiles=[]; ofiles2=[]; ofiles3=[]
         for offset in range(ws.stride):
             print "#    Pass ",offset,"/",ws.stride-1,"Starting block=",offset+nchunk*ws.nsubblocks
-            blocks=range(offset+nchunk*ws.nsubblocks,(nchunk+1)*ws.nsubblocks,ws.stride)            
+            blocks=range(offset+nchunk*ws.nsubblocks,(nchunk+1)*ws.nsubblocks,ws.stride)
             ws.cdata[...].read(ws.datafile,"Fx",blocks)
             ws.quality.append(qualitycheck.CRQualityCheckAntenna(ws.cdata,datafile=ws.datafile,normalize=True,blockoffset=offset+nchunk*ws.nsubblocks,observatorymode=ws.lofarmode))
             qualitycheck.CRDatabaseWrite(ws.quality_database_filename+".txt",ws.quality[-1])
@@ -461,15 +461,15 @@ for antenna in ws.antennas:
                     ws.power.fill(0.0)
                 else: #2nd or higher chunk, so read data in and add new spectrum to it
                     ws.power.readfilebinary(ws.spectrum_file,ws.subspeclen*offset)
-                    ws.power*= (ws.nspectraadded-1.0)/(ws.nspectraadded)                        
+                    ws.power*= (ws.nspectraadded-1.0)/(ws.nspectraadded)
                 if ws.dostride:
                     print "#    Offset",offset
                     ws.specT2[...].readfilebinary(Vector(ofiles2),Vector(int,ws.stride,fill=offset)*(ws.blocklen*ws.nblocks_section))
                     hTranspose(ws.spec,ws.specT2,ws.stride,ws.blocklen) # Make sure the blocks are properly interleaved
-                    if ws.nspectraadded>1: ws.spec/=float(ws.nspectraadded)   
+                    if ws.nspectraadded>1: ws.spec/=float(ws.nspectraadded)
                     ws.power.spectralpower(ws.spec)
                 else: # no striding, data is all fully in memory
-                    if ws.nspectraadded>1: ws.specT/=float(ws.nspectraadded)   
+                    if ws.nspectraadded>1: ws.specT/=float(ws.nspectraadded)
                     ws.power.spectralpower(ws.specT)
                 if ws.stride==1: ws.power[0:ws.subspeclen/2].write(ws.spectrum_file,nblocks=ws.nbands,block=offset,writeheader=writeheader)
                 else: ws.power.write(ws.spectrum_file,nblocks=ws.nbands,block=offset,writeheader=writeheader)

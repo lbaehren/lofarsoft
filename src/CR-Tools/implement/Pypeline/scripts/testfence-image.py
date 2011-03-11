@@ -32,7 +32,7 @@ FarField=False
 #------------------------------------------------------------------------
 
 
-ws=CRMainWorkSpace(filename=filename,fittype="POLY",ncoeffs=8,nbins=128,doplot=False,verbose=False,modulename="ws")  
+ws=CRMainWorkSpace(filename=filename,fittype="POLY",ncoeffs=8,nbins=128,doplot=False,verbose=False,modulename="ws")
 ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=128) #fittype="POLY" or "BSPLINE"
 
 ws["numin"]=12 #MHz
@@ -50,7 +50,7 @@ Time value arrays.
 """
 cr_time=cr["Time"].setUnit("\\mu","s")
 
-#ws["frequency"]=cr["Frequency"] 
+#ws["frequency"]=cr["Frequency"]
 # Attention don't do this here when later using it in caluclating
 #phases that require seconds and Hz as units
 
@@ -108,7 +108,7 @@ positions. For this we will use the method getCalData:
 """
 antennaset="LBA_OUTER"
 antennafilename=LOFARSOFT+"/data/calibration/AntennaArrays/"+stationname+"-AntennaArrays.conf"
-antfile = open(antennafilename,'r') 
+antfile = open(antennafilename,'r')
 antfile.seek(0)
 str = ''
 while antennaset not in str:
@@ -156,14 +156,14 @@ n_az=int((azRange[1]-azRange[0])/azRange[2])
 n_el=int((elRange[1]-elRange[0])/elRange[2])
 
 n_pixels = n_az * n_el;
-pixarray = np.zeros( (n_el,n_az) ) 
-pixarray_time = np.zeros( ((250-100),n_el,n_az ) ) 
+pixarray = np.zeros( (n_el,n_az) )
+pixarray_time = np.zeros( ((250-100),n_el,n_az ) )
 
 azel=hArray(float,dimensions=[3])
 cartesian=azel.new()
 delays=hArray(float,dimensions=[ws["nofAntennas"]])
 weights=hArray(complex,dimensions=ws["fft"],name="Complex Weights")
-phases=hArray(float,dimensions=ws["fft"],name="Phases",xvalues=ws["frequency"]) 
+phases=hArray(float,dimensions=ws["fft"],name="Phases",xvalues=ws["frequency"])
 shifted_fft=hArray(complex,dimensions=ws["fft"])
 beamformed_fft=hArray(complex,dimensions=ws["frequency"])
 beamformed_efield=hArray(float,dimensions=cr_time)
@@ -180,10 +180,10 @@ for el_ind in range(n_el):
         azel[0]=az_values[az_ind]
         azel[1]=el_values[el_ind]
         azel[2]= fixedDist
-        
-        
+
+
         hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
-        hGeometricDelays(delays,antenna_positions,cartesian,FarField)   
+        hGeometricDelays(delays,antenna_positions,cartesian,FarField)
         #p_("delays")
         hDelayToPhase(phases,ws["frequency"],delays)
         hPhaseToComplex(weights,phases)
@@ -209,7 +209,7 @@ plt.ylabel("Elevation [deg]")
 hdu = pyfits.PrimaryHDU(pixarray_time)
 hdulist = pyfits.HDUList([hdu])
 prihdr = hdulist[0].header
-prihdr.update('CTYPE1','??LN-CAR')  #This means "unkown longitude" with CARtesian projection, the 
+prihdr.update('CTYPE1','??LN-CAR')  #This means "unkown longitude" with CARtesian projection, the
 #                                   #casaviewer asumes this the be J2000 because it probably can't do AZEL
 prihdr.update('CRVAL1',azRange[0])  #value of the axis at the reference point "CRPIX"
 prihdr.update('CDELT1',azRange[2])  #increment from the reference pixel to the next pixel
@@ -218,7 +218,7 @@ prihdr.update('CRPIX1',1.)          #pixel position at which the axis has the "C
 prihdr.update('CUNIT1','deg')       #the unit in which "CRVAL" and "CDELT" are given
 
 prihdr.update('CTYPE2','??LT-CAR')  #This means "unkown latitude" with CARtesian projection, see above
-prihdr.update('CRVAL2',elRange[0]) 
+prihdr.update('CRVAL2',elRange[0])
 prihdr.update('CDELT2',elRange[2])
 prihdr.update('CROTA2',0.)
 prihdr.update('CRPIX2',1.)

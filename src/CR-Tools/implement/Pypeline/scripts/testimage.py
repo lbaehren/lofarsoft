@@ -148,4 +148,3 @@ plt.subplot(1,2,2)
 plt.imshow(intimage,cmap=plt.cm.hot)
 print "t=",time.clock()-t0,"s -","Done Method 2"
 plt.savefig("sunimage.pdf")
-

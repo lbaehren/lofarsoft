@@ -24,10 +24,10 @@ elif __builtins__.has_key("__IPYTHON__"):
 else:
     import sys
     if sys.modules.has_key("__main__") and hasattr(sys.modules["__main__"],"__builtins__"):
-	print "Python detected - importing user namespace"
-	tasks.globals=sys.modules["__main__"]#.__builtins__.globals()
+        print "Python detected - importing user namespace"
+        tasks.globals=sys.modules["__main__"]#.__builtins__.globals()
     else:
-	print "Unknown Python version detected - not importing user namespace into tasks module."
+        print "Unknown Python version detected - not importing user namespace into tasks module."
 """
 Some info on tasks:
 
@@ -80,9 +80,9 @@ class t_class():
     without brackets.
     """
     def __repr__(self):
-#	if tasks.task_instance == None: return ""
-	self()
-	return ""
+#       if tasks.task_instance == None: return ""
+        self()
+        return ""
 
 class go_class():
     """
@@ -98,25 +98,25 @@ class go_class():
     Before starting the task, go will store the current parameters with "tput".
     """
     def __repr__(self):
-#	if tasks.task_instance == None: return ""
-	print "Starting task",tasks.task_name
-	tput()
-	tasks.task_instance()
-	print "Task",tasks.task_name,"run."
-	return ""
+#       if tasks.task_instance == None: return ""
+        print "Starting task",tasks.task_name
+        tput()
+        tasks.task_instance()
+        print "Task",tasks.task_name,"run."
+        return ""
     def __call__(self,*args,**kwargs):
-	tput()
-	if kwargs.has_key('task') and not kwargs["task"]==None:
-	    ttask=kwargs["task"]
-	    del kwargs["task"]
-	else:
-	    ttask=tasks.task_instance
-	ttask(*args,**kwargs)
-#	    if len(args)>0:
-#	else:
-#	    ttask()
-	print "Task",ttask.__taskname__,"run."
-	
+        tput()
+        if kwargs.has_key('task') and not kwargs["task"]==None:
+            ttask=kwargs["task"]
+            del kwargs["task"]
+        else:
+            ttask=tasks.task_instance
+        ttask(*args,**kwargs)
+#           if len(args)>0:
+#       else:
+#           ttask()
+        print "Task",ttask.__taskname__,"run."
+
 go = go_class()
 
 class tpars_class(t_class):
@@ -124,18 +124,18 @@ class tpars_class(t_class):
     Usage:
 
     tpars -> list parameter workspace
-    
+
     Class to let the user view the current parameter set by simply
     typing 'tpars'. Use 'tpars 0' or 'tpars False' to just see input
     parameters (this only works in ipython, python requires brackets).
 
     *noninputparameters*=True - If False, don't list the derived paramters.
-    
+
     *workarrays*=False - If True also list the work arrays.
     """
     def __call__(self,noninputparameters=True,workarrays=False):
-	print "Parameters of task",tasks.task_name
-	print tasks.task_instance.ws.__repr__(workarrays=workarrays,noninputparameters=noninputparameters)
+        print "Parameters of task",tasks.task_name
+        print tasks.task_instance.ws.__repr__(workarrays=workarrays,noninputparameters=noninputparameters)
 
 tpars = tpars_class()
 
@@ -146,7 +146,7 @@ class tinit_class(t_class):
     this has been run before, unless force=False.
     """
     def __call__(self,force=True):
-	tasks.task_instance.callinit(forceinit=force)
+        tasks.task_instance.callinit(forceinit=force)
 
 tinit = tinit_class()
 
@@ -155,13 +155,13 @@ class thelp_class(t_class):
     Print documentation of tasks
     """
     def __call__(self,what=0):
-	import pycrtools.tasks
-	if what == 0:
-	    print  tasks.task_instance.__doc__
-	    print """\nTo get help on tasks type 'thelp 1'"""
-	if what == 1:
-	    print pycrtools.tasks.__doc__
-	    print """\nTo get help on current task type 'thelp 0'"""
+        import pycrtools.tasks
+        if what == 0:
+            print  tasks.task_instance.__doc__
+            print """\nTo get help on tasks type 'thelp 1'"""
+        if what == 1:
+            print pycrtools.tasks.__doc__
+            print """\nTo get help on current task type 'thelp 0'"""
 
 thelp = thelp_class()
 
@@ -170,10 +170,10 @@ class tlist_class(t_class):
     Class to let the user list the available tasks that can be loaded with tload.
     """
     def __call__(self):
-	print "Available Tasks:"
-	print "----------------"
-	for tpl in zip(range(len(tasks.task_allloaded)),tasks.task_allloaded.keys()):
-	    print "{0:2}: {1}".format(*tpl)
+        print "Available Tasks:"
+        print "----------------"
+        for tpl in zip(range(len(tasks.task_allloaded)),tasks.task_allloaded.keys()):
+            print "{0:2}: {1}".format(*tpl)
 
 tlist = tlist_class()
 
@@ -187,10 +187,10 @@ class tget_class(t_class):
     tget name -> Retrieve the parameters stored under the respective name
     """
     def __call__(self,name=""):
-	tasks.task_instance.get(name)
-	tasks.task_instance.ws.update()
-	tpars(False,False)
-	
+        tasks.task_instance.get(name)
+        tasks.task_instance.ws.update()
+        tpars(False,False)
+
 tget = tget_class()
 
 class treset_class(t_class):
@@ -201,17 +201,17 @@ class treset_class(t_class):
 
     treset(par1=val1,par2=val2,...) -> reset all parameters to
     default and initialze with parameters provided.
-	
+
     treset(restorecallparameters=True,par1=val1,par2=val2,...)
     -> reset all parameters to their state at initialization, but
     keep the parameters provided during the last initialisation.
 
     """
     def __call__(self,restorecallparameters=False,**args):
-	tasks.task_instance.reset(restorecallparameters=False,**args)
-	tasks.task_instance.ws.evalInputParameters()
-	tpars(False,False)
-	
+        tasks.task_instance.reset(restorecallparameters=False,**args)
+        tasks.task_instance.ws.evalInputParameters()
+        tpars(False,False)
+
 treset = treset_class()
 
 class tput_class(t_class):
@@ -224,7 +224,7 @@ class tput_class(t_class):
     tput name -> Store parameters stored under 'name' (retrieve with tget name)
     """
     def __call__(self,name=""):
-	tasks.task_instance.put(name)
+        tasks.task_instance.put(name)
 
 tput = tput_class()
 
@@ -234,7 +234,7 @@ class tpar_class():
     Example:
 
     In ipython you can say something like
-    
+
     par x=2
 
     to set parameter x of the current task.
@@ -242,14 +242,14 @@ class tpar_class():
     If no parameters are provided, just print the input parameters.
     """
     def __call__(self,**args):
-	tasks.task_instance.ws(**args)
-	tasks.task_instance.ws.update()
+        tasks.task_instance.ws(**args)
+        tasks.task_instance.ws.update()
     def __repr__(self):
-#	if tasks.task_instance == None: return ""
-	print "Input parameters of task",tasks.task_name
-	print tasks.task_instance.ws.__repr__(workarrays=False,noninputparameters=False)
-	return ""
-    
+#       if tasks.task_instance == None: return ""
+        print "Input parameters of task",tasks.task_name
+        print tasks.task_instance.ws.__repr__(workarrays=False,noninputparameters=False)
+        return ""
+
 tpar=tpar_class()
 
 def tdel(*args):
@@ -258,7 +258,7 @@ def tdel(*args):
     Example:
 
     In ipython you can say something like
-    
+
     par x=2
 
     to set parameter x of the current task. If that was initially an ouput parameter,  it now becomes
@@ -267,7 +267,7 @@ def tdel(*args):
     tdel "x"
     """
     for p in args:
-	exec("del tasks.task_instance.ws."+p)
+        exec("del tasks.task_instance.ws."+p)
     tasks.task_instance.ws.update()
 
 

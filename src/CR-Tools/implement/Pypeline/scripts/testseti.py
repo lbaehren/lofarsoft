@@ -44,7 +44,7 @@ for ant in antennas[0:1]:
         print "t=",time.clock()-t0,"s -","Finished calculating average spectrum"
 
 dumpfile="seti-avspectrum.dmp"
-print "Dumping spectrum to file",dumpfile 
+print "Dumping spectrum to file",dumpfile
 avspectrum.writedump(dumpfile)
 #avspectrum.readdump(dumpfile)
 
@@ -68,5 +68,3 @@ for i in range(nfBlocks):
     plt.savefig("setispec"+str(i)+".pdf")
 """
 print time.asctime()
-
-

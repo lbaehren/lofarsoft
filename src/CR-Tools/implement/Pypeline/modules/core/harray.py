@@ -120,8 +120,8 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     elif (type(dimensions) in [list,tuple,IntVec]): ary.reshape(dimensions)
     elif (type(dimensions) in hAllArrayTypes): ary.reshape(dimensions.shape())
     if type(par) == dict:
-	for k,v in par.items():
-	     setattr(ary.par,k,v)
+        for k,v in par.items():
+            setattr(ary.par,k,v)
     if type(par) == tuple: setattr(ary.par,par[0],par[1])
     if type(par) == list: map(lambda elem:setattr(ary.par,elem[0],elem[1]),par)
     if type(header) == dict: ary.par.hdr.update(header)
@@ -201,14 +201,14 @@ def hArray_shape(self):
 
 def hArray_reshape(self, dimensions):
     """Reshape array to new dimensions if total number of elements is left
-    unchanged. 
+    unchanged.
     """
     apply(self.setDimensions,dimensions)
-    
+
 #   Raise ValueError otherwise. No, it is perfectly legal to rechange the vector if you want to ...
 #
 #    if reduce(lambda x, y : x*y, dimensions) == self.getSize():
-#        
+#
 #    else:
 #        raise ValueError("Total size of new array must not be changed.")
 
@@ -217,8 +217,8 @@ def hArray_return_slice_start(val):
     if val==Ellipsis:
         return 0
     elif type(val)==slice:
-         if (val.start == None): return 0
-         return val.start
+        if (val.start == None): return 0
+        return val.start
     elif type(val) in hListAndArrayTypes:
         return Vector(val)
     else:
@@ -370,9 +370,9 @@ def hArray_getSlicedArray(self,indexlist):
     Use array.reshape([dim1,dim2,...,dimN]) to set the dimensions.
     """
     if type(indexlist)==tuple:
-	indexlist=list(indexlist)
+        indexlist=list(indexlist)
     else:
-	indexlist=[indexlist]
+        indexlist=[indexlist]
     ary=hArray(self)
     ary.par=self.par
     ary.__slice__=tuple(indexlist)
@@ -525,10 +525,10 @@ def hArray_mprint(self):
 
 def hArray_transpose(self,ary=None):
     """
-    Usage: 
+    Usage:
     aryT=ary.transpose() -> return newly created transposed array from ary
     aryT.transpose(ary) -> aryT contains transposed array data from ary (aryT will be reshaped if necessary)
-    
+
     Transpose the current matrix (i.e. interchange the two lowest
     dimensions). This is always a copying operation, either a new
     array is created or data is copied to the array from the array
@@ -569,7 +569,7 @@ def hArray_transpose(self,ary=None):
     >> aryT.mprint()
 
     or simply
-        
+
     >> ary.transpose().mprint()
 
     """
@@ -642,15 +642,15 @@ def hArray_setHeader(self,**kwargs):
     """
     Usage:
 
-    ary.setHeader(par1=val1,par2=val2, ...) 
-    
+    ary.setHeader(par1=val1,par2=val2, ...)
+
     Set the parameters parN in the header of the array to the values
     valN. The header is stored as a dict in ary.par.hdr.
     """
     if not hasattr(self,"par"):
-	setattr(self,"par",hArray_par())
+        setattr(self,"par",hArray_par())
     if not hasattr(self.par,"hdr"):
-	setattr(self.par,"hdr",{})
+        setattr(self.par,"hdr",{})
     self.par.hdr.update(kwargs)
 
 def hArray_getHeader(self,parameter_name=None):
@@ -659,19 +659,19 @@ def hArray_getHeader(self,parameter_name=None):
 
     ary.getHeader() -> entire header dict
     ary.getHeader('parameter_name') -> header value
-    
+
     Get the parameter 'parameter_name' from the header of the array or
     return the entire dict, if no parameter name is specified. The
     header is stored as a dict in ary.par.hdr.
     """
     if hasattr(self,"par") and hasattr(self.par,"hdr"):
-	if parameter_name==None:
-	    return self.par.hdr
-	elif self.par.hdr.has_key(parameter_name):
-	    return self.par.hdr[parameter_name]
-	else:
-	    print "Error: Header keyword ",parameter_name,"not known."
-	    return None
+        if parameter_name==None:
+            return self.par.hdr
+        elif self.par.hdr.has_key(parameter_name):
+            return self.par.hdr[parameter_name]
+        else:
+            print "Error: Header keyword ",parameter_name,"not known."
+            return None
 
 
 #------------------------------------------------------------------------
@@ -684,7 +684,7 @@ def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varn
     Usage:
 
     array.write(filename,nblocks=1,block=0,dim=None,writeheader=None,clearfile=None)
-    
+
     Write an hArray to disk including a header file to read it back
     again. This is a simple interface to hArray_writeheader and then
     hWriteFileBinary.
@@ -740,7 +740,7 @@ y.par.xvalues -> hArray(int, [10], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=10
 
 The data files are stored in a directory with name test.pcr:
 
-ls test.pcr/ ->  data.bin		header.hdr		par.xvalues.pcr/
+ls test.pcr/ ->  data.bin               header.hdr              par.xvalues.pcr/
 
 Example using blocks:
 
@@ -757,24 +757,24 @@ y.par.xvalues -> hArray(int, [20], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 
     #Add proper ending if missing
     if not fn[-4:].upper() == ".PCR": fn+=".pcr"
     binfile=os.path.join(fn,"data.bin")
-    
+
     #Check if data and header directory is available
     if not os.path.exists(fn):
-	os.mkdir(fn)
+        os.mkdir(fn)
     elif not os.path.isdir(fn):
-	print "Error: Cannot write File. File",fn,"already exists and is not a directory!"
-	return    
+        print "Error: Cannot write File. File",fn,"already exists and is not a directory!"
+        return
 
     #Write header file if requested
     if not (writeheader==False):
         hArray_writeheader(self,fn,nblocks=nblocks,block=block,dim=dim,varname=varname,blockedIOnames=blockedIOnames,writeheader=writeheader,clearfile=clearfile)
-	if (block==0) and not (clearfile==False):
-	    if os.path.exists(binfile):
-		os.remove(binfile)
+        if (block==0) and not (clearfile==False):
+            if os.path.exists(binfile):
+                os.remove(binfile)
 
     if (clearfile):
         if os.path.exists(binfile):
-	    os.remove(binfile)
+            os.remove(binfile)
     self.writefilebinary(binfile,block*self.getSize())
 
 class hFileContainer():
@@ -782,15 +782,15 @@ class hFileContainer():
     Dummy class to hold a filename where an hArray is stored.
     """
     def __init__(self,path,name,vector=False):
-	self.path=path
-	self.name=name
-	self.vector=vector
-	self.__hFileContainer__=True
+        self.path=path
+        self.name=name
+        self.vector=vector
+        self.__hFileContainer__=True
     def __call__(self,path,name):
-	self.path=path
-	self.name=name
-	self.vector=vector
-    
+        self.path=path
+        self.name=name
+        self.vector=vector
+
 
 def hArrayReadDictArray(dictionary,path,block=-1,blockedIOnames=default_blockedIOnames,amalgateblocks=True):
     """
@@ -798,19 +798,19 @@ def hArrayReadDictArray(dictionary,path,block=-1,blockedIOnames=default_blockedI
     """
     newdictionary=dictionary.copy()
     for k,v in newdictionary.items():
-	if hasattr(v,"__hFileContainer__"):
-	    filename=os.path.join(path,v.name)
-	    parname=v.name[:-4]
-	    if parname in blockedIOnames:
-		bblock=block
-	    else:
-		bblock=-1
-	    if v.vector:
-		newdictionary[k]=hArrayRead(filename,block=bblock,amalgateblocks=amalgateblocks,restorevar=False).vec()
-	    else:
-		newdictionary[k]=hArrayRead(filename,block=bblock,amalgateblocks=amalgateblocks,restorevar=False)
-	elif type(v) == dict:
-	    newdictionary[k]=hArrayReadDictArray(v,path)
+        if hasattr(v,"__hFileContainer__"):
+            filename=os.path.join(path,v.name)
+            parname=v.name[:-4]
+            if parname in blockedIOnames:
+                bblock=block
+            else:
+                bblock=-1
+            if v.vector:
+                newdictionary[k]=hArrayRead(filename,block=bblock,amalgateblocks=amalgateblocks,restorevar=False).vec()
+            else:
+                newdictionary[k]=hArrayRead(filename,block=bblock,amalgateblocks=amalgateblocks,restorevar=False)
+        elif type(v) == dict:
+            newdictionary[k]=hArrayReadDictArray(v,path)
     return newdictionary
 
 def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=None,clearfile=None,blockedIOnames=default_blockedIOnames):
@@ -819,25 +819,25 @@ def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=No
     """
     newdictionary=dictionary.copy()
     for k,v in newdictionary.items():
-	if type(v) in hAllVectorTypes:
-	    parname=prefix+"."+k
-	    filename=parname+".pcr"
-	    if parname in blockedIOnames:
-		hArray_write(hArray(v), os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
-	    else:
-		hArray_write(hArray(v), os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
-	    newdictionary[k]=hFileContainer(path,filename,vector=True)
-	if type(v) in hAllArrayTypes:
-	    parname=prefix+"."+k
-	    filename=parname+".pcr"
-	    filename=prefix+"."+k+".pcr"
-	    if parname in blockedIOnames:
-		hArray_write(v, os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
-	    else:
-		hArray_write(v, os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
-	    newdictionary[k]=hFileContainer(path,filename)
-	elif type(v) == dict:
-	    newdictionary[k]=hArrayWriteDictArray(v,path,prefix+"."+k)
+        if type(v) in hAllVectorTypes:
+            parname=prefix+"."+k
+            filename=parname+".pcr"
+            if parname in blockedIOnames:
+                hArray_write(hArray(v), os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
+            else:
+                hArray_write(hArray(v), os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
+            newdictionary[k]=hFileContainer(path,filename,vector=True)
+        if type(v) in hAllArrayTypes:
+            parname=prefix+"."+k
+            filename=parname+".pcr"
+            filename=prefix+"."+k+".pcr"
+            if parname in blockedIOnames:
+                hArray_write(v, os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
+            else:
+                hArray_write(v, os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
+            newdictionary[k]=hFileContainer(path,filename)
+        elif type(v) == dict:
+            newdictionary[k]=hArrayWriteDictArray(v,path,prefix+"."+k)
     return newdictionary
 
 def hArray_writeheader(self, filename,nblocks=1,block=0,varname='',dim=None,blockedIOnames=default_blockedIOnames,writeheader=None,clearfile=None):
@@ -845,7 +845,7 @@ def hArray_writeheader(self, filename,nblocks=1,block=0,varname='',dim=None,bloc
     Usage:
 
     ary.writeheader(filename,nblocks=1,dim=None)
-    
+
     Write a header for an hArray binary data file, which was written with hWriteFileBinary.
 
     filename - the filename where the data was dumped. The header
@@ -861,7 +861,7 @@ def hArray_writeheader(self, filename,nblocks=1,block=0,varname='',dim=None,bloc
     dim - Specify a different dimension vector [dim1,dim2,dim3,
     ....,dimn] under which the array should be restored. The user is
     responsible for consistency.
-    
+
     varname - you can store the original variable name in which the
     hArray was stored.
 
@@ -874,14 +874,14 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     """
     fn=os.path.expandvars(os.path.expanduser(filename))
     if fn[-4:].upper() in [".PCR",".DAT",".HDR"]:
-	fn=fn[:-4]+'.pcr'
+        fn=fn[:-4]+'.pcr'
     else:
-	fn=fn+'.pcr'
+        fn=fn+'.pcr'
     if not os.path.exists(fn):
-	os.mkdir(fn)
+        os.mkdir(fn)
     elif not os.path.isdir(fn):
-	print "Error: Cannot write header. File",fn,"already exists!"
-	return
+        print "Error: Cannot write header. File",fn,"already exists!"
+        return
     f=open(os.path.join(fn,"header.hdr"),"wb")
     slicelength=self.getEnd()-self.getBegin()
     arydim=self.getDim()
@@ -902,7 +902,7 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
 def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blockedIOnames,amalgateblocks=True):
     """
     Usage:
-    
+
     ary=hArrayRead("testdata.hdr") -> new hArray read from testdata.hdr and testdata.dat
 
     Create and return a new hArray which contains data read from a
@@ -924,7 +924,7 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
      dimensions as the original data set with just the first dimension
      being nblock times bigger. If set to False, then an array with
      dimensions [nblocks,original dimensions ...] will be returned.
-    
+
 Example:
 
 x=hArray([1.0,2.0,3,4],name="test")
@@ -944,32 +944,32 @@ y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3
     binfile=os.path.join(fn,"data.bin")
     hdrfile=os.path.join(fn,"header.hdr")
     if not os.path.exists(fn):
-	print "Error hArrayRead: data directory ",fn," does not exist!"
-	return -1
+        print "Error hArrayRead: data directory ",fn," does not exist!"
+        return -1
     if not os.path.exists(hdrfile):
-	print "Error hArrayRead: data file ",hdrfile," does not exist!"
-	return -1
+        print "Error hArrayRead: data file ",hdrfile," does not exist!"
+        return -1
     f=open(hdrfile,"rb")
     exec f in locals()
     f.close()
     if ha_nblocks == 1 :
         block=0
     if block<0:
-	if amalgateblocks:
-	    dim = [ha_dim[0]*ha_nblocks]+ha_dim[1:]
-	else:
-	    dim = [ha_nblocks]+ha_dim
-	block=0
+        if amalgateblocks:
+            dim = [ha_dim[0]*ha_nblocks]+ha_dim[1:]
+        else:
+            dim = [ha_nblocks]+ha_dim
+        block=0
     else:
         dim=ha_dim
     par=pickle.loads(ha_parameters)
     par=hArrayReadDictArray(par,fn,blockedIOnames=blockedIOnames,amalgateblocks=amalgateblocks)
     ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=par)
     if sum(dim)>0:
-	if not os.path.exists(binfile):
-	    print "Error hArrayRead: data file ",binfile," does not exist!"
-	else:
-	    ary.readfilebinary(binfile,block*ary.getSize())
+        if not os.path.exists(binfile):
+            print "Error hArrayRead: data file ",binfile," does not exist!"
+        else:
+            ary.readfilebinary(binfile,block*ary.getSize())
 #    if restorevar & (not l["ha_varname"] == ''):
 #        print "Creating new object",l["ha_varname"]
 #        exec ("global "+l["ha_varname"]+"\n"+l["ha_varname"]+" = ary")
@@ -997,13 +997,13 @@ def ashArray(val):
 def asList(val):
     """
     Usage:
-    
+
     asList(val) -> list(val) if val is not a list already
 
     Returns its argument as a list, but leave it unchanged if it is
     already a list. Sets, vectors, arrays, etc. will be turned into
     list, strings will not.
-    
+
     Example:
 
     asList(3) -> [3]
@@ -1013,10 +1013,10 @@ def asList(val):
     if type(val)==list:
         return val
     elif type(val)==str:
-	return [val]
+        return [val]
     else:
-	return list(val)
-    
+        return list(val)
+
 # Fourier Transforms
 setattr(FloatArray,"fft",hFFTCasa)
 
@@ -1052,7 +1052,7 @@ for v in hAllArrayTypes:
     setattr(v,"setUnit",hArray_setUnit)
     setattr(v,"getHeader",hArray_getHeader)
     setattr(v,"setHeader",hArray_setHeader)
-    
+
 
 for v in hAllContainerTypes:
     for s in hAllContainerMethods:
@@ -1082,5 +1082,3 @@ for v in hNumericalContainerTypes:
     for s in hNumericalContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hNumericalContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
-
-

@@ -1,7 +1,7 @@
 """This module takes care of multi-file input for the pycr tools.
 
 With this module you are able to open multiple files and use operators on
-them to obtain data and metadata. These operators are ported from the 
+them to obtain data and metadata. These operators are ported from the
 pycrtools, but the output of that module is combined such that one object
 of the correct dimension is possible.
 
@@ -11,17 +11,17 @@ only data from some dipoles will be returned.
 At the moment the antennaset (like "HBA", "LBA_OUTER") still has to be set
 manually.
 
-The modules provides methods which work on a list of crfiles (opened with 
-pycrtools) to read data and metadata and set parameters. Also it provides 
-a class which needs a list of filenames, antennaselection and antennaset 
-and then uses the methods of the modules and then should from the outside 
+The modules provides methods which work on a list of crfiles (opened with
+pycrtools) to read data and metadata and set parameters. Also it provides
+a class which needs a list of filenames, antennaselection and antennaset
+and then uses the methods of the modules and then should from the outside
 work just like the pycrtools.
 
 Example::
 
     import os
     from pycrtools import IO
-    
+
     # Get list of files
     datadir=os.environ['LOFARSOFT']+'/data/lofar/trigger-2010-02-11/'
     tempfilenames=os.listdir(datadir)
@@ -29,13 +29,13 @@ Example::
     for file in tempfilenames:
         if '.h5' in file:
             filenames.append(datadir+file)
-    
+
     # Open files
     crfile=IO.open(filenames)
-    
+
     # Set the antennaset (Needed for antenna positions)
     crfile.setAntennaset('LBA_OUTER')
-    
+
     # Set a selection of dipoles
     # All dipoles
     crfile.setAntennaSelection(None)
@@ -43,27 +43,27 @@ Example::
     crfile.setAntennaSelection([128002016,128004036])
     # Selected by sequence number in file
     crfile.setAntennaSelection([5,20])
-    
+
     # Obtain keywords like the antenna IDs
     crfile['AntennaIDs']
-    
+
     # Obtain antenna positions, this is possible in three systems
     # Relative to array centre
     crfile.getRelativeAntennaPositions()
-    
+
     # In the ITRF frame
     crfile.getITRFAntennaPositions()
-    
+
     # In a local frame w.r.t. CS002LBA center
     crfile["AntennaPositions"]
-    
+
     # Read in data
     # Make an array first
     fxdata=crfile["emptyFx"]
-    
+
     block=5
     crfile.readData(fxdata,block)
-    
+
     # For all available keywords check
     crfile.keywords
 
@@ -84,7 +84,7 @@ __all__ = ['TBBdata', 'open']
 
 # Examples
 class TBBData(IOInterface):
-    """This class provides an interface to multi-file Transient Buffer 
+    """This class provides an interface to multi-file Transient Buffer
     Board data
     """
 
@@ -94,23 +94,23 @@ class TBBData(IOInterface):
         """Constructor
 
         Open files.
-        
+
         *filenames* Name of TBB hdf5 files to open
         *blocksize* Size of 1 block in samples
         *selection* Which antennas to select. 3 options:
-                    - list of Antenna IDs 
-                       (first 3 digits stationID 
+                    - list of Antenna IDs
+                       (first 3 digits stationID
                         next 3 digits RSPid (=RCUid/8)
                         next 3 digits RCUid)
                     - list of antenna numbers in file
                     - None (select all antennas)
         """
-        
+
         self.new_selection_method=False #True
         self.files=openAligned(filenames,blocksize)
-        
+
         self.setAntennaSelection(selection)
-                
+
         self.allfxdata=get(self.files,"emptyFx",False)
 
         self.setAntennaset()
@@ -135,14 +135,14 @@ class TBBData(IOInterface):
         return key in self.__keywords
 
     def setAntennaset(self,antennaset=None):
-        """This should set the antennaset variable. If this can be obtained         from the data file, this function should be changed, to set the 
+        """This should set the antennaset variable. If this can be obtained         from the data file, this function should be changed, to set the
         default value.
-        
+
         *antennaset* Antennaset, e.g. "HBA, LBA_OUTER", default None
         """
-        
+
         self.antennaset=antennaset
-        
+
         nyquistZone=get(self.files,"nyquistZone",True)
         if antennaset and "HBA" in antennaset and 1 in nyquistZone:
             if get(self.files,"sampleFrequency") > 180000000.0:
@@ -152,39 +152,39 @@ class TBBData(IOInterface):
             set(self.files,"nyquistZone",nyquistZone)
         else:
             nyquistZone=nyquistZone[0]
-        
+
         self.set("nyquistZone",nyquistZone)
         return True
 
     def __getitem__(self,keyword):
-        """This makes the get method available by using the normal bracket 
+        """This makes the get method available by using the normal bracket
         method.
         """
 
         return self.get(keyword)
 
     def __setitem__(self,keyword,value):
-        """This makes the set method available by using the normal bracket 
+        """This makes the set method available by using the normal bracket
         method.
         """
 
         self.set(keyword,value)
 
     def get(self,keyword):
-        """Get the values for the keyword for multiple files. Uses the 
+        """Get the values for the keyword for multiple files. Uses the
         modules get method on the files provided, unless the keyword is of
-        calibration metadata type, and then applies a 
+        calibration metadata type, and then applies a
         selection. Returns a single object.
-        
+
         Calibration metadata keywords:
-           
+
         A method to show which keywords are available should be added.
-        
-        *keyword* Variable (data or metadata) to be read. 
+
+        *keyword* Variable (data or metadata) to be read.
         Example "antennaIDs" , "shift", "TIME"
         """
 
-        if keyword in self.__metadataKeywords: 
+        if keyword in self.__metadataKeywords:
             data=md.get(keyword, self.get("antennaIDs"), self.antennaset, True)
             return data
         elif keyword is "maxblocknr":
@@ -197,35 +197,35 @@ class TBBData(IOInterface):
                 return applySelection(self.selection,data)
 
     def getAllList(self,keyword):
-        """Like the get method, but returns the value for all dipoles, 
+        """Like the get method, but returns the value for all dipoles,
         per file read. Returns a list of objects.
-        
-        *keyword* Variable to read 
+
+        *keyword* Variable to read
         """
 
         return get(self.files,keyword,True)
 
     def getAll(self,keyword):
         """Returns the values for all dipoles, not only the selected.
-        
+
         *keyword* Variable to read
         """
 
         return get(self.files,keyword,False)
 
     def set(self,keyword,value):
-        """Uses the set method of the module to set the value for all 
+        """Uses the set method of the module to set the value for all
         files
         """
-        
+
         set(self.files,keyword,value)
         if keyword == "blocksize":
             print "Adjusting internal allfxdata array"
             self.allfxdata=get(self.files,"emptyFx",False)
-    
+
     def getTimeseriesData(self, data, block=-1):
-        """Read a block of data for the selected antennas. 
-        
+        """Read a block of data for the selected antennas.
+
         *data* hArray to write the data in.
         *block*  Block for which the data should be returned. If negative
                  it will return the next block.
@@ -246,7 +246,7 @@ class TBBData(IOInterface):
 
     def setAntennaSelection(self, selection):
         """Set an antennaselection.
-        
+
         *selection* list of Antenna IDs or antenna numbers in file.
         """
 
@@ -269,7 +269,7 @@ class TBBData(IOInterface):
 
     def enableFastSelection(self):
         """This function enables selection of dipoles in the files,
-        to read out only the data that is actually used. This is 
+        to read out only the data that is actually used. This is
         experimental and has to be tested to work. There is one problem
         that at least 1 dipole has to be selected for each file.
         """
@@ -289,7 +289,7 @@ class TBBData(IOInterface):
                 self.files[filenr].set("selectedAntennas",list(selVec2[list(selForFile[0:nrSel])]-startAnt))
 
     def enableCalibration(self,antennaset=None):
-        """Returns  a calibrator object from the calibration class. 
+        """Returns  a calibrator object from the calibration class.
         This can be used to do a phase calibration on the fftdata.
         For this the antennaset should have been specified or given as
         a parameter.
@@ -302,21 +302,21 @@ class TBBData(IOInterface):
             antennaset=self.antennaset
         if not self.antennaset:
             self.setAntennaset(antennaset)
-        
+
         self.__calibrate = calibration.AntennaCalibration(self.files,antennaset,self.selection)
 
         # Sets a shift due to the clockoffsets such
         # that all the data starts at the same moment.
         # Only needed for multi-station data.
-        self.__calibrate.applyShift(self.files) 
+        self.__calibrate.applyShift(self.files)
 
     def getRelativeAntennaPositions(self):
         """Returns relative antenna positions for selected antennas, or all
         antennas if no selection was applied.
-        
+
         Arguments:
         None
-        
+
         Return value:
         a two dimensional array containing the Cartesian position of
         each antenna in meters in local coordinates from a predefined
@@ -324,16 +324,16 @@ class TBBData(IOInterface):
         So that if `a` is the returned array `a[i]` is an array of
         length 3 with positions (x,y,z) of antenna i.
         """
-    
+
         return self.get("RelativeAntennaPositions")
-    
+
     def getITRFAntennaPositions(self):
         """Returns antenna positions for selected antennas, or all
         antennas if no selection was applied.
-        
+
         Arguments:
         None
-        
+
         Return value:
         a two dimensional array containing the Cartesian position of
         each antenna in meters in local coordinates from a predefined
@@ -341,7 +341,7 @@ class TBBData(IOInterface):
         So that if `a` is the returned array `a[i]` is an array of
         length 3 with positions (x,y,z) of antenna i.
         """
-    
+
         return self.get("AbsoluteAntennaPositions")
 
     def setFrequencyRangeByIndex(self, nfmin, nfmax):
@@ -350,11 +350,11 @@ class TBBData(IOInterface):
         If **frequencies** is the array of frequencies available for the
         selected blocksize, then subsequent calls to `getFFTData` will
         return data corresponding to frequencies[nfmin:nfmax].
-        
+
         Arguments:
         *nfmin* minimum frequency as index into frequency array
         *nfmax* maximum frequency as index into frequency array
-        
+
         Return value:
         This method does not return anything.
         It raises an IndexError if frequency selection cannot be set
@@ -381,7 +381,7 @@ class TBBData(IOInterface):
         This method returns a FloatVector with the selected frequencies
         in Hz.
         """
-        
+
         frequencies = self.files[0]["Frequency"]
 
         if self.__nfmin != None and self.__nfmax != None:
@@ -423,7 +423,7 @@ class TBBData(IOInterface):
                 self.__calibrate.applyCalibration(self.scratchfft)
 
             data[...].copy(self.scratchfft[...,self.__nfmin:self.__nfmax])
-            
+
         else:
             # Perform FFT
             data[...].fftcasa(self.scratchfx[...], self["nyquistZone"])
@@ -440,8 +440,8 @@ def open(filenames,blocksize=1024,selection=None):
     *filenames* List of names from the files to open
     *blocksize* NR samples per data block (import for FFT resolution
     *selection* Which antennas to select. 3 options:
-                - list of Antenna IDs 
-                   (first 3 digits stationID 
+                - list of Antenna IDs
+                   (first 3 digits stationID
                     next 3 digits RSPid (=RCUid/8)
                     next 3 digits RCUid)
                 - list of antenna numbers in file
@@ -458,16 +458,16 @@ def openAligned(filenames,blocksize=1024):
     if not isinstance(filenames,list):
         filenames=[filenames]
 
-    files=[]    
+    files=[]
     for filename in filenames:
         if os.path.isfile(filename):
             files.append(cr.crfile(filename))
         else:
             print "File",filename,"could not be opened. Trying next file ..."
-    
+
     # check if any files could be opened
     assert len(files) > 0
-    
+
     times=get(files,"TIME",False)
     print 'these are the time from OLD: ', times
     tmin=times.min()
@@ -498,11 +498,11 @@ def openAligned(filenames,blocksize=1024):
 
 def get(files, keyword,return_as_list=True):
     """ Get data or metadata for the specified keyword. If not to be returned as list
-    it tries to return is as 1 object. 
-    
-    If the value is the same for all files, this will be returned. 
-    If the value is an IntVec, FloatVec or an hArray where the first dimensions is 
-    the same as the number of selected antennas, an equal type object will be returned 
+    it tries to return is as 1 object.
+
+    If the value is the same for all files, this will be returned.
+    If the value is an IntVec, FloatVec or an hArray where the first dimensions is
+    the same as the number of selected antennas, an equal type object will be returned
     with the value for all the antennas.
     If neither of these can be achieved it will return a list with values per file.
 
@@ -518,8 +518,8 @@ def get(files, keyword,return_as_list=True):
     else:
         ret=files[0][keyword]
         if isinstance(ret,(cr.IntVec,cr.FloatVec)) and ( len(ret)==files[0]["nofAntennas"] or len(ret)==files[0]["nofSelectedAntennas"]):
-                for i in range(1,len(files)):
-                    ret.extend(files[i][keyword])
+            for i in range(1,len(files)):
+                ret.extend(files[i][keyword])
         elif isinstance(ret,(cr.IntArray,cr.FloatArray,cr.ComplexArray)) and ( ret.getDim()[0] == files[0]["nofAntennas"] or ret.getDim()[0] == files[0]["nofSelectedAntennas"]):
             NrAnts=get(files,"nofAntennas")
             TotNrAnts=sum(NrAnts)
@@ -553,7 +553,7 @@ def get(files, keyword,return_as_list=True):
     return ret
 
 def set(files, keyword, value):
-    """ Set the keyword with the value for all the files. Currently two options are 
+    """ Set the keyword with the value for all the files. Currently two options are
     supported:
         - One value for all files, e.g. files.set("block",1024)
         - A list with values per file.
@@ -571,7 +571,7 @@ def set(files, keyword, value):
     return True
 
 def readFx(files,fxdata,block=-1):
-    """read a block of raw timeseries data for all (selected) antennas. 
+    """read a block of raw timeseries data for all (selected) antennas.
 
     *fxdata* Array in which to return the data
     *block*  Block for which data should be read
@@ -583,7 +583,7 @@ def readFx(files,fxdata,block=-1):
             block[num]=bl+1
 
     set(files,"block",block)
-     
+
     selAnts=get(files,"nofSelectedAntennas")
     antBeg=0
     antEnd=0
@@ -597,7 +597,7 @@ def readFx(files,fxdata,block=-1):
 def applySelection(selection,array,rArray=None):
     """ Select from the data only the applied selection
 
-    *selection* Number of antennas for which to return the data 
+    *selection* Number of antennas for which to return the data
                 (NOT antennaIDs, the can be converted by antIDsToSelection)
     *array*     Array on which to apply the selection
     *rArray*    Array to return the selected data in.
@@ -628,7 +628,7 @@ def applySelection(selection,array,rArray=None):
             if not rArray:
                 rArray=cr.hArray(copy=array,dimensions=dim,fill=0)
             rArray[...].copy(array[selection][...])
-        
+
         if returnArray:
             return rArray
         else:
@@ -642,12 +642,12 @@ def applySelection(selection,array,rArray=None):
 
 def antIDsToSelection(files,SelAntIDs):
     """Gives the numbers of the selected antennas, according to the antenna IDs
-    
+
     *files*   A list of cr files
     *SelAntIDs* IDs of the antenna selection (1e6*stationID+1e3*RSPid+RCUid )
                 where RSPid = RCUid / 8
-    
-    returns: List with antenna selection.            
+
+    returns: List with antenna selection.
     """
 
     allantIDs=get(files,"antennaIDs",False)
@@ -658,4 +658,3 @@ def antIDsToSelection(files,SelAntIDs):
             selection.append(num)
 
     return selection
-

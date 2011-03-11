@@ -124,10 +124,9 @@ if write_image:
     keys = imparam.keys()
     keys.sort()
     for key in keys:
-    	hdr.update(key, imparam[key])
+        hdr.update(key, imparam[key])
 
 # Check if file exists and overwrite if so
     if os.path.isfile('output.fits'):
-    	os.remove('output.fits')
+        os.remove('output.fits')
     hdu.writeto('output.fits')
-

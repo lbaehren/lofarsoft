@@ -1,12 +1,12 @@
-""" 
+"""
   Module rficlean.py. Part of the LOFAR Cosmic Ray pipeline.
   Works on a given CR event file, cleaning the spectrum from narrow-band interference.
   It can also do gain calibration, i.e. flattening the spectrum.
   Mostly taken from testrfi3.py.
-  
-  !! Working with event files opened by IO submodule of pycrtools. 
+
+  !! Working with event files opened by IO submodule of pycrtools.
   !! This gives compatibility issues down the line in workspaces.py and harray.py
-  
+
 .. moduleauthor:: Arthur Corstanje <A.Corstanje@astro.ru.nl>
 """
 
@@ -22,7 +22,7 @@ def cleanSpectrum(crfile):
 
     # note that the number of bins (e.g. nbins=256) is the number of bins after spline fitting
     ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256)#256) #fittype="POLY" or "BSPLINE"
-    ws.makeAverageSpectrum(ws) 
+    ws.makeAverageSpectrum(ws)
     # ? average spectrum over all antennas or over all blocks for each antenna?
 
     #------------------------------------------------------------------------
@@ -92,9 +92,8 @@ def cleanSpectrum(crfile):
 
 
 
-    
+
 # Execute doctests if module is executed as script
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-

@@ -58,12 +58,12 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     """
     if (xvalues==None):
         if hasattr(self.par,"xvalues"):
-	    if hasattr(self,"__slice__"):
-	        xvalues=self.par.xvalues.getSlicedArray(self.__slice__)
-	    else:
-	        xvalues=self.par.xvalues
+            if hasattr(self,"__slice__"):
+                xvalues=self.par.xvalues.getSlicedArray(self.__slice__)
+            else:
+                xvalues=self.par.xvalues
         else:
-	    xvalues=hArray(range(len(self.vec())))
+            xvalues=hArray(range(len(self.vec())))
     xunit=xvalues.getUnit().replace("\\mu","$\\mu$")
     if not xunit=="": xunit=" ["+xunit+"]"
     yunit=self.getUnit().replace("\\mu","$\\mu$")
@@ -127,8 +127,8 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     xlen=len(xvalues.vec())
     while (iterate):
         if ylen<xlen:
-	    _plot(xvalues.vec()[:ylen],self.vec(),**plotargs)
-	else:
+            _plot(xvalues.vec()[:ylen],self.vec(),**plotargs)
+        else:
             _plot(xvalues.vec(),self.vec(),**plotargs)
         if not highlight==None:
             if type(nhighlight)==int: nhighlight=[nhighlight]
@@ -157,8 +157,6 @@ def plotconst(xvalues,y):
     Usage:
 
     plotconst(xvalues,y).plot() -> will plot a constant line with y-value 'y' for the xvalues provided.
-    
+
     """
     return hArray([y,y],xvalues=hArray([xvalues.vec()[0],xvalues.vec()[-1]]))
-
-    

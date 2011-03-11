@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 
 from pycrtools import *
 import os
@@ -45,7 +45,7 @@ elrange=(59.0699-30,59.0699+30,1.5)
 # (end) configuration
 
 
-antfile = open(antennafilename,'r') 
+antfile = open(antennafilename,'r')
 antfile.seek(0)
 str = ''
 while antennaset not in str:
@@ -108,7 +108,7 @@ for i in range(0,nrfiles):
     files[i]["blocksize"]=blocksize
     shifts.append(files[i]["SAMPLE_NUMBER"])
     files[i]["NyquistZone"]=NyquistZone
-    
+
 #totAntennas=file["nofSelectedAntennas"]
 #AntennasInFile=file["nofSelectedAntennas"]
 
@@ -118,7 +118,7 @@ for i in range(0,nrfiles):
     localmax=shifts[i].max()
     if localmax>shiftmax:
         shiftmax=localmax
-    
+
 
 #multiple number uses SAMPLE_NUMBER and TIME
 for i in range(0,nrfiles):
@@ -213,7 +213,7 @@ weights.phasetocomplex(phases)
 for i in range(nrfiles):
     file_efieldtemp[i].setHistory(False)
 
-    
+
 file_efield.setHistory(False)
 file_fft.setHistory(False)
 shifted_fft.setHistory(False)
@@ -315,4 +315,3 @@ hdulist.writeto(data_directory+"/image32.fits")
 #    file["block"]=block
 #    file_efield.read(file,"Fx").none()
 #    print block," ",file_efield[0].max()
-

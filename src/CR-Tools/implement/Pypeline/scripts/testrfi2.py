@@ -14,7 +14,7 @@ filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 #Creating Workspaces
 #------------------------------------------------------------------------
 
-ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")  
+ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")
 ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256)#256) #fittype="POLY" or "BSPLINE"
 ws.makeAverageSpectrum(ws)
 #------------------------------------------------------------------------
@@ -27,7 +27,7 @@ ws["ncoeffs"]=12
 if ws["datafile"]["Observatory"]=='LOFAR':
     ws["numin"]=12 #MHz
     ws["numax"]=82 #MHz
-ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")  
+ws=CRMainWorkSpace(filename=filename,doplot=True,verbose=True,modulename="ws")
 ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256)#256) #fittype="POLY" or "BSPLINE"
 if ws["datafile"]["Observatory"]=='LOPES':
     ws["numin"]=43 #MHz
@@ -124,7 +124,7 @@ phaseonly *= (clean[0,2000:5000].stddev()/phaseonly[0,2000:5000].stddev()).val()
 
 #phaseonly /= ws["datafile"]["blocksize"]
 
-if ws["doplot"]: 
+if ws["doplot"]:
     rfitime-=rfitime[0].val()
     dirty[10].plot(xvalues=rfitime)
     clean[10].plot(xvalues=rfitime,clf=False)
@@ -135,4 +135,3 @@ if ws["doplot"]:
 #--------------------------------------------------------------------------------
 #End of Calculations
 #--------------------------------------------------------------------------------
-

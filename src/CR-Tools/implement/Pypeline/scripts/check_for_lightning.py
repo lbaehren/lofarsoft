@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 
 from pycrtools import *
 import os
@@ -21,7 +21,7 @@ trackHistory=False
 # Get environment variables
 LOFARSOFT = os.environ["LOFARSOFT"].rstrip('/')+'/'
 LOFAR_DATA_DIR = os.environ['LOFAR_DATA_DIR'].rstrip('/')+'/'
-data_directory = LOFAR_DATA_DIR+"/lightning/" 
+data_directory = LOFAR_DATA_DIR+"/lightning/"
 stationname="CS302"
 #filenames=["lightning_16_48.h5"]
 filenames=["lightning_17_23.h5"]
@@ -29,7 +29,7 @@ nrfiles=len(filenames)
 antennaset="LBA_INNER"
 blocksize=2**16
 nblocks=4074
-startblock=1 
+startblock=1
 # (end) configuration
 
 # (start) Imaging
@@ -71,4 +71,3 @@ print "Average: ",file_average.mean().val()
 
 print "t=",time.time()-tstart,"s -","Total run time"
 print "time: ",time.time()
-

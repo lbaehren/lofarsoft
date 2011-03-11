@@ -31,7 +31,7 @@ FarField=False
 #------------------------------------------------------------------------
 
 
-ws=CRMainWorkSpace(filename=filename,fittype="POLY",ncoeffs=8,nbins=1024,doplot=False,verbose=False,modulename="ws")  
+ws=CRMainWorkSpace(filename=filename,fittype="POLY",ncoeffs=8,nbins=1024,doplot=False,verbose=False,modulename="ws")
 ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256) #fittype="POLY" or "BSPLINE"
 
 ws["numin"]=12 #MHz
@@ -49,7 +49,7 @@ Time value arrays.
 """
 cr_time=cr["Time"].setUnit("\\mu","s")
 
-#ws["frequency"]=cr["Frequency"] 
+#ws["frequency"]=cr["Frequency"]
 # Attention don't do this here when later using it in caluclating
 #phases that require seconds and Hz as units
 
@@ -106,7 +106,7 @@ positions. For this we will use the method getCalData:
 """
 antennaset="LBA_OUTER"
 antennafilename=LOFARSOFT+"/data/calibration/AntennaArrays/"+stationname+"-AntennaArrays.conf"
-antfile = open(antennafilename,'r') 
+antfile = open(antennafilename,'r')
 antfile.seek(0)
 str = ''
 while antennaset not in str:
@@ -227,11 +227,11 @@ t2w=cr_time.findlowerbound(329.0+5.)
 #
 cr_efield_shifted[1,t1:t2].plot(xvalues=cr_time[t1:t2])
 for ant in range(3,96,2):
-  cr_efield_shifted[ant,t1:t2].plot(xvalues=cr_time[t1:t2],clf=False)
+    cr_efield_shifted[ant,t1:t2].plot(xvalues=cr_time[t1:t2],clf=False)
 raw_input("Plotted shifted timeseries - press Enter to continue...")
 
 """
-The beamforming we here do by simply adding the data in the time domain 
+The beamforming we here do by simply adding the data in the time domain
 """
 antennalist = range(1,96,2)
 cr_efield_shifted_added=hArray(float,dimensions=cr_time,name="beamformed E-field",xvalues=cr_time)
@@ -289,7 +289,7 @@ cr_fft_sel[...].fftw(cr_efield_sel[...])
 #cartesian=azel.new()
 delays=hArray(float,dimensions=[ws["nofAntennas"]])
 weights=hArray(complex,dimensions=cr_fft_sel)
-phases=hArray(float,dimensions=cr_fft_sel) 
+phases=hArray(float,dimensions=cr_fft_sel)
 shifted_fft=hArray(complex,dimensions=[ws["nofAntennas"],myfftsize])
 beamformed_fft=hArray(complex,dimensions=[myfftsize])
 beamformed_efield=hArray(float,dimensions=[myblocksize])
@@ -304,7 +304,7 @@ def beamform_function(azel_in):
         azel[1] = azel_in[1]
         azel[2] = azel_in[2]
         hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
-        hGeometricDelays(delays,antenna_positions,cartesian,False)   
+        hGeometricDelays(delays,antenna_positions,cartesian,False)
         hDelayToPhase(phases,frequencies,delays)
         hPhaseToComplex(weights,phases)
         shifted_fft=hArray(complex,dimensions=[ws["nofAntennas"],myfftsize])

@@ -134,7 +134,7 @@ phaseonly *= (clean[0,2000:5000].stddev()/phaseonly[0,2000:5000].stddev()).val()
 
 #phaseonly /= ws["datafile"]["blocksize"]
 
-if ws["doplot"]: 
+if ws["doplot"]:
     rfitime-=rfitime[0]
     dirty[faulty_antenna].plot(xvalues=rfitime)
     clean[faulty_antenna].plot(xvalues=rfitime,clf=False)
@@ -145,4 +145,3 @@ if ws["doplot"]:
 #--------------------------------------------------------------------------------
 #End of Calculations
 #--------------------------------------------------------------------------------
-

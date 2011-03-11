@@ -11,7 +11,7 @@ import pycrtools as cr
 
 def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
     """Return metadata values, given the antennaIDs and the antennaset.
-    
+
     Required arguments:
 
     ================== ====================================================
@@ -78,7 +78,7 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
 
     for station in allStIDs:
         allValues[station]=functionname(int(station),antennaset,return_as_hArray)
-   
+
     if not return_as_hArray:
         if keyword not in ["StationPositions","ClockCorrection"]:
             if dim2==1:
@@ -87,7 +87,7 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
                 mdata=np.zeros((len(antennaIDs),allValues[allStIDs[0]].shape[1]),dtype=allValues[allStIDs[0]].dtype)
 
             for st in allStIDs:
-                mdata[stationIDs==st]=allValues[st][rcuIDs[stationIDs==st]]    
+                mdata[stationIDs==st]=allValues[st][rcuIDs[stationIDs==st]]
         else:
             if dim2==1:
                 mdata=np.zeros(len(antennaIDs))
@@ -95,8 +95,8 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
                 mdata=np.zeros((len(antennaIDs),allValues[allStIDs[0]].shape[0]),dtype=allValues[allStIDs[0]].dtype)
 
             for st in allStIDs:
-                mdata[stationIDs==st]=allValues[st]   
-    else:    
+                mdata[stationIDs==st]=allValues[st]
+    else:
         #import pycrtools as hf
         if keyword in ["StationPhaseCalibration"]:
             if dim2==1:
@@ -167,7 +167,7 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
            [ 0.98463207 +6.80081617e-03j,  0.98463138 +6.89975906e-03j,
              0.98463069 +6.99870187e-03j, ...,  0.98299670 +5.71319125e-02j,
              0.98299096 +5.72306908e-02j,  0.98298520 +5.73294686e-02j],
-           ..., 
+           ...,
            [ 1.03201290 +7.39535744e-02j,  1.03144532 +8.14880844e-02j,
              1.03082273 +8.90182487e-02j, ..., -0.82551740 -6.23731331e-01j,
             -0.82094046 -6.29743206e-01j, -0.81631975 -6.35721497e-01j],
@@ -179,11 +179,11 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
             -1.01290481 +4.34513198e-01j, -1.01526883 +4.28960464e-01j]])
 
         >>> metadata.getStationPhaseCalibration(122,"LBA_OUTER")
-        Calibration data not yet available. Returning 1 
+        Calibration data not yet available. Returning 1
         array([[ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
            [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
            [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
-           ..., 
+           ...,
            [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
            [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j],
            [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j]])
@@ -202,7 +202,7 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
     antennasetToMode["HBA"]="5"
     antennasetToMode["HBA0"]="5"
     antennasetToMode["HBA1"]="5"
-     
+
     modenr=antennasetToMode[antennaset]
     if isinstance(station, int):
         # Convert a station id to a station name
@@ -219,7 +219,7 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
         print "Calibration data not yet available for station",station,"Returning 1"
         if return_as_hArray:
             #import pycrtools as hf
-            complexdata=cr.hArray(complex,[96,512],fill=complex(1,0))    
+            complexdata=cr.hArray(complex,[96,512],fill=complex(1,0))
         else:
             complexdata=np.zeros(shape=(96,512),dtype=complex)
             complexdata.real=1
@@ -259,11 +259,11 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
     else:
         data=np.array(data)
         data.resize(512,96,2)
-        
+
         complexdata=np.empty(shape=(512,96),dtype=complex)
         complexdata.real=data[:,:,0]
         complexdata.imag=data[:,:,1]
-        
+
         return complexdata.transpose()
 
 def getCableDelays(station,antennaset,return_as_hArray=False):
@@ -386,38 +386,38 @@ def idToStationName(station_id):
 def stationNameToID(station_name):
     """Returns the station id from a station name
     """
-    
+
     digit1=int(station_name[2])
     digit2=int(station_name[3])
     digit3=int(station_name[4])
-    
+
     if digit1==6:
         digit1=2
     elif digit1>1:
         digit2=(digit1-1)*2+digit2
         digit1=1
-    
+
     station_id=100*digit1+10*digit2+digit3
-    
+
     return station_id
 
-    
+
 def stationNameToNR(station_name):
     """Returns the station id from a station name
     """
-    
+
     digit1=int(station_name[2])
     digit2=int(station_name[3])
     digit3=int(station_name[4])
-    
+
     if digit1==6:
         digit1=2
     elif digit1>1:
         digit2=(digit1-1)*2+digit2
         digit1=1
-    
+
     station_nr=str(digit1)+str(digit2)+str(digit3)
-    
+
     return station_nr
 
 def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
@@ -602,7 +602,7 @@ def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
 
     # Check if requested antennaset is known
     assert antennaset in names
-    
+
     if "LBA" in antennaset:
         antennatype="LBA"
     elif "HBA" in antennaset:
@@ -656,10 +656,10 @@ def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
         # Even numbered antennas
         antpos.extend([float(line[3])+stationX,float(line[4])+stationY,float(line[5])+stationZ])
 
-    
+
     # Make the appropriate selection
     antpos=np.asarray(antpos).reshape(2*int(nrantennas),int(nrdir))
-    
+
     if antennatype == "LBA":
         # There are three types of feed
         # H for HBA
@@ -687,11 +687,11 @@ def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
             feedsel=feedsel[len(str(nrset)):]
             for i in range(nrset):
                 feeds+=feedsel
-         
+
         indexselection=[]
         for i in range(len(feeds)):
             if feeds[i]=='l':
-                # The 'l' feeds are the last 96 numbers of the total list 
+                # The 'l' feeds are the last 96 numbers of the total list
                 indexselection.append(i+96)
             elif feeds[i]=='h':
                 # The 'h' feeds are the first 96 numbers of the total list
@@ -700,16 +700,16 @@ def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
                 # This selection is not yet supported
                 assert False
         antpos=antpos[indexselection]
-    
+
 
 
     # Return requested type
     if return_as_hArray:
         #import pycrtools as hf
-        antpos=cr.hArray(antpos)        
+        antpos=cr.hArray(antpos)
     #else:
     #    antpos=np.asarray(antpos).reshape(2*int(nrantennas),int(nrdir))
-    
+
     return antpos
 
 
@@ -754,12 +754,12 @@ def getAntennaPositions(station,antennaset,return_as_hArray=False):
     lonlatCS002=cr.hArray([6.869837540*np.pi/180.,52.91512249*np.pi/180.]) # 49.344
     ITRFCS002=cr.hArray([3826577.09500000,461022.916010,5064892.767])
     returnpos=convertITRFToLocal(itrfpos,refpos=ITRFCS002,reflonlat=lonlatCS002)
-    
+
     if not return_as_hArray:
         returnpos=returnpos.toNumpy()
 
     return returnpos
-    
+
 
 def getClockCorrection(station,antennaset="HBA",time=1278480000):
     """Get clock correction for superterp stations in seconds. Currently static values.
@@ -904,15 +904,15 @@ def convertITRFToLocal(itrfpos,refpos,reflonlat):
 
     from numpy import sin
     from numpy import cos
-    
+
     lon=reflonlat[0]
     lat=reflonlat[1]
     Arg0=cr.hArray([-sin(lon),-sin(lat)*cos(lon),cos(lat)*cos(lon)])
     Arg1=cr.hArray([cos(lon),-sin(lat)*sin(lon),cos(lat)*sin(lon)])
     Arg2=cr.hArray([0.0,cos(lat),sin(lat)])
-    
+
     itrfpos.sub(refpos)
-    
+
     returnpos=cr.hArray(float,itrfpos.shape())
 
     returnpos[...].muladd(Arg0,itrfpos[...,0])
@@ -920,4 +920,3 @@ def convertITRFToLocal(itrfpos,refpos,reflonlat):
     returnpos[...].muladd(Arg2,itrfpos[...,2])
 
     return returnpos
-

@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 
 import os
 import numpy as np
@@ -83,7 +83,7 @@ sin_freq=20.
 for block in range(startblock,startblock+nblocks):
 
     crfile.readdata(fxdata,block)
-    
+
 #    fxdata.mul(sweights)
     #Quality check, to be made
 
@@ -96,7 +96,7 @@ for block in range(startblock,startblock+nblocks):
     fftdata[...].fftcasa(fxdata[...],nyquistZone)
     # Apply calibration for station clock, antenna cables and station calibration (now only for LBA_OUTER, blocksize = 1024 )
     #MyCal.applyCalibration(fftdata)
-    
+
 #plot data:
 
 fftdata.abs()

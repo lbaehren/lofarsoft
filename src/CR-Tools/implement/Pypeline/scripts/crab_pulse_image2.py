@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 
 from pycrtools import *
 import os
@@ -12,8 +12,8 @@ import pyfits
 # Data should show the Crab Nebula and a giant pulse in limited unknown bandwidth
 # The position of the Crab Nebula should be (pulse3) Az,El 206.229,57.0392
 #                                           (pulse1) Az,El 183.831, 59.0699
-#					                        (pulse5) Az,El 224.908, 52.6475
-# Data can be obtained from: 
+#                                                               (pulse5) Az,El 224.908, 52.6475
+# Data can be obtained from:
 # mkdir $LOFAR_DATA_DIR/Crab
 # scp -r <username>@helios:/mnt/lofar/CS1_tbb/CrabFirstTrigger/pulse1 $LOFAR_DATA_DIR/Crab/
 # scp -r <username>@helios:/mnt/lofar/CS1_tbb/CrabFirstTrigger/pulse3 $LOFAR_DATA_DIR/Crab/
@@ -84,7 +84,7 @@ if filenames==filenames5:
 # Obtain the antenna positions from a calibration file
 # This should be changed to obtain the positions from the hdf5
 # This is limited to a single station set in the configuration variables
-antfile = open(antennafilename,'r') 
+antfile = open(antennafilename,'r')
 antfile.seek(0)
 str = ''
 while antennaset not in str:
@@ -105,7 +105,7 @@ antenna_positions=hArray(ant,[2*int(nrantennas),int(nrdir)])
 
 # Get gain calibration coefficients
 # At the moment only variables for CS302 HBA avaiable.
-# Maybe can also add them for RS503 
+# Maybe can also add them for RS503
 # Add a check if the file correct file is avaiable?
 
 # These where obtained by correlation on the source for a dataset from an earlier time
@@ -159,7 +159,7 @@ for i in range(0,nrfiles):
     localmax=shifts[i].max()
     if localmax>shiftmax:
         shiftmax=localmax
-    
+
 
 # multiple number uses SAMPLE_NUMBER and TIME
 for i in range(0,nrfiles):
@@ -267,7 +267,7 @@ weights.phasetocomplex(phases)
 for i in range(nrfiles):
     file_efieldtemp[i].setHistory(False)
 
-    
+
 file_efield.setHistory(False)
 file_fft.setHistory(False)
 shifted_fft.setHistory(False)
@@ -356,7 +356,7 @@ hdulist = pyfits.HDUList([hdu])
 prihdr = hdulist[0].header
 (0-azrange[0])/azrange[2]
 
-prihdr.update('CTYPE1','??LN-CAR')  #This means "unkown longitude" with CARtesian projection, the 
+prihdr.update('CTYPE1','??LN-CAR')  #This means "unkown longitude" with CARtesian projection, the
 #                                   #casaviewer asumes this the be J2000 because it probably can't do AZEL
 prihdr.update('CRVAL1',azrange[0])  #value of the axis at the reference point "CRPIX"
 prihdr.update('CDELT1',azrange[2])  #increment from the reference pixel to the next pixel
@@ -365,7 +365,7 @@ prihdr.update('CRPIX1',0.5)          #pixel position at which the axis has the "
 prihdr.update('CUNIT1','deg')       #the unit in which "CRVAL" and "CDELT" are given
 
 prihdr.update('CTYPE2','??LT-CAR')  #This means "unkown latitude" with CARtesian projection, see above
-prihdr.update('CRVAL2',0.) 
+prihdr.update('CRVAL2',0.)
 prihdr.update('CDELT2',elrange[2])
 prihdr.update('CROTA2',0.)
 prihdr.update('CRPIX2',(0.5-elrange[0])/elrange[2])
@@ -382,10 +382,8 @@ hdulist.writeto(data_directory+SummedFitsFilename)
 
 # For images where frequency or time are also a dimension, the array has to be rearranged
 # Still have to do this part
-# 
+#
 
 hdu2 = pyfits.PrimaryHDU(freqpower)
 hdulist2 = pyfits.HDUList([hdu2])
 hdulist2.writeto(data_directory+SeparatedFitsFilename)
-
-

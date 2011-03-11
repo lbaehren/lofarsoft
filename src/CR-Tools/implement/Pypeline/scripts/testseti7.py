@@ -102,17 +102,17 @@ cdata=hArray(complex,[nblocks,blocklen]) # creating input and work array
 cdataT=hArray(complex,[blocklen,nblocks]) # creating output array with transposed axis
 
 #Note, that all the following arrays have the same memory als cdata and cdataT
-tmpspecT=hArray(cdataT.vec(),[stride,nblocks_section,blocklen]) 
-tmpspec=hArray(cdata.vec(),[nblocks_section,full_blocklen]) 
+tmpspecT=hArray(cdataT.vec(),[stride,nblocks_section,blocklen])
+tmpspec=hArray(cdata.vec(),[nblocks_section,full_blocklen])
 
-specT=hArray(cdataT.vec(),[full_blocklen,nblocks_section]) 
-specT2=hArray(cdataT.vec(),[stride,blocklen,nblocks_section]) 
+specT=hArray(cdataT.vec(),[full_blocklen,nblocks_section])
+specT2=hArray(cdataT.vec(),[stride,blocklen,nblocks_section])
 spec=hArray(cdata.vec(),[blocklen,nblocks])
 
 power=hArray(float,[subspeclen/2],name="Power of spectrum",xvalues=frequencies,par=[("logplot","y")])
 subpower=hArray(power.vec(),[nsubsubspectra,subsubspeclen],name="Power of spectrum",xvalues=frequencies,par=[("logplot","y")])
-    
-subspec=hArray(cdata.vec(),[subspeclen],name="FFT",xvalues=subfrequencies,par=[("logplot","y")]) 
+
+subspec=hArray(cdata.vec(),[subspeclen],name="FFT",xvalues=subfrequencies,par=[("logplot","y")])
 print "Time:",time.clock()-t0,"s for set-up."
 
 if dobig:
@@ -192,7 +192,7 @@ def findpeaks(self,subpower,threshold=7):
     minlength=Vector(int,len(datamean),fill=1)
     npeaks=self[...].findsequencegreaterthan(subpower[...],datathreshold,maxgapvec,minlength)
     return (npeaks,datathreshold,datamean)
-    
+
 def rp(offset,sub=-1,clf=True,markpeaks=False):
     """Basic plotting of a part of the specturm"""
     global subspeclen,start_frequency,delta_frequency,delta_band,ofiles3,nsubsubspectra,subsubfrequencies
@@ -224,7 +224,7 @@ def pa(sub=0,nstart=0):
 #----------------------
 
 if maxchunks==0:
-    print "maxchunks==0 - > Reading spectrum from file."  
+    print "maxchunks==0 - > Reading spectrum from file."
     power.readdump("spectrum.dat")
 
 datapeaks=hArray(int,[nsubsubspectra,subsubspeclen/16],name="Slicelist of Peaks")

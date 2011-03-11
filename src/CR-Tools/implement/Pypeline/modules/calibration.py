@@ -33,7 +33,7 @@ For Python, PEP 8  has emerged as the style guide that most projects adhere to; 
 import pycrtools as hf
 import numpy as np
 import metadata as md
-import IO 
+import IO
 
 ## Examples
 class AntennaCalibration():
@@ -44,26 +44,26 @@ class AntennaCalibration():
         Initializes all the Antenna Calibration variables.
         This is a CableDelay, ClockOffset and station fine calibration,
         for as far as these are available.
-        
+
         This needs to be updated for:
             Station Calibration for blocks not of size 1024
             Values obtained from HDF5 file instead of datafiles in the repository,
-            
+
         *files*  List of crfiles, opened by IO.open()
-        *antennaset* Antennaset corresponding to the files (e.g. "HBA", "LBA_OUTER" ) 
+        *antennaset* Antennaset corresponding to the files (e.g. "HBA", "LBA_OUTER" )
         """
-        
+
         self.selection=selection
         #initialize used arrays
         self.antennaIDs=IO.get(files,"antennaIDs",False)
 
         timeinterval=IO.get(files,"sampleInterval",False)
         samplefrequency=IO.get(files,"sampleFrequency",False)
-        self.frequencyValues=hf.hArray(IO.get(files,"frequencyValues",False)) 
+        self.frequencyValues=hf.hArray(IO.get(files,"frequencyValues",False))
         self.antennaset=antennaset
         self.totalCalibrationtemp=IO.get(files,"emptyFFT",False)
         self.totalShift=IO.get(files,"shift",False).new()
-    	
+
         nyquistZone=IO.get(files,"nyquistZone",True)
         if "HBA" in antennaset and 1 in nyquistZone:
             if IO.get(files,"sampleFrequency") > 180000000.0:
@@ -73,14 +73,14 @@ class AntennaCalibration():
             IO.set(files,"nyquistZone",nyquistZone)
         else:
             nyquistZone=nyquistZone[0]
-        
+
         # CableDelays
         CableDelays=md.get("CableDelays",self.antennaIDs,antennaset,True)
-        
+
         self.CablePhaseDelays=CableDelays.new()
-        
+
         self.CablePhaseDelays.fmod(CableDelays,timeinterval)
-        
+
         self.CableTimeDelays=CableDelays.new()
 
         self.CableTimeDelays.sub(CableDelays,self.CablePhaseDelays)
@@ -99,34 +99,34 @@ class AntennaCalibration():
         # Station Phase Calibration
 
         self.StationCalibration=md.get("StationPhaseCalibration",self.antennaIDs,antennaset,True)
-        
+
         if IO.get(files,"blocksize",False)!=1024:
             print "Blocksize not yet supported for station fine calibration."
 
-            
+
             #interpolate frequencies
             #BeginFreq=IO.get(files,"frequencyRange",False)[0]
             #StationFrequencies=Vector(float,513)
             #StationFrequencies.fillrange(BeginFreq,samplefrequency/1024)
-            
+
             self.StationCalibration.copy(self.totalCalibrationtemp)
             self.StationCalibration.fill(complex(1,0))
-        
+
         self.CalcShift()
         self.CalcDelay()
- 
+
     def CalcShift(self):
         """Calculate the shift"""
         # Add that Cable Time delay is also optionally applied
         self.totalShift=self.ClockTimeDelays.new()
         self.totalShift.copy(self.ClockTimeDelays)
-    
+
     def CalcDelay(self):
         """Calculate the delays"""
         self.totalDelays=self.ClockPhaseDelays.new()
         #a.sub(b,c) = a=b-c
         self.totalDelays.sub(self.ClockPhaseDelays,self.CablePhaseDelays)
-        phases=self.totalDelays.new() 
+        phases=self.totalDelays.new()
         phases.delaytophase(self.frequencyValues,self.totalDelays)
         phases.negate()
         self.totalCalibrationtemp.phasetocomplex(phases)
@@ -135,7 +135,7 @@ class AntennaCalibration():
 
     def applyCalibration(self,fftdata):
         """Apply all the calibration set.
-        
+
         *fftdata* Array with FFT data, data is return in this as well
         """
 
@@ -157,7 +157,7 @@ class AntennaCalibration():
         nrAnts=IO.get(files,"nofSelectedAntennas",True)
         allinitialShift=hf.hArray(IO.get(files,"shift",False))
         allinitialShift.add(self.totalShift)
-        
+
         shifts=[]
         startAnt=0
         endAnt=0
@@ -165,13 +165,13 @@ class AntennaCalibration():
             startAnt=endAnt
             endAnt+=nAnts
             shifts.append(allinitialShift[startAnt:endAnt].val())
-        
-        IO.set(files,"shiftVector",shifts)
-        
 
-        
+        IO.set(files,"shiftVector",shifts)
+
+
+
         return True
-	
+
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
 #  as a selftest for the module.
@@ -179,4 +179,3 @@ class AntennaCalibration():
 if __name__=='__main__':
     import doctest
     doctest.testmod()
-

@@ -5,7 +5,7 @@ Parse batch results from the CR Analysis Pipeline, filter on quality criteria, p
 """
 
 import os
-from pycrtools import * 
+from pycrtools import *
 import numpy as np
 import matplotlib.pyplot as plt
 #import time
@@ -44,7 +44,7 @@ for line in resultsFile:
 resultsFile.close()
 
 # transpose results
-results = zip(*results) 
+results = zip(*results)
 
 # make scatter plot with arrival directions (triggers)
 trigAz = np.array(results[trigAzKey])

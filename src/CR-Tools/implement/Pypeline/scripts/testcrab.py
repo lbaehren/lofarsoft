@@ -58,15 +58,15 @@ filename_lofar="triggered-pulse-2010-02-11-TBB1.h5"
 #pulse3: Az, El: 206.229 57.0392
 
 #src/CR-Tools/data/calibrationCS302.dat
-#	double phase=p0[rcu_ids[i](antenna)/2]+frequencies(ifreq)*p1[rcu_ids[i](antenna)/2];
-#					//cout << phase << " ";
+#       double phase=p0[rcu_ids[i](antenna)/2]+frequencies(ifreq)*p1[rcu_ids[i](antenna)/2];
+#                                       //cout << phase << " ";
 #matCal(ifreq,antenna)=DComplex(cos(-calibrationfactor*phase),sin(-calibrationfactor*phase));
 
 #antennapositions
 
 antennaset="LBA_INNER"
 antennafilename=LOFARSOFT+"/data/calibration/AntennaArrays/"+stationname+"-AntennaArrays.conf"
-antfile = open(antennafilename,'r') 
+antfile = open(antennafilename,'r')
 antfile.seek(0)
 str = ''
 while antennaset not in str:
@@ -128,7 +128,7 @@ spectrum=hArray(float,[cfile.fftLength],fill=0,name="Spectrum",units="a.u.",xval
 #spectrum=hArray(float,[1,cfile.fftLength],fill=0,name="Spectrum",units="a.u.",xvalues=c_frequency,par=[("logplot","y")])
 
 
- 
+
 #Initialization phases
 #part of this needs to change to inside the loop if the nofSelectedAntennas per file changes
 FarField=True
@@ -144,37 +144,37 @@ weights=hArray(complex,dimensions=[n_pixels,cfile["nofSelectedAntennas"],cfile["
 filecounter=0
 for filename in filenames:
 #
- cfile=crfile(data_directory+filename)
+    cfile=crfile(data_directory+filename)
 #
- cfile["blocksize"]=blocksize
- TBBboard=TBBboards[filecounter] 
- #used_antenna_positions=hArray(float,dimensions=[cfile["nofSelectedAntennas"]*2])
- #fill with the used antenna positions
- 
- 
- #hGeometricDelays(delays,used_antenna_positions,cartesian,FarField)
- 
- 
- #change this to have the values of this file
- used_antenna_positions=hArray(antenna_positions[TBBboards[TBBboard]*16:TBBboards[TBBboard]*16+cfile["nofSelectedAntennas"]-1],dimensions=[cfile["nofSelectedAntennas"],int(nrdir)])
- hGeometricDelays(delays,used_antenna_positions,cartesian,FarField)
- #delays += cal_delays
- phases.delaytophase(c_frequency,delays)
- weights.phasetocomplex(phases)
- 
- 
+    cfile["blocksize"]=blocksize
+    TBBboard=TBBboards[filecounter]
+    #used_antenna_positions=hArray(float,dimensions=[cfile["nofSelectedAntennas"]*2])
+    #fill with the used antenna positions
+
+
+    #hGeometricDelays(delays,used_antenna_positions,cartesian,FarField)
+
+
+    #change this to have the values of this file
+    used_antenna_positions=hArray(antenna_positions[TBBboards[TBBboard]*16:TBBboards[TBBboard]*16+cfile["nofSelectedAntennas"]-1],dimensions=[cfile["nofSelectedAntennas"],int(nrdir)])
+    hGeometricDelays(delays,used_antenna_positions,cartesian,FarField)
+    #delays += cal_delays
+    phases.delaytophase(c_frequency,delays)
+    weights.phasetocomplex(phases)
+
+
 #Reading in one File
- 
- t0=time.clock()
- for block in range(nblocks):
-  t1=time.clock()-t0
-  print "block=",block,"t=",t1,"s"
-  cfile["Block"]=block
-  c_efield.read(cfile,"Fx").none()
-  c_fft[...].fftw(c_efield[...])
-  c_fft[...].nyquistswap(2)
-  c_fft *= weights
-  c_fft[...].addto(c_complex_dynspec[[block],...])
+
+    t0=time.clock()
+    for block in range(nblocks):
+        t1=time.clock()-t0
+        print "block=",block,"t=",t1,"s"
+        cfile["Block"]=block
+        c_efield.read(cfile,"Fx").none()
+        c_fft[...].fftw(c_efield[...])
+        c_fft[...].nyquistswap(2)
+        c_fft *= weights
+        c_fft[...].addto(c_complex_dynspec[[block],...])
 #    complexspectrum.fill(0)
 #    for i in range(cfile.nofAntennas):
 #    spectrum[...].spectralpower(c_fft[...])
@@ -204,12 +204,3 @@ print "Run time ",tTotal,"s"
 #hdu = pyfits.PrimaryHDU(ds)
 #hdulist = pyfits.HDUList([hdu])
 #hdulist.writeto(data_directory+'spectrum2.fits')
-
-
-
-
-  
- 
-
-
-

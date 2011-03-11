@@ -137,7 +137,7 @@ rfi_meanrms *= nsigma
 nbad_channels=rfi_bad_channels[...].findgreaterthan(rfi_cleanspec[...],rfi_meanrms)
 rfi_cleanspec2.copy(rfi_cleanspec)
 rfi_cleanspec2[...].set(rfi_bad_channels[...,[0]:nbad_channels],1.0)
-if doplot: 
+if doplot:
     rfi_cleanspec[0].plot()
     rfi_cleanspec2[0].plot(clf=False)
 if verbose: print time.clock()-t0,"s: Done."

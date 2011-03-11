@@ -74,4 +74,3 @@ if option.verbose:
 # And the remaining positional arguments (typically for a list of filenames)
 for i, arg in enumerate(args):
     print "positional argument", i, arg
-

@@ -40,15 +40,15 @@ antenna=0 # Select which antenna to read in
 cdata=hArray(complex,[nblocks,blocklen]) # creating input and work array
 cdataT=hArray(complex,[blocklen,nblocks]) # creating output array with transposed axis
 
-tmpspecT=hArray(complex,[stride,nblocks_section,blocklen]) 
-tmpspec=hArray(complex,[nblocks_section,full_blocklen]) 
+tmpspecT=hArray(complex,[stride,nblocks_section,blocklen])
+tmpspec=hArray(complex,[nblocks_section,full_blocklen])
 
-specT=hArray(complex,[full_blocklen,nblocks_section]) 
-specT2=hArray(complex,[stride,blocklen,nblocks_section]) 
-spec=hArray(complex,[blocklen,nblocks]) 
-allspec=hArray(complex,[stride,subspeclen]) 
+specT=hArray(complex,[full_blocklen,nblocks_section])
+specT2=hArray(complex,[stride,blocklen,nblocks_section])
+spec=hArray(complex,[blocklen,nblocks])
+allspec=hArray(complex,[stride,subspeclen])
 
-bigfft=hArray(complex,[fullsize]) 
+bigfft=hArray(complex,[fullsize])
 print "Time:",time.clock()-t0,"s for set-up."
 
 t0=time.clock(); print "Reading in data and doing a full FFT."
@@ -71,7 +71,7 @@ for offset in range(stride):
     ofile=tmpfilename+str(offset)+"a"+tmpfileext
     ofiles+=[ofile]
     cdata.writefilebinary(ofile)  # output of doublefft1 is in cdata ...
-    
+
 #Now sort the different blocks together (which requires a transpose over passes/strides)
 ofiles2=[]
 for offset in range(stride):

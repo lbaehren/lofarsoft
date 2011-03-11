@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 
 from pycrtools import *
 import os
@@ -25,22 +25,18 @@ if dimensions==1:
     x.setHistory(False)
     hRandom(x,0,1)
     y=np.array(x.vec())
-    
+
 t0=time.time()
 for i in range(nrofrepeats):
     func_hf(x)
 t1=time.time()
 th=t1-t0
-print "Performing ",nrofrepeats," on a hArray of ",nrofelements," takes ",th," seconds." 
+print "Performing ",nrofrepeats," on a hArray of ",nrofelements," takes ",th," seconds."
 
 t0=time.time()
 for i in range(nrofrepeats):
     func_np(y,y)
 t1=time.time()
 tnp=t1-t0
-print "Performing ",nrofrepeats," on a numpy array of ",nrofelements," takes ",tnp," seconds." 
+print "Performing ",nrofrepeats," on a numpy array of ",nrofelements," takes ",tnp," seconds."
 print "hArray takes ",th/tnp," as long."
-
-
-
-

@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 
 from pycrtools import *
 import os
@@ -20,7 +20,7 @@ import pyfits
 # Get environment variables
 LOFARSOFT = os.environ["LOFARSOFT"].rstrip('/')+'/'
 LOFAR_DATA_DIR = os.environ['LOFAR_DATA_DIR'].rstrip('/')+'/'
-data_directory = LOFAR_DATA_DIR+"/lightning/" 
+data_directory = LOFAR_DATA_DIR+"/lightning/"
 stationname="CS302"
 #filenames=["lightning_16_48.h5"]
 filenames=["lightning_17_23.h5"]
@@ -46,7 +46,7 @@ startblock=225950 #for 17_23 (+1)
 # where the current TBBboard and nofSelectedAntennas (=file["nofSelectedAntennas"]) still has to be specified
 # In the future the antenna positions should be selected from the current datafile
 
-antfile = open(antennafilename,'r') 
+antfile = open(antennafilename,'r')
 antfile.seek(0)
 str = ''
 while antennaset not in str:

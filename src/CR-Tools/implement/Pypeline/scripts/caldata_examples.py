@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 
 
 ######## A Modified Pipeline Start Script by Clancy ##########

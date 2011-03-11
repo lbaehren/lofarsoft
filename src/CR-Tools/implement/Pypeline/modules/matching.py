@@ -1,5 +1,5 @@
 """
-This module supplies different function to mach datafiles from different 
+This module supplies different function to mach datafiles from different
 stations, datafiles and trigger messages, etc. together using their
 timestamps.
 
@@ -14,11 +14,11 @@ import metadata as md
 
 def matccrLes(dirs, sortstring, coinctime, mincoinc):
     """
-    Match the datafiles from different stations together. It will print out 
+    Match the datafiles from different stations together. It will print out
     the groups of filenames of that were taken at (about) the same time.
 
     Required arguments:
-    
+
     ============ ======================================================
     Parameter    Description
     ============ ======================================================
@@ -26,7 +26,7 @@ def matccrLes(dirs, sortstring, coinctime, mincoinc):
                  different stations
     *sortstring* Strin that - when executed on a shell- sorths the list
                  of files by time
-    *coinctime*  Coincidence-time in seconds 
+    *coinctime*  Coincidence-time in seconds
     *mincoinc*   Minimum number of files to give one conicidence
     ============ ======================================================
 
@@ -41,7 +41,7 @@ def matccrLes(dirs, sortstring, coinctime, mincoinc):
     """
     files=dict()
     times=dict()
-    
+
     for dirIndex in range(len(dirs)):
         fd = os.popen('ls '+ dirs[dirIndex]+' | ' + sortstring)
         files[dirIndex] = fd.readlines()
@@ -51,39 +51,39 @@ def matccrLes(dirs, sortstring, coinctime, mincoinc):
         for file in files[dirIndex]:
             dr = cr.crfile( file.strip() )
             ddate = dr["date"] + dr["SAMPLE_NUMBER"][0]/200.0e6
-            times[dirIndex].append(ddate) 
+            times[dirIndex].append(ddate)
             del dr
 
     indices = np.zeros( (len(dirs)), int)
     running = True
 
     while running:
-      mintime = times[0][(indices[0])]
-      for dirIndex in range(1,len(dirs)):
-        if (times[dirIndex][(indices[dirIndex])] <= mintime):
-          mintime = times[dirIndex][(indices[dirIndex])]
-      nocoinc = 0;
-      coincdirs = list()
-      for dirIndex in range(len(dirs)):
-        if (times[dirIndex][(indices[dirIndex])] <= (mintime+coinctime) ):
-          nocoinc += 1
-          coincdirs.append(dirIndex)
-      if (nocoinc >= mincoinc):
-        print "Found coincident event:"
+        mintime = times[0][(indices[0])]
+        for dirIndex in range(1,len(dirs)):
+            if (times[dirIndex][(indices[dirIndex])] <= mintime):
+                mintime = times[dirIndex][(indices[dirIndex])]
+        nocoinc = 0;
+        coincdirs = list()
+        for dirIndex in range(len(dirs)):
+            if (times[dirIndex][(indices[dirIndex])] <= (mintime+coinctime) ):
+                nocoinc += 1
+                coincdirs.append(dirIndex)
+        if (nocoinc >= mincoinc):
+            print "Found coincident event:"
+            for dirIndex in coincdirs:
+                print files[dirIndex][(indices[dirIndex])]
         for dirIndex in coincdirs:
-          print files[dirIndex][(indices[dirIndex])]
-      for dirIndex in coincdirs:
-        indices[dirIndex] += 1
-        if indices[dirIndex] >= len(files[dirIndex]):
-          running = False
+            indices[dirIndex] += 1
+            if indices[dirIndex] >= len(files[dirIndex]):
+                running = False
 
 def readtriggers(crfile, directory=''):
     """
     Read in a TBBDriver-dumpfile with the data from the trigger-messages.
     Returns a tuple of 1-d numpy arrays: (antennaIDs, dDates, dates, samplenumers)
-    
+
     Required arguments:
-    
+
     ============ ======================================================
     Parameter    Description
     ============ ======================================================
@@ -106,7 +106,7 @@ def readtriggers(crfile, directory=''):
     h5filename = crfile.files[0].filename
     directory = os.path.dirname(h5filename) + '/'
     filename = directory + datestring + "_TRIGGER-"+stationName+".dat" # like "2011-02-15_TRIGGER-RS307.dat"
-    
+
 #    fd = os.popen('wc '+ filename)
 #    str_line = fd.readline()
 #    fd.close()
@@ -117,19 +117,19 @@ def readtriggers(crfile, directory=''):
     dDates = np.zeros(1000)
     dates = np.zeros(1000, int)
     samplenumers = np.zeros(1000, int)
-  
+
     print timestamp
     if os.path.isfile(filename):
         fd = open(filename)
     else:
         print 'No trigger file to be read: %s' % filename
         return []
-        
+
     i = 0
     line = fd.readline()
     while not str(timestamp) in line: # read over it until hitting 'timestamp' (second)
         line = fd.readline()
-        
+
     while str(timestamp) in line: # now process until passing beyond 'timestamp'
 #        print line
         antennaIDs[i] = int(line.split()[0])
@@ -139,18 +139,18 @@ def readtriggers(crfile, directory=''):
             dates[i] = int(testdate)
         else:
             dates[i] = 0 # not easy to skip over it... it'll fall out when matching dates.
-        
+
         testSampleNum = long(line.split()[3]) # and sometimes the sample number goes invalid as well. Glitches...
         if testSampleNum < 200e6:
             samplenumers[i] = int(testSampleNum)
         else:
             samplenumers[i] = 0
             print 'WARNING: sample number invalid in trigger log!'
-            
+
         dDates[i] = float(dates[i]) + float(samplenumers[i])/200.0e6
         i += 1 # !
         line = fd.readline()
-          
+
     fd.close()
     antennaIDs = np.resize(antennaIDs, i)
     dDates = np.resize(dDates, i)
@@ -162,11 +162,11 @@ def readtriggers(crfile, directory=''):
 
 def getTriggerIndicesFromTime(ddate, dDates, coinctime=1e-6):
     """
-    Find the indices of the triggers which arrived within  "coinctime" of 
+    Find the indices of the triggers which arrived within  "coinctime" of
     "ddate".
 
     Required arguments:
-    
+
     ============ ======================================================
     Parameter    Description
     ============ ======================================================
@@ -184,7 +184,7 @@ def matchTriggerfileToTime(ddate, triggerfile, coinctime=1e-5):
     "ddate". Returns a tuple of 1-d numpy arrays: (antennaIDs, dDates, difftimes, dates, samplenumers)
 
     Required arguments:
-    
+
     ============= ======================================================
     Parameter     Description
     ============= ======================================================
@@ -210,27 +210,26 @@ def matchTriggerfileToTime(ddate, triggerfile, coinctime=1e-5):
         (allIDs, allDDates, alldates, allSNs) = triggerfile
     indices = getTriggerIndicesFromTime(ddate, allDDates, coinctime)
     if (len(indices)>0):
-      selectedIDs = allIDs[indices]
-      selectedDDates = allDDates[indices]
-      selecteddates = alldates[indices]
-      selectedSNs = allSNs[indices]
-      sortind = np.argsort(selectedIDs)
-      sortIDs = selectedIDs[sortind]
-      sortDDates = selectedDDates[sortind]
-      sortdates = selecteddates[sortind]
-      sortSNs = selectedSNs[sortind]
-      if (len(np.unique(sortIDs)) != len(sortIDs)):
-        print "matchTriggerfileToTime: duplicated antenna IDs!"
-      outIDs = sortIDs
-      outDDates = sortDDates
-      outdates = sortdates
-      outSNs = sortSNs
+        selectedIDs = allIDs[indices]
+        selectedDDates = allDDates[indices]
+        selecteddates = alldates[indices]
+        selectedSNs = allSNs[indices]
+        sortind = np.argsort(selectedIDs)
+        sortIDs = selectedIDs[sortind]
+        sortDDates = selectedDDates[sortind]
+        sortdates = selecteddates[sortind]
+        sortSNs = selectedSNs[sortind]
+        if (len(np.unique(sortIDs)) != len(sortIDs)):
+            print "matchTriggerfileToTime: duplicated antenna IDs!"
+        outIDs = sortIDs
+        outDDates = sortDDates
+        outdates = sortdates
+        outSNs = sortSNs
     else:
-      outIDs = np.zeros((0), int)
-      outDDates = np.zeros((0))
-      outdates = np.zeros((0), int)
-      outSNs = np.zeros((0), int)
+        outIDs = np.zeros((0), int)
+        outDDates = np.zeros((0))
+        outdates = np.zeros((0), int)
+        outSNs = np.zeros((0), int)
     difftimes = (outdates-ddate)+outSNs/200.0e6
 
-    return (outIDs, outDDates, difftimes, outdates, outSNs) 
-
+    return (outIDs, outDDates, difftimes, outdates, outSNs)

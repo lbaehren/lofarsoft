@@ -60,7 +60,7 @@ class Test(object):
         """Initializes the object.
 
         Required arguments:
-        
+
         ========= =================
         Parameter Description
         ========= =================
@@ -69,7 +69,7 @@ class Test(object):
         ========= =================
 
         Optional arguments:
-        
+
         ========= =======================
         Parameter Description
         ========= =======================
@@ -82,7 +82,7 @@ def test(x, y):
     """ Returns x+y
 
     Required arguments:
-    
+
     ========= ====================
     Parameter Description
     ========= ====================
@@ -110,4 +110,3 @@ def test(x, y):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-

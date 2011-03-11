@@ -37,29 +37,29 @@ class Imager(Task):
     """
 
     def call(self, #This function actually never gets called
-	     image,
-	     data,
-	     startblock=0,
-	     nblocks=16,
-	     ntimesteps=1,
-	     obstime=0, # Not a sensible default
-	     L=pytmf.deg2rad(6.869837540),
-	     phi=pytmf.deg2rad(52.915122495),
-	     wcs=wcs_default):
-         
-	# Store reference to image and data
-	self.image = image
-	self.data = data
+             image,
+             data,
+             startblock=0,
+             nblocks=16,
+             ntimesteps=1,
+             obstime=0, # Not a sensible default
+             L=pytmf.deg2rad(6.869837540),
+             phi=pytmf.deg2rad(52.915122495),
+             wcs=wcs_default):
+
+        # Store reference to image and data
+        self.image = image
+        self.data = data
 
         # Store image parameters
         self.startblock = startblock
         self.nblocks = nblocks
         self.ntimesteps = ntimesteps
         self.obstime = obstime
-	self.wcs=wcs
-	self.phi=phi
-	self.L=L
-	    
+        self.wcs=wcs
+        self.phi=phi
+        self.L=L
+
     def init(self):
 
         """Initialize the imager.
@@ -103,23 +103,22 @@ class Imager(Task):
 
         for step in range(self.ntimesteps):
             for block in range(self.startblock, self.startblock+self.nblocks):
-        
+
                 print "processing block:", block
-        
+
                 self.data.getFFTData(self.fftdata, block)
-        
+
                 print "reading done"
-        
+
                 self.t_image.fill(0.)
-        
+
                 print "beamforming started"
                 cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
                 print "beamforming done"
-                
+
                 cr.hAbsSquareAdd(self.image[step], self.t_image)
-        
+
             self.startblock += self.nblocks
 
 # Create a TaskLauncher
 #imager = TaskLauncher(Imager)
- 

@@ -84,4 +84,3 @@ def help(func=help,brief=True):
             print "\nType help("+func.__name__+".METHOD) to get more info on the individual methods."
         else:
             print "\nType help(func.METHOD) to get more info on the individual methods."
-

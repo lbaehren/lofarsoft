@@ -15,4 +15,3 @@ for opt, arg in opts:
     # Execute yet another script if added in the parameter list
     elif opt in ("-i", "--include"):
         execfile(arg)
-

@@ -26,4 +26,3 @@ from workspaces import *
 
 # Some initialization on the C++ side
 hInit()
-

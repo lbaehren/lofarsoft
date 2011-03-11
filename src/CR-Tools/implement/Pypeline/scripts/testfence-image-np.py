@@ -98,8 +98,8 @@ n_az=int((azRange[1]-azRange[0])/azRange[2])
 n_el=int((elRange[1]-elRange[0])/elRange[2])
 
 n_pixels = n_az * n_el;
-pixarray = np.zeros( (n_el,n_az) ) 
-pixarray_time = np.zeros( ((250-100),n_el,n_az ) ) 
+pixarray = np.zeros( (n_el,n_az) )
+pixarray_time = np.zeros( ((250-100),n_el,n_az ) )
 
 azel = np.zeros( (3) );
 cartesian = np.zeros( (3) );
@@ -121,17 +121,17 @@ for el_ind in range(n_el):
     azel[1]=el_values[el_ind]
     for az_ind in range(n_az):
         azel[0]=az_values[az_ind]
-        
+
         ttl.azElRadius2Cartesian(cartesian, azel, True)
         ttl.geometricDelays(delays, antenna_positions, cartesian, FarField)
         ttl.complexWeights(weights, delays, cr_freqs)
-        
+
         shifted_fft = cr_fft*weights
         beamformed_fft = shifted_fft[ant_indices[0]]
         for n in ant_indices[1:]:
             beamformed_fft += shifted_fft[n]
 
-        ttl.backwardFFTW(beamformed_efield, beamformed_fft); 
+        ttl.backwardFFTW(beamformed_efield, beamformed_fft);
         pixarray[el_ind,az_ind] = np.sum(np.abs(beamformed_efield))
 
 """
@@ -151,7 +151,7 @@ plt.ylabel("Elevation [deg]")
 hdu = pyfits.PrimaryHDU(pixarray_time)
 hdulist = pyfits.HDUList([hdu])
 prihdr = hdulist[0].header
-prihdr.update('CTYPE1','??LN-CAR')  #This means "unkown longitude" with CARtesian projection, the 
+prihdr.update('CTYPE1','??LN-CAR')  #This means "unkown longitude" with CARtesian projection, the
 #                                   #casaviewer asumes this the be J2000 because it probably can't do AZEL
 prihdr.update('CRVAL1',azRange[0])  #value of the axis at the reference point "CRPIX"
 prihdr.update('CDELT1',azRange[2])  #increment from the reference pixel to the next pixel
@@ -160,7 +160,7 @@ prihdr.update('CRPIX1',1.)          #pixel position at which the axis has the "C
 prihdr.update('CUNIT1','deg')       #the unit in which "CRVAL" and "CDELT" are given
 
 prihdr.update('CTYPE2','??LT-CAR')  #This means "unkown latitude" with CARtesian projection, see above
-prihdr.update('CRVAL2',elRange[0]) 
+prihdr.update('CRVAL2',elRange[0])
 prihdr.update('CDELT2',elRange[2])
 prihdr.update('CROTA2',0.)
 prihdr.update('CRPIX2',1.)

@@ -71,7 +71,7 @@ for channel in range(nrchannels):
             pre_fft_data[counter*nrsamples:(counter+1)*nrsamples].real.fill(data[station,channel,0:nrsamples,pol,0])
             # Add the imaginary part to the complex array
             pre_fft_data[counter*nrsamples:(counter+1)*nrsamples].imag.fill(data[station,channel,0:nrsamples,pol,1])
-        
+
         # Take an fft
         fft_data=np.fft.fft(pre_fft_data)
         # Add this to the spectrum
@@ -93,8 +93,8 @@ for channel in range(nrchannels):
     freqdelta=2e8/1024/nrchannels/nrblocksperfft/nrsamples
     timedelta=5e-9*1024*nrchannels*nrblocksperfft*nrsamples
 
-# Write the header information 
-    prihdr.update('CTYPE1','FREQ')  #This means "unkown longitude" with CARtesian projection, the 
+# Write the header information
+    prihdr.update('CTYPE1','FREQ')  #This means "unkown longitude" with CARtesian projection, the
 #                                   #casaviewer asumes this the be J2000 because it probably can't do AZEL
     prihdr.update('CRVAL1',startfreq)  #value of the axis at the reference point "CRPIX"
     prihdr.update('CDELT1',freqdelta)  #increment from the reference pixel to the next pixel
@@ -103,7 +103,7 @@ for channel in range(nrchannels):
     prihdr.update('CUNIT1','Hz')       #the unit in which "CRVAL" and "CDELT" are given
 
 #prihdr.update('CTYPE2','??LT-STG')  #This means "unkown latitude" with CARtesian projection, see above
-#prihdr.update('CRVAL2',90.) 
+#prihdr.update('CRVAL2',90.)
 #prihdr.update('CDELT2',2.566666603088)
 #prihdr.update('CROTA2',0.)
 #prihdr.update('CRPIX2',45.5)

@@ -26,4 +26,3 @@ def getFilenames(datadir,root="",extension=".h5"):
         if (f[:lroot]==root) & (f[-lext:]==extension):
             filenames.append(os.path.join(datadir,f))
     return filenames
-

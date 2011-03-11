@@ -7,8 +7,8 @@ me.doframe(lofarpos)
 me.framenow()  # select current date and time
 
 #uncomment the following lines if you want to set a specific date
-date="2012/09/26"  
-utctime="12:00:00" 
+date="2012/09/26"
+utctime="12:00:00"
 #me.doframe(me.epoch("UTC",date+"/"+utctime))
 #------------------------------------------------------------------------
 #me.doframe(me.observatory('WSRT'))
@@ -80,7 +80,7 @@ def meprettyhms(q):
     """ Returns a quanta in a pretty hms form, i.e.: HHh MM' SS.dd"  " """
     l=qa.formxxx(q,"hms").split(":")
     return l[0]+'h '+l[1]+"' "+l[2]+'"'
-        
+
 
 def meprettystring(mes):
     """Return a readable string of a direction or position measure.
@@ -104,7 +104,7 @@ def meprettystring(mes):
         else:
             s="ERROR: Code "+mes["refer"] + " unknown!"
     if mes["type"]=="epoch":
-        s=qa.time(mes["m0"],form=["ymd","local"])+" (local time)"  # local time  
+        s=qa.time(mes["m0"],form=["ymd","local"])+" (local time)"  # local time
     return s
 
 
@@ -180,7 +180,7 @@ class KML_File:
         "</Document>\n"\
         "</kml>")
         file.close()
-        
+
     def open_folder(self, name):
         file = open(self.filepath,"a")
         file.write(
@@ -193,7 +193,7 @@ class KML_File:
         file.write(
         "</Folder>\n")
         file.close()
-        
+
     def add_placemarker(self, latitude, longitude, altitude = 0.0, description = " ", name = " ", range = 6000, tilt = 45, heading = 0):
         "adds the point to a kml file"
         file = open(self.filepath,"a")
@@ -201,7 +201,7 @@ class KML_File:
         "<Placemark>\n"\
         "  <description>" + description + "</description>\n"\
         "  <name>" + name + "</name>\n"\
-        "  <styleUrl>#normalPlaceMarker</styleUrl>" + 
+        "  <styleUrl>#normalPlaceMarker</styleUrl>" +
         "  <LookAt>\n"\
         "    <longitude>" + str(longitude) + "</longitude>\n"\
         "    <latitude>" + str(latitude) + "</latitude>\n"\
@@ -249,9 +249,9 @@ def megoogleearth(filename,position,scale=1.0,iconcolor="ff00f00f",linecolor="73
     Named parameters:
     scale=1.0  - scale the size of text and icon
     iconcolor="ff00f00f", linecolor="73ffffff" - colors of icons and lines
-    
+
     Example:
-    
+
     megoogleearth("eht.kml",['ALMA', 'CARMA', 'SMT', 'JCMT', 'EHT1', 'LLAMA1', 'LLAMA3', 'LMT', 'SOUTHPOLE'],scale=3.5)
     """
     if not type(position) in [list,set,tuple]: position=[position]
@@ -270,7 +270,7 @@ def uptime(sources,observatory=None,utcdate=None,step=1,coords="J2000",verbose=T
     """
     Prints or plots the position (elevation) of a list of astronomical
     sources at various observatories.
-    
+
     sources: list of sources or a single source, the source can be
     specified by its name (e.g."SUN", "MOON", or "Sgr A*", see the planetlist in CASA, "me.sourcelist()" or "hfradiosources") or simply by its
     J2000 coordinates in the format "23:30:25.0 +70.23.10" or "23H30M25.0S +70D23M10S" (some casa convention separated by space) - the coordinate system can
@@ -279,14 +279,14 @@ def uptime(sources,observatory=None,utcdate=None,step=1,coords="J2000",verbose=T
     observatory: list or single observatory, the observatory can be
     specified by its name (e.g., observatory=["ALMA","LOFAR"]) or by a position measure, e.g. observatory=me.position(rf="WGS84",v0=qa.quantity("+06.52.11.415"),v1=qa.quantity("+52.54.54.44098"),v2=qa.quantity("49.344m"))
     if none is specified the current frame is used.
-    
+
     utcdate: the date (UTC) for which to calculate the uptimes.
 
     step: the stepsize to calculate elevations values in hours
 
     coords: The coordinate system to be used for interpreting source
     coordinates (could be e.g., "B1950", "GALACTIC").
-    
+
     """
     if not utcdate==None: me.doframe(me.epoch("UTC",utcdate))
     if not type(observatory)==list: observatory=[observatory]
@@ -326,62 +326,62 @@ def uptime(sources,observatory=None,utcdate=None,step=1,coords="J2000",verbose=T
         pl.xlim(0,30)
         pl.ylim(0,90)
     return result
-        
-sourceliststringall="""TYCHO SNR,                      00h25m14.0s +64d08m39s 
-87GB[BWE91] 0022+6351,          00h25m21.0s +64d08m24s 
-3C 58,                         02h05m35.2s +64d49m35s 
-4C +61.05,                      02h25m44.1s +62d06m08s 
-PERSEUS A,                      03h19m48.1s +41d30m42s 
-MG2 J053411+2201,               05h34m11.6s +22d01m53s 
-MG2 J053430+2204,               05h34m30.5s +22d04m22s 
-MESSIER 1,                    05h34m32.0s +22d00m52s 
-MG2 J053432+2157,               05h34m32.9s +21d57m55s 
-MG2 J053439+2203,               05h34m39.5s +22d03m53s 
-MG2 J053450+2200,               05h34m54.6s +22d00m17s 
-NGC 2070,                 05h38m44.4s -69d04m39s 
-3C 147.1,                       05h41m42.1s -01d53m55s 
-PKS 0857-43,                    08h59m27.1s -43d45m09s 
-ESO 212-EN 006,                 09h24m24.2s -51d59m29s 
-PMN J1006-5712,                 10h06m39.0s -57d12m14s 
-NGC 3581,                       11h12m01.9s -61d18m07s 
-PMN J1209-6249,                 12h09m59.8s -62d49m38s 
-3C 273,                         12h29m06.7s +02d03m09s 
-MESSIER 87,                    12h30m49.4s +12d23m28s 
-CEN A,                          13h25m27.6s -43d01m09s 
-PMN J1325-4257,                 13h25m44.5s -42d57m39s 
-PKS 1343-60,                    13h46m49.0s -60d24m29s 
-PMN J1445-5949,                 14h45m16.2s -59d49m31s 
-PMN J1553-5435,                 15h53m03.1s -54d35m18s 
-PMN J1621-5026,                 16h21m31.6s -50d26m19s 
-PKS 1618-49,                    16h22m12.0s -50d05m51s 
-ESO 332-PN 023,                 17h09m34.3s -41d35m41s 
-3C 353,                         17h20m28.1s -00d58m47s 
-PMN J1809-2019,                 18h09m25.3s -20d19m08s 
-PMN J1814-1755,                 18h14m15.1s -17d55m51s 
-MRC 1828-021,                   18h31m25.8s -02d05m51s 
-87GB 190753.4+090111,           19h10m14.7s +09d06m19s 
-PKS 1921+14,                    19h23m42.9s +14d30m08s 
-Cygnus A,                       19h59m28.3s +40d44m02s 
-3C 454.3,                       22h53m57.7s +16d08m54s 
-NGC 7538,                       23h13m38.6s +61d30m45s 
+
+sourceliststringall="""TYCHO SNR,                      00h25m14.0s +64d08m39s
+87GB[BWE91] 0022+6351,          00h25m21.0s +64d08m24s
+3C 58,                         02h05m35.2s +64d49m35s
+4C +61.05,                      02h25m44.1s +62d06m08s
+PERSEUS A,                      03h19m48.1s +41d30m42s
+MG2 J053411+2201,               05h34m11.6s +22d01m53s
+MG2 J053430+2204,               05h34m30.5s +22d04m22s
+MESSIER 1,                    05h34m32.0s +22d00m52s
+MG2 J053432+2157,               05h34m32.9s +21d57m55s
+MG2 J053439+2203,               05h34m39.5s +22d03m53s
+MG2 J053450+2200,               05h34m54.6s +22d00m17s
+NGC 2070,                 05h38m44.4s -69d04m39s
+3C 147.1,                       05h41m42.1s -01d53m55s
+PKS 0857-43,                    08h59m27.1s -43d45m09s
+ESO 212-EN 006,                 09h24m24.2s -51d59m29s
+PMN J1006-5712,                 10h06m39.0s -57d12m14s
+NGC 3581,                       11h12m01.9s -61d18m07s
+PMN J1209-6249,                 12h09m59.8s -62d49m38s
+3C 273,                         12h29m06.7s +02d03m09s
+MESSIER 87,                    12h30m49.4s +12d23m28s
+CEN A,                          13h25m27.6s -43d01m09s
+PMN J1325-4257,                 13h25m44.5s -42d57m39s
+PKS 1343-60,                    13h46m49.0s -60d24m29s
+PMN J1445-5949,                 14h45m16.2s -59d49m31s
+PMN J1553-5435,                 15h53m03.1s -54d35m18s
+PMN J1621-5026,                 16h21m31.6s -50d26m19s
+PKS 1618-49,                    16h22m12.0s -50d05m51s
+ESO 332-PN 023,                 17h09m34.3s -41d35m41s
+3C 353,                         17h20m28.1s -00d58m47s
+PMN J1809-2019,                 18h09m25.3s -20d19m08s
+PMN J1814-1755,                 18h14m15.1s -17d55m51s
+MRC 1828-021,                   18h31m25.8s -02d05m51s
+87GB 190753.4+090111,           19h10m14.7s +09d06m19s
+PKS 1921+14,                    19h23m42.9s +14d30m08s
+Cygnus A,                       19h59m28.3s +40d44m02s
+3C 454.3,                       22h53m57.7s +16d08m54s
+NGC 7538,                       23h13m38.6s +61d30m45s
 Cas A,                          23h23m27.9s +58d48m42s"""
 
-sourceliststring="""TYCHO SNR,                      00h25m14.0s +64d08m39s 
-87GB[BWE91] 0022+6351,          00h25m21.0s +64d08m24s 
-3C 58,                          02h05m35.2s +64d49m35s 
-4C +61.05,                      02h25m44.1s +62d06m08s 
-PERSEUS A,                      03h19m48.1s +41d30m42s 
-M1,                      05h34m32.0s +22d00m52s 
-3C 147.1,                       05h41m42.1s -01d53m55s 
-3C 273,                         12h29m06.7s +02d03m09s 
-M87,                     12h30m49.4s +12d23m28s 
-3C 353,                         17h20m28.1s -00d58m47s 
-MRC 1828-021,                   18h31m25.8s -02d05m51s 
-87GB 190753.4+090111,           19h10m14.7s +09d06m19s 
-PKS 1921+14,                    19h23m42.9s +14d30m08s 
-Cygnus A,                       19h59m28.3s +40d44m02s 
-3C 454.3,                       22h53m57.7s +16d08m54s 
-NGC 7538,                       23h13m38.6s +61d30m45s 
+sourceliststring="""TYCHO SNR,                      00h25m14.0s +64d08m39s
+87GB[BWE91] 0022+6351,          00h25m21.0s +64d08m24s
+3C 58,                          02h05m35.2s +64d49m35s
+4C +61.05,                      02h25m44.1s +62d06m08s
+PERSEUS A,                      03h19m48.1s +41d30m42s
+M1,                      05h34m32.0s +22d00m52s
+3C 147.1,                       05h41m42.1s -01d53m55s
+3C 273,                         12h29m06.7s +02d03m09s
+M87,                     12h30m49.4s +12d23m28s
+3C 353,                         17h20m28.1s -00d58m47s
+MRC 1828-021,                   18h31m25.8s -02d05m51s
+87GB 190753.4+090111,           19h10m14.7s +09d06m19s
+PKS 1921+14,                    19h23m42.9s +14d30m08s
+Cygnus A,                       19h59m28.3s +40d44m02s
+3C 454.3,                       22h53m57.7s +16d08m54s
+NGC 7538,                       23h13m38.6s +61d30m45s
 Cas A,                          23h23m27.9s +58d48m42s
 Sgr A*,                         17h45m40.0409 -29d00m28.118s"""
 

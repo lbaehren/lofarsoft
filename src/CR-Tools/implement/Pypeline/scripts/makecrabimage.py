@@ -143,4 +143,3 @@ for key in keys:
 if os.path.isfile(storename+'.fits'):
     os.remove(storename+'.fits')
 hdu.writeto(storename+'.fits')
-

@@ -15,13 +15,12 @@ def p_(default=None,doc="",unit="",**args):
     Example:
 
     class TaskWorkSpace(pycrtools.tasks.WorkSpace):
-	parameter_definitions = {
-	    "lofarmode":{default:"LBA_OUTER",doc:"Which LOFAR mode was used (HBA/LBA_OUTER/LBA_INNER)"},   
-	    "stride_n":p_(0,"if >0 then divide the FFT processing in n=2**stride_n blocks. This is slower but uses less memory.")
-	    }
+        parameter_definitions = {
+            "lofarmode":{default:"LBA_OUTER",doc:"Which LOFAR mode was used (HBA/LBA_OUTER/LBA_INNER)"},
+            "stride_n":p_(0,"if >0 then divide the FFT processing in n=2**stride_n blocks. This is slower but uses less memory.")
+            }
 
     """
     d={"default":default,"doc":doc,"unit":unit}
     if len(args)>0: d.update(args)
     return d
-

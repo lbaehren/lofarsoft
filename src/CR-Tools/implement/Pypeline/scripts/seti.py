@@ -37,8 +37,8 @@ quality_database_filename="qualitydatabase"
 doplot=True
 plotsubspectrum=151# Which part of the spectrum to plot
 maxblocksflagged=2
-#delta_nu=120 # Hz 
-delta_nu=6 # Hz 
+#delta_nu=120 # Hz
+delta_nu=6 # Hz
 blocklen=2**15 #The size of a block being read in
 stride=1 # if >1 then then one block is actually stride*blocklen and data is stored on disk during processing to save memory (slower!)
 maxchunks=0# read from file
@@ -129,17 +129,17 @@ cdata=hArray(complex,[nblocks,blocklen]) # creating input and work array
 cdataT=hArray(complex,[blocklen,nblocks]) # creating output array with transposed axis
 
 #Note, that all the following arrays have the same memory als cdata and cdataT
-tmpspecT=hArray(cdataT.vec(),[stride,nblocks_section,blocklen]) 
-tmpspec=hArray(cdata.vec(),[nblocks_section,full_blocklen]) 
+tmpspecT=hArray(cdataT.vec(),[stride,nblocks_section,blocklen])
+tmpspec=hArray(cdata.vec(),[nblocks_section,full_blocklen])
 
-specT=hArray(cdataT.vec(),[full_blocklen,nblocks_section]) 
-specT2=hArray(cdataT.vec(),[stride,blocklen,nblocks_section]) 
+specT=hArray(cdataT.vec(),[full_blocklen,nblocks_section])
+specT2=hArray(cdataT.vec(),[stride,blocklen,nblocks_section])
 spec=hArray(cdata.vec(),[blocklen,nblocks])
 
 power=hArray(float,[subspeclen/2],name="Power of spectrum",xvalues=frequencies,par=[("logplot","y")])
 subpower=hArray(power.vec(),[nsubsubspectra,subsubspeclen],name="Power of spectrum",xvalues=frequencies,par=[("logplot","y")])
-    
-subspec=hArray(cdata.vec(),[subspeclen],name="FFT",xvalues=subfrequencies,par=[("logplot","y")]) 
+
+subspec=hArray(cdata.vec(),[subspeclen],name="FFT",xvalues=subfrequencies,par=[("logplot","y")])
 print "Time:",time.clock()-t0,"s for set-up."
 
 def findpeaks(self,subpower,threshold=6):
@@ -151,7 +151,7 @@ def findpeaks(self,subpower,threshold=6):
     minlength=Vector(int,len(datamean),fill=1)
     npeaks=self[...].findsequencegreaterthan(subpower[...],datathreshold,maxgapvec,minlength)
     return (npeaks,datathreshold,datamean)
-    
+
 def rp(offset,sub=-1,clf=True,markpeaks=False):
     """Basic plotting of a part of the specturm"""
     global subspeclen,start_frequency,delta_frequency,delta_band,ofiles3,nsubsubspectra,subsubfrequencies
@@ -176,7 +176,7 @@ def rp(offset,sub=-1,clf=True,markpeaks=False):
 t0=time.clock(); print "Reading in data and doing a double FFT."
 datafile["blocksize"]=blocklen #Setting initial block size
 
-t0=time.clock(); 
+t0=time.clock();
 for antenna in antennas:
     rms=0; mean=0; npeaks=0
     datafile["selectedAntennas"]=[antenna]
@@ -188,7 +188,7 @@ for antenna in antennas:
         for offset in range(stride):
             print "#    Pass ",offset,"/",stride-1,"Starting block=",offset+nchunk*nsubblocks
             blocks=range(offset+nchunk*nsubblocks,(nchunk+1)*nsubblocks,stride)
-            cdata[...].read(datafile,"Fx",blocks)            
+            cdata[...].read(datafile,"Fx",blocks)
             quality.append(CRQualityCheckAntenna(cdata,datafile=datafile,normalize=True,blockoffset=offset+nchunk*nsubblocks,observatorymode=lofarmode))
             CRDatabaseWrite(quality_database_filename+".txt",quality[-1])
             mean+=quality[-1]["mean"]
@@ -236,7 +236,7 @@ for antenna in antennas:
                     power.spectralpower(specT)
                     nspectraadded+=1
                     if nspectraadded>1:
-                        power *= (nspectraadded-1.0)/nspectraadded                        
+                        power *= (nspectraadded-1.0)/nspectraadded
                 power.writedump(ofile)
             print "#  Time:",time.clock()-t0,"s for processing this chunk. Number of spectra added =",nspectraadded
         else: #dataok
@@ -266,7 +266,7 @@ def pa(sub=0,nstart=0):
 #----------------------
 
 if maxchunks==0:
-    print "maxchunks==0 - > Reading spectrum from file."  
+    print "maxchunks==0 - > Reading spectrum from file."
     power.readdump("spectrum.dat")
     antennacharacteristics={}
     filename="qualitydatabase_16.py"
@@ -276,7 +276,7 @@ if maxchunks==0:
     a_npeaks=map(lambda(k):antennacharacteristics[k]["npeaks"],antennacharacteristics.keys())
     #plt.clf(); plt.plot(a_rms,a_npeaks,'bo'); plt.xlabel("RMS [ADC]"); plt.ylabel("Npeaks")
     #plt.clf(); plt.plot(a_rms,a_mean,'bo'); plt.xlabel("RMS [ADC]"); plt.ylabel("Mean [ADC]")
-    
+
 plt.ion()
 datapeaks=hArray(int,[nsubsubspectra,subsubspeclen/16],name="Slicelist of Peaks")
 (npeaks,datathreshold,datamean)=findpeaks(datapeaks,subpower)

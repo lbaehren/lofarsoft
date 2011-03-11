@@ -7,7 +7,7 @@
 # This implements and tests a size-N FFT, with N = M K,
 # by splitting up the FFT in a radix-M (or radix-K) splitting step.
 # When N is too large to fit in memory, like when we'll take 256 * 10^6 Samples from an entire TBB buffer,
-# the calculation can be done by doing 2 M FFTs of size-M, plus N complex multiplications (phase factors). 
+# the calculation can be done by doing 2 M FFTs of size-M, plus N complex multiplications (phase factors).
 # In this case we'd have M = 16384 which is relatively small.
 # Generalization to N = M K is easy (as long as N factorizes).
 #
@@ -16,7 +16,7 @@
 # make a MxK matrix-shape out of the length-N signal
 # do FFT on all the columns in the matrix (or: transpose first, then operate on rows)
 # multiply element-wise by a set of phase factors (see below)
-# do FFT on all the rows 
+# do FFT on all the rows
 # result is in the columns of this FFT.
 #
 # Therefore:
@@ -40,7 +40,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 pi = np.pi; cos = np.cos; sin = np.sin; sqrt = np.sqrt
 
-rowBlocksize = 128                
+rowBlocksize = 128
 columnBlocksize = 1024  # = bigFFTblocksize / rowBlocksize
 bigFFTblocksize = rowBlocksize*columnBlocksize        # small enough to be done in memory (for this test)
 w0 = 2 * pi / bigFFTblocksize # fundamental frequency of the 'big' signal
@@ -49,10 +49,10 @@ w0 = 2 * pi / bigFFTblocksize # fundamental frequency of the 'big' signal
 
 #numpy legacy code
 t = np.arange(0, bigFFTblocksize)
-x = cos((100 + 20 * sin(w0*t)) * w0 * t) # The FFT loves frequency-modulated signals... 
+x = cos((100 + 20 * sin(w0*t)) * w0 * t) # The FFT loves frequency-modulated signals...
 x = x.reshape(columnBlocksize, rowBlocksize) # put into M x K matrix with M = size of row, K = size of column. And, # rows = N / columnBlocksize and vice versa.
 
-#Now proceed with hftools implementation 
+#Now proceed with hftools implementation
 a=hArray(complex,dimensions=x.shape,fill=hArray(x))
 b=hArray(complex,dimensions=[bigFFTblocksize],fill=a)
 bT=hArray(complex,dimensions=[bigFFTblocksize],fill=-1)
@@ -70,10 +70,10 @@ aT[...].fftw(aT[...])
 aT.doublefftphasemul(bigFFTblocksize,columnBlocksize,rowBlocksize,0)
 
 #Do the second transpose and fft again
-a.transpose(aT) 
+a.transpose(aT)
 a[...].fftw(a[...]) # should be the same as fftOverRows
 
-#Final (3rd) transpose contains result 
+#Final (3rd) transpose contains result
 aT.transpose(a)
 print "Done."
 print "Do double fft in one c++ function:"
@@ -100,4 +100,3 @@ print "Done plotting."
 print "Difference in abs log between full and double FFT:",abs(bigFFT.diffsquaredsum(aT)[0])
 
 #plt.show()
-

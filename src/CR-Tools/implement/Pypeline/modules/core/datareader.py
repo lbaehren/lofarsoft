@@ -47,7 +47,7 @@ listfiles(["$LOFARSOFT/*.txt","~/.ema*"])
     """
     ll=[]
     for l in asList(unix_style_filter):
-	ll += glob.glob(os.path.expandvars(os.path.expanduser(l)))
+        ll += glob.glob(os.path.expandvars(os.path.expanduser(l)))
     if ll.count("."): del ll[ll.index(".")]
     return ll
 
@@ -58,12 +58,12 @@ listfiles(["$LOFARSOFT/*.txt","~/.ema*"])
 def DataReader_read(self,key,aryvec,block=-1,antenna=-1):
     """
     Usage:
-    
+
     datafile.read(ary,"Time",block=-1,antenna=-1)
     -> read key Data Array 'Time' from file and current block for all antennas into array 'ary'.
 
     aryvec: can be an array or a vector to contain the data
-    
+
     blocks: this allows you to specify the block to be read in. If
     specified as a list, the read operation will loop over the array
     (if ellipses are used).
@@ -186,4 +186,3 @@ DataReader.getHeaderVariables=DataReader_getHeaderVariables
 DataReader.__doc__=crfile.__doc__
 DataReader.getCalData = hgetCalData
 DataReader.__repr__=DataReader_repr
-

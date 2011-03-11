@@ -316,7 +316,7 @@ for v in hAllVectorTypes:
     for s in hAllVectorMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hAllVectorMethods: function ",s," is not defined. Likely due to a missing library in hftools.cc."
-    
+
 for v in hAllContainerTypes:
     for s in hAllContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
@@ -345,4 +345,3 @@ for v in hNumericalContainerTypes:
     for s in hNumericalContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hNumericalContainerMethods(v): function ",s," is not defined. Likely due to a missing library in hftools.cc."
-

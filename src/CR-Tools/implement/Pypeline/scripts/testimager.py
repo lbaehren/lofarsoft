@@ -89,7 +89,7 @@ for block in range(startblock, startblock+nblocks):
     print "processing block:", block
 
     crfile.readdata(fxdata, block)
-    
+
     fxdata[...].applyhanningfilter()
 
     fftdata[...].fftcasa(fxdata[...], nyquistZone)
@@ -128,4 +128,3 @@ for key in keys:
 if os.path.isfile('output.fits'):
     os.remove('output.fits')
 hdu.writeto('output.fits')
-

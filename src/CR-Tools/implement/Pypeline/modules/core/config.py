@@ -36,5 +36,3 @@ hArrays on (True) or off (False). Default at start-up is "on". This
 setting is valid for all arrays created after the function is
 called. If history tracking is on, you can use array.history() to see
 a list of actions that were performed with the array."""
-
-

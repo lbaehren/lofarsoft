@@ -100,4 +100,3 @@ if options.verbose:
 
 # Save grid as binary numpy array
 np.save(args[0].rstrip('.fits')+'.npy', coordinates)
-

@@ -19,21 +19,21 @@ cr_direction=[41.9898208, 64.70544, 1750.]
 XC=-25.44; YC=8.94; #shower core in KASCADE coordinates
 antennalist=[0,1,2,3,4,5,6,7]
 
-#	// Rotation by 15.25 degrees
-#	// (GPS measurement of angle between KASCADE and LOPES coordinate system)
-#	// remark: the value in the Gauss-Kuerger coordinate system is 15.7 Degree
-#	// which would correspond to 15.23 Degree to geographic north
-#	// Value used in the KRETA-evaluation is 15.0 Degree.
-#	// cos 15.25 Degree = 0.964787323  ;  sin 15.25 Degree = 0.263031214
-#	XCn = XC*0.964787323+YC*0.263031214;
-#	YCn = XC*-0.263031214+YC*0.964787323;
+#       // Rotation by 15.25 degrees
+#       // (GPS measurement of angle between KASCADE and LOPES coordinate system)
+#       // remark: the value in the Gauss-Kuerger coordinate system is 15.7 Degree
+#       // which would correspond to 15.23 Degree to geographic north
+#       // Value used in the KRETA-evaluation is 15.0 Degree.
+#       // cos 15.25 Degree = 0.964787323  ;  sin 15.25 Degree = 0.263031214
+#       XCn = XC*0.964787323+YC*0.263031214;
+#       YCn = XC*-0.263031214+YC*0.964787323;
 
 cr_shower_core=[XC*0.964787323 + YC*0.263031214,-XC*0.263031214 + YC*0.964787323,0.0] # first version
 #cr_shower_core=[-XC*0.263031214 + YC*0.964787323,XC*0.964787323 + YC*0.263031214,0.0]
 #FarField=True
 FarField=False
 
-ws=CRMainWorkSpace(filename=filename_cr,fittype="POLY",ncoeffs=8,nbins=1024,doplot=False,verbose=False,modulename="ws")  
+ws=CRMainWorkSpace(filename=filename_cr,fittype="POLY",ncoeffs=8,nbins=1024,doplot=False,verbose=False,modulename="ws")
 ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256) #fittype="POLY" or "BSPLINE"
 
 if ws["datafile"]["Observatory"]=='LOFAR':
@@ -53,7 +53,7 @@ Time value arrays.
 """
 cr_time=cr["Time"].setUnit("\\mu","s")
 
-#ws["frequency"]=cr["Frequency"] 
+#ws["frequency"]=cr["Frequency"]
 #Attention don't do this here when later using it in caluclating
 #phases that require seconds and Hz as units
 
@@ -281,7 +281,7 @@ raw_input("Plotted shifted efields - press Enter to continue...")
 
 
 """
-The beamforming we here do by simply adding the data in the time domain 
+The beamforming we here do by simply adding the data in the time domain
 """
 ws["efield_shifted_added"]=hArray(float,dimensions=cr_time,name="beamformed E-field",xvalues=cr_time)
 ws["efield_shifted"][antennalist,...].addto(ws["efield_shifted_added"])
@@ -310,4 +310,3 @@ ws["efield_shifted_added_smoothed"].plot(xlim=(-400,400),title=cr.filename,clf=F
 plt.savefig("cr_pulse.pdf")
 
 #Voila ...
-

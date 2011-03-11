@@ -31,7 +31,7 @@ def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=
     Parameters:
 
     *dataarray* - an array containing the data with the dimensions
-    [nblocks,blocksize]. 
+    [nblocks,blocksize].
 
     *qualitycriteria* - a Python dict with keywords of parameters and
     tuples with limits thereof (lower, upper). Keywords currently
@@ -39,7 +39,7 @@ def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=
     Example: qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
 
     *normalize* - If true subtract the mean from the data and divide by the rms.
-    
+
     *antennaID* - the ID of the current antenna (for output only)
 
     *blockoffset* - offset of the first block from the beginning of the
@@ -97,10 +97,10 @@ def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=
         if date==None: date=datafile["Date"]
         if observatory==None: observatory=datafile["Observatory"]
         if observatorymode==None: observatorymode="unknown"
-	if filename=="": filename=datafile.filename
+        if filename=="": filename=datafile.filename
 #Calculate probabilities to find peaks
     if nsigma<0:
-	nsigma=sqrt(-2.0*log(sqrt(2.*pi)/blocksize))  # set nsigma such that the expected number of peaks is one
+        nsigma=sqrt(-2.0*log(sqrt(2.*pi)/blocksize))  # set nsigma such that the expected number of peaks is one
     probability=funcGaussian(nsigma,1,0) # what is the probability of a 5 sigma peak
     npeaksexpected=probability*blocksize # what is the probability to see such a peak for the given blocksize
     npeaksexpected_full=npeaksexpected*nblocks # what is the probability to see such a peak for the given blocksize
@@ -167,4 +167,3 @@ def CRDatabaseWrite(filename, quality):
             f.write(k+"= "+str(quality[k])+"  ")
     f.write("\n")
     f.close()
-        

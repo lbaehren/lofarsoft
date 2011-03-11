@@ -46,7 +46,7 @@ class IOInterface(object):
         *frequencies* :class:`~pycrtools.FloatVector` of frequencies
                       in Hz
         ============= =================================================
-        
+
         Output:
         This method does not return anything.
 
@@ -57,12 +57,12 @@ class IOInterface(object):
 
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
-    
+
     def setFrequencyRange(self, fmin, fmax):
         """Sets the frequency selection used in subsequent calls to
         `getFFTData`. The selection set is all frequencies available
         for the set blocksize in the range [fmin,fmax].
-        
+
         Required Arguments:
 
         ============= =================================================
@@ -71,7 +71,7 @@ class IOInterface(object):
         *fmin*        minimum frequency in Hz
         *fmax*        maximum frequency in Hz
         ============= =================================================
-        
+
         Output:
         This method does not return anything.
 
@@ -89,7 +89,7 @@ class IOInterface(object):
         If **frequencies** is the array of frequencies available for the
         selected blocksize, then subsequent calls to `getFFTData` will
         return data corresponding to frequencies[nfmin:nfmax].
-        
+
         Required Arguments:
 
         ============= =================================================
@@ -98,7 +98,7 @@ class IOInterface(object):
         *nfmin*       minimum frequency as index into frequency array
         *nfmax*       maximum frequency as index into frequency array
         ============= =================================================
-        
+
         Output:
         This method does not return anything.
 
@@ -188,14 +188,12 @@ class IOInterface(object):
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
     def getReferencePosition(self):
-        """Returns reference position used for antenna position 
+        """Returns reference position used for antenna position
         coordinate system.
 
         Output:
-        a FloatVector with (lon,lat,height) in (rad,rad,m) of the WGS84 
+        a FloatVector with (lon,lat,height) in (rad,rad,m) of the WGS84
         position of the center used for the antenna position coordinate
-        system. 
+        system.
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
-
-

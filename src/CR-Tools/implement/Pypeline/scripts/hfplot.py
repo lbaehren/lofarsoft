@@ -15,7 +15,7 @@ class hfQtPlotter(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.img=(QtGui.QImage())
     def plotGraph(self,gr):
-        self.buffer='\t' 
+        self.buffer='\t'
         self.buffer=self.buffer.expandtabs(4*gr.GetWidth()*gr.GetHeight())
         gr.GetBGRN(self.buffer,len(self.buffer))
         self.img=QtGui.QImage(self.buffer, gr.GetWidth(),gr.GetHeight(),QtGui.QImage.Format_ARGB32)
@@ -27,7 +27,7 @@ class hfQtPlotter(QtGui.QWidget):
         paint.end()
 
 
-        
+
 mglGraphZB=0
 mglGraphPS=1
 mglGraphGL=2
@@ -53,7 +53,7 @@ def hplot(gr,yvec):
     gr.Title("Average Power","iC:k",-1.8)
     gr.SetFontSize(4.)
     gr.SetCut(False);
-    gr.SetBaseLineWidth(1); 
+    gr.SetBaseLineWidth(1);
     gr.SetTickLen(0.1,2);
     gr.SetRanges(xmin,xmax,ymin,ymax)
     gr.SetTuneTicks(True,-1.2)
@@ -66,7 +66,7 @@ def hplot(gr,yvec):
     gr.Label("x","Frequency [MHz]",1)
 #    gr.SetFontSize(5.)
 #    gr.ClearLegend()
-#    gr.SetBaseLineWidth(1);     
+#    gr.SetBaseLineWidth(1);
 #    gr.AddLegend("Antenna: "+str(n),"k")
 #    gr.Legend(3,"rL",-0.7*(nx*ny)**0.5)
     gr.Plot(x,y)
@@ -79,4 +79,3 @@ def hplot(gr,yvec):
 
 #plotpanel(gr,x,y,1,1,0,xmin,xmax,ymin,ymax)
 #gr.WritePNG("averagepower.png","Test Plot")
-

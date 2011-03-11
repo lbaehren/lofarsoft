@@ -664,8 +664,8 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
         if 'filename' in dir(datafile):
             ws["fx"].read(datafile,"Fx")  # that's the old method
         else:
-            ws["fx"] = datafile["Fx"] # case sensitivity... 
-            
+            ws["fx"] = datafile["Fx"] # case sensitivity...
+
         ws["fft"][...].fftw(ws["fx"][...])
         spectrum[...].spectralpower(ws["fft"][...])
         if ws["verbose"]:
@@ -836,4 +836,3 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,nantennas=
 for v in hRealContainerTypes:
     for s in ["hCRAverageSpectrum","hCRFitBaseline","hCRCalcBaseline"]:
         setattr(v,s[1:].lower(),eval(s))
-
