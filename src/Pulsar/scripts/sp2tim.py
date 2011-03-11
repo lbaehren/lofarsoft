@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 #
+# converts the .singlepulse file (output from single_pulse_search.py script 
+# from Presto) to the tim-file in either Tempo or Tempo2 format.
+#
+# Vlad Kondratiev (c)
+#
 import numpy as np
 import os, os.path, stat, glob, sys, getopt
 import infodata as inf
