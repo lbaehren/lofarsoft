@@ -17,4 +17,4 @@ cd $basedir
 rm -rf CMakeCache.txt
 rm -rf CMakeFiles
 rm -rf Makefile
-cmake ..
+cmake $* ..
