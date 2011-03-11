@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os
 import re
 from optparse import OptionParser
 
@@ -230,7 +231,8 @@ class WrapperBlock():
         """
         inDoc = False
 
-        pyDoc = self.doc.getPyDocString()
+        pyDocString = self.doc.getPyDocString()
+        pythonDoc = self.doc.getPythonDoc()
         doxDoc = self.doc.getDoxygenDoc()
 
         # Write block content to output file
@@ -241,7 +243,8 @@ class WrapperBlock():
                 # In iterator blocks: replace iterator variable
                 if (iter_var is not None):
                     line = iter_subst(iter_var, iter_val, line)
-                    pyDoc = iter_subst(iter_var, iter_val, pyDoc)
+                    pyDocString = iter_subst(iter_var, iter_val, pyDocString)
+                    pythonDoc = iter_subst(iter_var, iter_val, pythonDoc)
                     doxDoc = iter_subst(iter_var, iter_val, doxDoc)
 
                 # Header block start
@@ -263,10 +266,10 @@ class WrapperBlock():
                 if (m is not None):
                     inHeader = False
                     # Dump all extra (auto generated) header information, e.g. PYDOCSTRING
-                    self._file.write("#define PYDOCSTRING \"" + pyDoc + "\"\n")
+                    self._file.write("#define PYDOCSTRING \"" + pyDocString + "\"\n")
                     # Dump documentation
                     self._file.write("/*!\n" + doxDoc + "\n*/\n")
-                    self._pydocfile.write(self.doc.getPythonDoc() + "\n\n")
+                    self._pydocfile.write(pythonDoc + "\n\n")
                     # Add separator in definition file
                     self._deffile.write("#include \"hfppnew-generatewrappers.def\"\n\n")
                     continue
@@ -301,6 +304,8 @@ class DocumentationBlock():
     Documentation of a wrapper block function.
     """
 
+
+
     # ______________________________________________________________________
     #                                                         Initialisation
     def __init__(self, options):
@@ -314,12 +319,39 @@ class DocumentationBlock():
 
 
     # ______________________________________________________________________
+    #                                                    Check string syntax
+    def checkSyntax(self, line_str):
+        """
+        Check and correct the syntax of a string in order not to
+        conflict with python syntax.
+        """
+        result = line_str
+
+        # Check for quotes: " -> '
+        result = re.sub("\"", "\'", result)
+
+        # Remove \f$
+        result = re.sub(".f\$", "$", result)
+
+        # Exponent (** -> ^)
+        result = re.sub("\*\*", "^", result)
+
+        # Vector
+        result = re.sub("\\vec", "vec", result)
+
+        return result
+
+
+    # ______________________________________________________________________
     #                                                   Name of the function
     def setName(self, name="[empty]"):
         """
         Set the name of the block.
         """
-        self._name = name
+
+        name_checked = self.checkSyntax(name)
+
+        self._name = name_checked
 
 
     def name(self):
@@ -335,7 +367,9 @@ class DocumentationBlock():
         """
         Set the summary of the block.
         """
-        self._summary = summary
+        summary_checked = self.checkSyntax(summary)
+
+        self._summary = summary_checked
 
 
     def summary(self):
@@ -351,7 +385,10 @@ class DocumentationBlock():
         """
         Add a parameter description.
         """
-        self._parameters.append([name, description])
+        name_checked = self.checkSyntax(name)
+        description_checked = self.checkSyntax(description)
+
+        self._parameters.append([name_checked, description_checked])
 
 
     def parameters(self):
@@ -367,7 +404,9 @@ class DocumentationBlock():
         """
         Add example.
         """
-        self._example_lines.append(example)
+        example_checked = self.checkSyntax(example)
+
+        self._example_lines.append(example_checked)
 
 
     def examples(self):
@@ -383,7 +422,10 @@ class DocumentationBlock():
         """
         Add attribute name and description.
         """
-        self._attributes.append([attribute_name, attribute_description])
+        attribute_name_checked = self.checkSyntax(attribute_name)
+        attribute_description_checked = self.checkSyntax(attribute_description)
+
+        self._attributes.append([attribute_name_checked, attribute_description_checked])
 
 
     # ______________________________________________________________________
@@ -427,11 +469,11 @@ class DocumentationBlock():
     #                                                           getPythonDoc
     def getPythonDoc(self):
         """
-        Get Python documentation.
+        Get Python documentation statement.
         """
         result = ""
 
-        result += "%s.__doc__ = \"%s\"" %(self.name(), self.getPyDocString())
+        result += "%s.__doc__ = \"\"\"%s\"\"\"" %(self.name(), self.getPyDocString())
 
         return result
 
@@ -586,18 +628,30 @@ def parseCode(input_filename, output_filename, options):
 
     # Open input file
     input_file = open(input_filename, 'r')
+    if (options.verbose):
+        print "Input file  : %s" %(input_filename)
 
     # Open output file
+    output_path = os.path.dirname(os.path.abspath(output_filename))
+    output_basename = os.path.basename(output_filename).split(".")[0]
+
+    output_filename = output_path + "/" + output_basename + ".pp.cc"
     output_file = open(output_filename, 'w')
     if (output_file is not None):
         output_file.write(header)
+    if (options.verbose):
+        print "Output file : %s" %(os.path.relpath(output_filename))
+
 
     # Definitions file
     def_file = None
 
-    # PyDoc file (
-    pydoc_filename = output_filename.split(".")[0] + ".doc.py"
+    # PyDoc file
+    pydoc_filename = output_path + "/" + output_basename + ".py"
     pydoc_file = open(pydoc_filename, 'w')
+    pydoc_file.write("from _hftools import *\n\n")
+    if (options.verbose):
+        print "Python doc file  : %s" %(os.path.relpath(pydoc_filename))
 
     # Parse input file
     for line in input_file:
@@ -605,10 +659,10 @@ def parseCode(input_filename, output_filename, options):
         # Check definition file (open if filename is set)
         m = re.match("^\/\/\$FILENAME: HFILE=(.*)", line)
         if ((m is not None) & (def_file is None)):
-            def_file_name = m.group(1) + ".latest"
-            def_file = open(def_file_name, 'w')
+            def_filename = m.group(1) + ".latest"
+            def_file = open(def_filename, 'w')
             if (options.verbose):
-                print "Definition file: %s" %(def_file_name)
+                print "Definition file: %s" %(def_filename)
             if (def_file is not None):
                 def_file.write(header)
             continue
@@ -700,10 +754,6 @@ def main():
 
     input_filename  = args[0]
     output_filename = args[1]
-
-    if (options.verbose):
-        print "Input file  : %s" %(input_filename)
-        print "Output file : %s" %(output_filename)
 
     parseCode(input_filename, output_filename, options)
 

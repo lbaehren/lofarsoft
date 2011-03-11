@@ -7,9 +7,6 @@ from hftools import *
 # Import configuration
 from config import *
 
-# Import help
-from help import *
-
 # Import array class overloaded methods
 from htypes import *
 from vector import *

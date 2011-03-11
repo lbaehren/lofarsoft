@@ -220,7 +220,7 @@ target_link_libraries (hftools
 ## additional target properties
 set_target_properties (hftools
   PROPERTIES
-  PREFIX ""
+  PREFIX "_"
   SUFFIX .so
   COMPILE_FLAGS "${PYPELINE_CXX_FLAGS}"
   LINK_FLAGS "${PYPELINE_LINKER_FLAGS}"
@@ -229,27 +229,30 @@ set_target_properties (hftools
 ##_______________________________________________________________________________
 ## Create the documentation
 
+
 foreach (FILE ${PYPELINE_CPP_MODULES})
 
-   # Generate the basic documentation strings that python help will use
-   add_custom_command (
-     TARGET hftools
-     POST_BUILD
-     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc
-     COMMAND echo "" > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
-     COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetpydoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
-#     COMMENT "Generating python documentation for module ${FILE}"
-     )
+  list (APPEND PYPELINE_PYTHON_DOCS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.py)
 
-   # Generate basic documentation in text form
-   add_custom_command (
-     TARGET hftools
-     POST_BUILD
-     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc
-     COMMAND echo "" > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
-     COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetdoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
-#     COMMENT "Generating text documentation for module ${FILE}"
-     )
+  # # Generate the basic documentation strings that python help will use
+  # add_custom_command (
+  #   TARGET hftools
+  #   POST_BUILD
+  #   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc
+  #   COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
+  #   COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetpydoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
+  #   #     COMMENT "Generating python documentation for module ${FILE}"
+  #   )
+
+  # # Generate basic documentation in text form
+  # add_custom_command (
+  #   TARGET hftools
+  #   POST_BUILD
+  #   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc
+  #   COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
+  #   COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetdoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
+  #   #     COMMENT "Generating text documentation for module ${FILE}"
+  #   )
 
   # # Generate a file that can be processed by doxygen
   # add_custom_command (
@@ -268,17 +271,19 @@ endforeach (FILE)
 # Install Python C++ modules
 install (
   TARGETS hftools
-  LIBRARY DESTINATION lib/python/pycrtools/core
+  LIBRARY DESTINATION lib/python/pycrtools/core/hftools
   )
 
 # Install Python modules
-install (CODE "message (STATUS \"Install Python modules...\")")
+install (CODE "message (STATUS \"Installing Python modules...\")")
 install (CODE "execute_process(COMMAND ${PYPELINE_PREPROCESSOR_DIR}/hfCreateLinks.sh ${CMAKE_CURRENT_SOURCE_DIR}/modules ${LUS_ROOT}/release/lib/python/pycrtools)")
 
-# Install Python scripts
-install (CODE "message (STATUS \"Install Python scripts...\")")
-install (CODE "execute_process(COMMAND ${PYPELINE_PREPROCESSOR_DIR}/hfCreateLinks.sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts ${LUS_ROOT}/release/bin/python)")
+install (CODE "message (STATUS \"Installing Python module documentation...\")")
+install (FILES ${PYPELINE_PYTHON_DOCS} DESTINATION ${LUS_ROOT}/release/lib/python/pycrtools/core/hftools)
 
+# Install Python scripts
+install (CODE "message (STATUS \"Installing Python scripts...\")")
+install (CODE "execute_process(COMMAND ${PYPELINE_PREPROCESSOR_DIR}/hfCreateLinks.sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts ${LUS_ROOT}/release/bin/python)")
 
 ## =============================================================================
 ##

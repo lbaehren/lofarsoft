@@ -11,9 +11,6 @@ PYCRBIN=LOFARSOFT+"/release/bin/python/"
 PYCR=LOFARSOFT+"/src/CR-Tools/implement/Pypeline/scripts/"
 PYP=LOFARSOFT+"/src/CR-Tools/implement/Pypeline/"
 
-pydocpyfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.py"
-pydoctxtfilename=LOFARSOFT +"/build/cr/implement/Pypeline/hftools.doc.tex"
-
 filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecond.h5"
 filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecondtbb1.h5"
 filename_lopes_test=LOFARSOFT+"/data/lopes/test.event"
@@ -22,13 +19,10 @@ filename_lopes=LOFARSOFT+"/data/lopes/example.event"
 
 DEFAULTDATAFILE=filename_lopes
 
-# Read in the doc strings for the functions in hftools
-
-#!!!HF_FIX!!!!
-#execfile(pydocpyfilename)
-#f=open(pydoctxtfilename)
-#pycralldocstring=f.read()
-#f.close()
+#Current tasks
+#import pycrtools.tasks #as tasks
+#import pycrtools.tasks.averagespectrum
+#import pycrtools.tasks.imager
 
 trackHistory.__doc__="""
 Function for PYCRTOOLS module. Globally switch history tracking of

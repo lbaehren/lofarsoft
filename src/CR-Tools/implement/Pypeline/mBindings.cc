@@ -167,12 +167,17 @@ namespace PyCR { // Namespace PyCR -- begin
 
 //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(hArray_setDimensions_overloads,setDimensions<HNumber>,1,2)
 
-BOOST_PYTHON_MODULE(hftools)
+BOOST_PYTHON_MODULE(_hftools)
 {
    import_array();
    boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
 
    using namespace boost::python;
+
+   docstring_options doc_options;
+   doc_options.enable_user_defined();
+   doc_options.enable_py_signatures();
+   doc_options.disable_cpp_signatures();
 
 // ________________________________________________________________________
 //                                                    Exception translation
