@@ -8,6 +8,8 @@
 #          if command is a command with arguments it
 #          should be enclosed in quotes
 #
+# Vlad Kondratiev (c)
+#
 
 if [ $# == 0 ]; then
  echo "Usage: `basename $0` <command> 38 40 43"
