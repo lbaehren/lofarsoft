@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+#
+# plots the summary histogram of most frequent RFI based on *.rfirep files from many observations. 
+# User can specify the top-level directories where to look for processed data.
+#
+# Vlad Kondratiev (c)
+#
 import glob, os, sys, getopt, re
 import numpy as np
 import matplotlib.pyplot as plt

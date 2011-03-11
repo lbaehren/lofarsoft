@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+#
+# creates "master" RFI report file of bad channels based on *.rfirep files from many observations. 
+# User can specify the top-level directories where to look for processed data. 
+# Also, plots the summary histogram of bad frequencies.
+#
+# Vlad Kondratiev (c)
+#
 import glob, os, sys, getopt, re
 import numpy as np
 
