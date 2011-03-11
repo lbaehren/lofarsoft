@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/bash -x
 #
 if [ $# -eq 0 ]; then
  exit
 else
- dec=$1
+ dec=`echo $1 | sed 's/+//'`
 fi
 d=`echo $dec | cut -d : -f 1`
 is_minus=`echo $d | grep - | wc -l`
