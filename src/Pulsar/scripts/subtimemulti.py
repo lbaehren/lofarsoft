@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+#
+# makes multi-plot pages of time series for a given *.sub files.
+#
+# Vlad Kondratiev (c)
+#
 import numpy as np
 import array as ar
 import os, stat, glob, sys, getopt

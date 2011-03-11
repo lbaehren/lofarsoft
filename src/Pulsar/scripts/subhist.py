@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+#
+# plots samples' histogram for a given sub-file.
+#
+# Vlad Kondratiev (c)
+#
 import numpy as np
 import array as ar
 import os, stat, sys, getopt

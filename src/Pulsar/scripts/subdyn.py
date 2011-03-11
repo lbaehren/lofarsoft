@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+#
+# plots the dynamic spectrum for a given *.sub files. In interactive mode, 
+# allows to manually select channels corrupted by RFI, view time series and 
+# samples' histogram of selected channels.
+#
+# Vlad Kondratiev (c)
+#
 import numpy as np
 import array as ar
 import os, os.path, stat, glob, sys, getopt
